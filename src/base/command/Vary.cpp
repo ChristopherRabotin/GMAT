@@ -326,6 +326,60 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Vary.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Vary::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SOLVER);
+   refObjectTypes.push_back(Gmat::PARAMETER);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Vary.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SOLVER)
+   {
+      refObjectNames.push_back(solverName);
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::PARAMETER)
+   {
+      refObjectNames.insert(refObjectNames.end(), variableName.begin(),
+                            variableName.end());
+   }
+   
+   return refObjectNames;
+}
+
+
 //---------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //---------------------------------------------------------------------------
@@ -715,7 +769,7 @@ bool Vary::InterpretAction()
       throw CommandException(
          "Line '" + generatingString + 
          "'\n should be a Vary command, but the '" + typeName + 
-         "' keyword is not the opening token in the line.");  
+         "' keyword is not the opening token in the line.\n");  
 
    StringArray currentChunks = tp.Decompose(chunks[1], "()");
    #ifdef DEBUG_VARY_PARSING
@@ -801,10 +855,12 @@ bool Vary::InterpretAction()
       }
       else
       {
-         std::string msg = "On the line \n'" + generatingString +
-            "'\nthe setting '" + (*i) + 
-            "' does not match the available options for the Vary command.";
-         MessageInterface::ShowMessage(msg);
+         //std::string msg = "On the line \n'" + generatingString +
+         //   "'\nthe setting '" + (*i) + 
+         //   "' does not match the available options for the Vary command";
+         std::string msg = "The setting \"" + (*i) + 
+            "\" does not match field name for the Vary command";
+         //MessageInterface::ShowMessage(msg);
          throw CommandException(msg); 
       }
    }
@@ -928,7 +984,7 @@ bool Vary::Execute(void)
         if (obj == NULL) {
             std::string errorstr = "Could not find object ";
             errorstr += objectName;
-            throw CommandException(errorstr);
+            throw CommandException(errorstr + "\n");
         }
         
         Integer id;
@@ -946,7 +1002,7 @@ bool Vary::Execute(void)
                 errorstr += parmName;
                 errorstr += " on object ";
                 errorstr += objectName;
-                throw CommandException(errorstr);
+                throw CommandException(errorstr + "\n");
             } 
         
             Gmat::ParameterType type = obj->GetParameterType(id);
@@ -956,7 +1012,7 @@ bool Vary::Execute(void)
                 errorstr += " on object ";
                 errorstr += objectName;
                 errorstr += " is not Real.";
-                throw CommandException(errorstr);
+                throw CommandException(errorstr + "\n");
             }
         }
          

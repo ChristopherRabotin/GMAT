@@ -428,6 +428,45 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
    return Burn::SetRealParameter(id, value);
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& FiniteBurn::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes = Burn::GetRefObjectTypeArray();
+   refObjectTypes.push_back(Gmat::HARDWARE);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+const StringArray& FiniteBurn::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   refObjectNames = Burn::GetRefObjectNameArray(type);
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::HARDWARE)
+   {
+      refObjectNames.insert(refObjectNames.end(), thrusters.begin(), thrusters.end());
+      refObjectNames.insert(refObjectNames.end(), tanks.begin(), tanks.end());
+   }
+   
+   return refObjectNames;
+}
+
+
 //------------------------------------------------------------------------------
 //  bool Fire(Real *burnData)
 //------------------------------------------------------------------------------

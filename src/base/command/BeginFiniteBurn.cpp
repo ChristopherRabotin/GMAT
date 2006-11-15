@@ -175,6 +175,25 @@ std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 
 
 //------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the BeginFiniteBurn.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& BeginFiniteBurn::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::BURN);
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
@@ -188,20 +207,36 @@ std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
                                                     const Gmat::ObjectType type)
 {
-   switch (type)
+   
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SPACECRAFT)
    {
-      case Gmat::SPACECRAFT:
-         #ifdef DEBUG_BEGIN_MANEUVER
-            MessageInterface::ShowMessage
-               ("Getting BeginFiniteBurn reference spacecraft list\n");
-         #endif
-         return satNames;
-      
-      default:
-         ;
+      refObjectNames.insert(refObjectNames.end(), satNames.begin(), satNames.end());
    }
    
-   return GmatCommand::GetRefObjectNameArray(type);
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::BURN)
+   {
+      refObjectNames.push_back(burnName);
+   }
+
+   return refObjectNames;
+   
+//    switch (type)
+//    {
+//       case Gmat::SPACECRAFT:
+//          #ifdef DEBUG_BEGIN_MANEUVER
+//             MessageInterface::ShowMessage
+//                ("Getting BeginFiniteBurn reference spacecraft list\n");
+//          #endif
+//          return satNames;
+//       default:
+//          ;
+//    }
+   
+//    return GmatCommand::GetRefObjectNameArray(type);
 }
 
 
@@ -297,7 +332,7 @@ void BeginFiniteBurn::SetTransientForces(std::vector<PhysicalModel*> *tf)
 /**
  * This method returns a clone of the BeginFiniteBurn command.
  *
- * @return clone of the Propagate.
+ * @return clone of the BeginFiniteBurn.
  */
 //------------------------------------------------------------------------------
 GmatBase* BeginFiniteBurn::Clone() const

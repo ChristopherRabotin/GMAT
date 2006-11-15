@@ -1534,6 +1534,25 @@ GmatBase* ForceModel::Clone() const
    return (new ForceModel(*this));
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& ForceModel::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   return refObjectTypes;
+}
+
+
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -1545,8 +1564,6 @@ GmatBase* ForceModel::Clone() const
  * 
  * @return the list of object names.
  * 
- * @note This method catches exceptions, and just returns true or false to
- *       indicate success or failure.
  */
 //------------------------------------------------------------------------------
 const StringArray& 
@@ -1556,6 +1573,11 @@ const StringArray&
    StringArray pmRefs;
    
    forceReferenceNames.clear();
+
+   // Provide point mass body names for validation checking
+   if (type == Gmat::SPACE_POINT)
+      return BuildBodyList("PointMassForce");
+   
    
    // Always grab these two:
    forceReferenceNames.push_back("EarthMJ2000Eq");

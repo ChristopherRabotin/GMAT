@@ -54,6 +54,11 @@ public:
    virtual Real            GetRealParameter(const Integer id) const;
    virtual Real            SetRealParameter(const Integer id, const Real value);
 
+   virtual const ObjectTypeArray&
+                           GetRefObjectTypeArray();
+   virtual const StringArray&
+                           GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    virtual bool            Initialize();
    virtual bool            Fire(Real *burnData, Real epoch);
    

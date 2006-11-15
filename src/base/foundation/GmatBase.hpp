@@ -70,8 +70,8 @@ public:
    // Access methods called on the base class
    virtual Gmat::ObjectType
                        GetType() const;
-   inline std::string         GetTypeName() const;
-   inline std::string         GetName() const;
+   inline std::string  GetTypeName() const;
+   inline std::string  GetName() const;
    virtual bool        SetName(const std::string &who);
    virtual Integer     GetParameterCount() const;
 
@@ -79,6 +79,8 @@ public:
    bool                IsOfType(std::string typeDescription);
 
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
@@ -184,7 +186,11 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
    virtual const StringArray& 
                        GetStringArrayParameter(const Integer id, 
-                                               const Integer index) const; 
+                                               const Integer index) const;
+   
+   virtual std::string GetOnOffParameter(const Integer id) const;
+   virtual bool        SetOnOffParameter(const Integer id, 
+                                         const std::string &value);
 
    virtual const std::string  GetCommentLine();
    virtual void               SetCommentLine(const std::string comment);
@@ -266,7 +272,7 @@ public:
    virtual const StringArray& 
                        GetStringArrayParameter(const std::string &label, 
                                                const Integer index) const; 
-                       
+   
    virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const std::string &label,
                                            const bool value);
@@ -275,7 +281,11 @@ public:
    virtual bool        SetBooleanParameter(const std::string &label,
                                            const bool value,
                                            const Integer index);
-                                           
+   
+   virtual std::string GetOnOffParameter(const std::string &label) const;
+   virtual bool        SetOnOffParameter(const std::string &label, 
+                                         const std::string &value);
+   
    virtual bool        TakeAction(const std::string &action,  
                                   const std::string &actionData = "");
    
@@ -336,11 +346,15 @@ protected:
    /// Script string used to build the object
    std::string         generatingString;
    /// The list of generic types that this class extends.
-   std::vector<Gmat::ObjectType>
-                       objectTypes;
+   ObjectTypeArray     objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
 
+   /// The list of object types referenced by this class
+   ObjectTypeArray     refObjectTypes;
+   /// The list of object names referenced by this class
+   StringArray         refObjectNames;
+   
    /// flag indicating whether or not a Callback method is currently executing
    bool                callbackExecuting;
    

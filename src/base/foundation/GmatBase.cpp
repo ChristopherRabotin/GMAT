@@ -175,8 +175,8 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    
 {
    attributeCommentLines.clear();
-   attributeInlineComments.clear();	
-	
+   attributeInlineComments.clear();     
+        
    // one more instance - add to the instanceCount
    ++instanceCount;
 }
@@ -347,26 +347,26 @@ Integer GmatBase::GetParameterCount(void) const
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 {
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
-   MessageInterface::ShowMessage(
-                                 "Checking to see if %s is of type %d (Actual type is %d)\n",
-                                 instanceName.c_str(), ofType, type);
-#endif
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage
+      ("Checking to see if %s is of type %d (Actual type is %d)\n",
+       instanceName.c_str(), ofType, type);
+   #endif
    
    if (std::find(objectTypes.begin(), objectTypes.end(), ofType) !=
        objectTypes.end())
    {
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
+      #ifdef DEBUG_OBJECT_TYPE_CHECKING
       MessageInterface::ShowMessage("   Object %s is the requested type\n",
                                     instanceName.c_str());
-#endif
+      #endif
       return true;
    }
    
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
-   MessageInterface::ShowMessage(
-                                 "   Not the requested type; current types are [");
-   for (std::vector<Gmat::ObjectType>::iterator i = objectTypes.begin();
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage
+      ("   Not the requested type; current types are [");
+   for (ObjectTypeArray::iterator i = objectTypes.begin();
         i != objectTypes.end(); ++i)
    {
       if (i != objectTypes.begin())
@@ -374,7 +374,7 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType)
       MessageInterface::ShowMessage("%d", *i);
    }
    MessageInterface::ShowMessage("]\n");
-#endif
+   #endif
    
    return false;
 }
@@ -393,25 +393,25 @@ bool GmatBase::IsOfType(Gmat::ObjectType ofType)
 //---------------------------------------------------------------------------
 bool GmatBase::IsOfType(std::string typeDescription)
 {
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
-   MessageInterface::ShowMessage(
-                                 "Checking to see if %s is of type %s (Actual type is %s)\n",
-                                 instanceName.c_str(), typeDescription.c_str(), typeName.c_str());
-#endif
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage
+      ("Checking to see if %s is of type %s (Actual type is %s)\n",
+       instanceName.c_str(), typeDescription.c_str(), typeName.c_str());
+   #endif
    
    if (std::find(objectTypeNames.begin(), objectTypeNames.end(),
                  typeDescription) != objectTypeNames.end())
    {
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
+      #ifdef DEBUG_OBJECT_TYPE_CHECKING
       MessageInterface::ShowMessage("   Object %s is the requested type\n",
                                     instanceName.c_str());
-#endif
+      #endif
       return true;
    }
    
-#ifdef DEBUG_OBJECT_TYPE_CHECKING
-   MessageInterface::ShowMessage(
-                                 "   Not the requested type; current types are [");
+   #ifdef DEBUG_OBJECT_TYPE_CHECKING
+   MessageInterface::ShowMessage
+      ("   Not the requested type; current types are [");
    for (StringArray::iterator i = objectTypeNames.begin();
         i != objectTypeNames.end(); ++i)
    {
@@ -420,7 +420,7 @@ bool GmatBase::IsOfType(std::string typeDescription)
       MessageInterface::ShowMessage("%s", i->c_str());
    }
    MessageInterface::ShowMessage("]\n");
-#endif
+   #endif
    
    return false;
 }
@@ -443,6 +443,20 @@ std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
 }
 
 //---------------------------------------------------------------------------
+//  const ObjectTypeArray& GetRefObjectTypeArray()
+//---------------------------------------------------------------------------
+/**
+ * Returns the types of the reference object. (Derived classes should implement
+ * this as needed.)
+ *
+ * @return The types of the reference object.
+ */
+const ObjectTypeArray& GmatBase::GetRefObjectTypeArray()
+{
+   return refObjectTypes;
+}
+
+//---------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //---------------------------------------------------------------------------
 /**
@@ -455,7 +469,7 @@ std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
  */
 const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   throw GmatBaseException("Reference Object Array not defined for " + 
+   throw GmatBaseException("GetRefObjectNameArray() not defined for " + 
                            typeName + " named \"" + instanceName + "\"\n");
 }
 
@@ -1498,6 +1512,49 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
                            " on " + typeName + " named " + instanceName);
 }
 
+
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a On/Off parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The string stored for this parameter, or throw an exception if 
+ *         there is no string association.
+ */
+std::string GmatBase::GetOnOffParameter(const Integer id) const
+{
+   std::stringstream idString;
+   idString << id;
+   throw GmatBaseException("Cannot get On/Off parameter with ID " + 
+                           idString.str() + 
+                           " on " + typeName + " named " + instanceName);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   std::stringstream idString;
+   idString << id;
+   throw GmatBaseException("Cannot set On/Off parameter with ID " + 
+                           idString.str() + 
+                           " on " + typeName + " named " + instanceName);
+}
+
+
 //---------------------------------------------------------------------------
 //  const std::string GetCommentLine()
 //---------------------------------------------------------------------------
@@ -1537,7 +1594,7 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
       #endif
       return "";
@@ -1560,7 +1617,7 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Attribute comment index:%d - %s - has not been set. Size=%d\n",
          index, comment.c_str(), (Integer)attributeCommentLines.size());
       #endif
@@ -1583,14 +1640,14 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Inline attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
       #endif
       return "";
    }
    else
    {  
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Getting Inline attribute comment name:%s index:%d - %s.\n",
          instanceName.c_str(), index, attributeInlineComments[index].c_str());
       #endif   
@@ -1607,7 +1664,7 @@ void GmatBase::SetInlineAttributeComment(Integer index,
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Inline attribute comment - %s - has not been set. Size=%d\n",
          comment.c_str(), (Integer)attributeInlineComments.size());
       #endif
@@ -1615,7 +1672,7 @@ void GmatBase::SetInlineAttributeComment(Integer index,
    }
    else
    {  
-   	  #ifdef DEBUG_COMMENTS
+          #ifdef DEBUG_COMMENTS
       MessageInterface::ShowMessage("Setting Inline attribute comment - %s.\n",
          comment.c_str());
       #endif 
@@ -2308,6 +2365,42 @@ bool GmatBase::SetBooleanParameter(const std::string &label, const bool value,
 
 
 //---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve an On/Off parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ *
+ * @return The "On/Off" string stored for this parameter.
+ */
+std::string GmatBase::GetOnOffParameter(const std::string &label) const
+{
+   Integer id = GetParameterID(label);
+   return GetOnOffParameter(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value)
+//---------------------------------------------------------------------------
+/**
+ * Change the value of an On/Off parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new "On/Off" string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+bool GmatBase::SetOnOffParameter(const std::string &label, 
+                                 const std::string &value)
+{
+   Integer id = GetParameterID(label);
+   return SetOnOffParameter(id, value);
+}
+
+
+//---------------------------------------------------------------------------
 //  bool TakeAction(const std::string &action, const std::string &actionData)
 //---------------------------------------------------------------------------
 /**
@@ -2532,9 +2625,9 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                WriteParameterValue(i, value);
                if (value.str() != "")
                {
-               	  std::string attCmtLn = GetAttributeCommentLine(i);
-               	  
-               	  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                  std::string attCmtLn = GetAttributeCommentLine(i);
+                  
+                  if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn;
                      
@@ -2558,7 +2651,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             if (sar.size() > 0)
             {
                std::string attCmtLn = GetAttributeCommentLine(i);
-               	  
+                  
                if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                   (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                {

@@ -68,6 +68,11 @@ public:
                                 const std::string &oldName,
                                 const std::string &newName);
    
+   virtual const ObjectTypeArray&
+                          GetRefObjectTypeArray();
+   virtual const StringArray&
+                          GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    // Parameter accessor methods -- overridden from GmatBase
    virtual std::string     GetParameterText(const Integer id) const;
    virtual Integer         GetParameterID(const std::string &str) const;
@@ -94,7 +99,7 @@ protected:
    std::string             satName;
    /// The spacecraft
    Spacecraft              *sat;
-    
+   
    // Parameter IDs 
    /// ID for the burn object
    Integer                 burnNameID;

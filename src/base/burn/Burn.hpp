@@ -58,9 +58,13 @@ public:
    virtual bool            SetStringParameter(const Integer id,
                                               const std::string &value,
                                               const Integer index);
+   virtual const ObjectTypeArray&
+                           GetRefObjectTypeArray();
    virtual const StringArray&
                            GetStringArrayParameter(const Integer id) const;
    
+   virtual const StringArray&
+                           GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
    
@@ -118,6 +122,8 @@ protected:
    std::string             j2000BodyName;
    /// Pointer to the J2000 body
    CelestialBody           *j2000Body;
+   /// String array that holds ref. object names
+   StringArray refObjectNames;
    
    void                    TransformJ2kToBurnOrigin(const Real *scState, 
                               Real *state, Real epoch);

@@ -250,6 +250,75 @@ bool Achieve::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Achieve.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Achieve::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SOLVER);
+   refObjectTypes.push_back(Gmat::PARAMETER);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Achieve.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& Achieve::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SOLVER)
+   {
+      refObjectNames.push_back(targeterName);
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::PARAMETER)
+   {
+      refObjectNames.push_back(goalName);
+      
+      if (isAchieveParm)
+      {
+         if (isAchieveArray)
+         {
+            refObjectNames.push_back(achieveArrName);
+            if (achieveArrRow == -1)
+               refObjectNames.push_back(achieveArrRowStr);
+            if (achieveArrCol == -1)
+               refObjectNames.push_back(achieveArrColStr);
+         }
+         else
+         {
+            refObjectNames.push_back(achieveName);
+         }
+      }
+   }
+   
+   return refObjectNames;
+}
+
+
 // Parameter accessors
 
 //------------------------------------------------------------------------------
@@ -723,12 +792,12 @@ bool Achieve::ConstructGoal(const char* str)
       if (achieveArrRow == -1)
          if (mod->GetParameter(achieveArrRowStr) == NULL)
             throw CommandException("Cannot find array row index variable: " +
-                                   achieveArrRowStr + "\n");
+                                   achieveArrRowStr);
       
       if (achieveArrCol == -1)
          if (mod->GetParameter(achieveArrColStr) == NULL)
             throw CommandException("Cannot find array column index variable: " +
-                                   achieveArrColStr + "\n");
+                                   achieveArrColStr);
       
       return true;
    }

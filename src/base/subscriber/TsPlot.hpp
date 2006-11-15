@@ -37,7 +37,7 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-   virtual bool SetName(const std::string &who); //loj: 11/19/04 - added
+   virtual bool SetName(const std::string &who);
    
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
@@ -80,12 +80,12 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
 
-   //loj: 11/9/04 added
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
 
+   virtual const ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
 
 protected:

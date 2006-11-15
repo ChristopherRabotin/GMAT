@@ -241,6 +241,59 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Maneuver.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::BURN);
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Maneuver.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::BURN)
+   {
+      refObjectNames.push_back(burnName);
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SPACECRAFT)
+   {
+      refObjectNames.push_back(satName);
+   }
+
+   return refObjectNames;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------

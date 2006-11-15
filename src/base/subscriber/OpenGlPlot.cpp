@@ -89,18 +89,18 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,            //"ViewUpCoordinaetSystem"
    Gmat::STRING_TYPE,            //"ViewUpAxis"
    
-   Gmat::STRING_TYPE,            //"CelestialPlane"
-   Gmat::STRING_TYPE,            //"XYPlane"
-   Gmat::STRING_TYPE,            //"WireFrame"
-   Gmat::STRING_TYPE,            //"TargetStatus"
-   Gmat::STRING_TYPE,            //"Axes"
-   Gmat::STRING_TYPE,            //"Grid"
-   Gmat::STRING_TYPE,            //"EarthSunLines"
+   Gmat::ON_OFF_TYPE,            //"CelestialPlane"
+   Gmat::ON_OFF_TYPE,            //"XYPlane"
+   Gmat::ON_OFF_TYPE,            //"WireFrame"
+   Gmat::ON_OFF_TYPE,            //"TargetStatus"
+   Gmat::ON_OFF_TYPE,            //"Axes"
+   Gmat::ON_OFF_TYPE,            //"Grid"
+   Gmat::ON_OFF_TYPE,            //"EarthSunLines"   
+   Gmat::ON_OFF_TYPE,            //"Overlap"
+   Gmat::ON_OFF_TYPE,            //"LockView"
+   Gmat::ON_OFF_TYPE,            //"PerspectiveMode"
+   Gmat::ON_OFF_TYPE,            //"UseFixedFov"
    
-   Gmat::STRING_TYPE,            //"Overlap"
-   Gmat::STRING_TYPE,            //"LockView"
-   Gmat::STRING_TYPE,            //"PerspectiveMode"
-   Gmat::STRING_TYPE,            //"UseFixedFov"
    Gmat::INTEGER_TYPE,           //"DataCollectFrequency"
    Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
    Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
@@ -237,7 +237,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    
    mOldName = ogl.mOldName;;
    mViewCoordSysName = ogl.mViewCoordSysName;
-
+   
    // viewpoint
    mViewPointRefName = ogl.mViewPointRefName;
    mViewPointVectorName = ogl.mViewPointVectorName;
@@ -1123,28 +1123,29 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mViewUpCoordSysName;
    case VIEW_UP_AXIS:
       return mViewUpAxisName;
-   case CELESTIAL_PLANE:
-      return mEclipticPlane;
-   case XY_PLANE:
-      return mXYPlane;
-   case WIRE_FRAME:
-      return mWireFrame;
-   case TARGET_STATUS:
-      return mTargetStatus;
-   case AXES:
-      return mAxes;
-   case GRID:
-      return mGrid;
-   case EARTH_SUN_LINES:
-      return mEarthSunLines;
-   case OVERLAP_PLOT:
-      return mOverlapPlot;
-   case USE_INITIAL_VIEW:
-      return mUseInitialView;
-   case PERSPECTIVE_MODE:
-      return mPerspectiveMode;
-   case USE_FIXED_FOV:
-      return mUseFixedFov;
+      
+//    case CELESTIAL_PLANE:
+//       return mEclipticPlane;
+//    case XY_PLANE:
+//       return mXYPlane;
+//    case WIRE_FRAME:
+//       return mWireFrame;
+//    case TARGET_STATUS:
+//       return mTargetStatus;
+//    case AXES:
+//       return mAxes;
+//    case GRID:
+//       return mGrid;
+//    case EARTH_SUN_LINES:
+//       return mEarthSunLines;
+//    case OVERLAP_PLOT:
+//       return mOverlapPlot;
+//    case USE_INITIAL_VIEW:
+//       return mUseInitialView;
+//    case PERSPECTIVE_MODE:
+//       return mPerspectiveMode;
+//    case USE_FIXED_FOV:
+//       return mUseFixedFov;
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -1197,39 +1198,40 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case VIEW_UP_AXIS:
       mViewUpAxisName = value;
       return true;
-   case CELESTIAL_PLANE:
-      mEclipticPlane = value;
-      return true;
-   case XY_PLANE:
-      mXYPlane = value;
-      return true;
-   case WIRE_FRAME:
-      mWireFrame = value;
-      return true;
-   case TARGET_STATUS:
-      mTargetStatus = value;
-      return true;
-   case AXES:
-      mAxes = value;
-      return true;
-   case GRID:
-      mGrid = value;
-      return true;
-   case EARTH_SUN_LINES:
-      mEarthSunLines = value;
-      return true;
-   case OVERLAP_PLOT:
-      mOverlapPlot = value;
-      return true;
-   case USE_INITIAL_VIEW:
-      mUseInitialView = value;
-      return true;
-   case PERSPECTIVE_MODE:
-      mPerspectiveMode = value;
-      return true;
-   case USE_FIXED_FOV:
-      mUseFixedFov = value;
-      return true;
+      
+//    case CELESTIAL_PLANE:
+//       mEclipticPlane = value;
+//       return true;
+//    case XY_PLANE:
+//       mXYPlane = value;
+//       return true;
+//    case WIRE_FRAME:
+//       mWireFrame = value;
+//       return true;
+//    case TARGET_STATUS:
+//       mTargetStatus = value;
+//       return true;
+//    case AXES:
+//       mAxes = value;
+//       return true;
+//    case GRID:
+//       mGrid = value;
+//       return true;
+//    case EARTH_SUN_LINES:
+//       mEarthSunLines = value;
+//       return true;
+//    case OVERLAP_PLOT:
+//       mOverlapPlot = value;
+//       return true;
+//    case USE_INITIAL_VIEW:
+//       mUseInitialView = value;
+//       return true;
+//    case PERSPECTIVE_MODE:
+//       mPerspectiveMode = value;
+//       return true;
+//    case USE_FIXED_FOV:
+//       mUseFixedFov = value;
+//       return true;
    default:
       return Subscriber::SetStringParameter(id, value);
    }
@@ -1383,6 +1385,7 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label)
 
 
 //------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool OpenGlPlot::GetBooleanParameter(const Integer id) const
 {
@@ -1393,6 +1396,7 @@ bool OpenGlPlot::GetBooleanParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool OpenGlPlot::GetBooleanParameter(const std::string &label) const
 {
@@ -1401,6 +1405,7 @@ bool OpenGlPlot::GetBooleanParameter(const std::string &label) const
 
 
 //------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetBooleanParameter(const std::string &label, const bool value)
 {
@@ -1413,7 +1418,89 @@ bool OpenGlPlot::SetBooleanParameter(const std::string &label, const bool value)
 }
 
 
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+std::string OpenGlPlot::GetOnOffParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case CELESTIAL_PLANE:
+      return mEclipticPlane;
+   case XY_PLANE:
+      return mXYPlane;
+   case WIRE_FRAME:
+      return mWireFrame;
+   case TARGET_STATUS:
+      return mTargetStatus;
+   case AXES:
+      return mAxes;
+   case GRID:
+      return mGrid;
+   case EARTH_SUN_LINES:
+      return mEarthSunLines;
+   case OVERLAP_PLOT:
+      return mOverlapPlot;
+   case USE_INITIAL_VIEW:
+      return mUseInitialView;
+   case PERSPECTIVE_MODE:
+      return mPerspectiveMode;
+   case USE_FIXED_FOV:
+      return mUseFixedFov;
+   default:
+      return Subscriber::GetOnOffParameter(id);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+bool OpenGlPlot::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   switch (id)
+   {
+   case CELESTIAL_PLANE:
+      mEclipticPlane = value;
+      return true;
+   case XY_PLANE:
+      mXYPlane = value;
+      return true;
+   case WIRE_FRAME:
+      mWireFrame = value;
+      return true;
+   case TARGET_STATUS:
+      mTargetStatus = value;
+      return true;
+   case AXES:
+      mAxes = value;
+      return true;
+   case GRID:
+      mGrid = value;
+      return true;
+   case EARTH_SUN_LINES:
+      mEarthSunLines = value;
+      return true;
+   case OVERLAP_PLOT:
+      mOverlapPlot = value;
+      return true;
+   case USE_INITIAL_VIEW:
+      mUseInitialView = value;
+      return true;
+   case PERSPECTIVE_MODE:
+      mPerspectiveMode = value;
+      return true;
+   case USE_FIXED_FOV:
+      mUseFixedFov = value;
+      return true;
+   default:
+      return Subscriber::SetOnOffParameter(id, value);
+   }
+}
+
+
 //------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
 bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
 {
@@ -1462,6 +1549,25 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    
    return Subscriber::GetRefObjectName(type);
    //return "OpenGlPlot::GetRefObjectName() " + msg;
+}
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& OpenGlPlot::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
+   return refObjectTypes;
 }
 
 

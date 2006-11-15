@@ -1179,6 +1179,69 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Propagate.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Propagate::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::PROP_SETUP);
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Propagate.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::PROP_SETUP)
+   {
+      // Remove backward prop notation '-'
+      std::string newPropName;
+      for (UnsignedInt i=0; i<propName.size(); i++)
+      {
+         newPropName = propName[i];
+         if (newPropName[0] == '-')
+            newPropName = propName[i].substr(1);
+      
+         refObjectNames.push_back(newPropName);
+      }      
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SPACECRAFT)
+   {
+      refObjectNames.insert(refObjectNames.end(), stopSatNames.begin(),
+                            stopSatNames.end());
+   }
+   
+   return refObjectNames;
+}
+
+
 //------------------------------------------------------------------------------
 // bool InterpretAction()
 //------------------------------------------------------------------------------

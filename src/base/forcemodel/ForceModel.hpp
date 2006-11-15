@@ -106,11 +106,12 @@ public:
                                  const std::string &newName);
     virtual GmatBase* Clone() const;
     
-    virtual void SetSolarSystem(SolarSystem *ss);
+    virtual void  SetSolarSystem(SolarSystem *ss);
+    virtual const ObjectTypeArray& GetRefObjectTypeArray();
     virtual const StringArray&
-                      GetRefObjectNameArray(const Gmat::ObjectType type);
-    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                              const std::string &name = "");
+                  GetRefObjectNameArray(const Gmat::ObjectType type);
+    virtual bool  SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                               const std::string &name = "");
 
 
     // Access methods derived classes can override

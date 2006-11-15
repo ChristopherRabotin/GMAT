@@ -51,18 +51,23 @@ public:
    virtual ~Vary();
     
    Vary(const Vary& t);
-   Vary&             operator=(const Vary& t);
+   Vary&              operator=(const Vary& t);
 
    // inherited from GmatBase
-   virtual GmatBase* Clone() const;
+   virtual GmatBase*  Clone() const;
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode,
-                                            const std::string &prefix,
-                                            const std::string &useName);
-
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+                      GetGeneratingString(Gmat::WriteMode mode,
+                                          const std::string &prefix,
+                                          const std::string &useName);
+   // for Ref Objects
+   virtual bool        RenameRefObject(const Gmat::ObjectType type,
+                                       const std::string &oldName,
+                                       const std::string &newName);
+   
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // Parameter accessors
    virtual std::string GetParameterText(const Integer id) const;

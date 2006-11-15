@@ -48,7 +48,12 @@ public:
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
-
+   
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    virtual bool        SetObject(const std::string &name,
                                  const Gmat::ObjectType type,
                                  const std::string &associate = "",
@@ -63,10 +68,10 @@ public:
    virtual GmatBase* Clone(void) const;
    
    virtual const std::string&
-                        GetGeneratingString(Gmat::WriteMode mode =
-                                               Gmat::SCRIPTING,
-                                            const std::string &prefix = "",
-                                            const std::string &useName = "");
+                       GetGeneratingString(Gmat::WriteMode mode =
+                                           Gmat::SCRIPTING,
+                                           const std::string &prefix = "",
+                                           const std::string &useName = "");
 
    // Reference object accessor methods
    virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,

@@ -558,6 +558,43 @@ const StringArray& Burn::GetStringArrayParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Burn::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   //Spacecraft is not used
+   //refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+const StringArray& Burn::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
+      refObjectNames.push_back(satName);
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
+      refObjectNames.push_back(burnOriginName);
+
+   return refObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //                    const std::string &name)
 //------------------------------------------------------------------------------

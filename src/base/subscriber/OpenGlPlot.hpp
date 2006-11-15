@@ -117,7 +117,12 @@ public:
    virtual bool  SetBooleanParameter(const std::string &label,
                                      const bool value);
 
+   virtual std::string GetOnOffParameter(const Integer id) const;
+   virtual bool        SetOnOffParameter(const Integer id, 
+                                         const std::string &value);
+   
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
    
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
