@@ -144,6 +144,7 @@ namespace Gmat
       TIME_TYPE,
       OBJECT_TYPE,
       OBJECTARRAY_TYPE,
+      ON_OFF_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };
@@ -168,5 +169,7 @@ namespace Gmat
    };
 
 }
+
+typedef std::vector<Gmat::ObjectType> ObjectTypeArray;
 
 #endif //GMATDEFS_HPP
