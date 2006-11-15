@@ -793,25 +793,25 @@ void OpenGlPlotSetupPanel::LoadData()
       
       mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
       mXYPlaneCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("XYPlane") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("CelestialPlane") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("CelestialPlane") == "On");
       mWireFrameCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("WireFrame") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("WireFrame") == "On");
       mTargetStatusCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("TargetStatus") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("TargetStatus") == "On");
       mAxesCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("Axes") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("Axes") == "On");
       mGridCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("Grid") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("Grid") == "On");
       mEarthSunLinesCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("EarthSunLines") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("EarthSunLines") == "On");
       mUseInitialViewCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("UseInitialView") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("UseInitialView") == "On");
       mPerspectiveModeCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("PerspectiveMode") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("PerspectiveMode") == "On");
       mUseFixedFovCheckBox->
-         SetValue(mOpenGlPlot->GetStringParameter("UseFixedFov") == "On");
+         SetValue(mOpenGlPlot->GetOnOffParameter("UseFixedFov") == "On");
       
       rval = mOpenGlPlot->GetRealParameter("FixedFovAngle");
       mFixedFovTextCtrl->SetValue(theGuiManager->ToWxString(rval));
@@ -1099,59 +1099,59 @@ void OpenGlPlotSetupPanel::SaveData()
       mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
       
       if (mXYPlaneCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("XYPlane", "On");
+         mOpenGlPlot->SetOnOffParameter("XYPlane", "On");
       else
-         mOpenGlPlot->SetStringParameter("XYPlane", "Off");
+         mOpenGlPlot->SetOnOffParameter("XYPlane", "Off");
       
       if (mEclipticPlaneCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("CelestialPlane", "On");
+         mOpenGlPlot->SetOnOffParameter("CelestialPlane", "On");
       else
-         mOpenGlPlot->SetStringParameter("CelestialPlane", "Off");
+         mOpenGlPlot->SetOnOffParameter("CelestialPlane", "Off");
       
       if (mWireFrameCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("WireFrame", "On");
+         mOpenGlPlot->SetOnOffParameter("WireFrame", "On");
       else
-         mOpenGlPlot->SetStringParameter("WireFrame", "Off");
+         mOpenGlPlot->SetOnOffParameter("WireFrame", "Off");
       
       if (mTargetStatusCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("TargetStatus", "On");
+         mOpenGlPlot->SetOnOffParameter("TargetStatus", "On");
       else
-         mOpenGlPlot->SetStringParameter("TargetStatus", "Off");
+         mOpenGlPlot->SetOnOffParameter("TargetStatus", "Off");
       
       if (mAxesCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("Axes", "On");
+         mOpenGlPlot->SetOnOffParameter("Axes", "On");
       else
-         mOpenGlPlot->SetStringParameter("Axes", "Off");
+         mOpenGlPlot->SetOnOffParameter("Axes", "Off");
       
       if (mGridCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("Grid", "On");
+         mOpenGlPlot->SetOnOffParameter("Grid", "On");
       else
-         mOpenGlPlot->SetStringParameter("Grid", "Off");
+         mOpenGlPlot->SetOnOffParameter("Grid", "Off");
       
       if (mEarthSunLinesCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("EarthSunLines", "On");
+         mOpenGlPlot->SetOnOffParameter("EarthSunLines", "On");
       else
-         mOpenGlPlot->SetStringParameter("EarthSunLines", "Off");
+         mOpenGlPlot->SetOnOffParameter("EarthSunLines", "Off");
       
       //if (mOverlapCheckBox->IsChecked())
-      //   mOpenGlPlot->SetStringParameter("Overlap", "On");
+      //   mOpenGlPlot->SetOnOffParameter("Overlap", "On");
       //else
-      //   mOpenGlPlot->SetStringParameter("Overlap", "Off");
+      //   mOpenGlPlot->SetOnOffParameter("Overlap", "Off");
       
       if (mUseInitialViewCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("UseInitialView", "On");
+         mOpenGlPlot->SetOnOffParameter("UseInitialView", "On");
       else
-         mOpenGlPlot->SetStringParameter("UseInitialView", "Off");
+         mOpenGlPlot->SetOnOffParameter("UseInitialView", "Off");
       
       if (mPerspectiveModeCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("PerspectiveMode", "On");
+         mOpenGlPlot->SetOnOffParameter("PerspectiveMode", "On");
       else
-         mOpenGlPlot->SetStringParameter("PerspectiveMode", "Off");
+         mOpenGlPlot->SetOnOffParameter("PerspectiveMode", "Off");
       
       if (mUseFixedFovCheckBox->IsChecked())
-         mOpenGlPlot->SetStringParameter("UseFixedFov", "On");
+         mOpenGlPlot->SetOnOffParameter("UseFixedFov", "On");
       else
-         mOpenGlPlot->SetStringParameter("UseFixedFov", "Off");
+         mOpenGlPlot->SetOnOffParameter("UseFixedFov", "Off");
       
       Real fov;
       inputString[0] = mFixedFovTextCtrl->GetValue();
