@@ -6,7 +6,7 @@
 //
 // Author: Darrel J. Conway
 // Created: 2003/08/28
-// Rework:  2006/09/27
+// Rework:  2006/09/27 by Linda Jun (NASA/GSFC)
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -120,12 +120,14 @@ protected:
    std::string  headerComment;
    std::string  footerComment;
    std::string  currentBlock;
+   std::string  currentLine;
    std::string  lineNumber;
    Gmat::BlockType currentBlockType;
    
    /// Error handling data
    bool continueOnError;
-   std::string errorMsg;
+   std::string errorMsg1;
+   std::string errorMsg2;
    StringArray errorList;
    
    void   Initialize();
@@ -212,14 +214,15 @@ protected:
    bool IsArray(const std::string &str);
    
    // for error handling
-   void HandleError(BaseException &e);
+   void HandleError(BaseException &e, bool writeLine = true, bool warning = false);
 
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
    
    // For converting integer to string 
    // Used by current line number display on exceptions
-   std::string itoa(Integer value, unsigned int base);
+   // Use StringUtil::ToString() instead
+   //std::string itoa(Integer value, unsigned int base);
    
 private:
    
@@ -243,8 +246,8 @@ private:
    StringArray   subscriberList;
    
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
+   bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
    void WriteParts(const std::string &title, StringArray &parts);
-      
 };
 
 #endif // INTERPRETER_HPP

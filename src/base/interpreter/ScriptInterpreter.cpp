@@ -17,10 +17,12 @@
 #include "ScriptInterpreter.hpp"
 #include "MessageInterface.hpp"  
 #include "Moderator.hpp"
+#include "MathParser.hpp"
 
-//#define DEBUG_PARSE
-//#define DEBUG_SCRIPT_READING_AND_WRITING
 //#define DEBUG_SCRIPT_READING 1
+//#define DEBUG_SCRIPT_WRITING
+//#define DEBUG_DELAYED_BLOCK 1
+//#define DEBUG_PARSE
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -90,12 +92,22 @@ bool ScriptInterpreter::Interpret()
    if (!initialized)
       Initialize();
    
-   bool retval = ReadScript();
+   bool retval1 = ReadScript();
    
-   if (retval)
-      retval = FinalPass();
+   //if (retval)
+   //   retval = FinalPass();
+
+   bool retval2 = FinalPass();
    
-   return retval;
+   //MessageInterface::ShowMessage
+   //   ("===> Leaving Interpret() retval1=%d, retval2=%d\n", retval1, retval2);
+   
+   // Write any error messages collected
+   for (UnsignedInt i=0; i<errorList.size(); i++)
+      MessageInterface::ShowMessage("%d: %s\n", i+1, errorList[i].c_str());
+   
+   //return retval;
+   return (retval1 && retval2);
 }
 
 //------------------------------------------------------------------------------
@@ -224,9 +236,13 @@ bool ScriptInterpreter::SetOutStream(std::ostream *str)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadScript()
 {
+   bool retval1 = true;
    
    if (inStream->fail() || inStream->eof()) 
       return false;
+   
+   //MessageInterface::ShowMessage
+   //   ("===> continueOnError=%d\n", continueOnError);
    
    // Empty header & footer comment data members
    headerComment = "";
@@ -239,56 +255,107 @@ bool ScriptInterpreter::ReadScript()
    
    initialized = false;
    Initialize();
-
+   
    currentBlock = ReadLogicalBlock();
-      
+   
    #if DEBUG_SCRIPT_READING
    MessageInterface::ShowMessage
       ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
    #endif
-      
+   
    while (currentBlock != "")
    {
-      #if DEBUG_SCRIPT_READING
-      MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
-      #endif
+      try
+      {
+         currentLine = currentBlock;
          
-      currentBlockType = theTextParser.EvaluateBlock(currentBlock);
+         #if DEBUG_SCRIPT_READING
+         MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
+         #endif
          
-      if ( !Parse(currentBlock) )
-         return false; 
+         currentBlockType = theTextParser.EvaluateBlock(currentBlock);
          
+         //MessageInterface::ShowMessage
+         //   ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         
+         #if DEBUG_SCRIPT_READING
+         MessageInterface::ShowMessage
+            ("==========> Calling Parse() currentBlockType=%d\n", currentBlockType);
+         #endif
+         
+         // Keep previous retval1 value
+         retval1 = retval1 && Parse(currentBlock);
+         //retval1 = Parse(currentBlock);
+         
+         //MessageInterface::ShowMessage
+         //   ("===> after Parse() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         //MessageInterface::ShowMessage
+         //   ("===> currentBlockType:%d, retval1=%d\n", currentBlockType, retval1);
+         
+      }
+      catch (BaseException &e)
+      {
+         // Catch exception thrown from the Command::InterpretAction()
+         HandleError(e);
+         retval1 = false;
+      }
+      
+      if (!retval1 && !continueOnError)
+         return false;
+      
+      //if ( !Parse(currentBlock) )
+      //   return false; 
+      
       #if DEBUG_SCRIPT_READING
       MessageInterface::ShowMessage("===> Read next logical block\n");
       #endif
-         
+      
       currentBlock = ReadLogicalBlock();
-         
-      #if DEBUG_SCRIPT_READING > 1
+      
+      #if DEBUG_SCRIPT_READING
       MessageInterface::ShowMessage
          ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
       #endif
-         
    }
    
    // Parse delayed blocks here
    Integer delayedCount = delayedBlocks.size();
-   bool retval = true;
+   bool retval2 = true;
    inCommandMode = false;
    for (Integer i = 0; i < delayedCount; i++)
    {
+      #if DEBUG_DELAYED_BLOCK
       MessageInterface::ShowMessage
          ("===> delayedBlocks[%d]=%s\n", i, delayedBlocks[i].c_str());
+      #endif
       
-      if (!Parse(delayedBlocks[i]))
-         retval = false;
+      currentBlock = delayedBlocks[i];
+      currentBlockType = theTextParser.EvaluateBlock(currentBlock);
+      
+      // Keep previous retval1 value
+      retval2 = retval2 && Parse(currentBlock);
+      //retval2 = Parse(currentBlock);
+      
+      MessageInterface::ShowMessage("===> delayedCount:%d, retval2=%d\n", i, retval2);
+      
+      if (!retval2 && !continueOnError)
+         return false;
+      
+      //if (!Parse(currentBlock))
+      //   retval = false;
    }
    
-   if (continueOnError)
-      return true;
-   else
-      return (retval);
-
+//    if (continueOnError)
+//       return true;
+//    else
+//       return (retval);
+   
+   #if DEBUG_DELAYED_BLOCK
+   MessageInterface::ShowMessage
+      ("Leaving ReadScript() retval1=%d, retval2=%d\n", retval1, retval2);
+   #endif
+   
+   return (retval1 && retval2);
 }
 
 //------------------------------------------------------------------------------
@@ -306,7 +373,7 @@ std::string ScriptInterpreter::ReadLogicalBlock()
    std::string block = theReadWriter->ReadLogicalBlock();
    
    // Get the line number of the logical block
-   lineNumber = itoa(theReadWriter->GetLineNumber(), 10);
+   //lineNumber = itoa(theReadWriter->GetLineNumber(), 10);
    
    return block;
 }
@@ -362,9 +429,15 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    else if (currentBlockType == Gmat::DEFINITION_BLOCK)
    {
       if (count < 3)
-         throw InterpreterException
-            ("Missing parameter creating object for: \n" + lineNumber + ": " + logicBlock + "\n");
-
+      {
+         //throw InterpreterException
+         //   ("Missing parameter creating object for: \n" + lineNumber + ": " + logicBlock + "\n");
+         InterpreterException ex
+            ("Missing parameter creating object for");
+         HandleError(ex);
+         return false;
+      }
+      
       std::string type = chunks[1];
       StringArray names = theTextParser.Decompose(chunks[2], "()");
       count = names.size();
@@ -384,9 +457,14 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          obj = CreateObject(type, names[i]);
          
          if (obj == NULL)
-            throw InterpreterException
-               ("Error encountered creating objects for: \n" + lineNumber+ ":" + logicBlock + "\n");
-               
+         {
+            //throw InterpreterException
+            //   ("Error encountered creating objects for: \n" + lineNumber+ ":" + logicBlock + "\n");
+            InterpreterException ex
+               ("Error encountered creating objects for");
+            HandleError(ex);
+            return false;
+         }
          objCounter++;     
          obj->FinalizeCreation();
          
@@ -399,9 +477,14 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
 
       // if not all objectes are created, return false
       if (objCounter < count)
-         throw InterpreterException
-            ("All objects are not created: \n\"" + lineNumber+ ":" + currentBlock + "\"\n");
-         
+      {
+         //throw InterpreterException
+         //   ("All objects are not created: \n\"" + lineNumber+ ":" + currentBlock + "\"\n");
+         InterpreterException ex("All objects are not created");
+         HandleError(ex);
+         return false;
+      }
+      
       logicalBlockCount++;
    }
    else if (currentBlockType == Gmat::COMMAND_BLOCK)
@@ -435,8 +518,13 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          else if (isFunction)
             obj = (GmatBase*)CreateCommand("CallFunction", chunks[0]);
          else
-            throw InterpreterException
-               ("Missing parameter with command object: \n" + lineNumber + ":" + logicBlock + "\n");
+         {
+            //throw InterpreterException
+            //   ("Missing parameter with command object: \n" + lineNumber + ":" + logicBlock + "\n");
+            InterpreterException ex("Missing parameter with command object: ");
+            HandleError(ex);
+            return false;
+         }
       }
       else
       {
@@ -444,7 +532,12 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       }
           
       if (obj == NULL)
-         throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
+      {
+         //throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
+         //InterpreterException ex("Cannot Parse the line: ");
+         //HandleError(ex);
+         return false;
+      }
       
       std::string preStr = ""; 
       std::string inStr = ""; 
@@ -463,8 +556,55 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
    {
       if (count < 2)
-         throw InterpreterException
-            ("Missing parameter assigning object for: \n" + lineNumber + ":" + logicBlock + "\n");
+      {
+         //throw InterpreterException
+         //   ("Missing parameter assigning object for: \n" + lineNumber + ":" + logicBlock + "\n");
+         InterpreterException ex("Missing parameter assigning object for: ");
+         HandleError(ex);
+         return false;
+      }
+      
+      GmatBase *owner = NULL;
+      std::string attrStr = ""; 
+      std::string attrInLineStr = ""; 
+      Integer paramID = -1;
+      
+      if (!inCommandMode)
+      {
+         // check for math operators/functions
+         MathParser mp = MathParser();
+         
+         try
+         {            
+            //MessageInterface::ShowMessage
+            //   ("===> chunks[0]=%s, chunks[1]=%s\n", chunks[0].c_str(), chunks[1].c_str());
+            
+            if (mp.IsEquation(chunks[1]))
+            {
+               // check if LHS is object.property
+               if (FindPropertyID(obj, chunks[0], &owner, paramID))
+               {
+                  // Since string can have minus sign, check it first
+                  if (obj->GetParameterType(paramID) != Gmat::STRING_TYPE)
+                     inCommandMode = true;
+               }
+               else
+               {
+                  // check if LHS is a parameter
+                  GmatBase *tempObj = GetObject(chunks[0]);
+                  if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
+                     if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
+                        inCommandMode = true;
+               }
+            }
+         }
+         catch (BaseException &e)
+         {
+            #ifdef DEBUG_PARSE
+            MessageInterface::ShowMessage(e.GetMessage());
+            #endif
+         }
+      }
       
       if (inCommandMode)
          obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
@@ -472,15 +612,18 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          obj = MakeAssignment(chunks[0], chunks[1]);
       
       if (obj == NULL)
-         throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
+      {
+         //throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
+         return false;
+      }
       
-      GmatBase *owner = NULL;
-      std::string attrStr = ""; 
-      std::string attrInLineStr = ""; 
-      Integer paramID = -1;
+//       GmatBase *owner = NULL;
+//       std::string attrStr = ""; 
+//       std::string attrInLineStr = ""; 
+//       Integer paramID = -1;
       
       // paramID will be assigned from call to Interpreter class
-      if ( FindPropertyID(obj, chunks[0], &owner,paramID) )
+      if ( FindPropertyID(obj, chunks[0], &owner, paramID) )
       {
          attrStr = theTextParser.GetPrefaceComment();
          attrInLineStr = theTextParser.GetInlineComment();
@@ -547,7 +690,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    
    // Setup the coordinate systems on Spacecraft so they can perform conversions
    CoordinateSystem *ics = theModerator->GetInternalCoordinateSystem(), *sccs;
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -578,7 +721,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Hardware Components");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING 
+   #ifdef DEBUG_SCRIPT_WRITING 
    std::cout << "Found " << objs.size() << " Hardware Components\n";
    #endif
    // Hardware Tanks
@@ -614,7 +757,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Formations");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Spacecraft\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -637,7 +780,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "ForceModels");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Force Models\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -660,7 +803,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Propagators");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Propagators\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -683,7 +826,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Calculated Points");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage("Found %d Calculated Points\n", objs.size());
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -706,7 +849,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Burns");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Burns\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -740,7 +883,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText(sectionDelimiterString[2]);
       }
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Parameters\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -764,7 +907,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Coordinate Systems");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Coordinate Systems\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -787,7 +930,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Solvers");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Solvers\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -809,7 +952,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Subscribers");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Subscribers\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -834,7 +977,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Functions");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
-   #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+   #ifdef DEBUG_SCRIPT_WRITING
    std::cout << "Found " << objs.size() << " Functions\n";
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
@@ -859,7 +1002,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    }
    while (cmd != NULL) 
    {
-      #ifdef DEBUG_SCRIPT_READING_AND_WRITING
+      #ifdef DEBUG_SCRIPT_WRITING
       MessageInterface::ShowMessage
          ("===> ScriptInterpreter::WriteScript() before write cmd=%s, mode=%d, "
           "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
