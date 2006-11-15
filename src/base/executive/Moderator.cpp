@@ -375,11 +375,15 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
  *
  * @param <type> object type
  *
- * @return array of configured item names; return empty array if none
+ * @return array of configured item names of the type; return empty array if none
+ *  return all configured item if type is UNKNOWN_OBJECT
  */
 //------------------------------------------------------------------------------
 StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type)
 {
+   if (type == Gmat::UNKNOWN_OBJECT)
+      return theConfigManager->GetListOfAllItems();
+
    if (type == Gmat::CELESTIAL_BODY || type == Gmat::SPACE_POINT)
    {
       theSpacePointList.clear();
@@ -491,7 +495,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    // let's check to make sure it is a valid name
    if (newName == "GMAT" || newName == "Create")
    {
-   	  MessageInterface::PopupMessage
+          MessageInterface::PopupMessage
          (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",
          newName.c_str());
       return false;
@@ -1587,7 +1591,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       
       // Set parameter owner and dependent object
       if (ownerName != "")
+      {
          param->SetRefObjectName(param->GetOwnerType(), ownerName);
+         param->AddRefObject(GetObject(ownerName));
+      }
       
       // Set dependent object name
       if (depName != "")
