@@ -193,7 +193,7 @@ protected:
    
    // for setting/getting property value
    bool SetPropertyValue(GmatBase *obj, const Integer id,
-                         const std::string &value);
+                         const std::string &value, const Integer index = -1);
    std::string GetPropertyValue(GmatBase *obj, const Integer id);
    
    bool SetProperty(GmatBase *obj, const Integer id, const std::string &value);

@@ -284,8 +284,7 @@ bool ScriptInterpreter::ReadScript()
          #endif
          
          // Keep previous retval1 value
-         retval1 = retval1 && Parse(currentBlock);
-         //retval1 = Parse(currentBlock);
+         retval1 = Parse(currentBlock) && retval1;
          
          //MessageInterface::ShowMessage
          //   ("===> after Parse() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
@@ -302,9 +301,6 @@ bool ScriptInterpreter::ReadScript()
       
       if (!retval1 && !continueOnError)
          return false;
-      
-      //if ( !Parse(currentBlock) )
-      //   return false; 
       
       #if DEBUG_SCRIPT_READING
       MessageInterface::ShowMessage("===> Read next logical block\n");
@@ -333,23 +329,15 @@ bool ScriptInterpreter::ReadScript()
       currentBlockType = theTextParser.EvaluateBlock(currentBlock);
       
       // Keep previous retval1 value
-      retval2 = retval2 && Parse(currentBlock);
-      //retval2 = Parse(currentBlock);
+      retval2 = Parse(currentBlock) && retval2;
       
-      MessageInterface::ShowMessage("===> delayedCount:%d, retval2=%d\n", i, retval2);
+      //MessageInterface::ShowMessage("===> delayedCount:%d, retval2=%d\n", i, retval2);
       
       if (!retval2 && !continueOnError)
          return false;
       
-      //if (!Parse(currentBlock))
-      //   retval = false;
    }
-   
-//    if (continueOnError)
-//       return true;
-//    else
-//       return (retval);
-   
+      
    #if DEBUG_DELAYED_BLOCK
    MessageInterface::ShowMessage
       ("Leaving ReadScript() retval1=%d, retval2=%d\n", retval1, retval2);
@@ -430,8 +418,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    {
       if (count < 3)
       {
-         //throw InterpreterException
-         //   ("Missing parameter creating object for: \n" + lineNumber + ": " + logicBlock + "\n");
          InterpreterException ex
             ("Missing parameter creating object for");
          HandleError(ex);
@@ -458,8 +444,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          
          if (obj == NULL)
          {
-            //throw InterpreterException
-            //   ("Error encountered creating objects for: \n" + lineNumber+ ":" + logicBlock + "\n");
             InterpreterException ex
                ("Error encountered creating objects for");
             HandleError(ex);
@@ -478,8 +462,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       // if not all objectes are created, return false
       if (objCounter < count)
       {
-         //throw InterpreterException
-         //   ("All objects are not created: \n\"" + lineNumber+ ":" + currentBlock + "\"\n");
          InterpreterException ex("All objects are not created");
          HandleError(ex);
          return false;
@@ -519,8 +501,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
             obj = (GmatBase*)CreateCommand("CallFunction", chunks[0]);
          else
          {
-            //throw InterpreterException
-            //   ("Missing parameter with command object: \n" + lineNumber + ":" + logicBlock + "\n");
             InterpreterException ex("Missing parameter with command object: ");
             HandleError(ex);
             return false;
@@ -533,9 +513,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
           
       if (obj == NULL)
       {
-         //throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
-         //InterpreterException ex("Cannot Parse the line: ");
-         //HandleError(ex);
          return false;
       }
       
@@ -557,8 +534,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    {
       if (count < 2)
       {
-         //throw InterpreterException
-         //   ("Missing parameter assigning object for: \n" + lineNumber + ":" + logicBlock + "\n");
          InterpreterException ex("Missing parameter assigning object for: ");
          HandleError(ex);
          return false;
@@ -568,6 +543,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       std::string attrStr = ""; 
       std::string attrInLineStr = ""; 
       Integer paramID = -1;
+      
+      //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
       
       if (!inCommandMode)
       {
@@ -606,21 +583,49 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          }
       }
       
+      //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
+      
       if (inCommandMode)
-         obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
+      {
+         // If LHS is CoordinateSystem property, Call MakeAssignment
+         StringArray parts = theTextParser.SeparateDots(chunks[0]);
+         //MessageInterface::ShowMessage("===> parts.size()=%d\n", parts.size());
+         
+         if (parts.size() > 1)
+         {
+            GmatBase *tempObj = GetObject(parts[0]);
+            if (tempObj)
+            {
+               // Set values by calling Set*Parameter(), even in command mode
+               // for the following types
+               if (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
+                   tempObj->GetType() == Gmat::SUBSCRIBER)
+                  obj = MakeAssignment(chunks[0], chunks[1]);
+               else
+                  obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
+            }
+            else
+            {
+               obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
+            }
+         }
+         else
+         {
+            obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);
+         }
+      }
       else
+      {
          obj = MakeAssignment(chunks[0], chunks[1]);
+      }
       
       if (obj == NULL)
       {
-         //throw InterpreterException("Cannot Parse the line: \n\"" + lineNumber + ":" + currentBlock + "\"\n");
+         //InterpreterException ex("Cannot Parse the line: ");
+         //HandleError(ex);
          return false;
       }
       
-//       GmatBase *owner = NULL;
-//       std::string attrStr = ""; 
-//       std::string attrInLineStr = ""; 
-//       Integer paramID = -1;
       
       // paramID will be assigned from call to Interpreter class
       if ( FindPropertyID(obj, chunks[0], &owner, paramID) )
@@ -639,8 +644,10 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          attrInLineStr = ""; 
          paramID = -1;
          
-         //MessageInterface::ShowMessage("Owner===>%s\n", owner->GetGeneratingString(Gmat::SCRIPTING).c_str());
-         //MessageInterface::ShowMessage("\n\n\nObj===>%s\n", obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
+         //MessageInterface::ShowMessage
+         //   ("Owner===>%s\n", owner->GetGeneratingString(Gmat::SCRIPTING).c_str());
+         //MessageInterface::ShowMessage
+         //   ("\n\n\nObj===>%s\n", obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
       }
       
       logicalBlockCount++;

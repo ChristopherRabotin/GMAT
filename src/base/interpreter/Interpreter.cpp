@@ -42,6 +42,7 @@
 //#define DEBUG_SET_FORCE_MODEL 1
 //#define DEBUG_SET_SOLAR_SYS 1
 //#define DEBUG_FINAL_PASS
+//#define DEBUG_CHECK_OBJECT 1
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -872,12 +873,12 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // if command has it's own InterpretAction(), jsut return cmd
       if (cmd->InterpretAction())
       {
-         #if DEBUG_ASSEMBLE_COMMAND
-         MessageInterface::ShowMessage
-            ("   ===> %s has InterpretAction() \n", type.c_str());
-         #endif
-
          CheckUndefinedReference(cmd);
+         
+         #if DEBUG_CREATE_COMMAND
+         MessageInterface::ShowMessage
+            ("   ===> %s has InterpretAction() retruning %p\n", type.c_str(), cmd);
+         #endif
          
          return cmd;
       }
@@ -2529,7 +2530,8 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
 
 
 //------------------------------------------------------------------------------
-// bool SetPropertyValue(GmatBase *obj, const Integer id, const std::string &value)
+// bool SetPropertyValue(GmatBase *obj, const Integer id, const std::string &value,
+//                       const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets parameters on GMAT objects.
@@ -2537,12 +2539,13 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
  * @param  obj    Pointer to the object that owns the parameter.
  * @param  id     ID for the parameter.
  * @param  value  Value of the parameter.
+ * @param  index  Index of the parameter in array.
  * 
  * @return true if the parameter is set, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
-                                   const std::string &value)
+                                   const std::string &value, const Integer index)
 {
    bool retval = false;
    
@@ -2649,7 +2652,6 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            //errorMsg1 = errorMsg1 + "'" + valueToUse + "' is not a valid Integer number.\n";
             errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
             errorMsg2 = " Only integer number is allowed";
          }
@@ -2672,14 +2674,12 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            //errorMsg1 = errorMsg1 + "'" + valueToUse + "' is not a valid Real number.\n";
             errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
             errorMsg2 = " Only real number is allowed";
          }
          break;
       }
    case Gmat::STRING_TYPE:
-   case Gmat::STRINGARRAY_TYPE:
       {
          #if DEBUG_SET
          MessageInterface::ShowMessage
@@ -2687,6 +2687,25 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          #endif
          
          retval = obj->SetStringParameter(id, valueToUse);
+         break;
+      }
+   case Gmat::STRINGARRAY_TYPE:
+      {
+         #if DEBUG_SET
+         MessageInterface::ShowMessage
+            ("===> Calling SetStringParameter(%d, %s, %d)\n", id,
+             valueToUse.c_str(), index);
+         #endif
+         
+         try
+         {
+            retval = obj->SetStringParameter(id, valueToUse);
+         }
+         catch (BaseException &e)
+         {
+            // try with index
+            retval = obj->SetStringParameter(id, valueToUse, index);
+         }
          break;
       }
    case Gmat::BOOLEAN_TYPE:
@@ -2840,7 +2859,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    if (count > 0)
    {
       for (int i=0; i<count; i++)
-         retval = SetPropertyValue(obj, id, rhsValues[i]);
+         retval = SetPropertyValue(obj, id, rhsValues[i], i);
    }
    else
    {
@@ -3505,42 +3524,6 @@ bool Interpreter::FinalPass()
 }
 
 
-// //------------------------------------------------------------------------------
-// // std::string Interpreter::itoa(int value, unsigned int base)
-// //------------------------------------------------------------------------------
-// /**
-//  * C++ version std::string style "itoa":
-//  */
-// //------------------------------------------------------------------------------
-// std::string Interpreter::itoa(Integer value, unsigned int base)
-// {       
-//    const char digitMap[] = "0123456789abcdef";     
-//    std::string buf;
-
-//    // Guard:
-//    if (base == 0 || base > 16)
-//    {
-//       // Error: may add more trace/log output here
-//       return buf;
-//    }
-        
-//    // Take care of negative int:
-//    std::string sign;
-//    int _value = value;
-
-//    // Check for case when input is zero:
-//    if (_value == 0) return "0";
-        
-//    // Translating number to string with base:
-//    for (int i = 30; _value && i ; --i) 
-//    {
-//       buf = digitMap[ _value % base ] + buf;
-//       _value /= base;
-//    }
-//    return sign.append(buf);
-// }
-
-
 //------------------------------------------------------------------------------
 // bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value)
 //------------------------------------------------------------------------------
@@ -3669,6 +3652,10 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          MessageInterface::ShowMessage(e.GetMessage());
       }
    }
+
+   #ifdef DEBUG_CHECK_OBJECT
+   MessageInterface::ShowMessage("CheckUndefinedReference() returning %d\n", retval);
+   #endif
    
    return retval;
 }
