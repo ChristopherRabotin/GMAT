@@ -45,7 +45,7 @@
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
-#define DEBUG_CB_ANALYTIC
+//#define DEBUG_CB_ANALYTIC
 
 
 using namespace GmatMathUtil;
