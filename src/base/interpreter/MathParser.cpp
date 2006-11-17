@@ -332,8 +332,7 @@ MathNode* MathParser::Parse(const std::string &theEquation)
 
    // check if parenthesis are balanced
    if (!GmatStringUtil::IsParenBalanced(newEq))
-      //throw MathException("MathParser found unbalanced parenthesis in: " + newEq + "\n");
-      throw MathException("MathParser found unbalanced parenthesis");
+      throw MathException("Found unbalanced parenthesis");
    
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
@@ -391,8 +390,6 @@ MathNode* MathParser::ParseNode(const std::string &str)
          str1 = str.substr(open+1, close-open-1);
       
       mathNode = CreateNode("MathElement", str1);
-      
-      ///mathNode = CreateNode("MathElement", str);
    }
    else
    {
@@ -426,7 +423,21 @@ MathNode* MathParser::ParseNode(const std::string &str)
       if (right != "")
          rightNode = ParseNode(right);
       
-      //((MathFunction*)mathNode)->SetChildren(leftNode, rightNode);
+      // check for empty argument for function
+      if (left == "")
+      {
+         if (HasFunctionName(op, MATH_FUNC_LIST, MathFuncCount))
+            throw MathException("Need an argument of the function \"" + op + "\"");
+      }
+      
+      // check if two operands are needed
+      if (right == "")
+         if (op == "Add" || op == "Subtract" || op == "Multiply" ||
+             op == "Divide")
+         {
+            throw MathException("Need right side of the operator \"" + op + "\"");
+         }
+      
       mathNode->SetChildren(leftNode, rightNode);
    }
 
@@ -461,7 +472,8 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
    #endif
    
    if (node == NULL)
-      throw MathException("*** ERROR *** Cannot create MathNode: " + type);
+      //throw MathException("*** ERROR *** Cannot create MathNode: " + type);
+      throw MathException("Cannot create MathNode of \"" + type + "\"");
    
    return node;
 }
@@ -1194,7 +1206,8 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
       }
       else 
       {
-         throw MathException("*** ERROR *** Unhandled equation in: " + str + "\n");
+         //throw MathException("*** ERROR *** Unhandled equation in: " + str + "\n");
+         throw MathException("Cannot understand the equation \"" + str + "\"");
       }
    }
    
@@ -1208,7 +1221,8 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    #endif
    
    if (right == "")
-      throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      //throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      throw MathException("Need right side of \"" + op + "\"");
    
    FillItems(items, op, left, right);
    
@@ -1349,10 +1363,11 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    std::string right = str.substr(index+1, str.npos);
 
    if (left == "")
-      throw MathException("*** ERROR *** Need left side in: " + str + "\n");
+      throw MathException("Need left side of the operator \"" + op + "\"");
    
    if (right == "")
-      throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      //throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      throw MathException("Need right side of the operator \"" + op + "\"");
    
    FillItems(items, op, left, right);
 
@@ -1427,10 +1442,12 @@ StringArray MathParser::ParsePower(const std::string &str)
    std::string right = str.substr(index+1, str.npos);
 
    if (left == "")
-      throw MathException("*** ERROR *** Need left side in: " + str + "\n");
+      //throw MathException("*** ERROR *** Need left side in: " + str + "\n");
+      throw MathException("Need left side of the operator \"" + op + "\"");
    
    if (right == "")
-      throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      //throw MathException("*** ERROR *** Need right side in: " + str + "\n");
+      throw MathException("Need right side of the operator \"" + op + "\"");
    
    FillItems(items, op, left, right);
    
@@ -1533,8 +1550,9 @@ StringArray MathParser::ParseMathFunctions(const std::string &str)
    }
    
    if (left == "")
-      throw MathException("*** ERROR *** Need an argument in: " + str + "\n");
-
+      //throw MathException("*** ERROR *** Need an argument in: " + str + "\n");
+      throw MathException("Need an argument of the function \"" + fnName + "\"");
+   
    FillItems(items, fnName, left, "");
    
    #if DEBUG_FUNCTION > 1
@@ -1799,8 +1817,9 @@ UnsignedInt MathParser::FindMatchingParen(const std::string &str, UnsignedInt st
       if (leftCounter == rightCounter)
          return i;
    }
-      
-   throw MathException("*** ERROR *** Unmatching parenthesis: ')' in " + str + "\n");
+   
+   //throw MathException("*** ERROR *** Unmatching parenthesis: ')' in " + str + "\n");
+   throw MathException("Unmatching parenthesis found");
 }
 
 
