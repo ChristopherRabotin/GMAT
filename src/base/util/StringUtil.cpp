@@ -65,11 +65,12 @@ std::string GmatStringUtil::RemoveAll(const std::string &str, char ch,
 std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
                                                   const std::string &bracketPair)
 {
-   // Removed extra space in the array indexing, between ()
+   // Removed extra space in the array indexing, between bracketPair (), [], {}
    std::string str1;
    UnsignedInt index1 = 0;
    UnsignedInt closeParen;
    UnsignedInt length = str.size();
+   std::string closeStr = bracketPair.substr(1,1);
    
    while (index1 < length)
    {
@@ -77,6 +78,10 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
       {
          str1.push_back(str[index1]);
          closeParen = str.find(bracketPair[1], index1);
+         
+         if (closeParen == str.npos)
+            throw UtilityException
+               ("Closing bracket \"" + closeStr + "\" not found");
          
          // find close paren and copy non-blank char
          for (UnsignedInt j=index1+1; j<=closeParen; j++)
