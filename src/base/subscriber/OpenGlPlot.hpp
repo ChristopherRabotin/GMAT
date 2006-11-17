@@ -63,26 +63,32 @@ public:
    virtual bool        IsParameterReadOnly(const Integer id) const;
    
    virtual Integer GetIntegerParameter(const Integer id) const;
-   virtual Integer GetIntegerParameter(const std::string &label) const;
    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer GetIntegerParameter(const std::string &label) const;
    virtual Integer SetIntegerParameter(const std::string &label,
                                        const Integer value);
    
    virtual Real GetRealParameter(const Integer id) const;
-   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const Integer id, const Real value);
+   virtual Real GetRealParameter(const std::string &label) const;
    virtual Real SetRealParameter(const std::string &label, const Real value);
    
+   virtual Real GetRealParameter(const Integer id,
+                                 const Integer index) const;
+   virtual Real SetRealParameter(const Integer id,
+                                 const Real value,
+                                 const Integer index);
+   
    virtual const Rvector& GetRvectorParameter(const Integer id) const;
-   virtual const Rvector& GetRvectorParameter(const std::string &label) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,
                                               const Rvector &value);
+   virtual const Rvector& GetRvectorParameter(const std::string &label) const;
    virtual const Rvector& SetRvectorParameter(const std::string &label,
                                               const Rvector &value);
    
    virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
+   virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
    
@@ -96,27 +102,15 @@ public:
                                                const UnsignedInt value,
                                                const Integer index);
    
-   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                               const UnsignedInt value,
-                                               const Integer index);
-   
    virtual const UnsignedIntArray&
-                 GetUnsignedIntArrayParameter(const Integer id) const;
-   virtual const UnsignedIntArray& 
-                 GetUnsignedIntArrayParameter(const std::string &label) const;
-      
+                 GetUnsignedIntArrayParameter(const Integer id) const;   
    virtual const StringArray&
                  GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray&
-                 GetStringArrayParameter(const std::string &label) const;
    
    virtual bool  GetBooleanParameter(const Integer id) const;
-   virtual bool  GetBooleanParameter(const std::string &label) const;
    virtual bool  SetBooleanParameter(const Integer id,
                                      const bool value);
-   virtual bool  SetBooleanParameter(const std::string &label,
-                                     const bool value);
-
+   
    virtual std::string GetOnOffParameter(const Integer id) const;
    virtual bool        SetOnOffParameter(const Integer id, 
                                          const std::string &value);
@@ -149,7 +143,7 @@ protected:
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
    SpacePoint *mViewPointRefObj;
-   SpacePoint *mViewPointVectorObj;
+   SpacePoint *mViewPointObj;
    SpacePoint *mViewDirectionObj;
    std::vector<SpacePoint*> mObjectArray;
    std::vector<SpacePoint*> mAllSpArray;
@@ -171,7 +165,7 @@ protected:
    std::string mOldName;
    std::string mViewCoordSysName;
    std::string mViewPointRefName;
-   std::string mViewPointVectorName;
+   std::string mViewPointName;
    std::string mViewDirectionName;
    std::string mViewUpCoordSysName;
    std::string mViewUpAxisName;
@@ -217,11 +211,13 @@ protected:
    enum
    {
       ADD = SubscriberParamCount,
+      ORBIT_COLOR,
+      //TARGET_COLOR,
       COORD_SYSTEM,
       VIEWPOINT_REF,
       VIEWPOINT_REF_VECTOR,
+      VIEWPOINT,
       VIEWPOINT_VECTOR,
-      VIEWPOINT_VECTOR_VECTOR,
       VIEW_DIRECTION,
       VIEW_DIRECTION_VECTOR,
       VIEW_SCALE_FACTOR,
@@ -242,8 +238,6 @@ protected:
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       NUM_POINTS_TO_REDRAW,
-      ORBIT_COLOR,
-      //TARGET_COLOR,
       SHOW_PLOT,
       OpenGlPlotParamCount
    };

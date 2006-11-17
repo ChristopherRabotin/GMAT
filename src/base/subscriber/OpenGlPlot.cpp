@@ -18,12 +18,12 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlot.hpp"
-#include "PlotInterface.hpp"     // for UpdateGlPlot()
-#include "ColorTypes.hpp"        // for namespace GmatColor::
-#include "Publisher.hpp"         // for Instance()
-#include "GmatBaseException.hpp" // for GmatBaseException()
-#include "MessageInterface.hpp"  // for ShowMessage()
-#include <algorithm>             // for find(), distance()
+#include "PlotInterface.hpp"       // for UpdateGlPlot()
+#include "ColorTypes.hpp"          // for namespace GmatColor::
+#include "Publisher.hpp"           // for Instance()
+#include "SubscriberException.hpp" // for SubscriberException()
+#include "MessageInterface.hpp"    // for ShowMessage()
+#include <algorithm>               // for find(), distance()
 
 #define REMOVE_OBJ_BY_SETTING_FLAG 1
 
@@ -42,6 +42,8 @@ const std::string
 OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 {
    "Add",
+   "OrbitColor",
+   //"TargetColor",
    "CoordinateSystem",
    "ViewPointRef",
    "ViewPointRefVector",
@@ -67,8 +69,6 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
    "DataCollectFrequency",
    "UpdatePlotFrequency",
    "NumPointsToRedraw",
-   "OrbitColor",
-   //"TargetColor",
    "ShowPlot",
 }; 
 
@@ -77,6 +77,8 @@ const Gmat::ParameterType
 OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,       //"Add"
+   Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
+   //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
    Gmat::STRING_TYPE,            //"CoordinateSystem"
    Gmat::STRING_TYPE,            //"ViewPointRef",
    Gmat::RVECTOR_TYPE,           //"ViewPointRefVector",
@@ -105,8 +107,6 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::INTEGER_TYPE,           //"UpdatePlotFrequency"
    Gmat::INTEGER_TYPE,           //"NumPointsToRedraw"
    
-   Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
-   //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
    Gmat::BOOLEAN_TYPE,           //"ShowPlot"
 };
 
@@ -151,7 +151,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
 
    // viewpoint
    mViewPointRefName = "Earth";
-   mViewPointVectorName = "Vector";
+   mViewPointName = "Vector";
    mViewDirectionName = "Earth";
    mViewScaleFactor = 1.0;
    mFixedFovAngle = 45.0;
@@ -164,7 +164,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
    mViewPointRefObj = NULL;
-   mViewPointVectorObj = NULL;
+   mViewPointObj = NULL;
    mViewDirectionObj = NULL;
    
    mDataCollectFrequency = 1;
@@ -240,7 +240,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    
    // viewpoint
    mViewPointRefName = ogl.mViewPointRefName;
-   mViewPointVectorName = ogl.mViewPointVectorName;
+   mViewPointName = ogl.mViewPointName;
    mViewDirectionName = ogl.mViewDirectionName;
    mViewScaleFactor = ogl.mViewScaleFactor;
    mFixedFovAngle = ogl.mFixedFovAngle;
@@ -255,7 +255,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewUpCoordSystem = ogl.mViewCoordSystem;
    mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
    mViewPointRefObj = ogl.mViewPointRefObj;
-   mViewPointVectorObj = ogl.mViewPointVectorObj;
+   mViewPointObj = ogl.mViewPointObj;
    mViewDirectionObj = ogl.mViewDirectionObj;
    
    mDataCollectFrequency = ogl.mDataCollectFrequency;
@@ -374,6 +374,11 @@ bool OpenGlPlot::SetColor(const std::string &item, const std::string &name,
       if (mOrbitColorMap.find(name) != mOrbitColorMap.end())
       {
          mOrbitColorMap[name] = value;
+         
+         for (int i=0; i<mAllSpCount; i++)
+            if (mAllSpNameArray[i] == name)
+               mOrbitColorArray[i] = value;
+         
          return true;
       }
    }
@@ -549,12 +554,12 @@ bool OpenGlPlot::Initialize()
          // check ViewPoint info to see if any objects need to be
          // included in the non-spacecraft list
          if (mViewCoordSystem == NULL)
-            throw GmatBaseException
+            throw SubscriberException
                ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewCoordSysName +
                 " not set\n");
             
          if (mViewUpCoordSystem == NULL)
-            throw GmatBaseException
+            throw SubscriberException
                ("OpenGlPlot::Initialize() CoordinateSystem: " + mViewUpCoordSysName +
                 " not set\n");               
             
@@ -567,8 +572,8 @@ bool OpenGlPlot::Initialize()
          if (mViewPointRefObj != NULL)
             UpdateObjectList(mViewPointRefObj);
             
-         if (mViewPointVectorObj != NULL)
-            UpdateObjectList(mViewPointVectorObj);
+         if (mViewPointObj != NULL)
+            UpdateObjectList(mViewPointObj);
             
          if (mViewDirectionObj != NULL)
             UpdateObjectList(mViewDirectionObj);
@@ -622,10 +627,10 @@ bool OpenGlPlot::Initialize()
          #endif
          
          PlotInterface::SetGlViewOption
-            (instanceName, mViewPointRefObj, mViewPointVectorObj,
+            (instanceName, mViewPointRefObj, mViewPointObj,
              mViewDirectionObj, mViewScaleFactor, mViewPointRefVector,
              mViewPointVector, mViewDirectionVector, mViewUpAxisName,
-             (mViewPointRefName == "Vector"), (mViewPointVectorName == "Vector"),
+             (mViewPointRefName == "Vector"), (mViewPointName == "Vector"),
              (mViewDirectionName == "Vector"), (mUseFixedFov == "On"),
              mFixedFovAngle);
 
@@ -875,11 +880,6 @@ bool OpenGlPlot::IsParameterReadOnly(const Integer id) const
    if (id == OVERLAP_PLOT)
       return true;
    
-//    if ((id == OVERLAP_PLOT) || (id == DATA_COLLECT_FREQUENCY) ||
-//        (id == UPDATE_PLOT_FREQUENCY) || (id == USE_INITIAL_VIEW) ||
-//        (id == PERSPECTIVE_MODE))
-//       return true;
-
    return Subscriber::IsParameterReadOnly(id);
 }
 
@@ -904,15 +904,6 @@ Integer OpenGlPlot::GetIntegerParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// virtual Integer GetIntegerParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-Integer OpenGlPlot::GetIntegerParameter(const std::string &label) const
-{
-   return GetIntegerParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
 // virtual Integer SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
 Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
@@ -933,6 +924,15 @@ Integer OpenGlPlot::SetIntegerParameter(const Integer id, const Integer value)
    default:
       return Subscriber::SetIntegerParameter(id, value);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Integer OpenGlPlot::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
 }
 
 
@@ -965,20 +965,6 @@ Real OpenGlPlot::GetRealParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// virtual Real GetRealParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-Real OpenGlPlot::GetRealParameter(const std::string &label) const
-{
-   #if DEBUG_OPENGL_PARAM
-     MessageInterface::ShowMessage
-        ("OpenGlPlot::GetRealParameter() label = %s\n", label.c_str());
-   #endif
-   
-   return GetRealParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
 // virtual Real SetRealParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
 Real OpenGlPlot::SetRealParameter(const Integer id, const Real value)
@@ -998,6 +984,20 @@ Real OpenGlPlot::SetRealParameter(const Integer id, const Real value)
 
 
 //------------------------------------------------------------------------------
+// virtual Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real OpenGlPlot::GetRealParameter(const std::string &label) const
+{
+   #if DEBUG_OPENGL_PARAM
+     MessageInterface::ShowMessage
+        ("OpenGlPlot::GetRealParameter() label = %s\n", label.c_str());
+   #endif
+   
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // virtual Real SetRealParameter(const std::string &label, const Real value)
 //------------------------------------------------------------------------------
 Real OpenGlPlot::SetRealParameter(const std::string &label, const Real value)
@@ -1013,6 +1013,54 @@ Real OpenGlPlot::SetRealParameter(const std::string &label, const Real value)
 
 
 //------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
+Real OpenGlPlot::GetRealParameter(const Integer id, const Integer index) const
+{
+   switch (id)
+   {
+   case VIEWPOINT_REF_VECTOR:
+      return mViewPointRefVector[index];
+      
+   case VIEWPOINT_VECTOR:
+      return mViewPointVector[index];
+      
+   case VIEW_DIRECTION_VECTOR:
+      return mViewDirectionVector[index];
+      
+   default:
+      return Subscriber::GetRealParameter(id, index);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value, const Integer index)
+//------------------------------------------------------------------------------
+Real OpenGlPlot::SetRealParameter(const Integer id, const Real value,
+                                  const Integer index)
+{
+   switch (id)
+   {
+   case VIEWPOINT_REF_VECTOR:
+      mViewPointRefVector[index] = value;
+      return value;
+      
+   case VIEWPOINT_VECTOR:
+      mViewPointVector[index] = value;
+      return value;
+      
+   case VIEW_DIRECTION_VECTOR:
+      mViewDirectionVector[index] = value;
+      return value;
+      
+   default:
+      return Subscriber::SetRealParameter(id, value, index);
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // virtual const Rvector& GetRvectorParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const Rvector& OpenGlPlot::GetRvectorParameter(const Integer id) const
@@ -1021,7 +1069,7 @@ const Rvector& OpenGlPlot::GetRvectorParameter(const Integer id) const
    {
    case VIEWPOINT_REF_VECTOR:
       return mViewPointRefVector;
-   case VIEWPOINT_VECTOR_VECTOR:
+   case VIEWPOINT_VECTOR:
       {
       #if DEBUG_OPENGL_PARAM
         Rvector vec = mViewPointVector;
@@ -1040,20 +1088,6 @@ const Rvector& OpenGlPlot::GetRvectorParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// virtual const Rvector& GetRvectorParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-const Rvector& OpenGlPlot::GetRvectorParameter(const std::string &label) const
-{
-   #if DEBUG_OPENGL_PARAM
-     MessageInterface::ShowMessage
-        ("OpenGlPlot::GetRvectorParameter() label = %s\n", label.c_str());
-   #endif
-   
-   return GetRvectorParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
 // virtual const Rvector& SetRvectorParameter(const Integer id,
 //                                            const Rvector &value)
 //------------------------------------------------------------------------------
@@ -1068,7 +1102,7 @@ const Rvector& OpenGlPlot::SetRvectorParameter(const Integer id,
       mViewPointRefVector[2] = value[2];
       return value;
       
-   case VIEWPOINT_VECTOR_VECTOR:
+   case VIEWPOINT_VECTOR:
       mViewPointVector[0] = value[0];
       mViewPointVector[1] = value[1];
       mViewPointVector[2] = value[2];
@@ -1083,6 +1117,20 @@ const Rvector& OpenGlPlot::SetRvectorParameter(const Integer id,
    default:
       return Subscriber::SetRvectorParameter(id, value);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual const Rvector& GetRvectorParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const Rvector& OpenGlPlot::GetRvectorParameter(const std::string &label) const
+{
+   #if DEBUG_OPENGL_PARAM
+     MessageInterface::ShowMessage
+        ("OpenGlPlot::GetRvectorParameter() label = %s\n", label.c_str());
+   #endif
+   
+   return GetRvectorParameter(GetParameterID(label));
 }
 
 
@@ -1115,54 +1163,17 @@ std::string OpenGlPlot::GetStringParameter(const Integer id) const
       return mViewCoordSysName;
    case VIEWPOINT_REF:
       return mViewPointRefName;
-   case VIEWPOINT_VECTOR:
-      return mViewPointVectorName;
+   case VIEWPOINT:
+      return mViewPointName;
    case VIEW_DIRECTION:
       return mViewDirectionName;
    case VIEW_UP_COORD_SYSTEM:
       return mViewUpCoordSysName;
    case VIEW_UP_AXIS:
       return mViewUpAxisName;
-      
-//    case CELESTIAL_PLANE:
-//       return mEclipticPlane;
-//    case XY_PLANE:
-//       return mXYPlane;
-//    case WIRE_FRAME:
-//       return mWireFrame;
-//    case TARGET_STATUS:
-//       return mTargetStatus;
-//    case AXES:
-//       return mAxes;
-//    case GRID:
-//       return mGrid;
-//    case EARTH_SUN_LINES:
-//       return mEarthSunLines;
-//    case OVERLAP_PLOT:
-//       return mOverlapPlot;
-//    case USE_INITIAL_VIEW:
-//       return mUseInitialView;
-//    case PERSPECTIVE_MODE:
-//       return mPerspectiveMode;
-//    case USE_FIXED_FOV:
-//       return mUseFixedFov;
    default:
       return Subscriber::GetStringParameter(id);
    }
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetStringParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-std::string OpenGlPlot::GetStringParameter(const std::string &label) const
-{
-   #if DEBUG_OPENGL_PARAM
-      MessageInterface::ShowMessage
-         ("OpenGlPlot::GetStringParameter() label = %s\n", label.c_str());
-   #endif
-   
-   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -1186,8 +1197,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case VIEWPOINT_REF:
       mViewPointRefName = value;
       return true;
-   case VIEWPOINT_VECTOR:
-      mViewPointVectorName = value;
+   case VIEWPOINT:
+      mViewPointName = value;
       return true;
    case VIEW_DIRECTION:
       mViewDirectionName = value;
@@ -1198,43 +1209,23 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
    case VIEW_UP_AXIS:
       mViewUpAxisName = value;
       return true;
-      
-//    case CELESTIAL_PLANE:
-//       mEclipticPlane = value;
-//       return true;
-//    case XY_PLANE:
-//       mXYPlane = value;
-//       return true;
-//    case WIRE_FRAME:
-//       mWireFrame = value;
-//       return true;
-//    case TARGET_STATUS:
-//       mTargetStatus = value;
-//       return true;
-//    case AXES:
-//       mAxes = value;
-//       return true;
-//    case GRID:
-//       mGrid = value;
-//       return true;
-//    case EARTH_SUN_LINES:
-//       mEarthSunLines = value;
-//       return true;
-//    case OVERLAP_PLOT:
-//       mOverlapPlot = value;
-//       return true;
-//    case USE_INITIAL_VIEW:
-//       mUseInitialView = value;
-//       return true;
-//    case PERSPECTIVE_MODE:
-//       mPerspectiveMode = value;
-//       return true;
-//    case USE_FIXED_FOV:
-//       mUseFixedFov = value;
-//       return true;
    default:
       return Subscriber::SetStringParameter(id, value);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string OpenGlPlot::GetStringParameter(const std::string &label) const
+{
+   #if DEBUG_OPENGL_PARAM
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::GetStringParameter() label = %s\n", label.c_str());
+   #endif
+   
+   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -1284,59 +1275,12 @@ bool OpenGlPlot::SetStringParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-//                                             const UnsignedInt value,
-//                                             const Integer index)
-//------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
-                                                const UnsignedInt value,
-                                                const Integer index)
-{
-   switch (id)
-   {
-   case ORBIT_COLOR:
-      if (index < mAllSpCount)
-      {
-         mOrbitColorArray[index] = value;
-         return value;
-      }
-      break;
-//    case TARGET_COLOR:
-//       if (index < mAllSpCount)
-//       {
-//          mTargetColorArray[index] = value;
-//          return value;
-//       }
-//       break;
-   default:
-      return Subscriber::SetUnsignedIntParameter(id, value, index);
-   }
-
-   throw GmatBaseException("OpenGlPlot::SetUnsignedIntParameter() index out of bounds "
-                           "for " + GetParameterText(id));
-}
-
-
-//------------------------------------------------------------------------------
-// virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-//                                             const UnsignedInt value,
-//                                             const Integer index)
-//------------------------------------------------------------------------------
-UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const std::string &label,
-                                                const UnsignedInt value,
-                                                const Integer index)
-{
-   return SetUnsignedIntParameter(GetParameterID(label), value, index);
-}
-
-
-//------------------------------------------------------------------------------
 // virtual const UnsignedIntArray&
 // GetUnsignedIntArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 const UnsignedIntArray&
 OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
-{
+{   
    switch (id)
    {
    case ORBIT_COLOR:
@@ -1350,13 +1294,45 @@ OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// virtual const UnsignedIntArray& 
-// GetUnsignedIntArrayParameter(const std::string &label) const
+// virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+//                                             const UnsignedInt value,
+//                                             const Integer index)
 //------------------------------------------------------------------------------
-const UnsignedIntArray& 
-OpenGlPlot::GetUnsignedIntArrayParameter(const std::string &label) const
+UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value,
+                                                const Integer index)
 {
-   return GetUnsignedIntArrayParameter(GetParameterID(label));
+   //MessageInterface::ShowMessage
+   //   ("===> OpenGlPlot::SetUnsignedIntParameter() id=%d, value=%u, index=%d, "
+   //    "mAllSpCount=%d, mOrbitColorArray.size()=%d\n",  id, value, index,
+   //    mAllSpCount, mOrbitColorArray.size());
+   
+   switch (id)
+   {
+   case ORBIT_COLOR:
+      {
+         Integer size = mAllSpNameArray.size();
+         if (index >= size)
+            throw SubscriberException
+               ("index out of bounds for " + GetParameterText(id));
+      
+         for (int i=0; i<size; i++)
+         {
+            if (index == i)
+               mOrbitColorMap[mAllSpNameArray[i]] = value;
+            
+            if (index < size)
+               mOrbitColorArray[index] = value;
+            else
+               mOrbitColorArray.push_back(value);
+         }
+         return value;
+      }
+      //case TARGET_COLOR:
+      //break;
+   default:
+      return Subscriber::SetUnsignedIntParameter(id, value, index);
+   }
 }
 
 
@@ -1376,15 +1352,6 @@ const StringArray& OpenGlPlot::GetStringArrayParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetStringArrayParameter(const std::string &label) const
-//------------------------------------------------------------------------------
-const StringArray& OpenGlPlot::GetStringArrayParameter(const std::string &label) const
-{
-   return GetStringArrayParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
 // bool GetBooleanParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool OpenGlPlot::GetBooleanParameter(const Integer id) const
@@ -1396,25 +1363,21 @@ bool OpenGlPlot::GetBooleanParameter(const Integer id) const
 
 
 //------------------------------------------------------------------------------
-// bool GetBooleanParameter(const std::string &label) const
+// bool SetBooleanParameter(const Integer id, const bool value)
 //------------------------------------------------------------------------------
-bool OpenGlPlot::GetBooleanParameter(const std::string &label) const
-{
-   return GetBooleanParameter(GetParameterID(label));
-}
-
-
-//------------------------------------------------------------------------------
-// bool SetBooleanParameter(const std::string &label, const bool value)
-//------------------------------------------------------------------------------
-bool OpenGlPlot::SetBooleanParameter(const std::string &label, const bool value)
+bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
 {
    #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetBooleanParameter() label=%s, value=%d\n", label.c_str(), value);
+      ("OpenGlPlot::SetBooleanParameter() id=%d, value=%d\n", id, value);
    #endif
    
-   return SetBooleanParameter(GetParameterID(label), value);
+   if (id == SHOW_PLOT)
+   {
+      active = value;
+      return active;
+   }
+   return Subscriber::SetBooleanParameter(id, value);
 }
 
 
@@ -1519,25 +1482,6 @@ bool OpenGlPlot::SetOnOffParameter(const std::string &label,
 
 
 //------------------------------------------------------------------------------
-// bool SetBooleanParameter(const Integer id, const bool value)
-//------------------------------------------------------------------------------
-bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
-{
-   #if DEBUG_OPENGL_PARAM
-   MessageInterface::ShowMessage
-      ("OpenGlPlot::SetBooleanParameter() id=%d, value=%d\n", id, value);
-   #endif
-   
-   if (id == SHOW_PLOT)
-   {
-      active = value;
-      return active;
-   }
-   return Subscriber::SetBooleanParameter(id, value);
-}
-
-
-//------------------------------------------------------------------------------
 // virtual std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
@@ -1622,11 +1566,11 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
                mViewPointRefName) == mAllRefObjectNames.end())
          mAllRefObjectNames.push_back(mViewPointRefName);
       
-      if (mViewPointVectorName != "Vector")
+      if (mViewPointName != "Vector")
       {
          if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointVectorName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointVectorName);
+                  mViewPointName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewPointName);
       }
       
       if (mViewDirectionName != "Vector")
@@ -1649,11 +1593,11 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
                mViewPointRefName) == mAllRefObjectNames.end())
          mAllRefObjectNames.push_back(mViewPointRefName);
       
-      if (mViewPointVectorName != "Vector")
+      if (mViewPointName != "Vector")
       {
          if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
-                  mViewPointVectorName) == mAllRefObjectNames.end())
-            mAllRefObjectNames.push_back(mViewPointVectorName);
+                  mViewPointName) == mAllRefObjectNames.end())
+            mAllRefObjectNames.push_back(mViewPointName);
       }
       
       if (mViewDirectionName != "Vector")
@@ -1695,15 +1639,15 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
    {
       if (name == mViewPointRefName)
          return mViewPointRefObj;
-      else if (name == mViewPointVectorName)
-         return mViewPointVectorObj;
+      else if (name == mViewPointName)
+         return mViewPointObj;
       else if (name == mViewDirectionName)
          return mViewDirectionObj;
    }
 
    return Subscriber::GetRefObject(type, name);
    
-//    throw GmatBaseException("OpenGlPlot::GetRefObject() the object name: " + name +
+//    throw SubscriberException("OpenGlPlot::GetRefObject() the object name: " + name +
 //                            "not found\n");
 }
 
@@ -1743,8 +1687,6 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          mViewUpCoordSystem = (CoordinateSystem*)obj;
       return true;
    }
-//    else if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
-//             type == Gmat::SPACECRAFT || type == Gmat::CALCULATED_POINT)
    else if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       for (Integer i=0; i<mAllSpCount; i++)
@@ -1764,8 +1706,8 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       if (name == mViewPointRefName)
          mViewPointRefObj = (SpacePoint*)obj;
       
-      if (name == mViewPointVectorName)
-         mViewPointVectorObj = (SpacePoint*)obj;
+      if (name == mViewPointName)
+         mViewPointObj = (SpacePoint*)obj;
       
       else if (name == mViewDirectionName)
          mViewDirectionObj = (SpacePoint*)obj;
@@ -1788,7 +1730,8 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
 {
    #if DEBUG_OPENGL_ADD
    MessageInterface::ShowMessage
-      ("OpenGlPlot::AddSpacePoint() name=%s\n", name.c_str());
+      ("OpenGlPlot::AddSpacePoint() name=%s, index=%d, show=%d, mAllSpCount=%d\n",
+       name.c_str(), index, show, mAllSpCount);
    #endif
    
    bool status = false;
@@ -1803,8 +1746,6 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
          mAllSpArray.push_back(NULL);
          mAllSpCount = mAllSpNameArray.size();
          
-         //mDrawOrbitMap[name] = true;
-         //mShowObjectMap[name] = true;
          mDrawOrbitMap[name] = show;
          mShowObjectMap[name] = show;
          
@@ -1815,7 +1756,12 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
             if (mOrbitColorMap.find(name) == mOrbitColorMap.end())
             {
                mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
+               mOrbitColorArray.push_back(DEFAULT_ORBIT_COLOR[mNonStdBodyCount]); //loj:11/17
                mNonStdBodyCount++;
+            }
+            else
+            {
+               mOrbitColorArray.push_back(mOrbitColorMap[name]); //loj:11/17
             }
             
             mTargetColorMap[name] = GmatColor::TEAL32;
@@ -1823,6 +1769,7 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
          else
          {
             mOrbitColorMap[name] = GmatColor::RED32;
+            mOrbitColorArray.push_back(GmatColor::RED32); // loj:11/17
             mTargetColorMap[name] = GmatColor::TEAL32;
          }
          
@@ -1836,9 +1783,11 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("OpenGlPlot::AddSpacePoint() status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d"
-          "orbColor=%d, targColor=%d\n", status, i, objName.c_str(), mDrawOrbitMap[objName],
+         ("OpenGlPlot::AddSpacePoint() status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d "
+          "orbColor=%u, targColor=%u\n", status, i, objName.c_str(), mDrawOrbitMap[objName],
           mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
+      MessageInterface::ShowMessage
+         ("   mOrbitColorArray[%d]=%u\n", i, mOrbitColorArray[i]);
    }
    #endif
    

@@ -81,7 +81,8 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
 {
    "Integer",     "UnsignedInt", "UnsignedIntArray", "Real",       
    "RealElement", "String",      "StringArray",      "Boolean",     
-   "Rvector",     "Rmatrix",     "Time",             "Object"
+   "Rvector",     "Rmatrix",     "Time",             "Object",
+   "ObjectArray", "OnOff",
 };
 
 /**
@@ -2614,8 +2615,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          {
             // Skip unhandled types
             if (
-                (parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-                (parmType != Gmat::RVECTOR_TYPE) &&
+                //(parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
+                //(parmType != Gmat::RVECTOR_TYPE) &&
                 (parmType != Gmat::RMATRIX_TYPE) &&
                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
                )
@@ -2732,62 +2733,84 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //------------------------------------------------------------------------------
 void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
-    Gmat::ParameterType tid = GetParameterType(id);
+   Gmat::ParameterType tid = GetParameterType(id);
     
-    switch (tid) {
-        case Gmat::OBJECT_TYPE:
-        case Gmat::STRING_TYPE:     // Strings and objects write out a string
-            if (inMatlabMode)
-               stream << "'";
-            stream << GetStringParameter(id);
-            if (inMatlabMode)
-               stream << "'";
-            break;
+   switch (tid)
+   {
+   case Gmat::OBJECT_TYPE:
+   case Gmat::STRING_TYPE:     // Strings and objects write out a string
+      if (inMatlabMode)
+         stream << "'";
+      stream << GetStringParameter(id);
+      if (inMatlabMode)
+         stream << "'";
+      break;
+      
+   case Gmat::ON_OFF_TYPE:     // "On" and "Off"
+      if (inMatlabMode)
+         stream << "'";
+      stream << GetOnOffParameter(id);
+      if (inMatlabMode)
+         stream << "'";
+      break;
+      
+   case Gmat::INTEGER_TYPE:
+      stream << GetIntegerParameter(id);
+      break;
+      
+   case Gmat::UNSIGNED_INT_TYPE:
+      stream << GetUnsignedIntParameter(id);
+      break;
             
-        case Gmat::INTEGER_TYPE:
-            stream << GetIntegerParameter(id);
-            break;
-            
-        case Gmat::UNSIGNED_INT_TYPE:
-            stream << GetUnsignedIntParameter(id);
-            break;
-            
-        case Gmat::REAL_TYPE:
-            stream << GetRealParameter(id);
-            break;
+   case Gmat::UNSIGNED_INTARRAY_TYPE:
+      {
+         UnsignedIntArray arr = GetUnsignedIntArrayParameter(id);
+         stream << "[ ";
+         for (UnsignedInt i=0; i<arr.size(); i++)
+            stream << arr[i] << " ";
+         stream << "]";         
+      }
+      break;
+      
+   case Gmat::REAL_TYPE:
+      stream << GetRealParameter(id);
+      break;
+      
+   case Gmat::RVECTOR_TYPE:
+      {
+         Rvector rv = GetRvectorParameter(id);
+         stream << "[ " << rv.ToString() << "]";
+      }
+      break;
+      
+   case Gmat::RMATRIX_TYPE:
+      {
+         Rmatrix ra = GetRmatrixParameter(id);
+         Integer r, c;
+         ra.GetSize(r, c);
 
-        case Gmat::RVECTOR_TYPE:
-            {
-               Rvector rv = GetRvectorParameter(id);
-               stream << "[ " << rv.ToString() << "]";
-            }
-            break;
-
-        case Gmat::RMATRIX_TYPE:
-            {
-               Rmatrix ra = GetRmatrixParameter(id);
-               Integer r, c;
-               ra.GetSize(r, c);
-
-               stream << "[ ";
-               for (Integer i = 0; i < r; ++i)
-               {
-                  for (Integer j = 0; j < c; ++j)
-                     stream << ra.GetElement(i,j) << " ";
-                  if (i < r-1)
-                  stream << "; ";
-               }
-               stream << "]";
-            }
-            break;
-
-        case Gmat::BOOLEAN_TYPE:
-            stream << ((GetBooleanParameter(id)) ? "true" : "false");
-            break;
-            
-        default:
-            break;
-    }
+         stream << "[ ";
+         for (Integer i = 0; i < r; ++i)
+         {
+            for (Integer j = 0; j < c; ++j)
+               stream << ra.GetElement(i,j) << " ";
+            if (i < r-1)
+               stream << "; ";
+         }
+         stream << "]";
+      }
+      break;
+      
+   case Gmat::BOOLEAN_TYPE:
+      stream << ((GetBooleanParameter(id)) ? "true" : "false");
+      break;
+      
+   default:
+      MessageInterface::ShowMessage
+         ("Writing of '%s' type is not handled yet.\n",
+          PARAM_TYPE_STRING[tid].c_str());
+      break;
+   }
 }
 
 //---------------------------------------------------------------------------

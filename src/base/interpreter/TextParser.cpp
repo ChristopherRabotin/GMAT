@@ -255,9 +255,20 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             noCommentLine = i;
 
             // check for CallFunction
-            if (str.find("[") != str.npos) // Is this checking enough?
+            // ex) [a b c] = function(d, e, f);
+            
+            //if (str.find("[") != str.npos) // Is this checking enough?
+            
+            // check for RVECTOR_TYPE or UNSIGNED_INTARRAY_TYPE setting
+            // ex) opengl.OrbitColor = [100 200 300 ];
+            //     opengl.ViewPointVectorVector = [0, 0, 50000];
+            
+            UnsignedInt index1 = str.find("[");
+            if (index1 != str.npos)
             {
-               theBlockType = Gmat::COMMAND_BLOCK;
+               UnsignedInt index2 = str.find("=");
+               if (index2 == str.npos || index2 > index1)
+                  theBlockType = Gmat::COMMAND_BLOCK;
             }
             
             /// @TODO: This is a work around for a call function with
