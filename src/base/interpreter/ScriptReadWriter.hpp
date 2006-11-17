@@ -32,7 +32,7 @@ public:
    ~ScriptReadWriter();
 
    void SetInStream(std::istream *is) { 
-   	  inStream = is; 
+      inStream = is; 
       reachedEndOfFile = false;
       readFirstBlock = false;  
       currentLineNumber = 0;}
@@ -45,7 +45,7 @@ public:
    void SetLineWidth(Integer width);
    
    Integer GetLineNumber();
-   
+   std::string GetCurrentLine() { return currentLine; }
 //    bool OpenScriptFile(bool readMode);
    
    std::string ReadLogicalBlock();
@@ -60,6 +60,8 @@ private:
    // These data are not created here
    std::istream *inStream;
    std::ostream *outStream;
+
+   std::string currentLine;
    
    //std::string fileName;
    //std::fstream fileStream;

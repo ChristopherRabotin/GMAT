@@ -55,8 +55,7 @@ Interpreter::Interpreter()
 {
    initialized = false;
    continueOnError = true;   
-//   continueOnError = false;
-
+   
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
    
@@ -66,25 +65,6 @@ Interpreter::Interpreter()
        initialized, theModerator);
    #endif
 
-   // Not used
-//    if (theModerator)
-//    {
-//       // Set up the mapping for the core types
-//       typeMap["Spacecraft"] = Gmat::SPACECRAFT;
-//       typeMap["GroundStation"] = Gmat::GROUND_STATION;
-//       typeMap["Command"] = Gmat::COMMAND;
-//       typeMap["ForceModel"] = Gmat::FORCE_MODEL;
-//       typeMap["Force"] = Gmat::PHYSICAL_MODEL;
-//       typeMap["SolarSystem"] = Gmat::SOLAR_SYSTEM;
-//       typeMap["CelestialBody"] = Gmat::CELESTIAL_BODY;
-//       typeMap["Parameter"] = Gmat::PARAMETER;
-//       typeMap["StoppingCondition"] = Gmat::STOP_CONDITION;
-//       typeMap["Subscriber"] = Gmat::SUBSCRIBER;
-//       typeMap["Propagator"] = Gmat::PROP_SETUP;
-//       typeMap["Burn"] = Gmat::BURN;
-//       typeMap["CoordinateSystem"] = Gmat::COORDINATE_SYSTEM;
-//       typeMap["AxisSystem"] = Gmat::AXIS_SYSTEM;
-//    }
 }
 
 
@@ -599,10 +579,12 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
        (name != "EarthFixed"))
    {
       obj = FindObject(name);
-      if (obj != NULL)
+      // Since Parameters are created automatically as they are referenced,
+      // add check for PARAMETER type
+      if (obj != NULL && obj->GetType() != Gmat::PARAMETER)
       {
          InterpreterException ex
-            (type + " object named " + name + " already exist.");
+            (type + " object named \"" + name + "\" already exist");
          HandleError(ex, true, true);
          return obj;
       }
@@ -2040,7 +2022,8 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          }
          else
          {
-            if (toType == Gmat::STRING_TYPE)
+            if (toType == Gmat::STRING_TYPE || toType == Gmat::OBJECT_TYPE ||
+                toType == Gmat::OBJECTARRAY_TYPE)
             {
                toObj->SetStringParameter(toId, fromObj->GetName());
             }
@@ -2246,7 +2229,7 @@ bool Interpreter::SetArrayToProperty(GmatBase *toOwner, const std::string &toPro
    
    Integer row, col;
    Real rval = GetArrayValue(fromArray, row, col);
-
+   
    try
    {
       toOwner->SetRealParameter(toId, rval);
@@ -2637,7 +2620,6 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::INTEGER_TYPE:
    case Gmat::UNSIGNED_INT_TYPE:
-   case Gmat::UNSIGNED_INTARRAY_TYPE:
       {
          Integer ival;
          if (GmatStringUtil::ToInteger(valueToUse, ival))
@@ -2657,7 +2639,28 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          break;
       }
+   case Gmat::UNSIGNED_INTARRAY_TYPE:
+      {
+         Integer ival;
+         if (GmatStringUtil::ToInteger(valueToUse, ival))
+         {
+            #if DEBUG_SET
+            MessageInterface::ShowMessage
+               ("===> Calling SetUnsignedIntParameter(%d, %d, %d)\n", id, ival, index);
+            #endif
+            
+            obj->SetUnsignedIntParameter(id, ival, index);
+            retval = true;
+         }
+         else
+         {
+            errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
+            errorMsg2 = " Only integer number is allowed";
+         }
+         break;
+      }
    case Gmat::REAL_TYPE:
+   case Gmat::RVECTOR_TYPE:
       {
          Real rval;
          if (GmatStringUtil::ToDouble(valueToUse, rval))
@@ -2668,8 +2671,12 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             MessageInterface::ShowMessage
                ("===> Calling SetRealParameter(%d, %s)\n", id, rvalStr.c_str());
             #endif
+
+            if (type == Gmat::REAL_TYPE)
+               obj->SetRealParameter(id, rval);
+            else
+               obj->SetRealParameter(id, rval, index);
             
-            obj->SetRealParameter(id, rval);
             retval = true;
          }
          else
@@ -2853,8 +2860,14 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    // if value has braces, setting multiple values
    if (value.find("{") != value.npos)
       rhsValues = theTextParser.SeparateBrackets(value, "{}", " ,");
+   else if (value.find("[") != value.npos)
+      rhsValues = theTextParser.SeparateBrackets(value, "[]", " ,");
    
    count = rhsValues.size();
+   
+   #if DEBUG_SET
+   MessageInterface::ShowMessage("   count=%d\n", count);
+   #endif
    
    if (count > 0)
    {
@@ -3286,7 +3299,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
  */
 //------------------------------------------------------------------------------
 Real Interpreter::GetArrayValue(const std::string &arrayStr,
-                                   Integer &row, Integer &col)
+                                Integer &row, Integer &col)
 {
    #if DEBUG_SET
    MessageInterface::ShowMessage
@@ -3372,6 +3385,7 @@ void Interpreter::HandleError(BaseException &e, bool writeLine, bool warning)
    if (writeLine)
    {
       lineNumber = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
+      currentLine = theReadWriter->GetCurrentLine();
       currMsg = " in line:\n   \"" + lineNumber + ": " + currentLine + "\"\n";
    }
    

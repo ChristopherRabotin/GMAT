@@ -267,6 +267,8 @@ std::string ScriptReadWriter::CrossPlatformGetLine()
    }
    
    ++currentLineNumber;
+   currentLine = result;
+   
    return result;
 }
 

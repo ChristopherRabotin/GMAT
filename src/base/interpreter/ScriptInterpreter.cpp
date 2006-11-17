@@ -61,6 +61,7 @@ ScriptInterpreter::ScriptInterpreter() : Interpreter()
    sectionDelimiterString.clear();
    
    inCommandMode = false;
+   inRealCommandMode = false;
    
    theReadWriter = ScriptReadWriter::Instance();
    
@@ -267,8 +268,6 @@ bool ScriptInterpreter::ReadScript()
    {
       try
       {
-         currentLine = currentBlock;
-         
          #if DEBUG_SCRIPT_READING
          MessageInterface::ShowMessage("==========> Calling EvaluateBlock()\n");
          #endif
@@ -425,9 +424,21 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
       }
       
       std::string type = chunks[1];
-      StringArray names = theTextParser.Decompose(chunks[2], "()");
+      StringArray names;
+      if (type == "Array")
+      {
+         if (chunks[2].find('[') == chunks[2].npos)
+            throw UtilityException("Opening bracket \"[\" not found");
+         
+         names = theTextParser.Decompose(chunks[2], "[]");
+      }
+      else
+      {
+         names = theTextParser.Decompose(chunks[2], "()");
+      }
+      
       count = names.size();
-
+      
       if (type == "Propagator")
          type = "PropSetup";
       
@@ -472,6 +483,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    else if (currentBlockType == Gmat::COMMAND_BLOCK)
    {
       inCommandMode = true;
+      inRealCommandMode = true;
       
       // a call function doesn't have to have parameters
       // so this code gets a list of the functions and 
@@ -598,8 +610,9 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
             {
                // Set values by calling Set*Parameter(), even in command mode
                // for the following types
-               if (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
-                   tempObj->GetType() == Gmat::SUBSCRIBER)
+               if (!inRealCommandMode &&
+                   (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
+                    tempObj->GetType() == Gmat::SUBSCRIBER))
                   obj = MakeAssignment(chunks[0], chunks[1]);
                else
                   obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);

@@ -111,8 +111,9 @@ protected:
    Moderator    *theModerator;
    TextParser   theTextParser;
    bool         inCommandMode;
+   bool         inRealCommandMode;
    bool         initialized;
-
+   
    /// For handling delayed blocks
    StringArray  delayedBlocks;
    
