@@ -1424,7 +1424,7 @@ void Propagate::FindSetupsAndStops(Integer &loc,
          Integer braceStart = setupWithStop.find("{", 0),
                  braceEnd   = setupWithStop.find("}", 0);
                  
-         if (braceEnd == (Integer)std::string::npos)
+         if (braceEnd == (Integer)std::string::npos) 
             throw CommandException("Propagate::AssemblePropagators: PropSetup"
                                   " string " + tempString +
                                   " starts a stopping condition, but does not"
@@ -1474,6 +1474,15 @@ void Propagate::FindSetupsAndStops(Integer &loc,
    while (scanning) 
    {
       end = generatingString.find("}", parmstart)+1;
+      
+      if (end == (Integer)std::string::npos+1)
+      { 
+         throw CommandException("Propagate::AssemblePropagators: PropSetup"
+                                  " string " + generatingString +
+                                  " starts a stopping condition, but does not"
+                                  " have a closing brace.");
+      }
+            
       tempString = generatingString.substr(parmstart+1, end-parmstart-2);
       
       // Split out stops, one at a time
