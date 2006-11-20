@@ -195,6 +195,12 @@ void ManeuverPanel::LoadData()
    {
       burnCB->SetValue("Select a burn");
    }
+   
+   if (!burnCB->SetStringSelection(burn.c_str()))
+   {
+   	  burnCB->Append("");
+   	  burnCB->SetStringSelection("");
+   }
     
    // spacecraft
    id = theCommand->GetParameterID("Spacecraft");
@@ -215,6 +221,13 @@ void ManeuverPanel::LoadData()
    {
       satCB->SetValue("Select a spacecraft");
    }
+   
+   if (!satCB->SetStringSelection(sat.c_str()))
+   {
+   	  satCB->Append("");
+   	  satCB->SetStringSelection("");
+   }
+   
 
 }
 
