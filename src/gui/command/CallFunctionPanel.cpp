@@ -211,7 +211,12 @@ void CallFunctionPanel::LoadData()
 
    int id = theCommand->GetParameterID("FunctionName");
    std::string filename = theCommand->GetStringParameter(id);
-   functionComboBox->SetValue(wxT(filename.c_str()));
+   
+   if (!functionComboBox->SetStringSelection(wxT(filename.c_str())))
+   {
+   	  functionComboBox->Append("");
+   	  functionComboBox->SetStringSelection("");
+   }
 
    #ifdef DEBUG_CALLFUNCTION_PANEL
       MessageInterface::ShowMessage("   Function name is: %s\n",
@@ -248,8 +253,11 @@ void CallFunctionPanel::LoadData()
          if (i == mNumInput-1)
             delimiter = "";
 
-         cellValue = cellValue + param->GetName().c_str() + delimiter;
-         inputStrings.Add(param->GetName().c_str());
+         if (param != NULL)
+         {
+            cellValue = cellValue + param->GetName().c_str() + delimiter;
+            inputStrings.Add(param->GetName().c_str());
+         }
       }
 
       inputGrid->SetCellValue(0, 0, cellValue);
@@ -285,9 +293,12 @@ void CallFunctionPanel::LoadData()
 
          if (i == mNumOutput-1)
             delimiter = "";
-
-         cellValue = cellValue + param->GetName().c_str() + delimiter;
-         outputStrings.Add(param->GetName().c_str());
+         
+         if (param != NULL)
+         {
+            cellValue = cellValue + param->GetName().c_str() + delimiter;
+            outputStrings.Add(param->GetName().c_str());
+         }
       }
 
       outputGrid->SetCellValue(0, 0, cellValue);
