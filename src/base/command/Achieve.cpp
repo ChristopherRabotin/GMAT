@@ -434,9 +434,22 @@ Real Achieve::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Achieve::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == toleranceID) {
-      tolerance = value;
+   if (id == toleranceID) 
+   {
+      if (value >= 0.0)
+         tolerance = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
+         throw CommandException(
+            "The value of \"" + buffer.str() + "\" for field \"Tolerence\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ Real >= 0.0 ].");
+      }
       return tolerance;
+//      tolerance = value;
+//      return tolerance;
    }
     
    return GmatCommand::SetRealParameter(id, value);
