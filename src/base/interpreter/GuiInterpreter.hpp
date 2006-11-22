@@ -19,10 +19,11 @@
 #ifndef GuiInterpreter_hpp
 #define GuiInterpreter_hpp
 
-#include "Interpreter.hpp"
+#include "ScriptInterpreter.hpp"
 #include "gmatdefs.hpp"
+#include <sstream>      // for std::istringstream
 
-class GMAT_API GuiInterpreter : public Interpreter
+class GMAT_API GuiInterpreter : public ScriptInterpreter
 {
 public:
 
@@ -30,9 +31,10 @@ public:
    ~GuiInterpreter();
 
    // Interpreter abstract methods
-   virtual bool Interpret();
+   // virtual bool Interpret();
    virtual bool Interpret(GmatBase *obj, const std::string generator);
-   virtual bool Build(Gmat::WriteMode mode);
+   virtual bool Interpret(GmatBase *obj, std::istringstream *ss);
+   // virtual bool Build(Gmat::WriteMode mode);
    
    void Finalize();
    
