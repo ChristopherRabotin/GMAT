@@ -330,9 +330,14 @@ std::string Array::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Array::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == NUM_ROWS) || (id == NUM_COLS) || (id == SINGLE_VALUE))
+   //loj: 11/22/06 read only parameters were wrong
+   //if ((id == NUM_ROWS) || (id == NUM_COLS) || (id == SINGLE_VALUE))
+   //   return true;
+   
+   if ((id == NUM_ROWS) || (id == NUM_COLS) || (id == RMAT_VALUE) ||
+       (id == ROW_VALUE) || (id == COL_VALUE))
       return true;
-
+   
    return Parameter::IsParameterReadOnly(id);
 }
 
@@ -384,15 +389,17 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
       preface = "GMAT ";
    }
 
-   // set value before changing nomme
-   if (mRmatValue.IsSized())
-   {
-      for (Integer i=0; i<mNumRows; i++)
-         for (Integer j=0; j<mNumCols; j++)
-            value << "GMAT " << nomme << "(" <<i+1 <<", " <<j+1 <<") = " 
-            <<mRmatValue.GetElement(i, j)  <<";\n";
-   }
-  
+   //loj: 11/22/06
+   // Writing REAL_ELEMENT_TYPE parameter is now handled in GmatBase
+//    // set value before changing nomme
+//    if (mRmatValue.IsSized())
+//    {
+//       for (Integer i=0; i<mNumRows; i++)
+//          for (Integer j=0; j<mNumCols; j++)
+//             value << "GMAT " << nomme << "(" <<i+1 <<", " <<j+1 <<") = " 
+//             <<mRmatValue.GetElement(i, j)  <<";\n";
+//    }
+   
    nomme += ".";
    
    if (mode == Gmat::OWNED_OBJECT) {
@@ -401,10 +408,10 @@ const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    preface += nomme;
-   WriteParameters(mode, preface, data);
    
-   generatingString = data.str();
-   generatingString = generatingString +value.str();
+   WriteParameters(mode, preface, data);
+   generatingString = data.str();   
+//    generatingString = generatingString + value.str();
    
    return generatingString;
 }
