@@ -2516,7 +2516,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
          if ((commentLine != "") && ((mode == Gmat::SCRIPTING) || 
              (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
             data << commentLine;
-            
+         
          data << "Create " << tname << " " << nomme << ";";
          
          if ((inlineComment != "") && ((mode == Gmat::SCRIPTING) || 
@@ -2587,13 +2587,15 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
 
 
 //------------------------------------------------------------------------------
-// void WriteParameters(std::string &prefix, GmatBase *obj)
+// void WriteParameters(Gmat::WriteMode mode, std::string &prefix,
+//                      std::stringstream &stream)
 //------------------------------------------------------------------------------
 /**
  * Code that writes the parameter details for an object.
  * 
+ * @param mode   The writing mode.
  * @param prefix Starting portion of the script string used for the parameter.
- * @param obj The object that is written.
+ * @param stream The stringstream the object is written to.
  */
 //------------------------------------------------------------------------------
 void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
@@ -2631,9 +2633,13 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn;
-                     
-                  stream << prefix << GetParameterText(i)
-                         << " = " << value.str() << ";";
+                  
+                  // REAL_ELEMENT_TYPE is handled specially in WriteParameterValue()
+                  if (parmType == Gmat::REAL_ELEMENT_TYPE)
+                     stream << value.str();
+                  else
+                     stream << prefix << GetParameterText(i)
+                            << " = " << value.str() << ";";
                   
                   // overwrite tmp variable for attribute cmt line
                   attCmtLn = GetInlineAttributeComment(i);
@@ -2734,7 +2740,11 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
-    
+   
+   //MessageInterface::ShowMessage
+   //   ("===> %s, tid=%s\n", GetParameterText(id).c_str(),
+   //    PARAM_TYPE_STRING[tid].c_str());
+   
    switch (tid)
    {
    case Gmat::OBJECT_TYPE:
@@ -2776,6 +2786,19 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
       stream << GetRealParameter(id);
       break;
       
+   case Gmat::REAL_ELEMENT_TYPE:
+      {
+         Integer row = GetIntegerParameter("NumRows");
+         Integer col = GetIntegerParameter("NumCols");
+         for (Integer i = 0; i < row; ++i)
+         {
+            for (Integer j = 0; j < col; ++j)
+               stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+                  ") = " << GetRealParameter(id, i, j) << ";\n";
+         }
+      }
+      break;
+      
    case Gmat::RVECTOR_TYPE:
       {
          Rvector rv = GetRvectorParameter(id);
@@ -2807,7 +2830,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
       
    default:
       MessageInterface::ShowMessage
-         ("Writing of '%s' type is not handled yet.\n",
+         ("Writing of \"%s\" type is not handled yet.\n",
           PARAM_TYPE_STRING[tid].c_str());
       break;
    }
