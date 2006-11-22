@@ -52,10 +52,11 @@ protected:
    bool                        WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
    
-private:
    ScriptInterpreter();
    virtual ~ScriptInterpreter();
-
+   
+private:
+   
    /// A counter that counts the logical blocks of script as they are read.
    Integer logicalBlockCount; 
    /// Name of the current script file

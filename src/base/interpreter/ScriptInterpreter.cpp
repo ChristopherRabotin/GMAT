@@ -63,8 +63,6 @@ ScriptInterpreter::ScriptInterpreter() : Interpreter()
    inCommandMode = false;
    inRealCommandMode = false;
    
-   theReadWriter = ScriptReadWriter::Instance();
-   
    Initialize();
 }
 
@@ -80,7 +78,7 @@ ScriptInterpreter::~ScriptInterpreter()
 }
 
 //------------------------------------------------------------------------------
-// bool Interpret(void)
+// bool Interpret()
 //------------------------------------------------------------------------------
 /**
  * Parses the input stream, line by line, into GMAT objects.
@@ -190,6 +188,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mod
     
     return retval;
 }
+
 
 //------------------------------------------------------------------------------
 // bool SetInStream(std::istream *str)
@@ -470,9 +469,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
          
          if (obj == NULL)
          {
-            InterpreterException ex
-               ("Error encountered creating objects for");
-            HandleError(ex);
+            //InterpreterException ex("Error encountered creating objects for");
+            //HandleError(ex);
             return false;
          }
          objCounter++;     

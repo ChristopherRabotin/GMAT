@@ -49,22 +49,22 @@ GuiInterpreter::~GuiInterpreter()
 }
 
 
-//------------------------------------------------------------------------------
+// //------------------------------------------------------------------------------
+// // bool GuiInterpreter::Interpret()
+// //------------------------------------------------------------------------------
 // bool GuiInterpreter::Interpret()
-//------------------------------------------------------------------------------
-bool GuiInterpreter::Interpret()
-{
-   return false;
-}
+// {
+//    return false;
+// }
 
 
-//------------------------------------------------------------------------------
+// //------------------------------------------------------------------------------
+// // bool GuiInterpreter::Build(Gmat::WriteMode mode)
+// //------------------------------------------------------------------------------
 // bool GuiInterpreter::Build(Gmat::WriteMode mode)
-//------------------------------------------------------------------------------
-bool GuiInterpreter::Build(Gmat::WriteMode mode)
-{
-   return false;
-}
+// {
+//    return false;
+// }
 
 
 //------------------------------------------------------------------------------
@@ -122,6 +122,28 @@ bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
    }
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Interpret(GmatBase *obj, std::istringstream *ss)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::Interpret(GmatBase *obj, std::istringstream *ss)
+{
+   if (obj->GetType() != Gmat::COMMAND)
+      throw InterpreterException(
+         "Interpret(GmatBase*) currently only supports GmatCommands.");
+   
+   // This block is just for testing
+   SetInStream(ss);
+   bool status = ScriptInterpreter::Interpret();
+   //MessageInterface::ShowMessage
+   //   ("===> GuiInterpreter::InterpretScript() status=%d\n", status);
+   
+   //loj: 11/22/06 Need more work here to append command and update resource tree
+   // if any objects were created within ScriptEvent
+   
+   return status;
 }
 
 
@@ -775,7 +797,7 @@ void GuiInterpreter::CloseCurrentProject()
 // GuiInterpreter()
 //------------------------------------------------------------------------------
 GuiInterpreter::GuiInterpreter()
-   : Interpreter()
+   : ScriptInterpreter()
 {
    Initialize();
    isInitialized = false;
