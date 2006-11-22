@@ -110,24 +110,24 @@ For::For(void) :
  */
 //------------------------------------------------------------------------------
 For::For(const For& f) :
-BranchCommand   (f),
-forName         (f.forName),
-startValue      (f.startValue),
-endValue        (f.endValue),
-stepSize        (f.stepSize),
-currentValue    (f.currentValue),
-indexParam      (NULL),
-startParam      (NULL),
-endParam        (NULL),
-incrParam       (NULL),
-indexName       (f.indexName),
-startName       (f.startName),
-endName         (f.endName),
-incrName        (f.incrName),
-indexIsParam    (f.indexIsParam),
-startIsParam    (f.startIsParam),
-endIsParam      (f.endIsParam),
-incrIsParam     (f.incrIsParam)
+   BranchCommand   (f),
+   forName         (f.forName),
+   startValue      (f.startValue),
+   endValue        (f.endValue),
+   stepSize        (f.stepSize),
+   currentValue    (f.currentValue),
+   indexParam      (NULL),
+   startParam      (NULL),
+   endParam        (NULL),
+   incrParam       (NULL),
+   indexName       (f.indexName),
+   startName       (f.startName),
+   endName         (f.endName),
+   incrName        (f.incrName),
+   indexIsParam    (f.indexIsParam),
+   startIsParam    (f.startIsParam),
+   endIsParam      (f.endIsParam),
+   incrIsParam     (f.incrIsParam)
 {
 }
 
@@ -223,7 +223,7 @@ bool For::Append(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-//  bool Initialize(void)
+//  bool Initialize()
 //------------------------------------------------------------------------------
 /**
  * Performs the initialization needed to run the For loop.
@@ -231,7 +231,7 @@ bool For::Append(GmatCommand *cmd)
  * @return true if the GmatCommand is initialized, false if an error occurs.
  */
 //------------------------------------------------------------------------------
-bool For::Initialize(void)
+bool For::Initialize()
 {
    #if DEBUG_FOR_INIT
    MessageInterface::ShowMessage
@@ -242,42 +242,42 @@ bool For::Initialize(void)
    // Get Parameter pointers from the Sandbox
    if (indexIsParam)
    {
-      if (objectMap->find(indexName) == objectMap->end())
-         throw CommandException("Undefined start variable:" + indexName +
-                                " in For loop\n" + generatingString);
-      
-      indexParam = (Parameter*)(*objectMap)[indexName];
+      indexParam = (Parameter*)FindObject(indexName);
+      if (indexParam == NULL)
+         throw CommandException
+            ("Found undefined object \"" + indexName + "\" in line:\n   " +
+             generatingString + "\n");
    }
-
+   
    if (startIsParam)
    {
-      if (objectMap->find(startName) == objectMap->end())
-         throw CommandException("Undefined start variable:" + startName +
-                                " in For loop\n" + generatingString);
-      
-      startParam = (Parameter*)(*objectMap)[startName];
-   }
-
-   if (endIsParam)
-   {
-      if (objectMap->find(endName) == objectMap->end())
-         throw CommandException("Undefined stop variable:" + endName +
-                                " in For loop\n" + generatingString);
-      
-      endParam = (Parameter*)(*objectMap)[endName];
+      startParam = (Parameter*)FindObject(startName);
+      if (startParam == NULL)
+         throw CommandException
+            ("Found undefined object \"" + startName + "\" in line:\n   " +
+             generatingString + "\n");
    }
    
    if (incrIsParam)
    {
-      if (objectMap->find(incrName) == objectMap->end())
-         throw CommandException("Undefined increment variable:" + incrName +
-                                " in For loop\n" + generatingString);
-      
-      incrParam = (Parameter*)(*objectMap)[incrName];
+      incrParam = (Parameter*)FindObject(incrName);
+      if (incrParam == NULL)
+         throw CommandException
+            ("Found undefined object \"" + incrName + "\" in line:\n   " +
+             generatingString + "\n");
    }
-
+   
+   if (endIsParam)
+   {
+      endParam = (Parameter*)FindObject(endName);
+      if (endParam == NULL)
+         throw CommandException
+            ("Found undefined object \"" + endName + "\" in line:\n   " +
+             generatingString + "\n");
+   }
+   
    bool retval = BranchCommand::Initialize();
-
+   
    return retval;
 }
 
@@ -488,17 +488,17 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
             indexParam   = (Parameter*) obj;
             indexIsParam = true;
          }
-         if (name == startName)
+         else if (name == startName)
          {
             startParam   = (Parameter*) obj;
             startIsParam = true;
          }
-         if (name == endName)
+         else if (name == endName)
          {
             endParam   = (Parameter*) obj;
             endIsParam = true;
          }
-         if (name == incrName)
+         else if (name == incrName)
          {
             incrParam   = (Parameter*) obj;
             incrIsParam = true;
@@ -544,6 +544,59 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
    
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the For.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& For::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::PARAMETER);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the For.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::PARAMETER)
+   {
+      if (indexIsParam)
+         refObjectNames.push_back(indexName);
+      if (startIsParam)
+         refObjectNames.push_back(startName);
+      if (endIsParam)
+         refObjectNames.push_back(endName);
+      if (incrIsParam)
+         refObjectNames.push_back(incrName);
+   }
+   
+   return refObjectNames;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -722,11 +775,12 @@ std::string For::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-bool For::SetStringParameter(const Integer id, 
-                             const std::string &value)
+bool For::SetStringParameter(const Integer id, const std::string &value)
 {
    Real rval;
    bool isReal = false;
+   std::string name, rowStr, colStr;
+   Integer row, col;
    
    if (GmatStringUtil::ToDouble(value, rval))
       isReal = true;
@@ -739,21 +793,42 @@ bool For::SetStringParameter(const Integer id,
    else if (id == START_NAME)
    {
       startName = value;
+      startParamName = value;
+      startIsParam = true;
       if (isReal)
       {
          startValue = rval;
          startIsParam = false;
       }
+      else
+      {
+         GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
+         if (rowStr != "-1" || colStr != "-1")
+            startParamName = name;
+      }
+      
+      //MessageInterface::ShowMessage
+      //   ("===> For::SetStringParameter() startName=%s, startParamName=%s, "
+      //    "isReal=%d, startIsParam=%d\n", startName.c_str(), startParamName.c_str(),
+      //    isReal, startIsParam);
       
       return true;
    }
    else if (id == END_NAME)
    {
       endName = value;
+      endParamName = value;
+      endIsParam = true;
       if (isReal)
       {
          endValue = rval;
          endIsParam = false;
+      }
+      else
+      {
+         GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
+         if (rowStr != "-1" || colStr != "-1")
+            endParamName = name;
       }
       
       return true;
@@ -761,11 +836,23 @@ bool For::SetStringParameter(const Integer id,
    else if (id == INCREMENT_NAME)
    {
       incrName = value;
+      incrParamName = value;
+      incrIsParam = true;
       if (isReal)
       {
          stepSize = rval;
          incrIsParam = false;
       }
+      else
+      {
+         GmatStringUtil::GetArrayIndex(incrName, rowStr, colStr, row, col, name);
+         if (rowStr != "-1" || colStr != "-1")
+            incrParamName = name;
+      }
+      
+      //MessageInterface::ShowMessage
+      //   ("===> For::SetStringParameter() isReal=%d, incrIsParam=%d\n",
+      //    isReal, incrIsParam);
       
       return true;
    }
@@ -868,10 +955,58 @@ bool For::StillLooping()
    // initialize the loop, if it's the first time through
    if (currentValue == UNINITIALIZED_VALUE)
    {
-      if (startIsParam)  startValue = startParam->GetReal();
-      if (endIsParam)    endValue   = endParam->GetReal();
-      if (incrIsParam)   stepSize   = incrParam->GetReal();
+      //if (startIsParam)  startValue = startParam->GetReal();
+      //if (endIsParam)    endValue   = endParam->GetReal();
+      //if (incrIsParam)   stepSize   = incrParam->GetReal();
 
+      Parameter *param = NULL;
+      Integer row, col;
+      
+      // Handle start Array element
+      if (startIsParam)
+      {
+         if (startParam->GetTypeName() == "Array")
+         {            
+            param = GetArrayIndex(startName, row, col);
+            Rmatrix rmat = startParam->GetRmatrix();
+            startValue = rmat.GetElement(row, col);
+         }
+         else
+         {
+            startValue = startParam->GetReal();
+         }
+      }
+      
+      // Handle end Array element
+      if (endIsParam)
+      {
+         if (endParam->GetTypeName() == "Array")
+         {            
+            param = GetArrayIndex(endName, row, col);
+            Rmatrix rmat = endParam->GetRmatrix();
+            endValue = rmat.GetElement(row, col);
+         }
+         else
+         {
+            endValue = endParam->GetReal();
+         }
+      }
+      
+      // Handle increment Array element
+      if (incrIsParam)
+      {
+         if (incrParam->GetTypeName() == "Array")
+         {            
+            param = GetArrayIndex(incrName, row, col);     
+            Rmatrix rmat = incrParam->GetRmatrix();
+            stepSize = rmat.GetElement(row, col);
+         }
+         else
+         {
+            stepSize = incrParam->GetReal();
+         }
+      }
+      
       #if DEBUG_FOR
       MessageInterface::ShowMessage
          ("For::StillLooping() startValue=%f, stepSize=%f, endValue=%f\n",
@@ -882,7 +1017,8 @@ bool For::StillLooping()
           ((stepSize > 0.0) && (startValue > endValue)) ||
           ((stepSize < 0.0) && (startValue < endValue)) )
          throw CommandException(
-               "For loop values incorrect - will result in infinite loop.\n");
+               "For loop values incorrect - will result in infinite loop "
+               "in line:\n   \"" + generatingString + "\"\n");
       
       currentValue = startValue;
       
@@ -897,3 +1033,115 @@ bool For::StillLooping()
    // not looping anymore
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// Parameter* GetArrayIndex(const std::string &arrayStr, Integer &row, Integer &col)
+//------------------------------------------------------------------------------
+/**
+ * Retrives array index from the configured array.
+ *
+ * @param  arrayStr  String form of array (A(1,3), B(2,j), etc)
+ *
+ * @note Array name must be created and configured before acces.
+ */
+//------------------------------------------------------------------------------
+Parameter* For::GetArrayIndex(const std::string &arrayStr,
+                              Integer &row, Integer &col)
+{
+   std::string name, rowStr, colStr;
+   
+   // parse array name and index
+   GmatStringUtil::GetArrayIndex(arrayStr, rowStr, colStr, row, col, name);
+   
+   // Remove - sign from the name
+   if (name[0] == '-')
+      name = name.substr(1);
+   
+   #if DEBUG_ARRAY_GET
+   MessageInterface::ShowMessage
+      ("For::GetArrayIndex() arrayStr=%s, name=%s, rowStr=%s, "
+       "colStr=%s, row=%d, col=%d\n", arrayStr.c_str(), name.c_str(),
+       rowStr.c_str(), colStr.c_str(), row, col);
+   #endif
+   
+   GmatBase *obj = FindObject(name);
+   
+   if (obj == NULL)
+   {
+      throw CommandException
+         ("For loop cannot find Array named \"" + name + "\" "
+          "in line:\n   \"" + generatingString + "\"\n");
+   }
+   
+   if (obj->GetTypeName() != "Array")
+   {
+      throw CommandException
+         ("For loop cannot find Array index with \"" + name + "\" "
+          "in line:\n   \"" + generatingString + "\"\n");
+   }
+   
+   // get row value
+   if (row == -1 && rowStr != "-1")
+   {
+      Parameter *param = (Parameter*)FindObject(rowStr);
+      if (param == NULL)
+      {
+         throw CommandException
+            ("For loop cannot find Array row index variable \"" + name + "\" "
+             "in line:\n   \"" + generatingString + "\"\n");
+      }
+      
+      if (param->GetReturnType() == Gmat::REAL_TYPE)
+         row = (Integer)param->GetReal() - 1; // index starts at 0
+      else
+         if (param == NULL)
+         {
+            throw CommandException
+               ("For loop cannot handle row index of Array \"" + name + "\" "
+                "in line:\n   \"" + generatingString + "\"\n");
+         }
+   }
+      
+   // get column value
+   if (col == -1 && colStr != "-1")
+   {
+      Parameter *param = (Parameter*)FindObject(colStr);
+      if (FindObject(colStr) == NULL)
+      {
+         throw CommandException
+            ("For loop cannot find Array column index variable \"" + name + "\" "
+             "in line:\n   \"" + generatingString + "\"\n");
+      }
+      
+      if (param->GetReturnType() == Gmat::REAL_TYPE)
+         col = (Integer)param->GetReal() - 1; // index starts at 0
+      else
+         if (param == NULL)
+         {
+            throw CommandException
+               ("For loop cannot handle column index of Array \"" + name + "\" "
+                "in line:\n   \"" + generatingString + "\"\n");
+         }
+   }
+   
+   if (row == -1)
+   {
+      throw CommandException("For loop row index is invalid "
+                             "in line:\n   \"" + generatingString + "\"\n");
+   }
+   
+   if (col == -1)
+   {
+      throw CommandException("For loop column index is invalid "
+                             "in line:\n   \"" + generatingString + "\"\n");
+   }
+   
+   #if DEBUG_ARRAY_GET
+   MessageInterface::ShowMessage
+      ("   GetArrayIndex() row=%d, col=%d\n", row, col);
+   #endif
+   
+   return (Parameter*)obj;
+}
+

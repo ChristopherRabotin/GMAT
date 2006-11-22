@@ -68,6 +68,11 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
    
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -128,23 +133,28 @@ protected:
    /// Current value for the For loop counter
    Real         currentValue;
 
-   Parameter*                 indexParam;
-   Parameter*                 startParam;
-   Parameter*                 endParam;
-   Parameter*                 incrParam;
+   Parameter* indexParam;
+   Parameter* startParam;
+   Parameter* endParam;
+   Parameter* incrParam;
    
-   std::string                indexName;
-   std::string                startName;
-   std::string                endName;
-   std::string                incrName;
-
-   bool                       indexIsParam;
-   bool                       startIsParam;
-   bool                       endIsParam;
-   bool                       incrIsParam;
+   std::string indexName;
+   std::string startName;
+   std::string endName;
+   std::string incrName;
+   
+   std::string startParamName;
+   std::string endParamName;
+   std::string incrParamName;
+   
+   bool indexIsParam;
+   bool startIsParam;
+   bool endIsParam;
+   bool incrIsParam;
    
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();
-    
+   Parameter* GetArrayIndex(const std::string &arrayStr,
+                            Integer &row, Integer &col);
 };
 #endif  // For_hpp
