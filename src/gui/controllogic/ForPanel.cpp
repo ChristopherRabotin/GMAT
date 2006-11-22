@@ -164,19 +164,20 @@ void ForPanel::LoadData()
          }  
       }    
       conditionGrid->SetCellValue(0, INDEX_COL, mIndexString); 
-    
+      
       paramId = theForCommand->GetParameterID("StartIsParam");
       mStartIsParam = theForCommand->GetBooleanParameter(paramId);
-          
+      
       if (mStartIsParam)
       {
          paramId = theForCommand->GetParameterID("StartName");
          mStartString = theForCommand->GetStringParameter(paramId).c_str();
- 
-         Parameter *param = (Parameter*)theForCommand->GetRefObject
-            (Gmat::PARAMETER, mStartString.c_str());
-           
-         mStartString = param->GetName().c_str(); 
+
+         //loj: 11/21/06 We want to show name as is
+         //Parameter *param = (Parameter*)theForCommand->GetRefObject
+         //   (Gmat::PARAMETER, mStartString.c_str());
+         
+         //mStartString = param->GetName().c_str(); 
          conditionGrid->SetCellValue(0, START_COL, mStartString); 
       }
       else
@@ -190,15 +191,17 @@ void ForPanel::LoadData()
       
       paramId = theForCommand->GetParameterID("IncrIsparam");
       mIncrIsParam = theForCommand->GetBooleanParameter(paramId);
-
+      //MessageInterface::ShowMessage("===> mIncrIsParam=%d\n", mIncrIsParam);
+      
       if (mIncrIsParam)
       {
          paramId = theForCommand->GetParameterID("IncrementName");
          mIncrString = theForCommand->GetStringParameter(paramId).c_str();
-           
-         Parameter *param = (Parameter*)theForCommand->GetRefObject
-            (Gmat::PARAMETER, mIncrString.c_str());
-         mIncrString = param->GetName().c_str();
+         //MessageInterface::ShowMessage("===> mIncrString=%s\n", mIncrString.c_str());
+         //loj: 11/21/06 We want to show name as is
+         //Parameter *param = (Parameter*)theForCommand->GetRefObject
+         //   (Gmat::PARAMETER, mIncrString.c_str());
+         //mIncrString = param->GetName().c_str();
          conditionGrid->SetCellValue(0, INCR_COL, mIncrString); 
       }
       else
@@ -212,15 +215,16 @@ void ForPanel::LoadData()
       
       paramId = theForCommand->GetParameterID("EndIsParam");
       mEndIsParam = theForCommand->GetBooleanParameter(paramId);
-       
+      
       if (mEndIsParam)
       {
          paramId = theForCommand->GetParameterID("EndName");
          mEndString = theForCommand->GetStringParameter(paramId).c_str();
            
-         Parameter *param = (Parameter*)theForCommand->GetRefObject
-            (Gmat::PARAMETER, mEndString.c_str());
-         mEndString = param->GetName().c_str(); 
+         //loj: 11/21/06 We want to show name as is
+         //Parameter *param = (Parameter*)theForCommand->GetRefObject
+         //   (Gmat::PARAMETER, mEndString.c_str());
+         //mEndString = param->GetName().c_str(); 
          conditionGrid->SetCellValue(0, END_COL, mEndString);
       }
       else
