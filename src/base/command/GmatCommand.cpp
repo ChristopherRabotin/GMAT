@@ -1513,9 +1513,10 @@ void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
          next->ConfigurationChanged(tf, setAll);
 }
 
-
+//------------------------------------------------------------------------------
 // Temporary -- need to figure out how we're supposed to do transformations 
 // generically
+//------------------------------------------------------------------------------
 void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
 {
    Real mu = 398600.4415;
@@ -1568,4 +1569,22 @@ void GmatCommand::CartToKep(const Rvector6 in, Rvector6 &out)
    out[5] *= 180.0 / M_PI;
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* GmatCommand::FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* GmatCommand::FindObject(const std::string &name)
+{
+   std::string newName = name;
+   
+   // Ignore array indexing of Array
+   UnsignedInt index = name.find('(');
+   if (index != name.npos)
+      newName = name.substr(0, index);
+   
+   if (objectMap->find(newName) == objectMap->end())
+      return NULL;
+   else
+      return (*objectMap)[newName];
+}
 

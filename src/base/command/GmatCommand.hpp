@@ -237,6 +237,7 @@ protected:
 
    // Temporary -- replace when convenient
    void CartToKep(const Rvector6 in, Rvector6 &out);
+   GmatBase* FindObject(const std::string &name);
 };
 
 #endif // Command_hpp
