@@ -889,7 +889,7 @@ void OrbitPanel::Create()
       MessageInterface::ShowMessage("In OrbitPanel::Create() \n");
    #endif
 
-   Integer bsize = 3; // border size
+   Integer bsize = 2; // border size
 
    wxString emptyList[] = {};
 
@@ -992,87 +992,97 @@ void OrbitPanel::Create()
 //------------------------------------------------------------------------------
 void OrbitPanel::AddElements(wxWindow *parent)
 {
-    elementsPanel = new wxPanel(parent);
-    wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
+   Integer bsize = 2; // border size
 
-    wxFlexGridSizer *item3 = new wxFlexGridSizer( 6, 3, 0, 0 );
-    item3->AddGrowableCol( 0 );
-    item3->AddGrowableCol( 1 );
-    item3->AddGrowableCol( 2 );
+   elementsPanel = new wxPanel(parent);
+   wxGridSizer *item0 = new wxGridSizer( 1, 0, 0 );
 
-    description1 = new wxStaticText( elementsPanel, ID_TEXT, 
-                    wxT("Descriptor1     "), wxDefaultPosition, 
-                    wxDefaultSize, 0 );
-    item3->Add( description1, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl1 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, 
-                    wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl1, 0, wxALIGN_CENTER|wxALL, 5 );
-    label1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label1"), 
+   wxFlexGridSizer *item3 = new wxFlexGridSizer( 6, 3, 0, 0 );
+   item3->AddGrowableCol( 0 );
+   item3->AddGrowableCol( 1 );
+   item3->AddGrowableCol( 2 );
+
+   // Element 1
+   description1 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor1     "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl1 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, 
+                   wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
+   label1 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label1"), 
                     wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label1, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    description2 = new wxStaticText( elementsPanel, ID_TEXT, 
-                    wxT("Descriptor2    "), wxDefaultPosition, 
-                    wxDefaultSize, 0 );
-    item3->Add( description2, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl2 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
-                    wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl2, 0, wxALIGN_CENTER|wxALL, 5 );
-    label2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label2"), 
-                    wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label2, 0, wxALIGN_CENTER|wxALL, 5 );
-    
-    description3 = new wxStaticText( elementsPanel, ID_TEXT, 
-                    wxT("Descriptor3    "), wxDefaultPosition, 
-                    wxDefaultSize, 0 );
-    item3->Add( description3, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl3 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
+   // Element 2
+   description2 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor2    "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl2 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl3, 0, wxALIGN_CENTER|wxALL, 5 );
-    label3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label3"), 
-                   wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label3, 0, wxALIGN_CENTER|wxALL, 5 );
-    
-    description4 = new wxStaticText( elementsPanel, ID_TEXT, 
-                   wxT("Descriptor4    "), wxDefaultPosition, 
-                   wxDefaultSize, 0 );
-    item3->Add( description4, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl4 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
+   label2 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label2"), 
+                wxDefaultPosition, wxDefaultSize, 0 );
+   
+   // Element 3
+   description3 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor3    "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl3 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl4, 0, wxALIGN_CENTER|wxALL, 5 );
-    label4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label4"), 
-                   wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label4, 0, wxALIGN_CENTER|wxALL, 5 );
+   label3 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label3"), 
+                wxDefaultPosition, wxDefaultSize, 0 );
     
-    description5 = new wxStaticText( elementsPanel, ID_TEXT, 
-                   wxT("Descriptor5    "), wxDefaultPosition, 
-                   wxDefaultSize, 0 );
-    item3->Add( description5, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl5 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
+   // Element 4
+   description4 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor4    "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl4 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
                    wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl5, 0, wxALIGN_CENTER|wxALL, 5 );
-    label5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label5"), 
-                   wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label5, 0, wxALIGN_CENTER|wxALL, 5 );
+   label4 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label4"), 
+                wxDefaultPosition, wxDefaultSize, 0 );
+
+   // Element 5    
+   description5 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor5    "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl5 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""), 
+                   wxDefaultPosition, wxSize(150,-1), 0 );
+   label5 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label5"), 
+                wxDefaultPosition, wxDefaultSize, 0 );
     
-    description6 = new wxStaticText( elementsPanel, ID_TEXT, 
-                  wxT("Descriptor6    "), wxDefaultPosition, 
-                  wxDefaultSize, 0 );
-    item3->Add( description6, 0, wxALIGN_CENTER|wxALL, 5 );
-    textCtrl6 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""),
-                  wxDefaultPosition, wxSize(150,-1), 0 );
-    item3->Add( textCtrl6, 0, wxALIGN_CENTER|wxALL, 5 );
-    label6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label6"), 
-                  wxDefaultPosition, wxDefaultSize, 0 );
-    item3->Add( label6, 0, wxALIGN_CENTER|wxALL, 5 );
+   // Element 6
+   description6 = new wxStaticText( elementsPanel, ID_TEXT, 
+                      wxT("Descriptor6    "), wxDefaultPosition, 
+                      wxDefaultSize, 0 );
+   textCtrl6 = new wxTextCtrl( elementsPanel, ID_TEXTCTRL, wxT(""),
+                   wxDefaultPosition, wxSize(150,-1), 0 );
+   label6 = new wxStaticText( elementsPanel, ID_TEXT, wxT("Label6"), 
+                wxDefaultPosition, wxDefaultSize, 0 );
 
-    item0->Add( item3, 0, wxGROW|wxALL|wxALIGN_CENTER, 5 );
+   // Add to wx*Sizers 
+   item3->Add( description1, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl1, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label1, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( description2, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl2, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label2, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( description3, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl3, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label3, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( description4, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl4, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label4, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( description5, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl5, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label5, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( description6, 0, wxALIGN_LEFT|wxALL, bsize );
+   item3->Add( textCtrl6, 0, wxALIGN_CENTER|wxALL, bsize );
+   item3->Add( label6, 0, wxALIGN_LEFT|wxALL, bsize );
 
-    elementsPanel->SetAutoLayout( TRUE );
-    elementsPanel->SetSizer( item0 );
+   item0->Add( item3, 0, wxGROW|wxALL|wxALIGN_CENTER, bsize );
 
-    item0->Fit( elementsPanel );
-    item0->SetSizeHints( elementsPanel );
+   elementsPanel->SetAutoLayout( TRUE );
+   elementsPanel->SetSizer( item0 );
+
+   item0->Fit( elementsPanel );
+   item0->SetSizeHints( elementsPanel );
 }
 
 
