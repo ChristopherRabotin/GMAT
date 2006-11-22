@@ -16,6 +16,7 @@
 #include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "AchievePanel.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 #include <wx/variant.h>
 
 // base includes
@@ -82,37 +83,16 @@ AchievePanel::~AchievePanel()
 //------------------------------------------------------------------------------
 void AchievePanel::Create()
 {
-   int bsize = 3; // bordersize
+   int bsize = 2; // bordersize
 
-   // wxStaticText
+   // Solver name
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
-   wxStaticText *goalStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Goal"), 
-                       wxDefaultPosition, wxSize(40, -1), 0);
-   wxStaticText *initialStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Goal Value"), //loj: 2/4/05 Changed from initial value
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *toleranceStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   // wxTextCtrl
-   mGoalNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(250,-1), 0);
-   mGoalValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                       wxDefaultPosition, wxSize(150,-1), 0);
-   mToleranceTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                       wxDefaultPosition, wxSize(80,-1), 0);
-   
-   // wxString
    wxString emptyArray[] = 
    {
       wxT("No Solver Available")
    };
-
-   // wxComboBox
    StringArray solverNames;
    solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
@@ -136,47 +116,85 @@ void AchievePanel::Create()
          new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
                         wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
    }
-   
-   // wxButton
+
+   // Goal
+   wxStaticText *goalStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Goal"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+//                       wxDefaultPosition, wxSize(40, -1), 0);
+   mGoalNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(250,-1), 0);
    mViewGoalButton = new
       wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
-   
+
+   // Value
+   wxStaticText *initialStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Value"), //loj: 2/4/05 Changed from initial value
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mGoalValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                       wxDefaultPosition, wxSize(250,-1), 0);
    mViewGoalValueButton = new
       wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+
+   // Tolerence
+   wxStaticText *toleranceStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mToleranceTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                       wxDefaultPosition, wxSize(80,-1), 0);   
    
    // wx*Sizers
-   wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-   wxStaticBox *goalSetupStaticBox = new wxStaticBox(this, -1, wxT("Goal Setup"));
-   wxStaticBoxSizer *goalSetupSizer = new wxStaticBoxSizer(goalSetupStaticBox, wxVERTICAL);
-   wxFlexGridSizer *valueGridSizer = new wxFlexGridSizer(4, 0, 0);
-   wxBoxSizer *solverBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *goalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+//   wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
+//   wxStaticBox *goalSetupStaticBox = new wxStaticBox(this, -1, wxT("Goal Setup"));
+//   wxStaticBoxSizer *goalSetupSizer = new wxStaticBoxSizer(goalSetupStaticBox, wxVERTICAL);
+//   wxFlexGridSizer *valueGridSizer = new wxFlexGridSizer(4, 0, 0);
+   wxFlexGridSizer *goalGridSizer = new wxFlexGridSizer(3, 0, 0);
+//   wxBoxSizer *solverBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+//   wxBoxSizer *goalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    
    // Add to wx*Sizers  
-   solverBoxSizer->Add(solverStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   solverBoxSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+//   solverBoxSizer->Add(solverStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+//   solverBoxSizer->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(solverStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   goalBoxSizer->Add(goalStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   goalBoxSizer->Add(mGoalNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   goalBoxSizer->Add(mViewGoalButton, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(mGoalValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   goalGridSizer->Add(goalStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mGoalNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mViewGoalButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
-   goalSetupSizer->Add(goalBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   goalSetupSizer->Add(valueGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(initialStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mGoalValueTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
-   panelSizer->Add(solverBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   panelSizer->Add(goalSetupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   goalGridSizer->Add(toleranceStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   goalGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+//   goalGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
-   theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//   goalBoxSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+//   goalBoxSizer->Add(mGoalNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+//   goalBoxSizer->Add(mViewGoalButton, 0, wxALIGN_CENTER|wxALL, bsize);
+//   
+//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+//   
+//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(mGoalValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
+//   valueGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+//
+//   goalSetupSizer->Add(goalBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+//   goalSetupSizer->Add(valueGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+
+//   panelSizer->Add(solverBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//   panelSizer->Add(goalSetupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//   panelSizer->Add(goalGridSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+
+   // add page sizer to middle sizer
+   theMiddleSizer->Add(goalGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+//   theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
 
@@ -240,8 +258,18 @@ void AchievePanel::SaveData()
    MessageInterface::ShowMessage("AchievePanel::SaveData() entered\n");
    #endif
    
-   canClose = true;
+//   canClose = true;
    
+   // Save data to core engine
+   Integer id;
+   Real rvalue;
+      
+   canClose = true;
+      
+   std::string inputString;
+   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
+                      mAchieveCommand->GetName() + "\" is not an allowed value. \n"
+                     "The allowed values are: [%s].";                        
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
@@ -272,9 +300,23 @@ void AchievePanel::SaveData()
           std::string(mSolverData.goalValue.c_str()));
    }
    
-   mAchieveCommand->SetRealParameter
-      (mAchieveCommand->GetParameterID("Tolerance"),
-       mSolverData.tolerance);
+   // check to see if input is a real
+   inputString = mToleranceTextCtrl->GetValue();      
+   if (GmatStringUtil::ToDouble(inputString,&rvalue))
+   {  
+      id = mAchieveCommand->GetParameterID("Tolerance");
+      mAchieveCommand->SetRealParameter(id, rvalue);
+   }
+   else
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+         inputString.c_str(), "Tolerence","Real Number > 0.0");
+
+      canClose = false;
+   }
+//   mAchieveCommand->SetRealParameter
+//      (mAchieveCommand->GetParameterID("Tolerance"),
+//       mSolverData.tolerance);
    
    theApplyButton->Disable();
 }
@@ -287,7 +329,11 @@ void AchievePanel::ShowGoalSetup()
 {
    wxString str;
    
-   mSolverComboBox->SetStringSelection(mSolverData.solverName);
+   if (!mSolverComboBox->SetStringSelection(mSolverData.solverName))
+   {
+      mSolverComboBox->Append("");
+      mSolverComboBox->SetValue("");
+   }
    mGoalNameTextCtrl->SetValue(mSolverData.goalName);
 
    mGoalValueTextCtrl->SetValue(mSolverData.goalValue);
