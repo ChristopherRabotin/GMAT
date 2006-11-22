@@ -550,13 +550,14 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #endif
    
    GmatBase *obj = NULL;
-
+   
    // let's check object name
-   if (name == "GMAT" || name == "Create")
+   if (name == "GMAT" || name == "Create" || name == "=" ||
+       name == ":" || name == ";" || name == ".")
    {
       InterpreterException ex
-          (type + " object can not be named " + name + ".");
-          HandleError(ex);
+          (type + " object can not be named " + name);
+      HandleError(ex);
       return NULL;
    }
    
@@ -732,6 +733,9 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
    return theModerator->GetSolarSystemInUse();
 }
 
+//---------------------------------
+// protected
+//---------------------------------
 
 //------------------------------------------------------------------------------
 // bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
@@ -1458,91 +1462,91 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
        rowStr.c_str(), colStr.c_str(), row, col);
    #endif
 
-   GmatBase *obj = FindObject(name);
-   
-   if (obj == NULL)
-   {
-      InterpreterException ex
-         ("Interpreter::GetArrayIndex() cannot find Array name: " + name + "\n");
-      HandleError(ex);
-   }
-   
-   if (obj->GetTypeName() != "Array")
-   {
-      InterpreterException ex
-         ("Interpreter::GetArrayIndex() " + name + " is not an Array\n");
-      HandleError(ex);
-   }
-   
-   // get row value
-   if (row == -1 && rowStr != "-1")
-   {
-      Parameter *param = (Parameter*)FindObject(rowStr);
-      if (param == NULL)
-      {
-         InterpreterException ex
-            ("Interpreter::GetArrayIndex() cannot find Array row index "
-             "Variable: " + name + "\n");
-         HandleError(ex);
-      }
-      
-      if (param->GetReturnType() == Gmat::REAL_TYPE)
-         row = (Integer)param->GetReal() - 1; // index starts at 0
-      else
-         if (param == NULL)
-         {
-            InterpreterException ex
-               ("Interpreter::GetArrayIndex() cannot handle Array row of "
-                "Array: " + name + "\n");
-            HandleError(ex);
-         }
-   }
-   
-   
-   // get column value
-   if (col == -1 && colStr != "-1")
-   {
-      Parameter *param = (Parameter*)FindObject(colStr);
-      if (FindObject(colStr) == NULL)
-      {
-         InterpreterException ex
-            ("Interpreter::GetArrayIndex() cannot find Array column index "
-             "Variable: " + name + "\n");
-         HandleError(ex);
-      }
-      
-      if (param->GetReturnType() == Gmat::REAL_TYPE)
-         col = (Integer)param->GetReal() - 1; // index starts at 0
-      else
-         if (param == NULL)
-         {
-            InterpreterException ex
-               ("Interpreter::GetArrayIndex() cannot handle Array column of "
-                "Array: " + name + "\n");
-            HandleError(ex);
-         }
-   }
-   
-   if (row == -1)
-   {
-      InterpreterException ex
-         ("Interpreter::GetArrayIndex() Row index is invalid\n");
-      HandleError(ex);
-   }
-   
-   if (col == -1)
-   {
-      InterpreterException ex
-         ("Interpreter::GetArrayIndex() Column index is invalid\n");
-      HandleError(ex);
-   }
+   Parameter *param = (Parameter*)FindObject(name);
 
+   // Catch errors as much as possible, so limited return statement used
+   // even when error found
+   
+   if (param == NULL)
+   {
+      InterpreterException ex("Array named \"" + name + "\" is undefined");
+      HandleError(ex);
+   }
+   else
+   {
+      if (param->GetTypeName() != "Array")
+      {
+         InterpreterException ex("\"" + name + " is not an Array");
+         HandleError(ex);
+      }
+   
+      if (rowStr == "0" || colStr == "0" ||rowStr == "-1" || colStr == "-1")
+      {
+         InterpreterException ex("Index must be greater than 0");
+         HandleError(ex);
+         return NULL;
+      }
+      
+      // get row value
+      if (row == -1 && rowStr != "-1")
+      {
+         Parameter *rowParam = (Parameter*)FindObject(rowStr);
+         if (rowParam == NULL)
+         {
+            InterpreterException ex
+               ("Array row index named \"" + rowStr + "\" is undefined");
+            HandleError(ex);
+         }
+         else
+         {
+            if (rowParam->GetReturnType() == Gmat::REAL_TYPE)
+            {
+               row = (Integer)rowParam->GetReal() - 1; // index starts at 0
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Cannot handle row index of Array named \"" + name + "\"");
+               HandleError(ex);
+            }
+         }
+      }
+      
+      // get column value
+      if (col == -1 && colStr != "-1")
+      {
+         Parameter *colParam = (Parameter*)FindObject(colStr);
+         if (colParam == NULL)
+         {
+            InterpreterException ex
+               ("Column index named \"" + colStr + "\" is undefined");
+            HandleError(ex);
+         }
+         else
+         {
+            if (colParam->GetReturnType() == Gmat::REAL_TYPE)
+            {
+               col = (Integer)colParam->GetReal() - 1; // index starts at 0
+            }
+            else
+            {
+               InterpreterException ex
+                  ("Cannot handle column index of Array named \"" + name + "\"");
+               HandleError(ex);
+            }
+         }
+      }
+   }
+   
    #if DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
       ("   GetArrayIndex() row=%d, col=%d\n", row, col);
    #endif
    
-   return (Parameter*)obj;
+   if (param == NULL || row == -1 || col == -1)
+      return NULL;
+   else
+      return param;
 }
 
 
@@ -1854,7 +1858,9 @@ bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray
    }
    
    Integer row, col;
-   GetArrayIndex(fromArray, row, col);
+   Parameter *param = GetArrayIndex(fromArray, row, col);
+   if (param == NULL)
+      return false;
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
@@ -1905,7 +1911,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
    if (objType != "Variable" && objType != "String")
    {
       InterpreterException ex
-         ("Cannot set value to object other than Variable or String.");
+         ("Cannot set value to object other than Variable or String");
       HandleError(ex);
       return false;
    }
@@ -2361,7 +2367,9 @@ bool Interpreter::SetObjectToArray(GmatBase *toArrObj, const std::string &toArra
    Real rval = fromObj->GetRealParameter("Value");
    
    Integer row, col;
-   GetArrayIndex(toArray, row, col);
+   Parameter *param = GetArrayIndex(toArray, row, col);
+   if (param == NULL)
+      return false;
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
@@ -2410,8 +2418,10 @@ bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toAr
    Real rval = fromOwner->GetRealParameter(fromId);
    
    Integer row, col;
-   GetArrayIndex(toArray, row, col);
-
+   Parameter *param = GetArrayIndex(toArray, row, col);
+   if (param == NULL)
+      return false;
+   
    #if DEBUG_SET
    MessageInterface::ShowMessage
       ("   SetPropertyToArray()rval=%f, row=%d, col=%d\n", rval, row, col);
@@ -2448,8 +2458,13 @@ bool Interpreter::SetArrayToArray(GmatBase *toArrObj, const std::string &toArray
    Integer rowFrom, colFrom;
    Integer rowTo, colTo;
    
-   GetArrayIndex(toArray, rowTo, colTo);
-   GetArrayIndex(fromArray, rowFrom, colFrom);
+   Parameter *param = GetArrayIndex(toArray, rowTo, colTo);
+   if (param == NULL)
+      return false;
+   
+   param = GetArrayIndex(fromArray, rowFrom, colFrom);
+   if (param == NULL)
+      return false;
    
    Real rval = GetArrayValue(fromArray, rowFrom, colFrom);
    
@@ -2494,8 +2509,9 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
    Integer row, col;
    Real rval;
 
-   GetArrayIndex(toArray, row, col);
-   
+   Parameter *param = GetArrayIndex(toArray, row, col);
+   if (param == NULL)
+      return false;
    
    if (GmatStringUtil::ToDouble(value, rval))
    {
@@ -2510,7 +2526,7 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
       }
       catch (BaseException &e)
       {
-         InterpreterException ex("Out of bound index found: " + toArray);
+         InterpreterException ex("Index must be greater than 0");
          HandleError(ex);
          return false;
       }
@@ -3347,8 +3363,8 @@ bool Interpreter::IsArrayElement(const std::string &str)
    }
    
    retval = GmatStringUtil::IsParenPartOfArray(str);
-   
-   #if DEBUG_ARRAY
+
+   #if DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
       ("Interpreter::IsArrayElement() str=%s, array=%d\n", str.c_str(), retval);
    #endif
