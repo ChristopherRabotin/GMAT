@@ -93,6 +93,9 @@ bool ScriptInterpreter::Interpret()
    if (!initialized)
       Initialize();
    
+   inCommandMode = false;
+   inRealCommandMode = false;
+   
    bool retval1 = ReadScript();
    
    //if (retval)
@@ -385,7 +388,9 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    Integer count = sarray.size();
    
    #ifdef DEBUG_PARSE
-   MessageInterface::ShowMessage("   currentBlockType=%d\n", currentBlockType);   
+   MessageInterface::ShowMessage
+      ("   currentBlockType=%d, inCommandMode=%d, inRealCommandMode=%d\n",
+       currentBlockType, inCommandMode, inRealCommandMode);
    for (UnsignedInt i=0; i<sarray.size(); i++)
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, sarray[i].c_str());
    #endif
@@ -415,6 +420,16 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
    }
    else if (currentBlockType == Gmat::DEFINITION_BLOCK)
    {
+      //loj: 11/21/06 Uncomment the lines when all scripts are ready
+      // Do not allow object creation on command mode
+      //if (inRealCommandMode)
+      //{
+      //   InterpreterException ex
+      //      ("Creating Object is not allowed in command mode");
+      //   HandleError(ex);
+      //   return false;
+      //}
+      
       if (count < 3)
       {
          InterpreterException ex
@@ -610,9 +625,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock)
             {
                // Set values by calling Set*Parameter(), even in command mode
                // for the following types
-               if (!inRealCommandMode &&
-                   (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
-                    tempObj->GetType() == Gmat::SUBSCRIBER))
+               if (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
+                   (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER))
                   obj = MakeAssignment(chunks[0], chunks[1]);
                else
                   obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1]);

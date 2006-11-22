@@ -918,84 +918,6 @@ bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
 
 
 //------------------------------------------------------------------------------
-//bool AssembleForCommand(GmatCommand *cmd, const std::string &desc)
-//------------------------------------------------------------------------------
-bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
-{
-   bool retval = true;
-   UnsignedInt equalSign = desc.find("=");
-   
-   if (equalSign == desc.npos)
-   {
-      InterpreterException ex("Cannot find equal sign (=) ");
-      HandleError(ex);
-      return false;
-   }
-   
-   std::string var = desc.substr(0, equalSign-1);
-   var = GmatStringUtil::Trim(var);
-   
-   std::string substr = desc.substr(equalSign+1);
-   
-   StringArray parts = theTextParser.SeparateBy(substr, ":");
-   int count = parts.size();
-   
-   if (count < 2)
-   {
-      InterpreterException ex("Cannot find equal sign (=) in ");
-      HandleError(ex);
-      return false;
-   }
-   
-   std::string start = parts[0];
-   std::string end = parts[1];
-   std::string step = "1";
-   
-   if (count > 2)
-   {
-      step = parts[1];
-      end = parts[2];
-   }
-   
-   #if DEBUG_ASSEMBLE_FOR
-   MessageInterface::ShowMessage
-      ("Interpreter::AssembleForCommand() var=%s, start=<%s>, end=<%s>, "
-       "step=<%s>\n", var.c_str(), start.c_str(), end.c_str(), step.c_str());
-   #endif
-   
-   cmd->SetStringParameter("IndexName", var);
-   cmd->SetStringParameter("StartName", start);
-   cmd->SetStringParameter("EndName", end);
-   cmd->SetStringParameter("IncrementName", step);
-
-   GmatBase *obj = FindObject(var);
-
-   // Create index variable
-   if (obj == NULL)
-      obj = CreateObject("Variable", var);
-   
-   cmd->SetRefObject(obj, Gmat::PARAMETER, var);
-
-   // Set start varibale, if exist
-   obj = FindObject(start);
-   if (obj != NULL)
-      cmd->SetRefObject(obj, Gmat::PARAMETER, start);
-
-   // Set end varibale, if exist
-   obj = FindObject(end);
-   if (obj != NULL)
-      cmd->SetRefObject(obj, Gmat::PARAMETER, end);
-
-   // Set step varibale, if exist
-   obj = FindObject(step);
-   if (obj != NULL)
-      cmd->SetRefObject(obj, Gmat::PARAMETER, step);
-   
-   return retval;
-}
-
-
-//------------------------------------------------------------------------------
 //bool AssembleCallFunctionCommand(GmatCommand *cmd, const std::string &desc)
 //------------------------------------------------------------------------------
 bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
@@ -1153,10 +1075,18 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       #endif
       
       // Try to create a parameter first
-      CreateParameter(parts[i]);
-      CreateParameter(parts[i+2]);
+      //CreateParameter(parts[i]);
+      //CreateParameter(parts[i+2]);
       
       cb->SetCondition(parts[i], parts[i+1], parts[i+2]);
+      
+      // Set 1st variable in condition, if exist
+      if (!SetCommandParameter(cmd, parts[i], "The variable in Condition", true, true))
+         retval = false;
+      
+      // Set 2nd variable in condition, if exist
+      if (!SetCommandParameter(cmd, parts[i+2], "The variable in Condition", true, true))
+         retval = false;
       
       if (count > i+3)
       {
@@ -1167,6 +1097,90 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
          cb->SetConditionOperator(parts[i+3]);
       }
    }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+//bool AssembleForCommand(GmatCommand *cmd, const std::string &desc)
+//------------------------------------------------------------------------------
+/* Parses For loop control expression
+ *    It's syntax is 
+ *       For index = start:increment:end
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
+{
+   bool retval = true;
+   UnsignedInt equalSign = desc.find("=");
+   
+   if (equalSign == desc.npos)
+   {
+      InterpreterException ex("Cannot find equal sign (=) for For loop control");
+      HandleError(ex);
+      return false;
+   }
+   
+   std::string index = desc.substr(0, equalSign-1);
+   index = GmatStringUtil::Trim(index);
+   
+   std::string substr = desc.substr(equalSign+1);
+   
+   StringArray parts = theTextParser.SeparateBy(substr, ":");
+   int count = parts.size();
+   
+   if (count < 2)
+   {
+      InterpreterException ex("Cannot find equal sign (=) for For loop control");
+      HandleError(ex);
+      return false;
+   }
+   
+   std::string start = parts[0];
+   std::string end = parts[1];
+   std::string step = "1";
+   
+   if (count > 2)
+   {
+      step = parts[1];
+      end = parts[2];
+   }
+   
+   #if DEBUG_ASSEMBLE_FOR
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleForCommand() index=%s, start=<%s>, end=<%s>, "
+       "step=<%s>\n", index.c_str(), start.c_str(), end.c_str(), step.c_str());
+   #endif
+   
+   cmd->SetStringParameter("IndexName", index);
+   cmd->SetStringParameter("StartName", start);
+   cmd->SetStringParameter("EndName", end);
+   cmd->SetStringParameter("IncrementName", step);
+
+   // Should we really create For loop index if not exist?
+   if (FindObject(index) == NULL)
+   {
+      CreateObject("Variable", index);
+      InterpreterException ex
+         ("For loop index \"" + index + "\" not found, so it was created");
+      HandleError(ex, true, true);
+   }
+   
+   if (!SetCommandParameter(cmd, index, "For loop index", false, false))
+      retval = false;
+   
+   // Set start varibale, if exist
+   if (!SetCommandParameter(cmd, start, "For loop start index", true, true))
+      retval = false;
+   
+   // Set step varibale, if exist
+   if (!SetCommandParameter(cmd, step, "For loop step index", true, true))
+      retval = false;
+   
+   // Set end varibale, if exist
+   if (!SetCommandParameter(cmd, end, "For loop end index", true, true))
+      retval = false;
    
    return retval;
 }
@@ -1598,7 +1612,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       
       if (lhsObj)
       {
-         if (IsArray(lhs))
+         if (IsArrayElement(lhs))
             isLhsArray = true;
          else
             isLhsObject = true;
@@ -1653,7 +1667,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
 
       if (rhsObj)
       {
-         if (IsArray(rhs))
+         if (IsArrayElement(rhs))
             isRhsArray = true;
          else
             isRhsObject = true;
@@ -3320,15 +3334,15 @@ Real Interpreter::GetArrayValue(const std::string &arrayStr,
 
 
 //------------------------------------------------------------------------------
-// bool IsArray(const std::string &str)
+// bool IsArrayElement(const std::string &str)
 //------------------------------------------------------------------------------
-bool Interpreter::IsArray(const std::string &str)
+bool Interpreter::IsArrayElement(const std::string &str)
 {
    bool retval = false;
    
    if (str.find("[") != str.npos)
    {
-      InterpreterException ex("[ is invalid in assignment : " + str + "\n");
+      InterpreterException ex("\"" + str + "\" is not a valid Array element");
       HandleError(ex);
    }
    
@@ -3336,7 +3350,7 @@ bool Interpreter::IsArray(const std::string &str)
    
    #if DEBUG_ARRAY
    MessageInterface::ShowMessage
-      ("Interpreter::IsArray() str=%s, array=%d\n", str.c_str(), retval);
+      ("Interpreter::IsArrayElement() str=%s, array=%d\n", str.c_str(), retval);
    #endif
    
    return retval;
@@ -3672,6 +3686,71 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    #endif
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
+//                          const std::string &msg, bool isNumberAllowed,
+//                          bool isArrayAllowed)
+//------------------------------------------------------------------------------
+bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param,
+                                      const std::string &msg, bool isNumberAllowed,
+                                      bool isArrayAllowed)
+{
+   GmatBase *obj = FindObject(param);
+   
+   Real rval;
+   
+   if (obj != NULL)
+   {
+      if ((obj->GetTypeName() == "String") ||
+          ((obj->GetTypeName() != "Variable") && !isArrayAllowed))
+      {
+         InterpreterException ex
+            (msg + " has to be \"Variable\" but found \"" +
+             obj->GetTypeName() + "\"");
+         HandleError(ex);
+         return false;
+      }
+      else
+      {
+         if (obj->GetTypeName() == "Array" && !IsArrayElement(param))
+         {
+            InterpreterException ex
+               (msg + " \"" + param + "\" is not a valid Array element");
+            HandleError(ex);
+            return false;
+         }
+         
+         cmd->SetRefObject(obj, Gmat::PARAMETER, param);
+      }
+   }
+   else
+   {
+      // Create parameter if system parameter and isNumberAllowed      
+      if (isNumberAllowed)
+      {
+         std::string type, ownerName, depObj;
+         GmatStringUtil::ParseParameter(param, type, ownerName, depObj);
+         
+         if (theModerator->IsParameter(type))
+         {
+            CreateParameter(type, param, ownerName, depObj);
+            return true;
+         }
+      }
+      
+      if ((!isNumberAllowed) ||
+          (isNumberAllowed && !GmatStringUtil::ToDouble(param, rval)))
+      {
+         InterpreterException ex(msg + " \"" + param + "\" is undefined");
+         HandleError(ex);
+         return false;
+      }
+   }
+   
+   return true;
 }
 
 

@@ -157,9 +157,9 @@ protected:
                                         const std::string &rhs);
    
    bool AssembleCommand(GmatCommand *cmd, const std::string &desc);
-   bool AssembleForCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleCallFunctionCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleConditionalCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleForCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc);
    
    // for assignment
@@ -212,7 +212,7 @@ protected:
    // for setting/getting array value
    Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col);
    
-   bool IsArray(const std::string &str);
+   bool IsArrayElement(const std::string &str);
    
    // for error handling
    void HandleError(BaseException &e, bool writeLine = true, bool warning = false);
@@ -248,6 +248,9 @@ private:
    
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
+   bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
+                            const std::string &msg, bool isNumberAllowed,
+                            bool isArrayAllowed);
    void WriteParts(const std::string &title, StringArray &parts);
 };
 
