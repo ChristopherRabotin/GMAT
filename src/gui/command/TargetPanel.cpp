@@ -65,10 +65,13 @@ TargetPanel::~TargetPanel()
 //------------------------------------------------------------------------------
 void TargetPanel::Create()
 {    
+   Integer bsize = 2;
+
    // wxButton
    correctionsButton =
       new wxButton(this, ID_BUTTON, wxT("Apply Corrections"), wxDefaultPosition,
-                   wxSize(117,-1), 0);
+                   wxDefaultSize, 0);
+//                   wxSize(117,-1), 0);
    
    // wxStaticText
    wxStaticText *solverNameStaticText =
@@ -120,29 +123,33 @@ void TargetPanel::Create()
    }
    
    mConvComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                  wxSize(180,-1), 1, strArray2, wxCB_DROPDOWN);
+                     wxSize(180,-1), 1, strArray2, wxCB_DROPDOWN|wxCB_READONLY);
    modeComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                 wxSize(180,-1), 1, strArray3, wxCB_DROPDOWN);
+                     wxSize(180,-1), 1, strArray3, wxCB_DROPDOWN|wxCB_READONLY);
    
    // wx*Sizer
    wxBoxSizer *item0 = new wxBoxSizer(wxVERTICAL);
-   wxFlexGridSizer *item5 = new wxFlexGridSizer(5, 0, 0);
+   wxFlexGridSizer *item5 = new wxFlexGridSizer(2, 0, 0);
       
     //First row
-   item5->Add(solverNameStaticText, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(mSolverComboBox, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(convStaticText, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(mConvComboBox, 0, wxALIGN_CENTRE|wxALL, 5);
+   item5->Add(solverNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   item5->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+//   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
+   item5->Add(convStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   item5->Add(mConvComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    //Second row
-   item5->Add(modeStaticText, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(modeComboBox, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(correctionsButton, 0, wxALIGN_CENTRE|wxALL, 5);
+   item5->Add(modeStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   item5->Add(modeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+//   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
+   item5->Add(20, 20, 0, wxALIGN_LEFT|wxALL, bsize);
+   item5->Add(correctionsButton, 0, wxALIGN_LEFT|wxALL, bsize);
 
-   item0->Add(item5, 0, wxALIGN_CENTRE|wxALL, 5);
+   item0->Add(item5, 0, wxALIGN_CENTRE|wxALL, bsize);
 
+   convStaticText->Enable(false);
+   mConvComboBox->Enable(false);
+   modeStaticText->Enable(false);
+   modeComboBox->Enable(false);
    correctionsButton->Enable(false);
    
    theMiddleSizer->Add(item0, 0, wxGROW, 5);
