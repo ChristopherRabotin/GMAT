@@ -1064,7 +1064,8 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
       ("GmatStringUtil::IsBracketPartOfArray() str=%s, bracketPairs=%s, "
        "checkOnlyFirst=%d\n", str.c_str(), bracketPairs.c_str(), checkOnlyFirst);
    #endif
-   
+
+   std::string str1 = RemoveAll(str, ' ');
    bool ret = true;
    UnsignedInt index1, index2, comma;
    std::string substr;
@@ -1084,10 +1085,10 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
        closeBrackets.c_str());
    #endif
    
-   index1 = str.find_first_of(openBrackets);   
+   index1 = str1.find_first_of(openBrackets);   
    //MessageInterface::ShowMessage("   index1=%u\n", index1);
    
-   if (index1 == str.npos)
+   if (index1 == str1.npos)
    {
       #if DEBUG_STRING_UTIL
       MessageInterface::ShowMessage("   No open bracket found.\n");
@@ -1101,13 +1102,13 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    //MessageInterface::ShowMessage("   openChar=%c\n", openChar);
 
    if (checkOnlyFirst)
-      index2 = str.find_first_of(closeBrackets, index1);
+      index2 = str1.find_first_of(closeBrackets, index1);
    else
-      index2 = str.find_last_of(closeBrackets);
+      index2 = str1.find_last_of(closeBrackets);
    
    //MessageInterface::ShowMessage("   index2=%u\n", index2);
    
-   if (index2 == str.npos)
+   if (index2 == str1.npos)
    {
       #if DEBUG_STRING_UTIL
       MessageInterface::ShowMessage("   No close bracket found\n");
@@ -1131,10 +1132,10 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    
    
    // str1 does not include open and close bracket
-   std::string str1 = str.substr(index1+1, index2-index1-1);
+   std::string str2 = str1.substr(index1+1, index2-index1-1);
    //MessageInterface::ShowMessage("   str1=<%s>/n", str1.c_str());
    
-   if (str1 == "")
+   if (str2 == "")
    {
       #if DEBUG_STRING_UTIL
       MessageInterface::ShowMessage("   It is empty sub-string.\n");
@@ -1144,14 +1145,14 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    }
    
    
-   Integer length = str1.size();
-   comma = str1.find(',');
+   Integer length = str2.size();
+   comma = str2.find(',');
    //MessageInterface::ShowMessage("   comma=%u\n", comma);
    
    // if single dimension array
-   if (comma == str.npos)
+   if (comma == str2.npos)
    {
-      substr = str1.substr(0, length-1);
+      substr = str2.substr(0, length-1);
       //MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
       
       if (IsSingleItem(substr))
@@ -1169,7 +1170,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    
    
    // It's double dimension array
-   substr = str1.substr(0, comma-1);
+   substr = str2.substr(0, comma-1);
    //MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
    
    if (!IsSingleItem(substr))
@@ -1182,7 +1183,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
       return false;
    }
    
-   substr = str1.substr(comma+1, length-comma-1);
+   substr = str2.substr(comma+1, length-comma-1);
    //MessageInterface::ShowMessage("   2nd=%s\n", substr.c_str());
    
    if (!IsSingleItem(substr))
