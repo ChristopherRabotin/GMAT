@@ -548,6 +548,67 @@ bool ConditionalBranch::RenameRefObject(const Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                    const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a reference object for the ConditionalBranch Command.
+ *
+ * @param <obj>   pointer to the reference object
+ * @param <type>  type of the reference object 
+ * @param <name>  name of the reference object
+ *
+ * @return true if successful; otherwise, false.
+ *
+ */
+//------------------------------------------------------------------------------
+bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name)
+{
+   #ifdef DEBUG_CONDITIONS
+      MessageInterface::ShowMessage(
+         "ConditionalBranch::SetRefObject() entered; Parameters are\n   "
+         "obj with type \"%s\"\n   Gmat::ObjectType = %d\n   name = \"%s\"\n",
+         obj->GetTypeName().c_str(), type, name.c_str());
+   #endif
+   
+   switch (type)
+   {
+      case Gmat::PARAMETER:
+      {
+         std::string newName = name;
+         UnsignedInt openParen = name.find('(');
+   
+         if (openParen != name.npos)
+            newName = name.substr(0, openParen);
+         
+         // if name is not found int the parameter list, add
+         Integer size = params.size();
+         bool paramFound = false;
+         for (int i=0; i<size; i++)
+         {
+            if (params[i]->GetName() == newName)
+            {
+               paramFound = true;
+               break;
+            }
+         }
+
+         if (!paramFound)
+            params.push_back((Parameter *)obj);
+
+         return true;
+      }
+      default:
+         break;
+   }
+   
+   // Not handled here -- invoke the next higher SetRefObject call
+   return BranchCommand::SetRefObject(obj, type, name);
+}
+
+
+//------------------------------------------------------------------------------
 //  GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                         const std::string &name,
 //                         const Integer index)
@@ -821,7 +882,8 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      return (lhsParamList.at(index));
+      //return (lhsParamList.at(index));
+      return (lhsList.at(index));
    }
    if (id == OPERATOR_STRINGS)   
    {
@@ -839,7 +901,8 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      return (rhsParamList.at(index));
+      //return (rhsParamList.at(index));
+      return (rhsList.at(index));
    }
    if (id == LOGICAL_OPERATORS)  
    {
@@ -988,9 +1051,9 @@ bool ConditionalBranch::SetStringParameter(const std::string &label,
 const StringArray& 
 ConditionalBranch::GetStringArrayParameter(const Integer id) const
 {
-   if (id == LEFT_HAND_STRINGS)  return lhsParamList;
+   if (id == LEFT_HAND_STRINGS)  return lhsList; //lhsParamList;
    if (id == OPERATOR_STRINGS)   return opStrings;
-   if (id == RIGHT_HAND_STRINGS) return rhsParamList;
+   if (id == RIGHT_HAND_STRINGS) return rhsList; //rhsParamList;
    if (id == LOGICAL_OPERATORS)  return logicalOpStrings;
    //if (id == PARAMETER_NAMES)  return ??;
    

@@ -63,6 +63,9 @@ public:
                                      const std::string &oldName,
                                      const std::string &newName);
    
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name);
+   
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name,
                                      const Integer index);
