@@ -18,6 +18,7 @@
 
 
 #include "BeginScript.hpp" 
+#include "TextParser.hpp"     // for DecomposeBlock()
 #include <sstream>
 
 #include "MessageInterface.hpp"
@@ -157,10 +158,10 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       gen << commentLine;
    gen << prefix << "BeginScript";
    if (inlineComment != "")
-      gen << inlineComment;
+      gen << inlineComment << "\n";
    else
       gen << "\n";
-
+   
    #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
    MessageInterface::ShowMessage
       ("BeginScript::GetGeneratingString() this=%s, mode=%d, prefix=%s, "
@@ -190,7 +191,19 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
             ("   BeginScript::cmdstr=\n%s\n", cmdstr.c_str());
          #endif
          
-         gen << indent << prefix << cmdstr << "\n";
+         // Indent whole block within Begin/EndScript (loj: 11/28/06)
+         //gen << indent << prefix << cmdstr << "\n";
+         TextParser tp;
+         StringArray textArray = tp.DecomposeBlock(cmdstr);
+         
+         for (UnsignedInt i=0; i<textArray.size(); i++)
+         {
+            gen << indent << textArray[i];
+            if (textArray[i].find("\n") == cmdstr.npos &&
+                textArray[i].find("\r") == cmdstr.npos)
+               gen << "\n";
+         }
+         
          current = current->GetNext();
          if (current == NULL)
             gen << prefix << "EndScript;\n";
