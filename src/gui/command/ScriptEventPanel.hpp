@@ -22,24 +22,32 @@ class ScriptEventPanel: public GmatPanel
 {
 public:
    // constructors
-   ScriptEventPanel(wxWindow *parent, GmatCommand *cmd);
+   //ScriptEventPanel(wxWindow *parent, GmatCommand *cmd);
+   ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item);
+   ~ScriptEventPanel();
+   
    wxTextCtrl *mFileContentsTextCtrl;
-    
+   
 private:
    // member data
+   MissionTreeItemData *theItem;
    GmatCommand *theCommand;
-      
+   GmatCommand *mPrevCommand;
+   GmatCommand *mNextCommand;
+   GmatCommand *mNewCommand;
+   
    wxGridSizer *mBottomSizer;
    wxBoxSizer *mPageSizer;
-
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   virtual void OnScript(wxCommandEvent &event);
+   
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
-
+   
    DECLARE_EVENT_TABLE();
 
    // IDs for the controls and the menu commands
