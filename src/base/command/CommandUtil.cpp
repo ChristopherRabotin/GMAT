@@ -38,17 +38,48 @@ GmatCommand* GmatCommandUtil::GetLastCommand(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
+// GmatCommand* GetNextCommand(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/*
+ * Returns next non-ScriptEvent command.
+ *
+ * @param  cmd  Command which search begins from
+ * @return next non-ScriptEvent command
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GmatCommandUtil::GetNextCommand(GmatCommand *cmd)
+{
+   if (cmd->GetTypeName() != "BeginScript")
+      return cmd->GetNext();
+   
+   GmatCommand *current = cmd->GetNext();
+   
+   while (current != NULL)
+   {
+      if (current->GetTypeName() == "EndScript")
+         break;
+      
+      current = current->GetNext();
+   }
+   
+   return current->GetNext();
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetCommandSeqString(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd)
 {
+   char buf[10];
    std::string cmdseq;
    cmdseq.append("\n---------- Mission Sequence ----------\n");
    
    while (cmd != NULL)
    {
-      cmdseq.append("--- " + cmd->GetTypeName() + "\n");
-
+      sprintf(buf, "(%p)", cmd);
+      cmdseq.append("--- " + std::string(buf) + cmd->GetTypeName() + "\n");
+      
       if ((cmd->GetChildCommand(0)) != NULL)
          GetSubCommands(cmd, 0, cmdseq);
       
@@ -67,6 +98,7 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd)
 void GmatCommandUtil::GetSubCommands(GmatCommand* brCmd, Integer level,
                                      std::string &cmdseq)
 {
+   char buf[10];
    GmatCommand* current = brCmd;
    Integer childNo = 0;
    GmatCommand* nextInBranch;
@@ -82,7 +114,8 @@ void GmatCommandUtil::GetSubCommands(GmatCommand* brCmd, Integer level,
             cmdseq.append("---");
          }
          
-         cmdseq.append("--- " + nextInBranch->GetTypeName() + "\n");
+         sprintf(buf, "(%p)", nextInBranch);
+         cmdseq.append("--- " + std::string(buf) + nextInBranch->GetTypeName() + "\n");
          
          if (nextInBranch->GetChildCommand() != NULL)
             GetSubCommands(nextInBranch, level+1, cmdseq);

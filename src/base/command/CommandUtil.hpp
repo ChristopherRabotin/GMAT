@@ -25,6 +25,7 @@
 namespace GmatCommandUtil
 {
    GmatCommand* GetLastCommand(GmatCommand *cmd);
+   GmatCommand* GetNextCommand(GmatCommand *cmd);
    std::string GetCommandSeqString(GmatCommand *cmd);
    void GetSubCommands(GmatCommand* brCmd, Integer level, std::string &cmdseq);
 }
