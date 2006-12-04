@@ -128,7 +128,9 @@ public:
    // Sequence methods
    virtual bool         Initialize();
    virtual GmatCommand* GetNext();
-   virtual bool         ForceSetNext(GmatCommand *toCmd); // dangerous!
+   virtual GmatCommand* GetPrevious();
+   virtual bool         ForceSetNext(GmatCommand *toCmd);     // dangerous!
+   virtual bool         ForceSetPrevious(GmatCommand *toCmd); // dangerous!
    virtual bool         Append(GmatCommand *cmd);
    virtual bool         Insert(GmatCommand *cmd, GmatCommand *prev);
    virtual GmatCommand* Remove(GmatCommand *cmd);
@@ -187,6 +189,8 @@ protected:
    bool                 initialized;
    /// Pointer to the next GmatCommand in the sequence; NULL at the end
    GmatCommand          *next;
+   /// Pointer to the previous GmatCommand in the sequence; NULL passed begining
+   GmatCommand          *previous;
    /// Indicator of the current nesting level
    Integer              level;
    /// Object store obtained from the Sandbox

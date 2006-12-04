@@ -32,7 +32,9 @@
 //#define DEBUG_COMMAND_SUMMARY_LIST
 //#define DEBUG_COMMAND_INIT 1
 //#define DEBUG_BUILD_CMD_SUMMARY 1
-//#define DEBUG_COMMAND_APPEND
+//#define DEBUG_COMMAND_APPEND 1
+//#define DEBUG_COMMAND_INSERT 1
+//#define DEBUG_COMMAND_REMOVE 1
 
 
 //---------------------------------
@@ -80,6 +82,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    GmatBase             (Gmat::COMMAND, typeStr),
    initialized          (false),
    next                 (NULL),
+   previous             (NULL),
    level                (-1),   // Not set
    objectMap            (NULL),
    solarSys             (NULL),
@@ -296,13 +299,25 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       empty = "% Generating string not set for " + typeName + " command.";
       return empty;
    }
-
-   std::string commentLine = GetCommentLine(), 
-               inlineComment = GetInlineComment();
+   
+   std::string commentLine = GetCommentLine();
+   std::string inlineComment = GetInlineComment();
+   
+   // This code keep appending the commentLine and inineComment
+   // when ScriptEventPanel is opened
+   //if (commentLine != "")
+   //   generatingString = commentLine + generatingString;
+   //if (inlineComment != "")
+   //   generatingString = generatingString + inlineComment;
+   
    if (commentLine != "")
-      generatingString = commentLine + generatingString;
+      if (generatingString.find(commentLine) == generatingString.npos)
+         generatingString = commentLine + generatingString;
+   
    if (inlineComment != "")
-      generatingString = generatingString + inlineComment;
+      if (generatingString.find(inlineComment) == generatingString.npos)
+         generatingString = generatingString + inlineComment;
+   
    return generatingString;
 }
 
@@ -969,9 +984,38 @@ GmatCommand* GmatCommand::GetNext()
    return next;
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatCommand* GetPrevious()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the previous GmatCommand in the GmatCommand sequence
+ * 
+ * @return Pointer to the previous GmatCommand
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GmatCommand::GetPrevious()
+{
+   return previous;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ForceSetNext(GmatCommand *toCmd)
+//------------------------------------------------------------------------------
 bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 {
    next = toCmd;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ForceSetPrevious(GmatCommand *toCmd)
+//------------------------------------------------------------------------------
+bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
+{
+   previous = toCmd;
    return true;
 }
 
@@ -989,8 +1033,15 @@ bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 //------------------------------------------------------------------------------
 bool GmatCommand::Append(GmatCommand *cmd)
 {
+   #ifdef DEBUG_COMMAND_APPEND
+   MessageInterface::ShowMessage
+      ("===> GmatCommand::Append() cmd=%s, addr=%p, this=%s, addr=%p\n",
+       cmd->GetTypeName().c_str(), cmd, this->GetTypeName().c_str(), this);
+   #endif
+   
    if (cmd == this)
       throw CommandException("Attempting to add GmatCommand already in list");
+   
    if (next)
    {
       #ifdef DEBUG_COMMAND_APPEND
@@ -1006,8 +1057,14 @@ bool GmatCommand::Append(GmatCommand *cmd)
       // Always set the command changed flag when a command is added to the list
       commandChanged = true;
       next = cmd;
+      cmd->previous = this;
+      #ifdef DEBUG_COMMAND_APPEND
+         MessageInterface::ShowMessage
+            ("In GmatCommand::Append, setting %s->previous to %s\n",
+             cmd->GetTypeName().c_str(), this->GetTypeName().c_str());
+      #endif
    }
-      
+   
    return true;
 }
 
@@ -1026,18 +1083,38 @@ bool GmatCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
+   #if DEBUG_COMMAND_INSERT
+   MessageInterface::ShowMessage
+      ("===> GmatCommand::Insert() this=%s, addr=%p\n   cmd=%s, addr=%p, "
+       "prev=%s, addr=%p\n", this->GetTypeName().c_str(), this,
+       cmd->GetTypeName().c_str(), cmd, prev->GetTypeName().c_str(), prev);
+   #endif
+   
    if (this == prev)
    {
       GmatCommand *temp = next;
-      if (!next) return Append(cmd);
+      
+      if (!next)
+         return Append(cmd);
+      
       next = cmd;
+      cmd->previous = prev;
+      
+      #if DEBUG_COMMAND_INSERT
+      MessageInterface::ShowMessage
+         ("GmatCommand::Insert(), setting %s->previous to %s\n",
+          cmd->GetTypeName().c_str(), prev->GetTypeName().c_str());
+      #endif
+      
       return next->Append(temp); // assumes cmd->next is NULL and next != NULL
    }
    
    if (next == NULL)
       return false;
+   
    return next->Insert(cmd, prev);
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatCommand* Remove(GmatCommand *cmd)
@@ -1233,7 +1310,7 @@ bool GmatCommand::HasPropStateChanged()
 //  void RunComplete()
 //------------------------------------------------------------------------------
 /**
- * Tells the sewuence that the run was ended, possibly before reaching the end.
+ * Tells the sequence that the run was ended, possibly before reaching the end.
  *
  * Some commands -- for instance, the BranchCommands -- track state during a 
  * run.  This method is called when the sequence is terminated by the Moderator
@@ -1252,7 +1329,8 @@ void GmatCommand::RunComplete()
    #ifdef DEBUG_COMMAND_DEALLOCATION
       MessageInterface::ShowMessage("Next cmd is a %s\n", (next->GetTypeName()).c_str());
       if (next->IsOfType("BranchEnd"))
-      MessageInterface::ShowMessage(".. and that cmd is a branchEnd!!!!!!!!! %s\n", (next->GetTypeName()).c_str());     
+      MessageInterface::ShowMessage(".. and that cmd is a branchEnd!!!!!!!!! %s\n",
+                                    (next->GetTypeName()).c_str());     
    #endif
       // Branch command ends point back to start; this line prevents looping
       if (!next->IsOfType("BranchEnd"))
