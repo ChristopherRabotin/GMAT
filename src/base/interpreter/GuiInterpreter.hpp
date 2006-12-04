@@ -33,7 +33,7 @@ public:
    // Interpreter abstract methods
    // virtual bool Interpret();
    virtual bool Interpret(GmatBase *obj, const std::string generator);
-   virtual bool Interpret(GmatBase *obj, std::istringstream *ss);
+   virtual bool Interpret(GmatCommand *inCmd, std::istringstream *ss);
    // virtual bool Build(Gmat::WriteMode mode);
    
    void Finalize();
@@ -96,6 +96,13 @@ public:
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "",
                                      GmatCommand *refCmd = NULL);
+   GmatCommand* AppendCommand(const std::string &type, const std::string &name,
+                              bool &retFlag, Integer sandboxNum = 1);
+   GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   GmatCommand* GetFirstCommand(Integer sandboxNum = 1);
+   bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
+                      Integer sandboxNum = 1);
    
    // Resource
    bool ClearResource();
@@ -103,13 +110,6 @@ public:
    // Command sequence
    bool LoadDefaultMission();
    bool ClearCommandSeq(Integer sandboxNum = 1);
-   bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-   bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
-                      Integer sandboxNum = 1);
-   GmatCommand* AppendCommand(const std::string &type, const std::string &name,
-                              Integer sandboxNum = 1);
-   GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-   GmatCommand* GetNextCommand(Integer sandboxNum = 1);
    
    // Sandbox
    void ClearAllSandboxes();

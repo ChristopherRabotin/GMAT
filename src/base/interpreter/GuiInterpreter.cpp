@@ -24,6 +24,8 @@
 #include "GuiInterpreter.hpp"
 #include "Moderator.hpp"
 
+#define DEBUG_INTERPRET 1
+
 GuiInterpreter* GuiInterpreter::instance = NULL;
 
 //---------------------------------
@@ -91,7 +93,7 @@ bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
       throw InterpreterException(
          "Interpret(GmatBase*) currently only supports GmatCommands.");
 
-   #ifdef DEBUG_TOKEN_PARSING
+   #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage(
          "%s\n%s\n\"%s\"\n",
          "\nInterpret(GmatBase*)is under construction.  Please be patient!",
@@ -100,7 +102,7 @@ bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
    
    if (obj->GetTypeName() == "BeginScript")
    {
-      #ifdef DEBUG_TOKEN_PARSING
+      #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage
          ("Parsing in-line text:\n%s\n", generator.c_str());
       #endif
@@ -111,7 +113,7 @@ bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
    }
    else
    {
-      #ifdef DEBUG_TOKEN_PARSING
+      #ifdef DEBUG_INTERPRET
       MessageInterface::ShowMessage
          ("Resetting command using\n%s\n", generator.c_str());
       #endif
@@ -126,24 +128,12 @@ bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
 
 
 //------------------------------------------------------------------------------
-// bool Interpret(GmatBase *obj, std::istringstream *ss)
+// bool Interpret(GmatCommand *inCmd, std::istringstream *ss)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::Interpret(GmatBase *obj, std::istringstream *ss)
-{
-   if (obj->GetType() != Gmat::COMMAND)
-      throw InterpreterException(
-         "Interpret(GmatBase*) currently only supports GmatCommands.");
-   
-   // This block is just for testing
+bool GuiInterpreter::Interpret(GmatCommand *inCmd, std::istringstream *ss)
+{   
    SetInStream(ss);
-   bool status = ScriptInterpreter::Interpret();
-   //MessageInterface::ShowMessage
-   //   ("===> GuiInterpreter::InterpretScript() status=%d\n", status);
-   
-   //loj: 11/22/06 Need more work here to append command and update resource tree
-   // if any objects were created within ScriptEvent
-   
-   return status;
+   return ScriptInterpreter::Interpret(inCmd);
 }
 
 
@@ -533,29 +523,40 @@ GmatCommand* GuiInterpreter::CreateDefaultCommand(const std::string &type,
 
 
 //------------------------------------------------------------------------------
-// bool LoadDefaultMission()
+// GmatCommand* AppendCommand(const std::string &type, const std::string &name,
+//                        Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::LoadDefaultMission()
+GmatCommand* GuiInterpreter::AppendCommand(const std::string &type,
+                                           const std::string &name, bool &retFlag,
+                                           Integer sandboxNum)
 {
-   return theModerator->LoadDefaultMission();
+   return theModerator->AppendCommand(type, name, retFlag, sandboxNum);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ClearResource()
+// GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::ClearResource()
+GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
 {
-   return theModerator->ClearResource();
+   return theModerator->DeleteCommand(cmd, snadboxNum);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ClearCommandSeq(Integer sandboxNum = 1)
+// GmatCommand* GetFirstCommand(Integer sandboxNum)
 //------------------------------------------------------------------------------
-bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
+/**
+ * Retrieves a first command in the sequence.
+ *
+ * @param <sandboxNum> sandbox number
+ *
+ * @return a next command object pointer, return null if no command found
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GuiInterpreter::GetFirstCommand(Integer sandboxNum)
 {
-   return theModerator->ClearCommandSeq(sandboxNum);
+   return theModerator->GetFirstCommand(sandboxNum);
 }
 
 
@@ -577,18 +578,6 @@ bool GuiInterpreter::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* AppendCommand(const std::string &type, const std::string &name,
-//                        Integer sandboxNum)
-//------------------------------------------------------------------------------
-GmatCommand* GuiInterpreter::AppendCommand(const std::string &type,
-                                           const std::string &name,
-                                           Integer sandboxNum)
-{
-   return theModerator->AppendCommand(type, name, sandboxNum);
-}
-
-
-//------------------------------------------------------------------------------
 // bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
@@ -599,28 +588,29 @@ bool GuiInterpreter::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
+// bool ClearResource()
 //------------------------------------------------------------------------------
-GmatCommand* GuiInterpreter::DeleteCommand(GmatCommand *cmd, Integer snadboxNum)
+bool GuiInterpreter::ClearResource()
 {
-   return theModerator->DeleteCommand(cmd, snadboxNum);
+   return theModerator->ClearResource();
 }
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* GetNextCommand(Integer sandboxNum)
+// bool LoadDefaultMission()
 //------------------------------------------------------------------------------
-/**
- * Retrieves a next command object.
- *
- * @param <sandboxNum> sandbox number
- *
- * @return a next command object pointer, return null if no command found
- */
-//------------------------------------------------------------------------------
-GmatCommand* GuiInterpreter::GetNextCommand(Integer sandboxNum)
+bool GuiInterpreter::LoadDefaultMission()
 {
-   return theModerator->GetNextCommand(sandboxNum);
+   return theModerator->LoadDefaultMission();
+}
+
+
+//------------------------------------------------------------------------------
+// bool ClearCommandSeq(Integer sandboxNum = 1)
+//------------------------------------------------------------------------------
+bool GuiInterpreter::ClearCommandSeq(Integer sandboxNum)
+{
+   return theModerator->ClearCommandSeq(sandboxNum);
 }
 
 
