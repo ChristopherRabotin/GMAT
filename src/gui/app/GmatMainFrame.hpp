@@ -117,9 +117,7 @@ private:
    
    GmatMdiChildFrame* CreateNewResource(const wxString &title,
                                         const wxString &name, int dataType);
-   GmatMdiChildFrame* CreateNewCommand(const wxString &title,
-                                       const wxString &name, int dataType,
-                                       GmatCommand *cmd);
+   GmatMdiChildFrame* CreateNewCommand(int dataType, GmatTreeItemData *item);
    GmatMdiChildFrame* CreateNewControl(const wxString &title,
                                        const wxString &name, int dataType,
                                        GmatCommand *cmd);

@@ -393,8 +393,9 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    else if (dataType >= GmatTree::BEGIN_OF_COMMAND &&
             dataType <= GmatTree::END_OF_COMMAND)
    {
-      newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), dataType,
-                                  item->GetCommand());
+      //newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), dataType,
+      //                            item->GetCommand());
+      newChild = CreateNewCommand(dataType, item);
    }
    else if (dataType >= GmatTree::BEGIN_OF_CONTROL &&
             dataType <= GmatTree::END_OF_CONTROL)
@@ -1498,16 +1499,24 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    return newChild;
 }
 
-
+//loj: 12/1/06
+// Changed arg of CreateNewCommand to (int dataType, GmatTreeItemData *item)
+// so that ScriptEvent can set new BeginScript pointer.
 //------------------------------------------------------------------------------
 // GmatMdiChildFrame* CreateNewCommand(const wxString &title,
-//                                   const wxString &name, int dataType)
+//                                     const wxString &name, int dataType,
+//                                     GmatCommand *cmd)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-GmatMainFrame::CreateNewCommand(const wxString &title,
-                                const wxString &name, int dataType,
-                                GmatCommand *cmd)
+// GmatMainFrame::CreateNewCommand(const wxString &title,
+//                                 const wxString &name, int dataType,
+//                                 GmatCommand *cmd)
+GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
 {
+   wxString title = item->GetDesc();
+   wxString name = item->GetDesc();
+   GmatCommand *cmd = item->GetCommand();
+   
    //MessageInterface::ShowMessage
    //   ("===> title=%s, name=%s, dataType=%d\n", title.c_str(), name.c_str(),
    //    dataType);
@@ -1565,10 +1574,12 @@ GmatMainFrame::CreateNewCommand(const wxString &title,
       break;
    case GmatTree::SCRIPT_COMMAND:
    {
-      ScriptEventPanel *scriptEventPanel = new ScriptEventPanel(scrolledWin, cmd);
+      //ScriptEventPanel *scriptEventPanel = new ScriptEventPanel(scrolledWin, cmd);
+      ScriptEventPanel *scriptEventPanel =
+         new ScriptEventPanel(scrolledWin, (MissionTreeItemData*)item);
       sizer->Add(scriptEventPanel, 0, wxGROW|wxALL, 0);
       newChild->SetScriptTextCtrl(scriptEventPanel->mFileContentsTextCtrl);
-//      sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      //sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    }
       //case GmatTree::ASSIGNMENT_COMMAND:
