@@ -131,8 +131,8 @@ protected:
    std::string errorMsg2;
    StringArray errorList;
    
-   void   Initialize();
-   void   RegisterAliases();
+   void Initialize();
+   void RegisterAliases();
    
    bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
                        Integer &id);
@@ -151,10 +151,13 @@ protected:
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
    
    // for commands
-   GmatCommand* CreateCommand(const std::string &type, const std::string &desc);
-   GmatCommand* AppendCommand(const std::string &type);
+   GmatCommand* CreateCommand(const std::string &type, const std::string &desc,
+                              bool &retFlag, GmatCommand *inCmd = NULL);
+   GmatCommand* AppendCommand(const std::string &type, bool &retFlag,
+                              GmatCommand *inCmd = NULL);
    GmatCommand* CreateAssignmentCommand(const std::string &lhs,
-                                        const std::string &rhs);
+                                        const std::string &rhs, bool &retFlag,
+                                        GmatCommand *inCmd = NULL);
    
    bool AssembleCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleCallFunctionCommand(GmatCommand *cmd, const std::string &desc);
@@ -246,6 +249,7 @@ private:
    StringArray   stopcondList;
    StringArray   subscriberList;
    
+   bool IsObjectType(const std::string &type);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
    bool SetCommandParameter(GmatCommand *cmd, const std::string &param,

@@ -26,6 +26,7 @@
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
 
+//#define __ENABLE_ATTITUDE_LIST__
 
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_OBJECT_LIST
@@ -610,99 +611,66 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    else
    {
       // Handle Propagator
-      if (obj == NULL)
-         if (find(propagatorList.begin(), propagatorList.end(), type) != 
-             propagatorList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreatePropagator(type, name);
-         }
+      if (find(propagatorList.begin(), propagatorList.end(), type) != 
+          propagatorList.end())
+         obj = (GmatBase*)theModerator->CreatePropagator(type, name);
       
       // Handle AxisSystem
-      if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
-          axisSystemList.end()) 
-      {
+      else if (find(axisSystemList.begin(), axisSystemList.end(), type) != 
+               axisSystemList.end())
          obj =(GmatBase*) theModerator->CreateAxisSystem(type, name);
-      }
 
       // Handle Atmosphere Model
-      if (obj == NULL)
-         if (find(atmosphereList.begin(), atmosphereList.end(), type) != 
-             atmosphereList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateAtmosphereModel(type, name);
-         }
+      else if (find(atmosphereList.begin(), atmosphereList.end(), type) != 
+               atmosphereList.end())
+         obj = (GmatBase*)theModerator->CreateAtmosphereModel(type, name);
       
-//       // Handle Attitude
-//       if (obj == NULL)
-//          if (find(attitudeList.begin(), attitudeList.end(), type) != 
-//              attitudeList.end()) 
-//          {
-//             obj = (GmatBase*)theModerator->CreateAttitude(type, name);
-//          }
+      #ifdef __ENABLE_ATTITUDE_LIST__
+      // Handle Attitude
+      else if (find(attitudeList.begin(), attitudeList.end(), type) != 
+               attitudeList.end())
+         obj = (GmatBase*)theModerator->CreateAttitude(type, name);
+      #endif
       
       // Handle Burns
-      if (obj == NULL)
-         if (find(burnList.begin(), burnList.end(), type) != 
-             burnList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateBurn(type, name);
-         }
+      else if (find(burnList.begin(), burnList.end(), type) != 
+               burnList.end())
+         obj = (GmatBase*)theModerator->CreateBurn(type, name);
       
       // Handle CalculatedPoint (Barycenter, LibrationPoint)
-      if (obj == NULL)
-         if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
-             calculatedPointList.end()) 
-         {
-            obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
-         }
+      else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
+               calculatedPointList.end())
+         obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
       
       // Handle Functions
-      if (obj == NULL)
-         if (find(functionList.begin(), functionList.end(), type) != 
-             functionList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateFunction(type, name);
-         }
+      else if (find(functionList.begin(), functionList.end(), type) != 
+               functionList.end())
+         obj = (GmatBase*)theModerator->CreateFunction(type, name);
       
       // Handle Hardware (tanks, thrusters, etc.)
-      if (obj == NULL)
-         if (find(hardwareList.begin(), hardwareList.end(), type) != 
-             hardwareList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateHardware(type, name);
-         }
+      else if (find(hardwareList.begin(), hardwareList.end(), type) != 
+               hardwareList.end())
+         obj = (GmatBase*)theModerator->CreateHardware(type, name);
       
       // Handle System Parameters
-      if (obj == NULL)
-         if (find(parameterList.begin(), parameterList.end(), type) != 
-             parameterList.end())
-         {
-            obj = (GmatBase*)CreateParameter(type, name);
-         }
+      else if (find(parameterList.begin(), parameterList.end(), type) != 
+               parameterList.end())
+         obj = (GmatBase*)CreateParameter(type, name);
       
       // Handle PhysicalModel
-      if (obj == NULL)
-         if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
-             physicalModelList.end())
-         {
-            obj = (GmatBase*)theModerator->CreatePhysicalModel(type, name);
-         }
+      else if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
+               physicalModelList.end())
+         obj = (GmatBase*)theModerator->CreatePhysicalModel(type, name);
       
       // Handle Solvers
-      if (obj == NULL)
-         if (find(solverList.begin(), solverList.end(), type) != 
-             solverList.end()) 
-         {
-            obj = (GmatBase*)theModerator->CreateSolver(type, name);
-         }
+      else if (find(solverList.begin(), solverList.end(), type) != 
+               solverList.end())
+         obj = (GmatBase*)theModerator->CreateSolver(type, name);
       
       // Handle Subscribers
-      if (obj == NULL)
-         if (find(subscriberList.begin(), subscriberList.end(), type) != 
-             subscriberList.end())
-         {
-            obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
-         }
+      else if (find(subscriberList.begin(), subscriberList.end(), type) != 
+               subscriberList.end())
+         obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
    
    }
    
@@ -808,26 +776,27 @@ GmatBase* Interpreter::FindObject(const std::string &name)
 // GmatCommand* CreateCommand(const std::string &type, const std::string &desc)
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::CreateCommand(const std::string &type,
-                                        const std::string &desc)
+                                        const std::string &desc, bool &retFlag,
+                                        GmatCommand *inCmd)
 {
    #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::CreateCommand() type=%s, desc=%s\n", type.c_str(),
-       desc.c_str());
+      ("Interpreter::CreateCommand() type=%s, inCmd=%p, \n   desc=%s\n", type.c_str(),
+       inCmd, desc.c_str());
    #endif
-
+   
    GmatCommand *cmd = NULL;
    std::string desc1 = desc;
-   bool found = false;
+   bool commandFound = false;
    
    if (find(commandList.begin(), commandList.end(), type)
        != commandList.end())
-      found = true;
+      commandFound = true;
    
    // Check for CallFunction
    if (type[0] == '[')
    {
-      cmd = AppendCommand("CallFunction");
+      cmd = AppendCommand("CallFunction", retFlag, inCmd);
       desc1 = type + desc;
       cmd->SetGeneratingString(desc1);
    }
@@ -835,31 +804,57 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    /// without any return parameters.  It should be updated in
    /// the design to handle this situation.
    else if ((desc1.find("=") == desc1.npos) && (desc != "")
-            && (!found))
+            && (!commandFound))
    {
-      cmd = AppendCommand("CallFunction");
-      desc1 = "[] =" + type + desc;
-      cmd->SetGeneratingString(desc1);  
+      StringArray parts = theTextParser.SeparateSpaces(desc1);
+      //WriteParts("calling IsObjectType()", parts);
+      
+      // Check for valid object type first before creating a command,
+      // since UnknownCommand Variable var1 still creates CallFunction command
+      
+      if (IsObjectType(parts[0]))
+      {
+         InterpreterException ex
+            ("Found invalid command \"" + type + "\"");
+         HandleError(ex);
+      }
+      else
+      {
+         cmd = AppendCommand("CallFunction", retFlag, inCmd);
+         desc1 = "[] =" + type + desc;
+         cmd->SetGeneratingString(desc1);
+      }
    }
    else
    {
-      cmd = AppendCommand(type);
+      cmd = AppendCommand(type, retFlag, inCmd);
       cmd->SetGeneratingString(type + " " + desc);
    }
    
+   if (cmd == NULL)
+   {
+      retFlag = false;
+      return NULL;
+   }
+   
    #if DEBUG_CREATE_COMMAND
-   MessageInterface::ShowMessage("   %s created.\n", cmd->GetTypeName().c_str());
+   if (inCmd == NULL)
+      MessageInterface::ShowMessage
+         ("   => %s created.\n", cmd->GetTypeName().c_str());
+   else
+      MessageInterface::ShowMessage
+         ("   => %s created and appended to %s.\n",
+          cmd->GetTypeName().c_str(), inCmd->GetTypeName().c_str());
    #endif
    
-//    ObjectTypeArray refTypes = cmd->GetRefObjectTypeArray();
-//    StringArray refNames;
    
+   // Now assemble command
    try
    {
       // if command has it's own InterpretAction(), jsut return cmd
       if (cmd->InterpretAction())
       {
-         CheckUndefinedReference(cmd);
+         retFlag = CheckUndefinedReference(cmd);
          
          #if DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
@@ -872,15 +867,20 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    catch (BaseException &e)
    {
       HandleError(e);
-      return NULL;
+      //loj: 11/29/06 We should return cmd since comand already created
+      //return NULL;
+      retFlag = false;
+      return cmd;
    }
    
-   // Assemble command
    if (desc1 != "")
-      AssembleCommand(cmd, desc1);
-   
-   CheckUndefinedReference(cmd);
-   
+   {
+      //loj: 11/29/06 added check for return code
+      bool retval1  = AssembleCommand(cmd, desc1);
+      bool retval2 = CheckUndefinedReference(cmd);
+      retFlag = retval1 && retval2;
+   }
+
    return cmd;;
 }
 
@@ -888,9 +888,26 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 //------------------------------------------------------------------------------
 //GmatCommand* AppendCommand(const std::string &type)
 //------------------------------------------------------------------------------
-GmatCommand* Interpreter::AppendCommand(const std::string &type)
+GmatCommand* Interpreter::AppendCommand(const std::string &type, bool &retFlag,
+                                        GmatCommand *inCmd)
 {
-   return theModerator->AppendCommand(type, "");
+   if (inCmd == NULL)
+   {
+      return theModerator->AppendCommand(type, "", retFlag);
+   }
+   else
+   {
+      GmatCommand *cmd = theModerator->CreateCommand(type, "", retFlag);
+      inCmd->Append(cmd);
+      
+      #if DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("===> Interpreter::AppendCommand() inCmd=%s, cmd=%s\n",
+          inCmd->GetTypeName().c_str(), cmd->GetTypeName().c_str());
+      #endif
+      
+      return cmd;
+   }
 }
 
 
@@ -1202,7 +1219,10 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    Integer count = parts.size();
    
    #if DEBUG_ASSEMBLE_COMMAND
-   WriteParts("AssembleGeneralCommand()" , parts);
+   MessageInterface::ShowMessage
+      ("AssembleGeneralCommand() cmd=%s, desc=%s\n", cmd->GetTypeName().c_str(),
+       desc.c_str());
+   WriteParts("AssembleGeneralCommand()", parts);
    #endif
    
    if (type == "Target" || type == "Report" || type == "BeginFiniteBurn" ||
@@ -1226,6 +1246,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             InterpreterException ex
                ("Cannot find the Solver \"" + parts[0] + "\"");
             HandleError(ex);
+            retval = false;
          }
       }
       else if (type == "Optimize")
@@ -1245,21 +1266,32 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (obj != NULL)
          {
             cmd->SetRefObject(obj, Gmat::SUBSCRIBER, parts[0], 0);
-            
-            // next items are Parameters
-            for (int i=1; i<count; i++)
+
+            //loj: 11/29/06 added for checking items to report
+            if (count < 2)
             {
-               obj = (GmatBase*)CreateParameter(parts[i]);
-               if (obj != NULL)
+               InterpreterException ex ("There are no itmes to report");
+               HandleError(ex);
+               retval = false;
+            }
+            else
+            {
+               // next items are Parameters
+               for (int i=1; i<count; i++)
                {
-                  cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
-               }
-               else
-               {
-                  InterpreterException ex
-                     ("Cannot find Report Variable: " + parts[i] +
-                      ".\nIt will not be added to Report");
-                  HandleError(ex);
+                  obj = (GmatBase*)CreateParameter(parts[i]);
+                  if (obj != NULL)
+                  {
+                     cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
+                  }
+                  else
+                  {
+                     InterpreterException ex
+                        ("Cannot find Report Variable: " + parts[i] +
+                         ".\nIt will not be added to Report");
+                     HandleError(ex);
+                     retval = false;
+                  }
                }
             }
          }
@@ -1269,6 +1301,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
                ("*** ERROR *** Cannot find ReportFile: " + parts[0] +
                 " in line:\n\"" + currentBlock + "\"\n");
             HandleError(ex);
+            retval = false;
          }
       }
       else
@@ -1308,22 +1341,31 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    
    #if DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
-      ("   AssembleGeneralCommand() completed setting %s\n", type.c_str());
+      ("   AssembleGeneralCommand() leaving setting %s, retval=%d\n",
+       type.c_str(), retval);
    #endif
-
+   
    return retval;
 }
 
 
 //------------------------------------------------------------------------------
 //GmatCommand* CreateAssignmentCommand(const std::string &lhs,
-//                                     const std::string &rhs)
+//                                     const std::string &rhs, bool &retFlag,
+//                                     GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
-                                                  const std::string &rhs)
+                                                  const std::string &rhs,
+                                                  bool &retFlag, GmatCommand *inCmd)
 {
+   #if DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("Interpreter::CreateAssignmentCommand() lhs=%s, rhs=%s\n", lhs.c_str(),
+       rhs.c_str());
+   #endif
+   
    std::string desc = lhs + " = " + rhs;
-   return CreateCommand("GMAT", desc);
+   return CreateCommand("GMAT", desc, retFlag, inCmd);
 }
 
 
@@ -3565,6 +3607,79 @@ bool Interpreter::FinalPass()
    #endif
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsObjectType(const std::string &type)
+//------------------------------------------------------------------------------
+bool Interpreter::IsObjectType(const std::string &type)
+{
+   if (type == "Spacecraft") 
+      return true;
+   
+   if (type == "Formation") 
+      return true;
+   
+   if (type == "Propagator") 
+      return true;
+   
+   if (type == "ForceModel") 
+      return true;
+   
+   if (type == "CoordinateSystem") 
+      return true;
+   
+   if (find(propagatorList.begin(), propagatorList.end(), type) !=
+       propagatorList.end())
+      return true;
+   
+   if (find(axisSystemList.begin(), axisSystemList.end(), type) !=
+       axisSystemList.end())
+      return true;
+   
+   if (find(atmosphereList.begin(), atmosphereList.end(), type) !=
+       atmosphereList.end())
+      return true;
+
+   #ifdef __ENABLE_ATTITUDE_LIST__
+   if (find(attitudeList.begin(), attitudeList.end(), type) !=
+       attitudeList.end())
+      return true;
+   #endif
+   
+   if (find(burnList.begin(), burnList.end(), type) != burnList.end())
+      return true;
+
+   if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
+       calculatedPointList.end()) 
+      return true;
+   
+   if (find(functionList.begin(), functionList.end(), type) != 
+       functionList.end())
+      return true;
+   
+   if (find(hardwareList.begin(), hardwareList.end(), type) != 
+       hardwareList.end())
+      return true;
+
+   if (find(parameterList.begin(), parameterList.end(), type) != 
+       parameterList.end())
+      return true;
+   
+   if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
+       physicalModelList.end())
+      return true;
+   
+   if (find(solverList.begin(), solverList.end(), type) != 
+       solverList.end())
+      return true;
+   
+   if (find(subscriberList.begin(), subscriberList.end(), type) != 
+       subscriberList.end())
+      return true;
+   
+   return false;
 }
 
 
