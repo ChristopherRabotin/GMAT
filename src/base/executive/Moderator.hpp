@@ -212,12 +212,20 @@ public:
    // GmatCommand
    GmatCommand* InterpretGmatFunction(const std::string &functionFilename);
    GmatCommand* CreateCommand(const std::string &type,
-                              const std::string &name = "");
+                              const std::string &name, bool &retFlag);
    GmatCommand* CreateDefaultCommand(const std::string &type,
                                      const std::string &name = "",
                                      GmatCommand *refCmd = NULL);
-   void         SetCommandsUnchanged(Integer whichList = 0); 
-
+   GmatCommand* AppendCommand(const std::string &type,
+                              const std::string &name, bool &retFlag,
+                              Integer sandboxNum = 1);
+   GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   GmatCommand* GetFirstCommand(Integer sanboxNum = 1);
+   bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
+   bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
+                      Integer sandboxNum = 1);
+   void SetCommandsUnchanged(Integer whichList = 0); 
+   
    // CoordinateSystem
    CoordinateSystem* GetInternalCoordinateSystem();
    
@@ -249,14 +257,6 @@ public:
     
    // Mission sequence
    bool ClearCommandSeq(Integer sandboxNum = 1);
-   bool AppendCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-   GmatCommand* AppendCommand(const std::string &type,
-                              const std::string &name,
-                              Integer sandboxNum = 1);
-   bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
-                      Integer sandboxNum = 1);
-   GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum = 1);
-   GmatCommand* GetNextCommand(Integer sanboxNum = 1);
    
    // Sandbox
    void ClearAllSandboxes();
