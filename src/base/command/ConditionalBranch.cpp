@@ -28,6 +28,7 @@
 
 //#define DEBUG_CONDITIONS 1
 //#define DEBUG_CONDITIONS_INIT 1
+//#define DEBUG_CONDBR_GET_GEN_STRING
 
 
 //---------------------------------
@@ -1384,6 +1385,11 @@ bool ConditionalBranch::SetStringArrayValue(Integer forArray,
 //------------------------------------------------------------------------------
 std::string ConditionalBranch::GetConditionalString()
 {
+   #ifdef DEBUG_CONDBR_GET_GEN_STRING
+      MessageInterface::ShowMessage("Entering ConditionalBranch::GetConditionalString\n");
+      MessageInterface::ShowMessage("... number of conditions = %d\n", 
+         numberOfConditions);
+   #endif
    std::string cond;
    
    if ((lhsList.size() == 0) || (rhsList.size() == 0))
@@ -1394,9 +1400,21 @@ std::string ConditionalBranch::GetConditionalString()
    
    for (Integer i = 1; i < numberOfConditions; i++)
    {
+   #ifdef DEBUG_CONDBR_GET_GEN_STRING
+      MessageInterface::ShowMessage("Now adding condition %d to the string\n", i);
+      MessageInterface::ShowMessage("The logical operator = \"%s\"\n", logicalOpStrings[i-1].c_str());
+      MessageInterface::ShowMessage("The left-hand-side = \"%s\"\n", lhsList[i].c_str());
+      MessageInterface::ShowMessage("The operator = \"%s\"\n", opStrings[i].c_str());
+      MessageInterface::ShowMessage("The right-hand-side = \"%s\"\n", rhsList[i].c_str());
+   #endif
       cond += " " + logicalOpStrings[i-1] + " ";
-      cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
+      //cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
+      cond += lhsList[i] + " " + opStrings[i] + " " + rhsList[i];
    }
 
+   #ifdef DEBUG_CONDBR_GET_GEN_STRING
+      MessageInterface::ShowMessage("Exiting ConditionalBranch::GetConditionalString\n");
+      MessageInterface::ShowMessage("... returning cond = %s\n", cond.c_str());
+   #endif
    return cond;
 }
