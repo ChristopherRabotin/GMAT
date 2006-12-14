@@ -236,8 +236,6 @@ GmatBase* SolarRadiationPressure::Clone(void) const
 //------------------------------------------------------------------------------
 std::string SolarRadiationPressure::GetParameterText(const Integer id) const
 {
-   MessageInterface::ShowMessage("SRP index %d\n", id);
-   
    if (id >= USE_ANALYTIC && id < SRPParamCount)
       return SolarRadiationPressure::PARAMETER_TEXT[id - PhysicalModelParamCount];
    else
@@ -686,10 +684,9 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     if (order > 2)
         return false;
 
-    // The following is an approximation -- the vector and sun distance both
-    // are set to the central body rather than the satellite.
     Integer i6;
     Real sunSat[3];
+
     for (Integer i = 0; i < satCount; ++i) 
     {
         i6 = i*6;
@@ -752,12 +749,6 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
       MessageInterface::ShowMessage(
          "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   percent\n",
          ep, nominalSun, sunDistance);
-//      MessageInterface::ShowMessage(
-//         "= %16le\n   cr = %16le\n   fluxP = %16le\n   area = %16le\n   mass",
-//         percentSun, cr, fluxPressure, area);
-//      MessageInterface::ShowMessage(
-//         " = %16le\n   distFac = %16le\n   forceVector = [%16le %16le %16le]",
-//         mass, distancefactor, forceVector[0], forceVector[1], forceVector[2]);
    #endif
 
    #ifdef DEBUG_SRP_ORIGIN
