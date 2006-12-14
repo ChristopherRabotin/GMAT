@@ -29,6 +29,7 @@
 Stop::Stop() :
     GmatCommand("Stop")
 {
+   generatingString = "Stop";
 }
 
 
@@ -56,6 +57,7 @@ Stop::~Stop()
 Stop::Stop(const Stop& stop) :
     GmatCommand (stop)
 {
+   generatingString = stop.generatingString;
 }
 
 
@@ -72,7 +74,12 @@ Stop::Stop(const Stop& stop) :
 //------------------------------------------------------------------------------
 Stop& Stop::operator=(const Stop &stop)
 {
-   GmatCommand::operator=(stop);
+   if (this != &stop)
+   {
+      GmatCommand::operator=(stop);
+      generatingString = stop.generatingString;
+   }
+   
    return *this;
 }
 
