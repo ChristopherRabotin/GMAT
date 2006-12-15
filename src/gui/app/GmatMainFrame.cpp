@@ -287,6 +287,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    win->SetDefaultSize(wxSize(w, h));
 #else
    win->SetDefaultSize(wxSize(200, h));
+   // 200 is too narrow for most linux themes
+   #ifdef __LINUX__
+      win->SetDefaultSize(wxSize(220, h));
+   #endif
 #endif
    win->SetOrientation(wxLAYOUT_VERTICAL);
    win->SetAlignment(wxLAYOUT_LEFT);

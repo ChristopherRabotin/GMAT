@@ -87,6 +87,12 @@ bool GmatApp::OnInit()
         //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
         wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
         
+        // The code above broke the Linux scaling.  This is a temporary hack to 
+        // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
+        #ifdef __LINUX__
+           size = wxSize(1024, 768);
+        #endif
+                
         //show the splash screen
         try
         {
