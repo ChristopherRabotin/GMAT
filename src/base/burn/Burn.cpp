@@ -457,13 +457,27 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       /// @todo validate the input value when the CS code is incorporated.
       // if (!IsValidFrame(value))
       //    return false;
-
-      if (value != "Inertial" && value != "VNB")
-//         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
+      
+      // Burns know the frame options, so use that to detect if there is 
+      // an issue with the input
+      StringArray frames = GetStringArrayParameter(BURNAXES);
+      if (find(frames.begin(), frames.end(), value) == frames.end())
+      {
+         std::string framelist = frames[0];
+         for (UnsignedInt n = 1; n < frames.size(); ++n)
+            framelist += ", " + frames[n];
          throw BurnException(
             "The value of \"" + value + "\" for field \"Axes\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ VNB, Inertial ]. ");
+            "The allowed values are: [ " + framelist + " ]. ");
+      }
+
+//      if (value != "Inertial" && value != "VNB")
+//         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
+//         throw BurnException(
+//            "The value of \"" + value + "\" for field \"Axes\""
+//            " on object \"" + instanceName + "\" is not an allowed value.\n"
+//            "The allowed values are: [ VNB, Inertial ]. ");
       
       coordAxes = value;
       frame = frameman->GetFrameInstance(coordAxes);

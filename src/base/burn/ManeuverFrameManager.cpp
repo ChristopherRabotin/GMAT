@@ -42,7 +42,8 @@ ManeuverFrameManager::ManeuverFrameManager() :
     currentFrame            (NULL)
 {
     // Add the name of each supported frame to this list
-    frames.push_back("Inertial");
+//    frames.push_back("Inertial");
+    frames.push_back("MJ2000Eq");
     frames.push_back("VNB");
 }
 
@@ -103,7 +104,8 @@ ManeuverFrame* ManeuverFrameManager::GetFrameInstance(
     }
     
     // Add constructor calls for the supported frames here
-    if (frameType == "Inertial")
+    // For now, keep "Inertial" for backwards compatibility
+    if ((frameType == "Inertial") || (frameType == "MJ2000Eq"))
         currentFrame = new InertialManeuverFrame;
     if (frameType == "VNB")
         currentFrame = new VnbManeuverFrame;

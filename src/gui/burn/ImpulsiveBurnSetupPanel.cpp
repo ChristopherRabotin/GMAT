@@ -182,10 +182,15 @@ void ImpulsiveBurnSetupPanel::LabelsUnits()
    std::string axesStr = theBurn->GetStringParameter(id);
     
    // check the combo box selection
-   if (coordStr == "Inertial")
-      theBurn->SetStringParameter(id, "Inertial");
-   else if (coordStr == "VNB")
-      theBurn->SetStringParameter(id, "VNB");
+//   if ((coordStr == "Inertial") || (coordStr == "MJ2000Eq"))
+//      theBurn->SetStringParameter(id, "MJ2000Eq");
+//   else if (coordStr == "VNB")
+//      theBurn->SetStringParameter(id, "VNB");
+
+   // ALL validation is in base code, so we pass the string there 
+   // and let that code throw if there is a problem.
+   std::string framestring = coordStr.c_str();
+   theBurn->SetStringParameter(id, framestring);
     
    // set label for element1 
    id = theBurn->GetParameterID("Element1Label");
