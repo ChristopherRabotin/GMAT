@@ -462,24 +462,28 @@ bool Burn::SetStringParameter(const Integer id, const std::string &value)
       // an issue with the input
       StringArray frames = GetStringArrayParameter(BURNAXES);
       if (find(frames.begin(), frames.end(), value) == frames.end())
-      {
-         std::string framelist = frames[0];
-         for (UnsignedInt n = 1; n < frames.size(); ++n)
-            framelist += ", " + frames[n];
-         throw BurnException(
-            "The value of \"" + value + "\" for field \"Axes\""
-            " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ " + framelist + " ]. ");
+      { 
+         // For now, keep "Inertial" as a deprecated option
+         if (value != "Inertial")
+         {
+            std::string framelist = frames[0];
+            for (UnsignedInt n = 1; n < frames.size(); ++n)
+               framelist += ", " + frames[n];
+            throw BurnException(
+               "The value of \"" + value + "\" for field \"Axes\""
+               " on object \"" + instanceName + "\" is not an allowed value.\n"
+               "The allowed values are: [ " + framelist + " ]. ");
+         }
+         else
+         {
+            MessageInterface::ShowMessage("\"Inertial\" maneuver frames are "
+               "deprecated and will be removed from a future build; please use "
+               "\"MJ2000Eq\" instead.\n");
+               coordAxes = "MJ2000Eq";
+         }
       }
-
-//      if (value != "Inertial" && value != "VNB")
-//         throw BurnException("Burn Axes has to be 'Inertial' or 'VNB'.\n");
-//         throw BurnException(
-//            "The value of \"" + value + "\" for field \"Axes\""
-//            " on object \"" + instanceName + "\" is not an allowed value.\n"
-//            "The allowed values are: [ VNB, Inertial ]. ");
-      
-      coordAxes = value;
+      else
+         coordAxes = value;
       frame = frameman->GetFrameInstance(coordAxes);
 
       dvLabels[0] = frame->GetFrameLabel(1);
