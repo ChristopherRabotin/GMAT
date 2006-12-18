@@ -133,23 +133,23 @@ private:
    
    struct ForceType
    {
-      std::string bodyName;
-      std::string gravType;
-      std::string dragType;
-      std::string magfType;
+      wxString bodyName;
+      wxString gravType;
+      wxString dragType;
+      wxString magfType;
       wxString gravDegree;
       wxString gravOrder;
       wxString magfDegree;
       wxString magfOrder;
-      std::string potFilename;
+      wxString potFilename;
       PointMassForce *pmf;
       GravityField *gravf;
       DragForce *dragf;
       SolarRadiationPressure *srpf;
       bool useSrp;
       
-      ForceType(const std::string &body, const std::string &grav = "None",
-                const std::string &drag = "None", const std::string &mag = "None")
+      ForceType(const wxString &body, const wxString &grav = "None",
+                const wxString &drag = "None", const wxString &mag = "None")
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
             gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; 
@@ -173,29 +173,9 @@ private:
          }
    };
    
-   wxStaticText *integratorStaticText;
-   wxStaticText *initialStepSizeStaticText;
-   wxStaticText *unitsInitStepSizeStaticText;
-   wxStaticText *accuracyStaticText;
-   wxStaticText *unitsMinStepStaticText;
-   wxStaticText *unitsMaxStepStaticText;
-   wxStaticText *minStepStaticText;
-   wxStaticText *maxStepStaticText;
-   wxStaticText *maxStepAttemptStaticText;
    wxStaticText *minIntErrorStaticText;
    wxStaticText *nomIntErrorStaticText;
-   wxStaticText *errorCtrlStaticText;
-   wxStaticText *pointMassStaticText;
-   wxStaticText *centralBodyStaticText;
-   wxStaticText *degree1StaticText;
-   wxStaticText *order1StaticText;
    wxStaticText *potFileStaticText;
-   wxStaticText *type1StaticText;
-   wxStaticText *type2StaticText;
-   wxStaticText *type3StaticText;
-   wxStaticText *degree2StaticText;
-   wxStaticText *order2StaticText;
-   wxStaticText *type4StaticText;
    
    wxTextCtrl *initialStepSizeTextCtrl;
    wxTextCtrl *accuracyTextCtrl;
@@ -235,25 +215,26 @@ private:
    
    wxBoxSizer *leftBoxSizer;
    
-   std::string propSetupName;
+   std::string propSetupName;   
    std::string thePropagatorName;
-   std::string currentBodyName;
-   std::string gravTypeName;
-   std::string dragTypeName;
-   std::string propOriginName;
-   std::string errorControlTypeName;
    
-   StringArray propagatorTypeArray;
-   StringArray earthGravModelArray;
-   StringArray lunaGravModelArray;
-   StringArray venusGravModelArray;
-   StringArray marsGravModelArray;
-   StringArray othersGravModelArray;
-   StringArray dragModelArray;
-   StringArray magfModelArray;
-   StringArray errorControlArray;
+   wxString currentBodyName;
+   wxString gravTypeName;
+   wxString dragTypeName;
+   wxString propOriginName;
+   wxString errorControlTypeName;
    
-   std::map<std::string, std::string> theFileMap;
+   wxArrayString integratorTypeArray;
+   wxArrayString earthGravModelArray;
+   wxArrayString lunaGravModelArray;
+   wxArrayString venusGravModelArray;
+   wxArrayString marsGravModelArray;
+   wxArrayString othersGravModelArray;
+   wxArrayString dragModelArray;
+   wxArrayString magfModelArray;
+   wxArrayString errorControlArray;
+   
+   std::map<wxString, wxString> theFileMap;
    
    wxArrayString primaryBodiesArray;
    wxArrayString secondaryBodiesArray;
@@ -301,16 +282,16 @@ private:
    virtual void SaveData();
    
    // Layout & data handling methods
-   Integer FindBody(const std::string &bodyName,
-                    const std::string &gravType = "None",
-                    const std::string &dragType = "None",
-                    const std::string &magfType = "None");
+   Integer FindBody(const wxString& bodyName,
+                    const wxString& gravType = "None",
+                    const wxString& dragType = "None",
+                    const wxString& magfType = "None");
    void Initialize();
    void Setup(wxWindow *parent);
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
-   void DisplayGravityFieldData(std::string bodyName);
+   void DisplayGravityFieldData(const wxString& bodyName);
    void DisplayAtmosphereModelData();
    void DisplayPointMassData();
    void DisplayMagneticFieldData();
@@ -356,9 +337,9 @@ private:
    void ShowForceModel(const std::string &header);
    
    // for reading gravity files
-   void ParseDATGravityFile(std::string fname);
-   void ParseGRVGravityFile(std::string fname);
-   void ParseCOFGravityFile(std::string fname);
+   void ParseDATGravityFile(const wxString& fname);
+   void ParseGRVGravityFile(const wxString& fname);
+   void ParseCOFGravityFile(const wxString& fname);
    void PrepareGravityArrays();
    
    // Strictly for reading gravity files
@@ -366,7 +347,7 @@ private:
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
