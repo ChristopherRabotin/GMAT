@@ -2567,9 +2567,11 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
           (id == ANALYTIC_RAAN)          || (id == ANALYTIC_AOP)        ||
           (id == ANALYTIC_TA)            || (id == ANALYTIC_METHOD)      )
       {
-         MessageInterface::ShowMessage(
-         "In CB::IParameterReadOnly, id = %d, returning TRUE\n",
-         id);
+         #ifdef DEBUG_CB_ANALYTIC
+            MessageInterface::ShowMessage(
+            "In CB::IParameterReadOnly, id = %d, returning TRUE\n",
+            id);
+         #endif
          return true;
       }
    }
