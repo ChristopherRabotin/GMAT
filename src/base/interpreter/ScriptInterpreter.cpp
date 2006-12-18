@@ -1087,7 +1087,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    if (objSize > 0)
    {
       theReadWriter->WriteText(sectionDelimiterString[0]);
-      theReadWriter->WriteText(sectionDelimiterString[1] + "Subscribers");
+      theReadWriter->WriteText(sectionDelimiterString[1] + "Plots and Reports");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
    #ifdef DEBUG_SCRIPT_WRITING
