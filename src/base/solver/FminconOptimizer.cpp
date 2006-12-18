@@ -24,6 +24,7 @@
 #include "FminconOptimizer.hpp"
 #include "MessageInterface.hpp"
 #include "SolverException.hpp"
+#include "StringUtil.hpp"
 
 #if defined __USE_MATLAB__
    #include "MatlabInterface.hpp"  // currently all static
@@ -1260,8 +1261,11 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
        (opt == ALLOWED_OPTIONS[5]) ||
        (opt == ALLOWED_OPTIONS[6]))
    {
-      if (atof(val.c_str()) > 0.0)  return true;
-      return false;
+      //if (atof(val.c_str()) > 0.0)  return true;
+      //return false;
+      Real tmpVal;
+      if (!GmatStringUtil::ToDouble(val.c_str(), &tmpVal)) return false;
+      return true;
    }
    else if ((opt == ALLOWED_OPTIONS[2]) || 
             (opt == ALLOWED_OPTIONS[3]))

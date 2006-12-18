@@ -473,7 +473,17 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       }
       else
       {
-         realValue = atof(nlcParmName.c_str());
+         //realValue = atof(nlcParmName.c_str());
+         bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &realValue);
+         if (!isNum)
+         {
+            std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
+               PARAMETER_TEXT[CONSTRAINT_VALUE - GmatCommandParamCount] + "\" on object \"" 
+               + instanceName +
+               "\" is not an allowed value.  The allowed values are: " +
+               " [Real number]."; 
+            throw CommandException(errMsg);
+         }
          isNlcParm = false;
       }
       
@@ -678,7 +688,17 @@ bool NonlinearConstraint::InterpretAction()
    }
    else
    {
-      value = atof(nlcParmName.c_str());
+      //value = atof(nlcParmName.c_str());
+      bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &value);
+      if (!isNum)
+      {
+         std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
+            PARAMETER_TEXT[CONSTRAINT_VALUE - GmatCommandParamCount] + "\" on object \"" 
+            + instanceName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [Real number]."; 
+         throw CommandException(errMsg);
+      }
       isNlcParm = false;
    }
    
@@ -1068,7 +1088,17 @@ bool NonlinearConstraint::Execute()
    // Evaluate the (in)equality constraint value and set it on the optimizer
    if (!isNlcParm)
    {
-      desiredValue = atof(nlcParmName.c_str());  
+      //desiredValue = atof(nlcParmName.c_str());  
+      bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &desiredValue);
+      if (!isNum)
+      {
+         std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
+            PARAMETER_TEXT[CONSTRAINT_VALUE - GmatCommandParamCount] + "\" on object \"" 
+            + instanceName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [Real number]."; 
+         throw CommandException(errMsg);
+      }
    }
    else if (nlcParm != NULL)
    {
