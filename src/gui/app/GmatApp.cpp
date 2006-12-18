@@ -23,17 +23,19 @@
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
 
+#include "GmatApp.hpp"
 #include "GmatMainFrame.hpp"
 #include "ViewTextFrame.hpp"
-#include "GmatApp.hpp"
 #include "GmatAppData.hpp"
 #include "Moderator.hpp"
 
-#include "wx/mdi.h"
-#include "wx/docview.h"
-#include "wx/docmdi.h"
-#include "wx/docview.h"
-#include "wx/cmdproc.h"
+//loj: We don't need these.
+//#include "wx/mdi.h"
+//#include "wx/docmdi.h"
+//#include "wx/docview.h"
+//#include "wx/cmdproc.h"
+
+#include <wx/datetime.h>
 #include "wx/splash.h"
 #include "wx/image.h"
 
@@ -66,97 +68,120 @@ GmatApp::GmatApp()
 //------------------------------------------------------------------------------
 bool GmatApp::OnInit()
 {
-    bool status = false;
-    
-    // create MessageWindow and save in GmatApp for later use
-    GmatAppData::theMessageWindow =
-        new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-                          20, 20, 600, 350, "Permanent");
-    GmatAppData::theMessageWindow->Show(false);
-    
-    // create the Moderator - GMAT executive
-    theModerator = Moderator::Instance();
-    
-    // initialize the moderator
-    if (theModerator->Initialize(true))
-    {
-        // get GuiInterpreter
-        GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
-        
-        // Make default size larger for Linux
-        //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
-        wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
-        
-        // The code above broke the Linux scaling.  This is a temporary hack to 
-        // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
-        #ifdef __LINUX__
-           size = wxSize(1024, 768);
-        #endif
-                
-        //show the splash screen
-        try
-        {
-           wxImage::AddHandler(new wxTIFFHandler);
-           
-           //loj: 7/7/05 Get splash file from FileManager through the Moderator
-           wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
-           wxBitmap *bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
-        
-           //wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
-           //                   wxBITMAP_TYPE_TIF);
-           
-           new wxSplashScreen(*bitmap,
-                              wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-                              6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
-                              wxSIMPLE_BORDER|wxSTAY_ON_TOP);
-        }
-        catch (BaseException &e)
-        {
-           MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-        }
-        
-        wxYield();
-        
-        theMainFrame =
+   bool status = false;
+   wxDateTime now = wxDateTime::Now();
+   wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+   std::string nowStr = wxNowStr.c_str();
+   
+   try
+   {      
+      // create MessageWindow and save in GmatApp for later use
+      GmatAppData::theMessageWindow =
+         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+                           20, 20, 600, 350, "Permanent");
+      GmatAppData::theMessageWindow->Show(false);
+      
+      // create the Moderator - GMAT executive
+      theModerator = Moderator::Instance();
+      
+      // initialize the moderator
+      if (theModerator->Initialize(true))
+      {
+         // get GuiInterpreter
+         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
+         
+         // Make default size larger for Linux
+         //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
+         wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
+         
+         // The code above broke the Linux scaling.  This is a temporary hack to 
+         // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
+         #ifdef __LINUX__
+            size = wxSize(1024, 768);
+         #endif
+            
+         //show the splash screen
+         try
+         {
+            wxImage::AddHandler(new wxTIFFHandler);
+            
+            //loj: 7/7/05 Get splash file from FileManager through the Moderator
+            wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
+            wxBitmap *bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
+            
+            //wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
+            //                   wxBITMAP_TYPE_TIF);
+            
+            new wxSplashScreen(*bitmap,
+                               wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+                               6000, NULL, -1, wxDefaultPosition, wxSize(100, 100),
+                               wxSIMPLE_BORDER|wxSTAY_ON_TOP);
+         }
+         catch (BaseException &e)
+         {
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         }
+         
+         wxYield();
+         
+         theMainFrame =
             new GmatMainFrame((wxFrame *)NULL, -1,
                               _T("GMAT - General Mission Analysis Tool"),
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-        
-#ifndef __WXMAC__   // Mac user rather smaller frame and top left corner
-        theMainFrame->Maximize();
-        
-        // and show it (the frames, unlike simple controls, are not shown when
-        // created initially)
-        theMainFrame->CenterOnScreen(wxBOTH);
-#endif 
-        theMainFrame->Show(true);
-        
-        status = true;
-    }
-    else
-    {
-        // show error messages
-        {
+
+         // Mac user rather smaller frame and top left corner and show it.
+         // (the frames, unlike simple controls, are not shown when created
+         // initially)
+#ifndef __WXMAC__
+         theMainFrame->Maximize();
+         theMainFrame->CenterOnScreen(wxBOTH);
+#endif
+         
+         theMainFrame->Show(true);
+         
+         status = true;
+      }
+      else
+      {
+         // show error messages
+         {
             wxBusyCursor bc;
             wxLogWarning(wxT("The Moderator failed to initialize."));
             
             // and if ~wxBusyCursor doesn't do it, then call it manually
             wxYield();
-        }
-        
-        //loj: How do I change the title?
-        wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));
-        wxLog::FlushActive();
-        status = false;
-    }
-    
-    // success: wxApp::OnRun() will be called which will enter the main message
-    // loop and the application will run. If we returned FALSE here, the
-    // application would exit immediately.
-    
-    return status;
+         }
+         
+         //loj: How do I change the title?
+         wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));
+         wxLog::FlushActive();
+         status = false;
+      }
+      
+      // success: wxApp::OnRun() will be called which will enter the main message
+      // loop and the application will run. If we returned FALSE here, the
+      // application would exit immediately.
+      
+      MessageInterface::LogMessage(nowStr + "GMAT GUI successfully launched.\n\n");
+      
+      return status;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::LogMessage
+         (nowStr + "Error encounted while launching GMAT GUI.\n\n");
+      MessageInterface::LogMessage(e.GetMessage());
+      return false;
+   }
+   catch (...)
+   {
+      MessageInterface::LogMessage
+         (nowStr + "Unknown error encounted while launching GMAT GUI.\n\n");
+      return false;
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // OnExit()
