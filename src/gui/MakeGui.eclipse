@@ -143,6 +143,7 @@ OBJECTS = \
     foundation/GmatMdiChildFrame.o \
     foundation/GmatPanel.o \
     foundation/GmatSavePanel.o \
+    foundation/GmatStaticBoxSizer.o \
     foundation/GuiItemManager.o \
     foundation/ParameterCreateDialog.o \
     foundation/ParameterSelectDialog.o \
