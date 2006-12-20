@@ -219,15 +219,18 @@ protected:
    
    // for error handling
    void HandleError(BaseException &e, bool writeLine = true, bool warning = false);
-
+   void HandleErrorMessage(BaseException &e, const std::string &lineNumber,
+                           const std::string &line, bool writeLine = true,
+                           bool warning = false);
+   
+   // for branch command checking
+   bool IsBranchCommand(const std::string &str);
+   bool CheckBranchCommands(const IntegerArray &lineNumbers,
+                            const StringArray &lines);
+   
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
-   
-   // For converting integer to string 
-   // Used by current line number display on exceptions
-   // Use StringUtil::ToString() instead
-   //std::string itoa(Integer value, unsigned int base);
-   
+      
 private:
    
    // Mapping between the object base class strings and the objecttypes enum
