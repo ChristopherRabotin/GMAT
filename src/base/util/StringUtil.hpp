@@ -88,7 +88,8 @@ namespace GmatStringUtil
    bool IsSingleItem(const std::string &str);
    bool StartsWith(const std::string &str, const std::string &value);
    bool EndsWith(const std::string &str, const std::string &value);
-   
+   bool IsValidName(const std::string &str);
+   bool IsBlank(const std::string &str);
 }
 
 #endif // StringUtil_hpp

@@ -110,8 +110,6 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    std::string str2;
    std::string whiteSpace = " \t";
    
-//    UnsignedInt index1 = str.find_first_not_of(' ');
-//    UnsignedInt index2 = str.find_last_not_of(' ');
    UnsignedInt index1 = str.find_first_not_of(whiteSpace);
    UnsignedInt index2 = str.find_last_not_of(whiteSpace);
    
@@ -1232,8 +1230,8 @@ bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
 //------------------------------------------------------------------------------
 /*
  * return true if string does not have arithmetic operators or '.' or
- * enclosed with double parenthesis
- * For example -123.0, abc, (a), (sat.X), (-123.0).
+ * enclosed with double parenthesis. For example -123.0, abc, (a), (sat.X), (-123.0).
+ *
  * It will return false for (1,1)
  */
 //------------------------------------------------------------------------------
@@ -1385,6 +1383,7 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
    return str2;
 }
 
+
 //------------------------------------------------------------------------------
 // bool StartsWith(const std::string &str, const std::string &value)
 //------------------------------------------------------------------------------
@@ -1398,6 +1397,7 @@ bool GmatStringUtil::StartsWith(const std::string &str, const std::string &value
           (str.substr(0, value.size()) == value); 
 }
 
+
 //------------------------------------------------------------------------------
 // bool EndsWith(const std::string &str, const std::string &value)
 //------------------------------------------------------------------------------
@@ -1410,3 +1410,39 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
    return (str.size() >= value.size()) && 
           (str.substr(str.size() - value.size(), value.size()) == value); 
 }
+
+
+//------------------------------------------------------------------------------
+// bool IsValidName(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if string contains only alphanumeric characters and doesn't
+ * start with number.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsValidName(const std::string &str)
+{
+   if (!isalpha(str[0]))
+      return false;
+   
+   for (UnsignedInt i=1; i<str.size(); i++)
+      if (!isalnum(str[i]))
+          return false;
+
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsBlank(const std::string &text)
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsBlank(const std::string &text)
+{
+   std::string str = Trim(text, GmatStringUtil::BOTH);
+   
+   if (str == "")
+      return true;
+   else
+      return false;
+}
+
