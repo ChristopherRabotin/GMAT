@@ -25,8 +25,10 @@
 #include "MessageInterface.hpp"
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
+#include <stack>
 
 //#define __ENABLE_ATTITUDE_LIST__
+//#ifdef __DO_NOT_USE_OBJ_TYPE_NAME__
 
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_OBJECT_LIST
@@ -554,26 +556,34 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    // let's check object name
    if (name == "GMAT" || name == "Create" || name == "=" ||
-       name == ":" || name == ";" || name == ".")
+       name == ":" || name == ";" || name == "." || name == ",")
    {
       InterpreterException ex
-          (type + " object can not be named " + name);
+          (type + " object can not be named to \"" + name + "\"");
       HandleError(ex);
       return NULL;
    }
    
-   StringArray commandNames = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
-   for (Integer i=0; i<(Integer)commandNames.size(); i++)
+   // object name cannot be any of command names
+   if (find(commandList.begin(), commandList.end(), name) != commandList.end())
    {
-      if (commandNames[i] == name)
-      {
-         InterpreterException ex
-            (type + " object can not be named " + name + ".");
-            HandleError(ex);
-         return NULL;
-      }
+      InterpreterException ex
+         (type + " object can not be named to Command \"" + name + "\"");
+      HandleError(ex);
+      return NULL;
    }
-
+   
+   #ifdef __DO_NOT_USE_OBJ_TYPE_NAME__
+   // object name cannot be any of object types
+   if (IsObjectType(name))
+   {
+      InterpreterException ex
+         (type + " object can not be named to Object Type \"" + name + "\"");
+      HandleError(ex);
+      return NULL;
+   }
+   #endif
+   
    // This error message may be confusing to users
    // check for name first
    if ((name != "EarthMJ2000Eq") && 
@@ -818,6 +828,12 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             ("Found invalid command \"" + type + "\"");
          HandleError(ex);
       }
+      else if (!GmatStringUtil::IsValidName(type + desc))
+      {
+         InterpreterException ex
+            ("Found invalid function name \"" + type + "\"");
+         HandleError(ex);
+      }
       else
       {
          cmd = AppendCommand("CallFunction", retFlag, inCmd);
@@ -886,7 +902,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 
 
 //------------------------------------------------------------------------------
-//GmatCommand* AppendCommand(const std::string &type)
+//GmatCommand* AppendCommand(const std::string &type, bool &retFlag,
+//                           GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 GmatCommand* Interpreter::AppendCommand(const std::string &type, bool &retFlag,
                                         GmatCommand *inCmd)
@@ -1133,6 +1150,11 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
 //------------------------------------------------------------------------------
 bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
 {
+   #if DEBUG_ASSEMBLE_FOR
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleForCommand() desc=<%s>\n", desc.c_str());
+   #endif
+   
    bool retval = true;
    UnsignedInt equalSign = desc.find("=");
    
@@ -1143,7 +1165,9 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
       return false;
    }
    
-   std::string index = desc.substr(0, equalSign-1);
+   //loj: 12/07/06 This line is incorrtly parses For i=1:5
+   //std::string index = desc.substr(0, equalSign-1);
+   std::string index = desc.substr(0, equalSign);
    index = GmatStringUtil::Trim(index);
    
    std::string substr = desc.substr(equalSign+1);
@@ -1180,13 +1204,15 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    cmd->SetStringParameter("IncrementName", step);
 
    // Should we really create For loop index if not exist?
-   if (FindObject(index) == NULL)
-   {
-      CreateObject("Variable", index);
-      InterpreterException ex
-         ("For loop index \"" + index + "\" not found, so it was created");
-      HandleError(ex, true, true);
-   }
+   // No, we should throw an exception (loj 12/06/06)
+   //if (FindObject(index) == NULL)
+   //{
+   //   CreateObject("Variable", index);
+   //   InterpreterException ex
+   //      ("For loop index \"" + index + "\" not found, so it was created");
+   //   HandleError(ex, true, true);
+   //}
+   
    
    if (!SetCommandParameter(cmd, index, "For loop index", false, false))
       retval = false;
@@ -1234,11 +1260,6 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       {
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
 
-         //loj: 9/13/06
-         //I cannot remember why this code was here. Target command has only a Solver
-         //for (int i=1; i<count; i++)
-         //   cmd->SetRefObjectName(Gmat::PARAMETER, parts[i]);
-         
          // Check if the Solver exist
          GmatBase *obj = FindObject(parts[0]);
          if (obj == NULL)
@@ -1306,6 +1327,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       }
       else
       {
+         // Note:
          // Begin/EndFiniteBurn has the syntax: BeginFiniteBurn burn1(sat1 sat2)
          
          // Get FiniteBurn name
@@ -1506,7 +1528,8 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
 
    Parameter *param = (Parameter*)FindObject(name);
 
-   // Catch errors as much as possible, so limited return statement used
+   // Note:
+   // To catch errors as much as possible, limited return statement used
    // even when error found
    
    if (param == NULL)
@@ -1703,20 +1726,32 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    }
    else
    {
-      // if rist RHS char is - sign, use without it in finding name
+      // If firist RHS char is "-" sign, use without it in finding name.
+      // This is due to backward propagation. For example,
+      // Propagate -prop(Sat1, Sat2, {Sat1.Periapsis})
       std::string newName = rhs;
       
       if (rhs[0] == '-')
          newName = rhs.substr(1);
       
       rhsObj = FindObject(newName);
-
+      
       if (rhsObj)
       {
          if (IsArrayElement(rhs))
             isRhsArray = true;
          else
-            isRhsObject = true;
+         {
+            // Note: loj: 12/07/06
+            // We want to allow user to create object and name it with one of
+            // ObjectTypes. e.g. Create Spacecraft Spacecraft.
+            // So if name found in configuration and not an ObjectType, except
+            // calculated PARAMETER, it will considered as string value.
+            if (IsObjectType(newName) && rhsObj->GetType() != Gmat::PARAMETER)
+               isRhsObject = false;
+            else
+               isRhsObject = true;
+         }
       }
    }
    
@@ -2626,14 +2661,20 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    case Gmat::OBJECT_TYPE:
    case Gmat::OBJECTARRAY_TYPE:
       {
-         // Try create Parameter first
-         Parameter *param = CreateParameter(value);
+         Parameter *param = NULL;
          
-         #if DEBUG_SET
-         if (param)
-            MessageInterface::ShowMessage
-               ("   param=%s\n", param->GetName().c_str());
-         #endif
+         // Try create Parameter first if it is not ObjectType (loj: 12/05/06)
+         if (!IsObjectType(value))
+         {
+            //Parameter *param = CreateParameter(value);
+            param = CreateParameter(value);
+         
+            #if DEBUG_SET
+            if (param)
+               MessageInterface::ShowMessage
+                  ("   param=%s\n", param->GetName().c_str());
+            #endif
+         }
          
          if (param != NULL)
          {
@@ -3002,7 +3043,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    Integer count = parts.size();
    std::string pmType = parts[count-1];
 
-   // Current ForceModel scripting
+   // Current ForceModel scripting, SRP is on for central body.
    //GMAT FM.PrimaryBodies        = {Earth};
    //GMAT FM.PointMasses          = {Sun, Luna, Jupiter}; 
    //GMAT FM.Drag                 = None;
@@ -3012,9 +3053,9 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    //GMAT FM.SRP                  = On;
    
    // For future scripting we want to specify body for Drag and SRP
-   // eg. FM.Drag.Earth = JacchiaRoberts;
-   //     FM.Drag.Mars = MarsAtmos;
-   //     FM.SRP.ShadowBodies = {Earth,Moon}
+   // e.g. FM.Drag.Earth = JacchiaRoberts;
+   //      FM.Drag.Mars = MarsAtmos;
+   //      FM.SRP.ShadowBodies = {Earth,Moon}
    
    ForceModel *forceModel = (ForceModel*)obj;
    std::string forceType = ForceModel::GetScriptAlias(pmType);
@@ -3449,24 +3490,45 @@ AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 //------------------------------------------------------------------------------
 void Interpreter::HandleError(BaseException &e, bool writeLine, bool warning)
 {
+   if (writeLine)
+   {
+      lineNumber = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
+      currentLine = theReadWriter->GetCurrentLine();
+   
+      HandleErrorMessage(e, lineNumber, currentLine, writeLine, warning);
+   }
+   else
+   {
+      HandleErrorMessage(e, "", "", writeLine, warning);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void HandleErrorMessage(BaseException &e, const std::string &lineNumber,
+//                         const std::string &line, bool warning)
+//------------------------------------------------------------------------------
+void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNumber,
+                                     const std::string &line, bool writeLine,
+                                     bool warning)
+{
    std::string currMsg;
    std::string msgKind = "**** ERROR **** ";
    if (warning)
       msgKind = "*** WARNING *** ";
    
    if (writeLine)
-   {
-      lineNumber = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
-      currentLine = theReadWriter->GetCurrentLine();
-      currMsg = " in line:\n   \"" + lineNumber + ": " + currentLine + "\"\n";
-   }
+      currMsg = " in line:\n   \"" + lineNumber + ": " + line + "\"\n";
    
    std::string msg = msgKind + e.GetMessage() + currMsg;
    
    if (continueOnError)
    {
       errorList.push_back(msg);
-      //MessageInterface::ShowMessage(msg + "\n");
+
+      #if DEBUG_SET
+      MessageInterface::ShowMessage(msg + "\n");
+      #endif
    }
    else
    {
@@ -3475,6 +3537,100 @@ void Interpreter::HandleError(BaseException &e, bool writeLine, bool warning)
       else
          throw InterpreterException(msg);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsBranchCommand(const std::string &str)
+//------------------------------------------------------------------------------
+bool Interpreter::IsBranchCommand(const std::string &str)
+{
+   StringArray parts = theTextParser.SeparateSpaces(str);
+   
+   if (parts[0] == "If" || parts[0] == "EndIf" ||
+       parts[0] == "For" || parts[0] == "EndFor" ||
+       parts[0] == "While" || parts[0] == "EndWhile" ||
+       parts[0] == "Target" || parts[0] == "EndTarget" ||
+       parts[0] == "Optimize" || parts[0] == "EndOptimize" ||
+       parts[0] == "BeginScript" || parts[0] == "EndScript")
+      return true;
+   else
+      return false;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckBranchCommands(const IntegerArray &lineNumbers,
+//                          const StringArray &lines,)
+//------------------------------------------------------------------------------
+/**
+ * Checks branch command matching end command.
+ *
+ * @return true if the all matches, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
+                                      const StringArray &lines)
+{
+   #if DEBUG_CHECK_BRANCH
+   MessageInterface::ShowMessage("Interpreter::CheckBranchCommands()\n");
+   for (UnsignedInt i=0; i<lines.size(); i++)
+      MessageInterface::ShowMessage("%d: %s\n", lineNumbers[i], lines[i].c_str());
+   #endif
+   
+   // Check for unbalaced branch commands
+   
+   std::stack<std::string> controlStack;
+   std::string expEndStr, str, str1;
+   bool retval = true;
+   
+   for (UnsignedInt i=0; i<lines.size(); i++)
+   {
+      str = lines[i];
+      if (GmatStringUtil::StartsWith(str, "End"))
+      {
+         str1 = controlStack.top();
+         controlStack.pop();
+         
+         if (str1 == "BeginScript")
+            expEndStr = "EndScript";
+         else
+            expEndStr = "End" + str1;
+         
+         if (expEndStr != str)
+         {
+            InterpreterException ex
+               ("Expecting \"" + expEndStr + "\" but found \"" + str + "\"");
+            HandleErrorMessage(ex, GmatStringUtil::ToString(lineNumbers[i]), str);
+            retval = false;
+            break;
+         }
+      }
+      else
+      {
+         controlStack.push(str);
+      }
+   }
+   
+   
+   if (retval == true)
+   {
+      if (!controlStack.empty())
+      {
+         InterpreterException ex
+            ("Matching \"End\" not found for \"" +  controlStack.top() + "\"");
+         HandleError(ex, false);
+         retval = false;
+      }
+   }
+   
+   #if DEBUG_CHECK_BRANCH
+   MessageInterface::ShowMessage
+      ("Interpreter::CheckBranchCommands() returning %d\n", retval);
+   #endif
+
+   return retval;
 }
 
 
