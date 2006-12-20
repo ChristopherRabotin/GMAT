@@ -33,6 +33,8 @@ public:
    virtual bool Interpret(const std::string &scriptfile); 
    virtual bool Build(Gmat::WriteMode mode);
    
+   bool ReadFirstPass();
+   
    bool Build(const std::string &scriptfile,
               Gmat::WriteMode mode = Gmat::SCRIPTING);
    
@@ -47,7 +49,7 @@ protected:
    std::istream *inStream;
    std::ostream *outStream;
    
-   std::string ReadLogicalBlock();
+   //std::string ReadLogicalBlock();
    bool ReadScript(GmatCommand *cmd = NULL);
    bool Parse(const std::string &logicBlock, GmatCommand *inCmd = NULL);
    bool WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);

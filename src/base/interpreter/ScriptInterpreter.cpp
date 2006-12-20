@@ -15,9 +15,10 @@
 //------------------------------------------------------------------------------
 
 #include "ScriptInterpreter.hpp"
-#include "MessageInterface.hpp"  
+#include "MessageInterface.hpp"
 #include "Moderator.hpp"
 #include "MathParser.hpp"
+#include "StringUtil.hpp"      // for GmatStringUtil::
 
 //#define DEBUG_SCRIPT_READING 1
 //#define DEBUG_SCRIPT_WRITING
@@ -94,10 +95,19 @@ bool ScriptInterpreter::Interpret()
    
    inCommandMode = false;
    inRealCommandMode = false;
+
+   // Before parsing script, check for unmatching control logic
+   bool retval0 = ReadFirstPass();
    
-   bool retval1 = ReadScript();
-   bool retval2 = FinalPass();
-      
+   bool retval1 = false;
+   bool retval2 = false;
+   
+   if (retval0)
+   {
+      retval1 = ReadScript();
+      retval2 = FinalPass();
+   }
+   
    // Write any error messages collected
    for (UnsignedInt i=0; i<errorList.size(); i++)
       MessageInterface::ShowMessage("%d: %s\n", i+1, errorList[i].c_str());
@@ -116,7 +126,7 @@ bool ScriptInterpreter::Interpret()
 // bool Interpret(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 /**
- * Parses the input stream, line by line, into GMAT objects.
+ * Parses and creates commands from input stream and append to input command.
  *
  * @param  inCmd  Command which appended to
  * @return true if the stream parses successfully, false on failure.
@@ -135,8 +145,17 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd)
    inCommandMode = true;
    inRealCommandMode = true;
    
-   bool retval1 = ReadScript(inCmd);   
-   bool retval2 = FinalPass();
+   // Before parsing script, check for unmatching control logic
+   bool retval0 = ReadFirstPass();
+   
+   bool retval1 = false;
+   bool retval2 = false;
+   
+   if (retval0)
+   {
+      retval1 = ReadScript(inCmd);   
+      retval2 = FinalPass();
+   }
    
    // Write any error messages collected
    for (UnsignedInt i=0; i<errorList.size(); i++)
@@ -214,9 +233,7 @@ bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mod
     
     if (scriptfile != "")
        scriptFilename = scriptfile;
-    //else
-    //   scriptFilename = "NewScript";
-       
+
     std::ofstream outFile(scriptFilename.c_str());
     outStream = &outFile;
 
@@ -269,6 +286,95 @@ bool ScriptInterpreter::SetOutStream(std::ostream *str)
 
 
 //------------------------------------------------------------------------------
+// bool ReadFirstPass()
+//------------------------------------------------------------------------------
+/**
+ * Reads only contol logic command lines from the input stream and checks for
+ * unmatching End
+ * 
+ * @return true if the file passes checking, false on failure.
+ */
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::ReadFirstPass()
+{
+   #if DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage("ScriptInterpreter::ReadFirstPass() entered\n");
+   #endif
+   
+   char ch;
+   bool reachedEndOfFile = false;
+   std::string line, newLine, type;
+   StringArray controlLines;
+   IntegerArray lineNumbers;
+   Integer charCounter = -1;
+   Integer lineCounter = 0;
+   
+   while (!reachedEndOfFile)
+   {
+      line = "";
+      
+      charCounter++;
+      inStream->seekg(charCounter, std::ios::beg);
+      
+      while ((ch = inStream->peek()) != '\r' && ch != '\n' && ch != EOF)
+      {
+         line += ch;
+         charCounter++;
+         inStream->seekg(charCounter, std::ios::beg);
+      }
+      
+      if ((ch == '\0') || (ch == EOF))
+         break;
+      
+      if (ch == '\r' || ch == '\n')
+      {
+         // Why is line number incorrect for some script files?
+         lineCounter++;
+         inStream->seekg(charCounter+1, std::ios::beg);
+         if (inStream->peek() == '\n')
+            charCounter++;
+      }
+      
+      newLine = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
+      
+      #if DEBUG_SCRIPT_READING > 1
+      MessageInterface::ShowMessage("newLine=%s\n", newLine.c_str());
+      #endif
+      
+      type = newLine;
+      UnsignedInt index = newLine.find_first_of(" \t");
+      if (index != newLine.npos)
+      {
+         type = newLine.substr(0, index);
+         if (type[index-1] == ';')
+            type = type.substr(0, index-1);
+      }
+      
+      if (type != "" && IsBranchCommand(type))
+      {
+         lineNumbers.push_back(lineCounter);
+         controlLines.push_back(type);
+      }
+   }
+   
+   // Clear staus flags first and then move pointer to beginning
+   inStream->clear();
+   inStream->seekg(std::ios::beg);
+   
+   // Check for unbalaced control logic
+   bool retval = CheckBranchCommands(lineNumbers, controlLines);
+   
+   #if DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::ReadFirstPass() returning %d\n", retval);
+   #endif
+   
+   return retval;
+   
+}
+
+
+//------------------------------------------------------------------------------
 // bool ReadScript(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 /**
@@ -296,7 +402,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
    initialized = false;
    Initialize();
    
-   currentBlock = ReadLogicalBlock();
+   currentBlock = theReadWriter->ReadLogicalBlock();
    
    #if DEBUG_SCRIPT_READING
    MessageInterface::ShowMessage
@@ -352,7 +458,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
       MessageInterface::ShowMessage("===> Read next logical block\n");
       #endif
       
-      currentBlock = ReadLogicalBlock();
+      currentBlock = theReadWriter->ReadLogicalBlock();
       
       #if DEBUG_SCRIPT_READING
       MessageInterface::ShowMessage
@@ -401,25 +507,6 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
    return (retval1 && retval2);
 }
 
-//------------------------------------------------------------------------------
-// bool ReadLogicalBlock()
-//------------------------------------------------------------------------------
-/**
- * Reads a line from the input stream.
- * 
- * @return the logical block
- */
-//------------------------------------------------------------------------------
-std::string ScriptInterpreter::ReadLogicalBlock()
-{
-   // Get block here so we can get line number next
-   std::string block = theReadWriter->ReadLogicalBlock();
-   
-   // Get the line number of the logical block
-   //lineNumber = itoa(theReadWriter->GetLineNumber(), 10);
-   
-   return block;
-}
 
 //------------------------------------------------------------------------------
 // bool Parse(const std::string &logicBlock)
@@ -799,22 +886,22 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
    if (outStream == NULL)
       return false;
-    
+   
    // Header  Comment
    if (headerComment != "")
       theReadWriter->WriteText(headerComment);
-      
+   
    // Initialize the section delimiter comment
    sectionDelimiterString.push_back("\n%----------------------------------------\n");
    sectionDelimiterString.push_back("%---------- ");
    sectionDelimiterString.push_back("\n%----------------------------------------\n\n");
-      
+   
    StringArray::iterator current;
    StringArray objs;
    std::string objName;
    GmatBase *object =  NULL;
    Integer objSize;
-      
+   
    // Spacecraft
    objs = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
    // Write out the section delimiter comment
@@ -848,7 +935,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    // Hardware
    objs = theModerator->GetListOfObjects(Gmat::HARDWARE);
    // Write out the section delimiter comment
@@ -884,7 +971,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
             theReadWriter->WriteText("\n");
          }
    }
-      
+   
    // Formations
    objs = theModerator->GetListOfObjects(Gmat::FORMATION);
    // Write out the section delimiter comment
@@ -907,7 +994,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    // Force Models
    objs = theModerator->GetListOfObjects(Gmat::FORCE_MODEL);
    // Write out the section delimiter comment
@@ -930,7 +1017,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    // Propagator
    objs = theModerator->GetListOfObjects(Gmat::PROP_SETUP);
    // Write out the section delimiter comment
@@ -953,7 +1040,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    // Libration Points and Barycenters
    objs = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
    // Write out the section delimiter comment
@@ -976,7 +1063,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-         
+   
    // Burn objects
    objs = theModerator->GetListOfObjects(Gmat::BURN);
    // Write out the section delimiter comment
@@ -999,7 +1086,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-         
+   
    // Array and Variable setups
    objs = theModerator->GetListOfObjects(Gmat::PARAMETER);
    // Write out the section delimiter comment
@@ -1034,7 +1121,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
             theReadWriter->WriteText("\n");
          }         
    }
-      
+   
    // Coordinate System setups
    objs = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
    // Write out the section delimiter comment
@@ -1057,7 +1144,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    // Solver objects
    objs = theModerator->GetListOfObjects(Gmat::SOLVER);
    // Write out the section delimiter comment
@@ -1080,7 +1167,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText("\n");
       }
    }
-      
+   
    objs = theModerator->GetListOfObjects(Gmat::SUBSCRIBER);
    // Write out the section delimiter comment
    objSize = objs.size();
@@ -1104,7 +1191,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          
          }
    }
-    
+   
    // Function setups
    objs = theModerator->GetListOfObjects(Gmat::FUNCTION);
    // Write out the section delimiter comment
@@ -1131,6 +1218,8 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    // Command sequence
    GmatCommand *cmd = theModerator->GetFirstCommand();
    bool inTextMode = false;
+   Integer scriptEventCount = 0;
+   
    // Write out the section delimiter comment
    if (cmd != NULL)
    {
@@ -1138,6 +1227,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       theReadWriter->WriteText(sectionDelimiterString[1] + "Mission Sequence");
       theReadWriter->WriteText(sectionDelimiterString[2]);
    }
+   
    while (cmd != NULL) 
    {
       #ifdef DEBUG_SCRIPT_WRITING
@@ -1146,19 +1236,31 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
           "inTextMode=%d\n", cmd->GetTypeName().c_str(), mode, inTextMode);
       #endif
       
-      if (!inTextMode)
+      // EndScript is written from BeginScript
+      if (!inTextMode && cmd->GetTypeName() != "EndScript")
       {
          theReadWriter->WriteText(cmd->GetGeneratingString());
          theReadWriter->WriteText("\n");
       }
-         
+      
+      // To handle nested ScriptEvent (loj: 12/07/06)
+      
+      //if (cmd->GetTypeName() == "BeginScript")
+      //   inTextMode = true;      
+      //if (cmd->GetTypeName() == "EndScript")
+      //   inTextMode = false;
+      
       if (cmd->GetTypeName() == "BeginScript")
-         inTextMode = true;
+         scriptEventCount++;
+      
       if (cmd->GetTypeName() == "EndScript")
-         inTextMode = false;
+         scriptEventCount--;
+      
+      inTextMode = (scriptEventCount == 0) ? false : true;
       
       if (cmd == cmd->GetNext())
-         throw InterpreterException("Self-reference found in command stream during write.\n");
+         throw InterpreterException
+            ("Self-reference found in command stream during write.\n");
       
       cmd = cmd->GetNext();
    }
