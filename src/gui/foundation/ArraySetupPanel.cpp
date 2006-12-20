@@ -124,10 +124,12 @@ void ArraySetupPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("="),
                         wxDefaultPosition, wxDefaultSize, 0);
    
-   mRowComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                 wxSize(40,-1), 0, arrValArray, wxCB_DROPDOWN);
-   mColComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                                 wxSize(40,-1), 0, arrValArray, wxCB_DROPDOWN);
+   mRowComboBox = 
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(40,-1),
+         0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
+   mColComboBox = 
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(40,-1), 
+         0, arrValArray, wxCB_DROPDOWN|wxCB_READONLY);
    
    mArrValTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(100,20), 0);

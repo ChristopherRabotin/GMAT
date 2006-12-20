@@ -16,6 +16,7 @@
 #include "AxisSystem.hpp"
 #include "SpacePoint.hpp"
 #include "TimeSystemConverter.hpp"
+#include "StringUtil.hpp"  // for ToDouble()
 
 //#define DEBUG_COORD_PANEL 1
 
@@ -592,19 +593,19 @@ void CoordPanel::Setup( wxWindow *parent)
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    typeComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN );
+      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    primaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    formatComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN );
+      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
    xComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN );
+      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    yComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN );
+      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    zComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN );
+      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
 
    //wxTextCtrl
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -771,6 +772,12 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
    
    try
    {
+      std::string inputString;
+      std::string msg = "The value of \"%s\" for field \"%s\" on object \""
+                         + coordName + 
+                        "\" is not an allowed value. \n"
+                        "The allowed values are: [%s].";                        
+
       // create CoordinateSystem if not exist
       CoordinateSystem *coordSys =
          (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
@@ -865,7 +872,9 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          std::string epochStr = epochTextCtrl->GetValue().c_str();
          Real epoch;
          
-         if (epochTextCtrl->GetValue().ToDouble(&epoch))
+//         if (epochTextCtrl->GetValue().ToDouble(&epoch))
+         inputString = epochTextCtrl->GetValue();      
+	      if ((GmatStringUtil::ToDouble(inputString,&epoch)) && (epoch >= 0.0))
          {
             epochValue = epochTextCtrl->GetValue();
             if (epochFormat != newEpochFormat)
@@ -888,7 +897,9 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          }
          else
          {
-            wxLogError("Invalid epoch value entered.");
+//            wxLogError("Invalid epoch value entered.");
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+               inputString.c_str(),"Epoch","Real Number >= 0.0");
             canClose = false;
          }
       }
@@ -899,13 +910,18 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       if (intervalTextCtrl->IsEnabled())
       {
          Real interval;
-         if (intervalTextCtrl->GetValue().ToDouble(&interval))
+         inputString = intervalTextCtrl->GetValue();      
+	      if ((GmatStringUtil::ToDouble(inputString,&interval)) && 
+	          (interval >= 0.0))     
+//         if (intervalTextCtrl->GetValue().ToDouble(&interval))
          {
             axis->SetRealParameter("UpdateInterval", interval);
          }
          else
          {
-            wxLogError("Invalid update interval value entered.");
+//            wxLogError("Invalid update interval value entered.");
+            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+               inputString.c_str(),"Update Interval","Real Number >= 0.0");
             canClose = false;
          }
       }
