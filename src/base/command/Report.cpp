@@ -372,9 +372,17 @@ const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName)
 {
-   std::string gen = prefix;
-   gen = gen + GmatStringUtil::Trim(generatingString, GmatStringUtil::BOTH);
+//    std::string gen = prefix;
+//    gen = gen + GmatStringUtil::Trim(generatingString, GmatStringUtil::BOTH);
+//    generatingString = gen;
+   
+   std::string gen = prefix + "Report " + rfName + " ";
+
+   for (UnsignedInt i=0; i<actualParmNames.size(); i++)
+      gen += actualParmNames[i] + " ";
+   
    generatingString = gen;
+   
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
