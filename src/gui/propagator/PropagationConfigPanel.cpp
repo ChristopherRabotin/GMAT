@@ -213,8 +213,8 @@ void PropagationConfigPanel::LoadData()
       typeId = BS;
    else if (propType == "AdamsBashforthMoulton")
       typeId = ABM;
-   else if (propType == "Cowell")
-      typeId = CW;
+//   else if (propType == "Cowell")
+//      typeId = CW;
 
    // Display primary bodies
    if ( !primaryBodiesArray.IsEmpty() )
@@ -269,10 +269,12 @@ void PropagationConfigPanel::SaveData()
       ShowPropData("SaveData() BEFORE saving Integrator");
       #endif
       
+   MessageInterface::ShowMessage("Changed Integrator \n");
       isIntegratorChanged = false;
 
       if (isIntegratorDataChanged)
       {
+   MessageInterface::ShowMessage("Changed Integrator and data \n");
          isIntegratorDataChanged = false;
          if (!SaveIntegratorData())
             canClose = false;
@@ -283,6 +285,7 @@ void PropagationConfigPanel::SaveData()
    }
    else if (isIntegratorDataChanged)
    {
+   MessageInterface::ShowMessage("Changed data \n");
       isIntegratorDataChanged = false;
       if (!SaveIntegratorData())
          canClose = false;
@@ -545,15 +548,23 @@ void PropagationConfigPanel::Initialize()
    //Note: All the settings should match enum types in the header.
    
    // initialize integrator type array for ComboBox
-   integratorArray.Add("RKV 8(9)");
-   integratorArray.Add("RKN 6(8)");
-   integratorArray.Add("RKF 5(6)");
-   integratorArray.Add("PD  4(5)");
-   integratorArray.Add("PD  7(8)");
-   integratorArray.Add("BS");
-   integratorArray.Add("ABM");
-   integratorArray.Add("Cowell");
-   
+//   integratorArray.Add("RKV 8(9)");
+//   integratorArray.Add("RKN 6(8)");
+//   integratorArray.Add("RKF 5(6)");
+//   integratorArray.Add("PD  4(5)");
+//   integratorArray.Add("PD  7(8)");
+//   integratorArray.Add("BS");
+//   integratorArray.Add("ABM");
+//   integratorArray.Add("Cowell");
+   integratorArray.Add("RungeKutta89");
+   integratorArray.Add("RungeKutta68");
+   integratorArray.Add("RungeKutta56");
+   integratorArray.Add("PrinceDormand45");
+   integratorArray.Add("PrinceDormand78");
+   integratorArray.Add("BulirschStoer");
+   integratorArray.Add("AdamsBashforthMoulton");
+//   integratorArray.Add("Cowell");
+  
    // initialize integrator type array for creating
    integratorTypeArray.Add("RungeKutta89");
    integratorTypeArray.Add("DormandElMikkawyPrince68");
@@ -562,7 +573,7 @@ void PropagationConfigPanel::Initialize()
    integratorTypeArray.Add("PrinceDormand78");
    integratorTypeArray.Add("BulirschStoer");
    integratorTypeArray.Add("AdamsBashforthMoulton");
-   integratorTypeArray.Add("Cowell");
+//   integratorTypeArray.Add("Cowell");
 
    // initialize gravity model type arrays
    earthGravModelArray.Add("None");
@@ -1790,10 +1801,10 @@ void PropagationConfigPanel::SavePotFile()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveIntegratorData()
 {
-   #if DEBUG_PROP_SAVE
+//   #if DEBUG_PROP_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveIntegratorData() entered\n");
-   #endif
+//   #endif
    
 // LTR 09/15/06 - moved to where setting of Max Step Size is done
 //   Real min = atof(minStepTextCtrl->GetValue());
@@ -1822,10 +1833,9 @@ bool PropagationConfigPanel::SaveIntegratorData()
       
       // save initial step size
       id = thePropagator->GetParameterID("InitialStepSize");
-      inputString = initialStepSizeTextCtrl->GetValue();      
-     
+      inputString = initialStepSizeTextCtrl->GetValue();
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))      
+      if (GmatStringUtil::ToDouble(inputString,&rvalue))
          thePropagator->SetRealParameter(id, rvalue);
       else
       {
@@ -1836,7 +1846,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 
       // save accuracy
       id = thePropagator->GetParameterID("Accuracy");
-      inputString = accuracyTextCtrl->GetValue();      
+      inputString = accuracyTextCtrl->GetValue();
       // check to see if input is a real
       if (GmatStringUtil::ToDouble(inputString,&rvalue))     
          thePropagator->SetRealParameter(id, rvalue);
