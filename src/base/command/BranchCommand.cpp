@@ -24,6 +24,8 @@
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 //#define DEBUG_BRANCHCOMMAND_APPEND
+//#define DEBUG_BRANCHCOMMAND_INSERT
+//#define DEBUG_BRANCHCOMMAND_ADD
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
 
@@ -54,6 +56,8 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
 {
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
+   
+   objectTypeNames.push_back("BranchCommand"); //loj: 12/11/06 Added
 }
 
 
@@ -96,8 +100,7 @@ BranchCommand::~BranchCommand()
          if (current)
          {
             #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-               MessageInterface::ShowMessage("Removing %s\n", 
-                                          current->GetTypeName().c_str());
+               ShowMessage("Removing ", current);
             #endif
                
             current->Remove(current);
@@ -258,25 +261,65 @@ bool BranchCommand::Initialize()
 //------------------------------------------------------------------------------
 void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
+   #ifdef DEBUG_BRANCHCOMMAND_ADD
+   ShowCommand("AddBranch() cmd = ", cmd);
+   MessageInterface::ShowMessage
+      ("     which=%d, branch.size=%d\n", which, branch.size());
+   #endif
+   
    // Increase the size of the vector if it's not big enough
    if (which >= (Integer)branch.capacity())
    {
       branch.reserve(which+1);
-//      current.reserve(which+1);
+      //current.reserve(which+1);
    }
    
    if (which == (Integer)(branch.size()))
    {
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("addging to branch ", cmd);
+      #endif
+      
       branch.push_back(cmd);
-//      current.push_back(NULL);
-   }   
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting previous of ", cmd, " to ", this);
+      #endif
+      
+      cmd->ForceSetPrevious(this); //loj: 12/11/06
+      
+      //current.push_back(NULL);
+   }
    else if (branch[which] == NULL)
    {
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting branch.at(which) to ", cmd);
+      #endif
+      
       branch.at(which) = cmd;
-//      current.at(which) = NULL;
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting previous of ", cmd, " to ", this);
+      #endif
+      
+      cmd->ForceSetPrevious(this); //loj: 12/11/06
+      
+      //current.at(which) = NULL;
    }
    else
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("appending ", cmd, " to ", branch.at(which));
+      #endif
+      
       (branch.at(which))->Append(cmd);
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting previous of ",cmd, " to ", branch.at(which));
+      #endif
+      
+      cmd->ForceSetPrevious(branch.at(which)); //loj: 12/11/06
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -291,19 +334,60 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 //------------------------------------------------------------------------------
 void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 {
+   
+   #ifdef DEBUG_BRANCHCOMMAND_ADD
+   ShowCommand("AddToFrontOfBranch() cmd = ", cmd);
+   MessageInterface::ShowMessage
+      ("     which=%d, branch.size=%d\n", which, branch.size());
+   #endif
+   
    // Increase the size of the vector if it's not big enough
    if (which >= (Integer)branch.capacity())
       branch.reserve(which+1);
    
    if (which == (Integer)(branch.size()))
-      branch.push_back(cmd);   
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("adding to branch ", cmd);
+      #endif
+      
+      branch.push_back(cmd);
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting previous of ", cmd, " to ", this);
+      #endif
+      
+      cmd->ForceSetPrevious(this); //loj: 12/11/06      
+   }
    else if (branch.at(which) == NULL)
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting branch.at(which) to ", cmd);
+      #endif
+      
       branch.at(which) = cmd;
+   }
    else
    {
-      GmatCommand* tmp = branch.at(which);
+      GmatCommand *tmp = branch.at(which);
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting branch.at(which) to ", cmd);
+      #endif
+      
       branch.at(which) = cmd;
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("appending ", tmp, " to ", cmd);
+      #endif
+      
       cmd->Append(tmp);
+      
+      #ifdef DEBUG_BRANCHCOMMAND_ADD
+      ShowCommand("setting previous of ", tmp, " to ", cmd);
+      #endif
+      
+      tmp->ForceSetPrevious(cmd); //loj: 12/11/06
    }
 }
 
@@ -325,6 +409,11 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 //------------------------------------------------------------------------------
 bool BranchCommand::Append(GmatCommand *cmd)
 {
+   #ifdef DEBUG_BRANCHCOMMAND_APPEND
+   ShowCommand("Append() this = ", this, " next = ", next);
+   ShowCommand("Append() cmd = ", cmd);
+   #endif
+   
    // If we are still filling in a branch, append on that branch
    if (branchToFill >= 0)
    {
@@ -358,6 +447,11 @@ bool BranchCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
+   #ifdef DEBUG_BRANCHCOMMAND_INSERT
+   ShowCommand("Insert() this = ", this, " next = ", next);
+   ShowCommand("Insert() cmd  = ", cmd, " prev = ", prev);
+   #endif
+   
    GmatCommand *currentOne   = NULL;
    GmatCommand *toShift      = NULL;
    bool        newBranch     = false;
@@ -382,8 +476,19 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
          toShift = currentOne;
          brNum   = 0;
       }
+      
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      ShowCommand("currentOne = ", currentOne, " branch[0] = ", branch[0]);
+      #endif
+            
       cmd->Append(currentOne);
       foundHere = true;
+            
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      ShowCommand("currentOne->GetPrevious() = ", currentOne->GetPrevious());
+      ShowCommand("currentOne->GetNext() = ", currentOne->GetNext());
+      #endif
+      
       //return true;
    }
    // see if we're supposed to add it to the front of a branch
@@ -449,11 +554,28 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       }
    }
    
+   #ifdef DEBUG_BRANCHCOMMAND_INSERT
+   MessageInterface::ShowMessage
+      ("===> BranchCommand::Insert() newBranch=%d, foundHere=%d, toShift=%p\n",
+       newBranch, foundHere, toShift);
+   #endif
+   
    if (newBranch && foundHere && (toShift != NULL))
    {
       // make sure the new Else or ElseIf points back to the If command
+      
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      ShowCommand("setting next of ", cmd, " to ", this);
+      #endif
+      
       cmd->ForceSetNext(this);
-         
+      
+      #ifdef DEBUG_BRANCHCOMMAND_INSERT
+      ShowCommand("setting previous of ", this, " to ", cmd);
+      #endif
+      
+      this->ForceSetPrevious(cmd); //loj: 12/11/06
+      
       // shift all the later comamnds down one branch
       bool isOK = ShiftBranches(toShift, brNum);
       if (!isOK) 
@@ -616,9 +738,7 @@ bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
       if (current != NULL)
       {
          #ifdef DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("BranchCommand::RenameRefObject() current=%s\n",
-             current->GetTypeName().c_str());
+         ShowCommand("RenameRefObject() current = ", current);
          #endif
          
          current->RenameRefObject(type, oldName, newName);
@@ -630,9 +750,7 @@ bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
                break;
             
             #ifdef DEBUG_RENAME
-            MessageInterface::ShowMessage
-               ("BranchCommand::RenameRefObject() current=%s\n",
-                current->GetTypeName().c_str());
+            ShowCommand("RenameRefObject() current = ", current);
             #endif
             
             current->RenameRefObject(type, oldName, newName);            
@@ -667,6 +785,18 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &useName)
 {
    fullString = prefix + generatingString;
+   
+   #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
+   ShowCommand("GetGeneratingString() this = ", this);
+   MessageInterface::ShowMessage
+      ("   mode='%d', prefix='%s', useName='%s'\n", mode, prefix.c_str(),
+       useName.c_str());
+   MessageInterface::ShowMessage("   fullString = '%s'\n", fullString.c_str());
+   #endif
+   
+   std::string indent = "   ";
+   UnsignedInt indentSize = indent.size();
+   
    // Handle comments
    std::string commentLine = GetCommentLine(), inlineComment = GetInlineComment();
    if (commentLine != "")
@@ -675,52 +805,61 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       fullString = fullString + inlineComment;
    
    GmatCommand *current;
-
-   std::string newPrefix = "   " + prefix;
-
-   #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
-   MessageInterface::ShowMessage
-      ("BranchCommand::GetGeneratingString() this=%s, mode=%d, prefix=%s, "
-       "newPrefix=%s, useName=%s\n", this->GetTypeName().c_str(), mode,
-       prefix.c_str(), newPrefix.c_str(), useName.c_str());
-   #endif
-   
+   std::string newPrefix = indent + prefix;
    bool inTextMode = false;
+   Integer scriptEventCount = 0;
+   
    // Loop through the branches, appending the strings from commands in each
    for (Integer which = 0; which < (Integer)branch.size(); ++which)
    {
       current = branch[which];
+      
       while ((current != NULL) && (current != this))
       {
          #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
-         MessageInterface::ShowMessage
-            ("BranchCommand::GetGeneratingString() current=%s, mode=%d, "
-             "inTextMode=%d\n", current->GetTypeName().c_str(), mode, inTextMode);
+         ShowCommand("GetGeneratingString() current = ", current);
+         MessageInterface::ShowMessage("   inTextMode=%d\n", inTextMode);
          #endif
          
-         // BeginScript writes its own children, so write if not TextMode
+         // BeginScript writes its own children, so write if not in TextMode.
+         // EndScript is written from BeginScript
+         //if (!inTextMode && current->GetTypeName() != "EndScript")
          if (!inTextMode)
          {
-            fullString += "\n";            
+            fullString += "\n";
             if (current->GetNext() != this)
                fullString += current->GetGeneratingString(mode, newPrefix, useName);
             else // current is the End command for this branch command
-                  fullString += current->GetGeneratingString(mode, prefix, useName);
+               fullString += current->GetGeneratingString(mode, prefix, useName);
          }
          
+         // To handle nested ScriptEvent (loj: 12/07/06)
+         
+         //if (current->GetTypeName() == "BeginScript")
+         //   inTextMode = true;      
+         //if (current->GetTypeName() == "EndScript")
+         //   inTextMode = false;
+         
          if (current->GetTypeName() == "BeginScript")
-            inTextMode = true;
+            scriptEventCount++;
+         
          if (current->GetTypeName() == "EndScript")
-            inTextMode = false;
+            scriptEventCount--;
+         
+         inTextMode = (scriptEventCount == 0) ? false : true;
          
          current = current->GetNext();
       }
    }
    
+   // We don't want inner BranchCommand to indent (loj: 12/15/06)
+   if (this->IsOfType("BranchCommand") && prefix != "")
+      fullString = fullString.substr(indentSize);
+   
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    MessageInterface::ShowMessage
-      ("BranchCommand::GetGeneratingString() return fullString=\n   %s\n",
-       fullString.c_str());
+      ("%s::GetGeneratingString() return fullString = \n%s\n",
+       this->GetTypeName().c_str(), fullString.c_str());
    #endif
    
    return fullString;
