@@ -219,6 +219,11 @@ protected:
    virtual void         BuildCommandSummaryString(bool commandCompleted = true);
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
+
+   // for Debug (just one copy)
+   virtual void         ShowCommand(const std::string &title1, GmatCommand *cmd1,
+                                    const std::string &title2 = "",
+                                    GmatCommand *cmd2 = NULL);
    
    // IDs used to buffer the command summary data
    static Integer       satEpochID;

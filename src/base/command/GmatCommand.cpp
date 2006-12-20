@@ -1034,9 +1034,8 @@ bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
 bool GmatCommand::Append(GmatCommand *cmd)
 {
    #ifdef DEBUG_COMMAND_APPEND
-   MessageInterface::ShowMessage
-      ("===> GmatCommand::Append() cmd=%s, addr=%p, this=%s, addr=%p\n",
-       cmd->GetTypeName().c_str(), cmd, this->GetTypeName().c_str(), this);
+   ShowCommand("Append() this = ", this, " next = ", next);
+   ShowCommand("Append() cmd = ", cmd);
    #endif
    
    if (cmd == this)
@@ -1045,10 +1044,12 @@ bool GmatCommand::Append(GmatCommand *cmd)
    if (next)
    {
       #ifdef DEBUG_COMMAND_APPEND
-         MessageInterface::ShowMessage("In GmatCommand::Append, appending %s to %s\n",
-         (cmd->GetTypeName()).c_str(), GetTypeName().c_str());
-         MessageInterface::ShowMessage("    and appending to next (%s)\n",
-         (next->GetTypeName()).c_str());
+//          MessageInterface::ShowMessage
+//             ("In GmatCommand::Append, appending %s to %s\n",
+//              (cmd->GetTypeName()).c_str(), GetTypeName().c_str());
+//          MessageInterface::ShowMessage("    and appending to next (%s)\n",
+//          (next->GetTypeName()).c_str());
+      ShowCommand("appending ", cmd, " to ", next);
       #endif
       next->Append(cmd);
    }
@@ -1056,13 +1057,18 @@ bool GmatCommand::Append(GmatCommand *cmd)
    {
       // Always set the command changed flag when a command is added to the list
       commandChanged = true;
-      next = cmd;
-      cmd->previous = this;
+      
       #ifdef DEBUG_COMMAND_APPEND
-         MessageInterface::ShowMessage
-            ("In GmatCommand::Append, setting %s->previous to %s\n",
-             cmd->GetTypeName().c_str(), this->GetTypeName().c_str());
+      ShowCommand("setting next of ", this, " to ", cmd);
       #endif
+      
+      next = cmd;
+      
+      #ifdef DEBUG_COMMAND_APPEND
+      ShowCommand("setting previous of ", cmd, " to ", this);
+      #endif
+         
+      cmd->previous = this;
    }
    
    return true;
@@ -1083,11 +1089,9 @@ bool GmatCommand::Append(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
-   #if DEBUG_COMMAND_INSERT
-   MessageInterface::ShowMessage
-      ("===> GmatCommand::Insert() this=%s, addr=%p\n   cmd=%s, addr=%p, "
-       "prev=%s, addr=%p\n", this->GetTypeName().c_str(), this,
-       cmd->GetTypeName().c_str(), cmd, prev->GetTypeName().c_str(), prev);
+   #ifdef DEBUG_COMMAND_INSERT
+   ShowCommand("Insert() this = ", this, " next = ", next);
+   ShowCommand("Insert() cmd = ", cmd, " prev = ", prev);
    #endif
    
    if (this == prev)
@@ -1097,14 +1101,17 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       if (!next)
          return Append(cmd);
       
+      #ifdef DEBUG_COMMAND_APPEND
+      ShowCommand("setting next of ", this, " to ", cmd);
+      #endif
+      
       next = cmd;
-      cmd->previous = prev;
       
       #if DEBUG_COMMAND_INSERT
-      MessageInterface::ShowMessage
-         ("GmatCommand::Insert(), setting %s->previous to %s\n",
-          cmd->GetTypeName().c_str(), prev->GetTypeName().c_str());
+      ShowCommand("setting previous of ", cmd, " to ", prev);
       #endif
+      
+      cmd->previous = prev;
       
       return next->Append(temp); // assumes cmd->next is NULL and next != NULL
    }
@@ -1590,6 +1597,44 @@ void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
       if (next)
          next->ConfigurationChanged(tf, setAll);
 }
+
+
+//------------------------------------------------------------------------------
+// void ShowCommand(const std::string &title1, GmatCommand *cmd1,
+//                  const std::string &title2, GmatCommand *cmd2)
+//------------------------------------------------------------------------------
+/*
+ * <static method>
+ * Shows command info to message window.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::ShowCommand(const std::string &title1, GmatCommand *cmd1,
+                              const std::string &title2, GmatCommand *cmd2)
+{
+   if (title2 == "")
+   {
+      if (cmd1 == NULL)
+         MessageInterface::ShowMessage
+            ("%s::%s(%p)NULL\n", this->GetTypeName().c_str(), title1.c_str(), cmd1);
+      else
+         MessageInterface::ShowMessage
+            ("%s::%s(%p)%s\n", this->GetTypeName().c_str(), title1.c_str(), cmd1,
+             cmd1->GetTypeName().c_str());
+   }
+   else
+   {
+      if (cmd2 == NULL)
+         MessageInterface::ShowMessage
+            ("%s::%s(%p)NULL%s(%p)NULL\n", this->GetTypeName().c_str(),
+             title1.c_str(), cmd1, title2.c_str(), cmd2);
+      else
+         MessageInterface::ShowMessage
+            ("%s::%s(%p)%s%s(%p)%s\n", this->GetTypeName().c_str(), title1.c_str(),
+             cmd1, cmd1->GetTypeName().c_str(),
+             title2.c_str(), cmd2, cmd2->GetTypeName().c_str());
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // Temporary -- need to figure out how we're supposed to do transformations 
