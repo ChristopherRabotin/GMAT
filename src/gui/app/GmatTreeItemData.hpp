@@ -245,8 +245,10 @@ namespace GmatTree
       
       //---------- NO panels will be created
       BEGIN_NO_PANEL,
-      END_TARGET_COMMAND,
       OPTIMIZE_COMMAND,
+      STOP_COMMAND,
+      SCRIPT_FOLDER,
+      END_TARGET_COMMAND,   // begins No Delete menu also
       END_OPTIMIZE_COMMAND,
       ELSE_CONTROL,
       END_IF_CONTROL,
@@ -254,8 +256,6 @@ namespace GmatTree
       END_DO_CONTROL,
       END_WHILE_CONTROL,
       END_SWITCH_CONTROL,
-      STOP_COMMAND,
-      SCRIPT_FOLDER,    // arg:  added here, so blank panel doesn't open
       END_NO_PANEL,
    };
 }
