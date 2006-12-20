@@ -69,6 +69,15 @@ void FunctionSetupPanel::Create()
    mTopSizer = new wxStaticBoxSizer(topStaticBox, wxHORIZONTAL);
    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
 
+   //wxStaticText
+   wxStaticText *fileStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("File: "), wxDefaultPosition, 
+         wxDefaultSize, 0);
+
+   // wxTextCtrl
+   mFileNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(250,20), 0);
+
    // create buttons
    mBrowseButton =
       new wxButton(this, ID_BUTTON, "Browse", wxDefaultPosition, wxDefaultSize, 0);
@@ -81,17 +90,10 @@ void FunctionSetupPanel::Create()
       new wxButton(this, ID_BUTTON, "Save", wxDefaultPosition, wxDefaultSize, 0);
    mSaveButton->Enable(mEnableSave);
 
-   //wxStaticText
-   wxStaticText *fileStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("File: "),
-                       wxDefaultPosition, wxDefaultSize, 0);
-      
    // wxTextCtrl
-   mFileNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(250,20), 0);
-   mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-                            wxDefaultPosition, wxDefaultSize,
-                            wxTE_MULTILINE | wxGROW);
+   mFileContentsTextCtrl = 
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+         wxDefaultSize, wxTE_MULTILINE | wxGROW);
    mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
 
    //------------------------------------------------------

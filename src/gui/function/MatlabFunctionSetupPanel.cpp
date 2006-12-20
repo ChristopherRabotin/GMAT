@@ -54,7 +54,7 @@ MatlabFunctionSetupPanel::MatlabFunctionSetupPanel(wxWindow *parent, const wxStr
 //------------------------------------------------------------------------------
 void MatlabFunctionSetupPanel::Create()
 {
-   int bsize = 3; // border size
+   int bsize = 2; // border size
    
    wxStaticBox *topStaticBox = new wxStaticBox(this, -1, wxT(""));
 
@@ -63,18 +63,17 @@ void MatlabFunctionSetupPanel::Create()
    mTopSizer = new wxStaticBoxSizer(topStaticBox, wxHORIZONTAL);
    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
 
+   //wxStaticText
+   wxStaticText *pathStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Path: "), wxDefaultPosition, 
+         wxDefaultSize, 0);
+   // wxTextCtrl
+   mPathTextCtrl = 
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
+         wxSize(250,20), 0);
    // create buttons
    mBrowseButton =
       new wxButton(this, ID_BUTTON, "Browse", wxDefaultPosition, wxDefaultSize, 0);
-
-   //wxStaticText
-   wxStaticText *pathStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Path: "),
-                       wxDefaultPosition, wxDefaultSize, 0);
-      
-   // wxTextCtrl
-   mPathTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(250,20), 0);
 
    //------------------------------------------------------
    // add to sizer

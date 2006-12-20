@@ -79,7 +79,7 @@ CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void CelestialBodyPanel::Create()
 {
-   int bsize = 3; // border size
+   int bsize = 2; // border size
 
    wxStaticBox *staticBox = new wxStaticBox(this, -1, wxT(""));
    wxStaticBox *analyticStaticBox = new wxStaticBox(this, -1, wxT("Low Fidelity Model"));
@@ -93,121 +93,125 @@ void CelestialBodyPanel::Create()
    wxBoxSizer *horizontalBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
    wxString emptyList[] = {};
 
-   mMuTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-
-   mEquatorialRadiusTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-
-   mFlatteningTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-
-   mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mIntervalTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement1TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement2TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement3TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement4TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement5TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-   mElement6TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                 wxDefaultPosition, wxSize(150,-1), 0);
-                                 
-   muStaticText = new wxStaticText(this, ID_TEXT, wxT("Mu"),
-          wxDefaultPosition, wxDefaultSize, 0);
+   // Mu
+   muStaticText = new wxStaticText(this, ID_TEXT, wxT("Mu"), wxDefaultPosition,
+      wxDefaultSize, 0);
+   mMuTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+      wxSize(150,-1), 0);
    unitStaticTextMu = new wxStaticText(this, ID_TEXT, wxT("km^3/s^2"), 
-          wxDefaultPosition, wxDefaultSize, 0);
+      wxDefaultPosition, wxDefaultSize, 0);
 
+   // Equatorial Radius
    equatorialRadiusStaticText = new wxStaticText(this, ID_TEXT, 
-          wxT("Equatorial Radius"),wxDefaultPosition,wxDefaultSize, 0);
+      wxT("Equatorial Radius"),wxDefaultPosition,wxDefaultSize, 0);
+   mEquatorialRadiusTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticTextER =  new wxStaticText(this, ID_TEXT, wxT("km"), 
-          wxDefaultPosition, wxDefaultSize, 0);
+      wxDefaultPosition, wxDefaultSize, 0);
 
+   // Flattening
    flatteningStaticText = new wxStaticText(this, ID_TEXT, wxT("Flattening"),
-          wxDefaultPosition, wxDefaultSize, 0);
+      wxDefaultPosition, wxDefaultSize, 0);
+   mFlatteningTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticTextFlat =  new wxStaticText(this, ID_TEXT, wxT(""), 
-          wxDefaultPosition, wxDefaultSize, 0);
+      wxDefaultPosition, wxDefaultSize, 0);
 
-   epochStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Initial Epoch"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   unitStaticTextepoch =
-      new wxStaticText(this, ID_TEXT, wxT("A1ModJulian"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-
+   // Nutation Update Interval
    intervalStaticText =
       new wxStaticText(this, ID_TEXT, "Nutation Update Interval",
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mIntervalTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticTextinterval =
-      new wxStaticText(this, ID_TEXT, wxT("sec"),
-                       wxDefaultPosition, wxDefaultSize, 0);
+      new wxStaticText(this, ID_TEXT, wxT("sec"), wxDefaultPosition, 
+         wxDefaultSize, 0);
 
+   // Initial State with Respect to Central Body
    initialStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Initial State with Respect to Central Body: "),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   centralBodyText=
+      new wxStaticText(this, ID_TEXT, 
+         wxT("Initial State with Respect to Central Body: "), wxDefaultPosition, 
+         wxDefaultSize, 0);
+   centralBodyText =
       new wxStaticText(this, ID_TEXT, wxT("central body"),
                        wxDefaultPosition, wxDefaultSize, 0);
    centralBodyText->SetFont(wxFont(8, wxSWISS, wxNORMAL, wxBOLD));
-   noCentralBodyText=
+   noCentralBodyText =
       new wxStaticText(this, ID_TEXT, wxT(""),
                        wxDefaultPosition, wxDefaultSize, 0);
 
+   // Initial Epoch
+   epochStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Initial Epoch"), wxDefaultPosition,
+         wxDefaultSize, 0);
+   mEpochTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
+   unitStaticTextepoch =
+      new wxStaticText(this, ID_TEXT, wxT("A1ModJulian"), wxDefaultPosition, 
+         wxDefaultSize, 0);
+
+   // Elements
    nameStaticText1 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[0].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement1TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText1 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[0].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
 
    nameStaticText2 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[1].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement2TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText2 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[1].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-                       
+         wxDefaultPosition, wxDefaultSize, 0);
+
    nameStaticText3 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[2].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement3TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText3 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[2].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-                       
+         wxDefaultPosition, wxDefaultSize, 0);
+
    nameStaticText4 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[3].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement4TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText4 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[3].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-                       
+         wxDefaultPosition, wxDefaultSize, 0);
+
    nameStaticText5 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[4].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement5TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText5 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[4].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-                       
+         wxDefaultPosition, wxDefaultSize, 0);
+
    nameStaticText6 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_NAMES[5].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-
+         wxDefaultPosition, wxDefaultSize, 0);
+   mElement6TextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+      wxDefaultPosition, wxSize(150,-1), 0);
    unitStaticText6 =
       new wxStaticText(this, ID_TEXT, KEP_ELEMENT_UNITS[5].c_str(),
-                       wxDefaultPosition, wxDefaultSize, 0);
-
+         wxDefaultPosition, wxDefaultSize, 0);
+                                 
+   // Rotation Data Source
    rotDataSourceText =
       new wxStaticText(this, ID_TEXT, "Rotation Data Source",
-                       wxDefaultPosition, wxDefaultSize, 0);
-                       
+         wxDefaultPosition, wxDefaultSize, 0);
    rotDataSourceCB = new wxComboBox( this, ID_COMBO, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
+      wxDefaultPosition, wxSize(150,-1), 0, emptyList, 
+      wxCB_DROPDOWN | wxCB_READONLY );
 
    flexGridSizer0->Add( muStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    flexGridSizer0->Add( mMuTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);

@@ -103,11 +103,6 @@ void AttitudePanel::Create()
       MessageInterface::ShowMessage("AttitudePanel::Create() entered\n");
    #endif
    
-   #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage
-         ("AttitudePanel::Create() Creating wxStaticText objects.\n");
-   #endif
-   
    // arrays to hold temporary values
    unsigned int x;
    for (x = 0; x < 3; ++x)
@@ -124,26 +119,74 @@ void AttitudePanel::Create()
    {
       cosineMatrix[x] = new wxString();
    }
-   
-   //wxStaticText
+      
+   // Mode
+//   wxString *attitudeModeArray = new wxString;
+//   *attitudeModeArray = "Kinematic";
+   wxString *attitudeModeArray = new wxString[2];
+   attitudeModeArray[0] = "CSFixed";
+   attitudeModeArray[1] = "Spinner";
+
    config1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude Mode"),
+      new wxStaticText( this, ID_TEXT, wxT("Mode"),
                         wxDefaultPosition, wxDefaultSize, 0);
+   config1ComboBox = 
+      new wxComboBox( this, ID_CB_CONFIG, wxT(attitudeModeArray[0]), 
+         wxDefaultPosition, wxDefaultSize, 2, attitudeModeArray, 
+         wxCB_DROPDOWN|wxCB_READONLY );
+
+   // Coordinate System
    config2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Coordinate System"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   config3StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Kinematic Attitude Type"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+         wxDefaultPosition, wxDefaultSize, 0);
+   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_CONFIG, 
+      wxDefaultSize);
+
+   //Kinematic Attitude Type
+//   wxString *kinematicAttitudeTypeArray = new wxString[2];
+//   kinematicAttitudeTypeArray[0] = "CSFixed";
+//   kinematicAttitudeTypeArray[1] = "Spinner";
+//
+//   config3StaticText =
+//      new wxStaticText( this, ID_TEXT, wxT("Kinematic Attitude Type"),
+//                        wxDefaultPosition, wxDefaultSize, 0);
+//   config3ComboBox = 
+//      new wxComboBox( this, ID_CB_CONFIG, wxT(kinematicAttitudeTypeArray[0]),
+//         wxDefaultPosition, wxDefaultSize, 2,
+//         kinematicAttitudeTypeArray, wxCB_DROPDOWN|wxCB_READONLY );
+
+   //Euler Angle Sequence
+   StringArray eulerSequenceStringArray = Attitude::GetEulerSequenceStrings();
+   
+   wxString *estArray = new wxString[12];  // Euler sequence types
+   for (Integer i=0; i<12; i++)
+      estArray[i] = eulerSequenceStringArray[i].c_str();
+
    config4StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Euler Angle Sequence"),
                         wxDefaultPosition, wxDefaultSize, 0);
+   config4ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(estArray[0]),
+                      wxDefaultPosition, wxDefaultSize, 12,
+                      estArray, wxCB_DROPDOWN|wxCB_READONLY );
+
+   // State Type
    stateTypeStaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
-   stateTypeRate4StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude Rate State Type"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+
+   stateTypeArray.push_back("Euler Angles");
+   stateTypeArray.push_back("Quaternions");
+   stateTypeArray.push_back("DCM");
+
+   wxString *stArray = new wxString[StateTypeCount];
+   for (Integer i=0; i<StateTypeCount; i++)
+      stArray[i] = stateTypeArray[i].c_str();
+
+   stateTypeComboBox = 
+      new wxComboBox( this, ID_CB_ST, wxT(stArray[STARTUP_STATE_TYPE_SELECTION]),
+         wxDefaultPosition, wxSize(180,20), StateTypeCount, stArray, 
+         wxCB_DROPDOWN|wxCB_READONLY );
+
    st1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("String 1"),
                         wxDefaultPosition, wxSize(80,20), 0);
@@ -165,22 +208,6 @@ void AttitudePanel::Create()
    col3StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Column 3"),
                         wxDefaultPosition, wxSize(80,20), 0);
-   str1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("String 1"),
-                        wxDefaultPosition, wxSize(125,20), 0);
-   str2StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("String 2"),
-                        wxDefaultPosition, wxSize(125,20), 0);
-   str3StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("String 3"),
-                        wxDefaultPosition, wxSize(125,20), 0);
-
-   #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage
-         ("AttitudePanel::Create() Creating wxTextCtrl objects\n");
-   #endif
-   
-   //wxTextCtrl
    st1TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_ST, wxT(""),
                       wxDefaultPosition, wxSize(60,-1), 0 );
@@ -211,86 +238,68 @@ void AttitudePanel::Create()
    st10TextCtrl =
       new wxTextCtrl( this, ID_TEXTCTRL_ST, wxT(""),
                       wxDefaultPosition, wxSize(60,-1), 0 );  
-                  
+
+   // Rate State Type
+   stateTypeRate4StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Attitude Rate State Type"),
+                        wxDefaultPosition, wxDefaultSize, 0);
+
+   stateTypeRateArray.push_back("Euler Angles Rates");
+   stateTypeRateArray.push_back("Angular Velocity");
+   
+   wxString *strArray = new wxString[RateStateTypeCount];
+   for (Integer i=0; i<RateStateTypeCount; i++)
+      strArray[i] = stateTypeRateArray[i].c_str();
+
+   stateTypeRateComboBox =
+      new wxComboBox( this, ID_CB_STR, 
+         wxT(strArray[STARTUP_RATE_STATE_TYPE_SELECTION]), wxDefaultPosition, 
+         wxSize(180,20), RateStateTypeCount, strArray, 
+         wxCB_DROPDOWN|wxCB_READONLY );                  
+
+   str1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("String 1"), wxDefaultPosition, 
+         wxSize(125,20), 0);
+   str2StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("String 2"), wxDefaultPosition, 
+         wxSize(125,20), 0);
+   str3StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("String 3"), wxDefaultPosition, 
+         wxSize(125,20), 0);
+
    str1TextCtrl =
-      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""),
-                      wxDefaultPosition, wxSize(100,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""), wxDefaultPosition, 
+         wxSize(100,-1), 0 );
    str2TextCtrl =
-      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""),
-                      wxDefaultPosition, wxSize(100,-1), 0 );
+      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""), wxDefaultPosition, 
+         wxSize(100,-1), 0 );
    str3TextCtrl =
-      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""),
-                      wxDefaultPosition, wxSize(100,-1), 0 );                
+      new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""), wxDefaultPosition, 
+         wxSize(100,-1), 0 );                
+
+   wxStaticText *rateUnits1 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   wxStaticText *rateUnits2 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   wxStaticText *rateUnits3 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+
+   #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("AttitudePanel::Create() Creating wxTextCtrl objects\n");
+   #endif
+   
+   //wxTextCtrl
+                  
 /*
         attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
         attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
         attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
 
 */
-         wxStaticText *rateUnits1 =
-           new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-         wxStaticText *rateUnits2 =
-           new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-         wxStaticText *rateUnits3 =
-           new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
          ("AttitudePanel::Create() Creating wxString objects\n");
    #endif
 
-   //StringArray Initialization
-   stateTypeArray.push_back("Euler Angles");
-   stateTypeArray.push_back("Quaternions");
-   stateTypeArray.push_back("DCM");
-   stateTypeRateArray.push_back("Euler Angles Rates");
-   stateTypeRateArray.push_back("Angular Velocity");
-   
-   wxString *stArray = new wxString[StateTypeCount];
-   for (Integer i=0; i<StateTypeCount; i++)
-      stArray[i] = stateTypeArray[i].c_str();
-     
-   wxString *strArray = new wxString[RateStateTypeCount];
-   for (Integer i=0; i<RateStateTypeCount; i++)
-      strArray[i] = stateTypeRateArray[i].c_str();
-   
-   wxString *attitudeModeArray = new wxString;
-   *attitudeModeArray = "Kinematic";
-   
-   wxString *kinematicAttitudeTypeArray = new wxString[2];
-   kinematicAttitudeTypeArray[0] = "CSFixed";
-   kinematicAttitudeTypeArray[1] = "Spinner";
-   
-   StringArray eulerSequenceStringArray = Attitude::GetEulerSequenceStrings();
-   
-   wxString *estArray = new wxString[12];  // Euler sequence types
-   for (Integer i=0; i<12; i++)
-      estArray[i] = eulerSequenceStringArray[i].c_str();
-      
-   #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage
-         ("AttitudePanel::Create() Creating wxComboBox objects.\n");
-   #endif
-   
-   //wxComboBox
-   config1ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(attitudeModeArray[0]),
-                      wxDefaultPosition, wxDefaultSize, 1,
-                      attitudeModeArray, wxCB_DROPDOWN|wxCB_READONLY );
-   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_CONFIG, wxDefaultSize);
-
-   config3ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(kinematicAttitudeTypeArray[0]),
-                      wxDefaultPosition, wxDefaultSize, 2,
-                      kinematicAttitudeTypeArray, wxCB_DROPDOWN|wxCB_READONLY );
-   config4ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(estArray[0]),
-                      wxDefaultPosition, wxDefaultSize, 12,
-                      estArray, wxCB_DROPDOWN|wxCB_READONLY );
-   stateTypeComboBox = new wxComboBox( this, ID_CB_ST, wxT(stArray[STARTUP_STATE_TYPE_SELECTION]),
-                      wxDefaultPosition, wxSize(180,20), StateTypeCount,
-                      stArray, wxCB_DROPDOWN|wxCB_READONLY );
-   stateTypeRateComboBox =
-      new wxComboBox( this, ID_CB_STR, wxT(strArray[STARTUP_RATE_STATE_TYPE_SELECTION]),
-                      wxDefaultPosition, wxSize(180,20), RateStateTypeCount,
-                      strArray, wxCB_DROPDOWN|wxCB_READONLY );                  
                       
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage(
@@ -472,8 +481,8 @@ void AttitudePanel::Create()
    gSConfig->Add(  config1ComboBox, 0, wxEXPAND|wxALL, bsize);
    gSConfig->Add(config2StaticText, 0, wxALL, bsize);
    gSConfig->Add(  config2ComboBox, 0, wxEXPAND|wxALL, bsize);
-   gSConfig->Add(config3StaticText, 0, wxALL, bsize);
-   gSConfig->Add(  config3ComboBox, 0, wxEXPAND|wxALL, bsize);
+//   gSConfig->Add(config3StaticText, 0, wxALL, bsize);
+//   gSConfig->Add(  config3ComboBox, 0, wxEXPAND|wxALL, bsize);
    gSConfig->Add(config4StaticText, 0, wxALL, bsize);
    gSConfig->Add(  config4ComboBox, 0, wxEXPAND|wxALL, bsize);
    
