@@ -318,6 +318,10 @@ private:
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);
+
+   // for Debug
+   void ShowCommand(const std::string &title1, GmatCommand *cmd1,
+                    const std::string &title2 = "", GmatCommand *cmd2 = NULL);
    
    Moderator();
    virtual ~Moderator();
