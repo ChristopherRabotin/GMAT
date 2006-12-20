@@ -76,9 +76,10 @@ private:
    int mNumStop;
    int mNumMinimize;
    int mNumNonlinearConstraint;
-   
+
    bool inScriptEvent;
    bool inFiniteBurn;
+   int  mScriptEventCount;
    
    void InitializeCounter();
    void UpdateCommand();
