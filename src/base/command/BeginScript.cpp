@@ -19,6 +19,7 @@
 
 #include "BeginScript.hpp" 
 #include "TextParser.hpp"     // for DecomposeBlock()
+#include "CommandUtil.hpp"    // for GetNextCommand()
 #include <sstream>
 
 #include "MessageInterface.hpp"
@@ -147,16 +148,21 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                                                     const std::string &prefix,
                                                     const std::string &useName)
 {
-   std::stringstream gen;
-   //Integer whichOne;
-   Integer start;
-   std::string indent = "   ", cmdstr;
+   //Note: This method is called only once from the ScriptInterpreter::WriteScript()
+   // So all nested ScriptEvent generating string should be handled here
    
-   std::string commentLine = GetCommentLine(), 
-               inlineComment = GetInlineComment();
+   std::stringstream gen;
+   //    Integer start;
+   std::string indent = "   ", cmdstr;
+   std::string commentLine = GetCommentLine();
+   std::string inlineComment = GetInlineComment();
+   std::string newPrefix = prefix + indent;
+   
    if (commentLine != "")
       gen << commentLine;
+   
    gen << prefix << "BeginScript";
+   
    if (inlineComment != "")
       gen << inlineComment << "\n";
    else
@@ -164,34 +170,36 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    
    #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
    MessageInterface::ShowMessage
-      ("BeginScript::GetGeneratingString() this=%s, mode=%d, prefix=%s, "
-       "useName=%s\n", this->GetTypeName().c_str(), mode, prefix.c_str(),
+      ("BeginScript::GetGeneratingString() this=(%p)%s, mode=%d, prefix='%s', "
+       "useName='%s'\n", this, this->GetTypeName().c_str(), mode, prefix.c_str(),
        useName.c_str());
    #endif
    
    GmatCommand *current = next;
+   
    while (current != NULL)
    {
       #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
       MessageInterface::ShowMessage
-         ("   BeginScript::GetGeneratingString() current=%s\n",
+         ("BeginScript::GetGeneratingString() current=(%p)%s\n", current,
           current->GetTypeName().c_str());
       #endif
       
       if (current->GetTypeName() != "EndScript")
       {
-         cmdstr = current->GetGeneratingString();
-         start = 0;
-         while (cmdstr[start] == ' ')
-            ++start;
-         cmdstr = cmdstr.substr(start);
+         // Indent whole block within Begin/EndScript (loj: 12/15/06)
+         cmdstr = current->GetGeneratingString(mode, prefix, useName);
+         
+         //start = 0;
+         //while (cmdstr[start] == ' ')
+         //   ++start;
+         //cmdstr = cmdstr.substr(start);
          
          #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
          MessageInterface::ShowMessage
-            ("   BeginScript::cmdstr=\n%s\n", cmdstr.c_str());
+            ("BeginScript::GetGeneratingString() cmdstr=\n   \"%s\"\n", cmdstr.c_str());
          #endif
          
-         // Indent whole block within Begin/EndScript (loj: 11/28/06)
          //gen << indent << prefix << cmdstr << "\n";
          TextParser tp;
          StringArray textArray = tp.DecomposeBlock(cmdstr);
@@ -204,22 +212,26 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
                gen << "\n";
          }
          
-         current = current->GetNext();
+         // Get command after EndScript
+         //current = current->GetNext();
+         current = GmatCommandUtil::GetNextCommand(current);
+         
          if (current == NULL)
             gen << prefix << "EndScript;\n";
       }
       else
       {
-         gen << prefix << "EndScript;\n";
+         //gen << prefix << "EndScript;\n";         
+         gen << prefix << "EndScript;";
          current = NULL;
       }
    }
-
+   
    generatingString = gen.str();
-
+   
    #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
    MessageInterface::ShowMessage
-      ("BeginScript::GetGeneratingString() return generatingString=\n%s\n",
+      ("BeginScript::GetGeneratingString() return generatingString=\n%s\n\n",
        generatingString.c_str());
    #endif
    
