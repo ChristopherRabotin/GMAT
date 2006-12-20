@@ -26,8 +26,16 @@ namespace GmatCommandUtil
 {
    GmatCommand* GetLastCommand(GmatCommand *cmd);
    GmatCommand* GetNextCommand(GmatCommand *cmd);
+   GmatCommand* GetPreviousCommand(GmatCommand *cmd);
+   GmatCommand* GetMatchingEnd(GmatCommand *cmd);
+   GmatCommand* GetParentCommand(GmatCommand *top, GmatCommand *cmd);
+   GmatCommand* GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
    std::string GetCommandSeqString(GmatCommand *cmd);
-   void GetSubCommands(GmatCommand* brCmd, Integer level, std::string &cmdseq);
+   bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
+   void GetSubCommandString(GmatCommand* brCmd, Integer level,
+                            std::string &cmdseq);
+   void ShowCommand(const std::string &title1, GmatCommand *cmd1,
+                    const std::string &title2 = "", GmatCommand *cmd2 = NULL);
 }
 
 #endif // CommandUtil_hpp
