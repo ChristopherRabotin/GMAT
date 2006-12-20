@@ -46,47 +46,54 @@ void NonlinearConstraintPanel::Create()
 {
    int bsize = 2; // bordersize
 
-   // wxStaticText
+   // Optimizer
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Optimizer Name"),
                        wxDefaultPosition, wxSize(70, -1), 0);
-   wxStaticText *lhsStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Constraint Variable Name"), 
-                       wxDefaultPosition, wxSize(80, -1), 0);
-   wxStaticText *rhsStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Constraint Value"), 
-                       wxDefaultPosition, wxSize(80, -1), 0);
-   wxStaticText *blankStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(""), 
-                       wxDefaultPosition, wxSize(60, -1), 0);
-   wxStaticText *toleranceStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
-                       wxDefaultPosition, wxSize(60, -1), 0);
-   
-   // wxTextCtrl
-   mLHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(120,-1), 0);
-   mRHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(120,-1), 0);
-   mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(40,-1), 0);
-   
    mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
       			wxSize(120,-1));
 
+   // Constraint Variable
+   wxStaticText *lhsStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Constraint Variable Name"), 
+                       wxDefaultPosition, wxSize(80, -1), 0);
+   mLHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(120,-1), 0);
+
+   // Left choose button
+   mLeftChooseButton = new
+      wxButton(this, ID_BUTTON, wxT("Choose"), wxDefaultPosition, 
+      wxSize(50,-1), 0);
+      
+   // Comparison
+   wxStaticText *blankStaticText =
+      new wxStaticText(this, ID_TEXT, wxT(""), 
+                       wxDefaultPosition, wxSize(60, -1), 0);
    wxString comparisons[] = { wxT("<="), wxT(">="), wxT("=") };
    mComparisonComboBox =
          new wxComboBox(this, ID_COMBO, wxT(comparisons[0]), wxDefaultPosition,
                         wxSize(45,-1), 3, comparisons,
                         wxCB_DROPDOWN|wxCB_READONLY);
-                        
-   // wxButton
-   mLeftChooseButton = new
-      wxButton(this, ID_BUTTON, wxT("Choose"), wxDefaultPosition, wxSize(50,-1), 0);
-      
-   mRightChooseButton = new
-      wxButton(this, ID_BUTTON, wxT("Choose"), wxDefaultPosition, wxSize(50,-1), 0);
 
+   // Constraint Value
+   wxStaticText *rhsStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Constraint Value"), 
+                       wxDefaultPosition, wxSize(80, -1), 0);
+   mRHSTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(120,-1), 0);
+
+   // Right choose button
+   mRightChooseButton = new
+      wxButton(this, ID_BUTTON, wxT("Choose"), wxDefaultPosition, 
+      wxSize(50,-1), 0);
+
+   // Tolerence
+   wxStaticText *toleranceStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+                       wxDefaultPosition, wxSize(60, -1), 0);
+   mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(40,-1), 0);
+   
    wxBoxSizer *panelSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *solverSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *lhsSizer = new wxBoxSizer(wxVERTICAL);

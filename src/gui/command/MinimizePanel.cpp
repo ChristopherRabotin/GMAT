@@ -48,27 +48,26 @@ MinimizePanel::~MinimizePanel()
 
 void MinimizePanel::Create()
 {
-   int bsize = 3; // bordersize
+   int bsize = 2; // bordersize
 
-   // wxStaticText
+   // Optimizer
    wxStaticText *solverStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Solver"),
+      new wxStaticText(this, ID_TEXT, wxT("Optimizer"),
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *variableStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Variable to be Minimized"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   // wxTextCtrl
-   mVariableTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(250,-1), 0);
-   
    mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
       			wxSize(120,-1));
    
-   // wxButton
+   // Variable to be Minimized
+   wxStaticText *variableStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Variable to be Minimized"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mVariableTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(250,-1), 0);
+   
+   // Choose button
    mChooseButton = new
       wxButton(this, ID_BUTTON, wxT("Choose"), wxDefaultPosition, wxDefaultSize, 0);
-
+ 
    wxBoxSizer *panelSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *solverSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *variableSizer = new wxBoxSizer(wxVERTICAL);

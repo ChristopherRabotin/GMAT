@@ -83,63 +83,18 @@ VaryPanel::~VaryPanel()
 //------------------------------------------------------------------------------
 void VaryPanel::Create()
 {
-   int bsize = 3; // bordersize
+   int bsize = 2; // bordersize
 
-
-   // wxStaticText
+   // Targeter
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
-   wxStaticText *varStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Variable"), 
-                       wxDefaultPosition, wxSize(40, -1), 0);
-   wxStaticText *initialStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Initial Value"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   pertStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Perturbation"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   maxStepStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Max Step"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *minValueStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Lower"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *maxValueStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Upper"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   additiveStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Additive Scale Factor"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   multiplicativeStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Multiplicative Scale Factor"), 
-                       wxDefaultPosition, wxDefaultSize, 0);
-   
-   // wxTextCtrl
-   mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(250,-1), 0);
-   mInitialTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(80,-1), 0);
-   mPertTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                  wxDefaultPosition, wxSize(80,-1), 0);
-   mMaxStepTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                 wxDefaultPosition, wxSize(80,-1), 0);
-   mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
-   mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
-   mAdditiveTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
-   mMultiplicativeTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
-   
-   // wxString
+
    wxString emptyArray[] = 
    {
       wxT("No Solver Available")
    };
 
-   // wxComboBox
    StringArray solverNames;
    solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
    int solverCount = solverNames.size();
@@ -164,9 +119,63 @@ void VaryPanel::Create()
                         wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
    }
    
-   // wxButton
+   // Variable
+   wxStaticText *varStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Variable"), 
+                       wxDefaultPosition, wxSize(40, -1), 0);
+   mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(250,-1), 0);
    mViewVarButton = new
       wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+   
+   // Initial Value
+   wxStaticText *initialStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Initial Value"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mInitialTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Perturbation
+   pertStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Perturbation"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mPertTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                  wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Lower
+   wxStaticText *minValueStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Lower"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Upper
+   wxStaticText *maxValueStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Upper"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Max Step
+   maxStepStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Max Step"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mMaxStepTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                 wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Additive Scale Factor
+   additiveStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Additive Scale Factor"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mAdditiveTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
+
+   // Multiplicative Scale Factor
+   multiplicativeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Multiplicative Scale Factor"), 
+                       wxDefaultPosition, wxDefaultSize, 0);
+   mMultiplicativeTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                   wxDefaultPosition, wxSize(80,-1), 0);
    
    // wx*Sizers
    wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
