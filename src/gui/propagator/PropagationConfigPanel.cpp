@@ -269,12 +269,10 @@ void PropagationConfigPanel::SaveData()
       ShowPropData("SaveData() BEFORE saving Integrator");
       #endif
       
-   MessageInterface::ShowMessage("Changed Integrator \n");
       isIntegratorChanged = false;
 
       if (isIntegratorDataChanged)
       {
-   MessageInterface::ShowMessage("Changed Integrator and data \n");
          isIntegratorDataChanged = false;
          if (!SaveIntegratorData())
             canClose = false;
@@ -285,7 +283,6 @@ void PropagationConfigPanel::SaveData()
    }
    else if (isIntegratorDataChanged)
    {
-   MessageInterface::ShowMessage("Changed data \n");
       isIntegratorDataChanged = false;
       if (!SaveIntegratorData())
          canClose = false;
@@ -1801,10 +1798,10 @@ void PropagationConfigPanel::SavePotFile()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveIntegratorData()
 {
-//   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveIntegratorData() entered\n");
-//   #endif
+   #endif
    
 // LTR 09/15/06 - moved to where setting of Max Step Size is done
 //   Real min = atof(minStepTextCtrl->GetValue());
