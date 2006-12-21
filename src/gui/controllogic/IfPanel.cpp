@@ -247,9 +247,16 @@ void IfPanel::SaveData()
              "   mRhsList[%s]\n", i, mLogicalOpStrings[i].c_str(), mLhsList[i].c_str(),
              mEqualityOpStrings[i].c_str(), mRhsList[i].c_str());
          #endif
-         
-         theIfCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
-                                    mRhsList[i], i);
+         try
+         {
+            theIfCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
+                                       mRhsList[i], i);
+         }
+         catch (BaseException &be)
+         {
+            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetMessage());
+            return;            
+         }
          
          if (i > 0)
          {

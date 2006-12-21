@@ -23,6 +23,7 @@
 #include "ConditionalBranch.hpp"
 #include "Parameter.hpp"
 #include "StringUtil.hpp"       // for GetArrayIndex()
+#include "Moderator.hpp"
 
 #include "MessageInterface.hpp"
 
@@ -262,9 +263,44 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
    
    if (ot == NumberOfOperators)
    {
-      throw CommandException(
-             "ConditionalCommand error: invalid operator");
+       std::string errMsg = "The value of \"" + operation + 
+            "\" for the relational operator of conditional \"" 
+            + typeName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [==, ~=, <, >, <=, >=]."; 
+       throw CommandException(errMsg);
    }
+
+    static Moderator *mod = Moderator::Instance();
+    Real rval;
+    // if left is just a number, skip
+    if (GmatStringUtil::ToDouble(lhs, &rval))
+    {
+       ;
+    }
+    else if (mod->GetParameter(lhs) == NULL)
+    {
+       std::string errMsg = "The value of \"" + lhs + 
+            "\" for the left-hand-side of conditional \"" 
+            + typeName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [Real number, variable, array element, or object parameter]."; 
+       throw CommandException(errMsg);
+    }
+    // if right is just a number, skip
+    if (GmatStringUtil::ToDouble(rhs, &rval))
+    {
+       ;
+    }
+    else if (mod->GetParameter(rhs) == NULL)
+    {
+       std::string errMsg = "The value of \"" + rhs + 
+            "\" for the right-hand-side of conditional \"" 
+            + typeName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [Real number, variable, array element, or object parameter]."; 
+       throw CommandException(errMsg);
+    }
    
    // Handle LHS Array indexing
    Integer lhsRow, lhsCol;
@@ -363,8 +399,12 @@ bool ConditionalBranch::SetConditionOperator(const std::string &op,
    
    if (ot == NumberOfLogicalOperators)
    {
-      throw CommandException(
-            "ConditionalCommand error: invalid logical operator");
+       std::string errMsg = "The value of \"" + op + 
+            "\" for the logical operator of conditional \"" 
+            + typeName +
+            "\" is not an allowed value.  The allowed values are: " +
+            " [&,|]."; 
+       throw CommandException(errMsg);
    }
    
    if ((atIndex == -999) || (atIndex == numberOfLogicalOps))

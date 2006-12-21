@@ -249,8 +249,16 @@ void WhilePanel::SaveData()
              mEqualityOpStrings[i].c_str(), mRhsList[i].c_str());
          #endif
          
-         theWhileCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
+         try
+         {
+          theWhileCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
                                        mRhsList[i], i);
+         }
+         catch (BaseException &be)
+         {
+            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetMessage()); 
+            return;           
+         }
          
          if (i > 0)
          {
