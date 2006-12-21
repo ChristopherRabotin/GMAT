@@ -191,50 +191,52 @@ void NonlinearConstraintPanel::SaveData()
    
    try
    {
-   Real rvalue;
-   canClose = true;
-      
-   std::string inputString;
-   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         mNonlinearConstraintCommand->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
+      Real rvalue;
+	   canClose = true;
+	      
+	   std::string inputString;
+	   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" 
+	                     + mNonlinearConstraintCommand->GetName() + 
+	                     "\" is not an allowed value. \n"
+	                     "The allowed values are: [%s].";                        
   
-   //-------------------------------------------------------
-   // Saving Solver Data
-   //-------------------------------------------------------
-      
-   mNonlinearConstraintCommand->SetStringParameter
-      (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
-       mSolverComboBox->GetValue().c_str());
-
-   mNonlinearConstraintCommand->SetStringParameter
-      (mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"),
-       mLHSTextCtrl->GetValue().c_str());
-
-   mNonlinearConstraintCommand->SetStringParameter
-      (mNonlinearConstraintCommand->GetParameterID("Operator"),
-       mComparisonComboBox->GetValue().c_str());
-
-   mNonlinearConstraintCommand->SetStringParameter
-      (mNonlinearConstraintCommand->GetParameterID("ConstraintValue"),
-       mRHSTextCtrl->GetValue().c_str());
-       
-   inputString = mTolTextCtrl->GetValue();      
-
-   // check to see if input is a real
-   if (GmatStringUtil::ToDouble(inputString,&rvalue))  
-      mNonlinearConstraintCommand->SetRealParameter
-         (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
-          rvalue);
-   else
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-         inputString.c_str(), "Tolerance","Real Number >= 0");
-
-      canClose = false;
-   }
-   
-   theApplyButton->Disable();
+	   //-------------------------------------------------------
+	   // Saving Solver Data
+	   //-------------------------------------------------------
+	      
+	   mNonlinearConstraintCommand->SetStringParameter
+	      (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
+	       mSolverComboBox->GetValue().c_str());
+	
+	   mNonlinearConstraintCommand->SetStringParameter
+	      (mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"),
+	       mLHSTextCtrl->GetValue().c_str());
+	
+	   mNonlinearConstraintCommand->SetStringParameter
+	      (mNonlinearConstraintCommand->GetParameterID("Operator"),
+	       mComparisonComboBox->GetValue().c_str());
+	
+	   mNonlinearConstraintCommand->SetStringParameter
+	      (mNonlinearConstraintCommand->GetParameterID("ConstraintValue"),
+	       mRHSTextCtrl->GetValue().c_str());
+	       
+	   inputString = mTolTextCtrl->GetValue();      
+	
+	   // check to see if input is a real
+	   if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
+	      mNonlinearConstraintCommand->SetRealParameter
+	         (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
+	          rvalue);
+	   else
+	   {
+	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	         inputString.c_str(), "Tolerance","Real Number > 0.0");
+	
+	      canClose = false;
+	   }
+	   
+//	   theApplyButton->Disable();
+      EnableUpdate(false);
    
    }
    catch (BaseException &e)
