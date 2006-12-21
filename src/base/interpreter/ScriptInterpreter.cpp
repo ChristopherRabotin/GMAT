@@ -20,6 +20,7 @@
 #include "MathParser.hpp"
 #include "StringUtil.hpp"      // for GmatStringUtil::
 
+//#define DEBUG_READ_FIRST_PASS 1
 //#define DEBUG_SCRIPT_READING 1
 //#define DEBUG_SCRIPT_WRITING
 //#define DEBUG_DELAYED_BLOCK 1
@@ -297,7 +298,7 @@ bool ScriptInterpreter::SetOutStream(std::ostream *str)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::ReadFirstPass()
 {
-   #if DEBUG_SCRIPT_READING
+   #if DEBUG_READ_FIRST_PASS
    MessageInterface::ShowMessage("ScriptInterpreter::ReadFirstPass() entered\n");
    #endif
    
@@ -323,21 +324,9 @@ bool ScriptInterpreter::ReadFirstPass()
          inStream->seekg(charCounter, std::ios::beg);
       }
       
-      if ((ch == '\0') || (ch == EOF))
-         break;
-      
-      if (ch == '\r' || ch == '\n')
-      {
-         // Why is line number incorrect for some script files?
-         lineCounter++;
-         inStream->seekg(charCounter+1, std::ios::beg);
-         if (inStream->peek() == '\n')
-            charCounter++;
-      }
-      
       newLine = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
       
-      #if DEBUG_SCRIPT_READING > 1
+      #if DEBUG_READ_FIRST_PASS
       MessageInterface::ShowMessage("newLine=%s\n", newLine.c_str());
       #endif
       
@@ -355,16 +344,34 @@ bool ScriptInterpreter::ReadFirstPass()
          lineNumbers.push_back(lineCounter);
          controlLines.push_back(type);
       }
+      
+      if (ch == EOF)
+         break;
+      
+      if (ch == '\r' || ch == '\n')
+      {
+         lineCounter++;
+         inStream->seekg(charCounter+1, std::ios::beg);
+         // Why is line number incorrect for some script files?
+         if (inStream->peek() == '\n')
+            charCounter++;
+      }
    }
    
    // Clear staus flags first and then move pointer to beginning
    inStream->clear();
    inStream->seekg(std::ios::beg);
    
-   // Check for unbalaced control logic
+   #if DEBUG_READ_FIRST_PASS
+   for (UnsignedInt i=0; i<lineNumbers.size(); i++)
+      MessageInterface::ShowMessage
+         ("     %d: %s\n", lineNumbers[i], controlLines[i].c_str());
+   #endif
+   
+   // Check for unbalaced branch command Begin/End
    bool retval = CheckBranchCommands(lineNumbers, controlLines);
    
-   #if DEBUG_SCRIPT_READING
+   #if DEBUG_READ_FIRST_PASS
    MessageInterface::ShowMessage
       ("ScriptInterpreter::ReadFirstPass() returning %d\n", retval);
    #endif
