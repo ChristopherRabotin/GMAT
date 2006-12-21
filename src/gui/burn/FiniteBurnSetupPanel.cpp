@@ -391,7 +391,7 @@ void FiniteBurnSetupPanel::SaveData()
       inputString = scaleTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
       {  
          id = theBurn->GetParameterID("BurnScaleFactor");
          theBurn->SetRealParameter(id, rvalue);
