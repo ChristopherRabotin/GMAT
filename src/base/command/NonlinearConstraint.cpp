@@ -1225,17 +1225,19 @@ const std::string& NonlinearConstraint::GetGeneratingString(Gmat::WriteMode mode
                                             const std::string &useName)
 {
    // Build the local string
-   std::stringstream tol;
-   tol << tolerance;
+   //std::stringstream tol;  // may need tolerance in the future
+   //tol << tolerance;
    std::string opString;
    if (op == EQUAL)                   opString = "=";
    else if (op == LESS_THAN_OR_EQUAL) opString = "<=";
    else                               opString = ">=";
+   //std::string gen = prefix + "NonlinearConstraint " + optimizerName + "(" + 
+   //                  constraintName +  opString + nlcParmName + 
+   //                  ", {Tolerance = " + tol.str() + "}";
    std::string gen = prefix + "NonlinearConstraint " + optimizerName + "(" + 
-                     constraintName +  opString + nlcParmName + 
-                     ", {Tolerance = " + tol.str();
-
-   generatingString = gen + "});";
+                     constraintName +  opString + nlcParmName; 
+ 
+   generatingString = gen + ");";
    // Then call the base class method
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }

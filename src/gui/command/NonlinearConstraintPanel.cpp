@@ -88,9 +88,9 @@ void NonlinearConstraintPanel::Create()
       wxSize(50,-1), 0);
 
    // Tolerence
-   wxStaticText *toleranceStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
-                       wxDefaultPosition, wxSize(60, -1), 0);
+   //wxStaticText *toleranceStaticText =
+   //   new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+   //                    wxDefaultPosition, wxSize(60, -1), 0);
    mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(40,-1), 0);
    
@@ -101,7 +101,7 @@ void NonlinearConstraintPanel::Create()
    wxBoxSizer *rhsSizer = new wxBoxSizer(wxVERTICAL);
    wxBoxSizer *rhsInterSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *conditionSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *toleranceSizer = new wxBoxSizer(wxVERTICAL);
+   //wxBoxSizer *toleranceSizer = new wxBoxSizer(wxVERTICAL);
    
    solverSizer->Add(solverStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    solverSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -121,14 +121,14 @@ void NonlinearConstraintPanel::Create()
    conditionSizer->Add(blankStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    conditionSizer->Add(mComparisonComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
 
-   toleranceSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   toleranceSizer->Add(mTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   //toleranceSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   //toleranceSizer->Add(mTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    
    panelSizer->Add(solverSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(lhsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(conditionSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    panelSizer->Add(rhsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   panelSizer->Add(toleranceSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   //panelSizer->Add(toleranceSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
@@ -168,10 +168,10 @@ void NonlinearConstraintPanel::LoadData()
 
       mRHSTextCtrl->SetValue(wxT(loadedValue.c_str()));
       
-      Real tolValue = mNonlinearConstraintCommand->
-         GetRealParameter(mNonlinearConstraintCommand->GetParameterID("Tolerance"));
+      //Real tolValue = mNonlinearConstraintCommand->
+       //  GetRealParameter(mNonlinearConstraintCommand->GetParameterID("Tolerance"));
 
-      mTolTextCtrl->SetValue(theGuiManager->ToWxString(tolValue));
+      //mTolTextCtrl->SetValue(theGuiManager->ToWxString(tolValue));
      
    }
    catch (BaseException &e)
@@ -191,7 +191,7 @@ void NonlinearConstraintPanel::SaveData()
    
    try
    {
-      Real rvalue;
+      //Real rvalue;
 	   canClose = true;
 	      
 	   std::string inputString;
@@ -223,17 +223,17 @@ void NonlinearConstraintPanel::SaveData()
 	   inputString = mTolTextCtrl->GetValue();      
 	
 	   // check to see if input is a real
-	   if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
-	      mNonlinearConstraintCommand->SetRealParameter
-	         (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
-	          rvalue);
-	   else
-	   {
-	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	         inputString.c_str(), "Tolerance","Real Number > 0.0");
-	
-	      canClose = false;
-	   }
+	   //if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
+	   //   mNonlinearConstraintCommand->SetRealParameter
+	   //      (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
+	   //       rvalue);
+	   //else
+	   //{
+	   //   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+	   //      inputString.c_str(), "Tolerance","Real Number > 0.0");
+	//
+	   //   canClose = false;
+	   //}
 	   
 //	   theApplyButton->Disable();
       EnableUpdate(false);
