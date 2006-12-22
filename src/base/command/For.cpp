@@ -29,6 +29,7 @@
 
 //#define DEBUG_FOR 1
 //#define DEBUG_FOR_INIT 1
+//#define DEBUG_FOR_REAL
 
 //---------------------------------
 // static data
@@ -395,7 +396,14 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,
                                             const std::string &useName)
 {
+   #ifdef DEBUG_FOR_REAL
+      MessageInterface::ShowMessage("Entering For::GetGenStr\n");
+      MessageInterface::ShowMessage("... startValue = %.12f\n", startValue);
+      MessageInterface::ShowMessage("... stepSize   = %.12f\n", stepSize);
+      MessageInterface::ShowMessage("... endValue   = %.12f\n", endValue);
+   #endif
    std::stringstream gen;
+   gen.precision(4);
 
    if (indexName != "")
       gen << indexName;
@@ -668,9 +676,33 @@ std::string For::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real For::GetRealParameter(const Integer id) const
 {
-   if (id == START_VALUE)   return startValue;
-   if (id == END_VALUE)     return endValue;
-   if (id == STEP)          return stepSize;
+   if (id == START_VALUE)
+   {
+      #ifdef DEBUG_FOR_REAL
+         MessageInterface::ShowMessage(
+         "Entering For::GetReal with id = %d, ", id);
+         MessageInterface::ShowMessage("And the value is : %.12f\n", startValue);
+      #endif
+      return startValue;
+   }
+   if (id == END_VALUE)
+   {
+      #ifdef DEBUG_FOR_REAL
+         MessageInterface::ShowMessage(
+         "Entering For::GetReal with id = %d, ", id);
+         MessageInterface::ShowMessage("And the value is : %.12f\n", endValue);
+      #endif
+      return endValue;
+   }
+   if (id == STEP)
+   {
+      #ifdef DEBUG_FOR_REAL
+         MessageInterface::ShowMessage(
+         "Entering For::GetReal with id = %d, ", id);
+         MessageInterface::ShowMessage("And the value is : %.12f\n", stepSize);
+      #endif
+      return stepSize;
+   }
    
    return BranchCommand::GetRealParameter(id);
 }
@@ -792,11 +824,16 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == START_NAME)
    {
+      #ifdef DEBUG_FOR_REAL
+         MessageInterface::ShowMessage(
+         "In For::SetStrP, setting startName to %s\n", value.c_str());
+      #endif
       startName = value;
       startParamName = value;
       startIsParam = true;
       if (isReal)
       {
+         startName = "";
          startValue = rval;
          startIsParam = false;
       }
@@ -816,11 +853,16 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == END_NAME)
    {
+      #ifdef DEBUG_FOR_REAL
+         MessageInterface::ShowMessage(
+         "In For::SetStrP, setting endName to %s\n", value.c_str());
+      #endif
       endName = value;
       endParamName = value;
       endIsParam = true;
       if (isReal)
       {
+         endName = "";
          endValue = rval;
          endIsParam = false;
       }
@@ -840,6 +882,7 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
       incrIsParam = true;
       if (isReal)
       {
+         incrName = "";
          stepSize = rval;
          incrIsParam = false;
       }
