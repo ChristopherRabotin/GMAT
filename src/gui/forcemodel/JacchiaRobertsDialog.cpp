@@ -14,7 +14,7 @@
 
 #include "JacchiaRobertsDialog.hpp"
 #include "MessageInterface.hpp"
-
+#include "StringUtil.hpp"          // for ToDouble()
 #include <wx/variant.h>
 
 //------------------------------------------------------------------------------
@@ -45,13 +45,13 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 JacchiaRobertsDialog::JacchiaRobertsDialog(wxWindow *parent, DragForce *dragForce)
-    : GmatDialog(parent, -1, wxString(_T("JacchiaRobertsDialog")))
+   : GmatDialog(parent, -1, wxString(_T("JacchiaRobertsDialog")))
 {
-    if (dragForce != NULL)    
-        theForce = dragForce;
-       
-    Create();
-    ShowData(); //loj: 3/7/05 Changed from Show()
+   if (dragForce != NULL)    
+      theForce = dragForce;
+   
+   Create();
+   ShowData();
 }
 
 //------------------------------------------------------------------------------
@@ -82,10 +82,10 @@ DragForce* JacchiaRobertsDialog::GetForce()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::Initialize()
 {  
-    if (theForce == NULL)
-        theForce->Initialize();
-        
-    useFile = false;
+   if (theForce == NULL)
+      theForce->Initialize();
+   
+   useFile = false;
 }
 
 //------------------------------------------------------------------------------
@@ -93,34 +93,34 @@ void JacchiaRobertsDialog::Initialize()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::Update()
 {
-    if (useFile)  
-    {
-        fileNameStaticText->Enable(true);
-        fileNameTextCtrl->Enable(true);
-        browseButton->Enable(true);
+   if (useFile)  
+   {
+      fileNameStaticText->Enable(true);
+      fileNameTextCtrl->Enable(true);
+      browseButton->Enable(true);
         
-        solarFluxStaticText->Enable(false);
-        avgSolarFluxStaticText->Enable(false);
-        geomagneticIndexStaticText->Enable(false);
+      solarFluxStaticText->Enable(false);
+      avgSolarFluxStaticText->Enable(false);
+      geomagneticIndexStaticText->Enable(false);
         
-        solarFluxTextCtrl->Enable(false);
-        avgSolarFluxTextCtrl->Enable(false);
-        geomagneticIndexTextCtrl->Enable(false); 
-    }
-    else
-    {
-        fileNameStaticText->Enable(false);
-        fileNameTextCtrl->Enable(false);
-        browseButton->Enable(false);
+      solarFluxTextCtrl->Enable(false);
+      avgSolarFluxTextCtrl->Enable(false);
+      geomagneticIndexTextCtrl->Enable(false); 
+   }
+   else
+   {
+      fileNameStaticText->Enable(false);
+      fileNameTextCtrl->Enable(false);
+      browseButton->Enable(false);
         
-        solarFluxStaticText->Enable(true);
-        avgSolarFluxStaticText->Enable(true);
-        geomagneticIndexStaticText->Enable(true);
+      solarFluxStaticText->Enable(true);
+      avgSolarFluxStaticText->Enable(true);
+      geomagneticIndexStaticText->Enable(true);
     
-        solarFluxTextCtrl->Enable(true);
-        avgSolarFluxTextCtrl->Enable(true);
-        geomagneticIndexTextCtrl->Enable(true);
-    }
+      solarFluxTextCtrl->Enable(true);
+      avgSolarFluxTextCtrl->Enable(true);
+      geomagneticIndexTextCtrl->Enable(true);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -128,57 +128,79 @@ void JacchiaRobertsDialog::Update()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::Create()
 {
-    // wxStaticText
-    solarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
-    avgSolarFluxStaticText = new wxStaticText( this, ID_TEXT, wxT("Average Solar Flux"), wxDefaultPosition, wxDefaultSize, 0 );
-    geomagneticIndexStaticText = new wxStaticText( this, ID_TEXT, wxT("Geomagnetic Index (Kp)"), wxDefaultPosition, wxDefaultSize, 0 );
-    fileNameStaticText = new wxStaticText( this, ID_TEXT, wxT("File Name"), wxDefaultPosition, wxDefaultSize, 0 );
+   // wxStaticText
+   solarFluxStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Solar Flux"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   avgSolarFluxStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Average Solar Flux"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   geomagneticIndexStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Geomagnetic Index (Kp)"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   fileNameStaticText =
+      new wxStaticText( this, ID_TEXT, wxT("File Name"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
     
-    // wxTextCtrl
-    solarFluxTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
-    avgSolarFluxTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
-    geomagneticIndexTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(150,-1), 0 );
-    fileNameTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(200,-1), 0 );
+   // wxTextCtrl
+   solarFluxTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(150,-1), 0 );
+   avgSolarFluxTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(150,-1), 0 );
+   geomagneticIndexTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(150,-1), 0 );
+   fileNameTextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
+                      wxDefaultPosition, wxSize(200,-1), 0 );
     
-    // wxButton
-    browseButton = new wxButton( this, ID_BUTTON, wxT("Browse"), wxDefaultPosition, wxDefaultSize, 0 );
+   // wxButton
+   browseButton =
+      new wxButton( this, ID_BUTTON, wxT("Browse"),
+                    wxDefaultPosition, wxDefaultSize, 0 );
     
-    // wxRadioButton
-    userInputRadioButton = new wxRadioButton(this, ID_RADIOBUTTON, wxT("User Input"), wxDefaultPosition, wxDefaultSize, 0 );
-    fileInputRadioButton = new wxRadioButton(this, ID_RADIOBUTTON, wxT("File Input"), wxDefaultPosition, wxDefaultSize, 0 );
+   // wxRadioButton
+   userInputRadioButton =
+      new wxRadioButton(this, ID_RADIOBUTTON, wxT("User Input"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
+   fileInputRadioButton =
+      new wxRadioButton(this, ID_RADIOBUTTON, wxT("File Input"),
+                        wxDefaultPosition, wxDefaultSize, 0 );
     
-    // wxSizer
-    wxBoxSizer *mainPageSizer = new wxBoxSizer(wxVERTICAL);
-    wxFlexGridSizer *userInputFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
-    wxFlexGridSizer *fileInputPageFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
+   // wxSizer
+   wxBoxSizer *mainPageSizer = new wxBoxSizer(wxVERTICAL);
+   wxFlexGridSizer *userInputFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
+   wxFlexGridSizer *fileInputPageFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
     
-    userInputFlexGridSizer->AddGrowableCol(1);
-    fileInputPageFlexGridSizer->AddGrowableCol(1);
+   userInputFlexGridSizer->AddGrowableCol(1);
+   fileInputPageFlexGridSizer->AddGrowableCol(1);
 
-    userInputFlexGridSizer->Add( userInputRadioButton, 0, wxALIGN_LEFT|wxALL, 5 );
-    userInputFlexGridSizer->Add( 100, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( 100, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( solarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( solarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( avgSolarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( avgSolarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( geomagneticIndexStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( geomagneticIndexTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( userInputRadioButton, 0, wxALIGN_LEFT|wxALL, 5 );
+   userInputFlexGridSizer->Add( 100, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( 100, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( solarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( solarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( avgSolarFluxStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( avgSolarFluxTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( geomagneticIndexStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( geomagneticIndexTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   userInputFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
 
-    fileInputPageFlexGridSizer->Add( fileInputRadioButton, 0, wxALIGN_CENTER|wxALL, 5 );
-    fileInputPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
-    fileInputPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
-    fileInputPageFlexGridSizer->Add( fileNameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
-    fileInputPageFlexGridSizer->Add( fileNameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    fileInputPageFlexGridSizer->Add( browseButton, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( fileInputRadioButton, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( 20, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( fileNameStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( fileNameTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
+   fileInputPageFlexGridSizer->Add( browseButton, 0, wxALIGN_CENTER|wxALL, 5 );
     
-    mainPageSizer->Add(userInputFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
-    mainPageSizer->Add(fileInputPageFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
+   mainPageSizer->Add(userInputFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
+   mainPageSizer->Add(fileInputPageFlexGridSizer, 0, wxALIGN_CENTER|wxALL, 5);
     
-    theMiddleSizer->Add(mainPageSizer, 0, wxALIGN_CENTER|wxALL, 5);
+   theMiddleSizer->Add(mainPageSizer, 0, wxALIGN_CENTER|wxALL, 5);
 }
 
 //------------------------------------------------------------------------------
@@ -186,79 +208,79 @@ void JacchiaRobertsDialog::Create()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::LoadData()
 {   
-    Initialize();
+   Initialize();
     
-    try
-    {
-       solarFluxID = theForce->GetParameterID("F107");
-       solarFluxTextCtrl->
-          SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
-    }
-    catch (BaseException &e)
-    {
-       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
-          e.GetMessage()); 
-    }
-    try
-    {
-       avgSolarFluxID = theForce->GetParameterID("F107A");
-       avgSolarFluxTextCtrl->
-          SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
-    }
-    catch (BaseException &e)
-    {
-       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
-          e.GetMessage()); 
-    }
-    try
-    {
-       geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
-       geomagneticIndexTextCtrl->
-          SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
-    }
-    catch (BaseException &e)
-    {
-       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
-          e.GetMessage()); 
-    }
-    try
-    {
-       solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
-       wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
+   try
+   {
+      solarFluxID = theForce->GetParameterID("F107");
+      solarFluxTextCtrl->
+         SetValue(wxVariant(theForce->GetRealParameter(solarFluxID)));
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+                                    e.GetMessage()); 
+   }
+   try
+   {
+      avgSolarFluxID = theForce->GetParameterID("F107A");
+      avgSolarFluxTextCtrl->
+         SetValue(wxVariant(theForce->GetRealParameter(avgSolarFluxID)));
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+                                    e.GetMessage()); 
+   }
+   try
+   {
+      geomagnecticIndexID = theForce->GetParameterID("MagneticIndex");
+      geomagneticIndexTextCtrl->
+         SetValue(wxVariant(theForce->GetRealParameter(geomagnecticIndexID)));
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+                                    e.GetMessage()); 
+   }
+   try
+   {
+      solarFluxFileID = theForce->GetParameterID("SolarFluxFile");
+      wxString filename = theForce->GetStringParameter(solarFluxFileID).c_str();
 
-       if (!filename.IsNull())
-          fileNameTextCtrl->SetValue(filename);
-    }
-    catch (BaseException &e)
-    {
-       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
-          e.GetMessage()); 
-    }    
-    try
-    {
-       inputSourceID = theForce->GetParameterID("InputSource");
-       inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
-    }
-    catch (BaseException &e)
-    {
-       MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
-          e.GetMessage()); 
-    }       
-    
-    if ( inputSourceString.CmpNoCase("Constant") == 0 )
-    {
-       useFile = false;
-       userInputRadioButton->SetValue(true);
-       fileInputRadioButton->SetValue(false); 
-    }
-    else if ( inputSourceString.CmpNoCase("File") == 0 )
-    {
-       useFile = true;
-       userInputRadioButton->SetValue(false);
-       fileInputRadioButton->SetValue(true);
-    }
-    
-    Update();
+      if (!filename.IsNull())
+         fileNameTextCtrl->SetValue(filename);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+                                    e.GetMessage()); 
+   }    
+   try
+   {
+      inputSourceID = theForce->GetParameterID("InputSource");
+      inputSourceString = theForce->GetStringParameter(inputSourceID).c_str();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("MSISE90Dialog::LoadData()\n" +
+                                    e.GetMessage()); 
+   }
+   
+   if ( inputSourceString.CmpNoCase("Constant") == 0 )
+   {
+      useFile = false;
+      userInputRadioButton->SetValue(true);
+      fileInputRadioButton->SetValue(false); 
+   }
+   else if ( inputSourceString.CmpNoCase("File") == 0 )
+   {
+      useFile = true;
+      userInputRadioButton->SetValue(false);
+      fileInputRadioButton->SetValue(true);
+   }
+   
+   Update();
 }
 
 //------------------------------------------------------------------------------
@@ -266,25 +288,71 @@ void JacchiaRobertsDialog::LoadData()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::SaveData()
 {
-    if (theOkButton->IsEnabled())
-    {
-        if (useFile)
-        {
-           inputSourceString = wxT("File");
-           theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-           theForce->SetStringParameter(solarFluxFileID, fileNameTextCtrl->GetValue().c_str() );
-           
-           //MessageInterface::ShowMessage("Saved filename%s\n", fileNameTextCtrl->GetValue().c_str());
-        }
-        else
-        {
-           inputSourceString = wxT("Constant");
-           theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-           theForce->SetRealParameter(solarFluxID, atof(solarFluxTextCtrl->GetValue()) );
-           theForce->SetRealParameter(avgSolarFluxID, atof(avgSolarFluxTextCtrl->GetValue()) );
-           theForce->SetRealParameter(geomagnecticIndexID, atof(geomagneticIndexTextCtrl->GetValue()) );         
-        }
-    }       
+   canClose = true;
+   
+   if (theOkButton->IsEnabled())
+   {
+      try
+      {
+         if (useFile)
+         {
+            inputSourceString = wxT("File");
+            theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
+            theForce->SetStringParameter(solarFluxFileID,
+                                         fileNameTextCtrl->GetValue().c_str() );
+            
+            //MessageInterface::ShowMessage("Saved filename%s\n",
+            //   fileNameTextCtrl->GetValue().c_str());
+         }
+         else
+         {
+            Real rval;
+            inputSourceString = wxT("Constant");
+            theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
+            
+            std::string str = solarFluxTextCtrl->GetValue().c_str();
+            if (GmatStringUtil::ToDouble(str, &rval))
+            {
+               theForce->SetRealParameter(solarFluxID, rval);
+            }
+            else
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "Invalid number entered: %s", str.c_str());
+               canClose = false;
+            }
+            
+            str = avgSolarFluxTextCtrl->GetValue();
+            if (GmatStringUtil::ToDouble(str, &rval))
+            {
+               theForce->SetRealParameter(avgSolarFluxID, rval);
+            }
+            else
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "Invalid number entered: %s", str.c_str());
+               canClose = false;
+            }
+            
+            str = geomagneticIndexTextCtrl->GetValue();
+            if (GmatStringUtil::ToDouble(str, &rval))
+            {
+               theForce->SetRealParameter(geomagnecticIndexID, rval);
+            }
+            else
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "Invalid number entered: %s", str.c_str());
+               canClose = false;
+            }
+         }
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         canClose = false;
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -300,7 +368,10 @@ void JacchiaRobertsDialog::ResetData()
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::OnTextChange(wxCommandEvent &event)
 {
-    theOkButton->Enable(true);
+   if (((wxTextCtrl*)event.GetEventObject())->IsModified())
+   {
+      theOkButton->Enable(true);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -308,19 +379,18 @@ void JacchiaRobertsDialog::OnTextChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::OnRadioButtonChange(wxCommandEvent& event)
 {
-    if ( event.GetEventObject() == userInputRadioButton )  
-    {       
-        useFile = false;
-        Update();
-        theOkButton->Enable(true);
-    }
-    else if ( event.GetEventObject() == fileInputRadioButton )
-    { 
-        
-        useFile = true;
-        Update();
-        theOkButton->Enable(true);
-    }
+   if ( event.GetEventObject() == userInputRadioButton )  
+   {       
+      useFile = false;
+      Update();
+      theOkButton->Enable(true);
+   }
+   else if ( event.GetEventObject() == fileInputRadioButton )
+   {       
+      useFile = true;
+      Update();
+      theOkButton->Enable(true);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -328,16 +398,16 @@ void JacchiaRobertsDialog::OnRadioButtonChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void JacchiaRobertsDialog::OnBrowse(wxCommandEvent &event)
 {
-    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.*"));
     
-    if (dialog.ShowModal() == wxID_OK)
-    {
-        wxString filename;
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString filename;
         
-        filename = dialog.GetPath().c_str();
+      filename = dialog.GetPath().c_str();
         
-        fileNameTextCtrl->SetValue(filename); 
-    }
-    theOkButton->Enable(true);
+      fileNameTextCtrl->SetValue(filename); 
+   }
+   theOkButton->Enable(true);
 }
 
