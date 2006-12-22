@@ -37,6 +37,7 @@
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
 //#define DEBUG_PROP_SAVE 1
+//#define DEBUG_PROP_INTEGRATOR 1
 //#define DEBUG_GRAV_FIELD 1
 
 //------------------------------------------------------------------------------
@@ -253,11 +254,16 @@ void PropagationConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::SaveData()
 {
-   #if DEBUG_PROP_PANEL
+   #if DEBUG_PROP_SAVE
    MessageInterface::ShowMessage
       ("SaveData() thePropagatorName=%s\n", thePropagator->GetTypeName().c_str());
+   MessageInterface::ShowMessage("   isIntegratorChanged=%d\n", isIntegratorChanged);
+   MessageInterface::ShowMessage("   isIntegratorDataChanged=%d\n",isIntegratorDataChanged);
+   MessageInterface::ShowMessage("   isForceModelChanged=%d\n", isForceModelChanged);
+   MessageInterface::ShowMessage("   isDegOrderChanged=%d\n", isDegOrderChanged);
+   MessageInterface::ShowMessage("   isPotFileChanged=%d\n", isPotFileChanged);
    #endif
-
+   
    canClose = true;
    
    //-------------------------------------------------------
@@ -265,12 +271,12 @@ void PropagationConfigPanel::SaveData()
    //-------------------------------------------------------
    if (isIntegratorChanged)
    {
-      #if DEBUG_PROP_PANEL
+      #if DEBUG_PROP_SAVE
       ShowPropData("SaveData() BEFORE saving Integrator");
       #endif
       
       isIntegratorChanged = false;
-
+      
       if (isIntegratorDataChanged)
       {
          isIntegratorDataChanged = false;
@@ -280,6 +286,9 @@ void PropagationConfigPanel::SaveData()
       
       thePropSetup->SetPropagator(thePropagator);
       
+      // Since the propagator is cloned in the base code, get new pointer
+      thePropagator = thePropSetup->GetPropagator();
+      
    }
    else if (isIntegratorDataChanged)
    {
@@ -287,7 +296,7 @@ void PropagationConfigPanel::SaveData()
       if (!SaveIntegratorData())
          canClose = false;
    }
-
+   
    
    //-------------------------------------------------------
    // Saving the force model
@@ -295,7 +304,7 @@ void PropagationConfigPanel::SaveData()
    if (isForceModelChanged)
    {      
       #if DEBUG_PROP_SAVE
-      ShowForceList("SaveData() BEFORE saving ForceModel \n");
+      ShowForceList("SaveData() BEFORE saving ForceModel");
       #endif
       
       isForceModelChanged = false;
@@ -452,7 +461,37 @@ void PropagationConfigPanel::SaveData()
       numOfForces = thePropSetup->GetNumForces();
       
       // ForceModel is deleted in PropSetup::SetForceModel()
-      theForceModel = newFm;
+      //theForceModel = newFm;
+      
+      // Since the force model and it's physical models are cloned in the
+      // base code, get new pointers
+      theForceModel = thePropSetup->GetForceModel();
+      PhysicalModel *pm;
+      int size = forceList.size();
+      for (int i=0; i<numOfForces; i++)
+      {
+         pm = theForceModel->GetForce(i);
+         
+         #if DEBUG_PROP_SAVE
+         MessageInterface::ShowMessage
+            ("===> pm=(%p)%s\n", pm, pm->GetTypeName().c_str());
+         #endif
+         
+         for (int j=0; j<size; j++)
+         {
+            if ((forceList[j]->bodyName).IsSameAs(pm->GetBodyName().c_str()))
+            {
+               if (pm->GetTypeName() == "PointMassForce")
+                  forceList[j]->pmf = (PointMassForce*)pm;
+               else if (pm->GetTypeName() == "GravityField")
+                  forceList[j]->gravf = (GravityField*)pm;
+               else if (pm->GetTypeName() == "DragForce")
+                  forceList[j]->dragf = (DragForce*)pm;
+               else if (pm->GetTypeName() == "SolarRadiationPressure")
+                  forceList[j]->srpf = (SolarRadiationPressure*)pm;
+            }
+         }
+      }
       
       #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() AFTER  saving ForceModel");
@@ -460,10 +499,6 @@ void PropagationConfigPanel::SaveData()
    } // end if(isForceModelChange)
    else
    {
-      #if DEBUG_PROP_SAVE
-      ShowForceList("SaveData() BEFORE  saving ForceModel");
-      #endif
-      
       //----------------------------------------------------
       // Saving the Origin (Central Body)
       //----------------------------------------------------
@@ -479,17 +514,8 @@ void PropagationConfigPanel::SaveData()
       // Save only GravComboBox or PotFileText is changed
       if (isPotFileChanged)
          SavePotFile();
-      
-      #if DEBUG_PROP_SAVE
-      ShowForceList("SaveData() AFTER  saving ForceModel");
-      #endif
-      
+            
    }
-   
-   #if DEBUG_PROP_SAVE
-   ShowForceModel("SaveData() AFTER  saving ForceModel");
-   #endif
-   
 }
 
 
@@ -1315,7 +1341,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 {
    int propIndex = integratorComboBox->GetSelection();
    
-   #if DEBUG_PROP_PANEL_SETUP
+   #if DEBUG_PROP_INTEGRATOR
    MessageInterface::ShowMessage
       ("DisplayIntegratorData() integratorChanged=%d, integratorString=<%s>\n",
        integratorChanged, integratorString.c_str());
@@ -1324,12 +1350,11 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    if (integratorChanged)
    {
       std::string integratorType = integratorTypeArray[propIndex].c_str();
-      thePropagatorName = propSetupName + integratorType;
+      thePropagatorName = propSetupName + "_" + integratorType;
       thePropagator = (Propagator*)theGuiInterpreter->GetObject(thePropagatorName);
       if (thePropagator == NULL)
          thePropagator = (Propagator*)
-            theGuiInterpreter->CreateObject(integratorType,
-                                            thePropagatorName);
+            theGuiInterpreter->CreateObject(integratorType, thePropagatorName);
    }
 
    
@@ -1388,7 +1413,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
       nomIntErrorTextCtrl->SetValue(ToString(i7));
    }
    
-   #if DEBUG_PROP_PANEL
+   #if DEBUG_PROP_INTEGRATOR
    ShowPropData("DisplayIntegratorData() exiting...");
    #endif
 }
@@ -1826,11 +1851,12 @@ bool PropagationConfigPanel::SaveIntegratorData()
       std::string inputString, minStr, maxStr;
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
                          thePropSetup->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
+                        "The allowed values are: [%s].";
       
       // save initial step size
       id = thePropagator->GetParameterID("InitialStepSize");
       inputString = initialStepSizeTextCtrl->GetValue();
+
       // check to see if input is a real
       if (GmatStringUtil::ToDouble(inputString,&rvalue))
          thePropagator->SetRealParameter(id, rvalue);
@@ -1974,6 +2000,7 @@ void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
       isIntegratorChanged = true;
       integratorString = integratorComboBox->GetStringSelection();
       DisplayIntegratorData(true);
+      isIntegratorDataChanged = false; //loj: 12/20/06
       EnableUpdate(true);
    }
 }
@@ -2312,13 +2339,14 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
 void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
 {
    DragForce *dragForce;
-   
+
+   // if DragForce has not been created, create it first by calling SaveData()
    if (forceList[currentBodyId]->dragf == NULL)
    {
       isForceModelChanged = true;
       SaveData();
    }
-
+   
    dragForce = forceList[currentBodyId]->dragf;
    if (dragForce != NULL)
    {      
@@ -2339,7 +2367,8 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
          dragDlg.ShowModal();
       }
       
-      EnableUpdate(true);
+      // Since all data are saved in the Dialog, we don't want to save it again
+      //EnableUpdate(true);
    }
 }
 
@@ -2524,9 +2553,9 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::ShowForceList(const std::string &header)
 {
-   //#if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage(">>>>>=======================================\n");
-   MessageInterface::ShowMessage("%s%s\n", header.c_str(), " --- ForceList");
+   MessageInterface::ShowMessage("%s\n", header.c_str());
+   MessageInterface::ShowMessage("theForceModel=%p", theForceModel);
    for (unsigned int i=0; i<forceList.size(); i++)
    {
       MessageInterface::ShowMessage
@@ -2538,7 +2567,6 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
           forceList[i]->srpf);
    }
    MessageInterface::ShowMessage("============================================\n");
-   //#endif
 }   
 
 
