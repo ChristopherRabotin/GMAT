@@ -356,7 +356,8 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
    if (hasGrid && (rescaled || drawAll))
       DrawGrid(dc);
 
-   PlotData(dc);
+   if (hasData)
+      PlotData(dc);
 
    if (rescaled || drawAll)
    {
