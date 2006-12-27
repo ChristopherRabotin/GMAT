@@ -807,61 +807,64 @@ bool Vary::InterpretAction()
          MessageInterface::ShowMessage("            %s\n", i->c_str());
    #endif
    
-   // then the bracketed list of settings
-   currentChunks = tp.SeparateBrackets(currentChunks[1], "{}", ", ");
-
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage(
-         "         Vary::InterpretAction() Settings:\n");
+   // then the bracketed list of settings, if not using defaults
+   if (currentChunks.size() > 1)
+   {
+      currentChunks = tp.SeparateBrackets(currentChunks[1], "{}", ", ");
+   
+      #ifdef DEBUG_VARY_PARSING
+         MessageInterface::ShowMessage(
+            "         Vary::InterpretAction() Settings:\n");
+         for (StringArray::iterator i = currentChunks.begin(); 
+              i != currentChunks.end(); ++i)
+            MessageInterface::ShowMessage("            %s\n", i->c_str());
+      #endif
+      
+      // For each case here, the atof needs to be reset to handle the allowed types
       for (StringArray::iterator i = currentChunks.begin(); 
            i != currentChunks.end(); ++i)
-         MessageInterface::ShowMessage("            %s\n", i->c_str());
-   #endif
-   
-   // For each case here, the atof needs to be reset to handle the allowed types
-   for (StringArray::iterator i = currentChunks.begin(); 
-        i != currentChunks.end(); ++i)
-   {
-      nameval = tp.SeparateBy(*i, "= ");
-      if (nameval[0] == "Pert")
       {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(PERTURBATION, value);
-      }
-      else if (nameval[0] == "Lower")
-      {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(VARIABLE_MINIMUM, value);
-      }
-      else if (nameval[0] == "Upper")
-      {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(VARIABLE_MAXIMUM, value);
-      }
-      else if (nameval[0] == "MaxStep")
-      {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
-      }
-      else if (nameval[0] == "AdditiveScaleFactor")
-      {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
-      }
-      else if (nameval[0] == "MultiplicativeScaleFactor")
-      {
-         value = atof(nameval[1].c_str());
-         SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
-      }
-      else
-      {
-         //std::string msg = "On the line \n'" + generatingString +
-         //   "'\nthe setting '" + (*i) + 
-         //   "' does not match the available options for the Vary command";
-         std::string msg = "The setting \"" + (*i) + 
-            "\" does not match field name for the Vary command";
-         //MessageInterface::ShowMessage(msg);
-         throw CommandException(msg); 
+         nameval = tp.SeparateBy(*i, "= ");
+         if (nameval[0] == "Pert")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(PERTURBATION, value);
+         }
+         else if (nameval[0] == "Lower")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(VARIABLE_MINIMUM, value);
+         }
+         else if (nameval[0] == "Upper")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(VARIABLE_MAXIMUM, value);
+         }
+         else if (nameval[0] == "MaxStep")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
+         }
+         else if (nameval[0] == "AdditiveScaleFactor")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
+         }
+         else if (nameval[0] == "MultiplicativeScaleFactor")
+         {
+            value = atof(nameval[1].c_str());
+            SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
+         }
+         else
+         {
+            //std::string msg = "On the line \n'" + generatingString +
+            //   "'\nthe setting '" + (*i) + 
+            //   "' does not match the available options for the Vary command";
+            std::string msg = "The setting \"" + (*i) + 
+               "\" does not match field name for the Vary command";
+            //MessageInterface::ShowMessage(msg);
+            throw CommandException(msg); 
+         }
       }
    }
    
