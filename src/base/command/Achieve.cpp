@@ -614,7 +614,7 @@ bool Achieve::InterpretAction()
    
    std::string component = generatingString.substr(loc, end-loc);
    if (component == "")
-      throw CommandException("Achieve string does specify the targeter");
+      throw CommandException("Achieve string does not specify the targeter");
    
    SetStringParameter(targeterNameID, component);
    

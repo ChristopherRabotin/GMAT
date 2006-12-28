@@ -30,6 +30,7 @@
 //#define DEBUG_CONDITIONS 1
 //#define DEBUG_CONDITIONS_INIT 1
 //#define DEBUG_CONDBR_GET_GEN_STRING
+//#define DEBUG_CONDBR_GET_PARAM
 
 
 //---------------------------------
@@ -278,28 +279,57 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
     {
        ;
     }
-    else if (mod->GetParameter(lhs) == NULL)
+    else
     {
-       std::string errMsg = "The value of \"" + lhs + 
+      // remove array indexing, if it exists
+      std::string lhsNoIndices = lhs;
+      Integer openParen = lhs.find_first_of('(');
+      if (openParen != (Integer)lhs.npos)  
+         lhsNoIndices = lhs.substr(0,openParen);
+         
+      #ifdef DEBUG_CONDBR_GET_PARAM
+         MessageInterface::ShowMessage("In SetCondition, lhs parameter name is: %s\n",
+         lhsNoIndices.c_str());
+      #endif
+      
+      if (mod->GetParameter(lhsNoIndices) == NULL)
+      {
+          std::string errMsg = "The value of \"" + lhsNoIndices + 
             "\" for the left-hand-side of conditional \"" 
             + typeName +
             "\" is not an allowed value.  The allowed values are: " +
             " [Real number, variable, array element, or object parameter]."; 
-       throw CommandException(errMsg);
+          throw CommandException(errMsg);      
+       }
     }
+            
     // if right is just a number, skip
     if (GmatStringUtil::ToDouble(rhs, &rval))
     {
        ;
     }
-    else if (mod->GetParameter(rhs) == NULL)
+    else
     {
-       std::string errMsg = "The value of \"" + rhs + 
+      // remove array indexing, if it exists
+      std::string rhsNoIndices = rhs;
+      Integer openParen = rhs.find_first_of('(');
+      if (openParen != (Integer)rhs.npos)  
+         rhsNoIndices = rhs.substr(0,openParen);
+         
+      #ifdef DEBUG_CONDBR_GET_PARAM
+         MessageInterface::ShowMessage("In SetCondition, rhs parameter name is: %s\n",
+         rhsNoIndices.c_str());
+      #endif
+      
+      if (mod->GetParameter(rhsNoIndices) == NULL)
+      {
+          std::string errMsg = "The value of \"" + rhsNoIndices + 
             "\" for the right-hand-side of conditional \"" 
             + typeName +
             "\" is not an allowed value.  The allowed values are: " +
             " [Real number, variable, array element, or object parameter]."; 
-       throw CommandException(errMsg);
+          throw CommandException(errMsg);      
+       }
     }
    
    // Handle LHS Array indexing
