@@ -46,23 +46,22 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// AttitudePanel(wxWindow *parent, Spacecraft *spacecraft, wxButton *theApplyButton)
+// AttitudePanel(GmatPanel *scPanel, xWindow *parent, Spacecraft *spacecraft)
 //------------------------------------------------------------------------------
 /**
  * Constructs AttitudePanel object.
  */
 //------------------------------------------------------------------------------
-AttitudePanel::AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
-                             wxButton *applyButton, wxButton *okButton)
+AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
+                             Spacecraft *spacecraft)
    : wxPanel(parent), dontUpdate(false)
 {
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::AttitudePanel() entered\n");
    #endif
-      
-   this->theSpacecraft = spacecraft;
-   this->theApplyButton = applyButton;
-   this->theOkButton = okButton;
+
+   theScPanel = scPanel;
+   theSpacecraft = spacecraft;
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
@@ -711,20 +710,9 @@ void AttitudePanel::SaveData()
 {
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::SaveData() entered\n");
-   #endif
-
-   // This check is already done in the SpacecraftPanel (loj: 9/21/06)
-   // if (!theApplyButton->IsEnabled())
-   //   return;
-   
-   //theApplyButton->Disable();
-   
-   dataChanged = false;
-   
-   #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
    #endif
-
+      
    wxString mode = config1ComboBox->GetValue();
    wxString typeVal = config3ComboBox->GetValue();
    
@@ -849,6 +837,8 @@ void AttitudePanel::SaveData()
       a->SetRvectorParameter(a->GetParameterID("InitialAngularVelocity"), angularVelocityRvector);
    }
 
+   dataChanged = false;
+   
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::SaveData() ending\n");
    #endif
@@ -927,8 +917,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
    }
    
    dataChanged = true;
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   theScPanel->EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -963,8 +952,7 @@ void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
    }
    
    dataChanged = true;
-   theApplyButton->Enable();
-   theOkButton->Enable();
+   theScPanel->EnableUpdate(true);
 }
 
 

@@ -21,20 +21,19 @@
 #ifndef AttitudePanel_hpp
 #define AttitudePanel_hpp
 
+#include "gmatdefs.hpp"
 #include "Attitude.hpp"
+#include "GuiInterpreter.hpp"
+#include "Spacecraft.hpp"
 
 #include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
-
-#include "gmatdefs.hpp"
-#include "Spacecraft.hpp"
+#include "GmatPanel.hpp"
 
 class AttitudePanel: public wxPanel
 {
 public:
-   AttitudePanel(wxWindow *parent, Spacecraft *spacecraft,
-                 wxButton *applyButton, wxButton *okButton);
+   AttitudePanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft);
    ~AttitudePanel();
    void SaveData();
    void LoadData();
@@ -92,9 +91,8 @@ private:
    wxComboBox *config4ComboBox;
    wxComboBox *stateTypeComboBox;
    wxComboBox *stateTypeRateComboBox;
-   
-   wxButton *theApplyButton;
-   wxButton *theOkButton;
+
+   GmatPanel *theScPanel;
    
    StringArray modeArray;
    StringArray coordSysArray;

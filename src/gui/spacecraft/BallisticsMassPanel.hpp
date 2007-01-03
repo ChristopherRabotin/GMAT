@@ -24,14 +24,13 @@
 
 #include "gmatwxdefs.hpp"
 #include "Spacecraft.hpp"
+#include "GmatPanel.hpp"
+
 
 class BallisticsMassPanel: public wxPanel
 {
 public:
-   BallisticsMassPanel(wxWindow *parent,
-                       Spacecraft *spacecraft,
-                       wxButton *applyButton,
-                       wxButton *okButton);
+   BallisticsMassPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft);
    ~BallisticsMassPanel();
    
    void SaveData();
@@ -51,9 +50,9 @@ private:
    void OnTextChange(wxCommandEvent &event);
     
    Spacecraft *theSpacecraft;
-   wxButton *theApplyButton;
-   wxButton *theOkButton;
 
+   GmatPanel *theScPanel;
+   
    wxTextCtrl *dryMassTextCtrl;
    wxTextCtrl *dragCoeffTextCtrl;
    wxTextCtrl *reflectCoeffTextCtrl;

@@ -34,25 +34,23 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// TankPanel(wxWindow *parent, Spacecraft *spacecraft, wxButton *theApplyButton)
+// TankPanel(GmatPanel *scPanel, wwxWindow *parent, Spacecraft *spacecraft)
 //------------------------------------------------------------------------------
 /**
  * Constructs TankPanel object.
  */
 //------------------------------------------------------------------------------
-TankPanel::TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-                     wxButton *applyButton, wxButton *okButton)
+   TankPanel::TankPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft)
    : wxPanel(parent)
 {
-    this->theSpacecraft = spacecraft;
-    this->theApplyButton = applyButton;
-    this->theOkButton = okButton;
+   theScPanel = scPanel;
+   theSpacecraft = spacecraft;
     
-    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    theGuiManager = GuiItemManager::GetInstance();
+   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiManager = GuiItemManager::GetInstance();
 
-    dataChanged = false;
-    Create();
+   dataChanged = false;
+   Create();
 }
 
 //------------------------------------------------------------------------------
@@ -166,9 +164,6 @@ void TankPanel::LoadData()
 //------------------------------------------------------------------------------
 void TankPanel::SaveData()
 {
-   // This check is already done in the SpacecraftPanel (loj: 9/21/06)
-   //if (!theApplyButton->IsEnabled())
-   //    return;
    
    dataChanged = false;
    Integer paramID = 0;
@@ -214,8 +209,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        }
        
        dataChanged = true;
-       theApplyButton->Enable();
-       theOkButton->Enable();
+       theScPanel->EnableUpdate(true);
     }
     else if (event.GetEventObject() == removeButton)
     {
@@ -237,8 +231,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
           selectedTankListBox->SetSelection(sel-1);
    
        dataChanged = true;
-       theApplyButton->Enable();
-       theOkButton->Enable();
+       theScPanel->EnableUpdate(true);
     }   
     else if (event.GetEventObject() == selectAllButton)
     {
@@ -257,8 +250,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        selectedTankListBox->SetSelection(0);
     
        dataChanged = true;
-       theApplyButton->Enable();
-       theOkButton->Enable();
+       theScPanel->EnableUpdate(true);
     } 
     else if (event.GetEventObject() == removeAllButton)
     {
@@ -277,8 +269,7 @@ void TankPanel::OnButtonClick(wxCommandEvent &event)
        availableTankListBox->SetSelection(0);
    
        dataChanged = true;
-       theApplyButton->Enable();
-       theOkButton->Enable();
+       theScPanel->EnableUpdate(true);
     }
 }     
     

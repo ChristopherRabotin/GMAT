@@ -124,31 +124,31 @@ void SpacecraftPanel::Create()
    sensors = new wxPanel( spacecraftNotebook, -1 );
    
    theOrbitPanel = new OrbitPanel
-      (spacecraftNotebook, currentSpacecraft, theSolarSystem, theApplyButton, theOkButton);
+      (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   OrbitPanel created\n");
    #endif
    
    theBallisticMassPanel = new BallisticsMassPanel
-      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+      (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   BallisticsMassPanel created\n");
    #endif
    
    theTankPanel = new TankPanel
-      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+      (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   TankPanel created\n");
    #endif
    
    theThrusterPanel = new ThrusterPanel
-      (actuatorNotebook, currentSpacecraft, theApplyButton, theOkButton);
+      (this, actuatorNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   ThrusterPanel created\n");
    #endif
    
    theAttitudePanel = new AttitudePanel
-      (spacecraftNotebook, currentSpacecraft, theApplyButton, theOkButton);
+      (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   AttitudePanel created\n");
    #endif
@@ -196,8 +196,8 @@ void SpacecraftPanel::LoadData()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
-   if (!theApplyButton->IsEnabled())
-      return;
+   //if (!theApplyButton->IsEnabled())
+   //   return;
 
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::SaveData() entered\n");
@@ -223,15 +223,16 @@ void SpacecraftPanel::SaveData()
       canClose = canClose && theOrbitPanel->CanClosePanel();
    }
    
-   enableApply = true;
+   //enableApply = true;
    
    if (!canClose)
    {
-      EnableUpdate(false);
-//      enableApply = false;
+      //EnableUpdate(false);
+      EnableUpdate(true);
+      //enableApply = false;
       return;
    }
-
+   
    if (theTankPanel->IsDataChanged())
       theTankPanel->SaveData();
    

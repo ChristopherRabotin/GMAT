@@ -45,19 +45,16 @@ END_EVENT_TABLE()
  * @note Creates the Universe GUI
  */
 //------------------------------------------------------------------------------
-BallisticsMassPanel::BallisticsMassPanel(wxWindow *parent,
-                                         Spacecraft *spacecraft,
-                                         wxButton *applyButton,
-                                         wxButton *okButton)
+BallisticsMassPanel::BallisticsMassPanel(GmatPanel *scPanel, wxWindow *parent,
+                                         Spacecraft *spacecraft)
    : wxPanel(parent)
 {
-   this->theSpacecraft = spacecraft;
-   this->theApplyButton = applyButton;
-   this->theOkButton = okButton;
-    
+   theScPanel = scPanel;
+   theSpacecraft = spacecraft;
+   
    canClose = true;
    dataChanged = false;
-    
+   
    Create();
 }
 
@@ -205,7 +202,6 @@ void BallisticsMassPanel::SaveData()
    try
    {
       canClose    = true;
-      dataChanged = false;
     
       int dryMassID      = theSpacecraft->GetParameterID("DryMass");
       int coeffDragID    = theSpacecraft->GetParameterID("Cd");
@@ -293,6 +289,9 @@ void BallisticsMassPanel::SaveData()
          canClose = false;
       }
 
+      if (canClose)
+         dataChanged = false;
+      
    }
 //      if (atof(massStr) < 0)
 //      {
@@ -348,7 +347,6 @@ void BallisticsMassPanel::OnTextChange(wxCommandEvent &event)
        reflectCoeffTextCtrl->IsModified())
    {
       dataChanged = true;
-      theApplyButton->Enable();
-      theOkButton->Enable();
+      theScPanel->EnableUpdate(true);
    }
 }

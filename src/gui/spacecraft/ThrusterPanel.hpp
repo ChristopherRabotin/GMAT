@@ -21,19 +21,19 @@
 #ifndef ThrusterPanel_hpp
 #define ThrusterPanel_hpp
 
-#include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
-#include "GuiItemManager.hpp"
-
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
 #include "Thruster.hpp"
 
+#include "gmatwxdefs.hpp"
+#include "GuiInterpreter.hpp"
+#include "GuiItemManager.hpp"
+#include "GmatPanel.hpp"
+
 class ThrusterPanel: public wxPanel
 {
 public:
-   ThrusterPanel(wxWindow *parent, Spacecraft *spacecraft,
-                 wxButton *applyButton, wxButton *okButton);
+   ThrusterPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft);
    ~ThrusterPanel();
    void SaveData();
    void LoadData();
@@ -56,8 +56,8 @@ private:
     
    wxArrayString mExcludedThrusterList;
     
-   wxButton *theApplyButton;
-   wxButton *theOkButton;
+   GmatPanel *theScPanel;
+   
    wxButton *selectButton;
    wxButton *removeButton;
    wxButton *selectAllButton;

@@ -21,20 +21,20 @@
 #ifndef TankPanel_hpp
 #define TankPanel_hpp
 
+#include "gmatdefs.hpp"
+#include "FuelTank.hpp"
+#include "Spacecraft.hpp"
+#include "Hardware.hpp"
+
 #include "gmatwxdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
-
-#include "gmatdefs.hpp"
-#include "Spacecraft.hpp"
-#include "Hardware.hpp"
-#include "FuelTank.hpp"
+#include "GmatPanel.hpp"
 
 class TankPanel: public wxPanel
 {
 public:
-   TankPanel(wxWindow *parent, Spacecraft *spacecraft,
-             wxButton *applyButton, wxButton *okButton);
+   TankPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft);
    ~TankPanel();
    void SaveData();
    void LoadData();
@@ -56,9 +56,9 @@ private:
    GuiItemManager *theGuiManager;
 
    wxArrayString mExcludedTankList;
+
+   GmatPanel *theScPanel;
    
-   wxButton *theApplyButton;
-   wxButton *theOkButton;
    wxButton *selectButton;
    wxButton *removeButton;
    wxButton *selectAllButton;
