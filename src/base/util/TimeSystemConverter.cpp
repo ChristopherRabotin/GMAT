@@ -21,6 +21,7 @@
 #include "A1Mjd.hpp"
 #include "GregorianDate.hpp"
 #include "DateUtil.hpp"            // for ModifiedJulianDate()
+#include "StringUtil.hpp"          // for ToDouble()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FIRST_CALL
@@ -502,36 +503,50 @@ bool TimeConverterUtil::ValidateTimeSystem(std::string sys)
 bool TimeConverterUtil::ValidateTimeFormat(const std::string &format, 
                                            const std::string &value)
 {
-   if (format == "Gregorian")
-   {
-      // Gregorian formats should contain the month
-      std::string months[12] = {
-                                 "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                               };
-      Integer loc = -1;
-      for (Integer i = 0; i < 12; ++i)
-      {
-         loc = value.find(months[i], 0);
+   bool retval = false;
+   
+   std::string timeFormat = "ModJulian";
+   if (format.find("Gregorian") != format.npos)
+      timeFormat = "Gregorian";
 
-//         if (loc >= 0)
-                 // The month should be the second parameter in the string
-                 // 01 Jun 2004 ...
-         if (loc == 3)           
-            return true;
-      }
-      return false;         
-   }
+   #if DEBUG_VALIDATE_TIME
+   MessageInterface::ShowMessage
+      ("TimeConverterUtil::ValidateTimeFormat() format=%s, timeFormat=%s, "
+       "value=%s\n", format.c_str(), timeFormat.c_str(), value.c_str());
+   #endif
    
-   if (format == "ModJulian")
+   if (timeFormat == "Gregorian")
    {
-      // Sputnik launched Oct 4, 1957 = 6116 MJ; don't accept earlier epochs.
-      if (atof(value.c_str()) < 6116)
-         return false;
-      return true;
+      GregorianDate gregorianDate(value);
+      
+      if (!gregorianDate.IsValid())
+         throw TimeSystemConverterExceptions::TimeFormatException
+            ("Gregorian date \"" + value + "\" is not valid.");
+      
+      retval = true;      
+   }
+   else if (timeFormat == "ModJulian")
+   {
+      Real rval;
+      if (GmatStringUtil::ToDouble(value, rval))
+      {
+         // Sputnik launched Oct 4, 1957 = 6116 MJ; don't accept earlier epochs.
+         if (rval >= 6116)
+            retval = true;
+      }
+      
+      if (!retval)
+         throw TimeSystemConverterExceptions::InvalidTimeException
+            ("ModJulian Time \"" + value + "\" is not valid.");
+      
+   }
+   else
+   {
+      throw TimeSystemConverterExceptions::TimeFormatException
+         ("Invalid Time Format \"" + format + "\" found.");
    }
    
-   return false;
+   return true;
 }
 
 

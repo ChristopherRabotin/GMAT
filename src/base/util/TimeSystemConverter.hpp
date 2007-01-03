@@ -50,7 +50,13 @@ struct TimeSystemConverterExceptions
          "TimeSystemConverter: Requested format not implemented: ")
          : BaseException(message) {};
    };
-
+   class InvalidTimeException : public BaseException
+   {
+      public:
+         InvalidTimeException(const std::string &message =
+         "TimeSystemConverter: Requested time is invalid: ")
+         : BaseException(message) {};
+   };
 };
 
 namespace TimeConverterUtil
