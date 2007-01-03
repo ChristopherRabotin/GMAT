@@ -37,8 +37,11 @@
 #include <sstream>
 
 //#define DEBUG_ORBIT_PANEL 1
+//#define DEBUG_ORBIT_PANEL_LOAD 1
 //#define DEBUG_ORBIT_PANEL_CONVERT 1
+//#define DEBUG_ORBIT_PANEL_COMBOBOX 1
 //#define DEBUG_ORBIT_PANEL_SAVE 1
+//#define DEBUG_ORBIT_PANEL_CHECK_RANGE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -52,7 +55,8 @@ END_EVENT_TABLE()
 // public methods
 //------------------------------
 //------------------------------------------------------------------------------
-// OrbitPanel(wxWindow *parent)
+// OrbitPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft,
+//            SolarSystem *solarsystem
 //------------------------------------------------------------------------------
 /**
  * Constructs OrbitPanel object.
@@ -62,32 +66,34 @@ END_EVENT_TABLE()
  * @note Creates the Universe GUI
  */
 //------------------------------------------------------------------------------
-OrbitPanel::OrbitPanel(wxWindow *parent,
-                       Spacecraft *spacecraft,
-                       SolarSystem *solarsystem,
-                       wxButton *applyButton,
-                       wxButton *okButton)
-: wxPanel         (parent),
-  theApplyButton  (applyButton),
-  theOkButton     (okButton)
+OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
+                       Spacecraft *spacecraft, SolarSystem *solarsystem)
+   : wxPanel(parent)
 {
-   
    // initalize data members
+   theScPanel = scPanel;
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
-
+   
    theSpacecraft = spacecraft;
    theSolarSystem = solarsystem;
-
+   
    mIsCoordSysChanged = false;
    mIsStateChanged = false;
+   mIsStateModified = false;
    mIsStateTypeChanged = false;
    mIsEpochChanged = false;
+   mIsEpochModified = false;
    canClose = true;
    dataChanged = false;
    
    anomaly = theSpacecraft->GetAnomaly();
-
+   
+   mMsgFormat =
+      "The value of \"%s\" for field \"%s\" on object \""
+      + theSpacecraft->GetName() +  "\" is not an allowed value. \n"
+      "The allowed values are: [%s].";
+   
    Create();
 }
 
@@ -110,7 +116,7 @@ OrbitPanel::~OrbitPanel()
 //------------------------------------------------------------------------------
 void OrbitPanel::LoadData()
 {
-   #if DEBUG_ORBIT_PANEL
+   #if DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage("In OrbitPanel::LoadData() \n");
    #endif
 
@@ -123,7 +129,7 @@ void OrbitPanel::LoadData()
    }
    else
    {
-      #if DEBUG_ORBIT_PANEL
+      #if DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage(
             "   mInternalCoord=%s, addr=%d\n",
             mInternalCoord->GetName().c_str(), mInternalCoord);
@@ -167,7 +173,7 @@ void OrbitPanel::LoadData()
       }
       else
       {
-         #if DEBUG_ORBIT_PANEL
+         #if DEBUG_ORBIT_PANEL_LOAD
             MessageInterface::ShowMessage("   mOutCoord=%s, addr=%d\n",
                mOutCoord->GetName().c_str(), mOutCoord);
          #endif
@@ -182,7 +188,7 @@ void OrbitPanel::LoadData()
       std::string originName = mOutCoord->GetStringParameter("Origin");
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetObject(originName);
 
-      #if DEBUG_ORBIT_PANEL
+      #if DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
             ("   origin=%s, addr=%d\n", originName.c_str(), origin);
       #endif
@@ -229,7 +235,7 @@ void OrbitPanel::LoadData()
       // load the anomaly type - if state type is Keplerian or Modified Keplerian
       std::string anType = theSpacecraft->GetStringParameter("AnomalyType");
 
-      #if DEBUG_ORBIT_PANEL
+      #if DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage("\nOrbitPanel::LoadData()...\n"
          "Anomaly type = %s \n", anType.c_str());   
       #endif
@@ -242,7 +248,6 @@ void OrbitPanel::LoadData()
          wxT("Eccentric Anomaly"),
          wxT("Hyperbolic Anomaly")
       };
-//      anomaly = theSpacecraft->GetAnomaly();
 
       for (unsigned int i = 0; i<4; i++)
          anomalyComboBox->Append(wxString(anomalyList[i].c_str()));
@@ -251,7 +256,8 @@ void OrbitPanel::LoadData()
       anomalyComboBox->SetValue(wxT(anType.c_str()));
 
       mFromAnomalyTypeStr = anType;
-      #if DEBUG_ORBIT_PANEL
+      
+      #if DEBUG_ORBIT_PANEL_LOAD
           MessageInterface::ShowMessage("\nOrbitPanel::LoadData()...\n"
              "Anomaly info -> a: %f, e: %f, %s: %f\n", 
              anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
@@ -272,7 +278,6 @@ void OrbitPanel::LoadData()
       
       mIsStateChanged = false;
       DisplayState();
-//LTR      SetLabelsUnits(stType);
    }
    catch (BaseException &e)
    {
@@ -299,48 +304,37 @@ void OrbitPanel::SaveData()
          "OrbitPanel::SaveData() entered\n   mCartState=%s\n   "
          "mTempCartState=%s\n   mOutState=%s\n", mCartState.ToString().c_str(), 
          mTempCartState.ToString().c_str(), mOutState.ToString().c_str());
-      MessageInterface::ShowMessage("===> mIsCoordSysChanged=%d\n", 
-         mIsCoordSysChanged);
-      MessageInterface::ShowMessage("===> mIsStateTypeChanged=%d\n", 
-         mIsStateTypeChanged);
-      MessageInterface::ShowMessage("===> mIsStateChanged=%d\n", 
-         mIsStateChanged);
-      MessageInterface::ShowMessage("===> mIsEpochChanged=%d\n", 
-         mIsEpochChanged);
+      MessageInterface::ShowMessage("mIsCoordSysChanged=%d\n", mIsCoordSysChanged);
+      MessageInterface::ShowMessage("mIsStateTypeChanged=%d\n", mIsStateTypeChanged);
+      MessageInterface::ShowMessage("mIsStateChanged=%d\n", mIsStateChanged);
+      MessageInterface::ShowMessage("mIsEpochChanged=%d\n", mIsEpochChanged);
    #endif
    
    try
    {
       Rvector6 outState, cartState, displayState;
       canClose = true;
-      dataChanged = false;
-
-      Real rvalue, rvalue2;
-      std::string element1, element2, element3, element4, element5, element6;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \""
-                         + theSpacecraft->GetName() + 
-                        "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
-
-      wxString epochFormatStr = epochFormatComboBox->GetStringSelection();
+      
+      Real rvalue, rvalue2;      
+      wxString epochFormatStr = epochFormatComboBox->GetValue();
       wxString epochStr       = epochValue->GetValue();
-      wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
-      wxString stateTypeStr   = stateTypeComboBox->GetStringSelection();
-
-      element1 = textCtrl1->GetValue();
-      element2 = textCtrl2->GetValue();
-      element3 = textCtrl3->GetValue();
-      element4 = textCtrl4->GetValue();
-      element5 = textCtrl5->GetValue();
-      element6 = textCtrl6->GetValue();
-      std::string anomalyStr = description6->GetLabel().c_str();
-
-      GmatStringUtil::ToDouble(element1,&rvalue);
-      GmatStringUtil::ToDouble(element2,&rvalue2);
+      wxString coordSystemStr = mCoordSysComboBox->GetValue();
+      wxString stateTypeStr   = stateTypeComboBox->GetValue();
+      
+      mElement1 = textCtrl1->GetValue();
+      mElement2 = textCtrl2->GetValue();
+      mElement3 = textCtrl3->GetValue();
+      mElement4 = textCtrl4->GetValue();
+      mElement5 = textCtrl5->GetValue();
+      mElement6 = textCtrl6->GetValue();
+      mAnomalyType = description6->GetLabel().c_str();
+      
+      GmatStringUtil::ToDouble(mElement1,&rvalue);
+      GmatStringUtil::ToDouble(mElement2,&rvalue2);
       
       if ((rvalue >= 0.0) && (rvalue2 <= 1.0) && 
-         ((strcmp(anomalyStr.c_str(), "HA") == 0) || 
-          (strcmp(anomalyStr.c_str(), "EA") == 0)))
+         ((strcmp(mAnomalyType.c_str(), "HA") == 0) || 
+          (strcmp(mAnomalyType.c_str(), "EA") == 0)))
       {
          MessageInterface::PopupMessage
             (Gmat::ERROR_, "Anomaly type and other elements are incompatible.");
@@ -348,500 +342,96 @@ void OrbitPanel::SaveData()
       }
       else
       {
-         // save state type name if changed
-//      wxString stateTypeStr   = stateTypeComboBox->GetStringSelection();
-         if (mIsStateTypeChanged)
-         {
-            mIsStateTypeChanged = false;
-//         wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
-      
-         #if DEBUG_ORBIT_PANEL
-            MessageInterface::ShowMessage
-               ("OrbitPanel::SaveData() Saving stateType=%s\n", 
-                stateTypeStr.c_str());
-         #endif
-      
-            theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
-   /// @todo: need to correct in spacecraft code because this should
-   /// only save display state type
-         }
-   
-      // save state type
-//      wxString stateTypeStr = stateTypeComboBox->GetValue();
-//      theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
-//   /// @todo: need to correct in spacecraft code because this should
-//   /// only save display state type
-
-      // save coordinate system name if changed
-//      wxString coordSystemStr = mCoordSysComboBox->GetStringSelection();
-         if (mIsCoordSysChanged)
-         {
-            mIsCoordSysChanged = false;
-            theSpacecraft->SetStringParameter("CoordinateSystem", 
-               coordSystemStr.c_str());
-//            theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, 
-//               coordSystemStr.c_str());
-         }
-         // if coordinate system is NULL, 
-         // set it to avoid crash when show script(loj: 11/28/05)
-         if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-             theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-         if (theSpacecraft->GetInternalCoordSystem() == NULL)
-             theSpacecraft->SetInternalCoordSystem(mInternalCoord);
-   
-//      // save coordinate system name if changed
-//      if (mIsCoordSysChanged)
-//      {
-//         mIsCoordSysChanged = false;
-//         theSpacecraft->SetStringParameter
-//            ("CoordinateSystem", mCoordSysComboBox->GetStringSelection().c_str());
-//      }
-//   
-//      // save coordinate system
-//      wxString coordSystemStr = mCoordSysComboBox->GetValue();
-//      theSpacecraft->SetRefObjectName(Gmat::COORDINATE_SYSTEM, coordSystemStr.c_str());
-//
-//      // if coordinate system is NULL, set it to avoid crash when show script(loj: 11/28/05)
-//      if (theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
-//         theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-//      if (theSpacecraft->GetInternalCoordSystem() == NULL)
-//         theSpacecraft->SetInternalCoordSystem(mInternalCoord);
-   
-         // save epoch format
-//      wxString epochFormatStr = epochFormatComboBox->GetValue();
-         theSpacecraft->SetDateFormat(epochFormatStr.c_str());
-   
+         //-----------------------------------------------------------
          // save epoch
-//      wxString epochStr = epochValue->GetValue();
-      #if DEBUG_ORBIT_PANEL_SAVE
-         MessageInterface::ShowMessage( "epoch   = %s\n",epochStr.c_str() );
-      #endif
-   
-         std::string epochDateFormat =
-            (epochFormatStr.Contains("ModJulian") ? "ModJulian" : "Gregorian" );
-   
-         if (TimeConverterUtil::ValidateTimeFormat(epochDateFormat, epochStr.c_str()))
-            theSpacecraft->SetEpoch(epochStr.c_str());
-         else
+         //-----------------------------------------------------------
+         if (mIsEpochChanged)
          {
-            std::string message = "Epoch '";
-            message += epochStr.c_str();
-            message += "' is not formatted correctly as a ";
-            message += epochFormatStr.c_str();
-            message += " epoch, and not saved to the Spacecraft object.";
-      
-            MessageInterface::PopupMessage(Gmat::WARNING_, message);   
-            epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
-         }
-
-      // save orbital elements
-//      element1 = textCtrl1->GetValue();
-//      element2 = textCtrl2->GetValue();
-//      element3 = textCtrl3->GetValue();
-//      element4 = textCtrl4->GetValue();
-//      element5 = textCtrl5->GetValue();
-//      element6 = textCtrl6->GetValue();
-      
-	      // Cartesian
-         if (strcmp(stateTypeStr.c_str(), "Cartesian") == 0)
-         {
-            // check to see if X is a real
-            if (GmatStringUtil::ToDouble(element1,&rvalue))      
-               displayState[0] = rvalue;
-            else
+            // save epoch format and epoch
+            try
             {
-               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-                  element1.c_str(),"X","Real Number");
+               theSpacecraft->SetDateFormat(epochFormatStr.c_str());
+               theSpacecraft->SetEpoch(epochStr.c_str());
+               mIsEpochChanged = false;
+            }
+            catch (BaseException &e)
+            {
+               MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
                canClose = false;
             }
-            // check to see if Y is a real
-            if (GmatStringUtil::ToDouble(element2,&rvalue))      
-               displayState[1] = rvalue;
-            else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element2.c_str(),"Y","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if Z is a real
-	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
-	            displayState[2] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element3.c_str(),"Z","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if VX is a real
-	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
-	            displayState[3] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element4.c_str(),"VX","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if VY is a real
-	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
-	            displayState[4] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element5.c_str(),"VY","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if VZ is a real
-	         if (GmatStringUtil::ToDouble(element6,&rvalue))      
-	            displayState[5] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element6.c_str(),"VZ","Real Number");
-	            canClose = false;
-	         }
-	      }
-		  // Keplerian & Modified Keplerian 
-	      else if ((strcmp(stateTypeStr.c_str(), "Keplerian") == 0) ||
-	               (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0))
-	      {
-	         if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
-	         {
-	            // check to see if SMA is a real
-	            if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
-	               displayState[0] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element1.c_str(),"SMA","Real Number != 0.0");
-	               canClose = false;
-	            }
-	            // check to see if ECC is a real
-	            if ((GmatStringUtil::ToDouble(element2,&rvalue)) && 
-	                (rvalue >= 0.0) && (rvalue < 1.0))
-	               displayState[1] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element2.c_str(),"ECC","0.0 < = Real Number < 1.0");
-	               canClose = false;
-	            }
-	            
-	            // check coupling restictions on SMA and ECC for circular 
-	            // and elliptical orbits
-	            if((displayState[0] < 0.0) && (displayState[1] <= 1.0))
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, 
-	                  "(0.0 <= ECC <= 1.0) SMA should only be a positive Real Number");
-	               canClose = false;
-	            }
-	            // for hyperbolic orbit
-	            else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, 
-	                  "(ECC > 1) SMA should only be a negative Real Number");
-	               canClose = false;
-	            }
-	         } // Kelperian elements
-	         else if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
-	         {
-	            // check to see if RadPer is a real
-	            if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
-	               displayState[0] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element1.c_str(),"RadPer","Real Number != 0.0");
-	               canClose = false;
-	            }
-	            // check to see if RadApo is a real
-	            if ((GmatStringUtil::ToDouble(element2,&rvalue)) && (rvalue >= 0.0))      
-	               displayState[1] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element2.c_str(),"RadApo","Real Number >= 0.0");
-	               canClose = false;
-	            }
-	         } // Modified Keplerian elements
-	         
-	         // check to see if INC is a real
-	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
-	            displayState[2] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element3.c_str(),"INC","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if RAAN is a real
-	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
-	            displayState[3] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element4.c_str(),"RAAN","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if AOP is a real     
-	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
-	            displayState[4] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element5.c_str(),"AOP","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if anomaly type is a real
-	//         std::string anomalyStr = description6->GetLabel().c_str();
-	         if (GmatStringUtil::ToDouble(element6,&rvalue))
-	         {
-	            displayState[5] = rvalue;
-	            anomaly.Set(displayState[0], displayState[1], displayState[5], 
-	                        anomalyStr);
-	         }
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element6.c_str(),anomalyStr.c_str(),"Real Number");
-	            canClose = false;
-	         }
-	      }
-		  // SphericalAZFPA & SphericalRADEC 
-	      else if ((strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) ||
-	               (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0))
-	      {
-	         // check to see if RMAG is a real
-	         if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue > 0.0))     
-	            displayState[0] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element1.c_str(),"RMAG","Real Number > 0.0");
-	            canClose = false;
-	         }
-	         // check to see if RA is a real
-	         if (GmatStringUtil::ToDouble(element2,&rvalue))      
-	            displayState[1] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element2.c_str(),"RA","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if DEC is a real     
-	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
-	            displayState[2] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element3.c_str(),"DEC","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if VMAG is a real
-	         if ((GmatStringUtil::ToDouble(element4,&rvalue)) && (rvalue >= 0.0))     
-	            displayState[3] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element4.c_str(),"VMAG","Real Number >= 0.0");
-	            canClose = false;
-	         }
-	         
-	         if (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0)
-	         {
-	            // check to see if AZI is a real
-	            if (GmatStringUtil::ToDouble(element5,&rvalue))      
-	               displayState[4] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element5.c_str(),"AZI","Real Number");
-	               canClose = false;
-	            }
-	            // check to see if FPA is a real
-	            if (GmatStringUtil::ToDouble(element6,&rvalue))      
-	               displayState[5] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element6.c_str(),"FPA","Real Number");
-	               canClose = false;
-	            }
-	         } // SphericalAZFPA
-	         else if (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0)
-	         {
-	            // check to see if RAV is a real
-	            if (GmatStringUtil::ToDouble(element5,&rvalue))
-	               displayState[4] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element5.c_str(),"RAV","Real Number");
-	               canClose = false;
-	            }
-	            // check to see if DECV is a real
-	            if (GmatStringUtil::ToDouble(element6,&rvalue))
-	               displayState[5] = rvalue;
-	            else
-	            {
-	               MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	                  element6.c_str(),"DECV","Real Number");
-	               canClose = false;
-	            }
-	         } // SphericalRADEC
-	      }
-		  // Equinoctial
-	      else if (strcmp(stateTypeStr.c_str(), "Equinoctial") == 0)
-	      {
-	         // check to see if SMA is a real
-	         if ((GmatStringUtil::ToDouble(element1,&rvalue)) && (rvalue != 0.0))      
-	            displayState[0] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element1.c_str(),"SMA","Real Number != 0.0");
-	            canClose = false;
-	         }
-	         // check to see if h is a real
-	         if (GmatStringUtil::ToDouble(element2,&rvalue))      
-	            displayState[1] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element2.c_str(),"h","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if k is a real
-	         if (GmatStringUtil::ToDouble(element3,&rvalue))      
-	            displayState[2] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element3.c_str(),"k","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if p is a real
-	         if (GmatStringUtil::ToDouble(element4,&rvalue))      
-	            displayState[3] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element4.c_str(),"p","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if q is a real
-	         if (GmatStringUtil::ToDouble(element5,&rvalue))      
-	            displayState[4] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element5.c_str(),"q","Real Number");
-	            canClose = false;
-	         }
-	         // check to see if Mean Longitude is a real
-	         if (GmatStringUtil::ToDouble(element6,&rvalue))      
-	            displayState[5] = rvalue;
-	         else
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	               element6.c_str(),"Mean Longitude","Real Number");
-	            canClose = false;
-	         }
-	      }
-//   displayState[0] = atof(textCtrl1->GetValue());
-//   displayState[1] = atof(textCtrl2->GetValue());
-//   displayState[2] = atof(textCtrl3->GetValue());
-//   displayState[3] = atof(textCtrl4->GetValue());
-//   displayState[4] = atof(textCtrl5->GetValue());
-//   displayState[5] = atof(textCtrl6->GetValue()); 
-//   
-//   #if DEBUG_ORBIT_PANEL_SAVE
-//      MessageInterface::ShowMessage("OrbitPanel::SaveData() display state =%s\n ", 
-//         displayState.ToString().c_str());
-//   #endif
-//
-//   if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
-//   {
-//      if(displayState[1] < 0.0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "ECC must be greater than or equal to zero.");
-//         textCtrl2->SetValue(ToString(mOutState[1]));
-//         canClose = false;
-//         return;
-//      }
-//      else if((displayState[0] > 0.0) && (displayState[1] > 1.0))
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "SMA cannot be positive and ECC greater than 1.");
-//         textCtrl1->SetValue(ToString(mOutState[0]));
-//         textCtrl2->SetValue(ToString(mOutState[1]));
-//         canClose = false;
-//         return;
-//      }
-//      else if((displayState[0] < 0.0) && (displayState[1] < 1.0))
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "SMA cannot be negative and ECC less than 1.");
-//         textCtrl1->SetValue(ToString(mOutState[0]));
-//         textCtrl2->SetValue(ToString(mOutState[1]));
-//         canClose = false;
-//         return;
-//      }
-//   }
-//
-//   if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
-//   {
-//      if(displayState[0] <= 0.0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "RadPer must be greater than zero.");
-//         canClose = false;
-//         return;
-//      }
-//
-//      if(displayState[1] == 0.0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "RadApo can not be equal to zero.");
-//         canClose = false;
-//         return;
-//      }
-//   }
-//
-//   if ( (strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) || 
-//        (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0) )
-//   {
-//      if (displayState[0] <= 0.0)
-//      {
-//         MessageInterface::PopupMessage
-//            (Gmat::WARNING_, "RMAG must be greater than zero.");
-//         canClose = false;
-//         return;
-//      }
-//   }
-//
-//   if ( strcmp(stateTypeStr.c_str(), "Equinoctial") == 0) {
-//          // any restrictions on equinoctial coordinates
-//   }
-//   
-//      // Save the anomaly type
-//      if ( (strcmp(stateTypeStr.c_str(), "Keplerian") == 0) || 
-//           (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0) )
-//      {
-//         std::string anomalyStr = description6->GetLabel().c_str();
-//         anomaly.Set(displayState[0], displayState[1], displayState[5], anomalyStr);   
-////      theSpacecraft->SetStringParameter("AnomalyType", anomalyStr);
-//         #if DEBUG_ORBIT_PANEL_SAVE
-//            MessageInterface::ShowMessage( "SMA = %lf\n",anomaly.GetSMA() );
-//            MessageInterface::ShowMessage( "ECC = %lf\n",anomaly.GetECC() );
-//            MessageInterface::ShowMessage( "value = %lf\n",anomaly.GetValue() );
-//            MessageInterface::ShowMessage( "anomaly type = %s\n",anomaly.GetType().c_str() );
-//         #endif
-//   }
-
-	      BuildState(displayState);
-	      theSpacecraft->SetState(mCartState);
+         }
+         
+         //-----------------------------------------------------------
+         // save orbital elements
+         //-----------------------------------------------------------
+         bool retval = true;
+         
+         if (strcmp(stateTypeStr.c_str(), "Cartesian") == 0)
+         {
+            retval = CheckCartesian(displayState);
+         }
+         else if ((strcmp(stateTypeStr.c_str(), "Keplerian") == 0) ||
+                  (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0))
+         {
+            if (strcmp(stateTypeStr.c_str(), "Keplerian") == 0)
+            {
+               retval = CheckKeplerian(displayState);
+            }
+            else if (strcmp(stateTypeStr.c_str(), "ModifiedKeplerian") == 0)
+            {
+               retval = CheckModKeplerian(displayState);               
+            }        
+         }
+         else if ((strcmp(stateTypeStr.c_str(), "SphericalAZFPA") == 0) ||
+                  (strcmp(stateTypeStr.c_str(), "SphericalRADEC") == 0))
+         {
+            retval = CheckSpherical(displayState, stateTypeStr);            
+         }
+         else if (strcmp(stateTypeStr.c_str(), "Equinoctial") == 0)
+         {
+            retval = CheckEquinoctial(displayState);
+         }
+         
+         if (retval)
+         {
+            BuildState(displayState);
+            theSpacecraft->SetState(mCartState);
+            
+            //--------------------------------------------------------
+            // save state type name if changed
+            //--------------------------------------------------------
+            if (mIsStateTypeChanged)
+            {
+               mIsStateTypeChanged = false;
+               
+               #if DEBUG_ORBIT_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("OrbitPanel::SaveData() Saving stateType=%s\n", 
+                   stateTypeStr.c_str());
+               #endif
+               
+               theSpacecraft->SetStringParameter("StateType", stateTypeStr.c_str());
+               /// @todo: need to correct in spacecraft code because this should
+               /// only save display state type
+            }
+            
+            // save state type
+            /// @todo: need to correct in spacecraft code because this should
+            /// only save display state type
+            
+            //--------------------------------------------------------
+            // save coordinate system name if changed
+            //--------------------------------------------------------
+            if (mIsCoordSysChanged)
+            {
+               mIsCoordSysChanged = false;
+               theSpacecraft->SetStringParameter("CoordinateSystem", 
+                                                 coordSystemStr.c_str());
+            }
+         }
+         
+         if (canClose)
+            dataChanged = false;
       }
    }
    catch (BaseException &e)
@@ -851,16 +441,7 @@ void OrbitPanel::SaveData()
          canClose = false;
          return;
    }
-
-   #if DEBUG_ORBIT_PANEL
-//      MessageInterface::ShowMessage( "epoch format      = %s\n",epochFormatStr.c_str() );
-//      MessageInterface::ShowMessage( "epoch             = %s\n",epochStr.c_str() );
-//      MessageInterface::ShowMessage( "coordinate system = %s\n",coordSystemStr.c_str() );
-//      MessageInterface::ShowMessage( "state type        = %s\n",stateTypeStr.c_str() );
-//      MessageInterface::ShowMessage( "anomaly type      = %s\n",anomaly.GetType().c_str() );
-//      MessageInterface::ShowMessage( "mCartState        = %s\n",mCartState.ToString().c_str() );
-   #endif
-      
+   
    #if DEBUG_ORBIT_PANEL_SAVE
       MessageInterface::ShowMessage
          ("OrbitPanel::SaveData() exiting\n   mCartState=%s\n   mTempCartState=%s\n   "
@@ -893,7 +474,9 @@ void OrbitPanel::Create()
 
    wxString emptyList[] = {};
 
-   //------------- create sizers -------------
+   //-----------------------------------------------------------------
+   //  create sizers 
+   //-----------------------------------------------------------------
    // sizer for orbit tab
    wxBoxSizer *orbitSizer = new wxBoxSizer(wxHORIZONTAL);
       
@@ -905,9 +488,10 @@ void OrbitPanel::Create()
       new wxStaticBox(this, ID_STATIC_ELEMENT, wxT("Elements"));
    wxStaticBoxSizer *elementSizer =
       new wxStaticBoxSizer(elementBox, wxVERTICAL);
-   //-----------------------------------------
 
-   //----------------- epoch -----------------
+   //-----------------------------------------------------------------
+   // epoch 
+   //-----------------------------------------------------------------
    // label for epoch format
    wxStaticText *epochFormatStaticText = new wxStaticText( this, ID_TEXT,
       wxT("Epoch Format"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -923,9 +507,10 @@ void OrbitPanel::Create()
    // textfield for the epoch value
    epochValue = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0 );
-   //-----------------------------------------
 
-   //----------- coordinate system -----------
+   //-----------------------------------------------------------------
+   //  coordinate system 
+   //-----------------------------------------------------------------
    // label for coordinate system
    wxStaticText *coordSysStaticText = new wxStaticText( this, ID_TEXT,
       wxT("Coordinate System"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -933,9 +518,10 @@ void OrbitPanel::Create()
    //Get CordinateSystem ComboBox from the GuiItemManager.
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(150,-1));
-   //-----------------------------------------
 
-   //-------------- state type ---------------
+   //-----------------------------------------------------------------
+   //  state type 
+   //-----------------------------------------------------------------
    // label for state type
    wxStaticText *stateTypeStaticText = new wxStaticText( this, ID_TEXT,
       wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -943,9 +529,10 @@ void OrbitPanel::Create()
    // combo box for the state
    stateTypeComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY);
-   //-----------------------------------------
 
-   //---------------- anomaly ----------------
+   //-----------------------------------------------------------------
+   //  anomaly 
+   //-----------------------------------------------------------------
    // label for anomaly type
    anomalyStaticText = new wxStaticText( this, ID_TEXT,
       wxT("Anomaly Type "), wxDefaultPosition, wxDefaultSize, 0 );
@@ -953,12 +540,10 @@ void OrbitPanel::Create()
    // combo box for the anomaly type
    anomalyComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
       wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
-   //-----------------------------------------
    
    // add to page sizer
    pageSizer->Add( epochFormatStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( epochFormatComboBox, 0, wxALIGN_LEFT | wxALL, bsize );
-//   pageSizer->Add( 20, 20, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( epochStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( epochValue, 0, wxALIGN_LEFT | wxALL, bsize );
    pageSizer->Add( coordSysStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
@@ -972,12 +557,10 @@ void OrbitPanel::Create()
    // adds default descriptors/labels
    AddElements(this);
    elementSizer->Add(elementsPanel, 0, wxALIGN_CENTER, bsize);
-
+   
    orbitSizer->Add( pageSizer, 1, wxGROW|wxALIGN_CENTER, bsize );
    orbitSizer->Add( elementSizer, 1, wxGROW|wxALIGN_CENTER, bsize );
-
-   //theSpacecraft->SetDisplay(true);
-
+   
    this->SetSizer( orbitSizer );
 }
 
@@ -1089,83 +672,144 @@ void OrbitPanel::AddElements(wxWindow *parent)
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-/**
- * @note Activates the Apply button when text is changed
- */
-//------------------------------------------------------------------------------
 void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   wxString coordSysStr  = mCoordSysComboBox->GetStringSelection();
-   wxString stateTypeStr = stateTypeComboBox->GetStringSelection();
+   wxString coordSysStr  = mCoordSysComboBox->GetValue();
+   wxString stateTypeStr = stateTypeComboBox->GetValue();
 
-//   #if DEBUG_ORBIT_PANEL
-//      MessageInterface::ShowMessage
-//         ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
-//          "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
-//          coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
-//   #endif
-
-   // ---------------------------- epoch format change -------------------------
+   //-----------------------------------------------------------------
+   // epoch format change
+   //-----------------------------------------------------------------
    if (event.GetEventObject() == epochFormatComboBox)
    {
-      std::string toEpochFormat = epochFormatComboBox->GetStringSelection().c_str();    
+      std::string toEpochFormat = epochFormatComboBox->GetValue().c_str();    
       std::string epochStr = epochValue->GetValue().c_str();
-   #if DEBUG_ORBIT_PANEL
+      
+      #if DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
-         ("OrbitPanel::OnComboBoxChange() fromEpochFormat=%s, toEpochFormat=%s\n",
-          fromEpochFormat.c_str(), toEpochFormat.c_str());
-   #endif
+         ("OrbitPanel::OnComboBoxChange() fromEpochFormat=%s, "
+          "toEpochFormat=%s\n   epochStr=%s, mIsEpochModified=%d\n",
+          fromEpochFormat.c_str(), toEpochFormat.c_str(), epochStr.c_str(),
+          mIsEpochModified);
+      #endif
+      
       try
       {
-         theSpacecraft->SetDateFormat(toEpochFormat);
-         epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
-         fromEpochFormat = toEpochFormat;
+         // if modified by user, check if epoch is valid first
+         if (mIsEpochModified)
+         {
+            TimeConverterUtil::ValidateTimeFormat(fromEpochFormat, epochStr);
+            //theSpacecraft->SetDateFormat(fromEpochFormat);
+            //theSpacecraft->SetEpoch(epochStr);
+            
+            // update format and epoch
+            theSpacecraft->SetEpoch(epochStr);
+            theSpacecraft->SetDateFormat(toEpochFormat);
+            epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+            
+            mIsEpochModified = false;
+            fromEpochFormat = toEpochFormat;
+         }
+         else
+         {
+            theSpacecraft->SetDateFormat(toEpochFormat);
+            epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+            fromEpochFormat = toEpochFormat;
+         }
       }
       catch (BaseException &e)
       {
          epochFormatComboBox->SetValue(fromEpochFormat.c_str());
-         MessageInterface::ShowMessage
-            ("*** ERROR *** OrbitPanel:OnComboBoxChange() error occurred!\n%s\n",
-             e.GetMessage().c_str());
+         theSpacecraft->SetDateFormat(fromEpochFormat);
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, e.GetMessage() +
+             "\nPlease enter valid Epoch before changing the Epoch Format\n");
       }
    }
-
-   // ------------------- coordinate system or state type change ---------------
-   if (event.GetEventObject() == mCoordSysComboBox ||
-       event.GetEventObject() == stateTypeComboBox)
-   {
-   #if DEBUG_ORBIT_PANEL
+   //-----------------------------------------------------------------
+   // coordinate system or state type change
+   //-----------------------------------------------------------------
+   else if (event.GetEventObject() == mCoordSysComboBox ||
+            event.GetEventObject() == stateTypeComboBox)
+   {      
+      #if DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("OrbitPanel::OnComboBoxChange() mFromCoordStr=%s, coordSysStr=%s\n"
           "   mFromStateTypeStr=%s, stateTypeStr=%s\n", mFromCoordStr.c_str(),
           coordSysStr.c_str(), mFromStateTypeStr.c_str(), stateTypeStr.c_str());
-   #endif
+      #endif
+      
       if (event.GetEventObject() == mCoordSysComboBox)
          mIsCoordSysChanged = true;
-
+      
       if (event.GetEventObject() == stateTypeComboBox)
+      {
+         Rvector6 state;
          mIsStateTypeChanged = true;
+         mAnomalyType = anomalyComboBox->GetValue();
+         bool retval = false;
+         
+         // If state modified by user, validate elements first
+         if (mIsStateModified)
+         {            
+            mElement1 = textCtrl1->GetValue();
+            mElement2 = textCtrl2->GetValue();
+            mElement3 = textCtrl3->GetValue();
+            mElement4 = textCtrl4->GetValue();
+            mElement5 = textCtrl5->GetValue();
+            mElement6 = textCtrl6->GetValue();
+            
+            if (mFromStateTypeStr == "Cartesian")
+               retval = CheckCartesian(state);
+            else if (mFromStateTypeStr == "Keplerian")
+               retval = CheckKeplerian(state);
+            else if (mFromStateTypeStr == "ModifiedKeplerian")
+               retval = CheckModKeplerian(state);
+            else if (mFromStateTypeStr == "SphericalAZFPA" ||
+                     mFromStateTypeStr == "SphericalRADEC")
+               retval = CheckSpherical(state, stateTypeStr);
+            else if (mFromStateTypeStr == "Equinoctial")
+               retval = CheckEquinoctial(state);
+            else
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, + "*** Internal Error ***\nUnknown State Type: " +
+                   stateTypeStr);
+            }
+            
+            if (!retval)
+            {
+               stateTypeComboBox->SetValue(mFromStateTypeStr.c_str());
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, +
+                   "Please enter valid value before changing the State Type\n");
+               return;
+            }
+         }
+      }
       
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
-         GetObject(mCoordSysComboBox->GetStringSelection().c_str());
+         GetObject(mCoordSysComboBox->GetValue().c_str());
       
-      if (mIsEpochChanged)
-         UpdateEpoch();
+      //Epoch is handled before coordinate system or state type change
+      // so commented out (loj: 12/27/06)
+      //if (mIsEpochChanged)
+      //   UpdateEpoch();
       
       DisplayState();
       
       if (event.GetEventObject() == mCoordSysComboBox)
-         mFromCoordStr = mCoordSysComboBox->GetStringSelection().c_str();
+         mFromCoordStr = mCoordSysComboBox->GetValue().c_str();
       
       if (event.GetEventObject() == stateTypeComboBox)      
-         mFromStateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
+         mFromStateTypeStr = stateTypeComboBox->GetValue().c_str();
       
       mFromCoord = mOutCoord;
       theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
-//      anomaly = theSpacecraft->GetAnomaly();
    }
-   
-   // -------------------------- anomaly type change ---------------------------
+   //-----------------------------------------------------------------
+   // anomaly type change 
+   //-----------------------------------------------------------------
    else if (event.GetEventObject() == anomalyComboBox)
    {
       std::string anomalyType;
@@ -1184,40 +828,25 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          anomalyType = "HA";
       
       Real value = anomaly.Convert(mFromAnomalyTypeStr, anomalyType);
-
+      
       int anomalyID = theSpacecraft->GetParameterID("AnomalyType");
       theSpacecraft->SetStringParameter(anomalyID, anomalyType);
-// std::string temp = theSpacecraft->GetStringParameter(anomalyID);
-// MessageInterface::ShowMessage("OrbitPanel::OnComboBoxChange()..."
-//                               "S/c anomaly type -> %s\n", temp.c_str());   
-//   anomaly.SetValue(value);   
-//MessageInterface::ShowMessage("Anomaly type = %s\n", anomalyType.c_str());
-//      #if DEBUG_ORBIT_PANEL
-//         MessageInterface::ShowMessage("\nOrbitPanel::OnComboBoxChange()..."
-//             "\nAnomaly info -> a: %f, e: %f, %s: %f\n", 
-//             anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
-//             anomaly.GetValue());   
-//      #endif
-//      
       description.Printf("%s", anomalyType.c_str());
       description6->SetLabel(description);
       
       textCtrl6->SetValue(ToString(value));
 
       mFromAnomalyTypeStr = anomalyType;
-      #if DEBUG_ORBIT_PANEL
+      #if DEBUG_ORBIT_PANEL_COMBOBOX
          MessageInterface::ShowMessage( "anomaly id = %d\n",anomalyID );
          MessageInterface::ShowMessage( "anomaly type = %s\n",anomalyType.c_str() );
          MessageInterface::ShowMessage( "s/c anomaly type = %s\n",anomaly.GetType().c_str() );
       #endif
    }
-   
-   if (theApplyButton != NULL)
-   {
-      dataChanged = true;
-      theApplyButton->Enable();
-      theOkButton->Enable();
-   }
+
+   dataChanged = true;
+   theScPanel->EnableUpdate(true);
+
 }
 
 
@@ -1240,18 +869,17 @@ void OrbitPanel::OnTextChange(wxCommandEvent& event)
            (textCtrl5->IsModified()) || (textCtrl6->IsModified()) )
       {
          mIsStateChanged = true;
+         mIsStateModified = true;
+         dataChanged = true;
+         theScPanel->EnableUpdate(true);
       }
    }
    else if (obj == epochValue && epochValue->IsModified())
    {
       mIsEpochChanged = true;
-   }
-   
-   if (theApplyButton != NULL)
-   {
+      mIsEpochModified = true;
       dataChanged = true;
-      theApplyButton->Enable();
-      theOkButton->Enable();
+      theScPanel->EnableUpdate(true);
    }
 }
 
@@ -1365,51 +993,27 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 void OrbitPanel::UpdateEpoch()
 {
    std::string newEpoch = epochValue->GetValue().c_str();
-   std::string toEpochFormat = 
-      epochFormatComboBox->GetStringSelection().c_str();
-      
-   #if DEBUG_ORBIT_PANEL
-      MessageInterface::ShowMessage( "epoch = %s\n",newEpoch.c_str() );
-      MessageInterface::ShowMessage
-         ("OrbitPanel::UpdateEpoch() fromEpochFormat=%s, toEpochFormat=%s\n",
-          fromEpochFormat.c_str(), toEpochFormat.c_str());
+   std::string toEpochFormat = epochFormatComboBox->GetValue().c_str();
+   
+   #if DEBUG_ORBIT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("OrbitPanel::UpdateEpoch() newEpoch = %s\n", newEpoch.c_str() );
+   MessageInterface::ShowMessage
+      ("OrbitPanel::UpdateEpoch() fromEpochFormat=%s, toEpochFormat=%s\n",
+       fromEpochFormat.c_str(), toEpochFormat.c_str());
    #endif
-//   if (toEpochFormat != fromEpochFormat)
-//   {
+   
+   try
+   {
       theSpacecraft->SetStringParameter("DateFormat", toEpochFormat);
       theSpacecraft->SetEpoch(newEpoch);
       epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
       mEpoch = theSpacecraft->GetEpoch();
-//   }   
-   
-   Rvector6 outState;
-   
-   if (mFromStateTypeStr != "Cartesian")
-   {
-      // convert to Cartesian
-      stateConverter.SetMu(mFromCoord);
-      outState = stateConverter.Convert(mOutState, mFromStateTypeStr.c_str(),
-                                        "Cartesian", anomaly);
-      mTempCartState = outState;
    }
-   
-   if (mFromCoordStr != "EarthMJ2000Eq")
+   catch (BaseException &e)
    {
-      mCoordConverter.Convert(A1Mjd(mEpoch), mTempCartState, mFromCoord,
-                              mTempCartState, mInternalCoord);
-      
-      Rmatrix33 rmat = mCoordConverter.GetLastRotationMatrix();
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
-   
-   
-   #if DEBUG_ORBIT_PANEL
-   MessageInterface::ShowMessage
-      ("OrbitPanel::UpdateEpoch() new mEpoch=%f, mOutState=\n   %s\n"
-       "mTempCartState=\n   %s\n", mEpoch, mOutState.ToString().c_str(),
-       mTempCartState.ToString().c_str());
-   #endif
-   
-   mIsEpochChanged = false;
    
    // turn off modified flag
    epochValue->DiscardEdits();
@@ -1422,18 +1026,18 @@ void OrbitPanel::UpdateEpoch()
 void OrbitPanel::DisplayState()
 {
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
-   #if DEBUG_ORBIT_PANEL
-      std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
+   std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
 
+   #if DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage(
          "OrbitPanel::DisplayState() coordSysStr = '%s', stateTypeStr='%s', "
          "mEpoch=%.11lf\n", coordSysStr.c_str(), stateTypeStr.c_str(), mEpoch);
    #endif
-
+      
    Rvector6 midState;
    bool isInternal = false;
    
-   if (mIsStateChanged)
+   if (mIsStateModified)
    {
       // User has typed in new state data
       midState[0] = atof(textCtrl1->GetValue());
@@ -1449,6 +1053,7 @@ void OrbitPanel::DisplayState()
       midState = mCartState;
       isInternal = true;
    }
+   
    BuildState(midState, isInternal);
    
    #if DEBUG_ORBIT_PANEL_CONVERT
@@ -1456,7 +1061,7 @@ void OrbitPanel::DisplayState()
          "OrbitPanel::DisplayState()--- after conversion, mOutState= %s\n",
          mOutState.ToString().c_str());
    #endif
-
+      
    textCtrl1->SetValue(ToString(mOutState[0]));
    textCtrl2->SetValue(ToString(mOutState[1]));
    textCtrl3->SetValue(ToString(mOutState[2]));
@@ -1466,11 +1071,22 @@ void OrbitPanel::DisplayState()
    
    // labels for elements, anomaly and units
    SetLabelsUnits(stateTypeStr);
-   mIsStateChanged=false;
+   
+   // This flag is only reset in SaveData() (loj: 12/27/06)
+   //mIsStateChanged = false;
+   mIsStateModified = false;
+   
+   // turn off modified flag (loj: 12/27/06 added)
+   textCtrl1->DiscardEdits();
+   textCtrl2->DiscardEdits();
+   textCtrl3->DiscardEdits();
+   textCtrl4->DiscardEdits();
+   textCtrl5->DiscardEdits();
+   textCtrl6->DiscardEdits();
 }
 
 //------------------------------------------------------------------------------
-// void BuildState(const Rvector6 &inputState, bool isInternal)
+// void BuildState(const Rvector6 &inputState, bool isInternal = false)
 //------------------------------------------------------------------------------
 /**
  * This method takes the input state and converts it to match the state settings
@@ -1506,7 +1122,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       stateConverter.SetMu(mFromCoord);
       midState = stateConverter.Convert(inputState, mFromStateTypeStr, 
          "Cartesian", anomaly);
-         
+      
       // Transform to internal coordinates
       mCoordConverter.Convert(A1Mjd(mEpoch), midState, mFromCoord, mCartState, 
          mInternalCoord);
@@ -1560,4 +1176,326 @@ Rvector6 OrbitPanel::ConvertState(CoordinateSystem *cs, const Rvector6 &state,
          ("OrbitPanel:ConvertState() error occurred!\n%s\n", e.GetMessage().c_str());
    }
    return newState;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckCartesian(Rvector6 &state)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckCartesian(Rvector6 &state)
+{
+   bool retval = true;
+   
+   if (!CheckReal(state[0], mElement1, "X", "Real Number"))
+      retval = false;
+   if (!CheckReal(state[1], mElement2, "Y", "Real Number"))
+      retval = false;
+   if (!CheckReal(state[2], mElement3, "Z", "Real Number"))
+      retval = false;
+   if (!CheckReal(state[3], mElement4, "VX", "Real Number"))
+      retval = false;
+   if (!CheckReal(state[4], mElement5, "VY", "Real Number"))
+      retval = false;
+   if (!CheckReal(state[5], mElement6, "VZ", "Real Number"))
+      retval = false;
+   
+   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckCartesian() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckKeplerian(Rvector6 &state)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckKeplerian(Rvector6 &state)
+{
+   bool retval = true;
+   
+   if (CheckReal(state[0], mElement1, "SMA", "Real Number"))
+   {
+      if (state[0] == 0.0)
+      {
+         CheckReal(state[0], mElement1, "SMA", "Real Number != 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   if (CheckReal(state[1], mElement2, "ECC", "Real Number"))
+   {
+      if ((state[1] < 0.0) || (state[1] >= 1.0))
+      {
+         CheckReal(state[1], mElement1, "ECC", "0.0 < = Real Number < 1.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   // check coupling restictions on SMA and ECC for circular and elliptical orbits
+   if((state[0] < 0.0) && (state[1] <= 1.0))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "(0.0 <= ECC <= 1.0) SMA should only be a positive Real Number", true);
+      retval = false;
+      canClose = false;
+   }
+   
+   // for hyperbolic orbit
+   else if((state[0] > 0.0) && (state[1] > 1.0))
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "(ECC > 1) SMA should only be a negative Real Number", true);
+      retval = false;
+      canClose = false;
+   }
+   
+   if (!CheckReal(state[2], mElement3, "INC", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[3], mElement4, "RAAN", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[4], mElement5, "AOP", "Real Number"))
+      retval = false;
+   
+   // check Anomaly
+   if (CheckReal(state[5], mElement6, mAnomalyType, "Real Number"))
+   {
+      anomaly.Set(state[0], state[1], state[5], mAnomalyType);
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckKeplerian() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckModKeplerian(Rvector6 &state)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
+{
+   bool retval = true;
+   
+   if (CheckReal(state[0], mElement1, "RadPer", "Real Number"))
+   {
+      if (state[0] == 0.0)
+      {
+         CheckReal(state[0], mElement1, "RadPer", "Real Number != 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   if (CheckReal(state[1], mElement2, "RadApo", "Real Number"))
+   {
+      if (state[1] < 0.0)
+      {
+         CheckReal(state[1], mElement2, "RadApo", "Real Number >= 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   if (!CheckReal(state[2], mElement3, "INC", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[3], mElement4, "RAAN", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[4], mElement5, "AOP", "Real Number"))
+      retval = false;
+   
+   // check Anomaly
+   if (CheckReal(state[5], mElement6, mAnomalyType, "Real Number"))
+   {
+      anomaly.Set(state[0], state[1], state[5], mAnomalyType);
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckModKeplerian() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckSpherical(Rvector6 &state, const wxString &stateType)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
+{
+   bool retval = true;
+   
+   if (CheckReal(state[0], mElement1, "RMAG", "Real Number"))
+   {
+      if (state[0] <= 0.0)
+      {
+         CheckReal(state[0], mElement1, "RMAG", "Real Number > 0.0", true);
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   if (!CheckReal(state[1], mElement2, "RA", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[2], mElement3, "DEC", "Real Number"))
+      retval = false;
+
+   if (CheckReal(state[3], mElement4, "VMAG", "Real Number"))
+   {
+      if (state[3] < 0.0)
+      {
+         CheckReal(state[4], mElement4, "VMAG", "Real Number >= 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+
+   std::string label5, label6;
+   
+   if (strcmp(stateType.c_str(), "SphericalAZFPA") == 0)
+   {
+      label5 = "AZI";
+      label6 = "FPA";
+   }
+   else if (strcmp(stateType.c_str(), "SphericalRADEC") == 0)
+   {
+      label5 = "RAV";
+      label6 = "DECV";
+   }
+   
+   if (!CheckReal(state[4], mElement5, label5, "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[5], mElement6, label6, "Real Number"))
+      retval = false;
+   
+   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckSpherical() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckEquinoctial(Rvector6 &state)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
+{
+   bool retval = true;
+   
+   if (CheckReal(state[0], mElement1, "SMA", "Real Number"))
+   {
+      if (state[0] == 0.0)
+      {
+         CheckReal(state[0], mElement1, "SMA", "Real Number != 0.0", true);
+         retval = false;
+         canClose = false;
+      }
+   }
+   else
+   {
+      retval = false;
+   }
+   
+   if (!CheckReal(state[1], mElement2, "h", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[2], mElement3, "k", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[3], mElement4, "p", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[4], mElement5, "q", "Real Number"))
+      retval = false;
+   
+   if (!CheckReal(state[5], mElement6, "Mean Longitude", "Real Number"))
+      retval = false;
+   
+   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   MessageInterface::ShowMessage("CheckEquinoctial() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckReal(Real &rvalue, const std::string &element,
+//                const std::string &field, const std::string &expRange)
+//------------------------------------------------------------------------------
+bool OrbitPanel::CheckReal(Real &rvalue, const std::string &element,
+                           const std::string &field, const std::string &expRange,
+                           bool onlyMsg)
+{
+   //MessageInterface::ShowMessage
+   //   ("===> CheckReal() element=%s, field=%s, expRange=%s\n", element.c_str(),
+   //    field.c_str(), expRange.c_str());
+   
+   if (onlyMsg)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+
+   // check for real value
+   Real rval;
+   if (GmatStringUtil::ToDouble(element, &rval))
+   {
+      rvalue = rval;
+      return true;
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
 }
