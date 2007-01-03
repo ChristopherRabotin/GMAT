@@ -81,14 +81,20 @@ DragForce* ExponentialDragDialog::GetForce()
 void ExponentialDragDialog::Create()
 {
    // wxStaticText
-   wxStaticText *expDrag1StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 1"), wxDefaultPosition, wxDefaultSize, 0 );
-   wxStaticText *expDrag2StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 2"), wxDefaultPosition, wxDefaultSize, 0 );
-   wxStaticText *expDrag3StaticText = new wxStaticText( this, ID_TEXT, wxT("Parameter 3"), wxDefaultPosition, wxDefaultSize, 0 );
-    
+   wxStaticText *expDrag1StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Parameter 1"), wxDefaultPosition, wxDefaultSize, 0 );
+   wxStaticText *expDrag2StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Parameter 2"), wxDefaultPosition, wxDefaultSize, 0 );
+   wxStaticText *expDrag3StaticText =
+      new wxStaticText( this, ID_TEXT, wxT("Parameter 3"), wxDefaultPosition, wxDefaultSize, 0 );
+   
    // wxTextCtrl
-   expDrag1TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-   expDrag2TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
-   expDrag3TextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+   expDrag1TextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+   expDrag2TextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
+   expDrag3TextCtrl =
+      new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(80,-1), 0 );
     
    // wxSizer
    wxFlexGridSizer *pageFlexGridSizer = new wxFlexGridSizer( 3, 2, 0, 0 );
