@@ -410,7 +410,7 @@ void UniversePanel::SaveData()
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "Need to select at least one planetary source file.\n"
-          "Added SLP file as default\n");
+          "Added DE405 file as default\n");
       
       selectedListBox->Insert("DE405", 0);
       selectedListBox->SetSelection(0);
