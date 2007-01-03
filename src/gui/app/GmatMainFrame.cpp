@@ -112,6 +112,9 @@
 #include "bitmaps/script.xpm"
 #include "bitmaps/build.xpm"
 
+#define __USE_CHILD_BEST_SIZE__
+
+
 //#define DEBUG_MAINFRAME 1
 //#define DEBUG_MAINFRAME_CLOSE 1
 //#define DEBUG_FILE_COMPARE 1
@@ -377,7 +380,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
       return NULL;
    
    int dataType = item->GetDataType();
-
+   
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() name=%s, dataType=%d\n",
@@ -387,7 +390,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    //----------------------------------------------------------------------
    // create a mdi child
    // Note: Do not change the order of ItemType in GmatTreeItemData.hpp.
-   // The wrong order of dataType will not work propery.
+   // The wrong order of dataType will not work properly.
    //----------------------------------------------------------------------
    if (dataType >= GmatTree::BEGIN_OF_RESOURCE &&
        dataType <= GmatTree::END_OF_RESOURCE)
@@ -1390,13 +1393,16 @@ GmatMdiChildFrame*
 GmatMainFrame::CreateNewResource(const wxString &title,
                                  const wxString &name, int dataType)
 {
-   wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateNewResource() title=%s, name=%s, dataType=%d\n",
+       title.c_str(), name.c_str(), dataType);
+   #endif
    
-   GmatMdiChildFrame *newChild =
-      new GmatMdiChildFrame(this, title, name, dataType);
-
+   wxGridSizer *sizer = new wxGridSizer(1, 0, 0);   
+   GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, title, name, dataType);   
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
-
+   
    switch (dataType)
    {
    case GmatTree::SPACECRAFT:
@@ -1485,16 +1491,31 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    default:
       return NULL;
    }
-
+   
    scrolledWin->SetScrollRate(5, 5);
    scrolledWin->SetAutoLayout(TRUE);
    scrolledWin->SetSizer(sizer);
    sizer->Fit(scrolledWin);
    sizer->SetSizeHints(scrolledWin);
-
+   
+   #ifdef __USE_CHILD_BEST_SIZE__
+   if (dataType != GmatTree::SCRIPT_FILE)
+   {
+      wxSize bestSize = newChild->GetBestSize();
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+   }
+   else
+   {
+      #ifndef __WXMSW__
+      wxSize bestSize = newChild->GetBestSize();      
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+      #endif
+   }
+   #endif
+   
    // list of open children
    mdiChildren->Append(newChild);
-
+   
    // djc: Under linux, force the new child to display
 #ifndef __WXMSW__
    newChild->Show();
@@ -1600,6 +1621,21 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
    sizer->Fit(scrolledWin);
    sizer->SetSizeHints(scrolledWin);
    
+   #ifdef __USE_CHILD_BEST_SIZE__
+   if (dataType != GmatTree::SCRIPT_COMMAND)
+   {
+      wxSize bestSize = newChild->GetBestSize();
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+   }
+   else
+   {
+      #ifndef __WXMSW__
+      wxSize bestSize = newChild->GetBestSize();      
+      newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+      #endif
+   }
+   #endif
+   
    // list of open children
    mdiChildren->Append(newChild);
 
@@ -1659,6 +1695,11 @@ GmatMainFrame::CreateNewControl(const wxString &title,
    sizer->Fit(scrolledWin);
    sizer->SetSizeHints(scrolledWin);
 
+   #ifdef __USE_CHILD_BEST_SIZE__
+   wxSize bestSize = newChild->GetBestSize();
+   newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
+   #endif
+   
    // list of open children
    mdiChildren->Append(newChild);
 
