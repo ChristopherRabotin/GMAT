@@ -40,7 +40,7 @@ BEGIN_EVENT_TABLE(OpenGlPlotSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-
+   
    EVT_BUTTON(ADD_SP_BUTTON, OpenGlPlotSetupPanel::OnAddSpacePoint)
    EVT_BUTTON(REMOVE_SP_BUTTON, OpenGlPlotSetupPanel::OnRemoveSpacePoint)
    EVT_BUTTON(CLEAR_SP_BUTTON, OpenGlPlotSetupPanel::OnClearSpacePoint)
@@ -1325,7 +1325,6 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasViewInfoChanged)
       {
-         mHasViewInfoChanged = false;
          mOpenGlPlot->SetStringParameter
             ("ViewPointRef",
              std::string(mViewPointRefComboBox->GetStringSelection().c_str()));
@@ -1411,7 +1410,9 @@ void OpenGlPlotSetupPanel::SaveData()
             }
             mOpenGlPlot->SetRvectorParameter("ViewDirectionVector", vec);
          }
-      }
+         
+         mHasViewInfoChanged = false;
+      } // end if ( mHasViewInfoChanged)
       
       //--------------------------------------------------------------
       // save view up direction info

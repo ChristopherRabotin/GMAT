@@ -15,8 +15,8 @@
 #include "ParameterSetupPanel.hpp"
 #include "RgbColor.hpp"
 #include "MessageInterface.hpp"
-
-#include "wx/colordlg.h"   // for wxColourDialog
+#include "StringUtil.hpp"       // for GmatStringUtil::
+#include "wx/colordlg.h"        // for wxColourDialog
 
 //#define DEBUG_PARAM_PANEL 1
 
@@ -151,11 +151,11 @@ void ParameterSetupPanel::LoadData()
    if (mParam != NULL)
    {
       
-#if DEBUG_PARAM_PANEL
+      #if DEBUG_PARAM_PANEL
       MessageInterface::ShowMessage
          ("ParameterSetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
-#endif
-
+      #endif
+      
       try
       {
          // show expression
@@ -200,11 +200,24 @@ void ParameterSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::SaveData()
 {
+   canClose = true;
+   
    if (mIsExpChanged)
    {
-      mIsExpChanged = false;
-      mParam->SetStringParameter("Expression",
-                                 std::string(mVarExpTextCtrl->GetValue().c_str()));
+      std::string strval = mVarExpTextCtrl->GetValue().c_str();
+      Real rval;
+      if (GmatStringUtil::ToDouble(strval, &rval))
+      {
+         mIsExpChanged = false;
+         mParam->SetStringParameter("Expression",
+                                    std::string(mVarExpTextCtrl->GetValue().c_str()));
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "\"%s\" is not a valid Real number.", strval.c_str());
+         canClose = false;
+      }
    }
    
    if (mIsColorChanged)
@@ -223,7 +236,8 @@ void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
    if (mVarExpTextCtrl->IsModified())
    {
       mIsExpChanged = true;
-      theApplyButton->Enable();
+      //theApplyButton->Enable();
+      EnableUpdate(true);
    }
 }
 
@@ -244,7 +258,8 @@ void ParameterSetupPanel::OnColorButtonClick(wxCommandEvent& event)
       mColor = dialog.GetColourData().GetColour();
       mColorButton->SetBackgroundColour(mColor);
       mIsColorChanged = true;
-      theApplyButton->Enable();
+      //theApplyButton->Enable();
+      EnableUpdate(true);
    }
 }
 
