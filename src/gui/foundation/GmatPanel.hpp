@@ -36,40 +36,40 @@ public:
    // constructors
    GmatPanel( wxWindow *parent, bool showScriptButton = true);
 
+   virtual void EnableUpdate(bool enable = true);
+   
    virtual void OnApply(wxCommandEvent &event);
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
    virtual void OnHelp(wxCommandEvent &event);
    virtual void OnScript(wxCommandEvent &event);
    virtual void OnSummary(wxCommandEvent &event);
-
+   
 protected:
    // member functions
    virtual void Create() = 0;
    virtual void Show();
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
-
-   virtual void EnableUpdate(bool enable = true);
    
    // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool canClose;
-   bool enableApply;
    bool mShowScriptButton;
+   bool mDataChanged;
    
    wxWindow *theParent;
     
    wxBoxSizer *thePanelSizer;
-   wxStaticBoxSizer *theTopSizer;
+   //wxStaticBoxSizer *theTopSizer;
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
     
    wxButton *theOkButton;
    wxButton *theApplyButton;
    wxButton *theCancelButton;
-   wxButton *theHelpButton;
+   //wxButton *theHelpButton;
    wxButton *theScriptButton;
    wxButton *theSummaryButton;
    

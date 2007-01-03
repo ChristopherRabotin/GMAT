@@ -21,49 +21,49 @@
 class GmatMdiChildFrame : public wxMDIChildFrame
 {
 public:
-    // constructors
-    GmatMdiChildFrame(wxMDIParentFrame* parent, 
-                      const wxString& name = "",
-                      const wxString& title = "", 
-                      const int type = 20000,
-                      wxWindowID id = -1, 
-                      const wxPoint& pos = wxDefaultPosition, 
-                      const wxSize& size = wxDefaultSize, 
-                      long style = wxDEFAULT_FRAME_STYLE);
-    ~GmatMdiChildFrame();
+   // constructors
+   GmatMdiChildFrame(wxMDIParentFrame *parent, 
+                     const wxString &title = "", 
+                     const wxString &name = "",
+                     const int type = 20000,
+                     wxWindowID id = -1, 
+                     const wxPoint &pos = wxDefaultPosition, 
+                     const wxSize &size = wxDefaultSize, 
+                     long style = wxDEFAULT_FRAME_STYLE);
+   ~GmatMdiChildFrame();
    
 #ifdef __WXMAC__
-    wxString GetTitle();
-    void SetTitle(wxString newTitle);
+   wxString GetTitle();
+   void SetTitle(wxString newTitle);
 #endif
-
-    GmatMenuBar *menuBar;
-    int GetDataType();
-    void SetDataType(int type) {dataType = type;};
-    void OnClose(wxCloseEvent &event);
-    void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
-    wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
-    void SetDirty(bool dirty);
-    bool IsDirty();
+   
+   GmatMenuBar *menuBar;
+   int GetDataType();
+   void SetDataType(int type) {dataType = type;};
+   void OnClose(wxCloseEvent &event);
+   void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
+   wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
+   void SetDirty(bool dirty);
+   bool IsDirty();
    
 protected:
-
+   
 #ifdef __WXMAC__
-    wxString childTitle;
+   wxString childTitle;
 #endif
-
-    bool mDirty;
-    int dataType;
-    wxTextCtrl *theScriptTextCtrl;
-    
-    // any class wishing to process wxWindows events must use this macro
-    DECLARE_EVENT_TABLE();
-
-    // IDs for the controls and the menu commands
-    enum
-    {     
-    };
-
+   
+   bool mDirty;
+   int dataType;
+   wxTextCtrl *theScriptTextCtrl;
+   
+   // any class wishing to process wxWindows events must use this macro
+   DECLARE_EVENT_TABLE();
+   
+   // IDs for the controls and the menu commands
+   enum
+   {     
+   };
+   
 };
 
 #endif // GmatMdiChildFrame_hpp

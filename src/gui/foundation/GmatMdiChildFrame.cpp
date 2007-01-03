@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                             GmatNotebook
+//                             GmatMdiChildFrame
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
@@ -12,12 +12,12 @@
  * This class provides the layout of a mdi child frame
  */
 //------------------------------------------------------------------------------
-#include "GmatMdiChildFrame.hpp"
 
+#include "GmatMdiChildFrame.hpp"
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "FileManager.hpp"
-
+#include "MessageInterface.hpp"
 #include "GuiItemManager.hpp"
 
 using namespace GmatMenu;
@@ -42,24 +42,23 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // GmatMdiChildFrame::GmatMdiChildFrame(...)
 //------------------------------------------------------------------------------
-GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame* parent, 
-                                     const wxString& name,
-                                     const wxString& title, 
+GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent, 
+                                     const wxString &title, 
+                                     const wxString &name,
                                      const int type,
                                      wxWindowID id, 
-                                     const wxPoint& pos, 
-                                     const wxSize& size, 
+                                     const wxPoint &pos, 
+                                     const wxSize &size, 
                                      long style)
    : wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
    mDirty = false;
    dataType = type;
    
-#ifdef __WXMAC__
-   //this->title.Printf("%s", title.c_str());
-   this->childTitle = title.c_str();
-#endif
-
+   #ifdef __WXMAC__
+   childTitle = title;
+   #endif
+   
    menuBar = new GmatMenuBar(dataType);
    SetMenuBar(menuBar);
    
@@ -99,18 +98,18 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    // check if window is dirty?
    if (mDirty)
    {
-        if ( wxMessageBox(_T("Changes will be lost. \nReally close?"), _T("Please confirm"),
-                          wxICON_QUESTION | wxYES_NO) != wxYES )
-        {
-            event.Veto();
-            return;
-        }
+      if ( wxMessageBox(_T("Changes will be lost. \nDo you really want to close?"),
+                        _T("Please confirm"), wxICON_QUESTION | wxYES_NO) != wxYES )
+      {
+         event.Veto();
+         return;
+      }
    }
    
    // remove from list of frames
    GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), dataType);
-
-//   event.Skip();
+   
+   //event.Skip();
    wxSafeYield();
 }
 
@@ -120,7 +119,6 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::SetTitle(wxString newTitle)
 {
-//   SetTitle(newTitle);
    childTitle = newTitle;
 }
 
@@ -130,7 +128,7 @@ void GmatMdiChildFrame::SetTitle(wxString newTitle)
 //------------------------------------------------------------------------------
 wxString GmatMdiChildFrame::GetTitle()
 {
-	if (childTitle.IsNull())
+   if (childTitle.IsNull())
       return "";
    else
       return childTitle;
@@ -152,7 +150,7 @@ int GmatMdiChildFrame::GetDataType()
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::SetDirty(bool dirty)
 {
-    mDirty = dirty;
+   mDirty = dirty;
 }
 
 
