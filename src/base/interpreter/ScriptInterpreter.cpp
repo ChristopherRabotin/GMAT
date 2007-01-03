@@ -91,8 +91,8 @@ ScriptInterpreter::~ScriptInterpreter()
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret()
 {
-   if (!initialized)
-      Initialize();
+   //if (!initialized)
+   Initialize();
    
    inCommandMode = false;
    inRealCommandMode = false;
@@ -135,7 +135,8 @@ bool ScriptInterpreter::Interpret()
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret(GmatCommand *inCmd)
 {
-
+   Initialize();
+   
    #if DEBUG_SCRIPT_READING
    MessageInterface::ShowMessage
       ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s\n", inCmd,
@@ -185,19 +186,19 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 {
-    bool retval = false;
+   bool retval = false;
     
-    scriptFilename = scriptfile;   
-    std::ifstream inFile(scriptFilename.c_str());
-    inStream = &inFile;
+   scriptFilename = scriptfile;   
+   std::ifstream inFile(scriptFilename.c_str());
+   inStream = &inFile;
 
-    theReadWriter->SetInStream(inStream);
-    retval = Interpret();
+   theReadWriter->SetInStream(inStream);
+   retval = Interpret();
     
-    inFile.close();
-    inStream = NULL;
+   inFile.close();
+   inStream = NULL;
     
-    return retval;
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -211,11 +212,12 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 {
-    if (!initialized)
-        Initialize();
+   if (!initialized)
+      Initialize();
     
-    return WriteScript(mode);
+   return WriteScript(mode);
 }
+
 
 //------------------------------------------------------------------------------
 // bool Build(const std::string &scriptfile)
@@ -230,21 +232,21 @@ bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mode)
 {
-    bool retval = false;
+   bool retval = false;
     
-    if (scriptfile != "")
-       scriptFilename = scriptfile;
+   if (scriptfile != "")
+      scriptFilename = scriptfile;
 
-    std::ofstream outFile(scriptFilename.c_str());
-    outStream = &outFile;
+   std::ofstream outFile(scriptFilename.c_str());
+   outStream = &outFile;
 
-    theReadWriter->SetOutStream(outStream);
-    retval = Build(mode);
+   theReadWriter->SetOutStream(outStream);
+   retval = Build(mode);
     
-    outFile.close();
-    outStream = NULL;
+   outFile.close();
+   outStream = NULL;
     
-    return retval;
+   return retval;
 }
 
 
@@ -599,7 +601,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       if (type == "Array")
       {
          if (chunks[2].find('[') == chunks[2].npos)
-            throw UtilityException("Opening bracket \"[\" not found");
+            throw InterpreterException("Opening bracket \"[\" not found");
          
          names = theTextParser.Decompose(chunks[2], "[]");
       }

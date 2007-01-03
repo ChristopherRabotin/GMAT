@@ -30,8 +30,9 @@
 //#define __ENABLE_ATTITUDE_LIST__
 //#ifdef __DO_NOT_USE_OBJ_TYPE_NAME__
 
-//#define DEBUG_COMMAND_LIST
-//#define DEBUG_OBJECT_LIST
+//#define DEBUG_INIT 1
+//#define DEBUG_COMMAND_LIST 1
+//#define DEBUG_OBJECT_LIST 1
 //#define DEBUG_ARRAY_GET 1
 //#define DEBUG_CREATE_OBJECT 1
 //#define DEBUG_CREATE_PARAM 1
@@ -92,9 +93,11 @@ Interpreter::~Interpreter()
 //------------------------------------------------------------------------------
 void Interpreter::Initialize()
 {
-   //MessageInterface::ShowMessage
-   //   ("===> Interpreter::Initialize() initialized=%d\n", initialized);
-
+   #if DEBUG_INIT
+   MessageInterface::ShowMessage
+      ("Interpreter::Initialize() initialized=%d\n", initialized);
+   #endif
+   
    errorList.clear();
    delayedBlocks.clear();
    inCommandMode = false;
@@ -105,9 +108,25 @@ void Interpreter::Initialize()
    // Build a mapping for all of the defined commands
    StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
    copy(cmds.begin(), cmds.end(), back_inserter(commandList));
-
+   
+   #if DEBUG_INIT
+   MessageInterface::ShowMessage("Number of commands = %d\n", cmds.size());
+   #endif
+   
+   #ifdef DEBUG_COMMAND_LIST
+      std::vector<std::string>::iterator pos1;
+      
+      MessageInterface::ShowMessage("\nCommands:\n   ");      
+      for (pos1 = cmds.begin(); pos1 != cmds.end(); ++pos1)
+         MessageInterface::ShowMessage(*pos1 + "\n   ");
+      
+   #endif
+      
    if (cmds.size() == 0)
-      return;
+   {
+      throw InterpreterException("Command list is empty.");
+      //return;
+   }
    
    // Build a mapping for all of the defined objects
    StringArray atms = theModerator->GetListOfFactoryItems(Gmat::ATMOSPHERE);
@@ -150,15 +169,6 @@ void Interpreter::Initialize()
    copy(subs.begin(), subs.end(), back_inserter(subscriberList));
    
    
-   #ifdef DEBUG_COMMAND_LIST
-      std::vector<std::string>::iterator pos1;
-      
-      MessageInterface::ShowMessage("\nCommands:\n   ");      
-      for (pos1 = cmds.begin(); pos1 != cmds.end(); ++pos1)
-         MessageInterface::ShowMessage(*pos1 + "\n   ");
-      
-   #endif
-      
    #ifdef DEBUG_OBJECT_LIST
       std::vector<std::string>::iterator pos;
       
