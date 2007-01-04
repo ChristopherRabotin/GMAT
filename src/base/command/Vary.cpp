@@ -235,7 +235,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << variableName[i] << " = " << initialValue[i] <<  ", ";
    }
 
-   details << "{Pert =";
+   details << "{Perturbation =";
    // Toss in the perturbations
    for (UnsignedInt i = 0; i < perturbation.size(); ++i)
    {
@@ -746,14 +746,9 @@ bool Vary::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Vary::InterpretAction()
 {
-   TextParser tp;
-   StringArray cmds;
-   cmds.push_back("Vary");
-   tp.Initialize(cmds);
-   
-   tp.EvaluateBlock(generatingString);
-   StringArray blocks = tp.DecomposeBlock(generatingString);
-   StringArray chunks = tp.ChunkLine();
+   parser.EvaluateBlock(generatingString);
+   StringArray blocks = parser.DecomposeBlock(generatingString);
+   StringArray chunks = parser.ChunkLine();
    
    #ifdef DEBUG_VARY_PARSING
       MessageInterface::ShowMessage("Vary::InterpretAction() block list:\n");
@@ -771,7 +766,7 @@ bool Vary::InterpretAction()
          "'\n should be a Vary command, but the '" + typeName + 
          "' keyword is not the opening token in the line.\n");  
 
-   StringArray currentChunks = tp.Decompose(chunks[1], "()");
+   StringArray currentChunks = parser.Decompose(chunks[1], "()");
    #ifdef DEBUG_VARY_PARSING
       MessageInterface::ShowMessage("   Vary::InterpretAction() 1st level:\n");
       for (StringArray::iterator i = currentChunks.begin(); 
@@ -782,7 +777,7 @@ bool Vary::InterpretAction()
    SetStringParameter(SOLVER_NAME, currentChunks[0]);
    
    // Next break out the variables from the settings
-   currentChunks = tp.SeparateBrackets(currentChunks[1], "()", ", ");
+   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
    #ifdef DEBUG_VARY_PARSING
       MessageInterface::ShowMessage(
          "      Vary::InterpretAction() 2nd level:\n");
@@ -792,7 +787,7 @@ bool Vary::InterpretAction()
    #endif
    
    // First chunk is the variable and initial value
-   StringArray nameval = tp.SeparateBy(currentChunks[0], "= ");
+   StringArray nameval = parser.SeparateBy(currentChunks[0], "= ");
    variableName.push_back(nameval[0]);
    variableId.push_back(-1);
    // This part needs to be changed to handle all of the types
@@ -810,7 +805,7 @@ bool Vary::InterpretAction()
    // then the bracketed list of settings, if not using defaults
    if (currentChunks.size() > 1)
    {
-      currentChunks = tp.SeparateBrackets(currentChunks[1], "{}", ", ");
+      currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ", ");
    
       #ifdef DEBUG_VARY_PARSING
          MessageInterface::ShowMessage(
@@ -824,35 +819,78 @@ bool Vary::InterpretAction()
       for (StringArray::iterator i = currentChunks.begin(); 
            i != currentChunks.end(); ++i)
       {
-         nameval = tp.SeparateBy(*i, "= ");
-         if (nameval[0] == "Pert")
+         nameval = parser.SeparateBy(*i, "= ");
+         if ((nameval[0] == "Pert") || (nameval[0] == "Perturbation")) 
          {
-            value = atof(nameval[1].c_str());
+            if (nameval[0] == "Pert")
+            {
+               MessageInterface::ShowMessage( "\"Pert\" is deprecated as the "
+                  "string specifying variable perturbations, and will be "
+                  "removed from a future build; please use \"Perturbation\" "
+                  "instead.\n" ); 
+            }
+            bool retval = GmatStringUtil::ToDouble(nameval[1], value);
+            if ((retval == false) || (value <= 0.0))
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ] "
+                  "which evaluates > 0. ");
             SetRealParameter(PERTURBATION, value);
          }
          else if (nameval[0] == "Lower")
          {
-            value = atof(nameval[1].c_str());
+            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ] "
+                  "which evaluates such that Lower < Upper. ");
             SetRealParameter(VARIABLE_MINIMUM, value);
          }
          else if (nameval[0] == "Upper")
          {
-            value = atof(nameval[1].c_str());
+            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ] "
+                  "which evaluates such that Lower < Upper. ");
             SetRealParameter(VARIABLE_MAXIMUM, value);
          }
          else if (nameval[0] == "MaxStep")
          {
-            value = atof(nameval[1].c_str());
+            bool retval = GmatStringUtil::ToDouble(nameval[1], value);
+            if ((retval == false) || (value <= 0.0))
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ] "
+                  "which evaluates > 0. ");
             SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
          }
          else if (nameval[0] == "AdditiveScaleFactor")
          {
-            value = atof(nameval[1].c_str());
+            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [  Real Number, Variable, Array Element, or Parameter ]. ");
             SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
          }
          else if (nameval[0] == "MultiplicativeScaleFactor")
          {
-            value = atof(nameval[1].c_str());
+            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+               throw CommandException(
+                  "The value of \"" + nameval[1] + "\" for field \"" + 
+                  nameval[0] + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. ");
             SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
          }
          else
@@ -861,7 +899,7 @@ bool Vary::InterpretAction()
             //   "'\nthe setting '" + (*i) + 
             //   "' does not match the available options for the Vary command";
             std::string msg = "The setting \"" + (*i) + 
-               "\" does not match field name for the Vary command";
+               "\" does not match any field name for the Vary command";
             //MessageInterface::ShowMessage(msg);
             throw CommandException(msg); 
          }

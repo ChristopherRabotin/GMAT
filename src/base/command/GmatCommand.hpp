@@ -28,6 +28,9 @@
 #include "GmatBase.hpp"
 #include "CommandException.hpp"
 
+// Headers used by commands that override InterpretAction
+#include "StringUtil.hpp"
+#include "TextParser.hpp"
 
 // Headers for the referenced classes
 #include "SolarSystem.hpp"   // for SolarSystem
@@ -212,6 +215,11 @@ protected:
 //   std::string          comment;
    /// Flag indicating that a command has been changed by a user
    bool                 commandChanged;
+   
+   /// Text parser used by commands that override InterpretAction
+   TextParser           parser;
+   /// List used to initialize the local TextParser
+   StringArray          commandNameList;
       
    virtual bool         AssignObjects();
    virtual bool         ClearObjects();

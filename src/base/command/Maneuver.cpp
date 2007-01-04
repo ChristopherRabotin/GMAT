@@ -464,34 +464,58 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool Maneuver::InterpretAction()
 {
-   /// @todo: Clean up this hack for the Maneuver::InterpretAction method
-   // Sample string:  "Maneuver prop(Sat1);"
-   Integer loc = generatingString.find("Maneuver", 0) + 8, end;
-   const char *str = generatingString.c_str();
-   while (str[loc] == ' ')
-      ++loc;
-    
-   end = generatingString.find("(", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Maneuver string does not identify burn");
-    
-   std::string component = generatingString.substr(loc, end-loc);
-   if (component == "")
-      throw CommandException("Maneuver string does not identify burn");
-   SetStringParameter(burnNameID, component);
-    
-   loc = end + 1;
-   end = generatingString.find(")", loc);
-   if (end == (Integer)std::string::npos)
-      throw CommandException("Maneuver string does not identify spacecraft");
-    
-   component = generatingString.substr(loc, end-loc);
-   if (component == "")
-      throw CommandException("Maneuver string does not identify spacecraft");
-   SetStringParameter(satNameID, component);
-    
+   parser.EvaluateBlock(generatingString);
+   StringArray blocks = parser.DecomposeBlock(generatingString);
+   StringArray chunks = parser.ChunkLine();
+
+   // First comes the keyword, "Maneuver"
+   if (chunks[0] != typeName)
+      throw CommandException(
+         "Line '" + generatingString + 
+         "'\n should be a Maneuver command, but the '" + typeName + 
+         "' keyword is not the opening token in the line.\n");  
+
+   // Find and set the burn object name ...
+   StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   SetStringParameter(burnNameID, currentChunks[0]);
+
+   // ... and the spacecraft that is maneuvered
+   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   SetStringParameter(satNameID, currentChunks[0]);
+   
    return true;
 }
+
+
+//{   
+//   /// @todo: Clean up this hack for the Maneuver::InterpretAction method
+//   // Sample string:  "Maneuver prop(Sat1);"
+//   Integer loc = generatingString.find("Maneuver", 0) + 8, end;
+//   const char *str = generatingString.c_str();
+//   while (str[loc] == ' ')
+//      ++loc;
+//    
+//   end = generatingString.find("(", loc);
+//   if (end == (Integer)std::string::npos)
+//      throw CommandException("Maneuver string does not identify burn");
+//    
+//   std::string component = generatingString.substr(loc, end-loc);
+//   if (component == "")
+//      throw CommandException("Maneuver string does not identify burn");
+//   SetStringParameter(burnNameID, component);
+//    
+//   loc = end + 1;
+//   end = generatingString.find(")", loc);
+//   if (end == (Integer)std::string::npos)
+//      throw CommandException("Maneuver string does not identify spacecraft");
+//    
+//   component = generatingString.substr(loc, end-loc);
+//   if (component == "")
+//      throw CommandException("Maneuver string does not identify spacecraft");
+//   SetStringParameter(satNameID, component);
+//    
+//   return true;
+//}
 
 
 //------------------------------------------------------------------------------

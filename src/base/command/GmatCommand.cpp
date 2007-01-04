@@ -100,6 +100,9 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    parameterCount = GmatCommandParamCount;
    objectTypes.push_back(Gmat::COMMAND);
    
+   commandNameList.push_back(typeStr);
+   parser.Initialize(commandNameList);
+   
    BuildCommandSummary(false);
 }
 
