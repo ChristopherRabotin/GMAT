@@ -372,7 +372,7 @@ void ImpulsiveBurnSetupPanel::LoadData()
     
       // Set object pointer for "Show Script"
       mObject = theBurn;
-
+      
       // Axes
       id = theBurn->GetParameterID("Axes");
       std::string axesStr = theBurn->GetStringParameter(id);
@@ -386,7 +386,7 @@ void ImpulsiveBurnSetupPanel::LoadData()
          else
             ++index;
       }
-
+      
       // Vector Format
       id = theBurn->GetParameterID("VectorFormat");
       std::string vectorFormat = theBurn->GetStringParameter(id);
@@ -434,97 +434,63 @@ void ImpulsiveBurnSetupPanel::SaveData()
    {
       // save data to core engine
       Integer id;
-      wxString elemString;
       Real rvalue;
-    
-      canClose = true;
-
       std::string inputString;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theBurn->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
-
+      
       // save axes
       wxString axesStr = axesComboBox->GetStringSelection();
       id = theBurn->GetParameterID("Axes");
       std::string axes = std::string (axesStr.c_str());
       theBurn->SetStringParameter(id, axes);
-    
+      
       // save vector format
       wxString vectorStr = vectorFormatComboBox->GetStringSelection();
       id = theBurn->GetParameterID("VectorFormat");
       std::string vectorFormat = std::string (vectorStr.c_str());
       theBurn->SetStringParameter(id, vectorFormat);
-
+      
       // save element1
       inputString = textCtrl1->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (CheckReal(rvalue, inputString, "Element1", "Real Number"))
       {
          id = theBurn->GetParameterID("Element1");
          theBurn->SetRealParameter(id, rvalue);
       }
       else
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Element1","Real Number");
          canClose = false;
       }
-
+      
       // save element2
-      inputString = textCtrl2->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      inputString = textCtrl1->GetValue();      
+      if (CheckReal(rvalue, inputString, "Element2", "Real Number"))
       {
          id = theBurn->GetParameterID("Element2");
          theBurn->SetRealParameter(id, rvalue);
       }
       else
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Element2","Real Number");
          canClose = false;
       }
-
+      
       // save element3
       inputString = textCtrl3->GetValue();      
-
-         // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue)) 
-      {     
+      if (CheckReal(rvalue, inputString, "Element3", "Real Number"))
+      {
          id = theBurn->GetParameterID("Element3");
          theBurn->SetRealParameter(id, rvalue);
       }
       else
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Element3","Real Number");
          canClose = false;
       }
-
+      
       // save central body
       wxString burnOriginStr = centralBodyCB->GetStringSelection();
       id = theBurn->GetParameterID("Origin");
       std::string origin = std::string (burnOriginStr.c_str());
       theBurn->SetStringParameter(id, origin);
 
-      EnableUpdate(false);
-//      // save element1
-//      elemString = textCtrl1->GetValue();
-//      id = theBurn->GetParameterID("Element1");
-//      theBurn->SetRealParameter(id, atof(elemString));
-//
-//      // save element2
-//      elemString = textCtrl2->GetValue();
-//      id = theBurn->GetParameterID("Element2");
-//      theBurn->SetRealParameter(id, atof(elemString));
-//
-//      // save element3
-//      elemString = textCtrl3->GetValue();
-//      id = theBurn->GetParameterID("Element3");
-//      theBurn->SetRealParameter(id, atof(elemString));
    }
    catch (BaseException &e)
    {
