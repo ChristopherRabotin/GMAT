@@ -1122,9 +1122,17 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
           parts[i+2].c_str());
       #endif
       
-      // Try to create a parameter first
-      //CreateParameter(parts[i]);
-      //CreateParameter(parts[i+2]);
+      // Try to create a parameter first if system parameter
+      std::string type, ownerName, depObj;
+      GmatStringUtil::ParseParameter(parts[i], type, ownerName, depObj);
+      
+      if (theModerator->IsParameter(type))
+          CreateParameter(type, parts[i], ownerName, depObj);
+      
+      GmatStringUtil::ParseParameter(parts[i+2], type, ownerName, depObj);
+      
+      if (theModerator->IsParameter(type))
+         CreateParameter(type, parts[i+2], ownerName, depObj);
       
       cb->SetCondition(parts[i], parts[i+1], parts[i+2]);
       
@@ -3911,10 +3919,10 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       try
       {
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
-      
+         
          // Check System Parameters seperately since it follows certain naming convention
          // "owner.dep.type" where owner can be either Spacecraft of Burn for now
-      
+         
          if (refTypes[i] == Gmat::PARAMETER)
          {
             for (UnsignedInt j=0; j<refNames.size(); j++)
@@ -3923,7 +3931,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                {
                   std::string type, ownerName, depObj;
                   GmatStringUtil::ParseParameter(refNames[j], type, ownerName, depObj);
-               
+                  
                   // Check only system parameters
                   if (type == "")
                   {
@@ -3943,7 +3951,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                         HandleError(ex, writeLine);
                         retval = false;
                      }
-                  
+                     
                      if (!theModerator->IsParameter(type))
                      {
                         InterpreterException ex
