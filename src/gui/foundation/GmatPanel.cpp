@@ -109,6 +109,7 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
    //topStaticBox->Show(mShowScriptButton);
 
    mObject = NULL;
+   
 }
 
 //------------------------------------------------------------------------------
@@ -256,6 +257,46 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
 }
 
 
+//------------------------------------------------------------------------------
+// bool CheckReal(Real &rvalue, const std::string &element,
+//                const std::string &field, const std::string &expRange)
+//------------------------------------------------------------------------------
+bool GmatPanel::CheckReal(Real &rvalue, const std::string &element,
+                          const std::string &field, const std::string &expRange,
+                          bool onlyMsg)
+{
+   //MessageInterface::ShowMessage
+   //   ("===> CheckReal() element=%s, field=%s, expRange=%s\n", element.c_str(),
+   //    field.c_str(), expRange.c_str());
+   
+   if (onlyMsg)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   
+   // check for real value
+   Real rval;
+   if (GmatStringUtil::ToDouble(element, &rval))
+   {
+      rvalue = rval;
+      return true;
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+}
+
 //-------------------------------
 // protected methods
 //-------------------------------
@@ -287,6 +328,12 @@ void GmatPanel::Show()
    thePanelSizer->SetSizeHints(this); //set size hints to honour minimum size
    
    LoadData();
+   
+   mMsgFormat =
+      "The value of \"%s\" for field \"%s\" on object \""
+      + mObject->GetName() +  "\" is not an allowed value. \n"
+      "The allowed values are: [%s].";
+   
    EnableUpdate(false);
    
    // We want to enable all the time (12/22/06)

@@ -45,6 +45,10 @@ public:
    virtual void OnScript(wxCommandEvent &event);
    virtual void OnSummary(wxCommandEvent &event);
    
+   bool CheckReal(Real &rvalue, const std::string &element,
+                  const std::string &field, const std::string &expRange,
+                  bool onlyMsg = false);
+   
 protected:
    // member functions
    virtual void Create() = 0;
@@ -58,6 +62,7 @@ protected:
    bool canClose;
    bool mShowScriptButton;
    bool mDataChanged;
+   std::string mMsgFormat;
    
    wxWindow *theParent;
     
