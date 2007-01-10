@@ -2219,6 +2219,24 @@ bool        CelestialBody::SetBooleanParameter(const Integer id,
 {
    if (id == USE_POTENTIAL_FILE_FLAG)
    {
+      if ((usePotentialFile == false) && (value == true))
+      {
+         potentialFileRead = false;
+         isFirstTimeMu = true;
+         isFirstTimeRadius = true;
+      }
+      else if ((usePotentialFile == true) && (value == false))
+      {
+         mu               = defaultMu;
+         equatorialRadius = defaultEqRadius;
+         // recompute polar radius
+         polarRadius = (1.0 - flattening) * equatorialRadius;
+         // recompute mass
+         mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
+         isFirstTimeMu = true;
+         isFirstTimeRadius = true;
+      }
+   
       usePotentialFile = value;
       return true; 
    }
