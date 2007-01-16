@@ -20,6 +20,7 @@
 #define StringUtil_hpp
 
 #include "gmatdefs.hpp"
+#include "GmatGlobal.hpp"
 
 namespace GmatStringUtil
 {
@@ -41,15 +42,23 @@ namespace GmatStringUtil
    std::string Capitalize(const std::string &str);
    std::string Replace(const std::string &str, const std::string &from,
                        const std::string &to);
-   std::string ToString(const Real &val, bool scientific=false,
-                        Integer width=10, Integer precision=9);
-   std::string ToString(const Integer &val, Integer width=4);
+   
+   std::string ToString(const Real &val, Integer precision);
+   std::string ToString(const Integer &val, Integer width);
+   
+   std::string ToString(const Real &val, bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH);
+   std::string ToString(const Integer &val, bool useCurrentFormat = true,
+                        Integer width = GmatGlobal::INTEGER_WIDTH);
+   
    std::string RemoveExtraParen(const std::string &str);
    
    StringArray SeparateBy(const std::string &str, const std::string &delim);
    
-   bool ToDouble(const std::string &str, Real *value);
-   bool ToDouble(const std::string &str, Real &value);
+   bool ToReal(const std::string &str, Real *value);
+   bool ToReal(const std::string &str, Real &value);
    bool ToInteger(const std::string &str, Integer *value);
    bool ToInteger(const std::string &str, Integer &value);
    bool ToBoolean(const std::string &str, bool *value);

@@ -20,6 +20,7 @@
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 #include "UtilityException.hpp"
+#include "GmatGlobal.hpp"
 #include "Linear.hpp"            // for ToString()
 #include "StringTokenizer.hpp"   // for StringTokenizer()
 #include <map>
@@ -236,22 +237,78 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Integer &val, Integer width=3)
+// std::string ToString(const Real &val, Integer precision)
 //------------------------------------------------------------------------------
-std::string GmatStringUtil::ToString(const Integer &val, Integer width)
+/*
+ * Formats Real value to String.
+ *
+ * @param  val  Real value
+ * @param  precision  Precision to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Real &val, Integer precision)
 {
-   return GmatRealUtil::ToString(val, width);
+   return GmatRealUtil::ToString(val, false, false, precision, 0);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Real &val, bool scientific=false,
-//                      Integer width=10, Integer precision=9)
+// std::string ToString(const Integer &val, Integer width)
 //------------------------------------------------------------------------------
-std::string GmatStringUtil::ToString(const Real &val, bool scientific,
-                                     Integer width, Integer precision)
+/*
+ * Formats Integer value to String.
+ *
+ * @param  val  Integer value
+ * @param  width  Width to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Integer &val, Integer width)
 {
-   return GmatRealUtil::ToString(val, scientific, width, precision);
+   return GmatRealUtil::ToString(val, false, width);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(const Real &val, bool useCurrentFormat = true,
+//                      bool scientific = false,
+//                      Integer precision = GmatGlobal::DATA_PRECISION,
+//                      Integer width = GmatGlobal::INTEGER_WIDTH)
+//------------------------------------------------------------------------------
+/*
+ * Formats Real value to String.
+ *
+ * @param  val  Real value
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal
+ * @param  scientific  Formats using scientific notation if true
+ * @param  precision  Precision to be used in formatting
+ * @param  width  Width to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Real &val, bool useCurrentFormat,
+                                     bool scientific, Integer precision,
+                                     Integer width)
+{
+   return GmatRealUtil::ToString(val, useCurrentFormat, scientific, precision,
+                                 width);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(const Integer &val, bool useCurrentFormat = true,
+//                      Integer width = GmatGlobal::INTEGER_WIDTH)
+//------------------------------------------------------------------------------
+/*
+ * Formats Integer value to String.
+ *
+ * @param  val  Integer value
+ * @param  useCurrentFormat  Uses width from GmatGlobal if true
+ * @param  width  Width to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ToString(const Integer &val, bool useCurrentFormat,
+                                     Integer width)
+{
+   return GmatRealUtil::ToString(val, useCurrentFormat, width);
 }
 
 
@@ -268,20 +325,20 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
 
 
 //------------------------------------------------------------------------------
-// bool ToDouble(const std::string &str, Real *value)
+// bool ToReal(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToDouble(const std::string &str, Real *value)
+bool GmatStringUtil::ToReal(const std::string &str, Real *value)
 {
-   return ToDouble(str, *value);
+   return ToReal(str, *value);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ToDouble(const std::string &str, Real &value)
+// bool ToReal(const std::string &str, Real &value)
 //------------------------------------------------------------------------------
 // Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToDouble(const std::string &str, Real &value)
+bool GmatStringUtil::ToReal(const std::string &str, Real &value)
 {
    if (str == "")
       return false;
@@ -878,7 +935,7 @@ bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool check
          
          if (IsParenPartOfArray(substr))
             isEnclosed = true;
-         else if (ToDouble(substr, rval))
+         else if (ToReal(substr, rval))
             isEnclosed = true;
          else
          {
@@ -1247,7 +1304,7 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
    Real rval;
    
    // first check for number
-   if (ToDouble(str, rval))
+   if (ToReal(str, rval))
       return true;
    
    for (int i=0; i<length; i++)
