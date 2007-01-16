@@ -1264,7 +1264,7 @@ bool FminconOptimizer::IsAllowedValue(const std::string &opt,
       //if (atof(val.c_str()) > 0.0)  return true;
       //return false;
       Real tmpVal;
-      if (!GmatStringUtil::ToDouble(val.c_str(), &tmpVal)) return false;
+      if (!GmatStringUtil::ToReal(val.c_str(), &tmpVal)) return false;
       return true;
    }
    else if ((opt == ALLOWED_OPTIONS[2]) || 
