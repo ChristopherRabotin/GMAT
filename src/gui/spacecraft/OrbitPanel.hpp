@@ -49,11 +49,12 @@ public:
    bool IsDataChanged() { return dataChanged; }
    bool CanClosePanel() { return canClose; }
    
-protected:
-   Anomaly           anomaly;
-   StateConverter    stateConverter;
-
 private:
+   
+   Anomaly mAnomaly;
+   Anomaly mTrueAnomaly;
+   StateConverter stateConverter;
+   
    bool dataChanged;
    bool canClose;
    
@@ -67,10 +68,12 @@ private:
    
    Real mEpoch;
    
+   bool mIsEpochFormatChanged;
    bool mIsCoordSysChanged;
-   bool mIsStateChanged;
-   bool mIsStateModified;    // user typed in number
    bool mIsStateTypeChanged;
+   bool mIsAnomalyTypeChanged;
+   bool mIsStateChanged;
+   bool mIsStateModified[6]; // user typed in number
    bool mIsEpochChanged;
    bool mIsEpochModified;    // user typed in number
    
@@ -81,20 +84,13 @@ private:
    Rvector6 mOutState;
    
    CoordinateConverter mCoordConverter;
-   std::string mFromCoordStr;
+   std::string mFromCoordSysStr;
    std::string mFromStateTypeStr;
    std::string mFromAnomalyTypeStr;
-   std::string fromStateType;
-   std::string fromEpochFormat;
-   std::string fromCoordSys;
-   std::string mMsgFormat;
+   std::string mFromEpochFormat;
    
-   std::string mElement1;
-   std::string mElement2;
-   std::string mElement3;
-   std::string mElement4;
-   std::string mElement5;
-   std::string mElement6;
+   std::string mElements[6];
+   std::string mEpochStr;
    std::string mAnomalyType;
    
    void Create();
@@ -108,25 +104,20 @@ private:
    void InitializeCoordinateSystem(CoordinateSystem *cs);
    void SetLabelsUnits(const std::string &stateType);
    
-   void UpdateEpoch();
    void DisplayState();
    void BuildState(const Rvector6 &inputState, bool isInternal = false);
    
    wxString ToString(Real rval);
    
-   Rvector6 ConvertState(CoordinateSystem *cs, const Rvector6 &state, 
-                         const std::string &fromElementType, 
-                         const std::string &toElementType);
-
+   bool IsStateModified();
+   void ResetStateFlags(bool discardEdits = false);
+   
+   bool CheckState(Rvector6 &state);
    bool CheckCartesian(Rvector6 &state);
    bool CheckKeplerian(Rvector6 &state);
    bool CheckModKeplerian(Rvector6 &state);
    bool CheckSpherical(Rvector6 &state, const wxString &stateType);
    bool CheckEquinoctial(Rvector6 &state);
-   
-   bool CheckReal(Real &rvalue, const std::string &element,
-                  const std::string &field, const std::string &expRange,
-                  bool onlyMsg = false);
    
    GmatPanel *theScPanel;
    
@@ -137,22 +128,16 @@ private:
    wxStaticText *description5;
    wxStaticText *description6;
    
-   wxStaticText *label1;
-   wxStaticText *label2;
-   wxStaticText *label3;
-   wxStaticText *label4;
-   wxStaticText *label5;
-   wxStaticText *label6;
+   wxStaticText *unit1;
+   wxStaticText *unit2;
+   wxStaticText *unit3;
+   wxStaticText *unit4;
+   wxStaticText *unit5;
+   wxStaticText *unit6;
    
    wxStaticText *anomalyStaticText;
-   
-   wxTextCtrl *textCtrl1;
-   wxTextCtrl *textCtrl2;
-   wxTextCtrl *textCtrl3;
-   wxTextCtrl *textCtrl4;
-   wxTextCtrl *textCtrl5;
-   wxTextCtrl *textCtrl6;
-    
+
+   wxTextCtrl *textCtrl[6];   
    wxTextCtrl *epochValue;
 
    wxPanel *elementsPanel;
