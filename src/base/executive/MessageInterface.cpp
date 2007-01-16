@@ -35,6 +35,7 @@
 #include "MessageInterface.hpp"    // for MessageInterface functions
 #include "BaseException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
+#include "GmatGlobal.hpp"          // for RunBachMode()
 
 //---------------------------------
 //  static data
@@ -244,53 +245,37 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    }
    
    
-#if !defined __CONSOLE_APP__
-   switch (msgType)
+#if !defined __CONSOLE_APP__   
+   if (GmatGlobal::Instance()->IsBatchMode() == true)
    {
-   case Gmat::ERROR_:
-      (void)wxMessageBox(wxT(wxString(msgBuffer)),
-                         wxT("GMAT Error"));
-      //loj: 9/13/05 use wxMessageBox so that messages shows immediately
-      //wxLogError(wxT(wxString(msgBuffer)));
-      //wxLog::FlushActive();
-      break;
-   case Gmat::WARNING_:
-      //loj: 7/14/05 use wxMessageBox so that messages shows immediately
-      //wxLogWarning(wxT(wxString(msgBuffer)));
-      //wxLog::FlushActive();
-      (void)wxMessageBox(wxT(wxString(msgBuffer)),
-                         wxT("GMAT Warning"));
-      break;
-   case Gmat::INFO_:
-      (void)wxMessageBox(wxT(wxString(msgBuffer)),
-                         wxT("Information"));
-      break;
-   default:
-      break;
-   };
+      ShowMessage(msgBuffer);
+   }
+   else
+   {
+      switch (msgType)
+      {
+      case Gmat::ERROR_:
+         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                            wxT("GMAT Error"));
+         break;
+      case Gmat::WARNING_:
+         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                            wxT("GMAT Warning"));
+         break;
+      case Gmat::INFO_:
+         (void)wxMessageBox(wxT(wxString(msgBuffer)),
+                            wxT("Information"));
+         break;
+      default:
+         break;
+      };
+   }
 #endif
    
-   LogMessage(std::string(msgBuffer));
+   LogMessage(std::string(msgBuffer) + "\n");
    free(msgBuffer);
    
 } // end PopupMessage()
-
-
-//  //------------------------------------------------------------------------------
-//  //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg,
-//  //                           int interval)
-//  //------------------------------------------------------------------------------
-//  //  Purpose:
-//  //     Shows popup message and closes itself.
-//  //------------------------------------------------------------------------------
-//  void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg,
-//                                      int interval)
-//  {
-//      MessageInterface::popupMessage = msg;
-//      MessageInterface::messageType = msgType;
-//      MessageInterface::showIntervalInMilSec = interval;
-   
-//  } // end PopupMessage()
 
 
 //------------------------------------------------------------------------------
