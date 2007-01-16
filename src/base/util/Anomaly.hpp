@@ -22,58 +22,84 @@
 #define Anomaly_hpp
 
 #include "gmatdefs.hpp"
-#include "CoordUtil.hpp"
-#include "RealUtilities.hpp"
-#include "UtilityException.hpp"
+#include "RealTypes.hpp"          // for Radians
+#include "GmatGlobal.hpp"         // for DATA_PRECISION
 
 class GMAT_API Anomaly 
 {
 public:
-    Anomaly();
-    Anomaly(const std::string &mType); 
-    Anomaly(const Real a, const Real e, const Real value);
-    Anomaly(const Real a, const Real e, const Real value, 
-            const std::string &mType); 
-    Anomaly(const Anomaly &anomaly);
-    Anomaly& operator=(const Anomaly &anomaly);
-    virtual ~Anomaly();
-
-    // public method 
-    void Set(const Real a, const Real e, const Real value, 
-             const std::string &mType);
-
-    Real GetSMA() const;
-    void SetSMA(const Real a);
-
-    Real GetECC() const;
-    void SetECC(const Real e);
-
-    Real GetValue() const;
-    Real GetValue(const std::string &mType) const;
-    void SetValue(const Real value);
-
-    std::string GetType() const;
-    void SetType(const std::string &t);
-
-    Real GetTrueAnomaly() const;
-    Real GetMeanAnomaly() const;
-    Real GetEccentricAnomaly() const;
-    Real GetHyperbolicAnomaly() const;
-
-    bool IsInvalid(const std::string &inputType) const;
-
-    Real Convert(const std::string &fromType, const std::string &toType) const;
-
+   
+   enum AnomalyType
+   {
+      TA,
+      MA,
+      EA,
+      HA,
+      AnomalyTypeCount
+   };
+   
+   Anomaly();
+   Anomaly(Real sma, Real ecc, Real value, AnomalyType type = TA,
+           bool valueInRadians = false);
+   Anomaly(Real sma, Real ecc, Real value, const std::string &type = "TA",
+           bool valueInRadians = false);
+   Anomaly(const Anomaly &anomaly);
+   Anomaly& operator=(const Anomaly &anomaly);
+   virtual ~Anomaly();
+   
+   void Set(Real sma, Real ecc, Real value, AnomalyType type,
+            bool valueInRadians = false);
+   void Set(Real sma, Real ecc, Real value, const std::string &type,
+            bool valueInRadians = false);
+   
+   Real GetSMA() const { return mSma; }
+   Real GetECC() const { return mEcc; }
+   void SetSMA(const Real sma) { mSma = sma; }
+   void SetECC(const Real ecc) { mEcc = ecc; }
+   
+   Real GetValue(bool valueInRadians = false) const;
+   Real GetValue(AnomalyType type, bool inRadians = false) const;
+   Real GetValue(const std::string &type, bool inRadians = false) const;
+   void SetValue(Real value, bool valueInRadians = false);
+   
+   AnomalyType GetType() const { return mType; }
+   AnomalyType GetType(const std::string &typeStr) const;
+   void SetType(AnomalyType type) { mType = type; }
+   std::string GetTypeString() const;
+   void SetType(const std::string &type);
+   
+   Real GetTrueAnomaly(bool inRadians = false) const;
+   Real GetMeanAnomaly(bool inRadians = false) const;
+   Real GetEccentricAnomaly(bool inRadians = false) const;
+   Real GetHyperbolicAnomaly(bool inRadians = false) const;
+   
+   bool IsInvalid(const std::string &typeStr) const;
+   
+   Real Convert(AnomalyType toType, bool inRadians = false) const;   
+   Real Convert(const std::string &toType, bool inRadians = false) const;
+   
+   Anomaly ConvertToAnomaly(AnomalyType toType, bool inRadians = false);
+   Anomaly ConvertToAnomaly(const std::string &toType, bool inRadians = false);
+   
+   std::string ToString(Integer precision = GmatGlobal::DATA_PRECISION);
+   
+   static AnomalyType GetAnomalyType(const std::string &typeStr);
+   static std::string GetTypeString(const std::string &type);
+   static std::string GetLongTypeString(const std::string &type);
+   static Integer GetTypeCount() { return AnomalyTypeCount; }
+   static const std::string* GetLongTypeNameList();
+   
 protected:
-    static const Real    ANOMALY_TOL;// = 1.0e-30;
-    static const Integer MAX_ITERATIONS = 75;
-
+   
 private:
 
-    Real        semiMajorAxis;
-    Real        eccentricity;
-    Real        anomalyValue;
-    std::string type;                 //  Anomaly type
-
+   Real mSma;              // SemimajorAxis
+   Real mEcc;              // Eccentricity
+   Radians mAnomalyInRad;  // in radians
+   AnomalyType mType;
+   
+   static const std::string ANOMALY_LONG_TEXT[AnomalyTypeCount];
+   static const std::string ANOMALY_SHORT_TEXT[AnomalyTypeCount];
+   
 };
 #endif // Anomaly_hpp

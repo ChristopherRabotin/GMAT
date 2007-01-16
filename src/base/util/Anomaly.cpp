@@ -21,119 +21,107 @@
 
 #include "Anomaly.hpp"
 #include "MessageInterface.hpp"
-#include <math.h>          // for atan2(double y, double x) & atanh(double)
+#include "Keplerian.hpp"
+#include "RealUtilities.hpp"
+#include "UtilityException.hpp"
+#include "StringUtil.hpp"
+#include <sstream>
 
 //#define DEBUG_ANOMALY 1
-//#define DEBUG_ANOMALY_GET_SET
+
+using namespace GmatMathUtil;
 
 //---------------------------------
-//  static data
+// static data
 //---------------------------------
+const std::string Anomaly::ANOMALY_LONG_TEXT[AnomalyTypeCount] =
+{
+   "True Anomaly", "Mean Anomaly", "Eccentric Anomaly", "Hyperbolic Anomaly",
+};
 
-const Real Anomaly::ANOMALY_TOL = 1.0e-30;
+const std::string Anomaly::ANOMALY_SHORT_TEXT[AnomalyTypeCount] =
+{
+   "TA", "MA", "EA", "HA",
+};
+
 
 //---------------------------------
 //  public methods
 //---------------------------------
 
 //------------------------------------------------------------------------------
-//  Anomaly::Anomaly() 
+//  Anomaly() 
 //------------------------------------------------------------------------------
 /**
- * Creates default constructor.
+ * Default constructor.
  */
+//------------------------------------------------------------------------------
 Anomaly::Anomaly() :
-    semiMajorAxis     (0.0),
-    eccentricity      (0.0),
-    anomalyValue      (0.0),
-    type              ("TA")
+   mSma(0.0), mEcc(0.0), mAnomalyInRad (0.0), mType(TA)
 {
 }
 
-//------------------------------------------------------------------------------
-//  Anomaly::Anomaly(const std::string &mType)
-//------------------------------------------------------------------------------
-/**
- * Creates constructor with a parameter.
- * 
- * @param <mType>  Anomaly type.
- *
- */
-Anomaly::Anomaly(const std::string &mType) :
-    semiMajorAxis     (0.0),
-    eccentricity      (0.0),
-    anomalyValue      (0.0)
-{
-   // check for invalid type then use default
-   if (IsInvalid(mType))
-      type = "TA";
-   else
-      type = mType;
-}
 
 //------------------------------------------------------------------------------
-//  Anomaly::Anomaly(const Real a,  const Real e, const Real value)
+// Anomaly(Real sma, Real ecc, Real value, AnomalyType type = TA,
+//         bool valueInRadians = false)
 //------------------------------------------------------------------------------
 /**
- * Creates constructor with parameters.
+ * Constructor with parameters.
  * 
- * @param <a>      Semi-major axis.
- * @param <e>      Eccentricity.
- * @param <value>  Anomaly value.
- *
- */
-Anomaly::Anomaly(const Real a,  const Real e, const Real value) :
-    semiMajorAxis     (a),
-    eccentricity      (e),
-    anomalyValue      (value),
-    type              ("TA")
-{
-}
-
-//------------------------------------------------------------------------------
-//  Anomaly::Anomaly(const Real a,  const Real e, Real value, 
-//                   const std::string &mType)
-//------------------------------------------------------------------------------
-/**
- * Creates constructor with parameters.
- * 
- * @param <a>      Semi-major axis.
- * @param <e>      Eccentricity.
+ * @param <sma>    Semimajor axis.
+ * @param <ecc>    Eccentricity.
  * @param <value>  Anomaly value. 
- * @param <mType>  Anomaly type.
- *
+ * @param <type>   Anomaly type.
+ * @param <valueInRadians>  true if value is in radians
  */
-Anomaly::Anomaly(const Real a,  const Real e, Real value, 
-                 const std::string &mType) :
-    semiMajorAxis     (a),
-    eccentricity      (e),
-    anomalyValue      (value)
+//------------------------------------------------------------------------------
+Anomaly::Anomaly(Real sma, Real ecc, Real value, AnomalyType type,
+                 bool valueInRadians) :
+   mSma(sma), mEcc(ecc), mAnomalyInRad (value), mType(type)
 {
-   // Check for invalid type then use default
-   if (IsInvalid(mType))
-      type = "TA";
-   else
-      type = mType;
+   if (!valueInRadians)
+      mAnomalyInRad = value * RAD_PER_DEG;
+   
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("Anomaly::Anomaly() mEcc=%f, mAnomalyInRad=%f, mType=%d\n",
+       mEcc, mAnomalyInRad, mType);
+   #endif
 }
 
+
 //------------------------------------------------------------------------------
-//   Anomaly::Anomaly(const Anomaly &anomaly)
+// Anomaly(Real sma, Real ecc, Real value, const std::string &type = "TA",
+//         bool valueInRadians = false)
+//------------------------------------------------------------------------------
+Anomaly::Anomaly(Real sma, Real ecc, Real value, const std::string &type,
+                 bool valueInRadians)
+{
+   Anomaly(sma, ecc, value, GetType(type), valueInRadians);
+}
+
+
+//------------------------------------------------------------------------------
+//   Anomaly(const Anomaly &anomaly)
 //------------------------------------------------------------------------------
 /**
  * Copy Constructor for base Anomaly structures.
  *
  * @param <anomaly> The original that is being copied.
  */
+//------------------------------------------------------------------------------
 Anomaly::Anomaly(const Anomaly &anomaly) :
-    semiMajorAxis  (anomaly.semiMajorAxis),
-    eccentricity   (anomaly.eccentricity),
-    anomalyValue   (anomaly.anomalyValue),
-    type           (anomaly.type)
+   mSma          (anomaly.mSma),
+   mEcc          (anomaly.mEcc),
+   mAnomalyInRad (anomaly.mAnomalyInRad),
+   mType         (anomaly.mType)
 {
 }
 
+
 //------------------------------------------------------------------------------
-//  Anomaly& Anomaly::operator=(const Anomaly &anomaly)
+//  Anomaly& operator=(const Anomaly &anomaly)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator for Anomaly structures.
@@ -142,159 +130,151 @@ Anomaly::Anomaly(const Anomaly &anomaly) :
  *
  * @return Reference to this object.
  */
+//------------------------------------------------------------------------------
 Anomaly& Anomaly::operator=(const Anomaly &anomaly)
 {
    if (this != &anomaly)
    {
-      semiMajorAxis = anomaly.GetSMA();
-      eccentricity  = anomaly.GetECC();
-      anomalyValue  = anomaly.GetValue();
-      type          = anomaly.GetType();
+      mSma           = anomaly.mSma;
+      mEcc           = anomaly.mEcc;
+      mAnomalyInRad  = anomaly.mAnomalyInRad;
+      mType          = anomaly.mType;
    }
+   
    return *this;
 }
 
+
 //------------------------------------------------------------------------------
-//  Anomaly::~Anomaly() 
+//  ~Anomaly() 
 //------------------------------------------------------------------------------
 /**
- * Creates destructor.
+ * Destructor.
  */
+//------------------------------------------------------------------------------
 Anomaly::~Anomaly() 
 {
 }
 
+
 //------------------------------------------------------------------------------
-//  void Anomaly::Set(const Real a,  const Real e, Real value, 
-//                    const std::string &mType)
+// void Set(Real sma, Real ecc, Real value, AnomalyType type,
+//          bool valueInRadians = false)
 //------------------------------------------------------------------------------
 /**
  * Set the whole anomaly with parameters.
  * 
- * @param <a>      Semi-major axis.
- * @param <e>      Eccentricity.
- * @param <value>  Anomaly value. 
- * @param <mType>  Anomaly type.
- *
+ * @param <sma>    Semimajor axis
+ * @param <ecc>    Eccentricity
+ * @param <value>  Anomaly value
+ * @param <type>   Anomaly type
+ * @param <valueInRadians>  true if value is in radians
  */
-void Anomaly::Set(const Real a,  const Real e, Real value, 
-                  const std::string &mType)
+//------------------------------------------------------------------------------
+void Anomaly::Set(Real sma, Real ecc, Real value, AnomalyType type,
+                  bool valueInRadians)
 {
-    SetSMA(a);
-    SetECC(e);
-    SetValue(value);
-    SetType(mType);
+   mSma = sma;
+   mEcc = ecc;
+   mType = type;
+   
+   if (valueInRadians)
+      mAnomalyInRad = value;
+   else
+      mAnomalyInRad = value * RAD_PER_DEG;
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetSMA() const
+// void Set(Real sma, Real ecc, Real value, const std::string &type,
+//          bool valueInRadians = false)
 //------------------------------------------------------------------------------
-/** 
- * Gets semi-major axis.
+/**
+ * Set the whole anomaly with parameters.
  * 
- * @return  Semi-major axis.
- *
+ * @param <sma>    Semimajor axis
+ * @param <ecc>    Eccentricity
+ * @param <value>  Anomaly value
+ * @param <type>   Anomaly type string
+ * @param <valueInRadians>  true if value is in radians
  */
-Real Anomaly::GetSMA() const
+//------------------------------------------------------------------------------
+void Anomaly::Set(Real sma, Real ecc, Real value, const std::string &type,
+                  bool valueInRadians)
 {
-   return semiMajorAxis;
+   Set(sma, ecc, value, GetType(type), valueInRadians);
 }
 
-//------------------------------------------------------------------------------
-// void Anomaly::SetSMA(const Real a)
-//------------------------------------------------------------------------------
-/** 
- * Sets semi-major axis.
- * 
- * @param <a>  Semi-major axis.
- *
- */
-void Anomaly::SetSMA(const Real a)
-{
-   semiMajorAxis = a;
-}
 
 //------------------------------------------------------------------------------
-// Real Anomaly::GetECC() const
-//------------------------------------------------------------------------------
-/** 
- * Gets eccentricity.
- * 
- * @return Eccentricity.
- *
- */
-Real Anomaly::GetECC() const
-{
-   return eccentricity;
-}
-
-//------------------------------------------------------------------------------
-// void Anomaly::SetECC(const Real e)
-//------------------------------------------------------------------------------
-/** 
- * Sets eccentricity.
- * 
- * @param <e> Eccentricity.
- *
- */
-void Anomaly::SetECC(const Real e)
-{
-   eccentricity = e;
-}
-
-//------------------------------------------------------------------------------
-// Real Anomaly::GetValue() const
+// Real GetValue(bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets anomaly value.
  * 
- * @return Anomaly value.
+ * @param <inRadians>  true if output value in radians is requested
  *
+ * @return Anomaly value.
  */
-Real Anomaly::GetValue() const
+//------------------------------------------------------------------------------
+Real Anomaly::GetValue(bool inRadians) const
 {
-   #ifdef DEBUG_ANOMALY_GET_SET
-   MessageInterface::ShowMessage("Entering Anomaly::GetValue, returning %.18f\n",
-   anomalyValue);
+   Real value = mAnomalyInRad;
+   
+   if (!inRadians)
+      value = mAnomalyInRad * DEG_PER_RAD;
+
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("Anomaly::GetValue() returning %.18f\n", value);
    #endif
-   return anomalyValue;
+   
+   return value;
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetValue(const std::string &mType) const
+// Real GetValue(AnomalyType type, bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets anomaly value from the given anomaly type.
  * 
- @ @param <mType> type of anomaly
+ * @param <type> type of anomaly
+ * @param <inRadians>  true if output value in radians is requested
  * @return Anomaly value.
- *
  */
-Real Anomaly::GetValue(const std::string &mType) const
+//------------------------------------------------------------------------------
+Real Anomaly::GetValue(AnomalyType type, bool inRadians) const
 {
-   #ifdef DEBUG_ANOMALY_GET_SET
-   MessageInterface::ShowMessage("Entering Anomaly::GetValue with type &s\n",
-   mType.c_str());
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("Anomaly::GetValue() type=%d, inRadians=%d, mType=%d, mAnomalyInRad=%f\n",
+       type, inRadians, mType, mAnomalyInRad);
    #endif
-   if (IsInvalid(mType))
-      throw UtilityException("Anomaly::GetValue() - invalid input type");
-
-   if (mType == type) return GetValue();
-
-   if (mType == "TA")
-      return GetTrueAnomaly();
-   else if (mType == "MA") 
-      return GetMeanAnomaly();
-   else if (mType == "EA")
-      return GetEccentricAnomaly();
-   else // mType == "HA"
-      return GetHyperbolicAnomaly();
-
+   
+   return Convert(type, inRadians);
 }
 
 
 //------------------------------------------------------------------------------
-// void Anomaly::SetValue(const Real value)
+// Real GetValue(const std::string &type, bool valueInRadians = false) const
+//------------------------------------------------------------------------------
+/** 
+ * Gets anomaly value from the given anomaly type.
+ * 
+ * @param <type> type of anomaly
+ * @param <inRadians>  true if output value in radians is requested
+ * @return Anomaly value.
+ */
+//------------------------------------------------------------------------------
+Real Anomaly::GetValue(const std::string &type, bool valueInRadians) const
+{
+   return GetValue(GetType(type), valueInRadians);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetValue(Real value, bool valueInRadians = false)
 //------------------------------------------------------------------------------
 /** 
  * Sets anomaly value.
@@ -302,399 +282,444 @@ Real Anomaly::GetValue(const std::string &mType) const
  * @param <value> Anomaly value.
  *
  */
-void Anomaly::SetValue(const Real value)
+//------------------------------------------------------------------------------
+void Anomaly::SetValue(Real value, bool valueInRadians)
 {
-   anomalyValue = value;
+   if (valueInRadians)
+      mAnomalyInRad = value;
+   else
+      mAnomalyInRad = value * RAD_PER_DEG;
 }
 
+
 //------------------------------------------------------------------------------
-// std::string Anomaly::GetType() const
+// AnomalyType GetType(const std::string &typeStr) const
 //------------------------------------------------------------------------------
 /** 
- * Gets anomaly type.
- * 
- * @return Anomaly type.
- *
+ * @return  AnomalyType of input type string.
  */
-std::string Anomaly::GetType() const
+//------------------------------------------------------------------------------
+Anomaly::AnomalyType Anomaly::GetType(const std::string &typeStr) const
 {
-   return type;
+   return GetAnomalyType(typeStr);
 }
 
+
 //------------------------------------------------------------------------------
-// void Anomaly::SetType(const std::string &t)
+// std::string GetTypeString() const
+//------------------------------------------------------------------------------
+/*
+ * Returns internal type in string
+ */
+//------------------------------------------------------------------------------
+std::string Anomaly::GetTypeString() const
+{
+   return ANOMALY_SHORT_TEXT[mType];
+}
+
+
+//------------------------------------------------------------------------------
+// void SetType(const std::string &type)
 //------------------------------------------------------------------------------
 /** 
- * Sets anomaly value.
+ * Sets anomaly type.
  * 
- * @param <t> Anomaly type.
- *
+ * @param <type> Anomaly type string.
  */
-void Anomaly::SetType(const std::string &t)
+//------------------------------------------------------------------------------
+void Anomaly::SetType(const std::string &type)
 {
-/* Joey's code commented out(3/28/06) by LTR 
- * Set type should only set the anomaly type NOT convert  	
-   if (IsInvalid(t))
-      throw UtilityException("Anomaly::SetType() - invalid input type");
-
-   if (type == "TA" && t == "MA")
-      anomalyValue = GetMeanAnomaly();   
-
-   else if (type == "TA" && t == "EA")
-      anomalyValue = GetEccentricAnomaly();   
-
-   else if (type == "MA" && t == "EA")
-      anomalyValue = GetEccentricAnomaly();   
-
-   else if (type == "MA" && t == "TA")
-      anomalyValue = GetTrueAnomaly();   
-
-   else if (type == "EA" && t == "MA")
-      anomalyValue = GetMeanAnomaly();   
-
-   else if (type == "EA" && t == "TA")
-      anomalyValue = GetTrueAnomaly();   
-*/ 
-   type = t;
+   SetType(GetType(type));
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetTrueAnomaly() const
+// Real GetTrueAnomaly(bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets true anomaly.
- * 
- * @return    value of true anomaly.
  *
+ * @param <inRadians>  true if output value in radians is requested
+ * @return  value of true anomaly.
  */
-Real Anomaly::GetTrueAnomaly() const
+//------------------------------------------------------------------------------
+Real Anomaly::GetTrueAnomaly(bool inRadians) const
 {
-   Real ta;
-   if (type == "MA")
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("Anomaly::GetTrueAnomaly() mEcc=%f, mAnomalyInRad=%f\n", mEcc, mAnomalyInRad);
+   #endif
+   
+   Real ta = mAnomalyInRad;
+   
+   if (mType == MA)
    {
       try
       {
-         ta = CoordUtil::MeanToTrueAnomaly(anomalyValue,eccentricity);
-         return ta;
+         ta = Keplerian::MeanToTrueAnomaly(mAnomalyInRad * DEG_PER_RAD, mEcc) * RAD_PER_DEG;
       }
       catch(UtilityException &ue)
       {
          std::string msg = "Anomaly::GetTrueAnomaly - " + ue.GetMessage();
          throw UtilityException(msg); 
       }
-   } 
-   else if (type == "EA" || type == "HA")
-   {
-      Real ma = GetMeanAnomaly();
-      ta = CoordUtil::MeanToTrueAnomaly(ma, eccentricity);
-      return ta;
    }
-   return anomalyValue;   
+   else if (mType == EA || mType == HA)
+   {
+      if (mSma >= 0.0 && mEcc <= 1.0)
+      {
+         std::string typeStr = GetTypeString();
+         
+         throw UtilityException
+            ("Anomaly Type: \"" + typeStr + "\", SMA: \"" +
+             GmatStringUtil::ToString(mSma) + "\",  and ECC: \"" +
+             GmatStringUtil::ToString(mEcc) + "\" are incompatible.");
+      }
+      
+      ta = Keplerian::MeanToTrueAnomaly(mAnomalyInRad * DEG_PER_RAD, mEcc) * RAD_PER_DEG;
+   }
+   
+   if (!inRadians)
+      ta = ta * DEG_PER_RAD;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("Anomaly::GetTrueAnomaly() returning %f\n", ta);
+   #endif
+   
+   return ta;
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetMeanAnomaly() const
+// Real GetMeanAnomaly(bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets mean anomaly.
  * 
- * @return    value of mean anomaly.
+ * @param <inRadians>  true if output value in radians is requested
+ * @return  value of mean anomaly.
  *
  */
-Real Anomaly::GetMeanAnomaly() const
+//------------------------------------------------------------------------------
+Real Anomaly::GetMeanAnomaly(bool inRadians) const
 {
-#if DEBUG_ANOMALY
-   MessageInterface::ShowMessage("\nAnomaly::GetMeanAnomaly()..."
-             "\n type = %s\n a    = %f\n e    = %f\n value = %f\n", 
-             type.c_str(), semiMajorAxis, eccentricity, anomalyValue);
-#endif
-   Real eccAnomaly, meanAnomaly, hyperAnomaly;
-   Real E; // Eccentric anomaly in radians
-   Real H; // Hyperbolic anomaly in radians
-   Real M; // Mean anomaly in radians
-
-   if (type == "TA")
+   Real ma = mAnomalyInRad;
+   
+   if (mType == TA || mType == EA || mType == HA)
    {
-      // Determine it is ellipse or hyperbola for computing the mean anomaly
-      // Ellipse
-      if (eccentricity < (1.0 - 1.0e-12))
-      {
-         try
-         {
-			// Get the eccentric anamoly
-			eccAnomaly = GetEccentricAnomaly();
-
-		 	// Convert the eccentric anomaly from degrees to radians
-         	E = GmatMathUtil::DegToRad(eccAnomaly);
-
-			// Compute the mean anamoly
-            meanAnomaly = E - eccentricity * GmatMathUtil::Sin(E);
-			
-            if (meanAnomaly < 0.0) 
-            	meanAnomaly = meanAnomaly + GmatMathUtil::TWO_PI;
-			return (GmatMathUtil::RadToDeg(meanAnomaly));
-         }
-         catch(RealUtilitiesExceptions::ArgumentError &rue)
-         {
-            throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                   "unable to get the mean anomay due to "
-                                   "failure of use Sin"); 
-         }
-      }
-      // Hyperbola
-      else if (eccentricity > (1.0 + 1.0e-12))
-      {
-         try
-         {
-			// Get the hyperbolic anamoly
-			hyperAnomaly = GetHyperbolicAnomaly();
-			
-		 	// Convert the hyperbolic anomaly from degrees to radians
-         	H = GmatMathUtil::DegToRad(hyperAnomaly);
-
-			// Compute the mean anamoly 
-			meanAnomaly = eccentricity * GmatMathUtil::Sinh(H) - H;
-
-   			if ((meanAnomaly < 0.0) || (meanAnomaly > GmatMathUtil::TWO_PI))
-   			     meanAnomaly = GmatMathUtil::Mod(meanAnomaly,GmatMathUtil::TWO_PI);
-			return (GmatMathUtil::RadToDeg(meanAnomaly));
-         } 
-         catch(RealUtilitiesExceptions::ArgumentError &rue)
-         {
-            throw UtilityException("Anomaly::GetMeanAnomaly() - "
-                                   "unable to get the mean anomaly due to "
-                                   "failure of use Sinh"); 
-         }
-      }
-      else
-      {
-         meanAnomaly = 0.0;	
-         MessageInterface::ShowMessage
-               ("Anomaly::GetMeanAnomaly() "
-                "Warning: Orbit is near parabolic in mean "
-                "anomaly calculation. Setting MA = 0.0\n");
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_, "Warning: Orbit is near parabolic in mean "
-                             " anomaly calculation. Setting MA = 0.0");
-         return (meanAnomaly);
-      }
-   }
-   else if (type == "EA" || type == "HA")
-   {
-      E = GmatMathUtil::DegToRad(anomalyValue);
-      H = E;
-      if (type == "EA")
-         M = E - eccentricity * GmatMathUtil::Sin(E);
-      else
-         M = eccentricity * sinh(H) - H;
-      
-      return GmatMathUtil::RadToDeg(M);
+      Real ta = GetTrueAnomaly(true);   
+      ma = Keplerian::TrueToMeanAnomaly(ta, mEcc);
    }
    
-   return anomalyValue; 
+   if (!inRadians)
+      ma = ma * DEG_PER_RAD;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("Anomaly::GetMeanAnomaly() returning %f\n", ma);
+   #endif
+
+   return ma;
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetEccentricAnomaly() const
+// Real GetEccentricAnomaly(bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets eccentric anomaly.
  * 
- * @return   value of eccentric anomaly.
+ * @param <inRadians>  true if output value in radians is requested
+ * @return  value of eccentric anomaly.
  *
  */
-Real Anomaly::GetEccentricAnomaly() const
+//------------------------------------------------------------------------------
+Real Anomaly::GetEccentricAnomaly(bool inRadians) const
 {
-   Real eccAnomaly; // eccentric anomaly
-   Real nu;         // true anomaly in radians
-   Real ta;         // true anomaly in degrees
-
-   if (eccentricity > (1.0 - 1.0e-12))
+   Real ea = mAnomalyInRad;
+   
+   if (mType == TA || mType == MA || mType == HA)
    {
-   		eccAnomaly = 0.0;
+      Real ta = GetTrueAnomaly(true);   
+      ea = Keplerian::TrueToEccentricAnomaly(ta, mEcc);
    }
-   else
-   {
-      try
-      {
-         if (type == "MA" || type == "EA" || type == "HA")
-            ta = GetTrueAnomaly();
-         else 
-			ta = anomalyValue;
-			
-		 // Convert the true anomaly from degrees to radians
-         nu = GmatMathUtil::DegToRad(ta);
-         
-		 // Compute the eccentric anamoly
-         Real numerator1, numerator2, denominator, sinE, cosE;
-		 
-		 // sin(E)
-         numerator1 = GmatMathUtil::Sqrt(1.0 - eccentricity * eccentricity) *
-                      GmatMathUtil::Sin(nu);
-		 denominator = 1.0 + eccentricity * GmatMathUtil::Cos(nu);
-		 sinE = numerator1 / denominator;
-
-		 // cos(E)
-		 numerator2 = eccentricity + GmatMathUtil::Cos(nu);
-		 cosE = numerator2 / denominator;
-
-		 eccAnomaly = atan2(sinE, cosE);
-      }
-      catch(RealUtilitiesExceptions::ArgumentError &rue)
-      {
-         throw UtilityException("Anomaly::GetEccentricAnomaly() - "
-                                "unable to get the eccentric anomaly due to "
-                                "failure of use Cos, Sin or atan2");
-      }
-   }
-
-   return (GmatMathUtil::RadToDeg(eccAnomaly));
+   
+   if (!inRadians)
+      ea = ea * DEG_PER_RAD;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("Anomaly::GetEccentricAnomaly() returning %f\n", ea);
+   #endif
+   
+   return ea;
 }
 
+
 //------------------------------------------------------------------------------
-// Real Anomaly::GetHyperbolicAnomaly() const
+// Real GetHyperbolicAnomaly(bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Gets hyperbolic anomaly.
  * 
- * @return   value of hyperbolic anomaly.
- *
+ * @param <inRadians>  true if output value in radians is requested
+ * @return  value of hyperbolic anomaly.
  */
-Real Anomaly::GetHyperbolicAnomaly() const
+//------------------------------------------------------------------------------
+Real Anomaly::GetHyperbolicAnomaly(bool inRadians) const
 {
-   Real hyperAnomaly; // hyperbolic anomaly
-   Real nu;           // true anomaly in radians
-   Real ta;           // true anomaly in degrees
+   Real ha = mAnomalyInRad;
    
-   if (eccentricity < (1.0 + 1.0e-12))
+   if (mType == MA || mType == EA || mType == TA)
    {
-   		hyperAnomaly = 0.0;
+      Real ta = GetTrueAnomaly(true);
+      ha = Keplerian::TrueToHyperbolicAnomaly(ta, mEcc);
    }
-   else
-   {
-      try
-      {
-         if (type == "MA" || type == "EA" || type == "HA")
-            ta = GetTrueAnomaly();
-         else 
-			ta = anomalyValue;
-
-		 // Convert the true anomaly from degrees to radians
-         nu = GmatMathUtil::DegToRad(ta);
-         
-		 // Compute the hyperbolic anamoly
-         Real numerator1, numerator2, denominator, sinhH, coshH, tanhH;
-		 
-		 // Hyperbolic sin(H)
-		 numerator1 = GmatMathUtil::Sin(nu) * 
-		    GmatMathUtil::Sqrt(eccentricity * eccentricity - 1.0);
-		 denominator = 1.0 + eccentricity * GmatMathUtil::Cos(nu);
-		 sinhH = numerator1 / denominator;
-
-		 // Hyperbolic cos(H)
-		 numerator2 = eccentricity + GmatMathUtil::Cos(nu);
-		 coshH = numerator2 / denominator;
-
-         tanhH = sinhH / coshH;
-		 hyperAnomaly = atanh(tanhH);		
-      }
-      catch(RealUtilitiesExceptions::ArgumentError &rue)
-      {
-         throw UtilityException("Anomaly::GetHyperbolicAnomaly() - "
-                                "unable to get the eccentric anomaly due to "
-                                "failure of use Cos or atanh");
-      }
-   }
-   return (GmatMathUtil::RadToDeg(hyperAnomaly));
+   
+   if (!inRadians)
+      ha = ha * DEG_PER_RAD;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("Anomaly::GetHyperbolicAnomaly() returning %f\n", ha);
+   #endif
+   
+   return ha;
 }
 
+
 //------------------------------------------------------------------------------
-// bool Anomaly::IsInvalid(const std::string &inputType) const
+// bool IsInvalid(const std::string &typeStr) const
 //------------------------------------------------------------------------------
 /** 
  * Determines if the anomlay type is invalid.
  * 
  * @return   true if invalid, false it is valid.
- *
  */
-bool Anomaly::IsInvalid(const std::string &inputType) const
+//------------------------------------------------------------------------------
+bool Anomaly::IsInvalid(const std::string &typeStr) const
 {
-   if (inputType != "EA" && inputType != "HA" && 
-       inputType != "MA" && inputType != "TA")
-      return true;
-
-   return false;
+   for (int i=0; i<AnomalyTypeCount; i++)
+   {
+      if (typeStr == ANOMALY_LONG_TEXT[i])
+         return false;
+   }
+   
+   for (int i=0; i<AnomalyTypeCount; i++)
+   {
+      if (typeStr == ANOMALY_SHORT_TEXT[i])
+         return false;
+   }
+   
+   return true;
 }
 
+
 //------------------------------------------------------------------------------
-// void Anomaly::Convert(const std::string &t) const
+// Real Convert(AnomalyType toType, bool inRadians = false) const
 //------------------------------------------------------------------------------
 /** 
  * Converts anomaly value.
  * 
- * @param <fromType> Anomaly type to convert from.
  * @param <toType>   Anomaly type to convert to.
+ * @param <inRadians>  true if output value in radians is requested
  *
  * @return Converted anomaly type 
  */
-Real Anomaly::Convert(const std::string &fromType, 
-                      const std::string &toType) const
+//------------------------------------------------------------------------------
+Real Anomaly::Convert(AnomalyType toType, bool inRadians) const
 {
-   if (IsInvalid(toType))
-      throw UtilityException("Anomaly::Convert() - invalid input type");
-
-   Real value = GetValue();
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("Anomaly::Convert() toType=%d, inRadians=%d, mType=%d, mAnomalyInRad=%f\n",
+       toType, inRadians, mType, mAnomalyInRad);
+   #endif
    
-   try
-   {
-      // Convert from TA to MA, EA or HA
-      if (fromType == "TA") 
-      {
-	     if (toType == "MA")
-	        value = GetMeanAnomaly();   
-	     else if (toType == "EA")
-	        value = GetEccentricAnomaly();   
-	     else if (toType == "HA")
-	        value = GetHyperbolicAnomaly(); 
-      }  
-      // Convert from MA to TA, EA or HA
-	  else if (fromType == "MA") 
-	  {
-	     if (toType == "TA")
-	        value = GetTrueAnomaly(); 
-	     else if (toType == "EA")
-	        value = GetEccentricAnomaly();   
-	     else if (toType == "HA")
-	        value = GetHyperbolicAnomaly();   
-	  }
-      // Convert from EA to MA, TA or HA
-	  else if (fromType == "EA") 
-	  {
-	     if (toType == "MA")
-	        value = GetMeanAnomaly(); 
-	     else if (toType == "TA")
-	        value = GetTrueAnomaly();   
-	     else if (toType == "HA")
-	        value = GetHyperbolicAnomaly();   
-	  }
-      // Convert from HA to MA, TA or EA
-	  else if (fromType == "HA") 
-	  {
-	     if (toType == "MA")
-	        value = GetMeanAnomaly(); 
-	     else if (toType == "TA")
-	        value = GetTrueAnomaly();   
-	     else if (toType == "EA")
-	        value = GetEccentricAnomaly();   
-	  }
-   }
-   catch(RealUtilitiesExceptions::ArgumentError &rue)
-   {
-      throw UtilityException("Anomaly::GetEccentricAnomaly() - "
-                             "unable to get the eccentric anomaly due to "
-                             "failure of use Cos, Sin or atan2");
-   }
+   Real value;
+   
+   if (toType == mType)
+      value = mAnomalyInRad;
+   else if (toType == TA)
+      value = GetTrueAnomaly(true);
+   else if (toType == MA) 
+      value = GetMeanAnomaly(true);
+   else if (toType == EA)
+      value = GetEccentricAnomaly(true);
+   else if (toType == HA)
+      value = GetHyperbolicAnomaly(true);
+   else
+      throw UtilityException("Anomaly::Convert() - invalid input type");
+   
+   if (!inRadians)
+      value = value * DEG_PER_RAD;
+   
+   #ifdef DEBUG_ANOMALY
+   MessageInterface::ShowMessage("Anomaly::Convert() returning %f\n", value);
+   #endif
    
    return value;
+}
+
+
+//------------------------------------------------------------------------------
+// Real Convert(const std::string &toType, bool inRadians = false) const
+//------------------------------------------------------------------------------
+/** 
+ * Converts anomaly value.
+ * 
+ * @param <toType>   Anomaly type to convert to.
+ * @param <inRadians>  true if output value in radians is requested
+ *
+ * @return Converted anomaly type 
+ */
+//------------------------------------------------------------------------------
+Real Anomaly::Convert(const std::string &toType,  bool inRadians) const
+{
+   return Convert(GetType(toType), inRadians);
+}
+
+
+//------------------------------------------------------------------------------
+// Anomaly ConvertToAnomaly(AnomalyType toType, bool inRadians = false)
+//------------------------------------------------------------------------------
+/*
+ * Converts internal anomaly using toType and returns new Anomaly.
+ *
+ * @param <toType>     AnomalyType to convert internal anomaly to
+ * @param <inRadians>  true if output value in radians is requested
+ */
+//------------------------------------------------------------------------------
+Anomaly Anomaly::ConvertToAnomaly(AnomalyType toType, bool inRadians)
+{
+   Anomaly temp = *this;
+   Real value = temp.Convert(toType, inRadians);
+   temp.SetValue(value);
+   return temp;
+}
+
+
+//------------------------------------------------------------------------------
+// Anomaly ConvertToAnomaly(const std::string &toType, bool inRadians = false)
+//------------------------------------------------------------------------------
+/*
+ * Converts internal anomaly using toType and returns new Anomaly.
+ *
+ * @param <toType>     AnomalyType to convert internal anomaly to
+ * @param <inRadians>  true if output value in radians is requested
+ */
+//------------------------------------------------------------------------------
+Anomaly Anomaly::ConvertToAnomaly(const std::string &toType, bool inRadians)
+{
+   return ConvertToAnomaly(GetType(toType), inRadians);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string ToString(Integer precision = GmatIO::DATA_PRECISION)
+//------------------------------------------------------------------------------
+/**
+ * @return data value string
+ */
+//------------------------------------------------------------------------------
+std::string Anomaly::ToString(Integer precision)
+{
+   std::stringstream ss("");
+   ss.precision(precision);
+   
+   ss << "Anomaly Type: " << GetTypeString();
+   ss << ", SMA: " << mSma;
+   ss << ", ECC: " << mEcc;
+   ss << ", Value: " << GetValue();
+      
+   return ss.str();
+}
+
+//---------------------------------
+// static functions
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// AnomalyType GetAnomalyType(const std::string &typeStr)
+//------------------------------------------------------------------------------
+/** 
+ * @return  AnomalyType of input type string.
+ */
+//------------------------------------------------------------------------------
+Anomaly::AnomalyType Anomaly::GetAnomalyType(const std::string &typeStr)
+{
+   for (int i=0; i<AnomalyTypeCount; i++)
+   {
+      if (typeStr == ANOMALY_LONG_TEXT[i])
+         return (AnomalyType)i;
+   }
+   
+   for (int i=0; i<AnomalyTypeCount; i++)
+   {
+      if (typeStr == ANOMALY_SHORT_TEXT[i])
+         return (AnomalyType)i;
+   }
+   
+   throw UtilityException
+      ("Invalid Anomaly Type \"" + typeStr + "\"\nAllowed "
+       "are \"TA\", \"MA\", \"EA\", \"HA\" or \n\"True Anomaly\", "
+       "\"Mean Anomaly\", \"Eccentric Anomaly\", \"Hyperbolic Anomaly\"");
+}
+
+
+//------------------------------------------------------------------------------
+// static std::string GetTypeString(const std::string &type)
+//------------------------------------------------------------------------------
+/*
+ * Returns matching short type string of input type string.
+ */
+//------------------------------------------------------------------------------
+std::string Anomaly::GetTypeString(const std::string &type)
+{
+   if (type == "True Anomaly" || type == "TA")
+      return "TA";
+   else if (type == "Mean Anomaly" || type == "MA") 
+      return "MA";
+   else if (type == "Eccentric Anomaly" || type == "EA")
+      return "EA";
+   else if (type == "Hyperbolic Anomaly" || type == "HA")
+      return "HA";
+   else
+      throw UtilityException
+         ("Invalid Anomaly Type \"" + type + "\"\nAllowed "
+          "are \"TA\", \"MA\", \"EA\", \"HA\" or \n\"True Anomaly\", "
+          "\"Mean Anomaly\", \"Eccentric Anomaly\", \"Hyperbolic Anomaly\"");
+   
+}
+
+
+//------------------------------------------------------------------------------
+// static std::string GetLongTypeString(const std::string &type)
+//------------------------------------------------------------------------------
+/*
+ * Returns matching long type string of input type string.
+ */
+//------------------------------------------------------------------------------
+std::string Anomaly::GetLongTypeString(const std::string &type)
+{
+   if (type == "True Anomaly" || type == "TA")
+      return "True Anomaly";
+   else if (type == "Mean Anomaly" || type == "MA") 
+      return "Mean Anomaly";
+   else if (type == "Eccentric Anomaly" || type == "EA")
+      return "Eccentric Anomaly";
+   else if (type == "Hyperbolic Anomaly" || type == "HA")
+      return "Hyperbolic Anomaly";
+   else
+      throw UtilityException
+         ("Invalid Anomaly Type \"" + type + "\"\nAllowed "
+          "are \"TA\", \"MA\", \"EA\", \"HA\" or \n\"True Anomaly\", "
+          "\"Mean Anomaly\", \"Eccentric Anomaly\", \"Hyperbolic Anomaly\"");
+   
+}
+
+
+//------------------------------------------------------------------------------
+// static const std::string* GetLongTypeNameList()
+//------------------------------------------------------------------------------
+const std::string* Anomaly::GetLongTypeNameList()
+{
+   return ANOMALY_LONG_TEXT;
 }
 
