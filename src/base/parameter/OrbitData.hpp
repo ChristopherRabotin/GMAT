@@ -71,23 +71,13 @@ public:
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
-   
-   const static Real ORBIT_REAL_UNDEFINED;// = -9876543210.1234;
-   const static Real ORBIT_TOL;// = 1.0e-6; //1.0e-10;
-   const static Real ORBIT_ZERO_TOL;// = 1.0e-30;
-   
+      
 protected:
 
    bool mOriginDep;
    SolarSystem* GetSolarSystem();
    CoordinateSystem* GetInternalCoordSys();
-   
-   Rvector6 GetAngularMomentum(const Rvector3 &pos, const Rvector3 &vel);
-   Real GetSemiMajorAxis(const Rvector3 &pos, const Rvector3 &vel);
-   Real GetEccentricity(const Rvector3 &pos, const Rvector3 &vel);
-   Real GetRightAscensionOfVelocity(const Rvector3 &vel);
-   Real GetRAofAN(const Rvector3 &pos, const Rvector3 &vel);
-   
+      
    void SetInternalCoordSys(CoordinateSystem *cs);
    Rvector6 GetRelativeCartState(SpacePoint *origin);
    Real GetPositionMagnitude(SpacePoint *origin);
@@ -102,7 +92,6 @@ protected:
    Rvector6 mSphRaDecState;
    Rvector6 mSphAzFpaState;
    
-   Real mMA;
    Real mCartEpoch;
    Real mGravConst;
    
@@ -117,7 +106,7 @@ protected:
    CoordinateConverter mCoordConverter;
    
    enum {PX, PY, PZ, VX, VY, VZ};
-   enum {SMA, ECC, INC, RAAN, AOP, TA, MA, RADN};
+   enum {SMA, ECC, INC, RAAN, AOP, TA, MA, EA, HA, RADN};
    enum {RD_RMAG, RD_RRA, RD_RDEC, RD_VMAG, RD_RAV, RD_DECV};
    enum {AF_RMAG, AF_RRA, AF_RDEC, AF_VMAG, AF_AZI, AF_FPA};
    enum {MM, VEL_APOAPSIS, VEL_PERIAPSIS, ORBIT_PERIOD, RAD_APOAPSIS,
