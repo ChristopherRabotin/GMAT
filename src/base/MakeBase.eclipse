@@ -264,7 +264,6 @@ OBJECTS = \
     parameter/EnvData.o \
     parameter/EnvParameters.o \
     parameter/EnvReal.o \
-    parameter/EquinoctialParameters.o \
     parameter/ExpressionParser.o \
     parameter/KeplerianParameters.o \
     parameter/OrbitalParameters.o \
@@ -356,9 +355,9 @@ OBJECTS = \
     util/DateUtil.o \
     util/ElapsedTime.o \
     util/EopFile.o \
-    util/EphemerisUtil.o \
     util/Equinoctial.o \
     util/FileUtil.o \
+    util/GmatGlobal.o \
     util/GregorianDate.o \
     util/Keplerian.o \
     util/LeapSecsFileReader.o \
@@ -377,10 +376,13 @@ OBJECTS = \
     util/StringTokenizer.o \
     util/StringUtil.o \
     util/TimeSystemConverter.o \
+    util/TimeTypes.o \
     util/UtcDate.o \
     solarsys/msise90_sub.o \
     $(BRIDGEOBJECTS) \
     $(TCPIP_OBJECTS)
+
+    # parameter/EquinoctialParameters.o \
 
 
 $(TARGET) : $(OBJECTS)
