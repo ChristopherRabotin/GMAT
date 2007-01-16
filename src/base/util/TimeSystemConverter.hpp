@@ -27,19 +27,19 @@
 #include "EopFile.hpp"
 #include "LeapSecsFileReader.hpp"
 
-struct TimeSystemConverterExceptions
-{
-   class ImplementationException : public BaseException
+// struct TimeSystemConverterExceptions
+// {
+   class UnimplementedException : public BaseException
    {
       public:
-         ImplementationException(const std::string &message =
+         UnimplementedException(const std::string &message =
          "TimeSystemConverter: Conversion not implemented: ")
          : BaseException(message) {};
    };
-   class FileException : public BaseException
+   class TimeFileException : public BaseException
    {
       public:
-         FileException(const std::string &message =
+         TimeFileException(const std::string &message =
          "TimeSystemConverter: File is unknown: ")
          : BaseException(message) {};
    };
@@ -57,7 +57,7 @@ struct TimeSystemConverterExceptions
          "TimeSystemConverter: Requested time is invalid: ")
          : BaseException(message) {};
    };
-};
+// };
 
 namespace TimeConverterUtil
 {
@@ -127,8 +127,7 @@ namespace TimeConverterUtil
                 const Integer fromType,
                 const Integer toType,
                 Real refJd);
-                //loj: 3/16/06 Real refJd = GmatTimeUtil::JD_NOV_17_1858);
-
+   
    Real ConvertToTaiMjd(Integer fromType, Real origValue,
       Real refJd= GmatTimeUtil::JD_NOV_17_1858);
    Real ConvertFromTaiMjd(Integer toType, Real origValue,
@@ -136,11 +135,17 @@ namespace TimeConverterUtil
 
    void SetEopFile(EopFile *eopFile);
    void SetLeapSecsFileReader(LeapSecsFileReader *leapSecsFileReader);
-
-   std::string ConvertMjdToGregorian(const Real mjd);
-   Real ConvertGregorianToMjd(const std::string &greg);
-   bool ValidateTimeSystem(std::string sys);
    
+   void GetTimeSystemAndFormat(const std::string &type, std::string &system,
+                               std::string &format);
+   
+   std::string ConvertMjdToGregorian(const Real mjd);   
+   Real ConvertGregorianToMjd(const std::string &greg);
+   void Convert(const std::string &fromType, Real fromMjd,
+                const std::string &fromStr, const std::string &toType,
+                Real &toMjd, std::string &toStr);
+   
+   bool ValidateTimeSystem(std::string sys);   
    bool ValidateTimeFormat(const std::string &format, const std::string &value);
    StringArray GetValidTimeRepresentations();
 }
