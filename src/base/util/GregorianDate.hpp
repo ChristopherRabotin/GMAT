@@ -39,7 +39,7 @@ public:
           "GregorianDateException:  Invalid date format")
          : BaseException(message) {};
    };
-                
+   
    GregorianDate();
    GregorianDate(const std::string &str);
    GregorianDate(Date *newDate);
@@ -55,7 +55,8 @@ public:
    std::string      GetYMDHMS() const;
 
    bool             IsValid() const;
-    
+   static bool      IsValid(const std::string &greg);
+   
 private:
    // function method
    void           Initialize(const std::string &str);
@@ -72,7 +73,6 @@ private:
    std::string      stringDate;
    std::string      stringYMDHMS;
    std::string      type; 
-   //StringArray      monthName; 
    bool             isValid;
    bool             initialized;
 };

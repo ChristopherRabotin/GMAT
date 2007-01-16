@@ -148,6 +148,20 @@ bool GregorianDate::SetDate(Date *newDate)
 }
 
 //---------------------------------------------------------------------------
+//  std::string GetYMDHMS() const
+//---------------------------------------------------------------------------
+/**
+ * Get YYYYMMDD.HHMMSSmmm from Gregorian format in string 
+ *
+ * @return    string in YYYYMMDD.HHMMSSmmm 
+ * 
+ */
+std::string GregorianDate::GetYMDHMS() const
+{
+   return stringYMDHMS;
+}
+
+//---------------------------------------------------------------------------
 //  bool IsValid() const 
 //---------------------------------------------------------------------------
 /**
@@ -162,17 +176,21 @@ bool GregorianDate::IsValid() const
 }
 
 //---------------------------------------------------------------------------
-//  std::string GetYMDHMS() const
+//  static bool IsValid(const std::string &greg)
 //---------------------------------------------------------------------------
 /**
- * Get YYYYMMDD.HHMMSSmmm from Gregorian format in string 
+ * Determines if input date is valid or not.
+ *   Valid format is dd mmm yyyy hh:mm:ss.mmm.
+ *   For example, 01 Jan 2000 12:00:00.000
  *
- * @return    string in YYYYMMDD.HHMMSSmmm 
- * 
+ * @param  greg  input gregorian string
+ *
+ * @return true if time is in valid Gregorian format; otherwise, false
  */
-std::string GregorianDate::GetYMDHMS() const
+//---------------------------------------------------------------------------
+bool GregorianDate::IsValid(const std::string &greg)
 {
-   return stringYMDHMS;
+   return DateUtil::IsValidGregorian(greg);
 }
 
 //-------------------------------------
@@ -192,20 +210,6 @@ void GregorianDate::Initialize(const std::string &str)
    stringYMDHMS = "";
    type = "Gregorian";
    isValid = false;
-
-//    // Initialize the month name
-//    monthName.push_back("Jan");
-//    monthName.push_back("Feb");
-//    monthName.push_back("Mar");
-//    monthName.push_back("Apr");
-//    monthName.push_back("May");
-//    monthName.push_back("Jun");
-//    monthName.push_back("Jul");
-//    monthName.push_back("Aug");
-//    monthName.push_back("Sep");
-//    monthName.push_back("Oct");
-//    monthName.push_back("Nov");
-//    monthName.push_back("Dec");
 }
 
 
@@ -218,7 +222,9 @@ void GregorianDate::Initialize(const std::string &str)
  */
 void GregorianDate::ParseOut(const std::string &str) 
 {
+   #if DEBUG_GREGORIAN_VALIDATE
    //MessageInterface::ShowMessage("==> GregorianDate::ParseOut() str=%s\n", str.c_str());
+   #endif
    
    // Check if non-empty string then parse out; otherwise, nothing. 
    if (str != "")
@@ -336,8 +342,10 @@ void GregorianDate::ParseOut(const std::string &str)
 
             // Get real number in seconds
             Real second = ToReal(strSeconds); 
+   #if DEBUG_GREGORIAN_VALIDATE
             //MessageInterface::ShowMessage
             //   ("==> GregorianDate::ParseOut() second=%.10f\n", second);
+            #endif
             
             // Finally check validity for the date  
             if (!IsValidTime(yearNum,monthNum,dayNum,hour,minute,second))
@@ -485,6 +493,5 @@ std::string GregorianDate::GetMonthName(const Integer month)
       return "";
    }
 
-//    return monthName[month-1];
    return GmatTimeUtil::MONTH_NAME_TEXT[month-1];
 }
