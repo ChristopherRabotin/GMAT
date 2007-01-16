@@ -56,6 +56,7 @@
 #include "RunScriptFolderDialog.hpp"
 #include "FileManager.hpp"            // for GetPathname()
 #include "FileUtil.hpp"               // for Compare()
+#include "GmatGlobal.hpp"             // for SetBatchMode()
 #include <sstream>
 #include <fstream>
 #include <wx/dir.h>
@@ -829,14 +830,14 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
       }
       else if (objTypeName == "FminconOptimizer")
       {
-      	 numSqp++;
+         numSqp++;
 
          if (restartCounter)
             ++mNumSqp;
          
          AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(wxT(objName), GmatTree::SQP));
-      	
+        
 //         AppendItem(mOptimizerItem, wxT(objName), GmatTree::ICON_DEFAULT, -1,
 //                    new GmatTreeItemData(wxT(objName), GmatTree::SQP));
       }
@@ -2810,8 +2811,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptId = GetNextChild(item, cookie);
    }
    
-   long runCount = numScripts;
-   long repeatCount = 1;
+   int runCount = numScripts;
+   int repeatCount = 1;
    
    Real absTol = GmatFileUtil::CompareAbsTol;
    wxString compareDir1  = ((GmatTreeItemData*)GetItemData(item))->GetDesc();
@@ -2870,6 +2871,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       textFrame->SetSize(w+1, h+1);
    }
    
+   // Set batch mode to true, so that PopupMessage will be rerouted to ShowMessage
+   GmatGlobal::Instance()->SetBatchMode(true);
+   
    while (scriptId.IsOk())
    {     
       if (GetItemImage(scriptId) == GmatTree::ICON_FOLDER)
@@ -2888,9 +2892,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
       MessageInterface::ShowMessage
-         ("Starting script %d out of %d: %s\n", count, numScripts, filename.c_str());
+         ("Starting script %d out of %d: %s\n", count, runCount, filename.c_str());
       wxString text;
-      text.Printf("Running script %d out of %d: %s\n", count, numScripts,
+      text.Printf("Running script %d out of %d: %s\n", count, runCount,
                   filename.c_str());
       GmatAppData::GetMainFrame()->SetStatusText(text, 1);
       
@@ -2898,7 +2902,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());       
       
       GmatAppData::GetMainFrame()->SetTitle(titleText);
-                  
+      
       if (compare)
          textCtrl->AppendText(text);
       
@@ -2942,19 +2946,22 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
       scriptId = GetNextChild(item, cookie);
    }
-
+   
    // save compare results to a file
    if (compare && saveCompareResults)
       textCtrl->SaveFile(dlg.GetSaveFilename());
-
+   
    // reset output path
    if (hasOutDirChanged)
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, oldOutPath);
-      
+   
    // Report completion
    wxString text;
-   text.Printf("Finished running %d scripts\n", numScripts);
+   text.Printf("Finished running %d scripts\n", runCount);
    GmatAppData::GetMainFrame()->SetStatusText(text, 1);
+   
+   // Set batch mode to false
+   GmatGlobal::Instance()->SetBatchMode(false);
 }
 
 
@@ -3022,9 +3029,14 @@ bool ResourceTree::BuildScript(const wxString &filename)
    }
    else
    {
-      wxLogError
-         ("Error occurred during parsing.\nPlease check the syntax and try again\n");
-      wxLog::FlushActive();
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Error occurred during parsing.\nPlease check the "
+          "syntax and try again\n");
+      
+//       wxLogError
+//          ("Error occurred during parsing.\nPlease check the syntax and try again\n");
+//       wxLog::FlushActive();
+      
       return false;
    }
 }
