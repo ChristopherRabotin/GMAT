@@ -328,7 +328,7 @@ void ThrusterCoefficientDialog::OnCellValueChange(wxGridEvent &event)
                         "\" is not an allowed value.  "
                         "\nThe allowed values are: [ Real Number ].";
 
-       if (!GmatStringUtil::ToDouble(inputString,&rvalue))
+       if (!GmatStringUtil::ToReal(inputString,&rvalue))
        {
           MessageInterface::PopupMessage(Gmat::ERROR_, msg);
           return;

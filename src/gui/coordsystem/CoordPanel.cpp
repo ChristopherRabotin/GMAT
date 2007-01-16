@@ -16,7 +16,7 @@
 #include "AxisSystem.hpp"
 #include "SpacePoint.hpp"
 #include "TimeSystemConverter.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //#define DEBUG_COORD_PANEL 1
 
@@ -872,9 +872,9 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          std::string epochStr = epochTextCtrl->GetValue().c_str();
          Real epoch;
          
-//         if (epochTextCtrl->GetValue().ToDouble(&epoch))
+//         if (epochTextCtrl->GetValue().ToReal(&epoch))
          inputString = epochTextCtrl->GetValue();      
-	      if ((GmatStringUtil::ToDouble(inputString,&epoch)) && (epoch >= 0.0))
+              if ((GmatStringUtil::ToReal(inputString,&epoch)) && (epoch >= 0.0))
          {
             epochValue = epochTextCtrl->GetValue();
             if (epochFormat != newEpochFormat)
@@ -911,9 +911,9 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {
          Real interval;
          inputString = intervalTextCtrl->GetValue();      
-	      if ((GmatStringUtil::ToDouble(inputString,&interval)) && 
-	          (interval >= 0.0))     
-//         if (intervalTextCtrl->GetValue().ToDouble(&interval))
+              if ((GmatStringUtil::ToReal(inputString,&interval)) && 
+                  (interval >= 0.0))     
+//         if (intervalTextCtrl->GetValue().ToReal(&interval))
          {
             axis->SetRealParameter("UpdateInterval", interval);
          }

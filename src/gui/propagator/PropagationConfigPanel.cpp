@@ -27,7 +27,7 @@
 #include "MessageInterface.hpp"
 #include "PropagatorException.hpp"
 #include "StringTokenizer.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 #include <fstream>
 #include <iostream>
@@ -1858,7 +1858,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
       inputString = initialStepSizeTextCtrl->GetValue();
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
          thePropagator->SetRealParameter(id, rvalue);
       else
       {
@@ -1871,7 +1871,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
       id = thePropagator->GetParameterID("Accuracy");
       inputString = accuracyTextCtrl->GetValue();
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))     
+      if (GmatStringUtil::ToReal(inputString,&rvalue))     
          thePropagator->SetRealParameter(id, rvalue);
       else
       {
@@ -1884,7 +1884,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
       id = thePropagator->GetParameterID("MinStep");
       inputString = minStepTextCtrl->GetValue();      
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))     
+      if (GmatStringUtil::ToReal(inputString,&rvalue))     
          thePropagator->SetRealParameter(id, rvalue);
       else
       {
@@ -1897,13 +1897,13 @@ bool PropagationConfigPanel::SaveIntegratorData()
       id = thePropagator->GetParameterID("MaxStep");
       inputString = maxStepTextCtrl->GetValue();      
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))     
+      if (GmatStringUtil::ToReal(inputString,&rvalue))     
       {
          // check to see if max step size is less than min
          minStr = minStepTextCtrl->GetValue();      
          maxStr = maxStepTextCtrl->GetValue();      
-         if (GmatStringUtil::ToDouble(minStr,&min) && 
-             GmatStringUtil::ToDouble(maxStr,&max))      
+         if (GmatStringUtil::ToReal(minStr,&min) && 
+             GmatStringUtil::ToReal(maxStr,&max))      
             // @todo waw: temporarily commented out, to be uncommented 
             // once Edwin updates his scripts to support this
             // if (min >= max) 
@@ -1943,7 +1943,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
          id = thePropagator->GetParameterID("LowerError");
          inputString = minIntErrorTextCtrl->GetValue();      
          // check to see if input is a real
-         if (GmatStringUtil::ToDouble(inputString,&rvalue))     
+         if (GmatStringUtil::ToReal(inputString,&rvalue))     
             thePropagator->SetRealParameter(id, rvalue);
          else
          {
@@ -1956,7 +1956,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
          id = thePropagator->GetParameterID("TargetError");
          inputString = nomIntErrorTextCtrl->GetValue();      
          // check to see if input is a real
-         if (GmatStringUtil::ToDouble(inputString,&rvalue))     
+         if (GmatStringUtil::ToReal(inputString,&rvalue))     
             thePropagator->SetRealParameter(id, rvalue);
          else
          {

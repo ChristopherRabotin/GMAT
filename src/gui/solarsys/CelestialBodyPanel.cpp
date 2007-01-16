@@ -436,8 +436,8 @@ void CelestialBodyPanel::SaveData()
       // Mu
       // check to see if input is a real
       inputString[0] = mMuTextCtrl->GetValue();
-	   if ((GmatStringUtil::ToDouble(inputString[0],&rvalue[0])) && 
-	       (rvalue[0] > 0.0))      
+           if ((GmatStringUtil::ToReal(inputString[0],&rvalue[0])) && 
+               (rvalue[0] > 0.0))      
       {
          paramID = theCelestialBody->GetParameterID("Mu");
          theCelestialBody->SetRealParameter(paramID, rvalue[0]);
@@ -449,7 +449,7 @@ void CelestialBodyPanel::SaveData()
          canClose = false;
       }
 //      inputString[0] = mMuTextCtrl->GetValue();
-//      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+//      if (!GmatStringUtil::ToReal(inputString[0], &rvalue[0]) || 
 //          rvalue[0] < 0)
 //      {
 //         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
@@ -462,8 +462,8 @@ void CelestialBodyPanel::SaveData()
       // EquatorialRadius
       // check to see if input is a real
       inputString[0] = mEquatorialRadiusTextCtrl->GetValue();
-	   if ((GmatStringUtil::ToDouble(inputString[0],&rvalue[0])) && 
-	       (rvalue[0] > 0.0))      
+           if ((GmatStringUtil::ToReal(inputString[0],&rvalue[0])) && 
+               (rvalue[0] > 0.0))      
       {
          paramID = theCelestialBody->GetParameterID("EquatorialRadius");
          theCelestialBody->SetRealParameter(paramID, rvalue[0]);
@@ -475,7 +475,7 @@ void CelestialBodyPanel::SaveData()
          canClose = false;
       }
 //      inputString[0] = mEquatorialRadiusTextCtrl->GetValue();
-//      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+//      if (!GmatStringUtil::ToReal(inputString[0], &rvalue[0]) || 
 //          rvalue[0] < 0)
 //      {
 //         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
@@ -489,7 +489,7 @@ void CelestialBodyPanel::SaveData()
       // Flattening
       // check to see if input is a real
       inputString[0] = mFlatteningTextCtrl->GetValue();
-	   if (GmatStringUtil::ToDouble(inputString[0],&rvalue[0]))      
+           if (GmatStringUtil::ToReal(inputString[0],&rvalue[0]))      
       {
          paramID = theCelestialBody->GetParameterID("Flattening");
          theCelestialBody->SetRealParameter(paramID, rvalue[0]);
@@ -501,7 +501,7 @@ void CelestialBodyPanel::SaveData()
          canClose = false;
       }
 //      inputString[0] = mFlatteningTextCtrl->GetValue();
-//      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0])) 
+//      if (!GmatStringUtil::ToReal(inputString[0], &rvalue[0])) 
 //      {
 //         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
 //                 inputString[0].c_str(), "Flattening", "Real Number");
@@ -513,21 +513,21 @@ void CelestialBodyPanel::SaveData()
       // Nutation Update Interval
       if (theCelestialBody->GetBodyType() == Gmat::PLANET)
       {
-	      // check to see if input is a real
-	      inputString[0] = mIntervalTextCtrl->GetValue();
-		   if ((GmatStringUtil::ToDouble(inputString[0],&rvalue[0])) && 
-		       (rvalue[0] >= 0.0))      
-	      {
+              // check to see if input is a real
+              inputString[0] = mIntervalTextCtrl->GetValue();
+                   if ((GmatStringUtil::ToReal(inputString[0],&rvalue[0])) && 
+                       (rvalue[0] >= 0.0))      
+              {
             thePlanet->SetUpdateInterval(rvalue[0]);
-	      }
-	      else
-	      {
-	         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	            inputString[0].c_str(), "Nutation Update Interval","Real Number > 0.0");
-	         canClose = false;
-	      }
+              }
+              else
+              {
+                 MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+                    inputString[0].c_str(), "Nutation Update Interval","Real Number > 0.0");
+                 canClose = false;
+              }
 //         inputString[0] = mIntervalTextCtrl->GetValue();
-//         if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0]) || 
+//         if (!GmatStringUtil::ToReal(inputString[0], &rvalue[0]) || 
 //             rvalue[0] < 0)
 //         {
 //             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
@@ -543,7 +543,7 @@ void CelestialBodyPanel::SaveData()
       // Initial Epoch
       // check to see if input is a real
       inputString[0] = mEpochTextCtrl->GetValue();
-	   if (GmatStringUtil::ToDouble(inputString[0],&rvalue[0]))      
+           if (GmatStringUtil::ToReal(inputString[0],&rvalue[0]))      
       {
          A1Mjd a1mjd =  A1Mjd(rvalue[0]);
          theCelestialBody->SetAnalyticEpoch(a1mjd);
@@ -555,7 +555,7 @@ void CelestialBodyPanel::SaveData()
          canClose = false;
       }
 //      inputString[0] =  mEpochTextCtrl->GetValue();
-//      if (!GmatStringUtil::ToDouble(inputString[0], &rvalue[0])) 
+//      if (!GmatStringUtil::ToReal(inputString[0], &rvalue[0])) 
 //      {
 //         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
 //                 inputString[0].c_str(), "Initial Epoch",
@@ -574,13 +574,13 @@ void CelestialBodyPanel::SaveData()
       
       for (Integer i=0; i < 6; ++i)
       {
-          if (!GmatStringUtil::ToDouble(inputString[i], &rvalue[i]))
+          if (!GmatStringUtil::ToReal(inputString[i], &rvalue[i]))
           {
              MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                               inputString[i].c_str(), 
                               KEP_ELEMENT_NAMES[i].c_str(),
                               "Real Number");
-	         canClose = false;
+                 canClose = false;
 //             return;
           }
       } 
@@ -591,7 +591,7 @@ void CelestialBodyPanel::SaveData()
                               inputString[0].c_str(), 
                               KEP_ELEMENT_NAMES[0].c_str(),
                               "Real Number must be non-zero");
-	         canClose = false;
+                 canClose = false;
 //         return;
       }
       else if (rvalue[1] < 0) {
@@ -599,7 +599,7 @@ void CelestialBodyPanel::SaveData()
                               inputString[1].c_str(), 
                               KEP_ELEMENT_NAMES[1].c_str(),
                               "Real Number >= 0");
-	         canClose = false;
+                 canClose = false;
 //         return; 
       }
 

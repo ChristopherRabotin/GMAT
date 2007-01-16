@@ -1,3 +1,21 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                SQPSetupPanel
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
+// Author: 
+// Created: 
+//
+/**
+ * Declares SQPSetupPanel.
+ */
+//------------------------------------------------------------------------------
 #include "GmatAppData.hpp"
 #include "SQPSetupPanel.hpp"
 
@@ -8,7 +26,7 @@
 #include "GuiInterpreter.hpp"
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -79,8 +97,8 @@ void SQPSetupPanel::LoadData()
    // load data from the core engine
    try
    {
-   	  mObject = theSolver;
-   	
+          mObject = theSolver;
+        
       std::string valueStr = theSolver->GetStringParameter("GradObj"); 
       if (valueStr == "On")
          gradObjCB->SetValue(true);
@@ -181,7 +199,7 @@ void SQPSetupPanel::SaveData()
       inputString = tolFunTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {  
          theSolver->SetStringParameter("TolFun", inputString.c_str());
       }
@@ -196,7 +214,7 @@ void SQPSetupPanel::SaveData()
       inputString = tolConTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {  
          theSolver->SetStringParameter("TolCon", inputString.c_str());
       }
@@ -211,7 +229,7 @@ void SQPSetupPanel::SaveData()
       inputString = tolXTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {  
          theSolver->SetStringParameter("TolX", inputString.c_str());
       }
@@ -256,7 +274,7 @@ void SQPSetupPanel::SaveData()
       inputString = diffMinChangeTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {  
          theSolver->SetStringParameter("DiffMinChange", inputString.c_str());
       }
@@ -271,7 +289,7 @@ void SQPSetupPanel::SaveData()
       inputString = diffMaxChangeTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {  
          theSolver->SetStringParameter("DiffMaxChange", inputString.c_str());
       }

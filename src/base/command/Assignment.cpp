@@ -310,7 +310,7 @@ bool Assignment::InterpretAction()
       if (dot != rhs.npos)
       {
          Real rval;
-         if (!GmatStringUtil::ToDouble(rhs, &rval))
+         if (!GmatStringUtil::ToReal(rhs, &rval))
          {
             // Get an instance if this is a Parameter
             Moderator *mod = Moderator::Instance();
@@ -1189,7 +1189,7 @@ bool Assignment::InitializeRHS(const std::string &rhs)
    else
    {
       Real rval;
-      if (GmatStringUtil::ToDouble(rhs, &rval))
+      if (GmatStringUtil::ToReal(rhs, &rval))
       {
          #ifdef DEBUG_ASSIGNMENT_INIT
          MessageInterface::ShowMessage(

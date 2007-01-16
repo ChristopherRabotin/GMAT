@@ -174,7 +174,7 @@ void ParameterSetupPanel::LoadData()
          wxLog::FlushActive();
       }
    }
-
+   
    if (!mIsStringVar)
    {
       // if expression is just a number, enable editing
@@ -206,7 +206,7 @@ void ParameterSetupPanel::SaveData()
    {
       std::string strval = mVarExpTextCtrl->GetValue().c_str();
       Real rval;
-      if (GmatStringUtil::ToDouble(strval, &rval))
+      if (GmatStringUtil::ToReal(strval, &rval))
       {
          mIsExpChanged = false;
          mParam->SetStringParameter("Expression",

@@ -22,7 +22,7 @@
 #include "For.hpp"
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
-#include "StringUtil.hpp"        // for ToDouble()
+#include "StringUtil.hpp"        // for ToReal()
 #include "MessageInterface.hpp"
 
 #include <sstream>      // for std::stringstream, used to make generating string
@@ -814,7 +814,7 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
    std::string name, rowStr, colStr;
    Integer row, col;
    
-   if (GmatStringUtil::ToDouble(value, rval))
+   if (GmatStringUtil::ToReal(value, rval))
       isReal = true;
    
    if (id == INDEX_NAME) 

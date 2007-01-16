@@ -227,7 +227,7 @@ void TankConfigPanel::SaveData()
       
       // Fuel Mass 
       inputString = fuelMassTextCtrl->GetValue();
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
       {
          paramID = theFuelTank->GetParameterID("FuelMass");
          theFuelTank->SetRealParameter(paramID, rvalue); 
@@ -241,7 +241,7 @@ void TankConfigPanel::SaveData()
 
       // Pressure 
       inputString = pressureTextCtrl->GetValue();
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
       {
          paramID = theFuelTank->GetParameterID("Pressure");
          theFuelTank->SetRealParameter(paramID, rvalue); 
@@ -255,7 +255,7 @@ void TankConfigPanel::SaveData()
 
       // Temperature
       inputString = temperatureTextCtrl->GetValue(); 
-      if (GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      if (GmatStringUtil::ToReal(inputString,&rvalue)) 
       {
          paramID = theFuelTank->GetParameterID("Temperature");
          theFuelTank->SetRealParameter(paramID, rvalue);
@@ -269,7 +269,7 @@ void TankConfigPanel::SaveData()
 
       // Reference Temperature
       inputString = refTemperatureTextCtrl->GetValue();
-      if (GmatStringUtil::ToDouble(inputString,&rvalue)) 
+      if (GmatStringUtil::ToReal(inputString,&rvalue)) 
       {
          paramID = theFuelTank->GetParameterID("RefTemperature");
          theFuelTank->SetRealParameter(paramID, rvalue); 
@@ -283,7 +283,7 @@ void TankConfigPanel::SaveData()
 
       // Volume 
       inputString = volumeTextCtrl->GetValue();
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
       {
          paramID = theFuelTank->GetParameterID("Volume");
          theFuelTank->SetRealParameter(paramID, rvalue); 
@@ -297,7 +297,7 @@ void TankConfigPanel::SaveData()
       
       // Fuel Density 
       inputString = fuelDensityTextCtrl->GetValue();
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
       {
          paramID = theFuelTank->GetParameterID("FuelDensity");
          theFuelTank->SetRealParameter(paramID, rvalue); 

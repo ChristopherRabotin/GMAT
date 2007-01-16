@@ -22,7 +22,7 @@
 #include "BallisticsMassPanel.hpp"
 #include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //------------------------------
 // event tables for wxWindows
@@ -224,7 +224,7 @@ void BallisticsMassPanel::SaveData()
       // check to see if dry mass is a real and 
       // greater than or equal to 0.0
       inputString = dryMassTextCtrl->GetValue();      
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
           (rvalue >= 0.0))
          theSpacecraft->SetRealParameter(dryMassID, rvalue);
       else
@@ -237,7 +237,7 @@ void BallisticsMassPanel::SaveData()
       // check to see if coeff of drag is a real and 
       // greater than or equal to 0.0
       inputString = dragCoeffTextCtrl->GetValue();      
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
           (rvalue >= 0.0))
          theSpacecraft->SetRealParameter(coeffDragID, rvalue);
       else
@@ -250,7 +250,7 @@ void BallisticsMassPanel::SaveData()
       // check to see if coeff of reflectivity is a real and 
       // greater than or equal to 0.0
       inputString = reflectCoeffTextCtrl->GetValue();      
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
           (rvalue >= 0.0))
          theSpacecraft->SetRealParameter(reflectCoeffID, rvalue);
       else
@@ -264,7 +264,7 @@ void BallisticsMassPanel::SaveData()
       // check to see if drag area is a real and 
       // greater than or equal to 0.0
       inputString = dragAreaTextCtrl->GetValue();      
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
           (rvalue >= 0.0))
          theSpacecraft->SetRealParameter(dragAreaID, rvalue);
       else
@@ -278,7 +278,7 @@ void BallisticsMassPanel::SaveData()
       // check to see if SRP area is a real and 
       // greater than or equal to 0.0
       inputString = srpAreaTextCtrl->GetValue();      
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && 
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
           (rvalue >= 0.0))
          theSpacecraft->SetRealParameter(srpAreaID, rvalue);
       else

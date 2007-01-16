@@ -275,7 +275,7 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
     static Moderator *mod = Moderator::Instance();
     Real rval;
     // if left is just a number, skip
-    if (GmatStringUtil::ToDouble(lhs, &rval))
+    if (GmatStringUtil::ToReal(lhs, &rval))
     {
        ;
     }
@@ -304,7 +304,7 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
     }
             
     // if right is just a number, skip
-    if (GmatStringUtil::ToDouble(rhs, &rval))
+    if (GmatStringUtil::ToReal(rhs, &rval))
     {
        ;
     }
@@ -533,7 +533,7 @@ bool ConditionalBranch::Initialize()
        #endif
        
        // if left is just a number, skip
-       if (GmatStringUtil::ToDouble(paramName, &rval))
+       if (GmatStringUtil::ToReal(paramName, &rval))
           continue;
        
        if (objectMap->find(paramName) != objectMap->end())
@@ -554,7 +554,7 @@ bool ConditionalBranch::Initialize()
        #endif
        
        // if right is just a number, skip
-       if (GmatStringUtil::ToDouble(paramName, &rval))
+       if (GmatStringUtil::ToReal(paramName, &rval))
           continue;
        
        if (objectMap->find(paramName) != objectMap->end())

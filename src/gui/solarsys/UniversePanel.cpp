@@ -485,7 +485,7 @@ void UniversePanel::SaveData()
    Real rvalue;
    inputString = mIntervalTextCtrl->GetValue();
 
-   if (!GmatStringUtil::ToDouble(inputString,&rvalue) || rvalue < 0)
+   if (!GmatStringUtil::ToReal(inputString,&rvalue) || rvalue < 0)
    {
        MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                         inputString.c_str(),"Ephemeris Update Interval",

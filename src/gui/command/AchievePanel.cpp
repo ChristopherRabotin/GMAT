@@ -16,7 +16,7 @@
 #include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "AchievePanel.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 #include <wx/variant.h>
 
 // base includes
@@ -302,7 +302,7 @@ void AchievePanel::SaveData()
    
    // check to see if input is a real
    inputString = mToleranceTextCtrl->GetValue();      
-   if (GmatStringUtil::ToDouble(inputString,&rvalue))
+   if (GmatStringUtil::ToReal(inputString,&rvalue))
    {  
       id = mAchieveCommand->GetParameterID("Tolerance");
       mAchieveCommand->SetRealParameter(id, rvalue);

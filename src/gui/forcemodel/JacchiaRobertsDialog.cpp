@@ -14,7 +14,7 @@
 
 #include "JacchiaRobertsDialog.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"          // for ToDouble()
+#include "StringUtil.hpp"          // for ToReal()
 #include <wx/variant.h>
 
 //------------------------------------------------------------------------------
@@ -311,7 +311,7 @@ void JacchiaRobertsDialog::SaveData()
             theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
             
             std::string str = solarFluxTextCtrl->GetValue().c_str();
-            if (GmatStringUtil::ToDouble(str, &rval))
+            if (GmatStringUtil::ToReal(str, &rval))
             {
                theForce->SetRealParameter(solarFluxID, rval);
             }
@@ -323,7 +323,7 @@ void JacchiaRobertsDialog::SaveData()
             }
             
             str = avgSolarFluxTextCtrl->GetValue();
-            if (GmatStringUtil::ToDouble(str, &rval))
+            if (GmatStringUtil::ToReal(str, &rval))
             {
                theForce->SetRealParameter(avgSolarFluxID, rval);
             }
@@ -335,7 +335,7 @@ void JacchiaRobertsDialog::SaveData()
             }
             
             str = geomagneticIndexTextCtrl->GetValue();
-            if (GmatStringUtil::ToDouble(str, &rval))
+            if (GmatStringUtil::ToReal(str, &rval))
             {
                theForce->SetRealParameter(geomagnecticIndexID, rval);
             }

@@ -21,7 +21,7 @@
 #include "NonlinearConstraint.hpp"
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //#define DEBUG_NONLINEAR_CONSTRAINT_PARSE 1
 //#define DEBUG_NONLINEAR_CONSTRAINT_INIT 1
@@ -474,7 +474,7 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       else
       {
          //realValue = atof(nlcParmName.c_str());
-         bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &realValue);
+         bool isNum = GmatStringUtil::ToReal(nlcParmName.c_str(), &realValue);
          if (!isNum)
          {
             std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
@@ -689,7 +689,7 @@ bool NonlinearConstraint::InterpretAction()
    else
    {
       //value = atof(nlcParmName.c_str());
-      bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &value);
+      bool isNum = GmatStringUtil::ToReal(nlcParmName.c_str(), &value);
       if (!isNum)
       {
          std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
@@ -742,7 +742,7 @@ bool NonlinearConstraint::ConstructConstraint(const char* str)
    
    Real rval = 54321.12345;
    // check to see if it is a number first
-   if (GmatStringUtil::ToDouble(str, &rval))
+   if (GmatStringUtil::ToReal(str, &rval))
       return false;
    
    // Skip white space
@@ -855,7 +855,7 @@ bool NonlinearConstraint::ConstructConstraint(const char* str)
       }
    }
 
-   if (GmatStringUtil::ToDouble(nlcParmName, &rval))
+   if (GmatStringUtil::ToReal(nlcParmName, &rval))
    {
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
       MessageInterface::ShowMessage
@@ -910,7 +910,7 @@ bool NonlinearConstraint::InterpretParameter(const std::string text,
 
    Real rval = 54321.12345;
    // check to see if it is a number first
-   if (GmatStringUtil::ToDouble(text, &rval))
+   if (GmatStringUtil::ToReal(text, &rval))
       return true;
    
    Integer start = 0, dotLoc = text.find(".", 0);
@@ -1089,7 +1089,7 @@ bool NonlinearConstraint::Execute()
    if (!isNlcParm)
    {
       //desiredValue = atof(nlcParmName.c_str());  
-      bool isNum = GmatStringUtil::ToDouble(nlcParmName.c_str(), &desiredValue);
+      bool isNum = GmatStringUtil::ToReal(nlcParmName.c_str(), &desiredValue);
       if (!isNum)
       {
          std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 

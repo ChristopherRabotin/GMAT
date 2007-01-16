@@ -829,7 +829,7 @@ bool Vary::InterpretAction()
                   "removed from a future build; please use \"Perturbation\" "
                   "instead.\n" ); 
             }
-            bool retval = GmatStringUtil::ToDouble(nameval[1], value);
+            bool retval = GmatStringUtil::ToReal(nameval[1], value);
             if ((retval == false) || (value <= 0.0))
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
@@ -841,7 +841,7 @@ bool Vary::InterpretAction()
          }
          else if (nameval[0] == "Lower")
          {
-            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+            if (GmatStringUtil::ToReal(nameval[1], value) == false)
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
                   nameval[0] + "\" on command \"" + typeName + 
@@ -852,7 +852,7 @@ bool Vary::InterpretAction()
          }
          else if (nameval[0] == "Upper")
          {
-            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+            if (GmatStringUtil::ToReal(nameval[1], value) == false)
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
                   nameval[0] + "\" on command \"" + typeName + 
@@ -863,7 +863,7 @@ bool Vary::InterpretAction()
          }
          else if (nameval[0] == "MaxStep")
          {
-            bool retval = GmatStringUtil::ToDouble(nameval[1], value);
+            bool retval = GmatStringUtil::ToReal(nameval[1], value);
             if ((retval == false) || (value <= 0.0))
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
@@ -875,7 +875,7 @@ bool Vary::InterpretAction()
          }
          else if (nameval[0] == "AdditiveScaleFactor")
          {
-            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+            if (GmatStringUtil::ToReal(nameval[1], value) == false)
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
                   nameval[0] + "\" on command \"" + typeName + 
@@ -885,7 +885,7 @@ bool Vary::InterpretAction()
          }
          else if (nameval[0] == "MultiplicativeScaleFactor")
          {
-            if (GmatStringUtil::ToDouble(nameval[1], value) == false)
+            if (GmatStringUtil::ToReal(nameval[1], value) == false)
                throw CommandException(
                   "The value of \"" + nameval[1] + "\" for field \"" + 
                   nameval[0] + "\" on command \"" + typeName + 

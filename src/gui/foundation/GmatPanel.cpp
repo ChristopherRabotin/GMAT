@@ -281,7 +281,7 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &element,
    
    // check for real value
    Real rval;
-   if (GmatStringUtil::ToDouble(element, &rval))
+   if (GmatStringUtil::ToReal(element, &rval))
    {
       rvalue = rval;
       return true;

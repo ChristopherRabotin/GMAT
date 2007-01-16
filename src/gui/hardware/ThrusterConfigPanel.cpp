@@ -286,42 +286,42 @@ void ThrusterConfigPanel::SaveData()
       // Origin
       ///@todo Need to be implemented in base code
       
-	   // X_Direction
-	   inputString = XTextCtrl->GetValue();
-	   if (GmatStringUtil::ToDouble(inputString,&rvalue))
-	   {
-	   	paramID = theThruster->GetParameterID("X_Direction");
-	   	theThruster->SetRealParameter(paramID, rvalue);
-	   }
-	   else
-	   {
-	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-	             inputString.c_str(), "X_Direction","Real Number");
+           // X_Direction
+           inputString = XTextCtrl->GetValue();
+           if (GmatStringUtil::ToReal(inputString,&rvalue))
+           {
+                paramID = theThruster->GetParameterID("X_Direction");
+                theThruster->SetRealParameter(paramID, rvalue);
+           }
+           else
+           {
+              MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                     inputString.c_str(), "X_Direction","Real Number");
          canClose = false;
-//	      return;
-	   }
-	   
-	   // Y_Direction
-	   inputString = YTextCtrl->GetValue();
-	   if (GmatStringUtil::ToDouble(inputString,&rvalue))
-	   {
-	   	paramID = theThruster->GetParameterID("Y_Direction");
-	   	theThruster->SetRealParameter(paramID, rvalue);
-	   }
-	   else
-	   {
-	      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-	             inputString.c_str(), "Y_Direction","Real Number");
+//            return;
+           }
+           
+           // Y_Direction
+           inputString = YTextCtrl->GetValue();
+           if (GmatStringUtil::ToReal(inputString,&rvalue))
+           {
+                paramID = theThruster->GetParameterID("Y_Direction");
+                theThruster->SetRealParameter(paramID, rvalue);
+           }
+           else
+           {
+              MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                     inputString.c_str(), "Y_Direction","Real Number");
          canClose = false;
-//	      return;
-	   }
+//            return;
+           }
         
       // Z_Direction
       inputString = ZTextCtrl->GetValue();
-      if (GmatStringUtil::ToDouble(inputString,&rvalue))
+      if (GmatStringUtil::ToReal(inputString,&rvalue))
       {
-      	paramID = theThruster->GetParameterID("Z_Direction");
-      	theThruster->SetRealParameter(paramID, rvalue);
+        paramID = theThruster->GetParameterID("Z_Direction");
+        theThruster->SetRealParameter(paramID, rvalue);
       }
       else
       {
@@ -333,10 +333,10 @@ void ThrusterConfigPanel::SaveData()
    
       // ThrustScaleFactor
       inputString = scaleFactorTextCtrl->GetValue();
-      if ((GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue >= 0.0))
+      if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
       {
-      	paramID = theThruster->GetParameterID("ThrustScaleFactor");
-      	theThruster->SetRealParameter(paramID, rvalue);
+        paramID = theThruster->GetParameterID("ThrustScaleFactor");
+        theThruster->SetRealParameter(paramID, rvalue);
       }
       else
       {

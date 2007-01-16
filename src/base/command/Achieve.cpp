@@ -21,7 +21,7 @@
 #include "Achieve.hpp"
 /// @todo Rework command so it doesn't need the Moderator!!!
 #include "Moderator.hpp" 
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //#define DEBUG_ACHIEVE_PARSE 1
 //#define DEBUG_ACHIEVE_INIT 1
@@ -727,7 +727,7 @@ bool Achieve::ConstructGoal(const char* str)
    
    Real rval = 54321.12345;
    // check to see if it is a number first
-   if (GmatStringUtil::ToDouble(str, &rval))
+   if (GmatStringUtil::ToReal(str, &rval))
       return false;
    
    // Skip white space
@@ -852,7 +852,7 @@ bool Achieve::ConstructGoal(const char* str)
       }
    }
 
-   if (GmatStringUtil::ToDouble(achieveName, &rval))
+   if (GmatStringUtil::ToReal(achieveName, &rval))
    {
       #ifdef DEBUG_ACHIEVE_PARSE
       MessageInterface::ShowMessage
@@ -899,7 +899,7 @@ bool Achieve::InterpretParameter(const std::string text,
    
    Real rval = 54321.12345;
    // check to see if it is a number first
-   if (GmatStringUtil::ToDouble(text, &rval))
+   if (GmatStringUtil::ToReal(text, &rval))
       return true;
    
    Integer start = 0, dotLoc = text.find(".", 0);

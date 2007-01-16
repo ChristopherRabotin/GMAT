@@ -14,7 +14,7 @@
 
 #include "FiniteBurnSetupPanel.hpp"
 #include "MessageInterface.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 
 //#define DEBUG_FINITEBURN_PANEL 1
 
@@ -391,7 +391,7 @@ void FiniteBurnSetupPanel::SaveData()
       inputString = scaleTextCtrl->GetValue();      
 
       // check to see if input is a real
-      if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
+      if ( (GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue > 0.0) )
       {  
          id = theBurn->GetParameterID("BurnScaleFactor");
          theBurn->SetRealParameter(id, rvalue);

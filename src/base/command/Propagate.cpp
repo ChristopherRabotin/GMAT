@@ -3070,7 +3070,7 @@ std::string Propagate::CreateParameter(const std::string &name)
    std::string str = name;
    Real rval;
 
-   if (GmatStringUtil::ToDouble(str, &rval))
+   if (GmatStringUtil::ToReal(str, &rval))
        return str;
 
    Moderator *theModerator = Moderator::Instance();
