@@ -9,9 +9,8 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: Rodger Abel, Wendy Shoan
-// Created: 1995/07/18 for GSS project (originally KeplerianElements)
-// Modified: - See Keplerian.hpp
+// Author: Linda Jun (NASA/GSFC)
+// Created: 2006/12/28
 //
 /**
  * Defines KeplerianElement class;  Performs conversions between mean, true and
@@ -21,13 +20,19 @@
 #include <iostream>
 #include <sstream>
 #include "gmatdefs.hpp"
-#include "RealUtilities.hpp" // for PI, TWO_PI, Sqrt()
-#include "Cartesian.hpp"
-#include "EphemerisUtil.hpp"
+#include "RealUtilities.hpp"    // for PI, TWO_PI, Sqrt()
 #include "Keplerian.hpp"
 #include "Rvector.hpp"
+#include "UtilityException.hpp"
+#include "OrbitTypes.hpp"        // for KEP_TOL, KEP_ZERO_TOL
+#include "CoordUtil.hpp"         // for KeplerianToCartesian()
+#include "MessageInterface.hpp"
+
+//#define DEBUG_KEPLERIAN 1
+//#define DEBUG_ANOMALY 1
 
 using namespace GmatMathUtil;
+
 
 //---------------------------------
 // static data
@@ -39,7 +44,7 @@ const std::string Keplerian::DATA_DESCRIPTIONS[NUM_DATA] =
    "Inclination",
    "RA of Ascending Node",
    "Argument of Periapsis",
-   "Mean Anomally"
+   "True Anomally"
 };
 
 //---------------------------------
@@ -54,32 +59,48 @@ Keplerian::Keplerian()
 }
 
 //------------------------------------------------------------------------------
-// Keplerian::Keplerian(Real a, Real e, Radians i,
-//                      Radians raan, Radians aop, Radians m)
+// Keplerian::Keplerian(Real sma, Real ecc, Radians inc,
+//                      Radians raan, Radians aop, Radians ta)
 //------------------------------------------------------------------------------
-Keplerian::Keplerian(Real a, Real e, Radians i,
-                     Radians raan, Radians aop, Radians ma)
+/*
+ * Constructor with values
+ *
+ * @param  sma   Semimajor axis in km
+ * @param  ecc   Eccentricity
+ * @param  inc   Inclination in radians
+ * @param  raan  Right ascension of ascending node in radians
+ * @param  aop   Argument of periapsis in radians
+ * @param  ta    True anomaly in radians
+ */
+//------------------------------------------------------------------------------
+Keplerian::Keplerian(Real sma, Real ecc, Radians inc,
+                     Radians raan, Radians aop, Radians ta)
    :
-   semimajorAxisD(a),
-   eccentricityD(e),
-   inclinationD(i),
-   RAAscendingNodeD(raan),
-   argumentOfPeriapsisD(aop),
-   meanAnomalyD(ma)
+   mSemimajorAxis(sma),
+   mEccentricity(ecc),
+   mInclination(inc),
+   mRaOfAscendingNode(raan),
+   mArgOfPeriapsis(aop),
+   mTrueAnomaly(ta)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // Keplerian::Keplerian(const Keplerian &keplerian)
 //------------------------------------------------------------------------------
+/*
+ * Copy Constructor
+ */
+//------------------------------------------------------------------------------
 Keplerian::Keplerian(const Keplerian &keplerian)
    :
-   semimajorAxisD(keplerian.semimajorAxisD),
-   eccentricityD(keplerian.eccentricityD),
-   inclinationD(keplerian.inclinationD),
-   RAAscendingNodeD(keplerian.RAAscendingNodeD),
-   argumentOfPeriapsisD(keplerian.argumentOfPeriapsisD),
-   meanAnomalyD(keplerian.meanAnomalyD)
+   mSemimajorAxis(keplerian.mSemimajorAxis),
+   mEccentricity(keplerian.mEccentricity),
+   mInclination(keplerian.mInclination),
+   mRaOfAscendingNode(keplerian.mRaOfAscendingNode),
+   mArgOfPeriapsis(keplerian.mArgOfPeriapsis),
+   mTrueAnomaly(keplerian.mTrueAnomaly)
 {
 }
 
@@ -90,12 +111,12 @@ const Keplerian& Keplerian::operator=(const Keplerian &keplerian)
 {
    if (this != &keplerian)
    {
-      semimajorAxisD       = keplerian.semimajorAxisD;
-      eccentricityD        = keplerian.eccentricityD;
-      inclinationD         = keplerian.inclinationD;
-      RAAscendingNodeD     = keplerian.RAAscendingNodeD;
-      argumentOfPeriapsisD = keplerian.argumentOfPeriapsisD;
-      meanAnomalyD         = keplerian.meanAnomalyD;
+      mSemimajorAxis       = keplerian.mSemimajorAxis;
+      mEccentricity        = keplerian.mEccentricity;
+      mInclination         = keplerian.mInclination;
+      mRaOfAscendingNode   = keplerian.mRaOfAscendingNode;
+      mArgOfPeriapsis      = keplerian.mArgOfPeriapsis;
+      mTrueAnomaly         = keplerian.mTrueAnomaly;
    }
    return *this;
 }
@@ -112,7 +133,7 @@ Keplerian::~Keplerian()
 //------------------------------------------------------------------------------
 Real Keplerian::GetSemimajorAxis() const
 {
-   return semimajorAxisD;
+   return mSemimajorAxis;
 }
 
 //------------------------------------------------------------------------------
@@ -120,7 +141,7 @@ Real Keplerian::GetSemimajorAxis() const
 //------------------------------------------------------------------------------
 Real Keplerian::GetEccentricity() const
 {
-   return eccentricityD;
+   return mEccentricity;
 }
 
 //------------------------------------------------------------------------------
@@ -128,7 +149,7 @@ Real Keplerian::GetEccentricity() const
 //------------------------------------------------------------------------------
 Radians Keplerian::GetInclination() const
 {
-   return inclinationD;
+   return mInclination;
 }
 
 //------------------------------------------------------------------------------
@@ -136,7 +157,7 @@ Radians Keplerian::GetInclination() const
 //------------------------------------------------------------------------------
 Radians Keplerian::GetRAAscendingNode() const
 {
-   return RAAscendingNodeD;
+   return mRaOfAscendingNode;
 }
 
 //------------------------------------------------------------------------------
@@ -144,7 +165,7 @@ Radians Keplerian::GetRAAscendingNode() const
 //------------------------------------------------------------------------------
 Radians Keplerian:: GetArgumentOfPeriapsis() const
 {
-   return argumentOfPeriapsisD;
+   return mArgOfPeriapsis;
 }
 
 //------------------------------------------------------------------------------
@@ -152,7 +173,7 @@ Radians Keplerian:: GetArgumentOfPeriapsis() const
 //------------------------------------------------------------------------------
 Radians Keplerian::GetMeanAnomaly() const
 {
-   return meanAnomalyD;
+   return 0.0;
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +181,7 @@ Radians Keplerian::GetMeanAnomaly() const
 //------------------------------------------------------------------------------
 Radians Keplerian::GetTrueAnomaly() const
 {
-    return MeanToTrueAnomaly(meanAnomalyD, eccentricityD);
+   return mTrueAnomaly;
 }
 
 //------------------------------------------------------------------------------
@@ -168,7 +189,7 @@ Radians Keplerian::GetTrueAnomaly() const
 //------------------------------------------------------------------------------
 void Keplerian::SetSemimajorAxis(Real a)
 {
-    semimajorAxisD = a;
+   mSemimajorAxis = a;
 }
 
 //------------------------------------------------------------------------------
@@ -176,7 +197,7 @@ void Keplerian::SetSemimajorAxis(Real a)
 //------------------------------------------------------------------------------
 void Keplerian::SetEccentricity(Real e)
 {
-    eccentricityD = e;
+   mEccentricity = e;
 }
 
 //------------------------------------------------------------------------------
@@ -184,7 +205,7 @@ void Keplerian::SetEccentricity(Real e)
 //------------------------------------------------------------------------------
 void Keplerian::SetInclination(Radians i)
 {
-    inclinationD = i;
+   mInclination = i;
 }
 
 //------------------------------------------------------------------------------
@@ -192,7 +213,7 @@ void Keplerian::SetInclination(Radians i)
 //------------------------------------------------------------------------------
 void Keplerian::SetRAAscendingNode(Radians raan)
 {
-    RAAscendingNodeD = raan;
+   mRaOfAscendingNode = raan;
 }
 
 //------------------------------------------------------------------------------
@@ -200,7 +221,7 @@ void Keplerian::SetRAAscendingNode(Radians raan)
 //------------------------------------------------------------------------------
 void Keplerian::SetArgumentOfPeriapsis(Radians aop)
 {
-    argumentOfPeriapsisD = aop;
+   mArgOfPeriapsis = aop;
 }
 
 //------------------------------------------------------------------------------
@@ -208,7 +229,7 @@ void Keplerian::SetArgumentOfPeriapsis(Radians aop)
 //------------------------------------------------------------------------------
 void Keplerian::SetMeanAnomaly(Radians ma)
 {
-    meanAnomalyD = ma;
+   mMeanAnomaly = ma;
 }
 
 //------------------------------------------------------------------------------
@@ -216,7 +237,7 @@ void Keplerian::SetMeanAnomaly(Radians ma)
 //------------------------------------------------------------------------------
 void Keplerian::SetTrueAnomaly(Radians ta)
 {
-    meanAnomalyD = TrueToMeanAnomaly(ta, eccentricityD);
+   mTrueAnomaly = ta;
 }
 
 //------------------------------------------------------------------------------
@@ -226,242 +247,12 @@ void Keplerian::SetTrueAnomaly(Radians ta)
 void Keplerian::SetAll(Real a, Real e, Radians i, Radians raan,
                        Radians aop, Radians ma)
 {
-   semimajorAxisD = a;
-   eccentricityD = e;
-   inclinationD = i;
-   RAAscendingNodeD = raan;
-   argumentOfPeriapsisD = aop;
-   meanAnomalyD = ma;
-}
-
-//------------------------------------------------------------------------------
-// Radians MeanToEccentricAnomaly(Radians meanAnomaly, Real eccentricity) 
-//
-// Notes:  Mean Anomaly is converted to eccentric Anomaly using Miles
-//         Standish's formula; see GMAS subroutine description of
-//         Celem for more information.
-//------------------------------------------------------------------------------
-Radians MeanToEccentricAnomaly(Radians meanAnomaly, Real eccentricity) 
-{
-    // Local variables
-    Real d;
-    Radians e1 = 0.0;
-    Radians e2 = 0.0;
-    Radians f;
-
-    // Return value      
-    Radians eccAnomaly;
-
-    if (IsEqual(eccentricity, 0.0))
-    {
-        eccAnomaly = meanAnomaly;
-    }
-    else
-    {
-        e1 = meanAnomaly;
-  
-        for (int j = 0; j < EphemerisUtil::MAX_ITERATIONS; j++)
-        {
-            f  = e1 - Radians(eccentricity * Sin(e1)) - meanAnomaly;
-            d  = 1.0 - eccentricity * Cos(e1 - 0.5 * f);
-            e2 = e1 - (f / Radians(d));
-
-            if (Abs(e1 - e2) < EphemerisUtil::KEPLER_TOLERANCE)
-            {
-                eccAnomaly = e2;
-
-                if (eccAnomaly < 0.0)
-                {
-                    eccAnomaly += TWO_PI;
-                }
-                return eccAnomaly;
-             }
-             else
-             { 
-                 e1 = e2;
-             }
-        }  // end for loop
-
-        // throw the exception, since conversion was not met within
-        // MAX_ITERATIONS  
-        throw EphemerisUtil::ToleranceNotMet();
-    }
-    return eccAnomaly;
-}
-
-//------------------------------------------------------------------------------
-// Radians TrueToEccentricAnomaly(Radians trueAnomaly,
-//                                Real eccentricity) 
-//
-// Notes: for information on how eccentricAnomaly is computed, see Methods 
-//        of Orbit Determination by Pedro Ramon Escobal, pp. 118 - 119.
-//------------------------------------------------------------------------------
-Radians TrueToEccentricAnomaly(Radians trueAnomaly, Real eccentricity) 
-{
-    // Local variables
-    const Real cosTrueAnomaly = Cos(trueAnomaly);
-    const Real sinTrueAnomaly = Sin(trueAnomaly);
-    const Real denom = 1.0 + eccentricity * cosTrueAnomaly;
-    const Real cosEccAnomaly = (eccentricity + cosTrueAnomaly) / denom;
-    const Real sinEccAnomaly = (Sqrt(1.0 - eccentricity * 
-                                     eccentricity) * sinTrueAnomaly) / denom;
-    Radians eccAnomaly;
-
-    eccAnomaly = Mod(ATan(sinEccAnomaly,
-                          cosEccAnomaly),
-                          TWO_PI);
-
-    // Make eccentric Anomaly a positive angle (0 - 2 pi)
-    if (eccAnomaly < 0.0)
-    {
-        eccAnomaly += TWO_PI;
-    }
-    return eccAnomaly;
-}
-
-//------------------------------------------------------------------------------
-// Radians EccentricToMeanAnomaly(Radians eccentricAnomaly,
-//                                Real eccentricity)
-//------------------------------------------------------------------------------
-Radians EccentricToMeanAnomaly(Radians eccentricAnomaly,
-                               Real eccentricity)
-{
-    return (eccentricAnomaly -
-                   Radians(eccentricity * Sin(eccentricAnomaly)));
-}
-
-//------------------------------------------------------------------------------
-// Radians TrueToMeanAnomaly(Radians trueAnomaly, Real eccentricity)
-//------------------------------------------------------------------------------
-Radians TrueToMeanAnomaly(Radians trueAnomaly, Real eccentricity)
-{
-
-    // Compute eccentric Anomaly
-    if (IsEqual(eccentricity, 0.0))
-    {
-        return trueAnomaly;
-    } 
-    else
-    {
-        Radians eccentricAnomaly;
-        eccentricAnomaly = TrueToEccentricAnomaly(trueAnomaly,
-                                                  eccentricity);
-
-        return EccentricToMeanAnomaly(eccentricAnomaly,
-                                      eccentricity);
-    }
-}
-
-//------------------------------------------------------------------------------
-// Radians EccentricToTrueAnomaly(Radians eccentricAnomaly,
-//                                Real eccentricity)
-//
-// Notes:  for information on how true anomaly is computed, see Methods
-//         of Orbit Determination by Pedro Ramon Escobal, pp. 118 - 119
-//------------------------------------------------------------------------------
-Radians EccentricToTrueAnomaly(Radians eccentricAnomaly,
-                               Real eccentricity)
-{
-    // Local variables
-    const Real cosEccAnomaly = Cos(eccentricAnomaly);
-    const Real sinEccAnomaly = Sin(eccentricAnomaly);
-    const Real denom = 1.0 - eccentricity * cosEccAnomaly;
-    const Real cosTrueAnomaly = (cosEccAnomaly - eccentricity) / denom;
-    const Real sinTrueAnomaly = (Sqrt(1.0 - eccentricity * 
-                                eccentricity) * sinEccAnomaly) / denom;
-  
-    // Return value
-    Radians trueAnomaly;
-
-    if (IsEqual(eccentricity, 0.0))
-    {
-        trueAnomaly = eccentricAnomaly;
-    }
-    else
-    {
-        trueAnomaly = ATan(sinTrueAnomaly,
-                           cosTrueAnomaly);
-    }
-
-    // Make TrueAnomaly a positive angle (0 - 2 pi)
-    if (trueAnomaly < 0.0)
-    {
-        trueAnomaly += TWO_PI;
-    }
-    return trueAnomaly;
-} 
-
-//------------------------------------------------------------------------------
-// Radians MeanToTrueAnomaly(Radians meanAnomaly, Real eccentricity)
-//------------------------------------------------------------------------------
-Radians MeanToTrueAnomaly(Radians meanAnomaly, Real eccentricity)
-{
-    // Compute eccentric Anomaly
-    if (IsEqual(eccentricity, 0.0))
-    {
-        return meanAnomaly;
-    }
-    else
-    {
-        Radians eccentricAnomaly;
-        eccentricAnomaly = MeanToEccentricAnomaly(
-                           meanAnomaly, eccentricity);
-
-        return EccentricToTrueAnomaly(
-               eccentricAnomaly,
-               eccentricity);
-    }
-}
-
-//------------------------------------------------------------------------------
-// Keplerian ToKeplerian(const Cartesian &c, Real localMu)
-//------------------------------------------------------------------------------
-Keplerian ToKeplerian(const Cartesian &c, Real localMu)
-{
-    // Return value   
-    Keplerian result;
-
-    ToKeplerian(c.GetPosition(), c.GetVelocity(), localMu, 
-                result.semimajorAxisD,
-                result.eccentricityD,
-                result.inclinationD,
-                result.RAAscendingNodeD,
-                result.argumentOfPeriapsisD,
-                result.meanAnomalyD);
-
-    return result;
-}
-
-//------------------------------------------------------------------------------
-// std::ostream& operator<<(std::ostream& output, Keplerian& k)
-//------------------------------------------------------------------------------
-std::ostream& operator<<(std::ostream& output, Keplerian& k)
-{
-    Rvector v(6, k.semimajorAxisD, k.eccentricityD,
-              k.inclinationD,   k.RAAscendingNodeD,
-              k.argumentOfPeriapsisD, k.meanAnomalyD);
-
-    output << v << std::endl;
-
-    return output;
-}
-
-//------------------------------------------------------------------------------
-// std::istream& operator>>(std::istream& input, Keplerian& k)
-//------------------------------------------------------------------------------
-std::istream& operator>>(std::istream& input, Keplerian& k)
-{
-    Rvector ke(6, 0.0);
-
-    input >> ke;
-    k.semimajorAxisD       = ke[0];
-    k.eccentricityD        = ke[1];
-    k.inclinationD         = ke[2];
-    k.RAAscendingNodeD     = ke[3];
-    k.argumentOfPeriapsisD = ke[4];
-    k.meanAnomalyD         = ke[5];
-
-    return input;
+   mSemimajorAxis = a;
+   mEccentricity = e;
+   mInclination = i;
+   mRaOfAscendingNode = raan;
+   mArgOfPeriapsis = aop;
+   mTrueAnomaly = ma;
 }
 
 //------------------------------------------------------------------------------
@@ -472,6 +263,7 @@ Integer Keplerian::GetNumData() const
    return NUM_DATA;
 }
 
+
 //------------------------------------------------------------------------------
 // const std::string* GetDataDescriptions() const
 //------------------------------------------------------------------------------
@@ -480,6 +272,7 @@ const std::string* Keplerian::GetDataDescriptions() const
    return DATA_DESCRIPTIONS;
 }
 
+
 //------------------------------------------------------------------------------
 // std::string* ToValueStrings()
 //------------------------------------------------------------------------------
@@ -487,29 +280,920 @@ std::string* Keplerian::ToValueStrings()
 {
    std::stringstream ss("");
 
-   ss << semimajorAxisD;
+   ss << mSemimajorAxis;
    stringValues[0] = ss.str();
    
    ss.str("");
-   ss << eccentricityD;
+   ss << mEccentricity;
    stringValues[1] = ss.str();
    
    ss.str("");
-   ss << inclinationD;
+   ss << mInclination;
    stringValues[2] = ss.str();
    
    ss.str("");
-   ss << RAAscendingNodeD;
+   ss << mRaOfAscendingNode;
    stringValues[3] = ss.str();
    
    ss.str("");
-   ss << argumentOfPeriapsisD;
+   ss << mArgOfPeriapsis;
    stringValues[4] = ss.str();
    
    ss.str("");
-   ss << meanAnomalyD;
+   ss << mTrueAnomaly;
    stringValues[5] = ss.str();
 
    return stringValues;
 }
+
+
+//---------------------------------
+// static functions
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// static Rvector6 KeplerianToCartesian(Real mu, const Rvector6 &state,
+//                                      const std::string &anomalyType = "TA")
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::KeplerianToCartesian(Real mu, const Rvector6 &state,
+                                         const std::string &anomalyType)
+{
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   return CoordUtil::KeplerianToCartesian(state, mu, anomaly);
+}
+
+
+//------------------------------------------------------------------------------
+// Real CartesianToSMA(Real mu, const Rvector3 &pos,
+//                     const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToSMA(Real mu, const Rvector3 &pos,
+                               const Rvector3 &vel)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToSMA() ");
+   #endif
+   
+   Real rMag = pos.GetMagnitude(); // ||r||
+   Real vMag = vel.GetMagnitude(); // ||v||
+   
+   Real zeta = 0.5*(vMag*vMag) - mu/rMag;
+   
+   // check if the orbit is near parabolic
+   Real ecc = CartesianToECC(mu, pos, vel);
+   if ((Abs(1.0 - ecc)) <= GmatOrbit::KEP_ZERO_TOL)
+   {
+      Rvector3 r = pos;
+      Rvector3 v = vel;
+      
+      MessageInterface::ShowMessage
+         ("CartesianToSMA() divide-by-zero occurred. pos: " +
+          r.ToString() + " vel: " + v.ToString());
+      
+      throw UtilityException
+         ("GMAT does not support parabolic orbits in conversion \n"
+          "from Cartesian to Keplerian state\n");      
+   }
+   
+   Real sma = -mu/(2*zeta);
+      
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", sma);
+   #endif
+   
+   return sma;
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector3 CartesianToEccVector(Real mu, const Rvector3 &pos,
+//                                      const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Rvector3 Keplerian::CartesianToEccVector(Real mu, const Rvector3 &pos,
+                                         const Rvector3 &vel)
+{
+   Real rMag = pos.GetMagnitude();
+   Real vMag = vel.GetMagnitude();
+   
+   Rvector3 eVec = (1/mu)*((vMag*vMag - mu/rMag)*pos - (pos*vel)*vel);
+   
+   return eVec;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToECC(Real mu, const Rvector3 &pos,
+//                            const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToECC(Real mu, const Rvector3 &pos,
+                               const Rvector3 &vel)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToECC() ");
+   #endif
+   
+   Rvector3 eVec = CartesianToEccVector(mu, pos, vel);   
+   Real eMag = eVec.GetMagnitude(); // ||e||
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", eMag);
+   #endif
+   
+   return eMag;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToINC(Real mu, const Rvector3 &pos,
+//                            const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToINC(Real mu, const Rvector3 &pos,
+                               const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToINC() ");
+   #endif
+   
+   // check if the orbit is near parabolic
+   Real eMag = CartesianToECC(mu, pos, vel);
+   if ((Abs(1.0 - eMag)) <= GmatOrbit::KEP_ZERO_TOL)
+   {
+      Rvector3 r = pos;
+      Rvector3 v = vel;
+      
+      MessageInterface::ShowMessage
+         ("CartesianToSMA() divide-by-zero occurred. pos: " +
+          r.ToString() + " vel: " + v.ToString());
+      
+      throw UtilityException
+         ("GMAT does not support parabolic orbits in conversion \n"
+          "from Cartesian to Keplerian state\n");      
+   }
+   
+   Rvector3 hVec = Cross(pos, vel);
+   Real hMag = hVec.GetMagnitude();
+   
+   Real inc = ACos(hVec[2] / hMag);
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", inc);
+   #endif
+   
+   if (inRadian)
+      return inc;
+   else
+      return inc * DEG_PER_RAD;
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector3 CartesianToDirOfLineOfNode(const Rvector3 &pos, const Rvector3 &vel)
+//------------------------------------------------------------------------------
+Rvector3 Keplerian::CartesianToDirOfLineOfNode(const Rvector3 &pos, const Rvector3 &vel)
+{
+   Rvector3 hVec = Cross(pos, vel);
+   Rvector3 nVec = Cross(Rvector3(0, 0, 1), hVec);
+   return nVec;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToRAAN(Real mu, const Rvector3 &pos,
+//                             const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToRAAN(Real mu, const Rvector3 &pos,
+                                const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToRAAN() ");
+   #endif
+   
+   Real ecc = CartesianToECC(mu, pos, vel);
+   Real inc = CartesianToINC(mu, pos, vel, true);
+   Real raan = 0.0;
+   
+   // Case 1:  Non-circular, Inclined Orbit
+   if ((ecc >= GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {
+      Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
+      Real nMag = nVec.GetMagnitude();
+      raan = ACos(nVec[0] / nMag);
+      
+      // Fix quadrant
+      if (nVec[1] < 0.0)
+         raan = TWO_PI - raan;   
+   }
+   // Case 2: Non-circular, Equatorial Orbit
+   else if ((ecc >= GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      raan = 0.0;
+   }
+   // Case 3: Circular, Inclined Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {
+      Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
+      Real nMag = nVec.GetMagnitude();
+      raan = ACos(nVec[0] / nMag);
+      
+      // Fix quadrant
+      if (nVec[1] < 0.0)
+         raan = TWO_PI - raan;   
+   }
+   // Case 4: Circular, Equatorial Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      raan = 0.0;
+   }
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", raan);
+   #endif
+   
+   if (inRadian)
+      return raan;
+   else
+      return raan * DEG_PER_RAD;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToAOP(Real mu, const Rvector3 &pos,
+//                            const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToAOP(Real mu, const Rvector3 &pos,
+                               const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToAOP() ");
+   #endif
+   
+   Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
+   Real inc = CartesianToINC(mu, pos, vel, true);
+   Real ecc = eVec.GetMagnitude();
+   Real aop = 0.0;
+   
+   // Case 1:  Non-circular, Inclined Orbit
+   if ((ecc >= GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {
+      Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
+      Real nMag = nVec.GetMagnitude();
+      aop = ACos((nVec*eVec) / (nMag*ecc));
+      
+      // Fix quadrant
+      if (eVec[2] < 0.0)
+         aop = TWO_PI - aop;
+   }
+   // Case 2: Non-circular, Equatorial Orbit
+   else if ((ecc >= GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      aop = ACos(eVec[0] / ecc);
+      
+      // Fix quadrant
+      if (eVec[1] < 0.0)
+         aop = TWO_PI - aop;
+   }
+   // Case 3: Circular, Inclined Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {
+      aop = 0.0;
+   }
+   // Case 4: Circular, Equatorial Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      aop = 0.0;
+   }
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", aop);
+   #endif
+   
+   if (inRadian)
+      return aop;
+   else
+      return aop * DEG_PER_RAD;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToTA(Real mu, const Rvector3 &pos,
+//                           const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
+                              const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToTA() ");
+   #endif
+   
+   Rvector3 eVec = CartesianToEccVector(mu, pos, vel);
+   Real inc = CartesianToINC(mu, pos, vel, true);
+   Real ecc = eVec.GetMagnitude();
+   Real rMag = pos.GetMagnitude();
+   Real ta = 0.0;
+   
+   // Case 1:  Non-circular, Inclined Orbit
+   if ((ecc >= GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {      
+      #if DEBUG_KEPLERIAN
+      MessageInterface::ShowMessage("Case 1:  Non-circular, Inclined Orbit\n");
+      #endif
+      
+      ta = ACos((eVec*pos) / (ecc*rMag));
+      
+      // Fix quadrant
+      if ((pos*vel) < 0.0)
+         ta = TWO_PI - ta;
+   }
+   // Case 2: Non-circular, Equatorial Orbit
+   else if ((ecc >= GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      #if DEBUG_KEPLERIAN
+      MessageInterface::ShowMessage("Case 2: Non-circular, Equatorial Orbit\n");
+      #endif
+      
+      ta = ACos((eVec*pos) / (ecc*rMag));
+      
+      // Fix quadrant
+      if ((pos*vel) < 0.0)
+         ta = TWO_PI - ta;
+   }
+   // Case 3: Circular, Inclined Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
+   {
+      #if DEBUG_KEPLERIAN
+      MessageInterface::ShowMessage("Case 3: Circular, Inclined Orbit\n");
+      #endif
+      
+      Rvector3 nVec =  CartesianToDirOfLineOfNode(pos, vel);
+      Real nMag = nVec.GetMagnitude();
+      ta = ACos((nVec*pos) / (nMag*rMag));
+      
+      // Fix quadrant
+      if ((pos[2]) < 0.0)
+         ta = TWO_PI - ta;
+   }
+   // Case 4: Circular, Equatorial Orbit
+   else if ((ecc < GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
+   {
+      #if DEBUG_KEPLERIAN
+      MessageInterface::ShowMessage("Case 4: Circular, Equatorial Orbit\n");
+      #endif
+      
+      ta = ACos(pos[0] / rMag);
+      
+      // Fix quadrant
+      if ((pos[1]) < 0.0)
+         ta = TWO_PI - ta;
+   }
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", ta);
+   #endif
+   
+   if (inRadian)
+      return ta;
+   else
+      return ta * DEG_PER_RAD;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToEA(Real mu, const Rvector3 &pos,
+//                           const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToEA(Real mu, const Rvector3 &pos,
+                              const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToEA() ");
+   #endif
+   
+   Real ta = CartesianToTA(mu, pos, vel, true);
+   Real ecc = CartesianToECC(mu, pos, vel);
+   Real ea = TrueToEccentricAnomaly(ta, ecc);
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", ea);
+   #endif
+   
+   if (inRadian)
+      return ea;
+   else
+      return ea * DEG_PER_RAD;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToHA(Real mu, const Rvector3 &pos,
+//                           const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToHA(Real mu, const Rvector3 &pos,
+                              const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToHA() ");
+   #endif
+   
+   Real ta = CartesianToTA(mu, pos, vel, true);
+   Real ecc = CartesianToECC(mu, pos, vel);
+   Real ha = TrueToHyperbolicAnomaly(ta, ecc);
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %f\n", ha);
+   #endif
+   
+   if (inRadian)
+      return ha;
+   else
+      return ha * DEG_PER_RAD;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// static Real CartesianToMA(Real mu, const Rvector3 &pos,
+//                           const Rvector3 &vel, bool inRadian = false)
+//------------------------------------------------------------------------------
+Real Keplerian::CartesianToMA(Real mu, const Rvector3 &pos,
+                              const Rvector3 &vel, bool inRadian)
+{
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("CartesianToMA() ");
+   #endif
+   
+   Real ta = CartesianToTA(mu, pos, vel, true);
+   Real ecc = CartesianToECC(mu, pos, vel);   
+   Real ma = TrueToMeanAnomaly(ta, ecc);
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("returning %f\n", ma);
+   #endif
+      
+   if (inRadian)
+      return ma;
+   else
+      return ma * DEG_PER_RAD;
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector6 CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
+//                                            const Rvector3 &vel)
+//------------------------------------------------------------------------------
+/**
+ * CartesianTos angular momentum, its magnitude, and other related data.
+ *
+ * @param <pos> input position vector
+ * @param <vel> input velocity vector
+ *
+ * @return [0] Angular momentum x unit vector
+ *         [1] Angular momentum y unit vector
+ *         [2] Angular momentum z unit vector
+ *         [3] Angular momentum magnitude
+ *         [4] velocity magnitude squared
+ *         [5] Orbit parameter
+ */
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::CartesianToAngularMomentum(Real mu, const Rvector3 &pos,
+                                               const Rvector3 &vel)
+{   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToAngularMomentum() ");
+   #endif
+   
+   Real vMag = pos.GetMagnitude();
+   Real vMagSq = vMag*vMag;
+   
+   Rvector3 hVec = Cross(pos, vel);
+   Real hMag = Sqrt(hVec * hVec);
+   Real orbParam = (hMag*hMag) / mu;
+   hVec.Normalize();
+   
+   Rvector6 h(hVec[0], hVec[1], hVec[2], hMag, vMagSq, orbParam);
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %s\n", h.ToString().c_str());
+   #endif
+   
+   return h;
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector6 CartesianToKeplerian(Real mu, const Rvector3 &pos,
+//                                      const Rvector3 &vel,
+//                                      Anomaly::AnomalyType anomalyType)
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector3 &pos,
+                                         const Rvector3 &vel,
+                                         Anomaly::AnomalyType anomalyType)
+{
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("CartesianToKeplerian() ");
+   #endif
+   
+   Real sma = CartesianToSMA(mu, pos, vel);
+   Real ecc = CartesianToECC(mu, pos, vel);
+   Real inc = CartesianToINC(mu, pos, vel);
+   Real raan = CartesianToRAAN(mu, pos, vel);
+   Real aop = CartesianToAOP(mu, pos, vel);
+   Real ta = CartesianToTA(mu, pos, vel);
+   
+   Real anomaly = ta;
+   
+   if (anomalyType != Anomaly::TA)
+   {
+      Anomaly temp;
+      temp.Set(sma, ecc, ta, Anomaly::TA);
+      anomaly = temp.GetValue(anomalyType);
+   }
+   
+   Rvector6 kep(sma, ecc, inc, raan, aop, anomaly);
+   
+   #if DEBUG_KEPLERIAN
+   MessageInterface::ShowMessage("returning %s\n", kep.ToString().c_str());
+   #endif
+   
+   return kep;
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector6 CartesianToKeplerian(Real mu, const Rvector3 &pos,
+//                                      const Rvector3 &vel,
+//                                      const std::string &anomalyType = "TA")
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector3 &pos,
+                                         const Rvector3 &vel,
+                                         const std::string &anomalyType)
+{
+   Anomaly::AnomalyType type = Anomaly::GetAnomalyType(anomalyType);
+   return CartesianToKeplerian(mu, pos, vel, type);
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector6 CartesianToKeplerian(Real mu, const Rvector6 &state
+//                                      Anomaly::AnomalyType anomalyType)
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector6 &state,
+                                         Anomaly::AnomalyType anomalyType)
+{
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);
+   return CartesianToKeplerian(mu, pos, vel, anomalyType);
+}
+
+
+//------------------------------------------------------------------------------
+// static Rvector6 CartesianToKeplerian(Real mu, const Rvector6 &state
+//                                      const std::string &anomalyType = "TA")
+//------------------------------------------------------------------------------
+Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector6 &state,
+                                         const std::string &anomalyType)
+{
+   Rvector3 pos(state[0], state[1], state[2]);
+   Rvector3 vel(state[3], state[4], state[5]);
+   return CartesianToKeplerian(mu, pos, vel, anomalyType);
+}
+
+
+//------------------------------------------------------------------------------
+// static Radians TrueToMeanAnomaly(Radians ta, Real ecc)
+//------------------------------------------------------------------------------
+/*
+ * Computes mean anomaly from true anomaly
+ */
+//------------------------------------------------------------------------------
+Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
+{
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("TrueToMeanAnomaly() ta=%f, ecc=%f\n", ta, ecc);
+   #endif
+   
+   Real ma = 0.0;
+   
+   if (ecc < (1.0 - GmatOrbit::KEP_ANOMALY_TOL))
+   {
+      Real ea = TrueToEccentricAnomaly(ta, ecc);
+      ma = ea - ecc * Sin(ea);
+   }
+   else if (ecc > (1.0 + GmatOrbit::KEP_ANOMALY_TOL))
+   {
+      Real ha = TrueToHyperbolicAnomaly(ta, ecc);
+      ma = ecc * Sinh(ha) - ha;
+   }
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("TrueToMeanAnomaly() returning %f\n", ma);
+   #endif
+   
+   if (ma < 0.0)
+      ma = ma + TWO_PI;
+   
+   return ma;
+}
+
+
+//------------------------------------------------------------------------------
+// static Radians TrueToEccentricAnomaly(Radians ta, Real ecc)
+//------------------------------------------------------------------------------
+Radians Keplerian::TrueToEccentricAnomaly(Radians ta, Real ecc)
+{
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("TrueToEccentricAnomaly() ta=%f, ecc=%f\n", ta, ecc);
+   #endif
+   
+   Real ea = 0.0;
+   
+   if (ecc <= (1.0 - GmatOrbit::KEP_ANOMALY_TOL))
+   {
+      Real cosTa = Cos(ta);
+      Real eccCosTa = ecc * cosTa;
+      Real sinEa = (Sqrt(1.0 - ecc*ecc) * Sin(ta)) / (1.0 + eccCosTa);
+      Real cosEa = (ecc + cosTa) / (1.0 + eccCosTa);
+      ea = ATan2(sinEa, cosEa);
+   }
+   
+   if (ea < 0.0)
+      ea = ea + TWO_PI;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("TrueToEccentricAnomaly() returning %f\n", ea);
+   #endif
+   
+   return ea;
+}
+
+
+//------------------------------------------------------------------------------
+// static Radians TrueToHyperbolicAnomaly(Radians ta, Real ecc)
+//------------------------------------------------------------------------------
+Radians Keplerian::TrueToHyperbolicAnomaly(Radians ta, Real ecc)
+{
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("TrueToHyperbolicAnomaly() ta=%f, ecc=%f\n", ta, ecc);
+   #endif
+   
+   Real ha = 0.0;
+   
+   if (ecc >= (1.0 + GmatOrbit::KEP_ANOMALY_TOL))
+   {
+      Real cosTa = Cos(ta);
+      Real eccCosTa = ecc * cosTa;
+      Real sinhHa = (Sin(ta) * Sqrt(ecc*ecc - 1.0)) / (1.0 + eccCosTa);
+      Real coshHa = (ecc + cosTa) / (1.0 + eccCosTa);
+      ha = ATanh(sinhHa / coshHa);
+   }
+   
+   if (ha < 0.0)
+      ha = ha + TWO_PI;
+   
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() returning %f\n", ha);
+   #endif
+   
+   return ha;
+}
+
+
+//------------------------------------------------------------------------------
+// static Real MeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol = 1.0e-08)
+//------------------------------------------------------------------------------
+Real Keplerian::MeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol)
+{
+   #if DEBUG_ANOMALY
+   MessageInterface::ShowMessage
+      ("MeanToTrueAnomaly() maInDeg=%f, ecc=%f\n", maInDeg, ecc);
+   #endif
+   
+   Real ta;
+   Integer iter;
+   Integer ret;
+   
+   ret = ComputeMeanToTrueAnomaly(maInDeg, ecc, tol, &ta, &iter);
+   
+   if (ret == 0)
+   {
+      #if DEBUG_ANOMALY
+      MessageInterface::ShowMessage("MeanToTrueAnomaly() returning %f\n", ta);
+      #endif
+      
+      return ta;
+   }
+   
+   throw UtilityException("MeanToTrueAnomaly() Error converting "
+                          " Mean Anomaly to True Anomaly\n");
+}
+
+
+//------------------------------------------------------------------------------
+// static Integer ComputeMeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol,
+//                                         Real *ta, Integer *iter)
+//------------------------------------------------------------------------------
+/*
+ * @param <ecc>  input eccentricity
+ * @param <maInDeg>   input elliptical, hyperbolic or mean anomaly in degrees
+ * @param <tol>  input tolerance for accuracy
+ * @param <ta>   output true anomaly in degrees
+ * @param <iter> output number of iterations
+ */
+//------------------------------------------------------------------------------
+Integer Keplerian::ComputeMeanToTrueAnomaly(Real maInDeg, Real ecc, Real tol,
+                                            Real *ta, Integer *iter)
+{
+   Real temp, temp2;
+   Real rm,   e,     e1,  e2,  c,  f,  f1,   f2,    g;
+   Real ztol = 1.0e-30;
+   int done;
+   
+   rm = DegToRad(Mod(maInDeg, 360.0));
+   *iter = 0;
+   
+   if (ecc <= 1.0)
+   {
+      //---------------------------------------------------------
+      // elliptical orbit
+      //---------------------------------------------------------
+      
+      e2 = rm + ecc * Sin(rm);
+      done = 0;
+
+      while (!done)
+      {
+         *iter = *iter + 1;
+         temp = 1.0 - ecc * Cos(e2);
+
+         if (Abs(temp) < ztol)
+            return (3);
+
+         e1 = e2 - (e2 - ecc * Sin(e2) - rm)/temp;
+
+         if (Abs(e2-e1) < tol)
+         {
+            done = 1;
+            e2 = e1;
+         }
+
+         if (!done)
+         {
+            *iter = *iter + 1;
+            temp = 1.0 - ecc * Cos(e1);
+
+            if (Abs(temp) < ztol)
+               return (4);
+
+            e2 = e1 - (e1 - ecc * Sin(e1) - rm)/temp;
+
+            if( Abs(e1-e2) < tol)
+               done = 1;
+         }
+      }
+
+      e = e2;
+
+      if (e < 0.0)
+         e = e + TWO_PI;
+
+      c = Abs(RadToDeg(e) - 180.0);
+      
+      if (c >= 1.0e-08) 
+      {
+         temp  = 1.0 - ecc;
+         
+         if (Abs(temp)< ztol)
+            return (5);
+         
+         temp2 = (1.0 + ecc)/temp;
+         
+         if (temp2 <0.0)
+            return (6);
+         
+         f = Sqrt(temp2);
+         g = Tan(e/2.0);
+         *ta = 2.0 * RadToDeg(ATan(f*g));
+         
+      }
+      else
+      {
+         *ta = RadToDeg(e);
+      }
+      
+      if( *ta < 0.0)
+         *ta = *ta + 360.0;
+      
+   }
+   else
+   {
+      //---------------------------------------------------------
+      // hyperbolic orbit
+      //---------------------------------------------------------
+      
+      if (rm > PI)
+         rm = rm - TWO_PI;
+      
+      f2 = ecc * Sinh(rm) - rm;
+      done = 0;
+      
+      while (!done)
+      {
+         *iter = *iter + 1;
+         temp = ecc * Cosh(f2) - 1.0;
+         
+         if (Abs(temp) < ztol)
+            return (7);
+         
+         f1 = f2 - (ecc * Sinh(f2) - f2 - rm) / temp;
+         
+         if (Abs(f2-f1) < tol)
+         {
+            done = 1;
+            f2 = f1;
+         } 
+         
+         if (!done)
+         {
+            *iter = *iter + 1; 
+            temp = ecc * Cosh(f1) - 1.0;
+
+            if (Abs(temp) < ztol)
+               return (8);
+            
+            f2 = f1 - (ecc * Sinh(f1) - f1 - rm) / temp;
+            
+            if ( Abs(f1-f2) < tol)
+               done = 1;
+         }
+         
+         if (*iter > 1000)
+         {
+            throw UtilityException
+               ("ComputeMeanToTrueAnomaly() "
+                "Caught in infinite loop numerical argument "
+                "out of domain for sinh() and cosh()\n");
+         }
+      }
+      
+      f = f2;
+      temp = ecc - 1.0;
+      
+      if (Abs(temp) < ztol)
+         return (9);
+      
+      temp2 = (ecc + 1.0) / temp;
+      
+      if (temp2 <0.0)
+         return (10);
+      
+      e = Sqrt(temp2);
+      g = Tanh(f/2.0);
+      *ta = 2.0 * RadToDeg(ATan(e*g));
+      
+      if (*ta < 0.0)
+         *ta = *ta + 360.0;
+   }
+   
+   return (0);
+   
+} // end ComputeMeanToTrueAnomaly()
+
+
+//------------------------------------------------------------------------------
+// friend std::ostream& operator<<(std::ostream& output, Keplerian& k)
+//------------------------------------------------------------------------------
+std::ostream& operator<<(std::ostream& output, Keplerian& k)
+{
+   Rvector v(6, k.mSemimajorAxis, k.mEccentricity,
+             k.mInclination,   k.mRaOfAscendingNode,
+             k.mArgOfPeriapsis, k.mTrueAnomaly);
+
+   output << v << std::endl;
+
+   return output;
+}
+
+
+//------------------------------------------------------------------------------
+// friend std::istream& operator>>(std::istream& input, Keplerian& k)
+//------------------------------------------------------------------------------
+std::istream& operator>>(std::istream& input, Keplerian& k)
+{
+   Rvector ke(6, 0.0);
+
+   input >> ke;
+   k.mSemimajorAxis      = ke[0];
+   k.mEccentricity       = ke[1];
+   k.mInclination        = ke[2];
+   k.mRaOfAscendingNode  = ke[3];
+   k.mArgOfPeriapsis     = ke[4];
+   k.mTrueAnomaly        = ke[5];
+
+   return input;
+}
+
 
