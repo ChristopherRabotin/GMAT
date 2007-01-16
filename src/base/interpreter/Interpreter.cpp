@@ -20,7 +20,7 @@
 #include "Moderator.hpp"
 #include "StringTokenizer.hpp"
 #include "ConditionalBranch.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 #include "Array.hpp"
 #include "MessageInterface.hpp"
 #include <sstream>         // for std::stringstream
@@ -1183,8 +1183,6 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
       return false;
    }
    
-   //loj: 12/07/06 This line is incorrtly parses For i=1:5
-   //std::string index = desc.substr(0, equalSign-1);
    std::string index = desc.substr(0, equalSign);
    index = GmatStringUtil::Trim(index);
    
@@ -1232,6 +1230,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    //}
    
    
+   // Set loop index varibale, if exist
    if (!SetCommandParameter(cmd, index, "For loop index", false, false))
       retval = false;
    
@@ -1246,6 +1245,11 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    // Set end varibale, if exist
    if (!SetCommandParameter(cmd, end, "For loop end index", true, true))
       retval = false;
+   
+   #if DEBUG_ASSEMBLE_FOR
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleForCommand() returning %d\n", retval);
+   #endif
    
    return retval;
 }
@@ -2026,7 +2030,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
 
       try
       {
-         if (GmatStringUtil::ToDouble(value, rval))
+         if (GmatStringUtil::ToReal(value, rval))
          {      
             #if DEBUG_SET
             MessageInterface::ShowMessage("   SetValueToObject() rval=%f\n", rval);
@@ -2608,7 +2612,7 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
    if (param == NULL)
       return false;
    
-   if (GmatStringUtil::ToDouble(value, rval))
+   if (GmatStringUtil::ToReal(value, rval))
    {
       #if DEBUG_SET
       MessageInterface::ShowMessage
@@ -2794,11 +2798,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    case Gmat::RVECTOR_TYPE:
       {
          Real rval;
-         if (GmatStringUtil::ToDouble(valueToUse, rval))
+         if (GmatStringUtil::ToReal(valueToUse, rval))
          {
             #if DEBUG_SET
             std::string rvalStr =
-               GmatStringUtil::ToString(rval, false, 17, 16);
+               GmatStringUtil::ToString(rval, false, false, 17, 16);
             MessageInterface::ShowMessage
                ("===> Calling SetRealParameter(%d, %s)\n", id, rvalStr.c_str());
             #endif
@@ -3512,7 +3516,7 @@ void Interpreter::HandleError(BaseException &e, bool writeLine, bool warning)
    {
       lineNumber = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
       currentLine = theReadWriter->GetCurrentLine();
-   
+      
       HandleErrorMessage(e, lineNumber, currentLine, writeLine, warning);
    }
    else
@@ -3543,7 +3547,7 @@ void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNu
    if (continueOnError)
    {
       errorList.push_back(msg);
-
+      
       #if DEBUG_SET
       MessageInterface::ShowMessage(msg + "\n");
       #endif
@@ -3695,7 +3699,7 @@ bool Interpreter::FinalPass()
                                     i->c_str());
       #endif
       obj = GetObject(*i);
-
+      
       // check System Parameters seperately since it follows certain naming convention
       // "owner.dep.type" where owner can be either Spacecraft of Burn for now
       
@@ -3752,7 +3756,7 @@ bool Interpreter::FinalPass()
          {
             // Check referenced SpacePoint used by configured objects
             refNameList = obj->GetRefObjectNameArray(Gmat::SPACE_POINT);
-               
+            
             for (UnsignedInt j = 0; j < refNameList.size(); j++)
             {
                refObj = GetObject(refNameList[j]);
@@ -3907,6 +3911,18 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
 //------------------------------------------------------------------------------
 // bool CheckUndefinedReference(GmatBase *obj, bool writeLine)
 //------------------------------------------------------------------------------
+/*
+ * This method checks if reference objects of input object exist. First it
+ * gets reference object type list by calling obj->GetRefObjectTypeArray() and
+ * then gets reference object name list by calling obj->GetRefObjectNameArray(reftype).
+ * If reference object type is Parameter, it checks if owner object of that
+ * paramter exist; otherwise, it only check for the reference object name exist.
+ *
+ * @param  obj  input object of undefined reference object to be checked
+ * @param  writeLine  flag indicating whether line number should be written
+ *                    for ther error message
+ */
+//------------------------------------------------------------------------------
 bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
 {
    bool retval = true;
@@ -4003,8 +4019,14 @@ bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param
                                       const std::string &msg, bool isNumberAllowed,
                                       bool isArrayAllowed)
 {
-   GmatBase *obj = FindObject(param);
+   #if DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::SetCommandParameter() cmd=%s, param=%s, isNumberAllowed=%d,"
+       " isArrayAllowed=%d\n", cmd->GetTypeName().c_str(), param.c_str(),
+       isNumberAllowed, isArrayAllowed);
+   #endif
    
+   GmatBase *obj = FindObject(param);
    Real rval;
    
    if (obj != NULL)
@@ -4047,14 +4069,14 @@ bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param
       }
       
       if ((!isNumberAllowed) ||
-          (isNumberAllowed && !GmatStringUtil::ToDouble(param, rval)))
+          (isNumberAllowed && !GmatStringUtil::ToReal(param, rval)))
       {
          InterpreterException ex(msg + " \"" + param + "\" is undefined");
          HandleError(ex);
          return false;
       }
    }
-   
+      
    return true;
 }
 

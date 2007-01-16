@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "MathElement.hpp"
-#include "StringUtil.hpp"  // for ToDouble()
+#include "StringUtil.hpp"  // for ToReal()
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -43,7 +43,7 @@ MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
    isFunction = false;
    
    Real rval;
-   if (GmatStringUtil::ToDouble(nomme, &rval))
+   if (GmatStringUtil::ToReal(nomme, &rval))
    {
       SetRealValue(rval);
       SetNumberFlag(true);

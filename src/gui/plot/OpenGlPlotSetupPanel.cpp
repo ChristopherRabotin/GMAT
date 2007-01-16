@@ -78,7 +78,6 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
                                  std::string(subscriberName.c_str()) + "\n");
 #endif
    Subscriber *subscriber = (Subscriber*)
-      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
       theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
    
    mOpenGlPlot = (OpenGlPlot*)subscriber;
@@ -1155,7 +1154,7 @@ void OpenGlPlotSetupPanel::SaveData()
       
       Real fov;
       inputString[0] = mFixedFovTextCtrl->GetValue();
-      if (!GmatStringUtil::ToDouble(inputString[0], &fov) || fov < 1)
+      if (!GmatStringUtil::ToReal(inputString[0], &fov) || fov < 1)
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                  inputString[0].c_str(), "FixedFovAngle","Real Number >= 1");
@@ -1336,9 +1335,8 @@ void OpenGlPlotSetupPanel::SaveData()
              std::string(mViewDirectionComboBox->GetStringSelection().c_str()));
          
          Real realVal[3];
-//         mViewScaleFactorTextCtrl->GetValue().ToDouble(&realVal);
          inputString[0] = mViewScaleFactorTextCtrl->GetValue();
-         if (!GmatStringUtil::ToDouble(inputString[0], &realVal[0]) || 
+         if (!GmatStringUtil::ToReal(inputString[0], &realVal[0]) || 
              realVal[0] < 0)
          {
             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
@@ -1356,7 +1354,7 @@ void OpenGlPlotSetupPanel::SaveData()
             inputString[2] = mViewPointRef3TextCtrl->GetValue();
             for (Integer i=0; i < 3; ++i)
             {
-               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
                {
                   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                           inputString[i].c_str(), "ViewPointRefVector",
@@ -1377,7 +1375,7 @@ void OpenGlPlotSetupPanel::SaveData()
             inputString[2] = mViewPointVec3TextCtrl->GetValue();
             for (Integer i=0; i < 3; ++i)
             {
-               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
                {
                   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                           inputString[i].c_str(), "ViewPointVectorVector",
@@ -1399,7 +1397,7 @@ void OpenGlPlotSetupPanel::SaveData()
 
             for (Integer i=0; i < 3; ++i)
             {
-               if (!GmatStringUtil::ToDouble(inputString[i], &realVal[i]))
+               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
                {
                   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                           inputString[i].c_str(), "ViewDirectionVector",

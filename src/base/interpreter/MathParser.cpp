@@ -149,7 +149,7 @@ bool MathParser::IsEquation(const std::string &str)
    UnsignedInt opIndex;
    
    // If it is just a number, return false
-   if (GmatStringUtil::ToDouble(str, &rval))
+   if (GmatStringUtil::ToReal(str, &rval))
    {
       isEq = false;
    }

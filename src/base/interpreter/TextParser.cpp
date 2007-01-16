@@ -936,7 +936,7 @@ StringArray TextParser::SeparateDots(const std::string &chunk)
    StringArray parts;
 
    // Separate by dots if not a number
-   if (GmatStringUtil::ToDouble(chunk, rval))
+   if (GmatStringUtil::ToReal(chunk, rval))
    {
       parts.push_back(chunk);
    }
