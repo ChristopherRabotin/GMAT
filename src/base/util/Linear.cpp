@@ -22,11 +22,13 @@
 #include <iomanip>
 #include <sstream>
 #include "RealTypes.hpp"
-#include "RealUtilities.hpp" // for PI, TWO_PI, Acos(), Atan()
+#include "RealUtilities.hpp"     // for PI, TWO_PI, Acos(), Atan()
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
 #include "Rmatrix.hpp"
 #include "Linear.hpp"
+#include "GmatGlobal.hpp"        // for Global settings
+#include "MessageInterface.hpp"
 
 using namespace GmatRealUtil;
 using namespace GmatMathUtil;
@@ -74,6 +76,7 @@ GmatRealUtil::RaCodec GmatRealUtil::CartesianToRaCodec(const Rvector3 &r)
    return s;
 }
 
+
 //------------------------------------------------------------------------------
 //  GmatRealUtil::RaDec GmatRealUtil::CartesianToRaDec(const Rvector3 &r)
 //------------------------------------------------------------------------------
@@ -114,6 +117,7 @@ GmatRealUtil::RaDec GmatRealUtil::CartesianToRaDec(const Rvector3 &r)
    return RD;
 }
 
+
 //------------------------------------------------------------------------------
 //  Rvector3 GmatRealUtil::RaCodecToCartesian(const RaCodec &r)
 //------------------------------------------------------------------------------
@@ -125,6 +129,7 @@ Rvector3 GmatRealUtil::RaCodecToCartesian(const RaCodec &r)
    v[2] = r.radiusD * Cos(r.coDeclinationD);
    return v;
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatRealUtil::RaDec GmatRealUtil::RaCodecToRaDec(const RaCodec &r)
@@ -138,6 +143,7 @@ GmatRealUtil::RaDec GmatRealUtil::RaCodecToRaDec(const RaCodec &r)
    return rD;
 }
 
+
 //------------------------------------------------------------------------------
 //  Rvector3 GmatRealUtil::RaDecToCartesian(const RaDec &r)
 //------------------------------------------------------------------------------
@@ -150,6 +156,7 @@ Rvector3 GmatRealUtil::RaDecToCartesian(const RaDec &r)
    return v;
 }
 
+
 //------------------------------------------------------------------------------
 //  GmatRealUtil::RaCodec GmatRealUtil::RaDecToRaCodec(const RaDec &r)
 //------------------------------------------------------------------------------
@@ -161,6 +168,7 @@ GmatRealUtil::RaCodec GmatRealUtil::RaDecToRaCodec(const RaDec &r)
    s.coDeclinationD = GmatMathUtil::PI_OVER_TWO - r.declinationD;
    return s;
 }
+
 
 //------------------------------------------------------------------------------
 //  Real GmatRealUtil::Min(const Rvector &numbers)
@@ -176,8 +184,10 @@ Real GmatRealUtil::Min(const Rvector &numbers)
       if (numbers[i]<smallest) 
          smallest = numbers[i];
    }
+   
    return smallest;
 }
+
 
 //------------------------------------------------------------------------------
 //  Real GmatRealUtil::Max(const Rvector &numbers)
@@ -193,130 +203,38 @@ Real GmatRealUtil::Max(const Rvector &numbers)
       if (numbers[i]>biggest) 
          biggest = numbers[i];
    }
+   
    return biggest;
 }
 
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetWidth(int w)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetWidth(int w)
-{
-   format.mWidth = w;
-}
-
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetPrecision(int p)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetPrecision(int p)
-{
-   format.mPrecision = p;
-}
-
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetSpacing(int s)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetSpacing(int s)
-{
-   format.mSpacing = s;
-}
-
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetHorizontal(bool h)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetHorizontal(bool h)
-{
-   format.mHorizontal = h;
-}
-
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetBinaryIn(bool b)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetBinaryIn(bool b)
-{
-   format.mBinaryIn = b;
-}
-
-//------------------------------------------------------------------------------
-// void GmatRealUtil::SetBinaryOut(bool b)
-//------------------------------------------------------------------------------
-void GmatRealUtil::SetBinaryOut(bool b)
-{
-   format.mBinaryOut = b;
-}
-
-//------------------------------------------------------------------------------
-//  int GmatRealUtil::GetWidth() 
-//------------------------------------------------------------------------------
-int GmatRealUtil::GetWidth()
-{
-   return format.mWidth;
-}
-
-//------------------------------------------------------------------------------
-//  int GmatRealUtil::GetPrecision() 
-//------------------------------------------------------------------------------
-int GmatRealUtil::GetPrecision()
-{
-   return format.mPrecision;
-}
-
-//------------------------------------------------------------------------------
-//  int GmatRealUtil::GetSpacing() 
-//------------------------------------------------------------------------------
-int GmatRealUtil::GetSpacing()
-{
-   return format.mSpacing;
-}
-
-//------------------------------------------------------------------------------
-// bool GmatRealUtil::IsHorizontal() 
-//------------------------------------------------------------------------------
-bool GmatRealUtil::IsHorizontal() 
-{
-   return format.mHorizontal;
-}
-
-//------------------------------------------------------------------------------
-//  bool GmatRealUtil::IsBinaryIn() 
-//------------------------------------------------------------------------------
-bool GmatRealUtil::IsBinaryIn() 
-{
-   return format.mBinaryIn;
-}
-
-//------------------------------------------------------------------------------
-//  bool GmatRealUtil::IsBinaryOut() 
-//------------------------------------------------------------------------------
-bool GmatRealUtil::IsBinaryOut() 
-{
-   return format.mBinaryOut;
-}
 
 //------------------------------------------------------------------------------
 //  std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a) 
 //------------------------------------------------------------------------------
 std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a) 
 {
+   GmatGlobal *global = GmatGlobal::Instance();
    int size = a.GetSize();
-   int i;
    
-   if (format.mBinaryIn)
+   if (global->IsBinaryIn())
    {
-      for (i=0; i<size; i++)  
+      for (int i=0; i<size; i++)  
          input.read((char*)&a[i], sizeof(Real));
    }
    else
    {
-      for (i=0; i<size; i++)  
+      for (int i=0; i<size; i++)  
          input>>a[i];
    }
    
-   format.mBinaryIn = DEFAULT_FORMAT.mBinaryIn;
+   global->SetBinaryIn(false);
+   
    return input;
 }
 
+
 //------------------------------------------------------------------------------
-//  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
+// std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
 //------------------------------------------------------------------------------
 /**
  * @note Resets format to default.
@@ -324,78 +242,73 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a) 
 {
-   int size = a.GetSize();
-   int i;
+   using namespace std;
    
-   if (format.mBinaryOut)
+   GmatGlobal *global = GmatGlobal::Instance();
+   Integer size = a.GetSize();
+   Integer p, w, spacing;
+   bool scientific, horizontal;
+   global->GetActualFormat(scientific, p, w, horizontal, spacing);
+   
+   if (scientific)
+      output.setf(std::ios::scientific);
+   
+   if (global->IsBinaryOut())
    {
-      for (i=0; i<size; i++)  
-      {
+      for (int i=0; i<size; i++)  
          output.write((char*)&a[i], sizeof(Real));
-      }
    }
    else
    {      
-      if (format.mHorizontal) 
+      if (horizontal)
       {
-         char *spaces = new char[format.mSpacing + 1];
-         for (i=0; i<format.mSpacing; i++) 
-         {
-            spaces[i] = ' ';
-         }
-         spaces[format.mSpacing] = '\0';
-         for (i=0; i<size; i++) 
-         {
-            output.width(format.mWidth);
-            output.precision(format.mPrecision);
-            output << a[i] << spaces;
-         }
-         output << std::endl;
+         std::string spaces;
+         spaces.append(spacing, ' ');
+         
+         for (int i=0; i<size; i++) 
+            output << setw(w) << setprecision(p) << a[i] << spaces;
       } 
       else 
       {
-         for (i=0; i<size; i++) 
-         {
-            output.width(format.mWidth);
-            output.precision(format.mPrecision);
-            output << a[i] << std::endl;
-         }
+         for (int i=0; i<size; i++) 
+            output << setw(w) << setprecision(p) << a[i] << std::endl;
       }
    }
-
-   format.mWidth = DEFAULT_FORMAT.mWidth;
-   format.mPrecision = DEFAULT_FORMAT.mPrecision;
-   format.mSpacing = DEFAULT_FORMAT.mSpacing;
-   format.mHorizontal = DEFAULT_FORMAT.mHorizontal;
-   format.mBinaryOut = DEFAULT_FORMAT.mBinaryOut;
+   
+   // Reset to current format
+   global->SetToCurrentFormat();
+   
    return output;
 }
+
 
 //------------------------------------------------------------------------------
 //  std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a) 
 //------------------------------------------------------------------------------
 std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a) 
 {
+   GmatGlobal *global = GmatGlobal::Instance();
    int row = a.GetNumRows();
    int column = a.GetNumColumns();
-   int i,j;
-
-   if (format.mBinaryIn)
+   
+   if (global->IsBinaryIn())
    {
-      for (i=0; i<row; i++) 
-         for (j=0; j<column; j++) 
+      for (int i=0; i<row; i++) 
+         for (int j=0; j<column; j++) 
             input.read((char*)&a(i,j), sizeof(Real));
    }
    else
    {
-      for (i=0; i<row; i++) 
-         for (j=0; j<column; j++) 
+      for (int i=0; i<row; i++) 
+         for (int j=0; j<column; j++) 
             input >> a(i,j);
    }
    
-   format.mBinaryIn = DEFAULT_FORMAT.mBinaryIn;
+   global->SetBinaryIn(false);
+   
    return input;
 }
+
 
 //------------------------------------------------------------------------------
 //  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &)
@@ -406,89 +319,122 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a)
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a) 
 {
+   using namespace std;
+   
+   GmatGlobal *global = GmatGlobal::Instance();
    int row = a.GetNumRows();
    int column = a.GetNumColumns();
-   int i,j;
-   char *spaces = new char[format.mSpacing + 1];
-
-   if (format.mBinaryOut)
+   Integer p, w, spacing;
+   bool scientific, horizontal;
+   global->GetActualFormat(scientific, p, w, horizontal, spacing);
+   
+   if (scientific)
+      output.setf(std::ios::scientific);
+   
+   if (global->IsBinaryOut())
    {
-      for (i=0; i<row; i++) 
+      for (int i=0; i<row; i++) 
       {
-         for (j=0; j<column; j++) 
+         for (int j=0; j<column; j++) 
             output.write((char*)&a(i,j), sizeof(Real));
       }
    }
    else
-   {
-      for(i=0; i<format.mSpacing; i++) 
+   {      
+      std::string spaces;
+      spaces.append(spacing, ' ');
+      
+      if (horizontal) 
       {
-         spaces[i] = ' ';
+         for (int i=0; i<row; i++) 
+            for (int j=0; j<column; j++) 
+               output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
+         
+         output << std::endl;
       }
-      
-      spaces[format.mSpacing] = '\0';
-      
-      if (format.mHorizontal) 
-      {
-         for (i=0; i<row; i++) 
-         {
-            for (j=0; j<column; j++) 
-            {
-               output.width(format.mWidth);
-               output.precision(format.mPrecision);
-               output  << a.GetElement(i,j) << spaces;
-            }
-         }
-      }   
       else 
       {
-         for (i=0; i<row; i++) 
+         for (int i=0; i<row; i++)
          {
-            for (j=0; j<column; j++) 
-            {
-               output.width(format.mWidth);
-               output.precision(format.mPrecision);
-               output << a.GetElement(i,j) << spaces;
-            }
+            for (int j=0; j<column; j++)
+               output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
+            
             output << std::endl;
          }
       }
    }
    
-   format.mWidth = DEFAULT_FORMAT.mWidth;
-   format.mPrecision = DEFAULT_FORMAT.mPrecision;
-   format.mSpacing = DEFAULT_FORMAT.mSpacing;
-   format.mHorizontal = DEFAULT_FORMAT.mHorizontal;
-   format.mBinaryOut = DEFAULT_FORMAT.mBinaryOut;
+   // Reset to current format
+   global->SetToCurrentFormat();
+   
    return output;
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Real &val, bool scientific=false,
-//                      Integer width=10, Integer precision=9)
+// std::string ToString(const Real &rval, bool useCurrentFormat = true,
+//                      bool scientific = false,
+//                      Integer precision = GmatGlobal::DATA_PRECISION,
+//                      Integer width = GmatGlobal::INTEGER_WIDTH)
 //------------------------------------------------------------------------------
-std::string GmatRealUtil::ToString(const Real &val, bool scientific,
-                                   Integer width, Integer precision)
+/*
+ * Formats Real value to String.
+ *
+ * @param  rval  Real value
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal
+ * @param  scientific  if true, formats using scientific notation
+ * @param  precision  Precision to be used in formatting
+ * @param  width  Width to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
+                                   bool scientific, Integer precision,
+                                   Integer width)
 {
+   Integer p = precision;
+   Integer w = width;
+   
+   if (useCurrentFormat)
+   {
+      GmatGlobal *global = GmatGlobal::Instance();
+      p = global->GetDataPrecision();
+      w = global->GetDataWidth();
+   }
+   
    std::stringstream ss("");
-   ss.width(width);
-   ss.precision(precision);
+   ss.width(w);
+   ss.precision(p);
+   
    if (scientific)
       ss.setf(std::ios::scientific);
    
-   ss << val;
-   return std::string(ss.str());
+   ss << rval;
+   return ss.str();
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Integer &val, Integer width=3)
+// std::string ToString(const Integer &ival, bool useCurrentFormat = true,
+//                      Integer width = GmatGlobal::INTEGER_WIDTH)
 //------------------------------------------------------------------------------
-std::string GmatRealUtil::ToString(const Integer &val, Integer width)
+/*
+ * Formats Integer value to String.
+ *
+ * @param  ival  Integer value
+ * @param  useCurrentFormat  Uses width from GmatGlobal if true
+ * @param  width  Width to be used in formatting
+ */
+//------------------------------------------------------------------------------
+std::string GmatRealUtil::ToString(const Integer &ival, bool useCurrentFormat,
+                                   Integer width)
 {
+   Integer w = width;
+   
+   if (useCurrentFormat)
+      w = GmatGlobal::Instance()->GetIntegerWidth();
+   
    std::stringstream ss("");
-   ss.width(width);
-   ss << val;
-   return std::string(ss.str());
+   ss.width(w);
+   ss << ival;
+   return ss.str();
 }
