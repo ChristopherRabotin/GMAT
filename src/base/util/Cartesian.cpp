@@ -20,7 +20,7 @@
 #include <iostream>
 #include <sstream>
 #include "gmatdefs.hpp"
-#include "EphemerisUtil.hpp"
+//#include "EphemerisUtil.hpp"
 #include "Keplerian.hpp"
 #include "Cartesian.hpp"
 #include "Rvector3.hpp"
@@ -184,36 +184,36 @@ void Cartesian::SetAll(const Real &posX, const Real &posY, const Real &posZ,
    velocityD.Set(velX, velY, velZ);
 }
 
-//------------------------------------------------------------------------------
+// //------------------------------------------------------------------------------
+// // Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
+// //                       const Rvector3 &qVector, Real mu)
+// //------------------------------------------------------------------------------
 // Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
 //                       const Rvector3 &qVector, Real mu)
-//------------------------------------------------------------------------------
-Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
-                      const Rvector3 &qVector, Real mu)
-{
-    Cartesian c;
+// {
+//     Cartesian c;
 
-    ToCartesian(k.GetSemimajorAxis(), k.GetEccentricity(),
-                               k.GetInclination(), k.GetRAAscendingNode(),
-                               k.GetArgumentOfPeriapsis(), k.GetMeanAnomaly(),
-                               mu, pVector, qVector, c.positionD, c.velocityD);
+//     ToCartesian(k.GetSemimajorAxis(), k.GetEccentricity(),
+//                                k.GetInclination(), k.GetRAAscendingNode(),
+//                                k.GetArgumentOfPeriapsis(), k.GetMeanAnomaly(),
+//                                mu, pVector, qVector, c.positionD, c.velocityD);
 
-    return c;
-}
+//     return c;
+// }
 
-//------------------------------------------------------------------------------
-//  Cartesian ToCartesian(const Keplerian &k, Real mu)
-//------------------------------------------------------------------------------
-Cartesian ToCartesian(const Keplerian &k, Real mu)
-{
-    Cartesian c;
+// //------------------------------------------------------------------------------
+// //  Cartesian ToCartesian(const Keplerian &k, Real mu)
+// //------------------------------------------------------------------------------
+// Cartesian ToCartesian(const Keplerian &k, Real mu)
+// {
+//     Cartesian c;
 
-    ToCartesian(k.GetSemimajorAxis(), k.GetEccentricity(), k.GetInclination(),
-                k.GetRAAscendingNode(), k.GetArgumentOfPeriapsis(), k.GetMeanAnomaly(),
-                mu, c.positionD, c.velocityD);
+//     ToCartesian(k.GetSemimajorAxis(), k.GetEccentricity(), k.GetInclination(),
+//                 k.GetRAAscendingNode(), k.GetArgumentOfPeriapsis(), k.GetMeanAnomaly(),
+//                 mu, c.positionD, c.velocityD);
 
-    return c;
-}
+//     return c;
+// }
 
 //------------------------------------------------------------------------------
 //  std::ostream& operator<<(std::ostream& output, Cartesian& c)

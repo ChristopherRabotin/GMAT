@@ -52,17 +52,16 @@ public:
    static Integer ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
                                     Real v[3], AnomalyType anomalyType);
 
-   // friend functions
-   friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, 
+   static Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, 
                                         const Real grav,
                                         Anomaly &anomaly);
-   friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav,
+   static Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav,
                                         Real *ma);
 
-   friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
+   static Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
                                         const Real grav,
                                         Anomaly anomaly);
-   friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
+   static Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
                                         AnomalyType anomalyType);
 };
 

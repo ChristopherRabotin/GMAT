@@ -258,109 +258,110 @@ Integer CoordUtil::ComputeMeanToTrueAnomaly(Real ma, Real ecc, Real tol,
 Integer CoordUtil::ComputeCartToKepl(Real grav, Real r[3], Real v[3], Real *tfp,
                                      Real elem[6], Real *ma)
 {
-if (Abs(grav) < 1E-30)
-   return(2);
+   if (Abs(grav) < 1E-30)
+      return(2);
    
- Rvector3 pos(r[0], r[1], r[2]);
- Rvector3 vel(v[0], v[1], v[2]);
+   Rvector3 pos(r[0], r[1], r[2]);
+   Rvector3 vel(v[0], v[1], v[2]);
+   
+   // eqn 4.1
+   Rvector3 angMomentum = Cross(pos, vel);
+   
+   // eqn 4.2
+   Real h = angMomentum.GetMagnitude();
+   
+   if (h < 1E-30) {
+      return 1;
+   }
+   
+   // eqn 4.3
+   Rvector3 nodeVec = Cross(Rvector3(0,0,1), angMomentum);
+   
+   // eqn 4.4
+   Real n = nodeVec.GetMagnitude();
+   
+   // eqn 4.5 - 4.6
+   Real posMag = pos.GetMagnitude();
+   Real velMag = vel.GetMagnitude();
+   
+   // eqn 4.7 - 4.8
+   Rvector3 eccVec = (1/grav)*((velMag*velMag - grav/posMag)*pos - (pos * vel) * vel);
+   Real e = eccVec.GetMagnitude();
+   
+   // eqn 4.9
+   Real zeta = 0.5*velMag*velMag - grav/posMag;
+   
+   if (Abs(1 - e) < 1E-30)
+   {
+      throw UtilityException
+         ("CoordUtil::CartesianToKeplerian() "
+          "Radius is near infinite in keplarian to cartesian conversion\n");
+   }
+   
+   // eqn 4.10
+   Real sma = -grav/(2*zeta);
+   
+   // eqn 4.11
+   Real i = ACos( angMomentum.Get(2)/h );
+   
+   Real raan, argPeriapsis, trueAnom;
+   raan=argPeriapsis=trueAnom=0;
+   if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
+   {
+      raan = ACos( nodeVec.Get(0)/n );
+      if (nodeVec.Get(1) < 0)
+         raan = TWO_PI - raan;
+           
+      argPeriapsis = ACos( (nodeVec*eccVec)/(n*e) );
+      if (eccVec.Get(2) < 0)
+         argPeriapsis = TWO_PI - argPeriapsis;
+        
+      trueAnom = ACos( (eccVec*pos)/(e*posMag) );
+      if (pos*vel < 0)
+         trueAnom = TWO_PI - trueAnom;
+   }
+   if ( e >= 1E-11 && i < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
+   {
+      raan = 0;
+      argPeriapsis = ACos(eccVec.Get(0)/e);
+      if (eccVec.Get(1) < 0)
+         argPeriapsis = TWO_PI - argPeriapsis;
+           
+      trueAnom = ACos( (eccVec*pos)/(e*posMag) );
+      if (pos*vel < 0)
+         trueAnom = TWO_PI - trueAnom;
+   }
+   if ( e < 1E-11 && i >= 1E-11 )  // CASE 3: Circular, Inclined Orbit
+   {
+      raan = ACos( nodeVec.Get(0)/n );
+      if (nodeVec.Get(1) < 0)
+         raan = TWO_PI - raan;
+           
+      argPeriapsis = 0;
+        
+      trueAnom = ACos( (nodeVec*pos)/(n*posMag) );
+      if (pos.Get(2) < 0)
+         trueAnom = TWO_PI - trueAnom;
+   }
+   if ( e < 1E-11 && i < 1E-11 )  // CASE 4: Circular, Equatorial Orbit
+   {
+      raan = 0;
+      argPeriapsis = 0;
+      trueAnom = ACos(pos.Get(0)/posMag);
+      if (pos.Get(1) < 0)
+         trueAnom = TWO_PI - trueAnom;
+   }
+   
+   elem[0] = sma;
+   elem[1] = e;
+   elem[2] = i*DEG_PER_RAD;
+   elem[3] = raan*DEG_PER_RAD;
+   elem[4] = argPeriapsis*DEG_PER_RAD;
+   elem[5] = trueAnom*DEG_PER_RAD;
  
- // eqn 4.1
- Rvector3 angMomentum = Cross(pos, vel);
- 
- // eqn 4.2
- Real h = angMomentum.GetMagnitude();
- 
- if (h < 1E-30) {
-   return 1;
- }
- 
- // eqn 4.3
- Rvector3 nodeVec = Cross(Rvector3(0,0,1), angMomentum);
- 
- // eqn 4.4
- Real n = nodeVec.GetMagnitude();
- 
- // eqn 4.5 - 4.6
- Real posMag = pos.GetMagnitude();
- Real velMag = vel.GetMagnitude();
- 
- // eqn 4.7 - 4.8
- Rvector3 eccVec = (1/grav)*((velMag*velMag - grav/posMag)*pos - (pos * vel) * vel);
- Real e = eccVec.GetMagnitude();
- 
- // eqn 4.9
- Real zeta = 0.5*velMag*velMag - grav/posMag;
- 
- if (Abs(1 - e) < 1E-30)
- {
- 	throw UtilityException
-               ("CoordUtil::CartesianToKeplerian() "
-                "Radius is near infinite in keplarian to cartesian conversion\n");
- }
-
- // eqn 4.10
- Real sma = -grav/(2*zeta);
- 
- // eqn 4.11
- Real i = ACos( angMomentum.Get(2)/h );
-
- Real raan, argPeriapsis, trueAnom;
- raan=argPeriapsis=trueAnom=0;
- if ( e >= 1E-11 && i >= 1E-11 )  // CASE 1: Non-circular, Inclined Orbit
- {
-	raan = ACos( nodeVec.Get(0)/n );
- 	if (nodeVec.Get(1) < 0)
- 	   raan = TWO_PI - raan;
- 	   
- 	argPeriapsis = ACos( (nodeVec*eccVec)/(n*e) );
- 	if (eccVec.Get(2) < 0)
- 	   argPeriapsis = TWO_PI - argPeriapsis;
- 	
- 	trueAnom = ACos( (eccVec*pos)/(e*posMag) );
- 	if (pos*vel < 0)
- 	   trueAnom = TWO_PI - trueAnom;
- }
- if ( e >= 1E-11 && i < 1E-11 )  // CASE 2: Non-circular, Equatorial Orbit
- {
- 	raan = 0;
- 	argPeriapsis = ACos(eccVec.Get(0)/e);
- 	if (eccVec.Get(1) < 0)
- 	   argPeriapsis = TWO_PI - argPeriapsis;
- 	   
- 	trueAnom = ACos( (eccVec*pos)/(e*posMag) );
- 	if (pos*vel < 0)
- 	   trueAnom = TWO_PI - trueAnom;
-  	}
- if ( e < 1E-11 && i >= 1E-11 )  // CASE 3: Circular, Inclined Orbit
- {
- 	raan = ACos( nodeVec.Get(0)/n );
- 	if (nodeVec.Get(1) < 0)
- 	   raan = TWO_PI - raan;
- 	   
- 	argPeriapsis = 0;
- 	
- 	trueAnom = ACos( (nodeVec*pos)/(n*posMag) );
- 	if (pos.Get(2) < 0)
- 	   trueAnom = TWO_PI - trueAnom;
- }
- if ( e < 1E-11 && i < 1E-11 )  // CASE 4: Circular, Equatorial Orbit
- {
- 	raan = 0;
- 	argPeriapsis = 0;
- 	trueAnom = ACos(pos.Get(0)/posMag);
- 	if (pos.Get(1) < 0)
- 	   trueAnom = TWO_PI - trueAnom;
-  	}
- 
- elem[0] = sma;
- elem[1] = e;
- elem[2] = i*DEG_PER_RAD;
- elem[3] = raan*DEG_PER_RAD;
- elem[4] = argPeriapsis*DEG_PER_RAD;
- elem[5] = trueAnom*DEG_PER_RAD;
- 
- return 0;  
+   return 0;  
 }
+
 
 //------------------------------------------------------------------------------
 // static Integer ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
@@ -375,7 +376,7 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
        raan = elem[3]*RAD_PER_DEG,
         per = elem[4]*RAD_PER_DEG,
        anom = elem[5]*RAD_PER_DEG;
-   	   
+           
    // **************
    // taken from old code above; necessary to avoid crash, but not in spec
    if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
@@ -383,8 +384,8 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
       Real ma = elem[5]; 
       ecc = elem[1];
 
-	  Real ta;
-	  Integer iter;
+          Real ta;
+          Integer iter;
       Integer ret = CoordUtil::ComputeMeanToTrueAnomaly(ma, ecc, 1E-8, &ta, &iter);
       
       if (ret > 0)
@@ -396,7 +397,7 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    
    // radius near infinite
    if (1-ecc*Cos(anom) < 1E-30) {
-   	return 1;
+        return 1;
    }
    
    // eqn 4.24; semilatus rectum
@@ -404,7 +405,7 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    
    // orbit parabolic
    if (Abs(p) < 1E-30) {
-   	return 2;
+        return 2;
    }
    
    // eqn 4.25; radius
@@ -414,52 +415,52 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    r[0] = rad*(Cos(per + anom) * Cos(raan) - Cos(inc) * Sin(per + anom) * Sin(raan)),
    r[1] = rad*(Cos(per + anom) * Sin(raan) + Cos(inc) * Sin(per + anom) * Cos(raan)),
    r[2] = rad*Sin(per + anom)*Sin(inc);
-   		
+                
    v[0] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Cos(raan)-Cos(inc)*Sin(raan)*Cos(per))
-   			- Sqrt(grav/p)*Sin(anom)*(Cos(per)*Cos(raan)-Cos(inc)*Sin(raan)*Sin(per));
-   			
+                        - Sqrt(grav/p)*Sin(anom)*(Cos(per)*Cos(raan)-Cos(inc)*Sin(raan)*Sin(per));
+                        
    v[1] = Sqrt(grav/p)*(Cos(anom)+ecc)*(-Sin(per)*Sin(raan)+Cos(inc)*Cos(raan)*Cos(per))
-   			- Sqrt(grav/p)*Sin(anom)*(Cos(per)*Sin(raan)+Cos(inc)*Cos(raan)*Sin(per));
-   			
+                        - Sqrt(grav/p)*Sin(anom)*(Cos(per)*Sin(raan)+Cos(inc)*Cos(raan)*Sin(per));
+                        
    v[2] = Sqrt(grav/p)*((Cos(anom)+ecc)*Sin(inc)*Cos(per) - Sin(anom)*Sin(inc)*Sin(per));
    
    return 0;
 }
 
 //------------------------------------------------------------------------------
-// friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, 
+// static Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, 
 //                                      const Real grav, Anomaly &anomaly)
 //------------------------------------------------------------------------------
-Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, const Real grav, 
-                              Anomaly &anomaly)
+Rvector6 CoordUtil::CartesianToKeplerian(const Rvector6 &cartVec, const Real grav, 
+                                         Anomaly &anomaly)
 {
     Real ma;
     Rvector6 newKepl = CartesianToKeplerian(cartVec, grav, &ma); 
-
+    
     anomaly.SetSMA(newKepl[0]);
     anomaly.SetECC(newKepl[1]);
     anomaly.SetValue(newKepl[5]);
    
-    if (anomaly.GetType() == "MA")
+    if (anomaly.GetTypeString() == "MA")
     {
        newKepl[5] = ma;
        anomaly.SetValue(ma); 
     }
-    else if (anomaly.GetType() == "EA")
+    else if (anomaly.GetTypeString() == "EA")
     {
-        Anomaly tempAnomaly(newKepl[0],newKepl[1],newKepl[5]);
-        newKepl[5] = tempAnomaly.GetEccentricAnomaly();
-        anomaly.SetValue(newKepl[5]); 
+       Anomaly tempAnomaly(newKepl[0], newKepl[1], newKepl[5], Anomaly::TA);
+       newKepl[5] = tempAnomaly.GetEccentricAnomaly();
+       anomaly.SetValue(newKepl[5]); 
     }
-
+    
     return newKepl;
 }
 
 //------------------------------------------------------------------------------
-// friend Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav,
+// static Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav,
 //                                      Real *ma);
 //------------------------------------------------------------------------------
-Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
+Rvector6 CoordUtil::CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 {
    Real kepl[6];
    Real r[3];
@@ -518,37 +519,34 @@ Rvector6 CartesianToKeplerian(const Rvector6 &cartVec, Real grav, Real *ma)
 
 }
 
-//---------------------------------
-// friend functions
-//---------------------------------
 
 //------------------------------------------------------------------------------
-// friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
+// static Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
 //                                      const Real grav, Anomaly anomaly)
 //------------------------------------------------------------------------------
-Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, 
-                              const Real grav, Anomaly anomaly)
+Rvector6 CoordUtil::KeplerianToCartesian(const Rvector6 &keplVec, 
+                                         const Real grav, Anomaly anomaly)
 {
-   if (anomaly.GetType() == "EA" || anomaly.GetType() == "HA")
+   if (anomaly.GetTypeString() == "EA" || anomaly.GetTypeString() == "HA")
    {
       Rvector6 temp = keplVec;
       temp[5] = anomaly.GetTrueAnomaly();
       return KeplerianToCartesian(temp, grav, CoordUtil::TA);
    }
-   else if (anomaly.GetType() == "TA")
+   else if (anomaly.GetTypeString() == "TA")
       return KeplerianToCartesian(keplVec, grav, CoordUtil::TA);
-
+   
    else   //  mean anomaly
       return KeplerianToCartesian(keplVec, grav, CoordUtil::MA);
-         
+   
 }
 
 //------------------------------------------------------------------------------
-// friend Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
+// static Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
 //                                      AnomalyType anomalyType)
 //------------------------------------------------------------------------------
-Rvector6 KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
-                              CoordUtil::AnomalyType anomalyType)
+Rvector6 CoordUtil::KeplerianToCartesian(const Rvector6 &keplVec, Real grav,
+                                         CoordUtil::AnomalyType anomalyType)
 {
    Integer   ret = 1;
    Real  temp_r[3];

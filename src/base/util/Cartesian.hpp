@@ -72,9 +72,9 @@ public:
                const Real &velX, const Real &velY, const Real &velZ);
 
    //  Friend functions
-   friend Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
-                                const Rvector3 &qVector, Real mu);
-   friend Cartesian ToCartesian(const Keplerian &k, Real mu);
+//    friend Cartesian ToCartesian(const Keplerian &k,  const Rvector3 &pVector,
+//                                 const Rvector3 &qVector, Real mu);
+//    friend Cartesian ToCartesian(const Keplerian &k, Real mu);
    friend std::ostream& operator<<(std::ostream& output, Cartesian& c);
    friend std::istream& operator>>(std::istream& input, Cartesian& c);
 

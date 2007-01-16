@@ -25,6 +25,7 @@
 #include "TableTemplate.hpp"
 #include "BaseException.hpp"
 #include "gmatdefs.hpp"
+#include "GmatGlobal.hpp"      // for DATA_PRECISION
 
 // Forward declarations
 class Rvector;
@@ -102,18 +103,25 @@ public:
    // friends
    friend Rmatrix SkewSymmetric4by4(const Rvector3 &v);
    friend Rmatrix TransposeTimesRmatrix(const Rmatrix &m1, const Rmatrix &m2);
-   //loj: 7/22/05 Corrected the name from RmatrixTimesTranspose()
    friend Rmatrix MatrixTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
    friend Rmatrix TransposeTimesTranspose(const Rmatrix &m1, const Rmatrix &m2);
    
    friend std::istream& operator>> (std::istream &input, Rmatrix &a);
    friend std::ostream& operator<< (std::ostream &output, const Rmatrix &a);
    
-   Rvector GetRow(int r) const;  //arg 4/24/06
-   Rvector GetColumn(int c) const; //arg 4/24/06
+   Rvector GetRow(int r) const;
+   Rvector GetColumn(int c) const;
    
-   const StringArray& GetStringVals(Integer w=12, Integer p=10);
-   virtual std::string ToString(Integer w=12, Integer p=10);
+   const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
+                                    Integer w = GmatGlobal::DATA_WIDTH);
+   
+   std::string ToString(Integer precision) const;
+   
+   std::string ToString(bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH,
+                        bool horizontal = true, Integer spacing = 1) const;
    
 protected:   
    StringArray stringVals;

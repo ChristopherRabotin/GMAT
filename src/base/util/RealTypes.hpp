@@ -26,7 +26,8 @@ typedef Real Radians;
 
 namespace GmatRealConst
 {
-
+   const Real    REAL_TOL = 1.0e-15;
+   
    #ifdef __glibcpp_f64_radix
       const Integer SHORT_REAL_RADIX = __glibcpp_f64_radix;
    #else
@@ -82,9 +83,7 @@ namespace GmatRealConst
    #else
       const Integer REAL_MAX_10_EXP  = 308;
    #endif
-   
-   //const Real    REAL_TOL         = REAL_EPSILON;
-   const Real    REAL_TOL         = 1.0e-15;
+      
 };
 
 #endif // RealTypes_hpp

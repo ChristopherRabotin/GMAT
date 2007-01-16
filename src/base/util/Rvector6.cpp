@@ -21,6 +21,7 @@
 #include "gmatdefs.hpp"
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
+#include "Linear.hpp"
 
 //---------------------------------
 //  static data
@@ -447,6 +448,7 @@ Integer Rvector6::GetNumData() const
    return NUM_DATA;
 }
 
+
 //------------------------------------------------------------------------------
 // const std::string* GetDataDescriptions() const
 //------------------------------------------------------------------------------
@@ -459,63 +461,62 @@ const std::string* Rvector6::GetDataDescriptions() const
    return DATA_DESCRIPTIONS;
 }
 
+
 //------------------------------------------------------------------------------
-//  std::string* ToValueStrings()
+// std::string ToString(Integer precision) const
 //------------------------------------------------------------------------------
-/**
- * @return data value string pointer.
+/*
+ * Formats Rvector6 value to String.
+ *
+ * @param  precision  Precision to be used in formatting
+ *
+ * @return Formatted Rvector6 value string
  */
 //------------------------------------------------------------------------------
-std::string* Rvector6::ToValueStrings()
+std::string Rvector6::ToString(Integer precision) const
 {
+   GmatGlobal *global = GmatGlobal::Instance();
+   global->SetActualFormat(false, precision, 0, true, 1);
+   
    std::stringstream ss("");
-   ss.precision(10); //loj: 6/24/04 added
-   
-   ss << elementD[0];
-   stringValues[0] = ss.str();
-
-   ss.str("");
-   ss << elementD[1];
-   stringValues[1] = ss.str();
-   
-   ss.str("");
-   ss << elementD[2];
-   stringValues[2] = ss.str();
-   
-   ss.str("");
-   ss << elementD[3];
-   stringValues[3] = ss.str();
-   
-   ss.str("");
-   ss << elementD[4];
-   stringValues[4] = ss.str();
-   
-   ss.str("");
-   ss << elementD[5];
-   stringValues[5] = ss.str();
-   
-   return stringValues;
+   ss << *this;
+   return ss.str();
 }
 
+
 //------------------------------------------------------------------------------
-//  std::string ToString()
+// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
+//                      Integer precision = GmatGlobal::DATA_PRECISION,
+//                      Integer width = GmatGlobal::DATA_WIDTH,
+//                      bool horizontal = false, Integer spacing = 1) const
 //------------------------------------------------------------------------------
-/**
- * @return data value string
+/*
+ * Formats Rvector6 value to String.
+ *
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal
+ * @param  scientific  Formats using scientific notation if true
+ * @param  precision  Precision to be used in formatting
+ * @param  width  Width to be used in formatting
+ * @param  horizontal  Format horizontally if true
+ * @param  spacing  Spacing to be used in formatting
+ *
+ * @return Formatted Rvector6 value string
  */
 //------------------------------------------------------------------------------
-std::string Rvector6::ToString()
+std::string Rvector6::ToString(bool useCurrentFormat, bool scientific,
+                               Integer precision, Integer width,
+                               bool horizontal, Integer spacing) const
 {
-   std::string s;
-   std::string *val;
-
-   val = ToValueStrings();
+   GmatGlobal *global = GmatGlobal::Instance();
    
-   for (int i=0; i<NUM_DATA; i++)
-      s = s + val[i] + " ";
+   if (!useCurrentFormat)
+      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
    
-   return s;
+   std::stringstream ss("");
+   ss << *this;
+   return ss.str();
 }
+
 
 //------------------------------------------------------------------------------
 // bool IsValid(const Real val)
@@ -526,9 +527,9 @@ std::string Rvector6::ToString()
 //------------------------------------------------------------------------------
 bool Rvector6::IsValid(const Real val)
 {
-    if (elementD[0] == val || elementD[1] == val || elementD[2] == val ||
-        elementD[3] == val || elementD[4] == val || elementD[5] == val)
-        return false;
-    else
-        return true;
+   if (elementD[0] == val || elementD[1] == val || elementD[2] == val ||
+       elementD[3] == val || elementD[4] == val || elementD[5] == val)
+      return false;
+   else
+      return true;
 }

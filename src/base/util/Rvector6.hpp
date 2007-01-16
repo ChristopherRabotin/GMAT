@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
 #include "Rvector3.hpp"
+#include "GmatGlobal.hpp"      // for DATA_PRECISION
 
 class Rvector3;
 
@@ -35,7 +36,7 @@ public:
    Rvector6(const Real e1, const Real e2, const Real e3, const Real e4,
             const Real e5, const Real e6);
    Rvector6(const Rvector3 &r, const Rvector3 &v);
-   Rvector6(Real vec[6]); //loj: 4/20/04 added
+   Rvector6(Real vec[6]);
    Rvector6(const Rvector6 &v);
    Rvector6& operator=(const Rvector6 &v);
    virtual ~Rvector6();
@@ -43,8 +44,8 @@ public:
    Real Get(Integer index) const;
    Rvector3 GetR() const;
    Rvector3 GetV() const;
-   void GetR(Real *r) const; //loj: 4/19/04 added
-   void GetV(Real *v) const; //loj: 4/19/04 added
+   void GetR(Real *r) const;
+   void GetV(Real *v) const;
    
    void Set(const Real e1, const Real e2, const Real e3,
             const Real e4, const Real e5, const Real e6);
@@ -66,17 +67,22 @@ public:
    
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
-   std::string* ToValueStrings();
-   std::string ToString();
+   
+   std::string ToString(Integer precision) const;
+   
+   std::string ToString(bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH,
+                        bool horizontal = true, Integer spacing = 1) const;
    
    bool IsValid(const Real val);
+   
    static const Real UTIL_REAL_UNDEFINED;
    static const Rvector6 RVECTOR6_UNDEFINED;
-    
-protected:
+   
 private:
    static const Integer NUM_DATA;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA_INIT];
-   std::string stringValues[NUM_DATA_INIT];
 };
 #endif // Rvector6_hpp

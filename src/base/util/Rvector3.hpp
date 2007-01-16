@@ -9,10 +9,8 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: M. Weippert, T. McRoberts, L. Jun
-// Created: 1995/10/10 for GSS project (originally Vector3)
-// Modified: 2003/09/16 Linda Jun - Added new methods and member data to return
-//           data descriptions and values.
+// Author: Linda Jun (NASA/GSFC)
+// Created: 2003/09/16
 //
 /**
  * Provides linear algebra operations for 3-element Real vectors.
@@ -23,6 +21,7 @@
 
 #include "gmatdefs.hpp"
 #include "Rvector.hpp"
+#include "GmatGlobal.hpp"      // for DATA_PRECISION
 
 //forward declaration for matrix operations
 class Rmatrix33;
@@ -62,20 +61,24 @@ public:
    const Rvector3& operator*=(const Rmatrix33 &m);
    Rvector3 operator/(const Rmatrix33 &m) const;
    const Rvector3& operator/=(const Rmatrix33 &m);
-
+   
    friend Rvector3 operator*(Real s, const Rvector3 &v);
    friend Rmatrix33 Outerproduct(const Rvector3 &v1, const Rvector3 &v2);
    friend Rvector3 Cross(const Rvector3 &v1, const Rvector3 &v2);
-
+   
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
-   std::string* ToValueStrings();
-   std::string ToString(); //loj: 4/7/05 Added
-
-protected:
+   
+   std::string ToString(Integer precision) const;
+   
+   std::string ToString(bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH,
+                        bool horizontal = true, Integer spacing = 1) const;
+   
 private:
    static const Integer NUM_DATA = 3;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];
-   std::string stringValues[NUM_DATA];
 };
 #endif // Rvector3_hpp

@@ -25,6 +25,7 @@
 #include "Rvector3.hpp"
 #include "Rmatrix33.hpp"
 #include "RealUtilities.hpp"
+#include "Linear.hpp"
 
 //---------------------------------
 //  static data
@@ -568,78 +569,56 @@ const std::string* Rmatrix33::GetDataDescriptions() const
 
 
 //------------------------------------------------------------------------------
-//  std::string* ToValueStrings(Integer w=10, Integer p=8)
+// std::string ToString(Integer precision) const
 //------------------------------------------------------------------------------
-std::string* Rmatrix33::ToValueStrings(Integer w, Integer p)
-{
-   std::stringstream ss("");
-   
-   ss.setf(std::ios::right);
-
-   for (int i=0; i<rowsD*colsD; i++)
-   {
-      ss.str("");
-      ss << std::setw(w) << std::setprecision(p) << elementD[i];
-      stringValues[i] = ss.str();
-   }
-   
-//    ss << std::setw(w) << std::setprecision(p) << elementD[0];
-//    stringValues[0] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[1];
-//    stringValues[1] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[2];
-//    stringValues[2] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[3];
-//    stringValues[3] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[4];
-//    stringValues[4] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[5];
-//    stringValues[5] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[6];
-//    stringValues[6] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[7];
-//    stringValues[7] = ss.str();
-   
-//    ss.str("");
-//    ss << std::setw(w) << std::setprecision(p) << elementD[8];
-//    stringValues[8] = ss.str();
-   
-   return stringValues;
-}
-
-
-//------------------------------------------------------------------------------
-//  std::string ToString(Integer w=17, Integer p=10)
-//------------------------------------------------------------------------------
-/**
- * @return data value string
+/*
+ * Formats Rmatrix33 value to String.
+ *
+ * @param  precision  Precision to be used in formatting
+ *
+ * @return Formatted Rmatrix33 value string
  */
 //------------------------------------------------------------------------------
-std::string Rmatrix33::ToString(Integer w, Integer p)
+std::string Rmatrix33::ToString(Integer precision) const
 {
-   std::string s;
-   std::string *val;
+   GmatGlobal *global = GmatGlobal::Instance();
+   global->SetActualFormat(false, precision, 0, true, 1);
    
-   val = ToValueStrings(w, p);
-   
-   s = s + "\n";
-   for (int i=0; i<3; i++)
-      s = s + val[i*3] + "  " + val[i*3+1] + "  " +  val[i*3+2] + "\n";
-   
-   return s;
+   std::stringstream ss("");
+   ss << *this;
+   return ss.str();
 }
 
+
+//------------------------------------------------------------------------------
+// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
+//                      Integer precision = GmatGlobal::DATA_PRECISION,
+//                      Integer width = GmatGlobal::DATA_WIDTH,
+//                      bool horizontal = false, Integer spacing = 1) const
+//------------------------------------------------------------------------------
+/*
+ * Formats Rmatrix33 value to String.
+ *
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal
+ * @param  scientific  Formats using scientific notation if true
+ * @param  precision  Precision to be used in formatting
+ * @param  width  Width to be used in formatting
+ * @param  horizontal  Format horizontally if true
+ * @param  spacing  Spacing to be used in formatting
+ *
+ * @return Formatted Rmatrix33 value string
+ */
+//------------------------------------------------------------------------------
+std::string Rmatrix33::ToString(bool useCurrentFormat, bool scientific,
+                               Integer precision, Integer width,
+                               bool horizontal, Integer spacing) const
+{
+   GmatGlobal *global = GmatGlobal::Instance();
+   
+   if (!useCurrentFormat)
+      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
+   
+   std::stringstream ss("");
+   ss << *this;
+   return ss.str();
+}

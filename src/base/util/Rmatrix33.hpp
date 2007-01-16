@@ -91,13 +91,16 @@ public:
                                              const Rmatrix33& m2); 
    
    const std::string* GetDataDescriptions() const;
-
-   std::string* ToValueStrings(Integer w=17, Integer p=10);
-   virtual std::string ToString(Integer w=17, Integer p=10);
    
-protected:
+   std::string ToString(Integer precision) const;
+   
+   std::string ToString(bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH,
+                        bool horizontal = true, Integer spacing = 1) const;
+      
 private:
    static const std::string descs[9];
-   std::string stringValues[9];
 };
 #endif // Rmatrix33_hpp

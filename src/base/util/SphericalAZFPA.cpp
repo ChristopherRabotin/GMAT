@@ -206,7 +206,7 @@ Rvector6 KeplerianToSphericalAZFPA(const Rvector6& keplerian, const Real mu,
 {
    Rvector6 cartesian;
 
-   cartesian = KeplerianToCartesian(keplerian,mu,anomaly);
+   cartesian = CoordUtil::KeplerianToCartesian(keplerian,mu,anomaly);
    return (CartesianToSphericalAZFPA(cartesian)); 
 }
 
@@ -220,7 +220,7 @@ Rvector6 SphericalAZFPAToKeplerian(const Rvector6& spherical, const Real mu,
    Rvector6 cartesian;
 
    cartesian = SphericalAZFPAToCartesian(spherical);
-   return (CartesianToKeplerian(cartesian,mu,anomaly));
+   return (CoordUtil::CartesianToKeplerian(cartesian,mu,anomaly));
 }
 
 

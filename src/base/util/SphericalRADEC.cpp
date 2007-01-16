@@ -338,7 +338,7 @@ Rvector6 SphericalRADECToCartesian(const Rvector6& spherical)
 Rvector6 KeplerianToSphericalRADEC(const Rvector6& keplerian, 
                                    const Real mu, Anomaly anomaly)
 {
-   Rvector6 cartesian = KeplerianToCartesian(keplerian,mu,anomaly);
+   Rvector6 cartesian = CoordUtil::KeplerianToCartesian(keplerian,mu,anomaly);
 
    return CartesianToSphericalRADEC(cartesian);
 }
@@ -352,7 +352,7 @@ Rvector6 SphericalRADECToKeplerian(const Rvector6& spherical,
 {
    Rvector6 cartesian = SphericalRADECToCartesian(spherical);
 
-   return (CartesianToKeplerian(cartesian,mu,anomaly));
+   return (CoordUtil::CartesianToKeplerian(cartesian,mu,anomaly));
 }
 
 //------------------------------------------------------------------------------

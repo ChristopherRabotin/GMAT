@@ -30,11 +30,13 @@ struct RealUtilitiesExceptions
 {
    class ArgumentError : public BaseException
    {public : ArgumentError(const std::string& message = "")
-       : BaseException("Real Utilities Argument Error: ", message) {};  };
+       //: BaseException("Real Utilities Argument Error: ", message) {};  };
+       : BaseException("", message) {};  };
    
    class IllegalTime   : public BaseException
    {public : IllegalTime(const std::string& message = "")
-       : BaseException("Real Utilities Illegal Time: ", message) {};  };
+       //: BaseException("Real Utilities Illegal Time: ", message) {};  };
+       : BaseException("", message) {};  };
 };
 
 namespace GmatMathUtil
@@ -112,7 +114,8 @@ namespace GmatMathUtil
       
    Real    ASinh(Real x, Real cycleInRad=TWO_PI); 
    Real    ACosh(Real x, Real cycleInRad=TWO_PI); 
-      
+   Real    ATanh(Real x, Real cycleInRad=TWO_PI); 
+   
    Real    Ln(Real x);             // Natural (base e) Logarithm of x
    Real    Log(Real x);            // Natural (base e) Logarithm of x
    Real    Log10(Real x);          // Base 10 Logarithm of x

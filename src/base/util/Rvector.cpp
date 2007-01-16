@@ -558,24 +558,9 @@ const Rvector& Rvector::operator/=(const Rmatrix &m)
 }
 
 
-//loj: 4/19/05 Added
 //------------------------------------------------------------------------------
-//  std::string ToString()
+// bool Rvector::MakeZeroVector()
 //------------------------------------------------------------------------------
-std::string Rvector::ToString()
-{
-   std::stringstream ss("");
-   ss.precision(12);
-   //ss.setf(std::ios::showpoint);
-   
-   for (Integer i=0; i<sizeD; i++) 
-   {
-      ss << elementD[i] << " ";
-   }
-
-   return ss.str();
-}
-
 bool Rvector::MakeZeroVector()
 {
    for (Integer i=0; i<sizeD; i++)
@@ -583,7 +568,6 @@ bool Rvector::MakeZeroVector()
    return true;
 }
 
-//arg: 4/24/06 Added
 //------------------------------------------------------------------------------
 //  Real Norm()
 //------------------------------------------------------------------------------
@@ -601,6 +585,63 @@ Real Rvector::Norm()
    return GmatMathUtil::Sqrt(sum);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string ToString(Integer precision) const
+//------------------------------------------------------------------------------
+/*
+ * Formats Rvector value to String.
+ *
+ * @param  precision  Precision to be used in formatting
+ *
+ * @return Formatted Rvector value string
+ */
+//------------------------------------------------------------------------------
+std::string Rvector::ToString(Integer precision) const
+{
+   GmatGlobal *global = GmatGlobal::Instance();
+   global->SetActualFormat(false, precision, 0, true, 1);
+   
+   std::stringstream ss("");
+   ss << *this;
+   return ss.str();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
+//                      Integer precision = GmatGlobal::DATA_PRECISION,
+//                      Integer width = GmatGlobal::DATA_WIDTH,
+//                      bool horizontal = false, Integer spacing = 1) const
+//------------------------------------------------------------------------------
+/*
+ * Formats Rvector value to String.
+ *
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal
+ * @param  scientific  Formats using scientific notation if true
+ * @param  precision  Precision to be used in formatting
+ * @param  width  Width to be used in formatting
+ * @param  horizontal  Format horizontally if true
+ * @param  spacing  Spacing to be used in formatting
+ *
+ * @return Formatted Rvector value
+ */
+//------------------------------------------------------------------------------
+std::string Rvector::ToString(bool useCurrentFormat, bool scientific,
+                              Integer precision, Integer width,
+                              bool horizontal, Integer spacing) const
+{
+   GmatGlobal *global = GmatGlobal::Instance();
+   
+   if (!useCurrentFormat)
+      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
+   
+   std::stringstream ss("");
+   ss << *this;
+   return ss.str();
+}
+
+
 //---------------------------------
 // friend function
 //---------------------------------
@@ -614,16 +655,16 @@ Rvector operator*(Real s, const Rvector &v)
     int i;
 
     if (v.isSizedD == false)
-    {
         throw ArrayTemplateExceptions::UnsizedArray();
-    }
+
     Rvector returnRvector(v.sizeD);
+    
     for (i = 0; i < v.sizeD; i++)
-    {
         returnRvector.elementD[i] = s * v.elementD[i];
-    }
+    
     return returnRvector;
 }
+
 
 //------------------------------------------------------------------------------
 //  <friend>
@@ -639,20 +680,16 @@ Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2)
     int i,j;
 
     if ((v1.isSizedD == false) || (v2.isSizedD == false))
-    {
         throw ArrayTemplateExceptions::UnsizedArray();
-    }
 
     Rmatrix prod(v1.sizeD, v2.sizeD);
     for (i = 0; i < v1.sizeD; i++)
-    {
         for (j = 0; j < v2.sizeD;j++)
-        {
             prod(i,j) = v1.elementD[i] * v2.elementD[j];
-        }
-    }
+    
     return prod;
 }
+
 
 //------------------------------------------------------------------------------
 // friend std::istream& operator>> (std::istream &input, Rvector &a)
@@ -661,6 +698,7 @@ std::istream& operator>> (std::istream &input, Rvector &a)
 {
    return GmatRealUtil::operator>> (input, a);
 }
+
 
 //------------------------------------------------------------------------------
 // friend std::ostream& operator<< (std::ostream &output, const Rvector &a)

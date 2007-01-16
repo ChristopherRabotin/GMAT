@@ -213,7 +213,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    // report the difference summary
    std::string outLine;
    outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
-      ToString(tol, true, 7, 6) + "\n\n";
+      ToString(tol, false, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
    #if DEBUG_COMPARE_REPORT
@@ -258,17 +258,17 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
 
       if (colTitles.size() == 0)
       {
-         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], true, 7, 6) +
+         outLine = ToString(i+1) + "     " + ToString(minDiffs[i], false, true, 7, 6) +
             "   " + ToString(minLines[i]) + "    " +
-            ToString(maxDiffs[i], true, 7, 6) + "   " + ToString(maxLines[i]) +
+            ToString(maxDiffs[i], false, true, 7, 6) + "   " + ToString(maxLines[i]) +
             "       " + minGtTol + "         " + maxGtTol + "\n";
       }
       else
       {
          sprintf(title, "%-30.30s", colTitles[i].c_str());
          outLine = ToString(i+1) + "     " + title + "   " +
-            ToString(minDiffs[i], true, 7, 6) + "   " + ToString(minLines[i]) +
-            "    " + ToString(maxDiffs[i], true, 7, 6) + "   " +
+            ToString(minDiffs[i], false, true, 7, 6) + "   " + ToString(minLines[i]) +
+            "    " + ToString(maxDiffs[i], false, true, 7, 6) + "   " +
             ToString(maxLines[i]) + "       " + minGtTol + "         " +
             maxGtTol + "\n";
       }
@@ -576,7 +576,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    // report the difference summary
    std::string outLine;
    outLine = "Total lines compared: " + ToString(count) + ",   Tolerance: " +
-      ToString(tol, true, 7, 6) + "\n\n";
+      ToString(tol, false, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
    #if DEBUG_COMPARE_REPORT
@@ -624,15 +624,15 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       if (numDirsToCompare == 2)
       {
          outLine = ToString(i+1) + "     " +
-            ToString(maxDiffs1[i], true, 7, 6) + "      " + maxGtTol1 + "       " +
-            ToString(maxDiffs2[i], true, 7, 6) + "      " + maxGtTol2 + "\n";
+            ToString(maxDiffs1[i], false, true, 7, 6) + "      " + maxGtTol1 + "       " +
+            ToString(maxDiffs2[i], false, true, 7, 6) + "      " + maxGtTol2 + "\n";
       }
       else if (numDirsToCompare == 3)
       {
          outLine = ToString(i+1) + "     " +
-            ToString(maxDiffs1[i], true, 7, 6) + "      " + maxGtTol1 + "       " +
-            ToString(maxDiffs2[i], true, 7, 6) + "      " + maxGtTol2 + "       " +
-            ToString(maxDiffs3[i], true, 7, 6) + "      " + maxGtTol3 + "\n";
+            ToString(maxDiffs1[i], false, true, 7, 6) + "      " + maxGtTol1 + "       " +
+            ToString(maxDiffs2[i], false, true, 7, 6) + "      " + maxGtTol2 + "       " +
+            ToString(maxDiffs3[i], false, true, 7, 6) + "      " + maxGtTol3 + "\n";
       }
       
       textBuffer.push_back(outLine);

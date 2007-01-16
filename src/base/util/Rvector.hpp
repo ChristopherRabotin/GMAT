@@ -26,6 +26,7 @@
 #include "ArrayTemplate.hpp"
 #include "BaseException.hpp"
 #include "RealUtilities.hpp"
+#include "GmatGlobal.hpp"      // for DATA_PRECISION
 
 //forward declaration for matrix operations
 class Rmatrix;
@@ -69,17 +70,24 @@ public:
    const Rvector& operator*=(const Rmatrix &m);
    Rvector operator/(const Rmatrix &m) const;
    const Rvector& operator/=(const Rmatrix &m);
-    
-   std::string ToString(); //loj: 4/19/05 Added
-   virtual bool MakeZeroVector();  // wcs   2006.02.17
-   Real Norm(); //arg 4/24/06
+      
+   virtual bool MakeZeroVector();
+   Real Norm();
+   
+   std::string ToString(Integer precision) const;
+   
+   std::string ToString(bool useCurrentFormat = true,
+                        bool scientific = false,
+                        Integer precision = GmatGlobal::DATA_PRECISION,
+                        Integer width = GmatGlobal::DATA_WIDTH,
+                        bool horizontal = true, Integer spacing = 1) const;
    
    friend Rvector operator*(Real s, const Rvector &v);
    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);
    
    friend std::istream& operator>> (std::istream &input, Rvector &a);
    friend std::ostream& operator<< (std::ostream &output, const Rvector &a);
-
+   
 protected:
 private:
 };

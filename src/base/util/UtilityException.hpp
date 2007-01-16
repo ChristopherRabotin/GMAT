@@ -21,11 +21,22 @@
 
 #include "BaseException.hpp"
 
+// General utility exception
 class UtilityException : public BaseException
 {
 public:
    UtilityException(const std::string& message = 
                     "Error occurred in utility class") 
+      : BaseException(message) {};
+};
+
+
+// Time utility exception
+class TimeException : public BaseException
+{
+public:
+   TimeException(const std::string& message = 
+                 "Error occurred in time utility class") 
       : BaseException(message) {};
 };
 #endif
