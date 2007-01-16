@@ -20,15 +20,32 @@
 #include "StateConverter.hpp"
 #include "SpacePoint.hpp"
 #include "Equinoctial.hpp"
+#include "CoordUtil.hpp"
+#include "Keplerian.hpp"
+#include "ModKeplerian.hpp"
+#include "Equinoctial.hpp"
+#include "SphericalAZFPA.hpp"
+#include "SphericalRADEC.hpp"
 #include "MessageInterface.hpp"
+#include "UtilityException.hpp"
 
-// #define DEBUG_STATE_CONVERTER 1
+//#define DEBUG_STATE_CONVERTER 1
 
 //-------------------------------------
 // static data
 //-------------------------------------
 
 const Real StateConverter::DEFAULT_MU = 0.3986004415e+06;
+const std::string StateConverter::STATE_TYPE_TEXT[StateTypeCount] =
+{
+   "Cartesian",
+   "Keplerian",
+   "ModifiedKeplerian",
+   "SphericalAZFPA",
+   "SphericalRADEC",
+   "Equinoctial",
+};
+
 
 //-------------------------------------
 // public methods
@@ -42,11 +59,11 @@ const Real StateConverter::DEFAULT_MU = 0.3986004415e+06;
  *
  */
 StateConverter::StateConverter()
-// :   Converter("Cartesian") 
 {
-   type = "Cartesian";
-   mu = DEFAULT_MU;
+//    mStateType = "Cartesian";
+   mMu = DEFAULT_MU;
 }
+
 
 //---------------------------------------------------------------------------
 //  StateConverter(const std::string &newTtype)
@@ -57,12 +74,13 @@ StateConverter::StateConverter()
  * @param <newType> Element type of coordinate system.
  *
  */
+//---------------------------------------------------------------------------
 StateConverter::StateConverter(const std::string &newType) 
-// :   Converter(type) 
 {
-   type = newType;
-   mu = DEFAULT_MU;
+//    mStateType = newType;
+   mMu = DEFAULT_MU;
 }
+
 
 //---------------------------------------------------------------------------
 //  StateConverter(const std::string &newTtype, const Real newMu)
@@ -73,11 +91,13 @@ StateConverter::StateConverter(const std::string &newType)
  * @param <newType> Element type of coordinate system.
  *
  */
+//---------------------------------------------------------------------------
 StateConverter::StateConverter(const std::string &newType, const Real newMu) 
 {
-   type = newType;
-   mu = newMu;
+//    mStateType = newType;
+   mMu = newMu;
 }
+
 
 //---------------------------------------------------------------------------
 //  StateConverter(const StateConverter &stateConverter)
@@ -87,12 +107,13 @@ StateConverter::StateConverter(const std::string &newType, const Real newMu)
  *
  * @param <stateConverter> The original that is being copied.
  */
+//---------------------------------------------------------------------------
 StateConverter::StateConverter(const StateConverter &stateConverter) 
-//    : Converter (stateConverter.type)
 {
-   type = stateConverter.type;
-   mu   = stateConverter.mu; 
+//    mStateType = stateConverter.mStateType;
+   mMu   = stateConverter.mMu; 
 }
+
 
 //---------------------------------------------------------------------------
 //  ~StateConverter()
@@ -114,322 +135,663 @@ StateConverter::~StateConverter()
  *
  * @return Reference to this object
  */
+//---------------------------------------------------------------------------
 StateConverter& StateConverter::operator=(const StateConverter &converter)
 {
-    // Don't do anything if copying self
-    if (&converter == this)
-        return *this;
+   // Don't do anything if copying self
+   if (&converter == this)
+      return *this;
         
-    type = converter.type;
-    mu   = converter.mu; 
+//    mStateType = converter.mStateType;
+   mMu   = converter.mMu; 
    
-    // Will fix it later
-    return *this;
+   return *this;
 }
 
-//---------------------------------------------------------------------------
-//  Real StateConverter::GetMu() const
-//---------------------------------------------------------------------------
-/**
- * Get the mu 
- *
- * @return mu's value
- */
-Real StateConverter::GetMu() const
-{
-   return mu;
-}
 
 //---------------------------------------------------------------------------
 //  bool StateConverter::SetMu(const CoordinateSystem *cs)
 //---------------------------------------------------------------------------
 /**
- * Set the mu from the Celestial body's gravitational constant
+ * Set the mu from the central body of the given coordinate system.
  *
  * @param <cs>  Given coordinate system
  * @return true if successful; otherwise, return false
  *
  */
+//---------------------------------------------------------------------------
 bool StateConverter::SetMu(const CoordinateSystem *coordSys)
 {
    #if DEBUG_STATE_CONVERTER
       MessageInterface::ShowMessage("\nStateConverter::SetMu(cs) enters...\n");
    #endif
-
+      
    // Check for empty coordinate system then stop process
    if (coordSys == NULL)
       return false;
-
+   
    // Get the coordinate system's origin
    SpacePoint *origin = coordSys->GetOrigin();
-
+   
    #if DEBUG_STATE_CONVERTER
       std::string typeName = origin->GetTypeName();
-      MessageInterface::ShowMessage("\n...Type name is '%s'.\n ",
-         typeName.c_str());
-   
+      MessageInterface::ShowMessage("...Origin type is '%s'.", typeName.c_str());
+      
       if (origin->IsOfType(Gmat::CELESTIAL_BODY))
-         MessageInterface::ShowMessage("\n...It is CelestialBody.");
+         MessageInterface::ShowMessage("It is CelestialBody.\n");
       else
          MessageInterface::ShowMessage(
-            "\n...CoordSys origin is not a CelestialBody.\n ");
+            "CoordSys origin is not a CelestialBody.\n ");
    #endif
-
+      
    // Check if it is Celestial Body then get the mu; 
    // Otherwise, it sets mu to zero
    if (origin->IsOfType(Gmat::CELESTIAL_BODY))
-      mu = ((CelestialBody *)origin)->GetGravitationalConstant(); 
+      mMu = ((CelestialBody *)origin)->GetGravitationalConstant(); 
    else
-      mu = 0.0;
-
+      mMu = 0.0;
+   
    #if DEBUG_STATE_CONVERTER
-      MessageInterface::ShowMessage("\n...mu = %f before "
-        "StateConverter::SetMu() exits\n\n",mu);
+      MessageInterface::ShowMessage("...mMu = %f before "
+        "StateConverter::SetMu() exits\n\n", mMu);
+   #endif
+      
+   return true;
+}
+
+
+// //---------------------------------------------------------------------------
+// //  bool StateConverter::SetMu(const SolarSystem *solarSystem, 
+// //                             const std::string &body)
+// //---------------------------------------------------------------------------
+// /**
+//  * Set the mu from the Celestial body's gravitational constant
+//  *
+//  * @return true if successful; otherwise, return false
+//  *
+//  */
+// //---------------------------------------------------------------------------
+// bool StateConverter::SetMu(SolarSystem *solarSystem, 
+//                            const std::string &body)
+// {
+//    if (solarSystem == NULL) return false;
+
+//    CelestialBody *centralBody = solarSystem->GetBody(body);
+//    if (centralBody == NULL) return false;
+
+//    // Get the gravitational constant and set new value for mu
+//    mMu = centralBody->GetGravitationalConstant();
+
+//    return true;
+// }
+
+
+//---------------------------------------------------------------------------
+// Rvector6 FromCartesian(const Rvector6 &state, const std::string &toType,
+//                        const std::string &anomalyType = "TA")
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::FromCartesian(const Rvector6 &state,
+                                       const std::string &toType,
+                                       const std::string &anomalyType)
+{
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromCartesian() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
    #endif
 
-   return true;
+   if (toType == STATE_TYPE_TEXT[CARTESIAN])
+      return state;
+   
+   Rvector6 outState;
+   
+   if (toType == "Keplerian" || toType == "ModifiedKeplerian") 
+   {
+      Rvector6 kepl = Keplerian::CartesianToKeplerian(mMu, state, anomalyType);
+      
+      if (toType == "ModifiedKeplerian")
+         outState = KeplerianToModKeplerian(kepl);
+      else
+         outState = kepl; 
+   }
+   else if (toType == "SphericalAZFPA")
+   {
+      outState = CartesianToSphericalAZFPA(state);
+   }
+   else if (toType == "SphericalRADEC")
+   {
+      outState = CartesianToSphericalRADEC(state);
+   }
+   else if (toType == "Equinoctial")
+   {
+      outState = CartesianToEquinoctial(state, mMu);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"Cartesian\" to \"" + toType +
+          "\". \"" + toType + "\" is Unknown State Type\n");
+   }
+   
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromCartesian() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+
+   return outState;
 }
 
 
 //---------------------------------------------------------------------------
-//  bool StateConverter::SetMu(const SolarSystem *solarSystem, 
-//                             const std::string &body)
+// Rvector6 FromKeplerian(const Rvector6 &state, const std::string &toType,
+//                        const std::string &anomalyType = "TA")
 //---------------------------------------------------------------------------
-/**
- * Set the mu from the Celestial body's gravitational constant
- *
- * @return true if successful; otherwise, return false
- *
- */
-bool StateConverter::SetMu(SolarSystem *solarSystem, 
-                           const std::string &body)
+Rvector6 StateConverter::FromKeplerian(const Rvector6 &state,
+                                       const std::string &toType,
+                                       const std::string &anomalyType)
 {
-   if (solarSystem == NULL) return false;
-
-   CelestialBody *centralBody = solarSystem->GetBody(body);
-   if (centralBody == NULL) return false;
-
-   // Get the gravitational constant and set new value for mu
-   mu = centralBody->GetGravitationalConstant();
-
-   return true;
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromKeplerian() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (toType == STATE_TYPE_TEXT[MOD_KEPLERIAN])
+      return state;
+   
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   Rvector6 outState;
+   
+   if (toType == "Cartesian")
+   {
+      //outState = CoordUtil::KeplerianToCartesian(state, mMu, anomaly);
+      outState = Keplerian::KeplerianToCartesian(mMu, state, anomalyType);
+   }
+   else if (toType == "ModifiedKeplerian")
+   {
+      outState = KeplerianToModKeplerian(state); 
+   }
+   else if (toType == "SphericalAZFPA")
+   {
+      outState = KeplerianToSphericalAZFPA(state, mMu, anomaly);
+   }
+   else if (toType == "SphericalRADEC")
+   {
+      outState = KeplerianToSphericalRADEC(state, mMu, anomaly);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"Keperian\" to \"" + toType +
+          "\". \"" + toType + " is Unknown State Type\n");
+   }
+   
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromKeplerian() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
 }
 
 
-//loj: 10/21/04 added
 //---------------------------------------------------------------------------
-//  Rvector6 StateConverter::Convert(const Rvector6 &state,   
-//                                   const std::string &fromElementType,
-//                                   const std::string &toElementType,
-//                                   Anomaly &anomaly)
+// Rvector6 FromModKeplerian(const Rvector6 &state, const std::string &toType,
+//                           const std::string &anomalyType = "TA")
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::FromModKeplerian(const Rvector6 &state,
+                                          const std::string &toType,
+                                          const std::string &anomalyType)
+{
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromModKeplerian() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (toType == STATE_TYPE_TEXT[KEPLERIAN])
+      return state;
+   
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   Rvector6 outState;
+   
+   if (toType == "Cartesian")
+   {
+      Rvector6 keplerian = ModKeplerianToKeplerian(state);
+      outState = CoordUtil::KeplerianToCartesian(keplerian, mMu, anomaly);
+   }
+   else if (toType == "Keplerian")
+   {
+      outState = ModKeplerianToKeplerian(state); 
+   }
+   else if (toType == "SphericalAZFPA")
+   {
+      Rvector6 keplerian = ModKeplerianToKeplerian(state);
+      outState = KeplerianToSphericalAZFPA(keplerian, mMu, anomaly);
+   }
+   else if (toType == "SphericalRADEC")
+   {
+      Rvector6 keplerian = ModKeplerianToKeplerian(state);
+      outState = KeplerianToSphericalRADEC(keplerian, mMu, anomaly);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"ModKeplerian\" to \"" + toType +
+          "\". \"" + toType + " is Unknown State Type\n");
+   }
+   
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromModKeplerian() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
+}
+
+
+//---------------------------------------------------------------------------
+// Rvector6 FromSphericalAZFPA(const Rvector6 &state, const std::string &toType,
+//                             const std::string &anomalyType = "TA")
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::FromSphericalAZFPA(const Rvector6 &state,
+                                            const std::string &toType,
+                                            const std::string &anomalyType)
+{
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromSphericalAZFPA() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (toType == STATE_TYPE_TEXT[SPH_AZFPA])
+      return state;
+   
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   Rvector6 outState;
+      
+   if (toType == "Cartesian")
+   {
+      outState = SphericalAZFPAToCartesian(state);
+   }
+   else if (toType == "Keplerian")
+   {
+      outState = SphericalAZFPAToKeplerian(state, mMu, anomaly);
+   }
+   else if (toType == "ModifiedKeplerian")
+   {
+      Rvector6 keplerian = SphericalAZFPAToKeplerian(state, mMu, anomaly);
+      outState = KeplerianToModKeplerian(keplerian);
+   }
+   else if (toType == "SphericalRADEC")
+   {
+      outState = AZFPA_To_RADECV(state);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"SphericalAZFPA\" to \"" + toType +
+          "\". \"" + toType + " is Unknown State Type\n");
+   }
+   
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromSphericalAZFPA() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
+}
+
+
+//---------------------------------------------------------------------------
+// Rvector6 FromSphericalRADEC(const Rvector6 &state, const std::string &toType,
+//                             const std::string &anomalyType = "TA")
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::FromSphericalRADEC(const Rvector6 &state,
+                                            const std::string &toType,
+                                            const std::string &anomalyType)
+{
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromSphericalRADEC() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (toType == STATE_TYPE_TEXT[SPH_RADEC])
+      return state;
+   
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   Rvector6 outState;
+   
+   if (toType == "Cartesian")
+   {
+      outState = SphericalRADECToCartesian(state);
+   }
+   else if (toType == "Keplerian")
+   {
+      outState = SphericalRADECToKeplerian(state, mMu, anomaly);
+   }
+   else if (toType == "ModifiedKeplerian")
+   {
+      Rvector6 keplerian = SphericalRADECToKeplerian(state, mMu, anomaly);
+      outState = KeplerianToModKeplerian(keplerian);
+   }
+   else if (toType == "SphericalAZFPA")
+   {
+      outState = RADECV_To_AZFPA(state);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"SphericalRADEC\" to \"" + toType +
+          "\". \"" + toType + " is Unknown State Type\n");
+   }
+   
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromSphericalRADEC() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
+}
+
+
+//---------------------------------------------------------------------------
+// Rvector6 FromEquinoctial(const Rvector6 &state, const std::string &toType,
+//                          const std::string &anomalyType = "TA")
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::FromEquinoctial(const Rvector6 &state,
+                                         const std::string &toType,
+                                         const std::string &anomalyType)
+{
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromEquinoctial() toType=%s, anomalyType=%s\n"
+       "   state=%s\n", toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (toType == STATE_TYPE_TEXT[EQUINOCTIAL])
+      return state;
+   
+   Anomaly anomaly;
+   anomaly.Set(state[0], state[1], state[5], anomalyType);
+   
+   Rvector6 cartState = EquinoctialToCartesian(state, mMu);
+   Rvector6 outState;
+   
+   if (toType == "Cartesian")
+   {
+      outState = cartState;
+   }
+   else if (toType == "Keplerian" || toType == "ModifiedKeplerian") 
+   {
+      Rvector6 kepl =
+         CoordUtil::CartesianToKeplerian(cartState, mMu, anomaly);
+      
+      if (toType == "ModifiedKeplerian")
+         outState =  KeplerianToModKeplerian(kepl);
+      else
+         outState = kepl; 
+   } 
+   else if (toType == "SphericalAZFPA")
+   {
+      outState =  CartesianToSphericalAZFPA(cartState);
+   }
+   else if (toType == "SphericalRADEC")
+   {
+      outState = CartesianToSphericalRADEC(cartState);
+   }
+   else
+   {
+      throw UtilityException
+         ("Cannot convert the state from \"Equinoctial\" to \"" + toType +
+          "\". \"" + toType + " is Unknown State Type\n");
+   }
+
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::FromEquinoctial() returning \n   %s\n",
+       outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
+   
+}
+
+
+// //---------------------------------------------------------------------------
+// //  Rvector6 Convert(const Rvector6 &state, const std::string &fromType,
+// //                   const std::string &toType,
+// //                   Anomaly::AnomalyType anomalyType = Anomaly::TA)
+// //---------------------------------------------------------------------------
+// /**
+//  * Converts state from fromType to toType.
+//  *
+//  * @param <state> state to convert
+//  * @param <fromType>  state type to convert from
+//  * @param <toType> state type to convert to
+//  * @param <anomalyType> anomaly type string if toType is Mod/Keplerian
+//  *
+//  * @return Converted states from the specific element type 
+//  */
+// //---------------------------------------------------------------------------
+// Rvector6 StateConverter::Convert(const Rvector6 &state,   
+//                                  const std::string &fromType,
+//                                  const std::string &toType,
+//                                  Anomaly::AnomalyType anomalyType)
+// {
+//    if (fromType == "Cartesian" && toType == "Keplerian")
+//    {
+//       return Keplerian::CartesianToKeplerian(mMu, state, anomalyType);
+//    }
+//    else
+//    {
+//       Anomaly tempAnomaly;
+//       tempAnomaly.SetType(anomalyType);
+//       Real tempState[6];
+//       for (int i=0; i<6; i++)
+//          tempState[i] = state.Get(i);
+//       return Convert(tempState, fromType, toType, tempAnomaly);
+//    }
+// }
+
+
+//---------------------------------------------------------------------------
+//  Rvector6 Convert(const Rvector6 &state, const std::string &fromType,
+//                   const std::string &toType,
+//                   const std::string &anomalyType = "TA")
 //---------------------------------------------------------------------------
 /**
- * Assignment operator for StateConverter structures.
+ * Converts state from fromType to toType.
  *
- * @param <state> Element states 
- * @param <fromElementType>  Element Type 
- * @param <toElementType> Element Type
+ * @param <state> state to convert
+ * @param <fromType>  state type to convert from
+ * @param <toType> state type to convert to
+ * @param <anomalyType> anomaly type string if toType is Mod/Keplerian
  *
  * @return Converted states from the specific element type 
  */
 //---------------------------------------------------------------------------
 Rvector6 StateConverter::Convert(const Rvector6 &state,   
-                                 const std::string &fromElementType,
-                                 const std::string &toElementType,
-                                 Anomaly &anomaly)
+                                 const std::string &fromType,
+                                 const std::string &toType,
+                                 const std::string &anomalyType)
 {
-   Real tempState[6];
-   for (int i=0; i<6; i++)
-      tempState[i] = state.Get(i);
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::Convert() fromType=%s, toType=%s, anomalyType=%s\n"
+       "   state=%s\n", fromType.c_str(), toType.c_str(), anomalyType.c_str(),
+       state.ToString(13).c_str());
+   #endif
+   
+   if (fromType == toType)
+      return state;
 
-   return Convert(tempState, fromElementType, toElementType, anomaly);
+   Rvector6 outState;
+   
+   try
+   {
+      // Determine the input of state type
+      if (fromType == "Cartesian") 
+      {
+         outState = FromCartesian(state, toType, anomalyType);
+      }
+      else if (fromType == "Keplerian")
+      {       
+         outState = FromKeplerian(state, toType, anomalyType);
+      }
+      else if (fromType == "ModifiedKeplerian")
+      {
+         outState = FromModKeplerian(state, toType, anomalyType);
+      }
+      else if (fromType == "SphericalAZFPA")
+      {
+         outState = FromSphericalAZFPA(state, toType, anomalyType);
+      }
+      else if (fromType == "SphericalRADEC")
+      {       
+         outState = FromSphericalRADEC(state, toType, anomalyType);
+      }
+      else if (fromType == "Equinoctial")
+      {
+         outState = FromEquinoctial(state, toType, anomalyType);
+      }
+      else
+      {
+         throw UtilityException
+            ("StateConverter::Convert() Cannot convert the state \"" +
+             fromType + "\" to \"" + toType + "\". \"" + fromType +
+             " is Unknown State Type\n");
+      }
+   }
+   catch(UtilityException &ue)
+   {
+      throw ue;
+   }
+
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+      ("StateConverter::Convert() returning \n   %s\n", outState.ToString(13).c_str());
+   #endif
+   
+   return outState;
 }
 
+
 //---------------------------------------------------------------------------
-//  Rvector6 StateConverter::Convert(const Real *state,   
-//                                   const std::string &toElementType)
+//  Rvector6 Convert(const Rvector6 &state, const std::string &fromType,
+//                   const std::string &toType, Anomaly &anomaly)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for StateConverter structures.
  *
  * @param <state> Element states 
- * @param <toElementType> Element Type
+ * @param <fromType>  Element Type 
+ * @param <toType> Element Type
  *
  * @return Converted states from the specific element type 
  */
-Rvector6 StateConverter::Convert(const Real *state,
-                                 const std::string &toElementType)
+//---------------------------------------------------------------------------
+Rvector6 StateConverter::Convert(const Rvector6 &state,   
+                                 const std::string &fromType,
+                                 const std::string &toType,
+                                 Anomaly &anomaly)
 {
-   Anomaly tempAnomaly;
-   return Convert(state, type, toElementType, tempAnomaly);
+   #if DEBUG_STATE_CONVERTER
+   MessageInterface::ShowMessage
+       ("StateConverter::Convert() fromType=%s, toType=%s, state=\n%s\n",
+        fromType.c_str(), toType.c_str(), state.ToString(13).c_str());
+
+   MessageInterface::ShowMessage
+       ("Anomaly info-> a: %f, e: %f, type:%s, value: %f\n",
+        anomaly.GetSMA(),anomaly.GetECC(), anomaly.GetTypeString().c_str(),
+        anomaly.GetValue());
+   #endif
+   
+   // Check if both are the same then return the state with no conversion 
+   if (fromType == toType)
+      return state;
+   
+   std::string anomalyType = anomaly.GetTypeString();
+   return Convert(state, fromType, toType, anomalyType);
+   
 }
+
+
+// //---------------------------------------------------------------------------
+// //  Rvector6 StateConverter::Convert(const Real *state,   
+// //                                   const std::string &toType)
+// //---------------------------------------------------------------------------
+// /**
+//  * Converts state from internal state type to requested state type
+//  *
+//  * @param <state>  input state
+//  * @param <toType> state type to convert state to
+//  *
+//  * @return Converted states from the specific element type 
+//  */
+// //---------------------------------------------------------------------------
+// Rvector6 StateConverter::Convert(const Real *state,
+//                                  const std::string &toType)
+// {
+//    Anomaly tempAnomaly;
+//    return Convert(state, mStateType, toType, tempAnomaly);
+// }
+
 
 //---------------------------------------------------------------------------
 //  Rvector6 StateConverter::Convert(Real *state,   
-//                                   const std::string &fromElementType,
-//                                   const std::string &toElementType,
+//                                   const std::string &fromType,
+//                                   const std::string &toType,
 //                                   Anomaly &anomaly)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for StateConverter structures.
  *
- * @param <state>            Element states 
- * @param <fromElementType>  Element Type converted from
- * @param <toElementType>    Element Type converted to
- * @param <anomaly>          Anomaly 
+ * @param <state>     Element states 
+ * @param <fromType>  Element Type converted from
+ * @param <toType>    Element Type converted to
+ * @param <anomaly>   Anomaly 
  *
  * @return Converted states from the specific element type 
  */
+//---------------------------------------------------------------------------
 Rvector6 StateConverter::Convert(const Real *state,   
-                                 const std::string &fromElementType,
-                                 const std::string &toElementType,
+                                 const std::string &fromType,
+                                 const std::string &toType,
                                  Anomaly &anomaly)
 {
    Rvector6 newState;
-   newState.Set(state[0],state[1],state[2],state[3],state[4],state[5]); 
-
-#if DEBUG_STATE_CONVERTER
-   MessageInterface::ShowMessage
-       ("StateConverter::Convert() fromElementType=%s, toElementType=%s,"
-        " state=\n %f %f %f %f %f %f\n", fromElementType.c_str(),
-        toElementType.c_str(), state[0], state[1], state[2], state[3],
-        state[4], state[5]);
-
-   MessageInterface::ShowMessage
-       ("Anomaly info-> a: %f, e: %f, %s value: %f\n",
-        anomaly.GetSMA(),anomaly.GetECC(),anomaly.GetType().c_str(),
-        anomaly.GetValue());
-#endif
-
-   // Check if both are the same then return the state with no conversion 
-   if (fromElementType == toElementType)
-      return newState;    // @todo - should throw exception??
-    
-   try
-   {
-      // Determine the input of coordinate representation 
-      if (fromElementType == "Cartesian") 
-      {
-         if (toElementType == "Keplerian" || 
-             toElementType == "ModifiedKeplerian") 
-         {
-            Rvector6 kepl = CartesianToKeplerian(newState,mu,anomaly);
-                      
-            if (toElementType == "ModifiedKeplerian")
-                return KeplerianToModKeplerian(kepl);
-            else
-               return kepl; 
-         } 
-
-         if (toElementType == "SphericalAZFPA")
-            return CartesianToSphericalAZFPA(newState);
-
-         if (toElementType == "SphericalRADEC")
-            return CartesianToSphericalRADEC(newState);
-
-         if (toElementType == "Equinoctial")
-                      return CartesianToEquinoctial(newState,mu);
-
-      }
-      else if (fromElementType == "Keplerian")
-      {       
-         if (toElementType == "Cartesian")
-            return(KeplerianToCartesian(newState,mu,anomaly));
-
-         else if (toElementType == "ModifiedKeplerian")
-            return KeplerianToModKeplerian(newState); 
-
-         else if (toElementType == "SphericalAZFPA")
-            return KeplerianToSphericalAZFPA(newState,mu,anomaly);
-
-         else if (toElementType == "SphericalRADEC")
-            return KeplerianToSphericalRADEC(newState,mu,anomaly);
-      }
-      else if (fromElementType == "ModifiedKeplerian")
-      {       
-         if (toElementType == "Cartesian")
-         {
-            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToCartesian(keplerian,mu,anomaly);
-         }
-         else if (toElementType == "Keplerian")
-            return ModKeplerianToKeplerian(newState); 
-
-         else if (toElementType == "SphericalAZFPA")
-         {
-            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToSphericalAZFPA(keplerian,mu,anomaly);
-         }
-
-         else if (toElementType == "SphericalRADEC")
-         {
-            Rvector6 keplerian = ModKeplerianToKeplerian(newState);
-            return KeplerianToSphericalRADEC(keplerian,mu,anomaly);
-         }
-      }
-      else if (fromElementType == "SphericalAZFPA")
-      {       
-         if (toElementType == "Cartesian")
-            return SphericalAZFPAToCartesian(newState);
-
-         else if (toElementType == "Keplerian")
-            return SphericalAZFPAToKeplerian(newState,mu,anomaly);
-
-         else if (toElementType == "ModifiedKeplerian")
-         {
-            Rvector6 keplerian = SphericalAZFPAToKeplerian(newState,mu,anomaly);
-            return KeplerianToModKeplerian(keplerian);
-         }
-
-         else if (toElementType == "SphericalRADEC")
-            return AZFPA_To_RADECV(newState);
-      }
-      else if (fromElementType == "SphericalRADEC")
-      {       
-         if (toElementType == "Cartesian")
-            return SphericalRADECToCartesian(newState);
-
-         else if (toElementType == "Keplerian")
-            return SphericalRADECToKeplerian(newState,mu,anomaly);
-
-         else if (toElementType == "ModifiedKeplerian")
-         {
-            Rvector6 keplerian = SphericalRADECToKeplerian(newState,mu,anomaly);
-            return KeplerianToModKeplerian(keplerian);
-         }
-
-         else if (toElementType == "SphericalAZFPA")
-            return RADECV_To_AZFPA(newState);
-      }
-      else if (fromElementType == "Equinoctial")
-      {
-        Rvector6 cartesianConversion = EquinoctialToCartesian(newState, mu);
-         if (toElementType == "Cartesian")
-         {
-            return cartesianConversion;
-         }
-         if (toElementType == "Keplerian" || 
-             toElementType == "ModifiedKeplerian") 
-         {
-            Rvector6 kepl = CartesianToKeplerian(cartesianConversion,mu,anomaly);
-                      
-            if (toElementType == "ModifiedKeplerian")
-                return KeplerianToModKeplerian(kepl);
-            else
-               return kepl; 
-         } 
-
-         if (toElementType == "SphericalAZFPA")
-            return CartesianToSphericalAZFPA(cartesianConversion);
-
-         if (toElementType == "SphericalRADEC")
-            return CartesianToSphericalRADEC(cartesianConversion);
-      }
-    }
-    catch(UtilityException &ue)
-    {
-       throw ue;
-    } 
-
-    return newState;   //  Nothing change
+   newState.Set(state[0], state[1], state[2], state[3], state[4], state[5]);
+   
+   if (fromType == toType)
+      return newState;
+   
+   std::string anomalyType = anomaly.GetTypeString();
+   return Convert(newState, fromType, toType, anomalyType);
 }
+
+
+//------------------------------------------------------------------------------
+// static const std::string* GetStateTypeList()
+//------------------------------------------------------------------------------
+const std::string* StateConverter::GetStateTypeList()
+{
+   return STATE_TYPE_TEXT;
+}
+
