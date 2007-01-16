@@ -20,7 +20,7 @@
 #include "BurnData.hpp"
 #include "ParameterException.hpp"
 #include "RealUtilities.hpp"
-#include "UtilityException.hpp"
+#include "Linear.hpp"           // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_BURNDATA_INIT 1

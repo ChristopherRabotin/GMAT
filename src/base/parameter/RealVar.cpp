@@ -19,7 +19,7 @@
 
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
-#include "StringUtil.hpp"          // for GmatStringUtil::ToDouble()
+#include "StringUtil.hpp"          // for GmatStringUtil::ToReal()
 #include "MessageInterface.hpp"
 #include <sstream>
 
@@ -77,7 +77,7 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
    Real rval;
    mIsNumberEquation = true;
    
-   if (GmatStringUtil::ToDouble(valStr, &rval))
+   if (GmatStringUtil::ToReal(valStr, &rval))
    {
       mRealValue = rval;
       mExpr = valStr;
@@ -348,7 +348,7 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
          // if value is just a number, convert and set to real value
          mIsNumberEquation = true;
          Real temp;
-         if (GmatStringUtil::ToDouble(value, &temp))
+         if (GmatStringUtil::ToReal(value, &temp))
          {
             mRealValue = temp;
             mIsNumberEquation = false;

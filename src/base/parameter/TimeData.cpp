@@ -21,6 +21,7 @@
 #include "TimeData.hpp"
 #include "ParameterException.hpp"
 #include "TimeSystemConverter.hpp"
+#include "Linear.hpp"               // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TIMEDATA 1

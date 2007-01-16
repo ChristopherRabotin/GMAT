@@ -18,6 +18,7 @@
  */
 //------------------------------------------------------------------------------
 #include "BplaneParameters.hpp"
+#include "Linear.hpp"           // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
 //==============================================================================

@@ -19,8 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include "SphericalParameters.hpp"
-
-//1/24/05 loj: Removed AddRefObject(obj) because it is also added in OrbitReal
+#include "OrbitTypes.hpp"
 
 //==============================================================================
 //                              SphRMag
@@ -110,10 +109,9 @@ SphRMag::~SphRMag()
 //------------------------------------------------------------------------------
 bool SphRMag::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphRMag");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_RMAG);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -224,10 +222,9 @@ SphRA::~SphRA()
 //------------------------------------------------------------------------------
 bool SphRA::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphRA");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_RRA);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -340,7 +337,7 @@ bool SphDec::Evaluate()
 {
    mRealValue = OrbitData::GetSphRaDecReal(RD_RDEC);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -451,10 +448,9 @@ SphVMag::~SphVMag()
 //------------------------------------------------------------------------------
 bool SphVMag::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphVMag");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_VMAG);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -565,10 +561,9 @@ SphRAV::~SphRAV()
 //------------------------------------------------------------------------------
 bool SphRAV::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphRAV");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_RAV);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -677,10 +672,9 @@ SphDecV::~SphDecV()
 //------------------------------------------------------------------------------
 bool SphDecV::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphRaDecReal("SphDecV");    
    mRealValue = OrbitData::GetSphRaDecReal(RD_DECV);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -793,7 +787,7 @@ bool SphAzi::Evaluate()
 {
    mRealValue = OrbitData::GetSphAzFpaReal(AF_AZI);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -903,10 +897,9 @@ SphFPA::~SphFPA()
 //------------------------------------------------------------------------------
 bool SphFPA::Evaluate()
 {
-   //mRealValue = OrbitData::GetSphAzFpaReal("SphFPA");    
    mRealValue = OrbitData::GetSphAzFpaReal(AF_FPA);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1022,7 +1015,7 @@ bool SphRaDecElem::Evaluate()
 {
    mRvec6Value = GetSphRaDecState();
 
-   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
 }
 
 
@@ -1135,7 +1128,7 @@ bool SphAzFpaElem::Evaluate()
 {
    mRvec6Value = GetSphAzFpaState();
 
-   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
 }
 
 

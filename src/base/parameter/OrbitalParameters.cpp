@@ -18,7 +18,9 @@
  *   RadApoapsis, RadPeriapais, C3Energy, Energy
  */
 //------------------------------------------------------------------------------
+
 #include "OrbitalParameters.hpp"
+#include "OrbitTypes.hpp"
 #include "MessageInterface.hpp"
 
 //==============================================================================
@@ -115,7 +117,7 @@ bool VelApoapsis::Evaluate()
 {
    mRealValue = OrbitData::GetOtherKepReal(VEL_APOAPSIS);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -232,10 +234,9 @@ VelPeriapsis::~VelPeriapsis()
 //------------------------------------------------------------------------------
 bool VelPeriapsis::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("VelPeriapsis");    
    mRealValue = OrbitData::GetOtherKepReal(VEL_PERIAPSIS);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -287,7 +288,7 @@ Apoapsis::Apoapsis(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-   mIsPlottable = false; //loj: 6/9/05 Added
+   mIsPlottable = false;
 }
 
 
@@ -352,8 +353,6 @@ Apoapsis::~Apoapsis()
 //------------------------------------------------------------------------------
 bool Apoapsis::Evaluate()
 {
-   //loj: 6/8/05 call GetRelativeCartState()
-   //Rvector6 cartState = OrbitData::GetCartState();
    Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
    
    if (cartState == Rvector6::RVECTOR6_UNDEFINED)
@@ -420,7 +419,7 @@ Periapsis::Periapsis(const std::string &name, GmatBase *obj)
    mDepObjectName = "Earth";
    SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-   mIsPlottable = false; //loj: 6/9/05 Added
+   mIsPlottable = false;
 }
 
 
@@ -485,8 +484,6 @@ Periapsis::~Periapsis()
 //------------------------------------------------------------------------------
 bool Periapsis::Evaluate()
 {
-   //loj: 6/8/05 call GetRelativeCartState()
-   //Rvector6 cartState = OrbitData::GetCartState();
    Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
    //MessageInterface::ShowMessage
    //   ("===> Periapsis::Evaluate() mOrigin=%s, cartState=%s\n",
@@ -619,10 +616,9 @@ OrbitPeriod::~OrbitPeriod()
 //------------------------------------------------------------------------------
 bool OrbitPeriod::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("OrbitPeriod");    
    mRealValue = OrbitData::GetOtherKepReal(ORBIT_PERIOD);    
 
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -735,10 +731,9 @@ RadApoapsis::~RadApoapsis()
 //------------------------------------------------------------------------------
 bool RadApoapsis::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("RadApoapsis");    
    mRealValue = OrbitData::GetOtherKepReal(RAD_APOAPSIS);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -851,10 +846,9 @@ RadPeriapsis::~RadPeriapsis()
 //------------------------------------------------------------------------------
 bool RadPeriapsis::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("RadPeriapsis");    
    mRealValue = OrbitData::GetOtherKepReal(RAD_PERIAPSIS);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -966,10 +960,9 @@ C3Energy::~C3Energy()
 //------------------------------------------------------------------------------
 bool C3Energy::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("C3Energy");    
    mRealValue = OrbitData::GetOtherKepReal(C3_ENERGY);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1081,10 +1074,9 @@ Energy::~Energy()
 //------------------------------------------------------------------------------
 bool Energy::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("Energy");    
    mRealValue = OrbitData::GetOtherKepReal(ENERGY);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;

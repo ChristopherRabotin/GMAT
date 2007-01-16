@@ -23,7 +23,8 @@
 #include "PlanetData.hpp"
 #include "ParameterException.hpp"
 #include "CelestialBody.hpp"
-#include "AngleUtil.hpp"          //for PutAngleInDegRange()
+#include "AngleUtil.hpp"          // for PutAngleInDegRange()
+#include "Linear.hpp"             // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
 //#define __COMPUTE_LONGITUDE_OLDWAY__

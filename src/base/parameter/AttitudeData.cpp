@@ -19,6 +19,7 @@
 #include "gmatdefs.hpp"
 #include "AttitudeData.hpp"
 #include "Attitude.hpp"
+#include "Linear.hpp"              // for GmatRealUtil::ToString()
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
