@@ -356,7 +356,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
    if (hasGrid && (rescaled || drawAll))
       DrawGrid(dc);
 
-   if (hasData)
+//   if (hasData)
       PlotData(dc);
 
    if (rescaled || drawAll)
@@ -742,18 +742,21 @@ void TsPlotCanvas::PlotData(wxDC &dc)
       for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
            curve != data.end(); ++curve)
       {
-         dc.SetPen(plotPens[n]);
-         int j;
-         for (j = (*curve)->lastPointPlotted;
-              j < (int)((*curve)->abscissa.size())-1; ++j)
+         if ((*curve)->abscissa.size() > 0)
          {
-            dc.DrawLine(
-                  int(left+((*curve)->abscissa[j]-currentXMin)*xScale + 0.5),
-                  int(top + (currentYMax-(*curve)->ordinate[j])*yScale + 0.5),
-                  int(left+((*curve)->abscissa[j+1]-currentXMin)*xScale + 0.5),
-                  int(top + (currentYMax-(*curve)->ordinate[j+1])*yScale+0.5));
+            dc.SetPen(plotPens[n]);
+            int j;
+            for (j = (*curve)->lastPointPlotted;
+                 j < (int)((*curve)->abscissa.size())-1; ++j)
+            {
+               dc.DrawLine(
+                     int(left+((*curve)->abscissa[j]-currentXMin)*xScale + 0.5),
+                     int(top + (currentYMax-(*curve)->ordinate[j])*yScale + 0.5),
+                     int(left+((*curve)->abscissa[j+1]-currentXMin)*xScale + 0.5),
+                     int(top + (currentYMax-(*curve)->ordinate[j+1])*yScale+0.5));
+            }
+            (*curve)->lastPointPlotted = j-1;
          }
-         (*curve)->lastPointPlotted = j-1;
          ++n;
       }
    }
