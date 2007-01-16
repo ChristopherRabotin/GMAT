@@ -14,12 +14,13 @@
 //
 /**
  * Implements Keplerian related parameter classes.
- *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepMM, KepElem,
- *   ModKepElem
+ *   KepSMA, KepEcc, KepInc, KepAOP, KepRAAN, KepTA, KepMA, KepEA, KepHA,
+ *   KepMM, KepElem, ModKepElem
  */
 //------------------------------------------------------------------------------
-#include "KeplerianParameters.hpp"
 
+#include "KeplerianParameters.hpp"
+#include "OrbitTypes.hpp"
 
 //==============================================================================
 //                              KepSMA
@@ -43,7 +44,7 @@ KepSMA::KepSMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "SMA", obj, "Semi-Major Axis", "Km", GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -108,10 +109,9 @@ KepSMA::~KepSMA()
 //------------------------------------------------------------------------------
 bool KepSMA::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepSMA");    
    mRealValue = OrbitData::GetKepReal(SMA);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -157,7 +157,7 @@ KepEcc::KepEcc(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "ECC", obj, "Eccentricity", " ", GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -222,10 +222,9 @@ KepEcc::~KepEcc()
 //------------------------------------------------------------------------------
 bool KepEcc::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepEcc");
    mRealValue = OrbitData::GetKepReal(ECC);
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -335,10 +334,9 @@ KepInc::~KepInc()
 //------------------------------------------------------------------------------
 bool KepInc::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepInc");    
    mRealValue = OrbitData::GetKepReal(INC);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -380,7 +378,6 @@ GmatBase* KepInc::Clone(void) const
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-//loj: 1/19/05 Changed to COORD_SYS dependent
 KepAOP::KepAOP(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "AOP", obj, "Argument of Periapsis", "Deg",
                GmatParam::COORD_SYS, true)
@@ -450,10 +447,9 @@ KepAOP::~KepAOP()
 //------------------------------------------------------------------------------
 bool KepAOP::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepAOP");    
    mRealValue = OrbitData::GetKepReal(AOP);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -564,10 +560,9 @@ KepRAAN::~KepRAAN()
 //------------------------------------------------------------------------------
 bool KepRAAN::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepRAAN");    
    mRealValue = OrbitData::GetKepReal(RAAN);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -677,10 +672,9 @@ KepRADN::~KepRADN()
 //------------------------------------------------------------------------------
 bool KepRADN::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepRADN");    
    mRealValue = OrbitData::GetKepReal(RADN);    
    
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -726,7 +720,7 @@ KepTA::KepTA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "TA", obj, "True Anomaly", "Deg", GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -791,10 +785,9 @@ KepTA::~KepTA()
 //------------------------------------------------------------------------------
 bool KepTA::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepTA");    
    mRealValue = OrbitData::GetKepReal(TA);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -840,7 +833,7 @@ KepMA::KepMA(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MA", obj, "Mean Anomaly", "Deg", GmatParam::ORIGIN, true)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -905,10 +898,9 @@ KepMA::~KepMA()
 //------------------------------------------------------------------------------
 bool KepMA::Evaluate()
 {
-   //mRealValue = OrbitData::GetKepReal("KepMA");    
    mRealValue = OrbitData::GetKepReal(MA);    
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -929,6 +921,232 @@ bool KepMA::Evaluate()
 GmatBase* KepMA::Clone(void) const
 {
    return new KepMA(*this);
+}
+
+
+//==============================================================================
+//                              KepEA
+//==============================================================================
+/**
+ * Implements Keplerian Eccentric Anomaly class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// KepEA(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+KepEA::KepEA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "EA", obj, "Eccentric Anomaly", "Deg", GmatParam::ORIGIN, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+}
+
+
+//------------------------------------------------------------------------------
+// KepEA(const KepEA &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+KepEA::KepEA(const KepEA &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const KepEA& operator=(const KepEA &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const KepEA& KepEA::operator=(const KepEA &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~KepEA()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+KepEA::~KepEA()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool KepEA::Evaluate()
+{
+   mRealValue = OrbitData::GetKepReal(EA);    
+    
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepEA::Clone(void) const
+{
+   return new KepEA(*this);
+}
+
+
+//==============================================================================
+//                              KepHA
+//==============================================================================
+/**
+ * Implements Keplerian Hyperbolic Anomaly class.
+ */
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// KepHA(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ *
+ * @param <name> name of the parameter
+ * @param <obj> reference object pointer
+ */
+//------------------------------------------------------------------------------
+KepHA::KepHA(const std::string &name, GmatBase *obj)
+   : OrbitReal(name, "HA", obj, "Hyperbolic Anomaly", "Deg", GmatParam::ORIGIN, true)
+{
+   mDepObjectName = "Earth";
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
+   SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
+}
+
+
+//------------------------------------------------------------------------------
+// KepHA(const KepHA &copy)
+//------------------------------------------------------------------------------
+/**
+ * Copy constructor.
+ *
+ * @param <copy> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+KepHA::KepHA(const KepHA &copy)
+   : OrbitReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// const KepHA& operator=(const KepHA &right)
+//------------------------------------------------------------------------------
+/**
+ * Assignment operator.
+ *
+ * @param <right> the parameter to make copy of
+ */
+//------------------------------------------------------------------------------
+const KepHA& KepHA::operator=(const KepHA &right)
+{
+   if (this != &right)
+      OrbitReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~KepHA()
+//------------------------------------------------------------------------------
+/**
+ * Destructor.
+ */
+//------------------------------------------------------------------------------
+KepHA::~KepHA()
+{
+}
+
+
+//-------------------------------------
+// Inherited methods from Parameter
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual bool Evaluate()
+//------------------------------------------------------------------------------
+/**
+ * Evaluates value of the parameter.
+ *
+ * @return true if parameter value successfully evaluated; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool KepHA::Evaluate()
+{
+   mRealValue = OrbitData::GetKepReal(HA);    
+   
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//-------------------------------------
+// methods inherited from GmatBase
+//-------------------------------------
+
+//------------------------------------------------------------------------------
+// virtual GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+/**
+ * Method used to create a copy of the object
+ */
+//------------------------------------------------------------------------------
+GmatBase* KepHA::Clone(void) const
+{
+   return new KepHA(*this);
 }
 
 
@@ -954,7 +1172,7 @@ KepMM::KepMM(const std::string &name, GmatBase *obj)
    : OrbitReal(name, "MM", obj, "Mean Motion", "Deg", GmatParam::ORIGIN)
 {
    mDepObjectName = "Earth";
-   SetRefObjectName(Gmat::SPACE_POINT, "Earth"); //loj: 4/7/05 Added
+   SetRefObjectName(Gmat::SPACE_POINT, "Earth");
    SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
 }
 
@@ -1018,10 +1236,9 @@ KepMM::~KepMM()
 //------------------------------------------------------------------------------
 bool KepMM::Evaluate()
 {
-   //mRealValue = OrbitData::GetOtherKepReal("KepMM");
    mRealValue = OrbitData::GetOtherKepReal(MM);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -1136,7 +1353,7 @@ bool KepElem::Evaluate()
 {
    mRvec6Value = OrbitData::GetKepState();
 
-   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
 }
 
 
@@ -1177,7 +1394,8 @@ GmatBase* KepElem::Clone(void) const
  */
 //------------------------------------------------------------------------------
 ModKepElem::ModKepElem(const std::string &name, GmatBase *obj)
-   : OrbitRvec6(name, "ModKeplerian", obj, "Keplerian Elements", " ", GmatParam::COORD_SYS)
+   : OrbitRvec6(name, "ModKeplerian", obj, "Keplerian Elements", " ",
+                GmatParam::COORD_SYS)
 {
    // Parameter member data
    mDepObjectName = "EarthMJ2000Eq";
@@ -1248,7 +1466,7 @@ bool ModKepElem::Evaluate()
 {
    mRvec6Value = OrbitData::GetModKepState();
 
-   return mRvec6Value.IsValid(ORBIT_REAL_UNDEFINED);
+   return mRvec6Value.IsValid(GmatOrbit::ORBIT_REAL_UNDEFINED);
 }
 
 

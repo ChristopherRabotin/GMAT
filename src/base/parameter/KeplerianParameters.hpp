@@ -247,6 +247,62 @@ protected:
 
 
 //==============================================================================
+//                              KepEA
+//==============================================================================
+/**
+ * Declares Keplerian Mean Anomaly class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API KepEA : public OrbitReal
+{
+public:
+
+   KepEA(const std::string &name = "", GmatBase *obj = NULL);
+   KepEA(const KepEA &copy);
+   const KepEA& operator=(const KepEA &right);
+   virtual ~KepEA();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//==============================================================================
+//                              KepHA
+//==============================================================================
+/**
+ * Declares Keplerian Mean Anomaly class.
+ */
+//------------------------------------------------------------------------------
+
+class GMAT_API KepHA : public OrbitReal
+{
+public:
+
+   KepHA(const std::string &name = "", GmatBase *obj = NULL);
+   KepHA(const KepHA &copy);
+   const KepHA& operator=(const KepHA &right);
+   virtual ~KepHA();
+
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+
+protected:
+
+};
+
+
+//==============================================================================
 //                              KepMM
 //==============================================================================
 /**

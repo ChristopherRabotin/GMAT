@@ -1497,20 +1497,32 @@ Burn* Moderator::GetBurn(const std::string &name)
 
 // Parameter
 //------------------------------------------------------------------------------
-// bool Moderator::IsParameter(const std::string &type)
+// bool Moderator::IsParameter(const std::string &str)
 //------------------------------------------------------------------------------
 /**
- * Checks to see if a given type is a Parameter.
+ * Checks to see if a given type is a Parameter. If str has '.', it parses
+ * string to get type before checking.
  *
- * @param <type> object type
+ * @param <str> object type string
  *
  * @return true if the type is a registered parameter, false if not.
  */
 //------------------------------------------------------------------------------
-bool Moderator::IsParameter(const std::string &type)
+bool Moderator::IsParameter(const std::string &str)
 {
    StringArray sar = theFactoryManager->GetListOfItems(Gmat::PARAMETER);
-      
+   std::string type;
+   
+   if (str.find(".") == str.npos)
+   {
+      type = str;
+   }
+   else
+   {
+      std::string ownerName, depObj;
+      GmatStringUtil::ParseParameter(str, type, ownerName, depObj);
+   }
+   
    if (find(sar.begin(), sar.end(), type) != sar.end()) {
       #ifdef DEBUG_LOOKUP_RESOURCE
       MessageInterface::ShowMessage("Found parameter \"%s\"\n", type.c_str());
@@ -1522,7 +1534,7 @@ bool Moderator::IsParameter(const std::string &type)
    MessageInterface::ShowMessage("Could not find parameter \"%s\"\n",
                                  type.c_str());
    #endif
-
+   
    return false;   
 }
 
@@ -4103,6 +4115,8 @@ void Moderator::CreateDefaultMission()
       CreateParameter("AOP", "DefaultSC.EarthMJ2000Eq.AOP");
       CreateParameter("TA", "DefaultSC.Earth.TA");
       CreateParameter("MA", "DefaultSC.Earth.MA");
+      CreateParameter("EA", "DefaultSC.Earth.EA");
+      CreateParameter("HA", "DefaultSC.Earth.HA");
       CreateParameter("MM", "DefaultSC.Earth.MM");
       
       // Orbital parameters

@@ -126,6 +126,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new KepTA(withName);
    if (ofType == "MA")
       return new KepMA(withName);
+   if (ofType == "EA")
+      return new KepEA(withName);
+   if (ofType == "HA")
+      return new KepHA(withName);
    if (ofType == "MM")
       return new KepMM(withName);
    if (ofType == "Keplerian")
@@ -296,6 +300,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("AOP");
       creatables.push_back("TA");
       creatables.push_back("MA");
+      creatables.push_back("EA");
+      creatables.push_back("HA");
       creatables.push_back("MM");
       creatables.push_back("Keplerian");
       creatables.push_back("ModKeplerian");
