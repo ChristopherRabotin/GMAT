@@ -29,7 +29,6 @@
 #include "Anomaly.hpp"
 #include "CoordinateSystem.hpp"
 #include "CoordinateConverter.hpp"
-//#include "TimeConverter.hpp"
 #include "TimeSystemConverter.hpp"
 #include "StateConverter.hpp"
 #include "Attitude.hpp"
@@ -53,7 +52,7 @@ public:
    void              SetState(const Rvector6 &cartState);
    void              SetState(const std::string &elementType, Real *instate);
    void              SetState(const Real s1, const Real s2, const Real s3, 
-                        const Real s4, const Real s5, const Real s6);
+                              const Real s4, const Real s5, const Real s6);
    
    virtual PropState& 
                      GetState();
@@ -67,23 +66,8 @@ public:
    
    Rmatrix33         GetAttitude(Real a1mjdTime) const;
    Rvector3          GetAngularVelocity(Real a1mjdTime) const;
-
-   bool              GetDisplay() const;
-   void              SetDisplay(const bool displayFlag);
-
-   std::string       GetDisplayDateFormat() const;
-   void              SetDisplayDateFormat(const std::string &dateType);
+   
    void              SetDateFormat(const std::string &dateType);
-   std::string       GetDisplayEpoch();
-   bool              SetDisplayEpoch(const std::string &value);
-
-   std::string       GetDisplayCoordType() const;
-   void              SetDisplayCoordType(const std::string &coordType);
-
-   Real*             GetDisplayState();
-   void              SetDisplayState(const Real *s);
-   void              SetDisplayState(const Rvector6 s);
-   void              SaveDisplay();
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -149,8 +133,11 @@ public:
                         const std::string &prefix = "",
                         const std::string &useName = "");
    
-   void              SetEpoch(const std::string &ep);
-
+   void SetEpoch(const std::string &ep);
+   void SetEpoch(const std::string &type, const std::string &ep, Real a1mjd);
+   void SetState(const std::string &type, const Rvector6 &cartState);
+   void SetAnomaly(const std::string &type, const Anomaly &ta);
+   
 protected:
    enum SC_Param_ID 
    {
@@ -198,9 +185,8 @@ protected:
       SPHERICAL_RADEC_ID
    };
 
-   std::map <std::string, std::string> 
-                     elementLabelMap;
-
+   std::map <std::string, std::string> elementLabelMap;
+   
    /// State element labels
    StringArray       stateElementLabel;
    /// State element units
@@ -209,27 +195,27 @@ protected:
    StringArray       representations;
    
    /// Epoch string, specifying the text form of the epoch
-   std::string       scEpoch;
+   std::string       scEpochStr;
    Real              dryMass;
    Real              coeffDrag;
    Real              dragArea;
    Real              srpArea;
    Real              reflectCoeff;
-   /// String specifying the epoch time system
+   /// String specifying the epoch time system (A1, TAI, UTC, or TT)
    std::string       epochSystem;
    /// String specifying the epoch time format (Gregorian or ModJulian)
    std::string       epochFormat;
-   /// String specifying the epoch system used for scEpoch
-   std::string       dateFormat;
+   /// String specifying the epoch system and format used for scEpochStr (TAIModJulian, etc)
+   std::string       epochType;
    std::string       stateType;
    std::string       anomalyType;
-   Anomaly           anomaly;
-
+   Anomaly           trueAnomaly;
+   
    /// Base coordinate system for the Spacecraft
    CoordinateSystem  *internalCoordSystem;
    /// Coordinate system used for the input and output to the GUI
    CoordinateSystem  *coordinateSystem;
-
+   
    std::string       coordSysName;
    
    /// Pointer to the object that manages the attitude of the spacecraft
@@ -237,12 +223,7 @@ protected:
    
    // for non-internal spacecraft information
    StateConverter    stateConverter;
-//   TimeConverter     timeConverter;
    CoordinateConverter coordConverter;
-   
-//   bool              isForDisplay;
-   std::string       displayEpoch;   
-   std::string       displayDateFormat;
    
    // Lists of hardware elements added 11/12/04, djc
    /// Fuel tank names
