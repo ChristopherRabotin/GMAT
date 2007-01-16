@@ -26,19 +26,19 @@
 
 // StateVector constant variables for the lists of state types and elements 
 const std::string StateVector::STATE_LIST[StateTypeCount] =
-      {
-          "Cartesian", "Keplerian", "ModifiedKeplerian", 
-          "SphericalAZFPA", "SphericalRADEC"
-      };
+   {
+      "Cartesian", "Keplerian", "ModifiedKeplerian", 
+      "SphericalAZFPA", "SphericalRADEC"
+   };
 
 const std::string StateVector::ELEMENT_LIST[StateTypeCount][ElementTypeCount] =
-      {
-          {"X", "Y", "Z", "VX", "VY", "VZ","",""},
-          {"SMA", "ECC", "INC", "RAAN", "AOP", "TA", "MA", "EA"},
-          {"RadPer", "RadApo", "INC", "RAAN", "AOP", "TA", "MA", "EA"},
-          {"RMAG", "RA", "DEC", "VMAG", "AZI", "FPA", "", ""},
-          {"RMAG", "RA", "DEC", "VMAG", "RAV", "DECV", "", ""}
-      };
+   {
+      {"X", "Y", "Z", "VX", "VY", "VZ","",""},
+      {"SMA", "ECC", "INC", "RAAN", "AOP", "TA", "MA", "EA"},
+      {"RadPer", "RadApo", "INC", "RAAN", "AOP", "TA", "MA", "EA"},
+      {"RMAG", "RA", "DEC", "VMAG", "AZI", "FPA", "", ""},
+      {"RMAG", "RA", "DEC", "VMAG", "RAV", "DECV", "", ""}
+   };
 
 //-------------------------------------
 // public methods
@@ -49,31 +49,34 @@ const std::string StateVector::ELEMENT_LIST[StateTypeCount][ElementTypeCount] =
 //---------------------------------------------------------------------------
 /**
  * Creates default constructor.
- *
  */
+//---------------------------------------------------------------------------
 StateVector::StateVector()
 {
    DefineDefault();
 }
 
+
 //---------------------------------------------------------------------------
-//  StateVector(const std::string &mType)
+//  StateVector(const std::string &type)
 //---------------------------------------------------------------------------
 /**
  * Creates constructors with parameters.
  *
- * @param <mType> state type
+ * @param <type> state type
  *
  */
-StateVector::StateVector(const std::string &mType)
+//---------------------------------------------------------------------------
+StateVector::StateVector(const std::string &type)
 {
    DefineDefault();
     
    // Check if invalid then use default
-   if (!SetValue(mType))
+   if (!SetValue(type))
       MessageInterface::ShowMessage("\n****Warning: Invalid state type ***"
                                     "\nUse default state values.\n");  
 }
+
 
 //---------------------------------------------------------------------------
 //  StateVector(const Rvector6 stateVector)
@@ -84,44 +87,50 @@ StateVector::StateVector(const std::string &mType)
  * @param <stateVector> state's values
  *
  */
+//---------------------------------------------------------------------------
 StateVector::StateVector(const Rvector6 stateVector)
 {
    DefineDefault();
-   value = stateVector;
+   mState = stateVector;
 }
 
+
 //---------------------------------------------------------------------------
-//  StateVector(const std::string &mType, const Rvector6 stateVector)
+//  StateVector(const std::string &type, const Rvector6 stateVector)
 //---------------------------------------------------------------------------
 /**
  * Creates constructors with parameters.
  *
- * @param <mType> state's type 
+ * @param <type> state's type 
  * @param <stateVector> state's values
  *
  */
-StateVector::StateVector(const std::string &mType, const Rvector6 stateVector)
+//---------------------------------------------------------------------------
+StateVector::StateVector(const std::string &type, const Rvector6 stateVector)
 {
    DefineDefault();
 
    // Check for invalid state type
-   if (!SetValue(mType, stateVector))
+   if (!SetValue(type, stateVector))
       MessageInterface::ShowMessage("\n****Warning: Invalid state type ***"
                                     "\nUse default state values.\n");  
 }
 
+
 //---------------------------------------------------------------------------
-//  StateVector(const StateVector &s)
+//  StateVector(const StateVector &sv)
 //---------------------------------------------------------------------------
 /**
  * Copy Constructor for base StateVector structures.
  *
- * @param <s> The original that is being copied.
+ * @param <sv> The original that is being copied.
  */
-StateVector::StateVector(const StateVector &s)
+//---------------------------------------------------------------------------
+StateVector::StateVector(const StateVector &sv)
 {
-    InitializeDataMethod(s);
+    InitializeDataMethod(sv);
 }
+
 
 //---------------------------------------------------------------------------
 //  ~StateVector(void)
@@ -129,31 +138,34 @@ StateVector::StateVector(const StateVector &s)
 /**
  * Destructor.
  */
+//---------------------------------------------------------------------------
 StateVector::~StateVector(void)
 {
 }
 
+
 //---------------------------------------------------------------------------
-//  StateVector& operator=(const StateVector &s)
+//  StateVector& operator=(const StateVector &sv)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for StateVector structures.
  *
- * @param <s> The original that is being copied.
+ * @param <sv> The original that is being copied.
  *
  * @return Reference to this object
- * 
  */
-StateVector& StateVector::operator=(const StateVector &s)
+//---------------------------------------------------------------------------
+StateVector& StateVector::operator=(const StateVector &sv)
 {
-    if (&s == this)
-        return *this;
+   if (&sv == this)
+      return *this;
 
-    // Duplicate the member data        
-    InitializeDataMethod(s);
+   // Duplicate the member data        
+   InitializeDataMethod(sv);
 
-    return *this;
+   return *this;
 }
+
 
 //---------------------------------------------------------------------------
 //  Rvector6 GetValue() const
@@ -163,53 +175,60 @@ StateVector& StateVector::operator=(const StateVector &s)
  *
  * @return the state's value.
  */
+//---------------------------------------------------------------------------
 Rvector6 StateVector::GetValue() const
 {
-   return value;
+   return mState;
 }
 
+
 //---------------------------------------------------------------------------
-//  Rvector6 GetValue(const std::string &mType) const
+//  Rvector6 GetValue(const std::string &type) const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the value with the specific state type.
  *
  * @return the state's value.
  */
-Rvector6 StateVector::GetValue(const std::string &mType) const
+//---------------------------------------------------------------------------
+Rvector6 StateVector::GetValue(const std::string &type) const
 {
-   return (stateConverter.Convert(value,type,mType,(Anomaly&)anomaly));
+   return (mStateConverter.Convert(mState, mStateType, type, (Anomaly&)mAnomaly));
 }
 
+
 //---------------------------------------------------------------------------
-//  bool SetValue(const std::string &mType)
+//  bool SetValue(const std::string &type)
 //---------------------------------------------------------------------------
 /**
  * Set the value with the specific state type.
  *
- * @param <mType>  state type 
+ * @param <type>  state type 
  *
  * @return true when successful; otherwise, false.
  */
-bool StateVector::SetValue(const std::string &mType) 
+//---------------------------------------------------------------------------
+bool StateVector::SetValue(const std::string &type) 
 {
-   if (!IsValidType(mType))
+   if (!IsValidType(type))
       return false; 
-
-   if (mType != type)
+   
+   if (mStateType != type)
    {
        try
        {
-          value = stateConverter.Convert(value,type,mType,anomaly);
-          type = mType;
+          mState = mStateConverter.Convert(mState, mStateType, type, mAnomaly);
+          mStateType = type;
        }
        catch(UtilityException &ue)
        {
           return false; 
        }
    }
+   
    return true;
 }
+
 
 //---------------------------------------------------------------------------
 //  bool SetValue(const Rvector6 state)
@@ -221,31 +240,36 @@ bool StateVector::SetValue(const std::string &mType)
  *
  * @return true when successful; otherwise, false.
  */
+//---------------------------------------------------------------------------
 bool StateVector::SetValue(const Rvector6 state) 
 {
-   value = state; 
+   mState = state;
+   
    // @todo:  need to make sure with anomaly and others
    return true;
 }
 
+
 //---------------------------------------------------------------------------
-//  bool SetValue(const std::string &mType,const Rvector6 state)
+//  bool SetValue(const std::string &type,const Rvector6 state)
 //---------------------------------------------------------------------------
 /**
  * Set the value with the specific state type.
  *
- * @param <mType>  state type 
+ * @param <type>  state type 
  * @param <state>  state value
  *
  * @return true when successful; otherwise, false.
  */
-bool StateVector::SetValue(const std::string &mType, const Rvector6 state) 
+//---------------------------------------------------------------------------
+bool StateVector::SetValue(const std::string &type, const Rvector6 state) 
 {
-   if (IsValidType(mType))
+   if (IsValidType(type))
       return false;
 
-   type = mType;
-   value = state; 
+   mStateType = type;
+   mState = state;
+   
    // @todo:  need to make sure with anomaly and others
    return true;
 }
@@ -261,18 +285,20 @@ bool StateVector::SetValue(const std::string &mType, const Rvector6 state)
  *
  * @return the element's value.
  */
+//---------------------------------------------------------------------------
 Real StateVector::GetElement(const Integer id) const
 {
-#if DEBUG_STATEVECTOR	
+   #if DEBUG_STATEVECTOR   
    MessageInterface::ShowMessage("\n*** StateVector::GetElement(%d) ****\n",id);
-#endif
+   #endif
 
    // Check for out of the range then throw exception
    if (id < 1 || id > 6)
       throw StateVectorException("StateVector::GetElement - out of range");
-
-   return value[id - 1];    
+   
+   return mState[id - 1];    
 }
+
 
 //---------------------------------------------------------------------------
 //  Real GetElement(const std::string &label) const
@@ -284,70 +310,71 @@ Real StateVector::GetElement(const Integer id) const
  *
  * @return the element's value.
  */
+//---------------------------------------------------------------------------
 Real StateVector::GetElement(const std::string &label) const
 {
-    // Find the state type
-    std::string findType = FindType(label);
+   // Find the state type
+   std::string findType = FindType(label);
 
-#if DEBUG_STATEVECTOR	
+   #if DEBUG_STATEVECTOR   
    MessageInterface::ShowMessage("\n*** StateVector::GetElement(%s), findType "
                                  "= %s\n",label.c_str(), findType.c_str());
-#endif
-
+   #endif
+   
    if (findType == "NoFound")
    {
       MessageInterface::ShowMessage("\nNo found due to invalid label.\n");
       throw StateVectorException("\nNo found due to invalid label.\n");
    }
-
+   
    // First check with anomaly -> @todo: also need move into element1-6 below
-   if (!anomaly.IsInvalid(label))
-      return anomaly.GetValue(label);
-
+   if (!mAnomaly.IsInvalid(label))
+      return mAnomaly.GetValue(label);
+   
    UnsignedInt id = GetElementID(label);
-
-   if (type == findType)
-      return value[id];
-
+   
+   if (mStateType == findType)
+      return mState[id];
+   
    // Do the conversion
-   Rvector6 tempState = stateConverter.Convert(value,type,findType,
-                                               (Anomaly&)anomaly);
-                                                
+   Rvector6 tempState = mStateConverter.Convert(mState, mStateType, findType,
+                                                (Anomaly&)mAnomaly);
+   
    return tempState[id];
 }
 
 
 //---------------------------------------------------------------------------
-//  bool SetElement(const Integer id, const Real mValue)
+//  bool SetElement(const Integer id, const Real value)
 //---------------------------------------------------------------------------
 /**
  * Set the value for element.
  *
  * @param <id> The integer ID for the element.
- * @param <mValue> The new element value.
+ * @param <value> The new element value.
  *
  * @return true if successful; otherwise, false
  */
-bool StateVector::SetElement(const Integer id, const Real mValue)
+//---------------------------------------------------------------------------
+bool StateVector::SetElement(const Integer id, const Real value)
 {
-#if DEBUG_STATEVECTOR
-//   std::string label = GetLabel(id);
+   #if DEBUG_STATEVECTOR
    MessageInterface::ShowMessage(
        "\n*** StateVector::SetElement(%d,%f) enters...\n\ttype = %s\n", 
-       id, mValue, type.c_str());
-#endif
+       id, value, type.c_str());
+   #endif
 
-    // Check for the coordinate representation then set the value
-    if (id < 1 || id > 6)
-       return false;
+   // Check for the coordinate representation then set the value
+   if (id < 1 || id > 6)
+      return false;
 
-    value[id - 1] = mValue;
-    return true;
+   mState[id - 1] = value;
+   return true;
 }
 
 
 //---------------------------------------------------------------------------
-//  void SetElement(const std::string &label, const Real mValue)
+//  void SetElement(const std::string &label, const Real value)
 //---------------------------------------------------------------------------
 /**
  * Set the value for element.
@@ -357,54 +384,56 @@ bool StateVector::SetElement(const Integer id, const Real mValue)
  *
  * @return true if successful; otherwise, false.
  */
-bool StateVector::SetElement(const std::string &label, const Real mValue)
+//---------------------------------------------------------------------------
+bool StateVector::SetElement(const std::string &label, const Real value)
 {
-#if DEBUG_STATEVECTOR
+   #if DEBUG_STATEVECTOR
    MessageInterface::ShowMessage(
        "\n*** StateVector::SetElement(%s,%f) with type (%s) enters...\n", 
-       label.c_str(),mValue,type.c_str());
-#endif
-
+       label.c_str(),value,type.c_str());
+   #endif
+   
    // Find the state type
    std::string findType = FindType(label);
-
-#if DEBUG_STATEVECTOR
-   MessageInterface::ShowMessage("\nfindType = %s\n",findType.c_str());
-#endif
-
+   
+   #if DEBUG_STATEVECTOR
+   MessageInterface::ShowMessage("\nfindType = %s\n", findType.c_str());
+   #endif
+   
    if (findType == "NoFound")
    {
        MessageInterface::ShowMessage("\nStateVector::SetElement(%s,%f), "
                                      "label(%s) has no found.\n",
-                                     label.c_str(), mValue, label.c_str());
+                                     label.c_str(), value, label.c_str());
        return false;
    }
-
+   
    // Get the element id from the element's label
    UnsignedInt id = GetElementID(label);
-
-#if DEBUG_STATEVECTOR
+   
+   #if DEBUG_STATEVECTOR
    MessageInterface::ShowMessage("\nStateVector::SetElement..., id = %d\n",id);
-#endif
-
+   #endif
+   
    // if different type from current then do conversion
-   if (findType != type)
+   if (findType != mStateType)
    {
       try
       {
-         value = stateConverter.Convert(value,type,findType,anomaly);
-         type = findType;
+         mState = mStateConverter.Convert(mState, mStateType, findType, mAnomaly);
+         mStateType = findType;
       } 
       catch(UtilityException &ue)
       {
          return false;
       }  
    }
-
-   value[id] = mValue;
-
+   
+   mState[id] = value;
+   
    return true;
 }
+
 
 //---------------------------------------------------------------------------
 //  std::string GetType() const
@@ -414,28 +443,32 @@ bool StateVector::SetElement(const std::string &label, const Real mValue)
  *
  * @return the element's type. 
  */
+//---------------------------------------------------------------------------
 std::string StateVector::GetType() const
 {
-   return type;
+   return mStateType;
 }
 
+
 //---------------------------------------------------------------------------
-//  bool SetType(const std::string &mType) 
+//  bool SetType(const std::string &type) 
 //---------------------------------------------------------------------------
 /**
  * Set the state type.
  *
- * @param <mType> Given element's type. 
+ * @param <type> Given element's type. 
  *
  * @return true if successful; otherwise, false.
  */
-bool StateVector::SetType(const std::string &mType)
+//---------------------------------------------------------------------------
+bool StateVector::SetType(const std::string &type)
 {
-   if (!SetValue(mType))
+   if (!SetValue(type))
       return false; 
   
    return true; 
 }
+
 
 //---------------------------------------------------------------------------
 //  std::string GetLabel(const Integer id)
@@ -447,17 +480,18 @@ bool StateVector::SetType(const std::string &mType)
  *
  * @return the element's label 
  */
+//---------------------------------------------------------------------------
 std::string StateVector::GetLabel(const Integer id) const
 {
-#if DEBUG_STATEVECTOR
+   #if DEBUG_STATEVECTOR
    MessageInterface::ShowMessage("\n*** StateVector::GetLabel(%d)\n",id);
-#endif
+   #endif
 
    if (id < 1 || id > 6)
       throw StateVectorException("StateVector::GetElement - out of range");
  
    // Check for Cartesian
-   if (type == STATE_LIST[0])
+   if (mStateType == STATE_LIST[0])
    {
       switch (id)
       {
@@ -469,25 +503,25 @@ std::string StateVector::GetLabel(const Integer id) const
          case 6:   return "VZ";
       }
    }
-
+   
    // Check for Keplerian and Modified Keplerian
-   if (type == STATE_LIST[1] || type == STATE_LIST[2])
+   if (mStateType == STATE_LIST[1] || mStateType == STATE_LIST[2])
    {
       switch (id)
       {
-         case 1:   if (type == STATE_LIST[1]) return "SMA";
+         case 1:   if (mStateType == STATE_LIST[1]) return "SMA";
                    return "RadPer";
-         case 2:   if (type == STATE_LIST[1]) return "ECC";
+         case 2:   if (mStateType == STATE_LIST[1]) return "ECC";
                    return "RadApo";
          case 3:   return "INC";
          case 4:   return "RAAN";
          case 5:   return "APO";
-         case 6:   return anomaly.GetType();
+         case 6:   return mAnomaly.GetTypeString();
       }
    }
 
    // Check for Spherical with AZIFPA and RADEC
-   if (type == STATE_LIST[2] || type == STATE_LIST[3])
+   if (mStateType == STATE_LIST[2] || mStateType == STATE_LIST[3])
    {
       switch (id)
       {
@@ -495,14 +529,16 @@ std::string StateVector::GetLabel(const Integer id) const
          case 2:   return "RA";
          case 3:   return "DEC";
          case 4:   return "VMAG";
-         case 5:   if (type == STATE_LIST[2]) return "AZI";
+         case 5:   if (mStateType == STATE_LIST[2]) return "AZI";
                    return "RAV";
-         case 6:   if (type == STATE_LIST[2]) return "FPA";
+         case 6:   if (mStateType == STATE_LIST[2]) return "FPA";
                    return "DECV";
       }
    }
+   
    return "";   // Won't happen unless the state type or element is no found
 }
+
 
 //---------------------------------------------------------------------------
 //  bool IsElement(const Integer id, const std::string &label) const
@@ -515,28 +551,30 @@ std::string StateVector::GetLabel(const Integer id) const
  *
  * @return true if it is a part of element; otherwise,false.
  */
+//---------------------------------------------------------------------------
 bool StateVector::IsElement(const Integer id, const std::string &label) const
 {
-    if (id < 1 || id > 6)
-       return false;
+   if (id < 1 || id > 6)
+      return false;
  
-    for (UnsignedInt i=0; i < StateTypeCount; i++)
-    {
-        if (ELEMENT_LIST[i][id-1] == label)
-           return true;
+   for (UnsignedInt i=0; i < StateTypeCount; i++)
+   {
+      if (ELEMENT_LIST[i][id-1] == label)
+         return true;
 
-        else if (id == 6 && (i == KEPLERIAN || i == MODIFIED_KEPLERIAN)) 
-        {
-           for (UnsignedInt temp = id; temp < ElementTypeCount; ++temp)
-           {
-              if (ELEMENT_LIST[i][temp] == label)
-                 return true;
-           }
-        }
-    }
+      else if (id == 6 && (i == KEPLERIAN || i == MODIFIED_KEPLERIAN)) 
+      {
+         for (UnsignedInt temp = id; temp < ElementTypeCount; ++temp)
+         {
+            if (ELEMENT_LIST[i][temp] == label)
+               return true;
+         }
+      }
+   }
 
-    return false;
+   return false;
 }
+
 
 //---------------------------------------------------------------------------
 //  bool IsElement(const std::string &label) const
@@ -548,39 +586,42 @@ bool StateVector::IsElement(const Integer id, const std::string &label) const
  *
  * @return true if it is a part of element; otherwise,false.
  */
+//---------------------------------------------------------------------------
 bool StateVector::IsElement(const std::string &label) const
 {
-#if DEBUG_STATEVECTOR
-    MessageInterface::ShowMessage("\nStateVector::IsElement(%s)\n",
-                                  label.c_str());
-#endif
+   #if DEBUG_STATEVECTOR
+   MessageInterface::ShowMessage("\nStateVector::IsElement(%s)\n",
+                                 label.c_str());
+   #endif
 
-    for (UnsignedInt i=0; i < StateTypeCount; i++)
-    {
-        for (UnsignedInt j=0; j < ElementTypeCount; j++)
-        {
-            if (ELEMENT_LIST[i][j] == label)
-               return true;
-        }
-    }
-    return false;
+   for (UnsignedInt i=0; i < StateTypeCount; i++)
+   {
+      for (UnsignedInt j=0; j < ElementTypeCount; j++)
+      {
+         if (ELEMENT_LIST[i][j] == label)
+            return true;
+      }
+   }
+   
+   return false;
 }
 
 
 //---------------------------------------------------------------------------
-//  bool SetAnomaly(const Rvector6 kepl,const std::string &mType)
+//  bool SetAnomaly(const Rvector6 kepl,const std::string &type)
 //---------------------------------------------------------------------------
 /**
  * Set the anomaly. 
  *
  * @param <kepl>  Keplerian state
- * @param <mType> anomaly type
+ * @param <type> anomaly type
  *
  * @return true if successful; otherwise,false.
  */
-bool StateVector::SetAnomaly(const Rvector6 kepl,const std::string &mType)
+//---------------------------------------------------------------------------
+bool StateVector::SetAnomaly(const Rvector6 kepl,const std::string &type)
 {
-   anomaly.Set(kepl[0],kepl[1],kepl[5],mType);
+   mAnomaly.Set(kepl[0], kepl[1], kepl[5], type);
   
    return true;
 }
@@ -594,26 +635,29 @@ bool StateVector::SetAnomaly(const Rvector6 kepl,const std::string &mType)
  *
  * @return anomaly type.
  */
+//---------------------------------------------------------------------------
 std::string StateVector::GetAnomalyType() const
 {
-   return anomaly.GetType();
+   return mAnomaly.GetTypeString();
 }
 
+
 //---------------------------------------------------------------------------
-//  bool SetAnomalyType(const std::string &mType) 
+//  bool SetAnomalyType(const std::string &type) 
 //---------------------------------------------------------------------------
 /**
  * Set the anomaly type.
  *
- * @param <mType> the anomaly type.
+ * @param <type> the anomaly type.
  *
  * @return true if successful; otherwise, false.
  */
-bool StateVector::SetAnomalyType(const std::string &mType)
+//---------------------------------------------------------------------------
+bool StateVector::SetAnomalyType(const std::string &type)
 {
    try
    {
-      anomaly.SetType(mType);
+      mAnomaly.SetType(type);
    }
    catch(UtilityException &ue)
    {
@@ -623,22 +667,22 @@ bool StateVector::SetAnomalyType(const std::string &mType)
 }
 
 
-
 //---------------------------------------------------------------------------
-//  bool IsValidType(const std::string &mType) const
+//  bool IsValidType(const std::string &type) const
 //---------------------------------------------------------------------------
 /**
  * Check validity on the given state type. 
  *
- * @param <mType> The state type.
+ * @param <type> The state type.
  *
  * @return true if valid; otherwise, false.
  */
-bool StateVector::IsValidType(const std::string &mType) const
+//---------------------------------------------------------------------------
+bool StateVector::IsValidType(const std::string &type) const
 {
    for (UnsignedInt i=0; i < 5; i++)
    {
-       if (STATE_LIST[i] == mType)
+       if (STATE_LIST[i] == type)
           return true;
    }
    return false;
@@ -653,9 +697,10 @@ bool StateVector::IsValidType(const std::string &mType) const
  *
  * @return true if successful; otherwise false
  */
+//---------------------------------------------------------------------------
 bool StateVector::SetCoordSys(const CoordinateSystem *cs)
 {
-   return stateConverter.SetMu(cs);
+   return mStateConverter.SetMu(cs);
 }
 
 //-------------------------------------
@@ -667,22 +712,22 @@ bool StateVector::SetCoordSys(const CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 /**
  * Initialize data method as default. 
- *
  */
+//---------------------------------------------------------------------------
 void StateVector::DefineDefault()
 {
-   type = "Cartesian";
+   mStateType = "Cartesian";
 
-   value[0] = 7100.0;
-   value[1] = 0.0;
-   value[2] = 1300.0;
-   value[3] = 0.0;
-   value[4] = 7.35;
-   value[5] = 1.0;
+   mState[0] = 7100.0;
+   mState[1] = 0.0;
+   mState[2] = 1300.0;
+   mState[3] = 0.0;
+   mState[4] = 7.35;
+   mState[5] = 1.0;
 
    // Get the keplerian state and then initialize anomaly
    Rvector6 tempKepl = GetValue("Keplerian");  
-   anomaly.Set(tempKepl[0],tempKepl[1],tempKepl[5],"TA");
+   mAnomaly.Set(tempKepl[0], tempKepl[1], tempKepl[5], "TA");
 }
 
 
@@ -694,14 +739,16 @@ void StateVector::DefineDefault()
  *
  * @param <s> The original that is being copied.
  */
+//---------------------------------------------------------------------------
 void StateVector::InitializeDataMethod(const StateVector &s)
 {
     // Duplicate the member data
-    type = s.type;
-    anomaly = s.anomaly;
-    stateConverter = s.stateConverter;
-    value = s.value;
+    mStateType = s.mStateType;
+    mAnomaly = s.mAnomaly;
+    mStateConverter = s.mStateConverter;
+    mState = s.mState;
 }
+
 
 //---------------------------------------------------------------------------
 // std::string FindType(const std::string &label)
@@ -713,12 +760,13 @@ void StateVector::InitializeDataMethod(const StateVector &s)
  *     
  * @return Getting the state type from the given element.
  */    
+//---------------------------------------------------------------------------
 std::string StateVector::FindType(const std::string &label) const
 {            
-#if DEBUG_STATEVECTOR
+   #if DEBUG_STATEVECTOR
    MessageInterface::ShowMessage("\n*** StateVector::FindType-> label: %s",
                                  label.c_str());
-#endif
+   #endif
 
    if (label == "X" || label == "Y" || label == "Z" ||
        label == "VX" || label == "VY" || label == "VZ")
@@ -727,7 +775,7 @@ std::string StateVector::FindType(const std::string &label) const
    }
 
    if (label == "SMA" || label == "ECC" || label == "INC" || label == "RAAN" ||
-       label == "AOP" || !(anomaly.IsInvalid(label)))
+       label == "AOP" || !(mAnomaly.IsInvalid(label)))
    {
       return STATE_LIST[1];
    }
@@ -758,6 +806,7 @@ std::string StateVector::FindType(const std::string &label) const
  *     
  * @return the element ID.
  */    
+//---------------------------------------------------------------------------
 UnsignedInt StateVector::GetElementID(const std::string &label) const
 {
    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
@@ -776,7 +825,7 @@ UnsignedInt StateVector::GetElementID(const std::string &label) const
       return 4;
 
    if (label == "VZ" || label == "FPA" || label == "DECV" || 
-       !anomaly.IsInvalid(label))
+       !mAnomaly.IsInvalid(label))
       return 5;
    
    // Use default if no found

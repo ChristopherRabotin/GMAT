@@ -31,32 +31,32 @@ class GMAT_API StateVector
 public:
    // Default constructor
    StateVector();
-   StateVector(const std::string &mType);
+   StateVector(const std::string &type);
    StateVector(const Rvector6 stateVector);
-   StateVector(const std::string &mType, const Rvector6 stateVector);
+   StateVector(const std::string &type, const Rvector6 stateVector);
 
    // Copy constructor
-   StateVector(const StateVector &s);
+   StateVector(const StateVector &sv);
    // Assignment operator
-   StateVector& operator=(const StateVector &s);
+   StateVector& operator=(const StateVector &sv);
 
    // Destructor
    virtual ~StateVector(void);
 
    // public methods
    Rvector6    GetValue() const;
-   Rvector6    GetValue(const std::string &mType) const;
-   bool        SetValue(const std::string &mType);
+   Rvector6    GetValue(const std::string &type) const;
+   bool        SetValue(const std::string &type);
    bool        SetValue(Rvector6 state);
-   bool        SetValue(const std::string &mType, Rvector6 state);
+   bool        SetValue(const std::string &type, Rvector6 state);
 
    Real        GetElement(const Integer id) const;
    Real        GetElement(const std::string &label) const;
-   bool        SetElement(const Integer id, const Real mValue);
-   bool        SetElement(const std::string &label, const Real mValue); 
+   bool        SetElement(const Integer id, const Real value);
+   bool        SetElement(const std::string &label, const Real value); 
 
    std::string GetType() const;
-   bool        SetType(const std::string &mType);
+   bool        SetType(const std::string &type);
 
    bool        IsValidType(const std::string &label) const;
 
@@ -64,9 +64,9 @@ public:
    bool        IsElement(const std::string &label) const;
    std::string GetLabel(const Integer id) const;
 
-   bool        SetAnomaly(const Rvector6 kepl,const std::string &mType);
+   bool        SetAnomaly(const Rvector6 kepl,const std::string &type);
    std::string GetAnomalyType() const;
-   bool        SetAnomalyType(const std::string &mType);
+   bool        SetAnomalyType(const std::string &type);
 
    bool        SetCoordSys(const CoordinateSystem *cs);
 
@@ -87,10 +87,10 @@ protected:
    static const std::string STATE_LIST[StateTypeCount];
    
 private:
-   std::string             type;             // State type
-   Rvector6                value;
-   Anomaly                 anomaly;
-   mutable StateConverter  stateConverter;
+   std::string             mStateType;
+   Rvector6                mState;
+   Anomaly                 mAnomaly;
+   mutable StateConverter  mStateConverter;
 
    // private methods
    void        DefineDefault();
