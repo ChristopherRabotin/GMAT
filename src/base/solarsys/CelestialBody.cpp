@@ -2985,7 +2985,7 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
    Real     dTime;
    if (newAnalytic)
    {
-      cart  = KeplerianToCartesian(analyticKepler, cbMu, CoordUtil::TA);  // or MA???
+      cart  = CoordUtil::KeplerianToCartesian(analyticKepler, cbMu, CoordUtil::TA);  // or MA???
       dTime = forTime.Subtract(analyticEpoch) * GmatTimeUtil::SECS_PER_DAY;
    }
    else

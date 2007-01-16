@@ -652,9 +652,9 @@ bool Planet::SetAnalyticElements(const Rvector6 &kepl)
                                     + instanceName);
       Real     ma;
       Real     totalMu = mu + cb->GetGravitationalConstant();
-      Rvector6 cart    = - (KeplerianToCartesian(kepl,
+      Rvector6 cart    = - (CoordUtil::KeplerianToCartesian(kepl,
                             totalMu, CoordUtil::TA)); 
-      Rvector6 sunKepl = CartesianToKeplerian(cart, totalMu, &ma);
+      Rvector6 sunKepl = CoordUtil::CartesianToKeplerian(cart, totalMu, &ma);
 
       #ifdef DEBUG_PLANET_ANALYTIC
          MessageInterface::ShowMessage(
