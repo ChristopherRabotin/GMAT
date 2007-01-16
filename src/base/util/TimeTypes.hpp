@@ -25,10 +25,6 @@
 
 typedef Real     UtcMjd;
 typedef Real     Ut1Mjd;
-//loj: implemented ElapsedTime as a class
-//loj: typedef Real     ElapsedTime;
-//loj: 3/12/04 conflicts with ElapsedDays parameter class, use Integer
-//typedef Integer  ElapsedDays;
 typedef Integer  YearNumber;
 
 typedef Integer  DayOfYear;
@@ -41,35 +37,35 @@ namespace GmatTimeUtil
 {
    class CalDate
    {
-   public:
-   CalDate(YearNumber y, MonthOfYear mo, DayOfMonth d,
-           HourOfDay h, MinuteOfHour m, Real s)
-      : year(y), month(mo), day(d), hour(h), minute(m), second(s)
-   {};
+      public:
+      CalDate(YearNumber y, MonthOfYear mo, DayOfMonth d,
+              HourOfDay h, MinuteOfHour m, Real s)
+         : year(y), month(mo), day(d), hour(h), minute(m), second(s)
+         {};
 
-   CalDate() : year(1941), month(1), day(5), hour(0), minute(0), second(0.0) {};
-   
-   YearNumber   year;
-   MonthOfYear  month;
-   DayOfMonth   day;
-   HourOfDay    hour;
-   MinuteOfHour minute;
-   Real         second;
+      CalDate() : year(1941), month(1), day(5), hour(0), minute(0), second(0.0) {};
+      
+      YearNumber   year;
+      MonthOfYear  month;
+      DayOfMonth   day;
+      HourOfDay    hour;
+      MinuteOfHour minute;
+      Real         second;
    };
    
    class ElapsedDate
    {
-   public:
-   ElapsedDate(Integer d, Integer h, Integer m, Real s)
-      : days(d), hours(d), minutes(m), seconds(s)
-   {};
+      public:
+      ElapsedDate(Integer d, Integer h, Integer m, Real s)
+         : days(d), hours(d), minutes(m), seconds(s)
+         {};
 
-   ElapsedDate() : days(0), hours(0), minutes(0), seconds(0.0) {};
+      ElapsedDate() : days(0), hours(0), minutes(0), seconds(0.0) {};
 
-   Integer days;
-   Integer hours;
-   Integer minutes;
-   Real    seconds;
+      Integer days;
+      Integer hours;
+      Integer minutes;
+      Real    seconds;
    };
 
    const Real SECS_PER_DAY = 86400.0;
@@ -99,15 +95,18 @@ namespace GmatTimeUtil
    
    enum MonthName {JANUARY = 1, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST,  
                    SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER};
-
+   
    static const std::string MONTH_NAME_TEXT[12] =
    {
       "Jan",  "Feb",  "Mar",  "Apr",  "May",  "Jun",
       "Jul",  "Aug",  "Sep",  "Oct",  "Nov",  "Dec"
    };
    
-
    enum SIGN {PLUS = 1, MINUS = -1 };
+   
+   bool IsValidMonthName(const std::string &str);
+   std::string GetMonthName(Integer month);
+   Integer GetMonth(const std::string &monthName);
    
 }
 #endif // TimeTypes_hpp
