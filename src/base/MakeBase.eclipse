@@ -195,6 +195,7 @@ OBJECTS = \
     forcemodel/PhysicalModel.o \
     forcemodel/PointMassForce.o \
     forcemodel/SolarRadiationPressure.o \
+    foundation/ElementWrapper.o \
     foundation/GmatBaseException.o \
     foundation/GmatBase.o \
     foundation/SpacePoint.o \
@@ -251,6 +252,7 @@ OBJECTS = \
     math/Transpose.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
+    parameter/ArrayElementWrapper.o \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
     parameter/AttitudeReal.o \
@@ -266,6 +268,8 @@ OBJECTS = \
     parameter/EnvReal.o \
     parameter/ExpressionParser.o \
     parameter/KeplerianParameters.o \
+    parameter/NumberWrapper.o \
+    parameter/ObjectPropertyWrapper.o \
     parameter/OrbitalParameters.o \
     parameter/OrbitData.o \
     parameter/OrbitReal.o \
@@ -273,6 +277,7 @@ OBJECTS = \
     parameter/ParameterDatabase.o \
     parameter/ParameterInfo.o \
     parameter/Parameter.o \
+    parameter/ParameterWrapper.o \
     parameter/PlanetData.o \
     parameter/PlanetParameters.o \
     parameter/PlanetReal.o \
@@ -286,6 +291,7 @@ OBJECTS = \
     parameter/TimeReal.o \
     parameter/TimeString.o \
     parameter/Variable.o \
+    parameter/VariableWrapper.o \
     propagator/AdamsBashforthMoulton.o \
     propagator/BulirschStoer.o \
     propagator/Cowell.o \

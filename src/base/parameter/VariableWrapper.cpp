@@ -52,39 +52,39 @@ VariableWrapper::VariableWrapper(const std::string &desc) :
 }
 
 //---------------------------------------------------------------------------
-//  VariableWrapper(const VariableWrapper &vr);
+//  VariableWrapper(const VariableWrapper &vw);
 //---------------------------------------------------------------------------
 /**
  * Constructs base VariableWrapper structures used in derived classes, by 
  * copying the input instance (copy constructor).
  *
- * @param <vr>  VariableWrapper instance to copy to create "this" instance.
+ * @param <vw>  VariableWrapper instance to copy to create "this" instance.
  */
 //---------------------------------------------------------------------------
-VariableWrapper::VariableWrapper(const VariableWrapper &vr) :
-   ElementWrapper(vr),
-   var           (vr.var)
+VariableWrapper::VariableWrapper(const VariableWrapper &vw) :
+   ElementWrapper(vw),
+   var           (vw.var)
 {
 }
 
 //---------------------------------------------------------------------------
-//  VariableWrapper& operator=(const VariableWrapper &vr)
+//  VariableWrapper& operator=(const VariableWrapper &vw)
 //---------------------------------------------------------------------------
 /**
  * Assignment operator for VariableWrapper structures.
  *
- * @param <vr> The original that is being copied.
+ * @param <vw> The original that is being copied.
  *
  * @return Reference to this object
  */
 //---------------------------------------------------------------------------
-const VariableWrapper& VariableWrapper::operator=(const VariableWrapper &vr)
+const VariableWrapper& VariableWrapper::operator=(const VariableWrapper &vw)
 {
-   if (&vr == this)
+   if (&vw == this)
       return *this;
 
-   ElementWrapper::operator=(vr);
-   var = vr.var;
+   ElementWrapper::operator=(vw);
+   var = vw.var;
 
    return *this;
 }

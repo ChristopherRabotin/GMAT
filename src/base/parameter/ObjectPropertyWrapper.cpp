@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  ParameterWrapper
+//                                  ObjectPropertyWrapper
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -13,14 +13,14 @@
 // Created: 2007.01.18
 //
 /**
- * Implementation of the ParameterWrapper class.
+ * Implementation of the ObjectPropertyWrapper class.
  *
  */
 //------------------------------------------------------------------------------
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-#include "ParameterWrapper.hpp"
+#include "ObjectPropertyWrapper.hpp"
 #include "ParameterException.hpp"
 
 //#include "MessageInterface.hpp"
@@ -35,82 +35,88 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  ParameterWrapper(const std::string &desc);
+//  ObjectPropertyWrapper(const std::string &desc);
 //---------------------------------------------------------------------------
 /**
- * Constructs ParameterWrapper structures
+ * Constructs ObjectPropertyWrapper structures
  * (default constructor).
  *
  * @param <desc> Optional description for the object.  Defaults to "".
  *
  */
 //---------------------------------------------------------------------------
-ParameterWrapper::ParameterWrapper(const std::string &desc) :
+ObjectPropertyWrapper::ObjectPropertyWrapper(const std::string &desc) :
    ElementWrapper(desc),
-   param         (NULL)
+   object        (NULL),
+   parameterId   (-1)
 {
 }
 
 //---------------------------------------------------------------------------
-//  ParameterWrapper(const ParameterWrapper &pw);
+//  ObjectPropertyWrapper(const ObjectPropertyWrapper &opw);
 //---------------------------------------------------------------------------
 /**
- * Constructs base ParameterWrapper structures used in derived classes, by 
- * copying the input instance (copy constructor).
+ * Constructs base ObjectPropertyWrapper structures used in derived classes, 
+ * by copying the input instance (copy constructor).
  *
- * @param <pw>  ParameterWrapper instance to copy to create "this" instance.
+ * @param <opw>  ObjectPropertyWrapper instance to copy to create "this" 
+ * instance.
  */
 //---------------------------------------------------------------------------
-ParameterWrapper::ParameterWrapper(const ParameterWrapper &pw) :
-   ElementWrapper(pw),
-   param         (pw.param)
+ObjectPropertyWrapper::ObjectPropertyWrapper(const ObjectPropertyWrapper &opw) :
+   ElementWrapper(opw),
+   object        (opw.object),
+   parameterId   (opw.parameterId)
 {
 }
 
 //---------------------------------------------------------------------------
-//  ParameterWrapper& operator=(const ParameterWrapper &pw)
+//  ObjectPropertyWrapper& operator=(const ObjectPropertyWrapper &opw)
 //---------------------------------------------------------------------------
 /**
- * Assignment operator for ParameterWrapper structures.
+ * Assignment operator for ObjectPropertyWrapper structures.
  *
- * @param <pw> The original that is being copied.
+ * @param <opw> The original that is being copied.
  *
  * @return Reference to this object
  */
 //---------------------------------------------------------------------------
-const ParameterWrapper& ParameterWrapper::operator=(const ParameterWrapper &pw)
+const ObjectPropertyWrapper& ObjectPropertyWrapper::operator=(
+                             const ObjectPropertyWrapper &opw)
 {
-   if (&pw == this)
+   if (&opw == this)
       return *this;
 
-   ElementWrapper::operator=(pw);
-   param = pw.param;
+   ElementWrapper::operator=(opw);
+   object      = opw.object;
+   parameterId = opw.parameterId;
 
    return *this;
 }
 //---------------------------------------------------------------------------
-//  ~ParameterWrapper()
+//  ~ObjectPropertyWrapper()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
  */
 //---------------------------------------------------------------------------
-ParameterWrapper::~ParameterWrapper()
+ObjectPropertyWrapper::~ObjectPropertyWrapper()
 {
 }
 
 //---------------------------------------------------------------------------
-//  bool SetParameter(Parameter *toVar)
+//  bool SetObjectAndId(ObjectProperty *toVar)
 //---------------------------------------------------------------------------
 /**
- * Method to set the Parameter pointer to the wrapped object.
+ * Method to set the ObjectProperty pointer to the wrapped object.
  *
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool ParameterWrapper::SetParameter(Parameter *toParam)
+bool ObjectPropertyWrapper::SetObjectAndId(GmatBase *toObj, Integer andId)
 {
-   param = toParam;
+   object      = toObj;
+   parameterId = andId;
    return true;
 }
 
@@ -124,12 +130,25 @@ bool ParameterWrapper::SetParameter(Parameter *toParam)
  * 
  */
 //---------------------------------------------------------------------------
-Real ParameterWrapper::EvaluateReal() const
+Real ObjectPropertyWrapper::EvaluateReal() const
 {
-   if (param == NULL)
+   if (object == NULL)
       throw ParameterException(
-      "Cannot return value of Parameter - pointer is NULL\n");
-   return param->EvaluateReal();
+      "Cannot return value of ObjectProperty - object pointer is NULL\n");
+   Real itsValue;
+   try
+   {
+      itsValue = object->GetRealParameter(parameterId);
+   }
+   catch (BaseException &be)
+   {
+      std::string errmsg = "Cannot return Real value for id " + parameterId; 
+      errmsg += " for object " + object->GetName() + " - exception thrown: " +
+      be.GetMessage();
+      throw ParameterException(errmsg);
+   }
+         
+   return itsValue;
 }
    
 //---------------------------------------------------------------------------
@@ -141,11 +160,23 @@ Real ParameterWrapper::EvaluateReal() const
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool ParameterWrapper::SetReal(const Real toValue)
+bool ObjectPropertyWrapper::SetReal(const Real toValue)
 {
-   if (param == NULL)
+   if (object == NULL)
       throw ParameterException(
-      "Cannot set value of Parameter - pointer is NULL\n");
-   param->SetReal(toValue);
+      "Cannot set value of ObjectProperty - object pointer is NULL\n");
+
+   try
+   {
+      object->SetRealParameter(parameterId, toValue);
+   }
+   catch (BaseException &be)
+   {
+      std::string errmsg = "Cannot set Real value for id " + parameterId; 
+      errmsg += " for object " + object->GetName() + " - exception thrown: " +
+      be.GetMessage();
+      throw ParameterException(errmsg);
+   }
+         
    return true;
 }

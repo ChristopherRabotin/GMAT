@@ -149,7 +149,21 @@ namespace Gmat
       UNKNOWN_PARAMETER_TYPE = -1
    };
    
-   enum RunState {
+   enum WrapperDataType
+   {
+      NUMBER,
+      STRING,
+      OBJECT_PROPERTY,
+      VARIABLE,
+      ARRAY,
+      ARRAY_ELEMENT,
+      PARAMETER_OBJECT,
+      OBJECT
+   };
+      
+   
+   enum RunState 
+   {
       IDLE = 10000,
       RUNNING,
       PAUSED,

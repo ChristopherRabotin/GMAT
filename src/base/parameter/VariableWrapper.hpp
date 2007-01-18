@@ -34,9 +34,9 @@ public:
    // default constructor
    VariableWrapper(const std::string &desc = "");
    // copy constructor
-   VariableWrapper(const VariableWrapper &vr);
+   VariableWrapper(const VariableWrapper &vw);
    // operator = 
-   const VariableWrapper& operator=(const VariableWrapper &vr);
+   const VariableWrapper& operator=(const VariableWrapper &vw);
    // destructor
    virtual ~VariableWrapper();
    
@@ -49,7 +49,7 @@ public:
    
 protected:  
 
-   // the Real value
+   // pointer to the Variable object
    Variable *var;
    
 };

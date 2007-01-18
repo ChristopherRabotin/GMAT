@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                                  ParameterWrapper
+//                                  ObjectPropertyWrapper
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -13,34 +13,33 @@
 // Created: 2007.01.18
 //
 /**
- * Definition of the ParameterWrapper class.
+ * Definition of the ObjectPropertyWrapper class.
  *
  *
  */
 //------------------------------------------------------------------------------
 
-#ifndef ParameterWrapper_hpp
-#define ParameterWrapper_hpp
+#ifndef ObjectPropertyWrapper_hpp
+#define ObjectPropertyWrapper_hpp
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "ElementWrapper.hpp"
-#include "Parameter.hpp"
 
-class GMAT_API ParameterWrapper : public ElementWrapper
+class GMAT_API ObjectPropertyWrapper : public ElementWrapper
 {
 public:
 
    // default constructor
-   ParameterWrapper(const std::string &desc = "");
+   ObjectPropertyWrapper(const std::string &desc = "");
    // copy constructor
-   ParameterWrapper(const ParameterWrapper &pw);
+   ObjectPropertyWrapper(const ObjectPropertyWrapper &opw);
    // operator = 
-   const ParameterWrapper& operator=(const ParameterWrapper &pw);
+   const ObjectPropertyWrapper& operator=(const ObjectPropertyWrapper &opw);
    // destructor
-   virtual ~ParameterWrapper();
+   virtual ~ObjectPropertyWrapper();
    
-   virtual bool            SetParameter(Parameter *toParam);
+   virtual bool            SetObjectAndId(GmatBase *toObj, Integer andId);
    
    virtual Real            EvaluateReal() const;
    
@@ -49,8 +48,10 @@ public:
    
 protected:  
 
-   // pointer to the Parameter object
-   Parameter *param;
+   // pointer to the base object
+   GmatBase *object;
+   /// parameter Id for the property of the object
+   Integer  parameterId;
    
 };
-#endif // ParameterWrapper_hpp
+#endif // ObjectPropertyWrapper_hpp
