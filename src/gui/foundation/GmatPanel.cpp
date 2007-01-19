@@ -19,6 +19,8 @@
 #include "ShowScriptDialog.hpp"
 #include "ShowSummaryDialog.hpp"
 
+//#define DEBUG_GMAT_PANEL_SAVE 1
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -112,11 +114,17 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
    
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void EnableUpdate(bool enable = true)
 //------------------------------------------------------------------------------
 void GmatPanel::EnableUpdate(bool enable)
 {
+   #if DEBUG_GMAT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("GmatPanel::EnableUpdate() enable=%d\n", enable);
+   #endif
+   
    GmatMdiChildFrame* mdichild = (GmatMdiChildFrame*)theParent->GetParent();
    
    if (enable)
@@ -144,12 +152,20 @@ void GmatPanel::EnableUpdate(bool enable)
 //------------------------------------------------------------------------------
 void GmatPanel::OnApply(wxCommandEvent &event)
 {
+   #if DEBUG_GMAT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("GmatPanel::OnApply() mDataChanged=%d\n", mDataChanged);
+   #endif
+   
    if (mDataChanged)
    {
       SaveData();
       GmatMdiChildFrame* mdichild = (GmatMdiChildFrame*)theParent->GetParent();
-      mdichild->SetDirty(false);
-      theGuiInterpreter->ConfigurationChanged(mObject, true);
+      if (canClose)
+      {
+         mdichild->SetDirty(false);
+         theGuiInterpreter->ConfigurationChanged(mObject, true);
+      }
    }
    
    //theApplyButton->Enable(!enableApply);
@@ -166,12 +182,21 @@ void GmatPanel::OnApply(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatPanel::OnOK(wxCommandEvent &event)
 {
+   #if DEBUG_GMAT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("GmatPanel::OnOK() mDataChanged=%d\n", mDataChanged);
+   #endif
+   
    if (mDataChanged)
    {
       SaveData();
       GmatMdiChildFrame* mdichild = (GmatMdiChildFrame*)theParent->GetParent();
-      mdichild->SetDirty(false);
-      theGuiInterpreter->ConfigurationChanged(mObject, true);
+
+      if (canClose)
+      {
+         mdichild->SetDirty(false);
+         theGuiInterpreter->ConfigurationChanged(mObject, true);
+      }
    }
    
    //if (theApplyButton->IsEnabled())
@@ -258,21 +283,35 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// bool CheckReal(Real &rvalue, const std::string &element,
-//                const std::string &field, const std::string &expRange)
+// bool CheckReal(Real &rvalue, const std::string &str,
+//                const std::string &field, const std::string &expRange,
+//                bool onlyMsg = false)
 //------------------------------------------------------------------------------
-bool GmatPanel::CheckReal(Real &rvalue, const std::string &element,
+/*
+ * This method checks if input string is valid real number. It uses
+ * GmatStringUtil::ToReal() to convert string to Real value. This method
+ * pops up the error message and sets canClose to false if input string is
+ * not a real number.
+ *
+ * @param  rvalue   Real value to be set if input string is valid
+ * @param  str      Input string value
+ * @param  field    Field name should used in the error message
+ * @param  expRange Expected value range to be used in the error message
+ * @param  onlyMsg  if true, it only shows error message
+ */
+//------------------------------------------------------------------------------
+bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
                           const std::string &field, const std::string &expRange,
                           bool onlyMsg)
 {
    //MessageInterface::ShowMessage
-   //   ("===> CheckReal() element=%s, field=%s, expRange=%s\n", element.c_str(),
+   //   ("===> CheckReal() str=%s, field=%s, expRange=%s\n", str.c_str(),
    //    field.c_str(), expRange.c_str());
    
    if (onlyMsg)
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
           expRange.c_str());
       
       canClose = false;
@@ -281,7 +320,7 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &element,
    
    // check for real value
    Real rval;
-   if (GmatStringUtil::ToReal(element, &rval))
+   if (GmatStringUtil::ToReal(str, &rval))
    {
       rvalue = rval;
       return true;
@@ -289,13 +328,65 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &element,
    else
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), element.c_str(), field.c_str(),
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
           expRange.c_str());
       
       canClose = false;
       return false;
    }
 }
+
+
+//------------------------------------------------------------------------------
+// bool CheckInteger(Integer &ivalue, const std::string &str,
+//                   const std::string &field, const std::string &expRange,
+//                   bool onlyMsg = false)
+//------------------------------------------------------------------------------
+/*
+ * This method checks if input string is valid integer number. It uses
+ * GmatStringUtil::ToInteger() to convert string to Integer value. This method
+ * pops up the error message and sets canClose to false if input string is
+ * not an integer number.
+ *
+ * @param  ivalue   Integer value to be set if input string is valid
+ * @param  str      Input string value
+ * @param  field    Field name should used in the error message
+ * @param  expRange Expected value range to be used in the error message
+ * @param  onlyMsg  if true, it only shows error message
+ */
+//------------------------------------------------------------------------------
+bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
+                             const std::string &field, const std::string &expRange,
+                             bool onlyMsg)
+{
+   if (onlyMsg)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   
+   // check for integer value
+   Integer ival;
+   if (GmatStringUtil::ToInteger(str, &ival))
+   {
+      ivalue = ival;
+      return true;
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+}
+
 
 //-------------------------------
 // protected methods

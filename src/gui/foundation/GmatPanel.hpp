@@ -33,6 +33,7 @@
 class GmatPanel : public wxPanel
 {
 public:
+   
    // constructors
    GmatPanel( wxWindow *parent, bool showScriptButton = true);
 
@@ -45,11 +46,16 @@ public:
    virtual void OnScript(wxCommandEvent &event);
    virtual void OnSummary(wxCommandEvent &event);
    
-   bool CheckReal(Real &rvalue, const std::string &element,
+   bool CheckReal(Real &rvalue, const std::string &str,
                   const std::string &field, const std::string &expRange,
                   bool onlyMsg = false);
    
+   bool CheckInteger(Integer &ivalue, const std::string &str,
+                     const std::string &field, const std::string &expRange,
+                     bool onlyMsg = false);
+   
 protected:
+   
    // member functions
    virtual void Create() = 0;
    virtual void Show();

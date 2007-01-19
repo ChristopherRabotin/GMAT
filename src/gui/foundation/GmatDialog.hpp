@@ -32,14 +32,25 @@
 class GmatDialog : public wxDialog
 {
 public:
+   
    // constructors
-   GmatDialog( wxWindow *parent, wxWindowID id, const wxString& title);
-    
+   GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
+              GmatBase *obj = NULL);
+   
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
    virtual void OnHelp(wxCommandEvent &event);
 
+   bool CheckReal(Real &rvalue, const std::string &str,
+                  const std::string &field, const std::string &expRange,
+                  bool onlyMsg = false);
+   
+   bool CheckInteger(Integer &ivalue, const std::string &str,
+                     const std::string &field, const std::string &expRange,
+                     bool onlyMsg = false);
+   
 protected:
+   
    // member functions
    // Changed Show() to ShowDate(), because it conflicts with wxDialog::Show()
    virtual void ShowData();   
@@ -48,9 +59,11 @@ protected:
    virtual void SaveData() = 0;
    virtual void ResetData() = 0;
    
-    // member data
+   // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   GmatBase *mObject;
+   std::string mMsgFormat;
    
    wxWindow *theParent;
     
@@ -67,7 +80,7 @@ protected:
    
    wxButton *theOkButton;
    wxButton *theCancelButton;
-   wxButton *theHelpButton;
+   //wxButton *theHelpButton;
 
    bool canClose;
    

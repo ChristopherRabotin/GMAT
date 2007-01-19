@@ -31,21 +31,28 @@ END_EVENT_TABLE()
 //------------------------------
 
 //------------------------------------------------------------------------------
-// GmatDialog(wxWindow *parent)
+// GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
+//            GmatBase *obj = NULL
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatDialog object.
  *
- * @param <parent> parent window
+ * @param  parent  parent window
+ * @param  id      window id
+ * @param  title   window title
+ * @param  obj     object to be used for setting values
  *
  */
 //------------------------------------------------------------------------------
-GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
+GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
+                       GmatBase *obj)
    : wxDialog(parent, id, title)
 {
+   mObject = obj;
+   
    canClose = true;
    int borderSize = 2;
-    
+   
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
@@ -71,16 +78,123 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title)
    theCancelButton =
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
    
-   theHelpButton =
-      new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-        
+   //theHelpButton =
+   //   new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
+   
    // adds the buttons to button sizer    
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
+   //theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
 }
+
+
+//------------------------------------------------------------------------------
+// bool CheckReal(Real &rvalue, const std::string &str,
+//                const std::string &field, const std::string &expRange,
+//                bool onlyMsg = false)
+//------------------------------------------------------------------------------
+/*
+ * This method checks if input string is valid real number. It uses
+ * GmatStringUtil::ToReal() to convert string to Real value. This method
+ * pops up the error message and sets canClose to false if input string is
+ * invaid real number.
+ *
+ * @param  rvalue   Real value to be set if input string is valid
+ * @param  str      Input string value
+ * @param  field    Field name should used in the error message
+ * @param  expRange Expected value range to be used in the error message
+ * @param  onlyMsg  if true, it only shows error message
+ */
+//------------------------------------------------------------------------------
+bool GmatDialog::CheckReal(Real &rvalue, const std::string &str,
+                          const std::string &field, const std::string &expRange,
+                          bool onlyMsg)
+{
+   //MessageInterface::ShowMessage
+   //   ("===> CheckReal() str=%s, field=%s, expRange=%s\n", str.c_str(),
+   //    field.c_str(), expRange.c_str());
+   
+   if (onlyMsg)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   
+   // check for real value
+   Real rval;
+   if (GmatStringUtil::ToReal(str, &rval))
+   {
+      rvalue = rval;
+      return true;
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool CheckInteger(Integer &ivalue, const std::string &str,
+//                   const std::string &field, const std::string &expRange,
+//                   bool onlyMsg = false)
+//------------------------------------------------------------------------------
+/*
+ * This method checks if input string is valid integer number. It uses
+ * GmatStringUtil::ToInteger() to convert string to Integer value. This method
+ * pops up the error message and sets canClose to false if input string is
+ * invaid integer number.
+ *
+ * @param  ivalue   Integer value to be set if input string is valid
+ * @param  str      Input string value
+ * @param  field    Field name should used in the error message
+ * @param  expRange Expected value range to be used in the error message
+ * @param  onlyMsg  if true, it only shows error message
+ */
+//------------------------------------------------------------------------------
+bool GmatDialog::CheckInteger(Integer &ivalue, const std::string &str,
+                             const std::string &field, const std::string &expRange,
+                             bool onlyMsg)
+{
+   if (onlyMsg)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   
+   // check for integer value
+   Integer ival;
+   if (GmatStringUtil::ToInteger(str, &ival))
+   {
+      ivalue = ival;
+      return true;
+   }
+   else
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+}
+
 
 //-------------------------------
 // protected methods
@@ -109,7 +223,21 @@ void GmatDialog::ShowData()
    CenterOnScreen(wxBOTH);
    
    theOkButton->Disable();
-   theHelpButton->Disable(); //loj: for future build
+   //theHelpButton->Disable(); //loj: for future build
+
+   if (mObject == NULL)
+   {
+      mMsgFormat =
+         "The value of \"%s\" for field \"%s\" \" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
+   else
+   {
+      mMsgFormat =
+         "The value of \"%s\" for field \"%s\" on object \""
+         + mObject->GetName() +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
    
    LoadData();
 
@@ -154,3 +282,5 @@ void GmatDialog::OnHelp(wxCommandEvent &event)
 {
    // open separate window to show help
 }
+
+
