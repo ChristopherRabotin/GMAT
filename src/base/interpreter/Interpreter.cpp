@@ -47,6 +47,8 @@
 //#define DEBUG_SET_SOLAR_SYS 1
 //#define DEBUG_FINAL_PASS
 //#define DEBUG_CHECK_OBJECT 1
+//#define DEBUG_CHECK_BRANCH 1
+
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -3397,31 +3399,6 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
 }
 
 
-// //------------------------------------------------------------------------------
-// // bool SetArrayValue(GmatBase *obj, const std::string &arrayStr, Real rval)
-// //------------------------------------------------------------------------------
-// bool Interpreter::SetArrayValue(GmatBase *obj, const std::string &arrayStr,
-//                                 Real rval)
-// {
-//    Integer row, col;
-   
-//    Parameter *param = GetArrayIndex(arrayStr, row, col);
-   
-//    if (row != -1 && col != -1)
-//    {
-//       param->SetRealParameter("SingleValue", rval, row-1, col-1);
-//    }
-//    else
-//    {
-//       InterpreterException ex("Invalid row and column index\n");
-//       HandleError(ex);
-//       return false;
-//    }
-
-//    return true;
-// }
-
-
 //------------------------------------------------------------------------------
 // Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col)
 //------------------------------------------------------------------------------
@@ -3607,11 +3584,29 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
    std::string expEndStr, str, str1;
    bool retval = true;
    
+   #if DEBUG_CHECK_BRANCH
+   MessageInterface::ShowMessage("   Now start checking\n");
+   #endif
+   
    for (UnsignedInt i=0; i<lines.size(); i++)
    {
       str = lines[i];
+      
+      #if DEBUG_CHECK_BRANCH
+      MessageInterface::ShowMessage
+         ("   line=%d, str=%s\n", lineNumbers[i], str.c_str());
+      #endif
+      
       if (GmatStringUtil::StartsWith(str, "End"))
       {
+         if (controlStack.empty())
+         {
+            InterpreterException ex("Found too many \"" + str + "\"");
+            HandleErrorMessage(ex, GmatStringUtil::ToString(lineNumbers[i]), str);
+            retval = false;
+            break;
+         }
+         
          str1 = controlStack.top();
          controlStack.pop();
          
@@ -3700,8 +3695,9 @@ bool Interpreter::FinalPass()
       #endif
       obj = GetObject(*i);
       
-      // check System Parameters seperately since it follows certain naming convention
-      // "owner.dep.type" where owner can be either Spacecraft of Burn for now
+      // check System Parameters seperately since it follows certain naming
+      // convention.  "owner.dep.type" where owner can be either Spacecraft
+      // or Burn for now
       
       if (obj->GetType() == Gmat::PARAMETER)
       {
@@ -3936,8 +3932,9 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       {
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
          
-         // Check System Parameters seperately since it follows certain naming convention
-         // "owner.dep.type" where owner can be either Spacecraft of Burn for now
+         // Check System Parameters seperately since it follows certain naming
+         // convention.  "owner.dep.type" where owner can be either Spacecraft
+         // or Burn for now
          
          if (refTypes[i] == Gmat::PARAMETER)
          {
