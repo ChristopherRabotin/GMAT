@@ -38,9 +38,9 @@
 
 //#define DEBUG_ORBIT_PANEL 1
 //#define DEBUG_ORBIT_PANEL_LOAD 1
-#define DEBUG_ORBIT_PANEL_CONVERT 1
+//#define DEBUG_ORBIT_PANEL_CONVERT 1
 //#define DEBUG_ORBIT_PANEL_COMBOBOX 1
-#define DEBUG_ORBIT_PANEL_SAVE 1
+//#define DEBUG_ORBIT_PANEL_SAVE 1
 //#define DEBUG_ORBIT_PANEL_CHECK_RANGE 1
 
 //------------------------------
@@ -144,8 +144,14 @@ void OrbitPanel::LoadData()
          epochFormatComboBox->Append(reps[i].c_str());
       
       // load the epoch
-      std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat");
+      std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat");      
       mEpoch = theSpacecraft->GetRealParameter("A1Epoch");
+      
+      #if DEBUG_ORBIT_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("   epochFormat=%s, mEpoch=%f\n", epochFormat.c_str(), mEpoch);
+      #endif
+      
       epochFormatComboBox->SetValue(wxT(epochFormat.c_str()));
       mFromEpochFormat = epochFormat;
       
@@ -302,8 +308,10 @@ void OrbitPanel::SaveData()
       Real taimjd = -999.999;
       std::string outStr;
       
+      #if DEBUG_ORBIT_PANEL_SAVE
       MessageInterface::ShowMessage
          ("   newEpoch=%s, epochFormat=%s\n", newEpoch.c_str(), epochFormat.c_str());
+      #endif
       
       if (mIsEpochChanged)
       {

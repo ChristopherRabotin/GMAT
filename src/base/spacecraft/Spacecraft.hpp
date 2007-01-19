@@ -61,13 +61,11 @@ public:
    Rvector6          GetCartesianState();
    Rvector6          GetKeplerianState();
    Rvector6          GetModifiedKeplerianState();
-
+   
    Anomaly           GetAnomaly() const;
    
    Rmatrix33         GetAttitude(Real a1mjdTime) const;
    Rvector3          GetAngularVelocity(Real a1mjdTime) const;
-   
-   void              SetDateFormat(const std::string &dateType);
    
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -133,6 +131,8 @@ public:
                         const std::string &prefix = "",
                         const std::string &useName = "");
    
+   std::string GetEpochString();
+   void SetDateFormat(const std::string &dateType);   
    void SetEpoch(const std::string &ep);
    void SetEpoch(const std::string &type, const std::string &ep, Real a1mjd);
    void SetState(const std::string &type, const Rvector6 &cartState);
