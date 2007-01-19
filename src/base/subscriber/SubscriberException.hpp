@@ -21,10 +21,10 @@
 
 #include "BaseException.hpp"
 
-class SubscriberException : public BaseException
+class GMAT_API SubscriberException : public BaseException
 {
-   public:
-      SubscriberException(const std::string& message) 
-         : BaseException("SubscriberException Thrown: ", message) {};
+public:
+   SubscriberException(const std::string& details = "") 
+      : BaseException("SubscriberException Thrown: ", details) {};
 };
 #endif

@@ -25,7 +25,7 @@
 class GMAT_API BurnException : public BaseException
 {
 public:
-   BurnException(const std::string &details);
+   BurnException(const std::string &details = "");
    virtual ~BurnException();
    BurnException(const BurnException &be);
 };
