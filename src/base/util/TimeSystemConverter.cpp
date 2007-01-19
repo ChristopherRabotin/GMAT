@@ -549,6 +549,11 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    #endif
    
    Real fromMjdVal = fromMjd;
+   bool convertToModJulian = false;
+   Integer timePrecision = GmatGlobal::Instance()->GetTimePrecision();
+   
+   if (fromMjd == -999.999)
+      convertToModJulian = true;
    
    //-------------------------------------------------------
    // Get from time system and format
@@ -563,7 +568,8 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
          ("\"" + fromSystem + "\" is not a valid time system");
    
    // Validate time format and value
-   ValidateTimeFormat(fromFormat, fromStr);
+   if (convertToModJulian)
+      ValidateTimeFormat(fromFormat, fromStr);
    
    //-------------------------------------------------------
    // Get to time system and format
@@ -584,10 +590,13 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    
    if (fromFormat == "ModJulian")
    {
-      std::stringstream str;
-      str.precision(GmatGlobal::TIME_PRECISION);
-      str.str(fromStr);
-      str >> fromMjdVal;
+      if (convertToModJulian)
+      {
+         std::stringstream str;
+         str.precision(timePrecision);
+         str.str(fromStr);
+         str >> fromMjdVal;
+      }
    }
    else
    {
@@ -617,7 +626,7 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    // Convert to output format
    //-------------------------------------------------------
    if (toFormat == "ModJulian")
-      toStr = GmatStringUtil::ToString(toMjd, GmatGlobal::TIME_PRECISION);
+      toStr = GmatStringUtil::ToString(toMjd, timePrecision);
    else
       toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd);
    
