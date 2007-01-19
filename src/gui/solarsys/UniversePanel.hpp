@@ -40,6 +40,7 @@ private:
    bool mHasFileTypesInUseChanged;
    bool mHasFileNameChanged;
    bool mHasAnaModelChanged;
+   bool mHasTextModified;
    
    wxComboBox *mFileTypeComboBox;
    wxComboBox *mAnalyticModelComboBox;
@@ -47,7 +48,7 @@ private:
    wxTextCtrl *mIntervalTextCtrl;
    wxTextCtrl *mFileNameTextCtrl;
    
-   wxButton   *mBrowseButton;
+   wxButton *mBrowseButton;
    wxButton *addButton;
    wxButton *removeButton;
    wxButton *clearButton;

@@ -357,62 +357,61 @@ void ReportFileSetupPanel::LoadData()
    writeCheckBox->SetValue(reportFile->IsActive());
    
    // load file name data from core engine
-   int filenameId = reportFile->GetParameterID("Filename");
-   std::string filename = reportFile->GetStringParameter(filenameId);
+   Integer id;
+   id = reportFile->GetParameterID("Filename");
+   std::string filename = reportFile->GetStringParameter(id);
    fileTextCtrl->SetValue(wxT(filename.c_str()));
 
    #if DEBUG_REPORTFILE_PANEL
    MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() filename=%s\n",
                                  filename.c_str());
    #endif
-   
-   int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
-   if (strcmp(reportFile->GetStringParameter(writeHeadersId).c_str(), "On") == 0)
+
+   id = reportFile->GetParameterID("WriteHeaders");
+   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
       showHeaderCheckBox->SetValue(true);
    else
       showHeaderCheckBox->SetValue(false);                     
    
-   int leftJustifyId = reportFile->GetParameterID("LeftJustify");
-   if (strcmp(reportFile->GetStringParameter(leftJustifyId).c_str(), "On") == 0)
+   id = reportFile->GetParameterID("LeftJustify");
+   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
       leftJustifyCheckBox->SetValue(true);
    else
       leftJustifyCheckBox->SetValue(false);                     
    
-   int zeroFillId = reportFile->GetParameterID("ZeroFill");
-   if (strcmp(reportFile->GetStringParameter(zeroFillId).c_str(), "On") == 0)
+   id = reportFile->GetParameterID("ZeroFill");
+   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
       zeroFillCheckBox->SetValue(true);
    else
       zeroFillCheckBox->SetValue(false);                     
 
-   int solverId = reportFile->GetParameterID("SolverIterations");
-   if (strcmp(reportFile->GetStringParameter(solverId).c_str(), "On") == 0)
+   id = reportFile->GetParameterID("SolverIterations");
+   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
       solverIterationsCheckBox->SetValue(true);
    else
       solverIterationsCheckBox->SetValue(false);                     
    
-   int spacesId = reportFile->GetParameterID("ColumnWidth");
+   id = reportFile->GetParameterID("ColumnWidth");
    wxString numSpacesValue;
-   numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(spacesId));
+   numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(id));
    colWidthTextCtrl->SetValue(numSpacesValue);
    
-   int precisionId = reportFile->GetParameterID("Precision");
+   id = reportFile->GetParameterID("Precision");
    wxString precisionValue;
-   precisionValue.Printf("%d", reportFile->GetIntegerParameter(precisionId));
+   precisionValue.Printf("%d", reportFile->GetIntegerParameter(id));
    precisionTextCtrl->SetValue(precisionValue);
    
    StringArray varParamList = reportFile->GetStringArrayParameter("Add");
    mNumVarParams = varParamList.size();
    
    if (mNumVarParams > 0)
-   {
-      
+   {      
       wxString *varParamNames = new wxString[mNumVarParams];
       Parameter *param;
       
       for (int i=0; i<mNumVarParams; i++)
       {
          varParamNames[i] = varParamList[i].c_str();
-         //param = theGuiInterpreter->GetParameter(varParamList[i]);
          param = (Parameter*)theGuiInterpreter->GetObject(varParamList[i]);
       }
       
@@ -427,7 +426,7 @@ void ReportFileSetupPanel::LoadData()
    
    // show coordinate system or central body
    ShowCoordSystem();
-
+   
    #if DEBUG_REPORTFILE_PANEL
    MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() exiting...\n");
    #endif
@@ -440,106 +439,129 @@ void ReportFileSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::SaveData()
 {
-   // save data to core engine
-   canClose = false;
-   theOkButton->Disable();
-
-   reportFile->Activate(writeCheckBox->IsChecked());
-   
-   //if (theSubscriber->IsActive())
-   //   MessageInterface::ShowMessage("\nReportFileSetupPanel:: "
-   //                                 "The subscriber was activiated\n");
-   // else
-   //   MessageInterface::ShowMessage("\nReportFileSetupPanel:: "
-   //                                 "The subscriber was NOT activiated\n");
-    
-   int writeHeadersId = reportFile->GetParameterID("WriteHeaders");
-   if (showHeaderCheckBox->IsChecked())
-      reportFile->SetStringParameter(writeHeadersId, "On");
-   else
-      reportFile->SetStringParameter(writeHeadersId, "Off");
-                  
-   int leftJustifyId = reportFile->GetParameterID("LeftJustify");
-   if (leftJustifyCheckBox->IsChecked())
-      reportFile->SetStringParameter(leftJustifyId, "On");
-   else
-      reportFile->SetStringParameter(leftJustifyId, "Off");
-   
-   int zeroFillId = reportFile->GetParameterID("ZeroFill");
-   if (zeroFillCheckBox->IsChecked())
-      reportFile->SetStringParameter(zeroFillId, "On");
-   else
-      reportFile->SetStringParameter(zeroFillId, "Off");
-
-   int solverId = reportFile->GetParameterID("SolverIterations");
-   if (solverIterationsCheckBox->IsChecked())
-      reportFile->SetStringParameter(solverId, "On");
-   else
-      reportFile->SetStringParameter(solverId, "Off");
-   
-   
-   Integer intValue;
-   std::string inputString;
-   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                 reportFile->GetName() + "\" is not an allowed value.  "
-                 "\nThe allowed values are: [ %s ].";
-
-   int spacesId = reportFile->GetParameterID("ColumnWidth");
-   inputString = colWidthTextCtrl->GetValue();
-   if (!GmatStringUtil::ToInteger(inputString, &intValue) || intValue <= 0)
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-             inputString.c_str(), "ColumnWidth","Integer > 0");
-      return;
-   }
-   reportFile->SetIntegerParameter(spacesId,intValue);
-
-   int precisionId = reportFile->GetParameterID("Precision");
-   inputString = precisionTextCtrl->GetValue();
-   if (!GmatStringUtil::ToInteger(inputString, &intValue) || intValue <= 0)
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-             inputString.c_str(), "Precision","Integer > 0");
-      return;
-   }
-   reportFile->SetIntegerParameter(precisionId,intValue);
-
-   // save file name data to core engine
-   inputString = fileTextCtrl->GetValue();
-   std::ofstream filename(inputString.c_str());
-
-   // Check for non-existing pathname/filename
-   if (!filename)
-   {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                 inputString.c_str(),"File", "Valid File Path and Name");
-      return;
-   }
-   int filenameId = reportFile->GetParameterID("Filename");
-   reportFile->SetStringParameter(filenameId,inputString.c_str());
-   
-   
-   mNumVarParams = mVarSelectedListBox->GetCount();
-
-   if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
-   {
-      if (mNumVarParams == 0)
-      {
-          MessageInterface::ShowMessage(
-                 "\nWarning:  No variable in %s's \"Selected\"  selection box",
-                 reportFile->GetName().c_str());
-      }
-      reportFile->TakeAction("Clear");
-      for (int i=0; i<mNumVarParams; i++)
-      {
-         std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
-         reportFile->SetStringParameter("Add", selYName, i);
-      }
-   }
-
-   theApplyButton->Disable();
-   theOkButton->Enable();
    canClose = true;
+   std::string str;
+   Integer width, prec;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   
+   str = colWidthTextCtrl->GetValue();
+   CheckInteger(width, str, "Column Width", "Integer Number > 0");
+   
+   str = precisionTextCtrl->GetValue();
+   CheckInteger(prec, str, "Column Precision", "Integer Number > 0");
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      Integer id;
+      
+      reportFile->Activate(writeCheckBox->IsChecked());
+      
+      #if DEBUG_RF_PANEL_SAVE
+      if (theSubscriber->IsActive())
+         MessageInterface::ShowMessage
+            ("\nReportFileSetupPanel:: The subscriber was activiated\n");
+      else
+         MessageInterface::ShowMessage
+            ("\nReportFileSetupPanel:: The subscriber was NOT activiated\n");
+      #endif
+      
+      // To show all the error messages, multiple try/catch is used
+      try
+      {
+         id = reportFile->GetParameterID("ColumnWidth");
+         reportFile->SetIntegerParameter(id, width);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         canClose = false;
+      }
+      
+      try
+      {
+         id = reportFile->GetParameterID("Precision");
+         reportFile->SetIntegerParameter(id, prec);
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         canClose = false;
+      }
+      
+      id = reportFile->GetParameterID("WriteHeaders");
+      if (showHeaderCheckBox->IsChecked())
+         reportFile->SetStringParameter(id, "On");
+      else
+         reportFile->SetStringParameter(id, "Off");
+      
+      id = reportFile->GetParameterID("LeftJustify");
+      if (leftJustifyCheckBox->IsChecked())
+         reportFile->SetStringParameter(id, "On");
+      else
+         reportFile->SetStringParameter(id, "Off");
+      
+      id = reportFile->GetParameterID("ZeroFill");
+      if (zeroFillCheckBox->IsChecked())
+         reportFile->SetStringParameter(id, "On");
+      else
+         reportFile->SetStringParameter(id, "Off");
+      
+      id = reportFile->GetParameterID("SolverIterations");
+      if (solverIterationsCheckBox->IsChecked())
+         reportFile->SetStringParameter(id, "On");
+      else
+         reportFile->SetStringParameter(id, "Off");
+      
+      // save file name data
+      str = fileTextCtrl->GetValue();
+      std::ofstream filename(str.c_str());
+      
+      // Check for non-existing pathname/filename
+      if (!filename)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(),
+             "File", "Valid File Path and Name");
+         canClose = false;
+         return;
+      }
+      
+      id = reportFile->GetParameterID("Filename");
+      reportFile->SetStringParameter(id, str.c_str());
+      
+      mNumVarParams = mVarSelectedListBox->GetCount();
+      
+      if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
+      {
+         if (mNumVarParams == 0)
+         {
+            MessageInterface::ShowMessage
+               ("\nWarning:  No variable in %s's \"Selected\"  selection box",
+                reportFile->GetName().c_str());
+         }
+         reportFile->TakeAction("Clear");
+         for (int i=0; i<mNumVarParams; i++)
+         {
+            std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
+            reportFile->SetStringParameter("Add", selYName, i);
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return;
+   }
 }
 
 

@@ -22,14 +22,19 @@
 class CelestialBodyPanel: public GmatPanel
 {
 public:
+   
    // constructors
    CelestialBodyPanel(wxWindow *parent, const wxString &name);
     
 private:
+   
    CelestialBody *theCelestialBody;
    Planet *thePlanet;
-   
    wxString bodyName;
+   
+   bool isTextModified;
+   bool isStateTextModified;
+   bool isRotDataSourceChanged;
    
    wxTextCtrl *mMuTextCtrl;
    wxTextCtrl *mEquatorialRadiusTextCtrl;

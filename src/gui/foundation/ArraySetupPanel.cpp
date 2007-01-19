@@ -16,11 +16,13 @@
 #include "ArraySetupPanel.hpp"
 #include "RgbColor.hpp"
 #include "Array.hpp"
+#include "StringUtil.hpp"       // for ToString()
 #include "MessageInterface.hpp"
 
-#include "wx/colordlg.h"   // for wxColourDialog
+#include "wx/colordlg.h"        // for wxColourDialog
 
 //#define DEBUG_ARRAY_PANEL 1
+//#define DEBUG_ARRAY_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -195,7 +197,7 @@ void ArraySetupPanel::LoadData()
       {
          mNumRows = mParam->GetIntegerParameter("NumRows");
          mNumCols = mParam->GetIntegerParameter("NumCols");
-            
+         
          mArrNameTextCtrl->SetValue(mVarName);
          wxString str;
          str << mNumRows;
@@ -208,7 +210,7 @@ void ArraySetupPanel::LoadData()
          for (int i=0; i<mNumRows; i++)
          {
             wxString intStr;
-            intStr << i+1; //loj: 7/21/05 changed to start from 1
+            intStr << i+1;
             mRowComboBox->Append(intStr);
          }
          mRowComboBox->SetSelection(0);
@@ -217,7 +219,7 @@ void ArraySetupPanel::LoadData()
          for (int i=0; i<mNumCols; i++)
          {
             wxString intStr;
-            intStr << i+1; //loj: 7/21/05 changed to start from 1
+            intStr << i+1;
             mColComboBox->Append(intStr);
          }
          mColComboBox->SetSelection(0);
@@ -226,8 +228,6 @@ void ArraySetupPanel::LoadData()
          
          // set value (wxTextCtrl)
          Real val = arrParam->GetRealParameter("SingleValue", 0, 0);
-//          str.Printf("%g", val);
-//          mArrValTextCtrl->SetValue(str);
          mArrValTextCtrl->SetValue(theGuiManager->ToWxString(val));
          
          #ifdef DEBUG_ARRAY_PANEL
@@ -268,8 +268,6 @@ void ArraySetupPanel::LoadData()
                #endif
                
                rval = mRmat.GetElement(row, col);
-//                str.Printf("%g", rval);
-//                mArrGrid->SetCellValue(row, col, str);
                mArrGrid->SetCellValue(row, col, theGuiManager->ToWxString(rval));
             }
          }
@@ -293,22 +291,58 @@ void ArraySetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void ArraySetupPanel::SaveData()
 {
+   #if DEBUG_ARRAY_SAVE
+   MessageInterface::ShowMessage
+      ("ArraySetupPanel::SaveData() mIsArrValChanged=%d\n", mIsArrValChanged);
+   #endif
+   
+   canClose = true;
+   
+   //-----------------------------------------------------------------
+   // Check text field and cell value
+   //-----------------------------------------------------------------
    if (mIsArrValChanged)
    {
-      mIsArrValChanged = false;
-      Array *arrParam = (Array*)mParam;
+      wxString str;
+      Real rval;
       
-      try
+      if (mUpdateButton->IsEnabled())
+         UpdateCellValue();
+      
+      for (int i=0; i<mNumRows; i++)
       {
-         for (int i=0; i<mNumRows; i++)
-            for (int j=0; j<mNumCols; j++)
-               arrParam->SetRealParameter("SingleValue", mRmat.GetElement(i,j), i, j);
+         for (int j=0; j<mNumCols; j++)
+         {
+            str = mArrGrid->GetCellValue(i, j);
+            CheckCellValue(rval, i, j, str.c_str());
+         }
       }
-      catch (BaseException &e)
-      {
-         wxLogError(wxT(e.GetMessage().c_str()));
-         wxLog::FlushActive();
-      }
+   }
+   
+   #if DEBUG_ARRAY_SAVE
+   MessageInterface::ShowMessage
+      ("   mIsArrValChanged=%d, canClose=%d\n", mIsArrValChanged, canClose);
+   #endif
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // Save cell value
+   //-----------------------------------------------------------------
+   
+   mIsArrValChanged = false;
+   Array *arrParam = (Array*)mParam;
+   
+   try
+   {
+      for (int i=0; i<mNumRows; i++)
+         for (int j=0; j<mNumCols; j++)
+            arrParam->SetRealParameter("SingleValue", mRmat.GetElement(i,j), i, j);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
 }
 
@@ -321,6 +355,8 @@ void ArraySetupPanel::OnTextUpdate(wxCommandEvent& event)
    if (event.GetEventObject() == mArrValTextCtrl &&
        mArrValTextCtrl->IsModified())
    {
+      EnableUpdate(true);
+      mIsArrValChanged = true;
       mUpdateButton->Enable();
    }
 }
@@ -349,10 +385,6 @@ void ArraySetupPanel::OnComboBoxChange(wxCommandEvent& event)
       Real rval = mRmat.GetElement(mRowComboBox->GetSelection(),
                                    mColComboBox->GetSelection());
       
-//       wxString str;
-//       str.Printf("%g", rval);
-//       mArrValTextCtrl->SetValue(str);
-      
       mArrValTextCtrl->SetValue(theGuiManager->ToWxString(rval));
    }
 }
@@ -376,34 +408,12 @@ void ArraySetupPanel::OnButtonClick(wxCommandEvent& event)
 void ArraySetupPanel::OnGridCellChange(wxGridEvent& event)
 {
    int row = mArrGrid->GetGridCursorRow();
-   int col = mArrGrid->GetGridCursorCol();
-   
-   wxString strVal = mArrGrid->GetCellValue(row, col);
-   
-   Real val;
-   strVal.ToDouble(&val);
-   
-   if (strVal.ToDouble(&val))
-   {
-      mIsArrValChanged = true;
-      mRmat.SetElement(row, col, val);
-      theApplyButton->Enable(true);
+   int col = mArrGrid->GetGridCursorCol();   
+   wxString str = mArrGrid->GetCellValue(row, col);
+   Real rval;
 
-      // update value text if same row and col
-      if (mRowComboBox->GetSelection() == row &&
-          mColComboBox->GetSelection() == col)
-      {
-         mArrValTextCtrl->SetValue(strVal);
-      }
-   }
-   else
-   {
-      wxLogError(wxT("Please enter a valid number."));
-//       strVal.Printf("%g", mRmat.GetElement(row, col));
-      strVal = theGuiManager->ToWxString(mRmat.GetElement(row, col));
-      mArrGrid->SetCellValue(row, col, strVal);
-      wxLog::FlushActive();
-   }
+   mIsArrValChanged = true;
+   CheckCellValue(rval, row, col, str.c_str());
 }
 
 
@@ -412,28 +422,40 @@ void ArraySetupPanel::OnGridCellChange(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void ArraySetupPanel::UpdateCellValue()
 {
-   mUpdateButton->Disable();
-   
    int row = mRowComboBox->GetSelection();
    int col = mColComboBox->GetSelection();
+   wxString str = mArrValTextCtrl->GetValue();
+   Real rval;
    
-   wxString strVal = mArrValTextCtrl->GetValue();
-   Real val;
-   
-   if (strVal.ToDouble(&val))
+   mIsArrValChanged = true;
+   if (CheckCellValue(rval, row, col, str.c_str()))
    {
-      mIsArrValChanged = true;
-      mRmat.SetElement(row, col, val);
-      mArrGrid->SetCellValue(row, col, strVal);
-      theApplyButton->Enable(true);
-   }
-   else
-   {
-      wxLogError(wxT("Please enter a valid number."));
-      wxLog::FlushActive();
-   }
+      mArrGrid->SetCellValue(row, col, str);
+      mUpdateButton->Disable();
+   }   
 }
 
 
+//------------------------------------------------------------------------------
+// bool CheckCellValue(Real &rval, int row, int col, const std::string &str)
+//------------------------------------------------------------------------------
+bool ArraySetupPanel::CheckCellValue(Real &rval, int row, int col,
+                                     const std::string &str)
+{
+   std::string field = "(" + GmatStringUtil::ToString(row+1, 1) +
+      "," + GmatStringUtil::ToString(col+1, 1) + ")";
+   
+   EnableUpdate(true);
+   
+   if (CheckReal(rval, str.c_str(), field, "Real Number"))
+   {
+      mRmat.SetElement(row, col, rval);
+      return true;
+   }
+   else
+   {
+      return false;
+   }
+}
 
 

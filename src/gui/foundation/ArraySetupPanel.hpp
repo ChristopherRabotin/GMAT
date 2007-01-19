@@ -66,6 +66,7 @@ private:
    void OnGridCellChange(wxGridEvent& event);
    
    void UpdateCellValue();
+   bool CheckCellValue(Real &rval, int row, int col, const std::string &str);
    
    DECLARE_EVENT_TABLE();
    

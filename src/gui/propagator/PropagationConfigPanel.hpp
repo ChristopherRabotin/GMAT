@@ -255,6 +255,7 @@ private:
       
    bool useDragForce;
    bool isForceModelChanged;
+   bool isAtmosChanged;
    bool isDegOrderChanged;
    bool isPotFileChanged;
    bool isMagfTextChanged;
@@ -299,9 +300,10 @@ private:
    void DisplayErrorControlData();
 
    // Saving data
-   void SaveDegOrder();
-   void SavePotFile();
    bool SaveIntegratorData();
+   bool SaveDegOrder();
+   bool SavePotFile();
+   bool SaveAtmosModel();
    
    // Converting Data
    wxString ToString(Real rval);

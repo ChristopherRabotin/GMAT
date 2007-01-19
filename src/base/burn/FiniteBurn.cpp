@@ -19,6 +19,7 @@
 
 
 #include "FiniteBurn.hpp"
+#include "StringUtil.hpp"     // for ToString()
 
 //#define DEBUG_BURN_ORIGIN
 //#define DEBUG_RENAME 1
@@ -394,6 +395,8 @@ Real FiniteBurn::GetRealParameter(const Integer id) const
  * @param <id>    Integer ID of the parameter.
  * @param <value> New value for the parameter.
  *
+ * @exception <BurnException> thrown if value is out of range
+ * 
  * @return The value of the parameter at the end of the call.
  */
 //---------------------------------------------------------------------------
@@ -401,30 +404,19 @@ Real FiniteBurn::SetRealParameter(const Integer id, const Real value)
 {
    if (id == BURN_SCALE_FACTOR)
    {
-//      if (value > 0.0)
-//         burnScaleFactor = value;
-//      else
-//         throw BurnException(
-//            "Attempting to set unphysical value for burns scale factor on " +
-//            instanceName);
-//      return burnScaleFactor;
       if (value > 0.0)
          burnScaleFactor = value;
       else
       {
-         std::stringstream buffer;
-         buffer << value;
-         throw BurnException(
-            "The value of \"" + buffer.str() + "\" for field \"Burn Scale Factor\""
-            " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ Real Number > 0.0 ]. ");
-//         throw BurnException(
-//            "The value of " + buffer.str() + " on object " + instanceName +
-//            " is not an allowed value. The allowed values are [Real Number > 0.0].");
+         BurnException be;
+         be.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                       GetParameterText(id).c_str(), "Real Number > 0 ");
+         throw be;
       }
       return burnScaleFactor;
    }
-
+   
    return Burn::SetRealParameter(id, value);
 }
 

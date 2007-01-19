@@ -1123,7 +1123,7 @@ void FminconOptimizer::WriteParameters(Gmat::WriteMode mode, std::string &prefix
    Integer id;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(DATA_PRECISION); 
+   value.precision(GetDataPrecision()); 
    for (id = 0; id < parameterCount; ++id)
    {
       if (IsParameterReadOnly(id) == false) 

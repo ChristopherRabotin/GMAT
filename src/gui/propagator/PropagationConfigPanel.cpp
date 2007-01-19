@@ -4,6 +4,11 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
+//
 // Author: Waka Waktola
 // Created: 2003/08/29
 //
@@ -16,9 +21,10 @@
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "CelesBodySelectDialog.hpp"
-#include "ExponentialDragDialog.hpp"
-#include "MSISE90Dialog.hpp"
-#include "JacchiaRobertsDialog.hpp"
+#include "DragInputsDialog.hpp"
+// #include "ExponentialDragDialog.hpp"
+// #include "MSISE90Dialog.hpp"
+// #include "JacchiaRobertsDialog.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "wx/platform.h"
@@ -118,18 +124,19 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    
    // Default body values
    theCelestialBody    = NULL;
-
+   
    Create();
    Show();
    
    isForceModelChanged = false;
+   isAtmosChanged = false;
    isDegOrderChanged = false;
    isPotFileChanged = false;
    isMagfTextChanged = false;
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
    isOriginChanged = false;
-
+   
    canClose = true;
    
    EnableUpdate(false);
@@ -249,6 +256,7 @@ void PropagationConfigPanel::LoadData()
    } 
 }
 
+
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
@@ -262,6 +270,7 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isForceModelChanged=%d\n", isForceModelChanged);
    MessageInterface::ShowMessage("   isDegOrderChanged=%d\n", isDegOrderChanged);
    MessageInterface::ShowMessage("   isPotFileChanged=%d\n", isPotFileChanged);
+   MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
    #endif
    
    canClose = true;
@@ -278,11 +287,8 @@ void PropagationConfigPanel::SaveData()
       isIntegratorChanged = false;
       
       if (isIntegratorDataChanged)
-      {
-         isIntegratorDataChanged = false;
-         if (!SaveIntegratorData())
-            canClose = false;
-      }
+         if (SaveIntegratorData())
+            isIntegratorDataChanged = false;
       
       thePropSetup->SetPropagator(thePropagator);
       
@@ -292,9 +298,8 @@ void PropagationConfigPanel::SaveData()
    }
    else if (isIntegratorDataChanged)
    {
-      isIntegratorDataChanged = false;
-      if (!SaveIntegratorData())
-         canClose = false;
+      if (SaveIntegratorData())
+         isIntegratorDataChanged = false;
    }
    
    
@@ -514,7 +519,9 @@ void PropagationConfigPanel::SaveData()
       // Save only GravComboBox or PotFileText is changed
       if (isPotFileChanged)
          SavePotFile();
-            
+      
+      if (isAtmosChanged)
+         SaveAtmosModel();
    }
 }
 
@@ -1654,116 +1661,188 @@ void PropagationConfigPanel::DisplayErrorControlData()
       errorComboBox->SetSelection(LARGESTSTATE);
 }
 
+
 //------------------------------------------------------------------------------
-// void SaveDegOrder()
+// bool SaveIntegratorData()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::SaveDegOrder()
+bool PropagationConfigPanel::SaveIntegratorData()
 {
-   /// @todo ltr: implement < the maximum specified by the model validation 
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveIntegratorData() entered\n");
+   #endif
+   
+   Integer maxAttempts;
+   Real initStep, accuracy, minStep, maxStep, minError, nomError;
+   std::string str;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   str = initialStepSizeTextCtrl->GetValue();      
+   CheckReal(initStep, str, "InitialStepSize", "Real Number > 0");
+   
+   str = accuracyTextCtrl->GetValue();      
+   CheckReal(accuracy, str, "Accuracy", "Real Number > 0");
+   
+   str = minStepTextCtrl->GetValue();            
+   CheckReal(minStep, str, "Min Step Size", "Real Number > 0");
+   
+   str = maxStepTextCtrl->GetValue();            
+   CheckReal(maxStep, str, "Max Step Size", "Real Number > 0");
+   
+   str = maxStepAttemptTextCtrl->GetValue();            
+   CheckInteger(maxAttempts, str, "Max Step Attempts", "Integer Number > 0");
+   
+   if (integratorString.IsSameAs(integratorArray[ABM]))
+   {
+      str = minIntErrorTextCtrl->GetValue();            
+      CheckReal(minError, str, "Min Integration Error", "Real Number > 0");
+      
+      str = nomIntErrorTextCtrl->GetValue();            
+      CheckReal(nomError, str, "Nominal Integration Error", "Real Number > 0");
+   }
+   
+   if (!canClose)
+      return false;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
+      Integer id;
+      
+      id = thePropagator->GetParameterID("InitialStepSize");
+      thePropagator->SetRealParameter(id, initStep);
+      
+      id = thePropagator->GetParameterID("Accuracy");
+      thePropagator->SetRealParameter(id, accuracy);
 
-      Integer ivalue;
-      canClose = true;
-      std::string degree, order;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \""
-                        + thePropSetup->GetName() + 
-                        "\" is not an allowed value.\n"
-                        "The allowed values are: [%s].";                        
-            
-      for (Integer i=0; i < (Integer)forceList.size(); i++)
+      id = thePropagator->GetParameterID("MinStep");
+      thePropagator->SetRealParameter(id, minStep);
+      
+      id = thePropagator->GetParameterID("MaxStep");
+      thePropagator->SetRealParameter(id, maxStep);
+      
+      id = thePropagator->GetParameterID("MaxStepAttempts");
+      thePropagator->SetIntegerParameter(id, maxAttempts);
+      
+      if (integratorString.IsSameAs(integratorArray[ABM]))
       {
-         if (forceList[i]->gravType != "None")
-         {
-            theGravForce = forceList[i]->gravf;
-            if (theGravForce != NULL)
-            {
-               #if DEBUG_PROP_SAVE
-               MessageInterface::ShowMessage
-                  ("SaveDegOrder() Saving Body:%s, degree=%s, order=%s\n",
-                  forceList[i]->bodyName.c_str(), forceList[i]->gravDegree.c_str(),
-                  forceList[i]->gravOrder.c_str());
-               #endif
-               
-               Integer deg, ord;
-               
-               degree = forceList[i]->gravDegree.c_str();      
-               order  = forceList[i]->gravOrder.c_str();      
-               
-               deg = atoi(degree.c_str());
-               ord = atoi(order.c_str());
-               
-               #if DEBUG_PROP_SAVE
-               MessageInterface::ShowMessage
-                  ("PropagationConfigPanel::SaveDegOrder()  deg = %d, "
-                   "ord =%d \n", deg, ord);
-               #endif
-               
-               // check to see if degree is less than order
-               if (deg < ord)
-               {
-                  MessageInterface::PopupMessage (Gmat::ERROR_, 
-                     "Degree can not be less than Order.\n"
-                     "The allowed values are: [Integer >= 0 "
-                     "and < the maximum specified by the model, "
-                     "Order <= Degree].");                        
-                  canClose = false;
-               }
-               else
-               {
-                  // save degree   
-                  // check to see if input is an integer, 
-                  // greater than or equal to zero
-                  // and less than or equal to the model maximum degree
-                  if ((GmatStringUtil::ToInteger(degree,&ivalue)) &&
-                      (ivalue >= 0)) //&& (ivalue <= fileDegree))
-                     theGravForce->SetIntegerParameter("Degree", ivalue);
-                  else
-                  {
-                     MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-                        degree.c_str(), "Degree",
-                        "Integer >= 0 and < the maximum specified by the model, "
-                        "Order <= Degree");
-                     canClose = false;
-                  }
-                  
-                  // save order   
-                  // check to see if input is an integer, 
-                  // greater than or equal to zero
-                  // and less than or equal to the model maximum order
-                  if ((GmatStringUtil::ToInteger(order,&ivalue)) && 
-                      (ivalue >= 0)) //&& (ivalue <= fileOrder))
-                     theGravForce->SetIntegerParameter("Order", ivalue);
-                  else
-                  {
-                     MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-                        order.c_str(), "Order",
-                        "Integer >= 0 and < the maximum specified by the model, "
-                        "Order <= Degree");
-                     canClose = false;
-                  }
-               } // else degree > order
-            } // end of (theGravForce != NULL)
-         } // end of (if forceList[i]->gravType != "None")
-      } // end of for
-   
-      isDegOrderChanged = false;
+         id = thePropagator->GetParameterID("LowerError");
+         thePropagator->SetRealParameter(id, minError);
+      
+         id = thePropagator->GetParameterID("TargetError");
+         thePropagator->SetRealParameter(id, nomError);
+      }
+      
+      #if DEBUG_PROP_SAVE
+      ShowPropData("SaveData() AFTER  saving Integrator");
+      #endif
+      
+      return true;
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("PropagationConfigPanel:SaveDegOrder() error occurred!\n%s\n", e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       canClose = false;
-      return;
+      return false;
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void SavePotFile()
+// bool SaveDegOrder()
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::SavePotFile()
+bool PropagationConfigPanel::SaveDegOrder()
 {
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveDegOrder() entered\n");
+   #endif
+
+   Integer degree, order;
+   std::string str;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   str = gravityDegreeTextCtrl->GetValue();
+   CheckInteger(degree, str, "Degree", "Integer Number >= 0");
+   
+   str = gravityOrderTextCtrl->GetValue();
+   CheckInteger(order, str, "Order", "Integer Number >= 0");
+
+   if (!canClose)
+      return false;
+
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   
+   /// @todo ltr: implement < the maximum specified by the model validation 
+   try
+   {
+      #if DEBUG_PROP_SAVE
+      MessageInterface::ShowMessage("   degree=%d, order=%d\n", degree, order);
+      #endif
+      
+      // check to see if degree is less than order
+      if (degree < order)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Degree can not be less than Order.\n"
+             "The allowed values are: [Integer >= 0 "
+             "and < the maximum specified by the model, "
+             "Order <= Degree].");                        
+         canClose = false;
+         return false;
+      }
+      
+      // save degree and order
+      wxString bodyName = bodyComboBox->GetValue();
+      
+      #if DEBUG_PROP_SAVE
+      MessageInterface::ShowMessage("   bodyName=%s\n", bodyName.c_str());
+      #endif
+      
+      // find gravity force pointer
+      for (Integer i=0; i < (Integer)forceList.size(); i++)
+      {
+         if (forceList[i]->gravType != "None")
+         {
+            theGravForce = forceList[i]->gravf;
+            if (theGravForce != NULL && forceList[i]->bodyName == bodyName)
+            {
+               theGravForce->SetIntegerParameter("Degree", degree);
+               theGravForce->SetIntegerParameter("Order", order);
+            }
+         }
+      }
+   
+      isDegOrderChanged = false;
+      return true;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return false;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SavePotFile()
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::SavePotFile()
+{
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SavePotFile() entered\n");
+   #endif
+   
    // save data to core engine
    try
    {
@@ -1796,7 +1875,7 @@ void PropagationConfigPanel::SavePotFile()
                      (Gmat::ERROR_, msg.c_str(), inputString.c_str(),
                       "Model File", "File must exist");
                   
-                  return;
+                  return false;
                }
                
                filename.close();               
@@ -1807,179 +1886,97 @@ void PropagationConfigPanel::SavePotFile()
       }
    
       isPotFileChanged = false;
-   }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage
-         ("PropagationConfigPanel:SavePotFile() error occurred!\n%s\n", e.GetMessage().c_str());
-      canClose = false;
-      return;
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// bool SaveIntegratorData()
-//------------------------------------------------------------------------------
-bool PropagationConfigPanel::SaveIntegratorData()
-{
-   #if DEBUG_PROP_SAVE
-   MessageInterface::ShowMessage
-      ("PropagationConfigPanel::SaveIntegratorData() entered\n");
-   #endif
-   
-// LTR 09/15/06 - moved to where setting of Max Step Size is done
-//   Real min = atof(minStepTextCtrl->GetValue());
-//   Real max = atof(maxStepTextCtrl->GetValue());
-//      
-//   // @todo waw: temporarily commented out, to be uncommented 
-//   // once Edwin updates his scripts to support this
-//   // if (max <= min) 
-//   if (max < min)
-//   {
-//      MessageInterface::PopupMessage
-//         (Gmat::WARNING_, "Maximum Step can not be less than Minimum Step.\n"
-//          "Propagation updates have not been saved");
-//      return false;
-//   }    
-   
-   try
-   {
-      Integer id, ivalue;
-      Real rvalue, min, max;
-      canClose = true;
-      std::string inputString, minStr, maxStr;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         thePropSetup->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";
-      
-      // save initial step size
-      id = thePropagator->GetParameterID("InitialStepSize");
-      inputString = initialStepSizeTextCtrl->GetValue();
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-         thePropagator->SetRealParameter(id, rvalue);
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Initial Step Size","Real Number");
-         canClose = false;
-      }
-
-      // save accuracy
-      id = thePropagator->GetParameterID("Accuracy");
-      inputString = accuracyTextCtrl->GetValue();
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))     
-         thePropagator->SetRealParameter(id, rvalue);
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Accuracy","Real Number >= 0.0");
-         canClose = false;
-      }
-
-      // save min step size
-      id = thePropagator->GetParameterID("MinStep");
-      inputString = minStepTextCtrl->GetValue();      
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))     
-         thePropagator->SetRealParameter(id, rvalue);
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Min Step Size","Real Number >= 0.0, MinStep <= MaxStep");
-         canClose = false;
-      }
-
-      // save max step size
-      id = thePropagator->GetParameterID("MaxStep");
-      inputString = maxStepTextCtrl->GetValue();      
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))     
-      {
-         // check to see if max step size is less than min
-         minStr = minStepTextCtrl->GetValue();      
-         maxStr = maxStepTextCtrl->GetValue();      
-         if (GmatStringUtil::ToReal(minStr,&min) && 
-             GmatStringUtil::ToReal(maxStr,&max))      
-            // @todo waw: temporarily commented out, to be uncommented 
-            // once Edwin updates his scripts to support this
-            // if (min >= max) 
-            if (max < min)
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::ERROR_, "Max Step Size can not be less than Mini Step Size.\n"
-                     "The allowed values are: [Real Number >= 0.0, MinStep <= MaxStep]."); 
-               canClose = false;
-            }
-            else  
-               thePropagator->SetRealParameter(id, rvalue);
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Max Step Size","Real Number >= 0.0, MinStep <= MaxStep");
-         canClose = false;
-      }
-
-      // save max step attempts
-      id = thePropagator->GetParameterID("MaxStepAttempts");
-      inputString = maxStepAttemptTextCtrl->GetValue();      
-      // check to see if input is an integer
-      if (GmatStringUtil::ToInteger(inputString,&ivalue))    
-         thePropagator->SetIntegerParameter(id, ivalue);
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Max Step Attempts","Integer > 0");
-         canClose = false;
-      }
-      
-      if (integratorString.IsSameAs(integratorArray[ABM]))
-      {
-         // save min integration error
-         id = thePropagator->GetParameterID("LowerError");
-         inputString = minIntErrorTextCtrl->GetValue();      
-         // check to see if input is a real
-         if (GmatStringUtil::ToReal(inputString,&rvalue))     
-            thePropagator->SetRealParameter(id, rvalue);
-         else
-         {
-            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-               inputString.c_str(), "Min Integration Error","Real Number > 0.0");
-            canClose = false;
-         }
-
-         // save nominal integration error
-         id = thePropagator->GetParameterID("TargetError");
-         inputString = nomIntErrorTextCtrl->GetValue();      
-         // check to see if input is a real
-         if (GmatStringUtil::ToReal(inputString,&rvalue))     
-            thePropagator->SetRealParameter(id, rvalue);
-         else
-         {
-            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-               inputString.c_str(), "Nominal Integration Error","Real Number > 0.0");
-            canClose = false;
-         }
-      }       
-      
-      #if DEBUG_PROP_SAVE
-      ShowPropData("SaveData() AFTER  saving Integrator");
-      #endif
-      
       return true;
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("PropagationConfigPanel:SaveIntegratorData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
       return false;
    }
 }
+
+
+//------------------------------------------------------------------------------
+// bool SaveAtmosModel()
+//------------------------------------------------------------------------------
+bool PropagationConfigPanel::SaveAtmosModel()
+{
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("PropagationConfigPanel::SaveAtmosModel() entered\n");
+   #endif
+   
+   //-------------------------------------------------------
+   // find drag force model
+   //-------------------------------------------------------
+   Integer paramId;
+   bool dragForceFound = false;
+   
+   wxString bodyName = bodyComboBox->GetValue();
+   wxString dragType = atmosComboBox->GetValue();
+   
+   #if DEBUG_PROP_SAVE
+   MessageInterface::ShowMessage
+      ("   bodyName=%s, dragType=%s\n", bodyName.c_str(), dragType.c_str());
+   #endif
+   
+   for (Integer i=0; i < (Integer)forceList.size(); i++)
+   {
+      if (forceList[i]->dragType != dragModelArray[NONE_DM])
+      {
+         theDragForce = forceList[i]->dragf;
+         if (theDragForce != NULL && forceList[i]->bodyName == bodyName)
+         {
+            dragForceFound = true;
+            break;
+         }
+      }
+   }
+   
+   if (!dragForceFound)
+   {
+      MessageInterface::ShowMessage
+         ("PropagationConfigPanel::SaveAtmosModel() Drag Force not found "
+          "for body:%s\n", bodyName.c_str());
+         
+      return false;
+   }
+   
+   theCelestialBody = theSolarSystem->GetBody(bodyName.c_str()); 
+   theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
+   
+   if (theAtmosphereModel == NULL)  
+   {
+      #if DEBUG_PROP_SAVE
+      MessageInterface::ShowMessage
+         ("PropagationConfigPanel::SaveAtmosModel() AtmosphereModel not found "
+          "for body:%s\n", bodyName.c_str());
+      #endif
+   }
+   
+   //-------------------------------------------------------
+   // save drag force model
+   //-------------------------------------------------------
+   try
+   {
+      theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);
+      paramId = theDragForce->GetParameterID("AtmosphereModel");
+      theDragForce->SetStringParameter(paramId, dragType.c_str());
+      theDragForce->SetStringParameter("BodyName", bodyName.c_str());
+      
+      isAtmosChanged = false;
+      canClose = true;
+      return true;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return false;
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // wxString ToString(Real rval)
@@ -2012,7 +2009,7 @@ void PropagationConfigPanel::OnBodyComboBoxChange(wxCommandEvent &event)
 {
    OnBodySelection(event);
    // We don't want to enable Apply when just switching body.
-   theApplyButton->Enable(false);
+   //theApplyButton->Enable(false);
 }
 
 //------------------------------------------------------------------------------
@@ -2125,6 +2122,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnAtmosphereSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -2132,7 +2130,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;
-      
+   
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage("OnAtmosphereSelection() body=%s\n",
                                  forceList[currentBodyId]->bodyName.c_str());
@@ -2140,6 +2138,10 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
    
    dragTypeName = atmosComboBox->GetStringSelection();
 
+   // if we are creating new DragForce, set isForceModelChanged
+   if (forceList[currentBodyId]->dragf == NULL)
+      isForceModelChanged = true;
+   
    if (forceList[currentBodyId]->dragType != dragTypeName)
    {    
       #if DEBUG_PROP_PANEL
@@ -2151,11 +2153,12 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
       
       forceList[currentBodyId]->dragType = dragTypeName;
       DisplayAtmosphereModelData();
-         
-      isForceModelChanged = true;
+      
+      isAtmosChanged = true;
       EnableUpdate(true);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnErrorControlSelection(wxCommandEvent &event)
@@ -2333,6 +2336,7 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnSetupButton(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -2346,6 +2350,10 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
       isForceModelChanged = true;
       SaveData();
    }
+   else if (isAtmosChanged)
+   {
+      SaveAtmosModel();
+   }
    
    dragForce = forceList[currentBodyId]->dragf;
    if (dragForce != NULL)
@@ -2358,19 +2366,17 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
       }
       else if (forceList[currentBodyId]->dragType == dragModelArray[MSISE90])
       {
-         MSISE90Dialog dragDlg(this, dragForce);
+         DragInputsDialog dragDlg(this, dragForce, "MSISE90DragDialog");
          dragDlg.ShowModal();
       }
       else if (forceList[currentBodyId]->dragType == dragModelArray[JR])
       {
-         JacchiaRobertsDialog dragDlg(this, dragForce);
+         DragInputsDialog dragDlg(this, dragForce, "JacchiaRobertsDialog");
          dragDlg.ShowModal();
       }
-      
-      // Since all data are saved in the Dialog, we don't want to save it again
-      //EnableUpdate(true);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnMagSearchButton(wxCommandEvent &event)

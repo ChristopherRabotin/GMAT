@@ -217,8 +217,10 @@ public:
    virtual bool           SetPotentialFilename(const std::string &fn);
    virtual bool           SetAnalyticEpoch(const A1Mjd &toTime);
    virtual bool           SetAnalyticElements(const Rvector6 &kepl);
+   virtual bool           SetSMA(Real value);
+   virtual bool           SetECC(Real value);   
    virtual bool           SetRotationDataSource(Gmat::RotationDataSource src);
-
+   
    // methods inherited from SpacePoint, that must be implemented here (and/or
    // in the derived classes
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);

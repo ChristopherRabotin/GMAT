@@ -17,6 +17,8 @@
 #include "ImpulsiveBurnSetupPanel.hpp"
 #include "StringUtil.hpp"  // for ToDouble()
 
+//#define DEBUG_IMPBURN_SAVE 1
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -49,12 +51,10 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
    : GmatPanel(parent)
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-
-   //theBurn = theGuiInterpreter->GetBurn(std::string(burnName.c_str()));
    theBurn = (Burn*)theGuiInterpreter->GetObject(std::string(burnName.c_str()));
-   
+   isTextModified = false;
    canClose = true;
-
+   
    Create();
    Show();
 
@@ -155,7 +155,12 @@ void ImpulsiveBurnSetupPanel::AddVector(wxWindow *parent)
 //------------------------------------------------------------------------------
 void ImpulsiveBurnSetupPanel::OnTextChange(wxCommandEvent& event)
 {
-   EnableUpdate(true);
+   if (textCtrl1->IsModified() || textCtrl2->IsModified() ||
+       textCtrl3->IsModified())
+   {
+      isTextModified = true;
+      EnableUpdate(true);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -425,17 +430,50 @@ void ImpulsiveBurnSetupPanel::LoadData()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void ImpulsiveBurnSetupPanel::SaveData()
 {
+   #if DEBUG_IMPBURN_SAVE
+   MessageInterface::ShowMessage
+      ("ImpulsiveBurnSetupPanel::SaveData() isTextModified=%d\n", isTextModified);
+   #endif
+
+   canClose = true;
+   Real elem1, elem2, elem3;
+   std::string str;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (isTextModified)
+   {
+      str = textCtrl1->GetValue();      
+      CheckReal(elem1, str, "Element1", "Real Number");
+      
+      str = textCtrl2->GetValue();      
+      CheckReal(elem2, str, "Element2", "Real Number");
+      
+      str = textCtrl3->GetValue();      
+      CheckReal(elem3, str, "Element3", "Real Number");
+   }
+   
+   if (!canClose)
+      return;
+   
+   #if DEBUG_IMPBURN_SAVE
+   MessageInterface::ShowMessage("   Saving to base code\n");
+   #endif
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
       // save data to core engine
       Integer id;
-      Real rvalue;
-      std::string inputString;
       
       // save axes
       wxString axesStr = axesComboBox->GetStringSelection();
@@ -449,53 +487,30 @@ void ImpulsiveBurnSetupPanel::SaveData()
       std::string vectorFormat = std::string (vectorStr.c_str());
       theBurn->SetStringParameter(id, vectorFormat);
       
-      // save element1
-      inputString = textCtrl1->GetValue();      
-      if (CheckReal(rvalue, inputString, "Element1", "Real Number"))
-      {
-         id = theBurn->GetParameterID("Element1");
-         theBurn->SetRealParameter(id, rvalue);
-      }
-      else
-      {
-         canClose = false;
-      }
-      
-      // save element2
-      inputString = textCtrl1->GetValue();      
-      if (CheckReal(rvalue, inputString, "Element2", "Real Number"))
-      {
-         id = theBurn->GetParameterID("Element2");
-         theBurn->SetRealParameter(id, rvalue);
-      }
-      else
-      {
-         canClose = false;
-      }
-      
-      // save element3
-      inputString = textCtrl3->GetValue();      
-      if (CheckReal(rvalue, inputString, "Element3", "Real Number"))
-      {
-         id = theBurn->GetParameterID("Element3");
-         theBurn->SetRealParameter(id, rvalue);
-      }
-      else
-      {
-         canClose = false;
-      }
-      
       // save central body
       wxString burnOriginStr = centralBodyCB->GetStringSelection();
       id = theBurn->GetParameterID("Origin");
       std::string origin = std::string (burnOriginStr.c_str());
       theBurn->SetStringParameter(id, origin);
-
+      
+      // save elements
+      if (isTextModified)
+      {
+         id = theBurn->GetParameterID("Element1");
+         theBurn->SetRealParameter(id, elem1);
+         
+         id = theBurn->GetParameterID("Element2");
+         theBurn->SetRealParameter(id, elem2);
+         
+         id = theBurn->GetParameterID("Element3");
+         theBurn->SetRealParameter(id, elem3);
+         
+         isTextModified = false;
+      }
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("ImpulsiveBurnSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       canClose = false;
       return;
    }

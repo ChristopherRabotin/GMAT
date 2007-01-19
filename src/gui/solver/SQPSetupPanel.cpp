@@ -53,11 +53,12 @@ SQPSetupPanel::DISPLAY_SCHEMES[4] =
 SQPSetupPanel::SQPSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-    
+   
    theSolver =
       (Solver*)theGuiInterpreter->GetObject(std::string(name.c_str()));
-    
+
+   isTextModified = true;
+   
    if (theSolver != NULL)
    {
       Create();
@@ -97,8 +98,8 @@ void SQPSetupPanel::LoadData()
    // load data from the core engine
    try
    {
-          mObject = theSolver;
-        
+      mObject = theSolver;
+      
       std::string valueStr = theSolver->GetStringParameter("GradObj"); 
       if (valueStr == "On")
          gradObjCB->SetValue(true);
@@ -165,161 +166,96 @@ void SQPSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void SQPSetupPanel::SaveData()
 {   
+   canClose = true;
+   Real tolFun, tolCon, tolX, diffMinChange, diffMaxChange;
+   Integer maxIter, maxFunEvals;
+   std::string tolFunStr, tolConStr, tolXStr, maxIterStr, maxFunEvalsStr;
+   std::string diffMinChangeStr, diffMaxChangeStr;
+   std::string str;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (isTextModified)
+   {
+      str = tolFunTextCtrl->GetValue();
+      CheckReal(tolFun, str, "TolFun", "Real Number > 0");
+      tolFunStr = str;
+      
+      str = tolConTextCtrl->GetValue();      
+      CheckReal(tolCon, str, "TolCon", "Real Number > 0");
+      tolConStr = str;
+      
+      str = tolXTextCtrl->GetValue();      
+      CheckReal(tolX, str, "TolX", "Real Number > 0");
+      tolXStr = str;
+      
+      str = maxIterTextCtrl->GetValue();      
+      CheckInteger(maxIter, str, "MaxIter", "Integer Number > 0");
+      maxIterStr = str;
+      
+      str = maxFunEvalsTextCtrl->GetValue();      
+      CheckInteger(maxFunEvals, str, "MaxFunEvals", "Integer Number > 0");
+      maxFunEvalsStr = str;
+      
+      str = diffMinChangeTextCtrl->GetValue();      
+      CheckReal(diffMinChange, str, "DiffMinChange", "Real Number > 0");
+      diffMinChangeStr = str;
+      
+      str = diffMaxChangeTextCtrl->GetValue();      
+      CheckReal(diffMaxChange, str, "DiffMaxChange", "Real Number > 0");
+      diffMaxChangeStr = str;
+   }
+   
+   if (!canClose)
+      return;
+   
    try
    {
-      Real rvalue;
-      Integer ivalue;    
-      canClose = true;
-      std::string inputString;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theSolver->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
-
+      
+      // Note: It will catch one error at a time
+      // Is this acceptable?
+      
+      if (isTextModified)
+      {
+         theSolver->SetStringParameter("TolFun", tolFunStr);
+         theSolver->SetStringParameter("TolCon", tolConStr);
+         theSolver->SetStringParameter("TolX", tolXStr);
+         theSolver->SetStringParameter("MaxIter", maxIterStr);
+         theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsStr);
+         theSolver->SetStringParameter("DiffMinChange", diffMinChangeStr);
+         theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeStr);
+         isTextModified = false;
+      }
+      
       if (gradObjCB->IsChecked())
          theSolver->SetStringParameter("GradObj", "On");
       else
          theSolver->SetStringParameter("GradObj", "Off");
-            
+      
       if (gradConstrCB->IsChecked())
          theSolver->SetStringParameter("GradConstr", "On");
       else
          theSolver->SetStringParameter("GradConstr", "Off");
-
+      
       if (derivativeCheckCB->IsChecked())
          theSolver->SetStringParameter("DerivativeCheck", "On");
       else
          theSolver->SetStringParameter("DerivativeCheck", "Off");
-             
+      
       if (diagnosticsCB->IsChecked())
          theSolver->SetStringParameter("Diagnostics", "On");
       else
          theSolver->SetStringParameter("Diagnostics", "Off");
-          
-      // save Tol Fun
-      inputString = tolFunTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-      {  
-         theSolver->SetStringParameter("TolFun", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Tol Fun","Real Number > 0.0");
-         canClose = false;
-      }
-
-      // save Tol Con
-      inputString = tolConTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-      {  
-         theSolver->SetStringParameter("TolCon", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Tol Con","Real Number > 0.0");
-         canClose = false;
-      }
-
-      // save Tol X
-      inputString = tolXTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-      {  
-         theSolver->SetStringParameter("TolX", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "Tol X","Real Number > 0.0");
-         canClose = false;
-      }
-
-      // save MaxIter
-      inputString = maxIterTextCtrl->GetValue();      
-
-      // check to see if input is a integer
-      if (GmatStringUtil::ToInteger(inputString,&ivalue))
-      {  
-         theSolver->SetStringParameter("MaxIter", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "MaxIter","Integer > 0");
-         canClose = false;
-      }
-
-      // save MaxFunEvals
-      inputString = maxFunEvalsTextCtrl->GetValue();      
-
-      // check to see if input is a integer
-      if (GmatStringUtil::ToInteger(inputString,&ivalue))
-      {  
-         theSolver->SetStringParameter("MaxFunEvals", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "MaxFunEvals","Integer > 0");
-         canClose = false;
-      }
-
-      // save DiffMinChange
-      inputString = diffMinChangeTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-      {  
-         theSolver->SetStringParameter("DiffMinChange", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "DiffMinChange","Real > 0.0");
-         canClose = false;
-      }
-
-      // save DiffMaxChange
-      inputString = diffMaxChangeTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if (GmatStringUtil::ToReal(inputString,&rvalue))
-      {  
-         theSolver->SetStringParameter("DiffMaxChange", inputString.c_str());
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "DiffMaxChange","Real > 0.0");
-         canClose = false;
-      }
-//      theSolver->SetStringParameter("TolFun", tolFunTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("TolCon", tolConTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("TolX", tolXTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("MaxFunEvals", maxFunEvalsTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("MaxIter", maxIterTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("DiffMinChange", diffMinChangeTextCtrl->GetValue().c_str());
-//      theSolver->SetStringParameter("DiffMaxChange", diffMaxChangeTextCtrl->GetValue().c_str());
-
-      theSolver->SetStringParameter("Display", displayComboBox->GetValue().c_str());                
+      
+      theSolver->SetStringParameter("Display", displayComboBox->GetValue().c_str());
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("SQPSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       canClose = false;
       return;
    }
-   
-   // explicitly disable apply button
-   // it is turned on in each of the panels
-   EnableUpdate(false);
 }
 
 
@@ -457,8 +393,8 @@ void SQPSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void SQPSetupPanel::OnTextChange(wxCommandEvent& event)
 {
-   if (theApplyButton != NULL)
-      EnableUpdate(true);
+   isTextModified = true;
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------

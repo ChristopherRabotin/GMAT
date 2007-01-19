@@ -42,6 +42,8 @@
 #include "AngleUtil.hpp"
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
+#include "StringUtil.hpp"           // for ToString()
+
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
@@ -1221,12 +1223,23 @@ bool CelestialBody::SetCentralBody(const std::string &cBody)
  *
  * @param <newMw> gravitational constant (km^3/s^2) for the body.
  *
+ * @exception <SolarSystemException> thrown if value is out of range
+ * 
  * @return flag indicating success of the method.
  *
  */
 //------------------------------------------------------------------------------
 bool CelestialBody::SetGravitationalConstant(Real newMu)
 {
+   if (newMu <= 0.0)
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(newMu, GetDataPrecision()).c_str(),
+                     "Mu", "Real Number > 0 ");
+      throw sse;
+   }
+   
    mu   = newMu;
    mass = mu / GmatPhysicalConst::UNIVERSAL_GRAVITATIONAL_CONSTANT;
    return true;
@@ -1240,12 +1253,23 @@ bool CelestialBody::SetGravitationalConstant(Real newMu)
  *
  * @param <newEqRadius> equatorial radius (km) for the body.
  *
+ * @exception <SolarSystemException> thrown if value is out of range
+ *
  * @return flag indicating success of the method.
  *
  */
 //------------------------------------------------------------------------------
 bool CelestialBody::SetEquatorialRadius(Real newEqRadius)
 {
+   if (newEqRadius <= 0.0)
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(newEqRadius, GetDataPrecision()).c_str(),
+                     "Equatorial Radius", "Real Number > 0 ");
+      throw sse;
+   }
+   
    equatorialRadius = newEqRadius;
    polarRadius      = (1.0 - flattening) * equatorialRadius;
    return true;
@@ -1537,40 +1561,102 @@ bool CelestialBody::SetAnalyticEpoch(const A1Mjd &toTime)
 
 
 //------------------------------------------------------------------------------
+// bool SetSMA(Real value)
+//------------------------------------------------------------------------------
+/*
+ * Sets SemimajorAxis of analytic model state.
+ *
+ * @param  value  value of semimajor axis
+ *
+ * @exception <SolarSystemException> thrown if new value is out of range
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetSMA(Real value)
+{
+   if (value == 0.0)
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                     PARAMETER_TEXT[ANALYTIC_SMA - SpacePointParamCount].c_str(),
+                     "Real Number non-zero");
+      throw sse;
+   }
+   
+   analyticKepler[0] = value;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetECC(Real value)
+//------------------------------------------------------------------------------
+/*
+ * Sets Eccentricity of analytic model state.
+ *
+ * @param  value  eccentricity value
+ *
+ * @exception <SolarSystemException> thrown if value is out of range
+ *
+ */
+//------------------------------------------------------------------------------
+bool CelestialBody::SetECC(Real value)
+{
+   if (value < 0.0)
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                     PARAMETER_TEXT[ANALYTIC_ECC - SpacePointParamCount].c_str(),
+                     "Real Number > 0 ");
+      throw sse;
+   }
+   
+   analyticKepler[1] = value;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetAnalyticElements(const Rvector6 &kepl)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
 {
    #ifdef DEBUG_CB_ANALYTIC
       MessageInterface::ShowMessage(
-      "In CB::SetAnalyticElements, setting elements to\n%.12f %.12f %.12f %.12f %.12f %.12f\n",
-      kepl[0],kepl[1],kepl[2],kepl[3],kepl[4],kepl[5]);
+      "In CB::SetAnalyticElements, setting elements to\n%.12f %.12f %.12f %.12f"
+      " %.12f %.12f\n", kepl[0],kepl[1],kepl[2],kepl[3],kepl[4],kepl[5]);
    #endif
-   if (kepl[0] == 0.0)
-   {
-      //std::string errMsg = "For body " + instanceName + 
-      //   ", SMA value must be non-zero"; 
-      std::stringstream buffer;
-      buffer << kepl[0];
-      std::string errMsg = "The value of \"" + buffer.str() + "\" for field \"" + 
-         PARAMETER_TEXT[ANALYTIC_SMA - SpacePointParamCount] + "\" on object \"" + instanceName +
-         "\" is not an allowed value.  The allowed values are: " +
-         " [Real number non-zero]."; 
-      throw SolarSystemException(errMsg);
-   }
+      
+   SetSMA(kepl[0]);
+   SetECC(kepl[1]);
    
-   if (kepl[1] < 0.0)
-   {
-      //std::string errMsg = "For body " + instanceName + 
-      //   ", ECC value must be greater than or equal to zero"; 
-      std::stringstream buffer;
-      buffer << kepl[1];
-      std::string errMsg = "The value of \"" + buffer.str() + "\" for field " + 
-         PARAMETER_TEXT[ANALYTIC_ECC - SpacePointParamCount] + "\" on object \"" + instanceName +
-         "\" is not an allowed value.  The allowed values are: " +
-         " [Real number >= zero]."; 
-      throw SolarSystemException(errMsg);
-   }
+//    if (kepl[0] == 0.0)
+//    {
+//       //std::string errMsg = "For body " + instanceName + 
+//       //   ", SMA value must be non-zero"; 
+//       std::stringstream buffer;
+//       buffer << kepl[0];
+//       std::string errMsg = "The value of \"" + buffer.str() + "\" for field \"" + 
+//          PARAMETER_TEXT[ANALYTIC_SMA - SpacePointParamCount] + "\" on object \"" + instanceName +
+//          "\" is not an allowed value.  \nThe allowed values are: " +
+//          " [Real number non-zero]."; 
+//       throw SolarSystemException(errMsg);
+//    }
+   
+//    if (kepl[1] < 0.0)
+//    {
+//       //std::string errMsg = "For body " + instanceName + 
+//       //   ", ECC value must be greater than or equal to zero"; 
+//       std::stringstream buffer;
+//       buffer << kepl[1];
+//       std::string errMsg = "The value of \"" + buffer.str() + "\" for field " + 
+//          PARAMETER_TEXT[ANALYTIC_ECC - SpacePointParamCount] + "\" on object \"" + instanceName +
+//          "\" is not an allowed value.  \nThe allowed values are: " +
+//          " [Real number >= zero]."; 
+//       throw SolarSystemException(errMsg);
+//    }
    
    analyticKepler = kepl;
    newAnalytic    = true;
@@ -1846,19 +1932,18 @@ Real        CelestialBody::GetRealParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
+Real CelestialBody::SetRealParameter(const Integer id, const Real value)
 {
    Rvector6 tmpKepl = analyticKepler;
    #ifdef DEBUG_CB_ANALYTIC
       MessageInterface::ShowMessage("In CB::SetReal with id = %d, and value = %.14f\n",
       id, value);
    #endif
+      
    //if (id == MASS)              return (mass               = value); // make sense?
    if (id == EQUATORIAL_RADIUS)
    {
-      equatorialRadius = value;
-      polarRadius = (1.0 - flattening) * equatorialRadius;
-      return true;
+      return SetEquatorialRadius(value);
    }
    if (id == FLATTENING)
    {
@@ -1869,8 +1954,7 @@ Real        CelestialBody::SetRealParameter(const Integer id, const Real value)
    //if (id == POLAR_RADIUS)      return (polarRadius        = value); // make sense?
    if (id == MU)
    {
-      mu = value;
-      return true;
+      return SetGravitationalConstant(value);
    }
    if (id == HOUR_ANGLE)
    {
@@ -2077,6 +2161,8 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
  * @param <id> ID for the requested parameter.
  * @param <value> string value for the requested parameter.
  *
+ * @exception <SolarSystemException> thrown if value is out of range
+ *
  * @return  success flag.
  *
  */
@@ -2145,13 +2231,19 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       #endif
       if (value != "TAIModJulian")
       {
-         //std::string msg = "CelestialBody:: analytic method date format ";
-         //msg +=  value + " not allowed - currently only TAIModJulian allowed\n"; 
-         std::string msg = "The value of \"" + value + "\" for field \"" + 
-            PARAMETER_TEXT[ANALYTIC_DATE_FORMAT] + "\" on object \"" + instanceName +
-            "\" is not an allowed value.  The allowed values are: " +
-            " [TAIModJulian]."; 
-         throw SolarSystemException(msg);
+         SolarSystemException sse;
+         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+                        PARAMETER_TEXT[ANALYTIC_DATE_FORMAT].c_str(),
+                        "[TAIModJulian]");
+         throw sse;
+         
+//          //std::string msg = "CelestialBody:: analytic method date format ";
+//          //msg +=  value + " not allowed - currently only TAIModJulian allowed\n"; 
+//          std::string msg = "The value of \"" + value + "\" for field \"" + 
+//             PARAMETER_TEXT[ANALYTIC_DATE_FORMAT] + "\" on object \"" + instanceName +
+//             "\" is not an allowed value.  The allowed values are: " +
+//             " [TAIModJulian]."; 
+//          throw SolarSystemException(msg);
       }
       analyticFormat = value;
       return true;
@@ -2165,13 +2257,18 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       #endif
       if (value != "Keplerian")
       {
-         //std::string msg = "CelestialBody:: analytic method state type ";
-         //msg +=  value + " not allowed - currently only Keplerian allowed\n"; 
-         std::string msg = "The value of \"" + value + "\" for field \"" + 
-            PARAMETER_TEXT[ANALYTIC_STATE_TYPE] + "\" on object \"" + instanceName +
-            "\" is not an allowed value.  The allowed values are: " +
-            " [Keplerian]."; 
-         throw SolarSystemException(msg);
+         SolarSystemException sse;
+         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+                        PARAMETER_TEXT[ANALYTIC_STATE_TYPE].c_str(),
+                        "[Keplerian]");
+         
+//          //std::string msg = "CelestialBody:: analytic method state type ";
+//          //msg +=  value + " not allowed - currently only Keplerian allowed\n"; 
+//          std::string msg = "The value of \"" + value + "\" for field \"" + 
+//             PARAMETER_TEXT[ANALYTIC_STATE_TYPE] + "\" on object \"" + instanceName +
+//             "\" is not an allowed value.  The allowed values are: " +
+//             " [Keplerian]."; 
+//          throw SolarSystemException(msg);
       }
       analyticStateType = value;
       return true;

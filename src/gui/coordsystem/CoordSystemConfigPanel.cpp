@@ -129,7 +129,7 @@ void CoordSystemConfigPanel::LoadData()
    
    mObject = theCoordSys;
    
-   theApplyButton->Enable(false);
+   //theApplyButton->Enable(false);
 }
 
 

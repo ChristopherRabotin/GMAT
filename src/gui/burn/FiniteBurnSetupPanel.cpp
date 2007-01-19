@@ -349,6 +349,7 @@ void FiniteBurnSetupPanel::LoadData()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
@@ -357,70 +358,50 @@ void FiniteBurnSetupPanel::SaveData()
    #if DEBUG_FINITEBURN_PANEL
       MessageInterface::ShowMessage( "FiniteBurnSetupPanel::SaveData() \n" );
    #endif
-
+      
+   canClose = true;
+   Real bsf;
+   std::string inputString;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   inputString = scaleTextCtrl->GetValue();      
+   CheckReal(bsf, inputString, "BurnScaleFactor", "Real Number > 0");
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
-      // Save data to core engine
       Integer id;
-      Real rvalue;
       
-      canClose = true;
+      // save burn scale factor
+      id = theBurn->GetParameterID("BurnScaleFactor");
+      theBurn->SetRealParameter(id, bsf);
       
-      std::string inputString;
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                         theBurn->GetName() + "\" is not an allowed value. \n"
-                        "The allowed values are: [%s].";                        
-
       // save central body
       wxString burnOriginStr = mCentralBodyComboBox->GetStringSelection();
       id = theBurn->GetParameterID("Origin");
       std::string origin = std::string (burnOriginStr.c_str());
       theBurn->SetStringParameter(id, origin);
-   
+      
       // save axes
       wxString axesStr = mAxesComboBox->GetStringSelection();
       id = theBurn->GetParameterID("Axes");
       std::string axes = std::string (axesStr.c_str());
       theBurn->SetStringParameter(id, axes);
-
+      
       // save thrusters
       id = theBurn->GetParameterID("Thrusters");
       theBurn->SetStringParameter(id, thrusterSelected.c_str(), 0);
-
-      // save burn scale factor
-      inputString = scaleTextCtrl->GetValue();      
-
-      // check to see if input is a real
-      if ( (GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue > 0.0) )
-      {  
-         id = theBurn->GetParameterID("BurnScaleFactor");
-         theBurn->SetRealParameter(id, rvalue);
-      }
-      else
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-            inputString.c_str(), "BurnScaleFactor","Real Number > 0.0");
-
-         canClose = false;
-      }
-
-//      // save burn scale factor
-//      id = theBurn->GetParameterID("BurnScaleFactor");
-//      wxString bsfStr = scaleTextCtrl->GetValue();
-//      theBurn->SetRealParameter(id, atof(bsfStr));
-
-          // save tanks
-          //wxString tankString = mTankComboBox->GetStringSelection();
-          //id = theBurn->GetParameterID("Tanks");
-          //std::string tank = std::string (tankString.c_str());
-          //theBurn->SetStringParameter(id, tank, 0);
-
-      EnableUpdate(false);
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("FiniteBurnSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
       canClose = false;
       return;
    }

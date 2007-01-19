@@ -72,6 +72,7 @@ UniversePanel::UniversePanel(wxWindow *parent):GmatPanel(parent)
    mHasFileTypesInUseChanged = false;
    mHasFileNameChanged = false;
    mHasAnaModelChanged = false;
+   mHasTextModified = false;
    
    Create();
    Show();
@@ -397,107 +398,117 @@ void UniversePanel::LoadData()
 //------------------------------------------------------------------------------
 void UniversePanel::SaveData()
 {
-   // save data to core engine
-
-   std::string inputString;
-   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                     theSolarSystem->GetName() + "\" is not an allowed value.  "
-                     "\nThe allowed values are: [ %s ].";
-
-   canClose = false;
-   
-   if (selectedListBox->GetCount() == 0)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Need to select at least one planetary source file.\n"
-          "Added DE405 file as default\n");
-      
-      selectedListBox->Insert("DE405", 0);
-      selectedListBox->SetSelection(0);
-   }
-   else
-   {
-      // save planetary file name, if changed
-      if (mHasFileNameChanged)
-      {
-         mHasFileNameChanged = false;
-
-         wxString type = mFileTypeComboBox->GetStringSelection();
-         inputString = mFileNameTextCtrl->GetValue();
-         std::ifstream filename(inputString.c_str());
-
-         // Check if the file doesn't exist then stop
-         if (type != "Analytic" && !filename) 
-         {
-            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                           inputString.c_str(),"File Name", "File must exist"); 
-            //loj: 9/26/06 theOkButton->Disable();
-            return;
-         }
-         filename.close();
-         
-         for (unsigned int i=0; i<mAllFileTypes.size(); i++)
-         {
-            wxString type = mAllFileTypes[i].c_str();
-            std::string name = std::string(mFileTypeNameMap[type].c_str());
-            theGuiInterpreter->SetPlanetarySourceName(mAllFileTypes[i], name);
-         }
-      }
-      
-      // save planetary file types in use, if changed
-      if (mHasFileTypesInUseChanged)
-      {
-         mHasFileTypesInUseChanged = false;
-         mFileTypesInUse.clear();
-         
-         // put planetary file types in the priority order
-         for (int i=0; i<selectedListBox->GetCount(); i++)
-         {
-            mFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
-         
-            #if DEBUG_UNIV_PANEL
-            MessageInterface::ShowMessage("UniversePanel::SaveData() types=%s\n",
-                                          mFileTypesInUse[i].c_str());
-            #endif
-         }
-         
-         Integer status = theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
-         
-         // if error opening the first file type, remove the file type from the list
-         if (status == 1)
-         {
-            selectedListBox->Delete(0);
-         }
-      }
-   }
-
-   if (mHasAnaModelChanged)
-   {
-      mHasAnaModelChanged = false;
-      theGuiInterpreter->
-         SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
-   }
-   
-   theSolarSystem->SetBooleanParameter("UseTTForEphemeris",
-      mOverrideCheckBox->IsChecked());
-      
-   // Saving EphemerisUpdateInterval
-   Real rvalue;
-   inputString = mIntervalTextCtrl->GetValue();
-
-   if (!GmatStringUtil::ToReal(inputString,&rvalue) || rvalue < 0)
-   {
-       MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                        inputString.c_str(),"Ephemeris Update Interval",
-                        "Real Number >= 0");
-       //loj: 9/26/06 theOkButton->Disable();
-       return;
-   }
-   theSolarSystem->SetEphemUpdateInterval(rvalue);
-
    canClose = true;
-   theApplyButton->Enable(false);
+   std::string str;
+   Real interval;
    
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   
+   if (mHasTextModified)
+   {
+      str = mIntervalTextCtrl->GetValue();
+      CheckReal(interval, str, "Mu", "Real Number >= 0.0");
+   }
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      if (mHasTextModified)
+      {
+         theSolarSystem->SetEphemUpdateInterval(interval);
+         mHasTextModified = false;
+      }
+      
+      if (selectedListBox->GetCount() == 0)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "Need to select at least one planetary source file.\n"
+             "Added DE405 file as default\n");
+         
+         selectedListBox->Insert("DE405", 0);
+         selectedListBox->SetSelection(0);
+      }
+      else
+      {
+         // save planetary file name, if changed
+         if (mHasFileNameChanged)
+         {
+            wxString type = mFileTypeComboBox->GetStringSelection();
+            str = mFileNameTextCtrl->GetValue();
+            std::ifstream filename(str.c_str());
+            
+            // Check if the file doesn't exist then stop
+            if (type != "Analytic" && !filename) 
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, mMsgFormat.c_str(),
+                   str.c_str(), "File Name", "File must exist");
+               canClose = false;
+               return;
+            }
+            filename.close();
+            
+            for (unsigned int i=0; i<mAllFileTypes.size(); i++)
+            {
+               wxString type = mAllFileTypes[i].c_str();
+               std::string name = std::string(mFileTypeNameMap[type].c_str());
+               theGuiInterpreter->SetPlanetarySourceName(mAllFileTypes[i], name);
+            }
+            
+            mHasFileNameChanged = false;
+         }
+         
+         // save planetary file types in use, if changed
+         if (mHasFileTypesInUseChanged)
+         {
+            mFileTypesInUse.clear();
+            
+            // put planetary file types in the priority order
+            for (int i=0; i<selectedListBox->GetCount(); i++)
+            {
+               mFileTypesInUse.push_back(std::string(selectedListBox->GetString(i)));
+         
+               #if DEBUG_UNIV_PANEL
+               MessageInterface::ShowMessage
+                  ("UniversePanel::SaveData() types=%s\n",
+                   mFileTypesInUse[i].c_str());
+               #endif
+            }
+            
+            Integer status =
+               theGuiInterpreter->SetPlanetarySourceTypesInUse(mFileTypesInUse);
+            
+            mHasFileTypesInUseChanged = false;
+            
+            // if error opening the first file type, remove the file type from the list
+            if (status == 1)
+               selectedListBox->Delete(0);
+         }
+      }
+      
+      if (mHasAnaModelChanged)
+      {
+         theGuiInterpreter->
+            SetAnalyticModelToUse(mAnalyticModelComboBox->GetStringSelection().c_str());
+         mHasAnaModelChanged = false;
+      }
+      
+      theSolarSystem->SetBooleanParameter("UseTTForEphemeris",
+                                          mOverrideCheckBox->IsChecked());
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return;
+   }
 }// end SaveData()
 
 
@@ -726,10 +737,16 @@ void UniversePanel::OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void UniversePanel::OnTextCtrlChange(wxCommandEvent& event)
 {
+   if (event.GetEventObject() == mIntervalTextCtrl)
+   {
+      if (mIntervalTextCtrl->IsModified())
+         mHasTextModified = true;
+   }
+   
    if (event.GetEventObject() == mFileNameTextCtrl)
    {
       mHasFileNameChanged = true;
    }
-
+   
    EnableUpdate(true);
 }

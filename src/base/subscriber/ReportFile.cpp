@@ -414,17 +414,35 @@ Integer ReportFile::SetIntegerParameter(const Integer id, const Integer value)
 {
    if (id == PRECISION)
    {
-      if (value > 0)
-         precision = value;
+      if (value <= 0)
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       GetParameterText(PRECISION).c_str(),
+                       "Integer Number > 0 ");
+         throw se;
+      }
+      
+      precision = value;
       return precision;
    }
    else if (id == COL_WIDTH)
    {
-      if (value > 0)
-         columnWidth = value;
+      if (value <= 0)
+      {
+         SubscriberException se;
+         se.SetDetails(errorMessageFormat.c_str(),
+                       GmatStringUtil::ToString(value, 1).c_str(),
+                       GetParameterText(COL_WIDTH).c_str(),
+                       "Integer Number > 0 ");
+         throw se;
+      }
+      
+      columnWidth = value;
       return columnWidth;
    }
-
+   
    return Subscriber::SetIntegerParameter(id, value);
 }
 
