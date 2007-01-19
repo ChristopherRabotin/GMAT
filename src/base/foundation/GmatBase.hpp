@@ -319,7 +319,10 @@ public:
                                          const std::string &prefix = "",
                                          const std::string &useName = "");
    virtual void FinalizeCreation();
-
+   
+   virtual std::string GetErrorMessageFormat();
+   virtual void SetErrorMessageFormat(const std::string &fmt);
+   
    static Integer          GetDataPrecision();
    static Integer          GetTimePrecision();
 
@@ -358,8 +361,11 @@ protected:
    /// flag indicating whether or not a Callback method is currently executing
    bool                callbackExecuting;
    
-   static Integer      DATA_PRECISION;
-   static Integer      TIME_PRECISION;
+   std::string         errorMessageFormat;
+   
+   // DATA_PRECISION and TIME_PRECISION are now in GmatGlobal
+   //static Integer      DATA_PRECISION;
+   //static Integer      TIME_PRECISION;
    
    // Scripting interfaces
    /// flag used to deterine if the current write is in Matlab mode

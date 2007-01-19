@@ -35,6 +35,7 @@
 
 
 #include "GmatBase.hpp"
+#include "GmatGlobal.hpp"  // for GetDataPrecision()
 #include <sstream>         // for StringStream
 
 #include "MessageInterface.hpp"
@@ -54,19 +55,22 @@ const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
 const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 
-// Set the precision used for data output
-Integer           GmatBase::DATA_PRECISION = 16;
-Integer           GmatBase::TIME_PRECISION = 16;
+// DATA_PRECISION and TIME_PRECISION are now in GmatGlobal
+// // Set the precision used for data output
+// Integer           GmatBase::DATA_PRECISION = 16;
+// Integer           GmatBase::TIME_PRECISION = 16;
 
 // Static accessors for the precision settings
 Integer GmatBase::GetDataPrecision()
 {
-   return DATA_PRECISION;
+   return GmatGlobal::Instance()->GetDataPrecision();
+   //return DATA_PRECISION;
 }
 
 Integer GmatBase::GetTimePrecision()
 {
-   return TIME_PRECISION;
+   return GmatGlobal::Instance()->GetTimePrecision();
+   //return TIME_PRECISION;
 }
 
 
@@ -176,8 +180,13 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    
 {
    attributeCommentLines.clear();
-   attributeInlineComments.clear();     
-        
+   attributeInlineComments.clear();
+   
+   errorMessageFormat =
+      "The value of \"%s\" for field \"%s\" on object \""
+      + instanceName +  "\" is not an allowed value. \n"
+      "The allowed values are: [%s].";
+   
    // one more instance - add to the instanceCount
    ++instanceCount;
 }
@@ -2485,7 +2494,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
 {
    std::stringstream data;
 
-   data.precision(DATA_PRECISION);   // Crank up data precision so we don't lose anything
+   //data.precision(DATA_PRECISION);   // Crank up data precision so we don't lose anything
+   data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
    std::string preface = "", nomme;
    
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
@@ -2604,7 +2614,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(DATA_PRECISION);
+   value.precision(GetDataPrecision());
 
    for (i = 0; i < parameterCount; ++i)
    {
@@ -2740,6 +2750,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
+   Integer precision = GmatGlobal::Instance()->GetDataPrecision();
    
    //MessageInterface::ShowMessage
    //   ("===> %s, tid=%s\n", GetParameterText(id).c_str(),
@@ -2802,7 +2813,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::RVECTOR_TYPE:
       {
          Rvector rv = GetRvectorParameter(id);
-         stream << "[ " << rv.ToString() << "]";
+         stream << "[ " << rv.ToString(precision) << "]";
       }
       break;
       
@@ -2811,7 +2822,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          Rmatrix ra = GetRmatrixParameter(id);
          Integer r, c;
          ra.GetSize(r, c);
-
+         
          stream << "[ ";
          for (Integer i = 0; i < r; ++i)
          {
@@ -2856,4 +2867,22 @@ void GmatBase::PrepCommentTables()
 void GmatBase::FinalizeCreation()
 {
    PrepCommentTables();
+}
+
+
+//---------------------------------------------------------------------------
+// std::string GetErrorMessageFormat()
+//---------------------------------------------------------------------------
+std::string GmatBase::GetErrorMessageFormat()
+{
+   return errorMessageFormat;
+}
+
+
+//---------------------------------------------------------------------------
+// void SetErrorMessageFormat(const std::string &fmt)
+//---------------------------------------------------------------------------
+void GmatBase::SetErrorMessageFormat(const std::string &fmt)
+{
+   errorMessageFormat = fmt;
 }
