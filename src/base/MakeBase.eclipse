@@ -355,6 +355,7 @@ OBJECTS = \
     util/AngleUtil.o \
     util/Anomaly.o \
     util/AttitudeUtil.o \
+    util/BaseException.o \
     util/Cartesian.o \
     util/CoordUtil.o \
     util/Date.o \

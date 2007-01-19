@@ -135,9 +135,7 @@ OBJECTS = \
     coordsystem/CoordPanel.o \
     coordsystem/CoordSysCreateDialog.o \
     coordsystem/CoordSystemConfigPanel.o \
-    forcemodel/ExponentialDragDialog.o \
-    forcemodel/JacchiaRobertsDialog.o \
-    forcemodel/MSISE90Dialog.o \
+    forcemodel/DragInputsDialog.o \
     foundation/ArraySetupPanel.o \
     foundation/GmatDialog.o \
     foundation/GmatMdiChildFrame.o \
