@@ -19,6 +19,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
@@ -36,13 +37,13 @@ public:
    
 private:
    
-   static const Integer MAX_PROP_ROW = 5;
+   static const Integer MAX_PROP_ROW     = 5;
    static const Integer MAX_STOPCOND_ROW = 10;
    static const Integer PROP_NAME_COL = 0;
-   static const Integer PROP_SOS_COL = 1;
-   static const Integer PROP_BK_COL = 2;
-   static const Integer STOPCOND_NAME_COL = 0;
-   static const Integer STOPCOND_DESC_COL = 1;
+   static const Integer PROP_SOS_COL  = 1;
+   static const Integer STOPCOND_PARAM_COL   = 0;
+   static const Integer STOPCOND_RELOPER_COL = 1;
+   static const Integer STOPCOND_COND_COL    = 2;
    
    struct PropType
    {
@@ -69,38 +70,36 @@ private:
    
    wxGrid *propGrid;
    wxGrid *stopCondGrid;
-   
-   wxTextCtrl *stopNameTextCtrl;
-   wxTextCtrl *varNameTextCtrl;
-   wxTextCtrl *goalTextCtrl;
-   //wxTextCtrl *toleranceTextCtrl;
-   
-   wxButton *updateButton;
-   wxButton *deleteButton;
-   wxButton *mStopViewButton;
-   wxButton *mGoalViewButton;
+
+   wxCheckBox *backPropCheckBox;
    
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
    
    wxBoxSizer *mMiddleBoxSizer;
-   wxStaticBoxSizer *mStopSizer;
+   wxFlexGridSizer *propModeSizer;
+   GmatStaticBoxSizer *mpropSizer;
+   GmatStaticBoxSizer *mStopSizer;
    
    bool    mPropModeChanged;
    bool    mPropChanged;
    bool    mStopCondChanged;
+   bool    mPropGridSelected;
+   bool    mStopCondGridSelected;
    
    Integer mPropModeCount;
-   Integer numOfEqualities;
+//   Integer numOfEqualities;
    Integer mPropCount;
    Integer mSpaceObjectCount;
    Integer mStopCondCount;
    Integer mTempPropCount;
+   Integer mCurrPropRow;
    Integer mCurrStopRow;
    PropType mTempProp[MAX_PROP_ROW];
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
    Propagate *thePropCmd;
+   Parameter *theParameter;
    
    wxArrayString mObjectTypeList;
    std::vector<StopCondition*> mRemovedStopCondList;
@@ -113,37 +112,34 @@ private:
    
    // Layout & data handling methods
    void DisplayPropagator();
-   void DisplayStopCondition(Integer selRow);
+   void DisplayStopCondition();
    void UpdateStopCondition();
    void RemoveStopCondition();
    void ClearStopCondition(Integer selRow);
-   void ShowDetailedStopCond(Integer stopRow);
-   void ActivateUpdateButton();
+   void MoveUpPropData();
    
-   // event handling method
-   void OnTextChange(wxCommandEvent &event);
-   void OnComboBoxChange(wxCommandEvent &event);
-   void OnButtonClick(wxCommandEvent &event);
-   void OnCellLeftClick(wxGridEvent &event);
-   void OnCellRightClick(wxGridEvent &event);
-
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
                                const wxString &goalStr);
-   void MoveUpPropData();
    
+   // event handling method
+   void OnCellLeftDoubleClick(wxGridEvent &event);
+   void OnCellRightClick(wxGridEvent &event);
+   void OnCellValueChange(wxGridEvent& event);
+   void OnCheckBoxChange(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent &event);
+   void OnKeyDown(wxKeyEvent& event);
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
    
    // IDs for the controls and the menu commands
    enum
    {     
-      ID_TEXTCTRL = 44000,
+      ID_TEXT = 44000,
       ID_COMBOBOX,
-      ID_BUTTON,
       ID_CHECKBOX,
       ID_GRID,
-     ID_TEXT,
    };
 };
 
