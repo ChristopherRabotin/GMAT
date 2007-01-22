@@ -327,6 +327,10 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
+/*
+ * @see ToReal(const std::string &str, Real &value)
+ */
+//------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real *value)
 {
    return ToReal(str, *value);
@@ -336,7 +340,16 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value)
 //------------------------------------------------------------------------------
 // bool ToReal(const std::string &str, Real &value)
 //------------------------------------------------------------------------------
-// Note: atof() returns 100.00 for 100.00ABC, but we want it be an error
+/*
+ * This method converts string to Real using atof() after validation.
+ *
+ * @param  str  input string to be converted to Real
+ * @param  value  output Real value
+ *
+ * @return true if input string represents valid Real number, false otherwise
+ *
+ * @note  atof() returns 100.00 for 100.00ABC, but we want it be an error.
+ */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToReal(const std::string &str, Real &value)
 {
@@ -345,13 +358,27 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    
    std::string str2 = Trim(str, BOTH);
    Integer numDot = 0;
+   UnsignedInt index1;
    
    if (str2.length() == 0)
       return false;
-
+   
+   // If first character is not '-' and '.' and digit, it's false
    if (str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
       return false;
-
+   
+   // Check for multiple E or e
+   index1 = str2.find_first_of("Ee");
+   if (index1 != str2.npos)
+      if (str2.find_first_of("Ee", index1 + 1) != str2.npos)
+         return false;
+   
+   // Check for multiple + or -
+   index1 = str2.find_first_of("+-");
+   if (index1 != str2.npos)
+      if (str2.find_first_of("+-", index1 + 1) != str2.npos)
+         return false;
+   
    for (unsigned int i=0; i<str2.length(); i++)
    {
       if (i == 0 && str2[0] == '-')
@@ -360,7 +387,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
       if (str2[i] == '.')
       {
          numDot++;
-
+         
          if (numDot > 1)
             return false;
          
@@ -371,13 +398,13 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
       {
          // Handle scientific notation
          if ((str2[i] == 'e' || str2[i] == 'E') &&
-             (str2[i+1] == '+' || str2[i+1] == '-'))
+             (str2[i+1] == '+' || str2[i+1] == '-' || isdigit(str2[i+1])))
             continue;
          
-         if ((str2[i] == '+' || str2[i] == '-') &&
+         if ((str2[i] == '+' || str2[i] == '-' || isdigit(str2[i])) &&
              (str2[i-1] == 'e' || str2[i-1] == 'E'))
             continue;
-
+         
          return false;
       }
    }
@@ -390,15 +417,34 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
 //------------------------------------------------------------------------------
 // bool ToInteger(const std::string &str, Integer *value)
 //------------------------------------------------------------------------------
+/*
+ * @see ToInteger(const std::string &str, Integer &value)
+ */
+//------------------------------------------------------------------------------
 bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
 {
    return ToInteger(str, *value);
 }
 
+
 //------------------------------------------------------------------------------
 // bool ToInteger(const std::string &str, Integer &value)
 //------------------------------------------------------------------------------
-// Note: atoi() returns 0 for X or 100 for 100ABC, but we want it be an error
+/*
+ * This method converts string to Integer (signed integer) using atoi() after
+ * validation.
+ *
+ * @param  str  input string to be converted to Integer
+ * @param  value  output Integer value
+ *
+ * @return true if input string represents valid Integer number, false otherwise
+ *
+ * @note  atoi() returns 0 for X or 100 for 100ABC, but we want it be an error.
+ *        This method returns signed interger value.
+ *        The minimum value of Integer is -2147483647.
+ *        The maximum value of Integer is +2147483647.
+ *        The value out of this range will return complementary number
+ */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
 {
@@ -406,10 +452,10 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
    
    if (str2.length() == 0)
       return false;
-
+   
    if (str2[0] != '-' && !isdigit(str2[0]))
       return false;
-
+   
    for (unsigned int i=0; i<str2.length(); i++)
    {
       if (i == 0 && str2[0] == '-')
@@ -1337,7 +1383,11 @@ bool GmatStringUtil::IsSingleItem(const std::string &str)
 // std::string RemoveExtraParen(const std::string &str)
 //------------------------------------------------------------------------------
 /*
- * Removs extra pair of parenthesis.
+ * This method removs extra pair of parenthesis.
+ * If input string is "(a(1,1) + 10.0)" it return a(1,1) + 10.0.
+ *
+ * *** NOTES ***
+ * This method is not complete and needs more testing.
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
