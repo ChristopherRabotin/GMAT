@@ -57,6 +57,7 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
    Show();
 }
 
+
 //------------------------------------------------------------------------------
 // void Create()
 //------------------------------------------------------------------------------
@@ -95,7 +96,7 @@ void ParameterSetupPanel::Create()
       new wxButton(this, ID_COLOR_BUTTON, wxT(""),
                    wxDefaultPosition, wxSize(25, 20), 0);
    mColorButton->SetBackgroundColour(mColor);
-      
+   
    // wxSizers
    mPageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -107,7 +108,7 @@ void ParameterSetupPanel::Create()
       variableStaticBox = new wxStaticBox(this, -1, wxT("String"));
    else
       variableStaticBox = new wxStaticBox(this, -1, wxT("Variable"));
-      
+   
    mVarStaticBoxSizer = new wxStaticBoxSizer(variableStaticBox, wxVERTICAL);
    
    // Add to wx*Sizers
@@ -116,12 +117,12 @@ void ParameterSetupPanel::Create()
    top1FlexGridSizer->Add(nameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    top1FlexGridSizer->Add(mExpStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-    
+   
    // 1st row
    top1FlexGridSizer->Add(mVarNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(equalSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(mVarExpTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   
    // detail
    detailsBoxSizer->Add(mColorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    detailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -129,6 +130,14 @@ void ParameterSetupPanel::Create()
    mVarStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mVarStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
+   // add note
+   wxStaticText *noteStaticText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("Only number is editable for expression for now."),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   noteStaticText->SetForegroundColour(*wxRED);
+   
+   mPageBoxSizer->Add(noteStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    mPageBoxSizer->Add(mVarStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
@@ -137,6 +146,7 @@ void ParameterSetupPanel::Create()
    theMiddleSizer->Add(mPageBoxSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
 
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -162,7 +172,7 @@ void ParameterSetupPanel::LoadData()
          std::string varExp = mParam->GetStringParameter("Expression");
          mVarNameTextCtrl->SetValue(mVarName);
          mVarExpTextCtrl->SetValue(varExp.c_str());
-
+         
          UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
          RgbColor color(intColor);
          mColor.Set(color.Red(), color.Green(), color.Blue());
@@ -236,7 +246,6 @@ void ParameterSetupPanel::OnTextUpdate(wxCommandEvent& event)
    if (mVarExpTextCtrl->IsModified())
    {
       mIsExpChanged = true;
-      //theApplyButton->Enable();
       EnableUpdate(true);
    }
 }
@@ -258,7 +267,6 @@ void ParameterSetupPanel::OnColorButtonClick(wxCommandEvent& event)
       mColor = dialog.GetColourData().GetColour();
       mColorButton->SetBackgroundColour(mColor);
       mIsColorChanged = true;
-      //theApplyButton->Enable();
       EnableUpdate(true);
    }
 }

@@ -12,11 +12,11 @@
  */
 //------------------------------------------------------------------------------
 #include "CoordPanel.hpp"
-
 #include "AxisSystem.hpp"
 #include "SpacePoint.hpp"
-#include "TimeSystemConverter.hpp"
-#include "StringUtil.hpp"  // for ToReal()
+#include "TimeSystemConverter.hpp"  // for Convert()
+#include "StringUtil.hpp"           // for ToReal()
+#include "MessageInterface.hpp"
 
 //#define DEBUG_COORD_PANEL 1
 
@@ -364,14 +364,30 @@ AxisSystem* CoordPanel::CreateAxis()
             axis->SetRealParameter("UpdateInterval", atof(updateStr.c_str()));
             
             // convert epoch to a1mjd
-            std::string taiEpochStr = mTimeConverter.Convert
-               (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
-                "TAIModJulian");
+            // if Epoch is not in A1ModJulian, convert to A1ModJulian(loj: 1/23/07)
+            Real a1mjd;
+            GmatStringUtil::ToReal(epochStr.c_str(), a1mjd);
             
-            Real epoch = TimeConverterUtil::ConvertFromTaiMjd
-               (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), 
-               GmatTimeUtil::JD_JAN_5_1941);
-            axis->SetEpoch(epoch);
+            if (epochFormat != "" && epochFormat != "A1ModJulian")
+            {
+               // Use TimsSystemConverter instead of TimeConverter
+               Real inputMjd = -999.999;
+               Real a1mjd;
+               std::string a1mjdStr;
+               TimeConverterUtil::Convert(epochFormat.c_str(), inputMjd,
+                                          epochStr.c_str(), "A1ModJulian",
+                                          a1mjd, a1mjdStr);
+               
+               //std::string taiEpochStr = mTimeConverter.Convert
+               //   (std::string(epochStr.c_str()), std::string(epochFormat.c_str()),
+               //    "TAIModJulian");
+               
+               //Real epoch = TimeConverterUtil::ConvertFromTaiMjd
+               //   (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()), 
+               //    GmatTimeUtil::JD_JAN_5_1941);
+            }
+            
+            axis->SetEpoch(a1mjd);
             
          }
          catch (BaseException &e)
@@ -870,34 +886,39 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {     
          wxString newEpochFormat = formatComboBox->GetValue().Trim();
          std::string epochStr = epochTextCtrl->GetValue().c_str();
-         Real epoch;
+         Real epoch, a1mjd;
          
-//         if (epochTextCtrl->GetValue().ToReal(&epoch))
-         inputString = epochTextCtrl->GetValue();      
-              if ((GmatStringUtil::ToReal(inputString,&epoch)) && (epoch >= 0.0))
+         inputString = epochTextCtrl->GetValue();
+         if ((GmatStringUtil::ToReal(inputString, &epoch)) && (epoch >= 0.0))
          {
             epochValue = epochTextCtrl->GetValue();
             if (epochFormat != newEpochFormat)
             {
                axis->SetEpochFormat(newEpochFormat.c_str());
                epochFormat = newEpochFormat;
+               a1mjd = epoch;
                
-               //convert epoch to a1mjd if not in this format
-               if (newEpochFormat != "TAIModJulian")
+               //convert epoch to A1ModJulian if not in this format
+               //if (newEpochFormat != "TAIModJulian")
+               if (newEpochFormat != "" && newEpochFormat != "A1ModJulian")
                {
-                  std::string taiEpochStr = mTimeConverter.Convert
-                     (epochStr, newEpochFormat.c_str(), "TAIModJulian");
-                  epoch = TimeConverterUtil::ConvertFromTaiMjd
-                     (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()),
-                      GmatTimeUtil::JD_JAN_5_1941);
+                  std::string a1mjdStr;
+                  TimeConverterUtil::Convert(epochFormat.c_str(), epoch,
+                                             "", "A1ModJulian",
+                                             a1mjd, a1mjdStr);
+                  
+                  //std::string taiEpochStr = mTimeConverter.Convert
+                  //   (epochStr, newEpochFormat.c_str(), "TAIModJulian");
+                  //epoch = TimeConverterUtil::ConvertFromTaiMjd
+                  //   (TimeConverterUtil::A1MJD, atof(taiEpochStr.c_str()),
+                  //    GmatTimeUtil::JD_JAN_5_1941);
                }
             }
             
-            axis->SetEpoch(epoch);
+            axis->SetEpoch(a1mjd);
          }
          else
          {
-//            wxLogError("Invalid epoch value entered.");
             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
                inputString.c_str(),"Epoch","Real Number >= 0.0");
             canClose = false;
@@ -911,15 +932,13 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {
          Real interval;
          inputString = intervalTextCtrl->GetValue();      
-              if ((GmatStringUtil::ToReal(inputString,&interval)) && 
-                  (interval >= 0.0))     
-//         if (intervalTextCtrl->GetValue().ToReal(&interval))
+         if ((GmatStringUtil::ToReal(inputString,&interval)) && 
+             (interval >= 0.0))
          {
             axis->SetRealParameter("UpdateInterval", interval);
          }
          else
          {
-//            wxLogError("Invalid update interval value entered.");
             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
                inputString.c_str(),"Update Interval","Real Number >= 0.0");
             canClose = false;

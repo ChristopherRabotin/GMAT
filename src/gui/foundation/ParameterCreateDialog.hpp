@@ -85,9 +85,6 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
-   // virtual methods from GmatDialog
-   virtual void OnOK(wxCommandEvent &event);
-
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);

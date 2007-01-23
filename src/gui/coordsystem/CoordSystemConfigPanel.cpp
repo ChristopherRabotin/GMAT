@@ -19,6 +19,7 @@
 // base includes
 #include "gmatdefs.hpp"
 #include "AxisSystem.hpp"
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows

@@ -33,7 +33,8 @@ public:
 
 protected:
    bool mIsCoordCreated;
-   bool mCanClose;
+   bool mIsTextModified;
+   
    wxString mCoordName;
    CoordPanel *mCoordPanel;
    
@@ -45,9 +46,6 @@ protected:
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
-   
-   // virtual methods from GmatDialog
-   virtual void OnOK(wxCommandEvent &event);
    
    // event handling
    void OnTextUpdate(wxCommandEvent& event);

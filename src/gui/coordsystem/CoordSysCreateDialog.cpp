@@ -20,14 +20,13 @@
 #include "AxisSystem.hpp"
 
 //#define DEBUG_COORD_DIALOG 1
+//#define DEBUG_COORD_DIALOG_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(CoordSysCreateDialog, GmatDialog)
-   EVT_BUTTON(ID_BUTTON_OK, CoordSysCreateDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_TEXT(ID_TEXTCTRL, CoordSysCreateDialog::OnTextUpdate)
    EVT_COMBOBOX(ID_COMBO, CoordSysCreateDialog::OnComboBoxChange)
 END_EVENT_TABLE()
@@ -39,6 +38,8 @@ CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
    : GmatDialog(parent, -1, wxString(_T("CoordSysCreateDialog")))
 {
    mIsCoordCreated = false;
+   mIsTextModified = false;
+   
    Create();
    ShowData();
 }
@@ -67,6 +68,7 @@ void CoordSysCreateDialog::Create()
     theMiddleSizer->Add(boxsizer1, 0, wxALIGN_CENTRE|wxALL, 5);
     theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 5);
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
@@ -109,8 +111,49 @@ void CoordSysCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::SaveData()
 {
-   mCanClose = true;
+   #if DEBUG_COORD_DIALOG_SAVE
+   MessageInterface::ShowMessage
+      ("CoordSysCreateDialog::SaveData() mIsTextModified=%d\n",
+       mIsTextModified);
+   #endif
+   
+   canClose = true;
+
    std::string coordName = std::string(nameTextCtrl->GetValue().Trim().c_str());
+   if (coordName == "")
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Please enter Coordinate System name");
+      canClose = false;
+      return;
+   }
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (mIsTextModified)
+   {
+      Real epoch, interval;
+      std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
+      bool isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0");
+      
+      // check range here, since there is no CoordinateSystem created yet
+      
+      if (isValid && epoch < 0.0)
+         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
+      
+      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
+      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
+      
+      if (isValid && epoch < 0.0)
+         CheckReal(interval, str, "UpdateInterval", "Real Number >= 0", true);
+      
+   }
+   
+   if (!canClose)
+      return;
+   
+   mIsTextModified = false;
    
    CoordinateSystem *coord =
       (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
@@ -120,7 +163,7 @@ void CoordSysCreateDialog::SaveData()
       AxisSystem *axis =
          (AxisSystem *)coord->GetRefObject(Gmat::AXIS_SYSTEM, "");
       
-      mCanClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
+      canClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
    }
    else
    {
@@ -131,15 +174,17 @@ void CoordSysCreateDialog::SaveData()
          
          if (axis != NULL)
          {
-            mCanClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
+            canClose = mCoordPanel->SaveData(coordName, axis, wxFormatName);
             mIsCoordCreated = true;
             mCoordName = wxString(coordName.c_str());
+            mIsCoordCreated = true;
          }
       }
       else
       {
-         wxLogError("The CoordinateSystem: " + wxString(coordName.c_str()) +
-                    " already exist. Please enter different name\n");
+         wxLogError("The CoordinateSystem \"" + wxString(coordName.c_str()) +
+                    "\" already exist. Please enter different name\n");
+         canClose = false;
       }
    }
 }
@@ -150,22 +195,10 @@ void CoordSysCreateDialog::SaveData()
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::ResetData()
 {
+   mIsCoordCreated = false;
+   mCoordName = "";
 }
 
-//------------------------------------------------------------------------------
-// void OnOK()
-//------------------------------------------------------------------------------
-/**
- * Saves the data and closes the page
- */
-//------------------------------------------------------------------------------
-void CoordSysCreateDialog::OnOK(wxCommandEvent &event)
-{
-   SaveData();
-   
-   if (mIsCoordCreated && mCanClose)
-      Close();
-}
 
 //---------------------------------
 // event handling
@@ -178,11 +211,17 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
 {
    if (nameTextCtrl->GetValue().Trim() != "")
    {
-      theOkButton->Enable();
+      EnableUpdate(true);
    }
-   else
-      theOkButton->Disable();
+   
+   if (mCoordPanel->GetEpochTextCtrl()->IsModified() ||
+       mCoordPanel->GetIntervalTextCtrl()->IsModified())
+   {
+      EnableUpdate(true);
+      mIsTextModified = true;
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboBoxChange(wxCommandEvent& event)
@@ -202,6 +241,6 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    
    if (nameTextCtrl->GetValue().Trim() != "")
-      theOkButton->Enable();
+      EnableUpdate(true);
 }
 
