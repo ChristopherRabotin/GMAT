@@ -26,8 +26,6 @@
 // Event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DragInputsDialog, GmatDialog)
-   EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, DragInputsDialog::OnBrowse)
    EVT_RADIOBUTTON(ID_RADIOBUTTON, DragInputsDialog::OnRadioButtonChange)
    EVT_TEXT(ID_TEXTCTRL, DragInputsDialog::OnTextChange)
@@ -311,76 +309,75 @@ void DragInputsDialog::SaveData()
 {
    canClose = true;
    
-   if (theOkButton->IsEnabled())
+   Real flux, avgFlux, magIndex;
+      
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (isTextModified)
    {
-      Real flux, avgFlux, magIndex;
+      std::string str;
+         
+      str = solarFluxTextCtrl->GetValue();
+      CheckReal(flux, str, "Solar Flux (F10.7)", "Real Number");
+         
+      str = avgSolarFluxTextCtrl->GetValue();
+      CheckReal(avgFlux, str, "Average Solar Flux (F10.7A)", "Real Number");
+         
+      str = geomagneticIndexTextCtrl->GetValue();
+      CheckReal(magIndex, str, "Magnetic Index)", "Real Number");
+         
+      if (!canClose)
+         return;
       
-      //-----------------------------------------------------------------
-      // check values from text field
-      //-----------------------------------------------------------------
-      if (isTextModified)
+   }
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      if (useFile)
       {
-         std::string str;
+         inputSourceString = wxT("File");
+         theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
+         theForce->SetStringParameter(solarFluxFileID,
+                                      fileNameTextCtrl->GetValue().c_str() );
          
-         str = solarFluxTextCtrl->GetValue();
-         CheckReal(flux, str, "Solar Flux (F10.7)", "Real Number");
-         
-         str = avgSolarFluxTextCtrl->GetValue();
-         CheckReal(avgFlux, str, "Average Solar Flux (F10.7A)", "Real Number");
-         
-         str = geomagneticIndexTextCtrl->GetValue();
-         CheckReal(magIndex, str, "Magnetic Index)", "Real Number");
-         
-         if (!canClose)
-            return;
+         //MessageInterface::ShowMessage("Saved filename%s\n",
+         //   fileNameTextCtrl->GetValue().c_str());
       }
-      
-      
-      //-----------------------------------------------------------------
-      // save values to base, base code should do the range checking
-      //-----------------------------------------------------------------
-      try
+      else
       {
-         if (useFile)
+         if (isTextModified)
          {
-            inputSourceString = wxT("File");
+            inputSourceString = wxT("Constant");
             theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-            theForce->SetStringParameter(solarFluxFileID,
-                                         fileNameTextCtrl->GetValue().c_str() );
             
-            //MessageInterface::ShowMessage("Saved filename%s\n",
-            //   fileNameTextCtrl->GetValue().c_str());
+            theForce->SetRealParameter(solarFluxID, flux);
+            theForce->SetRealParameter(avgSolarFluxID, avgFlux);
+            theForce->SetRealParameter(geomagnecticIndexID, magIndex);
+            
+            isTextModified = false;
          }
-         else
-         {
-            if (isTextModified)
-            {
-               inputSourceString = wxT("Constant");
-               theForce->SetStringParameter(inputSourceID, inputSourceString.c_str());
-               
-               theForce->SetRealParameter(solarFluxID, flux);
-               theForce->SetRealParameter(avgSolarFluxID, avgFlux);
-               theForce->SetRealParameter(geomagnecticIndexID, magIndex);
-               
-               isTextModified = false;
-            }
-         }
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-         canClose = false;
       }
    }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+   }
+
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void ResetData()
 //------------------------------------------------------------------------------
 void DragInputsDialog::ResetData()
 {
-
 }
+
 
 //------------------------------------------------------------------------------
 // void OnTextChange()
@@ -389,7 +386,7 @@ void DragInputsDialog::OnTextChange(wxCommandEvent &event)
 {
    if (((wxTextCtrl*)event.GetEventObject())->IsModified())
    {
-      theOkButton->Enable(true);
+      EnableUpdate(true);
       isTextModified = true;
    }
 }
@@ -404,13 +401,13 @@ void DragInputsDialog::OnRadioButtonChange(wxCommandEvent& event)
    {       
       useFile = false;
       Update();
-      theOkButton->Enable(true);
+      EnableUpdate(true);
    }
    else if ( event.GetEventObject() == fileInputRadioButton )
    {       
       useFile = true;
       Update();
-      theOkButton->Enable(true);
+      EnableUpdate(true);
    }
 }
 
@@ -429,6 +426,7 @@ void DragInputsDialog::OnBrowse(wxCommandEvent &event)
         
       fileNameTextCtrl->SetValue(filename); 
    }
-   theOkButton->Enable(true);
+   
+   EnableUpdate(true);
 }
 
