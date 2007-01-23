@@ -25,8 +25,6 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ParameterSelectDialog, GmatDialog)
-   EVT_BUTTON(ID_BUTTON_OK, ParameterSelectDialog::OnOK)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_COMBOBOX(ID_COMBOBOX, ParameterSelectDialog::OnComboBoxChange)
    EVT_BUTTON(ID_BUTTON, ParameterSelectDialog::OnButtonClick)
    EVT_BUTTON(CREATE_VARIABLE, ParameterSelectDialog::OnCreateVariable)
@@ -128,18 +126,6 @@ void ParameterSelectDialog::SetParamNameArray(const wxArrayString &paramNames)
       MessageInterface::ShowMessage("param=%s\n", mParamNameArray[i].c_str());
       #endif
    }
-}
-
-
-//------------------------------------------------------------------------------
-// virtual void OnOK()
-//------------------------------------------------------------------------------
-void ParameterSelectDialog::OnOK(wxCommandEvent &event)
-{
-   SaveData();
-   
-   if (mCanClose)
-      Close();
 }
 
 
@@ -373,7 +359,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          {
             mVarSelectedListBox->Append(newParam);
             mVarSelectedListBox->SetStringSelection(newParam);
-            theOkButton->Enable();
+            EnableUpdate(true);
          }
                   
          return;
@@ -396,7 +382,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          {
             mVarSelectedListBox->Append(newParam);
             mVarSelectedListBox->SetStringSelection(newParam);
-            theOkButton->Enable();
+            EnableUpdate(true);
          }
          
          //Show next parameter
@@ -421,18 +407,13 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       else
          mVarSelectedListBox->SetSelection(sel-1);
       
-      //if (mVarSelectedListBox->GetCount() > 0)
-      //   theOkButton->Enable();
-      //else
-      //   theOkButton->Disable();
    }
    else if (event.GetEventObject() == mRemoveAllParamButton)
    {
       mVarSelectedListBox->Clear();
-      //theOkButton->Disable();
    }
    
-   theOkButton->Enable();
+   EnableUpdate(true);
 }
 
 

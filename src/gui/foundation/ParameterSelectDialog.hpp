@@ -45,9 +45,7 @@ public:
    void SetParamNameArray(const wxArrayString &paramNames);
    
 protected:
-   // override methods from GmatDialog
-   virtual void OnOK(wxCommandEvent &event);
-
+   
    wxString mParamName;
    wxArrayString mObjectTypeList;
    wxString mObjectType;
