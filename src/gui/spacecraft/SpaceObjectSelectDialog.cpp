@@ -97,7 +97,7 @@ void SpaceObjectSelectDialog::Create()
    for (int i=0; i<soSelCount; i++)
    {
       MessageInterface::ShowMessage
-         ("SpaceObjectSelectDialog::Create() mSoExcList[%d]=%s\n",
+         ("SpaceObjectSelectDialog::Create() mSoSelList[%d]=%s\n",
           i, mSoSelList[i].c_str());
    }
    #endif
@@ -107,7 +107,7 @@ void SpaceObjectSelectDialog::Create()
       tempList = new wxString[soSelCount];
       for (int i=0; i<soSelCount; i++)
       {
-         tempList[i] = mSoExcList[i];
+         tempList[i] = mSoSelList[i];
       }
    }
    
@@ -191,6 +191,10 @@ void SpaceObjectSelectDialog::Create()
 //------------------------------------------------------------------------------
 void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
 {
+   #if DEBUG_SO_DIALOG
+      MessageInterface::ShowMessage
+         ( "SpaceObjectSelectDialog::OnButton() entered\n" );
+   #endif
    if ( event.GetEventObject() == addSpaceObjectButton )  
    {
       //-----------------------------------
@@ -217,7 +221,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
          //   SetSelection(spaceObjAvailableListBox->GetSelection()+1);
       }
       
-      theOkButton->Enable();
+         EnableUpdate(true);
    }
    else if ( event.GetEventObject() == removeSpaceObjectButton )  
    {
@@ -226,19 +230,27 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       //-----------------------------------
       int sel = spaceObjSelectedListBox->GetSelection();
       wxString str = spaceObjSelectedListBox->GetStringSelection();
-      spaceObjSelectedListBox->Delete(sel);
-      spaceObjAvailableListBox->Append(str);
-      spaceObjAvailableListBox->SetStringSelection(str);
-      
-      if (sel-1 < 0)
-         spaceObjSelectedListBox->SetSelection(0);
-      else
-         spaceObjSelectedListBox->SetSelection(sel-1);
-     
-      if (spaceObjSelectedListBox->GetCount() > 0)
-         theOkButton->Enable();
-      else
-         theOkButton->Disable();
+   #if DEBUG_SO_DIALOG
+      MessageInterface::ShowMessage
+         ("SpaceObjectSelectDialog::OnButton() sel #=%d string=%s\n", sel, str.c_str());
+   #endif
+
+      if (sel != -1)
+      {
+	      spaceObjSelectedListBox->Delete(sel);
+	      spaceObjAvailableListBox->Append(str);
+	      spaceObjAvailableListBox->SetStringSelection(str);
+
+	      if (sel-1 < 0)
+	         spaceObjSelectedListBox->SetSelection(0);
+	      else
+	         spaceObjSelectedListBox->SetSelection(sel-1);
+	     
+	      if (spaceObjSelectedListBox->GetCount() > 0)
+	         EnableUpdate(true);
+	      else
+	         EnableUpdate(false);
+      }
    }
    else if ( event.GetEventObject() == clearSpaceObjectButton )  
    {
@@ -249,7 +261,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
          spaceObjAvailableListBox->Append(spaceObjSelectedListBox->GetString(i));
       
       spaceObjSelectedListBox->Clear();
-      theOkButton->Disable();
+      EnableUpdate(true);
    }
 }
 
