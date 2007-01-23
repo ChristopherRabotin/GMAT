@@ -55,6 +55,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    mObject = obj;
    
    canClose = true;
+   mDataChanged = false;
    int borderSize = 2;
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
