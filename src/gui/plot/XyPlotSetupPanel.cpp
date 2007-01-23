@@ -28,6 +28,8 @@
 
 
 //#define DEBUG_XYPLOT_PANEL 1
+//#define DEBUG_XYPLOT_PANEL_LOAD 1
+//#define DEBUG_XYPLOT_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -98,14 +100,21 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    
    Create();
    Show();
-
-    // force saving data
+   
+   // force saving data
    if (mNumXParams == 0 || mNumYParams <= 0)
    {
       EnableUpdate(true);
       mXParamChanged = true;
       mYParamChanged = true;
+      showPlotCheckBox->SetValue(true);
    }
+   
+   #if DEBUG_XYPLOT_PANEL
+   MessageInterface::ShowMessage
+      ("   mNumXParams=%d, mNumYParams=%d, mXParamChanged=%d, mYParamChanged=%d\n",
+       mNumXParams, mNumYParams, mXParamChanged, mYParamChanged);
+   #endif
 }
 
 
@@ -589,7 +598,6 @@ void XyPlotSetupPanel::Create()
    mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    mFlexGridSizer->Add(xSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(xButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   //loj: 8/9/05 Changed from wxALIGN_CENTRE TO wxALIGN_TOP for Layout()
    mFlexGridSizer->Add(mParamBoxSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mFlexGridSizer->Add(yButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    mFlexGridSizer->Add(ySelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -631,9 +639,12 @@ void XyPlotSetupPanel::LoadData()
       // get X parameter
       wxString *xParamNames = new wxString[1];
       xParamNames[0] = mXyPlot->GetStringParameter("IndVar").c_str();
-      
-      //MessageInterface::ShowMessage("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
-      //                              xParamNames[0].c_str());
+
+      #if DEBUG_XYPLOT_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
+          xParamNames[0].c_str());
+      #endif
       
       if (!xParamNames[0].IsSameAs(""))
       {
@@ -656,18 +667,17 @@ void XyPlotSetupPanel::LoadData()
          
          for (int i=0; i<mNumYParams; i++)
          {
-            #if DEBUG_XYPLOT_PANEL
+            #if DEBUG_XYPLOT_PANEL_LOAD
                MessageInterface::ShowMessage
                   ("XyPlotSetupPanel::LoadData() y param = %s\n",
                    yParamList[i].c_str());
             #endif
             yParamNames[i] = yParamList[i].c_str();
-
+            
             // get parameter color
             //mColorMap[yParamList[i]]
             //   = RgbColor(mXyPlot->GetUnsignedIntParameter("Color", yParamList[i]));
-
-            //param = theGuiInterpreter->GetParameter(yParamList[i]);
+            
             param = (Parameter*)theGuiInterpreter->GetObject(yParamList[i]);
             if (param != NULL)
             {
@@ -690,8 +700,9 @@ void XyPlotSetupPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      //MessageInterface::ShowMessage
+      //   ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
@@ -700,7 +711,6 @@ void XyPlotSetupPanel::LoadData()
    
    // show coordinate system or central body
    ShowCoordSystem();
-         
 }
 
 
@@ -709,12 +719,17 @@ void XyPlotSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::SaveData()
 {
-   // save data to core engine
-   canClose = false;
-   theOkButton->Disable();
- 
+   #if DEBUG_XYPLOT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("XyPlotSetupPanel::SaveData() mNumXParams=%d, mNumYParams=%d, "
+       "mXParamChanged=%d, mYParamChanged=%d\n",
+       mNumXParams, mNumYParams, mXParamChanged, mYParamChanged);
+   #endif
+   
+   canClose = true;
+   
    mXyPlot->Activate(showPlotCheckBox->IsChecked());
-
+   
    if (showGridCheckBox->IsChecked())
       mXyPlot->SetStringParameter("Grid", "On");
    else
@@ -724,31 +739,30 @@ void XyPlotSetupPanel::SaveData()
       mXyPlot->SetStringParameter("TargetStatus", "On");
    else
       mXyPlot->SetStringParameter("TargetStatus", "Off");
-
+   
    // set X parameter
    if (mXParamChanged)
    {
       if (mXSelectedListBox->GetCount() == 0 && showPlotCheckBox->IsChecked())
       {
-         MessageInterface::ShowMessage("Warning: X parameter not selected. "
-                                       "The plot will not be activated.");
-                
-//         wxLogMessage(wxT("X parameter not selected. The plot will not be activated."));
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "X parameter not selected. "
+             "The plot will not be activated.");
+         //MessageInterface::ShowMessage("Warning: X parameter not selected. "
+         //                              "The plot will not be activated.");
          mXyPlot->Activate(false);
       }
       else
       {
          std::string selXName = std::string(mXSelectedListBox->GetString(0).c_str());
          mXyPlot->SetStringParameter("IndVar", selXName);
+         mXParamChanged = false;
       }
-
-      mXParamChanged = false;
    }
-
+   
    // set Y parameters
    if (mYParamChanged)
    {
-      mYParamChanged = false;
       mIsColorChanged = true;
       
       int numYParams = mYSelectedListBox->GetCount();
@@ -756,31 +770,37 @@ void XyPlotSetupPanel::SaveData()
       mNumYParams = numYParams;
       if (mNumYParams == 0 && showPlotCheckBox->IsChecked())
       {
-         MessageInterface::ShowMessage("Warning: Y parameter not selected. "
-                                       "The plot will not be activated.");
-//         wxLogMessage(wxT("Y parameters not selected. The plot will not be activated."));
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_,"Y parameters not selected. "
+             "The plot will not be activated.");
+         //MessageInterface::ShowMessage("Warning: Y parameter not selected. "
+         //                              "The plot will not be activated.");
          mXyPlot->Activate(false);
       }
       else if (numYParams > GmatPlot::MAX_XY_CURVE)
       {
-         wxLogMessage("Selected Y parameter count is greater than %d.\n"
-                      "First %d parameters will be plotted", GmatPlot::MAX_XY_CURVE,
-                      GmatPlot::MAX_XY_CURVE);
-
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "Selected Y parameter count is greater than 6.\n"
+             "First 6 parameters will be plotted.");
+         
+         //wxLogMessage("Selected Y parameter count is greater than %d.\n"
+         //             "First %d parameters will be plotted.",
+         //             GmatPlot::MAX_XY_CURVE, GmatPlot::MAX_XY_CURVE);
+         
          mNumYParams = GmatPlot::MAX_XY_CURVE;
       }
       else
       {
          mNumYParams = numYParams;
+         mYParamChanged = false;
       }
       
       if (mNumYParams >= 0) // >=0 because the list needs to be cleared
       {
-         //mXyPlot->SetBooleanParameter("ClearDepVarList", true);
          mXyPlot->TakeAction("Clear");
          for (int i=0; i<mNumYParams; i++)
          {
-            #if DEBUG_XYPLOT_PANEL
+            #if DEBUG_XYPLOT_PANEL_SAVE
                MessageInterface::ShowMessage
                   ("XyPlotSetupPanel::SaveData() DepVar = %s\n",
                    mYSelectedListBox->GetString(i).c_str());
@@ -801,7 +821,6 @@ void XyPlotSetupPanel::SaveData()
       for (int i=0; i<mNumYParams; i++)
       {
          mSelYName = std::string(mYSelectedListBox->GetString(i).c_str());
-         //param = theGuiInterpreter->GetParameter(mSelYName);
          param = (Parameter*)theGuiInterpreter->GetObject(mSelYName);
 
          if (param != NULL)
@@ -811,11 +830,6 @@ void XyPlotSetupPanel::SaveData()
          }
       }
    }
-
-   theApplyButton->Disable();
-   theOkButton->Enable();
-   canClose = true;
-
 }
 
 //---------------------------------
@@ -870,8 +884,6 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
       mFlexGridSizer->Show(mParamOptionBoxSizer, false);
    }
    
-   // 07/14/06 arg: To fix ovelay problem
-   // mFlexGridSizer->Layout();
 }
 
 
@@ -966,7 +978,6 @@ wxString XyPlotSetupPanel::GetParamName()
 Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
 {
    
-   //Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
    Parameter *param = (Parameter*)
       theGuiInterpreter->GetObject(std::string(name.c_str()));
    

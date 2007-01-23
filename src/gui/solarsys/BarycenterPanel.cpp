@@ -183,7 +183,8 @@ void BarycenterPanel::LoadData()
 //------------------------------------------------------------------------------
 void BarycenterPanel::SaveData()
 {
-   canClose = false;
+   canClose = true;
+   
    try
    {
 
@@ -193,12 +194,12 @@ void BarycenterPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_,
                  "At least one body must be selected!");
-         theOkButton->Disable();
+         canClose = false;
          return;
       }
-
+      
       theBarycenter->TakeAction("ClearBodies");
-
+      
       // get Earth pointer as J2000Body
       CelestialBody *j2000body =
          (CelestialBody*)theGuiInterpreter->GetObject("Earth");
@@ -210,8 +211,6 @@ void BarycenterPanel::SaveData()
          bodyName = bodySelectedListBox->GetString(i).c_str();
          theBarycenter->SetStringParameter("BodyNames", bodyName, i);
          
-         //loj: 8/31/05 Set body and J2000Body pointer
-         // set body pointer
          body = (CelestialBody*)theGuiInterpreter->GetObject(bodyName);
          
          // set J2000Body for the body
@@ -225,10 +224,7 @@ void BarycenterPanel::SaveData()
             ("BarycenterPanel::SaveData() body[%d]=%d, name=%s, J2000Body=%d\n",
              i, body, bodyName.c_str(), j2000body);
          #endif
-
-         EnableUpdate(false);
-         //loj: 9/26/06 theOkButton->Enable();
-         canClose = true;
+         
       }
    }
    catch (BaseException &e)
@@ -237,8 +233,8 @@ void BarycenterPanel::SaveData()
          ("BarycenterPanel:SaveData() error occurred!\n%s\n",
             e.GetMessage().c_str());
    }
-
 }
+
 
 //------------------------------------------------------------------------------
 // void OnButton(wxCommandEvent& event)
