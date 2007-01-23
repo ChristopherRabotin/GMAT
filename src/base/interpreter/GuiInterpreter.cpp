@@ -288,6 +288,24 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// bool Moderator::IsParameter(const std::string &str)
+//------------------------------------------------------------------------------
+/**
+ * Checks to see if a given type is a Parameter. If str has '.', it parses
+ * string to get type before checking.
+ *
+ * @param <str> object type string
+ *
+ * @return true if the type is a registered parameter, false if not.
+ */
+//------------------------------------------------------------------------------
+bool GuiInterpreter::IsParameter(const std::string &str)
+{
+   return theModerator->IsParameter(str);
+}
+
+
+//------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name,
 //                            const std::string &ownerName, const std::string &depName)
 //------------------------------------------------------------------------------
