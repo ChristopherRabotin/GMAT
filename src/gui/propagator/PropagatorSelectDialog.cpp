@@ -72,10 +72,8 @@ void PropagatorSelectDialog::Create()
                         wxDefaultPosition, wxDefaultSize, 0);
    
    // wxButton
-   mAddButton = new wxButton(this, ID_BUTTON, wxT("Add"),
+   mAddButton = new wxButton(this, ID_BUTTON, wxT("OK"),
                              wxDefaultPosition, wxDefaultSize, 0);
-   mRemoveButton = new wxButton(this, ID_BUTTON, wxT("Remove"),
-                                wxDefaultPosition, wxDefaultSize, 0);
    mCancelButton = new wxButton(this, ID_BUTTON, wxT("Cancel"),
                                 wxDefaultPosition, wxDefaultSize, 0);
    
@@ -108,7 +106,6 @@ void PropagatorSelectDialog::Create()
    
    // add buttons to sizer
    buttonsBoxSizer->Add(mAddButton, 0, wxALIGN_CENTER|wxALL, bsize);
-   buttonsBoxSizer->Add(mRemoveButton, 0, wxALIGN_CENTER|wxALL, bsize);
    buttonsBoxSizer->Add(mCancelButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    pageBoxSizer->Add(mPropagatorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -138,11 +135,6 @@ void PropagatorSelectDialog::OnButton(wxCommandEvent& event)
          mHasSelectionChanged = true;
          mNewPropName = mPropagatorListBox->GetStringSelection();
       }
-   }
-   else if (event.GetEventObject() == mRemoveButton)  
-   {
-      mHasSelectionChanged = true;
-      mNewPropName = "";
    }
    else if (event.GetEventObject() == mCancelButton)  
    {

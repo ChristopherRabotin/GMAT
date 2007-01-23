@@ -36,7 +36,6 @@ private:
    wxString mNewPropName;
    
    wxButton *mAddButton;
-   wxButton *mRemoveButton;
    wxButton *mCancelButton;
    
    wxListBox *mPropagatorListBox;
