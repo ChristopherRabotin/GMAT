@@ -577,8 +577,8 @@ void PropagatePanel::OnComboBoxChange(wxCommandEvent& event)
       ("PropagatePanel::OnComboBoxChange() entered\n");
    #endif
 
-   // Assume single selection
-   wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
+//   // Assume single selection
+//   wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
     
    if (event.GetEventObject() == mPropModeComboBox)
    {
@@ -653,6 +653,13 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
    Integer row = event.GetRow();
    Integer col = event.GetCol();
 
+   #if DEBUG_PROPAGATE_PANEL
+   MessageInterface::ShowMessage
+      ("PropagatePanel::OnCellRightClick() row = %d, col = %d\n", row, col);
+   MessageInterface::ShowMessage
+      ("PropagatePanel::OnCellRightClick() mTempPropCount=%d\n",mTempPropCount);
+   #endif
+
    // Propagate grid
    if (event.GetEventObject() == propGrid)
    {
@@ -671,24 +678,24 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             {
                wxString newPropName = propDlg.GetPropagatorName();
                
-               if (newPropName == "") // remove propagator
-               {
-                  propGrid->SetCellValue(row, col, "");
-                  mTempProp[row].isChanged = true;
-                  mTempProp[row].propName = "";
-                  if (row+1 < mTempPropCount)
-                     MoveUpPropData();
-                  else
-                     mTempPropCount--;
-               }
-               else // change propagator
-               {
+//               if (newPropName == "") // remove propagator
+//               {
+//                  propGrid->SetCellValue(row, col, "");
+//                  mTempProp[row].isChanged = true;
+//                  mTempProp[row].propName = "";
+//                  if (row+1 < mTempPropCount)
+//                     MoveUpPropData();
+//                  else
+//                     mTempPropCount--;
+//               }
+//               else // change propagator
+//               {
                   propGrid->SetCellValue(row, col, newPropName);
                   mTempProp[row].isChanged = true;
                   mTempProp[row].propName = newPropName;
                   if (mTempPropCount <= row)
                      mTempPropCount = row + 1;
-               }
+//               }
                
                #if DEBUG_PROPAGATE_PANEL
                MessageInterface::ShowMessage
@@ -769,8 +776,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
    {
       #if DEBUG_PROPAGATE_PANEL
       MessageInterface::ShowMessage
-         ("PropagatePanel::OnCellRightClick() row=%d, col=%d, stopCondCnt=%d\n",
-          row,col,mStopCondCount);
+         ("PropagatePanel::OnCellRightClick() stopCondCnt=%d\n",mStopCondCount);
       #endif
 
       if (row <= mStopCondCount)
@@ -778,7 +784,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
          #if DEBUG_PROPAGATE_PANEL
          Integer stopRow = mCurrStopRow;
          MessageInterface::ShowMessage
-            ( "PropagatePanel::OnCellRightClick() stopRow=%d\n", stopRow );
+            ( "PropagatePanel::OnCellRightClick() stopRow = %d\n", stopRow );
          #endif
          
          if (col == 0)
@@ -1017,8 +1023,9 @@ void PropagatePanel::LoadData()
          #endif
          
          // verify space object actually exist
-         if ( theGuiInterpreter->GetObject(soList[j]) ||
-              theGuiInterpreter->GetObject(soList[j]) )
+//         if ( theGuiInterpreter->GetObject(soList[j]) ||
+//              theGuiInterpreter->GetObject(soList[j]) )
+         if ( theGuiInterpreter->GetObject(soList[j]) )
          {
             actualSoCount++;
             mTempProp[i].soNameList.Add(soList[j].c_str());
@@ -1141,17 +1148,17 @@ void PropagatePanel::SaveData()
       {
          if (mTempStopCond[i].isChanged)
          {
-			   if (!wxString(mTempStopCond[i].goalStr.c_str()).ToDouble(&realNum))
-			   {
-			      theParameter = 
-			         theGuiInterpreter->GetParameter(mTempStopCond[i].goalStr.c_str());
-			      if (theParameter == NULL)
-			      {
-			         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-			            mTempStopCond[i].goalStr.c_str(), mTempStopCond[i].varName.c_str());
-			         canClose = false;
-			      }
-			   }
+            if (!wxString(mTempStopCond[i].goalStr.c_str()).ToDouble(&realNum))
+            {
+               theParameter = 
+                  theGuiInterpreter->GetParameter(mTempStopCond[i].goalStr.c_str());
+               if (theParameter == NULL)
+               {
+                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
+                     mTempStopCond[i].goalStr.c_str(), mTempStopCond[i].varName.c_str());
+                  canClose = false;
+               }
+            }
          }
       }
    }
@@ -1177,6 +1184,13 @@ void PropagatePanel::SaveData()
 	      
 	      delete mRemovedStopCondList[i];
 	   }
+	   
+      mRemovedStopCondList.clear();
+   #if DEBUG_PROPAGATE_PANEL
+   MessageInterface::ShowMessage
+      ("PropagatePanel::SaveData() mRemovedStopCondList.size()=%d\n",
+       mRemovedStopCondList.size());
+   #endif
 	   
 	   //-------------------------------------------------------
 	   // Saving propagation mode
