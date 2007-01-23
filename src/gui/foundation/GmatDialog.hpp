@@ -37,10 +37,13 @@ public:
    GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
               GmatBase *obj = NULL);
    
+   virtual void EnableUpdate(bool enable = true);
+   
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
    virtual void OnHelp(wxCommandEvent &event);
-
+   virtual void OnClose(wxCloseEvent &event);
+   
    bool CheckReal(Real &rvalue, const std::string &str,
                   const std::string &field, const std::string &expRange,
                   bool onlyMsg = false);
@@ -63,6 +66,8 @@ protected:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    GmatBase *mObject;
+   bool canClose;
+   bool mDataChanged;
    std::string mMsgFormat;
    
    wxWindow *theParent;
@@ -82,8 +87,6 @@ protected:
    wxButton *theCancelButton;
    //wxButton *theHelpButton;
 
-   bool canClose;
-   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
     

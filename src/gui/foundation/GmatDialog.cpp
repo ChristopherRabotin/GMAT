@@ -16,6 +16,9 @@
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_GMAT_DIALOG_SAVE 1
+//#define DEBUG_GMAT_DIALOG_CLOSE 1
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -24,6 +27,7 @@ BEGIN_EVENT_TABLE(GmatDialog, wxDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON_HELP, GmatDialog::OnHelp)
+   EVT_CLOSE(GmatDialog::OnClose) 
 END_EVENT_TABLE()
 
 //------------------------------
@@ -71,7 +75,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    theBottomSizer = new wxStaticBoxSizer(bottomStaticBox, wxVERTICAL);
    #endif
    
-    // create bottom buttons
+   // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
    
@@ -87,6 +91,99 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    //theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void EnableUpdate(bool enable = true)
+//------------------------------------------------------------------------------
+void GmatDialog::EnableUpdate(bool enable)
+{
+   #if DEBUG_GMAT_DIALOG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatDialog::EnableUpdate() enable=%d\n", enable);
+   #endif
+   
+   if (enable)
+      mDataChanged = true;
+   else
+      mDataChanged = false;
+}
+
+
+//------------------------------------------------------------------------------
+// void OnOK()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data and closes the page
+ */
+//------------------------------------------------------------------------------
+void GmatDialog::OnOK(wxCommandEvent &event)
+{
+   SaveData();
+
+   #if DEBUG_GMAT_DIALOG_SAVE
+   MessageInterface::ShowMessage
+      ("GmatDialog::OnOK() canClose=%d\n", canClose);
+   #endif
+   
+   if (canClose)
+   {
+      mDataChanged = false;
+      Close();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCancel()
+//------------------------------------------------------------------------------
+/**
+ * Close page.
+ */
+//------------------------------------------------------------------------------
+void GmatDialog::OnCancel(wxCommandEvent &event)
+{
+   ResetData();
+   mDataChanged = false;
+   Close();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnHelp()
+//------------------------------------------------------------------------------
+/**
+ * Shows Helps
+ */
+//------------------------------------------------------------------------------
+void GmatDialog::OnHelp(wxCommandEvent &event)
+{
+   // open separate window to show help
+}
+
+
+//------------------------------------------------------------------------------
+// void OnClose(wxCloseEvent &event)
+//------------------------------------------------------------------------------
+void GmatDialog::OnClose(wxCloseEvent &event)
+{
+   #if DEBUG_GMAT_DIALOG_CLOSE
+   MessageInterface::ShowMessage
+      ("GmatDialog::OnClose() mDataChanged=%d\n", mDataChanged);
+   #endif
+   
+   if (mDataChanged)
+   {
+      if ( wxMessageBox(_T("Changes will be lost. \nDo you really want to close?"),
+                        _T("Please confirm"), wxICON_QUESTION | wxYES_NO) != wxYES )
+      {
+         event.Veto();
+         return;
+      }
+   }
+   
+   event.Skip();
 }
 
 
@@ -204,7 +301,7 @@ bool GmatDialog::CheckInteger(Integer &ivalue, const std::string &str,
 // void ShowData()
 //------------------------------------------------------------------------------
 /**
- * Shows the panel.
+ * Shows the dialog.
  */
 //------------------------------------------------------------------------------
 void GmatDialog::ShowData()
@@ -213,22 +310,23 @@ void GmatDialog::ShowData()
     
    theDialogSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 1);
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
-    
+   
    // tells the enclosing window to adjust to the size of the sizer
    SetAutoLayout(TRUE);
    SetSizer(theDialogSizer); //use the sizer for layout
    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
-
+   
    CenterOnScreen(wxBOTH);
    
-   theOkButton->Disable();
+   // We want always enable OK button
+   //theOkButton->Disable();
    //theHelpButton->Disable(); //loj: for future build
-
+   
    if (mObject == NULL)
    {
       mMsgFormat =
-         "The value of \"%s\" for field \"%s\" \" is not an allowed value. \n"
+         "The value of \"%s\" for field \"%s\" is not an allowed value. \n"
          "The allowed values are: [%s].";
    }
    else
@@ -240,47 +338,7 @@ void GmatDialog::ShowData()
    }
    
    LoadData();
-
-}
-
-//------------------------------------------------------------------------------
-// void OnOK()
-//------------------------------------------------------------------------------
-/**
- * Saves the data and closes the page
- */
-//------------------------------------------------------------------------------
-void GmatDialog::OnOK(wxCommandEvent &event)
-{
-   SaveData();
-
-   if (canClose)
-      Close();
-}
-
-//------------------------------------------------------------------------------
-// void OnCancel()
-//------------------------------------------------------------------------------
-/**
- * Close page.
- */
-//------------------------------------------------------------------------------
-void GmatDialog::OnCancel(wxCommandEvent &event)
-{
-   ResetData();
-   Close();
-}
-
-//------------------------------------------------------------------------------
-// void OnHelp()
-//------------------------------------------------------------------------------
-/**
- * Shows Helps
- */
-//------------------------------------------------------------------------------
-void GmatDialog::OnHelp(wxCommandEvent &event)
-{
-   // open separate window to show help
+   
 }
 
 
