@@ -119,6 +119,9 @@ private:
    void OnRun(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);
    
+   void OnCollapse(wxCommandEvent &event);
+   void OnExpand(wxCommandEvent &event);
+   
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    
@@ -221,6 +224,8 @@ private:
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 
       
+      POPUP_COLLAPSE,
+      POPUP_EXPAND,
       POPUP_RUN,
       POPUP_SHOW_SCRIPT,
       

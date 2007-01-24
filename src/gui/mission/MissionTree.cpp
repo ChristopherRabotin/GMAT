@@ -90,6 +90,9 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU_RANGE(POPUP_INSERT_PROPAGATE, POPUP_INSERT_SWITCH_CASE,
                   MissionTree::OnInsertCommand)
    
+   EVT_MENU(POPUP_COLLAPSE, MissionTree::OnCollapse)
+   EVT_MENU(POPUP_EXPAND, MissionTree::OnExpand)
+   
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
    EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
@@ -263,7 +266,9 @@ void MissionTree::UpdateCommand()
       
    }
    
-   Expand(mMissionSeqSubItem);
+   Expand(mMissionSeqSubItem);   
+   ScrollTo(mMissionSeqSubItem);
+
 }
 
 
@@ -1219,6 +1224,9 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    }
    else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
    {
+      menu.Append(POPUP_COLLAPSE, wxT("Collapse"));
+      menu.Append(POPUP_EXPAND, wxT("Expand"));
+      menu.AppendSeparator();
       menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
                   CreatePopupMenu(dataType, false));
       // ag: can't delete because sys. doesn't handle multiple sequences yet
@@ -1810,6 +1818,56 @@ bool MissionTree::CheckClickIn(wxPoint position)
 
    return false;
 }
+
+
+//------------------------------------------------------------------------------
+// void OnCollapse(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * This method collapses MissionTree.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnCollapse(wxCommandEvent &event)
+{
+   // Get selected item
+   GmatTreeItemData *currItem = (GmatTreeItemData *) GetItemData(GetSelection());
+   wxTreeItemId selectId = currItem->GetId();
+   wxTreeItemId currId = currItem->GetId();
+   
+   int numChildren = GetChildrenCount(currId);
+   if (numChildren > 0)
+   {
+      wxTreeItemIdValue cookie;
+      wxTreeItemId childId = GetFirstChild(currId, cookie);
+      
+      while (childId.IsOk())
+      {
+         Collapse(childId);
+         childId = GetNextChild(currId, cookie);
+      }
+   }
+   
+   ScrollTo(selectId);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnExpand(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * This method expands MissionTree.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnExpand(wxCommandEvent &event)
+{
+   // Get selected item
+   GmatTreeItemData *currItem = (GmatTreeItemData *) GetItemData(GetSelection());
+   wxTreeItemId currId = currItem->GetId();
+   
+   ExpandAll();
+   ScrollTo(currId);
+}
+
 
 //------------------------------------------------------------------------------
 // void OnOpen(wxCommandEvent &event)
