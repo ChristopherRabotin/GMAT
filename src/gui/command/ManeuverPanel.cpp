@@ -236,20 +236,31 @@ void ManeuverPanel::LoadData()
 //------------------------------------------------------------------------------
 void ManeuverPanel::SaveData()
 {
-   // save data to core engine
-   Integer id;
-   wxString elemString;
-
-   // save burn
-   wxString burnString = burnCB->GetStringSelection();
-   id = theCommand->GetParameterID("Burn");
-   std::string burn = std::string (burnString.c_str());
-   theCommand->SetStringParameter(id, burn);
-
-    // save spacecraft
-   wxString satString = satCB->GetStringSelection();
-   id = theCommand->GetParameterID("Spacecraft");
-   std::string spacecraft = std::string (satString.c_str());
-   theCommand->SetStringParameter(id, spacecraft);
-
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+	   // save data to core engine
+	   Integer id;
+	   wxString elemString;
+	
+	   // save burn
+	   wxString burnString = burnCB->GetStringSelection();
+	   id = theCommand->GetParameterID("Burn");
+	   std::string burn = std::string (burnString.c_str());
+	   theCommand->SetStringParameter(id, burn);
+	
+	    // save spacecraft
+	   wxString satString = satCB->GetStringSelection();
+	   id = theCommand->GetParameterID("Spacecraft");
+	   std::string spacecraft = std::string (satString.c_str());
+	   theCommand->SetStringParameter(id, spacecraft);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return;
+   }
 }
