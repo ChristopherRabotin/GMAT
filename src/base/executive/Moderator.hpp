@@ -121,7 +121,8 @@ public:
    SpaceObject* CreateSpacecraft(const std::string &type,
                                  const std::string &name);
    SpaceObject* GetSpacecraft(const std::string &name);
-
+   std::string GetSpacecraftNotInFormation();
+   
    // Hardware
    Hardware* CreateHardware(const std::string &type,
                             const std::string &name);

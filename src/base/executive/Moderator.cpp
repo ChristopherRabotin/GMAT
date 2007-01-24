@@ -48,6 +48,7 @@
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"         // for GetCommandSeq()
 #include "StringTokenizer.hpp"
+#include <algorithm>               // for sort(), set_difference()
 #include <ctime>                   // for clock()
 
 //#define DEBUG_INIT 1
@@ -1069,6 +1070,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
    }
 }
 
+
 //------------------------------------------------------------------------------
 // SpaceObject* GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
@@ -1086,6 +1088,63 @@ SpaceObject* Moderator::GetSpacecraft(const std::string &name)
       return NULL;
    else
       return theConfigManager->GetSpacecraft(name);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetSpacecraftNotInFormation()
+//------------------------------------------------------------------------------
+/**
+ * This method finds the first spacecraft name sorted by ascending order not
+ * in any formation.
+ *
+ * @return  The first spacecraft name not in any formation.
+ *          return "" if such spacecraft is not found.
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::GetSpacecraftNotInFormation()
+{
+   StringArray scList = theGuiInterpreter->GetListOfObjects(Gmat::SPACECRAFT);
+   StringArray fmList = theGuiInterpreter->GetListOfObjects(Gmat::FORMATION);
+   int numSc = scList.size(), numFm = fmList.size();
+   
+   if (numSc == 0 && numFm == 0)
+      return "";
+   
+   if (numSc > 0 && numFm == 0)
+      return GetDefaultSpacecraft()->GetName();
+   
+   // formation exists
+   StringArray fmscListAll;
+   
+   //------------------------------------------
+   // Merge spacecrafts in Formation
+   //------------------------------------------
+   for (int i=0; i<numFm; i++)
+   {
+      GmatBase *fm = theGuiInterpreter->GetObject(fmList[i]);
+      StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
+      fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
+   }
+   
+   // sort the lists in order to  set_difference()
+   sort(scList.begin(), scList.end());
+   sort(fmscListAll.begin(), fmscListAll.end());
+   
+   //------------------------------------------
+   // Make list of spacecrafts not in Formation
+   //------------------------------------------
+   StringArray scsNotInForms;
+   
+   // The set_difference() algorithm produces a sequence that contains the
+   // difference between the two ordered sets.
+   set_difference(scList.begin(), scList.end(), fmscListAll.begin(),
+                  fmscListAll.end(), back_inserter(scsNotInForms));
+   
+   if (scsNotInForms.size() > 0)
+      return scsNotInForms[0];
+   else
+      return "";
 }
 
 
@@ -2432,7 +2491,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       ("Moderator::CreateDefaultCommand() entered: type = " +
        type + ", name = " + name + "\n");
    #endif
-      
+   
    GmatCommand *cmd = theFactoryManager->CreateCommand(type, name);
    
    if (cmd == NULL)
@@ -2477,15 +2536,23 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "Propagate")
       {
          cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
-
+         
          StringArray &formList = GetListOfObjects(Gmat::FORMATION);
-      
-         // if formation exist, set first formation to command
-         if (formList.size() > 0)
-            cmd->SetObject(formList[0], Gmat::SPACECRAFT);
-         else
+         
+         if (formList.size() == 0)
+         {
             cmd->SetObject(GetDefaultSpacecraft()->GetName(), Gmat::SPACECRAFT);
-      
+         }
+         else
+         {
+            // Get first spacecraft name not in formation
+            std::string scName = GetSpacecraftNotInFormation();
+            if (scName != "")
+               cmd->SetObject(scName, Gmat::SPACECRAFT);
+            else
+               cmd->SetObject(formList[0], Gmat::SPACECRAFT);
+         }
+         
          cmd->SetRefObject(CreateDefaultStopCondition(), Gmat::STOP_CONDITION, "", 0);
          cmd->SetSolarSystem(theSolarSystemInUse);
       }
@@ -2494,7 +2561,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          // set burn
          id = cmd->GetParameterID("Burn");
          cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName());
-      
+         
          // set spacecraft
          id = cmd->GetParameterID("Spacecraft");
          cmd->SetStringParameter(id, GetDefaultSpacecraft()->GetName());
@@ -2503,7 +2570,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          // set burn
          cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
-
+         
          // set spacecraft
          cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
       }
@@ -4395,10 +4462,14 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 // Spacecraft* GetDefaultSpacecraft()
 //------------------------------------------------------------------------------
+/*
+ * Returns first spacecraft not in the Formation
+ */
+//------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
    StringArray &soConfigList = GetListOfObjects(Gmat::SPACECRAFT);
-  
+   
    if (soConfigList.size() > 0)
    {
       // return 1st Spacecraft
@@ -4411,6 +4482,7 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
       return (Spacecraft*)CreateSpacecraft("Spacecraft", "DefaultSC");
    }
 }
+
 
 //------------------------------------------------------------------------------
 // PropSetup* GetDefaultPropSetup()
