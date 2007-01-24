@@ -86,7 +86,8 @@ ReportPanel::ReportPanel(wxWindow *parent, GmatCommand *cmd)
       mObjectTypeList.Add("ImpulsiveBurn");
       Create();
       Show();
-      theApplyButton->Disable();
+//      theApplyButton->Disable();
+         EnableUpdate(false);
    }
 }
 

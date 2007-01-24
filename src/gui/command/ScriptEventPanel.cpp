@@ -142,7 +142,7 @@ void ScriptEventPanel::LoadData()
    
    wxString scriptText = text.str().c_str();
    mFileContentsTextCtrl->AppendText(scriptText);
-   theApplyButton->Disable();
+   EnableUpdate(false);
 }
 
 
