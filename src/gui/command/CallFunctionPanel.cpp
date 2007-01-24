@@ -32,8 +32,7 @@ BEGIN_EVENT_TABLE(CallFunctionPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
 
    EVT_COMBOBOX(ID_COMBO, CallFunctionPanel::OnComboChange)
-   EVT_GRID_CELL_LEFT_CLICK(CallFunctionPanel::OnCellClick)
-   EVT_GRID_CELL_RIGHT_CLICK(CallFunctionPanel::OnCellClick)
+   EVT_GRID_CELL_RIGHT_CLICK(CallFunctionPanel::OnCellRightClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -55,7 +54,7 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
    {
       Create();
       Show();
-      theApplyButton->Disable();
+      EnableUpdate(false);
    }
 }
 
@@ -360,69 +359,86 @@ void CallFunctionPanel::LoadData()
 //------------------------------------------------------------------------------
 void CallFunctionPanel::SaveData()
 {
-//   MessageInterface::ShowMessage("Saving data...\n");
-   wxString functionName = functionComboBox->GetStringSelection();
-
-   // arg: for now to avoid a crash
-   if (functionName != "")
+   try
    {
-      theCommand->SetStringParameter("FunctionName",
-                     std::string(functionName.c_str()));
+//	   MessageInterface::ShowMessage("Saving data...\n");
+	   wxString functionName = functionComboBox->GetStringSelection();
+	
+	   // arg: for now to avoid a crash
+	   if (functionName != "")
+	   {
+	      theCommand->SetStringParameter("FunctionName",
+	                     std::string(functionName.c_str()));
+	   }
+	
+	   mNumInput = inputStrings.Count();
+	
+	   if (mNumInput >= 0) // >=0 because the list needs to be cleared
+	   {
+	      theCommand->TakeAction("ClearInput");
+	      for (int i=0; i<mNumInput; i++)
+	      {
+	         std::string selInName = std::string(inputStrings[i]);
+	         theCommand->SetStringParameter("AddInput", selInName, i);
+	      }
+	   }
+	
+	   mNumOutput = outputStrings.Count();
+	
+	   if (mNumOutput >= 0) // >=0 because the list needs to be cleared
+	   {
+	      theCommand->TakeAction("ClearOutput");
+	      for (int i=0; i<mNumOutput; i++)
+	      {
+	         std::string selOutName = std::string(outputStrings[i]);
+	         theCommand->SetStringParameter("AddOutput", selOutName, i);
+	      }
+	   }
    }
-
-
-    mNumInput = inputStrings.Count();
-
-    if (mNumInput >= 0) // >=0 because the list needs to be cleared
-    {
-         theCommand->TakeAction("ClearInput");
-         for (int i=0; i<mNumInput; i++)
-         {
-            std::string selInName = std::string(inputStrings[i]);
-            theCommand->SetStringParameter("AddInput", selInName, i);
-         }
-    }
-
-    mNumOutput = outputStrings.Count();
-
-    if (mNumOutput >= 0) // >=0 because the list needs to be cleared
-    {
-         theCommand->TakeAction("ClearOutput");
-         for (int i=0; i<mNumOutput; i++)
-         {
-            std::string selOutName = std::string(outputStrings[i]);
-            theCommand->SetStringParameter("AddOutput", selOutName, i);
-         }
-      }
-
-   // clear out previous parameters
-//   theCommand->ClearObject(Gmat::PARAMETER);
-//
-//   // set input parameters
-//   for (unsigned int i=0; i<inputStrings.Count(); i++)
-//   {
-//      Parameter *parameter = theGuiInterpreter->GetParameter(
-//            std::string(inputStrings[i]));
-//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
-//   }
-//
-//   // set output parameters
-//   for (unsigned int i=0; i<outputStrings.Count(); i++)
-//   {
-//      Parameter *parameter = theGuiInterpreter->GetParameter(
-//            std::string(outputStrings[i]));
-//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
-//   }
-//
+	   // clear out previous parameters
+	//   theCommand->ClearObject(Gmat::PARAMETER);
+	//
+	//   // set input parameters
+	//   for (unsigned int i=0; i<inputStrings.Count(); i++)
+	//   {
+	//      Parameter *parameter = theGuiInterpreter->GetParameter(
+	//            std::string(inputStrings[i]));
+	//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
+	//   }
+	//
+	//   // set output parameters
+	//   for (unsigned int i=0; i<outputStrings.Count(); i++)
+	//   {
+	//      Parameter *parameter = theGuiInterpreter->GetParameter(
+	//            std::string(outputStrings[i]));
+	//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
+	//   }
+	//
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
+      return;
+   }
 }
 
 //------------------------------------------------------------------------------
-// void OnCellClick(wxGridEvent& event)
+// void OnCellRightClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
-void CallFunctionPanel::OnCellClick(wxGridEvent& event)
-{
+void CallFunctionPanel::OnCellRightClick(wxGridEvent& event)
+{    
+   #if DEBUG_CALLFUNCTION_PANEL
+   MessageInterface::ShowMessage
+      ("CallFunctionPanel::OnCellRightClick() entered\n");
+   #endif
+
    unsigned int row = event.GetRow();
    unsigned int col = event.GetCol();
+
+   #if DEBUG_CALLFUNCTION_PANEL
+   MessageInterface::ShowMessage
+      ("CallFunctionPanel::OnCellRightClick row = %d, col = %d\n", row, col);
+   #endif
 
    if (event.GetEventObject() == inputGrid)
    {
@@ -430,6 +446,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
                                      GuiItemManager::SHOW_REPORTABLE,
                                      true, true, true, true, true); 
+      outputGrid->DeselectRow(0);
       paramDlg.SetParamNameArray(inputStrings);
       paramDlg.ShowModal();
       
@@ -451,8 +468,6 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       }
       else     // no selections
          inputGrid->SetCellValue(row, col, "");
-
-      //EnableUpdate(true);
    }
    else if (event.GetEventObject() == outputGrid)
    {
@@ -460,6 +475,7 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
                                      GuiItemManager::SHOW_REPORTABLE,
                                      true, true, false, true);
+      inputGrid->DeselectRow(0);
       paramDlg.SetParamNameArray(outputStrings);
       paramDlg.ShowModal();
       
@@ -481,10 +497,9 @@ void CallFunctionPanel::OnCellClick(wxGridEvent& event)
       }
       else     // no selections
          outputGrid->SetCellValue(row, col, "");
-
-      //EnableUpdate(true);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnComboChange()

@@ -50,7 +50,7 @@ private:
    virtual void SaveData();
 
    void OnComboChange(wxCommandEvent &event);
-   void OnCellClick(wxGridEvent& event);
+   void OnCellRightClick(wxGridEvent &event);
 
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
