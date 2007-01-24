@@ -631,15 +631,6 @@ void PropagatePanel::OnKeyDown(wxKeyEvent& event)
 }
 
 
-//Note: Do not remove this code. It is used in showing stopping condition
-//------------------------------------------------------------------------------
-// void OnCellLeftDoubleClick(wxGridEvent& event)
-//------------------------------------------------------------------------------
-/*
- * On this event stopping condition can be added by clicking View button and
- * Update button to make update to the stopping condition grid.
- */
-//------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)
 //------------------------------------------------------------------------------
@@ -871,6 +862,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
       } // row <= mStopCondCount
    } // event.GetEventObject() == stopCondGrid
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCellLeftDoubleClick(wxGridEvent& event)
