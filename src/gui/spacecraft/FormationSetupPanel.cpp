@@ -59,7 +59,6 @@ FormationSetupPanel::FormationSetupPanel(wxWindow *parent,
    mFormationName = std::string(formationName.c_str());
    Create();
    Show();
-   theApplyButton->Disable();
 }
 
 
@@ -91,9 +90,9 @@ FormationSetupPanel::~FormationSetupPanel()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::Create()
 {
-#ifdef DEBUG_FORMATION
+   #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage("FormationSetupPanel::Create() enters...\n");
-#endif
+   #endif
 
    Integer bsize = 3; // border size
    wxString emptyList[] = {};
@@ -165,9 +164,9 @@ void FormationSetupPanel::Create()
    //------------------------------------------------------
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 
-#ifdef DEBUG_FORMATION
+   #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage("FormationSetupPanel::Create() exits...\n");
-#endif
+   #endif
 
 }
 
@@ -220,11 +219,11 @@ void FormationSetupPanel::SaveData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 {
-#ifdef DEBUG_FORMATION
-   MessageInterface::ShowMessage(
-                   "\nFormationSetupPanel::OnAddSpaceObject() enters...");
-#endif
-
+   #ifdef DEBUG_FORMATION
+      MessageInterface::ShowMessage
+         ("FormationSetupPanel::OnAddSpaceObject() enters...");
+   #endif
+   
    // get string in first list and then search for it
    // in the second list
    wxString str = mSoAvailableListBox->GetStringSelection();
@@ -232,10 +231,10 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
    int found = mSoSelectedListBox->FindString(str);
    
    #ifdef DEBUG_FORMATION
-      MessageInterface::ShowMessage("\nstr = \"%s\", sel = %d, found = %d\n",
-                      str.c_str(),sel,found);
+      MessageInterface::ShowMessage
+         ("str = \"%s\", sel = %d, found = %d\n", str.c_str(),sel,found);
    #endif
-
+      
    // Check no selection then do nothing
    if (sel == -1)
       return;
@@ -244,26 +243,23 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
    if (found == wxNOT_FOUND)
    {
       #ifdef DEBUG_FORMATION
-         MessageInterface::ShowMessage("\nstring is not found...");
+         MessageInterface::ShowMessage("string is not found...");
       #endif
 
       mSoSelectedListBox->Append(str);
-      mSoAvailableListBox->Delete(sel); //loj: 5/25/05 Added
+      mSoAvailableListBox->Delete(sel);
       mSoSelectedListBox->SetStringSelection(str);
       mSoExcList.Add(str);
       
-      if (sel-1 < 0)
-         mSoAvailableListBox->SetSelection(0);
-      else
-         mSoAvailableListBox->SetSelection(sel-1);
+      mSoAvailableListBox->SetSelection(sel);
       
       EnableUpdate(true);
    }
-
-#ifdef DEBUG_FORMATION
-   MessageInterface::ShowMessage(
-                   "\nFormationSetupPanel::OnAddSpaceObject() exits...");
-#endif
+   
+   #ifdef DEBUG_FORMATION
+      MessageInterface::ShowMessage
+         ("FormationSetupPanel::OnAddSpaceObject() exits...");
+   #endif
 }
 
 
@@ -272,10 +268,10 @@ void FormationSetupPanel::OnAddSpaceObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
 {
-#ifdef DEBUG_FORMATION
+   #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage(
                    "\nFormationSetupPanel::OnRemoveSpaceObject() enters...");
-#endif
+   #endif
 
    wxString str = mSoSelectedListBox->GetStringSelection();
    int sel = mSoSelectedListBox->GetSelection();
@@ -301,10 +297,10 @@ void FormationSetupPanel::OnRemoveSpaceObject(wxCommandEvent& event)
    
    EnableUpdate(true);
 
-#ifdef DEBUG_FORMATION
+   #ifdef DEBUG_FORMATION
    MessageInterface::ShowMessage(
                    "\nFormationSetupPanel::OnRemoveSpaceObject() exits...\n");
-#endif
+   #endif
 }
 
 
