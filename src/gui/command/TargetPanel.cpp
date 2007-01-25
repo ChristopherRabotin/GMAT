@@ -41,7 +41,7 @@ TargetPanel::TargetPanel(wxWindow *parent, GmatCommand *cmd)
    {
       Create();
       Show();
-      theApplyButton->Disable();
+      EnableUpdate(false);
    }
    else
    {
@@ -185,7 +185,7 @@ void TargetPanel::SaveData()
 {
    // explicitly disable apply button
    // it is turned on in each of the panels
-   theApplyButton->Disable();
+   EnableUpdate(false);
    
    return;
 }
@@ -195,7 +195,7 @@ void TargetPanel::SaveData()
 //------------------------------------------------------------------------------
 void TargetPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
 
 //------------------------------------------------------------------------------
@@ -203,5 +203,5 @@ void TargetPanel::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void TargetPanel::OnComboSelection(wxCommandEvent& event)
 {
-   theApplyButton->Enable(true);
+   EnableUpdate(true);
 }
