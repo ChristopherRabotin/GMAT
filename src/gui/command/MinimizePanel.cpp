@@ -37,7 +37,8 @@ MinimizePanel::MinimizePanel(wxWindow *parent, GmatCommand *cmd)
    Create();
    Show();
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 MinimizePanel::~MinimizePanel()
@@ -143,7 +144,8 @@ void MinimizePanel::SaveData()
       (mMinimizeCommand->GetParameterID("MinimizedVariableName"),
        std::string(variableName.c_str()));
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 void MinimizePanel::ShowGoalSetup()

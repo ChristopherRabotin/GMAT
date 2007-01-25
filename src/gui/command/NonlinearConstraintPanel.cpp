@@ -33,7 +33,8 @@ NonlinearConstraintPanel::NonlinearConstraintPanel(wxWindow *parent, GmatCommand
    Create();
    Show();
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 NonlinearConstraintPanel::~NonlinearConstraintPanel()
@@ -88,11 +89,11 @@ void NonlinearConstraintPanel::Create()
       wxSize(50,-1), 0);
 
    // Tolerence
-   //wxStaticText *toleranceStaticText =
-   //   new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
-   //                    wxDefaultPosition, wxSize(60, -1), 0);
-   mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(40,-1), 0);
+//   wxStaticText *toleranceStaticText =
+//      new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
+//                       wxDefaultPosition, wxSize(60, -1), 0);
+//   mTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+//                                     wxDefaultPosition, wxSize(40,-1), 0);
    
    wxBoxSizer *panelSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *solverSizer = new wxBoxSizer(wxVERTICAL);
@@ -305,7 +306,8 @@ void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
 //            variableName = newParamName;
          }
          
-         theApplyButton->Enable(true);
+   EnableUpdate(true);
+//         theApplyButton->Enable(true);
       }
    }
    else

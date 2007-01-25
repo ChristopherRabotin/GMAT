@@ -61,7 +61,8 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    Create();
    Show();
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 
@@ -318,7 +319,8 @@ void AchievePanel::SaveData()
 //      (mAchieveCommand->GetParameterID("Tolerance"),
 //       mSolverData.tolerance);
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 
@@ -402,7 +404,8 @@ void AchievePanel::OnButtonClick(wxCommandEvent& event)
             mSolverData.goalValue = newParamName;
          }
          
-         theApplyButton->Enable(true);
+   EnableUpdate(true);
+//         theApplyButton->Enable(true);
       }
    }
    else

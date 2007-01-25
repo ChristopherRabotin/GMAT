@@ -49,7 +49,8 @@ AssignmentPanel::AssignmentPanel( wxWindow *parent, GmatCommand *cmd)
    {
       Create();
       Show();
-      theApplyButton->Disable();
+   EnableUpdate(false);
+//      theApplyButton->Disable();
    }
 }
 

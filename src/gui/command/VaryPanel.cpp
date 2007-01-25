@@ -63,7 +63,8 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
    Create();
    Show();
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -387,7 +388,8 @@ void VaryPanel::SaveData()
           e.GetMessage().c_str());
    }
    
-   theApplyButton->Disable();
+   EnableUpdate(false);
+//   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -474,7 +476,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
          mVarNameTextCtrl->SetValue(newParamName);
          mSolverData.varName = newParamName;
          
-         theApplyButton->Enable(true);
+   EnableUpdate(true);
+//         theApplyButton->Enable(true);
       }
    }
    else
