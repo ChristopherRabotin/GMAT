@@ -56,6 +56,7 @@
 #include "SolverGoalsPanel.hpp"
 #include "SolverVariablesPanel.hpp"
 #include "TargetPanel.hpp"
+#include "OptimizePanel.hpp"
 #include "AchievePanel.hpp"
 #include "VaryPanel.hpp"
 #include "MinimizePanel.hpp"
@@ -1555,51 +1556,53 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
 
    switch (dataType)
    {
-   case GmatTree::PROPAGATE_COMMAND:
+   case GmatTree::PROPAGATE:
       sizer->Add(new PropagatePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::MANEUVER_COMMAND:
+   case GmatTree::MANEUVER:
       sizer->Add(new ManeuverPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::BEGIN_FINITE_BURN_COMMAND:
+   case GmatTree::BEGIN_FINITE_BURN:
       sizer->Add(new BeginFiniteBurnPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::END_FINITE_BURN_COMMAND:
+   case GmatTree::END_FINITE_BURN:
       sizer->Add(new EndFiniteBurnPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::TARGET_COMMAND:
+   case GmatTree::TARGET:
       sizer->Add(new TargetPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::ACHIEVE_COMMAND:
+   case GmatTree::OPTIMIZE:
+      sizer->Add(new OptimizePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::ACHIEVE:
       sizer->Add(new AchievePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::VARY_COMMAND:
+   case GmatTree::VARY:
       sizer->Add(new VaryPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::OPTIMIZE_VARY_COMMAND:
+   case GmatTree::OPTIMIZE_VARY:
       sizer->Add(new VaryPanel(scrolledWin, cmd, true), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::SAVE_COMMAND:
+   case GmatTree::SAVE:
       sizer->Add(new SavePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::REPORT_COMMAND:
+   case GmatTree::REPORT:
       sizer->Add(new ReportPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::TOGGLE_COMMAND:
+   case GmatTree::TOGGLE:
       sizer->Add(new TogglePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::CALL_FUNCTION_COMMAND:
+   case GmatTree::CALL_FUNCTION:
       sizer->Add(new CallFunctionPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::MINIMIZE_COMMAND:
+   case GmatTree::MINIMIZE:
       sizer->Add(new MinimizePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::NON_LINEAR_CONSTRAINT_COMMAND:
+   case GmatTree::NON_LINEAR_CONSTRAINT:
       sizer->Add(new NonlinearConstraintPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::SCRIPT_COMMAND:
+   case GmatTree::SCRIPT_EVENT:
    {
-      //ScriptEventPanel *scriptEventPanel = new ScriptEventPanel(scrolledWin, cmd);
       ScriptEventPanel *scriptEventPanel =
          new ScriptEventPanel(scrolledWin, (MissionTreeItemData*)item);
       sizer->Add(scriptEventPanel, 0, wxGROW|wxALL, 0);
@@ -1607,7 +1610,7 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
       //sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    }
-      //case GmatTree::ASSIGNMENT_COMMAND:
+      //case GmatTree::ASSIGNMENT:
       //sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       //break;
    default:
@@ -1622,7 +1625,7 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
    sizer->SetSizeHints(scrolledWin);
    
    #ifdef __USE_CHILD_BEST_SIZE__
-   if (dataType != GmatTree::SCRIPT_COMMAND)
+   if (dataType != GmatTree::SCRIPT_EVENT)
    {
       wxSize bestSize = newChild->GetBestSize();
       newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
@@ -2696,7 +2699,7 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
       if ((theChild->GetDataType() == GmatTree::SCRIPT_FILE)   ||
          (theChild->GetDataType() == GmatTree::OUTPUT_REPORT)  ||
-         (theChild->GetDataType() == GmatTree::SCRIPT_COMMAND) ||
+         (theChild->GetDataType() == GmatTree::SCRIPT_EVENT) ||
          (theChild->GetDataType() == GmatTree::GMAT_FUNCTION))
       {
          theChild->GetScriptTextCtrl()->SetFont(newFont);
