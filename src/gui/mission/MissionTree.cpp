@@ -44,6 +44,10 @@
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"         // for GetNextCommand()
 
+// Should we sort the command list?
+#define __SORT_COMMAND_LIST__
+
+// Should we enable multiple mission sequence?
 //#define__ENABLE_MULTIPLE_SEQUENCE__
 
 //#define DEBUG_MISSION_TREE_SHOW_CMD 1
@@ -85,10 +89,12 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_ADD_MISSION_SEQ, MissionTree::OnAddMissionSeq)
    
-   EVT_MENU_RANGE(POPUP_ADD_PROPAGATE, POPUP_ADD_SWITCH_CASE,
-                  MissionTree::OnAddCommand)
-   EVT_MENU_RANGE(POPUP_INSERT_PROPAGATE, POPUP_INSERT_SWITCH_CASE,
-                  MissionTree::OnInsertCommand)
+   EVT_MENU_RANGE(POPUP_APPEND_PROPAGATE, POPUP_APPEND_SWITCH,
+                  MissionTree::OnAppend)
+   EVT_MENU_RANGE(POPUP_INSERT_BEFORE_PROPAGATE, POPUP_INSERT_BEFORE_SWITCH,
+                  MissionTree::OnInsertBefore)
+   EVT_MENU_RANGE(POPUP_INSERT_AFTER_PROPAGATE, POPUP_INSERT_AFTER_SWITCH,
+                  MissionTree::OnInsertAfter)
    
    EVT_MENU(POPUP_COLLAPSE, MissionTree::OnCollapse)
    EVT_MENU(POPUP_EXPAND, MissionTree::OnExpand)
@@ -145,6 +151,11 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mCommandList.Add("Stop");
    mCommandList.Add("GMAT");
    mCommandList.Add("ScriptEvent");
+   
+   // Should we sort the command list?
+   #ifdef __SORT_COMMAND_LIST__
+   mCommandList.Sort();
+   #endif
    
    SetParameter(BOXCOUNT, 0);
    SetParameter(DRAWOUTLINE, 0);
@@ -434,17 +445,30 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
 // wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 //                            wxTreeItemId prevId, GmatTree::MissionIconType icon,
 //                            GmatTree::ItemType type, const wxString &cmdName,
-//                            GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount)
+//                            GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount,
+//                            bool insertBefore)
 //------------------------------------------------------------------------------
 /**
- * Inserts tree item.
+ * Inserts command to mission tree.
+ *
+ * @param  parentId  Parent item id
+ * @param  currId  Currently selected item id
+ * @param  prevId  Previous item id
+ * @param  icon  Icon to be used
+ * @param  type  Item type, such as GmatTree::PROPAGATE
+ * @param  cmdName  Command name to be inserted
+ * @param  prevCmd  Previous command pointer
+ * @param  cmd  Command pointer to be inserted
+ * @param  cmdCount  Command counter to be appended to command name
+ * @param  insertBefore  true if inserting before, false if inserterting after
  */
 //------------------------------------------------------------------------------
 wxTreeItemId
 MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                            wxTreeItemId prevId, GmatTree::MissionIconType icon,
                            GmatTree::ItemType type, const wxString &cmdName,
-                           GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount)
+                           GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount,
+                           bool insertBefore)
 {
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId); 
    GmatCommand *currCmd = currItem->GetCommand();
@@ -454,7 +478,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    wxTreeItemId node;
    GmatCommand *endCmd = NULL;
    GmatCommand *elseCmd = NULL;
-   GmatTree::ItemType endType = GmatTree::END_TARGET_COMMAND;
+   GmatTree::ItemType endType = GmatTree::END_TARGET;
    bool cmdAdded = false;
    
    wxString prevTypeName = prevCmd->GetTypeName().c_str();
@@ -503,7 +527,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       if (cmdTypeName == "Target")
       {
          endCmd = theGuiInterpreter->CreateDefaultCommand("EndTarget");
-         endType = GmatTree::END_TARGET_COMMAND;
+         endType = GmatTree::END_TARGET;
       }
       else if (cmdTypeName == "For")
       {
@@ -523,17 +547,17 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       else if (cmdTypeName == "BeginScript")
       {
          endCmd = theGuiInterpreter->CreateDefaultCommand("EndScript");
-         endType = GmatTree::END_TARGET_COMMAND;
+         endType = GmatTree::END_TARGET;
       }
       else if (cmdTypeName == "Optimize")
       {
          endCmd = theGuiInterpreter->CreateDefaultCommand("EndOptimize");
-         endType = GmatTree::END_OPTIMIZE_COMMAND;
+         endType = GmatTree::END_OPTIMIZE;
       }
 //       else if (cmdTypeName == "BeginFiniteBurn")
 //       {
 //          endCmd = theGuiInterpreter->CreateDefaultCommand("EndFiniteBurn", "", cmd);
-//          endType = GmatTree::END_FINITE_BURN_COMMAND;
+//          endType = GmatTree::END_FINITE_BURN;
 //       }
       
       // create Else (temp code)
@@ -634,8 +658,16 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       {
          wxString currTypeName = currCmd->GetTypeName().c_str();
          
-         node = InsertItem(parentId, GetPrevSibling(currId), nodeName, icon, -1,
-                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
+         if (insertBefore)
+         {
+            node = InsertItem(parentId, GetPrevSibling(currId), nodeName, icon, -1,
+                              new MissionTreeItemData(nodeName, type, nodeName, cmd));
+         }
+         else
+         {
+            node = InsertItem(parentId, currId, nodeName, icon, -1,
+                              new MissionTreeItemData(nodeName, type, nodeName, cmd));
+         }
       }
       else
       {
@@ -667,9 +699,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                InsertItem(node, 0, elseName, icon, -1,
                           new MissionTreeItemData(elseName, GmatTree::ELSE_CONTROL,
                                                   elseName, elseCmd));
-            
-//            SetItemImage(elseNode, GmatTree::MISSION_ICON_OPENFOLDER,
-//                         wxTreeItemIcon_Expanded);
+
+            //SetItemImage(elseNode, GmatTree::MISSION_ICON_OPENFOLDER,
+            //   wxTreeItemIcon_Expanded);
             
             wxString endName = "End" + cmdTypeName;
             endName.Printf("%s%d", endName.c_str(), *cmdCount);
@@ -702,9 +734,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 
 
 //------------------------------------------------------------------------------
-// void AppendCommand(const wxString &cmdName)
+// void Append(const wxString &cmdName)
 //------------------------------------------------------------------------------
-void MissionTree::AppendCommand(const wxString &cmdName)
+void MissionTree::Append(const wxString &cmdName)
 {
    #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("Before Append: " + cmdName);
@@ -735,7 +767,8 @@ void MissionTree::AppendCommand(const wxString &cmdName)
       ("     after FindChild(Else) itemId=<%s>, lastId=<%s>, ",
        GetItemText(itemId).c_str(), GetItemText(lastId).c_str());
    #endif
-   
+
+   // Note:
    // Previous command is the 2nd last visible command from the current node
    // For example:
    // Target
@@ -799,7 +832,7 @@ void MissionTree::AppendCommand(const wxString &cmdName)
       wxTreeItemId node =
          InsertCommand(itemId, itemId, prevId, GetIconId(cmdName),
                        GetCommandId(cmdName), cmdName, prevCmd, cmd,
-                       GetCommandCounter(cmdName));
+                       GetCommandCounter(cmdName), true);
       
       //SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
       
@@ -814,12 +847,18 @@ void MissionTree::AppendCommand(const wxString &cmdName)
 
 
 //------------------------------------------------------------------------------
-// void InsertCommand(const wxString &cmdName)
+// void InsertBefore(const wxString &cmdName)
 //------------------------------------------------------------------------------
-void MissionTree::InsertCommand(const wxString &cmdName)
+/*
+ * Inserts a command before current selection.
+ *
+ * @param  cmdName  Command name to be inserted
+ */
+//------------------------------------------------------------------------------
+void MissionTree::InsertBefore(const wxString &cmdName)
 {
    #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("Before Insert: " + cmdName);
+   ShowCommands("Before InsertBefore(): " + cmdName);
    #endif
    
    wxTreeItemId itemId = GetSelection();
@@ -846,7 +885,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    {
       MessageInterface::ShowMessage
          ("\n***************  Warning ***************"
-          "\nMissionTree::InsertCommand() has empty prevItem "
+          "\nMissionTree::InsertBefore() has empty prevItem "
           "so it can't insert before this."
           "\n****************************************");
       return;
@@ -865,7 +904,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    //if (prevCmd == NULL)
    //{
    //   MessageInterface::ShowMessage
-   //      ("*** WARNING *** InsertCommand(%s) previous command is NULL. "
+   //      ("*** WARNING *** InsertBefore(%s) previous command is NULL. "
    //       "Cannot insert the command.\n", cmdName.c_str());
    //   return;
    //}
@@ -880,7 +919,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("InsertCommand(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+      ("InsertBefore(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
        currCmd->GetTypeName().c_str(), currCmd);
    #endif
    
@@ -893,7 +932,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
       
       ShowCommands("Before Insert: " + cmdName);
       MessageInterface::ShowMessage
-         ("InsertCommand(%s) currCmd=%s, addr=%p\n",
+         ("InsertBefore(%s) currCmd=%s, addr=%p\n",
           cmdName.c_str(), currCmd->GetTypeName().c_str(), currCmd);
       
       return;
@@ -901,7 +940,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("InsertCommand(%s) prevCmd=%s, addr=%p\n",
+      ("InsertBefore(%s) prevCmd=%s, addr=%p\n",
        cmdName.c_str(), prevCmd->GetTypeName().c_str(), prevCmd);
    #endif
    
@@ -939,7 +978,7 @@ void MissionTree::InsertCommand(const wxString &cmdName)
          wxTreeItemId node =
             InsertCommand(parentId, itemId, prevId, GetIconId(cmdName),
                           GetCommandId(cmdName), cmdName, realPrevCmd, cmd,
-                          GetCommandCounter(cmdName));
+                          GetCommandCounter(cmdName), true);
          
          //SetItemImage(node, GmatTree::MISSION_ICON_OPENFOLDER, 
          //   wxTreeItemIcon_Expanded);
@@ -949,7 +988,112 @@ void MissionTree::InsertCommand(const wxString &cmdName)
    }
    
    #if DEBUG_MISSION_TREE_SHOW_CMD
-   ShowCommands("After Insert: " + cmdName);
+   ShowCommands("After InsertBefore(): " + cmdName);
+   #endif
+   
+} // InsertBefore()
+
+
+//------------------------------------------------------------------------------
+// void InsertAfter(const wxString &cmdName)
+//------------------------------------------------------------------------------
+/*
+ * Inserts a command after current selection.
+ *
+ * @param  cmdName  Command name to be inserted
+ */
+//------------------------------------------------------------------------------
+void MissionTree::InsertAfter(const wxString &cmdName)
+{
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before InsertAfter(): " + cmdName);
+   #endif
+   
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId);
+   
+#ifdef __WXMAC__
+   wxTreeItemId prevId = GetPrevSibling(itemId);
+
+   // Check if no previous item then get parent item
+   if (!prevId.IsOk())
+   {
+      if (parentId.IsOk())
+         prevId = parentId;
+   }
+#else
+   wxTreeItemId prevId = GetPrevVisible(itemId);
+#endif
+   
+   MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
+   
+   GmatCommand *currCmd = currItem->GetCommand();
+   
+   if (currCmd == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "*** Internal Error Occurred ***\n"
+          "Current item has empty command. Cannot insert the command.\n");
+      return;
+   }
+   
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("InsertAfter(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+       currCmd->GetTypeName().c_str(), currCmd);
+   #endif
+   
+   
+   GmatCommand *prevCmd = currCmd;
+   
+   GmatCommand *cmd = NULL;
+   if (currCmd != NULL)
+   {
+      if (cmdName == "IfElse")
+      {
+         cmd = theGuiInterpreter->CreateDefaultCommand("If");
+      }
+      else
+      {
+         cmd = theGuiInterpreter->
+            CreateDefaultCommand(std::string(cmdName.c_str()));
+      }
+      
+      // Need to set previous command
+      cmd->ForceSetPrevious(currCmd);
+      
+      // Set parentId, itemId, prevId properly to pass to InsertCommand()
+      if (currCmd->IsOfType("BranchCommand"))
+      {
+         parentId = itemId;
+      }
+      else if (currCmd->IsOfType("BranchEnd"))
+      {
+         prevId = itemId;
+         itemId = parentId;
+         parentId = GetItemParent(itemId);
+      }
+      else
+      {
+         prevId = itemId;
+      }
+      
+      
+      if (cmd != NULL)
+      {
+         UpdateGuiManager(cmdName);
+         
+         wxTreeItemId node =
+            InsertCommand(parentId, itemId, prevId, GetIconId(cmdName),
+                          GetCommandId(cmdName), cmdName, prevCmd, cmd,
+                          GetCommandCounter(cmdName), false);
+         
+         Expand(node);
+      }
+   }
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("After InsertAfter(): " + cmdName);
    #endif
 }
 
@@ -957,13 +1101,24 @@ void MissionTree::InsertCommand(const wxString &cmdName)
 //------------------------------------------------------------------------------
 // void UpdateGuiManager(const wxString &cmdName)
 //------------------------------------------------------------------------------
+/*
+ * Calls GuiItemManager to update corresponding object list to dynamically
+ * show new objects.
+ *
+ * @param  cmdName  Command name
+ */
+//------------------------------------------------------------------------------
 void MissionTree::UpdateGuiManager(const wxString &cmdName)
 {
    if (cmdName == "Maneuver" || cmdName == "BeginFiniteBurn" ||
        cmdName == "Vary")
       theGuiManager->UpdateBurn();
    
-   else if (cmdName == "Report")
+   if (cmdName == "Target" || cmdName == "Optimize" || cmdName == "Vary" ||
+       cmdName == "Achieve" || cmdName == "Minimize")
+      theGuiManager->UpdateSolver();
+   
+   if (cmdName == "Report")
       theGuiManager->UpdateSubscriber();
 }
 
@@ -1147,13 +1302,16 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
    MessageInterface::ShowMessage("MissionTree::OnItemActivated() item=%s parent=%s\n",
                                  item->GetDesc().c_str(), parent->GetDesc().c_str());
    #endif
-   
-   if ((item->GetDataType() == GmatTree::VARY_COMMAND) &&
-      (parent->GetDataType() == GmatTree::OPTIMIZE_COMMAND))
-      item->SetDataType(GmatTree::OPTIMIZE_VARY_COMMAND);
+
+   // Since VaryPanel is used for both Target and Optimize,
+   // set proper id indicating Optimize Vary
+   if ((item->GetDataType() == GmatTree::VARY) &&
+       (parent->GetDataType() == GmatTree::OPTIMIZE))
+      item->SetDataType(GmatTree::OPTIMIZE_VARY);
    
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnDoubleClick(wxMouseEvent &event)
@@ -1179,9 +1337,11 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
                                  item->GetDesc().c_str(), parent->GetDesc().c_str());
    #endif
    
-   if ((item->GetDataType() == GmatTree::VARY_COMMAND) &&
-      (parent->GetDataType() == GmatTree::OPTIMIZE_COMMAND))
-      item->SetDataType(GmatTree::OPTIMIZE_VARY_COMMAND);
+   // Since VaryPanel is used for both Target and Optimize,
+   // set proper id indicating Optimize Vary
+   if ((item->GetDataType() == GmatTree::VARY) &&
+       (parent->GetDataType() == GmatTree::OPTIMIZE))
+      item->SetDataType(GmatTree::OPTIMIZE_VARY);
    
    // Show panel here. because OnItemActivated() always collapse the node.
    GmatAppData::GetMainFrame()->CreateChild(item);
@@ -1227,10 +1387,13 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_COLLAPSE, wxT("Collapse"));
       menu.Append(POPUP_EXPAND, wxT("Expand"));
       menu.AppendSeparator();
-      menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
-                  CreatePopupMenu(dataType, false));
-      // ag: can't delete because sys. doesn't handle multiple sequences yet
-      // menu.Append(POPUP_DELETE, wxT("Delete"));
+      menu.Append(POPUP_APPEND, wxT("Append"), CreatePopupMenu(dataType, APPEND));
+      
+      // If multiple sequence is enabled
+      #ifdef __ENABLE_MULTIPLE_SEQUENCE__
+      menu.Append(POPUP_DELETE, wxT("Delete"));
+      #endif
+      
       menu.Append(POPUP_RENAME, wxT("Rename"));
       menu.Enable(POPUP_RENAME, FALSE);
       menu.AppendSeparator();
@@ -1244,76 +1407,83 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_CLOSE, wxT("Close"));
       menu.AppendSeparator();
       
-      if (dataType == GmatTree::TARGET_COMMAND)
+      if (dataType == GmatTree::TARGET)
       {
-         menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
-                     CreateTargetPopupMenu(dataType, false));
-         if (parentDataType == GmatTree::TARGET_COMMAND)
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreateTargetPopupMenu(dataType, true));
-         else
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreatePopupMenu(dataType, true));
-         
-         menu.AppendSeparator();
-         menu.Append(POPUP_DELETE, wxT("Delete"));
-         menu.Append(POPUP_RENAME, wxT("Rename"));
-         menu.Enable(POPUP_RENAME, FALSE);
+         menu.Append(POPUP_APPEND, wxT("Append"),
+                     CreateTargetPopupMenu(dataType, APPEND));         
+         menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                     CreatePopupMenu(dataType, INSERT_BEFORE));         
+         menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                     CreateTargetPopupMenu(dataType, INSERT_AFTER));
       }
-      else if (dataType == GmatTree::OPTIMIZE_COMMAND)
+      else if (dataType == GmatTree::OPTIMIZE)
       {
-         menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
-                     CreateOptimizePopupMenu(dataType, false));
-         if (parentDataType == GmatTree::TARGET_COMMAND)
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreateOptimizePopupMenu(dataType, true));
-         else
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreatePopupMenu(dataType, true));
-         
-         menu.AppendSeparator();
-         menu.Append(POPUP_DELETE, wxT("Delete"));
-         menu.Append(POPUP_RENAME, wxT("Rename"));
-         menu.Enable(POPUP_RENAME, FALSE);
-      } 
+         menu.Append(POPUP_APPEND, wxT("Append"),
+                     CreateOptimizePopupMenu(dataType, APPEND));         
+         menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                     CreatePopupMenu(dataType, INSERT_BEFORE));         
+         menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                     CreateOptimizePopupMenu(dataType, INSERT_AFTER));         
+      }
+      else if (dataType == GmatTree::END_TARGET)
+      {
+         menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                     CreateTargetPopupMenu(dataType, INSERT_BEFORE));
+         menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                     CreatePopupMenu(dataType, INSERT_AFTER));
+      }
+      else if (dataType == GmatTree::END_OPTIMIZE)
+      {
+         menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                     CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
+         menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                     CreatePopupMenu(dataType, INSERT_AFTER));
+      }
       else 
       {
-         if (parentDataType == GmatTree::TARGET_COMMAND)
+         if (parentDataType == GmatTree::TARGET)
          {
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreateTargetPopupMenu(dataType, true));
+            menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                        CreateTargetPopupMenu(dataType, INSERT_BEFORE));
+            menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                        CreateTargetPopupMenu(dataType, INSERT_AFTER));
          }
-         else if (parentDataType == GmatTree::OPTIMIZE_COMMAND)
+         else if (parentDataType == GmatTree::OPTIMIZE)
          {
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreateOptimizePopupMenu(dataType, true));
+            menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                        CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
+            menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                        CreateOptimizePopupMenu(dataType, INSERT_AFTER));
          }
          else
          {
-            menu.Append(POPUP_INSERT_COMMAND, wxT("Insert Before"),
-                        CreatePopupMenu(dataType, true));
+            menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                        CreatePopupMenu(dataType, INSERT_BEFORE));
+            menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                        CreatePopupMenu(dataType, INSERT_AFTER));
          }
-         
-         // Append is allowed for the control logic
-         if ((dataType == GmatTree::IF_CONTROL) ||
-             (dataType == GmatTree::ELSE_CONTROL) ||
-             (dataType == GmatTree::FOR_CONTROL) ||
-             (dataType == GmatTree::WHILE_CONTROL))
-         {
-            menu.Append(POPUP_ADD_COMMAND, wxT("Append"),
-                        CreatePopupMenu(dataType, false));
-         }
-         
-         // Rename applies to all
+      }
+      
+      // Append is allowed for the control logic
+      if ((dataType == GmatTree::IF_CONTROL) ||
+          (dataType == GmatTree::ELSE_CONTROL) ||
+          (dataType == GmatTree::FOR_CONTROL) ||
+          (dataType == GmatTree::WHILE_CONTROL))
+      {
+         menu.Append(POPUP_APPEND, wxT("Append"),
+                     CreatePopupMenu(dataType, APPEND));
+      }
+      
+      // Delete and Rename applies to all, except End branch
+      if (dataType < GmatTree::END_TARGET)
+      {
          menu.AppendSeparator();
          menu.Append(POPUP_RENAME, wxT("Rename"));
-         
-         // Delete and Rename applies to all, except End branch
-         if (dataType < GmatTree::END_TARGET_COMMAND)
-            menu.Append(POPUP_DELETE, wxT("Delete"));
-         
-         menu.Enable(POPUP_RENAME, FALSE);
+         menu.Append(POPUP_DELETE, wxT("Delete"));
       }
+      
+      menu.Enable(POPUP_RENAME, FALSE);
+      
    }
    
    PopupMenu(&menu, pt);
@@ -1343,86 +1513,86 @@ void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddCommand(wxCommandEvent &event)
+// void OnAppend(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void MissionTree::OnAddCommand(wxCommandEvent &event)
+void MissionTree::OnAppend(wxCommandEvent &event)
 {
    switch (event.GetId())
    {
-   case POPUP_ADD_PROPAGATE:
-      AppendCommand("Propagate");
+   case POPUP_APPEND_PROPAGATE:
+      Append("Propagate");
       break;
-   case POPUP_ADD_MANEUVER:
-      AppendCommand("Maneuver");
+   case POPUP_APPEND_MANEUVER:
+      Append("Maneuver");
       break;
-   case POPUP_ADD_BEGIN_FINITE_BURN:
-      AppendCommand("BeginFiniteBurn");
+   case POPUP_APPEND_BEGIN_FINITE_BURN:
+      Append("BeginFiniteBurn");
       break;
-   case POPUP_ADD_END_FINITE_BURN:
-      AppendCommand("EndFiniteBurn");
+   case POPUP_APPEND_END_FINITE_BURN:
+      Append("EndFiniteBurn");
       break;
-   case POPUP_ADD_TARGET:
-      AppendCommand("Target");
+   case POPUP_APPEND_TARGET:
+      Append("Target");
       break;
-   case POPUP_ADD_OPTIMIZE:
-      AppendCommand("Optimize");
+   case POPUP_APPEND_OPTIMIZE:
+      Append("Optimize");
       break;
-   case POPUP_ADD_VARY:
-      AppendCommand("Vary");
+   case POPUP_APPEND_VARY:
+      Append("Vary");
       break;
-   case POPUP_ADD_ACHIEVE:
-      AppendCommand("Achieve");
+   case POPUP_APPEND_ACHIEVE:
+      Append("Achieve");
       break;
-   case POPUP_ADD_MINIMIZE:
-      AppendCommand("Minimize");
+   case POPUP_APPEND_MINIMIZE:
+      Append("Minimize");
       break;
-   case POPUP_ADD_NON_LINEAR_CONSTRAINT:
-      AppendCommand("NonlinearConstraint");
+   case POPUP_APPEND_NON_LINEAR_CONSTRAINT:
+      Append("NonlinearConstraint");
       break;
-   case POPUP_ADD_FUNCTION:
-      AppendCommand("CallFunction");
+   case POPUP_APPEND_FUNCTION:
+      Append("CallFunction");
       break;
-   case POPUP_ADD_ASSIGNMENT:
-      AppendCommand("GMAT");
+   case POPUP_APPEND_ASSIGNMENT:
+      Append("GMAT");
       break;
-   case POPUP_ADD_REPORT:
-      AppendCommand("Report");
+   case POPUP_APPEND_REPORT:
+      Append("Report");
       break;
-   case POPUP_ADD_TOGGLE:
-      AppendCommand("Toggle");
+   case POPUP_APPEND_TOGGLE:
+      Append("Toggle");
       break;
-   case POPUP_ADD_SAVE:
-      AppendCommand("Save");
+   case POPUP_APPEND_SAVE:
+      Append("Save");
       break;
-   case POPUP_ADD_STOP:
-      AppendCommand("Stop");
+   case POPUP_APPEND_STOP:
+      Append("Stop");
       break;
-   case POPUP_ADD_SCRIPT_EVENT:
-      AppendCommand("BeginScript");
+   case POPUP_APPEND_SCRIPT_EVENT:
+      Append("BeginScript");
       break;
-   case POPUP_ADD_IF_STATEMENT:
-      AppendCommand("If");
+   case POPUP_APPEND_IF:
+      Append("If");
       break;
-   case POPUP_ADD_IF_ELSE_STATEMENT:
-      AppendCommand("IfElse");
+   case POPUP_APPEND_IF_ELSE:
+      Append("IfElse");
       break;
-   case POPUP_ADD_ELSE_STATEMENT:
-      AppendCommand("Else");
+   case POPUP_APPEND_ELSE:
+      Append("Else");
       break;
-   case POPUP_ADD_ELSE_IF_STATEMENT:
-      //AppendCommand("ElseIf");
+   case POPUP_APPEND_ELSE_IF:
+      //Append("ElseIf");
       break;
-   case POPUP_ADD_FOR_LOOP:
-      AppendCommand("For");
+   case POPUP_APPEND_FOR:
+      Append("For");
       break;
-   case POPUP_ADD_WHILE_LOOP:
-      AppendCommand("While");
+   case POPUP_APPEND_WHILE:
+      Append("While");
       break;
-   case POPUP_ADD_D0_WHILE:
-      //AppendCommand("Do");
+   case POPUP_APPEND_D0_WHILE:
+      //Append("Do");
       break;
-   case POPUP_ADD_SWITCH_CASE:
-      //AppendCommand("Switch");
+   case POPUP_APPEND_SWITCH:
+      //Append("Switch");
       break;
    default:
       break;
@@ -1431,86 +1601,174 @@ void MissionTree::OnAddCommand(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnInsertCommand(wxCommandEvent &event)
+// void OnInsertBefore(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void MissionTree::OnInsertCommand(wxCommandEvent &event)
+void MissionTree::OnInsertBefore(wxCommandEvent &event)
 {
    switch (event.GetId())
    {
-   case POPUP_INSERT_PROPAGATE:
-      InsertCommand("Propagate");
+   case POPUP_INSERT_BEFORE_PROPAGATE:
+      InsertBefore("Propagate");
       break;
-   case POPUP_INSERT_MANEUVER:
-      InsertCommand("Maneuver");
+   case POPUP_INSERT_BEFORE_MANEUVER:
+      InsertBefore("Maneuver");
       break;
-   case POPUP_INSERT_BEGIN_FINITE_BURN:
-      InsertCommand("BeginFiniteBurn");
+   case POPUP_INSERT_BEFORE_BEGIN_FINITE_BURN:
+      InsertBefore("BeginFiniteBurn");
       break;
-   case POPUP_INSERT_END_FINITE_BURN:
-      InsertCommand("EndFiniteBurn");
+   case POPUP_INSERT_BEFORE_END_FINITE_BURN:
+      InsertBefore("EndFiniteBurn");
       break;
-   case POPUP_INSERT_TARGET:
-      InsertCommand("Target");
+   case POPUP_INSERT_BEFORE_TARGET:
+      InsertBefore("Target");
       break;
-   case POPUP_INSERT_OPTIMIZE:
-      InsertCommand("Optimize");
+   case POPUP_INSERT_BEFORE_OPTIMIZE:
+      InsertBefore("Optimize");
       break;
-   case POPUP_INSERT_VARY:
-      InsertCommand("Vary");
+   case POPUP_INSERT_BEFORE_VARY:
+      InsertBefore("Vary");
       break;
-   case POPUP_INSERT_ACHIEVE:
-      InsertCommand("Achieve");
+   case POPUP_INSERT_BEFORE_ACHIEVE:
+      InsertBefore("Achieve");
       break;
-   case POPUP_INSERT_MINIMIZE:
-      InsertCommand("Minimize");
+   case POPUP_INSERT_BEFORE_MINIMIZE:
+      InsertBefore("Minimize");
       break;
-   case POPUP_INSERT_NON_LINEAR_CONSTRAINT:
-      InsertCommand("NonlinearConstraint");
+   case POPUP_INSERT_BEFORE_NON_LINEAR_CONSTRAINT:
+      InsertBefore("NonlinearConstraint");
       break;
-   case POPUP_INSERT_FUNCTION:
-      InsertCommand("CallFunction");
+   case POPUP_INSERT_BEFORE_FUNCTION:
+      InsertBefore("CallFunction");
       break;
-   case POPUP_INSERT_ASSIGNMENT:
-      InsertCommand("GMAT");
+   case POPUP_INSERT_BEFORE_ASSIGNMENT:
+      InsertBefore("GMAT");
       break;
-   case POPUP_INSERT_REPORT:
-      InsertCommand("Report");
+   case POPUP_INSERT_BEFORE_REPORT:
+      InsertBefore("Report");
       break;
-   case POPUP_INSERT_TOGGLE:
-      InsertCommand("Toggle");
+   case POPUP_INSERT_BEFORE_TOGGLE:
+      InsertBefore("Toggle");
       break;
-   case POPUP_INSERT_SAVE:
-      InsertCommand("Save");
+   case POPUP_INSERT_BEFORE_SAVE:
+      InsertBefore("Save");
       break;
-   case POPUP_INSERT_STOP:
-      InsertCommand("Stop");
+   case POPUP_INSERT_BEFORE_STOP:
+      InsertBefore("Stop");
       break;
-   case POPUP_INSERT_SCRIPT_EVENT:
-      InsertCommand("BeginScript");
+   case POPUP_INSERT_BEFORE_SCRIPT_EVENT:
+      InsertBefore("BeginScript");
       break;
-   case POPUP_INSERT_IF_STATEMENT:
-      InsertCommand("If");
+   case POPUP_INSERT_BEFORE_IF:
+      InsertBefore("If");
       break;
-   case POPUP_INSERT_IF_ELSE_STATEMENT:
-      InsertCommand("IfElse");
+   case POPUP_INSERT_BEFORE_IF_ELSE:
+      InsertBefore("IfElse");
       break;
-   case POPUP_INSERT_ELSE_STATEMENT:
-      InsertCommand("Else");
+   case POPUP_INSERT_BEFORE_ELSE:
+      InsertBefore("Else");
       break;
-   case POPUP_INSERT_ELSE_IF_STATEMENT:
-      //InsertCommand("ElseIf");
+   case POPUP_INSERT_BEFORE_ELSE_IF:
+      //InsertBefore("ElseIf");
       break;
-   case POPUP_INSERT_FOR_LOOP:
-      InsertCommand("For");
+   case POPUP_INSERT_BEFORE_FOR:
+      InsertBefore("For");
       break;
-   case POPUP_INSERT_WHILE_LOOP:
-      InsertCommand("While");
+   case POPUP_INSERT_BEFORE_WHILE:
+      InsertBefore("While");
       break;
-   case POPUP_INSERT_D0_WHILE:
-      //InsertCommand("Do");
+   case POPUP_INSERT_BEFORE_D0_WHILE:
+      //InsertBefore("Do");
       break;
-   case POPUP_INSERT_SWITCH_CASE:
-      //InsertCommand("Switch");
+   case POPUP_INSERT_BEFORE_SWITCH:
+      //InsertBefore("Switch");
+      break;
+   default:
+      break;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnInsertAfter(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void MissionTree::OnInsertAfter(wxCommandEvent &event)
+{
+   switch (event.GetId())
+   {
+   case POPUP_INSERT_AFTER_PROPAGATE:
+      InsertAfter("Propagate");
+      break;
+   case POPUP_INSERT_AFTER_MANEUVER:
+      InsertAfter("Maneuver");
+      break;
+   case POPUP_INSERT_AFTER_BEGIN_FINITE_BURN:
+      InsertAfter("BeginFiniteBurn");
+      break;
+   case POPUP_INSERT_AFTER_END_FINITE_BURN:
+      InsertAfter("EndFiniteBurn");
+      break;
+   case POPUP_INSERT_AFTER_TARGET:
+      InsertAfter("Target");
+      break;
+   case POPUP_INSERT_AFTER_OPTIMIZE:
+      InsertAfter("Optimize");
+      break;
+   case POPUP_INSERT_AFTER_VARY:
+      InsertAfter("Vary");
+      break;
+   case POPUP_INSERT_AFTER_ACHIEVE:
+      InsertAfter("Achieve");
+      break;
+   case POPUP_INSERT_AFTER_MINIMIZE:
+      InsertAfter("Minimize");
+      break;
+   case POPUP_INSERT_AFTER_NON_LINEAR_CONSTRAINT:
+      InsertAfter("NonlinearConstraint");
+      break;
+   case POPUP_INSERT_AFTER_FUNCTION:
+      InsertAfter("CallFunction");
+      break;
+   case POPUP_INSERT_AFTER_ASSIGNMENT:
+      InsertAfter("GMAT");
+      break;
+   case POPUP_INSERT_AFTER_REPORT:
+      InsertAfter("Report");
+      break;
+   case POPUP_INSERT_AFTER_TOGGLE:
+      InsertAfter("Toggle");
+      break;
+   case POPUP_INSERT_AFTER_SAVE:
+      InsertAfter("Save");
+      break;
+   case POPUP_INSERT_AFTER_STOP:
+      InsertAfter("Stop");
+      break;
+   case POPUP_INSERT_AFTER_SCRIPT_EVENT:
+      InsertAfter("BeginScript");
+      break;
+   case POPUP_INSERT_AFTER_IF:
+      InsertAfter("If");
+      break;
+   case POPUP_INSERT_AFTER_IF_ELSE:
+      InsertAfter("IfElse");
+      break;
+   case POPUP_INSERT_AFTER_ELSE:
+      InsertAfter("Else");
+      break;
+   case POPUP_INSERT_AFTER_ELSE_IF:
+      //InsertAfter("ElseIf");
+      break;
+   case POPUP_INSERT_AFTER_FOR:
+      InsertAfter("For");
+      break;
+   case POPUP_INSERT_AFTER_WHILE:
+      InsertAfter("While");
+      break;
+   case POPUP_INSERT_AFTER_D0_WHILE:
+      //InsertAfter("Do");
+      break;
+   case POPUP_INSERT_AFTER_SWITCH:
+      //InsertAfter("Switch");
       break;
    default:
       break;
@@ -1523,103 +1781,136 @@ void MissionTree::OnInsertCommand(wxCommandEvent &event)
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// wxMenu* CreatePopupMenu(int type, bool insert)
+// wxMenu* CreatePopupMenu(int type, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::CreatePopupMenu(int type, bool insert)
+/*
+ * Creates popup menu. It will create proper menu id depends on the input
+ * action.
+ *
+ * @param  type  Command type id
+ * @param  action  One of APPEND, INSERT_BEFORE, INSERT_AFTER
+ */
+//------------------------------------------------------------------------------
+wxMenu* MissionTree::CreatePopupMenu(int type, ActionType action)
 {
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage
-      ("MissionTree::CreatePopupMenu() type=%d, insert=%d\n", type, insert);
+      ("MissionTree::CreatePopupMenu() type=%d, insert=%d\n", type, action);
    #endif
    
    unsigned int i;
    wxMenu *menu = new wxMenu;
-
+   
    for (i=0; i<mCommandList.GetCount(); i++)
-      menu->Append(GetMenuId(mCommandList[i], insert), mCommandList[i]);
+      menu->Append(GetMenuId(mCommandList[i], action), mCommandList[i]);
    
    menu->Append(POPUP_CONTROL_LOGIC, "Control Logic",
-                CreateControlLogicPopupMenu(type, insert));
+                CreateControlLogicPopupMenu(type, action));
    
    return menu;
 }
 
 
 //------------------------------------------------------------------------------
-// wxMenu* CreateTargetPopupMenu(int type, bool insert)
+// wxMenu* CreateTargetPopupMenu(int type, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::CreateTargetPopupMenu(int type, bool insert)
+wxMenu* MissionTree::CreateTargetPopupMenu(int type, ActionType action)
 {
    wxMenu *menu;
    
-   menu = CreatePopupMenu(type, insert);
-   menu = AppendTargetPopupMenu(menu, insert);
-
+   menu = CreatePopupMenu(type, action);
+   menu = AppendTargetPopupMenu(menu, action);
+   
    return menu;
 }
 
+
 //------------------------------------------------------------------------------
-// wxMenu* CreateOptimizePopupMenu(int type, bool insert)
+// wxMenu* CreateOptimizePopupMenu(int type, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::CreateOptimizePopupMenu(int type, bool insert)
+wxMenu* MissionTree::CreateOptimizePopupMenu(int type, ActionType action)
 {
    wxMenu *menu;
    
-   menu = CreatePopupMenu(type, insert);
-   menu = AppendOptimizePopupMenu(menu, insert);
+   menu = CreatePopupMenu(type, action);
+   menu = AppendOptimizePopupMenu(menu, action);
 
    return menu;
 }
 
+
 //------------------------------------------------------------------------------
-// wxMenu* AppendTargetPopupMenu(wxMenu *menu, bool insert)
+// wxMenu* AppendTargetPopupMenu(wxMenu *menu, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::AppendTargetPopupMenu(wxMenu *menu, bool insert)
+wxMenu* MissionTree::AppendTargetPopupMenu(wxMenu *menu, ActionType action)
 {
-   if (insert)
+   switch (action)
    {
-      menu->Append(POPUP_INSERT_VARY, wxT("Vary"));
-      menu->Append(POPUP_INSERT_ACHIEVE, wxT("Achieve"));
+   case APPEND:
+      menu->Append(POPUP_APPEND_VARY, wxT("Vary"));
+      menu->Append(POPUP_APPEND_ACHIEVE, wxT("Achieve"));
+      break;
+      
+   case INSERT_BEFORE:
+      menu->Append(POPUP_INSERT_BEFORE_VARY, wxT("Vary"));
+      menu->Append(POPUP_INSERT_BEFORE_ACHIEVE, wxT("Achieve"));
+      break;
+      
+   case INSERT_AFTER:
+      menu->Append(POPUP_INSERT_AFTER_VARY, wxT("Vary"));
+      menu->Append(POPUP_INSERT_AFTER_ACHIEVE, wxT("Achieve"));
+      break;
+      
+   default:
+      break;
    }
-   else
-   {
-      menu->Append(POPUP_ADD_VARY, wxT("Vary"));
-      menu->Append(POPUP_ADD_ACHIEVE, wxT("Achieve"));
-   }
-
+   
    return menu;
 }
 
+
 //------------------------------------------------------------------------------
-// wxMenu* AppendOptimizePopupMenu(wxMenu *menu, bool insert)
+// wxMenu* AppendOptimizePopupMenu(wxMenu *menu, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::AppendOptimizePopupMenu(wxMenu *menu, bool insert)
+wxMenu* MissionTree::AppendOptimizePopupMenu(wxMenu *menu, ActionType action)
 {
-   if (insert)
+   switch (action)
    {
-      menu->Append(POPUP_INSERT_VARY, wxT("Vary"));
-      menu->Append(POPUP_INSERT_MINIMIZE, wxT("Minimize"));
-      menu->Append(POPUP_INSERT_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
+   case APPEND:
+      menu->Append(POPUP_APPEND_VARY, wxT("Vary"));
+      menu->Append(POPUP_APPEND_MINIMIZE, wxT("Minimize"));
+      menu->Append(POPUP_APPEND_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
+      break;
+      
+   case INSERT_BEFORE:
+      menu->Append(POPUP_INSERT_BEFORE_VARY, wxT("Vary"));
+      menu->Append(POPUP_INSERT_BEFORE_MINIMIZE, wxT("Minimize"));
+      menu->Append(POPUP_INSERT_BEFORE_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
+      break;
+      
+   case INSERT_AFTER:
+      menu->Append(POPUP_INSERT_AFTER_VARY, wxT("Vary"));
+      menu->Append(POPUP_INSERT_AFTER_MINIMIZE, wxT("Minimize"));
+      menu->Append(POPUP_INSERT_AFTER_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
+      break;
+      
+   default:
+      break;
    }
-   else
-   {
-      menu->Append(POPUP_ADD_VARY, wxT("Vary"));
-      menu->Append(POPUP_ADD_MINIMIZE, wxT("Minimize"));
-      menu->Append(POPUP_ADD_NON_LINEAR_CONSTRAINT, wxT("NonlinearConstraint"));
-   }
-
+   
    return menu;
 }
 
+
 //------------------------------------------------------------------------------
-// wxMenu* CreateControlLogicPopupMenu(int type, bool insert)
+// wxMenu* CreateControlLogicPopupMenu(int type, ActionType action)
 //------------------------------------------------------------------------------
-wxMenu* MissionTree::CreateControlLogicPopupMenu(int type, bool insert)
+wxMenu* MissionTree::CreateControlLogicPopupMenu(int type, ActionType action)
 {
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage
-      ("MissionTree::CreateControlLogicMenu() type=%d, insert=%d\n",
-       type, insert);
+      ("MissionTree::CreateControlLogicMenu() type=%d, action=%d\n",
+       type, action);
    #endif
    
    wxMenu *menu = new wxMenu;
@@ -1633,34 +1924,49 @@ wxMenu* MissionTree::CreateControlLogicPopupMenu(int type, bool insert)
       
       if (type == GmatTree::END_IF_CONTROL)
          parentId = GetItemParent(itemId);
-
+      
       // show only one Else
       if (FindChild(parentId, "Else").IsOk())
          addElse = false;
    }
 
-   
-   if (insert)
+   switch (action)
    {
-      menu->Append(POPUP_INSERT_IF_STATEMENT, wxT("If"));
-      menu->Append(POPUP_INSERT_IF_ELSE_STATEMENT, wxT("If-Else"));
+   case APPEND:
+      menu->Append(POPUP_APPEND_IF, wxT("If"));
+      menu->Append(POPUP_APPEND_IF_ELSE, wxT("If-Else"));
       
       if (addElse)
-         menu->Append(POPUP_INSERT_ELSE_STATEMENT, wxT("Else"));
+         menu->Append(POPUP_APPEND_ELSE, wxT("Else"));
       
-      menu->Append(POPUP_INSERT_FOR_LOOP, wxT("For"));
-      menu->Append(POPUP_INSERT_WHILE_LOOP, wxT("While")); 
-   }
-   else
-   {
-      menu->Append(POPUP_ADD_IF_STATEMENT, wxT("If"));
-      menu->Append(POPUP_ADD_IF_ELSE_STATEMENT, wxT("If-Else"));
+      menu->Append(POPUP_APPEND_FOR, wxT("For"));
+      menu->Append(POPUP_APPEND_WHILE, wxT("While")); 
+      break;
+      
+   case INSERT_BEFORE:
+      menu->Append(POPUP_INSERT_BEFORE_IF, wxT("If"));
+      menu->Append(POPUP_INSERT_BEFORE_IF_ELSE, wxT("If-Else"));
       
       if (addElse)
-         menu->Append(POPUP_ADD_ELSE_STATEMENT, wxT("Else"));
+         menu->Append(POPUP_INSERT_BEFORE_ELSE, wxT("Else"));
       
-      menu->Append(POPUP_ADD_FOR_LOOP, wxT("For"));
-      menu->Append(POPUP_ADD_WHILE_LOOP, wxT("While")); 
+      menu->Append(POPUP_INSERT_BEFORE_FOR, wxT("For"));
+      menu->Append(POPUP_INSERT_BEFORE_WHILE, wxT("While"));
+      break;
+      
+   case INSERT_AFTER:
+      menu->Append(POPUP_INSERT_AFTER_IF, wxT("If"));
+      menu->Append(POPUP_INSERT_AFTER_IF_ELSE, wxT("If-Else"));
+      
+      if (addElse)
+         menu->Append(POPUP_INSERT_AFTER_ELSE, wxT("Else"));
+      
+      menu->Append(POPUP_INSERT_AFTER_FOR, wxT("For"));
+      menu->Append(POPUP_INSERT_AFTER_WHILE, wxT("While")); 
+      break;
+      
+   default:
+      break;
    }
    
    return menu;
@@ -1937,9 +2243,9 @@ void MissionTree::OnClose(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// int GetMenuId(const wxString &cmd, bool insert)
+// int GetMenuId(const wxString &cmd, ActionType action)
 //------------------------------------------------------------------------------
-int MissionTree::GetMenuId(const wxString &cmd, bool insert)
+int MissionTree::GetMenuId(const wxString &cmd, ActionType action)
 {
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage("MissionTree::GetMenuId() cmd=%s, insert=%d\n",
@@ -1950,72 +2256,104 @@ int MissionTree::GetMenuId(const wxString &cmd, bool insert)
    
    for (unsigned int i=0; i<mCommandList.Count(); i++)
    {
-      if (insert)
+      if (action == APPEND)
       {
          if (cmd == "Propagate")
-            return POPUP_INSERT_PROPAGATE;
+            return POPUP_APPEND_PROPAGATE;
          else if (cmd == "Maneuver")
-            return POPUP_INSERT_MANEUVER;
+            return POPUP_APPEND_MANEUVER;
          else if (cmd == "BeginFiniteBurn")
-            return POPUP_INSERT_BEGIN_FINITE_BURN;
+            return POPUP_APPEND_BEGIN_FINITE_BURN;
          else if (cmd == "EndFiniteBurn")
-            return POPUP_INSERT_END_FINITE_BURN;
+            return POPUP_APPEND_END_FINITE_BURN;
          else if (cmd == "Target")
-            return POPUP_INSERT_TARGET;
+            return POPUP_APPEND_TARGET;
          else if (cmd == "Optimize")
-            return POPUP_INSERT_OPTIMIZE;
+            return POPUP_APPEND_OPTIMIZE;
          else if (cmd == "CallFunction")
-            return POPUP_INSERT_FUNCTION;
+            return POPUP_APPEND_FUNCTION;
          else if (cmd == "GMAT")
-            return POPUP_INSERT_ASSIGNMENT;
+            return POPUP_APPEND_ASSIGNMENT;
          else if (cmd == "Report")
-            return POPUP_INSERT_REPORT;
+            return POPUP_APPEND_REPORT;
          else if (cmd == "Toggle")
-            return POPUP_INSERT_TOGGLE;
+            return POPUP_APPEND_TOGGLE;
          else if (cmd == "Save")
-            return POPUP_INSERT_SAVE;
+            return POPUP_APPEND_SAVE;
          else if (cmd == "Stop")
-            return POPUP_INSERT_STOP;
+            return POPUP_APPEND_STOP;
          else if (cmd == "ScriptEvent")
-            return POPUP_INSERT_SCRIPT_EVENT;
+            return POPUP_APPEND_SCRIPT_EVENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
       }
-      else
+      else if (action == INSERT_BEFORE)
       {
          if (cmd == "Propagate")
-            return POPUP_ADD_PROPAGATE;
+            return POPUP_INSERT_BEFORE_PROPAGATE;
          else if (cmd == "Maneuver")
-            return POPUP_ADD_MANEUVER;
+            return POPUP_INSERT_BEFORE_MANEUVER;
          else if (cmd == "BeginFiniteBurn")
-            return POPUP_ADD_BEGIN_FINITE_BURN;
+            return POPUP_INSERT_BEFORE_BEGIN_FINITE_BURN;
          else if (cmd == "EndFiniteBurn")
-            return POPUP_ADD_END_FINITE_BURN;
+            return POPUP_INSERT_BEFORE_END_FINITE_BURN;
          else if (cmd == "Target")
-            return POPUP_ADD_TARGET;
+            return POPUP_INSERT_BEFORE_TARGET;
          else if (cmd == "Optimize")
-            return POPUP_ADD_OPTIMIZE;
+            return POPUP_INSERT_BEFORE_OPTIMIZE;
          else if (cmd == "CallFunction")
-            return POPUP_ADD_FUNCTION;
+            return POPUP_INSERT_BEFORE_FUNCTION;
          else if (cmd == "GMAT")
-            return POPUP_ADD_ASSIGNMENT;
+            return POPUP_INSERT_BEFORE_ASSIGNMENT;
          else if (cmd == "Report")
-            return POPUP_ADD_REPORT;
+            return POPUP_INSERT_BEFORE_REPORT;
          else if (cmd == "Toggle")
-            return POPUP_ADD_TOGGLE;
+            return POPUP_INSERT_BEFORE_TOGGLE;
          else if (cmd == "Save")
-            return POPUP_ADD_SAVE;
+            return POPUP_INSERT_BEFORE_SAVE;
          else if (cmd == "Stop")
-            return POPUP_ADD_STOP;
+            return POPUP_INSERT_BEFORE_STOP;
          else if (cmd == "ScriptEvent")
-            return POPUP_ADD_SCRIPT_EVENT;
+            return POPUP_INSERT_BEFORE_SCRIPT_EVENT;
+         else
+            MessageInterface::ShowMessage
+               ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
+      }
+      else if (action == INSERT_AFTER)
+      {
+         if (cmd == "Propagate")
+            return POPUP_INSERT_AFTER_PROPAGATE;
+         else if (cmd == "Maneuver")
+            return POPUP_INSERT_AFTER_MANEUVER;
+         else if (cmd == "BeginFiniteBurn")
+            return POPUP_INSERT_AFTER_BEGIN_FINITE_BURN;
+         else if (cmd == "EndFiniteBurn")
+            return POPUP_INSERT_AFTER_END_FINITE_BURN;
+         else if (cmd == "Target")
+            return POPUP_INSERT_AFTER_TARGET;
+         else if (cmd == "Optimize")
+            return POPUP_INSERT_AFTER_OPTIMIZE;
+         else if (cmd == "CallFunction")
+            return POPUP_INSERT_AFTER_FUNCTION;
+         else if (cmd == "GMAT")
+            return POPUP_INSERT_AFTER_ASSIGNMENT;
+         else if (cmd == "Report")
+            return POPUP_INSERT_AFTER_REPORT;
+         else if (cmd == "Toggle")
+            return POPUP_INSERT_AFTER_TOGGLE;
+         else if (cmd == "Save")
+            return POPUP_INSERT_AFTER_SAVE;
+         else if (cmd == "Stop")
+            return POPUP_INSERT_AFTER_STOP;
+         else if (cmd == "ScriptEvent")
+            return POPUP_INSERT_AFTER_SCRIPT_EVENT;
          else
             MessageInterface::ShowMessage
                ("MissionTree::GetMenuId() Unknown command:%s\n", cmd.c_str());
       }
    }
-
+   
    return id;
 }
 
@@ -2090,35 +2428,35 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
 GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
 {
    if (cmd == "Propagate")
-      return GmatTree::PROPAGATE_COMMAND;
+      return GmatTree::PROPAGATE;
    if (cmd == "Maneuver")
-      return GmatTree::MANEUVER_COMMAND;
+      return GmatTree::MANEUVER;
    if (cmd == "BeginFiniteBurn")
-      return GmatTree::BEGIN_FINITE_BURN_COMMAND;
+      return GmatTree::BEGIN_FINITE_BURN;
    if (cmd == "EndFiniteBurn")
-      return GmatTree::END_FINITE_BURN_COMMAND;
+      return GmatTree::END_FINITE_BURN;
    if (cmd == "Target")
-      return GmatTree::TARGET_COMMAND;
+      return GmatTree::TARGET;
    if (cmd == "EndTarget")
-      return GmatTree::END_TARGET_COMMAND;
+      return GmatTree::END_TARGET;
    if (cmd == "Optimize")
-      return GmatTree::OPTIMIZE_COMMAND;
+      return GmatTree::OPTIMIZE;
    if (cmd == "EndOptimize")
-      return GmatTree::END_OPTIMIZE_COMMAND;
+      return GmatTree::END_OPTIMIZE;
    if (cmd == "Achieve")
-      return GmatTree::ACHIEVE_COMMAND;
+      return GmatTree::ACHIEVE;
    if (cmd == "Minimize")
-      return GmatTree::MINIMIZE_COMMAND;
+      return GmatTree::MINIMIZE;
    if (cmd == "NonlinearConstraint")
-      return GmatTree::NON_LINEAR_CONSTRAINT_COMMAND;
+      return GmatTree::NON_LINEAR_CONSTRAINT;
    if (cmd == "Vary")
-      return GmatTree::VARY_COMMAND;
+      return GmatTree::VARY;
    if (cmd == "Save")
-      return GmatTree::SAVE_COMMAND;
+      return GmatTree::SAVE;
    if (cmd == "Toggle")
-      return GmatTree::TOGGLE_COMMAND;
+      return GmatTree::TOGGLE;
    if (cmd == "Report")
-      return GmatTree::REPORT_COMMAND;
+      return GmatTree::REPORT;
    if (cmd == "For")
       return GmatTree::FOR_CONTROL;
    if (cmd == "EndFor")
@@ -2136,11 +2474,11 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
    if (cmd == "EndWhile")
       return GmatTree::END_WHILE_CONTROL;
    if (cmd == "CallFunction")
-      return GmatTree::CALL_FUNCTION_COMMAND;
+      return GmatTree::CALL_FUNCTION;
    if (cmd == "Stop")
-      return GmatTree::STOP_COMMAND;
+      return GmatTree::STOP;
    
-   return GmatTree::SCRIPT_COMMAND;
+   return GmatTree::SCRIPT_EVENT;
 }
 
 

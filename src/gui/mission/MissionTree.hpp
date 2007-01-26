@@ -40,6 +40,11 @@ protected:
    
 private:
 
+   enum ActionType
+   {
+      APPEND, INSERT_BEFORE, INSERT_AFTER
+   };
+   
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    
@@ -93,10 +98,12 @@ private:
    wxTreeItemId InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                               wxTreeItemId prevId, GmatTree::MissionIconType icon,
                               GmatTree::ItemType type, const wxString &cmdName,
-                              GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount);
+                              GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount,
+                              bool insertBefore);
    
-   void AppendCommand(const wxString &cmdName);
-   void InsertCommand(const wxString &cmdName);
+   void Append(const wxString &cmdName);
+   void InsertBefore(const wxString &cmdName);
+   void InsertAfter(const wxString &cmdName);
    void UpdateGuiManager(const wxString &cmdName);
    
    void AddDefaultMission();
@@ -112,8 +119,9 @@ private:
    
    void OnAddMissionSeq(wxCommandEvent &event);
 
-   void OnAddCommand(wxCommandEvent &event);
-   void OnInsertCommand(wxCommandEvent &event);
+   void OnAppend(wxCommandEvent &event);
+   void OnInsertBefore(wxCommandEvent &event);
+   void OnInsertAfter(wxCommandEvent &event);
       
    void OnDelete(wxCommandEvent &event);
    void OnRun(wxCommandEvent &event);
@@ -125,14 +133,14 @@ private:
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
    
-   wxMenu* CreatePopupMenu(int type, bool insert);
-   wxMenu* CreateTargetPopupMenu(int type, bool insert);
-   wxMenu* CreateOptimizePopupMenu(int type, bool insert);
-   wxMenu* AppendTargetPopupMenu(wxMenu *menu, bool insert);
-   wxMenu* AppendOptimizePopupMenu(wxMenu *menu, bool insert);
-   wxMenu* CreateControlLogicPopupMenu(int type, bool insert);
+   wxMenu* CreatePopupMenu(int type, ActionType action);
+   wxMenu* CreateTargetPopupMenu(int type, ActionType action);
+   wxMenu* CreateOptimizePopupMenu(int type, ActionType action);
+   wxMenu* AppendTargetPopupMenu(wxMenu *menu, ActionType action);
+   wxMenu* AppendOptimizePopupMenu(wxMenu *menu, ActionType action);
+   wxMenu* CreateControlLogicPopupMenu(int type, ActionType action);
    
-   int GetMenuId(const wxString &cmd, bool insert);
+   int GetMenuId(const wxString &cmd, ActionType action);
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    int* GetCommandCounter(const wxString &cmd);
@@ -159,73 +167,104 @@ private:
       POPUP_CONTROL_LOGIC,
       
       POPUP_ADD_MISSION_SEQ,
-      POPUP_ADD_COMMAND,
       
-      //----- begin of MENU_EVT_RANGE of OnAddCommand()
-      POPUP_ADD_PROPAGATE,
-      POPUP_ADD_MANEUVER,
-      POPUP_ADD_BEGIN_FINITE_BURN,
-      POPUP_ADD_END_FINITE_BURN,
-      POPUP_ADD_TARGET,
-      POPUP_ADD_OPTIMIZE,
-      POPUP_ADD_VARY,
-      POPUP_ADD_ACHIEVE,
-      POPUP_ADD_MINIMIZE,
-      POPUP_ADD_NON_LINEAR_CONSTRAINT,
-      POPUP_ADD_REPORT,
-      POPUP_ADD_FUNCTION,
-      POPUP_ADD_ASSIGNMENT,
-      POPUP_ADD_TOGGLE,
-      POPUP_ADD_SAVE,
-      POPUP_ADD_STOP,
-      POPUP_ADD_SCRIPT_EVENT,
+      POPUP_COLLAPSE,
+      POPUP_EXPAND,
       
-      POPUP_ADD_IF_STATEMENT,
-      POPUP_ADD_IF_ELSE_STATEMENT,
-      POPUP_ADD_ELSE_STATEMENT,
-      POPUP_ADD_ELSE_IF_STATEMENT,
-      POPUP_ADD_FOR_LOOP,
-      POPUP_ADD_WHILE_LOOP,
-      POPUP_ADD_D0_WHILE,
-      POPUP_ADD_SWITCH_CASE,
+      POPUP_APPEND,
+      POPUP_INSERT_BEFORE,
+      POPUP_INSERT_AFTER,
+      
+      //----- begin of MENU_EVT_RANGE of OnAppend()
+      POPUP_APPEND_PROPAGATE,
+      POPUP_APPEND_MANEUVER,
+      POPUP_APPEND_BEGIN_FINITE_BURN,
+      POPUP_APPEND_END_FINITE_BURN,
+      POPUP_APPEND_TARGET,
+      POPUP_APPEND_OPTIMIZE,
+      POPUP_APPEND_VARY,
+      POPUP_APPEND_ACHIEVE,
+      POPUP_APPEND_MINIMIZE,
+      POPUP_APPEND_NON_LINEAR_CONSTRAINT,
+      POPUP_APPEND_REPORT,
+      POPUP_APPEND_FUNCTION,
+      POPUP_APPEND_ASSIGNMENT,
+      POPUP_APPEND_TOGGLE,
+      POPUP_APPEND_SAVE,
+      POPUP_APPEND_STOP,
+      POPUP_APPEND_SCRIPT_EVENT,
+      
+      POPUP_APPEND_IF,
+      POPUP_APPEND_IF_ELSE,
+      POPUP_APPEND_ELSE,
+      POPUP_APPEND_ELSE_IF,
+      POPUP_APPEND_FOR,
+      POPUP_APPEND_WHILE,
+      POPUP_APPEND_D0_WHILE,
+      POPUP_APPEND_SWITCH,
       //----- end of MENU_EVT_RANGE
       
-      POPUP_INSERT_COMMAND,
+      //----- begin of MENU_EVT_RANGE of OnInsertBefore()
+      POPUP_INSERT_BEFORE_PROPAGATE, 
+      POPUP_INSERT_BEFORE_MANEUVER,
+      POPUP_INSERT_BEFORE_BEGIN_FINITE_BURN,
+      POPUP_INSERT_BEFORE_END_FINITE_BURN,
+      POPUP_INSERT_BEFORE_TARGET,
+      POPUP_INSERT_BEFORE_OPTIMIZE,
+      POPUP_INSERT_BEFORE_VARY,
+      POPUP_INSERT_BEFORE_ACHIEVE,
+      POPUP_INSERT_BEFORE_MINIMIZE,
+      POPUP_INSERT_BEFORE_NON_LINEAR_CONSTRAINT,
+      POPUP_INSERT_BEFORE_REPORT,
+      POPUP_INSERT_BEFORE_FUNCTION,
+      POPUP_INSERT_BEFORE_ASSIGNMENT,
+      POPUP_INSERT_BEFORE_TOGGLE,
+      POPUP_INSERT_BEFORE_SAVE,
+      POPUP_INSERT_BEFORE_STOP,
+      POPUP_INSERT_BEFORE_SCRIPT_EVENT,
       
-      //----- begin of MENU_EVT_RANGE of OnInsertCommand()
-      POPUP_INSERT_PROPAGATE, 
-      POPUP_INSERT_MANEUVER,
-      POPUP_INSERT_BEGIN_FINITE_BURN,
-      POPUP_INSERT_END_FINITE_BURN,
-      POPUP_INSERT_TARGET,
-      POPUP_INSERT_OPTIMIZE,
-      POPUP_INSERT_VARY,
-      POPUP_INSERT_ACHIEVE,
-      POPUP_INSERT_MINIMIZE,
-      POPUP_INSERT_NON_LINEAR_CONSTRAINT,
-      POPUP_INSERT_REPORT,
-      POPUP_INSERT_FUNCTION,
-      POPUP_INSERT_ASSIGNMENT,
-      POPUP_INSERT_TOGGLE,
-      POPUP_INSERT_SAVE,
-      POPUP_INSERT_STOP,
-      POPUP_INSERT_SCRIPT_EVENT,
+      POPUP_INSERT_BEFORE_IF,
+      POPUP_INSERT_BEFORE_IF_ELSE,
+      POPUP_INSERT_BEFORE_ELSE,
+      POPUP_INSERT_BEFORE_ELSE_IF,
+      POPUP_INSERT_BEFORE_FOR,
+      POPUP_INSERT_BEFORE_WHILE,
+      POPUP_INSERT_BEFORE_D0_WHILE,
+      POPUP_INSERT_BEFORE_SWITCH,
+      //----- end of MENU_EVT_RANGE
       
-      POPUP_INSERT_IF_STATEMENT,
-      POPUP_INSERT_IF_ELSE_STATEMENT,
-      POPUP_INSERT_ELSE_STATEMENT,
-      POPUP_INSERT_ELSE_IF_STATEMENT,
-      POPUP_INSERT_FOR_LOOP,
-      POPUP_INSERT_WHILE_LOOP,
-      POPUP_INSERT_D0_WHILE,
-      POPUP_INSERT_SWITCH_CASE,
+      //----- begin of MENU_EVT_RANGE of OnInsertAfter()
+      POPUP_INSERT_AFTER_PROPAGATE, 
+      POPUP_INSERT_AFTER_MANEUVER,
+      POPUP_INSERT_AFTER_BEGIN_FINITE_BURN,
+      POPUP_INSERT_AFTER_END_FINITE_BURN,
+      POPUP_INSERT_AFTER_TARGET,
+      POPUP_INSERT_AFTER_OPTIMIZE,
+      POPUP_INSERT_AFTER_VARY,
+      POPUP_INSERT_AFTER_ACHIEVE,
+      POPUP_INSERT_AFTER_MINIMIZE,
+      POPUP_INSERT_AFTER_NON_LINEAR_CONSTRAINT,
+      POPUP_INSERT_AFTER_REPORT,
+      POPUP_INSERT_AFTER_FUNCTION,
+      POPUP_INSERT_AFTER_ASSIGNMENT,
+      POPUP_INSERT_AFTER_TOGGLE,
+      POPUP_INSERT_AFTER_SAVE,
+      POPUP_INSERT_AFTER_STOP,
+      POPUP_INSERT_AFTER_SCRIPT_EVENT,
+      
+      POPUP_INSERT_AFTER_IF,
+      POPUP_INSERT_AFTER_IF_ELSE,
+      POPUP_INSERT_AFTER_ELSE,
+      POPUP_INSERT_AFTER_ELSE_IF,
+      POPUP_INSERT_AFTER_FOR,
+      POPUP_INSERT_AFTER_WHILE,
+      POPUP_INSERT_AFTER_D0_WHILE,
+      POPUP_INSERT_AFTER_SWITCH,
       //----- end of MENU_EVT_RANGE
       
       POPUP_VIEW_VARIABLES,
       POPUP_VIEW_GOALS, 
       
-      POPUP_COLLAPSE,
-      POPUP_EXPAND,
       POPUP_RUN,
       POPUP_SHOW_SCRIPT,
       
