@@ -420,10 +420,20 @@ void GmatPanel::Show()
    
    LoadData();
    
-   mMsgFormat =
-      "The value of \"%s\" for field \"%s\" on object \""
-      + mObject->GetName() +  "\" is not an allowed value. \n"
-      "The allowed values are: [%s].";
+   if (mObject->IsOfType(Gmat::COMMAND))
+   {
+      mMsgFormat =
+         "The value of \"%s\" for field \"%s\" on command \""
+         + mObject->GetTypeName() +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
+   else
+   {
+      mMsgFormat =
+         "The value of \"%s\" for field \"%s\" on object \""
+         + mObject->GetName() +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
    
    EnableUpdate(false);
    
