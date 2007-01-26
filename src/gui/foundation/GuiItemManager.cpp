@@ -4,6 +4,10 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc.
+//
 // Author: Linda Jun
 // Created: 2004/02/06
 //
@@ -33,6 +37,9 @@
 //#define DEBUG_GUI_ITEM_CS 2
 //#define DEBUG_GUI_ITEM_HW 2
 //#define DEBUG_GUI_ITEM_BURN 2
+//#define DEBUG_GUI_ITEM_SUBS 2
+//#define DEBUG_GUI_ITEM_SOLVER 1
+
 
 //------------------------------
 // static data
@@ -536,6 +543,14 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
       if (pos != mSolverCBList.end())
          mSolverCBList.erase(pos);
    }
+   else if (type == "BoundarySolver")
+   {
+      std::vector<wxComboBox*>::iterator pos =
+         find(mBoundarySolverCBList.begin(), mBoundarySolverCBList.end(), cb);
+      
+      if (pos != mBoundarySolverCBList.end())
+         mBoundarySolverCBList.erase(pos);
+   }
    else if (type == "Optimizer")
    {
       std::vector<wxComboBox*>::iterator pos =
@@ -645,8 +660,6 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
                                                   const wxSize &size,
                                                   const wxArrayString objectTypeList)
 {
-   // combo box for avaliable object types
-   
    wxString emptyList[] = {};
    wxComboBox *cb =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
@@ -678,11 +691,12 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
 wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size)
 {
-   // combo box for avaliable spacecrafts
-   
    wxComboBox *spacecraftComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumSpacecraft, theSpacecraftList, wxCB_READONLY);
+   
+   if (theNumSpacecraft == 0)
+      spacecraftComboBox->Append("No Spacecrafts Available");
    
    // show first spacecraft
    spacecraftComboBox->SetSelection(0);
@@ -711,11 +725,12 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
 wxComboBox* GuiItemManager::GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
                                                const wxSize &size)
 {
-   // combo box for avaliable burns
-   
    wxComboBox *burnComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumImpBurn, theImpBurnList, wxCB_READONLY);
+   
+   if (theNumImpBurn == 0)
+      burnComboBox->Append("No Impulsive Burns Available");
    
    // show first burn
    burnComboBox->SetSelection(0);
@@ -740,12 +755,13 @@ wxComboBox* GuiItemManager::GetImpBurnComboBox(wxWindow *parent, wxWindowID id,
 wxComboBox* GuiItemManager::GetFiniteBurnComboBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size)
 {
-   // combo box for avaliable finite burns
-   
    wxComboBox *burnComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumFiniteBurn, theFiniteBurnList, wxCB_READONLY);
 
+   if (theNumFiniteBurn == 0)
+      burnComboBox->Append("No Finite Burns Available");
+   
    // show first burn
    burnComboBox->SetSelection(0);
    
@@ -830,6 +846,9 @@ wxComboBox* GuiItemManager::GetFunctionComboBox(wxWindow *parent, wxWindowID id,
    wxComboBox *functionComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumFunction, theFunctionList, wxCB_READONLY);
+   
+   if (theNumFunction == 0)
+      functionComboBox->Append("No Functions Available");
    
    functionComboBox->SetSelection(0);
    
@@ -932,19 +951,12 @@ wxComboBox*
 GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
                                         const wxSize &size)
 {
-   // combo box for configured user parameters
-
-//    int numUserVar = theNumUserVariable;
-    
-//    if (theNumUserVariable == 0)
-//       numUserVar = 1;
-    
-//    wxComboBox *userParamComboBox =
-//       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-//                      numUserVar, theUserVariableList, wxCB_READONLY);
    wxComboBox *userParamComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumUserVariable, theUserVariableList, wxCB_READONLY);
+   
+   if (theNumUserVariable == 0)
+      userParamComboBox->Append("No Variables Available");
    
    // show first parameter
    userParamComboBox->SetSelection(0);
@@ -963,11 +975,12 @@ GuiItemManager::GetUserVariableComboBox(wxWindow *parent, wxWindowID id,
 wxComboBox* GuiItemManager::GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size)
 {
-   // combo box for avaliable fuel tanks
-   
    wxComboBox *fuelTankComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumFuelTank, theFuelTankList, wxCB_READONLY);
+   
+   if (theNumFuelTank == 0)
+      fuelTankComboBox->Append("No Fuel Tanks Available");
    
    // show first burn
    fuelTankComboBox->SetSelection(0);
@@ -992,11 +1005,12 @@ wxComboBox* GuiItemManager::GetFuelTankComboBox(wxWindow *parent, wxWindowID id,
 wxComboBox* GuiItemManager::GetThrusterComboBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size)
 {
-   // combo box for avaliable Thruster
-   
    wxComboBox *thrusterComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumThruster, theThrusterList, wxCB_READONLY);
+   
+   if (theNumThruster == 0)
+      thrusterComboBox->Append("No Thrusters Available");
    
    // show first Thruster
    thrusterComboBox->SetSelection(0);
@@ -1021,21 +1035,22 @@ wxComboBox* GuiItemManager::GetThrusterComboBox(wxWindow *parent, wxWindowID id,
 wxComboBox* GuiItemManager::GetSubscriberComboBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size)
 {
-   // combo box for avaliable Subscriber
-   
-   wxComboBox *subscriberComboBox =
+   wxComboBox *subsComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumSubscriber, theSubscriberList, wxCB_READONLY);
    
+   if (theNumSubscriber == 0)
+      subsComboBox->Append("No Subscribers Available");
+   
    // show first Subscriber
-   subscriberComboBox->SetSelection(0);
+   subsComboBox->SetSelection(0);
    
    //---------------------------------------------
    // register for update
    //---------------------------------------------
-   mSubscriberCBList.push_back(subscriberComboBox);
+   mSubscriberCBList.push_back(subsComboBox);
    
-   return subscriberComboBox;
+   return subsComboBox;
 }
 
 
@@ -1050,39 +1065,42 @@ wxComboBox* GuiItemManager::GetSubscriberComboBox(wxWindow *parent, wxWindowID i
 wxComboBox* GuiItemManager::GetReportFileComboBox(wxWindow *parent, wxWindowID id,
                                                   const wxSize &size)
 {
-   // combo box for avaliable ReportFile
-   
-   wxComboBox *reportFileComboBox =
+   wxComboBox *rfComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumReportFile, theReportFileList, wxCB_READONLY);
    
+   if (theNumReportFile == 0)
+      rfComboBox->Append("No Report Files Available");
+   
    // show first ReportFile
-   reportFileComboBox->SetSelection(0);
+   rfComboBox->SetSelection(0);
    
    //---------------------------------------------
    // register for update
    //---------------------------------------------
-   mReportFileCBList.push_back(reportFileComboBox);
+   mReportFileCBList.push_back(rfComboBox);
    
-   return reportFileComboBox;
+   return rfComboBox;
 }
+
 
 //------------------------------------------------------------------------------
 // wxComboBox* GetSolverComboBox(wxWindow *parent, wxWindowID id,
-//                                   const wxSize &size)
+//                               const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return Solver combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetSolverComboBox(wxWindow *parent, wxWindowID id,
-                                                  const wxSize &size)
+                                              const wxSize &size)
 {
-   // combo box for avaliable ReportFile
-   
    wxComboBox *solverComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumSolver, theSolverList, wxCB_READONLY);
+   
+   if (theNumSolver == 0)
+      solverComboBox->Append("No Solvers Available");
    
    // show first Solver
    solverComboBox->SetSelection(0);
@@ -1095,24 +1113,58 @@ wxComboBox* GuiItemManager::GetSolverComboBox(wxWindow *parent, wxWindowID id,
    return solverComboBox;
 }
 
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetBoundarySolverComboBox(wxWindow *parent, wxWindowID id,
+//                                      const wxSize &size)
+//------------------------------------------------------------------------------
+/**
+ * @return BoundarySolver combo box pointer
+ */
+//------------------------------------------------------------------------------
+wxComboBox* GuiItemManager::GetBoundarySolverComboBox(wxWindow *parent, wxWindowID id,
+                                                      const wxSize &size)
+{
+   wxComboBox *bvsComboBox =
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
+                     theNumBoundarySolver, theBoundarySolverList, wxCB_READONLY);
+   
+   // Is this correct name?
+   if (theNumBoundarySolver == 0)
+      bvsComboBox->Append("No Differential Correctors Available");
+   
+   // show first Boundary Solver
+   bvsComboBox->SetSelection(0);
+   
+   //---------------------------------------------
+   // register for update
+   //---------------------------------------------
+   mBoundarySolverCBList.push_back(bvsComboBox);
+   
+   return bvsComboBox;
+}
+
+
 //------------------------------------------------------------------------------
 // wxComboBox* GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
-//                                   const wxSize &size)
+//                                  const wxSize &size)
 //------------------------------------------------------------------------------
 /**
  * @return Optimizer combo box pointer
  */
 //------------------------------------------------------------------------------
 wxComboBox* GuiItemManager::GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
-                                                  const wxSize &size)
+                                                 const wxSize &size)
 {
-   // combo box for avaliable ReportFile
-   
    wxComboBox *optimizerComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theNumOptimizer, theOptimizerList, wxCB_READONLY);
    
-   // show first Solver
+   // Is this correct name?
+   if (theNumOptimizer == 0)
+      optimizerComboBox->Append("No Optimizers Available");
+   
+   // show first Optimizer
    optimizerComboBox->SetSelection(0);
    
    //---------------------------------------------
@@ -1122,6 +1174,7 @@ wxComboBox* GuiItemManager::GetOptimizerComboBox(wxWindow *parent, wxWindowID id
    
    return optimizerComboBox;
 }
+
 
 // CheckListBox
 //------------------------------------------------------------------------------
@@ -2483,10 +2536,6 @@ void GuiItemManager::UpdateSpacecraftList()
          #endif
       }
    }
-   else
-   {
-      theSpacecraftList[0] = wxString("-- None --");
-   }
    
    theNumSpacecraft = numSc;
    
@@ -2573,10 +2622,6 @@ void GuiItemManager::UpdateFormationList()
              i, theFormationList[i].c_str());
          #endif
       }
-   }
-   else
-   {
-      theFormationList[0] = wxString("-- None --");
    }
    
    theNumFormation = numForm;
@@ -2708,14 +2753,7 @@ void GuiItemManager::UpdateSpaceObjectList()
          }
       }
    }
-   //--------------------------------------
-   // else no space objects are configured
-   //--------------------------------------
-   else
-   {
-      theSpaceObjectList[0] = wxString("-- None --");
-   }
-
+   
    theNumSpaceObject = soCount;
 
    //-------------------------------------------------------
@@ -2963,13 +3001,16 @@ void GuiItemManager::UpdateBurnList()
    //-------------------------------------------------------
    // update registered ImpulsiveBurn ComboBox
    //-------------------------------------------------------
+   int sel;
    for (std::vector<wxComboBox*>::iterator pos = mImpBurnCBList.begin();
         pos != mImpBurnCBList.end(); ++pos)
    {      
+      sel = (*pos)->GetSelection();
+      
       (*pos)->Clear();
       (*pos)->Append(impBurnNames);
       
-      (*pos)->SetSelection(theNumImpBurn-1);
+      (*pos)->SetSelection(sel);
    }
    
    //-------------------------------------------------------
@@ -2978,10 +3019,12 @@ void GuiItemManager::UpdateBurnList()
    for (std::vector<wxComboBox*>::iterator pos = mFiniteBurnCBList.begin();
         pos != mFiniteBurnCBList.end(); ++pos)
    {      
+       sel = (*pos)->GetSelection();
+
       (*pos)->Clear();
       (*pos)->Append(finiteBurnNames);
       
-      (*pos)->SetSelection(theNumFiniteBurn-1);
+      (*pos)->SetSelection(sel);
    }
 
 
@@ -3405,6 +3448,7 @@ void GuiItemManager::UpdateSubscriberList()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void UpdateSolverList()
 //------------------------------------------------------------------------------
@@ -3416,10 +3460,12 @@ void GuiItemManager::UpdateSolverList()
 {
    StringArray items =
       theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
+   
    theNumSolver = items.size();
+   theNumBoundarySolver = 0;
    theNumOptimizer = 0;
    
-   #if DEBUG_GUI_ITEM_SUBS
+   #if DEBUG_GUI_ITEM_SOLVER
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateSolverList() theNumSolver=%d\n", theNumSolver);
    #endif
@@ -3432,25 +3478,65 @@ void GuiItemManager::UpdateSolverList()
       theNumSolver = MAX_SOLVER;
    }
    
-   wxArrayString solsNames;
+   wxArrayString solverNames;
+   wxArrayString bvsNames;
    wxArrayString optNames;
    GmatBase *obj;
-
-   // Update Subscriber list
+   
+   //-------------------------------------------------------
+   // Update Solver list
+   //-------------------------------------------------------
    for (int i=0; i<theNumSolver; i++)
    {
       theSolverList[i] = items[i].c_str();
-      solsNames.Add(items[i].c_str());
-
-      #if DEBUG_GUI_ITEM_SUBS > 1
-      MessageInterface::ShowMessage("GuiItemManager::UpdateSolverList() " +
-                                    std::string(theSolverList[i].c_str()) + "\n");
+      solverNames.Add(items[i].c_str());
+      
+      #if DEBUG_GUI_ITEM_SOLVER > 1
+      MessageInterface::ShowMessage
+         ("     theSolverList[%d]=%s\n", theSolverList[i].c_str());
       #endif
    }
-
+   
+   //-------------------------------------------------------
+   // Update Boundary Value Solver list
+   //-------------------------------------------------------
+   int numBoundarySolver = 0;
+   
+   for (int i=0; i<theNumSolver; i++)
+   {
+      // check for Optimizer
+      obj = theGuiInterpreter->GetObject(items[i]);
+      if (obj->GetTypeName() == "DifferentialCorrector")
+      {
+         if (i < MAX_BOUNDARY_SOLVER)
+         {
+            #if DEBUG_GUI_ITEM_SOLVER
+            MessageInterface::ShowMessage
+               ("   Adding %s to theBoundarySolverList\n", items[i].c_str());
+            #endif
+            
+            theBoundarySolverList[theNumBoundarySolver] = items[i].c_str();
+            bvsNames.Add(items[i].c_str());
+            theNumBoundarySolver++;
+         }
+         
+         numBoundarySolver++;
+      }
+   }
+   
+   if (numBoundarySolver > MAX_BOUNDARY_SOLVER)
+   {
+      MessageInterface::ShowMessage
+         ("GuiItemManager::UpdateSolverList() GUI can handle up to %d Boundary "
+          "Value Solver. The number of Boundary Value Solver configured: %d\n",
+          MAX_BOUNDARY_SOLVER, numBoundarySolver);
+   }
+   
+   //-------------------------------------------------------
+   // Update Optimizer list
+   //-------------------------------------------------------
    int numOptimizer = 0;
    
-   // Update Optimizer list
    for (int i=0; i<theNumSolver; i++)
    {
       // check for Optimizer
@@ -3459,6 +3545,11 @@ void GuiItemManager::UpdateSolverList()
       {
          if (i < MAX_OPTIMIZER)
          {
+            #if DEBUG_GUI_ITEM_SOLVER
+            MessageInterface::ShowMessage
+               ("   Adding %s to theOptimizerList\n", items[i].c_str());
+            #endif
+            
             theOptimizerList[theNumOptimizer] = items[i].c_str();
             optNames.Add(items[i].c_str());
             theNumOptimizer++;
@@ -3482,11 +3573,25 @@ void GuiItemManager::UpdateSolverList()
    int sel;
    for (std::vector<wxComboBox*>::iterator pos = mSolverCBList.begin();
         pos != mSolverCBList.end(); ++pos)
-   {      
+   {
        sel = (*pos)->GetSelection();
-
+       
       (*pos)->Clear();
-      (*pos)->Append(solsNames);
+      (*pos)->Append(solverNames);
+      
+      (*pos)->SetSelection(sel);
+   }
+   
+   //-------------------------------------------------------
+   // update registered Boundary Solver ComboBox
+   //-------------------------------------------------------
+   for (std::vector<wxComboBox*>::iterator pos = mBoundarySolverCBList.begin();
+        pos != mBoundarySolverCBList.end(); ++pos)
+   {
+       sel = (*pos)->GetSelection();
+       
+      (*pos)->Clear();
+      (*pos)->Append(bvsNames);
       
       (*pos)->SetSelection(sel);
    }
@@ -3496,15 +3601,16 @@ void GuiItemManager::UpdateSolverList()
    //-------------------------------------------------------
    for (std::vector<wxComboBox*>::iterator pos = mOptimizerCBList.begin();
         pos != mOptimizerCBList.end(); ++pos)
-   {      
+   {
        sel = (*pos)->GetSelection();
-
+       
       (*pos)->Clear();
       (*pos)->Append(optNames);
       
       (*pos)->SetSelection(sel);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void AddToAllObjectList()
@@ -3541,7 +3647,7 @@ void GuiItemManager::AddToAllObjectList()
       theAllObjectList[theNumAllObject] = theFiniteBurnList[i];
       theNumAllObject++;      
    }
-
+   
    #if DEBUG_ALL_OBJECT
    MessageInterface::ShowMessage
       ("GuiItemManager::AddToAllObjectList() theNumAllObject=%d\n",
@@ -3625,19 +3731,15 @@ GuiItemManager::GuiItemManager()
    theNumCalPoint = 0;
    theNumSubscriber = 0;
    theNumSolver = 0;
+   theNumBoundarySolver = 0;
    theNumOptimizer = 0;
    theNumSpacePoint = 0;
    
    // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
    // Add V, N, B. These are alias of Element1, Element2, Element3
-   // 7/6/06 X, Y, Z are property of Spacecraft, so removed them.
    theImpBurnPropertyList[0] = "V";
    theImpBurnPropertyList[1] = "N";
    theImpBurnPropertyList[2] = "B";
-   //theImpBurnPropertyList[3] = "X";
-   //theImpBurnPropertyList[4] = "Y";
-   //theImpBurnPropertyList[5] = "Z";
-   //theNumImpBurnProperty = 6;
    theNumImpBurnProperty = 3;
    
    // update property list

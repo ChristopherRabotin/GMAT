@@ -69,13 +69,14 @@ public:
    static const int MAX_COORD_SYS = 60;
    static const int MAX_HARDWARE = 60;
    static const int MAX_FUNCTION = 20;
-   static const int MAX_SOLVER = 30;
-   static const int MAX_OPTIMIZER = 30;
+   static const int MAX_SOLVER = 40;      // MAX_BOUNDARY_SOLVER + MAX_OPTIMIZER
+   static const int MAX_BOUNDARY_SOLVER = 20;
+   static const int MAX_OPTIMIZER = 20;
    static const int MAX_REPORT_FILE = 20;
    static const int MAX_SUBSCRIBER = 40;   // MAX_REPORT_FILE + 20
    
    static GuiItemManager* GetInstance();
-
+   
    wxString ToWxString(Real rval);
    
    void UpdateAll();
@@ -97,90 +98,37 @@ public:
                                wxArrayString *excList = NULL);
    void UnregisterComboBox(const wxString &type, wxComboBox *cb);
    
-   int GetNumSpacecraft()
-      { return theNumSpacecraft; }
+   int GetNumSpacecraft() { return theNumSpacecraft; }   
+   int GetNumImpulsiveBurn() { return theNumImpBurn; }   
+   int GetNumFiniteBurn() { return theNumFiniteBurn; }   
+   int GetNumFuelTank() { return theNumFuelTank; }  
+   int GetNumThruster() { return theNumThruster; }   
+   int GetNumConfigBody() { return theNumCelesBody; }   
+   int GetNumCoordSystem() { return theNumCoordSys; }   
+   int GetNumFunction() { return theNumFunction; }   
+   int GetNumPlottableParameter() { return theNumPlottableParam; }   
+   int GetNumSystemParameter() { return theNumSystemParam; }   
+   int GetNumUserVariable() { return theNumUserVariable; }   
+   int GetNumUserString() { return theNumUserString; }   
+   int GetNumUserArray() { return theNumUserArray; }   
+   int GetNumUserParameter() { return theNumUserParam; }      
+   int GetNumSolver() { return theNumSolver; }
+   int GetNumBoundarySolver() { return theNumBoundarySolver; }   
+   int GetNumOptimizer() { return theNumOptimizer; }
    
-   int GetNumImpulsiveBurn()
-      { return theNumImpBurn; }
+   wxString* GetPlottableParameterList() { return thePlottableParamList; }   
+   wxString* GetSystemParameterList() { return theSystemParamList; }   
+   wxString* GetUserVariableList() { return theUserVariableList; }   
+   wxString* GetUserStringList() { return theUserStringList; }   
+   wxString* GetUserParameterList() { return theUserParamList; }   
+   wxString* GetCoordSysList() { return theCoordSysList; }   
+   wxString* GetConfigBodyList() { return theCelesBodyList; }   
+   wxString* GetSpacecraftList() { return theSpacecraftList; }   
+   wxString* GetImpulsiveBurnList() { return theImpBurnList; }   
+   wxString* GetFiniteBurnList() { return theFiniteBurnList; }   
+   wxString* GetSolverList() { return theSolverList; }   
+   wxString* GetOptimizerList() { return theOptimizerList; }
    
-   int GetNumFiniteBurn()
-      { return theNumFiniteBurn; }
-   
-   int GetNumFuelTank()
-      { return theNumFuelTank; }
-   
-   int GetNumThruster()
-      { return theNumThruster; }
-   
-   int GetNumConfigBody()
-      { return theNumCelesBody; }
-   
-   int GetNumCoordSystem()
-      { return theNumCoordSys; }
-   
-   int GetNumFunction()
-      { return theNumFunction; }
-   
-   int GetNumPlottableParameter()
-      { return theNumPlottableParam; }
-   
-   int GetNumSystemParameter()
-      { return theNumSystemParam; }
-   
-   int GetNumUserVariable()
-      { return theNumUserVariable; }
-   
-   int GetNumUserString()
-      { return theNumUserString; }
-   
-   int GetNumUserArray()
-      { return theNumUserArray; }
-   
-   int GetNumUserParameter()
-      { return theNumUserParam; }
-      
-   int GetNumSolver()
-      { return theNumSolver; }
-
-   int GetNumOptimizer()
-      { return theNumOptimizer; }
-   
-   wxString* GetPlottableParameterList()
-      { return thePlottableParamList; }
-   
-   wxString* GetSystemParameterList()
-      { return theSystemParamList; }
-   
-   wxString* GetUserVariableList()
-      { return theUserVariableList; }
-   
-   wxString* GetUserStringList()
-      { return theUserStringList; }
-   
-   wxString* GetUserParameterList()
-      { return theUserParamList; }
-   
-   wxString* GetCoordSysList()
-      { return theCoordSysList; }
-   
-   wxString* GetConfigBodyList()
-      { return theCelesBodyList; }
-   
-   wxString* GetSpacecraftList()
-      { return theSpacecraftList; }
-   
-   wxString* GetImpulsiveBurnList()
-      { return theImpBurnList; }
-
-   wxString* GetFiniteBurnList()
-      { return theFiniteBurnList; }
-      
-   wxString* GetSolverList()
-      { return theSolverList; }
-
-   wxString* GetOptimizerList()
-      { return theOptimizerList; }
-
    wxArrayString GetSettablePropertyList(const wxString &objType);
    
    int GetNumProperty(const wxString &objType);
@@ -240,6 +188,8 @@ public:
                                      const wxSize &size);
    wxComboBox* GetSolverComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
+   wxComboBox* GetBoundarySolverComboBox(wxWindow *parent, wxWindowID id,
+                                         const wxSize &size);
    wxComboBox* GetOptimizerComboBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size);
 
@@ -385,6 +335,7 @@ private:
    std::vector<wxComboBox*> mSubscriberCBList;
    std::vector<wxComboBox*> mReportFileCBList;
    std::vector<wxComboBox*> mSolverCBList;
+   std::vector<wxComboBox*> mBoundarySolverCBList;
    std::vector<wxComboBox*> mOptimizerCBList;
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
@@ -420,6 +371,7 @@ private:
    int theNumSubscriber;
    int theNumReportFile;
    int theNumSolver;
+   int theNumBoundarySolver;
    int theNumOptimizer;
    int theNumAllObject;
    
@@ -440,6 +392,7 @@ private:
    wxString theReportFileList[MAX_REPORT_FILE];
    wxString theSubscriberList[MAX_SUBSCRIBER];
    wxString theSolverList[MAX_SOLVER];
+   wxString theBoundarySolverList[MAX_BOUNDARY_SOLVER];
    wxString theOptimizerList[MAX_OPTIMIZER];
    wxString theAllObjectList[MAX_ALL_OBJECT];
    
