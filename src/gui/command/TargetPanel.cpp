@@ -4,11 +4,13 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc.
+//
 // Author: Waka Waktola
 // Created: 2003/12/16
-// Modified:
-//    2004/05/06 Allison Greene - to inherit from GmatPanel
-//    2004/11/04 Linda Jun - Renamed from TargetPanel
+//
 /**
  * This class contains the Target setup window.
  */
@@ -21,8 +23,7 @@
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(TargetPanel, GmatPanel)
-   EVT_TEXT(ID_TEXTCTRL, TargetPanel::OnTextUpdate)
-   EVT_COMBOBOX(ID_COMBO, TargetPanel::OnComboSelection)
+   EVT_COMBOBOX(ID_COMBO, TargetPanel::OnComboBoxChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -41,7 +42,6 @@ TargetPanel::TargetPanel(wxWindow *parent, GmatCommand *cmd)
    {
       Create();
       Show();
-      EnableUpdate(false);
    }
    else
    {
@@ -49,11 +49,13 @@ TargetPanel::TargetPanel(wxWindow *parent, GmatCommand *cmd)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // ~TargetPanel()
 //------------------------------------------------------------------------------
 TargetPanel::~TargetPanel()
 {
+   theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
 }
 
 //-------------------------------
@@ -65,96 +67,28 @@ TargetPanel::~TargetPanel()
 //------------------------------------------------------------------------------
 void TargetPanel::Create()
 {    
-   Integer bsize = 2;
+   Integer bsize = 5;
 
-   // wxButton
-   correctionsButton =
-      new wxButton(this, ID_BUTTON, wxT("Apply Corrections"), wxDefaultPosition,
-                   wxDefaultSize, 0);
-//                   wxSize(117,-1), 0);
-   
-   // wxStaticText
+   //-------------------------------------------------------
+   // Solver ComboBox
+   //-------------------------------------------------------
    wxStaticText *solverNameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver Name"), wxDefaultPosition,
                        wxDefaultSize, 0);
-   wxStaticText *convStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Upon Convergence"), wxDefaultPosition,
-                       wxDefaultSize, 0);
-   wxStaticText *modeStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Mode"), wxDefaultPosition,
-                       wxDefaultSize, 0);
    
-   // wxString
-   wxString strArray2[] = 
-   {
-      wxT("")
-   };
-   wxString strArray3[] = 
-   {
-      wxT("")
-   };
-   wxString emptyArray[] = 
-   {
-      wxT("No Solver Available")
-   };
+   mSolverComboBox =
+      theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
    
-   // wxComboBox
-   StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
-   int solverCount = solverNames.size();
-   wxString *solverArray = new wxString[solverCount];
-   for (int i=0; i<solverCount; i++)
-   {
-      solverArray[i] = solverNames[i].c_str();
-   }
-
-   if (solverCount > 0)
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), solverCount, solverArray,
-                        wxCB_DROPDOWN|wxCB_READONLY);
-   }
-   else
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
-   }
    
-   mConvComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                     wxSize(180,-1), 1, strArray2, wxCB_DROPDOWN|wxCB_READONLY);
-   modeComboBox = new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition,
-                     wxSize(180,-1), 1, strArray3, wxCB_DROPDOWN|wxCB_READONLY);
+   wxFlexGridSizer *pageSizer = new wxFlexGridSizer(2);
    
-   // wx*Sizer
-   wxBoxSizer *item0 = new wxBoxSizer(wxVERTICAL);
-   wxFlexGridSizer *item5 = new wxFlexGridSizer(2, 0, 0);
-      
-    //First row
-   item5->Add(solverNameStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   item5->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-//   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(convStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   item5->Add(mConvComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   //Second row
-   item5->Add(modeStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   item5->Add(modeComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-//   item5->Add(20, 20, 0, wxALIGN_CENTRE|wxALL, 5);
-   item5->Add(20, 20, 0, wxALIGN_LEFT|wxALL, bsize);
-   item5->Add(correctionsButton, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   item0->Add(item5, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   convStaticText->Enable(false);
-   mConvComboBox->Enable(false);
-   modeStaticText->Enable(false);
-   modeComboBox->Enable(false);
-   correctionsButton->Enable(false);
+   pageSizer->Add(solverNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   theMiddleSizer->Add(item0, 0, wxGROW, 5);
+   theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
 
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -165,43 +99,42 @@ void TargetPanel::LoadData()
    {
       // Set the pointer for the "Show Script" button
       mObject = theCommand;
-
+      
       std::string solverName =
          theCommand->GetStringParameter(theCommand->GetParameterID("Targeter"));
-      mSolverComboBox->SetStringSelection(solverName.c_str());
+      
+      mSolverComboBox->SetValue(solverName.c_str());
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("TargetPanel:LoadData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void TargetPanel::SaveData()
 {
-   // explicitly disable apply button
-   // it is turned on in each of the panels
-   EnableUpdate(false);
-   
-   return;
+   try
+   {
+      std::string solverName = mSolverComboBox->GetValue().c_str();
+      theCommand->SetStringParameter(theCommand->GetParameterID("Targeter"),
+                                     solverName);
+      EnableUpdate(false);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+   }
 }
 
-//------------------------------------------------------------------------------
-// void OnTextUpdate(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void TargetPanel::OnTextUpdate(wxCommandEvent& event)
-{
-   EnableUpdate(true);
-}
 
 //------------------------------------------------------------------------------
-// void OnComboSelection(wxCommandEvent& event)
+// void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void TargetPanel::OnComboSelection(wxCommandEvent& event)
+void TargetPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
 }
