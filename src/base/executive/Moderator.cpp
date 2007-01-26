@@ -2482,6 +2482,17 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
 //                                   const std::string &name,
 //                                   GmatCommand *refCmd = NULL)
 //------------------------------------------------------------------------------
+/*
+ * Creates a command with default settings. The input refCmd is only used for
+ * EndFiniteBurn to match with BeginFiniteBurn.
+ *
+ * @param  type  Command type
+ * @param  name  Command name
+ * @param  refCmd  Referenced command name
+ *
+ * @return  New command pointer
+ */
+//------------------------------------------------------------------------------
 GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
                                              const std::string &name,
                                              GmatCommand *refCmd)
@@ -2581,7 +2592,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          {
             // set burn
             cmd->SetRefObjectName(Gmat::BURN, refCmd->GetRefObjectName(Gmat::BURN));
-         
+            
             // set spacecraft
             StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
             for (UnsignedInt i=0; i<scNames.size(); i++)
@@ -2604,6 +2615,14 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          id = cmd->GetParameterID("Targeter");
          cmd->SetStringParameter(id, solver->GetName());
       }
+      else if (type == "Optimize")
+      {
+         // set solver
+         Solver *solver = CreateSolver("DifferentialCorrector",
+                                       GetDefaultSolver()->GetName());
+         id = cmd->GetParameterID("OptimizerName");
+         cmd->SetStringParameter(id, solver->GetName());
+      }
       else if (type == "Vary")
       {
          // set solver
@@ -2611,7 +2630,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
                                        GetDefaultSolver()->GetName());
          id = cmd->GetParameterID("SolverName");
          cmd->SetStringParameter(id, solver->GetName());
-      
+         
          // set variable parameter
          id = cmd->GetParameterID("Variable");
          cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName() + ".V");
