@@ -32,15 +32,15 @@ public:
     
 private:             
 
-   struct SolverType
-   {
-      wxString  solverName;
-      wxString  goalName;
-      wxString  goalValue;
-      //Real      goalValue;
-      Real      tolerance;
-      Parameter *goalParam;
-   };
+   Achieve *mAchieveCommand;
+   
+   bool mIsTextModified;
+   
+   Real      mTolerance;
+   wxString  mSolverName;
+   wxString  mGoalName;
+   wxString  mGoalValue;
+   Parameter *mGoalParam;
    
    wxTextCtrl *mGoalNameTextCtrl;
    wxTextCtrl *mGoalValueTextCtrl;
@@ -48,19 +48,16 @@ private:
    
    wxButton *mViewGoalButton;
    wxButton *mViewGoalValueButton;
+   wxButton *mViewToleranceButton;
    
    wxComboBox *mSolverComboBox;
    
    wxArrayString mObjectTypeList;
-   SolverType mSolverData;
-   Achieve *mAchieveCommand;
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
-   void ShowGoalSetup();
    
    // event handling method
    void OnTextChange(wxCommandEvent& event);    
@@ -77,7 +74,6 @@ private:
       ID_TEXTCTRL,
       ID_BUTTON,
       ID_COMBO,
-      ID_GRID,
    };
 };
 

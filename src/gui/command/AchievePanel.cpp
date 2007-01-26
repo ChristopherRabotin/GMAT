@@ -13,7 +13,6 @@
 //------------------------------------------------------------------------------
 
 #include "gmatwxdefs.hpp"
-#include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "AchievePanel.hpp"
 #include "StringUtil.hpp"  // for ToReal()
@@ -48,13 +47,12 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
    mAchieveCommand = (Achieve *)cmd;
-   
-   mSolverData.solverName = "";
-   mSolverData.goalName = "";
-   mSolverData.goalValue = "";
-   //mSolverData.goalValue = 0.0; //loj: 2/4/05 Made goalValue wxString
-   mSolverData.tolerance = 1.0e-6;
-   mSolverData.goalParam = NULL;
+
+   mIsTextModified = false;
+   mSolverName = "";
+   mGoalName = "";
+   mGoalValue = "";
+   mTolerance = 1.0e-6;
    
    mObjectTypeList.Add("Spacecraft");
    
@@ -62,7 +60,6 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    Show();
    
    EnableUpdate(false);
-//   theApplyButton->Disable();
 }
 
 
@@ -72,6 +69,7 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
 AchievePanel::~AchievePanel()
 {
    mObjectTypeList.Clear();
+   theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
 }
 
 
@@ -88,49 +86,24 @@ void AchievePanel::Create()
 
    // Solver name
    wxStaticText *solverStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Solver"),
+      new wxStaticText(this, ID_TEXT, wxT("Solver Name"),
                        wxDefaultPosition, wxSize(40, -1), 0);
-   wxString emptyArray[] = 
-   {
-      wxT("No Solver Available")
-   };
-   StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
-   int solverCount = solverNames.size();
-   wxString *solverArray = new wxString[solverCount];
-
-   for (int i=0; i<solverCount; i++)
-   {
-      solverArray[i] = solverNames[i].c_str();
-   }
-
-   if (solverCount > 0)
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), solverCount, solverArray,
-                        wxCB_DROPDOWN|wxCB_READONLY);
-   }
-   else
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
-   }
-
+   
+   mSolverComboBox =
+      theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
+   
    // Goal
    wxStaticText *goalStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Goal"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-//                       wxDefaultPosition, wxSize(40, -1), 0);
    mGoalNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(250,-1), 0);
    mViewGoalButton = new
       wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
-
+   
    // Value
    wxStaticText *initialStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Value"), //loj: 2/4/05 Changed from initial value
+      new wxStaticText(this, ID_TEXT, wxT("Value"),
                        wxDefaultPosition, wxDefaultSize, 0);
    mGoalValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                        wxDefaultPosition, wxSize(250,-1), 0);
@@ -142,20 +115,15 @@ void AchievePanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Tolerance"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mToleranceTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                       wxDefaultPosition, wxSize(80,-1), 0);   
+                                       wxDefaultPosition, wxSize(250,-1), 0);   
+   mViewToleranceButton = new
+      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+   
    
    // wx*Sizers
-//   wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-//   wxStaticBox *goalSetupStaticBox = new wxStaticBox(this, -1, wxT("Goal Setup"));
-//   wxStaticBoxSizer *goalSetupSizer = new wxStaticBoxSizer(goalSetupStaticBox, wxVERTICAL);
-//   wxFlexGridSizer *valueGridSizer = new wxFlexGridSizer(4, 0, 0);
    wxFlexGridSizer *goalGridSizer = new wxFlexGridSizer(3, 0, 0);
-//   wxBoxSizer *solverBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-//   wxBoxSizer *goalBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    
    // Add to wx*Sizers  
-//   solverBoxSizer->Add(solverStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-//   solverBoxSizer->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(solverStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mSolverComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -163,39 +131,17 @@ void AchievePanel::Create()
    goalGridSizer->Add(goalStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mGoalNameTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mViewGoalButton, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   
    goalGridSizer->Add(initialStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mGoalValueTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   
    goalGridSizer->Add(toleranceStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    goalGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-//   goalGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
-
-//   goalBoxSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-//   goalBoxSizer->Add(mGoalNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-//   goalBoxSizer->Add(mViewGoalButton, 0, wxALIGN_CENTER|wxALL, bsize);
-//   
-//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(toleranceStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-//   
-//   valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(mGoalValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(mViewGoalValueButton, 0, wxALIGN_CENTER|wxALL, bsize);
-//   valueGridSizer->Add(mToleranceTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-//
-//   goalSetupSizer->Add(goalBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-//   goalSetupSizer->Add(valueGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-
-//   panelSizer->Add(solverBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-//   panelSizer->Add(goalSetupSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-//   panelSizer->Add(goalGridSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-
+   goalGridSizer->Add(mViewToleranceButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   
    // add page sizer to middle sizer
    theMiddleSizer->Add(goalGridSizer, 0, wxALIGN_CENTRE|wxALL, 5);
-//   theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
 
@@ -208,8 +154,13 @@ void AchievePanel::LoadData()
    MessageInterface::ShowMessage("AchievePanel::LoadData() entered\n");
    MessageInterface::ShowMessage("Command=%s\n", mAchieveCommand->GetTypeName().c_str());
    #endif
-
-   mGoalNameTextCtrl->Disable(); // we don't want user to edit this box
+   
+   // We don't want user to edit this box
+   mGoalNameTextCtrl->Disable();
+   
+   // When Parameter in commands is implemented, we can enable this
+   // according to Input Range Testing Table 3.8.
+   mViewToleranceButton->Disable();
    
    try
    {
@@ -218,10 +169,10 @@ void AchievePanel::LoadData()
       
       std::string solverName = mAchieveCommand->
          GetStringParameter(mAchieveCommand->GetParameterID("TargeterName"));
-
+      
       std::string goalName = mAchieveCommand->
          GetStringParameter(mAchieveCommand->GetParameterID("Goal"));
-
+      
       std::string goalValue = mAchieveCommand->GetStringParameter
          (mAchieveCommand->GetParameterID("GoalValue"));
       
@@ -231,22 +182,23 @@ void AchievePanel::LoadData()
       MessageInterface::ShowMessage("goalValue=%s\n", goalValue.c_str());
       #endif
       
-      mSolverData.solverName = wxT(solverName.c_str());      
-      mSolverData.goalName = wxT(goalName.c_str());
-      mSolverData.goalValue = wxT(goalValue.c_str());
+      mSolverName = wxT(solverName.c_str());      
+      mGoalName = wxT(goalName.c_str());
+      mGoalValue = wxT(goalValue.c_str());
       
-      mSolverData.tolerance = mAchieveCommand->GetRealParameter
+      mTolerance = mAchieveCommand->GetRealParameter
          (mAchieveCommand->GetParameterID("Tolerance"));
+      
+      mSolverComboBox->SetValue(mSolverName);
+      mGoalNameTextCtrl->SetValue(mGoalName);
+      mGoalValueTextCtrl->SetValue(mGoalValue);   
+      mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mTolerance));
       
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("AchievePanel:LoadData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
-
-   ShowGoalSetup();
 }
 
 
@@ -259,92 +211,64 @@ void AchievePanel::SaveData()
    MessageInterface::ShowMessage("AchievePanel::SaveData() entered\n");
    #endif
    
-//   canClose = true;
-   
-   // Save data to core engine
-   Integer id;
-   Real rvalue;
-      
    canClose = true;
-      
    std::string inputString;
-   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" + 
-                      mAchieveCommand->GetName() + "\" is not an allowed value. \n"
-                     "The allowed values are: [%s].";                        
-   //-------------------------------------------------------
-   // Saving Solver Data
-   //-------------------------------------------------------
-         
-   mAchieveCommand->SetStringParameter
-      (mAchieveCommand->GetParameterID("TargeterName"),
-       std::string(mSolverData.solverName.c_str()));
-
-   mAchieveCommand->SetStringParameter
-      (mAchieveCommand->GetParameterID("Goal"),
-       std::string(mSolverData.goalName.c_str()));
-
-   // goal value can ba a number or a prameter name, so validate
-   Real value;
-   if (!mSolverData.goalValue.ToDouble(&value))
+   Real tol;
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (mIsTextModified)
    {
-      if (theGuiInterpreter->GetObject(mSolverData.goalValue.c_str()) == NULL)
+      inputString = mToleranceTextCtrl->GetValue();      
+      CheckReal(tol, inputString, "Tolerence", "Real Number > 0.0");
+   }
+   
+   
+   Real value;
+   inputString = mGoalValue.c_str();
+   
+   // goal value can ba a number or a prameter name, so validate
+   if (!GmatStringUtil::ToReal(inputString, value))
+   {
+      if (theGuiInterpreter->GetObject(inputString) == NULL)
       {
-         wxLogError("The goal value is not a number or a valid parameter name");
-         canClose = false;
+         CheckReal(value, inputString, "GoalValue",
+                   "Real Number or valid Parameter Name", true);
       }
    }
    
-   if (canClose)
+   if (!canClose)
+      return;
+   
+   //-------------------------------------------------------
+   // Saving Solver Data
+   //-------------------------------------------------------
+   try
    {
       mAchieveCommand->SetStringParameter
-         (mAchieveCommand->GetParameterID("GoalValue"),
-          std::string(mSolverData.goalValue.c_str()));
+         (mAchieveCommand->GetParameterID("TargeterName"), mSolverName.c_str());
+      
+      mAchieveCommand->SetStringParameter
+         (mAchieveCommand->GetParameterID("Goal"), mGoalName.c_str());
+      
+      mAchieveCommand->SetStringParameter
+         (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
+      
+      if (mIsTextModified)
+      {
+         mAchieveCommand->SetRealParameter
+            (mAchieveCommand->GetParameterID("Tolerance"), tol);
+         
+         mIsTextModified = false;
+      }
+      
+      EnableUpdate(false);
    }
-   
-   // check to see if input is a real
-   inputString = mToleranceTextCtrl->GetValue();      
-   if (GmatStringUtil::ToReal(inputString,&rvalue))
-   {  
-      id = mAchieveCommand->GetParameterID("Tolerance");
-      mAchieveCommand->SetRealParameter(id, rvalue);
-   }
-   else
+   catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-         inputString.c_str(), "Tolerence","Real Number > 0.0");
-
-      canClose = false;
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
-//   mAchieveCommand->SetRealParameter
-//      (mAchieveCommand->GetParameterID("Tolerance"),
-//       mSolverData.tolerance);
-   
-   EnableUpdate(false);
-//   theApplyButton->Disable();
-}
-
-
-//------------------------------------------------------------------------------
-// void ShowGoalSetup()
-//------------------------------------------------------------------------------
-void AchievePanel::ShowGoalSetup()
-{
-   wxString str;
-   
-   if (!mSolverComboBox->SetStringSelection(mSolverData.solverName))
-   {
-      mSolverComboBox->Append("");
-      mSolverComboBox->SetValue("");
-   }
-   mGoalNameTextCtrl->SetValue(mSolverData.goalName);
-
-   mGoalValueTextCtrl->SetValue(mSolverData.goalValue);
-   
-//    str.Printf("%g", mSolverData.tolerance);
-//    mToleranceTextCtrl->SetValue(str);
-   
-   mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.tolerance));
-   
 }
 
 
@@ -355,16 +279,22 @@ void AchievePanel::ShowGoalSetup()
 //------------------------------------------------------------------------------
 // void AchievePanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
+/*
+ * Sets mIsTextModified to true if text field for Real value is modified.
+ */
+//------------------------------------------------------------------------------
 void AchievePanel::OnTextChange(wxCommandEvent& event)
 {
    if (mGoalValueTextCtrl->IsModified())
    {
-      mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
+      mGoalValue = mGoalValueTextCtrl->GetValue();
    }
    
    if (mToleranceTextCtrl->IsModified())
-      mSolverData.tolerance = atof(mToleranceTextCtrl->GetValue().c_str());
-
+   {
+      mIsTextModified = true;
+   }
+   
    EnableUpdate(true);
 }
 
@@ -374,7 +304,8 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void AchievePanel::OnSolverSelection(wxCommandEvent &event)
 {
-   mSolverData.solverName = mSolverComboBox->GetStringSelection();
+   mSolverName = mSolverComboBox->GetValue();
+   EnableUpdate(true);
 }
 
 
@@ -383,34 +314,25 @@ void AchievePanel::OnSolverSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void AchievePanel::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mViewGoalButton ||
-       event.GetEventObject() == mViewGoalValueButton)
-   {      
-      // show dialog to select parameter
-      ParameterSelectDialog paramDlg(this, mObjectTypeList);
-      paramDlg.ShowModal();
-
-      if (paramDlg.IsParamSelected())
-      {
-         wxString newParamName = paramDlg.GetParamName();
-         if (event.GetEventObject() == mViewGoalButton)
-         {
-            mGoalNameTextCtrl->SetValue(newParamName);
-            mSolverData.goalName = newParamName;
-         }
-         else
-         {
-            mGoalValueTextCtrl->SetValue(newParamName);
-            mSolverData.goalValue = newParamName;
-         }
-         
-   EnableUpdate(true);
-//         theApplyButton->Enable(true);
-      }
-   }
-   else
+   // show dialog to select parameter
+   ParameterSelectDialog paramDlg(this, mObjectTypeList);
+   paramDlg.ShowModal();
+      
+   if (paramDlg.IsParamSelected())
    {
-      event.Skip();
+      wxString newParamName = paramDlg.GetParamName();
+      if (event.GetEventObject() == mViewGoalButton)
+      {
+         mGoalNameTextCtrl->SetValue(newParamName);
+         mGoalName = newParamName;
+      }
+      else
+      {
+         mGoalValueTextCtrl->SetValue(newParamName);
+         mGoalValue = newParamName;
+      }
+         
+      EnableUpdate(true);
    }
 }
 
