@@ -30,6 +30,7 @@
 #include "bitmaps/backall.xpm"
 
 //#define DEBUG_REPORT_PANEL 1
+//#define DEBUG_REPORT_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -86,8 +87,7 @@ ReportPanel::ReportPanel(wxWindow *parent, GmatCommand *cmd)
       mObjectTypeList.Add("ImpulsiveBurn");
       Create();
       Show();
-//      theApplyButton->Disable();
-         EnableUpdate(false);
+      EnableUpdate(false);
    }
 }
 
@@ -264,39 +264,46 @@ void ReportPanel::LoadData()
    #if DEBUG_REPORT_PANEL
    MessageInterface::ShowMessage("ReportPanel::LoadData() entering...\n");
    #endif
-   
-   // Set the pointer for the "Show Script" button
-   mObject = theCommand;
-   
-   // Get ReportFile name
-   std::string reportFileName = theCommand->GetRefObjectName(Gmat::SUBSCRIBER);
-   
-   // Get parameters to report
-   StringArray varParamList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
-   mNumVarParams = varParamList.size();
-   
-   if (mNumVarParams > 0)
-   {      
-      Parameter *param;
+
+   try
+   {
+      // Set the pointer for the "Show Script" button
+      mObject = theCommand;
       
-      for (int i=0; i<mNumVarParams; i++)
-      {
-         param = theGuiInterpreter->GetParameter(varParamList[i]);
-         mVarSelectedListBox->Append(varParamList[i].c_str());
+      // Get ReportFile name
+      std::string reportFileName = theCommand->GetRefObjectName(Gmat::SUBSCRIBER);
+      
+      // Get parameters to report
+      StringArray varParamList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
+      mNumVarParams = varParamList.size();
+      
+      if (mNumVarParams > 0)
+      {      
+         Parameter *param;
+         
+         for (int i=0; i<mNumVarParams; i++)
+         {
+            param = theGuiInterpreter->GetParameter(varParamList[i]);
+            mVarSelectedListBox->Append(varParamList[i].c_str());
+         }
+         
+         mVarSelectedListBox->SetSelection(0);
       }
       
-      mVarSelectedListBox->SetSelection(0);
+      mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
+      mObjectComboBox->SetSelection(0);
+      mPropertyListBox->SetSelection(0);
+      
+      mLastCoordSysName = mCoordSysComboBox->GetString(0);
+      
+      // show coordinate system or central body
+      ShowCoordSystem();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
    }
    
-   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-   mObjectComboBox->SetSelection(0);
-   mPropertyListBox->SetSelection(0);
-   
-   mLastCoordSysName = mCoordSysComboBox->GetString(0);
-   
-   // show coordinate system or central body
-   ShowCoordSystem();
-
    #if DEBUG_REPORT_PANEL
    MessageInterface::ShowMessage("ReportPanel::LoadData() exiting...\n");
    #endif
@@ -309,36 +316,29 @@ void ReportPanel::LoadData()
 //------------------------------------------------------------------------------
 void ReportPanel::SaveData()
 {
-   if (mReportFileComboBox->GetSelection() == wxNOT_FOUND)
-   {
-      MessageInterface::ShowMessage
-         ("*** ERROR *** ReportPanel ReportFile object is empty. "
-          "Data is not saved\n");
-      
-      return;
-   }
+   #if DEBUG_REPORT_PANEL_SAVE
+   MessageInterface::ShowMessage("ReportPanel::SaveData() entering...\n");
+   #endif
    
-   std::string reportFileName = mReportFileComboBox->GetValue().c_str();
+   canClose = true;
+   
+   std::string rfName = mReportFileComboBox->GetValue().c_str();
    
    ReportFile *reportFile =
-      (ReportFile*)theGuiInterpreter->GetObject(reportFileName);
-   
-   if (reportFile == NULL)
-   {
-      MessageInterface::ShowMessage
-         ("*** ERROR *** ReportPanel cannot find ReportFile object:%s. "
-          "Data is not saved\n", reportFileName.c_str());
-      
-      return;
-   }
+      (ReportFile*)theGuiInterpreter->GetObject(rfName);
    
    try
    {
       // save ReportFile
       if (mIsReportFileChanged)
       {
+         #if DEBUG_REPORT_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("    rfName=%s, reportFile=%p\n", rfName.c_str(), reportFile);
+         #endif
+         
+         theCommand->SetRefObject(reportFile, Gmat::SUBSCRIBER, rfName, 0);
          mIsReportFileChanged = false;
-         theCommand->SetRefObject(reportFile, Gmat::SUBSCRIBER, reportFileName, 0);
       }
       
       // save parameters
@@ -351,7 +351,8 @@ void ReportPanel::SaveData()
          
          for (int i=0; i<mNumVarParams; i++)
          {
-            std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
+            std::string selYName =
+               std::string(mVarSelectedListBox->GetString(i).c_str());
             param = theGuiInterpreter->GetParameter(selYName);
             theCommand->SetRefObject(param, Gmat::PARAMETER, selYName, 1);
          }
@@ -359,10 +360,14 @@ void ReportPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Error occured in ReportPanel::Save() " +
-          e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      canClose = false;
    }
+   
+   #if DEBUG_REPORT_PANEL_SAVE
+   MessageInterface::ShowMessage("ReportPanel::SaveData() exiting...\n");
+   #endif
+   
 }
 
 
