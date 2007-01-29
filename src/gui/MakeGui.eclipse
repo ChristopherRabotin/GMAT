@@ -121,6 +121,7 @@ OBJECTS = \
     command/ManeuverPanel.o \
     command/MinimizePanel.o \
     command/NonlinearConstraintPanel.o \
+    command/OptimizePanel.o \
     command/PropagatePanel.o \
     command/ReportPanel.o \
     command/SavePanel.o \
