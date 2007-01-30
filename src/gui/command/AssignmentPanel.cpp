@@ -4,32 +4,29 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc.
+//
 // Author: Allison Greene
 // Created: 2004/12/23
 /**
- * This class contains the AssignmentPanel Setup window.
+ * This class contains the Assignment Setup window.
  */
 //------------------------------------------------------------------------------
 
 #include "AssignmentPanel.hpp"
 #include "MessageInterface.hpp"
 
-#define DEBUG_ASSIGNCMD_PANEL 0
+//#define DEBUG_ASSIGNMENT_PANEL 1
+//#define DEBUG_ASSIGNMENT_PANEL_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(AssignmentPanel, GmatPanel)
-   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-
-   EVT_COMBOBOX(ID_COMBO, AssignmentPanel::OnComboChange)
-   EVT_GRID_CELL_LEFT_CLICK(AssignmentPanel::OnCellClick)
-   EVT_GRID_CELL_RIGHT_CLICK(AssignmentPanel::OnCellClick)
+   EVT_TEXT(ID_TEXTCTRL, AssignmentPanel::OnTextChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -42,17 +39,24 @@ END_EVENT_TABLE()
 AssignmentPanel::AssignmentPanel( wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
-   theCommand = (CallFunction *)cmd;
-//   theCommand = cmd;
-
+   #if DEBUG_ASSIGNMENT_PANEL
+   MessageInterface::ShowMessage("AssignmentPanel() entered\n");
+   #endif
+   
+   theCommand = (Assignment *)cmd;
+   mIsTextModified = false;
+   
    if (theCommand != NULL)
    {
       Create();
       Show();
-   EnableUpdate(false);
-//      theApplyButton->Disable();
+      
+      // force to call SaveData() for empty LHS and RHS checking
+      mIsTextModified = true;
+      EnableUpdate(true);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // ~AssignmentPanel()
@@ -70,92 +74,150 @@ AssignmentPanel::~AssignmentPanel()
 //------------------------------------------------------------------------------
 void AssignmentPanel::Create()
 {
-   //MessageInterface::ShowMessage("AssignmentPanel::Create() entered\n");
-   int bsize = 5; // bordersize
+   #if DEBUG_ASSIGNMENT_PANEL
+   MessageInterface::ShowMessage("AssignmentPanel::Create() entered\n");
+   #endif
    
-   wxFlexGridSizer *mflexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
-   wxBoxSizer *horizontalSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *outputSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *inputSizer = new wxBoxSizer(wxHORIZONTAL);
-
+   int bsize = 2; // bordersize
+   
+   wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 0, 0);
+   
+   mLhsTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                     wxDefaultPosition, wxSize(150,-1), 0);
+   
    wxStaticText *equalSign =
-                     new wxStaticText( this, ID_TEXT, wxT("  =  "),
-                     wxDefaultPosition, wxDefaultSize, 0 );
-
-   // wxGrid
-   inputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(200, 23), wxWANTS_CHARS );
-
-   inputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
-   inputGrid->SetColSize(0, 200);
-   inputGrid->SetRowSize(0, 23);
-   inputGrid->SetColLabelSize(0);
-   inputGrid->SetRowLabelSize(0);
-   inputGrid->SetMargins(0, 0);
-   inputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
-   inputGrid->EnableEditing(false);
-
-   outputGrid =
-      new wxGrid( this, -1, wxDefaultPosition, wxSize(200, 23), wxWANTS_CHARS );
-
-   outputGrid->CreateGrid( 1, 1, wxGrid::wxGridSelectRows );
-   outputGrid->SetColSize(0, 200);
-   outputGrid->SetRowSize(0, 23);
-   outputGrid->SetColLabelSize(0);
-   outputGrid->SetRowLabelSize(0);
-   outputGrid->SetMargins(0, 0);
-   outputGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);
-   outputGrid->EnableEditing(false);
-
-   outputSizer->Add(outputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   inputSizer->Add(inputGrid, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   horizontalSizer->Add(equalSign, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-   mflexGridSizer->Add(outputSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mflexGridSizer->Add(horizontalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mflexGridSizer->Add(inputSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-
-//   theMiddleSizer->Add(outputSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-//   theMiddleSizer->Add(horizontalSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-//   theMiddleSizer->Add(mHorizontalSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-//   theMiddleSizer->Add(inputSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-   theMiddleSizer->Add(mflexGridSizer, 0, wxALIGN_CENTER|wxALL, bsize);
-
+      new wxStaticText(this, ID_TEXT, wxT(" = "),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mRhsTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                     wxDefaultPosition, wxSize(400,-1), 0);
+   
+   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(mLhsTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(equalSign, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(mRhsTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
 void AssignmentPanel::LoadData()
 {
-
+   #if DEBUG_ASSIGNMENT_PANEL
+   MessageInterface::ShowMessage("AssignmentPanel::LoadData() entered\n");
+   #endif
+   
+   mObject = theCommand;
+   
+   mLhsTextCtrl->SetValue(theCommand->GetLHS().c_str());
+   mRhsTextCtrl->SetValue(theCommand->GetRHS().c_str());
+   
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void AssignmentPanel::SaveData()
 {
-
+   #if DEBUG_ASSIGNMENT_PANEL_SAVE
+   MessageInterface::ShowMessage
+      ("AssignmentPanel::SaveData() mIsTextModified=%d\n", mIsTextModified);
+   #endif
+   
+   canClose = true;
+   std::string lhs = mLhsTextCtrl->GetValue().c_str();
+   std::string rhs = mRhsTextCtrl->GetValue().c_str();
+   
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+   if (mIsTextModified)
+   {
+      Real rval;
+      
+      // check if it has blank lhs or rhs
+      if (lhs == "" || rhs == "")
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "LHS or RHS cannot be blank");
+         canClose = false;
+         return;
+      }
+      
+      // Lhs cannot be a number
+      if (GmatStringUtil::ToReal(lhs, rval))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Left hand side cannot be a number. %f",
+             rval);
+         canClose = false;
+      }
+      
+      // Lhs should be an existing variable or valid object property
+      // Valid object property should be checked by Assignment::InterpretAction()
+      if (GmatStringUtil::IsValidName(lhs))
+      {
+         if (theGuiInterpreter->GetObject(lhs) == NULL)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Left hand side should be an existing Variable "
+                "or Object Property");
+            canClose = false;
+         }
+      }
+   }
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the syntax checking
+   //-----------------------------------------------------------------
+   if (mIsTextModified)
+   {
+      wxString genStr = "GMAT " + mLhsTextCtrl->GetValue() + " = " +
+         mRhsTextCtrl->GetValue();
+      
+      #if DEBUG_ASSIGNMENT_PANEL_SAVE
+      MessageInterface::ShowMessage("     genStr=%s\n", genStr.c_str());
+      #endif
+      
+      try
+      {
+         // interpret assignment string
+         
+         theCommand->SetGeneratingString(genStr.c_str());
+         theCommand->InterpretAction();
+         
+         mIsTextModified = false;
+      }
+      catch (BaseException &e)
+      {
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         canClose = false;
+      }
+   }
 }
 
+
 //------------------------------------------------------------------------------
-// void OnCellClick(wxGridEvent& event)
+// void OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void AssignmentPanel::OnCellClick(wxGridEvent& event)
+void AssignmentPanel::OnTextChange(wxCommandEvent& event)
 {
+   if (mLhsTextCtrl->IsModified() || mRhsTextCtrl->IsModified())
+   {
+      mIsTextModified = true;
+      EnableUpdate(true);
+   }
 }
 
-//------------------------------------------------------------------------------
-// void OnComboChange()
-//------------------------------------------------------------------------------
-/**
- * @note Activates the Apply button when text is changed
- */
-//------------------------------------------------------------------------------
-void AssignmentPanel::OnComboChange(wxCommandEvent &event)
-{
-    EnableUpdate(true);
-}

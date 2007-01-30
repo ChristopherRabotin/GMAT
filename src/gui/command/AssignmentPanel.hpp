@@ -4,10 +4,14 @@
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool
 //
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc.
+//
 // Author: Allison Greene
 // Created: 2004/12/23
 /**
- * This class contains the AssignmentPanel Setup window.
+ * This class contains the Assignment Setup window.
  */
 //------------------------------------------------------------------------------
 
@@ -16,7 +20,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatPanel.hpp"
-#include "CallFunction.hpp"
+#include "Assignment.hpp"
 
 class AssignmentPanel : public GmatPanel
 {
@@ -26,37 +30,27 @@ public:
    ~AssignmentPanel();
 
 private:
-   CallFunction *theCommand;
-
-   wxGrid *inputGrid;
-   wxGrid *outputGrid;
-
-   wxArrayString inputStrings;
-   wxArrayString outputStrings;
-
+   Assignment *theCommand;
+   bool mIsTextModified;
+   
+   wxTextCtrl *mLhsTextCtrl;
+   wxTextCtrl *mRhsTextCtrl;
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
-   void OnComboChange(wxCommandEvent &event);
-   void OnCellClick(wxGridEvent& event);
-
+   
+   void OnTextChange(wxCommandEvent& event);
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-
+   
    // IDs for the controls and the menu commands
    enum
    {
-      ID_TEXTCTRL = 44000,
-      ID_COMBO,
-      ID_BUTTON,
-      ID_CHECKBOX,
-      ID_GRID,
-      MENU_INSERT_P,
-      MENU_DELETE_P,
-      MENU_CLEAR_P,
-      ID_TEXT,
+      ID_TEXT = 44000,
+      ID_TEXTCTRL,
    };
 };
 
