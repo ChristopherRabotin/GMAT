@@ -66,10 +66,10 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    // GmatBase data
    objectTypes.push_back(Gmat::PROP_SETUP);
    objectTypeNames.push_back("PropSetup");
-
+   
    parameterCount = PropSetupParamCount;
    ownedObjectCount += 1;
-
+   
    // PropSetup data
    if (propagator != NULL)
        mPropagator = propagator;
@@ -186,8 +186,12 @@ bool PropSetup::IsInitialized()
 //------------------------------------------------------------------------------
 Propagator* PropSetup::GetPropagator()
 {
-   //MessageInterface::ShowMessage("PropSetup::GetPropagator() mPropagator=%d "
-   //   "name=%s\n", mPropagator, mPropagator->GetName().c_str());
+   #if DEBUG_PROPSETUP_GET
+   MessageInterface::ShowMessage
+      ("PropSetup::GetPropagator() mPropagator=%d name=%s\n",
+       mPropagator, mPropagator->GetName().c_str());
+   #endif
+   
    return mPropagator;
 }
 
@@ -214,7 +218,10 @@ ForceModel* PropSetup::GetForceModel()
 //------------------------------------------------------------------------------
 void PropSetup::SetPropagator(Propagator *propagator)
 {
-   //MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
+   #if DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
+   #endif
+   
    if (propagator == NULL)
       throw PropSetupException(
          "PropSetup::SetPropagator failed: propagator is NULL");
@@ -236,26 +243,28 @@ void PropSetup::SetPropagator(Propagator *propagator)
 //------------------------------------------------------------------------------
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
-   //MessageInterface::ShowMessage("PropSetup::SetForceModel() mForceModel=%s "
-   //   "forceModel=%s\n", mForceModel->GetName().c_str(),
-   //   forceModel->GetName().c_str());
+   #if DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage
+      ("PropSetup::SetForceModel() mForceModel=%s forceModel=%s\n",
+       mForceModel->GetName().c_str(), forceModel->GetName().c_str());
+   #endif
+   
    if (forceModel == NULL)
       throw PropSetupException(
          "PropSetup::SetForceModel failed: ForceModel is NULL");
-
+   
    if (mForceModel != NULL)
       delete mForceModel;
+   
    mForceModel = (ForceModel*)forceModel->Clone();
+   
+   #if DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage
+      ("PropSetup::SetForceModel() after forceModel->Clone() mForceModel=%p\n",
+       mForceModel);
+   #endif
 }
 
-// DJC 8/13/04: These are now part of the ForceModel
-//------------------------------------------------------------------------------
-// void SetUseDrag(bool flag)
-//------------------------------------------------------------------------------
-//void PropSetup::SetUseDrag(bool flag)
-//{
-//   usedrag = flag;
-//}
 
 //------------------------------------------------------------------------------
 // void AddForce(PhysicalModel *force)
@@ -282,6 +291,7 @@ void PropSetup::AddForce(PhysicalModel *force)
 //  {  
 //  }
 
+
 //------------------------------------------------------------------------------
 // PhysicalModel* GetForce(Integer index)
 //------------------------------------------------------------------------------
@@ -293,6 +303,7 @@ PhysicalModel* PropSetup::GetForce(Integer index)
 {
    return mForceModel->GetForce(index);      
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetNumForces()
@@ -319,16 +330,12 @@ const std::string* PropSetup::GetParameterList() const
 }
 
 
+//------------------------------------------------------------------------------
+// Integer GetParameterCount(void) const
+//------------------------------------------------------------------------------
 Integer PropSetup::GetParameterCount(void) const
 {
    Integer count = parameterCount;
-
-   // Increase the parameter count by the number of parameters in the members
-   //    if (mForceModel) 
-   //        count += mForceModel->GetParameterCount();
-   //    if (mPropagator)
-   //        count += mPropagator->GetParameterCount();
-
    return count;
 }
 
@@ -530,8 +537,29 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
             ForceModel *fm = theModerator->GetForceModel(value);
             if (fm)
             {
+               #if DEBUG_PROPSETUP_SET
+               MessageInterface::ShowMessage
+                  ("PropSetup::SetStringParameter() before SetForceModel() "
+                   "mForceModel=%p\n", mForceModel);
+               #endif
+               
                SetForceModel(fm);
-               return true;
+               
+               #if DEBUG_PROPSETUP_SET
+               MessageInterface::ShowMessage
+                  ("PropSetup::SetStringParameter() after  SetForceModel() "
+                   "mForceModel=%p\n", mForceModel);
+               #endif
+               
+               // Since the ForceModel is cloned in SetForce(), we need to reset
+               // the configured ForceModel pointer to cloned pointer in order to
+               // get correct generating string when saving mission. (loj: 1/30/07)
+               if (theModerator->ReconfigureItem(mForceModel, value))
+                  return true;
+               else
+                  throw PropSetupException
+                     ("Unable to reconfigure Force model \"" + value + "\".");
+               
             }
             else 
                throw PropSetupException("Force model '" + value + 
@@ -654,14 +682,20 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
       }
       else
          fMName = temp;
-         
+      
       if (mode == Gmat::SHOW_SCRIPT)
          showForceModel = true;
-         
+      
+      #if DEBUG_PROPSETUP_GEN_STRING
+      MessageInterface::ShowMessage
+         ("PropSetup::GetGeneratingString() fMName=%s, mForceModel=%p, "
+          "showForceModel=%d\n", fMName.c_str(), mForceModel, showForceModel);
+      #endif
+      
       if (showForceModel)
          gen = mForceModel->GetGeneratingString(mode, prefix, fMName) + "\n";
    }
-
+   
    gen += GmatBase::GetGeneratingString(mode, prefix, useName);
    generatingString = gen;
       
