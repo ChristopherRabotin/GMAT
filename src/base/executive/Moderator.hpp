@@ -162,7 +162,8 @@ public:
    ForceModel* GetForceModel(const std::string &name);
    bool AddToForceModel(const std::string &forceModelName,
                         const std::string &forceName);
-
+   bool ReconfigureItem(GmatBase *newobj, const std::string &name);
+   
    // Solver
    Solver* CreateSolver(const std::string &type,
                         const std::string &name);

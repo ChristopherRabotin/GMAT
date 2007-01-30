@@ -1830,6 +1830,24 @@ bool Moderator::AddToForceModel(const std::string &forceModelName,
 }
 
 
+//------------------------------------------------------------------------------
+// bool ReconfigureItem(GmatBase *newobj, const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Sets configured object pointer with new pointer.
+ *
+ * @param  newobj  New object pointer
+ * @param  name  Name of the configured object to be reset
+ *
+ * @return  true if pointer was reset, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool Moderator::ReconfigureItem(GmatBase *newobj, const std::string &name)
+{
+   return theConfigManager->ReconfigureItem(newobj, name);
+}
+
+
 // Solver
 //------------------------------------------------------------------------------
 // Solver* CreateSolver(const std::string &type, const std::string &name)

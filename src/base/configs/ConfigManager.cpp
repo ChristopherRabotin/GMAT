@@ -540,6 +540,86 @@ StringArray& ConfigManager::GetListOfAllItems()
 
 
 //------------------------------------------------------------------------------
+// StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
+//                                bool includeSysParam)
+//------------------------------------------------------------------------------
+/**
+ * Checks a specific item used in anywhere.
+ *
+ * @param type The type of the object that is being checked.
+ * @param name The name of the object.
+ * @param includeSysParam True if system parameter to be included
+ *
+ * @return array of item names where the name is used.
+ */
+//------------------------------------------------------------------------------
+StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
+                                              const std::string &name,
+                                              bool includeSysParam)
+{
+   StringArray items = GetListOfAllItems();
+   std::string::size_type pos;
+   GmatBase *obj;
+   std::string objName;
+   std::string objString;
+   static StringArray itemList;
+   itemList.clear();
+
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::GetListOfItemsHas() name=%s, includeSysParam=%d\n",
+       name.c_str(), includeSysParam);
+   #endif
+   
+   try
+   {
+      for (UnsignedInt i=0; i<items.size(); i++)
+      {
+         obj = GetItem(items[i]);
+         
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("===> obj[%d]=%s, %s\n", i, obj->GetTypeName().c_str(),
+             obj->GetName().c_str());
+         #endif
+         
+         // if same type, skip
+         if (obj->IsOfType(type))
+            continue;
+         
+         // if system parameter not to be included, skip
+         if (!includeSysParam)
+         {
+            if (obj->IsOfType(Gmat::PARAMETER))
+               if (((Parameter*)obj)->GetKey() == GmatParam::SYSTEM_PARAM)
+                  continue;
+         }
+         
+         objName = obj->GetName();
+         objString = obj->GetGeneratingString();
+         pos = objString.find(name);
+         
+         #if DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("===> objString=\n%s\n", objString.c_str());
+         #endif
+         
+         if (pos != objString.npos)
+         {
+            itemList.push_back(objName);
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
+   }
+   
+   return itemList;
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray& GetListOfItems(Gmat::ObjectType itemType)
 //------------------------------------------------------------------------------
 /**
@@ -848,82 +928,42 @@ bool ConfigManager::RemoveItem(Gmat::ObjectType type, const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
-//                                bool includeSysParam)
+// bool ReconfigureItem(GmatBase *newobj, const std::string &name)
 //------------------------------------------------------------------------------
-/**
- * Checks a specific item used in anywhere.
+/*
+ * Sets configured object pointer with new pointer.
  *
- * @param type The type of the object that is being checked.
- * @param name The name of the object.
- * @param includeSysParam True if system parameter to be included
+ * @param  newobj  New object pointer
+ * @param  name  Name of the configured object to be reset
  *
- * @return array of item names where the name is used.
+ * @return  true if pointer was reset, false otherwise
  */
 //------------------------------------------------------------------------------
-StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
-                                              const std::string &name,
-                                              bool includeSysParam)
+bool ConfigManager::ReconfigureItem(GmatBase *newobj, const std::string &name)
 {
-   StringArray items = GetListOfAllItems();
-   std::string::size_type pos;
-   GmatBase *obj;
-   std::string objName;
-   std::string objString;
-   static StringArray itemList;
-   itemList.clear();
-
-   #if DEBUG_RENAME
-   MessageInterface::ShowMessage
-      ("ConfigManager::GetListOfItemsHas() name=%s, includeSysParam=%d\n",
-       name.c_str(), includeSysParam);
-   #endif
+   GmatBase *obj = NULL;
    
-   try
+   if (mapping.find(name) != mapping.end())
    {
-      for (UnsignedInt i=0; i<items.size(); i++)
+      if (mapping[name]->GetName() == name)
       {
-         obj = GetItem(items[i]);
+         obj = mapping[name];
          
-         #if DEBUG_RENAME
+         #if DEBUG_CONFIG_RECONFIGURE
          MessageInterface::ShowMessage
-            ("===> obj[%d]=%s, %s\n", i, obj->GetTypeName().c_str(),
-             obj->GetName().c_str());
+            ("ConfigManager::ReconfigureItem() obj=%p newobj=%p\n", obj,
+             newobj);
          #endif
          
-         // if same type, skip
-         if (obj->IsOfType(type))
-            continue;
-         
-         // if system parameter not to be included, skip
-         if (!includeSysParam)
+         if (obj->GetTypeName() == newobj->GetTypeName())
          {
-            if (obj->IsOfType(Gmat::PARAMETER))
-               if (((Parameter*)obj)->GetKey() == GmatParam::SYSTEM_PARAM)
-                  continue;
-         }
-         
-         objName = obj->GetName();
-         objString = obj->GetGeneratingString();
-         pos = objString.find(name);
-         
-         #if DEBUG_RENAME
-         MessageInterface::ShowMessage
-            ("===> objString=\n%s\n", objString.c_str());
-         #endif
-         
-         if (pos != objString.npos)
-         {
-            itemList.push_back(objName);
+            mapping[name] = newobj;
+            return true;
          }
       }
    }
-   catch (BaseException &e)
-   {
-      MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
-   }
    
-   return itemList;
+   return false;
 }
 
 

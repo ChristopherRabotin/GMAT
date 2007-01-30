@@ -72,6 +72,10 @@ public:
    
    StringArray&        GetListOfAllItems();
    StringArray&        GetListOfItems(Gmat::ObjectType itemType);
+   StringArray&        GetListOfItemsHas(Gmat::ObjectType type,
+                                         const std::string &name,
+                                         bool includeSysParam = true);
+   
    GmatBase*           GetItem(const std::string &name);
    
    bool                RenameItem(Gmat::ObjectType itemType,
@@ -80,9 +84,8 @@ public:
    
    bool                RemoveAllItems();
    bool                RemoveItem(Gmat::ObjectType type, const std::string &name);
-   StringArray&        GetListOfItemsHas(Gmat::ObjectType type,
-                                         const std::string &name,
-                                         bool includeSysParam = true);
+   bool                ReconfigureItem(GmatBase *newobj, const std::string &name);
+   
    
    PhysicalModel*      GetPhysicalModel(const std::string &name);
    Propagator*         GetPropagator(const std::string &name);
@@ -127,7 +130,7 @@ private:
    std::map<std::string, GmatBase *>   mapping;
    /// Flag indicating that a managed object has been changed by a user
    bool                                objectChanged;
-
+   
    // Treat default and in use separately until we can manage solar system by name.
    // All sollar system names are "SolarSystem" for now.
    
