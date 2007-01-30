@@ -40,6 +40,10 @@ public:
    Assignment&          operator=(const Assignment& a);
 
    MathTree*            GetMathTree() { return mathTree; }
+
+   std::string          GetLHS() { return lhs; }
+   std::string          GetRHS() { return rhs; }
+   
    virtual bool         Initialize();
    virtual bool         InterpretAction();
    virtual bool         Execute();
@@ -59,6 +63,10 @@ public:
 
 
 protected:
+   /// string on the left side of the equals sign
+   std::string          lhs;
+   /// string on the right side of the equals sign
+   std::string          rhs;
    /// Name of the object that appears on the left side of the equals sign
    std::string          ownerName;
    /// Parameter associated with that object

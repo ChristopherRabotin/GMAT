@@ -51,6 +51,8 @@
 //------------------------------------------------------------------------------
 Assignment::Assignment  () :
    GmatCommand          ("GMAT"),
+   lhs                  (""),
+   rhs                  ("Not_Set"),
    ownerName            (""),
    parmName             (""),
    parmOwner            (NULL),
@@ -214,10 +216,12 @@ bool Assignment::InterpretAction()
    const char *str = genString.c_str();
    while (str[loc] == ' ')
       ++loc;
-
-   std::string lhs, rhs;
+   
+   // lhs and rhs are now member data so that GUI can display it
+   // through GetLHS() and GetRHS()(loj:1/26/07)
+   //std::string lhs, rhs;
    UnsignedInt eqloc = genString.find("=", loc), lend, rstart;
-
+   
    // Check to be sure equal sign is in place
    if (eqloc == std::string::npos)
       throw CommandException("Assignment string does not set value\n");
