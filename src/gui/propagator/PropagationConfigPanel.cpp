@@ -16,29 +16,15 @@
  * This class contains the Propagation configuration window.
  */
 //------------------------------------------------------------------------------
-
-// gui includes
 #include "gmatwxdefs.hpp"
 #include "GmatAppData.hpp"
 #include "CelesBodySelectDialog.hpp"
 #include "DragInputsDialog.hpp"
-// #include "ExponentialDragDialog.hpp"
-// #include "MSISE90Dialog.hpp"
-// #include "JacchiaRobertsDialog.hpp"
 #include "PropagationConfigPanel.hpp"
 #include "GmatStaticBoxSizer.hpp"
-#include "wx/platform.h"
-
-// base includes
 #include "MessageInterface.hpp"
-#include "PropagatorException.hpp"
-#include "StringTokenizer.hpp"
-#include "StringUtil.hpp"  // for ToReal()
 
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
+#include "wx/platform.h"
 
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
@@ -2361,7 +2347,7 @@ void PropagationConfigPanel::OnSetupButton(wxCommandEvent &event)
       if (forceList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
       {
          // TBD by Code 595
-         //ExponentialDragDialog dragDlg(this, dragForce);
+         //DragInputsDialog dragDlg(this, dragForce, "ExponentialDragDialog");
          //dragDlg.ShowModal();
       }
       else if (forceList[currentBodyId]->dragType == dragModelArray[MSISE90])
@@ -2518,11 +2504,11 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage(">>>>>=======================================\n");
    MessageInterface::ShowMessage("%s\n", header.c_str());
-   MessageInterface::ShowMessage("thePropSetup=%d name=%s\n",
+   MessageInterface::ShowMessage("thePropSetup =%p name=%s\n",
                                  thePropSetup, thePropSetup->GetName().c_str());
-   MessageInterface::ShowMessage("thePropagator=%d, name=%s\n", thePropagator,
-                                 thePropagator->GetName().c_str());
-   MessageInterface::ShowMessage("theForceModel=%d, name=%s\n", theForceModel,
+   MessageInterface::ShowMessage("thePropagator=%p, name=%s\n", thePropagator,
+                                 thePropagator->GetTypeName().c_str());
+   MessageInterface::ShowMessage("theForceModel=%p, name=%s\n", theForceModel,
                                  theForceModel->GetName().c_str());
    MessageInterface::ShowMessage("numOfForces=%d\n", numOfForces);
    
@@ -2536,16 +2522,16 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
       force = theForceModel->GetForce(i);
       forceType = force->GetTypeName();
 
-      if (forceType == "DragForce")
-      {
-         //paramId = force->GetParameterID("AtmosphereBody");
-         //forceBody = force->GetStringParameter(paramId);
-         forceBody = force->GetStringParameter("BodyName");
-      }
-      else 
-      {
-         forceBody = force->GetStringParameter("BodyName");
-      }
+      forceBody = force->GetStringParameter("BodyName");
+      
+//       if (forceType == "DragForce")
+//       {
+//          forceBody = force->GetStringParameter("BodyName");
+//       }
+//       else 
+//       {
+//          forceBody = force->GetStringParameter("BodyName");
+//       }
       
       MessageInterface::ShowMessage("forceBody=%s, forceType=%s\n", forceBody.c_str(),
                                     forceType.c_str());
@@ -2561,7 +2547,7 @@ void PropagationConfigPanel::ShowForceList(const std::string &header)
 {
    MessageInterface::ShowMessage(">>>>>=======================================\n");
    MessageInterface::ShowMessage("%s\n", header.c_str());
-   MessageInterface::ShowMessage("theForceModel=%p", theForceModel);
+   MessageInterface::ShowMessage("theForceModel=%p\n", theForceModel);
    for (unsigned int i=0; i<forceList.size(); i++)
    {
       MessageInterface::ShowMessage
