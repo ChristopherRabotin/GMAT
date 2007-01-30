@@ -2477,6 +2477,8 @@ GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
       return GmatTree::CALL_FUNCTION;
    if (cmd == "Stop")
       return GmatTree::STOP;
+   if (cmd == "GMAT")
+      return GmatTree::ASSIGNMENT;
    
    return GmatTree::SCRIPT_EVENT;
 }

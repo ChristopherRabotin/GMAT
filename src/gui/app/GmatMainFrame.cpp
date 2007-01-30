@@ -1610,9 +1610,9 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
       //sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    }
-      //case GmatTree::ASSIGNMENT:
-      //sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
-      //break;
+   case GmatTree::ASSIGNMENT:
+      sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
+      break;
    default:
       MessageInterface::ShowMessage("===> returning NULL\n");
       return NULL;
