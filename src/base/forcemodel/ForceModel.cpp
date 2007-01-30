@@ -60,7 +60,7 @@
 //#define DEBUG_FORCE_EPOCHS
 //#define DEBUG_SATELLITE_PARAMETERS
 //#define DEBUG_FIRST_CALL
-
+//#define DEBUG_OWNED_OBJECT_STRINGS
 
 //---------------------------------
 // static data
@@ -199,7 +199,6 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    centralBodyName            (fdf.centralBodyName),
    forceMembersNotInitialized (true),
    modelEpochId               (-1),
-//    rawState         (NULL),
    j2kBodyName                (fdf.j2kBodyName),
    /// @note: Since the next three are global objects or reset by the Sandbox, 
    ///assignment works
@@ -224,12 +223,15 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    spacecraft.clear();
    forceList.clear();
    InternalCoordinateSystems.clear();
-
+   
    // Copy the forces.  May not work -- the copy constructors need to be checked
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
         pm != fdf.forceList.end(); ++pm)
+   {
       forceList.push_back((PhysicalModel*)(*pm)->Clone());
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // ForceModel& ForceModel::operator=(const ForceModel& fdf)
@@ -503,10 +505,11 @@ void ForceModel::ClearSpacecraft()
 PhysicalModel* ForceModel::GetForce(Integer index)
 {
     if (index >= 0 && index < numForces)
-        return forceList[index];
+       return forceList[index];
     
     return NULL;
 }
+
 
 //------------------------------------------------------------------------------
 // PhysicalModel* GetForce(std::string forcetype, Integer whichOne)
@@ -523,21 +526,21 @@ PhysicalModel* ForceModel::GetForce(Integer index)
 const PhysicalModel* ForceModel::GetForce(std::string forcetype, 
                                           Integer whichOne) const
 {
-    Integer i = 0;
+   Integer i = 0;
 
-    for (std::vector<PhysicalModel *>::const_iterator force = forceList.begin(); 
-         force != forceList.end(); ++force) 
-    {
-        std::string pmName = (*force)->GetTypeName();
-        if (pmName == forcetype) {
-           if (whichOne <= i)
-              return *force;
-           else
-              ++i;
-        }
-    }
+   for (std::vector<PhysicalModel *>::const_iterator force = forceList.begin(); 
+        force != forceList.end(); ++force) 
+   {
+      std::string pmName = (*force)->GetTypeName();
+      if (pmName == forcetype) {
+         if (whichOne <= i)
+            return *force;
+         else
+            ++i;
+      }
+   }
 
-    return NULL;
+   return NULL;
 }
 
 
@@ -992,9 +995,9 @@ Integer ForceModel::GetOwnedObjectCount()
 
 GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
 {
-   if (whichOne < numForces)
+   if (whichOne < numForces) 
       return GetForce(whichOne);
-      
+   
    return NULL;
 }
 
@@ -2243,6 +2246,12 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
 {
+   #if DEBUG_FORCEMODEL_GEN_STRING
+   MessageInterface::ShowMessage
+      ("ForceModel::GetGeneratingString() this=%p, mode=%d, prefix=%s, "
+       "useName=%s\n", this, mode, prefix.c_str(), useName.c_str());
+   #endif
+   
    std::stringstream data;
 
    data.precision(18);   // Crank up data precision so we don't lose anything
@@ -2363,15 +2372,16 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
          }
       }
    }
-
+   
    GmatBase *ownedObject;
    std::string nomme, newprefix;
-
+   
    #ifdef DEBUG_OWNED_OBJECT_STRINGS
-      MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
-         instanceName.c_str(), GetOwnedObjectCount());
+      MessageInterface::ShowMessage
+         ("ForceModel::WriteFMParameters() \"%s\" has %d owned objects\n",
+          instanceName.c_str(), GetOwnedObjectCount());
    #endif
-
+      
    for (i = 0; i < GetOwnedObjectCount(); ++i)
    {
       newprefix = prefix;
@@ -2382,9 +2392,9 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
 
          #ifdef DEBUG_OWNED_OBJECT_STRINGS
              MessageInterface::ShowMessage(
-                "   id %d has type %s and name \"%s\"\n",
+                "   id %d has type %s and name \"%s\", addr=%p\n",
                 i, ownedObject->GetTypeName().c_str(),
-                nomme.c_str());
+                nomme.c_str(), ownedObject);
          #endif
 
          if (nomme != "")
@@ -2399,6 +2409,9 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
 }
 
 
+//------------------------------------------------------------------------------
+// std::string BuildForceNameString(PhysicalModel *force)
+//------------------------------------------------------------------------------
 std::string ForceModel::BuildForceNameString(PhysicalModel *force)
 {
    std::string retval = "UnknownForce", forceType = force->GetTypeName();
