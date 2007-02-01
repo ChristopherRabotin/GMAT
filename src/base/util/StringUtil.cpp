@@ -376,8 +376,15 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    // Check for multiple + or -
    index1 = str2.find_first_of("+-");
    if (index1 != str2.npos)
-      if (str2.find_first_of("+-", index1 + 1) != str2.npos)
-         return false;
+   {
+      index1 = str2.find_first_of("+-", index1 + 1);
+      if (index1 != str2.npos)
+      {
+         UnsignedInt firstE = str2.find_first_of("Ee");
+         if (firstE != str2.npos && index1 < firstE)
+            return false;
+      }
+   }
    
    for (unsigned int i=0; i<str2.length(); i++)
    {
