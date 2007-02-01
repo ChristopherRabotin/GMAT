@@ -237,7 +237,14 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rvector &a)
 // std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
 //------------------------------------------------------------------------------
 /**
- * @note Resets format to default.
+ * Formats Rvector value using global format and sends to output stream.
+ * Once global format is set, it remains the same format until it is reset by
+ * global->SetActualFormat().
+ *
+ * @param  output  Output stream
+ * @param  a       Rvector to write out
+ *
+ * return  Output stream
  */
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a) 
@@ -274,9 +281,11 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
             output << setw(w) << setprecision(p) << a[i] << std::endl;
       }
    }
-   
+
    // Reset to current format
+   #ifdef __RESET_TO_CURRENT_FORMAT__
    global->SetToCurrentFormat();
+   #endif
    
    return output;
 }
@@ -314,7 +323,14 @@ std::istream& GmatRealUtil::operator>> (std::istream &input, Rmatrix &a)
 //  std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &)
 //------------------------------------------------------------------------------
 /**
- * @note Resets format to default.
+ * Formats Rmatrix value using global format and sends to output stream.
+ * Once global format is set, it remains the same format until it is reset by
+ * global->SetActualFormat().
+ *
+ * @param  output  Output stream
+ * @param  a       Rmatrix to write out
+ *
+ * return  Output stream
  */
 //------------------------------------------------------------------------------
 std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a) 
@@ -365,7 +381,9 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
    }
    
    // Reset to current format
+   #ifdef __RESET_TO_CURRENT_FORMAT__
    global->SetToCurrentFormat();
+   #endif
    
    return output;
 }
