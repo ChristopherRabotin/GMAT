@@ -185,6 +185,30 @@ void TogglePanel::SaveData()
    int count = mSubsCheckListBox->GetCount();
    bool toggleOn = mOnRadioButton->GetValue();
    std::string onOff = toggleOn ? "On" : "Off";
+   int checkedCount = 0;
+   
+   canClose = true;
+   
+   //-----------------------------------------------------------------
+   // check for number of subscribers checked
+   //-----------------------------------------------------------------
+   for (int i=0; i<count; i++)
+      if (mSubsCheckListBox->IsChecked(i))
+         checkedCount++;
+
+   if (checkedCount == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "Please select one or more subscribers to toggle on or off.");
+      canClose = false;
+      return;
+   }
+
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do any range checking
+   //-----------------------------------------------------------------
    
    theCommand->TakeAction("Clear");
    
