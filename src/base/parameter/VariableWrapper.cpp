@@ -23,7 +23,7 @@
 #include "VariableWrapper.hpp"
 #include "ParameterException.hpp"
 
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -35,18 +35,16 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  VariableWrapper(const std::string &desc);
+//  VariableWrapper();
 //---------------------------------------------------------------------------
 /**
  * Constructs VariableWrapper structures
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-VariableWrapper::VariableWrapper(const std::string &desc) :
-   ElementWrapper(desc),
+VariableWrapper::VariableWrapper() :
+   ElementWrapper(),
    var           (NULL)
 {
 }
@@ -100,17 +98,32 @@ VariableWrapper::~VariableWrapper()
 }
 
 //---------------------------------------------------------------------------
-//  bool SetVariable(Variable *toVar)
+//  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------
 /**
- * Method to set the Variable pointer to the wrapped object.
+ * Method to set the reference object (Variable) pointer on the wrapped 
+ * object.
  *
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool VariableWrapper::SetVariable(Variable *toVar)
+bool VariableWrapper::SetRefObject(GmatBase *obj)
 {
-   var = toVar;
+   if ( (obj->GetName() != refObjectNames[0]) ||
+        (obj->GetTypeName() != "Variable") )
+   {
+      std::string errmsg = "Referenced variable \"";
+      errmsg += obj->GetName();
+      errmsg += ("\" of type \"" + obj->GetTypeName());
+      errmsg += "\" was passed into the variable wrapper \"";
+      errmsg += description;
+      errmsg += "\", but an object named \"";
+      errmsg += refObjectNames[0];
+      errmsg += "\" was expected.\n";
+      throw ParameterException(errmsg);
+   }
+
+   var = (Variable*) obj;
    return true;
 }
 
@@ -148,4 +161,17 @@ bool VariableWrapper::SetReal(const Real toValue)
       "Cannot set value of Variable - pointer is NULL\n");
    var->SetReal(toValue);
    return true;
+}
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method to set up the Variable Wrapper.
+ *
+ */
+//---------------------------------------------------------------------------
+void VariableWrapper::SetupWrapper()
+{
+   refObjectNames.push_back(description);
 }

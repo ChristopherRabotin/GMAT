@@ -23,8 +23,10 @@
 #include "ArrayElementWrapper.hpp"
 #include "ParameterException.hpp"
 #include "RealUtilities.hpp"
+#include "StringUtil.hpp"
+#include "UtilityException.hpp"
 
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -36,21 +38,22 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  ArrayElementWrapper(const std::string &desc);
+//  ArrayElementWrapper();
 //---------------------------------------------------------------------------
 /**
  * Constructs ArrayElementWrapper structures
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-ArrayElementWrapper::ArrayElementWrapper(const std::string &desc) :
-   ElementWrapper(desc),
+ArrayElementWrapper::ArrayElementWrapper() :
+   ElementWrapper(),
    array         (NULL),
    row           (NULL),
-   column        (NULL)
+   column        (NULL),
+   arrayName     (""),
+   rowName       (""),
+   columnName    ("")
 {
 }
 
@@ -67,8 +70,12 @@ ArrayElementWrapper::ArrayElementWrapper(const std::string &desc) :
 //---------------------------------------------------------------------------
 ArrayElementWrapper::ArrayElementWrapper(const ArrayElementWrapper &aew) :
    ElementWrapper(aew),
-   row           (aew.row),
-   column        (aew.column)
+   array         (NULL),
+   row           (NULL),
+   column        (NULL),
+   arrayName     (aew.arrayName),
+   rowName       (aew.rowName),
+   columnName    (aew.columnName)
 {
 }
 
@@ -90,8 +97,12 @@ const ArrayElementWrapper& ArrayElementWrapper::operator=(
       return *this;
 
    ElementWrapper::operator=(aew);
-   row      = aew.row;
-   column   = aew.column;
+   array        = NULL;  //
+   row          = NULL;  // or do I want copies or clones here?
+   column       = NULL;  //
+   arrayName    = aew.arrayName;
+   rowName      = aew.rowName;
+   columnName   = aew.columnName;
 
    return *this;
 }
@@ -104,50 +115,68 @@ const ArrayElementWrapper& ArrayElementWrapper::operator=(
 //---------------------------------------------------------------------------
 ArrayElementWrapper::~ArrayElementWrapper()
 {
+   if (row)    delete row;
+   if (column) delete column;
+}
+
+//------------------------------------------------------------------------------
+//  const StringArray&  GetRefObjectNames() 
+//------------------------------------------------------------------------------
+/**
+ * This method returns the list of reference object names for the ElementWrapper 
+ * object.
+ *
+ * @return list of reference object names for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& ArrayElementWrapper::GetRefObjectNames()
+{
+   refObjectNames.clear();
+   // start with the array name ...
+   refObjectNames.push_back(arrayName);
+   
+   // ... then add the reference object names from the row
+   // (don't worry about duplicates for now)
+   StringArray rowRefNames = row->GetRefObjectNames();
+   for (StringArray::const_iterator i = rowRefNames.begin(); 
+        i != rowRefNames.end(); ++i)
+          refObjectNames.push_back(*i);
+          
+   // ... then add the reference object names from the column
+   // (don't worry about duplicates for now)
+   StringArray colRefNames = column->GetRefObjectNames();
+   for (StringArray::const_iterator j = colRefNames.begin(); 
+        j != colRefNames.end(); ++j)
+          refObjectNames.push_back(*j);
+   
+   return refObjectNames;
 }
 
 //---------------------------------------------------------------------------
-//  bool SetArray(Array *toArray)
+//  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------
 /**
- * Method to set the ArrayElement pointer to the wrapped object.
+ * Method to set the reference object (ObjectProperty) pointer on the wrapped 
+ * object.
  *
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool ArrayElementWrapper::SetArray(Array *toArray)
+bool ArrayElementWrapper::SetRefObject(GmatBase *obj)
 {
-   array      = toArray;
-   return true;
-}
-
-//---------------------------------------------------------------------------
-//  bool SetRowWrapper(ElementWrapper* toRow)
-//---------------------------------------------------------------------------
-/**
- * Method to set the ElementWrapper for the row.
- *
- * @return true if successful; false otherwise.
- */
-//---------------------------------------------------------------------------
-bool ArrayElementWrapper::SetRowWrapper(ElementWrapper* toRow)
-{
-   row      = toRow;
-   return true;
-}
-
-//---------------------------------------------------------------------------
-//  bool SetColumnWrapper(ElementWrapper* toColumn)
-//---------------------------------------------------------------------------
-/**
- * Method to set the ElementWrapper for the column.
- *
- * @return true if successful; false otherwise.
- */
-//---------------------------------------------------------------------------
-bool ArrayElementWrapper::SetColumnWrapper(ElementWrapper* toColumn)
-{
-   column   = toColumn;
+   bool isOk   = false;
+   bool setRow = false;
+   bool setCol = false;
+   if ( (obj->IsOfType("Array")) && (obj->GetName() == arrayName) )
+   {
+      array = (Array*) obj;
+      isOk = true;
+   }
+   if (row)    setRow = row->SetRefObject(obj);
+   if (column) setCol = column->SetRefObject(obj);
+   
+   if (!isOk && !setRow && !setCol) return false;
    return true;
 }
 
@@ -266,4 +295,54 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
    }
          
    return true;
+}
+
+std::string ArrayElementWrapper::GetRowName()
+{
+   return rowName;
+}
+
+std::string ArrayElementWrapper::GetColumnName()
+{
+   return columnName;
+}
+
+   
+bool ArrayElementWrapper::SetRow(ElementWrapper* toWrapper)
+{
+   row = toWrapper;
+   return true;
+}
+
+bool ArrayElementWrapper::SetColumn(ElementWrapper* toWrapper)
+{
+   column = toWrapper;
+   return true;
+}
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method to set up the Array Element Wrapper.
+ *
+ */
+//---------------------------------------------------------------------------
+void ArrayElementWrapper::SetupWrapper()
+{
+   try
+   {
+      GmatStringUtil::GetArrayIndexVar(description, rowName, columnName,
+                                       arrayName);
+   }
+   catch (UtilityException *ue)
+   {
+      std::string errmsg = "Unable to set up ArrayElementWrapper \"" +
+                           description;
+      errmsg += "\" - does not parse correctly as an array.\n";
+      throw ParameterException(errmsg);
+   }
+   // for now, put the array name in the list of reference objects - add
+   // all the other stuff when GetRefObjectNames is called
+   refObjectNames.push_back(arrayName);
 }

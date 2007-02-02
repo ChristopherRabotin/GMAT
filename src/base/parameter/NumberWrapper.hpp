@@ -31,7 +31,7 @@ class GMAT_API NumberWrapper : public ElementWrapper
 public:
 
    // default constructor
-   NumberWrapper(const std::string &desc = "");
+   NumberWrapper();
    // copy constructor
    NumberWrapper(const NumberWrapper &nr);
    // operator = 
@@ -39,8 +39,7 @@ public:
    // destructor
    virtual ~NumberWrapper();
    
-   virtual Real            EvaluateReal() const;
-   
+   virtual Real            EvaluateReal() const;  
    virtual bool            SetReal(const Real toValue);
    
    
@@ -49,5 +48,6 @@ protected:
    // the Real value
    Real value;
    
+   virtual void            SetupWrapper();
 };
 #endif // NumberWrapper_hpp

@@ -32,7 +32,7 @@ class GMAT_API ParameterWrapper : public ElementWrapper
 public:
 
    // default constructor
-   ParameterWrapper(const std::string &desc = "");
+   ParameterWrapper();
    // copy constructor
    ParameterWrapper(const ParameterWrapper &pw);
    // operator = 
@@ -40,10 +40,8 @@ public:
    // destructor
    virtual ~ParameterWrapper();
    
-   virtual bool            SetParameter(Parameter *toParam);
-   
+   virtual bool            SetRefObject(GmatBase *obj);
    virtual Real            EvaluateReal() const;
-   
    virtual bool            SetReal(const Real toValue);
    
    
@@ -52,5 +50,6 @@ protected:
    // pointer to the Parameter object
    Parameter *param;
    
+   virtual void            SetupWrapper(); 
 };
 #endif // ParameterWrapper_hpp

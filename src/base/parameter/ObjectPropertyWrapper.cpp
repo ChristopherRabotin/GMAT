@@ -22,8 +22,9 @@
 #include "GmatBase.hpp"
 #include "ObjectPropertyWrapper.hpp"
 #include "ParameterException.hpp"
+#include "StringUtil.hpp"
 
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -35,20 +36,18 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  ObjectPropertyWrapper(const std::string &desc);
+//  ObjectPropertyWrapper();
 //---------------------------------------------------------------------------
 /**
  * Constructs ObjectPropertyWrapper structures
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-ObjectPropertyWrapper::ObjectPropertyWrapper(const std::string &desc) :
-   ElementWrapper(desc),
+ObjectPropertyWrapper::ObjectPropertyWrapper() :
+   ElementWrapper(),
    object        (NULL),
-   parameterId   (-1)
+   propID        (-1)
 {
 }
 
@@ -66,7 +65,8 @@ ObjectPropertyWrapper::ObjectPropertyWrapper(const std::string &desc) :
 ObjectPropertyWrapper::ObjectPropertyWrapper(const ObjectPropertyWrapper &opw) :
    ElementWrapper(opw),
    object        (opw.object),
-   parameterId   (opw.parameterId)
+   propIDNames   (opw.propIDNames),
+   propID        (opw.propID)
 {
 }
 
@@ -89,7 +89,8 @@ const ObjectPropertyWrapper& ObjectPropertyWrapper::operator=(
 
    ElementWrapper::operator=(opw);
    object      = opw.object;
-   parameterId = opw.parameterId;
+   propIDNames = opw.propIDNames;
+   propID      = opw.propID;
 
    return *this;
 }
@@ -105,18 +106,30 @@ ObjectPropertyWrapper::~ObjectPropertyWrapper()
 }
 
 //---------------------------------------------------------------------------
-//  bool SetObjectAndId(ObjectProperty *toVar)
+//  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------
 /**
- * Method to set the ObjectProperty pointer to the wrapped object.
+ * Method to set the reference object (ObjectProperty) pointer on the wrapped 
+ * object.
  *
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool ObjectPropertyWrapper::SetObjectAndId(GmatBase *toObj, Integer andId)
+bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
 {
-   object      = toObj;
-   parameterId = andId;
+   if (obj->GetName() != refObjectNames[0])
+   {
+      std::string errmsg = "Referenced object \"";
+      errmsg += object->GetName();
+      errmsg += "\" was passed into the variable wrapper \"";
+      errmsg += description;
+      errmsg += "\", but an object named \"";
+      errmsg += refObjectNames[0];
+      errmsg += "\" was expected.\n";
+      throw ParameterException(errmsg);
+   }
+   object = obj;
+   propID = object->GetParameterID(propIDNames[0]);
    return true;
 }
 
@@ -138,13 +151,13 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    Real itsValue;
    try
    {
-      itsValue = object->GetRealParameter(parameterId);
+      itsValue = object->GetRealParameter(propID);
    }
    catch (BaseException &be)
    {
-      std::string errmsg = "Cannot return Real value for id " + parameterId; 
-      errmsg += " for object " + object->GetName() + " - exception thrown: " +
-      be.GetMessage();
+      std::string errmsg = "Cannot return Real value for id \"" + propID; 
+      errmsg += "\" for object \"" + object->GetName();
+      errmsg += "\" - exception thrown: " + be.GetMessage();
       throw ParameterException(errmsg);
    }
          
@@ -168,15 +181,50 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
 
    try
    {
-      object->SetRealParameter(parameterId, toValue);
+      object->SetRealParameter(propID, toValue);
    }
    catch (BaseException &be)
    {
-      std::string errmsg = "Cannot set Real value for id " + parameterId; 
-      errmsg += " for object " + object->GetName() + " - exception thrown: " +
-      be.GetMessage();
+      std::string errmsg = "Cannot set Real value for id \"" + propID; 
+      errmsg += "\" for object \"" + object->GetName();
+      errmsg += "\" - exception thrown: " + be.GetMessage();
       throw ParameterException(errmsg);
    }
          
    return true;
+}
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method to set up the Object Property Wrapper.
+ *
+ */
+//---------------------------------------------------------------------------
+void ObjectPropertyWrapper::SetupWrapper()
+{
+   std::string type, owner, depobj;
+   GmatStringUtil::ParseParameter(description, type, owner, depobj);
+   if (depobj != "")
+   {
+      throw ParameterException(
+      "Dependent objects not yet supported for the object property wrapper \"" +
+      description + "\".\n");
+      /// @todo Handle object properties that use dependent objects here
+   }
+   if (owner == "")
+   {
+      throw ParameterException(
+      "Owner object name is empty for the object property wrapper \"" +
+      description + "\".\n");
+   }
+   if (type == "")
+   {
+      throw ParameterException(
+      "Property ID string is empty for the object property wrapper \"" +
+      description + "\".\n");
+   }
+   refObjectNames.push_back(owner);
+   propIDNames.push_back(type);
 }

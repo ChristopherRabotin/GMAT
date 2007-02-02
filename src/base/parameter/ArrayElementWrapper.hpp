@@ -32,7 +32,7 @@ class GMAT_API ArrayElementWrapper : public ElementWrapper
 public:
 
    // default constructor
-   ArrayElementWrapper(const std::string &desc = "");
+   ArrayElementWrapper();
    // copy constructor
    ArrayElementWrapper(const ArrayElementWrapper &aew);
    // operator = 
@@ -40,16 +40,17 @@ public:
    // destructor
    virtual ~ArrayElementWrapper();
    
-   virtual bool            SetArray(Array *toArray);
+   virtual const StringArray& GetRefObjectNames();
+   virtual bool               SetRefObject(GmatBase *obj);
+   virtual Real               EvaluateReal() const;
+   virtual bool               SetReal(const Real toValue);
    
-   virtual bool            SetRowWrapper(ElementWrapper* toRow);
+   /// additioanl methods needed to handle the row and column elements
+   virtual std::string        GetRowName();
+   virtual std::string        GetColumnName();
    
-   virtual bool            SetColumnWrapper(ElementWrapper* toColumn);
-   
-   virtual Real            EvaluateReal() const;
-   
-   virtual bool            SetReal(const Real toValue);
-   
+   virtual bool               SetRow(ElementWrapper* toWrapper);
+   virtual bool               SetColumn(ElementWrapper* toWrapper);
    
 protected:  
 
@@ -58,5 +59,14 @@ protected:
    /// pointers to the wrappers for the row and column
    ElementWrapper *row;
    ElementWrapper *column;   
+   
+   /// name of the array
+   std::string     arrayName;
+   
+   // names (description strings) for those row and column wrappers
+   std::string     rowName;
+   std::string     columnName;
+   
+   virtual void            SetupWrapper(); 
 };
 #endif // ArrayElementWrapper_hpp

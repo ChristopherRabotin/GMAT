@@ -32,7 +32,7 @@ class GMAT_API VariableWrapper : public ElementWrapper
 public:
 
    // default constructor
-   VariableWrapper(const std::string &desc = "");
+   VariableWrapper();
    // copy constructor
    VariableWrapper(const VariableWrapper &vw);
    // operator = 
@@ -40,10 +40,9 @@ public:
    // destructor
    virtual ~VariableWrapper();
    
-   virtual bool            SetVariable(Variable *toVar);
+   virtual bool            SetRefObject(GmatBase *obj);
    
    virtual Real            EvaluateReal() const;
-   
    virtual bool            SetReal(const Real toValue);
    
    
@@ -52,5 +51,6 @@ protected:
    // pointer to the Variable object
    Variable *var;
    
+   virtual void            SetupWrapper();
 };
 #endif // VariableWrapper_hpp

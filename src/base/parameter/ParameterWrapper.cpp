@@ -23,7 +23,7 @@
 #include "ParameterWrapper.hpp"
 #include "ParameterException.hpp"
 
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -35,18 +35,16 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  ParameterWrapper(const std::string &desc);
+//  ParameterWrapper();
 //---------------------------------------------------------------------------
 /**
  * Constructs ParameterWrapper structures
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-ParameterWrapper::ParameterWrapper(const std::string &desc) :
-   ElementWrapper(desc),
+ParameterWrapper::ParameterWrapper() :
+   ElementWrapper(),
    param         (NULL)
 {
 }
@@ -100,17 +98,30 @@ ParameterWrapper::~ParameterWrapper()
 }
 
 //---------------------------------------------------------------------------
-//  bool SetParameter(Parameter *toVar)
+//  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------
 /**
- * Method to set the Parameter pointer to the wrapped object.
+ * Method to set the reference object (Parameter) pointer on the wrapped 
+ * object.
  *
  * @return true if successful; false otherwise.
  */
 //---------------------------------------------------------------------------
-bool ParameterWrapper::SetParameter(Parameter *toParam)
+bool ParameterWrapper::SetRefObject(GmatBase *obj)
 {
-   param = toParam;
+   if ( (obj->GetName() != refObjectNames[0]) ||
+        (!obj->IsOfType("Parameter")) )
+   {
+      std::string errmsg = "Referenced object \"";
+      errmsg += obj->GetName();
+      errmsg += "\" was passed into the variable wrapper \"";
+      errmsg += description;
+      errmsg += "\", but an object named \"";
+      errmsg += refObjectNames[0];
+      errmsg += "\" was expected.\n";
+      throw ParameterException(errmsg);
+   }
+   param = (Parameter*) obj;
    return true;
 }
 
@@ -149,3 +160,17 @@ bool ParameterWrapper::SetReal(const Real toValue)
    param->SetReal(toValue);
    return true;
 }
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method to set up the Parameter Wrapper.
+ *
+ */
+//---------------------------------------------------------------------------
+void ParameterWrapper::SetupWrapper()
+{
+   refObjectNames.push_back(description);
+}
+

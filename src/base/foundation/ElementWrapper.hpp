@@ -34,7 +34,7 @@ class GMAT_API ElementWrapper
 public:
 
    // default constructor
-   ElementWrapper(const std::string &desc = "");
+   ElementWrapper();
    // copy constructor
    ElementWrapper(const ElementWrapper &er);
    // operator = 
@@ -42,8 +42,11 @@ public:
    // destructor
    virtual ~ElementWrapper();
    
-   virtual void            SetDescription(const std::string &str);
-   virtual std::string     GetDescription() const;
+   virtual void               SetDescription(const std::string &str);
+   virtual std::string        GetDescription() const;
+   
+   virtual const StringArray& GetRefObjectNames();
+   virtual bool               SetRefObject(GmatBase *obj);
    
 //---------------------------------------------------------------------------
 //  Real EvaluateReal() const
@@ -79,6 +82,23 @@ protected:
    static const Real UNDEFINED_REAL;
    /// Description of the wrapper
    std::string     description;
+   StringArray     refObjectNames;
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method that parses the description string so that the reference
+ * objects and related properties are identified.
+ *
+ * @return true if successful; false otherwise.
+ * 
+ * @note  This is a pure virtual (abstract) method and must be implemented in
+ * all leaf classes derived from this one.
+ */
+//---------------------------------------------------------------------------
+   virtual void            SetupWrapper() = 0;
+   
    
 };
 #endif // ElementWrapper_hpp

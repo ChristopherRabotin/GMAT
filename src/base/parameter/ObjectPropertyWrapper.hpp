@@ -31,7 +31,7 @@ class GMAT_API ObjectPropertyWrapper : public ElementWrapper
 public:
 
    // default constructor
-   ObjectPropertyWrapper(const std::string &desc = "");
+   ObjectPropertyWrapper();
    // copy constructor
    ObjectPropertyWrapper(const ObjectPropertyWrapper &opw);
    // operator = 
@@ -39,19 +39,21 @@ public:
    // destructor
    virtual ~ObjectPropertyWrapper();
    
-   virtual bool            SetObjectAndId(GmatBase *toObj, Integer andId);
-   
+   virtual bool            SetRefObject(GmatBase *obj);
    virtual Real            EvaluateReal() const;
-   
    virtual bool            SetReal(const Real toValue);
-   
+ 
    
 protected:  
 
-   // pointer to the base object
-   GmatBase *object;
+   /// pointer to the base object
+   GmatBase    *object;
+   /// array of property ID names
+   StringArray propIDNames;
    /// parameter Id for the property of the object
-   Integer  parameterId;
+   Integer     propID;
+   
+   virtual void            SetupWrapper(); 
    
 };
 #endif // ObjectPropertyWrapper_hpp

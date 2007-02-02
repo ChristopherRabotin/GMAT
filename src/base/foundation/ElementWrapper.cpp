@@ -35,18 +35,16 @@ const Real ElementWrapper::UNDEFINED_REAL = -999.99;
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  ElementWrapper(const std::string &desc);
+//  ElementWrapper();
 //---------------------------------------------------------------------------
 /**
  * Constructs base ElementWrapper structures used in derived classes
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-ElementWrapper::ElementWrapper(const std::string &desc) :
-   description  (desc)
+ElementWrapper::ElementWrapper() :
+   description  ("")
 {
 }
 
@@ -61,7 +59,8 @@ ElementWrapper::ElementWrapper(const std::string &desc) :
  */
 //---------------------------------------------------------------------------
 ElementWrapper::ElementWrapper(const ElementWrapper &er) :
-   description (er.description)
+   description    (er.description),
+   refObjectNames (er.refObjectNames)
 {
 }
 
@@ -81,7 +80,8 @@ const ElementWrapper& ElementWrapper::operator=(const ElementWrapper &er)
    if (&er == this)
       return *this;
 
-   description = er.description;
+   description    = er.description;
+   refObjectNames = er.refObjectNames;
 
    return *this;
 }
@@ -94,6 +94,7 @@ const ElementWrapper& ElementWrapper::operator=(const ElementWrapper &er)
 //---------------------------------------------------------------------------
 ElementWrapper::~ElementWrapper()
 {
+   refObjectNames.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -106,6 +107,7 @@ ElementWrapper::~ElementWrapper()
 void ElementWrapper::SetDescription(const std::string &str)
 {
    description = str;
+   SetupWrapper();
 }
 
 
@@ -125,3 +127,37 @@ std::string ElementWrapper::GetDescription() const
    return description;
 }
 
+//------------------------------------------------------------------------------
+//  const StringArray&  GetRefObjectNames() 
+//------------------------------------------------------------------------------
+/**
+ * This method returns the list of reference object names for the ElementWrapper 
+ * object.
+ *
+ * @return list of reference object names for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& ElementWrapper::GetRefObjectNames()
+{
+   return refObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetRefObject(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a reference object for the ElementWrapper 
+ * object.
+ * 
+ * @param <obj> pointer to the object.
+ *
+ * @return true for success; false for failure.
+ *
+ */
+//------------------------------------------------------------------------------
+bool ElementWrapper::SetRefObject(GmatBase *obj)
+{
+   return false;
+}

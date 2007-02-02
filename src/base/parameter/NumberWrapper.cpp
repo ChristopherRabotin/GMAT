@@ -21,8 +21,10 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "NumberWrapper.hpp"
+#include "ParameterException.hpp"
+#include "StringUtil.hpp"
 
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 // static data
@@ -34,18 +36,16 @@
 //------------------------------------------------------------------------------
 
 //---------------------------------------------------------------------------
-//  NumberWrapper(const std::string &desc);
+//  NumberWrapper(;
 //---------------------------------------------------------------------------
 /**
  * Constructs NumberWrapper structures
  * (default constructor).
  *
- * @param <desc> Optional description for the object.  Defaults to "".
- *
  */
 //---------------------------------------------------------------------------
-NumberWrapper::NumberWrapper(const std::string &desc) :
-   ElementWrapper(desc)
+NumberWrapper::NumberWrapper() :
+   ElementWrapper()
 {
    value = ElementWrapper::UNDEFINED_REAL;
 }
@@ -126,4 +126,24 @@ bool NumberWrapper::SetReal(const Real toValue)
 {
    value = toValue;
    return true;
+}
+
+//---------------------------------------------------------------------------
+//  void SetupWrapper()
+//---------------------------------------------------------------------------
+/**
+ * Method to set up the Number Wrapper.
+ *
+ */
+//---------------------------------------------------------------------------
+void NumberWrapper::SetupWrapper()
+{
+   if (GmatStringUtil::ToReal(description, value) == false)
+   {
+      std::string errmsg = "For number wrapper \"";
+      errmsg += description;
+      errmsg += 
+            "\", the description string does not evaluate to a real number\n"; 
+      throw ParameterException(errmsg);
+   }
 }
