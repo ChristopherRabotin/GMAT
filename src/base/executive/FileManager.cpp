@@ -205,7 +205,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    // now use log file from the startup file
    MessageInterface::SetLogFile(GetAbsPathname("LOG_FILE"));
-   MessageInterface::logEnabled = true;
+   MessageInterface::SetLogEnable(true);
    mInStream.close();
 }
 
@@ -725,7 +725,7 @@ void FileManager::AddAvailablePotentialFiles()
 //------------------------------------------------------------------------------
 FileManager::FileManager()
 {  
-   MessageInterface::logEnabled = false; // so that debug can be written from here
+   MessageInterface::SetLogEnable(false); // so that debug can be written from here
    MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
    
    AddFileType("ROOT_PATH", "./");
