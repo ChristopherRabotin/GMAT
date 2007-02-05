@@ -126,6 +126,7 @@ protected:
    
    void ClearVarParameters();
    void WriteHeaders();
+   std::string GetFileName();
    
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);

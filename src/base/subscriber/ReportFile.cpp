@@ -29,6 +29,8 @@
 #include <sstream>
 
 //#define DEBUG_REPORTFILE 1
+//#define DEBUG_REPORTFILE_OPEN 1
+//#define DEBUG_REPORTFILE_SET 1
 //#define DEBUG_REPORTFILE_DATA 1
 //#define DEBUG_RENAME 1
 
@@ -80,33 +82,6 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    lastUsedProvider(-1),
    usedByReport    (false)
 {
-   try
-   {
-      FileManager *fm = FileManager::Instance();
-      outputPath = fm->GetPathname(FileManager::REPORT_FILE);
-      
-      if (filename == "")
-      {
-         filename = fm->GetFullPathname(FileManager::REPORT_FILE);
-      }
-      else
-      {
-         // add output path if there is no path
-         if (filename.find("/") == filename.npos &&
-             filename.find("\\") == filename.npos)
-         {
-            filename = outputPath + filename;
-         }
-      }
-   }
-   catch (GmatBaseException &e)
-   {
-      if (filename == "")
-         filename = "ReportFile.txt";
-      
-      MessageInterface::ShowMessage(e.GetMessage());
-   }
-   
    mNumVarParams = 0;
 
    if (firstVarParam != NULL)
@@ -855,18 +830,20 @@ bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool ReportFile::OpenReportFile(void)
 {
-   #if DEBUG_REPORTFILE
+   std::string currName = GetFileName();
+   
+   #if DEBUG_REPORTFILE_OPEN
       MessageInterface::ShowMessage
-         ("ReportFile::OpenReportFile filename = %s\n", filename.c_str());
+         ("ReportFile::OpenReportFile currName = %s\n", currName.c_str());
    #endif
-
+   
    if (dstream.is_open())
      dstream.close();
-
-   dstream.open(filename.c_str());
+   
+   dstream.open(currName.c_str());
    if (!dstream.is_open())
    {
-      #if DEBUG_REPORTFILE
+      #if DEBUG_REPORTFILE_OPEN
       MessageInterface::ShowMessage
          ("ReportFile::OpenReportFile() Failed to open report file: %s\n",
           filename.c_str());
@@ -1099,4 +1076,41 @@ void ReportFile::WriteHeaders()
    initial = false;
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetFileName()
+//------------------------------------------------------------------------------
+std::string ReportFile::GetFileName()
+{
+   std::string fname = filename;
+   
+   try
+   {
+      FileManager *fm = FileManager::Instance();
+      outputPath = fm->GetPathname(FileManager::REPORT_FILE);
+      
+      if (filename == "")
+      {
+         fname = fm->GetFullPathname(FileManager::REPORT_FILE);
+      }
+      else
+      {
+         // add output path if there is no path
+         if (filename.find("/") == filename.npos &&
+             filename.find("\\") == filename.npos)
+         {
+            fname = outputPath + filename;
+         }
+      }
+   }
+   catch (GmatBaseException &e)
+   {
+      if (filename == "")
+         fname = "ReportFile.txt";
+      
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
+   return fname;
+}
 
