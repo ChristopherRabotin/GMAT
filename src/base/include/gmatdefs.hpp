@@ -109,7 +109,6 @@ namespace Gmat
       SOLVER,
       SUBSCRIBER,
       PROP_SETUP,
-      REF_FRAME,
       FUNCTION,
       FUEL_TANK,
       THRUSTER,

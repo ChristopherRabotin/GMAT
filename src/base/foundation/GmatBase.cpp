@@ -103,9 +103,9 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "PhysicalModel", "TransientForce","Interpolator",  "SolarSystem",   
    "SpacePoint",    "CelestialBody", "CalculatedPoint","LibrationPoint",
    "Barycenter",    "Atmosphere",    "Parameter",     "StopCondition", 
-   "Solver",        "Subscriber",    "PropSetup",     "RefFrame",      
-   "Function",      "FuelTank",      "Thruster",      "Hardware",      
-   "CoordinateSystem","AxisSystem",  "Attitude",      "UnknownObject"
+   "Solver",        "Subscriber",    "PropSetup",     "Function",
+   "FuelTank",      "Thruster",      "Hardware",      "CoordinateSystem",
+   "AxisSystem",    "Attitude",      "UnknownObject"
 };
 
 
