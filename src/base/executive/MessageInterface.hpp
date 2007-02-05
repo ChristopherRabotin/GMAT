@@ -51,9 +51,19 @@ public:
    static void PopupAbortContinue(const std::string &abortMsg,
                                   const std::string &continueMsg,
                                   const std::string &msg);
+   
    static void LogMessage(const std::string &msg);
+   
+   static std::string GetLogFileName();
+
+   static void SetLogEnable(bool flag);
+   static void SetLogPath(const std::string &pathname);
    static void SetLogFile(const std::string &filename);
+   
+   static void OpenLogFile(const std::string &filename);
    static void CloseLogFile();
+
+private:
    
    static const int MAX_MESSAGE_LENGTH = 3000;
    

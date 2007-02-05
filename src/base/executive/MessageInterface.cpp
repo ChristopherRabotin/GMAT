@@ -279,6 +279,44 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
 
 
 //------------------------------------------------------------------------------
+// std::string GetLogFileName()
+//------------------------------------------------------------------------------
+std::string MessageInterface::GetLogFileName()
+{
+   FileManager *fm = FileManager::Instance();
+   std::string fname;
+   try
+   {
+      if (logFileName == "")
+      {
+         fname = fm->GetFullPathname("LOG_FILE");
+      }
+      else
+      {
+         std::string outputPath = fm->GetPathname(FileManager::LOG_FILE);
+         
+         // add output path if there is no path
+         if (logFileName.find("/") == logFileName.npos &&
+             logFileName.find("\\") == logFileName.npos)
+         {
+            fname = outputPath + logFileName;
+         }
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** " + e.GetMessage() + 
+          "So setting log file name to GmatLog.txt");
+      
+      fname = "GmatLog.txt";
+   }
+   
+   return fname;
+}
+
+
+//------------------------------------------------------------------------------
 // void LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
 void MessageInterface::LogMessage(const std::string &msg)
@@ -289,26 +327,12 @@ void MessageInterface::LogMessage(const std::string &msg)
    {
       if (logFile == NULL)
       {
-         FileManager *fm = FileManager::Instance();
-         try
-         {
-            std::string filename = fm->GetFullPathname("LOG_FILE");
-            logFile = fopen(filename.c_str(), "w");
-            logFileSet = true;
-         }
-         catch (BaseException &e)
-         {
-            logFile = fopen(logFileName.c_str(), "w");
-         }
+         SetLogFile(GetLogFileName());
       }
    }
    else if (!logFileSet)
    {
-      if (logFile)
-         fclose(logFile);
-      
-      logFile = fopen(logFileName.c_str(), "w");
-      logFileSet = true;
+      OpenLogFile(logFileName);
    }
    
    if (logFile)
@@ -321,9 +345,65 @@ void MessageInterface::LogMessage(const std::string &msg)
 
 
 //------------------------------------------------------------------------------
+// void SetLogEnable(bool flag)
+//------------------------------------------------------------------------------
+void MessageInterface::SetLogEnable(bool flag)
+{
+   logEnabled = flag;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetLogPath(const std::string &pathname)
+//------------------------------------------------------------------------------
+/*
+ * Sets log file path with keeping log file name as is.
+ *
+ * @param  pathname  log file path name, such as "/newpath/test1/"
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::SetLogPath(const std::string &pathname)
+{
+   FileManager *fm = FileManager::Instance();
+   std::string fname;
+   try
+   {
+      std::string filename = fm->GetFilename(FileManager::LOG_FILE);
+      fname = pathname + filename;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** " + e.GetMessage() + 
+          "So setting log file name to GmatLog.txt");
+      
+      fname = "GmatLog.txt";
+   }
+   
+   OpenLogFile(fname);
+   
+}
+
+
+//------------------------------------------------------------------------------
 // void SetLogFile(const std::string &filename)
 //------------------------------------------------------------------------------
+/*
+ * Sets log file path and name.
+ *
+ * @param  filename  log file name, such as "/newpath/test1/GmatLog.txt"
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::SetLogFile(const std::string &filename)
+{
+   OpenLogFile(filename);
+}
+
+
+//------------------------------------------------------------------------------
+// void OpenLogFile(const std::string &filename)
+//------------------------------------------------------------------------------
+void MessageInterface::OpenLogFile(const std::string &filename)
 {
    logFileName = filename;
    
@@ -331,6 +411,7 @@ void MessageInterface::SetLogFile(const std::string &filename)
       fclose(logFile);
    
    logFile = fopen(logFileName.c_str(), "w");
+   
    if (logFile)
    {
       fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
