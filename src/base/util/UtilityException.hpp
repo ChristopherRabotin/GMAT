@@ -22,21 +22,19 @@
 #include "BaseException.hpp"
 
 // General utility exception
-class UtilityException : public BaseException
+class GMAT_API UtilityException : public BaseException
 {
 public:
-   UtilityException(const std::string& message = 
-                    "Error occurred in utility class") 
-      : BaseException(message) {};
+   UtilityException(const std::string& details = "") 
+      : BaseException("UtilityException Thrown: ", details) {};
 };
 
 
 // Time utility exception
-class TimeException : public BaseException
+class GMAT_API TimeException : public BaseException
 {
 public:
-   TimeException(const std::string& message = 
-                 "Error occurred in time utility class") 
-      : BaseException(message) {};
+   TimeException(const std::string& details = "") 
+      : BaseException("TimeException Thrown: ", details) {};
 };
 #endif
