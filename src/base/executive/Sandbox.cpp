@@ -74,18 +74,18 @@ Sandbox::Sandbox() :
    clonable.push_back(Gmat::SPACE_POINT);
    clonable.push_back(Gmat::CELESTIAL_BODY);
    clonable.push_back(Gmat::CALCULATED_POINT);
-//   clonable.push_back(Gmat::LIBRATION_POINT);
+   clonable.push_back(Gmat::LIBRATION_POINT);
    clonable.push_back(Gmat::BARYCENTER);
    clonable.push_back(Gmat::ATMOSPHERE);
    clonable.push_back(Gmat::PARAMETER);
    clonable.push_back(Gmat::STOP_CONDITION);
    clonable.push_back(Gmat::SOLVER);
+   clonable.push_back(Gmat::SUBSCRIBER);
    clonable.push_back(Gmat::PROP_SETUP);
-   clonable.push_back(Gmat::REF_FRAME);
    clonable.push_back(Gmat::FUNCTION);
-//   clonable.push_back(Gmat::FUEL_TANK);
-//   clonable.push_back(Gmat::THRUSTER);
-//   clonable.push_back(Gmat::HARDWARE);
+   clonable.push_back(Gmat::FUEL_TANK);
+   clonable.push_back(Gmat::THRUSTER);
+   clonable.push_back(Gmat::HARDWARE);
    clonable.push_back(Gmat::COORDINATE_SYSTEM);
    clonable.push_back(Gmat::AXIS_SYSTEM);
 
@@ -173,9 +173,11 @@ bool Sandbox::AddObject(GmatBase *obj)
          #endif
 
          // Subscribers are already cloned in AddSubscriber()
-         if (obj->GetType() != Gmat::SUBSCRIBER)
+         if (obj->GetType() == Gmat::SUBSCRIBER)
+            objectMap[name] = obj;
+         else
             objectMap[name] = obj->Clone();
-
+         
          if (obj->GetType() == Gmat::SPACECRAFT)
          {
             if (solarSys)
@@ -1271,6 +1273,7 @@ void Sandbox::Clear()
    {
       if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
+      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("Sandbox clearing %s\n",
             (omi->first).c_str());
