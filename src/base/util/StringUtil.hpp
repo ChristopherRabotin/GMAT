@@ -55,6 +55,8 @@ namespace GmatStringUtil
    
    std::string RemoveExtraParen(const std::string &str);
    
+   char GetClosingBracket(const char &openBracket);
+   
    StringArray SeparateBy(const std::string &str, const std::string &delim);
    
    bool ToReal(const std::string &str, Real *value);
@@ -65,7 +67,9 @@ namespace GmatStringUtil
    bool ToBoolean(const std::string &str, bool &value);
    
    void ParseParameter(const std::string &str, std::string &type,
-                       std::string &owner, std::string &depObj);
+                       std::string &owner, std::string &dep);
+   void GetArrayCommaIndex(const std::string &str, Integer &comma,
+                           const std::string &bracketPair = "()");
    void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
                       std::string &name, const std::string &bracketPair = "()");
    void GetArrayIndex(const std::string &str, std::string &rowStr,
@@ -91,6 +95,7 @@ namespace GmatStringUtil
    bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
    bool IsParenBalanced(const std::string &str);
    bool IsOuterParen(const std::string &str);
+   bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
    bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
                              bool checkOnlyFirst);
    bool IsParenPartOfArray(const std::string &str);

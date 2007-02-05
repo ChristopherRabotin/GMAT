@@ -26,6 +26,7 @@
 #include <map>
 
 //#define DEBUG_STRING_UTIL 1
+//#define DEBUG_ARRAY_INDEX 2
 
 using namespace std;
 
@@ -120,7 +121,7 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    if (stype == LEADING)
       str2 = str.substr(index1);
    else if (stype == TRAILING)
-      str2 = str.substr(0, index2 + 1);  // updated to +1 because it was chopping off last letter
+      str2 = str.substr(0, index2 + 1);
    else if (stype == BOTH)
       str2.assign(str.substr(index1, index2-index1+1));
    
@@ -312,6 +313,30 @@ std::string GmatStringUtil::ToString(const Integer &val, bool useCurrentFormat,
 }
 
 
+//-------------------------------------------------------------------------------
+// char GetClosingBracket(const char &openBracket)
+//-------------------------------------------------------------------------------
+char GmatStringUtil::GetClosingBracket(const char &openBracket)
+{
+   switch (openBracket)
+   {
+   case '(':
+      return ')';
+   case '[':
+      return ']';
+   case '{':
+      return '}';
+   case '<':
+      return '>';
+      
+   default:
+      UtilityException ex;
+      ex.SetDetails("Found unknown open bracket: %c", openBracket);
+      throw ex;
+   }
+}
+
+
 //------------------------------------------------------------------------------
 // StringArray SeparateBy(const std::string &str, const std::string &delim)
 //------------------------------------------------------------------------------
@@ -363,8 +388,8 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    if (str2.length() == 0)
       return false;
    
-   // If first character is not '-' and '.' and digit, it's false
-   if (str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
+   // If first character is not '+', '-', '.' and digit, it's false
+   if (str2[0] != '+' && str2[0] != '-' && !isdigit(str2[0]) && str2[0] != '.')
       return false;
    
    // Check for multiple E or e
@@ -372,7 +397,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    if (index1 != str2.npos)
       if (str2.find_first_of("Ee", index1 + 1) != str2.npos)
          return false;
-   
+
    // Check for multiple + or -
    index1 = str2.find_first_of("+-");
    if (index1 != str2.npos)
@@ -388,7 +413,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    
    for (unsigned int i=0; i<str2.length(); i++)
    {
-      if (i == 0 && str2[0] == '-')
+      if (i == 0 && (str2[0] == '-' || str2[0] == '+'))
          continue;
       
       if (str2[i] == '.')
@@ -518,12 +543,27 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
 
 //------------------------------------------------------------------------------
 // void ParseParameter(const std::string &str, std::string &type,
-//                     std::string &owner, std::string &depobj)
+//                     std::string &owner, std::string &dep)
+//------------------------------------------------------------------------------
+/*
+ * Parses input string as Parameter elements.
+ * Parameter is in the form of: Owner.Dependency.Type
+ * Owner is the owener object of the Type and Dependency is defined by the
+ * Parameter class of Type.  Dependency can be omitted.
+ *    such as Sat.MJ2000Eq.X, Sat.Y, Sat.Earth.ECC, ImpBurn.B
+ *
+ * @see Parameter
+ *
+ * @param  str  input parameter string
+ * @param  type  output type of parameter
+ * @param  owner  ouput owner of parameter
+ * @param  dep  output dependency of parameter
+ */ 
 //------------------------------------------------------------------------------
 void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
-                                    std::string &owner, std::string &depObj)
+                                    std::string &owner, std::string &dep)
 {
-   //find owner.depObj.type
+   //find owner.dep.type
    std::string str1 = str;
    std::string::size_type pos1 = str1.find(".");
    std::string::size_type pos2 = str1.find_last_of(".");
@@ -533,23 +573,252 @@ void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
       owner = str1.substr(0, pos1);
       type = str1.substr(pos2+1, str1.npos-pos2);
 
-      depObj = "";
+      dep = "";
       if (pos2 > pos1)
-         depObj = str1.substr(pos1+1, pos2-pos1-1);
+         dep = str1.substr(pos1+1, pos2-pos1-1);
    }
-
+   
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("GmatStringUtil::ParseParameter() str=%s, type=%s, owner=%s, depObj=%s\n",
-       str.c_str(), type.c_str(), owner.c_str(), depObj.c_str());
+      ("GmatStringUtil::ParseParameter() str=%s, type=%s, owner=%s, dep=%s\n",
+       str.c_str(), type.c_str(), owner.c_str(), dep.c_str());
    #endif
    
 }
 
 
 //------------------------------------------------------------------------------
+// void GetArrayCommaIndex(const std::string &str, Integer &comma,
+//                         const std::string &bracketPair = "()")
+//------------------------------------------------------------------------------
+void GmatStringUtil::GetArrayCommaIndex(const std::string &str, Integer &comma,
+                                        const std::string &bracketPair)
+{
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::GetArrayCommaIndex() str=%s\n", str.c_str());
+   #endif
+   
+   comma = -1;
+   std::string openStr = bracketPair.substr(0,1);
+   UnsignedInt openBracket = str.find(openStr);
+   UnsignedInt firstComma;
+   
+   Integer length = str.size();
+   std::string str1 = str.substr(openBracket+1, length-openBracket-2);
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("   openBracket=%u, str1=%s\n", openBracket, str1.c_str());
+   #endif
+   
+   // if array index is empty, Arr()
+   if (str1 == "")
+      return;
+   
+   
+   // if there is no opening bracket
+   if (openBracket == str.npos)
+   {
+      firstComma = str.find(',');
+      if (firstComma != str.npos)
+         comma = firstComma;
+      
+      #if DEBUG_ARRAY_INDEX
+      MessageInterface::ShowMessage
+         ("GmatStringUtil::GetArrayCommaIndex() comma=%d\n", comma);
+      #endif
+      
+      return;
+   }
+   
+   Integer open, close;
+   bool isOuterBracket;
+   length = str1.size();
+   
+   // find matching closing parenthesis
+   FindMatchingBracket(str1, open, close, isOuterBracket, bracketPair, 0);
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("   length=%d, open=%d, close=%d, isOuterBracket=%d\n",
+       length, open, close, isOuterBracket);
+   #endif
+
+   
+   firstComma = str1.find(',');
+
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage("   firstComma=%u\n", firstComma);
+   #endif
+   
+   // if closing paren found
+   if (close != -1)
+   {
+      UnsignedInt commaAfterClose = str1.find(',', close);
+      
+      // if row is missing
+      if (commaAfterClose == str1.npos && firstComma > UnsignedInt(open))
+      {
+         firstComma = str1.npos;
+      }
+      // if row has parenthesis
+      else if (commaAfterClose != str1.npos)
+      {
+         firstComma = close + 1;
+      }
+   }
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage("   firstComma=%u\n", firstComma);
+   #endif
+   
+   if (firstComma != str1.npos)
+      comma = firstComma + openBracket + 1;
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::GetArrayCommaIndex() comma=%d\n", comma);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void GetArrayIndexVar(const std::string &str, std::string &rowStr,
+//                       std::string &colStr, std::string &name,
+//                       const std::string &bracketPair)
+//------------------------------------------------------------------------------
+/*
+ * Returns array row and column index as string. If open bracket is not found,
+ * it will set "-1" as row and column string index and input string as name.
+ * If row or column is missing it will "-1" to index string.
+ *    Arr     will set rowStr to "-1", colStr to "-1", name to "Arr"
+ *    Arr(1,) will set rowStr to  "1", colStr to "-1", name to "Arr"
+ *    Arr(,1) will set rowStr to "-1", colStr to  "1", name to "Arr"
+ *    Arr(,)  will set rowStr to "-1", colStr to "-1", name to "Arr"
+ *    Arr()   will set rowStr to "-1", colStr to "-1", name to "Arr"
+ *
+ * @note It will remove all white spaces between array index
+ *
+ * The input array string can be a form of:
+ *    array[3,3], table(1,b), array(arr1(1,1), arr2(2,2)), etc
+ *
+ * If input string is array1(1,1) the output will be:
+ *    rowStr = "1", colStr = "1", name = "array1"
+ * If input string is array2(var1, arr1(1,1)) the output will be:
+ *    rowStr = "var1", colStr = "arr1(1,1)", name = "array2"
+ * If input string is array2(var1, arr1(1,  c(a, b))) the output will be:
+ *    rowStr = "var1", colStr = "arr1(1,c(a,b))", name = "array2"
+ *
+ * @param  str  input array string
+ * @param  rowStr  output row string index
+ * @param  colStr  output column string index
+ * @param  name  output array name
+ * @param  bracketPair  bracket pair used in the input array, such as "[]", "()"
+ *
+ * @exception UtilityException  if parenthesis are not balanced, eg) Arr(a, b(3,2
+ */
+//------------------------------------------------------------------------------
+void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
+                                      std::string &colStr, std::string &name,
+                                      const std::string &bracketPair)
+{
+   std::string str1;
+   str1 = RemoveAll(str, ' ');
+   std::string openStr = bracketPair.substr(0,1);
+   std::string closeStr = bracketPair.substr(1,1);
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::GetArrayIndexVar() str=%s\n   str1=%s\n",
+       str.c_str(), str1.c_str());
+   #endif
+   
+   // Check if bracket is balanced
+   if (!IsBracketBalanced(str1, bracketPair))
+   {
+      UtilityException ex;
+      ex.SetDetails("Text has unbalanced brackets: \"%s\"\n", str.c_str());
+      throw ex;
+   }
+   
+   rowStr = "-1";
+   colStr = "-1";
+   name = str1;
+   
+   UnsignedInt openBracket = str1.find(openStr);
+
+   // if there is no opening bracket
+   if (openBracket == str1.npos)
+      return;
+   
+   name = str1.substr(0, openBracket);
+   
+   Integer length = str1.size();
+   std::string str2 = str1.substr(openBracket+1, length-openBracket-2);
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage("   str2=%s\n", str2.c_str());
+   #endif
+   
+   // if array index is empty, Arr()
+   if (str2 == "")
+      return;
+   
+   Integer comma;
+   
+   // get array comma index
+   GetArrayCommaIndex(str1, comma, bracketPair);
+   
+   
+   UnsignedInt closeBracket = str1.size() - 1;
+   
+   // if single array, such as a(5), b(a(5,5)), set row string as "1"
+   if (comma == -1)
+   {
+      rowStr = "1";
+      colStr = str1.substr(openBracket+1, closeBracket-openBracket-1);
+   }
+   else
+   {
+      rowStr = str1.substr(openBracket+1, comma-openBracket-1);
+      colStr = str1.substr(comma+1, closeBracket-comma-1);
+   }
+   
+   name = str1.substr(0, openBracket);
+   
+   if (rowStr == "")
+      rowStr = "-1";
+   
+   if (colStr == "")
+      colStr = "-1";
+   
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("StringUtil::GetArrayIndexVar() rowStr=%s, colStr=%s, name=%s\n",
+       rowStr.c_str(), colStr.c_str(), name.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void GetArrayIndex(const std::string &str, Integer &row, Integer &col,
 //                    std::string &name, const std::string &bracketPair)
+//------------------------------------------------------------------------------
+/*
+ * Returns array integer row and column index.  This method calls
+ * GetArrayIndexVar() and if row and column string index string is not valid
+ * integer, it returns -1 as array index.
+ *
+ * @see GetArrayIndexVar()
+ *
+ * @param  str  input array string
+ * @param  row  output row integer index
+ * @param  col  output column integer index
+ * @param  name  output array name
+ * @param  bracketPair  bracket pair used in the input array, such as "[]", "()"
+ */
 //------------------------------------------------------------------------------
 void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
                                    Integer &col, std::string &name,
@@ -594,6 +863,22 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
 //                    std::string &colStr, Integer &row, Integer &col,
 //                    std::string &name, const std::string &bracketPair)
 //------------------------------------------------------------------------------
+/*
+ * Returns array row and column index as string and integer. This method calls
+ * GetArrayIndexVar() and if row and column string index is "-1", it returns
+ * -1 as array index.
+ *
+ * @see GetArrayIndexVar()
+ *
+ * @param  str  input array string
+ * @param  rowStr  output row string index
+ * @param  colStr  output column string index
+ * @param  row  output row integer index
+ * @param  col  output column integer index
+ * @param  name  output array name
+ * @param  bracketPair  bracket pair used in the input array, such as "[]", "()"
+ */
+//------------------------------------------------------------------------------
 void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
                                    std::string &colStr, Integer &row, Integer &col,
                                    std::string &name, const std::string &bracketPair)
@@ -616,67 +901,17 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, std::string &rowStr,
 
 
 //------------------------------------------------------------------------------
-// void GetArrayIndexVar(const std::string &str, std::string &rowStr,
-//                       std::string &colStr, std::string &name,
-//                       const std::string &bracketPair)
-//------------------------------------------------------------------------------
-void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowStr,
-                                      std::string &colStr, std::string &name,
-                                      const std::string &bracketPair)
-{
-   std::string str1;
-   str1 = RemoveAll(str, ' ');
-   std::string openStr = bracketPair.substr(0,1);
-   std::string closeStr = bracketPair.substr(1,1);
-   
-   #if DEBUG_STRING_UTIL
-   MessageInterface::ShowMessage
-      ("GmatStringUtil::GetArrayIndexVar() str=%s, str1=%s\n",
-       str.c_str(), str1.c_str());
-   #endif
-
-   rowStr = "-1";
-   colStr = "-1";
-   
-   // Handle Array indexing
-   UnsignedInt openBracket = str1.find(openStr);
-   if (openBracket != str1.npos)
-   {
-      UnsignedInt comma = str1.find(',');      
-      UnsignedInt closeBracket = str1.find(closeStr);
-      
-      if (closeBracket == str1.npos)
-         throw UtilityException("Expecting \"" + closeStr + "\" for Array " + str);
-      
-      if (comma == str1.npos)
-      {
-         rowStr = "1";
-         colStr = str1.substr(openBracket+1, closeBracket-openBracket-1);
-      }
-      else
-      {
-         rowStr = str1.substr(openBracket+1, comma-openBracket-1);
-         colStr = str1.substr(comma+1, closeBracket-comma-1);
-      }
-   }
-   
-   name = str1.substr(0, openBracket);
-   
-   #if DEBUG_STRING_UTIL
-   MessageInterface::ShowMessage
-      ("StringUtil::GetArrayIndexVar() rowStr=%s, colStr=%s, name=%s\n",
-       rowStr.c_str(), colStr.c_str(), name.c_str());
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
 // void FindFirstAndLast(const std::string &str, char ch, Integer &first,
 //                       Integer &last)
 //------------------------------------------------------------------------------
 /*
  * Finds first and last index of given chracter from the string.
  * if given chracter is not found it sets to -1
+ *
+ * @param  str  input string
+ * @param  ch  input character to find
+ * @param  first  output index of first input character found
+ * @param  last  output index of last input character found
  */
 //------------------------------------------------------------------------------
 void GmatStringUtil::FindFirstAndLast(const std::string &str, char ch,
@@ -905,7 +1140,7 @@ void GmatStringUtil::FindLastParenMatch(const std::string &str, Integer &openPar
 // bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true)
 //------------------------------------------------------------------------------
 /*
- * return true if item is enclosed with extra parenthesis
+ * Returns true if item is enclosed with extra parenthesis
  * It will return true: ((a+b)), (a(1,1)), 
  * It wiill return false: (123.456), (1,2), (a*b(1,1)), ((3+5)*2)
  * 
@@ -1146,14 +1381,62 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// bool IsCommaPartOfArray(const std::string &str, Integer start)
+//------------------------------------------------------------------------------
+/*
+ * Finds if first comma after start position is part of an array.
+ * It first removes outer parenthesis and check for comma.
+ *
+ * It will true for A(arr2(2,2)), A( b(x,y), I)
+ * It will false for A(1,2), A(1, b(c,d))
+ *
+ * @param  str  input string
+ * @param  start  input starting position for searching
+ *
+ * @return  true if comma is part of an arry, false else
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsCommaPartOfArray(const std::string &str, Integer start)
+{   
+   // First remove parenthesis around array
+   UnsignedInt open = str.find_first_of("(");
+   UnsignedInt close = str.find_last_of(")");
+   std::string str1 = str.substr(open+1, close-open-1);
+   
+   close = str1.find(")");
+   
+   // if close paren not found, return false
+   if (close == str.npos)
+      return false;
+   
+   // if comma is after open paren, comma is part of array
+   open = str1.find("(");
+   UnsignedInt comma = str1.find(",");
+
+   bool retval = false;
+   
+   if (comma > open)
+      retval = true;
+
+   #if DEBUG_ARRAY_INDEX
+   MessageInterface::ShowMessage
+      ("IsCommaPartOfArray() str1=<%s>, comma=%u, open=%u, retval=%d\n",
+       str1.c_str(), comma, open, retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsBracketPartOfArray(const std::string &str,
 //                           const std::string &bracketPairs)
 //------------------------------------------------------------------------------
 /*
  * Check if string is part of array.
  *
- * @param str           Input string
- * @param bracketPairs  Bracket pairs used in checking ("()", "([)]")
+ * @param str  input string
+ * @param bracketPairs  bracket pairs used in checking ("()", "([)]")
  *
  * return true if parenthesis or square bracket is part of an array.
  *    For example: (2,2) or (abc,def) or [2,2], [i,j]
