@@ -70,6 +70,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_DELETE 1
 //#define DEBUG_COMPARE_REPORT 1
+//#define DEBUG_RUN_SCRIPT_FOLDER 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -2683,7 +2684,7 @@ void ResourceTree::AddScriptItem(wxString path)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
 {
-   MessageInterface::ShowMessage("====>OnScriptBuildObject()\n");
+   //MessageInterface::ShowMessage("===> OnScriptBuildObject()\n");
    
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
@@ -2700,7 +2701,7 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   MessageInterface::ShowMessage("====>ResourceTree::OnScriptBuildAndRun()\n");
+   //MessageInterface::ShowMessage("===> ResourceTree::OnScriptBuildAndRun()\n");
    
    // Set the filename to mainframe, so first save has a filename
    // Get info from selected item
@@ -2799,7 +2800,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // find only script file, exclude script folder
    while (scriptId.IsOk())
    {
-      #if DEBUG_RESOURCE_TREE > 1
+      #if DEBUG_RUN_SCRIPT_FOLDER
       MessageInterface::ShowMessage
          ("ResourceTree::OnRunScriptsFromFolder() scriptText=<%s>\n",
           GetItemText(scriptId).c_str());
@@ -2832,14 +2833,19 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // for current output path
    FileManager *fm = FileManager::Instance();
    std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+   std::string oldLogFile = MessageInterface::GetLogFileName();
+   wxString currPath = oldOutPath.c_str();
    bool hasOutDirChanged = dlg.HasOutDirChanged();
+   
    if (hasOutDirChanged)
-      fm->SetAbsPathname(FileManager::OUTPUT_PATH, dlg.GetCurrentOutDir().c_str());
+   {
+      currPath = dlg.GetCurrentOutDir() + "/";
+   }
    
    int count = 0;
    mHasUserInterrupted = false;
    scriptId = GetFirstChild(item, cookie);
-
+   
    wxTextCtrl *textCtrl = NULL;
    wxString tempStr;
    
@@ -2908,6 +2914,18 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       for (int i=0; i<repeatCount; i++)
       {
+         wxString outPath;
+         
+         outPath << currPath << "Run_" << i+1;
+         if (!::wxDirExists(outPath))
+            ::wxMkdir(outPath);
+         
+         outPath = outPath + "/";
+         
+         // Set output path
+         fm->SetAbsPathname(FileManager::OUTPUT_PATH, outPath.c_str());
+         MessageInterface::SetLogPath(outPath.c_str());
+         
          MessageInterface::ShowMessage
             ("==> Run Count: %d\n", i+1);
          
@@ -2919,7 +2937,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          
          try
          {
-            // Create objects from script only first time
+            // Create objects from script only first time, to test re-run
             if (i == 0)
                builtOk = BuildScript(filename);
             
@@ -2953,7 +2971,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    // reset output path
    if (hasOutDirChanged)
+   {
       fm->SetAbsPathname(FileManager::OUTPUT_PATH, oldOutPath);
+      //MessageInterface::SetLogFile(oldLogFile);
+   }
    
    // Report completion
    wxString text;
