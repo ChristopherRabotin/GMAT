@@ -324,6 +324,22 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    return generatingString;
 }
 
+const StringArray& GmatCommand::GetWrapperObjectNameArray()
+{
+   return wrapperObjectNames;
+}
+
+bool GmatCommand::SetElementWrapper(ElementWrapper* toWrapper,
+                                    const std::string &withName)
+{
+   return false;
+}
+
+void GmatCommand::ClearWrappers()
+{
+   // this default implementation does nothing
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetObject(const std::string &name, const Gmat::ObjectType type,
@@ -1636,6 +1652,98 @@ void GmatCommand::ShowCommand(const std::string &title1, GmatCommand *cmd1,
              cmd1, cmd1->GetTypeName().c_str(),
              title2.c_str(), cmd2, cmd2->GetTypeName().c_str());
    }
+}
+//------------------------------------------------------------------------------
+// StringArray InterpretPreface()
+//------------------------------------------------------------------------------
+/**
+ * Method used to do the common InterpretAction startup stuff
+ * 
+ * @return The top level chunks from the instruction contained in the generatng 
+ *         string.
+ * 
+ * @notes - Original by Darrel Conway
+ */
+//------------------------------------------------------------------------------
+StringArray GmatCommand::InterpretPreface()
+{
+   parser.EvaluateBlock(generatingString);
+   StringArray blocks = parser.DecomposeBlock(generatingString);
+   StringArray chunks = parser.ChunkLine();
+   
+   // First comes the command keyword
+   if (chunks[0] != typeName)
+      throw CommandException(
+         "Line \"" + generatingString +
+         "\"\n should be a " + typeName + " command, but the \"" + typeName +
+         "\" keyword is not the opening token in the line.\n");
+
+   return chunks;
+}
+
+//------------------------------------------------------------------------------
+// bool IsSettable(const std::string &setDesc)
+//------------------------------------------------------------------------------
+/**
+ * Method used to check a string and see if it is local data
+ * 
+ * @param <setDesc> The string being checked.
+ * 
+ * @return true if the string is associated with a local data member, false if
+ *         it is not.
+ * 
+ * @notes - Original by Darrel Conway
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::IsSettable(const std::string &setDesc)
+{
+   if (find(settables.begin(), settables.end(), setDesc) != settables.end())
+      return true;
+   return false;
+
+}
+
+//------------------------------------------------------------------------------
+// bool SeparateEquals(const std::string &description, 
+//                     std::string &lhs, std::string &rhs)
+//------------------------------------------------------------------------------
+/**
+ * Method used to separate 'lhs = rhs' style strings into a lhs and rhs.
+ * 
+ * @param <description> The string that needs to be separated.
+ * @param <lhs>         The resulting left hand side.
+ * @param <rhs>         The resulting right hand side, or the empty string if 
+ *                      there was no right side.
+ * 
+ * @return true if the string was separated into two pieces, false if only one
+ *         piece.  The method throws if more than 2 pieces were found.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::SeparateEquals(const std::string &description,
+                                 std::string &lhs, std::string &rhs)
+{
+   StringArray sides = parser.SeparateBy(description, "= ");
+   lhs = sides[0];
+
+   if (sides.size() < 2)
+      return false;
+
+   if (sides.size() == 2)
+      rhs = sides[1];
+   else
+      rhs = "";
+
+   if (sides.size() > 2)
+   {
+      std::string msg = "Error decomposing the string \"";
+      msg += description;
+      msg += "\"\nTrying to separate into lhs and rhs on \"=\" sign, but found ";
+      msg += sides.size();
+      msg += " pieces separated by equanls or spaces.\n";
+      throw CommandException(msg);
+   }
+
+   return true;
 }
 
 

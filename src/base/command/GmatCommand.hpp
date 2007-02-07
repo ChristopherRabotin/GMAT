@@ -31,6 +31,7 @@
 // Headers used by commands that override InterpretAction
 #include "StringUtil.hpp"
 #include "TextParser.hpp"
+#include "ElementWrapper.hpp"
 
 // Headers for the referenced classes
 #include "SolarSystem.hpp"   // for SolarSystem
@@ -70,6 +71,13 @@ public:
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
                            const std::string &prefix = "",
                            const std::string &useName = "");
+           
+   // other methods for setting up the object w.r.t the elements needed
+   virtual const StringArray& 
+                        GetWrapperObjectNameArray();
+   virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
+                        const std::string &withName);
+   virtual void         ClearWrappers();
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
@@ -218,6 +226,10 @@ protected:
    
    /// Text parser used by commands that override InterpretAction
    TextParser           parser;
+   /// The list of settable entities for the command
+   StringArray          settables;
+   /// The list of names of Wrapper objects
+   StringArray          wrapperObjectNames;
    /// List used to initialize the local TextParser
    StringArray          commandNameList;
       
@@ -232,6 +244,12 @@ protected:
    virtual void         ShowCommand(const std::string &title1, GmatCommand *cmd1,
                                     const std::string &title2 = "",
                                     GmatCommand *cmd2 = NULL);
+                                    
+   // for the Parameters in Commands updates
+   StringArray          InterpretPreface();
+   bool                 IsSettable(const std::string &setDesc);
+   bool                 SeparateEquals(const std::string &description,
+                                       std::string &lhs, std::string &rhs);
    
    // IDs used to buffer the command summary data
    static Integer       satEpochID;

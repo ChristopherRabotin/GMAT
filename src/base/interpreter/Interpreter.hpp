@@ -28,6 +28,7 @@
 #include "GmatBase.hpp"
 #include "TextParser.hpp"
 #include "ScriptReadWriter.hpp"
+#include "ElementWrapper.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
@@ -101,6 +102,9 @@ public:
    StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}
+   
+   // to check commands
+   bool ValidateCommand(GmatCommand *cmd);
    
 protected:
    
@@ -230,6 +234,8 @@ protected:
    
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
+   
+   // for handling wrappers 
       
 private:
    
@@ -259,6 +265,9 @@ private:
                             const std::string &msg, bool isNumberAllowed,
                             bool isArrayAllowed);
    void WriteParts(const std::string &title, StringArray &parts);
+   
+   // for wrappers
+   ElementWrapper* CreateElementWrapper(const std::string &desc);
 };
 
 #endif // INTERPRETER_HPP

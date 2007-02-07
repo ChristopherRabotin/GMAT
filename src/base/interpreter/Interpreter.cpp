@@ -23,6 +23,11 @@
 #include "StringUtil.hpp"  // for ToReal()
 #include "Array.hpp"
 #include "MessageInterface.hpp"
+#include "NumberWrapper.hpp"
+#include "ParameterWrapper.hpp"
+#include "VariableWrapper.hpp"
+#include "ObjectPropertyWrapper.hpp"
+#include "ArrayElementWrapper.hpp"
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
 #include <stack>
@@ -723,6 +728,34 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
    return theModerator->GetSolarSystemInUse();
 }
 
+//------------------------------------------------------------------------------
+// bool ValidateCommand(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/**
+ * Checks the input command to make sure it wrappers are set up for it
+ * correctly, if necessary.
+ *
+ * @param <cmd> the command to validate
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::ValidateCommand(GmatCommand *cmd)
+{
+   const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
+   for (StringArray::const_iterator i = wrapperNames.begin();
+        i != wrapperNames.end(); ++i)
+   {
+//      ElementWrapper *ew = CreateElementWrapper(*i);
+//      if (cmd->SetElementWrapper(ew, *i) == false)
+//      {
+//         InterpreterException ex
+//             ("ElementWrapper for \"" + (*i) + "\" cannot be created.");
+//         HandleError(ex);
+//         return false;
+//      }
+   }
+   return true;
+}
+
 //---------------------------------
 // protected
 //---------------------------------
@@ -882,11 +915,14 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // if command has it's own InterpretAction(), jsut return cmd
       if (cmd->InterpretAction())
       {
-         retFlag = CheckUndefinedReference(cmd);
+         bool retval3  = ValidateCommand(cmd);
+         bool retval2  = CheckUndefinedReference(cmd);
+         retFlag = retval2 && retval3;
+         //retFlag = CheckUndefinedReference(cmd);
          
          #if DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
-            ("   ===> %s has InterpretAction() retruning %p\n", type.c_str(), cmd);
+            ("   ===> %s has InterpretAction() returning %p\n", type.c_str(), cmd);
          #endif
          
          return cmd;
@@ -903,10 +939,12 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    
    if (desc1 != "")
    {
+      bool retval3 = true;
       //loj: 11/29/06 added check for return code
       bool retval1  = AssembleCommand(cmd, desc1);
-      bool retval2 = CheckUndefinedReference(cmd);
-      retFlag = retval1 && retval2;
+      if (retval1) retval3  = ValidateCommand(cmd);
+      bool retval2  = CheckUndefinedReference(cmd);
+      retFlag = retval1 && retval2 && retval3;
    }
 
    return cmd;;
@@ -4089,4 +4127,96 @@ void Interpreter::WriteParts(const std::string &title, StringArray &parts)
    MessageInterface::ShowMessage("\n");
 }
 
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateElementWrapper(const std::string &desc)
+//------------------------------------------------------------------------------
+/**
+ * Creates the appropriate ElementWrapper, based on the description.
+ *
+ * @param  <desc>  description string for the element required
+ *
+ * @return pointer to the created ElementWrapper
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
+{
+   Gmat::WrapperDataType itsType = Gmat::NUMBER;
+   ElementWrapper *ew = NULL;
+   Real           rval;
+   
+   // first, check to see if it is a number
+   if (GmatStringUtil::ToReal(desc,rval))
+      ew = new NumberWrapper();
+   else 
+   {
+      Parameter *p;
+      // check to see if it is an array
+      bool isOuterParen;
+      Integer openParen, closeParen;
+      GmatStringUtil::FindParenMatch(desc, openParen, closeParen, isOuterParen);
+      if ((openParen  != -1) && (closeParen != -1) && (closeParen > openParen))
+      {
+         std::string arrayName = GmatStringUtil::Trim(desc.substr(0,openParen));
+         if ( ((p = theModerator->GetParameter(arrayName)) == NULL) ||
+              !p->IsOfType("Array") )
+         {
+            InterpreterException ex(arrayName + "is not an array");
+            HandleError(ex);
+            return false;
+         }
+         ew             = new ArrayElementWrapper();
+         itsType        = Gmat::ARRAY_ELEMENT;
+      }
+      // check to see if it is an object property or a parameter
+      else if (desc.find(".") != std::string::npos)
+      {
+         // try to parse the string for an owner and type
+         // NOTE - need to handle "special cases, e.g.Sat1.X" <<<<<<<<<<
+         bool isParm = theModerator->IsParameter(desc);
+         if (isParm)
+         {
+            ew = new ParameterWrapper();
+            itsType = Gmat::PARAMETER_OBJECT;
+         }
+         else // it must be an object property
+         {
+            std::string type, owner, dep;
+            GmatStringUtil::ParseParameter(desc, type, owner, dep);
+            // check owner here to make sure it is a valid object *** TBD
+            ew = new ObjectPropertyWrapper();
+            itsType = Gmat::OBJECT_PROPERTY;
+         }
+      }
+      else // check to see if it is a Variable or some other parameter
+      {
+         p = theModerator->GetParameter(desc);
+         if ( (p) && (p->IsOfType("Variable")) )
+         {
+            ew = new VariableWrapper();
+            itsType = Gmat::VARIABLE;
+         }
+         else if ( (p) && p->IsOfType("Parameter") )
+         {
+            ew = new ParameterWrapper();
+            itsType = Gmat::PARAMETER_OBJECT;
+         }
+      }
+   }
+   if (ew)
+   {
+      // set the description string; this will also setup the wrapper
+      ew->SetDescription(desc);
+      // if it's an ArrayElement, set up the row and column wrappers
+      if (itsType == Gmat::ARRAY_ELEMENT)
+      {
+         std::string    rowName = ((ArrayElementWrapper*)ew)->GetRowName();
+         ElementWrapper *row    = CreateElementWrapper(rowName);
+         ((ArrayElementWrapper*)ew)->SetRow(row);
+         std::string    colName = ((ArrayElementWrapper*)ew)->GetColumnName();
+         ElementWrapper *col    = CreateElementWrapper(colName);
+         ((ArrayElementWrapper*)ew)->SetColumn(col);
+      }
+   }
+   return ew;
+}
 
