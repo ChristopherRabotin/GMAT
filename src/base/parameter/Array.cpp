@@ -76,6 +76,7 @@ Array::Array(const std::string &name, const std::string &desc,
    mSizeSet = false;
    
    // GmatBase data
+   objectTypeNames.push_back("Array");
    mReturnType = Gmat::RMATRIX_TYPE;
    parameterCount = ArrayParamCount;
 }

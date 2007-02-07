@@ -53,6 +53,7 @@ Variable::Variable(const std::string &name, const std::string &valStr,
    // Set parameter database to be used
    mExpParser->SetParameterDatabase(mParamDb);
    
+   objectTypeNames.push_back("Variable");
    #if DEBUG_VARIABLE
    MessageInterface::ShowMessage("Variable::Variable() constructor\n");
    MessageInterface::ShowMessage
