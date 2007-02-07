@@ -306,6 +306,15 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
    
+   #if DEBUG_GEN_STRING
+   ShowCommand("GmatCommand::GetGeneratingString() this = ", this);
+   MessageInterface::ShowMessage
+      ("===> commentLine=<%s>, inlineComment=<%s>\n",
+       commentLine.c_str(), inlineComment.c_str());   
+   MessageInterface::ShowMessage
+      ("===> generatingString=\n%s\n", generatingString.c_str());
+   #endif
+   
    // This code keep appending the commentLine and inineComment
    // when ScriptEventPanel is opened
    //if (commentLine != "")
@@ -313,13 +322,32 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    //if (inlineComment != "")
    //   generatingString = generatingString + inlineComment;
    
+   // Handle multiple line comments
    if (commentLine != "")
-      if (generatingString.find(commentLine) == generatingString.npos)
-         generatingString = commentLine + generatingString;
+   {
+      std::stringstream gen;
+      TextParser tp;
+      StringArray textArray = tp.DecomposeBlock(commentLine);
+      
+      // handle multiple comment lines
+      for (UnsignedInt i=0; i<textArray.size(); i++)
+      {
+         gen << prefix << textArray[i];
+         if (textArray[i].find("\n") == commentLine.npos &&
+             textArray[i].find("\r") == commentLine.npos)
+            gen << "\n";
+      }
+      
+      generatingString = gen.str() + generatingString;
+   }
    
    if (inlineComment != "")
-      if (generatingString.find(inlineComment) == generatingString.npos)
-         generatingString = generatingString + inlineComment;
+      generatingString = generatingString + inlineComment;
+   
+   #if DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("===> return\n%s\n", generatingString.c_str());
+   #endif
    
    return generatingString;
 }

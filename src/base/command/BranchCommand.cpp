@@ -21,6 +21,7 @@
 
 #include "BranchCommand.hpp"
 #include "MessageInterface.hpp"
+#include <sstream>              // for stringstream
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 //#define DEBUG_BRANCHCOMMAND_APPEND
@@ -786,6 +787,11 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
 {
    fullString = prefix + generatingString;
    
+   // We don't want BranchCommand to indent
+   UnsignedInt prefixSize = prefix.size();   
+   if (this->IsOfType("BranchCommand") && prefix != "")
+      fullString = fullString.substr(prefixSize);
+   
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    ShowCommand("GetGeneratingString() this = ", this);
    MessageInterface::ShowMessage
@@ -795,17 +801,46 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    std::string indent = "   ";
-   UnsignedInt indentSize = indent.size();
    
-   // Handle comments
-   std::string commentLine = GetCommentLine(), inlineComment = GetInlineComment();
+   std::string commentLine = GetCommentLine();
+   std::string inlineComment = GetInlineComment();
+   
+   #if DEBUG_BRANCHCOMMAND_GEN_STRING
+   ShowCommand("GmatCommand::GetGeneratingString() this = ", this);
+   MessageInterface::ShowMessage
+      ("===> commentLine=<%s>, inlineComment=<%s>\n",
+       commentLine.c_str(), inlineComment.c_str());
+   #endif
+   
+   // Handle comments   
+   //if (commentLine != "")
+   //   fullString = prefix + commentLine + fullString;
+   
+   // Handle multiple line comments, we want to indent all lines.
    if (commentLine != "")
-      fullString = commentLine + fullString;
+   {
+      std::stringstream gen;
+      TextParser tp;
+      StringArray textArray = tp.DecomposeBlock(commentLine);
+      
+      // handle multiple comment lines
+      for (UnsignedInt i=0; i<textArray.size(); i++)
+      {
+         gen << prefix << textArray[i];
+         if (textArray[i].find("\n") == commentLine.npos &&
+             textArray[i].find("\r") == commentLine.npos)
+            gen << "\n";
+      }
+      
+      fullString = gen.str() + fullString;
+   }
+
+   // Handle inline comment
    if (inlineComment != "")
       fullString = fullString + inlineComment;
    
    GmatCommand *current;
-   std::string newPrefix = indent + prefix;
+   std::string newPrefix = indent + prefix;   
    bool inTextMode = false;
    Integer scriptEventCount = 0;
    
@@ -823,7 +858,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
          
          // BeginScript writes its own children, so write if not in TextMode.
          // EndScript is written from BeginScript
-         //if (!inTextMode && current->GetTypeName() != "EndScript")
          if (!inTextMode)
          {
             fullString += "\n";
@@ -832,13 +866,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
             else // current is the End command for this branch command
                fullString += current->GetGeneratingString(mode, prefix, useName);
          }
-         
-         // To handle nested ScriptEvent (loj: 12/07/06)
-         
-         //if (current->GetTypeName() == "BeginScript")
-         //   inTextMode = true;      
-         //if (current->GetTypeName() == "EndScript")
-         //   inTextMode = false;
          
          if (current->GetTypeName() == "BeginScript")
             scriptEventCount++;
@@ -851,10 +878,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
          current = current->GetNext();
       }
    }
-   
-   // We don't want inner BranchCommand to indent (loj: 12/15/06)
-   if (this->IsOfType("BranchCommand") && prefix != "")
-      fullString = fullString.substr(indentSize);
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    MessageInterface::ShowMessage

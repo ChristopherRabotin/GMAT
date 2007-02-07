@@ -152,15 +152,23 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    // So all nested ScriptEvent generating string should be handled here
    
    std::stringstream gen;
-   //    Integer start;
    std::string indent = "   ", cmdstr;
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
    std::string newPrefix = prefix + indent;
    
-   if (commentLine != "")
-      gen << commentLine;
+   TextParser tp;
+   StringArray textArray = tp.DecomposeBlock(commentLine);
    
+   // handle multiple comment lines
+   for (UnsignedInt i=0; i<textArray.size(); i++)
+   {
+      gen << prefix << textArray[i];
+      if (textArray[i].find("\n") == commentLine.npos &&
+          textArray[i].find("\r") == commentLine.npos)
+         gen << "\n";
+   }
+      
    gen << prefix << "BeginScript";
    
    if (inlineComment != "")
@@ -189,20 +197,13 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       {
          // Indent whole block within Begin/EndScript (loj: 12/15/06)
          cmdstr = current->GetGeneratingString(mode, prefix, useName);
-         
-         //start = 0;
-         //while (cmdstr[start] == ' ')
-         //   ++start;
-         //cmdstr = cmdstr.substr(start);
-         
+                  
          #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
          MessageInterface::ShowMessage
             ("BeginScript::GetGeneratingString() cmdstr=\n   \"%s\"\n", cmdstr.c_str());
          #endif
          
-         //gen << indent << prefix << cmdstr << "\n";
-         TextParser tp;
-         StringArray textArray = tp.DecomposeBlock(cmdstr);
+         textArray = tp.DecomposeBlock(cmdstr);
          
          for (UnsignedInt i=0; i<textArray.size(); i++)
          {
@@ -213,7 +214,6 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
          }
          
          // Get command after EndScript
-         //current = current->GetNext();
          current = GmatCommandUtil::GetNextCommand(current);
          
          if (current == NULL)
