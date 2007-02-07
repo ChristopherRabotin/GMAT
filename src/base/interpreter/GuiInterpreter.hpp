@@ -38,6 +38,9 @@ public:
    
    void Finalize();
    
+   //----- running object
+   GmatBase* GetRunningObject(const std::string &name);
+   
    //----- factory
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    
@@ -51,7 +54,6 @@ public:
    void ResetConfigurationChanged(bool resetResource = true,
                                   bool resetCommands = true,
                                   Integer sandboxNum = 1);
-   
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
    CoordinateSystem* GetInternalCoordinateSystem();
@@ -117,12 +119,12 @@ public:
    void ClearAllSandboxes();
    Integer RunMission(Integer sandboxNum = 1);
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
-
+   
    // Script
-   bool InterpretScript(const std::string &scriptFilename);
-   bool SaveScript(const std::string &scriptFilename,
+   bool InterpretScript(const std::string &filename);
+   bool SaveScript(const std::string &filename,
                    Gmat::WriteMode mode = Gmat::SCRIPTING);
-   std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING); //loj: 6/12/06 added
+   std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
    Integer RunScript(Integer sandboxNum = 1);
 

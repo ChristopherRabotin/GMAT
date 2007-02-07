@@ -147,6 +147,15 @@ void GuiInterpreter::Finalize()
 
 
 //------------------------------------------------------------------------------
+// GmatBase* GetRunningObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
+{
+   return theModerator->GetInternalObject(name);
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
@@ -670,42 +679,42 @@ Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandbox
 
 
 //------------------------------------------------------------------------------
-// bool InterpretScript(const std::string &scriptFilename)
+// bool InterpretScript(const std::string &filename)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
- * @param <scriptFilename> input script file name
+ * @param <filename> input script file name
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::InterpretScript(const std::string &scriptFilename)
+bool GuiInterpreter::InterpretScript(const std::string &filename)
 {
-   return theModerator->InterpretScript(scriptFilename);
+   return theModerator->InterpretScript(filename);
 }
 
 
 //------------------------------------------------------------------------------
-// bool SaveScript(const std::string &scriptFilename, Gmat::WriteMode mode)
+// bool SaveScript(const std::string &filename, Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 /**
  * Builds scripts from objects and write to a file.
  *
- * @param <scriptFilename> output script file name
+ * @param <filename> output script file name
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::SaveScript(const std::string &scriptFilename,
+bool GuiInterpreter::SaveScript(const std::string &filename,
                                 Gmat::WriteMode mode)
 {
-   return theModerator->SaveScript(scriptFilename, mode);
+   return theModerator->SaveScript(filename, mode);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string SaveScript(Gmat::WriteMode mode)
+// std::string GetScript(Gmat::WriteMode mode)
 //------------------------------------------------------------------------------
 /**
  * Returns Built scripts from objects
