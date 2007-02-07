@@ -38,6 +38,7 @@ public:
    // Methods used to run the command
    virtual bool        Initialize();
    virtual bool        Execute();
+   virtual void        RunComplete();
 
    // inherited from GmatBase
    // Method to execute a callback from an external function

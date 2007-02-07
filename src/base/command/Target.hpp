@@ -74,8 +74,10 @@ public:
                                         const std::string &name);
     
    // Methods used to run the command
-   virtual bool        Initialize(void);
-   virtual bool        Execute(void);
+   virtual bool        Initialize();
+   virtual bool        Execute();
+   virtual void        RunComplete();
+   
 
 protected:
    /// The name of the spacecraft that gets maneuvered

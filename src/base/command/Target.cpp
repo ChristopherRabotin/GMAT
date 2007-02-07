@@ -655,3 +655,10 @@ bool Target::Execute()
    BuildCommandSummary(true);
    return retval;
 }
+
+
+void Target::RunComplete()
+{
+   targeter->Finalize();
+   GmatCommand::RunComplete();
+}

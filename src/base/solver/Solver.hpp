@@ -115,8 +115,9 @@ public:
    virtual void        ReportProgress();
    virtual void        SetDebugString(const std::string &str);
     
-   //virtual bool        Initialize() = 0;
    virtual bool        Initialize();
+   virtual bool        Finalize();
+   
     
    virtual Integer     SetSolverVariables(Real *data,
                                           const std::string &name);
@@ -201,7 +202,7 @@ protected:
    std::string          solverTextFile;
    /// Used to indicate if data should append to the text file
    Integer              instanceNumber;
-   /// The targeter text file
+   /// The solver text file
    std::ofstream        textFile;
       
    /// Generic solver parameters.

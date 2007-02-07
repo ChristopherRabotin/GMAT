@@ -549,6 +549,14 @@ bool Optimize::Execute()
    return retval;
 }
 
+
+void Optimize::RunComplete()
+{
+   optimizer->Finalize();
+   GmatCommand::RunComplete();
+}
+
+
 bool Optimize::ExecuteCallback()
 {
    #ifdef DEBUG_CALLBACK

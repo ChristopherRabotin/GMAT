@@ -21,6 +21,7 @@
 #include <sstream>
 #include "Solver.hpp"
 #include "MessageInterface.hpp"
+#include "FileManager.hpp"
 
 //#define DEBUG_SOLVER_INIT
 //#define DEBUG_SOLVER_CALC
@@ -114,6 +115,9 @@ Solver::Solver(const std::string &type, const std::string &name) :
 //------------------------------------------------------------------------------
 Solver::~Solver()
 {
+   // Added per Linda, 2/7/07
+   if (textFile.is_open())
+      textFile.close();
 }
 
 
@@ -273,6 +277,15 @@ bool Solver::Initialize()
    // Prepare the text file for output
    if (solverTextFile != "")
    {
+      // Added per Linda, 2/7/07
+      FileManager *fm;
+      fm = FileManager::Instance();
+      std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+      solverTextFile = outPath + solverTextFile;
+   
+      if (textFile.is_open())
+         textFile.close();
+      
       if (instanceNumber == 1)
          textFile.open(solverTextFile.c_str());
       else
@@ -291,6 +304,19 @@ bool Solver::Initialize()
    #endif
    return true;
 }
+
+
+bool Solver::Finalize()
+{
+   // Close the solver text file
+   if (textFile.is_open())
+   {
+      textFile.flush();
+      textFile.close();
+   }
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 //  Integer SetSolverVariables(Real *data, const std::string &name)
@@ -1052,12 +1078,13 @@ std::string Solver::GetProgressString()
 //------------------------------------------------------------------------------
 void Solver::FreeArrays()
 {
+   /*
    if (textFile.is_open())
    {
       textFile.flush();
       textFile.close();
    }
-   /*    
+   
    if (variable)
    {
       delete [] variable;
