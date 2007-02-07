@@ -271,6 +271,7 @@ bool Save::Execute()
 void Save::RunComplete()
 {
    obj.clear();
+   GmatCommand::RunComplete();
 }
 
 

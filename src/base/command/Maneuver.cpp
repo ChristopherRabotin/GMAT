@@ -17,7 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-
+ 
 #include "Maneuver.hpp"
 
 //#define DEBUG_MANEUVER 1
@@ -464,16 +464,7 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool Maneuver::InterpretAction()
 {
-   parser.EvaluateBlock(generatingString);
-   StringArray blocks = parser.DecomposeBlock(generatingString);
-   StringArray chunks = parser.ChunkLine();
-
-   // First comes the keyword, "Maneuver"
-   if (chunks[0] != typeName)
-      throw CommandException(
-         "Line '" + generatingString + 
-         "'\n should be a Maneuver command, but the '" + typeName + 
-         "' keyword is not the opening token in the line.\n");  
+   StringArray chunks = InterpretPreface();
 
    // Find and set the burn object name ...
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
