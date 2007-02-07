@@ -206,13 +206,13 @@ void ObjectPropertyWrapper::SetupWrapper()
 {
    std::string type, owner, depobj;
    GmatStringUtil::ParseParameter(description, type, owner, depobj);
-   if (depobj != "")
-   {
-      throw ParameterException(
-      "Dependent objects not yet supported for the object property wrapper \"" +
-      description + "\".\n");
-      /// @todo Handle object properties that use dependent objects here
-   }
+   //if (depobj != "")
+   //{
+   //   throw ParameterException(
+   //   "Dependent objects not yet supported for the object property wrapper \"" +
+   //   description + "\".\n");
+   //   /// @todo Handle object properties that use dependent objects here
+   //}
    if (owner == "")
    {
       throw ParameterException(
