@@ -830,17 +830,17 @@ bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
 //------------------------------------------------------------------------------
 bool ReportFile::OpenReportFile(void)
 {
-   std::string currName = GetFileName();
+   filename = GetFileName();
    
    #if DEBUG_REPORTFILE_OPEN
       MessageInterface::ShowMessage
-         ("ReportFile::OpenReportFile currName = %s\n", currName.c_str());
+         ("ReportFile::OpenReportFile filename = %s\n", filename.c_str());
    #endif
    
    if (dstream.is_open())
      dstream.close();
    
-   dstream.open(currName.c_str());
+   dstream.open(filename.c_str());
    if (!dstream.is_open())
    {
       #if DEBUG_REPORTFILE_OPEN
