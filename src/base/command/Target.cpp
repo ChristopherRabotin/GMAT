@@ -659,6 +659,7 @@ bool Target::Execute()
 
 void Target::RunComplete()
 {
-   targeter->Finalize();
+   if (targeter != NULL)
+      targeter->Finalize();
    GmatCommand::RunComplete();
 }
