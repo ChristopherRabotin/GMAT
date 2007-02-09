@@ -552,7 +552,8 @@ bool Optimize::Execute()
 
 void Optimize::RunComplete()
 {
-   optimizer->Finalize();
+   if (optimizer != NULL)
+      optimizer->Finalize();
    GmatCommand::RunComplete();
 }
 
