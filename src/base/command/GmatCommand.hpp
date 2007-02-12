@@ -156,7 +156,7 @@ public:
    bool                 HasPropStateChanged();
             
    //---------------------------------------------------------------------------
-   //  bool GmatCommand::InterpretAction()
+   //  bool GmatCommand::Execute()
    //---------------------------------------------------------------------------
    /**
     * The method that is fired to perform the GmatCommand.
