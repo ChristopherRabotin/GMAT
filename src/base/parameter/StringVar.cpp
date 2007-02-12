@@ -255,6 +255,30 @@ Integer StringVar::GetParameterID(const std::string &str) const
 
 
 //------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string StringVar::GetStringParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case VALUE:
+      return mExpr;
+   default:
+      return Parameter::GetStringParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string StringVar::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
 // bool SetStringParameter(const Integer id, const std::string &value)
 //------------------------------------------------------------------------------
 bool StringVar::SetStringParameter(const Integer id, const std::string &value)
