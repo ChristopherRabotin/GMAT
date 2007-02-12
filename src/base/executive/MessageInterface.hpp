@@ -57,12 +57,12 @@ public:
    static std::string GetLogFileName();
 
    static void SetLogEnable(bool flag);
-   static void SetLogPath(const std::string &pathname);
+   static void SetLogPath(const std::string &pathname, bool append = false);
    static void SetLogFile(const std::string &filename);
    
-   static void OpenLogFile(const std::string &filename);
+   static void OpenLogFile(const std::string &filename, bool append = false);
    static void CloseLogFile();
-
+   
 private:
    
    static const int MAX_MESSAGE_LENGTH = 3000;

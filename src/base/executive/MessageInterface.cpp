@@ -354,15 +354,16 @@ void MessageInterface::SetLogEnable(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetLogPath(const std::string &pathname)
+// void SetLogPath(const std::string &pathname, bool append = false)
 //------------------------------------------------------------------------------
 /*
  * Sets log file path with keeping log file name as is.
  *
  * @param  pathname  log file path name, such as "/newpath/test1/"
+ * @param  append  true if appending log message
  */
 //------------------------------------------------------------------------------
-void MessageInterface::SetLogPath(const std::string &pathname)
+void MessageInterface::SetLogPath(const std::string &pathname, bool append)
 {
    FileManager *fm = FileManager::Instance();
    std::string fname;
@@ -380,7 +381,7 @@ void MessageInterface::SetLogPath(const std::string &pathname)
       fname = "GmatLog.txt";
    }
    
-   OpenLogFile(fname);
+   OpenLogFile(fname, append);
    
 }
 
@@ -401,16 +402,19 @@ void MessageInterface::SetLogFile(const std::string &filename)
 
 
 //------------------------------------------------------------------------------
-// void OpenLogFile(const std::string &filename)
+// void OpenLogFile(const std::string &filename, bool append = false)
 //------------------------------------------------------------------------------
-void MessageInterface::OpenLogFile(const std::string &filename)
+void MessageInterface::OpenLogFile(const std::string &filename, bool append)
 {
    logFileName = filename;
    
    if (logFile)
       fclose(logFile);
    
-   logFile = fopen(logFileName.c_str(), "w");
+   if (append)
+      logFile = fopen(logFileName.c_str(), "a");
+   else
+      logFile = fopen(logFileName.c_str(), "w");
    
    if (logFile)
    {
