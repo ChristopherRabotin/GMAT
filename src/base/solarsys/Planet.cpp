@@ -674,9 +674,20 @@ Real Planet::GetUpdateInterval() const
 
 bool Planet::SetUpdateInterval(Real val)
 {
-   if (val < 0.0) return false;
+   if (val < 0.0)
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(val, GetDataPrecision()).c_str(),
+                     "NutationUpdateInterval", "Real Number >= 0.0");
+      throw sse;
+   }
+   
    updateInterval = val;
    return true;
+//   if (val < 0.0) return false;
+//   updateInterval = val;
+//   return true;
 }
 
 
