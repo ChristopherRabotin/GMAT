@@ -15,6 +15,7 @@
 #include "RunScriptFolderDialog.hpp"
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 //#define DEBUG_RUN_SCRIPT_FOLDER_DIALOG 1
 
@@ -36,7 +37,8 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
                                              Real absTol, const wxString &compareDir)
-   : GmatDialog(parent, -1, wxString(_T("RunScriptFolderDialog")))
+   : GmatDialog(parent, -1, "RunScriptFolderDialog", NULL, wxDefaultPosition,
+                wxSize(100, 100))
 {
    mRunScripts = false;
    mCompareResults = false;
@@ -72,7 +74,32 @@ void RunScriptFolderDialog::Create()
    MessageInterface::ShowMessage("RunScriptFolderDialog::Create() entered.\n");
    #endif
    
-   int bsize = 2;
+   int bsize = 1;
+   
+   //------------------------------------------------------
+   // save scripts
+   //------------------------------------------------------
+   mRunFromSavedCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT(" Save scripts to new folder and run from it"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   wxStaticText *saveScriptsDir =
+      new wxStaticText(this, ID_TEXT, wxT("Directory to save scripts:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mSaveScriptsDirTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(320,20), 0);
+   
+   mChangeSaveScriptsDirButton =
+      new wxButton(this, ID_BUTTON, wxT("Browse"),
+                    wxDefaultPosition, wxDefaultSize, 0);
+   
+   wxBoxSizer *saveScriptsSizer = new wxBoxSizer(wxVERTICAL);
+   saveScriptsSizer->Add(mRunFromSavedCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   saveScriptsSizer->Add(saveScriptsDir, 0, wxALIGN_LEFT|wxALL, bsize);
+   saveScriptsSizer->Add(mSaveScriptsDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   saveScriptsSizer->Add(mChangeSaveScriptsDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
    
    //------------------------------------------------------
    // run scripts
@@ -115,39 +142,23 @@ void RunScriptFolderDialog::Create()
    runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
- 
- #if __WXMAC__
-   wxStaticText *title1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Run Scripts"),
-                        wxDefaultPosition, wxSize(220,20),
-                        wxBOLD);
-   title1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                             false, _T(""), wxFONTENCODING_SYSTEM));
-                                             
-   wxBoxSizer *runBoxSizer = new wxBoxSizer( wxVERTICAL );
+    
+   GmatStaticBoxSizer *runStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Run Scripts");
    
-   runBoxSizer->Add(title1StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   runBoxSizer->Add(runSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   runBoxSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   runBoxSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   runBoxSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   runBoxSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
-#else  
-   wxStaticBoxSizer *runStaticSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Run Scripts");
-   
+   runStaticSizer->Add(saveScriptsSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   runStaticSizer->Add(20, 3, 0, wxALIGN_LEFT|wxALL, bsize);
    runStaticSizer->Add(runSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
    runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
-#endif
 
    //------------------------------------------------------
    // compare results
    //------------------------------------------------------
    mCompareCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Compare Results"),
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Compare sesults"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *tolLabel =
@@ -189,67 +200,41 @@ void RunScriptFolderDialog::Create()
                     wxDefaultPosition, wxDefaultSize, 0);
    
    mSaveResultCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Save Compare Results to File"),
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Save compare results to file"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *saveFileLabel =
-      new wxStaticText(this, ID_TEXT, wxT("File Name to Save:"),
+      new wxStaticText(this, ID_TEXT, wxT("Filename to save:"),
                        wxDefaultPosition, wxDefaultSize, 0);
-
+   
    mSaveFileTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(mCompareDir + "/CompareResults.txt"),
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(320,20), 0);
    
    mSaveBrowseButton =
       new wxButton(this, ID_BUTTON, wxT("Browse"),
                     wxDefaultPosition, wxDefaultSize, 0);
-
- #if __WXMAC__
-   wxStaticText *title2StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Compare Results"),
-                        wxDefaultPosition, wxSize(220,20),
-                        wxBOLD);
-   title2StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                             false, _T(""), wxFONTENCODING_SYSTEM));
-                                             
-   wxBoxSizer *compareBoxSizer = new wxBoxSizer( wxVERTICAL );
    
-   compareBoxSizer->Add(title2StaticText, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareBoxSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareBoxSizer->Add(dirLabel, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
-   compareBoxSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
-   compareBoxSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   compareBoxSizer->Add(20,3, 0, wxALIGN_CENTRE|wxALL, bsize);
-   compareBoxSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareBoxSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-#else   
-   wxStaticBoxSizer *compareStaticSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Compare Results");
-
+   GmatStaticBoxSizer *compareStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Compare Results");
+   
    compareStaticSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
    compareStaticSizer->Add(dirLabel, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
    compareStaticSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
    compareStaticSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   compareStaticSizer->Add(20,3, 0, wxALIGN_CENTRE|wxALL, bsize);
+   compareStaticSizer->Add(20, 3, 0, wxALIGN_CENTRE|wxALL, bsize);
    compareStaticSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-#endif
    
    //------------------------------------------------------
    // add to page sizer
    //------------------------------------------------------
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
- #if __WXMAC__
-   pageBoxSizer->Add(runBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(compareBoxSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
- #else  
    pageBoxSizer->Add(runStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
    pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
- #endif  
+   
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
 
@@ -262,18 +247,24 @@ void RunScriptFolderDialog::LoadData()
    wxString str;
    str.Printf("%d", mNumScriptsToRun);
    mNumScriptsToRunTextCtrl->SetValue(str);
-
+   
    str.Printf("%g", mAbsTol);
    mAbsTolTextCtrl->SetValue(str);
-
+   
    FileManager *fm = FileManager::Instance();
+   wxString sep = fm->GetPathSeparator().c_str();
+   
    mCurrOutDir = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + "AutoSave");
    mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
    mCompareDirTextCtrl->SetValue(mCompareDir);
+   mSaveFileTextCtrl->SetValue(mCompareDir + sep + "CompareResults.txt");
+   
    mSaveResultCheckBox->Disable();
    mSaveFileTextCtrl->Disable();
    mSaveBrowseButton->Disable();
-   
+   mSaveScriptsDirTextCtrl->Disable();
+   mChangeSaveScriptsDirButton->Disable();
    theOkButton->Enable();
 }
 
@@ -308,13 +299,36 @@ void RunScriptFolderDialog::SaveData()
       return;
    }
    
+   if (mCurrOutDirTextCtrl->GetValue() == "")
+   {
+      wxMessageBox("Please enter output directory.");
+      canClose = false;
+      return;
+   }
+   
+   mRunFromSavedScripts = mRunFromSavedCheckBox->GetValue();
+
+   if (mRunFromSavedScripts)
+      mOutDirChanged = true;
+   
+   if (mRunFromSavedScripts &&
+       mSaveScriptsDirTextCtrl->GetValue() == "")
+   {
+      wxMessageBox("Please enter directory to save scripts.");
+      canClose = false;
+      return;
+   }
+   
+   
    mNumScriptsToRun = numScriptsToRun;
    mNumTimesToRun = numTimesToRun;
    
+   mSaveScriptsDir = mSaveScriptsDirTextCtrl->GetValue();
+   mCurrOutDir = mCurrOutDirTextCtrl->GetValue();
    mReplaceString = mReplaceTextCtrl->GetValue();
    mCompareDir = mCompareDirTextCtrl->GetValue();
    mSaveFilename = mSaveFileTextCtrl->GetValue();
-
+   
    mRunScripts = true;
    if (mNumScriptsToRun <= 0)
       mRunScripts = false;
@@ -349,28 +363,46 @@ void RunScriptFolderDialog::ResetData()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mChangeCurrOutDirButton)
+   if (event.GetEventObject() == mChangeSaveScriptsDirButton)
    {
-      //wxDirDialog dialog(this, "Select a new output directory", wxGetCwd());
+      wxDirDialog dialog(this, "Select a directory to save scripts", mCompareDir);
+   
+      if (dialog.ShowModal() == wxID_OK)
+      {
+         mSaveScriptsDir = dialog.GetPath();
+         mSaveScriptsDirTextCtrl->SetValue(mSaveScriptsDir);
+         
+         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         MessageInterface::ShowMessage
+            ("RunScriptFolderDialog::OnButtonClick() mSaveScriptsDir=%s\n",
+             mSaveScriptsDir.c_str());
+         #endif
+      }
+   }
+   else if (event.GetEventObject() == mChangeCurrOutDirButton)
+   {
       wxDirDialog dialog(this, "Select a new output directory", mCompareDir);
    
       if (dialog.ShowModal() == wxID_OK)
       {
+         FileManager *fm = FileManager::Instance();
+         wxString sep = fm->GetPathSeparator().c_str();
+         
          mCurrOutDir = dialog.GetPath();
          mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
-         mSaveFileTextCtrl->SetValue(mCurrOutDir + "/CompareResults.txt");
+         mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + sep + "AutoSave");
+         mSaveFileTextCtrl->SetValue(mCurrOutDir + sep + "CompareResults.txt");
          mOutDirChanged = true;
          
          #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
             ("RunScriptFolderDialog::OnButtonClick() mCurrOutDir=%s\n",
-             dirname.c_str());
+             mCurrOutDir.c_str());
          #endif
       }
    }
    else if (event.GetEventObject() == mDirBrowseButton)
    {
-      //wxDirDialog dialog(this, "Select a directory to compare", wxGetCwd());
       wxDirDialog dialog(this, "Select a directory to compare", mCompareDir);
       
       if (dialog.ShowModal() == wxID_OK)
@@ -381,7 +413,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
             ("RunScriptFolderDialog::OnButtonClick() dirname=%s\n",
-             mCurrOutDir.c_str());
+             dirname.c_str());
          #endif
       }
    }
@@ -396,7 +428,8 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
       {
          mSaveFileTextCtrl->SetValue(filename);
          MessageInterface::ShowMessage
-            ("RunScriptFolderDialog::OnButtonClick() savefile=%s\n", filename.c_str());
+            ("RunScriptFolderDialog::OnButtonClick() savefile=%s\n",
+             filename.c_str());
       }
       
    }
@@ -408,17 +441,33 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::OnCheckBoxChange(wxCommandEvent& event)
 {
-   if (mCompareCheckBox->IsChecked())
+   if (event.GetEventObject() == mRunFromSavedCheckBox)
    {
-      mSaveResultCheckBox->Enable();
-      mSaveFileTextCtrl->Enable();
-      mSaveBrowseButton->Enable();
+      if (mRunFromSavedCheckBox->IsChecked())
+      {
+         mSaveScriptsDirTextCtrl->Enable();
+         mChangeSaveScriptsDirButton->Enable();
+      }
+      else
+      {
+         mSaveScriptsDirTextCtrl->Disable();
+         mChangeSaveScriptsDirButton->Disable();
+      }
    }
-   else
+   else if (event.GetEventObject() == mCompareCheckBox)
    {
-      mSaveResultCheckBox->Disable();
-      mSaveFileTextCtrl->Disable();
-      mSaveBrowseButton->Disable();
+      if (mCompareCheckBox->IsChecked())
+      {
+         mSaveResultCheckBox->Enable();
+         mSaveFileTextCtrl->Enable();
+         mSaveBrowseButton->Enable();
+      }
+      else
+      {
+         mSaveResultCheckBox->Disable();
+         mSaveFileTextCtrl->Disable();
+         mSaveBrowseButton->Disable();
+      }
    }
 }
 

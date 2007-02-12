@@ -27,6 +27,7 @@ public:
    ~RunScriptFolderDialog();
    
    bool RunScripts() { return mRunScripts; }
+   bool RunFromSavedScripts() { return mRunFromSavedScripts; }
    bool CompareResults() { return mCompareResults; }
    bool SaveCompareResults() { return mSaveCompareResults; }
    bool HasOutDirChanged() { return mOutDirChanged; }
@@ -37,6 +38,8 @@ public:
    wxString GetCompareDirectory() { return mCompareDir; }
    wxString GetSaveFilename() { return mSaveFilename; }
    wxString GetCurrentOutDir() { return mCurrOutDir; }
+   wxString GetSaveScriptsDir() { return mSaveScriptsDir; }
+   
 protected:
    
    // override methods from GmatDialog
@@ -52,13 +55,16 @@ protected:
    wxTextCtrl *mAbsTolTextCtrl;
    wxTextCtrl *mSaveFileTextCtrl;
    wxTextCtrl *mCurrOutDirTextCtrl;
+   wxTextCtrl *mSaveScriptsDirTextCtrl;
    
+   wxCheckBox *mRunFromSavedCheckBox;
    wxCheckBox *mCompareCheckBox;
    wxCheckBox *mSaveResultCheckBox;
-
+   
    wxButton *mDirBrowseButton;
    wxButton *mSaveBrowseButton;
    wxButton *mChangeCurrOutDirButton;
+   wxButton *mChangeSaveScriptsDirButton;
    
    // event handling
    void OnButtonClick(wxCommandEvent& event);   
@@ -78,6 +84,7 @@ protected:
 private:
 
    bool mRunScripts;
+   bool mRunFromSavedScripts;
    bool mCompareResults;
    bool mSaveCompareResults;
    bool mOutDirChanged;
@@ -86,6 +93,7 @@ private:
    Real mAbsTol;
    wxString mReplaceString;
    wxString mCurrOutDir;
+   wxString mSaveScriptsDir;
    wxString mCompareDir;
    wxString mSaveFilename;
 };
