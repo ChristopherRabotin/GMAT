@@ -78,9 +78,13 @@ public:
    static FileManager* Instance();
    ~FileManager();
    
+   std::string GetPathSeparator();
+   bool DoesDirectoryExist(const std::string &dirPath);
+   bool DoesFileExist(const std::string &filename);
+   
    void ReadStartupFile(const std::string &fileName = "");
    void WriteStartupFile(const std::string &fileName = "");
-
+   
    std::string GetRootPath();
    
    std::string GetPathname(const FileType type);

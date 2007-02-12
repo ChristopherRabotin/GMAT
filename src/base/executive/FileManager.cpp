@@ -24,6 +24,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <dirent.h>
 
 // If we want to create default input file names turn this on
 //#define FM_CREATE_DEFAULT_INPUT
@@ -108,6 +109,75 @@ FileManager::~FileManager()
          delete pos->second;
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetPathSeparator()
+//------------------------------------------------------------------------------
+/**
+ * @return path separator; "/" or "\\" dependends on the platform
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetPathSeparator()
+{
+   std::string sep = "/";
+   
+   char *buffer;
+   buffer = getenv("OS");
+   if (buffer != NULL)
+   {
+      //MessageInterface::ShowMessage("Current OS is %s\n", buffer);
+      std::string osStr(buffer);
+      
+      if (osStr.find("Windows") != osStr.npos)
+         sep = "\\";
+   }
+   
+   return sep;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesDirectoryExist(const std::string &dirPath)
+//------------------------------------------------------------------------------
+bool FileManager::DoesDirectoryExist(const std::string &dirPath)
+{
+   if (dirPath == "")
+      return false;
+   
+   DIR *dir;
+   bool dirExist = false;
+   
+   dir = opendir(dirPath.c_str());
+   
+   if (dir != NULL)
+   {
+      dirExist = true; 
+      closedir(dir);
+   }
+   
+   return dirExist;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesFileExist(const std::string &filename)
+//------------------------------------------------------------------------------
+bool FileManager::DoesFileExist(const std::string &filename)
+{
+  FILE * pFile;
+  pFile = fopen (filename.c_str(), "rt+");
+  
+  if (pFile!=NULL)
+  {
+    fclose (pFile);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 
