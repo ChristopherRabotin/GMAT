@@ -1236,7 +1236,7 @@ bool CelestialBody::SetGravitationalConstant(Real newMu)
       SolarSystemException sse;
       sse.SetDetails(errorMessageFormat.c_str(),
                      GmatStringUtil::ToString(newMu, GetDataPrecision()).c_str(),
-                     "Mu", "Real Number > 0 ");
+                     "Mu", "Real Number > 0.0");
       throw sse;
    }
    
@@ -1266,7 +1266,7 @@ bool CelestialBody::SetEquatorialRadius(Real newEqRadius)
       SolarSystemException sse;
       sse.SetDetails(errorMessageFormat.c_str(),
                      GmatStringUtil::ToString(newEqRadius, GetDataPrecision()).c_str(),
-                     "Equatorial Radius", "Real Number > 0 ");
+                     "Equatorial Radius", "Real Number > 0.0");
       throw sse;
    }
    
@@ -1580,7 +1580,7 @@ bool CelestialBody::SetSMA(Real value)
       sse.SetDetails(errorMessageFormat.c_str(),
                      GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
                      PARAMETER_TEXT[ANALYTIC_SMA - SpacePointParamCount].c_str(),
-                     "Real Number non-zero");
+                     "Real Number != 0.0");
       throw sse;
    }
    
@@ -1609,7 +1609,7 @@ bool CelestialBody::SetECC(Real value)
       sse.SetDetails(errorMessageFormat.c_str(),
                      GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
                      PARAMETER_TEXT[ANALYTIC_ECC - SpacePointParamCount].c_str(),
-                     "Real Number > 0 ");
+                     "Real Number >= 0.0");
       throw sse;
    }
    
