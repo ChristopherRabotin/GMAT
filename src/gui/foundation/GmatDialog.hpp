@@ -35,7 +35,8 @@ public:
    
    // constructors
    GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
-              GmatBase *obj = NULL);
+              GmatBase *obj = NULL, const wxPoint& pos = wxDefaultPosition,
+              const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
    
    virtual void EnableUpdate(bool enable = true);
    

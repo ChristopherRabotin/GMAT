@@ -36,7 +36,8 @@ END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
 // GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
-//            GmatBase *obj = NULL
+//            GmatBase *obj = NULL, const wxPoint& pos = wxDefaultPosition,
+//            const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatDialog object.
@@ -49,8 +50,9 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
-                       GmatBase *obj)
-   : wxDialog(parent, id, title)
+                       GmatBase *obj, const wxPoint& pos, const wxSize& size,
+                       long style)
+   : wxDialog(parent, id, title, pos, size, style, title)
 {
    mObject = obj;
    
