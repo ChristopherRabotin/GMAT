@@ -445,10 +445,10 @@ void CelestialBodyPanel::SaveData()
    if (isTextModified)
    {
       str = mMuTextCtrl->GetValue();
-      CheckReal(mu, str, "Mu", "Real Number > 0");
+      CheckReal(mu, str, "Mu", "Real Number > 0.0");
       
       str = mEquatorialRadiusTextCtrl->GetValue();
-      CheckReal(radius, str, "EquatorialRadius", "Real Number > 0");
+      CheckReal(radius, str, "EquatorialRadius", "Real Number > 0.0");
       
       str = mFlatteningTextCtrl->GetValue();
       CheckReal(flattening, str, "Flattening", "Real Number");
@@ -456,7 +456,7 @@ void CelestialBodyPanel::SaveData()
       if (theCelestialBody->GetBodyType() == Gmat::PLANET)
       {
          str = mIntervalTextCtrl->GetValue();
-         CheckReal(interval, str, "Nutation Update Interval", "Real Number > 0");
+         CheckReal(interval, str, "Nutation Update Interval", "Real Number >= 0.0");
       }
       
    }
@@ -547,7 +547,16 @@ void CelestialBodyPanel::SaveData()
          // Nutation Update Interval
          if (theCelestialBody->GetBodyType() == Gmat::PLANET)
          {
-            thePlanet->SetUpdateInterval(interval);
+	         try
+	         {
+	            thePlanet->SetUpdateInterval(interval);
+	         }
+	         catch (BaseException &e)
+	         {
+	            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+	            canClose = false;
+	         }
+//            thePlanet->SetUpdateInterval(interval);
          }
          
          if (canClose)
