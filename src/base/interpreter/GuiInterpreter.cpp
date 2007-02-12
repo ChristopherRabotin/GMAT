@@ -679,19 +679,23 @@ Integer GuiInterpreter::ChangeRunState(const std::string &state, Integer sandbox
 
 
 //------------------------------------------------------------------------------
-// bool InterpretScript(const std::string &filename)
+// bool InterpretScript(const std::string &filename, bool readBack = false,
+//                      const std::string &newPath = "")
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
  * @param <filename> input script file name
+ * @param <readBack> true will read scripts, save, and read back in
+ * @param <newPath> new path to be used for saving scripts
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GuiInterpreter::InterpretScript(const std::string &filename)
+bool GuiInterpreter::InterpretScript(const std::string &filename, bool readBack,
+                                     const std::string &newPath)
 {
-   return theModerator->InterpretScript(filename);
+   return theModerator->InterpretScript(filename, readBack, newPath);
 }
 
 

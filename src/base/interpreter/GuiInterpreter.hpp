@@ -121,7 +121,8 @@ public:
    Integer ChangeRunState(const std::string &state, Integer sandboxNum = 1);
    
    // Script
-   bool InterpretScript(const std::string &filename);
+   bool InterpretScript(const std::string &filename, bool readBack = false,
+                        const std::string &newPath = "");
    bool SaveScript(const std::string &filename,
                    Gmat::WriteMode mode = Gmat::SCRIPTING);
    std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
