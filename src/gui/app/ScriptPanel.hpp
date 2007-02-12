@@ -26,24 +26,30 @@ public:
    wxTextCtrl *mFileContentsTextCtrl;
 
 private:
+   int mOldLineNumber;
+   int mOldLastPos;
+   
    wxString mScriptFilename;
-   wxStaticBoxSizer *mTopSizer;
-   wxGridSizer *mBottomSizer;
-   wxBoxSizer *mPageSizer;
-
+   wxColour mDefBgColor;
+   wxColour mBgColor;
+   
+   wxTextCtrl *mLineNumberTextCtrl;
+   
    wxButton *mBuildButton;
    wxButton *mBuildRunButton;
-//   wxButton *mFontButton;
+   //wxButton *mFontButton;
 
    // methods inherited from GmatSavePanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    // event handling
+   void OnTextEnterPressed(wxCommandEvent& event);
    void OnTextUpdate(wxCommandEvent& event);
+   void OnTextOverMaxLen(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
-//   void OnFontSelect(wxCommandEvent& event);
+   //void OnFontSelect(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 
