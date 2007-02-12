@@ -14,6 +14,7 @@
 
 #include "FunctionSetupPanel.hpp"
 #include "MessageInterface.hpp"
+#include <wx/filename.h>          // for wxFileName::
 
 
 //#define DEBUG_PARAM_PANEL 1
@@ -142,7 +143,7 @@ void FunctionSetupPanel::LoadData()
         // need to add default path...
    }
 
-   if (GmatAppData::GetMainFrame()->FileExists(filename.c_str()))
+   if (wxFileName::FileExists(filename))
    {
        mFileContentsTextCtrl->LoadFile(filename);
        mEnableSave = false;
