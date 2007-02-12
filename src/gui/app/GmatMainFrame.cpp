@@ -149,7 +149,6 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(TOOL_CLOSE_CURRENT, GmatMainFrame::OnCloseCurrent)
    
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
-   EVT_MENU(MENU_SCRIPT_BUILD, GmatMainFrame::OnScriptBuild)    
 //   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)
 //   EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile)
 
@@ -221,9 +220,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #endif
    
    // set the script name
-   scriptFilename = "$gmattempscript$.script";
+   mScriptFilename = "$gmattempscript$.script";
    scriptCounter =0;
-
+   mInterpretFailed = false;
+   
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
@@ -238,8 +238,6 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 
 #if wxUSE_STATUSBAR
    // create a status bar
-   //theStatusBar = CreateStatusBar(2);
-   //loj: 3/20/06 int widths[] = {150, 600, 200};
    int widths[] = {150, 600, 300};
    theStatusBar = CreateStatusBar(3, wxBORDER);
    SetStatusWidths(3, widths);
@@ -743,6 +741,7 @@ void GmatMainFrame::MinimizeChildren()
 
 }
 
+
 //------------------------------------------------------------------------------
 // void GmatMainFrame::SetActiveChildDirty()
 //------------------------------------------------------------------------------
@@ -755,7 +754,6 @@ void GmatMainFrame::SetActiveChildDirty(bool dirty)
 }
 
 
-
 //------------------------------------------------------------------------------
 // void CloseCurrentProject()
 //------------------------------------------------------------------------------
@@ -765,15 +763,90 @@ void GmatMainFrame::CloseCurrentProject()
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
    #endif
    
-   //close all windows
+   // close all windows
    CloseAllChildren();
    
+   // update title and status bar
+   wxString statusText;
+   statusText.Printf("GMAT - General Mission Analysis Tool");
+   SetStatusText("", 1);
+   SetTitle(statusText);
+   
+   // clear trees, message window
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
    MessageInterface::ClearMessage();
-
+   
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
+}
+
+
+//------------------------------------------------------------------------------
+// bool InterpretScript(const wxString &filename)
+//------------------------------------------------------------------------------
+bool GmatMainFrame::InterpretScript(const wxString &filename)
+{
+   wxString title;
+   title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
+   SetTitle(title);
+   
+   bool success = false;
+   
+   // let's try building the script, Moderator::InterpretScript() will
+   // clear all resource and commands
+   try
+   {
+      // If successfully interpreted, set status to true
+      if (GmatAppData::GetGuiInterpreter()->
+          InterpretScript(std::string(filename.c_str())))
+      {
+         success = true;
+      }  
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
+             "Please fix all errors listed in message window.\n", filename.c_str());
+         
+         theGuiInterpreter->ClearResource();
+         theGuiInterpreter->ClearCommandSeq();
+         
+         // I think PopupMessage can replace this (loj: 2/9/07)
+         //wxLogError
+         //   ("Error occurred during parsing.\nPlease check the syntax and try again\n");
+         //wxLog::FlushActive();
+      }
+      
+      // Always refresh the gui      
+      CloseAllChildren(false, true, filename);
+      GmatAppData::GetResourceTree()->ClearResource(false);
+      GmatAppData::GetMissionTree()->ClearMission();
+      
+      if (success)
+      {
+         // Update ResourceTree and MissionTree
+         GmatAppData::GetResourceTree()->UpdateResource(true);
+         GmatAppData::GetMissionTree()->UpdateMission(true);
+      }
+      else
+      {
+         SetStatusText("Errors Found in the Script!!", 1);
+         
+         // open script editor
+         OpenScript();
+      }
+   }
+   catch (BaseException &e)
+   {
+      wxLogError(e.GetMessage().c_str());
+      wxLog::FlushActive();
+      MessageInterface::ShowMessage(e.GetMessage());
+   }
+   
+   mInterpretFailed = !success;
+   
+   return success;
 }
 
 
@@ -787,9 +860,18 @@ void GmatMainFrame::RunCurrentMission()
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
    
+   if (mInterpretFailed)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
+          "Please fix all errors listed in message window before running "
+          "the mission.\n", mScriptFilename.c_str());
+      
+      return;
+   }
+   
    wxToolBar* toolBar = GetToolBar();
-   
-   
+      
    menuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
    UpdateMenus(FALSE);
    
@@ -910,14 +992,10 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       wxMessageBox(wxT("GMAT is still running the mission.\n"
                        "Please STOP the run before closing."),
                    wxT("GMAT Warning"));
-      //ProcessCommand(TOOL_PAUSE); (loj: We don't need OnPause() here)
       return;
    }
    
-   //CloseAllChildren(true, true); (loj: moved below)
-   
-   // prompt save
-   
+   // prompt save, if changes were made
    if (theGuiInterpreter->HasConfigurationChanged())
    {
       wxMessageDialog *msgDlg =
@@ -926,59 +1004,37 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
                              wxYES_NO | wxCANCEL |wxICON_QUESTION, wxDefaultPosition);
       
       int result = msgDlg->ShowModal();
-      std::string oldScriptName = scriptFilename;
-
+      std::string oldScriptName = mScriptFilename;
+      
       if (result == wxID_CANCEL)
       {
          return;
       }
       else if (result == wxID_YES)
       {
-         if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
+         bool scriptSaved = false;
+         
+         if (strcmp(mScriptFilename.c_str(), "$gmattempscript$.script") == 0)
          {
-            //open up dialog box to get the script name
-            wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
-                                _T("*.script"), wxSAVE );
-            
-            if (dialog.ShowModal() == wxID_OK)
-            {
-               scriptFilename = dialog.GetPath().c_str();
-
-               if(FileExists(scriptFilename))
-               {
-                  MessageInterface::ShowMessage("File DE 2 - prompt");
-                  if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
-                                   _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
-                     GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-                  else
-                  {
-                     scriptFilename = oldScriptName;
-                     return;
-                  }
-               }
-               else
-               {
-                  //MessageInterface::ShowMessage("File DNE 2 - just save");
-                  GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-               }
-           
-               GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
-               GmatAppData::GetResourceTree()->UpdateResource(false);
-            }
+            scriptSaved = SaveScriptAs();
          }
-         else if (result == wxID_NO)
+         else
          {
-            GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
+            GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
+            scriptSaved = true;
          }
          
-         //event.Skip();
+         if (scriptSaved)
+         {
+            MessageInterface::PopupMessage
+               (Gmat::INFO_, "Scrpt saved to \"%s\"\n", mScriptFilename.c_str());
+         }
       }
    }
    else
    {
       wxMessageDialog *msgDlg =
-         new wxMessageDialog(this,
-                             "Do you really want to exit?", "Exiting...",
+         new wxMessageDialog(this, "Do you really want to exit?", "Exiting...",
                              wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
       
       int result = msgDlg->ShowModal();
@@ -986,14 +1042,71 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       if (result == wxID_NO)
          return;
    }
-
+   
    CloseAllChildren(true, true);
-
+   
    // Let Moderator::Finalize() clear all resource and commands (loj: 6/13/06)
-//    theGuiInterpreter->ClearResource();
-//    theGuiInterpreter->ClearCommandSeq();
+   //theGuiInterpreter->ClearResource();
+   //theGuiInterpreter->ClearCommandSeq();
    
    event.Skip();
+}
+
+
+//------------------------------------------------------------------------------
+// bool SaveScriptAs()
+//------------------------------------------------------------------------------
+bool GmatMainFrame::SaveScriptAs()
+{
+   #if DEBUG_MAINFRAME_SAVE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::SaveScriptAs() mScriptFilename=%s\n",
+       mScriptFilename.c_str());
+   #endif
+   
+   bool scriptSaved = true;
+   std::string oldScriptName = mScriptFilename;
+   
+   //open up dialog box to get the script name
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
+                       _T("*.script"), wxSAVE );
+   
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      mScriptFilename = dialog.GetPath().c_str();
+      
+      if (wxFileName::FileExists(mScriptFilename.c_str()))
+      {
+         #if DEBUG_MAINFRAME_SAVE
+         MessageInterface::ShowMessage
+            ("The script file: \"%s\" exist\n", mScriptFilename.c_str());
+         #endif
+         
+         if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+                          _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+         {
+            GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
+         }
+         else
+         {
+            mScriptFilename = oldScriptName;
+            scriptSaved = false;
+         }
+      }
+      else
+      {
+         GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
+      }
+   }
+   else
+   {
+      scriptSaved = false;
+   }
+   
+   if (scriptSaved)
+      CloseAllChildren();
+   
+   return scriptSaved;
 }
 
 
@@ -1004,6 +1117,7 @@ wxToolBar* GmatMainFrame::GetMainFrameToolBar()
 {
    return GetToolBar();
 }
+
 
 //------------------------------------------------------------------------------
 // wxStatusBar* GmatMainFrame::GetMainFrameStatusBar()
@@ -1031,6 +1145,7 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
    CloseCurrentProject();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -1042,22 +1157,35 @@ void GmatMainFrame::OnProjectNew(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 {
-   // ask user to continue because changes will be lost
-   if (wxMessageBox(_T("Changes will be lost.\nDo you still want to continue?"), 
-         _T("Please confirm"),
-         wxICON_QUESTION | wxYES_NO) != wxYES)
+   // if any changes were made, ask user to continue
+   if (theGuiInterpreter->HasConfigurationChanged())
    {
-      return;
+      if (wxMessageBox(_T("Changes will be lost.\nDo you still want to continue?"), 
+                       _T("Please confirm"),
+                       wxICON_QUESTION | wxYES_NO) != wxYES)
+      {
+         return;
+      }
    }
-
+   else
+   {
+      if (wxMessageBox(_T("Do you really want to load default mission?"), 
+                       _T("Please confirm"),
+                       wxICON_QUESTION | wxYES_NO) != wxYES)
+      {
+         return;
+      }
+   }
+   
    CloseCurrentProject();
-   scriptFilename = "$gmattempscript$.script";
+   mScriptFilename = "$gmattempscript$.script";
    theGuiInterpreter->LoadDefaultMission();
-
+   
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
    GmatAppData::GetOutputTree()->UpdateOutput(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSaveScript(wxCommandEvent& WXUNUSED(event))
@@ -1068,45 +1196,49 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
 {
-   std::string oldScriptName = scriptFilename;
+   #if DEBUG_MAINFRAME_SAVE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnSaveScript() mInterpretFailed=%d\n", mInterpretFailed);
+   #endif
+
+   bool scriptSaved = false;
    
-   if (strcmp(scriptFilename.c_str(), "$gmattempscript$.script") == 0)
+   if (strcmp(mScriptFilename.c_str(), "$gmattempscript$.script") == 0)
    {
-      //open up dialog box to get the script name
-      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
-    
-      if (dialog.ShowModal() == wxID_OK)
+      scriptSaved = SaveScriptAs();
+      if (scriptSaved)
       {
-         scriptFilename = dialog.GetPath().c_str();
-         if(FileExists(scriptFilename))
-         {
-            MessageInterface::ShowMessage("File DE 3 - prompt");
-            if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
-                             _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
-               GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-            else
-            {
-               scriptFilename = oldScriptName;
-               return;
-            }
-         }
-         else
-         {
-            //MessageInterface::ShowMessage("File DNE 3 - just save");
-            GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-         }
-         
-         GmatAppData::GetResourceTree()->AddScriptItem(scriptFilename.c_str());
+         GmatAppData::GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
          GmatAppData::GetResourceTree()->UpdateResource(false);
       }
    }
    else
    {
-      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-   }   
+      if (mInterpretFailed)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
+             "Please fix all errors listed in message window before saving "
+             "the mission.\n", mScriptFilename.c_str());
+      }
+      else
+      {
+         GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
+         scriptSaved = true;
+      }
+   }
+   
+   if (scriptSaved)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::INFO_, "Scrpt saved to \"%s\"\n", mScriptFilename.c_str());
+      
+      CloseAllChildren();
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
@@ -1119,45 +1251,17 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
 {
-   //open up dialog box to get the script name
-   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""), _T("*.script"), wxSAVE );
-   std::string oldScriptName = scriptFilename;
-    
-   if (dialog.ShowModal() == wxID_OK)
+   if (SaveScriptAs())
    {
-      scriptFilename = dialog.GetPath().c_str();
+      GmatAppData::GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
       
-      if(FileExists(scriptFilename))
-      {
-           MessageInterface::ShowMessage("File DE - prompt");
-           if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
-               _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
-                   {
-                      GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-                   }
-           else
-              scriptFilename = oldScriptName;
-      }
-      else
-      {
-          MessageInterface::ShowMessage("File DNE - just save");
-          GmatAppData::GetGuiInterpreter()->SaveScript(scriptFilename);
-      }
+      // update title and status bar
+      wxString title;
+      title.Printf("%s - General Mission Analysis Tool (GMAT)",
+                        mScriptFilename.c_str());       
+      
+      SetTitle(title);
    }
-}
-
-bool GmatMainFrame::FileExists(std::string scriptFilename)
-{
-  FILE * pFile;
-  pFile = fopen (scriptFilename.c_str(),"rt+");
-  if (pFile!=NULL)
-  {
-    fclose (pFile);
-    return true;
-  }
-  else
-    return false;
-
 }
 
 
@@ -1525,18 +1629,12 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    return newChild;
 }
 
-//loj: 12/1/06
-// Changed arg of CreateNewCommand to (int dataType, GmatTreeItemData *item)
-// so that ScriptEvent can set new BeginScript pointer.
 //------------------------------------------------------------------------------
 // GmatMdiChildFrame* CreateNewCommand(const wxString &title,
 //                                     const wxString &name, int dataType,
 //                                     GmatCommand *cmd)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-// GmatMainFrame::CreateNewCommand(const wxString &title,
-//                                 const wxString &name, int dataType,
-//                                 GmatCommand *cmd)
 GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
 {
    wxString title = item->GetDesc();
@@ -1607,7 +1705,6 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
          new ScriptEventPanel(scrolledWin, (MissionTreeItemData*)item);
       sizer->Add(scriptEventPanel, 0, wxGROW|wxALL, 0);
       newChild->SetScriptTextCtrl(scriptEventPanel->mFileContentsTextCtrl);
-      //sizer->Add(new ScriptEventPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    }
    case GmatTree::ASSIGNMENT:
@@ -1773,46 +1870,6 @@ GmatMainFrame::CreateNewOutput(const wxString &title,
 
 
 //------------------------------------------------------------------------------
-// bool InterpretScript(const wxString &filename)
-//------------------------------------------------------------------------------
-bool GmatMainFrame::InterpretScript(const wxString &filename)
-{
-   bool status = false;
-   try
-   {
-      // If successfully interpreted, set status to true
-      if (GmatAppData::GetGuiInterpreter()->
-          InterpretScript(std::string(filename.c_str())))
-      {
-         status = true;
-      }  
-      else
-      {
-         wxLogError
-            ("Error occurred during parsing.\nPlease check the syntax and try again\n");
-         wxLog::FlushActive();
-      } 
-      
-      // Always refresh the gui      
-      CloseAllChildren(false, true, filename);
-     
-      // Update ResourceTree and MissionTree
-      GmatAppData::GetResourceTree()->UpdateResource(true);
-      GmatAppData::GetMissionTree()->UpdateMission(true);
-      
-   }
-   catch (BaseException &e)
-   {
-      wxLogError(e.GetMessage().c_str());
-      wxLog::FlushActive();
-      MessageInterface::ShowMessage(e.GetMessage());
-   }
-   
-   return status;
-}
-
-
-//------------------------------------------------------------------------------
 // void OnNewScript(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
@@ -1836,7 +1893,7 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
    ScriptPanel *scriptPanel = new ScriptPanel(scrolledWin, "");
    sizer->Add(scriptPanel, 0, wxGROW|wxALL, 0);
    newChild->SetScriptTextCtrl(scriptPanel->mFileContentsTextCtrl);
-
+   
    if (newChild && scrolledWin)
    {
        scrolledWin->SetScrollRate(5, 5);
@@ -1855,6 +1912,7 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnOpenScript(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -1868,50 +1926,36 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
 {
    GmatAppData::GetResourceTree()->OnAddScript(event);
    
-   if (GmatAppData::GetResourceTree()->wasChildAdded())
+   if (GmatAppData::GetResourceTree()->WasScriptAdded())
    {
-      if (theGuiInterpreter->HasConfigurationChanged())
+      #if DEBUG_MAINFRAME_OPEN
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::OnOpenScript() mInterpretFailed=%d, "
+          "HasConfigurationChanged=%d\n", mInterpretFailed,
+          theGuiInterpreter->HasConfigurationChanged());
+      #endif
+      
+      if (!mInterpretFailed && theGuiInterpreter->HasConfigurationChanged())
       {
           // need to save new file name because it gets overwritten in save
-          std::string tmpFilename = scriptFilename;
+          std::string tmpFilename = mScriptFilename;
           
           // ask user to continue because changes will be lost
-          //loj:if (wxMessageBox(_T("Changes will be lost.\nDo you still want to save?"), 
-          if (wxMessageBox(_T("Changes will be lost.\nDo you want to save?"), 
+          if (wxMessageBox(_T("Changes will be lost.\nDo you want to save the current script?"), 
              _T("Please confirm"),
              wxICON_QUESTION | wxYES_NO) == wxYES)
           {
              OnSaveScriptAs(event);
           }
           
-          scriptFilename = tmpFilename;
+          mScriptFilename = tmpFilename;
       }
       
-      wxString statusText;
-      statusText.Printf("%s - General Mission Analysis Tool (GMAT)", scriptFilename.c_str());       
-       
-      // let's try building the script
       SetStatusText("", 1);
-      SetTitle(statusText);
-      InterpretScript(scriptFilename.c_str());
+      InterpretScript(mScriptFilename.c_str());
    }
 }
 
-//------------------------------------------------------------------------------
-// void OnScriptBuild(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles building script file from objects
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnScriptBuild(wxCommandEvent& WXUNUSED(event))
-{
-   //loj: temp code
-   GmatAppData::GetGuiInterpreter()->
-      SaveScript("$gmattempscript$.script");
-}
 
 //------------------------------------------------------------------------------
 // void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
@@ -2102,7 +2146,7 @@ void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
       GmatTreeItemData *compareItem =
          new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
       
-      textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+      textFrame = CreateChild(compareItem);
    }
    
    textCtrl = textFrame->GetScriptTextCtrl();
@@ -2293,7 +2337,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       GmatTreeItemData *compareItem =
          new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
       
-      textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+      textFrame = CreateChild(compareItem);
    }
    
    textCtrl = textFrame->GetScriptTextCtrl();
@@ -2442,16 +2486,16 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 {
    int w, h;
    GetClientSize(&w, &h);
-
+   
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
-        
+   
    msgWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
-            
-
+   
+   
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
-
+   
    // Leaves bits of itself behind sometimes
    GetClientWindow()->Refresh();
 }
@@ -2532,16 +2576,13 @@ void GmatMainFrame::UpdateMenus(bool openOn)
 }
 
 
-
 //------------------------------------------------------------------------------
 // void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
-   //wxLogStatus(GmatAppData::GetMainFrame(), "script:%s", filename.c_str());
-   SetStatusText("", 1);
-   SetTitle(filename +" - General Mission Analysis Tool (GMAT)");
+   
    InterpretScript(filename);
 }
 
@@ -2553,10 +2594,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
    //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptBuildAndRun()\n");
    
-   //loj: 3/14 wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
-   wxString filename = scriptFilename.c_str();
-   SetStatusText("", 1);
-   SetTitle(filename +" - General Mission Analysis Tool (GMAT)");
+   wxString filename = mScriptFilename.c_str();
    
    if (InterpretScript(filename))
       OnRun(event);
@@ -2580,6 +2618,15 @@ void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
+// void SetScriptFileName(const std::string &filename)
+//------------------------------------------------------------------------------
+void GmatMainFrame::SetScriptFileName(const std::string &filename)
+{
+   mScriptFilename = filename;
+}
+
+
+//------------------------------------------------------------------------------
 // void OnUndo(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnUndo(wxCommandEvent& event)
@@ -2588,6 +2635,7 @@ void GmatMainFrame::OnUndo(wxCommandEvent& event)
    theChild->GetScriptTextCtrl()->Undo();
 //   theSaveButton->Enable(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnRedo(wxCommandEvent& event)
@@ -2598,6 +2646,7 @@ void GmatMainFrame::OnRedo(wxCommandEvent& event)
    theChild->GetScriptTextCtrl()->Redo();
 //   theSaveButton->Enable(true);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnCut(wxCommandEvent& event)
@@ -2711,11 +2760,14 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
   }
 }
 
-//------------------------------------------------------------------------------
-// void SetScriptFileName(std::string filename)
-//------------------------------------------------------------------------------
-void GmatMainFrame::SetScriptFileName(std::string filename)
-{
-    scriptFilename = filename;
-}
 
+//------------------------------------------------------------------------------
+// void OpenScript()
+//------------------------------------------------------------------------------
+void GmatMainFrame::OpenScript()
+{
+   GmatTreeItemData *scriptItem =
+      new GmatTreeItemData(mScriptFilename.c_str(), GmatTree::SCRIPT_FILE);
+   
+   CreateChild(scriptItem);
+}

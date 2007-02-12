@@ -65,6 +65,7 @@ public:
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
    void CloseCurrentProject();
+   bool InterpretScript(const wxString &filename);
    void RunCurrentMission();
    void NotifyRunCompleted();
    void ProcessPendingEvent();
@@ -73,27 +74,24 @@ public:
    wxToolBar* GetMainFrameToolBar();
    wxStatusBar* GetMainFrameStatusBar();
    
-   MdiChildTrajFrame *trajSubframe;
-   MdiChildTsFrame *tsSubframe;
-
-
-//    void UpdateUI();
-//    void OnSize(wxSizeEvent& event);
+   //void UpdateUI();
+   //void OnSize(wxSizeEvent& event);
    void OnClose(wxCloseEvent& event);
-//    void OnQuit(wxCommandEvent& event);
-//    void OnOpenTrajectoryFile(wxCommandEvent& event);
-//    void OnZoomIn(wxCommandEvent& event);
-//    void OnZoomOut(wxCommandEvent& event);
+   //void OnQuit(wxCommandEvent& event);
+   //void OnOpenTrajectoryFile(wxCommandEvent& event);
+   //void OnZoomIn(wxCommandEvent& event);
+   //void OnZoomOut(wxCommandEvent& event);
    void UpdateMenus(bool openOn);
-
+   
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
-
-   void SetScriptFileName(std::string filename);
-
+   
+   void SetScriptFileName(const std::string &filename);
+   
+   MdiChildTrajFrame *trajSubframe;
+   MdiChildTsFrame *tsSubframe;
    wxList *mdiChildren;
-   bool FileExists(std::string scriptFilename);
 
 protected:
 
@@ -101,9 +99,10 @@ private:
    int scriptCounter;
    bool mRunPaused;
    bool mRunCompleted;
+   bool mInterpretFailed;
    
    GmatServer *mServer;
-   std::string scriptFilename;
+   std::string mScriptFilename;
    GuiInterpreter *theGuiInterpreter;
    
    wxSashLayoutWindow* win;
@@ -125,7 +124,8 @@ private:
                                       const wxString &name, int dataType);
    
    void InitToolBar(wxToolBar* toolBar);
-   bool InterpretScript(const wxString &filename);
+   bool SaveScriptAs();
+   void OpenScript();
    
    // event handling
    DECLARE_EVENT_TABLE();
@@ -144,8 +144,6 @@ private:
    void OnNewScript(wxCommandEvent &event);
    void OnOpenScript(wxCommandEvent &event);
 
-   void OnScriptBuild(wxCommandEvent &event);
-
    void OnUndo(wxCommandEvent& event);
    void OnRedo(wxCommandEvent& event);
    void OnCut(wxCommandEvent& event);
@@ -158,9 +156,7 @@ private:
    
    void OnGlPlotTrajectoryFile(wxCommandEvent &event);
    void OnXyPlotTrajectoryFile(wxCommandEvent &event);
-   
-   //void OnNewScript(wxCommandEvent &event);
-   
+      
    void OnStartServer(wxCommandEvent& event);
    void OnStopServer(wxCommandEvent& event);
 
@@ -209,7 +205,6 @@ namespace GmatMenu
       MENU_EDIT_MISSION,
       
       MENU_SCRIPT_OPEN_EDITOR,
-      MENU_SCRIPT_BUILD,
       MENU_SCRIPT_BUILD_OBJECT,
       MENU_SCRIPT_RUN,
       MENU_SCRIPT_BUILD_AND_RUN,
