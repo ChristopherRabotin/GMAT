@@ -109,9 +109,10 @@ public:
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
-                                          const std::string &name);
+                                          const std::string &name,
+                                          bool addDefaultBodies = true);
    CalculatedPoint* GetCalculatedPoint(const std::string &name);
-
+   
    // CelestialBody
    CelestialBody* CreateCelestialBody(const std::string &type,
                                       const std::string &name);
@@ -269,9 +270,10 @@ public:
    Gmat::RunState GetRunState();
    
    // Script
-   bool InterpretScript(const std::string &scriptFileName);
+   bool InterpretScript(const std::string &filename, bool readBack = false,
+                        const std::string &newPath = "");
    bool InterpretScript(std::istringstream *ss, bool clearObjs);
-   bool SaveScript(const std::string &scriptFileName,
+   bool SaveScript(const std::string &filename,
                    Gmat::WriteMode mode = Gmat::SCRIPTING);
    std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    Integer RunScript(Integer sandboxNum = 1);

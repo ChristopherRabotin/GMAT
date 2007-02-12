@@ -797,19 +797,22 @@ bool Moderator::SetSolarSystemInUse(const std::string &name)
 // CalculatedPoint
 //------------------------------------------------------------------------------
 // CalculatedPoint* CreateCalculatedPoint(const std::string &type,
-//                                        const std::string &name)
+//                                        const std::string &name,
+//                                        bool addDefaultBodies = true)
 //------------------------------------------------------------------------------
 /**
  * Creates a calculated point object by given type and name.
  *
  * @param <type> object type
  * @param <name> object name
+ * @param <addDefaultBodies> true if add default bodies requested
  *
  * @return a CalculatedPoint object pointer
  */
 //------------------------------------------------------------------------------
 CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
-                                                  const std::string &name)
+                                                  const std::string &name,
+                                                  bool addDefaultBodies)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
@@ -831,6 +834,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          //return NULL;
          throw GmatBaseException("Error Creating CalculatedPoint: " + type + "\n");
       }
+      
       
       // add default bodies
       if (type == "LibrationPoint")
@@ -854,25 +858,28 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          // and use it in Coord.System conversion
          SpacePoint *sun = (SpacePoint*)GetObject("Sun");
          SpacePoint *earth = (SpacePoint*)GetObject("Earth");
-         
+            
          if (sun->GetJ2000Body() == NULL)
             sun->SetJ2000Body(earth);
-         
+            
          cp->SetRefObject(sun, Gmat::SPACE_POINT, "Sun");
       }
       else if (type == "Barycenter")
       {
-         cp->SetStringParameter("BodyNames", "Earth");
-         cp->SetStringParameter("BodyNames", "Luna");
-
-         // Set body and J2000Body pointer, so that GUI can create LibrationPoint
-         // and use it in Coord.System conversion
-         SpacePoint *earth = (SpacePoint*)GetObject("Earth");
-         SpacePoint *luna = (SpacePoint*)GetObject("Luna");
-         cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
-         if (luna->GetJ2000Body() == NULL)
-            luna->SetJ2000Body(earth);
-         cp->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
+         if (addDefaultBodies)
+         {
+            cp->SetStringParameter("BodyNames", "Earth");
+            cp->SetStringParameter("BodyNames", "Luna");
+            
+            // Set body and J2000Body pointer, so that GUI can create LibrationPoint
+            // and use it in Coord.System conversion
+            SpacePoint *earth = (SpacePoint*)GetObject("Earth");
+            SpacePoint *luna = (SpacePoint*)GetObject("Luna");
+            cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+            if (luna->GetJ2000Body() == NULL)
+               luna->SetJ2000Body(earth);
+            cp->SetRefObject(luna, Gmat::SPACE_POINT, "Luna");
+         }
       }
       
       // Manage it if it is a named calculated point
@@ -3669,17 +3676,23 @@ Gmat::RunState Moderator::GetRunState()
 
 // Script
 //------------------------------------------------------------------------------
-// bool InterpretScript(const std::string &scriptFileName)
+// bool InterpretScript(const std::string &filename, bool readBack = false,
+//                      const std::string &newPath = "")
 //------------------------------------------------------------------------------
 /**
- * Creates objects from script file.
+ * Creates objects from script file. If readBack is true, it will save to
+ * to new directory and interpret from it.  If newPath is blank "", then
+ * it will create default directory "AutoSaved".
  *
- * @param <scriptFileName> input script file name
+ * @param <filename> input script file name
+ * @param <readBack> true will read scripts, save, and read back in
+ * @param <newPath> new path to be used for saving scripts
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::InterpretScript(const std::string &scriptFileName)
+bool Moderator::InterpretScript(const std::string &filename, bool readBack,
+                                const std::string &newPath)
 {
    bool status = false;
    isRunReady = false;
@@ -3688,9 +3701,9 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    
    //MessageInterface::ShowMessage("========================================\n");
    //MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
-   //                              "***** file: " + scriptFileName + "\n");
+   //                              "***** file: " + filename + "\n");
    MessageInterface::ShowMessage
-      ("Interpreting scripts from the file.\n***** file: " + scriptFileName + "\n");
+      ("Interpreting scripts from the file.\n***** file: " + filename + "\n");
    
    //clear both resource and command sequence
    #if DEBUG_RUN
@@ -3708,7 +3721,46 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
       // Need default CS's in case they are used in the script
       CreateDefaultCoordSystems();
       
-      status = theScriptInterpreter->Interpret(scriptFileName);
+      status = theScriptInterpreter->Interpret(filename);
+      
+      if (readBack)
+      {
+         #if DEBUG_READ_BACK
+         MessageInterface::ShowMessage("===> newPath=%s\n", newPath.c_str());
+         #endif
+         
+         std::string newpath = newPath;
+         std::string sep = theFileManager->GetPathSeparator();
+         UnsignedInt index = filename.find_last_of("/\\");
+         std::string fname = filename.substr(index+1);
+         
+         if (newpath == "")
+            newpath = filename.substr(0, index) + sep + "AutoSave" + sep;
+         
+         std::string newfile = newpath + fname;
+         
+         #if DEBUG_READ_BACK
+         MessageInterface::ShowMessage
+            ("===> newpath=%s\n===> newfile=%s\n", newpath.c_str(), newfile.c_str());
+         #endif
+         
+         if (!theFileManager->DoesDirectoryExist(newpath))
+         {
+            std::string cmd = "mkdir " + newpath;
+            
+            int status = system(cmd.c_str());
+            if (status != 0)
+            {
+               #if DEBUG_READ_BACK
+               MessageInterface::ShowMessage
+                  ("===> cmd=%s, status=%d\n", cmd.c_str(), status);
+               #endif
+            }
+         }
+         
+         SaveScript(newfile);
+         InterpretScript(newfile);
+      }
       
       if (status)
       {
@@ -3730,11 +3782,10 @@ bool Moderator::InterpretScript(const std::string &scriptFileName)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      
-      ResetConfigurationChanged();
       isRunReady = false;
    }
    
+   ResetConfigurationChanged();
    endOfInterpreter = true;
    
    #if DEBUG_INTERPRET
@@ -3802,11 +3853,10 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      //MessageInterface::ShowMessage(e.GetMessage());
-      ResetConfigurationChanged(); //loj: 1/12/06 added
       isRunReady = false;
    }
 
+   ResetConfigurationChanged();
    endOfInterpreter = true;
 
    #if DEBUG_INTERPRET
@@ -3820,39 +3870,39 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
 
 
 //------------------------------------------------------------------------------
-// bool SaveScript(const std::string &scriptFileName,
+// bool SaveScript(const std::string &filename,
 //                 Gmat::WriteMode mode = Gmat::SCRIPTING)
 //------------------------------------------------------------------------------
 /**
  * Builds scripts from objects and write to a file.
  *
- * @param <scriptFileName> output script file name
+ * @param <filename> output script file name
  * @param <writeMode> write mode object(one of Gmat::SCRIPTING, Gmat::MATLAB_STRUCT)
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool Moderator::SaveScript(const std::string &scriptFileName, Gmat::WriteMode mode)
+bool Moderator::SaveScript(const std::string &filename, Gmat::WriteMode mode)
 {
-   //loj: 4/6/06
-   MessageInterface::ShowMessage
-      ("Moderator::SaveScript() entered\n   file: %s, mode: %d\n",
-       scriptFileName.c_str(), mode);
-   //   MessageInterface::PopupMessage(Gmat::INFO_, "The Script is saved to " +
-   //                                  scriptFileName);
+   //MessageInterface::ShowMessage
+   //   ("Moderator::SaveScript() entered\n   file: %s, mode: %d\n",
+   //    filename.c_str(), mode);
    
-   MessageInterface::ShowMessage("The Script is saved to " +
-                                 scriptFileName + "\n");
+   MessageInterface::ShowMessage("The Script is saved to " + filename + "\n");
+   bool status = false;
    
    try
    {
-      return theScriptInterpreter->Build(scriptFileName, mode);
+      status = theScriptInterpreter->Build(filename, mode);
+      if (status)
+         ResetConfigurationChanged();
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-      return false;
    }
+   
+   return status;
 }
 
 
