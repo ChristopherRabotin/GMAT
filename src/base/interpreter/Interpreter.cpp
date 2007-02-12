@@ -667,7 +667,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Handle CalculatedPoint (Barycenter, LibrationPoint)
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
-         obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name);
+         obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, false);
       
       // Handle Functions
       else if (find(functionList.begin(), functionList.end(), type) != 
@@ -2181,8 +2181,12 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          }
          else
          {
-            if (toType == Gmat::STRING_TYPE || toType == Gmat::OBJECT_TYPE ||
-                toType == Gmat::OBJECTARRAY_TYPE)
+            if (fromObj->GetTypeName() == "String" &&
+                (toType == Gmat::STRING_TYPE || toType == Gmat::STRINGARRAY_TYPE))
+            {
+               toObj->SetStringParameter(toId, fromObj->GetStringParameter("Value"));
+            }
+            else if (toType == Gmat::OBJECT_TYPE || toType == Gmat::OBJECTARRAY_TYPE)
             {
                toObj->SetStringParameter(toId, fromObj->GetName());
             }
@@ -2190,7 +2194,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
             {
                InterpreterException ex
                   ("Cannot set Variable or String to property. "
-                   "Parameter types are not the same.");
+                   "Property types are not the same.");
                HandleError(ex);
                return false;
             }
@@ -2549,7 +2553,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toAr
    if (fromOwner->GetParameterType(fromId) != Gmat::REAL_TYPE)
    {
       InterpreterException ex
-         ("Cannot set property to Array element. Parameter type is not Real.");
+         ("Cannot set property to Array element. Property type is not Real.");
       HandleError(ex);
       return false;
    }
@@ -3755,15 +3759,16 @@ bool Interpreter::FinalPass()
                if (refObj == NULL)
                {
                   InterpreterException ex
-                     ("Nonexistent object \"" + owner + 
-                      "\" referenced in \"" + obj->GetName() + "\"");
+                     ("Nonexistent object \"" + owner + "\" referenced in \"" +
+                      obj->GetName() + "\"");
                   HandleError(ex, false);
                   retval = false;
                }
                else if (param->GetOwnerType() != refObj->GetType())
                {
                   InterpreterException ex
-                     ("\"" + type + "\" is not property of \"" + refObj->GetTypeName() + "\"");
+                     ("\"" + type + "\" is not property of \"" +
+                      refObj->GetTypeName() + "\"");
                   HandleError(ex, false);
                   retval = false;
                }
@@ -3782,7 +3787,9 @@ bool Interpreter::FinalPass()
                obj->GetType() == Gmat::FORCE_MODEL ||
                obj->GetType() == Gmat::SUBSCRIBER)
       {
-         retval = CheckUndefinedReference(obj, false);
+         // Set return flag to false if any check failed
+         bool retval1 = CheckUndefinedReference(obj, false);
+         retval = retval && retval1;
       }
       else
       {
@@ -3814,8 +3821,7 @@ bool Interpreter::FinalPass()
    }
    
    #ifdef DEBUG_FINAL_PASS
-   MessageInterface::ShowMessage
-      ("Leaving FinalPass() retval=%d\n", retval);
+   MessageInterface::ShowMessage("Leaving FinalPass() retval=%d\n", retval);
    #endif
    
    return retval;
