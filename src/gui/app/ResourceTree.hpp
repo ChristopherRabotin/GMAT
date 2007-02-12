@@ -32,19 +32,19 @@ public:
                 const wxPoint& pos, const wxSize& size,
                 long style);
    
+   void ClearResource(bool leaveScripts);
+   void UpdateResource(bool resetCounter);
+   bool AddScriptItem(wxString path);
    void UpdateFormation();
    void UpdateVariable();
-   void UpdateResource(bool resetCounter);
    void OnAddScript(wxCommandEvent &event);
-   void OnNewScript();
-   void AddScriptItem(wxString path);
-   bool wasChildAdded();
+   bool WasScriptAdded() { return mScriptAdded; }
    
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool mHasUserInterrupted;
-   bool mHasAddedChild;
+   bool mScriptAdded;
    
    //GmatMainNotebook *mainNotebook;
    //GmatMainFrame *mainFrame;
@@ -157,9 +157,10 @@ private:
    void OnRunScriptsFromFolder(wxCommandEvent& event);
    void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
    void OnRemoveScriptFolder(wxCommandEvent& event);
-
-   bool BuildScript(const wxString &filename);
-
+   
+   bool BuildScript(const wxString &filename, bool readBack = false,
+                    const wxString &savePath = "");
+   
    // resource counter
    void ResetResourceCounter();
    void UpdateResourceCounter(wxTreeItemId itemId);

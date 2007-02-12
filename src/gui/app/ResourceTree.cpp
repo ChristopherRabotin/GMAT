@@ -116,7 +116,6 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_RUN_SCRIPTS_FROM_FOLDER, ResourceTree::OnRunScriptsFromFolder)
    EVT_MENU(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, ResourceTree::OnQuitRunScriptsFromFolder)
    EVT_MENU(POPUP_REMOVE_SCRIPT_FOLDER, ResourceTree::OnRemoveScriptFolder)
-   //EVT_MENU(POPUP_NEW_SCRIPT, ResourceTree::OnNewScript)
    EVT_MENU(POPUP_REMOVE_ALL_SCRIPTS, ResourceTree::OnRemoveAllScripts)
    EVT_MENU(POPUP_REMOVE_SCRIPT, ResourceTree::OnRemoveScript)
    EVT_MENU(POPUP_BUILD_SCRIPT, ResourceTree::OnScriptBuildObject)
@@ -148,7 +147,7 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mHasUserInterrupted = false;
-   mHasAddedChild = false;
+   mScriptAdded = false;
    
    AddIcons();
    AddDefaultResources();
@@ -159,54 +158,10 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
 
 
 //------------------------------------------------------------------------------
-// void UpdateFormation()
+// void ClearResource(bool leaveScripts)
 //------------------------------------------------------------------------------
-/**
- * Updates Formation node.
- */
-//------------------------------------------------------------------------------
-void ResourceTree::UpdateFormation()
+void ResourceTree::ClearResource(bool leaveScripts)
 {
-   DeleteChildren(mFormationItem);
-   AddDefaultFormations(mFormationItem);
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateVariable()
-//------------------------------------------------------------------------------
-/**
- * Updates Variable node.
- */
-//------------------------------------------------------------------------------
-void ResourceTree::UpdateVariable()
-{
-   DeleteChildren(mVariableItem);
-   AddDefaultVariables(mVariableItem);
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateResource(bool restartCounter = true)
-//------------------------------------------------------------------------------
-/**
- * Delete all nodes that are not folders, add default nodes
- *
- * @param restartCounter  Restarting the counter from zero if true.
- */
-//------------------------------------------------------------------------------
-void ResourceTree::UpdateResource(bool restartCounter)
-{
-   #if DEBUG_RESOURCE_TREE
-   MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
-   #endif
-   
-   if (restartCounter)
-   {
-      ResetResourceCounter();
-      theGuiInterpreter->ResetConfigurationChanged();
-   }
-   
    // ag: collapse, so folder icon is closed
    // djc: Under Linux, this crashes so it only applies to Windows
    #ifdef __WXMSW__
@@ -221,7 +176,7 @@ void ResourceTree::UpdateResource(bool restartCounter)
       Collapse(mCoordSysItem);
       Collapse(mSpecialPointsItem);
    #endif
-
+      
    DeleteChildren(mSpacecraftItem);
    DeleteChildren(mUniverseItem);
    DeleteChildren(mFormationItem);
@@ -232,8 +187,8 @@ void ResourceTree::UpdateResource(bool restartCounter)
    DeleteChildren(mVariableItem);
    DeleteChildren(mFunctItem);
    DeleteChildren(mCoordSysItem);
-
-
+   
+   
    //----- Hardware is child of spacecraft
    mHardwareItem =
       AppendItem(mSpacecraftItem, wxT("Hardware"), GmatTree::ICON_FOLDER, -1,
@@ -271,6 +226,31 @@ void ResourceTree::UpdateResource(bool restartCounter)
    SetItemImage(mOptimizerItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateResource(bool restartCounter = true)
+//------------------------------------------------------------------------------
+/**
+ * Delete all nodes that are not folders, add default nodes
+ *
+ * @param restartCounter  Restarting the counter from zero if true.
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateResource(bool restartCounter)
+{
+   #if DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
+   #endif
+   
+   if (restartCounter)
+   {
+      ResetResourceCounter();
+      theGuiInterpreter->ResetConfigurationChanged();
+   }
+
+   ClearResource(true);
 
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
@@ -287,6 +267,126 @@ void ResourceTree::UpdateResource(bool restartCounter)
 
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddScriptItem(wxString path)
+//------------------------------------------------------------------------------
+/*
+ * Adds script file path and name to resource tree.
+ *
+ * @param  path  script full path name
+ *
+ * @return true if script file successfully added, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool ResourceTree::AddScriptItem(wxString path)
+{
+   #if DEBUG_RESOURCE_TREE_ADD_SCRIPT
+   MessageInterface::ShowMessage
+      ("ResourceTree::AddScriptItem() path=<%s>\n", path.c_str());
+   #endif
+
+   wxTreeItemIdValue cookie;
+   wxString scriptPath, childText;
+   wxTreeItemId childId = GetFirstChild(mScriptItem, cookie);
+   wxTreeItemId scriptId;
+   bool scriptAdded = false;
+   bool hasSameName = false;
+   bool hasSamePath = false;
+   
+   // extract file name
+   wxFileName fn(path);
+   wxString filename = fn.GetName();
+
+   #if DEBUG_RESOURCE_TREE_ADD_SCRIPT
+   MessageInterface::ShowMessage("   filename=%s\n", filename.c_str());
+   #endif
+   
+   // find child with same path
+   while (childId.IsOk())
+   {
+      childText = GetItemText(childId);
+      
+      #if DEBUG_RESOURCE_TREE_ADD_SCRIPT
+      MessageInterface::ShowMessage
+         ("ResourceTree::OnAddScript() childText=<%s>\n", childText.c_str());
+      #endif
+      
+      scriptPath = ((GmatTreeItemData *)GetItemData(childId))->GetDesc();
+      
+      if (childText == filename)
+      {
+         hasSameName = true;
+         if (scriptPath == path)
+         {
+            hasSamePath = true;
+            break;
+         }
+      }
+      
+      childId = GetNextChild(mScriptItem, cookie);
+   }
+   
+   // if same path not found, add to tree
+   if (!hasSamePath)
+   {
+      if (hasSameName)
+      {
+         // add path to tree
+         scriptId =
+            AppendItem(mScriptItem, path, GmatTree::ICON_DEFAULT, -1,
+                       new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+      }
+      else
+      {
+         // add filename to tree
+         scriptId =
+            AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
+                       new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
+      }
+      
+      Expand(mScriptItem);
+      scriptAdded = true;
+   }
+   else
+   {
+      //MessageInterface::PopupMessage
+      //   (Gmat::INFO_, "The script file \"%s\" is already in the tree", path.c_str());
+      
+      scriptAdded = true;
+   }
+   
+   return scriptAdded;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateFormation()
+//------------------------------------------------------------------------------
+/**
+ * Updates Formation node.
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateFormation()
+{
+   DeleteChildren(mFormationItem);
+   AddDefaultFormations(mFormationItem);
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateVariable()
+//------------------------------------------------------------------------------
+/**
+ * Updates Variable node.
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateVariable()
+{
+   DeleteChildren(mVariableItem);
+   AddDefaultVariables(mVariableItem);
 }
 
 
@@ -492,16 +592,6 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
               new GmatTreeItemData(wxT("Neptune"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Pluto"), GmatTree::ICON_PLUTO, -1,
               new GmatTreeItemData(wxT("Pluto"), GmatTree::CELESTIAL_BODY));
-
-   //loj: 5/6/05 Commented out
-   //----- Space Points
-//    mSpecialPointsItem =
-//       AppendItem(itemId, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
-//                  new GmatTreeItemData(wxT("Special Points"),
-//                                       GmatTree::SPECIAL_POINTS_FOLDER));
-    
-//    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
-//                 wxTreeItemIcon_Expanded);
 
 }
 
@@ -2467,25 +2557,26 @@ void ResourceTree::OnAddLibration(wxCommandEvent &event)
 // void OnAddScript()
 //------------------------------------------------------------------------------
 /**
- * Add a script to the folder and open it
+ * Add a script to the folder and opens it.
  *
  */
 //------------------------------------------------------------------------------
 void ResourceTree::OnAddScript(wxCommandEvent &event)
 {
+   //---------------- debug
    //OnAddScriptFolder(event);
    //wxString cwd = wxGetCwd();
-
+   //
+   ////loj: 3/14/06 Why I need this to get the same precision as script folder?
+   //wxDirDialog dirDialog(this, "Select a script directory", wxGetCwd());
+   //
+   //if (dirDialog.ShowModal() == wxID_OK)
+   //{
+   //}
    //---------------- debug
-//    //loj: 3/14/06 Why I need this to work same as script folder?
-//    wxDirDialog dirDialog(this, "Select a script directory", wxGetCwd());
    
-//    if (dirDialog.ShowModal() == wxID_OK)
-//    {
-//    }
-   //---------------- debug
-
-   mHasAddedChild = false;
+   mScriptAdded = false;
+   
    wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
          _T("Script files (*.script, *.m)|*.script;*.m|"\
             "Text files (*.txt, *.text)|*.txt;*.text|"\
@@ -2494,110 +2585,16 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
    
    if (dialog.ShowModal() == wxID_OK)
    {
-      wxString filename = dialog.GetFilename().c_str();
       wxString path = dialog.GetPath().c_str();
-
-      #if DEBUG_RESOURCE_TREE
-      MessageInterface::ShowMessage
-         ("ResourceTree::OnAddScript() filename=<%s>\npath=<%s>\n",
-          filename.c_str(), path.c_str());
-      #endif
-      
-      wxTreeItemIdValue cookie;
-      wxString scriptPath, childText;
-      wxTreeItemId childId = GetFirstChild(mScriptItem, cookie);
-      wxTreeItemId scriptId;
-      bool hasSameName = false;
-
-      // find child with same path
-      while (childId.IsOk())
+      mScriptAdded = AddScriptItem(path);
+      if (mScriptAdded)
       {
-         childText = GetItemText(childId);
-         
-         #if DEBUG_RESOURCE_TREE > 1
-         MessageInterface::ShowMessage
-            ("ResourceTree::OnAddScript() childText=<%s>\n", childText.c_str());
-         #endif
-         
-         scriptPath = ((GmatTreeItemData *)GetItemData(childId))->GetDesc();
-         
-         if (childText == filename)
-         {
-            hasSameName = true;
-            if (scriptPath == path)
-               break;
-         }
-         
-         childId = GetNextChild(mScriptItem, cookie);
+         // need to set the filename to MainFrame
+         GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
       }
-      
-      // if same path found, do not add a child
-      if (childId.IsOk())
-      {
-         #if DEBUG_RESOURCE_TREE
-         MessageInterface::ShowMessage
-            ("ResourceTree::OnAddScript() Same path found.\npath=<%s>\n",
-             path.c_str());
-         #endif
-         
-         scriptId = childId;
-         GmatAppData::GetMainFrame()->CloseAllChildren(false, false, childText);
-      }
-      else
-      {
-         if (hasSameName)
-         {
-            // add path to tree
-            scriptId =
-               AppendItem(mScriptItem, path, GmatTree::ICON_DEFAULT, -1,
-                          new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
-         }
-         else
-         {
-            // add filename to tree
-            scriptId =
-               AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
-                          new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
-         }
-      }
-      
-      
-      // open item
-      GmatAppData::GetMainFrame()->
-         CreateChild((GmatTreeItemData *)GetItemData(scriptId));
-      
-      // need to set the filename mainframe, so first save has a filename
-      GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
-      
-      Expand(mScriptItem);
-      mHasAddedChild = true;
    }
-
 }
 
-
-//------------------------------------------------------------------------------
-// void OnNewScript()
-//------------------------------------------------------------------------------
-/**
- * Add a script to the folder and open it
- */
-//------------------------------------------------------------------------------
-void ResourceTree::OnNewScript()
-{
-   wxString name;
-   name.Printf("Script%d.script", ++mNumScripts);
-
-   // add item to tree
-   wxTreeItemId newItem = AppendItem(mScriptItem, name, GmatTree::ICON_DEFAULT, -1,
-                    new GmatTreeItemData(name, GmatTree::SCRIPT_FILE));
-
-   // open item
-   GmatAppData::GetMainFrame()->CreateChild(
-                  (GmatTreeItemData *)GetItemData(newItem));
-
-   Expand(mScriptItem);
-}
 
 //------------------------------------------------------------------------------
 // void OnRemoveAllScripts(wxCommandEvent &event)
@@ -2622,7 +2619,7 @@ void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
       
       // close window
       GmatAppData::GetMainFrame()->RemoveChild(name, dataType);
-
+      
       // delete item
       Delete(lastChild);
    }
@@ -2659,27 +2656,6 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void AddScriptItem(wxString path)
-//------------------------------------------------------------------------------
-void ResourceTree::AddScriptItem(wxString path)
-{
-   wxString filename = path;
-   /// @todo change from windows directory structure
-   int pos = filename.Find('\\', true);
-   int numChars = filename.Length();
-
-   if ((pos > 0) && (pos < numChars))
-   {
-      filename = filename.Right(numChars-pos-1);
-   }
-
-   // add item to tree
-   AppendItem(mScriptItem, filename, GmatTree::ICON_DEFAULT, -1,
-                    new GmatTreeItemData(path, GmatTree::SCRIPT_FILE));
-}
-
-
-//------------------------------------------------------------------------------
 // bool OnScriptBuildObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
@@ -2689,9 +2665,7 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
-
-   GmatAppData::GetMainFrame()->SetTitle(filename + " - General Mission Analysis Tool (GMAT)");
-   GmatAppData::GetMainFrame()->SetStatusText("", 1);
+   
    BuildScript(filename);
 }
 
@@ -2703,15 +2677,13 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
 {
    //MessageInterface::ShowMessage("===> ResourceTree::OnScriptBuildAndRun()\n");
    
-   // Set the filename to mainframe, so first save has a filename
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
-   GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
-   GmatAppData::GetMainFrame()->SetTitle(filename + " - General Mission Analysis Tool (GMAT)");
-   GmatAppData::GetMainFrame()->SetStatusText("", 1);
-
-   GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+   
+   if (BuildScript(filename))
+      GmatAppData::GetMainFrame()->RunCurrentMission();
+   
 }
 
 
@@ -2817,15 +2789,16 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    Real absTol = GmatFileUtil::CompareAbsTol;
    wxString compareDir1  = ((GmatTreeItemData*)GetItemData(item))->GetDesc();
-
+   
    RunScriptFolderDialog dlg(this, numScripts, absTol, compareDir1);
    dlg.ShowModal();
-
+   
    if (!dlg.RunScripts())
       return;
-
+   
    runCount = dlg.GetNumScriptsToRun();
    repeatCount = dlg.GetNumTimesToRun();
+   bool runFromSavedScripts = dlg.RunFromSavedScripts();
    bool compare = dlg.CompareResults();
    bool saveCompareResults = dlg.SaveCompareResults();
    bool builtOk = false;
@@ -2834,12 +2807,18 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    FileManager *fm = FileManager::Instance();
    std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
    std::string oldLogFile = MessageInterface::GetLogFileName();
-   wxString currPath = oldOutPath.c_str();
    bool hasOutDirChanged = dlg.HasOutDirChanged();
+   wxString sep = fm->GetPathSeparator().c_str();
    
-   if (hasOutDirChanged)
+   wxString currPath = dlg.GetCurrentOutDir() + sep;
+   wxString savePath = dlg.GetSaveScriptsDir() + sep;
+   
+   // if running from saved scripts folder, set path to save path
+   if (runFromSavedScripts)
    {
-      currPath = dlg.GetCurrentOutDir() + "/";
+      currPath = savePath;
+      if (!::wxDirExists(currPath))
+         ::wxMkdir(currPath);
    }
    
    int count = 0;
@@ -2924,7 +2903,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          
          // Set output path
          fm->SetAbsPathname(FileManager::OUTPUT_PATH, outPath.c_str());
-         MessageInterface::SetLogPath(outPath.c_str());
+         MessageInterface::SetLogPath(outPath.c_str(), true);
          
          MessageInterface::ShowMessage
             ("==> Run Count: %d\n", i+1);
@@ -2939,7 +2918,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          {
             // Create objects from script only first time, to test re-run
             if (i == 0)
-               builtOk = BuildScript(filename);
+               builtOk = BuildScript(filename, runFromSavedScripts, savePath);
             
             if (builtOk)
             {
@@ -3024,42 +3003,25 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// bool BuildScript(const wxString &filename)
+// bool BuildScript(const wxString &filename, bool readBack = false,
+//                  const wxString &savePath = "")
 //------------------------------------------------------------------------------
-bool ResourceTree::BuildScript(const wxString &filename)
+bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
+                               const wxString &savePath)
 {
-   #if DEBUG_RESOURCE_TREE
-   MessageInterface::ShowMessage("ResourceTree::BuildScript() filename=%s\n",
-                                 filename.c_str());
-   #endif
+   //#if DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage
+      ("ResourceTree::BuildScript() filename=%s, readBack=%d\n   savePath=%s\n",
+       filename.c_str(), readBack, savePath.c_str());
+   //#endif
    
-   // if successfuly interpreted the script
-   if (GmatAppData::GetGuiInterpreter()->
-       InterpretScript(std::string(filename.c_str())))
-   {
-      //close the open windows
-      GmatAppData::GetMainFrame()->CloseAllChildren(true, true, filename);
+   // Set the filename to mainframe, so first save has a filename
+   GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
    
-      // Update ResourceTree and MissionTree
-      GmatAppData::GetResourceTree()->UpdateResource(true);
-      GmatAppData::GetMissionTree()->UpdateMission(true);
-
-      // Set the filename mainframe, so first save has a filename
-      GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
-      return true;
-   }
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Error occurred during parsing.\nPlease check the "
-          "syntax and try again\n");
-      
-//       wxLogError
-//          ("Error occurred during parsing.\nPlease check the syntax and try again\n");
-//       wxLog::FlushActive();
-      
-      return false;
-   }
+   // Interpret script
+   bool status = GmatAppData::GetMainFrame()->InterpretScript(filename);
+   
+   return status;
 }
 
 
@@ -3509,13 +3471,13 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
          // append text
          for (unsigned int i=0; i<output.size(); i++)
             textCtrl->AppendText(wxString(output[i].c_str()));
-
+         
          textCtrl->Show();
-
+         
          reportCount++;
       }
    }
-
+   
    if (reportCount == 0)
    {
       textCtrl->AppendText("** There is no report file to compare.\n\n");
@@ -3528,10 +3490,3 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
    }
 }
 
-//------------------------------------------------------------------------------
-// bool wasChildAdded()
-//------------------------------------------------------------------------------
-bool ResourceTree::wasChildAdded()
-{
-    return mHasAddedChild;
-}
