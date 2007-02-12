@@ -33,7 +33,8 @@ public:
                long style);
    // void SetMainNotebook (GmatMainNotebook *mainNotebook);
    // GmatMainNotebook *GetMainNotebook();
-   
+
+   void ClearMission();
    void UpdateMission(bool resetCounter);
    
 protected:

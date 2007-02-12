@@ -167,6 +167,28 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 
 
 //------------------------------------------------------------------------------
+// void ClearMission()
+//------------------------------------------------------------------------------
+/**
+ * Clears Mission Sequence
+ */
+//------------------------------------------------------------------------------
+void MissionTree::ClearMission()
+{
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::ClearMission() entered\n");
+   #endif
+   
+   // Collapse, so folder icon is closed
+   #ifdef __WXMSW__
+      Collapse(mMissionSeqSubItem);
+   #endif
+   
+   DeleteChildren(mMissionSeqSubItem);
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateMission(bool resetCounter)
 //------------------------------------------------------------------------------
 /**
@@ -185,8 +207,9 @@ void MissionTree::UpdateMission(bool resetCounter)
       inScriptEvent = false;
       inFiniteBurn = false;
    }
+
+   ClearMission();
    
-   DeleteChildren(mMissionSeqSubItem);
    UpdateCommand();
 }
 
