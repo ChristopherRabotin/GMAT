@@ -82,7 +82,7 @@ void ScriptPanel::Create()
    mLineNumberTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(50, -1), 0);
       
-#ifdef __WXMAC__
+#ifndef __WXMSW__
    mFileContentsTextCtrl = new
       wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                  wxDefaultPosition, wxDefaultSize,
