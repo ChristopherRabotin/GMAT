@@ -184,6 +184,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    commandChangedState  (c.commandChangedState),
 //   comment              (c.comment),
    commandChanged       (c.commandChanged),
+   settables            (c.settables),
    epochData            (NULL),
    stateData            (NULL),
    parmData             (NULL)
@@ -232,6 +233,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    streamID = c.streamID;
 //   comment = c.comment;
    commandChanged = c.commandChanged;
+   settables      = c.settables;
    
    epochData = NULL;
    stateData = NULL;

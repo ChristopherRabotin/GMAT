@@ -92,6 +92,12 @@ public:
 
    // Inherited methods overridden from the base class
    virtual bool        InterpretAction();
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
+
    virtual bool        Initialize();
    virtual bool        Execute();
    virtual void        RunComplete();
@@ -118,8 +124,14 @@ protected:
                                PARAMETER_TYPE[VaryParamCount -
                                               GmatCommandParamCount];
 
-   /// The name of the spacecraft that gets maneuvered
+   /// The name of the solver that does the solving
    std::string         solverName;
+   /// The solver instance used to manage the state machine
+   Solver              *solver;
+
+/** 
+ * The following lines are the old code, superceded now by the wrapper code
+
    /// Name(s) of the variable(s)
    StringArray         variableName;
    /// Initial variable value(s)
@@ -140,32 +152,79 @@ protected:
    std::vector<GmatBase*> pobject;
    /// Object ID for the parameters
    std::vector<Integer> parmId;
-   /// The solver instance used to manage the state machine
-   Solver              *solver;
-   /// The integer ID assigned to the variable
-   Integer             variableID;
-   /// Flag used to finalize the solver data during execution
-   bool                solverDataFinalized;
+
    /// additive scale factor for optimizers
    std::vector<Real>   additiveScaleFactor;
    /// multiplicative scale factor for optimizers
    std::vector<Real>   multiplicativeScaleFactor;
-    
-    // Parameter IDs // wcs 2006.08.23 all moved to enum
-    /// ID for the burn object
-   //const Integer       solverNameID;
-   /// ID for the burn object
-   //const Integer       variableNameID;
-   /// ID for the burn object
-   //const Integer       initialValueID;
-   /// ID for the burn object
-   //const Integer       perturbationID;
-   /// ID for the burn object
-   //const Integer       variableMinimumID;
-   /// ID for the burn object
-   //const Integer       variableMaximumID;
-   /// ID for the burn object
-   //const Integer       variableMaximumStepID;
+
+   /// solver ID for the parameters
+   Integer             variableId;
+   /// Pointers to the object that the variable affects
+   GmatBase            *pobject;
+   /// Object ID for the object parameter
+   Integer             parmId;
+   /// The solver instance used to manage the state machine
+//   Solver              *solver;
+
+*/
+
+   /**
+    * The following code was reworked ti use ElementWrappers, and so that there 
+    * is only one variable allowed per Vary command.
+    */
+
+   /// Name(s) of the variable(s)
+   std::string         variableName;
+   /// A wrapper used for the variable's owning object
+   ElementWrapper      *variable;
+
+   /// Initial variable value(s)
+   std::string         initialValueName;
+   /// A wrapper used for the variable's initial value
+   ElementWrapper      *initialValue;
+
+   /// Current (nominal) variable value(s)
+   Real                currentValue;
+
+   /// Variable perturbation(s)
+   std::string         perturbationName;
+   /// A wrapper used for the variable perturbation
+   ElementWrapper      *perturbation;
+   /// Absolute minimum value
+   std::string         variableMinimumName;
+   /// A wrapper used for the variable's minimum allowed value
+   ElementWrapper      *variableMinimum;
+   /// Absolute maximum value
+   std::string         variableMaximumName;
+   /// A wrapper used for the variable's maximum allowed value
+   ElementWrapper      *variableMaximum;
+   /// Maximum step allowed
+   std::string         variableMaximumStepName;
+   /// A wrapper used for to set the largest allowed change in the variable
+   ElementWrapper      *variableMaximumStep;
+   /// additive scale factor for optimizers
+   std::string         additiveScaleFactorName;
+   /// A wrapper used for the additive scale factor
+   ElementWrapper      *additiveScaleFactor;
+   /// multiplicative scale factor for optimizers
+   std::string         multiplicativeScaleFactorName;
+   /// A wrapper used for the multiplicative scale factor
+   ElementWrapper      *multiplicativeScaleFactor;
+
+   /// The integer ID assigned by the solver to the variable
+   Integer             variableID;
+
+   /// Flag used to finalize the solver data during execution
+   bool                solverDataFinalized;
+   
+   /// ???
+   std::string         variableValueString;
+
+   
+   // Methods used for ParametersInCommands
+   bool                SetWrapperReferences(ElementWrapper &wrapper);
+
 };
 
 
