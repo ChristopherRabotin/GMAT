@@ -1746,7 +1746,7 @@ bool Propagate::InterpretParameter(const std::string text,
                                    std::string &paramObj, 
                                    std::string &paramSystem)
 {
-   //loj: 9/20/06 Used GmatStringUtil to throw invalid parameter syntax
+   // Use GmatStringUtil to throw invalid parameter syntax
    GmatStringUtil::ParseParameter(text, paramType, paramObj, paramSystem);
 
    
@@ -2781,7 +2781,7 @@ bool Propagate::Execute()
          PrepareToPropagate();
 
          // Check for initial stop condition before first step in while loop
-         // eg) elapsed time of 0 (loj: 4/6/06 added)
+         // eg) elapsed time of 0
          if (publisher->GetRunState() == Gmat::RUNNING)
          {
             for (UnsignedInt i=0; i<stopWhen.size(); i++)
@@ -3008,6 +3008,7 @@ void Propagate::ClearTransientForces()
          pm = fm->GetForce(i);
          if (pm->IsTransient()) {
             fm->DeleteForce(pm->GetName());
+            i--;  // Since fm->DeleteForce() resets the size (loj: 2/15/07)
          }
       }
    }
