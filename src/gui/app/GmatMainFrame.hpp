@@ -65,7 +65,8 @@ public:
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
    void CloseCurrentProject();
-   bool InterpretScript(const wxString &filename);
+   bool InterpretScript(const wxString &filename, bool readBack = false,
+                        const wxString &savePath = "", bool openScript = true);
    void RunCurrentMission();
    void NotifyRunCompleted();
    void ProcessPendingEvent();

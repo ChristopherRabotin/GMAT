@@ -783,9 +783,22 @@ void GmatMainFrame::CloseCurrentProject()
 
 
 //------------------------------------------------------------------------------
-// bool InterpretScript(const wxString &filename)
+// bool InterpretScript(const wxString &filename, bool readBack = false,
+//                      const wxString &savePath = "", bool openScript = true)
 //------------------------------------------------------------------------------
-bool GmatMainFrame::InterpretScript(const wxString &filename)
+/**
+ * Creates objects from script file.
+ *
+ * @param <filename> input script file name
+ * @param <readBack> true will read scripts, save, and read back in
+ * @param <newPath> new path to be used for saving scripts
+ * @param <openScript> true if script file to be opened on error
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
+                                    const wxString &savePath, bool openScript)
 {
    wxString title;
    title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
@@ -799,7 +812,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
    {
       // If successfully interpreted, set status to true
       if (GmatAppData::GetGuiInterpreter()->
-          InterpretScript(std::string(filename.c_str())))
+          InterpretScript(filename.c_str(), readBack, savePath.c_str()))
       {
          success = true;
       }  
@@ -832,10 +845,11 @@ bool GmatMainFrame::InterpretScript(const wxString &filename)
       else
       {
          SetStatusText("Errors Found in the Script!!", 1);
-         
-         // open script editor
-         OpenScript();
-      }
+
+         // open script editor      
+         if (openScript)
+            OpenScript();
+      }      
    }
    catch (BaseException &e)
    {
