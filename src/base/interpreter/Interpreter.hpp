@@ -117,9 +117,11 @@ protected:
    bool         inCommandMode;
    bool         inRealCommandMode;
    bool         initialized;
+   bool         parsingDelayedBlock;
    
    /// For handling delayed blocks
    StringArray  delayedBlocks;
+   StringArray  delayedBlockLineNumbers;
    
    /// Block type and comments
    std::string  headerComment;

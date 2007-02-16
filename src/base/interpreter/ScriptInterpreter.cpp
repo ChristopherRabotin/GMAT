@@ -24,7 +24,7 @@
 //#define DEBUG_SCRIPT_READING 1
 //#define DEBUG_SCRIPT_WRITING
 //#define DEBUG_DELAYED_BLOCK 1
-//#define DEBUG_PARSE
+//#define DEBUG_PARSE 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -479,13 +479,24 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
    Integer delayedCount = delayedBlocks.size();
    bool retval2 = true;
    inCommandMode = false;
+   
+   #if DEBUG_DELAYED_BLOCK
+   MessageInterface::ShowMessage
+      ("===> ScriptInterpreter::ReadScript() Start parsing delayed blocks. count=%d\n",
+       delayedBlocks.size());
+   #endif
+   
+   parsingDelayedBlock = true;
+   
    for (Integer i = 0; i < delayedCount; i++)
    {
       #if DEBUG_DELAYED_BLOCK
       MessageInterface::ShowMessage
          ("===> delayedBlocks[%d]=%s\n", i, delayedBlocks[i].c_str());
       #endif
-      
+
+      currentLine = delayedBlocks[i];
+      lineNumber = delayedBlockLineNumbers[i];
       currentBlock = delayedBlocks[i];
       currentBlockType = theTextParser.EvaluateBlock(currentBlock);
       
@@ -615,12 +626,6 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       if (type == "Propagator")
          type = "PropSetup";
       
-//       std::string preStr = ""; 
-//       std::string inStr = ""; 
-      
-//       preStr = theTextParser.GetPrefaceComment();
-//       inStr = theTextParser.GetInlineComment();
-      
       Integer objCounter = 0;
       for (Integer i = 0; i < count; i++)
       {
@@ -628,21 +633,17 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          
          if (obj == NULL)
          {
-            InterpreterException ex
-               ("Cannot create object for \"" + type + "\"");
-            HandleError(ex);
+            // We don't want to see duplicate error message (2/15/07)
+            //InterpreterException ex
+            //   ("Cannot create object for \"" + type + "\"");
+            //HandleError(ex);
             return false;
          }
+         
          objCounter++;     
          obj->FinalizeCreation();
 
          SetComments(obj, preStr, inStr);
-         
-//          if (preStr != "")
-//             obj->SetCommentLine(preStr);
-            
-//          if (inStr != "")
-//             obj->SetInlineComment(inStr);
       }
 
       // if not all objectes are created, return false
@@ -706,20 +707,8 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          return false;
       }
       
-//       std::string preStr = ""; 
-//       std::string inStr = ""; 
-      
-//       preStr = theTextParser.GetPrefaceComment();
-//       inStr = theTextParser.GetInlineComment();
-
       SetComments(obj, preStr, inStr);
-      
-//       if (preStr != "")
-//          obj->SetCommentLine(preStr);
-        
-//       if (inStr != "")
-//          obj->SetInlineComment(inStr);
-      
+            
       logicalBlockCount++;
    }
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
@@ -803,51 +792,9 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1], retval, inCmd);
       else
          obj = MakeAssignment(chunks[0], chunks[1]);
-
-
-
-      
-//       if (inCommandMode)
-//       {
-//          // If LHS is CoordinateSystem property, Call MakeAssignment
-//          StringArray parts = theTextParser.SeparateDots(chunks[0]);
-//          //MessageInterface::ShowMessage("===> parts.size()=%d\n", parts.size());
-
-//          if (parts.size() > 1)
-//          {
-//             GmatBase *tempObj = GetObject(parts[0]);
-//             if (tempObj)
-//             {
-//                // Set values by calling Set*Parameter(), even in command mode
-//                // for the following types
-//                if (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
-//                    (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER))
-//                   obj = MakeAssignment(chunks[0], chunks[1]);
-//                else
-//                   obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1],
-//                                                            retval, inCmd);
-//             }
-//             else
-//             {
-//                obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1],
-//                                                         retval, inCmd);
-//             }
-//          }
-//          else
-//          {
-//             obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1],
-//                                                      retval, inCmd);
-//          }
-//       }
-//       else
-//       {
-//          obj = MakeAssignment(chunks[0], chunks[1]);
-//       }
       
       if (obj == NULL)
       {
-         //InterpreterException ex("Cannot Parse the line: ");
-         //HandleError(ex);
          return false;
       }
       
@@ -878,9 +825,14 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       
       logicalBlockCount++;
    }
-
+   
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage("ScriptInterpreter::Parse() retval=%d\n", retval);
+   #endif
+   
    return retval;
 }
+
 
 //------------------------------------------------------------------------------
 // bool WriteScript()
@@ -1251,14 +1203,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
          theReadWriter->WriteText(cmd->GetGeneratingString());
          theReadWriter->WriteText("\n");
       }
-      
-      // To handle nested ScriptEvent (loj: 12/07/06)
-      
-      //if (cmd->GetTypeName() == "BeginScript")
-      //   inTextMode = true;      
-      //if (cmd->GetTypeName() == "EndScript")
-      //   inTextMode = false;
-      
+            
       if (cmd->GetTypeName() == "BeginScript")
          scriptEventCount++;
       
@@ -1291,9 +1236,15 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
                                     const std::string &inStr)
 {
+   #if DEBUG_SET_COMMENTS
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::SetComments() preStr=%s, inStr=%s\n",
+       preStr.c_str(), inStr.c_str());
+   #endif
+   
    if (preStr != "")
       obj->SetCommentLine(preStr);
-            
+   
    if (inStr != "")
       obj->SetInlineComment(inStr);
 }

@@ -33,7 +33,7 @@
 #include <stack>
 
 //#define __ENABLE_ATTITUDE_LIST__
-//#ifdef __DO_NOT_USE_OBJ_TYPE_NAME__
+//#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
 //#define DEBUG_INIT 1
 //#define DEBUG_COMMAND_LIST 1
@@ -67,6 +67,7 @@ Interpreter::Interpreter()
 {
    initialized = false;
    continueOnError = true;   
+   parsingDelayedBlock = false;
    
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
@@ -108,7 +109,9 @@ void Interpreter::Initialize()
    
    errorList.clear();
    delayedBlocks.clear();
+   delayedBlockLineNumbers.clear();
    inCommandMode = false;
+   parsingDelayedBlock = false;
    
    if (initialized)
       return;
@@ -2136,16 +2139,17 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          
          if (toObj == NULL)
          {
-            //InterpreterException ex
-            //   ("*** Internal Error *** "
-            //    "Interpreter::SetObjectToProperty() toObj is NULL\n");
-            //HandleError(ex);
+            if (parsingDelayedBlock)
+               return false;
             
             delayedBlocks.push_back(currentBlock);
+            std::string lineNumStr = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
+            delayedBlockLineNumbers.push_back(lineNumStr);
             
             #if DEBUG_SET
             MessageInterface::ShowMessage
-               ("   ===> added to delayed blocks: %s\n", currentBlock.c_str());
+               ("   ===> added to delayed blocks: line:%s, %s\n", lineNumStr.c_str(),
+                currentBlock.c_str());
             #endif
             
             return true;
@@ -2153,6 +2157,9 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
       }
       catch (BaseException &e)
       {
+         if (parsingDelayedBlock)
+            return false;
+         
          delayedBlocks.push_back(currentBlock);
          
          #if DEBUG_SET
@@ -3418,15 +3425,21 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
       
       if (errorCount == ownedObjCount)
       {
-         // Currently SolarSystem parameter is handled by the Moderator,
-         // so it is an exceptional case.
-         // Eventually we want to move parameter handling to SolarSyatem.
-         if (owner->GetName() != "SolarSystem")
+         // Throw error only when parsing delayed block, so that
+         // duplicated error message will not be shown
+         if (parsingDelayedBlock)
          {
-            InterpreterException ex
-               ("No parameter defined with description '" + toProp + "' on " +
-                owner->GetName());
-            HandleError(ex);
+            //@todo
+            // Currently SolarSystem parameter is handled by the Moderator,
+            // so it is an exceptional case.
+            // Eventually we want to move parameter handling to SolarSyatem.
+            if (owner->GetName() != "SolarSystem")
+            {
+               InterpreterException ex
+                  ("The field name \"" + toProp + "\" on object " + owner->GetName() +
+                   " is not permitted");
+               HandleErrorMessage(ex, lineNumber, currentLine, true);
+            }
          }
       }
    }
@@ -3759,9 +3772,12 @@ bool Interpreter::FinalPass()
                refObj = GetObject(owner);
                if (refObj == NULL)
                {
+//                   InterpreterException ex
+//                      ("Nonexistent object \"" + owner + "\" referenced in \"" +
+//                       obj->GetName() + "\"");
                   InterpreterException ex
-                     ("Nonexistent object \"" + owner + "\" referenced in \"" +
-                      obj->GetName() + "\"");
+                     ("The value of \"" + owner + "\" on object \"" +
+                      obj->GetName() + "\" is not an allowed value");
                   HandleError(ex, false);
                   retval = false;
                }
@@ -3995,7 +4011,8 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                   {
                      InterpreterException ex
                         ("Nonexistent object \"" + refNames[j] + 
-                         "\" referenced in \"" + obj->GetTypeName() + "\"");
+                         "\" referenced in the " + obj->GetTypeName() + "\"" +
+                         obj->GetName() + "\"");
                      HandleError(ex, writeLine);
                      retval = false;
                   }
@@ -4030,8 +4047,8 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                {
                   InterpreterException ex
                      ("Nonexistent " + GmatBase::GetObjectTypeString(refTypes[i]) +
-                      " \"" + refNames[j] + "\" referenced in \"" +
-                      obj->GetTypeName() + "\"");
+                      " \"" + refNames[j] + "\" referenced in " +
+                      obj->GetTypeName() + " \"" + obj->GetName() + "\"");
                   HandleError(ex, writeLine);
                   retval = false;
                }
@@ -4174,7 +4191,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          if ( ((p = theModerator->GetParameter(arrayName)) == NULL) ||
               !p->IsOfType("Array") )
          {
-            InterpreterException ex(arrayName + "is not an array");
+            InterpreterException ex("\"" + arrayName + "\"" + " is not an array");
             HandleError(ex);
             return false;
          }
@@ -4210,8 +4227,8 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             }
             else // there is an error
             {
-               InterpreterException ex(desc + 
-                                 "is not a valid object property or parameter");
+               InterpreterException ex("\"" + desc + "\"" + 
+                  " is not a valid object property or parameter");
                HandleError(ex);
                return NULL;
             }
