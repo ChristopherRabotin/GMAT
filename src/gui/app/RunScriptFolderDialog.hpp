@@ -31,6 +31,7 @@ public:
    bool CompareResults() { return mCompareResults; }
    bool SaveCompareResults() { return mSaveCompareResults; }
    bool HasOutDirChanged() { return mOutDirChanged; }
+   bool CreateRunFolder() { return mCreateRunFolder; }
    Integer GetNumScriptsToRun() { return mNumScriptsToRun; }
    Integer GetNumTimesToRun() { return mNumTimesToRun; }
    Real GetAbsTolerance() { return mAbsTol; }
@@ -58,6 +59,7 @@ protected:
    wxTextCtrl *mSaveScriptsDirTextCtrl;
    
    wxCheckBox *mRunFromSavedCheckBox;
+   wxCheckBox *mCreateRunFolderCheckBox;
    wxCheckBox *mCompareCheckBox;
    wxCheckBox *mSaveResultCheckBox;
    
@@ -88,6 +90,7 @@ private:
    bool mCompareResults;
    bool mSaveCompareResults;
    bool mOutDirChanged;
+   bool mCreateRunFolder;
    Integer mNumScriptsToRun;
    Integer mNumTimesToRun;
    Real mAbsTol;

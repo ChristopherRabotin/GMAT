@@ -2808,6 +2808,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    std::string oldOutPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
    std::string oldLogFile = MessageInterface::GetLogFileName();
    bool hasOutDirChanged = dlg.HasOutDirChanged();
+   bool createRunFolder = dlg.CreateRunFolder();
    wxString sep = fm->GetPathSeparator().c_str();
    
    wxString currPath = dlg.GetCurrentOutDir() + sep;
@@ -2858,6 +2859,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    // Set batch mode to true, so that PopupMessage will be rerouted to ShowMessage
    GmatGlobal::Instance()->SetBatchMode(true);
+   bool appendLog = false;
+   mBuildErrorCount = 0;
+   mFailedScriptsList.Clear();
    
    while (scriptId.IsOk())
    {     
@@ -2874,39 +2878,50 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       if (count > runCount)
          break;
-      
+
+      // Set main frame title to script file name
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
-      MessageInterface::ShowMessage
-         ("Starting script %d out of %d: %s\n", count, runCount, filename.c_str());
+      wxString titleText;
+      titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());      
+      GmatAppData::GetMainFrame()->SetTitle(titleText);
+      
+      // Set main frame status bar text
       wxString text;
       text.Printf("Running script %d out of %d: %s\n", count, runCount,
                   filename.c_str());
       GmatAppData::GetMainFrame()->SetStatusText(text, 1);
-      
-      wxString titleText;
-      titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());       
-      
-      GmatAppData::GetMainFrame()->SetTitle(titleText);
       
       if (compare)
          textCtrl->AppendText(text);
       
       for (int i=0; i<repeatCount; i++)
       {
-         wxString outPath;
+         wxString outPath = currPath;
          
-         outPath << currPath << "Run_" << i+1;
-         if (!::wxDirExists(outPath))
-            ::wxMkdir(outPath);
-         
-         outPath = outPath + "/";
+         if (createRunFolder)
+         {
+            outPath << "Run_" << i+1;
+            if (!::wxDirExists(outPath))
+               ::wxMkdir(outPath);
+            outPath = outPath + "/";
+         }
          
          // Set output path
          fm->SetAbsPathname(FileManager::OUTPUT_PATH, outPath.c_str());
-         MessageInterface::SetLogPath(outPath.c_str(), true);
+         
+         // Change log path and append log messages
+         MessageInterface::SetLogPath(outPath.c_str(), appendLog);
+         
+         MessageInterface::ShowMessage
+            ("Starting script %d out of %d: %s\n", count, runCount, filename.c_str());
          
          MessageInterface::ShowMessage
             ("==> Run Count: %d\n", i+1);
+         
+         // Set main frame status bar repeat count
+         wxString text;
+         text.Printf("Repeat Count %d", i+1);
+         GmatAppData::GetMainFrame()->SetStatusText(text, 0);
          
          if (compare)
          {
@@ -2940,8 +2955,9 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
                textCtrl->AppendText(e.GetMessage().c_str());
          }
       }
-   
+      
       scriptId = GetNextChild(item, cookie);
+      appendLog = true;
    }
    
    // save compare results to a file
@@ -2959,9 +2975,23 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxString text;
    text.Printf("Finished running %d scripts\n", runCount);
    GmatAppData::GetMainFrame()->SetStatusText(text, 1);
+   GmatAppData::GetMainFrame()->SetStatusText("", 0);
    
    // Set batch mode to false
    GmatGlobal::Instance()->SetBatchMode(false);
+
+   // Popup errors found message
+   if (mBuildErrorCount > 0)
+   {
+      wxString scriptNames;
+      for (int i=0; i<mBuildErrorCount; i++)
+         scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
+      
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Script errors were found in the following file(s):\n\n"
+          "%s", scriptNames.c_str());
+   }
+   
 }
 
 
@@ -3006,20 +3036,37 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 // bool BuildScript(const wxString &filename, bool readBack = false,
 //                  const wxString &savePath = "")
 //------------------------------------------------------------------------------
+/**
+ * Creates objects from script file.
+ *
+ * @param <filename> input script file name
+ * @param <readBack> true will read scripts, save, and read back in
+ * @param <newPath> new path to be used for saving scripts
+ *
+ * @return true if successful; false otherwise
+ */
+//------------------------------------------------------------------------------
 bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
                                const wxString &savePath)
 {
-   //#if DEBUG_RESOURCE_TREE
+   #if DEBUG_RESOURCE_TREE
    MessageInterface::ShowMessage
-      ("ResourceTree::BuildScript() filename=%s, readBack=%d\n   savePath=%s\n",
+      ("===> ResourceTree::BuildScript() filename=%s, readBack=%d\n   savePath=%s\n",
        filename.c_str(), readBack, savePath.c_str());
-   //#endif
+   #endif
    
-   // Set the filename to mainframe, so first save has a filename
+   // Set the filename to mainframe, so save will not bring up the file dialog
    GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
    
    // Interpret script
-   bool status = GmatAppData::GetMainFrame()->InterpretScript(filename);
+   bool status = GmatAppData::GetMainFrame()->
+      InterpretScript(filename, readBack, savePath, false);
+   
+   if (!status)
+   {
+      mBuildErrorCount++;
+      mFailedScriptsList.Add(filename);
+   }
    
    return status;
 }

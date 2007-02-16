@@ -44,6 +44,7 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mCompareResults = false;
    mSaveCompareResults = false;
    mOutDirChanged = false;
+   mCreateRunFolder = false;
    
    mNumScriptsToRun = numScripts;
    mNumTimesToRun = 1;
@@ -95,11 +96,14 @@ void RunScriptFolderDialog::Create()
       new wxButton(this, ID_BUTTON, wxT("Browse"),
                     wxDefaultPosition, wxDefaultSize, 0);
    
+   wxBoxSizer *saveScriptsDirSizer = new wxBoxSizer(wxHORIZONTAL);
+   saveScriptsDirSizer->Add(saveScriptsDir, 0, wxALIGN_CENTRE|wxALL, bsize);
+   saveScriptsDirSizer->Add(mChangeSaveScriptsDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   
    wxBoxSizer *saveScriptsSizer = new wxBoxSizer(wxVERTICAL);
    saveScriptsSizer->Add(mRunFromSavedCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   saveScriptsSizer->Add(saveScriptsDir, 0, wxALIGN_LEFT|wxALL, bsize);
-   saveScriptsSizer->Add(mSaveScriptsDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   saveScriptsSizer->Add(mChangeSaveScriptsDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   saveScriptsSizer->Add(saveScriptsDirSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   saveScriptsSizer->Add(mSaveScriptsDirTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    
    //------------------------------------------------------
    // run scripts
@@ -115,6 +119,10 @@ void RunScriptFolderDialog::Create()
    wxStaticText *numTimesLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of times to run each script:"),
                        wxDefaultPosition, wxDefaultSize, 0);
+   
+   mCreateRunFolderCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT(" Create RUN folder"),
+                     wxDefaultPosition, wxSize(-1, -1), 0);
    
    mNumTimesToRunTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
@@ -137,21 +145,25 @@ void RunScriptFolderDialog::Create()
                     wxDefaultPosition, wxDefaultSize, 0);
    
    //---------- sizer
-   wxFlexGridSizer *runSizer = new wxFlexGridSizer(2, 0, 0);
+   wxFlexGridSizer *runSizer = new wxFlexGridSizer(4, 0, 0);
    runSizer->Add(numScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-    
+   runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(mCreateRunFolderCheckBox, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   
    GmatStaticBoxSizer *runStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Run Scripts");
    
-   runStaticSizer->Add(saveScriptsSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   runStaticSizer->Add(saveScriptsSizer, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(20, 3, 0, wxALIGN_LEFT|wxALL, bsize);
-   runStaticSizer->Add(runSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   runStaticSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
-   runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   runStaticSizer->Add(runSizer, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
+   runStaticSizer->Add(currOutDir1, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
 
    //------------------------------------------------------
@@ -177,7 +189,7 @@ void RunScriptFolderDialog::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(mReplaceString),
                      wxDefaultPosition, wxSize(80,20), 0);
    
-   wxStaticText *dirLabel =
+   wxStaticText *compDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Directory to compare:"),
                        wxDefaultPosition, wxDefaultSize, 0);
 
@@ -187,9 +199,9 @@ void RunScriptFolderDialog::Create()
    compareSizer->Add(mCompareCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(20, 20, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(tolLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareSizer->Add(mAbsTolTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareSizer->Add(mAbsTolTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    compareSizer->Add(replaceLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareSizer->Add(mReplaceTextCtrl, 0, wxALIGN_RIGHT|wxALL|wxGROW, bsize);
+   compareSizer->Add(mReplaceTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
 
    mCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
@@ -218,22 +230,28 @@ void RunScriptFolderDialog::Create()
    GmatStaticBoxSizer *compareStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Compare Results");
    
-   compareStaticSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize);
-   compareStaticSizer->Add(dirLabel, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
-   compareStaticSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxALL|wxGROW, bsize+2);
-   compareStaticSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   wxBoxSizer *compDirSizer = new wxBoxSizer(wxHORIZONTAL);
+   compDirSizer->Add(compDirLabel, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   compDirSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   wxBoxSizer *saveDirSizer = new wxBoxSizer(wxHORIZONTAL);
+   saveDirSizer->Add(saveFileLabel, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   saveDirSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   compareStaticSizer->Add(compareSizer, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
+   compareStaticSizer->Add(compDirSizer, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize);
+   compareStaticSizer->Add(mCompareDirTextCtrl, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize+2);
    compareStaticSizer->Add(20, 3, 0, wxALIGN_CENTRE|wxALL, bsize);
    compareStaticSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(saveFileLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   compareStaticSizer->Add(mSaveBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   compareStaticSizer->Add(saveDirSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize+2);
    
    //------------------------------------------------------
    // add to page sizer
    //------------------------------------------------------
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   pageBoxSizer->Add(runStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
-   pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxALL|wxGROW, bsize);
+   pageBoxSizer->Add(runStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
    
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
 }
@@ -319,6 +337,7 @@ void RunScriptFolderDialog::SaveData()
       return;
    }
    
+   mCreateRunFolder = mCreateRunFolderCheckBox->GetValue();
    
    mNumScriptsToRun = numScriptsToRun;
    mNumTimesToRun = numTimesToRun;
