@@ -44,6 +44,10 @@ public:
    virtual bool               SetRefObject(GmatBase *obj);
    virtual Real               EvaluateReal() const;
    virtual bool               SetReal(const Real toValue);
+   // need to override this method, to handle the arrayName, rowName,
+   // and columnName data members
+   virtual bool               RenameObject(const std::string &oldName, 
+                                           const std::string &newName);
    
    /// additioanl methods needed to handle the row and column elements
    virtual std::string        GetRowName();

@@ -40,9 +40,11 @@ public:
    virtual ~ObjectPropertyWrapper();
    
    virtual bool            SetRefObject(GmatBase *obj);
+   virtual bool            RenameObject(const std::string &oldName, 
+                                        const std::string &newName);
+
    virtual Real            EvaluateReal() const;
-   virtual bool            SetReal(const Real toValue);
- 
+   virtual bool            SetReal(const Real toValue); 
    
 protected:  
 

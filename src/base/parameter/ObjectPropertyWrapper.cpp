@@ -26,6 +26,8 @@
 
 #include "MessageInterface.hpp"
 
+#define DEBUG_RENAME_OBJ_PROP
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -130,6 +132,46 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
    }
    object = obj;
    propID = object->GetParameterID(propIDNames[0]);
+   return true;
+}
+
+//---------------------------------------------------------------------------
+//  bool RenameObject(const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Method to rename a reference object for the wrapper.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::RenameObject(const std::string &oldName, 
+                                         const std::string &newName)
+{
+   ElementWrapper::RenameObject(oldName, newName);
+   // now rebuild the description string from the refObjectNames
+   Integer pos = description.find(".");
+   if (description.find(".") != std::string::npos)
+   {
+      #ifdef DEBUG_RENAME_OBJ_PROP
+         MessageInterface::ShowMessage(
+         "Found a dot at position %d in the description string %s\n",
+         (Integer) pos, description.c_str());
+      #endif
+      description.replace(0,pos,refObjectNames[0]);
+      #ifdef DEBUG_RENAME_OBJ_PROP
+         MessageInterface::ShowMessage(
+         "--- replacing with %s\n", (refObjectNames[0]).c_str());
+         MessageInterface::ShowMessage(
+         "--- and now description is %s\n", description.c_str());
+      #endif
+   }
+   else // this shouldn't happen, but ...
+   {
+      std::string errmsg = 
+         "Expecting a \".\" in the description for object property \"";
+      errmsg += description + " \"";
+      throw ParameterException(errmsg);
+   }
    return true;
 }
 

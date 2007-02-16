@@ -47,6 +47,9 @@ public:
    
    virtual const StringArray& GetRefObjectNames();
    virtual bool               SetRefObject(GmatBase *obj);
+   virtual bool               RenameObject(const std::string &oldName, 
+                                           const std::string &newName);
+   
    
 //---------------------------------------------------------------------------
 //  Real EvaluateReal() const
@@ -75,6 +78,7 @@ public:
  */
 //---------------------------------------------------------------------------
    virtual bool            SetReal(const Real toValue) = 0;
+   
    
    
 protected:  

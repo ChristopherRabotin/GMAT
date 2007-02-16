@@ -162,6 +162,31 @@ bool ParameterWrapper::SetReal(const Real toValue)
 }
 
 //---------------------------------------------------------------------------
+//  bool RenameObject(const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Method to rename a reference object for the wrapper.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ParameterWrapper::RenameObject(const std::string &oldName, 
+                                    const std::string &newName)
+{
+   ElementWrapper::RenameObject(oldName, newName);
+   // now rebuild the description string from the refObjectNames
+   Integer pos = description.find(".");
+   if (pos != (Integer) std::string::npos)
+   {
+      description.replace(0,pos,refObjectNames[0]);
+   }
+   else
+      description = refObjectNames[0];  
+   return true;
+}
+                                       
+
+//---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------
 /**
@@ -171,6 +196,14 @@ bool ParameterWrapper::SetReal(const Real toValue)
 //---------------------------------------------------------------------------
 void ParameterWrapper::SetupWrapper()
 {
-   refObjectNames.push_back(description);
+   // look for a '.' - if it's there only save the object name 
+   Integer pos = description.find(".");
+   if (pos != (Integer) std::string::npos)
+   {
+      std::string sub = description.substr(0,pos-1);
+      refObjectNames.push_back(sub);
+   }
+   else   // otherwise, save the whole thing
+      refObjectNames.push_back(description);
 }
 

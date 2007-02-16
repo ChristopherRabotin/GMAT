@@ -23,7 +23,11 @@
 #include "GmatBase.hpp"
 #include "ElementWrapper.hpp"
 
-//#include "MessageInterface.hpp"
+#define DEBUG_RENAME
+
+#ifdef DEBUG_RENAME
+   #include "MessageInterface.hpp"
+#endif
 
 //---------------------------------
 // static data
@@ -160,4 +164,35 @@ const StringArray& ElementWrapper::GetRefObjectNames()
 bool ElementWrapper::SetRefObject(GmatBase *obj)
 {
    return false;
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameObject(const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Method to rename a reference object for the wrapper.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool ElementWrapper::RenameObject(const std::string &oldName, 
+                                  const std::string &newName)
+{
+   #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage(
+      "Now entering EW::RenameObject with oldName = %s\n and newName = %s\n",
+      oldName.c_str(), newName.c_str());
+   #endif
+   // replace the old name with the new name in the list of ref objects
+   Integer sz = refObjectNames.size();
+   for (Integer j=0; j < sz; j++)
+   {
+      if (refObjectNames[j] == oldName)  refObjectNames[j] = newName;
+      #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage(
+         "--- And now changing the name in the refObjectNames array");
+      #endif
+   }
+   return true;
 }

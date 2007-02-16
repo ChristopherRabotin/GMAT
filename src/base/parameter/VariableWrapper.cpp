@@ -128,6 +128,26 @@ bool VariableWrapper::SetRefObject(GmatBase *obj)
 }
 
 //---------------------------------------------------------------------------
+//  bool RenameObject(const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Method to rename a reference object for the wrapper.
+ *
+ * @return true if successful; false otherwise.
+ */
+//---------------------------------------------------------------------------
+bool VariableWrapper::RenameObject(const std::string &oldName, 
+                                   const std::string &newName)
+{
+   ElementWrapper::RenameObject(oldName, newName);
+   // now rebuild the description string from the refObjectNames
+   // first, rename things in the row and column wrappers
+   description = refObjectNames[0];
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
 //  Real EvaluateReal() const
 //---------------------------------------------------------------------------
 /**
