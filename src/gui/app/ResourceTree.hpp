@@ -45,6 +45,10 @@ private:
    GuiItemManager *theGuiManager;
    bool mHasUserInterrupted;
    bool mScriptAdded;
+
+   // for script error log
+   int mBuildErrorCount;
+   wxArrayString mFailedScriptsList;
    
    //GmatMainNotebook *mainNotebook;
    //GmatMainFrame *mainFrame;
