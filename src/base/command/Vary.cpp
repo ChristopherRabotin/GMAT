@@ -32,6 +32,7 @@
 //#define DEBUG_VARY_PARAMS
 //#define DEBUG_VARY_PARSING
 //#define DEBUG_WRAPPER_CODE
+#define DEBUG_RENAME
 
 //------------------------------------------------------------------------------
 //  static data
@@ -244,57 +245,31 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    std::string gen = prefix + "Vary " + solverName + "(";
 
 //   // Iterate through the variables
-//   details << variableName[i] << " = " << initialValue[i] <<  ", ";
+   details << variable->GetDescription() << " = " << initialValue->GetDescription() <<  ", ";
 //
-//   details << "{Perturbation =";
-//   // Toss in the perturbations
-//   for (UnsignedInt i = 0; i < perturbation.size(); ++i)
-//   {
-//      details << " " << perturbation[i];
-//   }
-//   
-//   details << ", MaxStep =";
-//   for (UnsignedInt i = 0; i < variableMaximumStep.size(); ++i)
-//   {
-//      details << " ";
-//      details << variableMaximumStep[i];
-//   }
-//
-//   details << ", Lower =";
-//   for (UnsignedInt i = 0; i < variableMinimum.size(); ++i)
-//   {
-//      details << " ";
-//      details << variableMinimum[i];
-//   }
-//
-//   details << ", Upper =";
-//   for (UnsignedInt i = 0; i < variableMaximum.size(); ++i)
-//   {
-//      details << " ";
-//      details << variableMaximum[i];
-//   }
-//
-//   //if (solver && (solver->IsOfType("Optimizer")))
-//   //{
-//      details << ", AdditiveScaleFactor =";
-//      for (UnsignedInt i = 0; i < additiveScaleFactor.size(); ++i)
-//      {
-//         details << " ";
-//         details << additiveScaleFactor[i];
-//      }
-//   
-//      details << ", MultiplicativeScaleFactor =";
-//      for (UnsignedInt i = 0; i < multiplicativeScaleFactor.size(); ++i)
-//      {
-//         details << " ";
-//         details << multiplicativeScaleFactor[i];
-//      }
-//
-//   gen += details.str();
-//   generatingString = gen + "});";
+   details << "{Perturbation = ";
+   details << perturbation->GetDescription();
+ 
+   details << ", MaxStep = ";
+   details << variableMaximumStep->GetDescription();
+   details << ", Lower = ";
+   details << variableMinimum->GetDescription();
+
+
+   details << ", Upper = ";
+   details << variableMaximum->GetDescription();
    
-   generatingString = "!!!!! WARNING!!!!!  Generating String Not Set for Vary Command!!!";
-  
+   if (solver && (solver->IsOfType("Optimizer")))
+   {
+      details << ", AdditiveScaleFactor = ";
+      details << additiveScaleFactor->GetDescription();
+      details << ", MultiplicativeScaleFactor = ";
+      details << multiplicativeScaleFactor->GetDescription();
+    }
+
+   gen += details.str();
+   generatingString = gen + "});";
+   
    // Then call the base class method
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
@@ -308,31 +283,66 @@ bool Vary::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Vary::RenameRefObject() type=%d, oldName=%s, newName=%s\n",
        type, oldName.c_str(), newName.c_str());
    #endif
-   
-//!!! Needs updating!!!
 
    if (type == Gmat::SOLVER)
    {
       if (solverName == oldName)
          solverName = newName;
    }
-   else if (type == Gmat::BURN)
-   {
-      if (variableName == oldName)
-         variableName = newName;
-   }
-   else if (type == Gmat::PARAMETER)
-   {
-      if (variableName == oldName)
-         variableName = newName;
-   }
    
-//!!! Needs updating!!!
+   //else if ((type == Gmat::BURN) || (type == Gmat::PARAMETER)) // do I need this?
+   //{
+   //   if (variableName == oldName)
+    //     variableName = newName;
+   //}
+
+   // make sure the wrappers know to rename any objects they may be using
+   if (variable)
+   {
+      variable->RenameObject(oldName, newName);
+      variableName           = variable->GetDescription();
+   }
+   if (initialValue)        
+   {
+      initialValue->RenameObject(oldName, newName);
+      initialValueName       = initialValue->GetDescription();
+   }
+   if (perturbation)        
+   {
+      perturbation->RenameObject(oldName, newName);
+      perturbationName       = perturbation->GetDescription();
+   }
+   if (variableMinimum)     
+   {
+      variableMinimum->RenameObject(oldName, newName);
+      variableMinimumName    = variableMinimum->GetDescription();
+   }
+   if (variableMaximum)     
+   {
+      variableMaximum->RenameObject(oldName, newName);
+      variableMaximumName    = variableMaximum->GetDescription();
+   }
+   if (variableMaximumStep) 
+   {
+      variableMaximumStep->RenameObject(oldName, newName);
+      variableMaximumStepName= variableMaximumStep->GetDescription();
+   }
+   if (additiveScaleFactor) 
+   {    
+      additiveScaleFactor->RenameObject(oldName, newName);
+      additiveScaleFactorName  = additiveScaleFactor->GetDescription();
+   }
+   if (multiplicativeScaleFactor) 
+   {
+      multiplicativeScaleFactor->RenameObject(oldName, newName);
+       multiplicativeScaleFactorName    
+                      = multiplicativeScaleFactor->GetDescription();
+   }
    
    return true;
 }
@@ -352,7 +362,7 @@ const ObjectTypeArray& Vary::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::SOLVER);
-   refObjectTypes.push_back(Gmat::PARAMETER);
+   //refObjectTypes.push_back(Gmat::PARAMETER);
    return refObjectTypes;
 }
 
