@@ -273,6 +273,10 @@ protected:
    // Temporary -- replace when convenient
    void CartToKep(const Rvector6 in, Rvector6 &out);
    GmatBase* FindObject(const std::string &name);
+
+   
+   // Method(s) used for ParametersInCommands
+   bool                SetWrapperReferences(ElementWrapper &wrapper);
 };
 
 #endif // Command_hpp

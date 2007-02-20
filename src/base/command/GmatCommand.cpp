@@ -35,6 +35,7 @@
 //#define DEBUG_COMMAND_APPEND 1
 //#define DEBUG_COMMAND_INSERT 1
 //#define DEBUG_COMMAND_REMOVE 1
+//#define DEBUG_WRAPPER_CODE
 
 
 //---------------------------------
@@ -1850,5 +1851,46 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
       return NULL;
    else
       return (*objectMap)[newName];
+}
+
+
+bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
+{
+   if (&wrapper != NULL)
+   {
+      #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage("   Setting refs for wrapper \"%s\"\n", 
+            wrapper.GetDescription().c_str());
+      #endif
+      StringArray onames = wrapper.GetRefObjectNames();
+   
+      for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
+      {
+         std::string name = *j;
+         if (objectMap->find(name) == objectMap->end())
+         {
+            
+            throw CommandException(
+               "GmatCommand::SetWrapperReferences failed to find object named \"" + 
+               name + "\"\n");
+         }
+         if (wrapper.SetRefObject((*objectMap)[name]) == false)
+         {
+            MessageInterface::ShowMessage(
+               "GmatCommand::SetWrapperReferences failed to set object named \"%s\"\n", 
+               name.c_str());
+            return false;
+         }
+         #ifdef DEBUG_WRAPPER_CODE
+            MessageInterface::ShowMessage("      Set reference object \"%s\"\n", 
+               name.c_str());
+         #endif
+      }
+   }
+   else
+      throw CommandException("GmatCommand::SetWrapperReferences was passed a "
+         "NULL object instead of a wrapper!\n");
+   
+   return true;
 }
 

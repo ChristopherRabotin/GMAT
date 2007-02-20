@@ -221,10 +221,6 @@ protected:
    /// ???
    std::string         variableValueString;
 
-   
-   // Methods used for ParametersInCommands
-   bool                SetWrapperReferences(ElementWrapper &wrapper);
-
 };
 
 

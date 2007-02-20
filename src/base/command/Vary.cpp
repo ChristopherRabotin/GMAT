@@ -32,7 +32,7 @@
 //#define DEBUG_VARY_PARAMS
 //#define DEBUG_VARY_PARSING
 //#define DEBUG_WRAPPER_CODE
-#define DEBUG_RENAME
+//#define DEBUG_RENAME
 
 //------------------------------------------------------------------------------
 //  static data
@@ -403,43 +403,6 @@ const StringArray& Vary::GetRefObjectNameArray(const Gmat::ObjectType type)
    return refObjectNames;
 }
 
-bool Vary::SetWrapperReferences(ElementWrapper &wrapper)
-{
-   if (&wrapper != NULL)
-   {
-      #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage("   Setting refs for wrapper \"%s\"\n", 
-            wrapper.GetDescription().c_str());
-      #endif
-      StringArray onames = wrapper.GetRefObjectNames();
-   
-      for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
-      {
-         std::string name = *j;
-         if (objectMap->find(name) == objectMap->end())
-         {
-            
-            throw CommandException(
-               "Vary::SetWrapperReferences failed to find object named \"" + 
-               name + "\"\n");
-         }
-         if (wrapper.SetRefObject((*objectMap)[name]) == false)
-         {
-            MessageInterface::ShowMessage(
-               "Vary::SetWrapperReferences failed to set object named \"%s\"\n", 
-               name.c_str());
-            return false;
-         }
-         MessageInterface::ShowMessage("      Set reference object \"%s\"\n", 
-            name.c_str());
-      }
-   }
-   else
-      throw CommandException("Vary::SetWrapperReferences was passed a "
-         "NULL object instead of a wrapper!\n");
-   
-   return true;
-}
 
 //---------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -1347,7 +1310,9 @@ bool Vary::Initialize()
    if (SetWrapperReferences(*multiplicativeScaleFactor) == false)
       return false;
 
-MessageInterface::ShowMessage("Vary command Initialization complete\n");
+   #ifdef DEBUG_VARY_PARAMS
+      MessageInterface::ShowMessage("Vary command Initialization complete\n");
+   #endif
 
    return retval;
 }
@@ -1412,16 +1377,18 @@ bool Vary::Execute()
       varData[3] = (variableMaximum->EvaluateReal() + asf) / msf;  // maximum
       varData[4] = (variableMaximumStep->EvaluateReal()) / msf; // largest step
             
-//      #if DEBUG_VARY_EXECUTE
+      #if DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage(
             "For variable \"%s\", data is [%15.9lf %15.9lf %15.9lf %15.9lf "
             "%15.9lf]\n", variableName.c_str(), varData[0], varData[1], varData[2], 
             varData[3], varData[4]);
-//      #endif      
+      #endif      
    
       variableID = solver->SetSolverVariables(varData, variableName);
 
+      #if DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage("Solver variables were set\n");
+      #endif
 
       solverDataFinalized = true;
       BuildCommandSummary(true);
