@@ -51,7 +51,7 @@ const std::string Vary::PARAMETER_TEXT[VaryParamCount -
 //   "MaximumChange",
    "MaxStep",
    "AdditiveScaleFactor",
-   "MutiplicativeScaleFactor"   
+   "MultiplicativeScaleFactor"   
 };
 
 const Gmat::ParameterType Vary::PARAMETER_TYPE[VaryParamCount -
