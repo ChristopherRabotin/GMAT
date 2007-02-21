@@ -904,7 +904,7 @@ bool Achieve::InterpretParameter(const std::string text,
    
    Integer start = 0, dotLoc = text.find(".", 0);
    if (dotLoc == (Integer)std::string::npos)
-      throw CommandException("Propagate::InterpretParameter: Unable to "
+      throw CommandException("Achieve::InterpretParameter: Unable to "
                "interpret parameter object in the string " +
                text);
    
