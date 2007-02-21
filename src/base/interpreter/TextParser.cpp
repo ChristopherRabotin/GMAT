@@ -28,7 +28,7 @@
 //#define DEBUG_TP 1
 //#define DEBUG_TP_EVAL_BLOCK 2
 //#define DEBUG_TP_CHUNK_LINE 1
-//#define DEBUG_TP_DECOMPOSE 1
+//#define DEBUG_TP_DECOMPOSE 2
 //#define DEBUG_TP_SEP_BRACKETS 1
 //#define DEBUG_TP_DECOMPOSE_BLOCK 1
 
@@ -77,6 +77,7 @@ void TextParser::Reset()
    prefaceComment = "";
    inlineComment  = "";
    theInstruction = "";
+   isFunctionCall = false;
 }
 
 
@@ -253,7 +254,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             theBlockType = Gmat::ASSIGNMENT_BLOCK;
             noCommentLine = i;
-
+            
             // check for CallFunction
             // ex) [a b c] = function(d, e, f);
             
@@ -268,7 +269,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             {
                UnsignedInt index2 = str.find("=");
                if (index2 == str.npos || index2 > index1)
+               {
                   theBlockType = Gmat::COMMAND_BLOCK;
+                  isFunctionCall = true;
+               }
             }
             
             /// @TODO: This is a work around for a call function with
@@ -277,6 +281,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             if (str.find("=") == str.npos) // Is this checking enough?
             {
                theBlockType = Gmat::COMMAND_BLOCK;
+               isFunctionCall = true;
             }
             
          }
@@ -322,9 +327,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    theChunks.push_back(inlineComment);
    theChunks.push_back(theInstruction);
    
-    #if DEBUG_TP_EVAL_BLOCK
+   #if DEBUG_TP_EVAL_BLOCK
    MessageInterface::ShowMessage
-      ("   keyword=<%s>, blockType=%d\n", keyword.c_str(), theBlockType);
+      ("   keyword=<%s>, blockType=%d, isFunctionCall=%d\n", keyword.c_str(),
+       theBlockType, isFunctionCall);
    MessageInterface::ShowMessage
       ("   prefaceComment=<%s>\n   inlineComment=<%s>\n   theInstruction=<%s>\n",
        prefaceComment.c_str(), inlineComment.c_str(), theInstruction.c_str());
@@ -359,6 +365,9 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  *    The function definition instructions returns in the following format:
  *       <"CallFunction"> <out> <FunctionName> <in>
  *
+ * @exception <InterpreterException> thrown if no object type or name found
+ *
+ *
  * Examples of object definition line are:
  *   Create Spacecraft Sat1 Sat2, Sat3
  *      <Create> <Spacecraft> <Sat1 Sat2, Sat3>
@@ -366,6 +375,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  *      <Create> <Array> <Mat1[3,3], Mat2[6,3]>
  *
  * Examples of command definition line are:
+ *   ----- Commands:
  *   Save Sat1 Sat2,Sat3
  *      <Save> <Sat1 Sat2,Sat3>
  *   Report reportObject Mat1, Mat2,Mat2(1,1);
@@ -392,6 +402,13 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  *      <If> <var1 ~= var2>
  *   EndIf
  *      <EndIf>
+ *
+ *   ----- Function Call:
+ *   StoreData( FormState );  <== No output
+ *      <> <StoreData( FormState )>
+ *   GMAT [S1,S2,S3,S1dot,S2dot,S3dot] = GetLISAData(x, y, z, v(1), vv(1,1), vz ); <== RHS has [
+ *      <[S1,S2,S3,S1dot,S2dot,S3dot]> <GetLISAData(x, y, z, v(1), vv(1,1), vz )>
+ *
  * Examples of assignment definition line are:
  *   Sat1.X = 7000;
  *      <Sat1.X> <7000>
@@ -405,12 +422,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
  *      <Sat1> <Sat2>
  *   Mat1(1,1) = Sqrt(a + b + c + mat1(1,1)^2)
  *      <Mat1(1,1)> <Sqrt(a + b + c + mat1(1,1)^2)>
- *   var2 = MyFunction();
+ *
+ *   ----- Function Call:
+ *   var2 = MyFunction(); <== RHS is variable
  *      <var2> <MyFunction()>
- *   StoreData( FormState );
- *      <> <StoreData( FormState )>
- *   GMAT [S1,S2,S3,S1dot,S2dot,S3dot] = GetLISAData(x, y, z, v(1), vv(1,1), vz );
- *      <[S1,S2,S3,S1dot,S2dot,S3dot]> <GetLISAData(x, y, z, v(1), vv(1,1), vz )>
  *   
  */
 //-------------------------------------------------------------------------------
@@ -418,7 +433,8 @@ StringArray TextParser::ChunkLine()
 {
    #if DEBUG_TP_CHUNK_LINE
    MessageInterface::ShowMessage
-      ("TextParser::ChunkLine() theInstruction= %s\n", theInstruction.c_str());
+      ("TextParser::ChunkLine() theInstruction=%s\n   theBlockType=%d, "
+       "isFunctionCall=%d\n", theInstruction.c_str(), theBlockType, isFunctionCall);
    #endif
    
    std::string str = theInstruction;
@@ -478,7 +494,7 @@ StringArray TextParser::ChunkLine()
    //------------------------------------------------------------
    // command block
    //------------------------------------------------------------
-   else if (theBlockType == Gmat::COMMAND_BLOCK)
+   else if (theBlockType == Gmat::COMMAND_BLOCK && !isFunctionCall)
    {
       index1 = str.find_first_not_of(whiteSpace);
       if (index1 == str.npos)
@@ -494,36 +510,22 @@ StringArray TextParser::ChunkLine()
          if (index2 == str.npos)
          {
             chunks.push_back(str);
-            
-//             sprintf(errorMsg, "TextParser::ChunkLine() command description "
-//                     "not found in the command block\n   \"%s\"\n", str.c_str());
-//             throw InterpreterException(errorMsg);
          }
          else
          {
             chunks.push_back(str.substr(index1, index2-index1));
             
             index1 = str.find_first_not_of(whiteSpace, index2);
-            if (index1 == str.npos)
-            {
-               // push back empty string
-               //chunks.push_back("");
-               
-//                sprintf(errorMsg, "TextParser::ChunkLine() command description "
-//                        "not found in the command block\n   \"%s\"\n", str.c_str());
-//                throw InterpreterException(errorMsg);
-            }
-            else
-            {
-               chunks.push_back(str.substr(index1, length-index1));
-            }
+            
+            if (index1 != str.npos)
+               chunks.push_back(str.substr(index1, length-index1));            
          }
       }
    }
    //------------------------------------------------------------
    // assignment block
    //------------------------------------------------------------
-   else if (theBlockType == Gmat::ASSIGNMENT_BLOCK)
+   else if (theBlockType == Gmat::ASSIGNMENT_BLOCK || isFunctionCall)
    {
       // find equal sign
       index1 = str.find_first_not_of(whiteSpace);
@@ -595,8 +597,30 @@ StringArray TextParser::ChunkLine()
 /*
  * Breaks chunk into parts separated by space or comma but keeps bracket together.
  *
- * BeginFiniteBurn burn1(sat1 sat2) will return
+ * For example:
+ * string = "BeginFiniteBurn burn1(sat1 sat2)"
+ * Decomose(string, false, false) will return
  *    <burn1> <sat1 sat2>
+ *
+ * string = "DC(DefaultSC.SMA=6500,{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})"
+ * Decompose(string, true, true) will return
+ *    <DC> <(DefaultSC.SMA=6500,{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})
+ *
+ * string = "DC(DefaultSC.SMA=Vec(3),{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})"
+ * Decompose(string, true, true) will return
+ *    <DC> <(DefaultSC.SMA=Vec(3),{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})
+ *
+ * string = "(DefaultSC.SMA=6500,{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})"
+ * Decompose(string, true, true) will return
+ *    <DefaultSC.SMA=6500> <{Pert=1,MaxStep=1000,Lower=6000,Upper=100000}>
+ *
+ * string = "(DefaultSC.SMA=Vec(3),{Pert=1,MaxStep=1000,Lower=6000,Upper=100000})"
+ * Decompose(string, true, true) will return
+ *    <DefaultSC.SMA=Vec(3)> <{Pert=1,MaxStep=1000,Lower=6000,Upper=100000}>
+ *
+ * string = "(DefaultSC.SMA=G(1,1),{Pert=P(1,1),MaxStep=M(1,1),Lower=L(1,1),Upper=U(1,1)})"
+ * Decompose(string, true, true) will return
+ *    <DefaultSC.SMA=G(1,1)> <{Pert=P(1,1),MaxStep=M(1,1),Lower=L(1,1),Upper=U(1,1)}>
  *
  * @param <chunk>  Input chunk to be break apart
  * @param <bracketPair>  Input bracket pair (open and close) to keep together
@@ -617,12 +641,12 @@ StringArray TextParser::Decompose(const std::string &chunk,
 
    std::string str1 = chunk;
    
-   // First remove blank spaces inside array bracket
-   if (chunk[0] != bracketPair[0])
+   // If checking for array, first remove blank spaces inside array bracket
+   if (checkForArray && chunk[0] != bracketPair[0])
       str1 = RemoveSpaceInBrackets(chunk, bracketPair);
    
    int length = str1.size();
-   UnsignedInt index1, index2;
+   UnsignedInt index1;
    Integer open, close;
    bool isOuterBracket = false;
    
@@ -690,7 +714,8 @@ StringArray TextParser::Decompose(const std::string &chunk,
    #if DEBUG_TP_DECOMPOSE > 1
    MessageInterface::ShowMessage("   refObjFound=%d\n", refObjFound);
    #endif
-   
+
+   // if no Array found, just add
    if (refObjFound)
    {
       //MessageInterface::ShowMessage("===> index1=%u\n", index1);
@@ -700,33 +725,93 @@ StringArray TextParser::Decompose(const std::string &chunk,
    }
    else
    {
-      // find any opening brackets
-      for (int i=0; i<count-1; i++)
-      {
+      Integer size = -1;
+      bool append = false;
+      
+      // go through each part and put brackets together
+      for (int i=0; i<count; i++)
+      {         
          index1 = tempParts[i].find_first_of(openBrackets);
          
          if (index1 != str1.npos)
          {
-            index2 = tempParts[i].find_first_of(closeBrackets, index1);
-
-            // if closing bracket not found, append next string
-            if (index2 == str1.npos)
+            
+            if (append)
             {
-               tempParts[i] = tempParts[i] + "," + tempParts[i+1];
-               tempParts[i+1] = "***";
+               parts[size] = parts[size] + "," + tempParts[i];
             }
+            else
+            {
+               #if DEBUG_TP_DECOMPOSE > 1
+               MessageInterface::ShowMessage
+                  ("===> adding %s\n", tempParts[i].c_str());
+               #endif
+               
+               parts.push_back(tempParts[i]);
+               size++;
+            }
+            
+            // if any bracket is not balanced, append
+            if (!GmatStringUtil::IsBracketBalanced(parts[size], "()") ||
+                !GmatStringUtil::IsBracketBalanced(parts[size], "[]") ||
+                !GmatStringUtil::IsBracketBalanced(parts[size], "{}"))
+               append = true;
+            else
+               append = false;
+            
+            #if DEBUG_TP_DECOMPOSE > 1
+            MessageInterface::ShowMessage
+               ("===> parts[%d]=%s\n", size, parts[size].c_str());
+            MessageInterface::ShowMessage("===> append=%d\n", append);
+            #endif
+         }
+         else
+         {
+            if (append)
+            {
+               #if DEBUG_TP_DECOMPOSE > 1
+               MessageInterface::ShowMessage
+                  ("===> appending %s\n", tempParts[i].c_str());
+               #endif
+               
+               parts[size] = parts[size] + "," + tempParts[i];
+            }
+            else
+            {
+               #if DEBUG_TP_DECOMPOSE > 1
+               MessageInterface::ShowMessage
+                  ("===> adding %s\n", tempParts[i].c_str());
+               #endif
+               
+               parts.push_back(tempParts[i]);
+               size++;
+            }
+            
+            // if any bracket is not balanced, append
+            if (!GmatStringUtil::IsBracketBalanced(parts[size], "()") ||
+                !GmatStringUtil::IsBracketBalanced(parts[size], "[]") ||
+                !GmatStringUtil::IsBracketBalanced(parts[size], "{}"))
+               append = true;
+            else
+               append = false;
+            
+            #if DEBUG_TP_DECOMPOSE > 1
+            MessageInterface::ShowMessage
+               ("===> parts[%d]=%s\n", size, parts[size].c_str());
+            MessageInterface::ShowMessage("===> append=%d\n", append);
+            #endif
          }
       }
-      
-      // remove extra string "***"
-      StringArray::iterator iter = tempParts.begin();
-      while (iter != tempParts.end())
-      {
-         if (*iter != "***")
-            parts.push_back(*iter);
-         
-         ++iter;
-      }
+   }
+   
+   // Remove ending comma
+   Integer last = 0;
+   for (UnsignedInt i=0; i<parts.size(); i++)
+   {
+      //MessageInterface::ShowMessage("===> parts[%d]=%s\n", i, parts[i].c_str());
+      last = parts[i].size() - 1;
+      if (parts[i][last] == ',')
+         parts[i] = parts[i].substr(0, last);
    }
    
    #if DEBUG_TP_DECOMPOSE
@@ -743,15 +828,25 @@ StringArray TextParser::Decompose(const std::string &chunk,
 //-------------------------------------------------------------------------------
 // StringArray SeparateBrackets(const std::string &chunk,
 //                              const std::string &bracketPair,
-//                              const std::string &delim)
+//                              const std::string &delim,
+//                              bool checkOuterBracket = true)
 //-------------------------------------------------------------------------------
 /*
  * Breaks chunk into parts separated by space or comma but keeps bracket together,
  * except outer most brackets.
  *
+ * For example:
+ * string = "{Pert=P(1,1),MaxStep=M(1,1),Lower=L(1,1),Upper=U(1,1)}"
+ * SeparateBrackets(string, "{}", ",", false) will return
+ *    <Pert=P(1,1)> <MaxStep=M(1,1)> <Lower=L(1,1)> <Upper=U(1,1)>
+ *
  * @param <chunk> input chunk to be break apart
  * @param <bracketPair> input bracket pair (open and close) to keep together
  *                      (), [], {}
+ * @param <checkOuterBracket> true if outer bracket pair must be exist
+ *
+ * @exception <InterpreterException> thrown
+ *    If checkOuterBracket is set to true, and there is no matching bracket pair
  */
 //-------------------------------------------------------------------------------
 StringArray TextParser::SeparateBrackets(const std::string &chunk,

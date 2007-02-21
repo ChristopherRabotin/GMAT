@@ -83,6 +83,7 @@ private:
    StringArray theChunks;
    StringArray theCommandList;
    Gmat::BlockType theBlockType;
+   bool isFunctionCall;
    char errorMsg[1024];
 };
 
