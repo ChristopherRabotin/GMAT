@@ -1276,7 +1276,8 @@ bool GmatStringUtil::IsParenBalanced(const std::string &str)
 // bool IsBracketBalanced(const std::string &str, const std::string &bracketPair)
 //------------------------------------------------------------------------------
 /*
- * return true if brackets are balanced (no mismatching brackets)
+ * @return true if brackets are balanced (no mismatching brackets) or
+ *         no brackets found
  * 
  */
 //------------------------------------------------------------------------------
@@ -1287,7 +1288,7 @@ bool GmatStringUtil::IsBracketBalanced(const std::string &str,
    char close = bracketPair[1];
    int length = str.size();
    Integer openCounter = 0;
-   bool retval = false;
+   bool retval = true;
    
    for (int i=0; i<length; i++)
    {
@@ -1296,9 +1297,9 @@ bool GmatStringUtil::IsBracketBalanced(const std::string &str,
       else if (str[i] == close)
          openCounter--;
    }
-   
-   if (openCounter == 0)
-      retval = true;
+      
+   if (openCounter != 0)
+      retval = false;
 
    return retval;
 }
