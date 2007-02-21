@@ -28,6 +28,8 @@
 
 #include "MessageInterface.hpp"
 
+#define DEBUG_AE_WRAPPER
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -149,6 +151,12 @@ const StringArray& ArrayElementWrapper::GetRefObjectNames()
    for (StringArray::const_iterator j = colRefNames.begin(); 
         j != colRefNames.end(); ++j)
           refObjectNames.push_back(*j);
+          
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage("AEWrapper:: Returning ref object names:\n");
+      for (Integer ii = 0; ii < (Integer) refObjectNames.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", refObjectNames[ii].c_str());
+   #endif
    
    return refObjectNames;
 }
@@ -171,12 +179,21 @@ bool ArrayElementWrapper::SetRefObject(GmatBase *obj)
    if ( (obj->IsOfType("Array")) && (obj->GetName() == arrayName) )
    {
       array = (Array*) obj;
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage("AEWrapper:: Setting array object %s\n",
+            arrayName.c_str());
+      #endif
       isOk = true;
    }
    if (row)    setRow = row->SetRefObject(obj);
    if (column) setCol = column->SetRefObject(obj);
    
    if (!isOk && !setRow && !setCol) return false;
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper:: Returning true from SetRefObject\n");
+   #endif
+   
    return true;
 }
 
@@ -233,25 +250,38 @@ Real ArrayElementWrapper::EvaluateReal() const
       // get the row value
       Real rowVal        = row->EvaluateReal();
       Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage(
+            "AEWrapper::EvalReal - row evaluates to %d\n", (Integer) rowNearestInt);
+      #endif
       if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
       {
          std::string errmsg =  "Cannot evaluate ArrayElement - ";
          errmsg += "row Element evaluates to a non-Integer value\n";
          throw ParameterException(errmsg);
       }
-      rowInt = (Integer) rowNearestInt;
+      rowInt = (Integer) rowNearestInt - 1;
       // get the column value
       Real colVal        = column->EvaluateReal();
       Real colNearestInt = GmatMathUtil::NearestInt(colVal);
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage(
+            "AEWrapper::EvalReal - column evaluates to %d\n", (Integer) colNearestInt);
+      #endif
       if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
       {
          std::string errmsg = "Cannot evaluate ArrayElement - ";
          errmsg += "column Element evaluates to a non-Integer value\n";
          throw ParameterException(errmsg);
       }
-      columnInt = (Integer) colNearestInt;
+      columnInt = (Integer) colNearestInt - 1;
       
       itsValue = array->GetRealParameter("SingleValue", rowInt, columnInt);
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage(
+            "AEWrapper::EvalReal - itsValue evaluates to %.12f\n", 
+            itsValue);
+      #endif
    }
    catch (BaseException &be)
    {
@@ -277,6 +307,11 @@ Real ArrayElementWrapper::EvaluateReal() const
 //---------------------------------------------------------------------------
 bool ArrayElementWrapper::SetReal(const Real toValue)
 {
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetReal called with input %.12f\n", 
+         toValue);
+   #endif
    if (array == NULL)
       throw ParameterException(
       "Cannot set value of ArrayElement - object pointer is NULL\n");
@@ -369,6 +404,14 @@ void ArrayElementWrapper::SetupWrapper()
       errmsg += "\" - does not parse correctly as an array.\n";
       throw ParameterException(errmsg);
    }
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::SetupWrapper - \n");
+      MessageInterface::ShowMessage("   description = %s\n", description.c_str());
+      MessageInterface::ShowMessage("   rowName     = %s\n", rowName.c_str());
+      MessageInterface::ShowMessage("   columnName  = %s\n", columnName.c_str());
+      MessageInterface::ShowMessage("   arrayName   = %s\n", arrayName.c_str());
+   #endif
    // for now, put the array name in the list of reference objects - add
    // all the other stuff when GetRefObjectNames is called
    refObjectNames.push_back(arrayName);

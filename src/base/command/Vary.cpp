@@ -30,7 +30,7 @@
 //#define DEBUG_VARIABLE_RANGES
 //#define DEBUG_VARY_EXECUTE 1
 //#define DEBUG_VARY_PARAMS
-//#define DEBUG_VARY_PARSING
+#define DEBUG_VARY_PARSING
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_RENAME
 
@@ -845,8 +845,21 @@ bool Vary::InterpretAction()
    
    // The remaining text in the instruction is the variable definition and 
    // parameters, all contained in currentChunks[1].  Deal with those next.
-   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   //currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   std::string noLeftBrace  = GmatStringUtil::RemoveAll(currentChunks[1],'{');
+   std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
+   std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
+   currentChunks = parser.Decompose(noSpaces, "()", true, true);
+   //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
    
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage(
+         "Vary: after Decompose, current chunks = \n");
+      for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
+         MessageInterface::ShowMessage("   %s\n",
+                                       currentChunks[jj].c_str());
+   #endif
+
    // First chunk is the variable and initial value
    std::string lhs, rhs;
    if (!SeparateEquals(currentChunks[0], lhs, rhs))
@@ -860,9 +873,19 @@ bool Vary::InterpretAction()
    initialValueName = rhs;
    
    // Now deal with the settable parameters
-   currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ", ");
+   //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ", ", false);
    
-   for (StringArray::iterator i = currentChunks.begin(); 
+   //#ifdef DEBUG_VARY_PARSING
+   //   MessageInterface::ShowMessage(
+   //      "Vary: After SeparateBrackets, current chunks = \n");
+   //   for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
+   //      MessageInterface::ShowMessage("   %s\n",
+   //                                    currentChunks[jj].c_str());
+   //#endif
+   
+   // currentChunks now holds all of the pieces - no need for more separation  
+   
+   for (StringArray::iterator i = currentChunks.begin() + 1; 
         i != currentChunks.end(); ++i)
    {
       SeparateEquals(*i, lhs, rhs);
