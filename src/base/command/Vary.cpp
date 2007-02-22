@@ -854,6 +854,8 @@ bool Vary::InterpretAction()
    
    #ifdef DEBUG_VARY_PARSING
       MessageInterface::ShowMessage(
+         "Vary:  noSpaces = %s\n", noSpaces.c_str());
+      MessageInterface::ShowMessage(
          "Vary: after Decompose, current chunks = \n");
       for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
          MessageInterface::ShowMessage("   %s\n",
@@ -871,6 +873,13 @@ bool Vary::InterpretAction()
 
    variableValueString = rhs;
    initialValueName = rhs;
+   
+   #ifdef DEBUG_VARY_PARSING
+      MessageInterface::ShowMessage(
+         "Vary:  setting variableName to %s\n", variableName.c_str());
+      MessageInterface::ShowMessage(
+         "Vary:  setting initialValueName to %s\n", initialValueName.c_str());
+   #endif
    
    // Now deal with the settable parameters
    //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ", ", false);
