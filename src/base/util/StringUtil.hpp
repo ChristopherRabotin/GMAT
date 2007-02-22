@@ -57,7 +57,8 @@ namespace GmatStringUtil
    
    char GetClosingBracket(const char &openBracket);
    
-   StringArray SeparateBy(const std::string &str, const std::string &delim);
+   StringArray SeparateBy(const std::string &str, const std::string &delim,
+                          bool putBracketsTogether = false);
    
    bool ToReal(const std::string &str, Real *value);
    bool ToReal(const std::string &str, Real &value);

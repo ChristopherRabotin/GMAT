@@ -27,6 +27,8 @@
 
 //#define DEBUG_STRING_UTIL 1
 //#define DEBUG_ARRAY_INDEX 2
+//#define DEBUG_STRING_UTIL_ARRAY 1
+//#define DEBUG_STRING_UTIL_SEP 1
 
 using namespace std;
 
@@ -338,14 +340,144 @@ char GmatStringUtil::GetClosingBracket(const char &openBracket)
 
 
 //------------------------------------------------------------------------------
-// StringArray SeparateBy(const std::string &str, const std::string &delim)
+// StringArray SeparateBy(const std::string &str, const std::string &delim,
+//                        bool putBracketsTogether = false)
+//------------------------------------------------------------------------------
+/*
+ * Separates string by input delimiter.
+ *
+ * @param  str  input string
+ * @param  delim  input delimiter
+ * @param  putBracketsTogether  true if put brackets together
+ *
+ */
 //------------------------------------------------------------------------------
 StringArray GmatStringUtil::SeparateBy(const std::string &str,
-                                       const std::string &delim)
+                                       const std::string &delim,
+                                       bool putBracketsTogether)
 {
+   #if DEBUG_STRING_UTIL_SEP
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::SeparateBy() str=<%s>, delim=<%s>, putBracketsTogether=%d\n",
+       str.c_str(), delim.c_str(), putBracketsTogether);
+   #endif
+   
    StringTokenizer st(str, delim);
-   StringArray parts = st.GetAllTokens();
-   return parts;
+   StringArray tempParts = st.GetAllTokens();
+   
+   if (!putBracketsTogether)
+      return tempParts;
+   
+   //-----------------------------------------------------------------
+   // now go through each part and put brackets together
+   //-----------------------------------------------------------------
+   StringArray parts;   
+   std::string openBrackets = "([{";
+   UnsignedInt index1;
+   int count = tempParts.size();
+   
+   #if DEBUG_STRING_UTIL_SEP
+   for (int i=0; i<count; i++)
+      MessageInterface::ShowMessage
+         ("   tempParts[%d]=%s\n", i, tempParts[i].c_str());
+   #endif
+   
+   Integer size = -1;
+   bool append = false;
+   
+   // go through each part and put brackets together
+   for (int i=0; i<count; i++)
+   {         
+      index1 = tempParts[i].find_first_of(openBrackets);
+         
+      if (index1 != str.npos)
+      {
+         if (append)
+         {
+            parts[size] = parts[size] + "," + tempParts[i];
+         }
+         else
+         {
+            #if DEBUG_STRING_UTIL_SEP > 1
+            MessageInterface::ShowMessage
+               ("===> adding %s\n", tempParts[i].c_str());
+            #endif
+            
+            parts.push_back(tempParts[i]);
+            size++;
+         }
+         
+         // if any bracket is not balanced, append
+         if (!IsBracketBalanced(parts[size], "()") ||
+             !IsBracketBalanced(parts[size], "[]") ||
+             !IsBracketBalanced(parts[size], "{}"))
+            append = true;
+         else
+            append = false;
+         
+         #if DEBUG_STRING_UTIL_SEP > 1
+         MessageInterface::ShowMessage
+            ("===> parts[%d]=%s\n", size, parts[size].c_str());
+         MessageInterface::ShowMessage("===> append=%d\n", append);
+         #endif
+      }
+      else
+      {
+         if (append)
+         {
+            #if DEBUG_STRING_UTIL_SEP > 1
+            MessageInterface::ShowMessage
+               ("===> appending %s\n", tempParts[i].c_str());
+            #endif
+               
+            parts[size] = parts[size] + "," + tempParts[i];
+         }
+         else
+         {
+            #if DEBUG_STRING_UTIL_SEP > 1
+            MessageInterface::ShowMessage
+               ("===> adding %s\n", tempParts[i].c_str());
+            #endif
+               
+            parts.push_back(tempParts[i]);
+            size++;
+         }
+            
+         // if any bracket is not balanced, append
+         if (!IsBracketBalanced(parts[size], "()") ||
+             !IsBracketBalanced(parts[size], "[]") ||
+             !IsBracketBalanced(parts[size], "{}"))
+            append = true;
+         else
+            append = false;
+         
+         #if DEBUG_STRING_UTIL_SEP > 1
+         MessageInterface::ShowMessage
+            ("===> parts[%d]=%s\n", size, parts[size].c_str());
+         MessageInterface::ShowMessage("===> append=%d\n", append);
+         #endif
+      }
+   }
+
+   StringArray parts1;
+   
+   // add non-blank items
+   for (unsigned int i=0; i<parts.size(); i++)
+   {
+      parts[i] = Strip(parts[i]);
+      if (parts[i] != "")
+         parts1.push_back(parts[i]);
+   }
+   
+   #if DEBUG_STRING_UTIL_SEP
+   MessageInterface::ShowMessage("   Returning:\n");
+   for (unsigned int i=0; i<parts1.size(); i++)
+      MessageInterface::ShowMessage
+         ("   parts1[%d] = %s\n", i, parts1[i].c_str());
+   #endif
+   
+   return parts1;
+   
 }
 
 
@@ -1431,13 +1563,15 @@ bool GmatStringUtil::IsCommaPartOfArray(const std::string &str, Integer start)
 
 //------------------------------------------------------------------------------
 // bool IsBracketPartOfArray(const std::string &str,
-//                           const std::string &bracketPairs)
+//                           const std::string &bracketPairs,
+//                           bool checkOnlyFirst)
 //------------------------------------------------------------------------------
 /*
  * Check if string is part of array.
  *
  * @param str  input string
  * @param bracketPairs  bracket pairs used in checking ("()", "([)]")
+ * @param checkOnlyFirst  true if checking for first bracket pair
  *
  * return true if parenthesis or square bracket is part of an array.
  *    For example: (2,2) or (abc,def) or [2,2], [i,j]
@@ -1451,7 +1585,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
                                           const std::string &bracketPairs,
                                           bool checkOnlyFirst)
 {
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_STRING_UTIL_ARRAY
    MessageInterface::ShowMessage
       ("GmatStringUtil::IsBracketPartOfArray() str=%s, bracketPairs=%s, "
        "checkOnlyFirst=%d\n", str.c_str(), bracketPairs.c_str(), checkOnlyFirst);
@@ -1471,7 +1605,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    std::string openBrackets = bracketPairs.substr(0, count/2);
    std::string closeBrackets = bracketPairs.substr(count/2);
    
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_STRING_UTIL_ARRAY
    MessageInterface::ShowMessage
       ("   openBrackets=%s, closeBrackets=%s\n", openBrackets.c_str(),
        closeBrackets.c_str());
@@ -1502,7 +1636,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    
    if (index2 == str1.npos)
    {
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage("   No close bracket found\n");
       #endif
 
@@ -1515,7 +1649,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    if ((openChar == '(' && closeChar == ']') ||
        (openChar == '[' && closeChar == ')'))
    {
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage("   open and close bracket don't macth.\n");
       #endif
 
@@ -1523,13 +1657,15 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    }
    
    
+   //-----------------------------------------------------------------
    // str1 does not include open and close bracket
+   //-----------------------------------------------------------------
    std::string str2 = str1.substr(index1+1, index2-index1-1);
    //MessageInterface::ShowMessage("   str1=<%s>/n", str1.c_str());
    
    if (str2 == "")
    {
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage("   It is empty sub-string.\n");
       #endif
       
@@ -1541,7 +1677,9 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    comma = str2.find(',');
    //MessageInterface::ShowMessage("   comma=%u\n", comma);
    
+   //-----------------------------------------------------------------
    // if single dimension array
+   //-----------------------------------------------------------------
    if (comma == str2.npos)
    {
       substr = str2.substr(0, length-1);
@@ -1552,7 +1690,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
       else
          ret = false;
       
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage
          ("   It is single dimenstion array. returning ret=%d\n", ret);
       #endif
@@ -1560,18 +1698,23 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
       return ret;
    }
    
-   
+   //-----------------------------------------------------------------
    // It's double dimension array
+   //-----------------------------------------------------------------
    substr = str2.substr(0, comma-1);
-   //MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
+   
+   #if DEBUG_STRING_UTIL_ARRAY
+   MessageInterface::ShowMessage("   1st=%s\n", substr.c_str());
+   #endif
    
    if (!IsSingleItem(substr))
    {
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage
          ("   It is double dimenstion array. 1st index is not a single item\n");
       #endif
       
+      //return IsBracketPartOfArray(substr, bracketPairs, checkOnlyFirst);
       return false;
    }
    
@@ -1580,7 +1723,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
    
    if (!IsSingleItem(substr))
    {
-      #if DEBUG_STRING_UTIL
+      #if DEBUG_STRING_UTIL_ARRAY
       MessageInterface::ShowMessage
          ("   It is double dimenstion array. 2nd index is not a single item\n");
       #endif
@@ -1588,7 +1731,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
       return false;
    }
    
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_STRING_UTIL_ARRAY
    MessageInterface::ShowMessage
       ("   It is double dimension array. returning ret=%d\n", ret);
    #endif
