@@ -928,13 +928,21 @@ std::string DragForce::GetParameterTypeString(const Integer id) const
    return PhysicalModel::GetParameterTypeString(id);
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const Integer id) const
 {
-   if (id == centralBodyID)
+   if (id == centralBodyID || sourceTypeID)
       return true;
    return PhysicalModel::IsParameterReadOnly(id);
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
 bool DragForce::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
