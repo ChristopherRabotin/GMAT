@@ -119,20 +119,24 @@ ObjectPropertyWrapper::~ObjectPropertyWrapper()
 //---------------------------------------------------------------------------
 bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
 {
-   if (obj->GetName() != refObjectNames[0])
+//   if (obj->GetName() != refObjectNames[0])
+//   {
+//
+//      errmsg += object->GetName();
+//      errmsg += "\" was passed into the object property wrapper \"";
+//      errmsg += description;
+//      errmsg += "\", but an object named \"";
+//      errmsg += refObjectNames[0];
+//      errmsg += "\" was expected.\n";
+//      throw ParameterException(errmsg);
+//   }
+   if (obj->GetName() == refObjectNames[0])
    {
-      std::string errmsg = "Referenced object \"";
-      errmsg += object->GetName();
-      errmsg += "\" was passed into the variable wrapper \"";
-      errmsg += description;
-      errmsg += "\", but an object named \"";
-      errmsg += refObjectNames[0];
-      errmsg += "\" was expected.\n";
-      throw ParameterException(errmsg);
+      object = obj;
+      propID = object->GetParameterID(propIDNames[0]);
+      return true;
    }
-   object = obj;
-   propID = object->GetParameterID(propIDNames[0]);
-   return true;
+   else return false;
 }
 
 //---------------------------------------------------------------------------

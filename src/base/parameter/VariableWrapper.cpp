@@ -109,22 +109,27 @@ VariableWrapper::~VariableWrapper()
 //---------------------------------------------------------------------------
 bool VariableWrapper::SetRefObject(GmatBase *obj)
 {
-   if ( (obj->GetName() != refObjectNames[0]) ||
-        (obj->GetTypeName() != "Variable") )
-   {
-      std::string errmsg = "Referenced variable \"";
-      errmsg += obj->GetName();
-      errmsg += ("\" of type \"" + obj->GetTypeName());
-      errmsg += "\" was passed into the variable wrapper \"";
-      errmsg += description;
-      errmsg += "\", but an object named \"";
-      errmsg += refObjectNames[0];
-      errmsg += "\" was expected.\n";
-      throw ParameterException(errmsg);
-   }
+//   if ( (obj->GetName() != refObjectNames[0]) ||
+//        (obj->GetTypeName() != "Variable") )
+//   {
+//      std::string errmsg = "Referenced variable \"";
+//      errmsg += obj->GetName();
+//      errmsg += ("\" of type \"" + obj->GetTypeName());
+//      errmsg += "\" was passed into the variable wrapper \"";
+//      errmsg += description;
+//      errmsg += "\", but an object named \"";
+//      errmsg += refObjectNames[0];
+//      errmsg += "\" was expected.\n";
+//      throw ParameterException(errmsg);
+//   }
 
-   var = (Variable*) obj;
-   return true;
+   if ((obj->GetName() == refObjectNames[0]) &&
+       (obj->IsOfType("Variable")) )
+   {
+      var = (Variable*) obj;
+      return true;
+   }
+   else  return false;
 }
 
 //---------------------------------------------------------------------------

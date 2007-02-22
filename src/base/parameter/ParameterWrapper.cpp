@@ -109,20 +109,25 @@ ParameterWrapper::~ParameterWrapper()
 //---------------------------------------------------------------------------
 bool ParameterWrapper::SetRefObject(GmatBase *obj)
 {
-   if ( (obj->GetName() != refObjectNames[0]) ||
-        (!obj->IsOfType("Parameter")) )
+//   if ( (obj->GetName() != refObjectNames[0]) ||
+//        (!obj->IsOfType("Parameter")) )
+//   {
+//      std::string errmsg = "Referenced object \"";
+//      errmsg += obj->GetName();
+//      errmsg += "\" was passed into the parameter wrapper \"";
+//      errmsg += description;
+//      errmsg += "\", but an object named \"";
+//      errmsg += refObjectNames[0];
+//      errmsg += "\" was expected.\n";
+//      throw ParameterException(errmsg);
+//   }
+   if ( (obj->GetName() == refObjectNames[0]) ||
+        (obj->IsOfType("Parameter")) )
    {
-      std::string errmsg = "Referenced object \"";
-      errmsg += obj->GetName();
-      errmsg += "\" was passed into the variable wrapper \"";
-      errmsg += description;
-      errmsg += "\", but an object named \"";
-      errmsg += refObjectNames[0];
-      errmsg += "\" was expected.\n";
-      throw ParameterException(errmsg);
+      param = (Parameter*) obj;
+      return true;
    }
-   param = (Parameter*) obj;
-   return true;
+   else return false;
 }
 
 //---------------------------------------------------------------------------
@@ -175,12 +180,12 @@ bool ParameterWrapper::RenameObject(const std::string &oldName,
 {
    ElementWrapper::RenameObject(oldName, newName);
    // now rebuild the description string from the refObjectNames
-   Integer pos = description.find(".");
-   if (pos != (Integer) std::string::npos)
-   {
-      description.replace(0,pos,refObjectNames[0]);
-   }
-   else
+   //Integer pos = description.find(".");
+   //if (pos != (Integer) std::string::npos)
+   //{
+   //   description.replace(0,pos,refObjectNames[0]);
+   //}
+   //else
       description = refObjectNames[0];  
    return true;
 }
@@ -197,13 +202,14 @@ bool ParameterWrapper::RenameObject(const std::string &oldName,
 void ParameterWrapper::SetupWrapper()
 {
    // look for a '.' - if it's there only save the object name 
-   Integer pos = description.find(".");
-   if (pos != (Integer) std::string::npos)
-   {
-      std::string sub = description.substr(0,pos-1);
-      refObjectNames.push_back(sub);
-   }
-   else   // otherwise, save the whole thing
+//   Integer pos = description.find(".");
+//   if (pos != (Integer) std::string::npos)
+//   {
+//      std::string sub = description.substr(0,pos-1);
+//      MessageInterface::ShowMessage("the sub = %s\n", sub.c_str());
+//      refObjectNames.push_back(sub);
+//   }
+//   else   // otherwise, save the whole thing
       refObjectNames.push_back(description);
 }
 
