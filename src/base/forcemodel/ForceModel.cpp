@@ -73,26 +73,28 @@ static bool firstCallFired = false;
 const std::string
 ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
 {
-    "CentralBody",
-    "PrimaryBodies",
-    "PointMasses",
-    "Drag",
-    "SRP",
-    "ErrorControl",
-    "CoordinateSystemList"
+   "CentralBody",
+   "PrimaryBodies",
+   "PointMasses",
+   "Drag",
+   "SRP",
+   "ErrorControl",
+   "CoordinateSystemList"
 };
 
 
 const Gmat::ParameterType
 ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 {
-    Gmat::STRING_TYPE,
-    Gmat::STRINGARRAY_TYPE,
-    Gmat::STRINGARRAY_TYPE,
-    Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
-    Gmat::STRING_TYPE,
-    Gmat::STRINGARRAY_TYPE
+   //Gmat::STRING_TYPE,       // "CentralBody",
+   Gmat::OBJECT_TYPE,       // "CentralBody",
+   Gmat::STRINGARRAY_TYPE,  // "PrimaryBodies",
+   Gmat::STRINGARRAY_TYPE,  // "PointMasses",
+   Gmat::STRING_TYPE,       // "Drag",
+   //Gmat::STRING_TYPE,       // "SRP",
+   Gmat::ON_OFF_TYPE,       // "SRP",
+   Gmat::STRING_TYPE,       // "ErrorControl",
+   Gmat::STRINGARRAY_TYPE   // "CoordinateSystemList"
 };
 
 
@@ -1874,13 +1876,13 @@ std::string ForceModel::GetStringParameter(const Integer id) const
          return am;
       }
       
-      case  SRP:
-      {
-         const PhysicalModel *pm = GetForce("SolarRadiationPressure");
-         if (pm == NULL)
-            return "Off";
-         return "On";
-      }
+//       case  SRP:
+//       {
+//          const PhysicalModel *pm = GetForce("SolarRadiationPressure");
+//          if (pm == NULL)
+//             return "Off";
+//          return "On";
+//       }
       
       case NORM_TYPE:
          switch (normType)
@@ -1934,8 +1936,8 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
       case  DRAG:
          return false;
          
-      case  SRP:
-         return false;
+//       case  SRP:
+//          return false;
          
       case NORM_TYPE:
          if (value == "RSSState")
@@ -1979,6 +1981,60 @@ bool ForceModel::SetStringParameter(const std::string &label,
     return SetStringParameter(GetParameterID(label), value);
 }
 
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+std::string ForceModel::GetOnOffParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case SRP:
+      {
+         const PhysicalModel *pm = GetForce("SolarRadiationPressure");
+         if (pm == NULL)
+            return "Off";
+         return "On";
+      }
+   default:
+      return PhysicalModel::GetOnOffParameter(id);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+bool ForceModel::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   switch (id)
+   {
+   case SRP:
+      return true;
+   default:
+      return PhysicalModel::SetOnOffParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ForceModel::GetOnOffParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string ForceModel::GetOnOffParameter(const std::string &label) const
+{
+   return GetOnOffParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool ForceModel::SetOnOffParameter(const std::string &label, 
+                                   const std::string &value)
+{
+   return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
 //------------------------------------------------------------------------------
 // const StringArray& GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
@@ -1996,6 +2052,7 @@ const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
       return PhysicalModel::GetStringArrayParameter(id);
     }
 }
+
 
 //------------------------------------------------------------------------------
 // StringArray& GetStringArrayParameter(const std::string &label) const
@@ -2024,6 +2081,11 @@ const StringArray& ForceModel::BuildBodyList(std::string type) const
           bodylist.push_back((*i)->GetStringParameter("BodyName"));
        }
    }
+   
+   // Add central body if not previously added (02/20/06 loj: added)
+   if (find(bodylist.begin(), bodylist.end(), centralBodyName) == bodylist.end())
+      bodylist.push_back(centralBodyName);
+   
    return bodylist;
 }
 
