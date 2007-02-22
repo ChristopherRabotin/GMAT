@@ -58,7 +58,7 @@ BranchCommand::BranchCommand(const std::string &typeStr) :
    depthChange = 1;
    parameterCount = BranchCommandParamCount;
    
-   objectTypeNames.push_back("BranchCommand"); //loj: 12/11/06 Added
+   objectTypeNames.push_back("BranchCommand");
 }
 
 
@@ -73,7 +73,8 @@ BranchCommand::~BranchCommand()
 {
    #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
       MessageInterface::ShowMessage
-         ("In BranchCommand::~BranchCommand() this=%s\n", this->GetTypeName().c_str());
+         ("In BranchCommand::~BranchCommand() this=%s\n",
+          this->GetTypeName().c_str());
    #endif
    std::vector<GmatCommand*>::iterator node;
    GmatCommand* current;
@@ -85,7 +86,8 @@ BranchCommand::~BranchCommand()
       if (current != NULL)
       {
          #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-            MessageInterface::ShowMessage("current=%s\n", current->GetTypeName().c_str());
+            MessageInterface::ShowMessage
+               ("   current=%s\n", current->GetTypeName().c_str());
          #endif
             
          while (current->GetNext() != this)
@@ -101,7 +103,7 @@ BranchCommand::~BranchCommand()
          if (current)
          {
             #ifdef DEBUG_BRANCHCOMMAND_DEALLOCATION
-               ShowMessage("Removing ", current);
+               MessageInterface::ShowMessage("   Removing ", current);
             #endif
                
             current->Remove(current);
@@ -287,7 +289,7 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       ShowCommand("setting previous of ", cmd, " to ", this);
       #endif
       
-      cmd->ForceSetPrevious(this); //loj: 12/11/06
+      cmd->ForceSetPrevious(this);
       
       //current.push_back(NULL);
    }
@@ -303,7 +305,7 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       ShowCommand("setting previous of ", cmd, " to ", this);
       #endif
       
-      cmd->ForceSetPrevious(this); //loj: 12/11/06
+      cmd->ForceSetPrevious(this);
       
       //current.at(which) = NULL;
    }
@@ -319,7 +321,7 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       ShowCommand("setting previous of ",cmd, " to ", branch.at(which));
       #endif
       
-      cmd->ForceSetPrevious(branch.at(which)); //loj: 12/11/06
+      cmd->ForceSetPrevious(branch.at(which));
    }
 }
 
@@ -358,7 +360,7 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       ShowCommand("setting previous of ", cmd, " to ", this);
       #endif
       
-      cmd->ForceSetPrevious(this); //loj: 12/11/06      
+      cmd->ForceSetPrevious(this);   
    }
    else if (branch.at(which) == NULL)
    {
@@ -388,7 +390,7 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       ShowCommand("setting previous of ", tmp, " to ", cmd);
       #endif
       
-      tmp->ForceSetPrevious(cmd); //loj: 12/11/06
+      tmp->ForceSetPrevious(cmd);
    }
 }
 
@@ -575,7 +577,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       ShowCommand("setting previous of ", this, " to ", cmd);
       #endif
       
-      this->ForceSetPrevious(cmd); //loj: 12/11/06
+      this->ForceSetPrevious(cmd);
       
       // shift all the later comamnds down one branch
       bool isOK = ShiftBranches(toShift, brNum);
@@ -619,9 +621,9 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
       
       if (current != NULL)
       {
-         fromBranch = current->Remove(cmd); //loj: 6/29/05 put old code back
+         fromBranch = current->Remove(cmd);
          
-         if (fromBranch == current) //loj: 6/29/05 Added
+         if (fromBranch == current)
             branch[which] = tempNext;
          
          if (fromBranch != NULL)
@@ -994,10 +996,12 @@ void BranchCommand::RunComplete()
          if (!(*i)->IsOfType("BranchEnd"))
             (*i)->RunComplete();
 
-   if (next)
-      if (!next->IsOfType("BranchEnd"))
-         next->RunComplete();
-
+   // This block of code causes unnecesary looping since next is handled in
+   // the GmatCommand::RunComplete() (loj: 2/16/07)
+   //if (next)
+   //   if (!next->IsOfType("BranchEnd"))
+   //      next->RunComplete();
+   
    commandComplete = false;
    commandExecuting = false;
    branchExecuting = false;
