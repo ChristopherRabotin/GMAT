@@ -50,7 +50,7 @@
 //#define DEBUG_SET 1
 //#define DEBUG_SET_FORCE_MODEL 1
 //#define DEBUG_SET_SOLAR_SYS 1
-//#define DEBUG_FINAL_PASS
+//#define DEBUG_FINAL_PASS 1
 //#define DEBUG_CHECK_OBJECT 1
 //#define DEBUG_CHECK_BRANCH 1
 //#define DEBUG_WRAPPERS
@@ -749,6 +749,9 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
         i != wrapperNames.end(); ++i)
    {
       ElementWrapper *ew = CreateElementWrapper(*i);
+      if (ew == NULL)
+         return false;
+      
       if (cmd->SetElementWrapper(ew, *i) == false)
       {
          InterpreterException ex
@@ -1468,13 +1471,19 @@ Parameter* Interpreter::CreateParameter(const std::string &str)
 {
    #if DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("===> Interpreter::CreateParameter() str=%s\n", str.c_str());
+      ("Interpreter::CreateParameter() str=%s\n", str.c_str());
    #endif
    
    Parameter *param = NULL;
    std::string paramType, ownerName, depName;
    GmatStringUtil::ParseParameter(str, paramType, ownerName, depName);
-
+   
+   #if DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("   paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
+       ownerName.c_str(), depName.c_str());
+   #endif
+   
    // Create parameter, if type is System Parameter, Variable, Array
    if (find(parameterList.begin(), parameterList.end(), paramType) != 
        parameterList.end())
@@ -1483,7 +1492,10 @@ Parameter* Interpreter::CreateParameter(const std::string &str)
    }
    else
    {
-      param = (Parameter*)FindObject(str);
+      // Find parameter
+      GmatBase *obj = FindObject(str);
+      if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
+         param = (Parameter*)obj;
    }
    
    return param;
@@ -2187,6 +2199,10 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
             else if (toType == Gmat::REAL_TYPE)
                toObj->SetRealParameter(toId, fromObj->GetRealParameter("Value"));
          }
+         else if (toObj->GetTypeName() == "Variable" && fromType == Gmat::REAL_TYPE)
+         {
+            toObj->SetStringParameter(toId, fromObj->GetName());
+         }
          else
          {
             if (fromObj->GetTypeName() == "String" &&
@@ -2242,6 +2258,8 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
                                         GmatBase *fromOwner, const std::string &fromProp)
 {
    bool retval = true;
+   errorMsg1 = "";
+   errorMsg2 = "";
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
@@ -2364,10 +2382,20 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    
    if (!retval)
    {
-      InterpreterException ex
-         ("The field name \"" + fromProp + "\" on object " + toOwner->GetName() +
-          " is not permitted");
-      HandleError(ex);
+      if (errorMsg1 == "")
+      {
+         InterpreterException ex
+            ("The field name \"" + fromProp + "\" on object " + toOwner->GetName() +
+             " is not permitted");
+         HandleError(ex);
+      }
+      else
+      {
+         InterpreterException ex
+            (errorMsg1 + "field name \"" + toProp + "\" on object " + "\"" +
+             toOwner->GetName() + "\" is not an allowed value." + errorMsg2);
+         HandleError(ex);
+      }
    }
    
    return retval;
@@ -2462,8 +2490,9 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
          Integer toId = -1;
          
          if (FindPropertyID(toOwner, toProp, &toObj, toId))
+         {
             retval = SetProperty(toObj, toId, value);
-         
+         }
       }
    }
    
@@ -2726,7 +2755,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
-      ("   paramType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
+      ("   propertyType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
    #endif
    
    
@@ -2740,27 +2769,50 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          // Try create Parameter first if it is not ObjectType (loj: 12/05/06)
          if (!IsObjectType(value))
          {
-            //Parameter *param = CreateParameter(value);
             param = CreateParameter(value);
-         
+            
             #if DEBUG_SET
             if (param)
                MessageInterface::ShowMessage
-                  ("   param=%s\n", param->GetName().c_str());
+                  ("   param=(%p)%s type=%s returnType=%d\n", param,
+                   param->GetName().c_str(), param->GetTypeName().c_str(),
+                   param->GetReturnType());
             #endif
          }
          
          if (param != NULL)
          {
-            #if DEBUG_SET
-            MessageInterface::ShowMessage
-               ("===> Calling SetStringParameter(%d, %s)\n", id, value.c_str());
-            #endif
-            
-            obj->SetStringParameter(id, value);
+            // Other than Subscriber, it can only take STRING_TYPE parameter
+            if (param->GetReturnType() == Gmat::STRING_TYPE ||
+                obj->IsOfType(Gmat::SUBSCRIBER))
+            {
+               #if DEBUG_SET
+               MessageInterface::ShowMessage
+                  ("   Calling SetStringParameter(%d, %s)\n", id, value.c_str());
+               #endif
+               
+               obj->SetStringParameter(id, value);
+            }
+            else
+            {
+               errorMsg1 = errorMsg1 + "The value of \"" + value + "\" for ";
+               errorMsg2 = "  The allowed value is Object Name";
+               break;
+            }
          }
          else
          {
+            // check if value is not a number
+            Real rval;
+            Integer ival;
+            if (GmatStringUtil::ToReal(value, rval) ||
+                GmatStringUtil::ToInteger(value, ival))
+            {
+               errorMsg1 = errorMsg1 + "The value of \"" + value + "\" for ";
+               errorMsg2 = "  The allowed value is Object Name";
+               break;
+            }
+            
             // Create Owned Object
             GmatBase *ownedObj = CreateObject(value, "");
             
@@ -2775,7 +2827,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             {
                #if DEBUG_SET
                MessageInterface::ShowMessage
-                  ("===> Calling SetRefObject(%p, %d)\n", ownedObj,
+                  ("   Calling SetRefObject(%p, %d)\n", ownedObj,
                    ownedObj->GetType());
                #endif
                
@@ -2794,9 +2846,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                   // Special case of InternalForceModel in script
                   if (value != "InternalForceModel")
                   {
-                     InterpreterException ex
-                        ("*** Internal Error ***Cannot create " + value + "\n");
-                     HandleError(ex);
+                     // Set as String parameter, so it can be caught in FinalPass()
+                     obj->SetStringParameter(id, value);
+                     //InterpreterException ex
+                     //   ("*** Internal Error ***Cannot create " + value + "\n");
+                     //HandleError(ex);
                   }
                }
             }
@@ -2869,7 +2923,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          else
          {
             errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
-            errorMsg2 = " Only real number is allowed";
+            errorMsg2 = " The allowed value is Real number";
          }
          break;
       }
@@ -2877,17 +2931,18 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       {
          #if DEBUG_SET
          MessageInterface::ShowMessage
-            ("===> Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
+            ("   Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
          #endif
-         
+
          retval = obj->SetStringParameter(id, valueToUse);
+         
          break;
       }
    case Gmat::STRINGARRAY_TYPE:
       {
          #if DEBUG_SET
          MessageInterface::ShowMessage
-            ("===> Calling SetStringParameter(%d, %s, %d)\n", id,
+            ("   Calling SetStringParameter(%d, %s, %d)\n", id,
              valueToUse.c_str(), index);
          #endif
          
@@ -2917,7 +2972,6 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          }
          else
          {
-            //errorMsg1 = errorMsg1 + "'" + valueToUse + "' is not a valid boolean flag.\n";
             errorMsg1 = errorMsg1 + "The value of \"" + valueToUse + "\" for ";
             errorMsg2 = " The allowed values are: [true false]";
          }
@@ -3038,7 +3092,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    CheckForSpecialCase(obj, id, valueToUse);
    
    #if DEBUG_SET
-   MessageInterface::ShowMessage("   paramType=%d\n", obj->GetParameterType(id));
+   MessageInterface::ShowMessage("   propertyType=%d\n", obj->GetParameterType(id));
    #endif
    
    StringArray rhsValues;
@@ -3118,6 +3172,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    std::string pmType = parts[count-1];
 
    // Current ForceModel scripting, SRP is on for central body.
+   //GMAT FM.CentralBody          = Earth;
    //GMAT FM.PrimaryBodies        = {Earth};
    //GMAT FM.PointMasses          = {Sun, Luna, Jupiter}; 
    //GMAT FM.Drag                 = None;
@@ -3141,6 +3196,16 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
        "   pmType=%s, forceType=%s\n", obj->GetName().c_str(), prop.c_str(), value.c_str(),
        pmType.c_str(), forceType.c_str());
    #endif
+   
+   //------------------------------------------------------------
+   // Set ForceModel CentralBody
+   //------------------------------------------------------------
+   if (pmType == "CentralBody")
+   {
+      retval = SetPropertyValue(obj, obj->GetParameterID("CentralBody"), value);
+      return retval;
+   }
+   
    
    //------------------------------------------------------------
    // Create ForceModel owned PhysicalModel
@@ -3190,8 +3255,15 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    }
    else if (pmType == "SRP" || pmType == "Drag")
    {
-      if (pmType == "SRP" && value != "On")
-         return true;
+      if (pmType == "SRP")
+      {
+         retval = SetPropertyValue(obj, obj->GetParameterID("SRP"), value);
+         
+         if (retval && value != "On")
+            return true;
+         else if (!retval)
+            return false;
+      }
       
       if (pmType == "Drag" && value == "None")
          return true;
@@ -3764,7 +3836,7 @@ bool Interpreter::FinalPass()
          {
             objName = obj->GetName();            
             GmatStringUtil::ParseParameter(objName, type, owner, depObj);
-
+            
             // Since we can create a system parameter as: Create A1ModJulian Time,
             // we don't want to check if owner is blank.
             if (owner != "")
@@ -3772,12 +3844,9 @@ bool Interpreter::FinalPass()
                refObj = GetObject(owner);
                if (refObj == NULL)
                {
-//                   InterpreterException ex
-//                      ("Nonexistent object \"" + owner + "\" referenced in \"" +
-//                       obj->GetName() + "\"");
                   InterpreterException ex
-                     ("The value of \"" + owner + "\" on object \"" +
-                      obj->GetName() + "\" is not an allowed value");
+                     ("Nonexistent object \"" + owner + "\" referenced in \"" +
+                      obj->GetName() + "\"");
                   HandleError(ex, false);
                   retval = false;
                }
@@ -3986,12 +4055,27 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    ObjectTypeArray refTypes = obj->GetRefObjectTypeArray();
    StringArray refNames;
    
+   #if DEBUG_CHECK_OBJECT
+   MessageInterface::ShowMessage
+      ("===> Interpreter::CheckUndefinedReference() obj=%s, %s, refTypes=\n",
+       obj->GetTypeName().c_str(), obj->GetName().c_str());
+   for (UnsignedInt i=0; i<refTypes.size(); i++)
+      MessageInterface::ShowMessage
+         ("   ===> %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+   #endif
+   
    // Check if undefined ref. objects exist
    for (UnsignedInt i=0; i<refTypes.size(); i++)
    {
       try
       {
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
+         
+         #if DEBUG_CHECK_OBJECT
+         for (UnsignedInt j=0; j<refNames.size(); j++)
+         MessageInterface::ShowMessage
+            ("      ===> %s\n", refNames[j].c_str());
+         #endif
          
          // Check System Parameters seperately since it follows certain naming
          // convention.  "owner.dep.type" where owner can be either Spacecraft
@@ -4047,7 +4131,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                {
                   InterpreterException ex
                      ("Nonexistent " + GmatBase::GetObjectTypeString(refTypes[i]) +
-                      " \"" + refNames[j] + "\" referenced in " +
+                      " \"" + refNames[j] + "\" referenced in the " +
                       obj->GetTypeName() + " \"" + obj->GetName() + "\"");
                   HandleError(ex, writeLine);
                   retval = false;
