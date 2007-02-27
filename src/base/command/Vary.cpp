@@ -97,7 +97,8 @@ Vary::Vary() :
    additiveScaleFactor           (NULL),
    multiplicativeScaleFactorName ("1.0"),
    multiplicativeScaleFactor     (NULL),
-   variableID                    (-1)
+   variableID                    (-1),
+   solverDataFinalized           (false)
 {
    settables.push_back("Perturbation"); 
    settables.push_back("MaxStep");
@@ -194,6 +195,7 @@ Vary& Vary::operator=(const Vary& t)
 //------------------------------------------------------------------------------
 Vary::~Vary()
 {
+   ClearWrappers();
 }
 
 
@@ -849,6 +851,7 @@ bool Vary::InterpretAction()
    std::string noLeftBrace  = GmatStringUtil::RemoveAll(currentChunks[1],'{');
    std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
    std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
+   //std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
    currentChunks = parser.Decompose(noSpaces, "()", true, true);
    //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
    
@@ -1395,6 +1398,10 @@ bool Vary::Execute()
     
    if (!solverDataFinalized) 
    {
+      #if DEBUG_VARY_EXECUTE
+         MessageInterface::ShowMessage
+            ("Vary::Execute() - running code for the first time through <<<\n");
+      #endif
       // First time through, tell the solver about the variables
       Real varData[5], asf, msf;
       asf = additiveScaleFactor->EvaluateReal();
@@ -1424,6 +1431,11 @@ bool Vary::Execute()
 
       solverDataFinalized = true;
       BuildCommandSummary(true);
+      #if DEBUG_VARY_EXECUTE
+         MessageInterface::ShowMessage
+            ("Vary::Execute - exiting with retval = %s\n",
+            (retval? "true" : "False"));
+      #endif
       return retval;
    }
 
@@ -1441,6 +1453,11 @@ bool Vary::Execute()
     variable->SetReal(var);
 
     BuildCommandSummary(true);
+      #if DEBUG_VARY_EXECUTE
+         MessageInterface::ShowMessage
+            ("Vary::Execute - exiting with retval = %s\n",
+            (retval? "true" : "False"));
+      #endif
     return retval;
 }
 
@@ -1559,6 +1576,12 @@ bool Vary::Execute()
 
 void Vary::RunComplete()
 {
+   #ifdef DEBUG_VARY_EXECUTE
+      MessageInterface::ShowMessage(
+      "In Vary::RunComplete, solverDataFinalized = %s, ... now setting it to false\n",
+      (solverDataFinalized? "true" : "false"));
+   #endif
    solverDataFinalized = false;
+   //ClearWrappers();
    GmatCommand::RunComplete();
 }

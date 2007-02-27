@@ -24,6 +24,7 @@
 
 #include "BranchCommand.hpp"
 #include "Solver.hpp"
+#include "ElementWrapper.hpp"
 
 
 /**
