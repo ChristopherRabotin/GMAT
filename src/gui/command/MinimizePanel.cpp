@@ -105,7 +105,7 @@ void MinimizePanel::LoadData()
          GetStringParameter(mMinimizeCommand->GetParameterID("OptimizerName"));
 
       std::string loadedVariableName = mMinimizeCommand->
-         GetStringParameter(mMinimizeCommand->GetParameterID("MinimizedVariableName"));
+         GetStringParameter(mMinimizeCommand->GetParameterID("ObjectiveName"));
 
       #if DEBUG_ACHIEVE_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", loadedSolverName.c_str());
@@ -141,7 +141,7 @@ void MinimizePanel::SaveData()
        std::string(solverName.c_str()));
 
    mMinimizeCommand->SetStringParameter
-      (mMinimizeCommand->GetParameterID("MinimizedVariableName"),
+      (mMinimizeCommand->GetParameterID("ObjectiveName"),
        std::string(variableName.c_str()));
    
    EnableUpdate(false);

@@ -271,15 +271,15 @@ void VaryPanel::LoadData()
       mSolverData.pert = value;
 
       value = mVaryCommand->
-         GetRealParameter(mVaryCommand->GetParameterID("MinimumValue"));
+         GetRealParameter(mVaryCommand->GetParameterID("Lower"));
       mSolverData.minValue = value;
          
       value = mVaryCommand->
-         GetRealParameter(mVaryCommand->GetParameterID("MaximumValue"));
+         GetRealParameter(mVaryCommand->GetParameterID("Upper"));
       mSolverData.maxValue = value;
 
       value = mVaryCommand->
-         GetRealParameter(mVaryCommand->GetParameterID("MaximumChange"));
+         GetRealParameter(mVaryCommand->GetParameterID("MaxStep"));
       mSolverData.maxStep = value;
 
       value = mVaryCommand->
@@ -287,7 +287,7 @@ void VaryPanel::LoadData()
       mSolverData.additiveScaleFactor = value;
 
       value = mVaryCommand->
-         GetRealParameter(mVaryCommand->GetParameterID("MutiplicativeScaleFactor"));
+         GetRealParameter(mVaryCommand->GetParameterID("MultiplicativeScaleFactor"));
       mSolverData.multiplicativeScaleFactor = value;
             
       if (inOptimizeCmd)
@@ -362,15 +362,15 @@ void VaryPanel::SaveData()
           mSolverData.pert);
    
       mVaryCommand->SetRealParameter
-         (mVaryCommand->GetParameterID("MinimumValue"),
+         (mVaryCommand->GetParameterID("Lower"),
           mSolverData.minValue);
    
       mVaryCommand->SetRealParameter
-         (mVaryCommand->GetParameterID("MaximumValue"),
+         (mVaryCommand->GetParameterID("Upper"),
           mSolverData.maxValue);
    
       mVaryCommand->SetRealParameter
-         (mVaryCommand->GetParameterID("MaximumChange"),
+         (mVaryCommand->GetParameterID("MaxStep"),
           mSolverData.maxStep);
 
       mVaryCommand->SetRealParameter
@@ -378,7 +378,7 @@ void VaryPanel::SaveData()
           mSolverData.additiveScaleFactor);
 
       mVaryCommand->SetRealParameter
-         (mVaryCommand->GetParameterID("MutiplicativeScaleFactor"),
+         (mVaryCommand->GetParameterID("MultiplicativeScaleFactor"),
           mSolverData.multiplicativeScaleFactor);
    }
    catch (BaseException &e)
