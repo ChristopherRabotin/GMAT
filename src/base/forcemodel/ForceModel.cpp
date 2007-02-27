@@ -1578,11 +1578,21 @@ const StringArray&
    StringArray pmRefs;
    
    forceReferenceNames.clear();
-
+   
    // Provide point mass body names for validation checking
    if (type == Gmat::SPACE_POINT)
-      return BuildBodyList("PointMassForce");
-   
+   {
+      forceReferenceNames = BuildBodyList("PointMassForce");
+      
+      // Add central body (loj: 2/23/07 added)
+      if (find(forceReferenceNames.begin(), forceReferenceNames.end(),
+               centralBodyName) == forceReferenceNames.end())
+         forceReferenceNames.push_back(centralBodyName);
+      
+      return forceReferenceNames;
+      //return BuildBodyList("PointMassForce");
+      
+   }
    
    // Always grab these two:
    forceReferenceNames.push_back("EarthMJ2000Eq");
@@ -1650,6 +1660,11 @@ const StringArray&
          // Do nothing
       }
    }
+   
+   // Add central body (loj: 2/23/07 added)
+   if (find(forceReferenceNames.begin(), forceReferenceNames.end(),
+            centralBodyName) == forceReferenceNames.end())
+      forceReferenceNames.push_back(centralBodyName);
    
    #ifdef FORCE_REFERENCE_OBJECTS
       MessageInterface::ShowMessage("Reference object names for '%s'\n", 
@@ -2081,11 +2096,6 @@ const StringArray& ForceModel::BuildBodyList(std::string type) const
           bodylist.push_back((*i)->GetStringParameter("BodyName"));
        }
    }
-   
-   // Add central body if not previously added (02/20/06 loj: added)
-   if (find(bodylist.begin(), bodylist.end(), centralBodyName) == bodylist.end())
-      bodylist.push_back(centralBodyName);
-   
    return bodylist;
 }
 
