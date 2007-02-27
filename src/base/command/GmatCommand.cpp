@@ -35,6 +35,7 @@
 //#define DEBUG_COMMAND_APPEND 1
 //#define DEBUG_COMMAND_INSERT 1
 //#define DEBUG_COMMAND_REMOVE 1
+//#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
 
 
@@ -135,13 +136,13 @@ GmatCommand::~GmatCommand()
           this->GetTypeName().c_str(), nextStr.c_str());
    #endif
       
-   if (this->IsOfType("BranchEnd")) //loj: 6/29/05 Added
+   if (this->IsOfType("BranchEnd"))
       return;
    
    // Delete the subsequent GmatCommands
    if (next) {
       #ifdef DEBUG_COMMAND_DEALLOCATION
-         MessageInterface::ShowMessage("Deleting %s\n", 
+         MessageInterface::ShowMessage("   Deleting %s\n", 
                                        next->GetTypeName().c_str());
       #endif
       delete next;   
@@ -1376,19 +1377,26 @@ bool GmatCommand::HasPropStateChanged()
 //------------------------------------------------------------------------------
 void GmatCommand::RunComplete()
 {
-   #ifdef DEBUG_COMMAND_DEALLOCATION
-      MessageInterface::ShowMessage("RunComplete for %s\n", typeName.c_str());
+   #if DEBUG_RUN_COMPLETE
+   MessageInterface::ShowMessage
+      ("GmatCommand::RunComplete for (%p)%s\n", this, typeName.c_str());
    #endif
+   
+   if (this->IsOfType("BranchEnd"))
+      return;
    
    // By default, just call RunComplete on the next command.
    if (next)
    {
-   #ifdef DEBUG_COMMAND_DEALLOCATION
-      MessageInterface::ShowMessage("Next cmd is a %s\n", (next->GetTypeName()).c_str());
+      #if DEBUG_RUN_COMPLETE
+      MessageInterface::ShowMessage("   Next cmd is a (%p)%s\n", next,
+                                    (next->GetTypeName()).c_str());
       if (next->IsOfType("BranchEnd"))
-      MessageInterface::ShowMessage(".. and that cmd is a branchEnd!!!!!!!!! %s\n",
-                                    (next->GetTypeName()).c_str());     
-   #endif
+         MessageInterface::ShowMessage
+            ("   .. and that cmd is a branchEnd!!!!!!!!! %s\n",
+             (next->GetTypeName()).c_str());
+      #endif
+      
       // Branch command ends point back to start; this line prevents looping
       if (!next->IsOfType("BranchEnd"))
          next->RunComplete();
@@ -1650,40 +1658,45 @@ void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
 
 
 //------------------------------------------------------------------------------
-// void ShowCommand(const std::string &title1, GmatCommand *cmd1,
-//                  const std::string &title2, GmatCommand *cmd2)
+// void ShowCommand(const std::string &prefix = "",
+//                  const std::string &title1, GmatCommand *cmd1,
+//                  const std::string &title2 = "", GmatCommand *cmd2 = NULL)
 //------------------------------------------------------------------------------
 /*
  * <static method>
  * Shows command info to message window.
  */
 //------------------------------------------------------------------------------
-void GmatCommand::ShowCommand(const std::string &title1, GmatCommand *cmd1,
+void GmatCommand::ShowCommand(const std::string &prefix,
+                              const std::string &title1, GmatCommand *cmd1,
                               const std::string &title2, GmatCommand *cmd2)
 {
    if (title2 == "")
    {
       if (cmd1 == NULL)
          MessageInterface::ShowMessage
-            ("%s::%s(%p)NULL\n", this->GetTypeName().c_str(), title1.c_str(), cmd1);
+            ("%s%s::%s(%p)NULL\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1);
       else
          MessageInterface::ShowMessage
-            ("%s::%s(%p)%s\n", this->GetTypeName().c_str(), title1.c_str(), cmd1,
-             cmd1->GetTypeName().c_str());
+            ("%s%s::%s(%p)%s\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1, cmd1->GetTypeName().c_str());
    }
    else
    {
       if (cmd2 == NULL)
          MessageInterface::ShowMessage
-            ("%s::%s(%p)NULL%s(%p)NULL\n", this->GetTypeName().c_str(),
-             title1.c_str(), cmd1, title2.c_str(), cmd2);
+            ("%s%s::%s(%p)NULL%s(%p)NULL\n", prefix.c_str(),
+             this->GetTypeName().c_str(), title1.c_str(), cmd1, title2.c_str(), cmd2);
       else
          MessageInterface::ShowMessage
-            ("%s::%s(%p)%s%s(%p)%s\n", this->GetTypeName().c_str(), title1.c_str(),
-             cmd1, cmd1->GetTypeName().c_str(),
+            ("%s%s::%s(%p)%s%s(%p)%s\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1, cmd1->GetTypeName().c_str(),
              title2.c_str(), cmd2, cmd2->GetTypeName().c_str());
    }
 }
+
+
 //------------------------------------------------------------------------------
 // StringArray InterpretPreface()
 //------------------------------------------------------------------------------

@@ -29,6 +29,7 @@
 //#define DEBUG_BRANCHCOMMAND_ADD
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
+//#define DEBUG_RUN_COMPLETE 1
 
 //------------------------------------------------------------------------------
 // public methods
@@ -265,7 +266,7 @@ bool BranchCommand::Initialize()
 void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
    #ifdef DEBUG_BRANCHCOMMAND_ADD
-   ShowCommand("AddBranch() cmd = ", cmd);
+   ShowCommand("", "AddBranch() cmd = ", cmd);
    MessageInterface::ShowMessage
       ("     which=%d, branch.size=%d\n", which, branch.size());
    #endif
@@ -280,13 +281,13 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("addging to branch ", cmd);
+      ShowCommand("   ", "addging to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting previous of ", cmd, " to ", this);
+      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetPrevious(this);
@@ -296,13 +297,13 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    else if (branch[which] == NULL)
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting branch.at(which) to ", cmd);
+      ShowCommand("   ", "setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting previous of ", cmd, " to ", this);
+      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetPrevious(this);
@@ -312,13 +313,13 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    else
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("appending ", cmd, " to ", branch.at(which));
+      ShowCommand("   ", "appending ", cmd, " to ", branch.at(which));
       #endif
       
       (branch.at(which))->Append(cmd);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting previous of ",cmd, " to ", branch.at(which));
+      ShowCommand("   ", "setting previous of ",cmd, " to ", branch.at(which));
       #endif
       
       cmd->ForceSetPrevious(branch.at(which));
@@ -351,13 +352,13 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("adding to branch ", cmd);
+      ShowCommand("   ", "adding to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting previous of ", cmd, " to ", this);
+      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetPrevious(this);   
@@ -365,7 +366,7 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
    else if (branch.at(which) == NULL)
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting branch.at(which) to ", cmd);
+      ShowCommand("   ", "setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
@@ -375,19 +376,19 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       GmatCommand *tmp = branch.at(which);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting branch.at(which) to ", cmd);
+      ShowCommand("   ", "setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("appending ", tmp, " to ", cmd);
+      ShowCommand("   ", "appending ", tmp, " to ", cmd);
       #endif
       
       cmd->Append(tmp);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("setting previous of ", tmp, " to ", cmd);
+      ShowCommand("   ", "setting previous of ", tmp, " to ", cmd);
       #endif
       
       tmp->ForceSetPrevious(cmd);
@@ -481,15 +482,15 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       }
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("currentOne = ", currentOne, " branch[0] = ", branch[0]);
+      ShowCommand("   ", "currentOne = ", currentOne, " branch[0] = ", branch[0]);
       #endif
             
       cmd->Append(currentOne);
       foundHere = true;
             
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("currentOne->GetPrevious() = ", currentOne->GetPrevious());
-      ShowCommand("currentOne->GetNext() = ", currentOne->GetNext());
+      ShowCommand("   ", "currentOne->GetPrevious() = ", currentOne->GetPrevious());
+      ShowCommand("   ", "currentOne->GetNext() = ", currentOne->GetNext());
       #endif
       
       //return true;
@@ -568,13 +569,13 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       // make sure the new Else or ElseIf points back to the If command
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("setting next of ", cmd, " to ", this);
+      ShowCommand("   ", "setting next of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetNext(this);
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("setting previous of ", this, " to ", cmd);
+      ShowCommand("   ", "setting previous of ", this, " to ", cmd);
       #endif
       
       this->ForceSetPrevious(cmd);
@@ -808,7 +809,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    std::string inlineComment = GetInlineComment();
    
    #if DEBUG_BRANCHCOMMAND_GEN_STRING
-   ShowCommand("GmatCommand::GetGeneratingString() this = ", this);
+   ShowCommand("   ", "GmatCommand::GetGeneratingString() this = ", this);
    MessageInterface::ShowMessage
       ("===> commentLine=<%s>, inlineComment=<%s>\n",
        commentLine.c_str(), inlineComment.c_str());
@@ -854,7 +855,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       while ((current != NULL) && (current != this))
       {
          #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
-         ShowCommand("GetGeneratingString() current = ", current);
+         ShowCommand("   ", "GetGeneratingString() current = ", current);
          MessageInterface::ShowMessage("   inTextMode=%d\n", inTextMode);
          #endif
          
@@ -981,7 +982,7 @@ typeName.c_str(), which);
 //  void RunComplete()
 //------------------------------------------------------------------------------
 /**
- * Tells the sewuence that the run was ended, possibly before reaching the end.
+ * Tells the sequence that the run was ended, possibly before reaching the end.
  *
  * BranchCommands clear the "current" pointer and call RunComplete on their
  * branches, ensuring that the command sequence has reset the branches to an
@@ -990,17 +991,24 @@ typeName.c_str(), which);
 //------------------------------------------------------------------------------
 void BranchCommand::RunComplete()
 {
+   #if DEBUG_RUN_COMPLETE
+   ShowCommand("", "BranchCommand::RunComplete() this = ", this);
+   #endif
+   
    current = NULL;
+   
    for (std::vector <GmatCommand *>::iterator i = branch.begin(); i != branch.end(); ++i)
       if (*i != NULL)
          if (!(*i)->IsOfType("BranchEnd"))
             (*i)->RunComplete();
-
+   
+   
    // This block of code causes unnecesary looping since next is handled in
    // the GmatCommand::RunComplete() (loj: 2/16/07)
    //if (next)
    //   if (!next->IsOfType("BranchEnd"))
    //      next->RunComplete();
+   
    
    commandComplete = false;
    commandExecuting = false;

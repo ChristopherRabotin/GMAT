@@ -241,10 +241,11 @@ protected:
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
 
    // for Debug (just one copy)
-   virtual void         ShowCommand(const std::string &title1, GmatCommand *cmd1,
+   virtual void         ShowCommand(const std::string &prefix,
+                                    const std::string &title1, GmatCommand *cmd1,
                                     const std::string &title2 = "",
                                     GmatCommand *cmd2 = NULL);
-                                    
+   
    // for the Parameters in Commands updates
    StringArray          InterpretPreface();
    bool                 IsSettable(const std::string &setDesc);
