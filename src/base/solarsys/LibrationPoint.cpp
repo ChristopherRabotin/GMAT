@@ -46,8 +46,8 @@ LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCo
 const Gmat::ParameterType
 LibrationPoint::PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE, //loj: 2/23/07 Changed from STRING_TYPE
+   Gmat::OBJECT_TYPE, //loj: 2/23/07 Changed from STRING_TYPE
    Gmat::STRING_TYPE,
 };
 
@@ -626,6 +626,7 @@ const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType 
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
       static StringArray refs;
+      refs.clear(); //loj: 2/23/07 added
       refs.push_back(primaryBodyName);
       refs.push_back(secondaryBodyName);
       return refs;
