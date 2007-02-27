@@ -28,6 +28,8 @@
 //#define DEBUG_MINIMIZE_EXEC 1
 //#define DEBUG_MINIMIZE
 //#define DEBUG_MINIMIZE_PARAM
+//#define DEBUG_MINIMIZE_PARSING
+//#define DEBUG_WRAPPER_CODE
 
 
 //---------------------------------
@@ -37,7 +39,7 @@ const std::string
    Minimize::PARAMETER_TEXT[MinimizeParamCount - GmatCommandParamCount] =
    {
       "OptimizerName",
-      "MinimizedVariableName",
+      "ObjectiveName",
    };
    
 const Gmat::ParameterType
@@ -62,15 +64,17 @@ const Gmat::ParameterType
 Minimize::Minimize() :
    GmatCommand             ("Minimize"),
    optimizerName           (""),
-   objectiveName           (""),
+   objectiveName           ("9.999999e300"),
    objective               (NULL),
-   objectiveValue          (-999.99),
+   //objectiveValue          (-999.99),
    optimizer               (NULL),
    optimizerDataFinalized  (false),
-   isMinimizeParm          (false),
+   //isMinimizeParm          (false),
    objId                   (-1),
    interpreted             (false)
 {
+   // nothing to add to settables here ...
+
    #ifdef DEBUG_MINIMIZE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Creating Minimize command ...\n");
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
@@ -92,10 +96,10 @@ Minimize::Minimize(const Minimize& m) :
    optimizerName           (m.optimizerName),
    objectiveName           (m.objectiveName),
    objective               (NULL),
-   objectiveValue          (m.objectiveValue),
+   //objectiveValue          (m.objectiveValue),
    optimizer               (NULL),
    optimizerDataFinalized  (false),
-   isMinimizeParm          (m.isMinimizeParm),
+   //isMinimizeParm          (m.isMinimizeParm),
    objId                   (m.objId),
    interpreted             (false)
 {
@@ -126,12 +130,15 @@ Minimize& Minimize::operator=(const Minimize& m)
    optimizerName          = m.optimizerName;
    objectiveName          = m.objectiveName;
    objective              = NULL;
-   objectiveValue         = m.objectiveValue;
+   //objectiveValue         = m.objectiveValue;
    optimizer              = NULL;
    optimizerDataFinalized = false;
-   isMinimizeParm         = m.isMinimizeParm;
+   //isMinimizeParm         = m.isMinimizeParm;
    objId                  = m.objId;
    interpreted            = false;
+
+   // Initialize wrappers to NULL
+   ClearWrappers();
 
    return *this;
 }
@@ -145,6 +152,7 @@ Minimize& Minimize::operator=(const Minimize& m)
 //------------------------------------------------------------------------------
 Minimize::~Minimize()
 {
+   ClearWrappers();
    //delete objective;  // yes? no? not in ths case, it seems
 }
 
@@ -189,16 +197,67 @@ bool Minimize::RenameRefObject(const Gmat::ObjectType type,
       if (optimizerName == oldName)
          optimizerName = newName;
    }
-   else if (type == Gmat::PARAMETER)
+   else if (type == Gmat::PARAMETER) // do I need this here now????
    {
       if (objectiveName == oldName)
          objectiveName = newName;
+   }
+   // make sure the wrapper(s) know to rename any objects they may be using
+   if (objective)
+   {
+      objective->RenameObject(oldName, newName);
+      objectiveName           = objective->GetDescription();
    }
    
    return true;
 }
 
 // Parameter accessors
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Vary.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Minimize::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SOLVER);
+   //refObjectTypes.push_back(Gmat::PARAMETER);
+   return refObjectTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref objects used by the Vary.
+ *
+ * @param <type> The type of object desired, or Gmat::UNKNOWN_OBJECT for the
+ *               full list.
+ * 
+ * @return the list of object names.
+ * 
+ */
+//------------------------------------------------------------------------------
+const StringArray& Minimize::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SOLVER)
+   {
+      refObjectNames.push_back(optimizerName);
+   }
+
+   return refObjectNames;
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
@@ -290,13 +349,15 @@ std::string Minimize::GetParameterTypeString(const Integer id) const
  * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
-//Real Minimize::GetRealParameter(const Integer id) const
-//{
-//   if (id == toleranceID)
-//      return tolerance;
-//    
-//   return GmatCommand::GetRealParameter(id);
-//}
+Real Minimize::GetRealParameter(const Integer id) const
+{
+   if ((id == OBJECTIVE_NAME) && (objective))
+   {
+      return objective->EvaluateReal();
+   }
+    
+   return GmatCommand::GetRealParameter(id);
+}
 
 
 //------------------------------------------------------------------------------
@@ -311,15 +372,10 @@ std::string Minimize::GetParameterTypeString(const Integer id) const
  * @return Real value of the requested parameter.
  */
 //------------------------------------------------------------------------------
-//Real Minimize::SetRealParameter(const Integer id, const Real value)
-//{
-//   if (id == toleranceID) {
-//      tolerance = value;
-//      return tolerance;
-//   }
-//    
-//   return GmatCommand::SetRealParameter(id, value);
-//}
+Real Minimize::SetRealParameter(const Integer id, const Real value)
+{
+   return GmatCommand::SetRealParameter(id, value);
+}
 
 
 //------------------------------------------------------------------------------
@@ -339,7 +395,7 @@ std::string Minimize::GetStringParameter(const Integer id) const
    if (id == OPTIMIZER_NAME)
       return optimizerName;
         
-   if (id == MINIMIZED_VARIABLE_NAME)
+   if (id == OBJECTIVE_NAME)
       return objectiveName;
         
    return GmatCommand::GetStringParameter(id);
@@ -373,12 +429,17 @@ bool Minimize::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
-   if (id == MINIMIZED_VARIABLE_NAME) 
+   if (id == OBJECTIVE_NAME) 
    {
       objectiveName = value;
       interpreted   = false;
+
+      if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), value) == 
+          wrapperObjectNames.end())
+         wrapperObjectNames.push_back(value);
       return true;
    }
+
 
    return GmatCommand::SetStringParameter(id, value);
 }
@@ -414,15 +475,15 @@ bool Minimize::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       return false;
    }
-   if (type == Gmat::PARAMETER) 
-   {
-      if (objectiveName == obj->GetName()) 
-      {
-         objective = (Variable*)obj;
-         return true;
-      }
-      return false;
-   }
+   //if (type == Gmat::PARAMETER) 
+   //{
+   //   if (objectiveName == obj->GetName()) 
+    //  {
+    //     //objective = (ElementWrapper*)obj;
+    //     return true;
+    //  }
+    //  return false;
+   //}
 
    return GmatCommand::SetRefObject(obj, type, name);
 }
@@ -453,77 +514,46 @@ bool Minimize::InterpretAction()
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
    /// @todo: Clean up this hack for the Minimize::InterpretAction method
    // Sample string:  "Minimize myDC(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
+   /// @todo clean that up - because that's not even right ^^^^^
    
-   // Set starting location to the space following the command string
-   Integer loc = generatingString.find("Minimize", 0) + 8, end, strend;
-   const char *str = generatingString.c_str();
-   
-   // Skip white space
-   while (str[loc] == ' ')
-      ++loc;
-   
-   // Stop at the opening paren
-   end = generatingString.find("(", loc);
-   
-   std::string component = generatingString.substr(loc, end-loc);
-   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
-      MessageInterface::ShowMessage
-         ("Minimize::InterpretAction() optimizerName = \"%s\"\n", 
-         component.c_str());
-   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
-   if (component == "")
-      throw CommandException("Minimize string does specify the optimizer");
-   
-   SetStringParameter(OPTIMIZER_NAME, component);
-   
-   // Find the variable name
-   loc = end + 1;
-   // Skip white space
-   while (str[loc] == ' ')
-      ++loc;
-   // Stop at the opening paren
-   //end = generatingString.find("=", loc);
-   end = generatingString.find(")", loc);
-   strend = end-1;
-   // Drop trailing white space
-   while (str[strend] == ' ')
-      --strend;
-    
-   component = generatingString.substr(loc, strend-loc+1);
-   objectiveName = component;
+      // Clean out any old data
+   wrapperObjectNames.clear();
+   ClearWrappers();
 
+   StringArray chunks = InterpretPreface();
 
-   #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
-      MessageInterface::ShowMessage
-         ("Minimize::InterpretAction() objectiveName = \"%s\"\n", 
-         objectiveName.c_str());
-   #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
+   #ifdef DEBUG_MINIMIZE_PARSING
+      MessageInterface::ShowMessage("Preface chunks as\n");
+      for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+      MessageInterface::ShowMessage("\n");
+   #endif
+   
+   // Find and set the solver object name
+   // This is the only setting in Vary that is not in a wrapper
+   StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   SetStringParameter(OPTIMIZER_NAME, currentChunks[0]);
+ 
+    // The remaining text in the instruction is the variable definition and 
+   // parameters, all contained in currentChunks[1].  Deal with those next.
+   //currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   std::string noLeftBrace  = GmatStringUtil::RemoveAll(currentChunks[1],'{');
+   std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
+   std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
+   currentChunks = parser.Decompose(noSpaces, "()", true, true);
+   //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
+   
+   #ifdef DEBUG_MINIMIZE_PARSING
+      MessageInterface::ShowMessage(
+         "Minimize: after Decompose, current chunks = \n");
+      for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
+         MessageInterface::ShowMessage("   %s\n",
+                                       currentChunks[jj].c_str());
+   #endif
 
-   // Get an instance if this is a Parameter
-   Moderator *mod = Moderator::Instance();
-   //std::string parmObj, parmType, parmSystem;
-   if (mod->GetParameter(objectiveName) == NULL)
-      throw CommandException(
-      "Minimize::Parameter %s not known to Moderator\n");
-   objective = (Variable*) mod->GetParameter(objectiveName);
-
-   // ************** but would it already have been created, as we're still
-   // in the script interpreting phase here ******************** TBD *********
-   // query the objectMap here .....
-   /*
-   if (!objectMap)
-      throw CommandException("ObjectMap not set for Minimize command!");
+   // First chunk is the objectiveName
+   objectiveName = currentChunks[0];
       
-   if (objectMap->find(objectiveName) == objectMap->end()) 
-   {
-      std::string errorStr = "Minimize: parameter %s not found in objectMap\n" +
-         objectiveName;
-      throw CommandException(errorStr);
-   }
-   objective = (Variable*) (*objectMap)[objectiveName];
-   */
-   isMinimizeParm = true;
-   
    #ifdef DEBUG_MINIMIZE_PARSE // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
       MessageInterface::ShowMessage("Minimize::InterpretAction() exiting\n");
    #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
@@ -533,6 +563,48 @@ bool Minimize::InterpretAction()
    return true;
 }
 
+const StringArray& Minimize::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+
+   wrapperObjectNames.push_back(objectiveName);  
+      
+   return wrapperObjectNames;
+}
+
+bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+{
+   bool retval = false;
+
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Minimize command\n", 
+      withName.c_str());
+   #endif
+
+   if (objectiveName == withName)
+   {
+      objective = toWrapper;
+      retval = true;
+   }
+   
+   return retval;
+}
+
+void Minimize::ClearWrappers()
+{
+   std::vector<ElementWrapper*> temp;
+   if (objective)
+   {
+      temp.push_back(objective);
+      objective = NULL;
+   }
+   ElementWrapper *wrapper;
+   for (UnsignedInt i = 0; i < temp.size(); ++i)
+   {
+      wrapper = temp[i];
+      delete wrapper;
+   }
+}
 
 
 //------------------------------------------------------------------------------
@@ -634,51 +706,20 @@ bool Minimize::Initialize()
    //optimizer->SetStringParameter(id, goalName);
 
    // find objectiveName
-   GmatBase *obj = (*objectMap)[objectiveName];
+   //GmatBase *obj = (*objectMap)[objectiveName];
    
-   if (obj == NULL) 
-   {
-      std::string errorstr = "Could not find variable parameter ";
-      errorstr += objectiveName;
-      throw CommandException(errorstr);
-   }
+   //if (obj == NULL) 
+   //{
+   //   std::string errorstr = "Could not find variable parameter ";
+   //   errorstr += objectiveName;
+   //   throw CommandException(errorstr);
+   //}
 
-   objective = (Variable*)obj;
-   
-   //goalObject = obj;
-   //parmId = id;
-
-   // find achieveParm
-   /*
-   if (isMinimizeParm)
-   {
-      #if DEBUG_MINIMIZE_INIT
-      MessageInterface::ShowMessage
-         ("Minimize::Initialize() Find achieveParm=%s from objectMap\n",
-          achieveName.c_str());
-      #endif
-      if (objectMap->find(achieveName) != objectMap->end())
-         achieveParm = (Parameter*)((*objectMap)[achieveName]);
-
-      if (isMinimizeArray)
-      {
-         // if variable index is used, get variable from the objectMap
-         if (achieveArrRow == -1)
-            if (objectMap->find(achieveArrRowStr) != objectMap->end())
-               achieveArrRowParm = (Parameter*)((*objectMap)[achieveArrRowStr]);
-            else
-               throw CommandException("Cannot find array row index variable\n");
-
-         if (achieveArrCol == -1)
-            if (objectMap->find(achieveArrColStr) != objectMap->end())
-               achieveArrColParm = (Parameter*)((*objectMap)[achieveArrColStr]);
-            else
-               throw CommandException("Cannot find array column index variable\n");
-      }
-   }
-   */
    // The optimizer cannot be finalized until all of the loop is initialized
    optimizerDataFinalized = false;
+
+   if (SetWrapperReferences(*objective) == false)
+      return false;
    
    #if DEBUG_MINIMIZE_INIT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
@@ -721,7 +762,7 @@ bool Minimize::Execute()
    {
       // Tell the optimizer about the objective function
       Real minData[1];
-      minData[0] = objectiveValue; 
+      minData[0] = objective->EvaluateReal(); 
       //minData[1] = tolerance;
       objId = optimizer->SetSolverResults(minData, objectiveName, "Objective");
 
@@ -760,6 +801,12 @@ bool Minimize::Execute()
    return retval;
 }
 
+void Minimize::RunComplete()
+{
+   optimizerDataFinalized = false;
+   //ClearWrappers();
+   GmatCommand::RunComplete();
+}
 
 //------------------------------------------------------------------------------
 //  const std::string& GetGeneratingString()

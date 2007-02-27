@@ -25,6 +25,7 @@
 #include "GmatCommand.hpp"
 #include "Solver.hpp"
 #include "Variable.hpp"
+#include "ElementWrapper.hpp"
 
 /**
  * Command that manages processing for optimizer variables.
@@ -43,6 +44,11 @@ public:
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    
    // Parameter accessors
    virtual std::string GetParameterText(const Integer id) const;
@@ -51,9 +57,9 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
-   //virtual Real        GetRealParameter(const Integer id) const;
-   //virtual Real        SetRealParameter(const Integer id,
-   //                                     const Real value);
+   virtual Real        GetRealParameter(const Integer id) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value);
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id, 
                                           const std::string &value);
@@ -63,8 +69,15 @@ public:
     
     // Inherited methods overridden from the base class
    virtual bool        InterpretAction();
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
+
    virtual bool        Initialize();
    virtual bool        Execute();
+   virtual void        RunComplete();
    
    virtual const std::string&
                        GetGeneratingString(Gmat::WriteMode mode,
@@ -77,15 +90,17 @@ protected:
    /// Name of the variable to be minimized
    std::string         objectiveName;
    // pointer to the Variable that is to be minimized
-   Variable            *objective;
-   /// vallue of the variable
-   Real                objectiveValue; // maybe I don't need this
+   //Variable            *objective;
+   /// pointer to the wrapper containing the objective 
+   ElementWrapper      *objective;
+   /// value of the variable
+   //Real                objectiveValue; // maybe I don't need this
    /// The optimizer instance used to manage the optimizer state machine
    Solver              *optimizer;
    /// Flag used to finalize the targeter data during execution
    bool                optimizerDataFinalized;
    /// is it a parameter?
-   bool                isMinimizeParm;
+   //bool                isMinimizeParm;
    /// Optimizer ID for the variable 
    Integer             objId;
    /// flag indicating whether or not the generating string has been interpreted
@@ -96,7 +111,7 @@ protected:
    enum 
    {
       OPTIMIZER_NAME = GmatCommandParamCount,
-      MINIMIZED_VARIABLE_NAME,
+      OBJECTIVE_NAME,
       MinimizeParamCount
    };
    static const std::string
@@ -109,6 +124,7 @@ protected:
    //                                       std::string &paramObj,
    //                                       std::string &parmSystem);
    //bool                ConstructGoal(const char* str);
+
 };
 
 
