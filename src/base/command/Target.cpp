@@ -448,6 +448,7 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Target::Initialize()
 {
+   
    if (objectMap->find(targeterName) == objectMap->end()) {
       std::string errorString = "Target command cannot find targeter \"";
       errorString += targeterName;
@@ -528,12 +529,14 @@ bool Target::Execute()
    Solver::SolverState state = targeter->GetState();
    
    #ifdef DEBUG_TARGET_COMMANDS
-      MessageInterface::ShowMessage("TargetExecute(%c%c%d)\n",
+      MessageInterface::ShowMessage("TargetExecute(%c%c%c%d)\n",
          (commandExecuting?'Y':'N'),
          (commandComplete?'Y':'N'),
+         (branchExecuting?'Y':'N'),
          state);
+      MessageInterface::ShowMessage("   targeterConverged=%d\n", targeterConverged);
    #endif
-
+      
    // Attempt to reset if recalled   
    if (commandComplete)
    {
@@ -543,9 +546,9 @@ bool Target::Execute()
 
    if (!commandExecuting) 
    {
-           #ifdef DEBUG_TARGET_COMMANDS
-           MessageInterface::ShowMessage(
-           "Entered Targeter while command is not executing\n");
+      #ifdef DEBUG_TARGET_COMMANDS
+          MessageInterface::ShowMessage(
+          "Entered Targeter while command is not executing\n");
       #endif
 
       FreeLoopData();
@@ -657,9 +660,19 @@ bool Target::Execute()
 }
 
 
+//------------------------------------------------------------------------------
+//  void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Tells the sequence that the run was ended, possibly before reaching the end.
+ */
+//------------------------------------------------------------------------------
 void Target::RunComplete()
 {
    if (targeter != NULL)
       targeter->Finalize();
-   GmatCommand::RunComplete();
+
+   //Call RunComplete of parent (loj: 2/23/06)
+   //GmatCommand::RunComplete();
+   BranchCommand::RunComplete();
 }
