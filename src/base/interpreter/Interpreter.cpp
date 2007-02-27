@@ -745,6 +745,11 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
 bool Interpreter::ValidateCommand(GmatCommand *cmd)
 {
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
+   #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage("In Validate, wrapper names are:\n");
+      for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
+   #endif
    for (StringArray::const_iterator i = wrapperNames.begin();
         i != wrapperNames.end(); ++i)
    {
@@ -4258,7 +4263,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
       ew = new NumberWrapper();
       #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a NumberWrapper for \"%s",
+                     "In Interpreter, created a NumberWrapper for \"%s\n",
                      desc.c_str(), "\"\n");
       #endif
    }
@@ -4283,7 +4288,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          itsType        = Gmat::ARRAY_ELEMENT;
          #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ArrayElementWrapper for \"%s",
+                     "In Interpreter, created a ArrayElementWrapper for \"%s\n",
                      desc.c_str(), "\"\n");
          #endif
       }
@@ -4305,7 +4310,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
                itsType = Gmat::PARAMETER_OBJECT;
                #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage(
-                        "In Interpreter, created a ParameterWrapper for \"%s",
+                        "In Interpreter, created a ParameterWrapper for \"%s\n",
                         desc.c_str(), "\"\n");
                #endif
             }
@@ -4323,7 +4328,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::OBJECT_PROPERTY;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ObjectPropertyWrapper for \"%s",
+                     "In Interpreter, created a ObjectPropertyWrapper for \"%s\n",
                      desc.c_str(), "\"\n");
             #endif
          }
@@ -4337,7 +4342,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::VARIABLE;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a VariableWrapper for \"%s",
+                     "In Interpreter, created a VariableWrapper for \"%s\n",
                      desc.c_str(), "\"\n");
             #endif
          }
@@ -4347,7 +4352,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::PARAMETER_OBJECT;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ParameterWrapper for \"%s",
+                     "In Interpreter, created a ParameterWrapper for \"%s\n",
                      desc.c_str(), "\"\n");
             #endif
          }
