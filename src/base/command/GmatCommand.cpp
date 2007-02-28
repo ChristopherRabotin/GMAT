@@ -37,6 +37,7 @@
 //#define DEBUG_COMMAND_REMOVE 1
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_SEPARATE
 
 
 //---------------------------------
@@ -1767,6 +1768,13 @@ bool GmatCommand::SeparateEquals(const std::string &description,
                                  std::string &lhs, std::string &rhs)
 {
    StringArray sides = parser.SeparateBy(description, "= ");
+   #ifdef DEBUG_SEPARATE
+      MessageInterface::ShowMessage("In SeparateEquals, description = %s\n",
+      description.c_str());
+      MessageInterface::ShowMessage("----  and sides = \n");
+      for (Integer ii = 0; ii < (Integer) sides.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", sides[ii].c_str());    
+   #endif
    lhs = sides[0];
 
    if (sides.size() < 2)
