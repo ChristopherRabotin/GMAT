@@ -4263,7 +4263,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
       ew = new NumberWrapper();
       #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a NumberWrapper for \"%s\n",
+                     "In Interpreter, created a NumberWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
       #endif
    }
@@ -4288,7 +4288,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          itsType        = Gmat::ARRAY_ELEMENT;
          #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ArrayElementWrapper for \"%s\n",
+                     "In Interpreter, created a ArrayElementWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
          #endif
       }
@@ -4310,7 +4310,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
                itsType = Gmat::PARAMETER_OBJECT;
                #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage(
-                        "In Interpreter, created a ParameterWrapper for \"%s\n",
+                        "In Interpreter, created a ParameterWrapper for \"%s\"\n",
                         desc.c_str(), "\"\n");
                #endif
             }
@@ -4328,7 +4328,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::OBJECT_PROPERTY;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ObjectPropertyWrapper for \"%s\n",
+                     "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
             #endif
          }
@@ -4342,7 +4342,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::VARIABLE;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a VariableWrapper for \"%s\n",
+                     "In Interpreter, created a VariableWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
             #endif
          }
@@ -4352,7 +4352,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             itsType = Gmat::PARAMETER_OBJECT;
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
-                     "In Interpreter, created a ParameterWrapper for \"%s\n",
+                     "In Interpreter, created a ParameterWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
             #endif
          }
