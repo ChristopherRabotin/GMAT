@@ -851,9 +851,9 @@ bool Vary::InterpretAction()
    //std::string noLeftBrace  = GmatStringUtil::RemoveAll(currentChunks[1],'{');
    //std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
    //std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
-   //std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
-   //currentChunks = parser.Decompose(noSpaces, "()", true, true);
-   currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
+   std::string noSpaces2     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
+   currentChunks = parser.Decompose(noSpaces2, "()", true, true);
+   //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
    
    #ifdef DEBUG_VARY_PARSING
       //MessageInterface::ShowMessage(
