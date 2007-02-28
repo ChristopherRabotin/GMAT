@@ -176,7 +176,7 @@ const Real CelestialBody::KEPLER_TOL        = 1.0e-06;
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    SpacePoint(Gmat::CELESTIAL_BODY, itsBodyType, name),
-//   bodyType           (Gmat::PLANET),
+   //   bodyType           (Gmat::PLANET),
    mass               (5.9733319571407163e24),
    equatorialRadius   (6378.137),
    flattening         (0.0033528106647474807198455),
@@ -272,8 +272,9 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i].push_back("None");
    for (Integer i=0;i<6;i++)  prevState[i] = 0.0;
-
+   
    parameterCount = CelestialBodyParamCount;
+   
    InitializeBody(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
@@ -452,8 +453,20 @@ CelestialBody::~CelestialBody()
 //------------------------------------------------------------------------------
 bool CelestialBody::Initialize()
 {
+   #ifdef DEBUG_CB_INIT
+   MessageInterface::ShowMessage
+      ("CelestialBody::Initialize() posVelSrc=%d, this=%s, ephemUpdateInterval=%f\n",
+       posVelSrc, GetName().c_str(), ephemUpdateInterval);
+   #endif
+   
    isFirstTimeMu = true;
    isFirstTimeRadius = true;
+   
+   //loj: 2/28/07 added
+   lastEphemTime = 0.0;
+   stateTime = 0.0;   
+   newAnalytic = true; 
+   
    return true;
 }
 
@@ -477,10 +490,19 @@ bool CelestialBody::Initialize()
 //------------------------------------------------------------------------------
 const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
+   #ifdef DEBUG_GET_STATE
+      MessageInterface::ShowMessage("Entering Rvector6& GetState with time %.17f\n",
+      atTime.Get());
+      MessageInterface::ShowMessage("   lastEphemTime = %.17f\n",lastEphemTime.Get());
+   #endif
+      
    Real dt = Abs(atTime.Subtract(lastEphemTime)) * GmatTimeUtil::SECS_PER_DAY;
    if ( dt < ephemUpdateInterval)
    {
-       return lastState;
+      #ifdef DEBUG_GET_STATE
+      MessageInterface::ShowMessage("   returning lastState %s\n", state.ToString().c_str());
+      #endif
+      return lastState;
    }
    
    Real*     posVel = NULL;
@@ -515,12 +537,16 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
          // Moved to SetSourceFile to improve performance
          // bodyNumber = theSourceFile->GetBodyID(instanceName);
          posVel     = theSourceFile->GetPosVel(bodyNumber,atTime, overrideTime);
-         state.SetElement(0,posVel[0]);
-         state.SetElement(1,posVel[1]);
-         state.SetElement(2,posVel[2]);
-         state.SetElement(3,posVel[3]);
-         state.SetElement(4,posVel[4]);
-         state.SetElement(5,posVel[5]);
+         // I dont know how much this will help but try set in one call
+         // for performance(loj: 2/28/07)
+         //state.SetElement(0,posVel[0]);
+         //state.SetElement(1,posVel[1]);
+         //state.SetElement(2,posVel[2]);
+         //state.SetElement(3,posVel[3]);
+         //state.SetElement(4,posVel[4]);
+         //state.SetElement(5,posVel[5]);
+         state.Set(posVel[0], posVel[1], posVel[2],
+                   posVel[3], posVel[4], posVel[5]);
          break;
 //      case Gmat::EPHEMERIS :  
 //         break; // other cases later <<<<<<<<<<<<<<<<
@@ -533,6 +559,11 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
    lastEphemTime = atTime;
    lastState     = state;
    for (Integer i=0;i<6;i++) prevState[i]     = lastState[i];
+   
+   #ifdef DEBUG_GET_STATE
+   MessageInterface::ShowMessage("   returning state %s\n", state.ToString().c_str());
+   #endif
+   
    return state;
 }
 
@@ -2714,6 +2745,11 @@ bool CelestialBody::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 void CelestialBody::InitializeBody(std::string withBodyType)
 {
+   #ifdef DEBUG_CB_INIT
+   MessageInterface::ShowMessage
+      ("CelestialBody::InitializeBody(%s) entered\n", withBodyType.c_str());
+   #endif
+   
    // assuming derived classes will fill in all the specific things with
    // appropriate default values
    //usePotentialFile  = false; //loj: 3/23/06 set to false
@@ -2732,7 +2768,7 @@ void CelestialBody::InitializeBody(std::string withBodyType)
       if (withBodyType == BODY_TYPE_STRINGS[i]) bodyType = (Gmat::BodyType) i;
    angularVelocity(0) = 0.0;
    angularVelocity(1) = 0.0;
-   angularVelocity(2) = 7.29211585530e-5;  // should I so this here or in Planet??
+   angularVelocity(2) = 7.29211585530e-5;  // should I do this here or in Planet??
 
    isFirstTimeMu = true;
    isFirstTimeRadius = true;
@@ -3057,6 +3093,8 @@ Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
       return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
 
    Rvector6 cbState = cb->GetState(forTime);
+   Rvector6 posvel = KeplersProblem(forTime);
+   
    return (KeplersProblem(forTime) + cbState);    
 }
 
