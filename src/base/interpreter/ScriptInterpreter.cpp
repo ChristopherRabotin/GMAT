@@ -724,6 +724,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       std::string attrStr = ""; 
       std::string attrInLineStr = ""; 
       Integer paramID = -1;
+      Gmat::ParameterType paramType;
       
       //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
       
@@ -733,14 +734,14 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          MathParser mp = MathParser();
          
          try
-         {            
+         {
             //MessageInterface::ShowMessage
             //   ("===> chunks[0]=%s, chunks[1]=%s\n", chunks[0].c_str(), chunks[1].c_str());
             
             if (mp.IsEquation(chunks[1]))
             {
                // check if LHS is object.property
-               if (FindPropertyID(obj, chunks[0], &owner, paramID))
+               if (FindPropertyID(obj, chunks[0], &owner, paramID, paramType))
                {
                   // Since string can have minus sign, check it first
                   if (obj->GetParameterType(paramID) != Gmat::STRING_TYPE)
@@ -801,7 +802,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       SetComments(obj, preStr, inStr);
       
       // paramID will be assigned from call to Interpreter class
-      if ( FindPropertyID(obj, chunks[0], &owner, paramID) )
+      if ( FindPropertyID(obj, chunks[0], &owner, paramID, paramType) )
       {
          attrStr = theTextParser.GetPrefaceComment();
          attrInLineStr = theTextParser.GetInlineComment();
