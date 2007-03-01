@@ -25,6 +25,7 @@
 #include "GmatCommand.hpp"
 #include "Solver.hpp"
 #include "Parameter.hpp"
+#include "ElementWrapper.hpp"
 
 /**
  * Command that manages processing for targeter goals.
@@ -43,6 +44,11 @@ public:
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
                                        const std::string &newName);
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    
    // Parameter accessors
    virtual std::string GetParameterText(const Integer id) const;
@@ -63,8 +69,15 @@ public:
     
    // Inherited methods overridden from the base class
    virtual bool        InterpretAction();
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
+
    virtual bool        Initialize();
    virtual bool        Execute();
+   virtual void        RunComplete();
    
    virtual const std::string&
                        GetGeneratingString(Gmat::WriteMode mode,
@@ -76,9 +89,9 @@ protected:
    enum 
    {
       OPTIMIZER_NAME = GmatCommandParamCount,
-      CONSTRAINT_VARIABLE_NAME,
+      CONSTRAINT_ARG1,
       OPERATOR,
-      CONSTRAINT_VALUE,
+      CONSTRAINT_ARG2,
       TOLERANCE,
       NonlinearConstraintParamCount
    };
@@ -90,36 +103,40 @@ protected:
    enum Operator
    {
       LESS_THAN_OR_EQUAL = 0,
-      EQUAL,
-      GREATER_THAN_OR_EQUAL
+      GREATER_THAN_OR_EQUAL,
+      EQUAL
    };
+   
+   static const std::string OP_STRINGS[3];
 
    /// The name of the spacecraft that gets maneuvered
    std::string         optimizerName;
    /// The optimizer instance used to manage the optimizer state machine
    Solver              *optimizer;
    /// Name of the variable to be constrained
-   std::string         constraintName;
+   std::string         arg1Name;
    // pointer to the Variable that is to be minimized
-   Parameter           *constraint;
+   //Parameter           *constraint;
+   ElementWrapper      *arg1;
    /// most recent value of the variable
-   Real                constraintValue;
+   Real                constraintValue; // do I still need this?
    /// name of the parameter part of the right-hand-side
-   std::string         nlcParmName;
-   Parameter           *nlcParm;
+   std::string         arg2Name;
+   //Parameter           *nlcParm;
+   ElementWrapper      *arg2;
 
-   /// String of value array name
-   std::string         nlcArrName;
+   /// String of value array name  // I don't think I need any of this stuff
+   //std::string         nlcArrName;
    /// constraint array row index variable name
-   std::string         nlcArrRowStr;
+   //std::string         nlcArrRowStr;
    /// constraint array column index variable name
-   std::string         nlcArrColStr;
+   //std::string         nlcArrColStr;
    /// constraint array row index
-   Integer             nlcArrRow;
+   //Integer             nlcArrRow;
    /// constraint array column index
-   Integer             nlcArrCol;
-   Parameter           *nlcArrRowParm;
-   Parameter           *nlcArrColParm;
+   //Integer             nlcArrCol;
+   //Parameter           *nlcArrRowParm;
+   //Parameter           *nlcArrColParm;
 
    /// flag indicating whether or not the constraint is an inequality
    /// constraint
@@ -138,23 +155,23 @@ protected:
    /// ID for this constraint (returned from the optimizer)
    Integer             constraintId;
    /// is the right hand side a parameter?
-   bool                isNlcParm;
+   //bool                isNlcParm;
    /// is the right hand side an array?
-   bool                isNlcArray;
+   //bool                isNlcArray;
    /// Pointer to the object that owns the goal
-   GmatBase            *constraintObject;
+   //GmatBase            *constraintObject;
    /// Object ID for the parameter
-   Integer             parmId;
+   //Integer             parmId;
    /// flag indicating whether or not the generating string has been interpreted
    bool                interpreted;
    
-   bool                InterpretParameter(const std::string text,
-                                          std::string &paramType,
-                                          std::string &paramObj,
-                                          std::string &parmSystem);
+   //bool                InterpretParameter(const std::string text,
+   //                                       std::string &paramType,
+   //                                       std::string &paramObj,
+   //                                       std::string &parmSystem);
                                           
 
-   bool                ConstructConstraint(const char* str);
+   //bool                ConstructConstraint(const char* str);
 
 };
 
