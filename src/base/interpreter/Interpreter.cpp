@@ -774,7 +774,7 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
 
 //------------------------------------------------------------------------------
 // bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
-//                     Integer &id)
+//                     Integer &id, Gmat::ParameterType &type)
 //------------------------------------------------------------------------------
 /*
  * Finds property ID for given property. If property not found in the obj,
@@ -783,7 +783,9 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
  * @param  obj    Object to find proerty
  * @param  chunk  String contains property
  * @param  owner  Address of new owner pointer to be returned
- * @param  id     Property ID to return
+ * @param  id     Property ID to return (-1 if property not found)
+ * @param  type   Property type to return
+ *                (Gmat::UNKNOWN_ParameterType if property not found)
  *
  * @return true if property found
  *
@@ -792,7 +794,8 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
  */
 //------------------------------------------------------------------------------
 bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
-                                 GmatBase **owner, Integer &id)
+                                 GmatBase **owner, Integer &id,
+                                 Gmat::ParameterType &type)
 {
    if (obj == NULL)
       return false;
@@ -801,17 +804,21 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    StringArray parts = theTextParser.SeparateDots(chunk);
    Integer count = parts.size();
    std::string prop = parts[count-1];
-   id = -1; // Set initial output id to -1
+   
+   // Set initial output id and type
+   id = -1;
+   type = Gmat::UNKNOWN_PARAMETER_TYPE;
    
    try
    {
       id = obj->GetParameterID(prop);
+      type = obj->GetParameterType(id);
       *owner = obj;
       retval = true;
    }
    catch (BaseException &e)
    {
-      if (FindOwnedObject(obj, prop, owner, id))
+      if (FindOwnedObject(obj, prop, owner, id, type))
          retval = true;
    }
    
@@ -1794,7 +1801,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          
          #if DEBUG_ASSIGNMENT
          MessageInterface::ShowMessage
-            ("   Cannot find RHS object: %s. It may be a string value\n",
+            ("   Cannot find RHS object: '%s'. It may be a string value\n",
              rhsObjName.c_str());
          #endif
       }
@@ -1953,7 +1960,8 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
       // try if fromProp is a Parameter
       rhsParam = CreateParameter(rhs);
       
-      if (rhsParam == NULL)
+      if (rhsParam == NULL)      //toType = toOwner->GetParameterType(toId);
+
       {
          HandleError(e);
          return false;
@@ -2149,10 +2157,11 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
    {
       GmatBase *toObj = NULL;
       Integer toId = -1;
+      Gmat::ParameterType toType;
       
       try
       {
-         FindPropertyID(toOwner, toProp, &toObj, toId);
+         FindPropertyID(toOwner, toProp, &toObj, toId, toType);
          
          if (toObj == NULL)
          {
@@ -2187,7 +2196,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          return true;
       }
       
-      Gmat::ParameterType toType = toObj->GetParameterType(toId);
+      toType = toObj->GetParameterType(toId);
       
       #if DEBUG_SET
       MessageInterface::ShowMessage("   toId=%d, toType=%d\n", toId, toType);
@@ -2268,9 +2277,9 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
-      ("SetPropertyToProperty() toOwner=%s, toProp=%s, fromOwner=%s, fromProp=%s\n",
-       toOwner->GetName().c_str(), toProp.c_str(), fromOwner->GetName().c_str(),
-       fromProp.c_str());
+      ("SetPropertyToProperty() toOwner=%s<%s>, toProp=%s, fromOwner=%s, fromProp=%s\n",
+       toOwner->GetName().c_str(), toOwner->GetTypeName().c_str(), toProp.c_str(),
+       fromOwner->GetName().c_str(), fromProp.c_str());
    #endif
    
    Integer toId = -1;
@@ -2291,18 +2300,23 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    
    try
    {
-      toId = toOwner->GetParameterID(toProp);
-      toType = toOwner->GetParameterType(toId);
+      GmatBase *toObj = NULL;
+      FindPropertyID(toOwner, toProp, &toObj, toId, toType);
    }
    catch (BaseException &e)
    {
+      #if DEBUG_SET
+      MessageInterface::ShowMessage
+         ("   Parameter ID of '%s' not found. So create a parameter '%s'\n",
+          toProp.c_str(), lhs.c_str());
+      #endif
       lhsParam = CreateParameter(lhs);
    }
    
    //-----------------------------------
    // try RHS property
    //-----------------------------------
-   // try create parameter first if lhs type is OBJECT_TYPE
+   // try create parameter first if rhs type is OBJECT_TYPE
    if (toType == Gmat::OBJECT_TYPE)
       rhsParam = CreateParameter(rhs);
    
@@ -2341,11 +2355,11 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
       if (toType == rhsParam->GetReturnType())
       {
          value = rhsParam->ToString();
-         retval = SetProperty(toOwner, toId, value);
+         retval = SetProperty(toOwner, toId, toType, value);
       }
       else
       {
-         retval = SetProperty(toOwner, toId, rhs);
+         retval = SetProperty(toOwner, toId, toType, rhs);
       }
    }
    else if (lhsParam != NULL && rhsParam == NULL)
@@ -2366,22 +2380,22 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
             if (isRhsProperty)
             {
                value = GetPropertyValue(fromOwner, fromId);
-               retval = SetPropertyValue(toOwner, toId, value);
+               retval = SetPropertyValue(toOwner, toId, toType, value);
             }
             else
             {
-               retval = SetPropertyValue(toOwner, toId, rhs);
+               retval = SetPropertyValue(toOwner, toId, toType, rhs);
             }
          }
          else
          {
             value = GetPropertyValue(fromOwner, fromId);
-            retval = SetProperty(toOwner, toId, value);
+            retval = SetProperty(toOwner, toId, toType, value);
          }
       }
       else
       {
-         retval = SetProperty(toOwner, toId, rhs);
+         retval = SetProperty(toOwner, toId, toType, rhs);
       }
    }
    
@@ -2493,10 +2507,10 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
       {
          GmatBase *toObj = NULL;
          Integer toId = -1;
-         
-         if (FindPropertyID(toOwner, toProp, &toObj, toId))
+         Gmat::ParameterType toType;
+         if (FindPropertyID(toOwner, toProp, &toObj, toId, toType))
          {
-            retval = SetProperty(toObj, toId, value);
+            retval = SetProperty(toObj, toId, toType, value);
          }
       }
    }
@@ -2728,36 +2742,37 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
 
 
 //------------------------------------------------------------------------------
-// bool SetPropertyValue(GmatBase *obj, const Integer id, const std::string &value,
-//                       const Integer index)
+// bool SetPropertyValue(GmatBase *obj, const Integer id,
+//                       const Gmat::ParameterType type,
+//                       const std::string &value, const Integer index)
 //------------------------------------------------------------------------------
 /**
  * Sets parameters on GMAT objects.
  * 
- * @param  obj    Pointer to the object that owns the parameter.
- * @param  id     ID for the parameter.
- * @param  value  Value of the parameter.
- * @param  index  Index of the parameter in array.
+ * @param  obj    Pointer to the object that owns the property.
+ * @param  id     ID for the property.
+ * @param  type   Type for the property.
+ * @param  value  Value of the property.
+ * @param  index  Index of the property in array.
  * 
- * @return true if the parameter is set, false otherwise.
+ * @return true if the property is set, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
+                                   const Gmat::ParameterType type,
                                    const std::string &value, const Integer index)
 {
    bool retval = false;
    
    #if DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyValue() obj=%s, id=%d, value=%s\n",
-       obj->GetName().c_str(), id, value.c_str());
+      ("Interpreter::SetPropertyValue() obj=%s, id=%d, type=%d, value=%s\n",
+       obj->GetName().c_str(), id, type, value.c_str());
    #endif
    
    std::string valueToUse = value;
    CheckForSpecialCase(obj, id, valueToUse);
-   
-   Gmat::ParameterType type = obj->GetParameterType(id);
-   
+      
    #if DEBUG_SET
    MessageInterface::ShowMessage
       ("   propertyType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
@@ -3070,25 +3085,28 @@ std::string Interpreter::GetPropertyValue(GmatBase *obj, const Integer id)
 
 
 //------------------------------------------------------------------------------
-// bool SetProperty(GmatBase *obj, const Integer id, const std::string &value)
+// bool SetProperty(GmatBase *obj, const Integer id, const Gmat::ParameterType type
+//                  const std::string &value)
 //------------------------------------------------------------------------------
 /**
  * Sets parameters on GMAT objects.
  * 
- * @param  obj    Pointer to the object that owns the parameter.
- * @param  id     ID for the parameter.
- * @param  value  Value of the parameter.
+ * @param  obj    Pointer to the object that owns the property.
+ * @param  id     property ID
+ * @param  type   proerty Type
+ * @param  value  Value of the property.
  * 
- * @return true if the parameter is set, false otherwise.
+ * @return true if the property is set, false otherwise.
  */
 //------------------------------------------------------------------------------
 bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
+                              const Gmat::ParameterType type,
                               const std::string &value)
 {
    #if DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetProperty() obj=%s, id=%d, value=%s\n", obj->GetName().c_str(),
-       id, value.c_str());
+      ("Interpreter::SetProperty() obj=%s, id=%d, type=%d, value=%s\n",
+       obj->GetName().c_str(), id, type, value.c_str());
    #endif
    
    bool retval = false;
@@ -3118,11 +3136,11 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    if (count > 0)
    {
       for (int i=0; i<count; i++)
-         retval = SetPropertyValue(obj, id, rhsValues[i], i);
+         retval = SetPropertyValue(obj, id, type, rhsValues[i], i);
    }
    else
    {
-      retval = SetPropertyValue(obj, id, value);
+      retval = SetPropertyValue(obj, id, type, value);
    }
    
    #if DEBUG_SET
@@ -3175,7 +3193,9 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    StringArray parts = theTextParser.SeparateDots(prop);
    Integer count = parts.size();
    std::string pmType = parts[count-1];
-
+   Integer id;
+   Gmat::ParameterType type;
+   
    // Current ForceModel scripting, SRP is on for central body.
    //GMAT FM.CentralBody          = Earth;
    //GMAT FM.PrimaryBodies        = {Earth};
@@ -3207,7 +3227,9 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    //------------------------------------------------------------
    if (pmType == "CentralBody")
    {
-      retval = SetPropertyValue(obj, obj->GetParameterID("CentralBody"), value);
+      id = obj->GetParameterID("CentralBody");
+      type = obj->GetParameterType(id);
+      retval = SetPropertyValue(obj, id, type, value);
       return retval;
    }
    
@@ -3251,8 +3273,11 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             // Use JGM2 for default Earth gravity file, in case it is not
             // specified in the script
             if (pmType == "PrimaryBodies" && bodies[i] == "Earth")
-               retval = SetPropertyValue(pm, pm->GetParameterID("Model"), "JGM2");
-            
+            {
+               id = pm->GetParameterID("Model");
+               type = pm->GetParameterType(id);
+               retval = SetPropertyValue(pm, id, type, "JGM2");
+            }
          }
       }
       
@@ -3262,7 +3287,9 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    {
       if (pmType == "SRP")
       {
-         retval = SetPropertyValue(obj, obj->GetParameterID("SRP"), value);
+         id = obj->GetParameterID("SRP");
+         type = obj->GetParameterType(id);
+         retval = SetPropertyValue(obj, id, type, value);
          
          if (retval && value != "On")
             return true;
@@ -3337,10 +3364,12 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    
    GmatBase *owner;
    Integer propId;
-   
-   if (FindPropertyID(forceModel, propName, &owner, propId))
+   Gmat::ParameterType propType;
+   if (FindPropertyID(forceModel, propName, &owner, propId, propType))
    {
-      retval = SetPropertyValue(owner, owner->GetParameterID(propName), value);
+      id = owner->GetParameterID(propName);
+      type = owner->GetParameterType(id);
+      retval = SetPropertyValue(owner, id, type, value);
       if (fromObj != NULL)
          owner->SetRefObject(fromObj, fromObj->GetType(), value);
    }
@@ -3384,7 +3413,8 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       else
       {
          Integer id = obj->GetParameterID(prop);
-         retval = SetPropertyValue(obj, id, value);
+         Gmat::ParameterType type = obj->GetParameterType(id);
+         retval = SetPropertyValue(obj, id, type, value);
       }
    }
    else
@@ -3419,7 +3449,8 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       try
       {
          Integer id = body->GetParameterID(newProp);
-         retval = SetPropertyValue(body, id, value);
+         Gmat::ParameterType type = body->GetParameterType(id);
+         retval = SetPropertyValue(body, id, type, value);
       }
       catch (BaseException &e)
       {
@@ -3439,7 +3470,7 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
 
 //------------------------------------------------------------------------------
 // bool FindOwnedObject(GmatBase *owner, const std::string toProp,
-//                      GmatBase **ownedObj, Integer &id)
+//                      GmatBase **ownedObj, Integer &id, Gmat::OBJECT_TYPE &type)
 //------------------------------------------------------------------------------
 /*
  * Finds owned object and its property.
@@ -3447,12 +3478,15 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
  * @param  owner    Owner object to find owned object for property
  * @param  toProp   Property name to find
  * @param  id       Output owned property id (-1 if property not found)
+ * @param  type     Output owned property type
+ *                  (Gmat::UNKNOWN_PARAMETER_TYPE if property not found)
  *
  * @return  true if property found from the owned object
  */
 //------------------------------------------------------------------------------
 bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
-                                  GmatBase **ownedObj, Integer &id)
+                                  GmatBase **ownedObj, Integer &id,
+                                  Gmat::ParameterType &type)
 {
    #if DEBUG_SET
    MessageInterface::ShowMessage
@@ -3467,7 +3501,8 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
    
    // Initialize output parameters
    id = -1;
-
+   type = Gmat::UNKNOWN_PARAMETER_TYPE;
+   
    #if DEBUG_SET
    MessageInterface::ShowMessage("   ownedObjCount=%d\n", ownedObjCount);
    #endif
@@ -3488,6 +3523,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
             try
             {
                id = tempObj->GetParameterID(toProp);
+               type = tempObj->GetParameterType(id);
                *ownedObj = tempObj;
                retval = true;
                break;
@@ -3894,6 +3930,11 @@ bool Interpreter::FinalPass()
                refObj = GetObject(refNameList[j]);
                if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
                {
+                  #ifdef DEBUG_FINAL_PASS
+                  MessageInterface::ShowMessage
+                     ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+                  #endif
+                  
                   InterpreterException ex
                      ("Nonexistent SpacePoint \"" + refNameList[j] +
                       "\" referenced in \"" + obj->GetName() + "\"");

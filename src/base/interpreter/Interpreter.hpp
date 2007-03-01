@@ -141,7 +141,7 @@ protected:
    void RegisterAliases();
    
    bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
-                       Integer &id);
+                       Integer &id, Gmat::ParameterType &type);
    
    GmatBase* FindObject(const std::string &name);
    
@@ -203,10 +203,14 @@ protected:
    
    // for setting/getting property value
    bool SetPropertyValue(GmatBase *obj, const Integer id,
-                         const std::string &value, const Integer index = -1);
+                         const Gmat::ParameterType type,
+                         const std::string &value,
+                         const Integer index = -1);
+   
    std::string GetPropertyValue(GmatBase *obj, const Integer id);
    
-   bool SetProperty(GmatBase *obj, const Integer id, const std::string &value);
+   bool SetProperty(GmatBase *obj, const Integer id,
+                    const Gmat::ParameterType type, const std::string &value);
    
    bool SetComplexProperty(GmatBase *obj, const std::string &prop,
                            const std::string &value);
@@ -216,7 +220,7 @@ protected:
                                const std::string &value);
    
    bool FindOwnedObject(GmatBase *owner, const std::string toProp,
-                        GmatBase **ownedObj, Integer &id);
+                        GmatBase **ownedObj, Integer &id, Gmat::ParameterType &type);
    
    // for setting/getting array value
    Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col);
