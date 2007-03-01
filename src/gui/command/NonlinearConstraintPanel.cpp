@@ -10,7 +10,8 @@
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"  // for ToDouble()
 
-//#define DEBUG_NONLINEARCONSTRAINT_PANEL 1
+#define DEBUG_NLC_PANEL 1
+
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -155,7 +156,7 @@ void NonlinearConstraintPanel::LoadData()
          mSolverComboBox->SetStringSelection(wxT(loadedSolverName.c_str()));
 
       std::string loadedVariableName = mNonlinearConstraintCommand->
-         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"));
+         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"));
 
       mLHSTextCtrl->SetValue(wxT(loadedVariableName.c_str()));
 
@@ -165,7 +166,7 @@ void NonlinearConstraintPanel::LoadData()
       mComparisonComboBox->SetStringSelection(wxT(operatorStr.c_str()));
 
       std::string loadedValue = mNonlinearConstraintCommand->
-         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintValue"));
+         GetStringParameter(mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"));
 
       mRHSTextCtrl->SetValue(wxT(loadedValue.c_str()));
       
@@ -186,7 +187,7 @@ void NonlinearConstraintPanel::LoadData()
 
 void NonlinearConstraintPanel::SaveData()
 {   
-   #if DEBUG_ACHIEVE_PANEL
+   #if DEBUG_NLC_PANEL
    MessageInterface::ShowMessage("NonlinearConstraintPanel::SaveData() entered\n");
    #endif
    
@@ -210,18 +211,24 @@ void NonlinearConstraintPanel::SaveData()
 	       mSolverComboBox->GetValue().c_str());
 	
 	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("ConstraintVariableName"),
+	      (mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"),
 	       mLHSTextCtrl->GetValue().c_str());
 	
 	   mNonlinearConstraintCommand->SetStringParameter
 	      (mNonlinearConstraintCommand->GetParameterID("Operator"),
 	       mComparisonComboBox->GetValue().c_str());
 	
+      #if DEBUG_NLC_PANEL
+      MessageInterface::ShowMessage("   about to save ConstraintArg2 value\n");
+      #endif
 	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("ConstraintValue"),
+	      (mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"),
 	       mRHSTextCtrl->GetValue().c_str());
+      #if DEBUG_NLC_PANEL
+      MessageInterface::ShowMessage("   finished saving ConstraintArg2 value\n");
+      #endif
 	       
-	   inputString = mTolTextCtrl->GetValue();      
+	   //inputString = mTolTextCtrl->GetValue();      
 	
 	   // check to see if input is a real
 	   //if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
@@ -248,6 +255,9 @@ void NonlinearConstraintPanel::SaveData()
       return;
    }
    
+   #if DEBUG_NLC_PANEL
+   MessageInterface::ShowMessage("NonlinearConstraintPanel::SaveData() exited\n");
+   #endif
 }
 
 void NonlinearConstraintPanel::OnTextChange(wxCommandEvent& event)
