@@ -1,3 +1,20 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                              MinimizePanel
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc.
+//
+// Author: Allison Greene
+// Created: 2006/09/20
+/**
+ * This class contains the Minimize command setup window.
+ */
+//------------------------------------------------------------------------------
+
 #ifndef MINIMIZEPANEL_HPP_
 #define MINIMIZEPANEL_HPP_
 
@@ -20,8 +37,9 @@ private:
    GuiItemManager *theGuiManager;
 
    wxString  solverName;
-   wxString variableName;
+   wxString  variableName;
    Parameter *minParam;
+   bool mVarNameChanged;
    
    wxTextCtrl *mVariableTextCtrl;
    
