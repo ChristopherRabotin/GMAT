@@ -20,6 +20,7 @@
 #include "GmatAppData.hpp"
 #include "gmatdefs.hpp"           //put this one after GUI includes
 #include "Parameter.hpp"
+#include "Array.hpp"
 #include "ParameterInfo.hpp"
 #include "Hardware.hpp"
 #include "MessageInterface.hpp"
@@ -79,6 +80,66 @@ wxString GuiItemManager::ToWxString(Real rval)
    ss << rval;
    str.Printf("%s", ss.str().c_str());
    return str;
+}
+
+
+//------------------------------------------------------------------------------
+// int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType)
+//------------------------------------------------------------------------------
+/*
+ * Checks if input variable is a Variable, Array element, or parameter of
+ * input owner type.
+ *
+ *
+ * @param  varName  input variable name
+ * @param  ownerType  input owner type (such as Gmat::SPACECRAFT)
+ *
+ * @return -1 if varName NOT found in the configuration
+ *          0 if varName found BUT not one of Variable, Array element, or parameter
+ *          1 if varName found AND one of Variable, Array element, or parameter
+ */
+//------------------------------------------------------------------------------
+int GuiItemManager::IsValidVariable(const std::string &varName,
+                                    Gmat::ObjectType ownerType)
+{
+   GmatBase *obj = theGuiInterpreter->GetObject(varName);
+   
+   if (obj == NULL)
+      return -1;
+   
+   
+   Parameter *param = (Parameter*)obj;   
+   bool isValid = false;
+   
+   if (param->IsOfType("Variable"))
+   {
+      isValid = true;
+   }
+   else if (param->IsOfType("Array"))
+   {
+      // check to see if it is array element or whole array of 1x1
+      if (GmatStringUtil::IsParenPartOfArray(varName))
+      {
+         isValid = true;
+      }
+      else
+      {
+         Array *arr = (Array*)param;
+         if (arr->GetRowCount() == 1 && arr->GetColCount() == 1)
+            isValid = true;
+      }
+   }
+   else if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+   {
+      // check to see if it is parameter of owenerType
+      if (param->GetOwnerType() == ownerType)
+         isValid = true;
+   }
+
+   if (isValid)
+      return 1;
+   else
+      return 0;
 }
 
 

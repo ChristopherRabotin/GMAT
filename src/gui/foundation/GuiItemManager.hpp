@@ -78,6 +78,7 @@ public:
    static GuiItemManager* GetInstance();
    
    wxString ToWxString(Real rval);
+   int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType);
    
    void UpdateAll();
    void UpdateCelestialPoint();
