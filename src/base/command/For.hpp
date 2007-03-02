@@ -52,6 +52,7 @@ public:
    // Methods used to run the command
    virtual bool         Initialize(void);
    virtual bool         Execute(void);
+   virtual void         RunComplete();
 
    // inherited from GmatBase
    virtual GmatBase*    Clone(void) const;

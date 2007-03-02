@@ -27,7 +27,7 @@
 
 #include <sstream>      // for std::stringstream, used to make generating string
 
-//#define DEBUG_FOR 1
+//#define DEBUG_FOR_EXE 1
 //#define DEBUG_FOR_INIT 1
 //#define DEBUG_FOR_REAL
 
@@ -296,7 +296,7 @@ bool For::Initialize()
 //------------------------------------------------------------------------------
 bool For::Execute(void)
 {
-   #ifdef DEBUG_FOR
+   #ifdef DEBUG_FOR_EXE
       MessageInterface::ShowMessage(
          "For::Execute() status: commandComplete = %s, "
          "commandExecuting = %s, branchExecuting = %s\n",
@@ -308,7 +308,7 @@ bool For::Execute(void)
 
    if (branchExecuting)
    {
-      #ifdef DEBUG_FOR
+      #ifdef DEBUG_FOR_EXE
          MessageInterface::ShowMessage(
          "... branch still executing -> about to call ExecuteBranch\n");
       #endif
@@ -318,7 +318,7 @@ bool For::Execute(void)
          // Branch finished executing; update loop index
          currentValue += stepSize;
          if (indexIsParam)   indexParam->SetReal(currentValue);
-         #ifdef DEBUG_FOR
+         #ifdef DEBUG_FOR_EXE
             MessageInterface::ShowMessage(
             "...... Branch done executing -> currentValue updated to %.4f\n",
             currentValue);
@@ -333,7 +333,7 @@ bool For::Execute(void)
       if (StillLooping())
       {
          branchExecuting = true;
-         #ifdef DEBUG_FOR
+         #ifdef DEBUG_FOR_EXE
             MessageInterface::ShowMessage(
             "... still looping -> about to call ExecuteBranch\n");
          #endif
@@ -349,6 +349,21 @@ bool For::Execute(void)
    
    BuildCommandSummary(true);
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
+/**
+ * Resets the For command to an uninitialized state.
+ */
+//------------------------------------------------------------------------------
+void For::RunComplete()
+{
+   currentValue = UNINITIALIZED_VALUE;
+
+   BranchCommand::RunComplete();
 }
 
 
@@ -1050,7 +1065,7 @@ bool For::StillLooping()
          }
       }
       
-      #if DEBUG_FOR
+      #if DEBUG_FOR_EXE
       MessageInterface::ShowMessage
          ("For::StillLooping() startValue=%f, stepSize=%f, endValue=%f\n",
           startValue, stepSize, endValue);
