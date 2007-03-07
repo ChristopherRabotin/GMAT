@@ -691,6 +691,27 @@ std::string Vary::GetStringParameter(const Integer id) const
    if (id == VARIABLE_NAME)
       return variableName;
     
+   if (id == INITIAL_VALUE)
+      return initialValueName;
+    
+   if (id == PERTURBATION)
+      return perturbationName;
+    
+   if (id == VARIABLE_MINIMUM)
+      return variableMinimumName;
+    
+   if (id == VARIABLE_MAXIMUM)
+      return variableMaximumName;
+    
+   if (id == VARIABLE_MAXIMUM_STEP)
+      return variableMaximumStepName;
+    
+   if (id == ADDITIVE_SCALE_FACTOR)
+      return additiveScaleFactorName;
+    
+   if (id == MULTIPLICATIVE_SCALE_FACTOR)
+      return multiplicativeScaleFactorName;
+    
    return GmatCommand::GetStringParameter(id);
 }
 
@@ -1393,14 +1414,14 @@ bool Vary::Execute()
 {
    bool retval = true;
 
-   #if DEBUG_VARY_EXECUTE
+   #ifdef DEBUG_VARY_EXECUTE
       MessageInterface::ShowMessage
          ("Vary::Execute() solverDataFinalized=%d\n", solverDataFinalized);
    #endif
     
    if (!solverDataFinalized) 
    {
-      #if DEBUG_VARY_EXECUTE
+      #ifdef DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage
             ("Vary::Execute() - running code for the first time through <<<\n");
       #endif
@@ -1418,7 +1439,7 @@ bool Vary::Execute()
       varData[3] = (variableMaximum->EvaluateReal() + asf) / msf;  // maximum
       varData[4] = (variableMaximumStep->EvaluateReal()) / msf; // largest step
             
-      #if DEBUG_VARY_EXECUTE
+      #ifdef DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage(
             "For variable \"%s\", data is [%15.9lf %15.9lf %15.9lf %15.9lf "
             "%15.9lf]\n", variableName.c_str(), varData[0], varData[1], varData[2], 
@@ -1427,7 +1448,7 @@ bool Vary::Execute()
    
       variableID = solver->SetSolverVariables(varData, variableName);
 
-      #if DEBUG_VARY_EXECUTE
+      #ifdef DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage("Solver variables were set\n");
       #endif
 
@@ -1449,13 +1470,15 @@ bool Vary::Execute()
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage(
           "Setting %s to %lf; allowed range is [%lf, %lf]\n",
-          variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
+          variableName.c_str(), var, variableMinimum->EvaluateReal(), 
+          variableMaximum->EvaluateReal());
+          //variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
     #endif
 
     variable->SetReal(var);
 
     BuildCommandSummary(true);
-      #if DEBUG_VARY_EXECUTE
+      #ifdef DEBUG_VARY_EXECUTE
          MessageInterface::ShowMessage
             ("Vary::Execute - exiting with retval = %s\n",
             (retval? "true" : "False"));
