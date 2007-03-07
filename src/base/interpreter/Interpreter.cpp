@@ -744,6 +744,7 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
 //------------------------------------------------------------------------------
 bool Interpreter::ValidateCommand(GmatCommand *cmd)
 {
+   cmd->ClearWrappers();
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
    #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage("In Validate, wrapper names are:\n");
@@ -765,7 +766,8 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
          return false;
       }
    }
-   return true;
+   //return true;
+   return CheckUndefinedReference(cmd);
 }
 
 //---------------------------------
@@ -934,10 +936,11 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // if command has its own InterpretAction(), jsut return cmd
       if (cmd->InterpretAction())
       {
-         bool retval3  = ValidateCommand(cmd);
-         bool retval2  = CheckUndefinedReference(cmd);
-         retFlag = retval2 && retval3;
-         //retFlag = CheckUndefinedReference(cmd);
+         //bool retval3  = ValidateCommand(cmd);
+         //bool retval2  = CheckUndefinedReference(cmd);
+         //retFlag = retval2 && retval3;
+         ////retFlag = CheckUndefinedReference(cmd);
+         retFlag  = ValidateCommand(cmd);
          
          #if DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
@@ -962,8 +965,9 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       //loj: 11/29/06 added check for return code
       bool retval1  = AssembleCommand(cmd, desc1);
       if (retval1) retval3  = ValidateCommand(cmd);
-      bool retval2  = CheckUndefinedReference(cmd);
-      retFlag = retval1 && retval2 && retval3;
+      //bool retval2  = CheckUndefinedReference(cmd);
+      //retFlag = retval1 && retval2 && retval3;
+      retFlag = retval1  && retval3;
    }
 
    return cmd;;
@@ -4365,13 +4369,40 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          }
          else
          {
-            ew = new ObjectPropertyWrapper();
-            itsType = Gmat::OBJECT_PROPERTY;
-            #ifdef DEBUG_WRAPPERS
-               MessageInterface::ShowMessage(
-                     "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
-            #endif
+            // if there are two dots, then treat it as a parameter
+            if (desc.find_first_of(".") != desc.find_last_of("."))
+            {
+               Parameter *param = CreateParameter(desc);
+               //bool isParm = theModerator->IsParameter(desc);
+               //if (isParm)
+               if (param)
+               {
+                  ew = new ParameterWrapper();
+                  itsType = Gmat::PARAMETER_OBJECT;
+                  #ifdef DEBUG_WRAPPERS
+                     MessageInterface::ShowMessage(
+                           "In Interpreter, created a ParameterWrapper for \"%s\"\n",
+                           desc.c_str(), "\"\n");
+                  #endif
+               }
+               else // there is an error
+               {
+                  InterpreterException ex("\"" + desc + "\"" + 
+                     " is not a valid object property or parameter");
+                  HandleError(ex);
+                  return NULL;
+               }
+            }
+            else
+            {
+               ew = new ObjectPropertyWrapper();
+               itsType = Gmat::OBJECT_PROPERTY;
+               #ifdef DEBUG_WRAPPERS
+                  MessageInterface::ShowMessage(
+                        "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
+                        desc.c_str(), "\"\n");
+               #endif
+            }
          }
       }
       else // check to see if it is a Variable or some other parameter
