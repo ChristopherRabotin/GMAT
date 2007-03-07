@@ -10,7 +10,7 @@
 #include "MessageInterface.hpp"
 #include "StringUtil.hpp"  // for ToDouble()
 
-#define DEBUG_NLC_PANEL 1
+//#define DEBUG_NLC_PANEL 1
 
 
 //------------------------------------------------------------------------------
@@ -244,6 +244,7 @@ void NonlinearConstraintPanel::SaveData()
 	   //}
 	   
 //	   theApplyButton->Disable();
+      theGuiInterpreter->ValidateCommand(mNonlinearConstraintCommand);
       EnableUpdate(false);
    
    }

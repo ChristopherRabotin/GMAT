@@ -214,6 +214,8 @@ void MinimizePanel::SaveData()
       mMinimizeCommand->SetStringParameter
          (mMinimizeCommand->GetParameterID("ObjectiveName"),
           std::string(variableName.c_str()));
+          
+      theGuiInterpreter->ValidateCommand(mMinimizeCommand);
    }
    catch (BaseException &e)
    {
