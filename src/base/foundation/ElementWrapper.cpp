@@ -193,6 +193,12 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
          MessageInterface::ShowMessage(
          "--- And now changing the name in the refObjectNames array");
       #endif
+      std::string::size_type pos = refObjectNames[j].find(oldName);
+      
+      if (pos != refObjectNames[j].npos)
+      {
+         refObjectNames[j].replace(pos, oldName.size(), newName);
+      }
    }
    return true;
 }
