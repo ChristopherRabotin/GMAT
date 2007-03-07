@@ -52,7 +52,7 @@ AchievePanel::AchievePanel(wxWindow *parent, GmatCommand *cmd)
    mSolverName = "";
    mGoalName = "";
    mGoalValue = "";
-   mTolerance = 1.0e-6;
+   mTolerance = "1.0e-6";
    
    mObjectTypeList.Add("Spacecraft");
    
@@ -176,23 +176,29 @@ void AchievePanel::LoadData()
       std::string goalValue = mAchieveCommand->GetStringParameter
          (mAchieveCommand->GetParameterID("GoalValue"));
       
+      std::string toleranceValue = mAchieveCommand->GetStringParameter
+         (mAchieveCommand->GetParameterID("Tolerance"));
+      
       #if DEBUG_ACHIEVE_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
       MessageInterface::ShowMessage("goalName=%s\n", goalName.c_str());
       MessageInterface::ShowMessage("goalValue=%s\n", goalValue.c_str());
+      MessageInterface::ShowMessage("tolerance=%s\n", toleranceValue.c_str());
       #endif
       
       mSolverName = wxT(solverName.c_str());      
       mGoalName = wxT(goalName.c_str());
       mGoalValue = wxT(goalValue.c_str());
+      mTolerance = wxT(toleranceValue.c_str());
       
-      mTolerance = mAchieveCommand->GetRealParameter
-         (mAchieveCommand->GetParameterID("Tolerance"));
+      //mTolerance = mAchieveCommand->GetRealParameter
+      //   (mAchieveCommand->GetParameterID("Tolerance"));
       
       mSolverComboBox->SetValue(mSolverName);
       mGoalNameTextCtrl->SetValue(mGoalName);
       mGoalValueTextCtrl->SetValue(mGoalValue);   
-      mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mTolerance));
+      //mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mTolerance));
+      mToleranceTextCtrl->SetValue(mTolerance);
       
    }
    catch (BaseException &e)
@@ -213,7 +219,7 @@ void AchievePanel::SaveData()
    
    canClose = true;
    std::string inputString;
-   Real tol;
+   //Real tol;
    
    //-----------------------------------------------------------------
    // check values from text field
@@ -221,20 +227,20 @@ void AchievePanel::SaveData()
    if (mIsTextModified)
    {
       inputString = mToleranceTextCtrl->GetValue();      
-      CheckReal(tol, inputString, "Tolerence", "Real Number > 0.0");
+      //CheckReal(tol, inputString, "Tolerance", "Real Number > 0.0");
    }
    
    
    Real value;
    inputString = mGoalValue.c_str();
    
-   // goal value can ba a number or a prameter name, so validate
+   // goal value can be a number or a parameter name, so validate
    if (!GmatStringUtil::ToReal(inputString, value))
    {
       if (theGuiInterpreter->GetObject(inputString) == NULL)
       {
-         CheckReal(value, inputString, "GoalValue",
-                   "Real Number or valid Parameter Name", true);
+         //CheckReal(value, inputString, "GoalValue",
+         //          "Real Number or valid Parameter Name", true);
       }
    }
    
@@ -255,13 +261,17 @@ void AchievePanel::SaveData()
       mAchieveCommand->SetStringParameter
          (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
       
-      if (mIsTextModified)
-      {
-         mAchieveCommand->SetRealParameter
-            (mAchieveCommand->GetParameterID("Tolerance"), tol);
+      //if (mIsTextModified)
+      //{
+         //mAchieveCommand->SetRealParameter
+         //   (mAchieveCommand->GetParameterID("Tolerance"), tol);
          
+         mTolerance = mToleranceTextCtrl->GetValue();      
+         mAchieveCommand->SetStringParameter
+            (mAchieveCommand->GetParameterID("Tolerance"), mTolerance.c_str());
          mIsTextModified = false;
-      }
+      //}
+      theGuiInterpreter->ValidateCommand(mAchieveCommand);
       
       EnableUpdate(false);
    }

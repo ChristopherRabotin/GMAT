@@ -36,7 +36,8 @@ private:
    
    bool mIsTextModified;
    
-   Real      mTolerance;
+   //Real      mTolerance;
+   wxString  mTolerance;
    wxString  mSolverName;
    wxString  mGoalName;
    wxString  mGoalValue;

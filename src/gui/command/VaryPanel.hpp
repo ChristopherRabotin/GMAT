@@ -36,14 +36,21 @@ private:
    {
       wxString  solverName;
       wxString  varName;
-      Real      initialValue;
-      Real      pert;
-      Real      minValue;
-      Real      maxValue;
-      Real      maxStep;
-      Parameter *varParam;
-      Real      additiveScaleFactor;
-      Real      multiplicativeScaleFactor;
+      wxString  initialValue;
+      wxString  pert;
+      wxString  minValue;
+      wxString  maxValue;
+      wxString  maxStep;
+      wxString  additiveScaleFactor;
+      wxString  multiplicativeScaleFactor;
+      //Real      initialValue;
+      //Real      pert;
+      //Real      minValue;
+      //Real      maxValue;
+      //Real      maxStep;
+      //Parameter *varParam;
+      //Real      additiveScaleFactor;
+      //Real      multiplicativeScaleFactor;
    };
    
    wxTextCtrl *mVarNameTextCtrl;
