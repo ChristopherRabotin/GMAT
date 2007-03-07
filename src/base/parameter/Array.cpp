@@ -24,6 +24,7 @@
 #include <sstream>
 
 //#define DEBUG_ARRAY 1
+//#define DEBUG_ARRAY_SET
 
 //---------------------------------
 // static data
@@ -771,6 +772,11 @@ Real Array::SetRealParameter(const Integer id, const Real value,
    switch (id)
    {
    case SINGLE_VALUE: //loj: 12/30/04 Changed from ROW_VALUE
+      #ifdef DEBUG_ARRAY_SET
+         MessageInterface::ShowMessage(
+         "In Array::SetRealParameter, row = %d, col = %d, value = %.12f\n",
+         row, col, value);
+      #endif
       mRmatValue.SetElement(row, col, value);
       return value;
    default:
