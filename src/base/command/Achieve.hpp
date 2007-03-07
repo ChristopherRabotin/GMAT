@@ -25,6 +25,7 @@
 #include "GmatCommand.hpp"
 #include "Solver.hpp"
 #include "Parameter.hpp"
+#include "ElementWrapper.hpp"
 
 /**
  * Command that manages processing for targeter goals.
@@ -40,7 +41,7 @@ public:
 
 
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
 
    virtual bool        RenameRefObject(const Gmat::ObjectType type,
                                        const std::string &oldName,
@@ -69,9 +70,16 @@ public:
                                     const std::string &name = "");
     
     // Inherited methods overridden from the base class
-   virtual bool        InterpretAction(void);
-   virtual bool        Initialize(void);
-   virtual bool        Execute(void);
+   virtual bool        InterpretAction();
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
+
+   virtual bool        Initialize();
+   virtual bool        Execute();
+   virtual void        RunComplete();
    
    virtual const std::string&
                        GetGeneratingString(Gmat::WriteMode mode,
@@ -84,41 +92,46 @@ protected:
    /// Name of the goal
    std::string         goalName;
    /// Target value for the goal
-   Real                goal;
+   //Real                goal;
+   ElementWrapper      *goal;   // can be any kind of wrapper except a NumberWrapper
    /// String form of target value for the goal
-   std::string         achieveName;
-   /// String of goal array name
-   std::string         achieveArrName;
-   /// Goal array row index variable name
-   std::string         achieveArrRowStr;
-   /// Goal array column index variable name
-   std::string         achieveArrColStr;
-   /// Goal array row index
-   Integer             achieveArrRow;
-   /// Goal array row index
-   Integer             achieveArrCol;
-   Parameter           *achieveArrRowParm;
-   Parameter           *achieveArrColParm;
+   std::string         achieveName;  // arg1
    /// Parameter used for floating end point goals
-   Parameter           *achieveParm;
+   //Parameter           *achieveParm;
+   ElementWrapper      *achieve;   // arg1
    /// Accuracy needed for the goal
-   Real                tolerance;
+   //Real                tolerance;
+   std::string         toleranceName;
+   /// the tolerance object
+   ElementWrapper      *tolerance;
    /// Pointer to the object that owns the goal
-   GmatBase            *goalObject;
-   /// Object ID for the parameter
-   Integer             parmId;
+   //GmatBase            *goalObject;
    /// Targeter ID for the goal 
    Integer             goalId;
    /// The targeter instance used to manage the targeter state machine
    Solver              *targeter;
    /// Flag used to finalize the targeter data during execution
    bool                targeterDataFinalized;
+   /// String of goal array name
+   //std::string         achieveArrName;
+   /// Goal array row index variable name
+   //std::string         achieveArrRowStr;
+   /// Goal array column index variable name
+   //std::string         achieveArrColStr;
+   /// Goal array row index
+   //Integer             achieveArrRow;
+   /// Goal array row index
+   //Integer             achieveArrCol;
+   //Parameter           *achieveArrRowParm;
+   //Parameter           *achieveArrColParm;
    /// Flag use to indicate goal target is a parameter
-   bool                isAchieveParm;
+   //bool                isAchieveParm;
    /// Flag use to indicate goal target is a array
-   bool                isAchieveArray;
+   //bool                isAchieveArray;
+   /// Object ID for the parameter
+   //Integer             parmId;
    /// Class that performs the goal calculation
-   Parameter           *goalParm;
+   //Parameter           *goalParm;
    
    // Parameter IDs
    enum {
@@ -134,11 +147,11 @@ protected:
                      PARAMETER_TYPE[AchieveParamCount - GmatCommandParamCount];
 
 
-   bool                InterpretParameter(const std::string text,
-                                 std::string &paramType,
-                                 std::string &paramObj,
-                                 std::string &parmSystem);
-   bool                ConstructGoal(const char* str);
+   //bool                InterpretParameter(const std::string text,
+   //                              std::string &paramType,
+   //                              std::string &paramObj,
+   //                              std::string &parmSystem);
+   //bool                ConstructGoal(const char* str);
 };
 
 
