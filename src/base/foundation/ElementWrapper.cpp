@@ -23,7 +23,7 @@
 #include "GmatBase.hpp"
 #include "ElementWrapper.hpp"
 
-#define DEBUG_RENAME
+//#define DEBUG_RENAME
 
 #ifdef DEBUG_RENAME
    #include "MessageInterface.hpp"
