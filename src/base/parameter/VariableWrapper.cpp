@@ -25,6 +25,8 @@
 
 #include "MessageInterface.hpp"
 
+//#define DEBUG_VAR_WRAPPER
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -146,7 +148,6 @@ bool VariableWrapper::RenameObject(const std::string &oldName,
 {
    ElementWrapper::RenameObject(oldName, newName);
    // now rebuild the description string from the refObjectNames
-   // first, rename things in the row and column wrappers
    description = refObjectNames[0];
    return true;
 }
@@ -164,6 +165,11 @@ bool VariableWrapper::RenameObject(const std::string &oldName,
 //---------------------------------------------------------------------------
 Real VariableWrapper::EvaluateReal() const
 {
+   #ifdef DEBUG_VAR_WRAPPER
+      MessageInterface::ShowMessage("In VarWrapper::EvalReal - value is %.12f\n",
+      (var->EvaluateReal()));
+   #endif
+   
    if (var == NULL)
       throw ParameterException(
       "Cannot return value of Variable - pointer is NULL\n");
@@ -181,6 +187,11 @@ Real VariableWrapper::EvaluateReal() const
 //---------------------------------------------------------------------------
 bool VariableWrapper::SetReal(const Real toValue)
 {
+   #ifdef DEBUG_VAR_WRAPPER
+      MessageInterface::ShowMessage("In VarWrapper::SetReal - setting to %.12f\n",
+      toValue);
+   #endif
+   
    if (var == NULL)
       throw ParameterException(
       "Cannot set value of Variable - pointer is NULL\n");

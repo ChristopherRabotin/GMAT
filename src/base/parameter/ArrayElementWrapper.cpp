@@ -326,6 +326,10 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
       // get the row value
       Real rowVal        = row->EvaluateReal();
       Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage(
+            "AEWrapper::SetReal - row evaluates to %d\n", (Integer) rowNearestInt);
+      #endif
       if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
       {
          std::string errmsg = "Cannot evaluate ArrayElement - ";
@@ -336,6 +340,10 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
       // get the column value
       Real colVal        = column->EvaluateReal();
       Real colNearestInt = GmatMathUtil::NearestInt(colVal);
+      #ifdef DEBUG_AE_WRAPPER
+         MessageInterface::ShowMessage(
+            "AEWrapper::SetReal - col evaluates to %d\n", (Integer) colNearestInt);
+      #endif
       if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
       {
          std::string errmsg = "Cannot evaluate ArrayElement - ";

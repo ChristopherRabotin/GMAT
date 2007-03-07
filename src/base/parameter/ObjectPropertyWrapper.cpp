@@ -26,7 +26,8 @@
 
 #include "MessageInterface.hpp"
 
-#define DEBUG_RENAME_OBJ_PROP
+//#define DEBUG_RENAME_OBJ_PROP
+//#define DEBUG_OBJ_PROP
 
 //---------------------------------
 // static data
@@ -130,10 +131,17 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
 //      errmsg += "\" was expected.\n";
 //      throw ParameterException(errmsg);
 //   }
+
    if (obj->GetName() == refObjectNames[0])
    {
       object = obj;
       propID = object->GetParameterID(propIDNames[0]);
+      #ifdef DEBUG_OBJ_PROP
+         MessageInterface::ShowMessage(
+         "In ObjPropWrapper::SetRefObject, setting to object %s\n",
+         obj->GetName().c_str());
+         MessageInterface::ShowMessage("      and propID = %d\n", propID);
+      #endif
       return true;
    }
    else return false;
@@ -198,6 +206,10 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    try
    {
       itsValue = object->GetRealParameter(propID);
+      #ifdef DEBUG_OBJ_PROP
+         MessageInterface::ShowMessage(
+         "In ObjPropWrapper::EvaluateReal, value = %.12f\n", itsValue);
+      #endif
    }
    catch (BaseException &be)
    {
@@ -228,6 +240,10 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    try
    {
       object->SetRealParameter(propID, toValue);
+      #ifdef DEBUG_OBJ_PROP
+         MessageInterface::ShowMessage(
+         "In ObjPropWrapper::SetReal, value has been set to %.12f\n", toValue);
+      #endif
    }
    catch (BaseException &be)
    {
@@ -240,7 +256,6 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    return true;
 }
 
-//---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------
 /**
@@ -273,4 +288,9 @@ void ObjectPropertyWrapper::SetupWrapper()
    }
    refObjectNames.push_back(owner);
    propIDNames.push_back(type);
+   #ifdef DEBUG_OBJ_PROP
+      MessageInterface::ShowMessage(
+      "In ObjPropWrapper::SetupWrapper, owner = %s, type = %s\n", 
+      owner.c_str(), type.c_str());
+   #endif
 }

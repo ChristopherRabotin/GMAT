@@ -25,6 +25,8 @@
 
 #include "MessageInterface.hpp"
 
+//#define DEBUG_PW
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -145,6 +147,10 @@ Real ParameterWrapper::EvaluateReal() const
    if (param == NULL)
       throw ParameterException(
       "Cannot return value of Parameter - pointer is NULL\n");
+   #ifdef DEBUG_PW
+      MessageInterface::ShowMessage(
+      "In ParameterWrapper::EvalReal, value is %.12f\n", param->EvaluateReal());
+   #endif
    return param->EvaluateReal();
 }
    
@@ -179,14 +185,7 @@ bool ParameterWrapper::RenameObject(const std::string &oldName,
                                     const std::string &newName)
 {
    ElementWrapper::RenameObject(oldName, newName);
-   // now rebuild the description string from the refObjectNames
-   //Integer pos = description.find(".");
-   //if (pos != (Integer) std::string::npos)
-   //{
-   //   description.replace(0,pos,refObjectNames[0]);
-   //}
-   //else
-      description = refObjectNames[0];  
+   description = refObjectNames[0];  
    return true;
 }
                                        
@@ -201,15 +200,6 @@ bool ParameterWrapper::RenameObject(const std::string &oldName,
 //---------------------------------------------------------------------------
 void ParameterWrapper::SetupWrapper()
 {
-   // look for a '.' - if it's there only save the object name 
-//   Integer pos = description.find(".");
-//   if (pos != (Integer) std::string::npos)
-//   {
-//      std::string sub = description.substr(0,pos-1);
-//      MessageInterface::ShowMessage("the sub = %s\n", sub.c_str());
-//      refObjectNames.push_back(sub);
-//   }
-//   else   // otherwise, save the whole thing
-      refObjectNames.push_back(description);
+   refObjectNames.push_back(description);
 }
 
