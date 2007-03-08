@@ -807,8 +807,12 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == ReportStyle)
    {
+//      std::string stylelist ;
+      
       for (Integer i = NORMAL_STYLE; i < MaxStyle; ++i)
       {
+//         stylelist += ", " + STYLE_TEXT[i-NORMAL_STYLE];
+         
          if (value == STYLE_TEXT[i-NORMAL_STYLE])
          {
             textFileMode = value;
@@ -816,19 +820,26 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
             return true;
          }
       }
-      throw SolverException("Requested solver report style, " + value + 
-         ", is nor supported for " + typeName + " solvers.");
+      throw SolverException(
+         "The value of \"" + value + "\" for field \"Report Style\""
+         " on object \"" + instanceName + "\" is not an allowed value.\n"
+         "The allowed values are: [Normal, Concise, Verbose, Debug].");
+//         "The allowed values are: [ " + stylelist + " ]. ");
+//      throw SolverException("Requested solver report style, " + value + 
+//         ", is nor supported for " + typeName + " solvers.");
    }
-    if (id == solverTextFileID) {
-        solverTextFile = value;
-        return true;
-    }
-        
-    if (id == variableNamesID) {
-        variableNames.push_back(value);
-        return true;
-    }
-    
+   
+   if (id == solverTextFileID) 
+   {
+      solverTextFile = value;
+      return true;
+   }
+
+   if (id == variableNamesID) 
+   {
+      variableNames.push_back(value);
+      return true;
+   }
 
    return GmatBase::SetStringParameter(id, value);
 }
