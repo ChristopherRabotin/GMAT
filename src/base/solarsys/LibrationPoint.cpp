@@ -512,11 +512,17 @@ bool LibrationPoint::SetStringParameter(const Integer id,
 {     
    if (id == PRIMARY_BODY_NAME)             
    {
+      if (value == secondaryBodyName)
+         throw SolarSystemException(
+            "The primary body and secondary body can not be the same.");
       primaryBodyName = value;
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
+      if (value == primaryBodyName)
+         throw SolarSystemException(
+            "The primary body and secondary body can not be the same.");
       secondaryBodyName = value;
       return true;
    }
@@ -524,12 +530,10 @@ bool LibrationPoint::SetStringParameter(const Integer id,
    {
       if ((value != "L1") && (value != "L2") && (value != "L3") &&
           (value != "L4") && (value != "L5"))
-//         throw SolarSystemException(
-//               "Invalid libration point");
-            throw SolarSystemException(
-               "The value of \"" + value + "\" for field \"Libration\""
-               " on object \"" + instanceName + "\" is not an allowed value.\n"
-               "The allowed values are: [ L1, L2, L3, L4, L5 ]. ");
+         throw SolarSystemException(
+            "The value of \"" + value + "\" for field \"Libration\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [ L1, L2, L3, L4, L5 ]. ");
       whichPoint = value;
       return true;
    }
