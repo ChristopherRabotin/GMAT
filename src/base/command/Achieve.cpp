@@ -23,7 +23,7 @@
 #include "Moderator.hpp" 
 #include "StringUtil.hpp"  // for ToReal()
 
-//#define DEBUG_ACHIEVE_PARSE 1
+#define DEBUG_ACHIEVE_PARSE 1
 //#define DEBUG_ACHIEVE_INIT 1
 //#define DEBUG_ACHIEVE_EXEC 1
 //#define DEBUG_ACHIEVE_PARAMS
@@ -78,7 +78,7 @@ Achieve::Achieve() :
    //achieveArrRowParm       (NULL),
    //achieveArrColParm       (NULL),   
    achieve                 (NULL),
-   toleranceName           (""),
+   toleranceName           ("0.1"),
    tolerance               (NULL),
    //goalObject              (NULL),
    //parmId                  (-1),
@@ -705,6 +705,9 @@ bool Achieve::InterpretAction()
       MessageInterface::ShowMessage(
          "Achieve:  setting achieveName to %s\n", achieveName.c_str());
    #endif
+   
+   // if there are no more chunks, just return
+   if (currentChunks.size() == (Integer) 1) return true;
    
    std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
    // Now deal with the settable parameters
