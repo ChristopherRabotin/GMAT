@@ -109,7 +109,7 @@ void LibrationPointPanel::Create()
      
       // label for primary body combobox
       wxStaticText *primaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Primary body:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Primary Body:"), wxDefaultPosition, wxDefaultSize, 0);
       
       // combo box for avaliable bodies 
       primaryBodyCB = 
@@ -117,7 +117,7 @@ void LibrationPointPanel::Create()
       
       // label for secondary body combobox
       wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Secondary body:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Secondary Body:"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for avaliable bodies 
       secondaryBodyCB = 
@@ -125,7 +125,7 @@ void LibrationPointPanel::Create()
 
       // label for libration point combobox
       wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
-         wxT("Libration point:"), wxDefaultPosition, wxDefaultSize, 0);
+         wxT("Libration Point:"), wxDefaultPosition, wxDefaultSize, 0);
         
       // combo box for libration points 
       librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
