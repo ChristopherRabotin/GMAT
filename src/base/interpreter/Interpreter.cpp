@@ -4346,7 +4346,8 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          std::string type, owner, dep;
          GmatStringUtil::ParseParameter(desc, type, owner, dep);
          // if it's not a valid object, then see if it's a parameter
-         if (theModerator->GetObject(owner) == NULL)
+         GmatBase *theObj = theModerator->GetObject(owner);
+         if (theObj == NULL)
          {
             bool isParm = theModerator->IsParameter(desc);
             if (isParm)
@@ -4395,6 +4396,38 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             }
             else
             {
+              // if there is no such field for that object, it is a parameter
+              bool isValidProperty = true;
+              try
+              {
+                 theObj->GetParameterID(type);
+              }
+              catch (BaseException &be)
+              {
+                 isValidProperty = false;
+                 Parameter *param = CreateParameter(desc);
+                  //bool isParm = theModerator->IsParameter(desc);
+                  //if (isParm)
+                  if (param)
+                  {
+                     ew = new ParameterWrapper();
+                     itsType = Gmat::PARAMETER_OBJECT;
+                     #ifdef DEBUG_WRAPPERS
+                        MessageInterface::ShowMessage(
+                              "In Interpreter, created a ParameterWrapper for \"%s\"\n",
+                              desc.c_str(), "\"\n");
+                     #endif
+                  }
+                  else // there is an error
+                  {
+                     InterpreterException ex("\"" + desc + "\"" + 
+                        " is not a valid object property or parameter");
+                     HandleError(ex);
+                     return NULL;
+                  }
+              }
+              if (isValidProperty)
+              {
                ew = new ObjectPropertyWrapper();
                itsType = Gmat::OBJECT_PROPERTY;
                #ifdef DEBUG_WRAPPERS
@@ -4402,6 +4435,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
                         "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
                         desc.c_str(), "\"\n");
                #endif
+              }
             }
          }
       }
