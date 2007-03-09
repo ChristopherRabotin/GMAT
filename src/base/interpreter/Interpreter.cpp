@@ -1200,12 +1200,12 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       cb->SetCondition(parts[i], parts[i+1], parts[i+2]);
       
       // Set 1st variable in condition, if exist
-      if (!SetCommandParameter(cmd, parts[i], "The variable in Condition", true, true))
-         retval = false;
+      //if (!SetCommandParameter(cmd, parts[i], "The variable in Condition", true, true))
+      //   retval = false;
       
       // Set 2nd variable in condition, if exist
-      if (!SetCommandParameter(cmd, parts[i+2], "The variable in Condition", true, true))
-         retval = false;
+      //if (!SetCommandParameter(cmd, parts[i+2], "The variable in Condition", true, true))
+      //   retval = false;
       
       if (count > i+3)
       {
