@@ -24,6 +24,7 @@
 #include "gmatdefs.hpp"
 #include "BranchCommand.hpp"
 #include "Parameter.hpp"
+#include "ElementWrapper.hpp"
 
 /**
  * Command that manages processing for entry to the conditional
@@ -62,6 +63,10 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                      const std::string &oldName,
                                      const std::string &newName);
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
+   virtual const StringArray&
+                       GetRefObjectNameArray(const Gmat::ObjectType type);
    
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name);
@@ -104,7 +109,14 @@ public:
    //virtual const StringArray& 
    //                     GetStringArrayParameter(const std::string &label, 
    //                                             const Integer index) const; 
-   
+
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
+
+   virtual void        RunComplete();   
    
 protected:
 
@@ -125,7 +137,7 @@ protected:
       OPERATOR_STRINGS,
       RIGHT_HAND_STRINGS,
       LOGICAL_OPERATORS,
-      NUMBER_OF_REF_PARAMS,
+      //NUMBER_OF_REF_PARAMS,  // not needed for Parameters in Command mods
       //REF_PARAMETER_NAMES,
       ConditionalBranchParamCount
    };
@@ -163,24 +175,28 @@ protected:
    Integer                    numberOfLogicalOps;
    /// Arrays representing conditions
    StringArray                lhsList;
-   StringArray                lhsParamList;
+   /// vector of pointers to ElementWrappers for the lhs
+   std::vector<ElementWrapper*> lhsWrappers;
+   //StringArray                lhsParamList;
    StringArray                opStrings;
    std::vector<OpType>        opList;
    StringArray                rhsList;
-   StringArray                rhsParamList;
+    /// vector of pointers to ElementWrappers for the rhs
+   std::vector<ElementWrapper*> rhsWrappers;
+   //StringArray                rhsParamList;
    StringArray                logicalOpStrings;
    std::vector<LogicalOpType> logicalOpList;
    /// list of parameter objects used by the conditions
-   std::vector<Parameter*>    params;
+   //std::vector<Parameter*>    params;
    //StringArray                paramStrings;
    /// Row of lhs Array parameter
-   std::vector<Integer>       lhsParamRows;
+   //std::vector<Integer>       lhsParamRows;
    /// Col of lhs Array parameter
-   std::vector<Integer>       lhsParamCols;
+   //std::vector<Integer>       lhsParamCols;
    /// Row of rhs Array parameter
-   std::vector<Integer>       rhsParamRows;
+   //std::vector<Integer>       rhsParamRows;
    /// Col of rhs Array parameter
-   std::vector<Integer>       rhsParamCols;
+   //std::vector<Integer>       rhsParamCols;
    
 };
 #endif  // ConditionalBranch_hpp
