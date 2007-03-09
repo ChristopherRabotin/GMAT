@@ -310,6 +310,7 @@ void IfPanel::SaveData()
             }    
          }
       }
+      theGuiInterpreter->ValidateCommand(theIfCommand);
    }
    catch (BaseException &e)
    {

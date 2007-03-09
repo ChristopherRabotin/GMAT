@@ -313,6 +313,7 @@ void WhilePanel::SaveData()
             }    
          }
       }
+      theGuiInterpreter->ValidateCommand(theWhileCommand);
    }
    catch (BaseException &e)
    {
