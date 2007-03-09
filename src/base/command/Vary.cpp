@@ -890,7 +890,12 @@ bool Vary::InterpretAction()
    std::string lhs, rhs;
    if (!SeparateEquals(currentChunks[0], lhs, rhs))
       // Variable takes default initial value
-      rhs = "0.0";
+      //rhs = "0.0";
+   {
+      throw CommandException("The variable \"" + lhs + 
+         "\" is missing an initial value required for a " + typeName + 
+         " command.\n");
+   }
       
    variableName = lhs;
    variableID = -1;
@@ -923,18 +928,22 @@ bool Vary::InterpretAction()
    for (StringArray::iterator i = currentChunks.begin(); 
         i != currentChunks.end(); ++i)
    {
-      SeparateEquals(*i, lhs, rhs);
+      bool isOK = SeparateEquals(*i, lhs, rhs);
       #ifdef DEBUG_VARY_PARSING
          MessageInterface::ShowMessage("Setting Vary properties\n");
          MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
       #endif
-
+      if (!isOK || lhs.empty() || rhs.empty())
+         throw CommandException("The setting \"" + lhs + 
+            "\" is missing a value required for a " + typeName + 
+            " command.\n");
+      
       if (IsSettable(lhs))
          SetStringParameter(GetParameterID(lhs), rhs);
       else
-         throw CommandException("Setting \"" + lhs + 
-            "\" is missing a value required for a " + typeName + 
-            " command.\nSee the line \"" + generatingString +"\"\n");
+         throw CommandException("The setting \"" + lhs + 
+            "\" is not a valid setting for a " + typeName + 
+            " command.\n");
    }
    
    return true;
