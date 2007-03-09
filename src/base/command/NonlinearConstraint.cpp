@@ -699,6 +699,8 @@ bool NonlinearConstraint::InterpretAction()
       MessageInterface::ShowMessage("... operator = %s\n", OP_STRINGS[(Integer)op].c_str());
       MessageInterface::ShowMessage("... arg2Name = %s\n", arg2Name.c_str());
    #endif
+   
+   /// @todo Handle settables here, when Tolerance is added 
    /* this is the old code
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
       MessageInterface::ShowMessage("NLC:InterpretAction: generatingString = %s\n",
