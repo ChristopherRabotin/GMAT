@@ -11,8 +11,7 @@
 // framework.
 //
 // This code is Copyright (c) 2003, Thinking Systems, Inc.
-// Use and modification of the code is permitted following the terms of the 
-// LGPL.
+// Licensed under the Academic Free License version 3.0.
 // 
 /**
  * Implementation for the custom extension to the wxTree class.

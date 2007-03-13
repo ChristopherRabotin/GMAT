@@ -1,4 +1,26 @@
 // $Header$
+//------------------------------------------------------------------------------
+//                              TsPlotCanvas
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// Author: Darrel Conway
+// Created: 2005/05/20
+//
+// This code is Copyright (c) 2005, Thinking Systems, Inc.
+// Licensed under the Academic Free License version 3.0.
+/**
+ * Declares the TsPlotCanvas window.
+ *
+ * @note The TsPlotCanvas subsystem is a generic plotting package developed by
+ *       Thinking Systems using company resources.  Because the package was
+ *       developed independently from the GMAT project, it uses native C++
+ *       data types (e.g. int rather than Integer, double rather than Real), and
+ *       in that respect will look different from other pieces of the GMAT code
+ *       base.
+ */
+//------------------------------------------------------------------------------
+
 
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"

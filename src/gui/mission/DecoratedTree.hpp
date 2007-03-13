@@ -10,9 +10,8 @@
 // Developed by Thinking Systems, Inc. to support the internal Unit Test 
 // framework.
 //
-// This code is Copyright (c) 2003, Thinking SYstems, Inc.
-// Use and modification of the code is permitted following the terms of the 
-// LGPL.
+// This code is Copyright (c) 2003, Thinking Systems, Inc.
+// Licensed under the Academic Free License version 3.0.
 // 
 /**
  * A custom extension to the wxTree class
