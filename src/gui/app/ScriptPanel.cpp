@@ -14,6 +14,7 @@
 
 #include "ScriptPanel.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include <wx/file.h>              // for wxFile
 #include <wx/gdicmn.h>            // for wxColourDatabase
 
@@ -67,8 +68,12 @@ void ScriptPanel::Create()
    int bsize = 3; // border size
    
    // create sizers
-   wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
-   wxStaticBoxSizer *topSizer = new wxStaticBoxSizer( topStaticBox, wxHORIZONTAL );
+   //wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
+   //wxStaticBoxSizer *topSizer = new wxStaticBoxSizer( topStaticBox, wxHORIZONTAL );
+   
+   GmatStaticBoxSizer *topSizer =
+      new GmatStaticBoxSizer( wxHORIZONTAL, this, "");
+   
    wxGridSizer *bottomSizer = new wxGridSizer( 1, 0, 0 );
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    
