@@ -1254,6 +1254,8 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
 //------------------------------------------------------------------------------
 void ResourceTree::OnItemRightClick(wxTreeEvent& event)
 {
+   //wxWidgets-2.6.3 does not need this but wxWidgets-2.8.0 needs to SelectItem
+   SelectItem(event.GetItem());
    ShowMenu(event.GetItem(), event.GetPoint());
 }
 
@@ -1380,8 +1382,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          bool hasScriptFile = false;
          
          while (scriptId.IsOk())
-         {
-            
+         {            
             if (GetItemImage(scriptId) != GmatTree::ICON_FOLDER)
             {
                hasScriptFile = true;
