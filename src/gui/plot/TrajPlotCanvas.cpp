@@ -156,8 +156,17 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
                                const wxPoint& pos, const wxSize& size,
                                const wxString &csName, SolarSystem *solarSys,
                                const wxString& name, long style)
+   #ifdef __USE_WX280_GL__
+   : wxGLCanvas(parent, id, 0, pos, size, style, name)
+   #else
    : wxGLCanvas(parent, id, pos, size, style, name)
-{    
+   #endif
+{
+   
+   #ifdef __USE_WX280_GL__
+   mGlContext = new wxGLContext(this);
+   #endif
+   
    // initalize data members
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theStatusBar = GmatAppData::GetMainFrame()->GetStatusBar();
@@ -1716,10 +1725,16 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
    wxPaintDC dc(this);
    
 #ifndef __WXMOTIF__
+   #ifndef __USE_WX280_GL__
    if (!GetContext()) return;
+   #endif
 #endif
-   
+
+   #ifdef __USE_WX280_GL__
+   SetCurrent(*mGlContext);
+   #else
    SetCurrent();    
+   #endif
    
    if (mDrawWireFrame)
    {
@@ -1759,7 +1774,13 @@ void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
    {
       //loj: need this to make picture not to stretch to canvas
       ChangeProjection(nWidth, nHeight, mAxisLength);
+
+      #if __USE_WX280_GL__
+      SetCurrent(*mGlContext);
+      #else
       SetCurrent();
+      #endif
+      
       glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
    }
 }

@@ -163,6 +163,10 @@ private:
    static const float RADIUS_ZOOM_RATIO;// = 2.2;
    static const float DEFAULT_DIST;// = 30000.0;
    static const int UNKNOWN_OBJ_ID;// = -999;
+
+   #ifdef __USE_WX280__
+   wxGLContext *mGlContext;
+   #endif
    
    GuiInterpreter *theGuiInterpreter;
    wxStatusBar *theStatusBar;
