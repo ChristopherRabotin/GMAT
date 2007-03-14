@@ -202,7 +202,11 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
          // First check to see if the user is dragging the legend
          if (hasLegend)
          {
+            #ifdef __USE_WX280__
+            if (legendRect.Contains(pt))
+            #else
             if (legendRect.Inside(pt))
+            #endif
                movingLegend = true;
          }
          if (!movingLegend)
@@ -211,7 +215,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
                MessageInterface::ShowMessage("Down at [%ld  %ld]\n",
                   mouseRect.x, mouseRect.y);
             #endif
+               
+            #ifdef __USE_WX280__
+            if (plotArea.Contains(pt))
+            #else
             if (plotArea.Inside(pt))
+            #endif
                zooming = true;
          }
       }
@@ -295,7 +304,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             dc.DrawLine(oldX, mouseRect.y, oldX, oldY);
             dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
             dc.SetLogicalFunction(logfun);
+            
+            #ifdef __USE_WX280__
+            if (plotArea.Contains(pt))
+            #else
             if (plotArea.Inside(pt))
+            #endif
                if ((mouseRect.width > xSensitivity) &&
                    (mouseRect.height > ySensitivity))
                {
@@ -367,7 +381,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
          (*i)->lastPointPlotted = 0;
 
    // Now draw everything
-   dc.BeginDrawing();
+   //wx280deprecated->dc.BeginDrawing();
 
    if (rescaled || drawAll)
    {   
@@ -387,7 +401,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
          DrawLegend(dc);
    }
    
-   dc.EndDrawing();
+   //wx280deprecated->dc.EndDrawing();
    dataUpdated = false;
 }
 
@@ -1061,7 +1075,7 @@ void TsPlotCanvas::ClearAllCurveData()
    dc.DestroyClippingRegion();
    
    // Now draw other area
-   dc.BeginDrawing();
+   //wx280deprecated->dc.BeginDrawing();
 
    DrawAxes(dc);
    DrawLabels(dc);
@@ -1072,7 +1086,7 @@ void TsPlotCanvas::ClearAllCurveData()
    if (hasLegend)
       DrawLegend(dc);
 
-   dc.EndDrawing();
+   //wx280deprecated->dc.EndDrawing();
    dataUpdated = false;
 }
 
