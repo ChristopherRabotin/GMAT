@@ -796,7 +796,10 @@ void FileManager::AddAvailablePotentialFiles()
 FileManager::FileManager()
 {  
    MessageInterface::SetLogEnable(false); // so that debug can be written from here
+   
+   #if DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
+   #endif
    
    AddFileType("ROOT_PATH", "./");
    mStartupFileName = "gmat_startup_file.txt";
