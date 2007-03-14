@@ -271,7 +271,9 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
     
     GetSize(&w, &h);
     wxClientDC dc(this);
-    dc.BeginDrawing();
+
+    //wxWidgets-2.6.3:deprecated->dc.BeginDrawing();
+    
     while (current > 0) {
         visible = GetBoundingRect(current, bound, TRUE);
         dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
@@ -290,7 +292,8 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
         DrawOutline(current);
         current = GetNextChild(id, cookie);
     }
-    dc.EndDrawing();
+    
+    //wxWidgets-2.6.3:deprecated->dc.EndDrawing();
 }
 
 
@@ -314,58 +317,61 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
     GetSize(&w, &h);
 
     wxClientDC dc(this);
-    dc.BeginDrawing();
+
+    //wxWidgets-2.6.3:deprecated->dc.BeginDrawing();
     
     while (current > 0) {
-        visible = GetBoundingRect(current, bound, TRUE);
-        dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
+       visible = GetBoundingRect(current, bound, TRUE);
+       dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
 
-        if ((visible)) {                // Draw decorations on visible nodes
-            for (int i = 0; i < boxCount; ++i) {
-//                  lft = w-20-boxWidth*(i+1);
-//                  rt  = w-20-boxWidth*i;
-                lft = w-offset-boxWidth*(i+1);
-                rt  = w-offset-boxWidth*i;
-                top = bound.y;
-                btm = bound.y + rowHeight;
+       if ((visible)) {                // Draw decorations on visible nodes
+          for (int i = 0; i < boxCount; ++i) {
+             //lft = w-20-boxWidth*(i+1);
+             //rt  = w-20-boxWidth*i;
+             lft = w-offset-boxWidth*(i+1);
+             rt  = w-offset-boxWidth*i;
+             top = bound.y;
+             btm = bound.y + rowHeight;
                 
-                dc.DrawLine(lft, top, lft, btm);
-                dc.DrawLine(rt, top, rt, btm);
-                dc.DrawLine(lft, top, rt, top);
-                dc.DrawLine(lft, btm, rt, btm);
-                if (!boxData.empty())
-                {
-//                    MessageInterface::ShowMessage("Box not empty\n");
-                    // Should be DrawText, but the wx build for Dev-C++ has a
-                    // bug with that method
-//                    dc.DrawRotatedText("Ready", lft+2, top, 0);
-                    int boxDataNumber = i+lineNumber*boxCount;
-//                    MessageInterface::ShowMessage("Box data number %d\n", boxDataNumber);
+             dc.DrawLine(lft, top, lft, btm);
+             dc.DrawLine(rt, top, rt, btm);
+             dc.DrawLine(lft, top, rt, top);
+             dc.DrawLine(lft, btm, rt, btm);
+             if (!boxData.empty())
+             {
+                //MessageInterface::ShowMessage("Box not empty\n");
+                // Should be DrawText, but the wx build for Dev-C++ has a
+                // bug with that method
+                //dc.DrawRotatedText("Ready", lft+2, top, 0);
+                int boxDataNumber = i+lineNumber*boxCount;
+                //MessageInterface::ShowMessage("Box data number %d\n", boxDataNumber);
                     
-                    if (boxDataNumber < (int)boxData.size())
-                    {
-                      if (boxData[boxDataNumber])
-                      {
-                          dc.DrawRotatedText(boxData[i+lineNumber*boxCount]->c_str(),
-                                             lft+2, top, 0);
-//                          MessageInterface::ShowMessage("Drew text\nline number=%d\nboxcount=%d\ni=%d\n", lineNumber, boxCount, i);
-                      }
-                    }
+                if (boxDataNumber < (int)boxData.size())
+                {
+                   if (boxData[boxDataNumber])
+                   {
+                      dc.DrawRotatedText(boxData[i+lineNumber*boxCount]->c_str(),
+                                         lft+2, top, 0);
+                      //MessageInterface::ShowMessage
+                      //("Drew text\nline number=%d\nboxcount=%d\ni=%d\n", lineNumber, boxCount, i);
+                   }
                 }
-            }
-        }
-        
-        if (GetChildrenCount(current) > 0) {
-            ++lineNumber;
-            DrawBoxes(current);
-            --lineNumber;
-        }
-        
+             }
+          }
+       }
+       
+       if (GetChildrenCount(current) > 0) {
+          ++lineNumber;
+          DrawBoxes(current);
+          --lineNumber;
+       }
+       
         current = GetNextChild(id, cookie);
         ++lineNumber;
     }
-//    MessageInterface::ShowMessage("end drawing\n");
-    dc.EndDrawing();
+
+    //MessageInterface::ShowMessage("end drawing\n");
+    //wxWidgets-2.6.3:deprecated->dc.EndDrawing();
 }
 
 
