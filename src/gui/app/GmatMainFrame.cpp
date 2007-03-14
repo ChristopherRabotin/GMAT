@@ -2749,7 +2749,8 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
   data.SetInitialFont(GmatAppData::GetFont());
 //  data.SetColour(canvasTextColour);
 
-  wxFontDialog dialog(this, &data);
+  //wxWidgets2.6.3:deprecated->wxFontDialog dialog(this, &data);
+  wxFontDialog dialog(this, data);
   if (dialog.ShowModal() == wxID_OK)
   {
     wxFontData retData = dialog.GetFontData();
