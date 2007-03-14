@@ -890,6 +890,11 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, const std::string &wi
 
    if (goalName == withName)
    {
+      if (toWrapper->GetWrapperType() == Gmat::NUMBER)
+      {
+         throw CommandException(
+            "Achieve error: goal cannot be a number\n");
+      }
       goal = toWrapper;
       retval = true;
    }
