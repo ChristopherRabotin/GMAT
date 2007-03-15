@@ -52,6 +52,7 @@ ObjectPropertyWrapper::ObjectPropertyWrapper() :
    object        (NULL),
    propID        (-1)
 {
+   wrapperType = Gmat::OBJECT_PROPERTY;
 }
 
 //---------------------------------------------------------------------------

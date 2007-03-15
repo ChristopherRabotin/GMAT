@@ -44,6 +44,7 @@ public:
    
    virtual void               SetDescription(const std::string &str);
    virtual std::string        GetDescription() const;
+   Gmat::WrapperDataType      GetWrapperType() const;
    
    virtual const StringArray& GetRefObjectNames();
    virtual bool               SetRefObject(GmatBase *obj);
@@ -85,8 +86,10 @@ protected:
 
    static const Real UNDEFINED_REAL;
    /// Description of the wrapper
-   std::string     description;
-   StringArray     refObjectNames;
+   std::string           description;
+   StringArray           refObjectNames;
+   
+   Gmat::WrapperDataType wrapperType;
 
 //---------------------------------------------------------------------------
 //  void SetupWrapper()

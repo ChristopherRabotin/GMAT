@@ -47,7 +47,8 @@
 NumberWrapper::NumberWrapper() :
    ElementWrapper()
 {
-   value = ElementWrapper::UNDEFINED_REAL;
+   value       = ElementWrapper::UNDEFINED_REAL;
+   wrapperType = Gmat::NUMBER;
 }
 
 //---------------------------------------------------------------------------

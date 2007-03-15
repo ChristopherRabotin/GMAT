@@ -49,6 +49,7 @@ VariableWrapper::VariableWrapper() :
    ElementWrapper(),
    var           (NULL)
 {
+   wrapperType = Gmat::VARIABLE;
 }
 
 //---------------------------------------------------------------------------

@@ -49,6 +49,7 @@ ParameterWrapper::ParameterWrapper() :
    ElementWrapper(),
    param         (NULL)
 {
+   wrapperType = Gmat::PARAMETER_OBJECT;
 }
 
 //---------------------------------------------------------------------------

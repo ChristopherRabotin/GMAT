@@ -48,7 +48,8 @@ const Real ElementWrapper::UNDEFINED_REAL = -999.99;
  */
 //---------------------------------------------------------------------------
 ElementWrapper::ElementWrapper() :
-   description  ("")
+   description  (""),
+   wrapperType  (Gmat::NUMBER)
 {
 }
 
@@ -64,7 +65,8 @@ ElementWrapper::ElementWrapper() :
 //---------------------------------------------------------------------------
 ElementWrapper::ElementWrapper(const ElementWrapper &er) :
    description    (er.description),
-   refObjectNames (er.refObjectNames)
+   refObjectNames (er.refObjectNames),
+   wrapperType    (er.wrapperType)
 {
 }
 
@@ -86,6 +88,7 @@ const ElementWrapper& ElementWrapper::operator=(const ElementWrapper &er)
 
    description    = er.description;
    refObjectNames = er.refObjectNames;
+   wrapperType    = er.wrapperType;
 
    return *this;
 }
@@ -129,6 +132,21 @@ void ElementWrapper::SetDescription(const std::string &str)
 std::string ElementWrapper::GetDescription() const
 {
    return description;
+}
+
+//------------------------------------------------------------------------------
+//  Gmat::WrapperDataType  GetWrapperType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the wrapper type for the ElementWrapper object.
+ *
+ * @return wrapper type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::WrapperDataType ElementWrapper::GetWrapperType() const
+{
+   return wrapperType;
 }
 
 //------------------------------------------------------------------------------

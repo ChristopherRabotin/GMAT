@@ -57,6 +57,7 @@ ArrayElementWrapper::ArrayElementWrapper() :
    rowName       (""),
    columnName    ("")
 {
+   wrapperType = Gmat::ARRAY_ELEMENT;
 }
 
 //---------------------------------------------------------------------------
