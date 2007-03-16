@@ -24,6 +24,7 @@
 #include "Star.hpp"
 #include "Planet.hpp"
 #include "Moon.hpp"
+#include "StringUtil.hpp"     // for ToString()
 
 //---------------------------------
 // static data
@@ -652,7 +653,14 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
 bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 {
    if (intvl < 0.0)
-   throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
+	{
+	   SolarSystemException sse;
+	   sse.SetDetails(errorMessageFormat.c_str(),
+	      GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
+	      "Ephemeris Update Interval", "Real Number >= 0.0");
+	   throw sse;
+	}
+//   throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
    // Set it for each of the bodies
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
