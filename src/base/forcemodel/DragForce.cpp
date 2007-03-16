@@ -990,7 +990,7 @@ Real DragForce::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real DragForce::SetRealParameter(const Integer id, const Real value)
 {
-   ForceModelException fme;
+//   ForceModelException fme;
    if (id == fluxID)
    {
       if (value >= 0.0)
