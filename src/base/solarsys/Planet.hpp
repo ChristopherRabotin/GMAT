@@ -71,8 +71,10 @@ public:
    virtual bool          SetAnalyticEpoch(const A1Mjd &toTime);
    virtual bool          SetAnalyticElements(const Rvector6 &kepl);
    
-   virtual Real          GetUpdateInterval() const;
-   virtual bool          SetUpdateInterval(Real val);
+   virtual Real          GetNutationUpdateInterval() const;
+   virtual bool          SetNutationUpdateInterval(Real val);
+//   virtual Real          GetUpdateInterval() const;
+//   virtual bool          SetUpdateInterval(Real val);
 
    // inherited from GmatBase
    virtual GmatBase* Clone(void) const;
@@ -110,7 +112,8 @@ protected:
 
    enum
    {
-      UPDATE_INTERVAL = CelestialBodyParamCount,
+//      UPDATE_INTERVAL = CelestialBodyParamCount,
+      NUTATION_UPDATE_INTERVAL = CelestialBodyParamCount,
       PlanetParamCount
    };
    
@@ -136,7 +139,8 @@ protected:
    static const Real                  ANALYTIC_EPOCH[NumberOfPlanets];
    static const Rvector6              ANALYTIC_ELEMENTS[NumberOfPlanets];
                                             
-   Real                               updateInterval;
+//   Real                               updateInterval;
+   Real                               nutationUpdateInterval;
    /// @todo add other ones as needed
 
    void             InitializePlanet(const std::string &cBody);

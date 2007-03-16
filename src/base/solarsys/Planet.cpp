@@ -315,7 +315,8 @@ Planet::PARAMETER_TYPE[PlanetParamCount - CelestialBodyParamCount] =
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name) :
    CelestialBody     ("Planet",name),
-   updateInterval    (60.0)
+   nutationUpdateInterval    (60.0)
+//   updateInterval    (60.0)
 {   
    objectTypeNames.push_back("Planet");
    InitializePlanet(SolarSystem::SUN_NAME);  
@@ -336,7 +337,8 @@ Planet::Planet(std::string name) :
 //------------------------------------------------------------------------------
 Planet::Planet(std::string name, const std::string &cBody) :
    CelestialBody     ("Planet",name),
-   updateInterval    (60.0)
+   nutationUpdateInterval    (60.0)
+//   updateInterval    (60.0)
 {
    objectTypeNames.push_back("Planet");
    InitializePlanet(cBody); 
@@ -355,7 +357,8 @@ Planet::Planet(std::string name, const std::string &cBody) :
 //------------------------------------------------------------------------------
 Planet::Planet(const Planet &pl) :
    CelestialBody  (pl),
-   updateInterval (pl.updateInterval)
+   nutationUpdateInterval (pl.nutationUpdateInterval)
+//   updateInterval (pl.updateInterval)
 {
 }
 
@@ -377,7 +380,8 @@ Planet& Planet::operator=(const Planet &pl)
       return *this;
 
    CelestialBody::operator=(pl);
-   updateInterval = pl.updateInterval;
+   nutationUpdateInterval = pl.nutationUpdateInterval;
+//   updateInterval = pl.updateInterval;
    return *this;
 }
 
@@ -667,12 +671,13 @@ bool Planet::SetAnalyticElements(const Rvector6 &kepl)
    return OK;
 }
 
-Real Planet::GetUpdateInterval() const 
+Real Planet::GetNutationUpdateInterval() const 
 {
-   return updateInterval;
+   return nutationUpdateInterval;
+//   return updateInterval;
 }
 
-bool Planet::SetUpdateInterval(Real val)
+bool Planet::SetNutationUpdateInterval(Real val)
 {
    if (val < 0.0)
    {
@@ -683,7 +688,7 @@ bool Planet::SetUpdateInterval(Real val)
       throw sse;
    }
    
-   updateInterval = val;
+   nutationUpdateInterval = val;
    return true;
 //   if (val < 0.0) return false;
 //   updateInterval = val;
@@ -792,7 +797,8 @@ std::string Planet::GetParameterTypeString(const Integer id) const
 
 bool Planet::IsParameterReadOnly(const Integer id) const
 {
-   if (id == UPDATE_INTERVAL)
+//   if (id == UPDATE_INTERVAL)
+   if (id == NUTATION_UPDATE_INTERVAL)
       return false;
    return CelestialBody::IsParameterReadOnly(id);
 }
@@ -811,7 +817,8 @@ bool Planet::IsParameterReadOnly(const Integer id) const
 //------------------------------------------------------------------------------
 Real Planet::GetRealParameter(const Integer id) const
 {
-   if (id == UPDATE_INTERVAL) return updateInterval;
+//   if (id == UPDATE_INTERVAL) return updateInterval;
+   if (id == NUTATION_UPDATE_INTERVAL) return nutationUpdateInterval;
    return CelestialBody::GetRealParameter(id);
 }
 
@@ -830,9 +837,14 @@ Real Planet::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Planet::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == UPDATE_INTERVAL)
+//   if (id == UPDATE_INTERVAL)
+//   {
+//      updateInterval = value;
+//      return true;
+//   }
+   if (id == NUTATION_UPDATE_INTERVAL)
    {
-      updateInterval = value;
+   	SetNutationUpdateInterval(value);
       return true;
    }
    return CelestialBody::SetRealParameter(id,value);
