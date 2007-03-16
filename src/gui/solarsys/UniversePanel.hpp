@@ -49,13 +49,13 @@ private:
    wxTextCtrl *mFileNameTextCtrl;
    
    wxButton *mBrowseButton;
-   wxButton *addButton;
-   wxButton *removeButton;
-   wxButton *clearButton;
-   wxButton *prioritizeButton;
+//   wxButton *addButton;
+//   wxButton *removeButton;
+//   wxButton *clearButton;
+//   wxButton *prioritizeButton;
    
-   wxListBox *availableListBox;
-   wxListBox *selectedListBox;
+//   wxListBox *availableListBox;
+//   wxListBox *selectedListBox;
    
    wxCheckBox *mOverrideCheckBox;
 
@@ -64,12 +64,12 @@ private:
    
    SolarSystem *theSolarSystem;
    
-   void OnAddButton(wxCommandEvent& event);
-   void OnSortButton(wxCommandEvent& event);
-   void OnRemoveButton(wxCommandEvent& event);
-   void OnClearButton(wxCommandEvent& event);
+//   void OnAddButton(wxCommandEvent& event);
+//   void OnSortButton(wxCommandEvent& event);
+//   void OnRemoveButton(wxCommandEvent& event);
+//   void OnClearButton(wxCommandEvent& event);
    void OnBrowseButton(wxCommandEvent& event);
-   void OnListBoxSelect(wxCommandEvent& event);
+//   void OnListBoxSelect(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnTextCtrlChange(wxCommandEvent& event);
