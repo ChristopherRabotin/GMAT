@@ -19,6 +19,7 @@
 
 
 #include "DragForce.hpp"
+#include "StringUtil.hpp"     // for ToString()
 #include "ForceModelException.hpp"
 #include "MessageInterface.hpp"
 
@@ -989,46 +990,86 @@ Real DragForce::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real DragForce::SetRealParameter(const Integer id, const Real value)
 {
+   ForceModelException fme;
    if (id == fluxID)
    {
-      if ((value < 0.0) || (value > 500.0))
+      if (value >= 0.0)
+         fluxF107 = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw ForceModelException(
-            "The solar flux (F10.7) must be between 0 and 500, and is usually "
-            "between 50 and 400");
-      if ((value < 50.0) || (value > 400.0))
-         MessageInterface::ShowMessage(
-            "Warning: The solar flux (F10.7) usually falls "
-            "between 50 and 400\n");
-
-      fluxF107 = value;
+            "The value of \"" + buffer.str() + "\" for field \"F107(Solar Flux)\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Real Number >= 0.0]. ");
+      }
       return fluxF107;
+//      if ((value < 0.0) || (value > 500.0))
+//         throw ForceModelException(
+//            "The solar flux (F10.7) must be between 0 and 500, and is usually "
+//            "between 50 and 400");
+//      if ((value < 50.0) || (value > 400.0))
+//         MessageInterface::ShowMessage(
+//            "Warning: The solar flux (F10.7) usually falls "
+//            "between 50 and 400\n");
+//
+//      fluxF107 = value;
+//      return fluxF107;
    }
     
    if (id == averageFluxID)
    {
-      if ((value < 0.0) || (value > 500.0))
+      if (value >= 0.0)
+         fluxF107A = value;
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw ForceModelException(
-            "The average solar flux (F10.7A) must be between 0 and 500, and is "
-            "usually between 50 and 400");
-      if ((value < 50.0) || (value > 400.0))
-         MessageInterface::ShowMessage(
-            "Warning: The average solar flux (F10.7A) usually falls "
-            "between 50 and 400\n");
-
-      fluxF107A = value;
+            "The value of \"" + buffer.str() + "\" for field \"F107A(Average Solar Flux)\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Real Number >= 0.0]. ");
+      }
       return fluxF107A;
+//      if ((value < 0.0) || (value > 500.0))
+//         throw ForceModelException(
+//            "The average solar flux (F10.7A) must be between 0 and 500, and is "
+//            "usually between 50 and 400");
+//      if ((value < 50.0) || (value > 400.0))
+//         MessageInterface::ShowMessage(
+//            "Warning: The average solar flux (F10.7A) usually falls "
+//            "between 50 and 400\n");
+//
+//      fluxF107A = value;
+//      return fluxF107A;
    }
     
    if (id == magneticIndexID)
    {
-      if ((value < 0.0) || (value > 9.0))
+      if ((value >= 0.0) && (value <= 9.0))
+      {
+         kp = value;
+         ap = CalculateAp(kp);
+      }
+      else
+      {
+         std::stringstream buffer;
+         buffer << value;
          throw ForceModelException(
-            "The magnetic index (Kp) must be between 0 and 9");
-
-      kp = value;
-      ap = CalculateAp(kp);
-
+            "The value of \"" + buffer.str() + "\" for field \"Magnetic Index\""
+            " on object \"" + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Real Number >= 0.0]. ");
+      }
       return kp;
+//      if ((value < 0.0) || (value > 9.0))
+//         throw ForceModelException(
+//            "The magnetic index (Kp) must be between 0 and 9");
+//
+//      kp = value;
+//      ap = CalculateAp(kp);
+//
+//      return kp;
    }
 
    return PhysicalModel::SetRealParameter(id, value);

@@ -997,6 +997,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    //-----------------------------------------------------------------
    // Integrator
    //-----------------------------------------------------------------
+   // Type
    wxStaticText *integratorStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Type"),
                         wxDefaultPosition, wxSize(170,20), wxST_NO_AUTORESIZE);
@@ -1107,8 +1108,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    intStaticSizer->Add( intFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-----------------------------------------------------------------
-   // Error Control
+   // Force Model
    //-----------------------------------------------------------------
+   // Error Control
    wxStaticText *errorCtrlStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Error Control"),
                         wxDefaultPosition, wxSize(70,20), wxST_NO_AUTORESIZE );
@@ -1122,9 +1124,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    errorFlexGridSizer->Add( errorCtrlStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    errorFlexGridSizer->Add( errorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   //-----------------------------------------------------------------
    // Central Body
-   //-----------------------------------------------------------------
    wxStaticText *centralBodyStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Central Body"),
                         wxDefaultPosition, wxSize(70,20), wxST_NO_AUTORESIZE);
@@ -1135,9 +1135,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    centralBodySizer->Add( centralBodyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    centralBodySizer->Add( originComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   //-----------------------------------------------------------------
    // Primary Bodies
-   //-----------------------------------------------------------------
    wxString bodyArray[]  = {};
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
@@ -1155,11 +1153,9 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    bodySizer->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    bodySizer->Add( bodyButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
-   //-----------------------------------------------------------------
-   // Gravity Field
-   //-----------------------------------------------------------------
+   // Gravity
    wxStaticText *type1StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Type"),
+      new wxStaticText( parent, ID_TEXT, wxT("Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
    wxString gravArray[]  = {};
@@ -1193,7 +1189,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    degOrdSizer->Add( searchGravityButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    potFileStaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Model File"),
+      new wxStaticText( parent, ID_TEXT, wxT("Potential File"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    potFileTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
@@ -1204,15 +1200,13 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    potFileSizer->Add( potFileTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    GmatStaticBoxSizer *gravStaticSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Gravity Field");
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Gravity");
    gravStaticSizer->Add( degOrdSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    gravStaticSizer->Add( potFileSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   //-----------------------------------------------------------------
-   // Atmosphere Model
-   //-----------------------------------------------------------------
+   // Drag
    wxStaticText *type2StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Type"),
+      new wxStaticText( parent, ID_TEXT, wxT("Atmosphere Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
    atmosComboBox =
@@ -1229,14 +1223,12 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    atmosSizer->Add( dragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);       
    
    GmatStaticBoxSizer *atmosStaticSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Atmosphere Model");
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Drag");
    atmosStaticSizer->Add( atmosSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   //-----------------------------------------------------------------
    // Magnetic Field
-   //-----------------------------------------------------------------
    wxStaticText *type3StaticText =
-      new wxStaticText( parent, ID_TEXT, wxT("Type"),
+      new wxStaticText( parent, ID_TEXT, wxT("Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
    magfComboBox =
@@ -1696,16 +1688,16 @@ bool PropagationConfigPanel::SaveIntegratorData()
    // check values from text field
    //-----------------------------------------------------------------
    str = initialStepSizeTextCtrl->GetValue();      
-   CheckReal(initStep, str, "InitialStepSize", "Real Number > 0");
+   CheckReal(initStep, str, "InitialStepSize", "Real Number");
    
    str = accuracyTextCtrl->GetValue();      
-   CheckReal(accuracy, str, "Accuracy", "Real Number > 0");
+   CheckReal(accuracy, str, "Accuracy", "Real Number >= 0.0");
    
    str = minStepTextCtrl->GetValue();            
-   CheckReal(minStep, str, "Min Step Size", "Real Number > 0");
+   CheckReal(minStep, str, "Min Step Size", "Real Number > 0.0, MinStep <= MaxStep");
    
    str = maxStepTextCtrl->GetValue();            
-   CheckReal(maxStep, str, "Max Step Size", "Real Number > 0");
+   CheckReal(maxStep, str, "Max Step Size", "Real Number > 0.0, MinStep <= MaxStep");
    
    str = maxStepAttemptTextCtrl->GetValue();            
    CheckInteger(maxAttempts, str, "Max Step Attempts", "Integer Number > 0");
@@ -1785,10 +1777,12 @@ bool PropagationConfigPanel::SaveDegOrder()
    // check values from text field
    //-----------------------------------------------------------------
    str = gravityDegreeTextCtrl->GetValue();
-   CheckInteger(degree, str, "Degree", "Integer Number >= 0");
+   CheckInteger(degree, str, "Degree", "Integer Number >= 0"
+            "and < the maximum specified by the model, Order <= Degree].");
    
    str = gravityOrderTextCtrl->GetValue();
-   CheckInteger(order, str, "Order", "Integer Number >= 0");
+   CheckInteger(order, str, "Order", "Integer Number >= 0"
+            "and < the maximum specified by the model, Order <= Degree].");
 
    if (!canClose)
       return false;
@@ -1884,15 +1878,15 @@ bool PropagationConfigPanel::SavePotFile()
                inputString = forceList[i]->potFilename.c_str();
                std::ifstream filename(inputString.c_str());
                
-               // Check if the file doesn't exist then stop
-               if (!filename) 
-               {
-                  MessageInterface::PopupMessage
-                     (Gmat::ERROR_, msg.c_str(), inputString.c_str(),
-                      "Model File", "File must exist");
-                  
-                  return false;
-               }
+//               // Check if the file doesn't exist then stop
+//               if (!filename) 
+//               {
+//                  MessageInterface::PopupMessage
+//                     (Gmat::ERROR_, msg.c_str(), inputString.c_str(),
+//                      "Model File", "File must exist");
+//                  
+//                  return false;
+//               }
                
                filename.close();               
                theGravForce->SetStringParameter("PotentialFile",

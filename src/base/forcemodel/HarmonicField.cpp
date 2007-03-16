@@ -50,7 +50,8 @@
 #include "HarmonicField.hpp"
 
 #include "PhysicalModel.hpp"
-#include "ForceModelException.hpp"
+//#include "ForceModelException.hpp"
+#include "StringUtil.hpp"     // for ToString()
 #include "RealUtilities.hpp"
 #include "Rvector.hpp"
 #include "Rmatrix.hpp"
@@ -355,12 +356,13 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
 bool HarmonicField::SetFilename(const std::string &fn)
 {
    #ifdef DEBUG_HARMONIC_FIELD
-       char str[1024];
-       strcpy(str, fn.c_str());
-       MessageInterface::ShowMessage("HarmonicField::SetFilename called with \"%s\"\n",
-          str);
-       MessageInterface::ShowMessage("filename=%s, fn=%s\n", filename.c_str(),
-                                     fn.c_str());
+//       char str[1024];
+//       strcpy(str, fn.c_str());
+//       MessageInterface::ShowMessage
+//          ("HarmonicField::SetFilename() called with \"%s\"\n", str);
+       MessageInterface::ShowMessage ("HarmonicField::SetFilename()");
+       MessageInterface::ShowMessage
+          ("filename = %s\n fn = %s\n", filename.c_str(), fn.c_str());
    #endif
  
    if (filename != fn)
@@ -384,6 +386,13 @@ bool HarmonicField::SetFilename(const std::string &fn)
       else
       {
          filename = fn;
+      }
+
+      std::ifstream potfile(filename.c_str());
+      if (!potfile) 
+      {
+         throw ForceModelException
+            ("The file name \"" + filename + "\" does not exist.");
       }
       
       if (body != NULL)
@@ -656,6 +665,19 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 //   if (id == DEGREE)      return (degree    = value);
    if (id == DEGREE)
    {
+//	   if (value <= 0)
+//	   {
+//	      ForceModelException fme;
+//	      fme.SetDetails(errorMessageFormat.c_str(),
+//	         GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+//	         GetParameterText(id).c_str(),
+//	         "Integer >= 0 and < the maximum specified by the model, Order <= Degree");
+//	      throw fme;
+//	   }
+//	   
+//	   degree = value;
+//	   return degree;
+
       if (value >= 0)
          degree = value;
       else
@@ -663,8 +685,10 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
          std::stringstream buffer;
          buffer << value;
          throw ForceModelException(
-            "The value of " + buffer.str() + " on object " + instanceName +
-            " is not an allowed value. \n The allowed values are [Integer >= 0 "
+            "The value of \"" + buffer.str() + "\" for field \"" 
+            + GetParameterText(id).c_str() + "\" on object \"" 
+            + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Integer >= 0 "
             "and < the maximum specified by the model, Order <= Degree].");
       }
       return degree;
@@ -672,6 +696,19 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 //   if (id == ORDER)       return (order     = value);
    if (id == ORDER)
    {
+//	   if (value <= 0)
+//	   {
+//	      ForceModelException fme;
+//	      fme.SetDetails(errorMessageFormat.c_str(),
+//	         GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+//	         GetParameterText(id).c_str(),
+//	         "[Integer >= 0 and < the maximum specified by the model, Order <= Degree].");
+//	      throw fme;
+//	   }
+//	   
+//	   order = value;
+//	   return order;
+
       if (value >= 0)
          order = value;
       else
@@ -679,8 +716,10 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
          std::stringstream buffer;
          buffer << value;
          throw ForceModelException(
-            "The value of " + buffer.str() + " on object " + instanceName +
-            " is not an allowed value. \n The allowed values are [Integer >= 0 "
+            "The value of \"" + buffer.str() + "\" for field \"" 
+            + GetParameterText(id).c_str() + "\" on object \"" 
+            + instanceName + "\" is not an allowed value.\n"
+            "The allowed values are: [Integer >= 0 "
             "and < the maximum specified by the model, Order <= Degree].");
       }
       return order;
@@ -784,6 +823,7 @@ bool HarmonicField::SetStringParameter(const Integer id,
 //>>>>>>> 1.6
    if (id == FILENAME)
    {
+
       //loj: 3/24/06 just call SetFilename()
       return SetFilename(value);
   
@@ -792,10 +832,10 @@ bool HarmonicField::SetStringParameter(const Integer id,
 //          #ifdef DEBUG_HARMONIC_FIELD
 //             char str[1024];
 //             strcpy(str, value.c_str());
-            
+//            
 //             MessageInterface::ShowMessage("Setting file name to \"%s\"\n", str);
 //          #endif
-       
+//       
 //          fileRead = false;
 //          filename = value;
 //       }
