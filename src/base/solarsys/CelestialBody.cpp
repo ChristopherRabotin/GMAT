@@ -126,7 +126,8 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    //Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE,
+//   Gmat::INTEGER_TYPE,		// RotationDataSource
+   Gmat::STRING_TYPE,		// RotationDataSource
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
@@ -1465,6 +1466,14 @@ bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetEphemUpdateInterval(Real intvl)
 {
+   if (intvl < 0.0)
+	{
+	   SolarSystemException sse;
+	   sse.SetDetails(errorMessageFormat.c_str(),
+	      GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
+	      "Ephemeris Update Interval", "Real Number >= 0.0");
+	   throw sse;
+	}
    ephemUpdateInterval = intvl;
    return true;
 }
@@ -2136,13 +2145,13 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
       referenceBodyNumber = value;
       return true;
    }
-   if (id == ROTATION_DATA_SRC)
-   {
-      if ((value < 0) || (value >= Gmat::RotationDataSrcCount))
-         return false;
-      rotationSrc = (Gmat::RotationDataSource) value;
-      return true;
-   }
+//   if (id == ROTATION_DATA_SRC)
+//   {
+//      if ((value < 0) || (value >= Gmat::RotationDataSrcCount))
+//         return false;
+//      rotationSrc = (Gmat::RotationDataSource) value;
+//      return true;
+//   }
    
    //if (id == COEFFICIENT_SIZE)     return (coefficientSize     = value);
    
@@ -2264,8 +2273,8 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       {
          SolarSystemException sse;
          sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-                        PARAMETER_TEXT[ANALYTIC_DATE_FORMAT].c_str(),
-                        "[TAIModJulian]");
+                        PARAMETER_TEXT[ANALYTIC_DATE_FORMAT - SpacePointParamCount].c_str(),
+                        "TAIModJulian");
          throw sse;
          
 //          //std::string msg = "CelestialBody:: analytic method date format ";
@@ -2290,9 +2299,10 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       {
          SolarSystemException sse;
          sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
-                        PARAMETER_TEXT[ANALYTIC_STATE_TYPE].c_str(),
-                        "[Keplerian]");
+                        PARAMETER_TEXT[ANALYTIC_STATE_TYPE - SpacePointParamCount].c_str(),
+                        "Keplerian");
          
+         throw sse;
 //          //std::string msg = "CelestialBody:: analytic method state type ";
 //          //msg +=  value + " not allowed - currently only Keplerian allowed\n"; 
 //          std::string msg = "The value of \"" + value + "\" for field \"" + 
@@ -2305,6 +2315,25 @@ bool        CelestialBody::SetStringParameter(const Integer id,
       return true;
    }
    
+   if (id == ROTATION_DATA_SRC)
+   {
+      MessageInterface::ShowMessage
+         ("CelestialBody::SetStringParameter -> value = %s\n", value.c_str());
+      if (value == "DE405")
+         SetRotationDataSource(Gmat::DE_FILE);
+      else if (value == "IAU2002")
+         SetRotationDataSource(Gmat::IAU_DATA);
+      else
+      {
+         SolarSystemException sse;
+         sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+                        PARAMETER_TEXT[ROTATION_DATA_SRC - SpacePointParamCount].c_str(),
+                        "DE405, IAU2002");
+         throw sse;
+      }
+      return true;
+   }
+
    return SpacePoint::SetStringParameter(id, value);
 }
 
@@ -3248,4 +3277,3 @@ Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-
