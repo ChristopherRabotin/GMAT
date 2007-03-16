@@ -352,7 +352,7 @@ void CelestialBodyPanel::LoadData()
          
          if (theCelestialBody->GetBodyType() == Gmat::PLANET)
          {
-             intervalUpdate = thePlanet->GetUpdateInterval();
+             intervalUpdate = thePlanet->GetNutationUpdateInterval();
              mIntervalTextCtrl->
                 SetValue(theGuiManager->ToWxString(intervalUpdate));
          }
@@ -549,7 +549,7 @@ void CelestialBodyPanel::SaveData()
          {
 	         try
 	         {
-	            thePlanet->SetUpdateInterval(interval);
+	            thePlanet->SetNutationUpdateInterval(interval);
 	         }
 	         catch (BaseException &e)
 	         {
