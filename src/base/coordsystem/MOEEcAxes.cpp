@@ -154,7 +154,7 @@ bool MOEEcAxes::Initialize()
    
    
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
    ComputePrecessionMatrix(tTDB, epoch);

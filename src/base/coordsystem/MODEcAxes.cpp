@@ -273,7 +273,7 @@ void MODEcAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    //                 0.0, -GmatMathUtil::Sin(Epsbar), GmatMathUtil::Cos(Epsbar));
    
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    ComputePrecessionMatrix(tTDB, atEpoch);

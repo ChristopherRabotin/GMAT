@@ -155,7 +155,7 @@ bool TOEEqAxes::Initialize()
    Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, epoch);
 //   Rmatrix33  NUT       = ComputeNutationMatrix(tTDB, epoch, dPsi,

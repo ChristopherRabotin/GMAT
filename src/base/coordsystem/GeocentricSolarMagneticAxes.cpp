@@ -295,7 +295,7 @@ void GeocentricSolarMagneticAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real tTDB    = (mjdTT + offset) / 36525.0;
 
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
 
    ComputePrecessionMatrix(tTDB, atEpoch);

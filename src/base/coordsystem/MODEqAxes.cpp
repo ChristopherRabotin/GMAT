@@ -260,7 +260,7 @@ void MODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real tTDB   = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
 //   Rmatrix33  PREC      = ComputePrecessionMatrix(tTDB, atEpoch);
    ComputePrecessionMatrix(tTDB, atEpoch);

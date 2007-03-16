@@ -267,7 +267,7 @@ void TODEqAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
    Real tTDB  = (mjdTT + offset) / 36525.0;
    
    if (overrideOriginInterval) updateIntervalToUse = 
-                               ((Planet*) origin)->GetUpdateInterval();
+                               ((Planet*) origin)->GetNutationUpdateInterval();
    else                        updateIntervalToUse = updateInterval;
    #ifdef DEBUG_TODEQ_AXES
       MessageInterface::ShowMessage(
