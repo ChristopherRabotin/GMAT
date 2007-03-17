@@ -293,9 +293,18 @@ bool RungeKutta::Step()
 
         maxerror = EstimateError();
         stepTaken = stepSize;
-        if (AdaptStep(maxerror))
-            goodStepTaken = true;
-
+        if (maxerror!= 0.0)
+        {
+           if (AdaptStep(maxerror))
+              goodStepTaken = true;
+        }
+        else  // 0.0 means no error control; in that case leave step alone
+        {
+           memcpy(outState, candidateState, dimension*sizeof(Real));
+           stepAttempts = 0;
+           goodStepTaken = true;
+        }
+        
         if (stepAttempts >= maxStepAttempts)
             return false;
     } while (!goodStepTaken);
