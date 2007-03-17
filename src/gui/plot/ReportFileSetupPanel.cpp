@@ -417,7 +417,7 @@ void ReportFileSetupPanel::LoadData()
       
       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
       mVarSelectedListBox->SetSelection(0);
-      delete varParamNames;
+      delete [] varParamNames;
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
