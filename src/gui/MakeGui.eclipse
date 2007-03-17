@@ -36,7 +36,7 @@ prep:
 	mkdir -p ../bin
 
 HEADERS = -I../base/include \
-			-I../base/attitude \
+          -I../base/attitude \
           -I../base/foundation \
           -I../base/executive \
           -I../base/spacecraft \
@@ -107,7 +107,7 @@ OBJECTS = \
     app/GmatTreeItemData.o \
     app/InteractiveMatlabDialog.o \
     app/MissionTreeItemData.o \
-	app/RunScriptFolderDialog.o \
+    app/RunScriptFolderDialog.o \
     app/ResourceTree.o \
     app/ScriptPanel.o \
     app/TextEphemFileDialog.o \
@@ -156,7 +156,7 @@ OBJECTS = \
     hardware/ThrusterConfigPanel.o \
     mission/DecoratedTree.o \
     mission/MissionTree.o \
-	output/CompareReportPanel.o \
+    output/CompareReportPanel.o \
     output/OutputTree.o \
     output/ReportFilePanel.o \
     plot/MdiChildTrajFrame.o \
