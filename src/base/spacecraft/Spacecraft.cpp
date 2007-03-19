@@ -38,6 +38,7 @@
 //#define DEBUG_DATE_FORMAT
 //#define DEBUG_STATE_INTERFACE
 //#define DEBUG_SC_ATTITUDE
+//#define DEBUG_GET_REAL
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -1095,6 +1096,15 @@ std::string Spacecraft::GetParameterTypeString(const Integer id) const
  */
 Real Spacecraft::GetRealParameter(const Integer id) const
 {
+   #ifdef DEBUG_GET_REAL
+      MessageInterface::ShowMessage(
+      "In SC::GetReal, asking for parameter %d\n", id);
+      for (Integer i=0; i<6;i++)
+         MessageInterface::ShowMessage("   state(%d) = %.12f\n",
+         i, state[i]);
+      MessageInterface::ShowMessage("    and stateType = %s\n",
+         stateType.c_str());
+   #endif
    if (id == ELEMENT1_ID) return state[0];
    if (id == ELEMENT2_ID) return state[1];
    if (id == ELEMENT3_ID) return state[2];
