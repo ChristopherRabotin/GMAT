@@ -269,6 +269,11 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       if (operation == OPTYPE_TEXT[i])
       {
          ot = (OpType) i;
+         #if DEBUG_CONDITIONS
+            MessageInterface::ShowMessage
+            ("ConditionalBranch::operation is %s, OPTYPE_TEXT is %s\n",
+             operation.c_str(), (OPTYPE_TEXT[i]).c_str());
+         #endif
          break;
       }
    }
@@ -377,6 +382,10 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       //lhsParamCols.push_back(lhsCol);
       //rhsParamRows.push_back(rhsRow);
       //rhsParamCols.push_back(rhsCol);
+      #if DEBUG_CONDITIONS
+         MessageInterface::ShowMessage
+         ("ConditionalBranch::added condition to end of list\n");
+      #endif
       retVal = true;
       numberOfConditions++;
    }
@@ -400,6 +409,10 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       ew = rhsWrappers.at(atIndex);
       rhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
       delete ew;
+      #if DEBUG_CONDITIONS
+         MessageInterface::ShowMessage
+         ("ConditionalBranch::inserted condition into list\n");
+      #endif
       //lhsParamList.at(atIndex)   = newLhs;
       //rhsParamList.at(atIndex)   = newRhs;
       //lhsParamRows.at(atIndex) = lhsRow;
@@ -1299,6 +1312,8 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
    bool retval = false;
    ElementWrapper *ew;
 
+   if (toWrapper == NULL) return false;
+   
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage(
       "   Setting wrapper \"%s\" on Conditional Branch command\n", 
@@ -1398,6 +1413,9 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
          MessageInterface::ShowMessage(
          "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
          "Number of Conditions: %d\n", which, numberOfConditions);      
+         MessageInterface::ShowMessage(
+         "      lhs wrapper = %s        rhsWrapper = %s\n", 
+         (lhsList.at(which)).c_str(), (rhsList.at(which)).c_str());      
       
       #endif
    if ((which < 0) || (which >= numberOfConditions))

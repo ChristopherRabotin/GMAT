@@ -864,6 +864,8 @@ bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper, const std
 {
    bool retval = false;
 
+   if (toWrapper == NULL) return false;
+   
    #ifdef DEBUG_NLC_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on NLC command\n", 
       withName.c_str());

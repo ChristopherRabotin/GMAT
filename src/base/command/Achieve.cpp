@@ -474,7 +474,7 @@ Real Achieve::SetRealParameter(const Integer id, const Real value)
          std::stringstream buffer;
          buffer << value;
          throw CommandException(
-            "The value of \"" + buffer.str() + "\" for field \"Tolerence\""
+            "The value of \"" + buffer.str() + "\" for field \"Tolerance\""
             " on object \"" + instanceName + "\" is not an allowed value.\n"
             "The allowed values are: [ Real > 0.0 ].");
 //            "The allowed values are: [ Real >= 0.0 ].");
@@ -883,6 +883,8 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, const std::string &wi
 {
    bool retval = false;
 
+   if (toWrapper == NULL) return false;
+   
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Achieve command\n", 
       withName.c_str());
@@ -892,9 +894,14 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, const std::string &wi
    {
       if (toWrapper->GetWrapperType() == Gmat::NUMBER)
       {
-         throw CommandException(
-            "Achieve error: goal cannot be a number\n");
-      }
+         std::string errmsg = "The value of \"" + goalName;
+         errmsg            += "\" for field \"Goal\" on object \"";
+         errmsg            += instanceName + "\" is not an allowed value.\n";
+         errmsg            += "The allowed values are: ";
+         errmsg            += "[ Object Property, Array Element, Variable, ";
+         errmsg            += "or Parameter, excluding numbers].";
+         throw CommandException(errmsg);
+       }
       goal = toWrapper;
       retval = true;
    }

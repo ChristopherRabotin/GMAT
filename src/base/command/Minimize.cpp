@@ -576,6 +576,8 @@ bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &w
 {
    bool retval = false;
 
+   if (toWrapper == NULL) return false;
+   
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Minimize command\n", 
       withName.c_str());
