@@ -755,8 +755,10 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
         i != wrapperNames.end(); ++i)
    {
       ElementWrapper *ew = CreateElementWrapper(*i);
-      if (ew == NULL)
-         return false;
+      //if (ew == NULL)
+      //{
+      //   return false;
+      //}
       
       if (cmd->SetElementWrapper(ew, *i) == false)
       {
@@ -1293,21 +1295,21 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    //}
    
    
-   // Set loop index varibale, if exist
-   if (!SetCommandParameter(cmd, index, "For loop index", false, false))
-      retval = false;
+   // Set loop index variable, if exist
+   //if (!SetCommandParameter(cmd, index, "For loop index", false, false))
+   //   retval = false;
    
-   // Set start varibale, if exist
-   if (!SetCommandParameter(cmd, start, "For loop start index", true, true))
-      retval = false;
+   // Set start variable, if exist
+   //if (!SetCommandParameter(cmd, start, "For loop start index", true, true))
+   //   retval = false;
    
-   // Set step varibale, if exist
-   if (!SetCommandParameter(cmd, step, "For loop step index", true, true))
-      retval = false;
+   // Set step variable, if exist
+   //if (!SetCommandParameter(cmd, step, "For loop step index", true, true))
+   //   retval = false;
    
-   // Set end varibale, if exist
-   if (!SetCommandParameter(cmd, end, "For loop end index", true, true))
-      retval = false;
+   // Set end variable, if exist
+   //if (!SetCommandParameter(cmd, end, "For loop end index", true, true))
+   //   retval = false;
    
    #if DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage

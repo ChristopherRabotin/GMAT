@@ -14,7 +14,7 @@
 // Modified: W. Shoan 2004.09.13 - updated for use in Build 3
 //
 /**
- * Definition for the For command class
+ * Definition for the For command class 
  */
 //------------------------------------------------------------------------------
 
@@ -25,6 +25,7 @@
 
 #include "BranchCommand.hpp"
 #include "Parameter.hpp"
+#include "ElementWrapper.hpp"
 
 
 /**
@@ -37,11 +38,11 @@ class For : public BranchCommand
 {
 public:
   // default constructor
-   For(void);
+   For();
    // copy constructor
    For(const For& f);
    // destructor
-   virtual ~For(void);
+   virtual ~For();
 
    // operator = 
    For&                 operator=(const For& f);
@@ -50,12 +51,12 @@ public:
    virtual bool         Append(GmatCommand *cmd);
 
    // Methods used to run the command
-   virtual bool         Initialize(void);
-   virtual bool         Execute(void);
+   virtual bool         Initialize();
+   virtual bool         Execute();
    virtual void         RunComplete();
 
    // inherited from GmatBase
-   virtual GmatBase*    Clone(void) const;
+   virtual GmatBase*    Clone() const;
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,
@@ -68,7 +69,6 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
-   
    virtual const ObjectTypeArray&
                        GetRefObjectTypeArray();
    virtual const StringArray&
@@ -92,9 +92,14 @@ public:
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
-   virtual bool         GetBooleanParameter(const Integer id) const; 
-   virtual bool         GetBooleanParameter(const std::string &label) const; 
+   //virtual bool         GetBooleanParameter(const Integer id) const; 
+   //virtual bool         GetBooleanParameter(const std::string &label) const; 
    
+   virtual const StringArray& 
+                       GetWrapperObjectNameArray();
+   virtual bool        SetElementWrapper(ElementWrapper* toWrapper,
+                                         const std::string &withName);
+   virtual void        ClearWrappers();
     
 protected:
    enum
@@ -106,10 +111,10 @@ protected:
       START_NAME,
       END_NAME,
       INCREMENT_NAME,
-      INDEX_IS_PARAM,
-      START_IS_PARAM,
-      END_IS_PARAM,
-      INCR_IS_PARAM,
+      //INDEX_IS_PARAM,
+      //START_IS_PARAM,
+      //END_IS_PARAM,
+      //INCR_IS_PARAM,
       ForParamCount
    };
 
@@ -124,7 +129,7 @@ protected:
    static const Real DEFAULT_END;
    static const Real DEFAULT_INCREMENT;
 
-   std::string  forName;
+   //std::string  forName;
    /// Start value for the For loop
    Real         startValue;
    /// End value for the For loop
@@ -134,28 +139,32 @@ protected:
    /// Current value for the For loop counter
    Real         currentValue;
 
-   Parameter* indexParam;
-   Parameter* startParam;
-   Parameter* endParam;
-   Parameter* incrParam;
+   //Parameter* indexParam;
+   //Parameter* startParam;
+   //Parameter* endParam;
+   //Parameter* incrParam;
+   ElementWrapper *index;
+   ElementWrapper *start;
+   ElementWrapper *end;
+   ElementWrapper *increment;
    
    std::string indexName;
    std::string startName;
    std::string endName;
    std::string incrName;
    
-   std::string startParamName;
-   std::string endParamName;
-   std::string incrParamName;
+   //std::string startParamName;
+   //std::string endParamName;
+   //std::string incrParamName;
    
-   bool indexIsParam;
-   bool startIsParam;
-   bool endIsParam;
-   bool incrIsParam;
+   //bool indexIsParam;
+   //bool startIsParam;
+   //bool endIsParam;
+   //bool incrIsParam;
    
    // method to evaluate the counter to see if we are still looping
    bool StillLooping();
-   Parameter* GetArrayIndex(const std::string &arrayStr,
-                            Integer &row, Integer &col);
+   //Parameter* GetArrayIndex(const std::string &arrayStr,
+   //                         Integer &row, Integer &col);
 };
 #endif  // For_hpp

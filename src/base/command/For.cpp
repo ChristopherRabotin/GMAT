@@ -30,6 +30,7 @@
 //#define DEBUG_FOR_EXE 1
 //#define DEBUG_FOR_INIT 1
 //#define DEBUG_FOR_REAL
+//#define DEBUG_FOR_PARAMS
 
 //---------------------------------
 // static data
@@ -44,10 +45,10 @@ For::PARAMETER_TEXT[ForParamCount - BranchCommandParamCount] =
    "StartName",
    "EndName",
    "IncrementName",
-   "IndexIsParam",
-   "StartIsParam",
-   "EndIsParam",
-   "IncrIsparam"
+   //"IndexIsParam",
+   //"StartIsParam",
+   //"EndIsParam",
+   //"IncrIsparam"
 };
 
 const Gmat::ParameterType
@@ -60,10 +61,10 @@ For::PARAMETER_TYPE[ForParamCount - BranchCommandParamCount] =
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   Gmat::BOOLEAN_TYPE,
+   //Gmat::BOOLEAN_TYPE,
+   //Gmat::BOOLEAN_TYPE,
+   //Gmat::BOOLEAN_TYPE,
+   //Gmat::BOOLEAN_TYPE,
 };
 
 const Real For::UNINITIALIZED_VALUE = -999.99;
@@ -80,23 +81,27 @@ const Real For::DEFAULT_INCREMENT   = 1;
 //------------------------------------------------------------------------------
 For::For(void) :
    BranchCommand   ("For"),
-   forName         (""),
+   //forName         (""),
    startValue      (DEFAULT_START),
    endValue        (DEFAULT_END),
    stepSize        (DEFAULT_INCREMENT),
    currentValue    (UNINITIALIZED_VALUE),
-   indexParam      (NULL),
-   startParam      (NULL),
-   endParam        (NULL),
-   incrParam       (NULL),
-   indexName       (""),
-   startName       (""),
-   endName         (""),
-   incrName        (""),
-   indexIsParam    (false),
-   startIsParam    (false),
-   endIsParam      (false),
-   incrIsParam     (false)
+   //indexParam      (NULL),
+   //startParam      (NULL),
+   //endParam        (NULL),
+   //incrParam       (NULL),
+   index           (NULL),
+   start           (NULL),
+   end             (NULL),
+   increment       (NULL),
+   indexName       ("I"),
+   startName       ("1"),
+   endName         ("10"),
+   incrName        ("1")//,
+   //indexIsParam    (false),
+   //startIsParam    (false),
+   //endIsParam      (false),
+   //incrIsParam     (false)
 {
    parameterCount = ForParamCount;
 }
@@ -112,23 +117,27 @@ For::For(void) :
 //------------------------------------------------------------------------------
 For::For(const For& f) :
    BranchCommand   (f),
-   forName         (f.forName),
+   //forName         (f.forName),
    startValue      (f.startValue),
    endValue        (f.endValue),
    stepSize        (f.stepSize),
    currentValue    (f.currentValue),
-   indexParam      (NULL),
-   startParam      (NULL),
-   endParam        (NULL),
-   incrParam       (NULL),
+   //indexParam      (NULL),
+   //startParam      (NULL),
+   //endParam        (NULL),
+   //incrParam       (NULL),
+   index           (NULL),
+   start           (NULL),
+   end             (NULL),
+   increment       (NULL),
    indexName       (f.indexName),
    startName       (f.startName),
    endName         (f.endName),
-   incrName        (f.incrName),
-   indexIsParam    (f.indexIsParam),
-   startIsParam    (f.startIsParam),
-   endIsParam      (f.endIsParam),
-   incrIsParam     (f.incrIsParam)
+   incrName        (f.incrName)//,
+   //indexIsParam    (f.indexIsParam),
+   //startIsParam    (f.startIsParam),
+   //endIsParam      (f.endIsParam),
+   //incrIsParam     (f.incrIsParam)
 {
 }
 
@@ -142,6 +151,7 @@ For::For(const For& f) :
 //------------------------------------------------------------------------------
 For::~For(void)
 {
+   ClearWrappers();
 }
 
 
@@ -160,23 +170,27 @@ For& For::operator=(const For& f)
      return *this;
 
    BranchCommand::operator=(f);
-   forName       = f.forName;
+   //forName       = f.forName;
    startValue    = f.startValue;  // do I really want to do this?
    endValue      = f.endValue;
    stepSize      = f.stepSize;
    currentValue  = f.currentValue;
-   indexParam    = f.indexParam;
-   startParam    = f.startParam;
-   endParam      = f.endParam;
-   incrParam     = f.incrParam;
+   //indexParam    = f.indexParam;
+   //startParam    = f.startParam;
+   //endParam      = f.endParam;
+   //incrParam     = f.incrParam;
+   index         = f.index;
+   start         = f.start;
+   end           = f.end;
+   increment     = f.increment;
    indexName     = f.indexName;
    startName     = f.startName;
    endName       = f.endName;
    incrName      = f.incrName;
-   indexIsParam  = f.indexIsParam;
-   startIsParam  = f.startIsParam;
-   endIsParam    = f.endIsParam;
-   incrIsParam   = f.incrIsParam;
+   //indexIsParam  = f.indexIsParam;
+   //startIsParam  = f.startIsParam;
+   //endIsParam    = f.endIsParam;
+   //incrIsParam   = f.incrIsParam;
    return *this;
 }
 
@@ -235,11 +249,11 @@ bool For::Append(GmatCommand *cmd)
 bool For::Initialize()
 {
    #if DEBUG_FOR_INIT
-   MessageInterface::ShowMessage
-      ("For::Initialize() indexIsParam=%d, startIsParam=%d, endIsParam=%d, "
-       "incrIsParam=%d\n", indexIsParam, startIsParam, endIsParam, incrIsParam);
+   //MessageInterface::ShowMessage
+   //   ("For::Initialize() indexIsParam=%d, startIsParam=%d, endIsParam=%d, "
+   //    "incrIsParam=%d\n", indexIsParam, startIsParam, endIsParam, incrIsParam);
    #endif
-   
+   /*
    // Get Parameter pointers from the Sandbox
    if (indexIsParam)
    {
@@ -276,6 +290,28 @@ bool For::Initialize()
             ("Found undefined object \"" + endName + "\" in line:\n   " +
              generatingString + "\n");
    }
+   */
+   // Set references for the wrappers   
+   #ifdef DEBUG_FOR_PARAMS
+      MessageInterface::ShowMessage("Setting refs for index\n");
+   #endif
+   if (SetWrapperReferences(*index) == false)
+      return false;
+   #ifdef DEBUG_FOR_PARAMS
+      MessageInterface::ShowMessage("Setting refs for start\n");
+   #endif
+   if (SetWrapperReferences(*start) == false)
+      return false;
+   #ifdef DEBUG_FOR_PARAMS
+      MessageInterface::ShowMessage("Setting refs for end\n");
+   #endif
+   if (SetWrapperReferences(*end) == false)
+      return false;
+   #ifdef DEBUG_FOR_PARAMS
+      MessageInterface::ShowMessage("Setting refs for increment\n");
+   #endif
+   if (SetWrapperReferences(*increment) == false)
+      return false;
    
    bool retval = BranchCommand::Initialize();
    
@@ -284,7 +320,7 @@ bool For::Initialize()
 
 
 //------------------------------------------------------------------------------
-//  bool Execute(void)
+//  bool Execute()
 //------------------------------------------------------------------------------
 /**
  * Execute this for loop.
@@ -294,7 +330,7 @@ bool For::Initialize()
  *         occurs.
  */
 //------------------------------------------------------------------------------
-bool For::Execute(void)
+bool For::Execute()
 {
    #ifdef DEBUG_FOR_EXE
       MessageInterface::ShowMessage(
@@ -317,7 +353,8 @@ bool For::Execute(void)
       {
          // Branch finished executing; update loop index
          currentValue += stepSize;
-         if (indexIsParam)   indexParam->SetReal(currentValue);
+         //if (indexIsParam)   indexParam->SetReal(currentValue);
+         index->SetReal(currentValue);
          #ifdef DEBUG_FOR_EXE
             MessageInterface::ShowMessage(
             "...... Branch done executing -> currentValue updated to %.4f\n",
@@ -420,33 +457,33 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
    std::stringstream gen;
    gen.precision(4);
 
-   if (indexName != "")
+   //if (indexName != "")
       gen << indexName;
-   else
-      gen << forName;
+   //else
+   //   gen << forName;
    gen << " = ";
    
-   if (startName != "")
+   //if (startName != "")
       gen << startName;
-   else
-      gen << startValue;
+   //else
+   //   gen << startValue;
    gen << ":";
 
-   if (incrName != "")
-   {
+   //if (incrName != "")
+   //{
       gen << incrName;
       gen << ":";
-   }
-   else if (stepSize != 1.0)
-   {
-      gen << stepSize;
-      gen << ":";
-   }
+   //}
+   //else if (stepSize != 1.0)
+   //{
+   //   gen << stepSize;
+   //   gen << ":";
+   //}
 
-   if (endName != "")
+   //if (endName != "")
       gen << endName;
-   else
-      gen << endValue;
+   //else
+   //   gen << endValue;
 
    generatingString = prefix + "For " + gen.str() + ";";
 
@@ -469,6 +506,7 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
 GmatBase* For::GetRefObject(const Gmat::ObjectType type,
                             const std::string &name)
 {
+   /* OLD CODE
    switch (type)
    {
       case Gmat::PARAMETER:
@@ -481,7 +519,7 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
       default:
       break;
    }
-   
+    */  
    // Not handled here -- invoke the next higher GetRefObject call
    return BranchCommand::GetRefObject(type, name);
 }
@@ -501,7 +539,7 @@ GmatBase* For::GetRefObject(const Gmat::ObjectType type,
 bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                        const std::string &name)
 {
-   
+   /* OLD CODE
    switch (type)
    {
       case Gmat::PARAMETER:
@@ -531,7 +569,7 @@ bool For::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       default:
          break;
    }
-   
+    */  
    // Not handled here -- invoke the next higher SetRefObject call
    return BranchCommand::SetRefObject(obj, type, name);
 }
@@ -555,6 +593,7 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
                           const std::string &oldName,
                           const std::string &newName)
 {
+   /* OLD CODE
    if (type == Gmat::PARAMETER)
    {
       if (indexName == oldName)   indexName = newName;
@@ -562,7 +601,27 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
       if (endName   == oldName)   endName   = newName;
       if (incrName  == oldName)   incrName  = newName;
    }
-   
+   */ 
+   if (index) 
+   {
+      index->RenameObject(oldName, newName);
+       indexName  = index->GetDescription();
+   }
+   if (start) 
+   {
+      start->RenameObject(oldName, newName);
+       startName  = start->GetDescription();
+   }
+   if (end) 
+   {
+      end->RenameObject(oldName, newName);
+       endName  = end->GetDescription();
+   }
+   if (increment) 
+   {
+      increment->RenameObject(oldName, newName);
+       incrName  = increment->GetDescription();
+   }
    BranchCommand::RenameRefObject(type, oldName, newName);
    
    return true;
@@ -582,7 +641,7 @@ bool For::RenameRefObject(const Gmat::ObjectType type,
 const ObjectTypeArray& For::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::PARAMETER);
+   //refObjectTypes.push_back(Gmat::PARAMETER);
    return refObjectTypes;
 }
 
@@ -603,7 +662,7 @@ const ObjectTypeArray& For::GetRefObjectTypeArray()
 const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    refObjectNames.clear();
-   
+   /* OLD CODE
    if (type == Gmat::UNKNOWN_OBJECT ||
        type == Gmat::PARAMETER)
    {
@@ -616,7 +675,7 @@ const StringArray& For::GetRefObjectNameArray(const Gmat::ObjectType type)
       if (incrIsParam)
          refObjectNames.push_back(incrName);
    }
-   
+  */ 
    return refObjectNames;
 }
 
@@ -734,6 +793,7 @@ Real For::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real For::SetRealParameter(const Integer id, const Real value)
 {
+   /* NOT ALLOWED
    if (id == START_VALUE)
    {
       startValue   = value;
@@ -752,7 +812,7 @@ Real For::SetRealParameter(const Integer id, const Real value)
       incrIsParam  = false;
       return true;
    }
-   
+    */  
    return BranchCommand::SetRealParameter(id, value);
 }
 
@@ -824,18 +884,20 @@ std::string For::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool For::SetStringParameter(const Integer id, const std::string &value)
 {
-   Real rval;
-   bool isReal = false;
-   std::string name, rowStr, colStr;
-   Integer row, col;
+   bool retVal = false;
+   //Real rval;
+   //bool isReal = false;
+   //std::string name, rowStr, colStr;
+   //Integer row, col;
    
-   if (GmatStringUtil::ToReal(value, rval))
-      isReal = true;
+   //if (GmatStringUtil::ToReal(value, rval))
+   //   isReal = true;
    
    if (id == INDEX_NAME) 
    {
       indexName = value;
-      return true;
+      retVal    = true;
+      //return true;
    }
    else if (id == START_NAME)
    {
@@ -844,27 +906,28 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
          "In For::SetStrP, setting startName to %s\n", value.c_str());
       #endif
       startName = value;
-      startParamName = value;
-      startIsParam = true;
-      if (isReal)
-      {
-         startName = "";
-         startValue = rval;
-         startIsParam = false;
-      }
-      else
-      {
-         GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
-         if (rowStr != "-1" || colStr != "-1")
-            startParamName = name;
-      }
+      //startParamName = value;
+      //startIsParam = true;
+      //if (isReal)
+      //{
+      //   startName = "";
+      //   startValue = rval;
+      //   startIsParam = false;
+      //}
+      //else
+      //{
+      //   GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
+      //   if (rowStr != "-1" || colStr != "-1")
+      //      startParamName = name;
+      //}
       
       //MessageInterface::ShowMessage
       //   ("===> For::SetStringParameter() startName=%s, startParamName=%s, "
       //    "isReal=%d, startIsParam=%d\n", startName.c_str(), startParamName.c_str(),
       //    isReal, startIsParam);
       
-      return true;
+      //return true;
+      retVal = true;
    }
    else if (id == END_NAME)
    {
@@ -873,48 +936,50 @@ bool For::SetStringParameter(const Integer id, const std::string &value)
          "In For::SetStrP, setting endName to %s\n", value.c_str());
       #endif
       endName = value;
-      endParamName = value;
-      endIsParam = true;
-      if (isReal)
-      {
-         endName = "";
-         endValue = rval;
-         endIsParam = false;
-      }
-      else
-      {
-         GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
-         if (rowStr != "-1" || colStr != "-1")
-            endParamName = name;
-      }
+      //endParamName = value;
+      //endIsParam = true;
+      //if (isReal)
+      //{
+      //   endName = "";
+      //   endValue = rval;
+      //   endIsParam = false;
+      //}
+      //else
+      //{
+      //   GmatStringUtil::GetArrayIndex(startName, rowStr, colStr, row, col, name);
+      //   if (rowStr != "-1" || colStr != "-1")
+      //      endParamName = name;
+      //}
       
-      return true;
+      //return true;
+      retVal = true;
    }
    else if (id == INCREMENT_NAME)
    {
       incrName = value;
-      incrParamName = value;
-      incrIsParam = true;
-      if (isReal)
-      {
-         incrName = "";
-         stepSize = rval;
-         incrIsParam = false;
-      }
-      else
-      {
-         GmatStringUtil::GetArrayIndex(incrName, rowStr, colStr, row, col, name);
-         if (rowStr != "-1" || colStr != "-1")
-            incrParamName = name;
-      }
+      //incrParamName = value;
+      //incrIsParam = true;
+      //if (isReal)
+      //{
+      //   incrName = "";
+      //   stepSize = rval;
+      //   incrIsParam = false;
+      //}
+      //else
+      //{
+      //   GmatStringUtil::GetArrayIndex(incrName, rowStr, colStr, row, col, name);
+      //   if (rowStr != "-1" || colStr != "-1")
+      //      incrParamName = name;
+      //}
       
       //MessageInterface::ShowMessage
       //   ("===> For::SetStringParameter() isReal=%d, incrIsParam=%d\n",
       //    isReal, incrIsParam);
       
-      return true;
+      //return true;
+      retVal = true;
    }
-   
+   if (retVal) return true;  // is this right?
    return BranchCommand::SetStringParameter(id, value);
 }
 
@@ -965,6 +1030,7 @@ bool For::SetStringParameter(const std::string &label,
  *
  */
 //------------------------------------------------------------------------------
+/*
 bool For::GetBooleanParameter(const Integer id) const
 {
    if (id == INDEX_IS_PARAM)       return indexIsParam;
@@ -974,7 +1040,7 @@ bool For::GetBooleanParameter(const Integer id) const
 
    return BranchCommand::GetBooleanParameter(id);
 }
-
+*/
 //------------------------------------------------------------------------------
 //  bool  GetBooleanParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -988,9 +1054,116 @@ bool For::GetBooleanParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
+/*
 bool For::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
+}
+*/
+const StringArray& For::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+   wrapperObjectNames.push_back(indexName);
+
+   if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), 
+       startName) == wrapperObjectNames.end())
+      wrapperObjectNames.push_back(startName);
+    
+   if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), 
+       endName) == wrapperObjectNames.end())
+      wrapperObjectNames.push_back(endName);
+    
+   if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), 
+       incrName) == wrapperObjectNames.end())
+      wrapperObjectNames.push_back(incrName);
+    
+   return wrapperObjectNames;
+}
+
+
+bool For::SetElementWrapper(ElementWrapper *toWrapper, 
+                                          const std::string &withName)
+{
+   bool retval = false;
+
+   if (toWrapper == NULL) return false;
+   
+   #ifdef DEBUG_WRAPPER_CODE   
+   MessageInterface::ShowMessage(
+      "   Setting wrapper \"%s\" on Conditional Branch command\n", 
+      withName.c_str());
+   #endif
+   if (indexName == withName)
+   {
+      if (toWrapper->GetWrapperType() != Gmat::VARIABLE)
+      {
+         std::string errmsg = "The value of \"" + indexName;
+         errmsg            += "\" for field \"Index Name\" on object \"";
+         errmsg            += instanceName + "\" is not an allowed value.\n";
+         errmsg            += "The allowed values are: [ Variable].";
+         throw CommandException(errmsg);
+      }
+      index       = toWrapper;
+      retval      = true;
+   }
+   if (startName == withName)
+   {
+      start       = toWrapper;
+      retval      = true;
+   }
+   if (endName == withName)
+   {
+      end         = toWrapper;
+      retval      = true;
+   }
+   if (incrName == withName)
+   {
+      increment   = toWrapper;
+      retval      = true;
+   }
+
+   return retval;
+}
+
+void For::ClearWrappers()
+{
+   std::vector<ElementWrapper*> temp;
+   if (index)
+   {
+      temp.push_back(index);
+      index = NULL;
+   }
+   if (start)
+   {
+      if (find(temp.begin(), temp.end(), start) == temp.end())
+      {
+         temp.push_back(start);
+         start = NULL;
+      }
+   }
+   if (end)
+   {
+      if (find(temp.begin(), temp.end(), end) == temp.end())
+      {
+         temp.push_back(end);
+         end = NULL;
+      }
+   }
+   if (increment)
+   {
+      if (find(temp.begin(), temp.end(), increment) == temp.end())
+      {
+         temp.push_back(increment);
+         increment = NULL;
+      }
+   }
+   
+   ElementWrapper *wrapper;
+   for (UnsignedInt i = 0; i < temp.size(); ++i)
+   {
+      wrapper = temp[i];
+      delete wrapper;
+   }
 }
 
 
@@ -1016,54 +1189,56 @@ bool For::StillLooping()
       //if (startIsParam)  startValue = startParam->GetReal();
       //if (endIsParam)    endValue   = endParam->GetReal();
       //if (incrIsParam)   stepSize   = incrParam->GetReal();
-
-      Parameter *param = NULL;
-      Integer row, col;
+      startValue = start->EvaluateReal();
+      endValue   = end->EvaluateReal();
+      stepSize   = increment->EvaluateReal();
+      //Parameter *param = NULL;
+      //Integer row, col;
       
       // Handle start Array element
-      if (startIsParam)
-      {
-         if (startParam->GetTypeName() == "Array")
-         {            
-            param = GetArrayIndex(startName, row, col);
-            Rmatrix rmat = startParam->GetRmatrix();
-            startValue = rmat.GetElement(row, col);
-         }
-         else
-         {
-            startValue = startParam->GetReal();
-         }
-      }
+      //if (startIsParam)
+      //{
+      //   if (startParam->GetTypeName() == "Array")
+      //   {            
+      //      param = GetArrayIndex(startName, row, col);
+      //      Rmatrix rmat = startParam->GetRmatrix();
+      //      startValue = rmat.GetElement(row, col);
+      //   }
+      //   else
+      //   {
+      //      startValue = startParam->GetReal();
+      //   }
+      //}
       
-      // Handle end Array element
-      if (endIsParam)
-      {
-         if (endParam->GetTypeName() == "Array")
-         {            
-            param = GetArrayIndex(endName, row, col);
-            Rmatrix rmat = endParam->GetRmatrix();
-            endValue = rmat.GetElement(row, col);
-         }
-         else
-         {
-            endValue = endParam->GetReal();
-         }
-      }
+      //// Handle end Array element
+      //if (endIsParam)
+      //{
+      //   if (endParam->GetTypeName() == "Array")
+      //   {            
+      //      param = GetArrayIndex(endName, row, col);
+      //      Rmatrix rmat = endParam->GetRmatrix();
+      //      endValue = rmat.GetElement(row, col);
+      //   }
+      //   else
+      //   {
+      //      endValue = endParam->GetReal();
+      //   }
+      //}
       
-      // Handle increment Array element
-      if (incrIsParam)
-      {
-         if (incrParam->GetTypeName() == "Array")
-         {            
-            param = GetArrayIndex(incrName, row, col);     
-            Rmatrix rmat = incrParam->GetRmatrix();
-            stepSize = rmat.GetElement(row, col);
-         }
-         else
-         {
-            stepSize = incrParam->GetReal();
-         }
-      }
+      //// Handle increment Array element
+      //if (incrIsParam)
+      //{
+      //   if (incrParam->GetTypeName() == "Array")
+      //   {            
+      //      param = GetArrayIndex(incrName, row, col);     
+      //      Rmatrix rmat = incrParam->GetRmatrix();
+      //      stepSize = rmat.GetElement(row, col);
+      //   }
+      //   else
+      //   {
+      //      stepSize = incrParam->GetReal();
+      //   }
+      //}
       
       #if DEBUG_FOR_EXE
       MessageInterface::ShowMessage
@@ -1080,8 +1255,9 @@ bool For::StillLooping()
       
       currentValue = startValue;
       
-      if (indexIsParam)
-         indexParam->SetReal(currentValue);
+      //if (indexIsParam)
+      //   indexParam->SetReal(currentValue);
+      index->SetReal(currentValue);
       commandComplete  = false;      
    }
    if (((stepSize > 0.0) && (currentValue <= endValue)) ||
@@ -1104,6 +1280,7 @@ bool For::StillLooping()
  * @note Array name must be created and configured before acces.
  */
 //------------------------------------------------------------------------------
+/* OLD CODE - not neede with Parameters in Commands
 Parameter* For::GetArrayIndex(const std::string &arrayStr,
                               Integer &row, Integer &col)
 {
@@ -1202,4 +1379,4 @@ Parameter* For::GetArrayIndex(const std::string &arrayStr,
    
    return (Parameter*)obj;
 }
-
+*/
