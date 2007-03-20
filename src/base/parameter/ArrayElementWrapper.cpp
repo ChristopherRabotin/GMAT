@@ -237,6 +237,11 @@ bool ArrayElementWrapper::RenameObject(const std::string &oldName,
 //---------------------------------------------------------------------------
 Real ArrayElementWrapper::EvaluateReal() const
 {
+   #ifdef DEBUG_AE_WRAPPER
+      MessageInterface::ShowMessage(
+         "AEWrapper::EvaluateReal called on array %s\n", 
+         arrayName.c_str());
+   #endif
    if (array == NULL)
       throw ParameterException(
       "Cannot return value of ArrayElement - object pointer is NULL\n");
@@ -253,7 +258,8 @@ Real ArrayElementWrapper::EvaluateReal() const
       Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
       #ifdef DEBUG_AE_WRAPPER
          MessageInterface::ShowMessage(
-            "AEWrapper::EvalReal - row evaluates to %d\n", (Integer) rowNearestInt);
+            "AEWrapper::EvalReal(%s) - row evaluates to %d\n", 
+            arrayName.c_str(),(Integer) rowNearestInt);
       #endif
       if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
       {
@@ -267,7 +273,8 @@ Real ArrayElementWrapper::EvaluateReal() const
       Real colNearestInt = GmatMathUtil::NearestInt(colVal);
       #ifdef DEBUG_AE_WRAPPER
          MessageInterface::ShowMessage(
-            "AEWrapper::EvalReal - column evaluates to %d\n", (Integer) colNearestInt);
+            "AEWrapper::EvalReal(%s) - column evaluates to %d\n", 
+            arrayName.c_str(),(Integer) colNearestInt);
       #endif
       if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
       {
@@ -280,8 +287,8 @@ Real ArrayElementWrapper::EvaluateReal() const
       itsValue = array->GetRealParameter("SingleValue", rowInt, columnInt);
       #ifdef DEBUG_AE_WRAPPER
          MessageInterface::ShowMessage(
-            "AEWrapper::EvalReal - itsValue evaluates to %.12f\n", 
-            itsValue);
+            "AEWrapper::EvalReal(%s) - itsValue evaluates to %.12f\n", 
+            arrayName.c_str(),itsValue);
       #endif
    }
    catch (BaseException &be)
@@ -310,8 +317,8 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
 {
    #ifdef DEBUG_AE_WRAPPER
       MessageInterface::ShowMessage(
-         "AEWrapper::SetReal called with input %.12f\n", 
-         toValue);
+         "AEWrapper::SetReal called on array %s with input %.12f\n", 
+         arrayName.c_str(), toValue);
    #endif
    if (array == NULL)
       throw ParameterException(
@@ -329,7 +336,8 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
       Real rowNearestInt = GmatMathUtil::NearestInt(rowVal);
       #ifdef DEBUG_AE_WRAPPER
          MessageInterface::ShowMessage(
-            "AEWrapper::SetReal - row evaluates to %d\n", (Integer) rowNearestInt);
+            "AEWrapper::SetReal(%s) - row evaluates to %d\n", 
+            arrayName.c_str(),(Integer) rowNearestInt);
       #endif
       if ((GmatMathUtil::Mod(rowVal, rowNearestInt) != 0.0))
       {
@@ -337,13 +345,14 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
          errmsg += "row Element evaluates to a non-Integer value\n";
          throw ParameterException(errmsg);
       }
-      rowInt = (Integer) rowNearestInt;
+      rowInt = (Integer) rowNearestInt - 1;
       // get the column value
       Real colVal        = column->EvaluateReal();
       Real colNearestInt = GmatMathUtil::NearestInt(colVal);
       #ifdef DEBUG_AE_WRAPPER
          MessageInterface::ShowMessage(
-            "AEWrapper::SetReal - col evaluates to %d\n", (Integer) colNearestInt);
+            "AEWrapper::SetReal(%s) - col evaluates to %d\n", 
+            arrayName.c_str(),(Integer) colNearestInt);
       #endif
       if ((GmatMathUtil::Mod(colVal, colNearestInt) != 0.0))
       {
@@ -351,7 +360,7 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
          errmsg += "column Element evaluates to a non-Integer value\n";
          throw ParameterException(errmsg);
       }
-      columnInt = (Integer) colNearestInt;
+      columnInt = (Integer) colNearestInt - 1;
 
       array->SetRealParameter("SingleValue", toValue, rowInt, columnInt);
    }
@@ -415,7 +424,7 @@ void ArrayElementWrapper::SetupWrapper()
    }
    #ifdef DEBUG_AE_WRAPPER
       MessageInterface::ShowMessage(
-         "AEWrapper::SetupWrapper - \n");
+         "AEWrapper::SetupWrapper for array named %s- \n", arrayName.c_str());
       MessageInterface::ShowMessage("   description = %s\n", description.c_str());
       MessageInterface::ShowMessage("   rowName     = %s\n", rowName.c_str());
       MessageInterface::ShowMessage("   columnName  = %s\n", columnName.c_str());
