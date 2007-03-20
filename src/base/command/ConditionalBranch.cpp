@@ -1382,11 +1382,6 @@ void ConditionalBranch::ClearWrappers()
    }
 }
 
-void ConditionalBranch::RunComplete()
-{
-   GmatCommand::RunComplete();
-}
-
 //------------------------------------------------------------------------------
 // protected methods
 //------------------------------------------------------------------------------
