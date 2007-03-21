@@ -542,8 +542,12 @@ bool NonlinearConstraint::SetStringParameter(const Integer id,
       else if (value == ">=") op = GREATER_THAN_OR_EQUAL;
       else if (value == "=")  op = EQUAL;
       else
-         throw CommandException("NonlinearConstraint: invalid operator: "
-                                + value + "\n");
+      {
+         std::string errmsg = "The conditional operator \"" + value;
+         errmsg            += "\" is not allowed in a NonlinearConstraint command.\n";
+         errmsg            += "The allowed values are [=, <=, >=]\n";
+         throw CommandException(errmsg);
+      }
       //interpreted   = false;
       return true;
    }
@@ -682,15 +686,22 @@ bool NonlinearConstraint::InterpretAction()
          MessageInterface::ShowMessage("NLC:InterpretAction: less_than_or_equal\n");
       #endif
    }
-   else
+   else if ((end = constraintStr.find("=", 0)) != (Integer) constraintStr.npos)
    {
-      end = constraintStr.find("=", 0);
+      //end = constraintStr.find("=", 0);
       op = EQUAL;
       isInequality = false;
       isIneqString = "EqConstraint";
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
          MessageInterface::ShowMessage("NLC:InterpretAction: equal\n");
       #endif
+   }
+   else
+   {
+      std::string errmsg = "The conditional operator is missing or invalid ";
+      errmsg            += " in a NonlinearConstraint command.\n";
+      errmsg            += "The allowed values are [=, <=, >=]\n";
+      throw CommandException(errmsg);
    }
    arg1Name = constraintStr.substr(0,end);
    arg2Name = constraintStr.substr(end+opSize, (constraintStr.npos - end + opSize - 1));
