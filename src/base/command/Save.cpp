@@ -64,8 +64,9 @@ Save::Save(const Save& sv) :
    appendData    (sv.appendData),     // should be false...
    wasWritten    (sv.wasWritten),
    objName       (sv.objName),
-   writeVerbose  (sv.writeVerbose),
-   file          (NULL)
+   writeVerbose  (sv.writeVerbose)
+   //VC++ error, file is not a pointer
+   //file          (NULL)
 {
    obj.clear();
 }
