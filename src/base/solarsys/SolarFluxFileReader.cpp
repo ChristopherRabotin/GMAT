@@ -91,7 +91,10 @@ SolarFluxFileReader::SolarFluxFileReader(const SolarFluxFileReader& sf)
 Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr, 
                                                bool new_file, GEOPARMS *geoParams)
 {
-   Integer it;          // Time of first day of TC data
+   //@todo set initial value of it
+   //subtracting uninitialized it from day below, so initialize to 0
+   //Integer it;
+   Integer it = 0;      // Time of first day of TC data
    Integer kp[21][8];   // Magnetic activity, 3-hour indices
    Real tc[20];         // 20 days of nighttime minimum exospheric
                         // temperatures, starting with day IT.
@@ -101,9 +104,9 @@ Integer SolarFluxFileReader::LoadSolarFluxFile(Real a1_time, FILE *tkptr,
    Integer status, i, j, n, kp1[21][4];
    Real hour, tp1;
 
-   status = 0;          // Initialize status flag to zero
-   day = (Integer)a1_time;       // Assign time as an Integer value
-   diff = day - it;     // Compare input time to stored time
+   status = 0;               // Initialize status flag to zero
+   day = (Integer)a1_time;   // Assign time as an Integer value
+   diff = day - it;          // Compare input time to stored time
    
    // If input time out of range of stored time
    if (new_file || diff < 0 || diff > 19)
