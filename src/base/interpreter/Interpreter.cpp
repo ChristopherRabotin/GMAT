@@ -544,11 +544,11 @@ StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &name)
+// GmatBase* GetConfiguredObject(const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* Interpreter::GetObject(const std::string &name)
+GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
 {
-   return theModerator->GetObject(name);
+   return theModerator->GetConfiguredObject(name);
 }
 
 
@@ -846,7 +846,7 @@ GmatBase* Interpreter::FindObject(const std::string &name)
    if (name == "SolarSystem")
       return theModerator->GetSolarSystemInUse();
    else
-      return theModerator->GetObject(name);
+      return theModerator->GetConfiguredObject(name);
 }
 
 
@@ -3694,7 +3694,7 @@ void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNu
    if (writeLine)
       currMsg = " in line:\n   \"" + lineNumber + ": " + line + "\"\n";
    
-   std::string msg = msgKind + e.GetMessage() + currMsg;
+   std::string msg = msgKind + e.GetFullMessage() + currMsg;
    
    if (continueOnError)
    {
@@ -3855,7 +3855,7 @@ bool Interpreter::FinalPass()
       MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
                                     i->c_str());
       #endif
-      cs = (CoordinateSystem*)GetObject(*i);
+      cs = (CoordinateSystem*)GetConfiguredObject(*i);
       cs->Initialize();
    }
    
@@ -3868,7 +3868,7 @@ bool Interpreter::FinalPass()
       MessageInterface::ShowMessage("Checking ref. object on '%s'\n",
                                     i->c_str());
       #endif
-      obj = GetObject(*i);
+      obj = GetConfiguredObject(*i);
       
       // check System Parameters seperately since it follows certain naming
       // convention.  "owner.dep.type" where owner can be either Spacecraft
@@ -3888,7 +3888,7 @@ bool Interpreter::FinalPass()
             // we don't want to check if owner is blank.
             if (owner != "")
             {
-               refObj = GetObject(owner);
+               refObj = GetConfiguredObject(owner);
                if (refObj == NULL)
                {
                   InterpreterException ex
@@ -3933,7 +3933,7 @@ bool Interpreter::FinalPass()
             
             for (UnsignedInt j = 0; j < refNameList.size(); j++)
             {
-               refObj = GetObject(refNameList[j]);
+               refObj = GetConfiguredObject(refNameList[j]);
                if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
                {
                   #ifdef DEBUG_FINAL_PASS
@@ -3952,7 +3952,7 @@ bool Interpreter::FinalPass()
          catch (BaseException &e)
          {
             #ifdef DEBUG_FINAL_PASS
-            MessageInterface::ShowMessage(e.GetMessage());
+            MessageInterface::ShowMessage(e.GetFullMessage());
             #endif
          }
       }
@@ -4137,7 +4137,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          {
             for (UnsignedInt j=0; j<refNames.size(); j++)
             {
-               if (GetObject(refNames[j]) == NULL)
+               if (GetConfiguredObject(refNames[j]) == NULL)
                {
                   std::string type, ownerName, depObj;
                   GmatStringUtil::ParseParameter(refNames[j], type, ownerName, depObj);
@@ -4154,7 +4154,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                   }
                   else
                   {
-                     if (GetObject(ownerName) == NULL)
+                     if (GetConfiguredObject(ownerName) == NULL)
                      {
                         InterpreterException ex
                            ("Nonexistent object \"" + ownerName + 
@@ -4178,7 +4178,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          {
             for (UnsignedInt j=0; j<refNames.size(); j++)
             {
-               GmatBase *refObj = GetObject(refNames[j]);
+               GmatBase *refObj = GetConfiguredObject(refNames[j]);
                if (refObj == NULL || !refObj->IsOfType(refTypes[i]))
                {
                   InterpreterException ex
@@ -4193,7 +4193,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetMessage());
+         MessageInterface::ShowMessage(e.GetFullMessage());
       }
    }
 
@@ -4348,7 +4348,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          std::string type, owner, dep;
          GmatStringUtil::ParseParameter(desc, type, owner, dep);
          // if it's not a valid object, then see if it's a parameter
-         GmatBase *theObj = theModerator->GetObject(owner);
+         GmatBase *theObj = theModerator->GetConfiguredObject(owner);
          if (theObj == NULL)
          {
             bool isParm = theModerator->IsParameter(desc);
