@@ -318,9 +318,12 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       theBlockType = Gmat::COMMENT_BLOCK;
    
    // remove ending ; from the instruction
-   length = theInstruction.size();   
-   if (theInstruction[length-1] == ';')
-      theInstruction = theInstruction.substr(0, length-1);
+   length = theInstruction.size();
+
+   // Added if (length > 0) for VC++
+   if (length > 0)
+      if (theInstruction[length-1] == ';')
+         theInstruction = theInstruction.substr(0, length-1);
    
    theChunks.clear();
    theChunks.push_back(prefaceComment);
