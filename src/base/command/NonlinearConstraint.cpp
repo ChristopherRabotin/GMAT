@@ -632,7 +632,7 @@ bool NonlinearConstraint::InterpretAction()
 
    StringArray chunks = InterpretPreface();
 
-   #ifdef DEBUG_VARY_PARSING
+   #ifdef DEBUG_NLC_PARSING
       MessageInterface::ShowMessage("Preface chunks as\n");
       for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
@@ -657,11 +657,13 @@ bool NonlinearConstraint::InterpretAction()
          MessageInterface::ShowMessage("   %s\n",
                                        currentChunks[jj].c_str());
    #endif
+   bool testForMore = false;
    if ((Integer) currentChunks.size() > 1)
    {
-      std::string errMsg = "The NonlinearConstraint \"" + generatingString 
-         + "\" has too many \"chunks\""; 
-      throw CommandException(errMsg);
+      testForMore = true;
+      //std::string errMsg = "The NonlinearConstraint \"" + generatingString 
+      //   + "\" has too many \"chunks\""; 
+      //throw CommandException(errMsg);
    }
    Integer end;
    std::string constraintStr = currentChunks[0];
@@ -710,7 +712,46 @@ bool NonlinearConstraint::InterpretAction()
       MessageInterface::ShowMessage("... operator = %s\n", OP_STRINGS[(Integer)op].c_str());
       MessageInterface::ShowMessage("... arg2Name = %s\n", arg2Name.c_str());
    #endif
-   
+   if (testForMore)
+   {
+      std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
+      currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", false);
+      
+      #ifdef DEBUG_NLC_PARSING
+         MessageInterface::ShowMessage(
+            "NLC: After SeparateBrackets, current chunks = \n");
+         for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
+            MessageInterface::ShowMessage("   %s\n",
+                                          currentChunks[jj].c_str());
+      #endif
+      
+      // currentChunks now holds all of the pieces - no need for more separation  
+      
+      std::string lhs, rhs;
+      for (StringArray::iterator i = currentChunks.begin(); 
+           i != currentChunks.end(); ++i)
+      {
+         SeparateEquals(*i, lhs, rhs);
+         //bool isOK = SeparateEquals(*i, lhs, rhs);
+         //#ifdef DEBUG_NLC_PARSING
+         //   MessageInterface::ShowMessage("Setting NLC properties\n");
+         //   MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
+         //#endif
+         //if (!isOK || lhs.empty() || rhs.empty())
+         //   throw CommandException("The setting \"" + lhs + 
+         //      "\" is missing a value required for a " + typeName + 
+         //      " command.\n");
+         
+         if (IsSettable(lhs))
+            SetStringParameter(GetParameterID(lhs), rhs);
+         else
+         {
+            throw CommandException("The setting \"" + lhs + 
+               "\" is not a valid setting for a " + typeName + 
+               " command.\n");
+         }
+      }
+   }
    /// @todo Handle settables here, when Tolerance is added 
    /* this is the old code
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
