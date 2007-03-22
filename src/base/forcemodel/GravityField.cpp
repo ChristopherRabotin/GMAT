@@ -233,20 +233,20 @@ GravityField::GravityField(const GravityField &gf) :
    
    for (Integer i = 0; i < 361; i++)
    {
-   	   for (Integer j = 0; j < 361; j++)
-   	   {
-   	   	   Cbar[i][j] = gf.Cbar[i][j];
-   	   	   Sbar[i][j] = gf.Sbar[i][j];
-   	   }
+           for (Integer j = 0; j < 361; j++)
+           {
+                   Cbar[i][j] = gf.Cbar[i][j];
+                   Sbar[i][j] = gf.Sbar[i][j];
+           }
    }
    
    for (Integer i = 0; i < 17; i++)
    {
-   	   for (Integer j = 0; j < 17; j++)
-   	   {
-   	   	   dCbar[i][j] = gf.dCbar[i][j];
-   	   	   dSbar[i][j] = gf.dSbar[i][j];
-   	   }
+           for (Integer j = 0; j < 17; j++)
+           {
+                   dCbar[i][j] = gf.dCbar[i][j];
+                   dSbar[i][j] = gf.dSbar[i][j];
+           }
    }
   
    parameterCount = GravityFieldParamCount;
@@ -293,20 +293,20 @@ GravityField& GravityField::operator=(const GravityField &gf)
    
    for (Integer i = 0; i < 361; i++)
    {
-   	   for (Integer j = 0; j < 361; j++)
-   	   {
-   	   	   Cbar[i][j] = gf.Cbar[i][j];
-   	   	   Sbar[i][j] = gf.Sbar[i][j];
-   	   }
+           for (Integer j = 0; j < 361; j++)
+           {
+                   Cbar[i][j] = gf.Cbar[i][j];
+                   Sbar[i][j] = gf.Sbar[i][j];
+           }
    }
    
    for (Integer i = 0; i < 17; i++)
    {
-   	   for (Integer j = 0; j < 17; j++)
-   	   {
-   	   	   dCbar[i][j] = gf.dCbar[i][j];
-   	   	   dSbar[i][j] = gf.dSbar[i][j];
-   	   }
+           for (Integer j = 0; j < 17; j++)
+           {
+                   dCbar[i][j] = gf.dCbar[i][j];
+                   dSbar[i][j] = gf.dSbar[i][j];
+           }
    }
    
 //   if (Cbar) {
@@ -1502,21 +1502,27 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
          lineStr >> firstStr;
          if (firstStr == "END") break;
 
+         //-----------------------------------------------------------
+         //note: 2007.03.15
+         // Visual C++ doesn't know about strcasecmp()
+         // So change to stricmp()
+         //-----------------------------------------------------------
+         
          // ignore the stk version and blank lines
-         if ((strcasecmp(firstStr.c_str(),"Model") == 0) ||
-               (strcasecmp(firstStr.c_str(),"BEGIN") == 0))
+         if ((stricmp(firstStr.c_str(),"Model") == 0) ||
+               (stricmp(firstStr.c_str(),"BEGIN") == 0))
          {
             // do nothing - we don't need to know this
          }
-         else if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+         else if (stricmp(firstStr.c_str(),"Degree") == 0)
          {
             lineStr >> fileDegree;
          }
-         else if (strcasecmp(firstStr.c_str(),"Order") == 0)
+         else if (stricmp(firstStr.c_str(),"Order") == 0)
          {
             lineStr >> fileOrder;
          }
-         else if (strcasecmp(firstStr.c_str(),"Gm") == 0)
+         else if (stricmp(firstStr.c_str(),"Gm") == 0)
          {
             lineStr >> tmpMu;
             if (tmpMu == 0.0)
@@ -1524,7 +1530,7 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             else
                mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
          }
-         else if (strcasecmp(firstStr.c_str(),"RefDistance") == 0)
+         else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
          {
             lineStr >> tmpA;
             if (tmpA == 0.0)
@@ -1532,7 +1538,7 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             else
                a = tmpA / 1000.0;  // -> Km
          }
-         else if (strcasecmp(firstStr.c_str(),"Normalized") == 0)
+         else if (stricmp(firstStr.c_str(),"Normalized") == 0)
          {
             lineStr >> isNormalized;
             if (isNormalized == "No")
