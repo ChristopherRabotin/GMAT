@@ -24,7 +24,11 @@
 // Headers for the supported Solvers
 //#include "QuasiNewton.hpp"
 //#include "SteepestDescent.hpp"
+
+#ifdef __USE_MATLAB__
 #include "FminconOptimizer.hpp"
+#endif
+
 #include "DifferentialCorrector.hpp"
 //#include "Broyden.hpp"
 //#include "ParametricScanner.hpp"
@@ -53,16 +57,18 @@
 Solver* SolverFactory::CreateSolver(const std::string &ofType,
                                     const std::string &withName)
 {
+   if (ofType == "DifferentialCorrector")
+      return new DifferentialCorrector(withName);
+   
+   #if defined __USE_MATLAB__
+   if (ofType == "FminconOptimizer")
+      return new FminconOptimizer(withName);
+   #endif
+   
    //if (ofType == "QuasiNewton") 
    //   return new QuasiNewton(withName);
    //else if (ofType == "SteepestDescent")
    //   return new SteepestDescent(withName);
-   //else ... join lines ...
-   if (ofType == "FminconOptimizer")
-      return new FminconOptimizer(withName);
-      //MessageInterface::ShowMessage("FminconOptimizer not yet implemented ...\n");
-   else if (ofType == "DifferentialCorrector")
-      return new DifferentialCorrector(withName);
    // else if (ofType == "Broyden")
    //   return new Broyden(withName);
    //else if (ofType == "ParametricScanner")
@@ -89,7 +95,11 @@ SolverFactory::SolverFactory() :
    {
       //creatables.push_back("QuasiNewton");
       //creatables.push_back("SteepestDescent");
+      
+      #if defined __USE_MATLAB__
       creatables.push_back("FminconOptimizer");
+      #endif
+      
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
@@ -129,7 +139,11 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
    {
       //creatables.push_back("QuasiNewton");
       //creatables.push_back("SteepestDescent");
+      
+      #if defined __USE_MATLAB__
       creatables.push_back("FminconOptimizer");
+      #endif
+      
       creatables.push_back("DifferentialCorrector");
       //creatables.push_back("Broyden");
       //creatables.push_back("ParametricScanner");
