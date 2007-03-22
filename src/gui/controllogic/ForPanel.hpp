@@ -63,9 +63,11 @@ private:
    virtual void LoadData();
    virtual void SaveData();
    
+//    void CheckVariable(const wxString &varName, bool isNumberAllowed = true);
+   
    // Layout & data handling methods
    void Setup(wxWindow *parent);
-   void OnCellLeftClick(wxGridEvent& event);
+   void OnCellValueChange(wxGridEvent& event);
    void OnCellRightClick(wxGridEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
