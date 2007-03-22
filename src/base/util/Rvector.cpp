@@ -500,8 +500,13 @@ Rvector Rvector::operator*(const Rmatrix &m) const
 //------------------------------------------------------------------------------
 const Rvector& Rvector::operator*=(const Rmatrix &m)
 {
-    *this *= m;
-    return *this;
+   //VC++ compiler gives this warning:
+   //505 [Warning C4717] 'Rvector::operator*=' : recursive on all control paths,
+   //function will cause runtime stack overflow
+   //*this *= m;
+
+   *this = *this * m;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
