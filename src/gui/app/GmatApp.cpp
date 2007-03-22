@@ -91,8 +91,13 @@ bool GmatApp::OnInit()
          GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
          
          // Make default size larger for Linux
-         //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(800, 600));
-         wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
+         //VC++ error C2059 syntax error : '=' 
+         //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
+         #ifdef wxUSE_UNIX
+         wxSize size = wxSize(380, 900);
+         #else
+         wxSize size = wxSize(800, 600);
+         #endif
          
          // The code above broke the Linux scaling.  This is a temporary hack to 
          // repair it.  PLEASE don't use UNIX macros to detect the Mac code!!!
@@ -119,7 +124,7 @@ bool GmatApp::OnInit()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          }
          
          wxYield();
@@ -171,7 +176,7 @@ bool GmatApp::OnInit()
    {
       MessageInterface::LogMessage
          (nowStr + "Error encounted while launching GMAT GUI.\n\n");
-      MessageInterface::LogMessage(e.GetMessage());
+      MessageInterface::LogMessage(e.GetFullMessage());
       return false;
    }
    catch (...)
