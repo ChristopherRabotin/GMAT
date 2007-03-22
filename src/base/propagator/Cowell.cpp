@@ -15,15 +15,12 @@
 //---------------------------------
 // static data
 //---------------------------------
-const std::string
-Cowell::PARAMETER_TEXT[CowellParamCount - IntegratorParamCount] =
-{
-};
-
-const Gmat::ParameterType
-Cowell::PARAMETER_TYPE[CowellParamCount - IntegratorParamCount] =
-{
-};
+//VC++ error C2466: cannot allocate an array of constant size 0
+// so commented out for possible later use
+//const std::string
+//Cowell::PARAMETER_TEXT[CowellParamCount - IntegratorParamCount] = {};
+//const Gmat::ParameterType
+//Cowell::PARAMETER_TYPE[CowellParamCount - IntegratorParamCount] = {};
 
 //---------------------------------
 // public
@@ -117,7 +114,7 @@ bool Cowell::Initialize(void)
     initialized = false;
     
     if (physicalModel)
-	{
+        {
         dimension = physicalModel->GetDimension();
         estimatedState = new Real[dimension];
     } 

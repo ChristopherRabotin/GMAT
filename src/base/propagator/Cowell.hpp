@@ -41,14 +41,19 @@ public:
    virtual Real    GetRealParameter(const std::string &label) const;
    virtual Real    SetRealParameter(const Integer id, const Real value);
    virtual Real    SetRealParameter(const std::string &label, const Real value);
-	
+        
 protected:
+
    enum
    {  /// Count of the parameters for this class
       CowellParamCount = IntegratorParamCount
    };
-   static const std::string PARAMETER_TEXT[CowellParamCount - IntegratorParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[CowellParamCount - IntegratorParamCount];
+   
+   // save for possible later use
+   //static const std::string
+   //PARAMETER_TEXT[CowellParamCount - IntegratorParamCount];
+   //static const Gmat::ParameterType
+   //PARAMETER_TYPE[CowellParamCount - IntegratorParamCount];
 
 private:
    /// The estimated state
