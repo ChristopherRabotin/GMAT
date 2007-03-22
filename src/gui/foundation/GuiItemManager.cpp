@@ -84,12 +84,12 @@ wxString GuiItemManager::ToWxString(Real rval)
 
 
 //------------------------------------------------------------------------------
-// int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType)
+// int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType,
+//                     bool isNumberAllowed = false)
 //------------------------------------------------------------------------------
 /*
- * Checks if input variable is a Variable, Array element, or parameter of
- * input owner type.
- *
+ * Checks if input variable is a Variable, Array element, or plottable
+ * parameter of input owner type. The plottable parameter returns Real number.
  *
  * @param  varName  input variable name
  * @param  ownerType  input owner type (such as Gmat::SPACECRAFT)
@@ -97,11 +97,20 @@ wxString GuiItemManager::ToWxString(Real rval)
  * @return -1 if varName NOT found in the configuration
  *          0 if varName found BUT not one of Variable, Array element, or parameter
  *          1 if varName found AND one of Variable, Array element, or parameter
+ *          2 if number is allowed and varName is Real number
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
-                                    Gmat::ObjectType ownerType)
+                                    Gmat::ObjectType ownerType,
+                                    bool isNumberAllowed)
 {
+   if (isNumberAllowed)
+   {
+      Real rval;
+      if (GmatStringUtil::ToReal(varName.c_str(), rval))
+         return 2;
+   }
+
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
    
    if (obj == NULL)
@@ -132,10 +141,10 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    else if (param->GetKey() == GmatParam::SYSTEM_PARAM)
    {
       // check to see if it is parameter of owenerType
-      if (param->GetOwnerType() == ownerType)
+      if (param->GetOwnerType() == ownerType && param->IsPlottable())
          isValid = true;
    }
-
+   
    if (isValid)
       return 1;
    else
