@@ -23,11 +23,13 @@
 #include "MessageInterface.hpp"
 #include "CelestialBody.hpp"
 
+#ifndef __SKIP_MSISE90__
 extern "C" 
 { 
    void gtd6_(int*,float*,float*,float*,float*,float*,float*,float*,float*,int*,float*,float*);
 }
-   
+#endif
+
 //#define DEBUG_MSISE90_ATMOSPHERE
 
 #ifdef DEBUG_MSISE90_ATMOSPHERE
@@ -81,7 +83,7 @@ f107                (msise.f107),
 f107a               (msise.f107a),
 mass                (msise.mass)
 {
-	for (Integer i = 0; i < 7; i++)
+        for (Integer i = 0; i < 7; i++)
       ap[i] = msise.ap[i];
 }
 
@@ -112,7 +114,7 @@ Msise90Atmosphere& Msise90Atmosphere::operator=(const Msise90Atmosphere& msise)
    f107a        = msise.f107a;
    mass         = msise.mass;
    
-	for (Integer i = 0; i < 7; i++)
+        for (Integer i = 0; i < 7; i++)
       ap[i] = msise.ap[i];
       
    return *this;
@@ -272,7 +274,9 @@ bool Msise90Atmosphere::Density(Real *pos, Real *density, Real epoch,
       fprintf(logFile, "\n");
       #endif
       
+#ifndef __SKIP_MSISE90__
       gtd6_(&xyd,&xsod,&xalt,&xlat,&xlon,&xlst,&xf107a,&xf107,&xap[0],&xmass,&xden[0],&xtemp[0]);
+#endif
       
       #ifdef DEBUG_MSISE90_ATMOSPHERE
       fprintf(logFile, "Post-GTDS6() \n");
