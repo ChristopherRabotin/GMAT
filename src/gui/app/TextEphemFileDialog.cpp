@@ -67,7 +67,8 @@ void TextEphemFileDialog::Create()
    #endif
    
    int bsize = 2;
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
    //------------------------------------------------------
    // Ephemeris file parameters
@@ -113,10 +114,9 @@ void TextEphemFileDialog::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mEpochFormatComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""),
-                     wxDefaultPosition, wxSize(150,-1), 0, emptyList,
-                     wxCB_DROPDOWN | wxCB_READONLY);
-
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+                     emptyList, wxCB_DROPDOWN | wxCB_READONLY);
+   
    wxFlexGridSizer *fileSizer = new wxFlexGridSizer(3, 0, 0);
    fileSizer->Add(headerFileLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
    fileSizer->Add(mEphemFileTextCtrl, 0, wxALIGN_CENTER|wxALL|wxGROW, bsize);
@@ -152,8 +152,8 @@ void TextEphemFileDialog::Create()
       GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65));
    
    mSelectedScListBox =
-      new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(150,65), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+                    emptyList, wxLB_SINGLE);
    
    #if __WXMAC__
    int buttonWidth = 40;
@@ -384,7 +384,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    {
       MessageInterface::ShowMessage
          ("TextEphemFileDialog:CreateTextEphem() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
 
       return false;
    }
@@ -418,7 +418,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    {
       MessageInterface::ShowMessage
          ("TextEphemFileDialog:CreateTextEphem() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
 
       return false;
    }

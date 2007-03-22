@@ -256,7 +256,7 @@ void WhilePanel::SaveData()
          }
          catch (BaseException &be)
          {
-            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetMessage()); 
+            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetFullMessage()); 
             return;           
          }
          
@@ -318,7 +318,7 @@ void WhilePanel::SaveData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("*** Error *** WhilePanel::SaveData() " + e.GetMessage());
+         ("*** Error *** WhilePanel::SaveData() " + e.GetFullMessage());
    }
 }   
 

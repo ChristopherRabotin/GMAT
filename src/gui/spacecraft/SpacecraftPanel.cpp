@@ -56,8 +56,8 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
    #endif
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   //theSpacecraft = theGuiInterpreter->GetSpacecraft(std::string(scName.c_str()));
-   theSpacecraft = (Spacecraft*)theGuiInterpreter->GetObject(std::string(scName.c_str()));
+   theSpacecraft =
+      (Spacecraft*)theGuiInterpreter->GetConfiguredObject(std::string(scName.c_str()));
    
    if (theSpacecraft != NULL)
    {            

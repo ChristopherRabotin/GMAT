@@ -114,7 +114,7 @@ PlanetaryEphem(fileName)
    }
    catch (PlanetaryEphemException &pe)
    {
-      throw PlanetaryEphemException(pe.GetMessage());
+      throw PlanetaryEphemException(pe.GetFullMessage());
    }
 }
 
@@ -276,22 +276,22 @@ Real* DeFile::GetPosVel(Integer forBody, A1Mjd atTime, bool overrideTimeSystem)
    if (overrideTimeSystem)
    {
       // 20.02.06 - arg: changed to use enum types instead of strings
-//	   double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
-//					   "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
+//         double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
+//                                         "A1Mjd", "TtMjd", GmatTimeUtil::JD_JAN_5_1941);
        double mjdTT = (double) TimeConverterUtil::Convert(atTime.Get(),
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TTMJD, 
                        GmatTimeUtil::JD_JAN_5_1941);
-	   absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
-	}
-	else
+           absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
+        }
+        else
     {
       // 20.02.06 - arg: changed to use enum types instead of strings
-//	   double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
-//					   "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
+//         double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
+//                                         "A1Mjd", "TdbMjd", GmatTimeUtil::JD_JAN_5_1941);
        double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
                        GmatTimeUtil::JD_JAN_5_1941);
-	   absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
+           absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
     }
    
    //cout << "absJd = " << absJD << endl;

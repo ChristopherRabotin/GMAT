@@ -1003,7 +1003,7 @@ void Planet::InitializePlanet(const std::string &cBody)
    }
    catch (GmatBaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
 
    // Set use potential file to true if Earth

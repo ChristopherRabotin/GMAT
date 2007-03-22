@@ -67,7 +67,7 @@ CelestialBodyPanel::CelestialBodyPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent, true)
 {
    theCelestialBody = (CelestialBody*)
-            theGuiInterpreter->GetObject(std::string(name.c_str()));
+      theGuiInterpreter->GetConfiguredObject(name.c_str());
    
    thePlanet = (Planet*)theCelestialBody;         
    bodyName = name.c_str();
@@ -97,7 +97,8 @@ void CelestialBodyPanel::Create()
    wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
    wxStaticBoxSizer *analyticBoxSizer = new wxStaticBoxSizer(analyticStaticBox, wxVERTICAL);
    wxBoxSizer *horizontalBoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
 
    // Mu
    muStaticText = new wxStaticText(this, ID_TEXT, wxT("Mu"), wxDefaultPosition,
@@ -215,9 +216,9 @@ void CelestialBodyPanel::Create()
    rotDataSourceText =
       new wxStaticText(this, ID_TEXT, "Rotation Data Source",
          wxDefaultPosition, wxDefaultSize, 0);
-   rotDataSourceCB = new wxComboBox( this, ID_COMBO, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0, emptyList, 
-      wxCB_DROPDOWN | wxCB_READONLY );
+   rotDataSourceCB = new wxComboBox
+      ( this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+        emptyList, wxCB_DROPDOWN | wxCB_READONLY );
 
    flexGridSizer0->Add( muStaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    flexGridSizer0->Add( mMuTextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
@@ -414,7 +415,7 @@ void CelestialBodyPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("CelestialBodyPanel:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
 
    // Activate "ShowScript"
@@ -524,7 +525,7 @@ void CelestialBodyPanel::SaveData()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             canClose = false;
          }
          
@@ -536,7 +537,7 @@ void CelestialBodyPanel::SaveData()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             canClose = false;
          }
          
@@ -547,15 +548,15 @@ void CelestialBodyPanel::SaveData()
          // Nutation Update Interval
          if (theCelestialBody->GetBodyType() == Gmat::PLANET)
          {
-	         try
-	         {
-	            thePlanet->SetNutationUpdateInterval(interval);
-	         }
-	         catch (BaseException &e)
-	         {
-	            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
-	            canClose = false;
-	         }
+                 try
+                 {
+                    thePlanet->SetNutationUpdateInterval(interval);
+                 }
+                 catch (BaseException &e)
+                 {
+                    MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+                    canClose = false;
+                 }
 //            thePlanet->SetUpdateInterval(interval);
          }
          
@@ -578,7 +579,7 @@ void CelestialBodyPanel::SaveData()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             canClose = false;
          }
          
@@ -589,7 +590,7 @@ void CelestialBodyPanel::SaveData()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             canClose = false;
          }
          
@@ -616,7 +617,7 @@ void CelestialBodyPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

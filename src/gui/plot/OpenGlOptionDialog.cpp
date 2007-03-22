@@ -336,14 +336,17 @@ void OpenGlOptionDialog::Create()
    wxStaticText *centerOfViewStaticText =
       new wxStaticText(this, -1, wxT("Go To"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
-
-   wxString strObjectArray[mObjectCount];
+   //VC++ error C2057: expected constant expression 
+   //wxString strObjectArray[mObjectCount];
+   wxArrayString strObjectArray;
    for (int i=0; i<mObjectCount; i++)
-      strObjectArray[i] = mObjectNames[i];
+      //strObjectArray[i] = mObjectNames[i];
+      strObjectArray.Add(mObjectNames[i]);
    
-   mGotoObjectComboBox =
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxSize(105,-1), mObjectCount, strObjectArray, wxCB_DROPDOWN);
+   mGotoObjectComboBox = new wxComboBox
+      (this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(105,-1), //mObjectCount,
+       strObjectArray, wxCB_DROPDOWN);
+   
    mGotoObjectComboBox->SetStringSelection("Earth");
    
    wxStaticText *coordSysStaticText =
@@ -455,10 +458,12 @@ void OpenGlOptionDialog::Create()
    // view bodies options
    //-----------------------------------------------------------------
 
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
+
    mObjectListBox =
-      new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(75,60), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(75,60), //0,
+                    emptyList, wxLB_SINGLE);
    
    mObjectColorButton = new wxButton(this, ID_OBJECT_COLOR_BUTTON, "",
                                     wxDefaultPosition, wxSize(20,15), 0);

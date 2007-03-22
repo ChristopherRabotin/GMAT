@@ -129,7 +129,7 @@ bool AttitudeReal::Initialize()
    {
       throw GmatBaseException
          ("AttitudeReal::Initialize() Fail to initialize Parameter:" +
-          this->GetTypeName() + "\n" + e.GetMessage());
+          this->GetTypeName() + "\n" + e.GetFullMessage());
    }
    
    return true;

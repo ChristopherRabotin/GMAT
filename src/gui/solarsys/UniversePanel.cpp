@@ -121,7 +121,9 @@ void UniversePanel::Create()
    #endif
 
    int bsize = 2;
-   wxString emptyArray[] = { };
+   //VC++ error C2466: cannot allocate an array of constant size 0
+   //wxString emptyArray[] = { };
+   wxArrayString emptyArray;
    
    //-------------------------------------------------------
    // ephemeris update interval
@@ -140,9 +142,9 @@ void UniversePanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mFileTypeComboBox = 
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, emptyArray, wxCB_READONLY);
-
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize, //0,
+                     emptyArray, wxCB_READONLY);
+   
    //-------------------------------------------------------
    // ephemeris file
    //-------------------------------------------------------
@@ -174,8 +176,8 @@ void UniversePanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mAnalyticModelComboBox = 
-      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition,
-                     wxDefaultSize, 0, emptyArray, wxCB_READONLY);
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxDefaultSize, //0,
+                     emptyArray, wxCB_READONLY);
    
    //-------------------------------------------------------
    // Add to bottom grid sizer
@@ -364,7 +366,7 @@ void UniversePanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

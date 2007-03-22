@@ -360,7 +360,7 @@ Real Anomaly::GetTrueAnomaly(bool inRadians) const
       }
       catch(UtilityException &ue)
       {
-         std::string msg = "Anomaly::GetTrueAnomaly - " + ue.GetMessage();
+         std::string msg = "Anomaly::GetTrueAnomaly - " + ue.GetFullMessage();
          throw UtilityException(msg); 
       }
    }

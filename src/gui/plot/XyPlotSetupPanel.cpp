@@ -80,8 +80,7 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
    #endif
    
    Subscriber *subscriber = (Subscriber*)
-      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
-      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetConfiguredObject(std::string(subscriberName.c_str()));
 
    mXyPlot = (TsPlot*)subscriber;
 
@@ -410,7 +409,8 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::Create()
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    Integer bsize = 1; // border size
    
    // empty text for spacing line
@@ -429,8 +429,8 @@ void XyPlotSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
 
    mXSelectedListBox =
-      new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, X_SEL_LISTBOX, wxDefaultPosition, wxSize(170,260), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *xSelectedBoxSizer =
       new wxStaticBoxSizer(xSelectedStaticBox, wxVERTICAL);
@@ -545,8 +545,9 @@ void XyPlotSetupPanel::Create()
       new wxStaticText(this, -1, wxT("Selected Y"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
 
-   mYSelectedListBox = new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition,
-                                     wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+   mYSelectedListBox =
+      new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition, wxSize(170,260), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *ySelectedBoxSizer =
       new wxStaticBoxSizer(ySelectedStaticBox, wxVERTICAL);
@@ -678,7 +679,7 @@ void XyPlotSetupPanel::LoadData()
             //mColorMap[yParamList[i]]
             //   = RgbColor(mXyPlot->GetUnsignedIntParameter("Color", yParamList[i]));
             
-            param = (Parameter*)theGuiInterpreter->GetObject(yParamList[i]);
+            param = (Parameter*)theGuiInterpreter->GetConfiguredObject(yParamList[i]);
             if (param != NULL)
             {
                mColorMap[yParamList[i]]
@@ -700,9 +701,9 @@ void XyPlotSetupPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       //MessageInterface::ShowMessage
-      //   ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+      //   ("XyPlotSetupPanel:LoadData() error occurred!\n%s\n", e.GetFullMessage().c_str());
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
@@ -821,7 +822,7 @@ void XyPlotSetupPanel::SaveData()
       for (int i=0; i<mNumYParams; i++)
       {
          mSelYName = std::string(mYSelectedListBox->GetString(i).c_str());
-         param = (Parameter*)theGuiInterpreter->GetObject(mSelYName);
+         param = (Parameter*)theGuiInterpreter->GetConfiguredObject(mSelYName);
 
          if (param != NULL)
          {
@@ -854,8 +855,7 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
       // if parameter not in the map
       if (mColorMap.find(mSelYName) == mColorMap.end())
       {
-         //Parameter *param = theGuiInterpreter->GetParameter(mSelYName);
-         Parameter *param = (Parameter*)theGuiInterpreter->GetObject(mSelYName);
+         Parameter *param = (Parameter*)theGuiInterpreter->GetConfiguredObject(mSelYName);
 
          if (param != NULL)
          {
@@ -979,7 +979,7 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
 {
    
    Parameter *param = (Parameter*)
-      theGuiInterpreter->GetObject(std::string(name.c_str()));
+      theGuiInterpreter->GetConfiguredObject(std::string(name.c_str()));
    
    // create a parameter if it does not exist
    if (param == NULL)
@@ -1017,7 +1017,7 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
       {
          MessageInterface::ShowMessage
             ("XyPlotSetupPanel:GetParameter() error occurred!\n%s\n",
-             e.GetMessage().c_str());
+             e.GetFullMessage().c_str());
       }
    }
    

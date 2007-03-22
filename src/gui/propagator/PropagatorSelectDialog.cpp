@@ -64,7 +64,8 @@ wxString PropagatorSelectDialog::GetPropagatorName()
 void PropagatorSelectDialog::Create()
 {
    int bsize = 2; // border size
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
      
    //wxStaticText
    wxStaticText *mPropagatorStaticText =
@@ -96,8 +97,8 @@ void PropagatorSelectDialog::Create()
    else
    {
       mPropagatorListBox =
-         new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                       wxSize(150, 100), 0, emptyList, wxLB_SINGLE);
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150, 100), //0,
+                       emptyList, wxLB_SINGLE);
    }
    
    // wxSizers

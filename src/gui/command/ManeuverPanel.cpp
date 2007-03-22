@@ -198,8 +198,8 @@ void ManeuverPanel::LoadData()
    
    if (!burnCB->SetStringSelection(burn.c_str()))
    {
-   	  burnCB->Append("");
-   	  burnCB->SetStringSelection("");
+          burnCB->Append("");
+          burnCB->SetStringSelection("");
    }
     
    // spacecraft
@@ -224,8 +224,8 @@ void ManeuverPanel::LoadData()
    
    if (!satCB->SetStringSelection(sat.c_str()))
    {
-   	  satCB->Append("");
-   	  satCB->SetStringSelection("");
+          satCB->Append("");
+          satCB->SetStringSelection("");
    }
    
 
@@ -241,25 +241,25 @@ void ManeuverPanel::SaveData()
    //-----------------------------------------------------------------
    try
    {
-	   // save data to core engine
-	   Integer id;
-	   wxString elemString;
-	
-	   // save burn
-	   wxString burnString = burnCB->GetStringSelection();
-	   id = theCommand->GetParameterID("Burn");
-	   std::string burn = std::string (burnString.c_str());
-	   theCommand->SetStringParameter(id, burn);
-	
-	    // save spacecraft
-	   wxString satString = satCB->GetStringSelection();
-	   id = theCommand->GetParameterID("Spacecraft");
-	   std::string spacecraft = std::string (satString.c_str());
-	   theCommand->SetStringParameter(id, spacecraft);
+           // save data to core engine
+           Integer id;
+           wxString elemString;
+        
+           // save burn
+           wxString burnString = burnCB->GetStringSelection();
+           id = theCommand->GetParameterID("Burn");
+           std::string burn = std::string (burnString.c_str());
+           theCommand->SetStringParameter(id, burn);
+        
+            // save spacecraft
+           wxString satString = satCB->GetStringSelection();
+           id = theCommand->GetParameterID("Spacecraft");
+           std::string spacecraft = std::string (satString.c_str());
+           theCommand->SetStringParameter(id, spacecraft);
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

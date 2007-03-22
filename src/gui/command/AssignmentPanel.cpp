@@ -166,7 +166,7 @@ void AssignmentPanel::SaveData()
       // Valid object property should be checked by Assignment::InterpretAction()
       if (GmatStringUtil::IsValidName(lhs))
       {
-         if (theGuiInterpreter->GetObject(lhs) == NULL)
+         if (theGuiInterpreter->GetConfiguredObject(lhs) == NULL)
          {
             MessageInterface::PopupMessage
                (Gmat::ERROR_, "Left hand side should be an existing Variable "
@@ -202,7 +202,7 @@ void AssignmentPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          canClose = false;
       }
    }

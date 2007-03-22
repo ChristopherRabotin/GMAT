@@ -203,7 +203,7 @@ void AchievePanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 
@@ -237,7 +237,7 @@ void AchievePanel::SaveData()
    // goal value can be a number or a parameter name, so validate
    if (!GmatStringUtil::ToReal(inputString, value))
    {
-      if (theGuiInterpreter->GetObject(inputString) == NULL)
+      if (theGuiInterpreter->GetConfiguredObject(inputString) == NULL)
       {
          //CheckReal(value, inputString, "GoalValue",
          //          "Real Number or valid Parameter Name", true);
@@ -277,7 +277,7 @@ void AchievePanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 

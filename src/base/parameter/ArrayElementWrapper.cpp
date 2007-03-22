@@ -297,7 +297,7 @@ Real ArrayElementWrapper::EvaluateReal() const
                             array->GetName(); 
       errmsg += " with row " + rowInt;
       errmsg += " and column " + columnInt;
-      errmsg += " - exception thrown: " + be.GetMessage();
+      errmsg += " - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
          
@@ -370,7 +370,7 @@ bool ArrayElementWrapper::SetReal(const Real toValue)
                             array->GetName(); 
       errmsg += " with row " + rowInt;
       errmsg += " and column " + columnInt;
-      errmsg += " - exception thrown: " + be.GetMessage();
+      errmsg += " - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
          

@@ -45,7 +45,7 @@ DCSetupPanel::DCSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
    theSolver =
-      (Solver*)theGuiInterpreter->GetObject(std::string(name.c_str()));
+      (Solver*)theGuiInterpreter->GetConfiguredObject(std::string(name.c_str()));
    
    theDC = (DifferentialCorrector *)theSolver;
    isTextModified = false;
@@ -157,7 +157,7 @@ void DCSetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

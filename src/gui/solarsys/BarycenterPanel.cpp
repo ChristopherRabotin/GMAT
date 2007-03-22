@@ -52,7 +52,7 @@ BarycenterPanel::BarycenterPanel(wxWindow *parent, const wxString &name)
                 :GmatPanel(parent)
 {
    theBarycenter =
-      (Barycenter*)theGuiInterpreter->GetObject(name.c_str());
+      (Barycenter*)theGuiInterpreter->GetConfiguredObject(name.c_str());
 
    mBodyNames.Clear();
    mIsBodySelected = false;
@@ -84,7 +84,8 @@ BarycenterPanel::~BarycenterPanel()
 void BarycenterPanel::Create()
 {
    int borderSize = 2;
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
 
    //wxStaticText
    wxStaticText *bodyStaticText =
@@ -116,9 +117,10 @@ void BarycenterPanel::Create()
    bodyListBox =
       theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200), tmpArrayString);
 
-   bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
-                                          wxSize(150, 200), 0, emptyList, wxLB_SINGLE);
-
+   bodySelectedListBox = new wxListBox
+      (this, ID_BODY_SEL_LISTBOX, wxDefaultPosition, wxSize(150, 200), //0,
+       emptyList, wxLB_SINGLE);
+   
    // wxSizers
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *bodyGridSizer = new wxFlexGridSizer(3, 0, 0);
@@ -170,7 +172,7 @@ void BarycenterPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("BarycenterPanel:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
 
    // Activate "ShowScript"
@@ -202,7 +204,7 @@ void BarycenterPanel::SaveData()
       
       // get Earth pointer as J2000Body
       CelestialBody *j2000body =
-         (CelestialBody*)theGuiInterpreter->GetObject("Earth");
+         (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth");
       CelestialBody *body;
       std::string bodyName;
       
@@ -211,7 +213,7 @@ void BarycenterPanel::SaveData()
          bodyName = bodySelectedListBox->GetString(i).c_str();
          theBarycenter->SetStringParameter("BodyNames", bodyName, i);
          
-         body = (CelestialBody*)theGuiInterpreter->GetObject(bodyName);
+         body = (CelestialBody*)theGuiInterpreter->GetConfiguredObject(bodyName);
          
          // set J2000Body for the body
          if (body->GetJ2000Body() == NULL)
@@ -231,7 +233,7 @@ void BarycenterPanel::SaveData()
    {
       MessageInterface::ShowMessage
          ("BarycenterPanel:SaveData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
 }
 

@@ -193,7 +193,7 @@ bool TimeReal::Initialize()
       #endif
       
       throw ParameterException
-         ("WARNING:  " + e.GetMessage() + " in " + GetName() + "\n");
+         ("WARNING:  " + e.GetFullMessage() + " in " + GetName() + "\n");
    }
    
    return true;

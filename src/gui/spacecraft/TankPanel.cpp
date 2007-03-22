@@ -82,7 +82,8 @@ void TankPanel::Create()
                               wxDefaultPosition, wxDefaultSize, 0 );
                               
    // wxString
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
                             
    Integer paramID = theSpacecraft->GetParameterID("Tanks");
    StringArray tankNames = theSpacecraft->GetStringArrayParameter(paramID);
@@ -95,8 +96,9 @@ void TankPanel::Create()
       theGuiManager->GetFuelTankListBox(this, ID_LISTBOX, wxSize(150,200),
                                         &mExcludedTankList);
    
-   selectedTankListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+   selectedTankListBox =
+      new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
+                    emptyList, wxLB_SINGLE);
    
    Integer bsize = 3; // border size
    

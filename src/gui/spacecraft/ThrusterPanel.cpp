@@ -81,7 +81,8 @@ void ThrusterPanel::Create()
    removeAllButton = new wxButton( this, ID_BUTTON, wxT("<="),
                               wxDefaultPosition, wxDefaultSize, 0 );
                               
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
    Integer paramID = theSpacecraft->GetParameterID("Thrusters");
    StringArray thrusterNames = theSpacecraft->GetStringArrayParameter(paramID);
@@ -94,8 +95,9 @@ void ThrusterPanel::Create()
       theGuiManager->GetThrusterListBox(this, ID_LISTBOX, wxSize(150,200),
                                         &mExcludedThrusterList);
    
-   selectedThrusterListBox = new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+   selectedThrusterListBox =
+      new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
+                    emptyList, wxLB_SINGLE);
                     
    Integer bsize = 3; // border size
    

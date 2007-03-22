@@ -51,7 +51,7 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
    : GmatPanel(parent)
 {
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theBurn = (Burn*)theGuiInterpreter->GetObject(std::string(burnName.c_str()));
+   theBurn = (Burn*)theGuiInterpreter->GetConfiguredObject(std::string(burnName.c_str()));
    isTextModified = false;
    canClose = true;
    
@@ -426,7 +426,8 @@ void ImpulsiveBurnSetupPanel::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("ImpulsiveBurnSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("ImpulsiveBurnSetupPanel:LoadData() error occurred!\n%s\n",
+          e.GetFullMessage().c_str());
    }
 }
 
@@ -510,7 +511,7 @@ void ImpulsiveBurnSetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

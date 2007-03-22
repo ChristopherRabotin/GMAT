@@ -380,7 +380,7 @@ bool HarmonicField::SetFilename(const std::string &fn)
          catch (GmatBaseException &e)
          {
             filename = fn;
-            MessageInterface::ShowMessage(e.GetMessage());
+            MessageInterface::ShowMessage(e.GetFullMessage());
          }
       }
       else

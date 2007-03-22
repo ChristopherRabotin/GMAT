@@ -53,7 +53,7 @@ FiniteBurnSetupPanel::FiniteBurnSetupPanel(wxWindow *parent,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
 
    theBurn = 
-      (FiniteBurn*) theGuiInterpreter->GetObject(std::string(burnName.c_str()));
+      (FiniteBurn*) theGuiInterpreter->GetConfiguredObject(burnName.c_str());
 
    thrusterSelected = "";
    isThrusterEmpty = false;
@@ -345,7 +345,7 @@ void FiniteBurnSetupPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("FiniteBurnSetupPanel:LoadData() error occurred!\n%s\n", 
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
 }
 
@@ -401,7 +401,7 @@ void FiniteBurnSetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

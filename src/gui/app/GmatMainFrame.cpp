@@ -324,7 +324,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    }
    catch (GmatBaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
    
    #if DEBUG_MAINFRAME
@@ -853,9 +853,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    }
    catch (BaseException &e)
    {
-      wxLogError(e.GetMessage().c_str());
+      wxLogError(e.GetFullMessage().c_str());
       wxLog::FlushActive();
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
    
    mInterpretFailed = !success;
@@ -1570,12 +1570,12 @@ GmatMainFrame::CreateNewResource(const wxString &title,
       sizer->Add(new OpenGlPlotSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::VARIABLE:
-      if (theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "Variable" ||
-          theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "String")
+      if (theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "Variable" ||
+          theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "String")
       {
          sizer->Add(new ParameterSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       }
-      else if (theGuiInterpreter->GetObject(name.c_str())->GetTypeName() == "Array")
+      else if (theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "Array")
       {
          sizer->Add(new ArraySetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       }

@@ -233,7 +233,7 @@ void DragInputsDialog::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetMessage()); 
+                                    e.GetFullMessage()); 
    }
    
    try
@@ -245,7 +245,7 @@ void DragInputsDialog::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetMessage()); 
+                                    e.GetFullMessage()); 
    }
    
    try
@@ -257,7 +257,7 @@ void DragInputsDialog::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetMessage()); 
+                                    e.GetFullMessage()); 
    }
    
    try
@@ -271,7 +271,7 @@ void DragInputsDialog::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetMessage()); 
+                                    e.GetFullMessage()); 
    }
    
    try
@@ -282,7 +282,7 @@ void DragInputsDialog::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("DragInputsDialog::LoadData()\n" +
-                                    e.GetMessage()); 
+                                    e.GetFullMessage()); 
    }
    
    if ( inputSourceString.CmpNoCase("Constant") == 0 )
@@ -364,7 +364,7 @@ void DragInputsDialog::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
    }
 

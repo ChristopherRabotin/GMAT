@@ -53,7 +53,7 @@ void NonlinearConstraintPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Optimizer Name"),
                        wxDefaultPosition, wxSize(70, -1), 0);
    mSolverComboBox = theGuiManager->GetOptimizerComboBox(this, ID_COMBO,
-      			wxSize(120,-1));
+                        wxSize(120,-1));
 
    // Constraint Variable
    wxStaticText *lhsStaticText =
@@ -180,7 +180,7 @@ void NonlinearConstraintPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("NonlinearConstraintPanel:LoadData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
 
 }
@@ -194,56 +194,56 @@ void NonlinearConstraintPanel::SaveData()
    try
    {
       //Real rvalue;
-	   canClose = true;
-	      
-	   std::string inputString;
-	   std::string msg = "The value of \"%s\" for field \"%s\" on object \"" 
-	                     + mNonlinearConstraintCommand->GetName() + 
-	                     "\" is not an allowed value. \n"
-	                     "The allowed values are: [%s].";                        
+           canClose = true;
+              
+           std::string inputString;
+           std::string msg = "The value of \"%s\" for field \"%s\" on object \"" 
+                             + mNonlinearConstraintCommand->GetName() + 
+                             "\" is not an allowed value. \n"
+                             "The allowed values are: [%s].";                        
   
-	   //-------------------------------------------------------
-	   // Saving Solver Data
-	   //-------------------------------------------------------
-	      
-	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
-	       mSolverComboBox->GetValue().c_str());
-	
-	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"),
-	       mLHSTextCtrl->GetValue().c_str());
-	
-	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("Operator"),
-	       mComparisonComboBox->GetValue().c_str());
-	
+           //-------------------------------------------------------
+           // Saving Solver Data
+           //-------------------------------------------------------
+              
+           mNonlinearConstraintCommand->SetStringParameter
+              (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
+               mSolverComboBox->GetValue().c_str());
+        
+           mNonlinearConstraintCommand->SetStringParameter
+              (mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"),
+               mLHSTextCtrl->GetValue().c_str());
+        
+           mNonlinearConstraintCommand->SetStringParameter
+              (mNonlinearConstraintCommand->GetParameterID("Operator"),
+               mComparisonComboBox->GetValue().c_str());
+        
       #if DEBUG_NLC_PANEL
       MessageInterface::ShowMessage("   about to save ConstraintArg2 value\n");
       #endif
-	   mNonlinearConstraintCommand->SetStringParameter
-	      (mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"),
-	       mRHSTextCtrl->GetValue().c_str());
+           mNonlinearConstraintCommand->SetStringParameter
+              (mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"),
+               mRHSTextCtrl->GetValue().c_str());
       #if DEBUG_NLC_PANEL
       MessageInterface::ShowMessage("   finished saving ConstraintArg2 value\n");
       #endif
-	       
-	   //inputString = mTolTextCtrl->GetValue();      
-	
-	   // check to see if input is a real
-	   //if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
-	   //   mNonlinearConstraintCommand->SetRealParameter
-	   //      (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
-	   //       rvalue);
-	   //else
-	   //{
-	   //   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-	   //      inputString.c_str(), "Tolerance","Real Number > 0.0");
-	//
-	   //   canClose = false;
-	   //}
-	   
-//	   theApplyButton->Disable();
+               
+           //inputString = mTolTextCtrl->GetValue();      
+        
+           // check to see if input is a real
+           //if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
+           //   mNonlinearConstraintCommand->SetRealParameter
+           //      (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
+           //       rvalue);
+           //else
+           //{
+           //   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
+           //      inputString.c_str(), "Tolerance","Real Number > 0.0");
+        //
+           //   canClose = false;
+           //}
+           
+//         theApplyButton->Disable();
       theGuiInterpreter->ValidateCommand(mNonlinearConstraintCommand);
       EnableUpdate(false);
    
@@ -251,7 +251,8 @@ void NonlinearConstraintPanel::SaveData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("NonlinearConstraintPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("NonlinearConstraintPanel:SaveData() error occurred!\n%s\n",
+          e.GetFullMessage().c_str());
       canClose = false;
       return;
    }

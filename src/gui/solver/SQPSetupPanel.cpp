@@ -55,7 +55,7 @@ SQPSetupPanel::SQPSetupPanel(wxWindow *parent, const wxString &name)
 {
    
    theSolver =
-      (Solver*)theGuiInterpreter->GetObject(std::string(name.c_str()));
+      (Solver*)theGuiInterpreter->GetConfiguredObject(name.c_str());
 
    isTextModified = true;
    
@@ -152,7 +152,8 @@ void SQPSetupPanel::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("SQPSetupPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("SQPSetupPanel:LoadData() error occurred!\n%s\n",
+          e.GetFullMessage().c_str());
    }
    
    // explicitly disable apply button
@@ -252,7 +253,7 @@ void SQPSetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }

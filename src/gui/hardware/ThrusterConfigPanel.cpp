@@ -57,7 +57,7 @@ ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent,
    
    theGuiManager = GuiItemManager::GetInstance();
    
-   theThruster = (Thruster*)theGuiInterpreter->GetObject(thrusterName);
+   theThruster = (Thruster*)theGuiInterpreter->GetConfiguredObject(thrusterName);
    
    isCoordSysChanged = false;
    isTankChanged = false;
@@ -359,7 +359,7 @@ void ThrusterConfigPanel::SaveData()
    }
    catch(BaseException &ex)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
          canClose = false;
    }
 

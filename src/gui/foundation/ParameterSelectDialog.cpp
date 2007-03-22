@@ -139,12 +139,12 @@ void ParameterSelectDialog::Create()
    #endif
    
    int bsize = 2;
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
    //------------------------------------------------------
    // available variables list (1st column)
    //------------------------------------------------------
-//    mVarBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    wxButton *createVarButton;
    
@@ -223,9 +223,9 @@ void ParameterSelectDialog::Create()
       new wxStaticText(this, -1, wxT("Selected"),
                        wxDefaultPosition, wxSize(80,-1), 0);
    
-   mVarSelectedListBox = new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                                       //wxSize(170,260), 0, emptyList, wxLB_SINGLE);
-                                       wxSize(170,284), 0, emptyList, wxLB_SINGLE);
+   mVarSelectedListBox =
+      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition, wxSize(170,284), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);

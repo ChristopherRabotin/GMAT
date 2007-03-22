@@ -165,7 +165,7 @@ void OrbitPanel::LoadData()
       mFromCoordSysStr = coordSystemStr;
       
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
-         GetObject(coordSystemStr);
+         GetConfiguredObject(coordSystemStr);
       
       mFromCoord = mOutCoord;
       
@@ -189,7 +189,7 @@ void OrbitPanel::LoadData()
       
       // get the origin for the output coordinate system
       std::string originName = mOutCoord->GetStringParameter("Origin");
-      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetObject(originName);
+      SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
 
       #if DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
@@ -266,7 +266,7 @@ void OrbitPanel::LoadData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("OrbitPanel:LoadData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("OrbitPanel:LoadData() error occurred!\n%s\n", e.GetFullMessage().c_str());
    }
    
    dataChanged = false;
@@ -327,7 +327,7 @@ void OrbitPanel::SaveData()
          }
          catch (BaseException &e)
          {
-            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+            MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
             canClose = false;
          }
       }
@@ -388,7 +388,7 @@ void OrbitPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }
@@ -422,8 +422,9 @@ void OrbitPanel::Create()
 
    Integer bsize = 2; // border size
 
-   wxString emptyList[] = {};
-
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
+   
    //-----------------------------------------------------------------
    //  create sizers 
    //-----------------------------------------------------------------
@@ -447,9 +448,10 @@ void OrbitPanel::Create()
       wxT("Epoch Format"), wxDefaultPosition, wxDefaultSize, 0 );
    
    // combo box for the epoch format
-   epochFormatComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
-
+   epochFormatComboBox = new wxComboBox
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+        emptyList, wxCB_DROPDOWN | wxCB_READONLY );
+   
    // label for epoch
    wxStaticText *epochStaticText = new wxStaticText( this, ID_TEXT,
       wxT("Epoch"), wxDefaultPosition, wxDefaultSize, 0 );
@@ -477,9 +479,10 @@ void OrbitPanel::Create()
       wxT("State Type"), wxDefaultPosition, wxDefaultSize, 0 );
 
    // combo box for the state
-   stateTypeComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY);
-
+   stateTypeComboBox = new wxComboBox
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+        emptyList, wxCB_DROPDOWN | wxCB_READONLY);
+   
    //-----------------------------------------------------------------
    //  anomaly 
    //-----------------------------------------------------------------
@@ -488,8 +491,9 @@ void OrbitPanel::Create()
       wxT("Anomaly Type "), wxDefaultPosition, wxDefaultSize, 0 );
 
    // combo box for the anomaly type
-   anomalyComboBox = new wxComboBox( this, ID_COMBOBOX, wxT(""),
-      wxDefaultPosition, wxSize(150,-1), 0, emptyList, wxCB_DROPDOWN | wxCB_READONLY );
+   anomalyComboBox = new wxComboBox
+      ( this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(150,-1), //0,
+        emptyList, wxCB_DROPDOWN | wxCB_READONLY );
    
    // add to page sizer
    pageSizer->Add( epochFormatStaticText, 0, wxALIGN_LEFT | wxALL, bsize );
@@ -676,7 +680,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          epochFormatComboBox->SetValue(mFromEpochFormat.c_str());
          theSpacecraft->SetDateFormat(mFromEpochFormat);
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, e.GetMessage() +
+            (Gmat::ERROR_, e.GetFullMessage() +
              "\nPlease enter valid Epoch before changing the Epoch Format\n");
       }
    }
@@ -719,7 +723,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       }
       
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
-         GetObject(mCoordSysComboBox->GetValue().c_str());
+         GetConfiguredObject(mCoordSysComboBox->GetValue().c_str());
       
       DisplayState();
       
@@ -830,7 +834,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       catch (BaseException &e)
       {
          anomalyComboBox->SetValue(mFromAnomalyTypeStr.c_str());
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          MessageInterface::PopupMessage
             (Gmat::ERROR_, +
              "Please enter valid value before changing the Anomaly Type\n");
@@ -956,7 +960,7 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 
    // Set the Origin for the coordinate system
    spName = cs->GetStringParameter("Origin");
-   sp = (SpacePoint*) theGuiInterpreter->GetObject(spName);
+   sp = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(spName);
    
    if (sp == NULL)
       throw GmatBaseException("Cannot find SpacePoint named \"" +
@@ -967,7 +971,7 @@ void OrbitPanel::InitializeCoordinateSystem(CoordinateSystem *cs)
 
    // Set the J2000Body for the coordinate system
    spName = cs->GetStringParameter("J2000Body");
-   sp = (SpacePoint*) theGuiInterpreter->GetObject(spName);
+   sp = (SpacePoint*) theGuiInterpreter->GetConfiguredObject(spName);
    
    if (sp == NULL)
       throw GmatBaseException("Cannot find SpacePoint named \"" +

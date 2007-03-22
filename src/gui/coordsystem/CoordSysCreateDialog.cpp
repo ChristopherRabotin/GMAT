@@ -100,7 +100,7 @@ void CoordSysCreateDialog::LoadData()
    {
       MessageInterface::ShowMessage
          ("CoordSysCreateDialog:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
    
 }
@@ -156,7 +156,7 @@ void CoordSysCreateDialog::SaveData()
    mIsTextModified = false;
    
    CoordinateSystem *coord =
-      (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
+      (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(coordName);
    
    if (mIsCoordCreated)
    {

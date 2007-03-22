@@ -82,7 +82,8 @@ void CelesBodySelectDialog::SetBodyColors(const wxArrayString &bodyNames,
 void CelesBodySelectDialog::Create()
 {
    int borderSize = 2;
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
 
    //wxStaticText
    wxStaticText *bodyStaticText =
@@ -134,13 +135,15 @@ void CelesBodySelectDialog::Create()
          selectedBodyList[i] = mBodiesToExclude[i].c_str(); 
       }   
       
-      bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
-                                          wxSize(150, 200), count, selectedBodyList, wxLB_SINGLE);
+      bodySelectedListBox =
+         new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
+                       wxSize(150, 200), count, selectedBodyList, wxLB_SINGLE);
    }
    else
    {
-      bodySelectedListBox = new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
-                                          wxSize(150, 200), 0, emptyList, wxLB_SINGLE);
+      bodySelectedListBox =
+         new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition, wxSize(150, 200), //0,
+                       emptyList, wxLB_SINGLE);
    }
    
    // wxSizers

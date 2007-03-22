@@ -254,7 +254,7 @@ void IfPanel::SaveData()
          }
          catch (BaseException &be)
          {
-            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetMessage());
+            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetFullMessage());
             return;            
          }
          
@@ -315,7 +315,7 @@ void IfPanel::SaveData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("*** Error *** IfPanel::SaveData() " + e.GetMessage());
+         ("*** Error *** IfPanel::SaveData() " + e.GetFullMessage());
    }
 }
 

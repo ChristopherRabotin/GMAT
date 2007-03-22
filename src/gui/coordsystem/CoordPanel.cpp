@@ -308,7 +308,7 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
    {
       MessageInterface::ShowMessage
          ("CoordPanel::ShowAxisData() error occurred in getting data!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
 }
 
@@ -344,14 +344,14 @@ AxisSystem* CoordPanel::CreateAxis()
             if (priName != "")
             {
                SpacePoint *primary = (SpacePoint *)theGuiInterpreter->
-                  GetObject(std::string(priName.c_str()));
+                  GetConfiguredObject(std::string(priName.c_str()));
                axis->SetPrimaryObject(primary);
             }
             
             if (secName != "")
             {
                SpacePoint *secondary = (SpacePoint *)theGuiInterpreter->
-                  GetObject(std::string(secName.c_str()));
+                  GetConfiguredObject(std::string(secName.c_str()));
                axis->SetSecondaryObject(secondary);
             }
             
@@ -394,7 +394,7 @@ AxisSystem* CoordPanel::CreateAxis()
          {
             MessageInterface::ShowMessage
                ("CoordPanel::CreateAxis() error occurred in setting data!\n%s\n",
-                e.GetMessage().c_str());
+                e.GetFullMessage().c_str());
             
             delete axis;
             axis = NULL;
@@ -602,26 +602,31 @@ void CoordPanel::Setup( wxWindow *parent)
                                     true, _T(""), wxFONTENCODING_SYSTEM));
    #endif
 
-   // wxTextCtrl
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
 
    // wxComboBox
    originComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
-   typeComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
+   typeComboBox = new wxComboBox
+      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(120,-1), //0,
+        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    primaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
-   formatComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(120,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
+   formatComboBox = new wxComboBox
+      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(120,-1), //0,
+        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
    secondaryComboBox = theGuiManager->GetSpacePointComboBox(this, ID_COMBO,
       wxSize(120,-1), false);
-   xComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
-   yComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
-   zComboBox = new wxComboBox( parent, ID_COMBO, wxT(""), wxDefaultPosition,
-      wxSize(50,-1), 0, emptyList, wxCB_DROPDOWN|wxCB_READONLY );
+   xComboBox = new wxComboBox
+      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(50,-1), //0,
+        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
+   yComboBox = new wxComboBox
+      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(50,-1), //0,
+        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
+   zComboBox = new wxComboBox
+      ( parent, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(50,-1), //0,
+        emptyList, wxCB_DROPDOWN|wxCB_READONLY );
 
    //wxTextCtrl
    epochTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
@@ -765,7 +770,7 @@ void CoordPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("CoordPanel:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
    
 }
@@ -796,7 +801,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
 
       // create CoordinateSystem if not exist
       CoordinateSystem *coordSys =
-         (CoordinateSystem*)theGuiInterpreter->GetObject(coordName);
+         (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(coordName);
       
       if (coordSys == NULL)
       {
@@ -818,12 +823,12 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       coordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
       
       SpacePoint *origin =
-         (SpacePoint*)theGuiInterpreter->GetObject(originName.c_str());
+         (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName.c_str());
       
       coordSys->SetOrigin(origin);
       
       CelestialBody *j2000body =
-         (CelestialBody*)theGuiInterpreter->GetObject("Earth");
+         (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth");
       
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
@@ -842,7 +847,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
       {
          wxString primaryName = primaryComboBox->GetValue().Trim();
          SpacePoint *primary = (SpacePoint*)theGuiInterpreter->
-            GetObject(primaryName.c_str());
+            GetConfiguredObject(primaryName.c_str());
          
          axis->SetStringParameter("Primary", primaryName.c_str());
          axis->SetPrimaryObject(primary);
@@ -858,7 +863,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
          if (secondaryName != "")
          {
             SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->
-               GetObject(secondaryName.c_str());
+               GetConfiguredObject(secondaryName.c_str());
          
             axis->SetSecondaryObject(secondary);
          }
@@ -953,7 +958,7 @@ bool CoordPanel::SaveData(const std::string &coordName, AxisSystem *axis,
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("*** Error *** %s\n", e.GetMessage().c_str());
+         ("*** Error *** %s\n", e.GetFullMessage().c_str());
       canClose = false;
    }
    

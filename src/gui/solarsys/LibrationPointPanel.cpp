@@ -55,7 +55,7 @@ LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent)
 {
    theLibrationPt =
-      (LibrationPoint*)theGuiInterpreter->GetObject(name.c_str());
+      (LibrationPoint*)theGuiInterpreter->GetConfiguredObject(name.c_str());
 
    Create();
    Show();
@@ -175,7 +175,7 @@ void LibrationPointPanel::LoadData()
          for (i=0; i<count; i++)
          {
             CalculatedPoint *calpt
-               = (CalculatedPoint*)theGuiInterpreter->GetObject(items[i]);
+               = (CalculatedPoint*)theGuiInterpreter->GetConfiguredObject(items[i]);
             wxString objName = wxString(items[i].c_str());
             wxString objTypeName = wxString(calpt->GetTypeName().c_str());
 
@@ -219,7 +219,7 @@ void LibrationPointPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("LibrationPointPanel:LoadData() error occurred!\n%s\n",
-            e.GetMessage().c_str());
+            e.GetFullMessage().c_str());
    }
 
    // Activate "ShowScript"
@@ -240,12 +240,12 @@ void LibrationPointPanel::SaveData()
    std::string spName = primaryBodyString.c_str();
    int primaryBodyID = theLibrationPt->GetParameterID("Primary");
    theLibrationPt->SetStringParameter(primaryBodyID, spName);
-   SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetObject(spName);
+   SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
    theLibrationPt->SetRefObject(primary, Gmat::SPACE_POINT, spName);
 
    // get Earth pointer
    CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-      GetObject("Earth");
+      GetConfiguredObject("Earth");
 
    // set Earth as J000Body of primary body if NULL
    if (primary->GetJ2000Body() == NULL)
@@ -265,7 +265,7 @@ void LibrationPointPanel::SaveData()
    spName = secondaryBodyString.c_str();
    int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
    theLibrationPt->SetStringParameter(secondaryBodyID, spName);
-   SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetObject(spName);
+   SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
    theLibrationPt->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
    
    // set Earth as J000Body of secondary body if NULL

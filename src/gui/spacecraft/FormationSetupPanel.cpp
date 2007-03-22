@@ -95,7 +95,8 @@ void FormationSetupPanel::Create()
    #endif
 
    Integer bsize = 3; // border size
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
 
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
@@ -143,8 +144,8 @@ void FormationSetupPanel::Create()
                        wxDefaultPosition, wxSize(-1,-1), 0);
    
    mSoSelectedListBox =
-      new wxListBox(this, SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,200), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, SEL_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxBoxSizer *mSoSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
    mSoSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -176,7 +177,7 @@ void FormationSetupPanel::Create()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::LoadData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetObject(mFormationName));
+   Formation *form = (Formation*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
    StringArray scList = form->GetStringArrayParameter(form->GetParameterID("Add"));
 
    // Set object pointer for "Show Script"
@@ -199,7 +200,7 @@ void FormationSetupPanel::LoadData()
 //------------------------------------------------------------------------------
 void FormationSetupPanel::SaveData()
 {
-   Formation *form = (Formation*)(theGuiInterpreter->GetObject(mFormationName));
+   Formation *form = (Formation*)(theGuiInterpreter->GetConfiguredObject(mFormationName));
    form->SetBooleanParameter("Clear", true);
    
    int soCount = mSoSelectedListBox->GetCount();

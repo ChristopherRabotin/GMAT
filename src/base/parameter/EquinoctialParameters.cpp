@@ -20,6 +20,7 @@
 
 #include "EquinoctialParameters.hpp"
 #include "ColorTypes.hpp"
+#include "OrbitTypes.hpp"
 
 //#define DEBUG_CARTESIAN_PARAM 1
 
@@ -53,7 +54,7 @@ bool EquinSma::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinSma");
    mRealValue = OrbitData::GetEquinReal(SMA);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -96,7 +97,7 @@ bool EquinEy::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinEy");
    mRealValue = OrbitData::GetEquinReal(EY);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -139,7 +140,7 @@ bool EquinEx::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinEx");
    mRealValue = OrbitData::GetEquinReal(EX);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -182,7 +183,7 @@ bool EquinNy::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinNy");
    mRealValue = OrbitData::GetEquinReal(NY);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -225,7 +226,7 @@ bool EquinNx::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinNx");
    mRealValue = OrbitData::GetEquinReal(NX);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;
@@ -268,7 +269,7 @@ bool EquinMlong::Evaluate()
    //mRealValue = OrbitData::GetEquinReal("EquinMlong");
    mRealValue = OrbitData::GetEquinReal(MLONG);
     
-   if (mRealValue == OrbitData::ORBIT_REAL_UNDEFINED)
+   if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
       return false;
    else
       return true;

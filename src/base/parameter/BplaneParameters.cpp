@@ -122,7 +122,7 @@ bool BdotT::Evaluate()
 //    {
 //       mRealValue = REAL_PARAMETER_UNDEFINED;
 //       MessageInterface::ShowMessage
-//          (e.GetMessage() + ",\n     so setting BdotT parameter value to: " +
+//          (e.GetFullMessage() + ",\n     so setting BdotT parameter value to: " +
 //           GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
 //    }
    
@@ -249,7 +249,7 @@ bool BdotR::Evaluate()
    {
       mRealValue = REAL_PARAMETER_UNDEFINED;
       MessageInterface::ShowMessage
-         (e.GetMessage() + ",\n     so settting BdotR parameter value to: " +
+         (e.GetFullMessage() + ",\n     so settting BdotR parameter value to: " +
           GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
    }
    
@@ -376,7 +376,7 @@ bool BVectorMag::Evaluate()
    {
       mRealValue = REAL_PARAMETER_UNDEFINED;
       MessageInterface::ShowMessage
-         (e.GetMessage() + ",\n     so settting BVectorMag parameter value to: " +
+         (e.GetFullMessage() + ",\n     so settting BVectorMag parameter value to: " +
           GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
    }
    
@@ -503,7 +503,7 @@ bool BVectorAngle::Evaluate()
    {
       mRealValue = REAL_PARAMETER_UNDEFINED;
       MessageInterface::ShowMessage
-         (e.GetMessage() + ",\n     so settting BVectorAngle parameter value to: " +
+         (e.GetFullMessage() + ",\n     so settting BVectorAngle parameter value to: " +
           GmatRealUtil::ToString(REAL_PARAMETER_UNDEFINED) + "\n");
    }
    

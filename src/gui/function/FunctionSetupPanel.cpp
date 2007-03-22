@@ -47,7 +47,7 @@ FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    mEnableSave = false;
 
    theGmatFunction = (GmatFunction *)
-            theGuiInterpreter->GetObject(std::string(name.c_str()));
+            theGuiInterpreter->GetConfiguredObject(std::string(name.c_str()));
 
    Create();
    Show();

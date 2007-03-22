@@ -182,10 +182,10 @@ bool Moderator::Initialize(bool fromGui)
       
       // Set object pointers so that it can be used in CS conversion in the GUI
       SpacePoint *origin =
-         (SpacePoint*)GetObject(theInternalCoordSystem->GetOriginName());
+         (SpacePoint*)GetConfiguredObject(theInternalCoordSystem->GetOriginName());
       origin->SetJ2000Body(earth);
       SpacePoint *j2000body =
-         (SpacePoint*)GetObject(theInternalCoordSystem->GetJ2000BodyName());
+         (SpacePoint*)GetConfiguredObject(theInternalCoordSystem->GetJ2000BodyName());
       j2000body->SetJ2000Body(earth);
       theInternalCoordSystem->SetOrigin(origin);
       theInternalCoordSystem->SetJ2000Body(j2000body);
@@ -203,7 +203,7 @@ bool Moderator::Initialize(bool fromGui)
    {
       MessageInterface::PopupMessage(Gmat::WARNING_,
                                      "Error occured during initialization: " +
-                                     e.GetMessage());
+                                     e.GetFullMessage());
       return false;
    }
    catch (...)
@@ -422,13 +422,13 @@ StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// GmatBase* GetObject(const std::string &name)
+// GmatBase* GetConfiguredObject(const std::string &name)
 //------------------------------------------------------------------------------
-GmatBase* Moderator::GetObject(const std::string &name)
+GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 {
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage
-      ("Moderator::GetObject() entered: name=%s\n", name.c_str());
+      ("Moderator::GetConfiguredObject() entered: name=%s\n", name.c_str());
    #endif
    
    std::string newName = name;
@@ -441,7 +441,7 @@ GmatBase* Moderator::GetObject(const std::string &name)
       
       #if DEBUG_CONFIG
       MessageInterface::ShowMessage
-         ("Moderator::GetObject() entered: newName=%s\n", newName.c_str());
+         ("Moderator::GetConfiguredObject() entered: newName=%s\n", newName.c_str());
       #endif
    }
    
@@ -458,13 +458,13 @@ GmatBase* Moderator::GetObject(const std::string &name)
    if (obj)
    {
       MessageInterface::ShowMessage
-         ("Moderator::GetObject() Found object: name=%s, type=%s, "
+         ("Moderator::GetConfiguredObject() Found object: name=%s, type=%s, "
           "addr=%p\n", obj->GetName().c_str(), obj->GetTypeName().c_str(), obj);
    }
    else
    {
       MessageInterface::ShowMessage
-         ("Moderator::GetObject() Cannot find object: name=%s\n",
+         ("Moderator::GetConfiguredObject() Cannot find object: name=%s\n",
           newName.c_str());
    }
    #endif
@@ -856,8 +856,8 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
          
          // Set body and J2000Body pointer, so that GUI can create LibrationPoint
          // and use it in Coord.System conversion
-         SpacePoint *sun = (SpacePoint*)GetObject("Sun");
-         SpacePoint *earth = (SpacePoint*)GetObject("Earth");
+         SpacePoint *sun = (SpacePoint*)GetConfiguredObject("Sun");
+         SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
             
          if (sun->GetJ2000Body() == NULL)
             sun->SetJ2000Body(earth);
@@ -873,8 +873,8 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
             
             // Set body and J2000Body pointer, so that GUI can create LibrationPoint
             // and use it in Coord.System conversion
-            SpacePoint *earth = (SpacePoint*)GetObject("Earth");
-            SpacePoint *luna = (SpacePoint*)GetObject("Luna");
+            SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
+            SpacePoint *luna = (SpacePoint*)GetConfiguredObject("Luna");
             cp->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
             if (luna->GetJ2000Body() == NULL)
                luna->SetJ2000Body(earth);
@@ -891,7 +891,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateCalculatedPoint()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
     
       return cp;
@@ -970,7 +970,7 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateCelestialBody()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
     
       return body;
@@ -1061,7 +1061,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateSpacecraft()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
 
       return sc;
@@ -1129,7 +1129,8 @@ std::string Moderator::GetSpacecraftNotInFormation()
    //------------------------------------------
    for (int i=0; i<numFm; i++)
    {
-      GmatBase *fm = theGuiInterpreter->GetObject(fmList[i]);
+      //GmatBase *fm = theGuiInterpreter->GetConfiguredObject(fmList[i]);
+      GmatBase *fm = GetConfiguredObject(fmList[i]);
       StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
       fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
    }
@@ -1200,7 +1201,7 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateHardware()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
       
       return hw;
@@ -1283,7 +1284,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
         
       return prop;
@@ -1360,7 +1361,7 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreatePhysicalModel()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
         
       return physicalModel;
@@ -1450,7 +1451,7 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage
-            ("Moderator::CreateAtmosphereModel()\n" + e.GetMessage());
+            ("Moderator::CreateAtmosphereModel()\n" + e.GetFullMessage());
       }
     
       return atmosphereModel;
@@ -1526,7 +1527,7 @@ Burn* Moderator::CreateBurn(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateBurn()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
       
       return burn;
@@ -1648,7 +1649,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // so validate owner type after create.
       if (ownerName != "")
       {
-         GmatBase *obj = GetObject(ownerName);
+         GmatBase *obj = GetConfiguredObject(ownerName);
          if (obj)
          {
             //MessageInterface::ShowMessage
@@ -1673,7 +1674,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       if (ownerName != "")
       {
          param->SetRefObjectName(param->GetOwnerType(), ownerName);
-         param->AddRefObject(GetObject(ownerName));
+         param->AddRefObject(GetConfiguredObject(ownerName));
       }
       
       // Set dependent object name
@@ -1686,7 +1687,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       
       if (depName != "")
          if (param->NeedCoordSystem())
-            param->AddRefObject(GetObject(depName));
+            param->AddRefObject(GetConfiguredObject(depName));
       
       // create parameter dependent coordinate system
       if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
@@ -1716,10 +1717,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             // create BodyFixedAxis with origin
             AxisSystem *axis = CreateAxisSystem("BodyFixed", "");
             cs->SetStringParameter("Origin", origin);
-            cs->SetRefObject(GetObject(origin), Gmat::SPACE_POINT, origin);
+            cs->SetRefObject(GetConfiguredObject(origin), Gmat::SPACE_POINT, origin);
             cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
             //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
-            cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
+            cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
             cs->SetSolarSystem(theSolarSystemInUse);
             cs->Initialize();
             
@@ -1741,7 +1742,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
       
       return param;
@@ -1804,7 +1805,7 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage("Moderator::CreateForceModel()\n" +
-                                    e.GetMessage() + "\n");
+                                    e.GetFullMessage() + "\n");
    }
    
    return fm;
@@ -1899,7 +1900,7 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateSolver()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
       
       return solver;
@@ -2092,7 +2093,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
 
       // Set J2000Body and SolarSystem
       cs->SetStringParameter("J2000Body", "Earth");
-      cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
+      cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
       cs->SetSolarSystem(theSolarSystemInUse);
       
       if (createDefault)
@@ -2101,7 +2102,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
          AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
          //cs->SetStringParameter("J2000Body", "Earth");
          cs->SetStringParameter("Origin", "Earth");
-         //cs->SetRefObject(GetObject("Earth"), Gmat::SPACE_POINT, "Earth");
+         //cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
          cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
          //cs->SetSolarSystem(theSolarSystemInUse);
          cs->Initialize();
@@ -2111,7 +2112,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
    {
       #if DEBUG_CREATE_RESOURCE
       MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
-                                    e.GetMessage().c_str());
+                                    e.GetFullMessage().c_str());
       #endif
    }
    
@@ -2214,7 +2215,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateSubscriber()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
    
       return sub;
@@ -2295,7 +2296,7 @@ Function* Moderator::CreateFunction(const std::string &type,
       catch (BaseException &e)
       {
          MessageInterface::ShowMessage("Moderator::CreateFunction()\n" +
-                                       e.GetMessage());
+                                       e.GetFullMessage());
       }
    
       return function;
@@ -2402,8 +2403,8 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
    }
 
    // set origin and j2000body
-   axisSystem->SetOrigin((SpacePoint*)GetObject(axisSystem->GetOriginName()));
-   axisSystem->SetJ2000Body((SpacePoint*)GetObject(axisSystem->GetJ2000BodyName()));
+   axisSystem->SetOrigin((SpacePoint*)GetConfiguredObject(axisSystem->GetOriginName()));
+   axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredObject(axisSystem->GetJ2000BodyName()));
    
    // Notes: AxisSystem is not configured. It is local to CoordinateSystem
    // and gets deleted when CoordinateSystem is deleted.
@@ -2702,8 +2703,8 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetMessage());
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
    #if DEBUG_DEFAULT_COMMAND
@@ -3396,6 +3397,7 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    MessageInterface::ShowMessage
       ("   Calling %s->RunComplete\n", cmd->GetTypeName().c_str());
    #endif
+   
    cmd->RunComplete();
    
    oldcmd = cmd->GetNext();
@@ -3403,9 +3405,9 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    if (oldcmd) {
       #ifdef DEBUG_SEQUENCE_CLEARING
          GmatCommand *current = oldcmd;
-         MessageInterface::ShowMessage("Clearing this command list:\n   ");
+         MessageInterface::ShowMessage("\nClearing this command list:\n");
          while (current) {
-            ShowCommand(" current = ", current);
+            ShowCommand("   current = ", current);
             current = current->GetNext();
          }
          MessageInterface::ShowMessage("\n");
@@ -3529,8 +3531,8 @@ Integer Moderator::RunMission(Integer sandboxNum)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetMessage());
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::ShowMessage(e.GetFullMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          // assign status
          status = -2;
       }
@@ -3781,7 +3783,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       isRunReady = false;
    }
    
@@ -3792,6 +3794,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript());
+   MessageInterface::ShowMessage("===> Returning status=%d\n", status);
    #endif
    
    return status;
@@ -3852,7 +3855,7 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       isRunReady = false;
    }
 
@@ -3899,7 +3902,7 @@ bool Moderator::SaveScript(const std::string &filename, Gmat::WriteMode mode)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
    return status;
@@ -3939,7 +3942,7 @@ std::string Moderator::GetScript(Gmat::WriteMode mode)
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       return false;
    }
 }
@@ -4119,7 +4122,7 @@ void Moderator::CreateDefaultCoordSystems()
       StringArray csNames =
             theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
       
-      SpacePoint *earth = (SpacePoint*)GetObject("Earth");
+      SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
       
       // EarthMJ2000Eq
       if (find(csNames.begin(), csNames.end(), "EarthMJ2000Eq") == csNames.end())
@@ -4161,7 +4164,7 @@ void Moderator::CreateDefaultCoordSystems()
       MessageInterface::PopupMessage
          (Gmat::ERROR_,
           "Moderator::CreateDefaultCoordSystems() Error occurred during default "
-          "coordinate system creation. " +  e.GetMessage());
+          "coordinate system creation. " +  e.GetFullMessage());
    }
 }
 
@@ -4438,7 +4441,7 @@ void Moderator::CreateDefaultMission()
       MessageInterface::PopupMessage
          (Gmat::ERROR_,
           "*** Error occurred during default mission creation.\n    The default "
-          "mission will not run.\n    Message: " + e.GetMessage());
+          "mission will not run.\n    Message: " + e.GetFullMessage());
    }
 }
 
@@ -4652,7 +4655,7 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
    
    for (int i=0; i<subSize; i++)
    {
-      sub = (Subscriber*)GetObject(configList[i]);
+      sub = (Subscriber*)GetConfiguredObject(configList[i]);
       if (sub->GetTypeName() == type)
          return sub;
    }

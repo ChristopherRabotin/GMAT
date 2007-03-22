@@ -90,7 +90,8 @@ void SpaceObjectSelectDialog::Create()
 {
    int bsize = 2; // border size
    int soSelCount = mSoSelList.Count();
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxString *tempList = NULL;
    
    #if DEBUG_SO_DIALOG
@@ -139,7 +140,6 @@ void SpaceObjectSelectDialog::Create()
    
    // wxListBox
    spaceObjAvailableListBox =
-      //theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), mSoExcList);
       theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 100), &mSoExcList);
    
    if (soSelCount > 0)
@@ -151,8 +151,8 @@ void SpaceObjectSelectDialog::Create()
    else
    {
       spaceObjSelectedListBox =
-         new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
-                       wxSize(150, 100), 0, emptyList, wxLB_SINGLE);
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150, 100), //0,
+                       emptyList, wxLB_SINGLE);
    }
    
    // wxSizers
@@ -237,19 +237,19 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
 
       if (sel != -1)
       {
-	      spaceObjSelectedListBox->Delete(sel);
-	      spaceObjAvailableListBox->Append(str);
-	      spaceObjAvailableListBox->SetStringSelection(str);
+              spaceObjSelectedListBox->Delete(sel);
+              spaceObjAvailableListBox->Append(str);
+              spaceObjAvailableListBox->SetStringSelection(str);
 
-	      if (sel-1 < 0)
-	         spaceObjSelectedListBox->SetSelection(0);
-	      else
-	         spaceObjSelectedListBox->SetSelection(sel-1);
-	     
-	      if (spaceObjSelectedListBox->GetCount() > 0)
-	         EnableUpdate(true);
-	      else
-	         EnableUpdate(false);
+              if (sel-1 < 0)
+                 spaceObjSelectedListBox->SetSelection(0);
+              else
+                 spaceObjSelectedListBox->SetSelection(sel-1);
+             
+              if (spaceObjSelectedListBox->GetCount() > 0)
+                 EnableUpdate(true);
+              else
+                 EnableUpdate(false);
       }
    }
    else if ( event.GetEventObject() == clearSpaceObjectButton )  

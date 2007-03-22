@@ -78,7 +78,7 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
                                  std::string(subscriberName.c_str()) + "\n");
 #endif
    Subscriber *subscriber = (Subscriber*)
-      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetConfiguredObject(subscriberName.c_str());
    
    mOpenGlPlot = (OpenGlPlot*)subscriber;
 
@@ -143,7 +143,8 @@ void OpenGlPlotSetupPanel::Create()
    #endif
    
    // wxString
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxString axisArray[] = {"X", "-X", "Y", "-Y", "Z", "-Z"};
    
    wxArrayString empty;
@@ -310,11 +311,11 @@ void OpenGlPlotSetupPanel::Create()
    mCelesObjectListBox = theGuiManager->
       GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
    mSelectedScListBox =
-      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,65), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+                    emptyList, wxLB_SINGLE);
    mSelectedObjListBox =
-      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(150,65), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+                    emptyList, wxLB_SINGLE);
 
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxButton\n");
@@ -999,7 +1000,7 @@ void OpenGlPlotSetupPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("OpenGlPlotSetupPanel:LoadData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
 
    // deselect available object list
@@ -1432,7 +1433,8 @@ void OpenGlPlotSetupPanel::SaveData()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("OpenGlPlotSetupPanel:SaveData() error occurred!\n%s\n", e.GetMessage().c_str());
+         ("OpenGlPlotSetupPanel:SaveData() error occurred!\n%s\n",
+          e.GetFullMessage().c_str());
    }
 }
 

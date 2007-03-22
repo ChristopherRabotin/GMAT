@@ -612,7 +612,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage("*** Error: %s\n", e.GetMessage().c_str());
+      MessageInterface::ShowMessage("*** Error: %s\n", e.GetFullMessage().c_str());
    }
    
    return itemList;

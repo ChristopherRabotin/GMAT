@@ -84,8 +84,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    #endif
    
    Subscriber *subscriber = (Subscriber*)
-      //theGuiInterpreter->GetSubscriber(std::string(subscriberName.c_str()));
-      theGuiInterpreter->GetObject(std::string(subscriberName.c_str()));
+      theGuiInterpreter->GetConfiguredObject(subscriberName.c_str());
    
    reportFile = (ReportFile*)subscriber;
    
@@ -142,7 +141,8 @@ void ReportFileSetupPanel::Create()
    #endif
    
    Integer bsize = 2; // border size
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxBitmap upBitmap = wxBitmap(up_xpm);
    wxBitmap downBitmap = wxBitmap(down_xpm);
    wxBitmap backBitmap = wxBitmap(back_xpm);
@@ -236,8 +236,8 @@ void ReportFileSetupPanel::Create()
                        wxDefaultPosition, wxSize(80,-1), 0);
    
    mVarSelectedListBox =
-      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition, wxSize(170,260), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
@@ -412,7 +412,8 @@ void ReportFileSetupPanel::LoadData()
       for (int i=0; i<mNumVarParams; i++)
       {
          varParamNames[i] = varParamList[i].c_str();
-         param = (Parameter*)theGuiInterpreter->GetObject(varParamList[i]);
+         param = (Parameter*)
+            theGuiInterpreter->GetConfiguredObject(varParamList[i]);
       }
       
       mVarSelectedListBox->Set(mNumVarParams, varParamNames);
@@ -482,7 +483,7 @@ void ReportFileSetupPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          canClose = false;
       }
       
@@ -493,7 +494,7 @@ void ReportFileSetupPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          canClose = false;
       }
       
@@ -558,7 +559,7 @@ void ReportFileSetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }
@@ -899,9 +900,8 @@ wxString ReportFileSetupPanel::GetParamName()
 //------------------------------------------------------------------------------
 Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
 {
-   //Parameter *param = theGuiInterpreter->GetParameter(std::string(name.c_str()));
    Parameter *param = (Parameter*)
-      theGuiInterpreter->GetObject(std::string(name.c_str()));
+      theGuiInterpreter->GetConfiguredObject(name.c_str());
    
    // create a parameter if it does not exist
    if (param == NULL)
@@ -945,7 +945,7 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
       {
          MessageInterface::ShowMessage
             ("ReportFileSetupPanel:GetParameter() error occurred!\n%s\n",
-             e.GetMessage().c_str());
+             e.GetFullMessage().c_str());
       }
    }
    

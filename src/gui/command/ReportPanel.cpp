@@ -124,7 +124,8 @@ void ReportPanel::Create()
    #endif
    
    Integer bsize = 2; // border size
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxBitmap upBitmap = wxBitmap(up_xpm);
    wxBitmap downBitmap = wxBitmap(down_xpm);
    wxBitmap backBitmap = wxBitmap(back_xpm);
@@ -223,8 +224,8 @@ void ReportPanel::Create()
                        wxDefaultPosition, wxSize(80,-1), 0);
    
    mVarSelectedListBox =
-      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition,
-                    wxSize(170,260), 0, emptyList, wxLB_SINGLE);
+      new wxListBox(this, VAR_SEL_LISTBOX, wxDefaultPosition, wxSize(170,260), //0,
+                    emptyList, wxLB_SINGLE);
    
    wxStaticBoxSizer *mVarSelectedBoxSizer =
       new wxStaticBoxSizer(selectedStaticBox, wxVERTICAL);
@@ -301,7 +302,7 @@ void ReportPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
    #if DEBUG_REPORT_PANEL
@@ -325,7 +326,7 @@ void ReportPanel::SaveData()
    std::string rfName = mReportFileComboBox->GetValue().c_str();
    
    ReportFile *reportFile =
-      (ReportFile*)theGuiInterpreter->GetObject(rfName);
+      (ReportFile*)theGuiInterpreter->GetConfiguredObject(rfName);
    
    try
    {
@@ -360,7 +361,7 @@ void ReportPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
    }
    
@@ -730,7 +731,7 @@ Parameter* ReportPanel::GetParameter(const wxString &name)
       {
          MessageInterface::ShowMessage
             ("ReportPanel:GetParameter() error occurred!\n%s\n",
-             e.GetMessage().c_str());
+             e.GetFullMessage().c_str());
       }
    }
    

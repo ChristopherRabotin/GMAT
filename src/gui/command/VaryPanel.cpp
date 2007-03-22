@@ -315,8 +315,8 @@ void VaryPanel::LoadData()
       {   
          pertStaticText->Enable(false);
          maxStepStaticText->Enable(false);
-      	 mPertTextCtrl->Enable(false);
-      	 mMaxStepTextCtrl->Enable(false);
+         mPertTextCtrl->Enable(false);
+         mMaxStepTextCtrl->Enable(false);
       }
       else // in target
       {
@@ -333,7 +333,7 @@ void VaryPanel::LoadData()
    {
       MessageInterface::ShowMessage
          ("VaryPanel:LoadData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
 
    ShowVariableSetup();
@@ -358,7 +358,7 @@ void VaryPanel::SaveData()
        solverName.c_str(), variableName.c_str());
    #endif
    
-   Solver *solver = (Solver*)theGuiInterpreter->GetObject(solverName);
+   Solver *solver = (Solver*)theGuiInterpreter->GetConfiguredObject(solverName);
 
    if (solver == NULL)
       throw GmatBaseException("Cannot find the solver: " + solverName);
@@ -415,7 +415,7 @@ void VaryPanel::SaveData()
    {
       MessageInterface::ShowMessage
          ("VaryPanel:SaveData() error occurred!\n%s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
    
    EnableUpdate(false);

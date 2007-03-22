@@ -294,7 +294,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    //mViewCoordSystem = theGuiInterpreter->
    //   GetCoordinateSystem(std::string(csName.c_str()));
    mViewCoordSystem = (CoordinateSystem*)theGuiInterpreter->
-      GetObject(std::string(csName.c_str()));
+      GetConfiguredObject(std::string(csName.c_str()));
    
    // CoordinateSystem conversion
    mIsInternalCoordSystem = true;
@@ -482,7 +482,7 @@ void TrajPlotCanvas::SetViewCoordSystem(const wxString &csName)
    
    mViewCoordSystem =
       //theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
-      (CoordinateSystem*)theGuiInterpreter->GetObject(std::string(csName.c_str()));
+      (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(std::string(csName.c_str()));
    
    if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
    {
@@ -782,7 +782,7 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
       
       mViewCoordSystem =
          //theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
-         (CoordinateSystem*)theGuiInterpreter->GetObject(std::string(csName.c_str()));
+         (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(std::string(csName.c_str()));
       
       if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
          mIsInternalCoordSystem = true;
@@ -1964,10 +1964,14 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
          if (mIsEndOfRun)
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
+
+         //VC++ error C2668: 'pow' : ambiguous call to overloaded function
+         //'long double pow(long double,int)' 'float pow(float,int)' 'double pow(double,int);
+         // Changed pow to GmatMathUtil::Pow();
          
          // find the length
-         Real x2 = pow(mouseX - mLastMouseX, 2);
-         Real y2 = pow(mouseY - mLastMouseY, 2);
+         Real x2 = Pow(mouseX - mLastMouseX, 2);
+         Real y2 = Pow(mouseY - mLastMouseY, 2);
          Real length = sqrt(x2 + y2);
          mZoomAmount = length * 100;
 
@@ -2206,7 +2210,7 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    {
       MessageInterface::ShowMessage
          ("*** Warning *** TrajPlotCanvas::BindTexture() Cannot bind texture "
-          "image for %s.\n%s\n", objName.c_str(), e.GetMessage().c_str());
+          "image for %s.\n%s\n", objName.c_str(), e.GetFullMessage().c_str());
    }
    
    #if DEBUG_TRAJCANVAS_TEXTURE
@@ -4159,7 +4163,7 @@ void TrajPlotCanvas::MakeValidCoordSysList()
       secondary = "None";
       
       //cs = theGuiInterpreter->GetCoordinateSystem(csList[i]);
-      cs = (CoordinateSystem*)theGuiInterpreter->GetObject(csList[i]);
+      cs = (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(csList[i]);
       csName = cs->GetName().c_str();
       
       //MessageInterface::ShowMessage("==> csName=%s\n", csName.c_str());
@@ -4324,7 +4328,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
          error = true;
          MessageInterface::ShowMessage
             ("*** ERROR *** TrajPlotCanvas::ComputeEulerAngles() %s\n",
-             e.GetMessage().c_str());
+             e.GetFullMessage().c_str());
       }
    }
    #endif
@@ -4356,7 +4360,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
    {
       MessageInterface::ShowMessage
          ("*** ERROR *** TrajPlotCanvas::ComputeEulerAngles() %s\n",
-          e.GetMessage().c_str());
+          e.GetFullMessage().c_str());
    }
    
    modAngle = eulerAngle;

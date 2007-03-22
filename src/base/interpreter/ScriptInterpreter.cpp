@@ -750,7 +750,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
                else
                {
                   // check if LHS is a parameter
-                  GmatBase *tempObj = GetObject(chunks[0]);
+                  GmatBase *tempObj = GetConfiguredObject(chunks[0]);
                   if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
                      if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
                         inCommandMode = true;
@@ -778,7 +778,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          
          if (parts.size() > 1)
          {
-            GmatBase *tempObj = GetObject(parts[0]);
+            GmatBase *tempObj = GetConfiguredObject(parts[0]);
             if ((tempObj) &&
                 (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
                  (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
@@ -882,10 +882,12 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #endif
    for (current = objs.begin(); current != objs.end(); ++current)
    {
-      Spacecraft *sc = (Spacecraft*)(theModerator->GetObject(*current));
+      //Spacecraft *sc = (Spacecraft*)(theModerator->GetConfiguredObject(*current));
+      Spacecraft *sc = (Spacecraft*)(GetConfiguredObject(*current));
       sc->SetInternalCoordSystem(ics);
       sccs = (CoordinateSystem*)
-         theModerator->GetObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         //theModerator->GetConfiguredObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         GetConfiguredObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
       if (sccs)
          sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
       sc->Initialize();

@@ -503,7 +503,7 @@ Rvector6 BplaneData::GetCartState()
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetMessage());
+         MessageInterface::ShowMessage(e.GetFullMessage());
       }
    }
    

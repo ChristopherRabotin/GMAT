@@ -306,7 +306,7 @@ std::string MessageInterface::GetLogFileName()
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("**** ERROR **** " + e.GetMessage() + 
+         ("**** ERROR **** " + e.GetFullMessage() + 
           "So setting log file name to GmatLog.txt");
       
       fname = "GmatLog.txt";
@@ -375,7 +375,7 @@ void MessageInterface::SetLogPath(const std::string &pathname, bool append)
    catch (BaseException &e)
    {
       MessageInterface::ShowMessage
-         ("**** ERROR **** " + e.GetMessage() + 
+         ("**** ERROR **** " + e.GetFullMessage() + 
           "So setting log file name to GmatLog.txt");
       
       fname = "GmatLog.txt";

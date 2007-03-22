@@ -115,7 +115,7 @@ void OutputTree::UpdateOutput(bool resetTree)
    // put each subscriber in the proper folder
    for (unsigned int i=0; i<listOfSubs.size(); i++)
    {
-      Subscriber *sub = (Subscriber*)theGuiInterpreter->GetObject(listOfSubs[i]);
+      Subscriber *sub = (Subscriber*)theGuiInterpreter->GetConfiguredObject(listOfSubs[i]);
       wxString objName = wxString(listOfSubs[i].c_str());
       wxString objTypeName = wxString(sub->GetTypeName().c_str());
 
@@ -541,7 +541,7 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
    //MessageInterface::ShowMessage("OutputTree::OnCompareNumericValues() entered\n");
 
    ReportFile *theReport =
-      (ReportFile*) theGuiInterpreter->GetObject(theSubscriberName.c_str());
+      (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
 
    if (!theReport)
    {
@@ -607,7 +607,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    //MessageInterface::ShowMessage("OutputTree::OnCompareTextLines() entered\n");
 
    ReportFile *theReport =
-      (ReportFile*) theGuiInterpreter->GetObject(theSubscriberName.c_str());
+      (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
 
    if (!theReport)
    {

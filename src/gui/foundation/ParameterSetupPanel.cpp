@@ -49,7 +49,8 @@ ParameterSetupPanel::ParameterSetupPanel(wxWindow *parent, const wxString &name)
    mIsColorChanged = false;
    mIsExpChanged = false;
    
-   mParam = (Parameter*)theGuiInterpreter->GetObject(std::string(mVarName.c_str()));
+   mParam =
+      (Parameter*)theGuiInterpreter->GetConfiguredObject(mVarName.c_str());
    if (mParam->GetTypeName() == "String")
       mIsStringVar = true;
    
@@ -153,7 +154,8 @@ void ParameterSetupPanel::Create()
 //------------------------------------------------------------------------------
 void ParameterSetupPanel::LoadData()
 {
-   mParam = (Parameter*)theGuiInterpreter->GetObject(std::string(mVarName.c_str()));
+   mParam =
+      (Parameter*)theGuiInterpreter->GetConfiguredObject(mVarName.c_str());
 
    // Set the pointer for the "Show Script" button
    mObject = mParam;
@@ -180,7 +182,7 @@ void ParameterSetupPanel::LoadData()
       }
       catch (BaseException &e)
       {
-         wxLogError(wxT(e.GetMessage().c_str()));
+         wxLogError(wxT(e.GetFullMessage().c_str()));
          wxLog::FlushActive();
       }
    }

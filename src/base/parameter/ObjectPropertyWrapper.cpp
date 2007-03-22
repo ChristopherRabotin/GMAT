@@ -216,7 +216,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    {
       std::string errmsg = "Cannot return Real value for id \"" + propID; 
       errmsg += "\" for object \"" + object->GetName();
-      errmsg += "\" - exception thrown: " + be.GetMessage();
+      errmsg += "\" - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
          
@@ -250,7 +250,7 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    {
       std::string errmsg = "Cannot set Real value for id \"" + propID; 
       errmsg += "\" for object \"" + object->GetName();
-      errmsg += "\" - exception thrown: " + be.GetMessage();
+      errmsg += "\" - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
          

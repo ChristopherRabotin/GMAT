@@ -102,7 +102,7 @@ wxString GuiItemManager::ToWxString(Real rval)
 int GuiItemManager::IsValidVariable(const std::string &varName,
                                     Gmat::ObjectType ownerType)
 {
-   GmatBase *obj = theGuiInterpreter->GetObject(varName);
+   GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
    
    if (obj == NULL)
       return -1;
@@ -721,10 +721,11 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
                                                   const wxSize &size,
                                                   const wxArrayString objectTypeList)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxComboBox *cb =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     0, emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, // 0,
+                     emptyList, wxCB_READONLY);
    
    for (unsigned int i=0; i<objectTypeList.size(); i++)
    {
@@ -940,10 +941,11 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
       theNumSpacePoint);
    #endif
    
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxComboBox *spacePointComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     0, emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, //0,
+                     emptyList, wxCB_READONLY);
    
    if (addVector)
       spacePointComboBox->Append("Vector");
@@ -983,10 +985,11 @@ GuiItemManager::GetCelestialPointComboBox(wxWindow *parent, wxWindowID id,
       theNumCelesPoint);
    #endif
       
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxComboBox * celestialPointComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     0, emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, // 0,
+                     emptyList, wxCB_READONLY);
    
    if (addVector)
       celestialPointComboBox->Append("Vector");
@@ -1250,9 +1253,10 @@ wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWi
                                                           const wxSize &size,
                                                           wxArrayString *excList)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, //0,
                          emptyList, wxLB_SINGLE|wxLB_SORT);
 
    if (excList != NULL && excList->GetCount() > 0)
@@ -1292,9 +1296,10 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
                                                           const wxSize &size,
                                                           wxArrayString *excList)
 {
-   wxString emptyList[] = {};
+   //causing VCC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, //0,
                          emptyList, wxLB_SINGLE|wxLB_SORT);
 
    if (excList != NULL && excList->GetCount() > 0)
@@ -1334,9 +1339,10 @@ wxCheckListBox*
 GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                          const wxSize &size, wxArrayString *excList)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, //0,
                          emptyList, wxLB_SINGLE|wxLB_SORT);
    
    //---------------------------------------------
@@ -1390,9 +1396,10 @@ wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
    if (theNumSpacePoint == 0)
       numSpacePoint = 1;
 
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *spacePointListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
    
    if (addVector)
@@ -1427,9 +1434,10 @@ wxListBox* GuiItemManager::GetCelestialPointListBox(wxWindow *parent, wxWindowID
        theNumCelesPoint);
    #endif
    
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *celesPointListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
    
    if (excList.GetCount() > 0)
@@ -1475,9 +1483,10 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    }
    #endif
    
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *spaceObjectListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
    // get Formation list
@@ -1542,9 +1551,10 @@ wxListBox* GuiItemManager::GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size,
                                                 wxArrayString *excList)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *spacecraftListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
    if (excList != NULL && excList->GetCount() > 0)
@@ -1587,9 +1597,10 @@ wxListBox* GuiItemManager::GetPropertyListBox(wxWindow *parent, wxWindowID id,
 {
    
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
-   wxListBox *propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, 0,
+   wxListBox *propertyListBox = new wxListBox(parent, id, wxDefaultPosition, size, //0,
                                               emptyList, wxLB_SINGLE|wxLB_SORT);
    
    if (objType == "Spacecraft")
@@ -1654,10 +1665,11 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
                                                         const wxSize &size,
                                                         const wxString &nameToExclude)
 {       
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
    wxListBox *plottableParamListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
    if (nameToExclude != "")
@@ -1689,7 +1701,6 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
 wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
                                                       const wxSize &size, bool showArray)
 {
-   wxString emptyList[] = {};
    wxString *allUserParamList;
    int numParams = 0;
    int allUserParamCount = 0;
@@ -1726,8 +1737,11 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
    }
    else
    {
+      //causing VC++ error => wxString emptyList[] = {};
+      wxArrayString emptyList;
+      
       allUserParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+         new wxListBox(parent, id, wxDefaultPosition, size, //0,
                        emptyList, wxLB_SINGLE|wxLB_SORT);
    }
    
@@ -1749,10 +1763,11 @@ wxListBox* GuiItemManager::GetUserVariableListBox(wxWindow *parent, wxWindowID i
                                                   const wxString &nameToExclude)
 {
    
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    
    wxListBox *userVariableListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
    if (nameToExclude != "")
@@ -1785,7 +1800,8 @@ wxListBox* GuiItemManager::GetUserStringListBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size,
                                                 const wxString &nameToExclude)
 {       
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxString *newUserStringList;
    int numParams = 0;
    wxListBox *userStringListBox = NULL;
@@ -1817,7 +1833,7 @@ wxListBox* GuiItemManager::GetUserStringListBox(wxWindow *parent, wxWindowID id,
       else
       {
          userStringListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+            new wxListBox(parent, id, wxDefaultPosition, size, //0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
@@ -1838,7 +1854,8 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
                                                const wxSize &size,
                                                const wxString &nameToExclude)
 {       
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxString *newUserArrayList;
    int numParams = 0;
    wxListBox *userArrayListBox = NULL;
@@ -1870,7 +1887,7 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
       else
       {       
          userArrayListBox =
-            new wxListBox(parent, id, wxDefaultPosition, size, 0,
+            new wxListBox(parent, id, wxDefaultPosition, size, //0,
                           emptyList, wxLB_SINGLE|wxLB_SORT);
       }
    }
@@ -1889,7 +1906,8 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
 wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID id,
                                                    const wxSize &size)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *userParamListBox = NULL;
    
    if (theNumUserParam > 0)
@@ -1901,7 +1919,7 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
    else
    {       
       userParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size, 0,
+         new wxListBox(parent, id, wxDefaultPosition, size, //0,
                        emptyList, wxLB_SINGLE|wxLB_SORT);
    }
    
@@ -1921,11 +1939,11 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
 wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size,
                                                 wxArrayString &excList)
-{
-    
-   wxString emptyList[] = {};
+{    
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *celesBodyListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE);
 
    if (excList.GetCount() > 0)
@@ -1960,9 +1978,10 @@ wxListBox* GuiItemManager::GetFuelTankListBox(wxWindow *parent, wxWindowID id,
        "Exclude count=%d\n", theNumFuelTank, excList->GetCount());
    #endif
    
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *fuelTankListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
 
 //    //-------------------------------------------------------
@@ -2027,9 +2046,10 @@ wxListBox* GuiItemManager::GetThrusterListBox(wxWindow *parent, wxWindowID id,
                                               const wxSize &size,
                                               wxArrayString *excList)
 {
-   wxString emptyList[] = {};
+   //causing VC++ error => wxString emptyList[] = {};
+   wxArrayString emptyList;
    wxListBox *thrusterListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, 0,
+      new wxListBox(parent, id, wxDefaultPosition, size, //0,
                     emptyList, wxLB_SINGLE|wxLB_SORT);
       
    // It's ok to have the same Thruster in more than one spacecraft isince
@@ -2445,7 +2465,7 @@ void GuiItemManager::UpdateParameterList()
       #endif
       
       //param = theGuiInterpreter->GetParameter(items[i]);
-      param = (Parameter*)theGuiInterpreter->GetObject(items[i]);
+      param = (Parameter*)theGuiInterpreter->GetConfiguredObject(items[i]);
       
       // add if parameter plottable (returning single value)
       if (param->IsPlottable())
@@ -2738,7 +2758,7 @@ void GuiItemManager::UpdateSpaceObjectList()
          for (int i=0; i<numFm; i++)
          {
             //Formation *fm = (Formation*)(theGuiInterpreter->GetSpacecraft(fmList[i]));
-            GmatBase *fm = theGuiInterpreter->GetObject(fmList[i]);
+            GmatBase *fm = theGuiInterpreter->GetConfiguredObject(fmList[i]);
             StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
             fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
          }
@@ -3036,7 +3056,7 @@ void GuiItemManager::UpdateBurnList()
    
    for (int i=0; i<numBurn; i++)
    {
-      obj = theGuiInterpreter->GetObject(items[i]);
+      obj = theGuiInterpreter->GetConfiguredObject(items[i]);
       if (obj->GetTypeName() == "ImpulsiveBurn")
       {
          theImpBurnList[theNumImpBurn] = items[i].c_str();
@@ -3193,7 +3213,7 @@ void GuiItemManager::UpdateHardwareList()
    for (int i=0; i<numHardware; i++)
    {
       //hw = theGuiInterpreter->GetHardware(items[i]);
-      hw = theGuiInterpreter->GetObject(items[i]);
+      hw = theGuiInterpreter->GetConfiguredObject(items[i]);
       
       if (hw->IsOfType(Gmat::FUEL_TANK))
       {
@@ -3419,7 +3439,7 @@ void GuiItemManager::UpdateSubscriberList()
    for (int i=0; i<theNumSubscriber; i++)
    {
       // check for ReportFile
-      obj = theGuiInterpreter->GetObject(items[i]);
+      obj = theGuiInterpreter->GetConfiguredObject(items[i]);
       if (obj->GetTypeName() == "ReportFile")
       {
          if (i < MAX_REPORT_FILE)
@@ -3566,7 +3586,7 @@ void GuiItemManager::UpdateSolverList()
    for (int i=0; i<theNumSolver; i++)
    {
       // check for Optimizer
-      obj = theGuiInterpreter->GetObject(items[i]);
+      obj = theGuiInterpreter->GetConfiguredObject(items[i]);
       if (obj->GetTypeName() == "DifferentialCorrector")
       {
          if (i < MAX_BOUNDARY_SOLVER)
@@ -3601,7 +3621,7 @@ void GuiItemManager::UpdateSolverList()
    for (int i=0; i<theNumSolver; i++)
    {
       // check for Optimizer
-      obj = theGuiInterpreter->GetObject(items[i]);
+      obj = theGuiInterpreter->GetConfiguredObject(items[i]);
       if (obj->GetTypeName() == "FminconOptimizer")
       {
          if (i < MAX_OPTIMIZER)

@@ -460,7 +460,7 @@ void PropagationConfigPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
    
@@ -656,7 +656,7 @@ void PropagationConfigPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
 
       
@@ -721,7 +721,7 @@ void PropagationConfigPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
       
       //----------------------------------------------------
@@ -751,7 +751,7 @@ void PropagationConfigPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
       
       //----------------------------------------------------
@@ -773,7 +773,7 @@ void PropagationConfigPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
       
       //----------------------------------------------------
@@ -834,7 +834,7 @@ void PropagationConfigPanel::SaveData()
       }
       catch (BaseException &e)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
 
       if (isDegOrderChanged)
@@ -897,7 +897,7 @@ void PropagationConfigPanel::Initialize()
    #endif
    
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
-   thePropSetup = (PropSetup*)theGuiInterpreter->GetObject(propSetupName);
+   thePropSetup = (PropSetup*)theGuiInterpreter->GetConfiguredObject(propSetupName);
    
    //Note: All the settings should match enum types in the header.
    
@@ -1136,10 +1136,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    centralBodySizer->Add( originComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    // Primary Bodies
-   wxString bodyArray[]  = {};
+   //VC++ error=>wxString bodyArray[]  = {};
+   wxArrayString bodyArray;
    bodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
-                      wxDefaultPosition,  wxSize(80,-1), 0,
+                      wxDefaultPosition,  wxSize(80,-1),// 0,
                       bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
    bodyTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""),
@@ -1158,10 +1159,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-   wxString gravArray[]  = {};
+   //VC++ error => wxString gravArray[]  = {};
+   wxArrayString gravArray;
    gravComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(""),
-                      wxDefaultPosition, wxSize(150,-1), 0,
+                      wxDefaultPosition, wxSize(150,-1), // 0,
                       gravArray, wxCB_DROPDOWN|wxCB_READONLY );
    wxStaticText *degree1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Degree"),
@@ -1366,7 +1368,7 @@ void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
    {
       std::string integratorType = integratorTypeArray[propIndex].c_str();
       thePropagatorName = propSetupName + "_" + integratorType;
-      thePropagator = (Propagator*)theGuiInterpreter->GetObject(thePropagatorName);
+      thePropagator = (Propagator*)theGuiInterpreter->GetConfiguredObject(thePropagatorName);
       if (thePropagator == NULL)
          thePropagator = (Propagator*)
             theGuiInterpreter->CreateObject(integratorType, thePropagatorName);
@@ -1753,7 +1755,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return false;
    }
@@ -1836,7 +1838,7 @@ bool PropagationConfigPanel::SaveDegOrder()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return false;
    }
@@ -1900,7 +1902,7 @@ bool PropagationConfigPanel::SavePotFile()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return false;
    }
@@ -1981,7 +1983,7 @@ bool PropagationConfigPanel::SaveAtmosModel()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return false;
    }
@@ -2107,7 +2109,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
          catch (BaseException &e)
          {
             MessageInterface::PopupMessage
-               (Gmat::WARNING_, e.GetMessage() +
+               (Gmat::WARNING_, e.GetFullMessage() +
                 "\nPlease select Other and specify file name\n");
          }
       }
@@ -2727,19 +2729,19 @@ void PropagationConfigPanel::ParseGRVGravityFile(const wxString& fname)
       getline(inFile,s);
       std::istringstream lineStr;
       lineStr.str(s);
-          
+      
       // ignore comment lines
       if (s[0] != '#')
       {
          lineStr >> firstStr;
-         
-                 if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+         //VC++ error C3861: 'strcasecmp': identifier not found
+         if (strcmpi(firstStr.c_str(),"Degree") == 0)
             lineStr >> fileDegree;
-         else if (strcasecmp(firstStr.c_str(),"Order") == 0)
+         else if (strcmpi(firstStr.c_str(),"Order") == 0)
             lineStr >> fileOrder;
       }
    }
-
+   
    // Save as string
    forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
    forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);

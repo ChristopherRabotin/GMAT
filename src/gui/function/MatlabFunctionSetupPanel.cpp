@@ -43,7 +43,7 @@ MatlabFunctionSetupPanel::MatlabFunctionSetupPanel(wxWindow *parent, const wxStr
    : GmatPanel(parent)
 {
    theMatlabFunction = (MatlabFunction *)
-            theGuiInterpreter->GetObject(std::string(name.c_str()));
+      theGuiInterpreter->GetConfiguredObject(name.c_str());
 
    Create();
    Show();

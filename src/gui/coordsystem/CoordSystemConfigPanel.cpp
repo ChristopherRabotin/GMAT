@@ -41,7 +41,7 @@ CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
    : GmatPanel(parent)
 {
    theCoordSys =
-      (CoordinateSystem*) theGuiInterpreter->GetObject(coordName.c_str());
+      (CoordinateSystem*) theGuiInterpreter->GetConfiguredObject(coordName.c_str());
    mEpochFormat = "A1ModJulian";
    mOriginChanged = false;
    mObjRefChanged = false;
@@ -155,14 +155,14 @@ void CoordSystemConfigPanel::SaveData()
       
       // set coordinate system origin
       SpacePoint *origin =
-         (SpacePoint*)theGuiInterpreter->GetObject(originName);
+         (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
       theCoordSys->SetOrigin(origin);
       
       // set Earth as J000Body if NULL
       if (origin->GetJ2000Body() == NULL)
       {
          SpacePoint *j2000body =
-            (SpacePoint*)theGuiInterpreter->GetObject("Earth");
+            (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
          origin->SetJ2000Body(j2000body);
       }
    }

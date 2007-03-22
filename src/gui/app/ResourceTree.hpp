@@ -93,6 +93,8 @@ private:
    int mNumBarycenter;
    int mNumLibration;
    
+   GmatBase* GetObject(const std::string &name);
+   
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
    void AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter = true);

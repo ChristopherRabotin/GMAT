@@ -330,7 +330,7 @@ void InteractiveMatlabDialog::SetupCommand()
    // arg: for now to avoid a crash
    if (functionName != "")
    {
-      Function *function = (Function *)theGuiInterpreter->GetObject(
+      Function *function = (Function *)theGuiInterpreter->GetConfiguredObject(
                std::string(functionName));
 
       if (function != NULL)
@@ -381,7 +381,7 @@ void InteractiveMatlabDialog::SetResults()
    // output the results
    for (unsigned int i=0; i<outputStrings.Count(); i++)
    {
-      Parameter *param = (Parameter *)theGuiInterpreter->GetObject(
+      Parameter *param = (Parameter *)theGuiInterpreter->GetConfiguredObject(
             std::string(outputStrings[i]));
 
       if (param->GetTypeName() == "Array")

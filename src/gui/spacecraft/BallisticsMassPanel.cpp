@@ -186,7 +186,7 @@ void BallisticsMassPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
    
    dataChanged = false;
@@ -326,9 +326,9 @@ void BallisticsMassPanel::SaveData()
    {
       MessageInterface::ShowMessage
          ("BallisticsMassPanel::SaveData() error occurred!\n%s\n", 
-            e.GetMessage().c_str());
-         canClose = false;
-         return;
+          e.GetFullMessage().c_str());
+      canClose = false;
+      return;
    }
 }
 

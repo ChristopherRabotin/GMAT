@@ -391,6 +391,15 @@ void ResourceTree::UpdateVariable()
 
 
 //------------------------------------------------------------------------------
+// GmatBase* GetObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* ResourceTree::GetObject(const std::string &name)
+{
+   return theGuiInterpreter->GetConfiguredObject(name);
+}
+
+
+//------------------------------------------------------------------------------
 //  void AddDefaultResources()
 //------------------------------------------------------------------------------
 /**
@@ -656,12 +665,11 @@ void ResourceTree::AddDefaultHardware(wxTreeItemId itemId, bool restartCounter)
    
    for (int i = 0; i<size; i++)
    {
-      //Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
-      GmatBase *hw = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *hw = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(hw->GetTypeName().c_str());
       
-      if (objTypeName == "FuelTank")
+      if (objTypeName == "FuelTank") 
       {
          numFuelTank++;
 
@@ -723,9 +731,7 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool restartCounter
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
       
-      //Formation *form = (Formation *)theGuiInterpreter->
-      //   GetFormation(itemNames[i].c_str());
-      GmatBase *form = theGuiInterpreter->GetObject(itemNames[i].c_str());
+      GmatBase *form = GetObject(itemNames[i].c_str());
       
       // get added spacecrafts
       int scListId = form->GetParameterID("Add");
@@ -828,8 +834,7 @@ void ResourceTree::AddDefaultBurns(wxTreeItemId itemId, bool restartCounter)
    
    for (int i = 0; i<size; i++)
    {
-      //Burn *burn = theGuiInterpreter->GetBurn(itemNames[i]);
-      GmatBase *burn = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *burn = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(burn->GetTypeName().c_str());
 
@@ -893,8 +898,7 @@ void ResourceTree::AddDefaultSolvers(wxTreeItemId itemId, bool restartCounter)
    
    for (int i = 0; i<size; i++)
    {
-      //Solver *solver = theGuiInterpreter->GetSolver(itemNames[i]);
-      GmatBase *solver = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *solver = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(solver->GetTypeName().c_str());
 
@@ -970,8 +974,7 @@ void ResourceTree::AddDefaultSubscribers(wxTreeItemId itemId, bool restartCounte
    
    for (int i = 0; i<size; i++)
    {
-      //Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
-      GmatBase *sub = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *sub = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(sub->GetTypeName().c_str());
 
@@ -1065,9 +1068,8 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
    for (int i = 0; i<size; i++)
    {
       objName = wxString(itemNames[i].c_str());
-      //param = theGuiInterpreter->GetParameter(itemNames[i]);
-      param = (Parameter*)theGuiInterpreter->GetObject(itemNames[i]);
-
+      param = (Parameter*)GetObject(itemNames[i]);
+      
       // append only user parameters
       // all system parameters works as Object.Property
       if (param->GetKey() == GmatParam::USER_PARAM)
@@ -1101,8 +1103,7 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
 
    for (int i = 0; i<size; i++)
    {
-      //Function *funct = theGuiInterpreter->GetFunction(itemNames[i]);
-      GmatBase *funct = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *funct = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(funct->GetTypeName().c_str());
 
@@ -1198,8 +1199,7 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
    
    for (int i = 0; i<size; i++)
    {
-      //CalculatedPoint *cp = theGuiInterpreter->GetCalculatedPoint(itemNames[i]);
-      GmatBase *cp = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *cp = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(cp->GetTypeName().c_str());
 
@@ -1672,19 +1672,17 @@ void ResourceTree::OnClone(wxCommandEvent &event)
       const std::string stdName = name.c_str();
       std::string newName = "CloneOf";
       newName = newName + name.c_str();
-      //Spacecraft *sc1 = theGuiInterpreter->GetSpacecraft(stdName);
-      GmatBase *sc1 = theGuiInterpreter->GetObject(stdName);
+      GmatBase *sc1 = GetObject(stdName);
       
       // check to see if clone exists
-      //if (theGuiInterpreter->GetSpacecraft(newName))
-      if (theGuiInterpreter->GetObject(newName))
+      if (GetObject(newName))
       {
          int counter = 2;
          std::stringstream tmpNewName;
          tmpNewName<<newName<< counter;
          
          //while (theGuiInterpreter->GetSpacecraft(tmpNewName.str()))
-         while (theGuiInterpreter->GetObject(tmpNewName.str()))
+         while (GetObject(tmpNewName.str()))
          {
             ++counter;
             tmpNewName.str("");
@@ -1790,7 +1788,7 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
          //Spacecraft *theSpacecraft =
          //   theGuiInterpreter->GetSpacecraft(stdOldLabel);
          
-         GmatBase *theSpacecraft = theGuiInterpreter->GetObject(stdOldLabel);
+         GmatBase *theSpacecraft = GetObject(stdOldLabel);
          
          theSpacecraft->SetName(stdNewLabel);
 
@@ -2950,10 +2948,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          catch(BaseException &e)
          {
             MessageInterface::ShowMessage
-               ("*** Error running: %s\n   %s\n", e.GetMessage().c_str());
+               ("*** Error running: %s\n   %s\n", e.GetFullMessage().c_str());
             
             if (compare)
-               textCtrl->AppendText(e.GetMessage().c_str());
+               textCtrl->AppendText(e.GetFullMessage().c_str());
          }
       }
       
@@ -3134,8 +3132,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
       
       for (int i = 0; i<size; i++)
       {
-         //Hardware *hw = theGuiInterpreter->GetHardware(itemNames[i]);
-         GmatBase *hw = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *hw = GetObject(itemNames[i]);
          objTypeName = wxString(hw->GetTypeName().c_str());
 
          if (objTypeName == "FuelTank")
@@ -3160,8 +3157,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
          
       for (int i = 0; i<size; i++)
       {
-         //Burn *burn = theGuiInterpreter->GetBurn(itemNames[i]);
-         GmatBase *burn = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *burn = GetObject(itemNames[i]);
          objTypeName = wxString(burn->GetTypeName().c_str());
          
          if (objTypeName == "ImpulsiveBurn")
@@ -3193,8 +3189,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
    
       for (int i = 0; i<size; i++)
       {
-         //Solver *solver = theGuiInterpreter->GetSolver(itemNames[i]);
-         GmatBase *solver = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *solver = GetObject(itemNames[i]);
          objTypeName = wxString(solver->GetTypeName().c_str());
 
          if (objTypeName == "DifferentialCorrector")
@@ -3213,7 +3208,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
    
       for (int i = 0; i<size; i++)
       {
-         GmatBase *solver = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *solver = GetObject(itemNames[i]);
          objTypeName = wxString(solver->GetTypeName().c_str());
 
          if (objTypeName == "FminconOptimizer")
@@ -3233,8 +3228,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
       
       for (int i=0; i<size; i++)
       {
-         //Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
-         GmatBase *sub = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *sub = GetObject(itemNames[i]);
          objTypeName = wxString(sub->GetTypeName().c_str());
          
          if (objTypeName == "ReportFile")
@@ -3263,8 +3257,7 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
       
       for (int i=0; i<size; i++)
       {
-         //CalculatedPoint *cp = theGuiInterpreter->GetCalculatedPoint(itemNames[i]);
-         GmatBase *cp = theGuiInterpreter->GetObject(itemNames[i]);
+         GmatBase *cp = GetObject(itemNames[i]);
          objTypeName = wxString(cp->GetTypeName().c_str());
 
          if (objTypeName == "Barycenter")
@@ -3455,14 +3448,12 @@ void ResourceTree::CompareScriptRunResult(Real absTol, const wxString &replaceSt
    
    for (int i = 0; i<size; i++)
    {
-      //Subscriber *sub = theGuiInterpreter->GetSubscriber(itemNames[i]);
-      GmatBase *sub = theGuiInterpreter->GetObject(itemNames[i]);
+      GmatBase *sub = GetObject(itemNames[i]);
       objName = itemNames[i];
       
       if (sub->GetTypeName() == "ReportFile")
       {
-         //reportFile = (ReportFile*) theGuiInterpreter->GetSubscriber(objName);
-         reportFile = theGuiInterpreter->GetObject(objName);
+         reportFile = GetObject(objName);
          
          if (!reportFile)
          {

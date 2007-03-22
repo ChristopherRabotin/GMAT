@@ -51,7 +51,7 @@ TankConfigPanel::TankConfigPanel(wxWindow *parent, const wxString &name):GmatPan
    tankName = std::string(name.c_str());
     
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theFuelTank = (FuelTank*)theGuiInterpreter->GetObject(tankName);
+   theFuelTank = (FuelTank*)theGuiInterpreter->GetConfiguredObject(tankName);
     
    Create();
    Show();
@@ -222,9 +222,7 @@ void TankConfigPanel::SaveData()
       std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
                         theFuelTank->GetName() + "\" is not an allowed value.\n"
                         "The allowed values are: [ %s ]."; 
-      
-      //loj: 9/26/06 theOkButton->Disable();            
-      
+            
       // Fuel Mass 
       inputString = fuelMassTextCtrl->GetValue();
       if ((GmatStringUtil::ToReal(inputString,&rvalue)) && (rvalue >= 0.0))
@@ -315,11 +313,10 @@ void TankConfigPanel::SaveData()
          pressureRegulatedCheckBox->GetValue());
 
       EnableUpdate(false);
-//      canClose = true;
    }
    catch (BaseException &ex)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
          canClose = false;
    }
    

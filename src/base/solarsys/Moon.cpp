@@ -429,7 +429,7 @@ void Moon::InitializeMoon(const std::string &cBody)
    }
    catch (GmatBaseException &e)
    {
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
 
    // write message for now

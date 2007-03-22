@@ -274,7 +274,7 @@ void ArraySetupPanel::LoadData()
       }
       catch (BaseException &e)
       {
-         wxLogError(wxT(e.GetMessage().c_str()));
+         wxLogError(wxT(e.GetFullMessage().c_str()));
          wxLog::FlushActive();
       }
    }
@@ -342,7 +342,7 @@ void ArraySetupPanel::SaveData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 

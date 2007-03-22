@@ -231,7 +231,7 @@ Rvector6 OrbitData::GetCartState()
       {
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() Faild to convert to %s coordinate system.\n   %s\n",
-             mOutCoordSystem->GetName().c_str(), e.GetMessage().c_str());
+             mOutCoordSystem->GetName().c_str(), e.GetFullMessage().c_str());
          throw ParameterException
             ("OrbitData::GetCartState() Faild to convert to " +
              mOutCoordSystem->GetName() + " coordinate system.\n");

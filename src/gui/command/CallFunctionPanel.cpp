@@ -213,8 +213,8 @@ void CallFunctionPanel::LoadData()
    
    if (!functionComboBox->SetStringSelection(wxT(filename.c_str())))
    {
-   	  functionComboBox->Append("");
-   	  functionComboBox->SetStringSelection("");
+          functionComboBox->Append("");
+          functionComboBox->SetStringSelection("");
    }
 
    #ifdef DEBUG_CALLFUNCTION_PANEL
@@ -247,7 +247,7 @@ void CallFunctionPanel::LoadData()
          #ifdef DEBUG_CALLFUNCTION_PANEL
             MessageInterface::ShowMessage("   Looking up " + inputList[i] + "\n");
          #endif
-         param = theGuiInterpreter->GetObject(inputList[i]);
+         param = theGuiInterpreter->GetConfiguredObject(inputList[i]);
 
          if (i == mNumInput-1)
             delimiter = "";
@@ -288,7 +288,7 @@ void CallFunctionPanel::LoadData()
          #ifdef DEBUG_CALLFUNCTION_PANEL
             MessageInterface::ShowMessage("   Looking up " + outputList[i] + "\n");
          #endif
-         param = theGuiInterpreter->GetObject(outputList[i]);
+         param = theGuiInterpreter->GetConfiguredObject(outputList[i]);
 
          if (i == mNumOutput-1)
             delimiter = "";
@@ -361,62 +361,62 @@ void CallFunctionPanel::SaveData()
 {
    try
    {
-//	   MessageInterface::ShowMessage("Saving data...\n");
-	   wxString functionName = functionComboBox->GetStringSelection();
-	
-	   // arg: for now to avoid a crash
-	   if (functionName != "")
-	   {
-	      theCommand->SetStringParameter("FunctionName",
-	                     std::string(functionName.c_str()));
-	   }
-	
-	   mNumInput = inputStrings.Count();
-	
-	   if (mNumInput >= 0) // >=0 because the list needs to be cleared
-	   {
-	      theCommand->TakeAction("ClearInput");
-	      for (int i=0; i<mNumInput; i++)
-	      {
-	         std::string selInName = std::string(inputStrings[i]);
-	         theCommand->SetStringParameter("AddInput", selInName, i);
-	      }
-	   }
-	
-	   mNumOutput = outputStrings.Count();
-	
-	   if (mNumOutput >= 0) // >=0 because the list needs to be cleared
-	   {
-	      theCommand->TakeAction("ClearOutput");
-	      for (int i=0; i<mNumOutput; i++)
-	      {
-	         std::string selOutName = std::string(outputStrings[i]);
-	         theCommand->SetStringParameter("AddOutput", selOutName, i);
-	      }
-	   }
+//         MessageInterface::ShowMessage("Saving data...\n");
+           wxString functionName = functionComboBox->GetStringSelection();
+        
+           // arg: for now to avoid a crash
+           if (functionName != "")
+           {
+              theCommand->SetStringParameter("FunctionName",
+                             std::string(functionName.c_str()));
+           }
+        
+           mNumInput = inputStrings.Count();
+        
+           if (mNumInput >= 0) // >=0 because the list needs to be cleared
+           {
+              theCommand->TakeAction("ClearInput");
+              for (int i=0; i<mNumInput; i++)
+              {
+                 std::string selInName = std::string(inputStrings[i]);
+                 theCommand->SetStringParameter("AddInput", selInName, i);
+              }
+           }
+        
+           mNumOutput = outputStrings.Count();
+        
+           if (mNumOutput >= 0) // >=0 because the list needs to be cleared
+           {
+              theCommand->TakeAction("ClearOutput");
+              for (int i=0; i<mNumOutput; i++)
+              {
+                 std::string selOutName = std::string(outputStrings[i]);
+                 theCommand->SetStringParameter("AddOutput", selOutName, i);
+              }
+           }
    }
-	   // clear out previous parameters
-	//   theCommand->ClearObject(Gmat::PARAMETER);
-	//
-	//   // set input parameters
-	//   for (unsigned int i=0; i<inputStrings.Count(); i++)
-	//   {
-	//      Parameter *parameter = theGuiInterpreter->GetParameter(
-	//            std::string(inputStrings[i]));
-	//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
-	//   }
-	//
-	//   // set output parameters
-	//   for (unsigned int i=0; i<outputStrings.Count(); i++)
-	//   {
-	//      Parameter *parameter = theGuiInterpreter->GetParameter(
-	//            std::string(outputStrings[i]));
-	//      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
-	//   }
-	//
+           // clear out previous parameters
+        //   theCommand->ClearObject(Gmat::PARAMETER);
+        //
+        //   // set input parameters
+        //   for (unsigned int i=0; i<inputStrings.Count(); i++)
+        //   {
+        //      Parameter *parameter = theGuiInterpreter->GetParameter(
+        //            std::string(inputStrings[i]));
+        //      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Input", i);
+        //   }
+        //
+        //   // set output parameters
+        //   for (unsigned int i=0; i<outputStrings.Count(); i++)
+        //   {
+        //      Parameter *parameter = theGuiInterpreter->GetParameter(
+        //            std::string(outputStrings[i]));
+        //      theCommand->SetRefObject(parameter, Gmat::PARAMETER, "Output", i);
+        //   }
+        //
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }
