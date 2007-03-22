@@ -409,7 +409,11 @@ Real GmatMathUtil::ASinh (Real x, Real cycleInRad)
    if (cycleInRad <= 0.0) 
       throw RealUtilitiesExceptions::ArgumentError("ASinh(angle, cycle <= 0.0)\n");
    
+#ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*asinh(x);
+#else
+   return 0.0;
+#endif
 }
 
 
@@ -421,7 +425,11 @@ Real GmatMathUtil::ACosh (Real x, Real cycleInRad)
    if (cycleInRad <= 0.0) 
       throw RealUtilitiesExceptions::ArgumentError("ACosh(angle, cycle <= 0.0)\n");
    
+#ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*acosh(x);
+#else
+   return 0.0;
+#endif
 }
 
 
@@ -433,7 +441,12 @@ Real GmatMathUtil::ATanh (Real x, Real cycleInRad)
    if (cycleInRad <= 0.0) 
       throw RealUtilitiesExceptions::ArgumentError("ATanh(angle, cycle <= 0.0)\n");
    
+   //VC++ error C3861: 'atanh': identifier not found
+#ifndef _MSC_VER  // if not Microsoft Visual C++
    return (cycleInRad/TWO_PI)*atanh(x);
+#else
+   return 0.0;
+#endif
 }
 
 
