@@ -500,6 +500,7 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 GmatBase* Propagate::Clone() const
 {
+   MessageInterface::ShowMessage("===> Propagate::Clone() entering\n");
    return (new Propagate(*this));
 }
 
@@ -2677,7 +2678,10 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    if (TIME_ROUNDOFF != 0.0)
       secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
 
-   #if defined DEBUG_PROPAGATE_STEPSIZE or defined DEBUG_PROPAGATE_DIRECTION
+   //VC++ compiler gives warning:
+   //[Warning C4067] unexpected tokens following preprocessor directive - expected a newline 
+   //#if defined DEBUG_PROPAGATE_STEPSIZE or defined DEBUG_PROPAGATE_DIRECTION
+   #if defined DEBUG_PROPAGATE_STEPSIZE | defined DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
          ("Propagate::TakeFinalStep secsToStep at stop = %16.10le\n",
           secsToStep);
@@ -2916,7 +2920,7 @@ void Propagate::RunComplete()
 {
    if (inProgress)
       publisher->FlushBuffers();
-   
+      
    inProgress = false;
    hasFired = false;
 //   
