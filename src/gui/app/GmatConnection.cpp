@@ -168,7 +168,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    {
       wxString tempItem = item;
       tempItem.RemoveLast();
-      data = GmatInterface::Instance()->GetObject(std::string(tempItem.c_str()));
+      data = GmatInterface::Instance()->GetInternalObject(tempItem.c_str());
    }
    else if (item == "RunState") //loj: 8/2/05 Added
    {
