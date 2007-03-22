@@ -22,6 +22,7 @@
 
 //#define DEBUG_MATCHING_END 1
 //#define DEBUG_GET_PARENT 1
+//#define DEBUG_COMMAND_SEQ_STRING 1
 
 //------------------------------------------------------------------------------
 // GmatCommand* GetLastCommand(GmatCommand *cmd)
@@ -175,24 +176,6 @@ GmatCommand* GmatCommandUtil::GetNextCommand(GmatCommand *cmd)
    else
       return endScript->GetNext();
    
-//    GmatCommand *current = cmd;
-//    Integer scriptEventCount = 0;
-   
-//    while (current != NULL)
-//    {
-//       if (current->GetTypeName() == "BeginScript")
-//          scriptEventCount++;
-      
-//       if (current->GetTypeName() == "EndScript")
-//          scriptEventCount--;
-      
-//       if (scriptEventCount == 0)
-//          break;
-      
-//       current = current->GetNext();
-//    }
-   
-//    return current->GetNext();
 }
 
 
@@ -308,13 +291,26 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd)
 {
    char buf[10];
    GmatCommand *current = cmd;
-   std::string cmdseq;
-   cmdseq.append("\n---------- Mission Sequence ----------\n");
+   std::string cmdseq, cmdstr;
+   cmdstr = "\n---------- Mission Sequence ----------\n";
+   cmdseq.append(cmdstr);
+
+   #if DEBUG_COMMAND_SEQ_STRING
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::GetCommandSeqString(%p)\n", cmd);
+   MessageInterface::ShowMessage("%s", cmdstr.c_str());
+   #endif
+   
    
    while (current != NULL)
    {      
       sprintf(buf, "(%p)", current);
-      cmdseq.append("--- " + std::string(buf) + current->GetTypeName() + "\n");
+      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + "\n";
+      cmdseq.append(cmdstr);
+      
+      #if DEBUG_COMMAND_SEQ_STRING
+      MessageInterface::ShowMessage("%s", cmdstr.c_str());
+      #endif
       
       if ((current->GetChildCommand(0)) != NULL)
          GetSubCommandString(current, 0, cmdseq);
@@ -339,6 +335,7 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
    Integer childNo = 0;
    GmatCommand* nextInBranch;
    GmatCommand* child;
+   std::string cmdstr;
    
    while((child = current->GetChildCommand(childNo)) != NULL)
    {
@@ -349,10 +346,19 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
          for (int i=0; i<=level; i++)
          {
             cmdseq.append("---");
+            
+            #if DEBUG_COMMAND_SEQ_STRING
+            MessageInterface::ShowMessage("---");
+            #endif
          }
          
          sprintf(buf, "(%p)", nextInBranch);
-         cmdseq.append("--- " + std::string(buf) + nextInBranch->GetTypeName() + "\n");
+         cmdstr = "--- " + std::string(buf) + nextInBranch->GetTypeName() + "\n";
+         cmdseq.append(cmdstr);
+         
+         #if DEBUG_COMMAND_SEQ_STRING
+         MessageInterface::ShowMessage("%s", cmdstr.c_str());
+         #endif
          
          if (nextInBranch->GetChildCommand() != NULL)
             GetSubCommandString(nextInBranch, level+1, cmdseq);
