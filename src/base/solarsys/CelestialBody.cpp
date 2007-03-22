@@ -2949,22 +2949,28 @@ bool CelestialBody::ReadGrvFile()
       {
          lineStr >> firstStr;
          if (firstStr == "END") break;
+
+         //-----------------------------------------------------------
+         //note: 2007.03.15
+         // Visual C++ doesn't know about strcasecmp()
+         // So change to stricmp()
+         //-----------------------------------------------------------
          
          // ignore the stk version and blank lines
-         if ((strcasecmp(firstStr.c_str(),"Model") == 0) ||
-               (strcasecmp(firstStr.c_str(),"BEGIN") == 0))
+         if ((stricmp(firstStr.c_str(),"Model") == 0) ||
+               (stricmp(firstStr.c_str(),"BEGIN") == 0))
          {
             // do nothing - we don't need to know this
          }
-         else if (strcasecmp(firstStr.c_str(),"Degree") == 0)
+         else if (stricmp(firstStr.c_str(),"Degree") == 0)
          {
             lineStr >> fileDegree;
          }
-         else if (strcasecmp(firstStr.c_str(),"Order") == 0)
+         else if (stricmp(firstStr.c_str(),"Order") == 0)
          {
             lineStr >> fileOrder;
          }
-         else if (strcasecmp(firstStr.c_str(),"Gm") == 0)
+         else if (stricmp(firstStr.c_str(),"Gm") == 0)
          {
             lineStr >> tmpMu;
             if (tmpMu == 0.0)
@@ -2975,7 +2981,7 @@ bool CelestialBody::ReadGrvFile()
             // break as soon as both mu and a are read
             if ((tmpMu != 0.0) && (tmpA != 0.0)) break;
          }
-         else if (strcasecmp(firstStr.c_str(),"RefDistance") == 0)
+         else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
          {
             lineStr >> tmpA;
             if (tmpA == 0.0)
@@ -2985,7 +2991,7 @@ bool CelestialBody::ReadGrvFile()
             // break as soon as both mu and a are read
             if ((tmpMu != 0.0) && (tmpA != 0.0)) break;            
          }
-         else if (strcasecmp(firstStr.c_str(),"Normalized") == 0)
+         else if (stricmp(firstStr.c_str(),"Normalized") == 0)
          {
             lineStr >> isNormalized;
             if (isNormalized == "No")
