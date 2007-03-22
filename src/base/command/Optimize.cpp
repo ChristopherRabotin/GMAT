@@ -19,7 +19,12 @@
 
 #include <sstream>
 #include "Optimize.hpp"
+
+//Added __USE_EXTERNAL_OPTIMIZER__ so that header will not be compiled
+#ifdef __USE_EXTERNAL_OPTIMIZER__
 #include "ExternalOptimizer.hpp"
+#endif
+
 #if defined __USE_MATLAB__
    #include "MatlabInterface.hpp"
    #include "GmatInterface.hpp"
@@ -80,7 +85,7 @@ Optimize::Optimize(const Optimize& o) :
    optimizerConverged   (false),
    optimizerInDebugMode (o.optimizerInDebugMode)
 {
-	//parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
+        //parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
    #ifdef DEBUG_OPTIMIZE_CONSTRUCTION
       MessageInterface::ShowMessage("NOW creating (copying) Optimize command ...");
    #endif
@@ -303,7 +308,7 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Optimize::Initialize()
 {
-	if (objectMap->find(optimizerName) == objectMap->end()) 
+        if (objectMap->find(optimizerName) == objectMap->end()) 
    {
       std::string errorString = "Optimize command cannot find optimizer \"";
       errorString += optimizerName;
@@ -397,9 +402,9 @@ bool Optimize::Execute()
 
    if (!commandExecuting) 
    {
-	   #ifdef DEBUG_OPTIMIZE_COMMANDS
-   	   MessageInterface::ShowMessage(
-      	   "Entered Optimizer while command is not executing\n");
+           #ifdef DEBUG_OPTIMIZE_COMMANDS
+           MessageInterface::ShowMessage(
+           "Entered Optimizer while command is not executing\n");
       #endif
 
       FreeLoopData();
@@ -565,6 +570,8 @@ bool Optimize::ExecuteCallback()
    #endif
    // NOTE that in the future we may have a callback to/from a non_MATLAB
    // external optimizer
+
+   #ifdef __USE_EXTERNAL_OPTIMIZER__
    if (!optimizer || 
       (!(optimizer->IsOfType("ExternalOptimizer"))) || 
       (((ExternalOptimizer*)optimizer)->GetStringParameter("SourceType")
@@ -573,6 +580,8 @@ bool Optimize::ExecuteCallback()
       throw CommandException(
       "Optimize::ExecuteCallback not yet implemented for non_MATLAB optimizers");
    }
+   #endif
+   
    #ifndef __USE_MATLAB__ 
       throw CommandException("Optimize: ERROR - MATLAB required for Callback");
    #endif
@@ -628,7 +637,7 @@ bool Optimize::ExecuteCallback()
    catch (BaseException &be)
    {
       std::string errorStr = "Optimize:ExecuteCallback: ERROR - " +
-         be.GetMessage() + "\n";
+         be.GetFullMessage() + "\n";
       throw CommandException(errorStr);
    }
    // this call should just advance the state back to NOMINAL
