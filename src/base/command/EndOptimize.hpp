@@ -50,11 +50,10 @@ protected:
    };
 
    // save for possible later use
-   static const std::string
-          PARAMETER_TEXT[EndOptimizeParamCount - GmatCommandParamCount];
-   
-   static const Gmat::ParameterType
-          PARAMETER_TYPE[EndOptimizeParamCount - GmatCommandParamCount];
+   //static const std::string
+   //PARAMETER_TEXT[EndOptimizeParamCount - GmatCommandParamCount];   
+   //static const Gmat::ParameterType
+   //PARAMETER_TYPE[EndOptimizeParamCount - GmatCommandParamCount];
 };
 
 

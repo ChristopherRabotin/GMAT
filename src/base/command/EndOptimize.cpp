@@ -26,15 +26,13 @@
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
-const std::string
-EndOptimize::PARAMETER_TEXT[EndOptimizeParamCount - GmatCommandParamCount] =
-{
-};
 
-const Gmat::ParameterType
-EndOptimize::PARAMETER_TYPE[EndOptimizeParamCount - GmatCommandParamCount] =
-{
-};
+//VC++ error C2466: cannot allocate an array of constant size 0
+// so commented out for possible later use
+//const std::string
+//EndOptimize::PARAMETER_TEXT[EndOptimizeParamCount - GmatCommandParamCount] = {};
+//const Gmat::ParameterType
+//EndOptimize::PARAMETER_TYPE[EndOptimizeParamCount - GmatCommandParamCount] = {};
 
 //------------------------------------------------------------------------------
 // public methods
