@@ -2045,7 +2045,12 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       showAnomaly = true;
    
    // Set the parameter order for output
-   Integer parmOrder[parameterCount], parmIndex = 0;
+   //VC++ error C2057: expected constant expression
+   //     error C2466: cannot allocate an array of constant size 0
+   //Integer parmOrder[parameterCount], parmIndex = 0;
+   Integer *parmOrder = new Integer[parameterCount];   
+   Integer parmIndex = 0;
+   
    parmOrder[parmIndex++] = DATE_FORMAT_ID;
    parmOrder[parmIndex++] = SC_EPOCH_ID;
    parmOrder[parmIndex++] = COORD_SYS_ID;
@@ -2207,7 +2212,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
              i, ownedObject->GetTypeName().c_str(),
              ownedObject->GetName().c_str());
       #endif
-
+          
       if (nomme != "")
          newprefix += nomme + ".";
       else if (GetType() == Gmat::FORCE_MODEL)
@@ -2215,7 +2220,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
    
-//   isForDisplay = coordType;
+   delete [] parmOrder;
 }
 
 
