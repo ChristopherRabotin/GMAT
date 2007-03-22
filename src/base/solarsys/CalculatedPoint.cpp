@@ -19,6 +19,7 @@
 #include "SpacePoint.hpp"
 #include "CalculatedPoint.hpp"
 #include "SolarSystemException.hpp"
+#include <algorithm>              // for find()
 
 //---------------------------------
 // static data
