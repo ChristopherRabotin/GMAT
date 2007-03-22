@@ -549,8 +549,9 @@ Real MathElement::Evaluate()
       
       return realValue;
    }
-   
-   return MathNode::Evaluate();
+
+   //causing VC++ link error
+   //return MathNode::Evaluate();
 }
 
 
