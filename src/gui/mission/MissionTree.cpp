@@ -1143,6 +1143,9 @@ void MissionTree::UpdateGuiManager(const wxString &cmdName)
    
    if (cmdName == "Report")
       theGuiManager->UpdateSubscriber();
+   
+   // Always update parameter, since it is used in many commands
+   theGuiManager->UpdateParameter();
 }
 
 
