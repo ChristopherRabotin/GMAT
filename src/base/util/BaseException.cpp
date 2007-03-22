@@ -36,10 +36,18 @@ void BaseException::SetDetails(const char *details, ...)
    
    size = strlen(details) + MAX_MESSAGE_LENGTH;
    
-   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   if ( (msgBuffer = (char *)malloc(size)) != NULL )
    {
-      va_start(marker, details);      
-      ret = vsprintf(msgBuffer, details, marker);      
+      va_start(marker, details);
+      
+      #ifdef _MSC_VER  // Microsoft Visual C++
+      // _vscprintf doesn't count terminating '\0'
+      int len = _vscprintf( details, marker ) + 1; 
+      ret = vsprintf_s(msgBuffer, len, details, marker);
+      #else
+      ret = vsprintf(msgBuffer, details, marker);
+      #endif
+      
       va_end(marker);
    }
 
