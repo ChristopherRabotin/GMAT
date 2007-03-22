@@ -54,6 +54,11 @@ public:
                      const std::string &field, const std::string &expRange,
                      bool onlyMsg = false);
    
+   bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
+                      const std::string &field, const std::string &expRange,
+                      bool isNumberAllowed);
+   
+   
 protected:
    
    // member functions

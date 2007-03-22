@@ -295,7 +295,7 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
  *
  * @param  rvalue   Real value to be set if input string is valid
  * @param  str      Input string value
- * @param  field    Field name should used in the error message
+ * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
  * @param  onlyMsg  if true, it only shows error message
  */
@@ -350,7 +350,7 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
  *
  * @param  ivalue   Integer value to be set if input string is valid
  * @param  str      Input string value
- * @param  field    Field name should used in the error message
+ * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
  * @param  onlyMsg  if true, it only shows error message
  */
@@ -387,6 +387,57 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
    }
 }
 
+
+//------------------------------------------------------------------------------
+// bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
+//                    const std::string &field, const std::string &expRange,
+//                    bool isNumberAllowed)
+//------------------------------------------------------------------------------
+/*
+ * Checks if input variable is a Number, Variable, Array element, or parameter of
+ * input owner type.
+ *
+ * @param  varName    Input variable name to be checked
+ * @param  ownerType  Input owner type (such as Gmat::SPACECRAFT)
+ * @param  field      Field name should be used in the error message
+ * @param  expRange   Expected value range to be used in the error message
+ * @param  isNumberAllowed  true if varName can be a Real number 
+ *
+ * @return -1 if varName NOT found in the configuration
+ *          0 if varName found BUT not one of Variable, Array element, or parameter
+ *          1 if varName found AND one of Variable, Array element, or parameter
+ *          2 if number is allowed and varName is Real number
+ */
+//------------------------------------------------------------------------------
+bool GmatPanel::CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
+                              const std::string &field, const std::string &expRange,
+                              bool isNumberAllowed)
+{
+   int retval = theGuiManager->
+      IsValidVariable(varName.c_str(), Gmat::SPACECRAFT, isNumberAllowed);
+   
+   if (retval == -1)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "The variable \"" + varName + "\" does not exist.\n"
+          "Right click on the cell for the Parameter Dialog or\n"
+          "create from the Resource Tree.");
+      
+      canClose = false;
+      return false;
+   }
+   else if (retval == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, mMsgFormat.c_str(), varName.c_str(), field.c_str(),
+          expRange.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   
+   return true;
+}
 
 //-------------------------------
 // protected methods
