@@ -24,7 +24,10 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+
+#ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
+#endif
 
 // If we want to create default input file names turn this on
 //#define FM_CREATE_DEFAULT_INPUT
@@ -146,9 +149,10 @@ bool FileManager::DoesDirectoryExist(const std::string &dirPath)
    if (dirPath == "")
       return false;
    
-   DIR *dir;
    bool dirExist = false;
    
+#ifndef _MSC_VER  // if not Microsoft Visual C++
+   DIR *dir = NULL;
    dir = opendir(dirPath.c_str());
    
    if (dir != NULL)
@@ -156,6 +160,7 @@ bool FileManager::DoesDirectoryExist(const std::string &dirPath)
       dirExist = true; 
       closedir(dir);
    }
+#endif
    
    return dirExist;
 }
@@ -166,18 +171,18 @@ bool FileManager::DoesDirectoryExist(const std::string &dirPath)
 //------------------------------------------------------------------------------
 bool FileManager::DoesFileExist(const std::string &filename)
 {
-  FILE * pFile;
-  pFile = fopen (filename.c_str(), "rt+");
+   FILE * pFile;
+   pFile = fopen (filename.c_str(), "rt+");
   
-  if (pFile!=NULL)
-  {
-    fclose (pFile);
-    return true;
-  }
-  else
-  {
-    return false;
-  }
+   if (pFile!=NULL)
+   {
+      fclose (pFile);
+      return true;
+   }
+   else
+   {
+      return false;
+   }
 }
 
 
