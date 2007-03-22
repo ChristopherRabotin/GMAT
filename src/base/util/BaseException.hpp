@@ -25,7 +25,7 @@
 class BaseException
 {
 public:
-   virtual std::string GetMessage() const 
+   virtual std::string GetFullMessage() const 
       {return theMessage + theDetails;};
    virtual std::string GetDetails() const 
       {return theDetails;};
@@ -56,3 +56,4 @@ private:
    std::string theDetails;
 };
 #endif // BaseException_hpp
+
