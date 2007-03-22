@@ -369,17 +369,17 @@ char* GmatInterface::GetParameter(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// char* GetObject(const std::string &name)
+// char* GetInternalObject(const std::string &name)
 //------------------------------------------------------------------------------
 /*
  * @return serialized string value of the object.
  */
 //------------------------------------------------------------------------------
-char* GmatInterface::GetObject(const std::string &name)
+char* GmatInterface::GetInternalObject(const std::string &name)
 {
    #if DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
-      ("GmatInterface::GetObject() name=%s\n", name.c_str());
+      ("GmatInterface::GetInternalObject() name=%s\n", name.c_str());
    #endif
 
    static char dataString[MAX_OBJECT_VAL_STRING];
@@ -393,7 +393,7 @@ char* GmatInterface::GetObject(const std::string &name)
    {
       #if DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
-         ("GmatInterface::GetObject() get serialized string of object name:"
+         ("GmatInterface::GetInternalObject() get serialized string of object name:"
           "%s, type=%s\n", obj->GetName().c_str(), obj->GetTypeName().c_str());
       #endif
       
@@ -408,7 +408,7 @@ char* GmatInterface::GetObject(const std::string &name)
    else
    {
       MessageInterface::ShowMessage
-         ("GmatInterface::GetObject() the pointer of object name:%s is null\n",
+         ("GmatInterface::GetInternalObject() the pointer of object name:%s is null\n",
           name.c_str());
    }
    
