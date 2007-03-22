@@ -111,6 +111,10 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
 std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
                                  bool removeSemicolon)
 {
+   //Add for VC++ compiler
+   if (str == "")
+      return str;
+   
    std::string str2;
    std::string whiteSpace = " \t";
    
@@ -134,8 +138,12 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    #endif
    
    if (removeSemicolon)
-      if (str2[str2.size()-1] == ';')
-         str2.erase(str2.size()-1, 1);
+   {
+      //Add for VC++ compiler
+      if (str2.size() > 0)
+         if (str2[str2.size()-1] == ';')
+            str2.erase(str2.size()-1, 1);
+   }
    
    //MessageInterface::ShowMessage
    //   ("===> GmatStringUtil::Trim() returning:\n   %s\n", str2.c_str());
