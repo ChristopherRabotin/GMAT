@@ -1108,7 +1108,7 @@ std::string ReportFile::GetFileName()
       if (filename == "")
          fname = "ReportFile.txt";
       
-      MessageInterface::ShowMessage(e.GetMessage());
+      MessageInterface::ShowMessage(e.GetFullMessage());
    }
    
    return fname;
