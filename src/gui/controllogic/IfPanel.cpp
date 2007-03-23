@@ -17,7 +17,7 @@
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_IF_PANEL 1
+//#define DEBUG_IF_PANEL_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -122,72 +122,77 @@ void IfPanel::Setup(wxWindow *parent)
 //------------------------------------------------------------------------------
 void IfPanel::LoadData()
 {
-    // Set the pointer for the "Show Script" button
-    mObject = theIfCommand;
-
-    if (theIfCommand != NULL)
-    {
-       Integer paramId;
+   // Set the pointer for the "Show Script" button
+   mObject = theIfCommand;
+   
+   if (theIfCommand == NULL)
+      return;
+   
+   try
+   {
+      Integer paramId;
        
-       paramId = theIfCommand->GetParameterID("NumberOfConditions");
-       mNumberOfConditions = theIfCommand->GetIntegerParameter(paramId);
-       
-       if (mNumberOfConditions > 0)
-       {
-          paramId = theIfCommand->GetParameterID("NumberOfLogicalOperators");
-          mNumberOfLogicalOps = theIfCommand->GetIntegerParameter(paramId); 
-                
-          paramId = theIfCommand->GetParameterID("LeftHandStrings");
-          mLhsList = theIfCommand->GetStringArrayParameter(paramId);
-
-          paramId = theIfCommand->GetParameterID("OperatorStrings");
-          mEqualityOpStrings = theIfCommand->GetStringArrayParameter(paramId);
+      paramId = theIfCommand->GetParameterID("NumberOfConditions");
+      mNumberOfConditions = theIfCommand->GetIntegerParameter(paramId);
+      
+      if (mNumberOfConditions > 0)
+      {
+         paramId = theIfCommand->GetParameterID("NumberOfLogicalOperators");
+         mNumberOfLogicalOps = theIfCommand->GetIntegerParameter(paramId); 
+         
+         paramId = theIfCommand->GetParameterID("LeftHandStrings");
+         mLhsList = theIfCommand->GetStringArrayParameter(paramId);
+         
+         paramId = theIfCommand->GetParameterID("OperatorStrings");
+         mEqualityOpStrings = theIfCommand->GetStringArrayParameter(paramId);
           
-          paramId = theIfCommand->GetParameterID("RightHandStrings");
-          mRhsList = theIfCommand->GetStringArrayParameter(paramId);
-          
-          paramId = theIfCommand->GetParameterID("LogicalOperators");
-          mLogicalOpStrings = theIfCommand->GetStringArrayParameter(paramId); 
-          
-          for (Integer i = 0; i < mNumberOfConditions; i++)
-          {
-             conditionGrid->SetCellValue(i, LHS_COL, mLhsList[i].c_str()); 
-             conditionGrid->SetCellValue(i, COND_COL, mEqualityOpStrings[i].c_str()); 
-             conditionGrid->SetCellValue(i, RHS_COL, mRhsList[i].c_str());
-             
-             char leftChar = (mLhsList.at(i)).at(0);
-             if (isalpha(leftChar))
-                mLhsIsParam.push_back(true);
-             else
-                mLhsIsParam.push_back(false);
-             
-             char rightChar = (mRhsList.at(i)).at(0);
-             if (isalpha(rightChar))
-                mRhsIsParam.push_back(true);
-             else
-                mRhsIsParam.push_back(false);
-             
-             if (i != 0)
-                conditionGrid->SetCellValue(i, COMMAND_COL,
-                                            mLogicalOpStrings[i-1].c_str());
-          }    
-       }   
-    }         
+         paramId = theIfCommand->GetParameterID("RightHandStrings");
+         mRhsList = theIfCommand->GetStringArrayParameter(paramId);
+         
+         paramId = theIfCommand->GetParameterID("LogicalOperators");
+         mLogicalOpStrings = theIfCommand->GetStringArrayParameter(paramId); 
+         
+         for (Integer i = 0; i < mNumberOfConditions; i++)
+         {
+            conditionGrid->SetCellValue(i, LHS_COL, mLhsList[i].c_str()); 
+            conditionGrid->SetCellValue(i, COND_COL, mEqualityOpStrings[i].c_str()); 
+            conditionGrid->SetCellValue(i, RHS_COL, mRhsList[i].c_str());
+            
+            char leftChar = (mLhsList.at(i)).at(0);
+            if (isalpha(leftChar))
+               mLhsIsParam.push_back(true);
+            else
+               mLhsIsParam.push_back(false);
+            
+            char rightChar = (mRhsList.at(i)).at(0);
+            if (isalpha(rightChar))
+               mRhsIsParam.push_back(true);
+            else
+               mRhsIsParam.push_back(false);
+            
+            if (i != 0)
+               conditionGrid->SetCellValue(i, COMMAND_COL,
+                                           mLogicalOpStrings[i-1].c_str());
+         }    
+      }
+   }         
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void IfPanel::SaveData()
 {
-//    if ( (mLhsList.empty()) || (mRhsList.empty()) || (mEqualityOpStrings.empty()) )
-//    {
-//       MessageInterface::PopupMessage
-//       (Gmat::WARNING_, "Incomplete parameters for If loop condition.\n"
-//                        "Updates have not been saved");
-//       return;
-//    }      
+   canClose = true;
    
+   //-----------------------------------------------------------------
+   // check for incomplete conditions
+   //-----------------------------------------------------------------
    mNumberOfConditions = 0;
    Integer itemMissing = 0;
    mLogicalOpStrings.clear();
@@ -195,7 +200,7 @@ void IfPanel::SaveData()
    mEqualityOpStrings.clear();
    mRhsList.clear();
    
-   // Count number of conditions (loj: 8/11/05 Added)
+   // Count number of conditions
    for (Integer i=0; i<MAX_ROW; i++)
    {
       itemMissing = 0;
@@ -216,12 +221,14 @@ void IfPanel::SaveData()
       else if (itemMissing < 4)
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "Incomplete parameters for If condition in Row:%d.\n"
-             "This row will be skipped\n", i);
+            (Gmat::ERROR_,
+             "Logical operator or parameters are missing in row %d.\n", i+1);
+         canClose = false;
+         return;
       }
    }
    
-   #if DEBUG_IF_PANEL
+   #if DEBUG_IF_PANEL_SAVE
    MessageInterface::ShowMessage
       ("IfPanel::SaveData() mNumberOfConditions=%d\n", mNumberOfConditions);
    #endif
@@ -231,91 +238,64 @@ void IfPanel::SaveData()
       MessageInterface::PopupMessage
       (Gmat::WARNING_, "Incomplete parameters for If condition.\n"
                        "Updates have not been saved");
+      canClose = false;
       return;
    }
    
-   // Save conditions
+   //-----------------------------------------------------------------
+   // check input values: Number, Variable, Array element, Parameter
+   //-----------------------------------------------------------------
+   for (UnsignedInt i=0; i<mLhsList.size(); i++)
+      CheckVariable(mLhsList[i].c_str(), Gmat::SPACECRAFT, "LHS",
+                    "Variable, Array element, plottable Parameter", true);
+   
+   for (UnsignedInt i=0; i<mRhsList.size(); i++)
+      CheckVariable(mRhsList[i].c_str(), Gmat::SPACECRAFT, "RHS",
+                    "Variable, Array element, plottable Parameter", true);
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
-      Real realNum;
-      
       for (Integer i = 0; i < mNumberOfConditions; i++)
       {
-         #if DEBUG_IF_PANEL
+         #if DEBUG_IF_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("i=%d, mLogicalOpStrings=[%s], mLhsList=[%s], mEqualityOpStrings=[%s]\n"
-             "   mRhsList[%s]\n", i, mLogicalOpStrings[i].c_str(), mLhsList[i].c_str(),
+            ("   i=%d, mLogicalOpStrings='%s', mLhsList='%s', mEqualityOpStrings='%s'\n"
+             "   mRhsList='%s'\n", i, mLogicalOpStrings[i].c_str(), mLhsList[i].c_str(),
              mEqualityOpStrings[i].c_str(), mRhsList[i].c_str());
          #endif
          try
          {
             theIfCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
                                        mRhsList[i], i);
+            
+            if (i > 0)
+               theIfCommand->SetConditionOperator(mLogicalOpStrings[i], i-1);
+            
          }
          catch (BaseException &be)
          {
-            MessageInterface::PopupMessage(Gmat::WARNING_, be.GetFullMessage());
-            return;            
-         }
-         
-         if (i > 0)
-         {
-            //theIfCommand->SetConditionOperator(mLogicalOpStrings[i-1]);
-            theIfCommand->SetConditionOperator(mLogicalOpStrings[i], i-1);
-         } 
-         
-         //-----------------------------------------------------------
-         //loj: 8/12/05
-         // Actually setting RefObject should be done in the Sandbox
-         // ConditinalBranch::Initialize() should set all RefObjects
-         // when it is called from the Sandbox
-         //-----------------------------------------------------------
-         
-         // set LHS parameter if not a number
-         if (!wxString(mLhsList[i].c_str()).ToDouble(&realNum))
-         {
-            theParameter =
-               theGuiInterpreter->GetParameter(mLhsList[i].c_str());
-            if (theParameter != NULL)
-            {
-               theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER,
-                                          mLhsList[i].c_str(), i);
-            }    
-            else
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Invalid Parameter Selection.\n"
-                   "Updates have not been saved");
-               return;
-            }    
-         }
-         
-         // set RHS parameter if not a number
-         //if (mRhsIsParam[i])
-         if (!wxString(mRhsList[i].c_str()).ToDouble(&realNum))
-         {
-            theParameter = 
-               theGuiInterpreter->GetParameter(mRhsList[i].c_str());
-            if (theParameter != NULL)
-            {
-               theIfCommand->SetRefObject(theParameter, Gmat::PARAMETER,
-                                          mRhsList[i].c_str(), i);
-            }    
-            else
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Invalid Parameter Selection.\n"
-                   "Updates have not been saved");
-               return;
-            }    
+            MessageInterface::PopupMessage(Gmat::ERROR_, be.GetFullMessage());
+            canClose = false;
+            // We want to go through all conditions and show errors if any
+            //return; 
          }
       }
-      theGuiInterpreter->ValidateCommand(theIfCommand);
+      
+      if (canClose)
+         if (!theGuiInterpreter->ValidateCommand(theIfCommand))
+            canClose = false;
+      
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("*** Error *** IfPanel::SaveData() " + e.GetFullMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
 }
 

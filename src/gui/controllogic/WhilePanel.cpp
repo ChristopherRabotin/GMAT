@@ -123,72 +123,77 @@ void WhilePanel::Setup(wxWindow *parent)
 //------------------------------------------------------------------------------
 void WhilePanel::LoadData()
 {
-    // Set the pointer for the "Show Script" button
-    mObject = theWhileCommand;
+   // Set the pointer for the "Show Script" button
+   mObject = theWhileCommand;
 
-    if (theWhileCommand != NULL)
-    {
-       Integer paramId;
-       
-       paramId = theWhileCommand->GetParameterID("NumberOfConditions");
-       mNumberOfConditions = theWhileCommand->GetIntegerParameter(paramId);
-       
-       if (mNumberOfConditions > 0)
-       {
-          paramId = theWhileCommand->GetParameterID("NumberOfLogicalOperators");
-          mNumberOfLogicalOps = theWhileCommand->GetIntegerParameter(paramId); 
-                
-          paramId = theWhileCommand->GetParameterID("LeftHandStrings");
-          mLhsList = theWhileCommand->GetStringArrayParameter(paramId);
-
-          paramId = theWhileCommand->GetParameterID("OperatorStrings");
-          mEqualityOpStrings = theWhileCommand->GetStringArrayParameter(paramId);
-          
-          paramId = theWhileCommand->GetParameterID("RightHandStrings");
-          mRhsList = theWhileCommand->GetStringArrayParameter(paramId);
-          
-          paramId = theWhileCommand->GetParameterID("LogicalOperators");
-          mLogicalOpStrings = theWhileCommand->GetStringArrayParameter(paramId); 
-          
-          for (Integer i = 0; i < mNumberOfConditions; i++)
-          {
-             conditionGrid->SetCellValue(i, LHS_COL, mLhsList[i].c_str()); 
-             conditionGrid->SetCellValue(i, COND_COL, mEqualityOpStrings[i].c_str()); 
-             conditionGrid->SetCellValue(i, RHS_COL, mRhsList[i].c_str());
-             
-             char leftChar = (mLhsList.at(i)).at(0);
-             if (isalpha(leftChar))
-                mLhsIsParam.push_back(true);
-             else
-                mLhsIsParam.push_back(false);
-             
-             char rightChar = (mRhsList.at(i)).at(0);
-             if (isalpha(rightChar))
-                mRhsIsParam.push_back(true);
-             else
-                mRhsIsParam.push_back(false);
-             
-             if (i != 0)
-                conditionGrid->SetCellValue(i, COMMAND_COL,
-                                            mLogicalOpStrings[i-1].c_str());
-          }    
-       }   
-    }         
+   if (theWhileCommand == NULL)
+      return;
+   
+   try
+   {
+      Integer paramId;
+      
+      paramId = theWhileCommand->GetParameterID("NumberOfConditions");
+      mNumberOfConditions = theWhileCommand->GetIntegerParameter(paramId);
+      
+      if (mNumberOfConditions > 0)
+      {
+         paramId = theWhileCommand->GetParameterID("NumberOfLogicalOperators");
+         mNumberOfLogicalOps = theWhileCommand->GetIntegerParameter(paramId); 
+         
+         paramId = theWhileCommand->GetParameterID("LeftHandStrings");
+         mLhsList = theWhileCommand->GetStringArrayParameter(paramId);
+         
+         paramId = theWhileCommand->GetParameterID("OperatorStrings");
+         mEqualityOpStrings = theWhileCommand->GetStringArrayParameter(paramId);
+         
+         paramId = theWhileCommand->GetParameterID("RightHandStrings");
+         mRhsList = theWhileCommand->GetStringArrayParameter(paramId);
+         
+         paramId = theWhileCommand->GetParameterID("LogicalOperators");
+         mLogicalOpStrings = theWhileCommand->GetStringArrayParameter(paramId); 
+         
+         for (Integer i = 0; i < mNumberOfConditions; i++)
+         {
+            conditionGrid->SetCellValue(i, LHS_COL, mLhsList[i].c_str()); 
+            conditionGrid->SetCellValue(i, COND_COL, mEqualityOpStrings[i].c_str()); 
+            conditionGrid->SetCellValue(i, RHS_COL, mRhsList[i].c_str());
+            
+            char leftChar = (mLhsList.at(i)).at(0);
+            if (isalpha(leftChar))
+               mLhsIsParam.push_back(true);
+            else
+               mLhsIsParam.push_back(false);
+            
+            char rightChar = (mRhsList.at(i)).at(0);
+            if (isalpha(rightChar))
+               mRhsIsParam.push_back(true);
+            else
+               mRhsIsParam.push_back(false);
+            
+            if (i != 0)
+               conditionGrid->SetCellValue(i, COMMAND_COL,
+                                           mLogicalOpStrings[i-1].c_str());
+         }    
+      }   
+   }         
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void WhilePanel::SaveData()
 {
-//    if ( (mLhsList.empty()) || (mRhsList.empty()) || (mEqualityOpStrings.empty()) )
-//    {
-//       MessageInterface::PopupMessage
-//       (Gmat::WARNING_, "Incomplete parameters for While loop condition.\n"
-//                        "Updates have not been saved");
-//       return;
-//    }      
-
+   canClose = true;
+   
+   //-----------------------------------------------------------------
+   // check for incomplete conditions
+   //-----------------------------------------------------------------
    mNumberOfConditions = 0;
    Integer itemMissing = 0;
    mLogicalOpStrings.clear();
@@ -196,7 +201,6 @@ void WhilePanel::SaveData()
    mEqualityOpStrings.clear();
    mRhsList.clear();
    
-   // Count number of conditions (loj: 8/11/05 Added)
    for (Integer i=0; i<MAX_ROW; i++)
    {
       itemMissing = 0;
@@ -217,14 +221,16 @@ void WhilePanel::SaveData()
       else if (itemMissing < 4)
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "Incomplete parameters for If condition in Row:%d.\n"
-             "This row will be skipped\n", i);
+            (Gmat::ERROR_,
+             "Logical operator or parameters are missing in row %d.\n", i+1);
+         canClose = false;
+         return;
       }
    }
    
    #if DEBUG_WHILE_PANEL
    MessageInterface::ShowMessage
-      ("IfPanel::SaveData() mNumberOfConditions=%d\n", mNumberOfConditions);
+      ("WhilePanel::SaveData() mNumberOfConditions=%d\n", mNumberOfConditions);
    #endif
    
    if (mNumberOfConditions == 0)
@@ -232,95 +238,67 @@ void WhilePanel::SaveData()
       MessageInterface::PopupMessage
       (Gmat::WARNING_, "Incomplete parameters for If condition.\n"
                        "Updates have not been saved");
+      canClose = false;
       return;
    }
    
-   // Save conditions
+   //-----------------------------------------------------------------
+   // check input values: Number, Variable, Array element, Parameter
+   //-----------------------------------------------------------------
+   for (UnsignedInt i=0; i<mLhsList.size(); i++)
+      CheckVariable(mLhsList[i].c_str(), Gmat::SPACECRAFT, "LHS",
+                    "Variable, Array element, plottable Parameter", true);
+   
+   for (UnsignedInt i=0; i<mRhsList.size(); i++)
+      CheckVariable(mRhsList[i].c_str(), Gmat::SPACECRAFT, "RHS",
+                    "Variable, Array element, plottable Parameter", true);
+   
+   if (!canClose)
+      return;
+
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
-      Real realNum;
-      
       for (Integer i = 0; i < mNumberOfConditions; i++)
       {
          #if DEBUG_WHILE_PANEL
          MessageInterface::ShowMessage
-            ("i=%d, mLogicalOpStrings=[%s], mLhsList=[%s], mEqualityOpStrings=[%s]\n"
-             "   mRhsList[%s]\n", i, mLogicalOpStrings[i].c_str(), mLhsList[i].c_str(),
+            ("   i=%d, mLogicalOpStrings='%s', mLhsList='%s', mEqualityOpStrings='%s'\n"
+             "   mRhsList='%s'\n", i, mLogicalOpStrings[i].c_str(), mLhsList[i].c_str(),
              mEqualityOpStrings[i].c_str(), mRhsList[i].c_str());
          #endif
          
          try
          {
-          theWhileCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
-                                       mRhsList[i], i);
+            theWhileCommand->SetCondition(mLhsList[i], mEqualityOpStrings[i],
+                                          mRhsList[i], i);
+          
+            if (i > 0)
+               theWhileCommand->SetConditionOperator(mLogicalOpStrings[i], i-1);
          }
          catch (BaseException &be)
          {
             MessageInterface::PopupMessage(Gmat::WARNING_, be.GetFullMessage()); 
-            return;           
-         }
-         
-         if (i > 0)
-         {
-            //theWhileCommand->SetConditionOperator(mLogicalOpStrings[i-1]);
-            theWhileCommand->SetConditionOperator(mLogicalOpStrings[i], i-1);
-         } 
-         
-         //-----------------------------------------------------------
-         //loj: 8/12/05
-         // Actually setting RefObject should be done in the Sandbox
-         // ConditinalBranch::Initialize() should set all RefObjects
-         // when it is called from the Sandbox
-         //-----------------------------------------------------------
-         
-         // set LHS parameter if not a number
-         //if (mRhsIsParam[i])
-         if (!wxString(mLhsList[i].c_str()).ToDouble(&realNum))
-         {
-            theParameter =
-               theGuiInterpreter->GetParameter(mLhsList[i].c_str());
-            if (theParameter != NULL)
-            {
-               theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER,
-                                             mLhsList[i].c_str(), i);
-            }    
-            else
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Invalid Parameter Selection.\n"
-                   "Updates have not been saved");
-               return;
-            }    
-         }
-         
-         // set RHS parameter if not a number
-         //if (mRhsIsParam[i])
-         if (!wxString(mRhsList[i].c_str()).ToDouble(&realNum))
-         {
-            theParameter =
-               theGuiInterpreter->GetParameter(mRhsList[i].c_str());
-            if (theParameter != NULL)
-            {
-               theWhileCommand->SetRefObject(theParameter, Gmat::PARAMETER,
-                                             mRhsList[i].c_str(), i);
-            }    
-            else
-            {
-               MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Invalid Parameter Selection.\n"
-                   "Updates have not been saved");
-               return;
-            }    
-         }
+            canClose = false;
+            // We want to go through all conditions and show errors if any
+            //return; 
+         }         
       }
-      theGuiInterpreter->ValidateCommand(theWhileCommand);
+
+      if (canClose)
+         if (!theGuiInterpreter->ValidateCommand(theWhileCommand))
+            canClose = false;
+      
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("*** Error *** WhilePanel::SaveData() " + e.GetFullMessage());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
-}   
+}
+
 
 //------------------------------------------------------------------------------
 // void OnCellRightClick(wxGridEvent& event)
