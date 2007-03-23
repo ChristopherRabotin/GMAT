@@ -15,6 +15,7 @@
 #include "ParameterSelectDialog.hpp"
 
 //#define DEBUG_FOR_PANEL_LOAD 1
+//#define DEBUG_FOR_PANEL_SAVE 1
 //#define DEBUG_FOR_PANEL_CELL 1
 
 //------------------------------------------------------------------------------
@@ -138,7 +139,7 @@ void ForPanel::Setup( wxWindow *parent)
 void ForPanel::LoadData()
 {
    #if DEBUG_FOR_PANEL_LOAD
-   MessageInterface::ShowMessage("===> ForPanel::LoadData() entered\n");
+   MessageInterface::ShowMessage("ForPanel::LoadData() entered\n");
    #endif
    
    // Set the pointer for the "Show Script" button
@@ -182,17 +183,17 @@ void ForPanel::LoadData()
 //------------------------------------------------------------------------------
 void ForPanel::SaveData()
 {
-   #if DEBUG_FOR_PANEL_LOAD
-   MessageInterface::ShowMessage("===> ForPanel::SaveData() entered\n");
+   #if DEBUG_FOR_PANEL_SAVE
+   MessageInterface::ShowMessage("ForPanel::SaveData() entered\n");
    #endif
    
    canClose = true;
    
    //-----------------------------------------------------------------
-   // check input values: Number, Variable, Array element, Spacecraft Parameter
+   // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
    CheckVariable(mIndexString.c_str(), Gmat::SPACECRAFT, "Index",
-                 "Variable, Array element, Parameter", false);
+                 "Variable", false);
    CheckVariable(mStartString.c_str(), Gmat::SPACECRAFT, "Start",
                  "Real Number, Variable, Array element, plottable Parameter", true);
    CheckVariable(mIncrString.c_str(), Gmat::SPACECRAFT, "Increment",
@@ -223,42 +224,15 @@ void ForPanel::SaveData()
       
       if (!theGuiInterpreter->ValidateCommand(theForCommand))
          canClose = false;
+      
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
    
 }
-
-
-// //------------------------------------------------------------------------------
-// // void CheckVariable(const wxString &varName, bool isNumberAllowed)
-// //------------------------------------------------------------------------------
-// void ForPanel::CheckVariable(const wxString &varName, bool isNumberAllowed)
-// {
-//    int retval = theGuiManager->
-//       IsValidVariable(varName.c_str(), Gmat::SPACECRAFT, isNumberAllowed);
-   
-//    if (retval == -1)
-//    {
-//       MessageInterface::PopupMessage
-//          (Gmat::ERROR_, "The variable \"" + varName + "\" does not exist.\n"
-//           "Right click on the cell for the Parameter Dialog or\n"
-//           "create from the Resource Tree.");
-      
-//       canClose = false;
-//    }
-//    else if (retval == 0)
-//    {
-//       MessageInterface::PopupMessage
-//          (Gmat::ERROR_, mMsgFormat.c_str(),
-//           varName.c_str(), "Real Number, Variable, Array element, Spacecraft parameter");
-      
-//       canClose = false;
-//    }
-   
-// }
 
 
 //------------------------------------------------------------------------------

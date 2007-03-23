@@ -63,8 +63,6 @@ private:
    virtual void LoadData();
    virtual void SaveData();
    
-//    void CheckVariable(const wxString &varName, bool isNumberAllowed = true);
-   
    // Layout & data handling methods
    void Setup(wxWindow *parent);
    void OnCellValueChange(wxGridEvent& event);
