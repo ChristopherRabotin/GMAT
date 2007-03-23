@@ -26,13 +26,13 @@
  */
 class CommandException : public BaseException
 {
-	public:
-		// class constructor
-		CommandException(const std::string &details);
-		// class destructor
-		~CommandException();
-		// Copy constructor
-		CommandException(const CommandException &ce);
+public:
+   // class constructor
+   CommandException(const std::string &details = "");
+   // class destructor
+   ~CommandException();
+   // Copy constructor
+   CommandException(const CommandException &ce);
 };
 
 #endif // CommandException_hpp
