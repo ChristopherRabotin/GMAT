@@ -39,7 +39,6 @@ public:
    Achieve(const Achieve& t);
    Achieve&             operator=(const Achieve& t);
 
-
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
 
@@ -132,6 +131,8 @@ protected:
    //Integer             parmId;
    /// Class that performs the goal calculation
    //Parameter           *goalParm;
+   
+   void SetTolerance(Real value);
    
    // Parameter IDs
    enum {

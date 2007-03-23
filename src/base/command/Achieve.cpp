@@ -20,8 +20,10 @@
 
 #include "Achieve.hpp"
 /// @todo Rework command so it doesn't need the Moderator!!!
-#include "Moderator.hpp" 
+///#include "Moderator.hpp" 
 #include "StringUtil.hpp"  // for ToReal()
+#include <sstream>
+#include "MessageInterface.hpp"
 
 //#define DEBUG_ACHIEVE_PARSE 1
 //#define DEBUG_ACHIEVE_INIT 1
@@ -463,27 +465,26 @@ Real Achieve::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real Achieve::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == toleranceID) 
-   {
-      //if (value >= 0.0)
-      if (value > 0.0)
-         if (tolerance)
-            if (tolerance->SetReal(value)) return value;
-      else
-      {
-         std::stringstream buffer;
-         buffer << value;
-         throw CommandException(
-            "The value of \"" + buffer.str() + "\" for field \"Tolerance\""
-            " on object \"" + instanceName + "\" is not an allowed value.\n"
-            "The allowed values are: [ Real > 0.0 ].");
-//            "The allowed values are: [ Real >= 0.0 ].");
-      }
-      //return tolerance;
-//      tolerance = value;
-//      return tolerance;
-   }
-    
+   //note this code will not be entered since all parameter types are STRING_TYPE
+   // so moved this range check to SetTolerance()
+   // SetTolerance() is called from SetStringParameter()
+   
+   //if (id == toleranceID) 
+   //{
+   //   if (value > 0.0)
+   //      if (tolerance)
+   //         if (tolerance->SetReal(value)) return value;
+   //   else
+   //   {
+   //      std::stringstream buffer;
+   //      buffer << value;
+   //      throw CommandException(
+   //         "The value of \"" + buffer.str() + "\" for field \"Tolerance\""
+   //         " on object \"" + instanceName + "\" is not an allowed value.\n"
+   //         "The allowed values are: [ Real > 0.0 ].");
+   //   }
+   //}
+   
    return GmatCommand::SetRealParameter(id, value);
 }
 
@@ -583,12 +584,19 @@ bool Achieve::SetStringParameter(const Integer id, const std::string &value)
          wrapperObjectNames.push_back(value);
       return true;
    }
+   
    if (id == toleranceID) 
    {
       toleranceName = value;
       if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), value) == 
           wrapperObjectNames.end())
          wrapperObjectNames.push_back(value);
+      
+      // Do range check here if value is a real number
+      Real tol;
+      if (GmatStringUtil::ToReal(value, tol))
+         SetTolerance(tol);
+      
       return true;
    }
 
@@ -1451,5 +1459,26 @@ void Achieve::RunComplete()
    #endif
    targeterDataFinalized = false;
    GmatCommand::RunComplete();
+}
+
+//------------------------------------------------------------------------------
+// void SetTolerance(Real value)
+//------------------------------------------------------------------------------
+void Achieve::SetTolerance(Real value)
+{
+   if (value > 0.0)
+   {
+      if (tolerance)
+         tolerance->SetReal(value);
+   }
+   else
+   {
+      CommandException ce;
+      ce.SetDetails(errorMessageFormat.c_str(),
+                    GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                    "Tolerance",
+                    "Real Number, Array element, Variable, or Parameter > 0.0");
+      throw ce;
+   }
 }
 
