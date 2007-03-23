@@ -23,7 +23,8 @@
 #include "GuiInterpreter.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_ACHIEVE_PANEL 1
+//#define DEBUG_ACHIEVE_PANEL_LOAD 1
+//#define DEBUG_ACHIEVE_PANEL_SAVE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -150,7 +151,7 @@ void AchievePanel::Create()
 //------------------------------------------------------------------------------
 void AchievePanel::LoadData()
 {
-   #if DEBUG_ACHIEVE_PANEL
+   #if DEBUG_ACHIEVE_PANEL_LOAD
    MessageInterface::ShowMessage("AchievePanel::LoadData() entered\n");
    MessageInterface::ShowMessage("Command=%s\n", mAchieveCommand->GetTypeName().c_str());
    #endif
@@ -160,7 +161,8 @@ void AchievePanel::LoadData()
    
    // When Parameter in commands is implemented, we can enable this
    // according to Input Range Testing Table 3.8.
-   mViewToleranceButton->Disable();
+   //loj: 03/23/07 Removed it since it is implemented now
+   //mViewToleranceButton->Disable();
    
    try
    {
@@ -179,11 +181,11 @@ void AchievePanel::LoadData()
       std::string toleranceValue = mAchieveCommand->GetStringParameter
          (mAchieveCommand->GetParameterID("Tolerance"));
       
-      #if DEBUG_ACHIEVE_PANEL
-      MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
-      MessageInterface::ShowMessage("goalName=%s\n", goalName.c_str());
-      MessageInterface::ShowMessage("goalValue=%s\n", goalValue.c_str());
-      MessageInterface::ShowMessage("tolerance=%s\n", toleranceValue.c_str());
+      #if DEBUG_ACHIEVE_PANEL_LOAD
+      MessageInterface::ShowMessage("   solverName=%s\n", solverName.c_str());
+      MessageInterface::ShowMessage("   goalName=%s\n", goalName.c_str());
+      MessageInterface::ShowMessage("   goalValue=%s\n", goalValue.c_str());
+      MessageInterface::ShowMessage("   tolerance=%s\n", toleranceValue.c_str());
       #endif
       
       mSolverName = wxT(solverName.c_str());      
@@ -191,13 +193,9 @@ void AchievePanel::LoadData()
       mGoalValue = wxT(goalValue.c_str());
       mTolerance = wxT(toleranceValue.c_str());
       
-      //mTolerance = mAchieveCommand->GetRealParameter
-      //   (mAchieveCommand->GetParameterID("Tolerance"));
-      
       mSolverComboBox->SetValue(mSolverName);
       mGoalNameTextCtrl->SetValue(mGoalName);
       mGoalValueTextCtrl->SetValue(mGoalValue);   
-      //mToleranceTextCtrl->SetValue(theGuiManager->ToWxString(mTolerance));
       mToleranceTextCtrl->SetValue(mTolerance);
       
    }
@@ -213,37 +211,27 @@ void AchievePanel::LoadData()
 //------------------------------------------------------------------------------
 void AchievePanel::SaveData()
 {   
-   #if DEBUG_ACHIEVE_PANEL
+   #if DEBUG_ACHIEVE_PANEL_SAVE
    MessageInterface::ShowMessage("AchievePanel::SaveData() entered\n");
    #endif
    
    canClose = true;
    std::string inputString;
-   //Real tol;
    
    //-----------------------------------------------------------------
-   // check values from text field
+   // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
    if (mIsTextModified)
    {
-      inputString = mToleranceTextCtrl->GetValue();      
-      //CheckReal(tol, inputString, "Tolerance", "Real Number > 0.0");
+      inputString = mGoalValue.c_str();
+      CheckVariable(mGoalValue.c_str(), Gmat::SPACECRAFT, "GoalValue",
+                    "Real Number, Variable, Array element, plottable Parameter", true);
+      
+      inputString = mToleranceTextCtrl->GetValue();
+      CheckVariable(inputString.c_str(), Gmat::SPACECRAFT, "Tolerance",
+                    "Real Number, Variable, Array element, plottable Parameter", true);
    }
-   
-   
-   Real value;
-   inputString = mGoalValue.c_str();
-   
-   // goal value can be a number or a parameter name, so validate
-   if (!GmatStringUtil::ToReal(inputString, value))
-   {
-      if (theGuiInterpreter->GetConfiguredObject(inputString) == NULL)
-      {
-         //CheckReal(value, inputString, "GoalValue",
-         //          "Real Number or valid Parameter Name", true);
-      }
-   }
-   
+      
    if (!canClose)
       return;
    
@@ -258,22 +246,22 @@ void AchievePanel::SaveData()
       mAchieveCommand->SetStringParameter
          (mAchieveCommand->GetParameterID("Goal"), mGoalName.c_str());
       
-      mAchieveCommand->SetStringParameter
-         (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
-      
-      //if (mIsTextModified)
-      //{
-         //mAchieveCommand->SetRealParameter
-         //   (mAchieveCommand->GetParameterID("Tolerance"), tol);
+      if (mIsTextModified)
+      {
+         mAchieveCommand->SetStringParameter
+            (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
          
          mTolerance = mToleranceTextCtrl->GetValue();      
          mAchieveCommand->SetStringParameter
             (mAchieveCommand->GetParameterID("Tolerance"), mTolerance.c_str());
+         
          mIsTextModified = false;
-      //}
-      theGuiInterpreter->ValidateCommand(mAchieveCommand);
+      }
       
-      EnableUpdate(false);
+      if (!theGuiInterpreter->ValidateCommand(mAchieveCommand))
+         canClose = false;
+      
+      //EnableUpdate(false);
    }
    catch (BaseException &e)
    {
@@ -298,6 +286,7 @@ void AchievePanel::OnTextChange(wxCommandEvent& event)
    if (mGoalValueTextCtrl->IsModified())
    {
       mGoalValue = mGoalValueTextCtrl->GetValue();
+      mIsTextModified = true;
    }
    
    if (mToleranceTextCtrl->IsModified())
