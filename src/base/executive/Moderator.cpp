@@ -2662,19 +2662,20 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter(id, GetDefaultBurn("ImpulsiveBurn")->GetName() + ".V");
          
          id = cmd->GetParameterID("InitialValue");
-         cmd->SetRealParameter(id, 0.5);
+         cmd->SetStringParameter(id, "0.5");
          
          id = cmd->GetParameterID("Perturbation");
-         cmd->SetRealParameter(id, 0.0001);
+         cmd->SetStringParameter(id, "0.0001");
          
-         id = cmd->GetParameterID("MinimumValue");
-         cmd->SetRealParameter(id, 0.0);
+         id = cmd->GetParameterID("Lower");
+         cmd->SetStringParameter(id, "0.0");
          
-         id = cmd->GetParameterID("MaximumValue");
-         cmd->SetRealParameter(id, 3.14159);
+         id = cmd->GetParameterID("Upper");
+         cmd->SetStringParameter(id, "3.14159");
       
-         id = cmd->GetParameterID("MaximumChange");
-         cmd->SetRealParameter(id, 0.2);
+         id = cmd->GetParameterID("MaxStep");
+         cmd->SetStringParameter(id, "0.2");
+         
       }
       else if (type == "Achieve")
       {
@@ -2698,8 +2699,12 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter(id, "42165.0"); 
          
          id = cmd->GetParameterID("Tolerance");
-         cmd->SetRealParameter(id, 0.1);
+         cmd->SetStringParameter(id, "0.1");
       }
+      
+      // for creating ElementWrapper
+      theScriptInterpreter->ValidateCommand(cmd);
+      
    }
    catch (BaseException &e)
    {
@@ -4413,7 +4418,6 @@ void Moderator::CreateDefaultMission()
          CreateStopCondition("StopCondition", "StopOnDefaultSC.EarthMJ2000Eq.X");
       stopOnX->SetStringParameter("EpochVar", "DefaultSC.A1ModJulian");
       stopOnX->SetStringParameter("StopVar", "DefaultSC.EarthMJ2000Eq.X");
-      //stopOnX->SetRealParameter("Goal", 5000.0);
       stopOnX->SetStringParameter("Goal", "5000.0");
       propCommand->SetRefObject(stopOnX, Gmat::STOP_CONDITION, "", 1);
       #endif
