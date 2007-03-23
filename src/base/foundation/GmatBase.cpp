@@ -182,10 +182,20 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    attributeCommentLines.clear();
    attributeInlineComments.clear();
    
-   errorMessageFormat =
-      "The value of \"%s\" for field \"%s\" on object \""
-      + instanceName +  "\" is not an allowed value. \n"
-      "The allowed values are: [%s].";
+   if (type == Gmat::COMMAND)
+   {
+      errorMessageFormat =
+         "The value of \"%s\" for field \"%s\" on command \""
+         + typeName +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
+   else
+   {
+      errorMessageFormat =
+         "The value of \"%s\" for field \"%s\" on object \""
+         + instanceName +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+   }
    
    // one more instance - add to the instanceCount
    ++instanceCount;
