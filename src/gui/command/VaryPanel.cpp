@@ -64,7 +64,6 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
    Show();
    
    EnableUpdate(false);
-//   theApplyButton->Disable();
 }
 
 //------------------------------------------------------------------------------
@@ -73,6 +72,7 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
 VaryPanel::~VaryPanel()
 {
    mObjectTypeList.Clear();
+   theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
 }
 
 //-------------------------------
@@ -91,34 +91,42 @@ void VaryPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
 
-   wxString emptyArray[] = 
-   {
-      wxT("No Solver Available")
-   };
+//    wxString emptyArray[] = 
+//    {
+//       wxT("No Solver Available")
+//    };
 
-   StringArray solverNames;
-   solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
-   int solverCount = solverNames.size();
-   wxString *solverArray = new wxString[solverCount];
+//    StringArray solverNames;
+//    solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
+//    int solverCount = solverNames.size();
+//    wxString *solverArray = new wxString[solverCount];
 
-   for (int i=0; i<solverCount; i++)
-   {
-      solverArray[i] = solverNames[i].c_str();
-   }
+   // for now it only shows BoundarySolvers such as DifferentialCorrector
+   mSolverComboBox =
+      theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
+   
+   // When we are ready for Optimizer
+   //mSolverComboBox =
+   //   theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
+   
+//    for (int i=0; i<solverCount; i++)
+//    {
+//       solverArray[i] = solverNames[i].c_str();
+//    }
 
-   if (solverCount > 0)
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), solverCount, solverArray,
-                        wxCB_DROPDOWN|wxCB_READONLY);
-   }
-   else
-   {
-      mSolverComboBox =
-         new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
-                        wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
-   }
+//    if (solverCount > 0)
+//    {
+//       mSolverComboBox =
+//          new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
+//                         wxSize(180,-1), solverCount, solverArray,
+//                         wxCB_DROPDOWN|wxCB_READONLY);
+//    }
+//    else
+//    {
+//       mSolverComboBox =
+//          new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
+//                         wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
+//    }
    
    // Variable
    wxStaticText *varStaticText =
@@ -327,13 +335,10 @@ void VaryPanel::LoadData()
          mMultiplicativeTextCtrl->Enable(false);
       }
 
-
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("VaryPanel:LoadData() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 
    ShowVariableSetup();
@@ -345,10 +350,35 @@ void VaryPanel::LoadData()
 //------------------------------------------------------------------------------
 void VaryPanel::SaveData()
 {   
+   canClose = true;
    
-   //-------------------------------------------------------
-   // Saving Solver Data
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
+   // check input values: Number, Variable, Array element, Parameter
+   //-----------------------------------------------------------------
+   
+   CheckVariable(mSolverData.initialValue.c_str(), Gmat::BURN, "InitialValue",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.pert.c_str(), Gmat::BURN, "Perturbation",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.minValue.c_str(), Gmat::BURN, "Lower",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.maxValue.c_str(), Gmat::BURN, "Upper",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.maxStep.c_str(), Gmat::BURN, "MaxStep",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.additiveScaleFactor.c_str(), Gmat::BURN,
+                 "AdditiveScaleFactor",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   CheckVariable(mSolverData.multiplicativeScaleFactor.c_str(), Gmat::BURN,
+                 "MultiplicativeScaleFactor",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    std::string solverName = mSolverData.solverName.c_str();
    std::string variableName = mSolverData.varName.c_str();
    
@@ -367,18 +397,18 @@ void VaryPanel::SaveData()
    {
       solver->SetStringParameter
          (solver->GetParameterID("Variables"), variableName);
-   
+      
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("SolverName"), solverName);
-   
+      
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Variable"), variableName);
-   
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("InitialValue"),
           mSolverData.initialValue.c_str());
-   
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Perturbation"),
@@ -388,38 +418,38 @@ void VaryPanel::SaveData()
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Lower"),
           mSolverData.minValue.c_str());
-   
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Upper"),
           mSolverData.maxValue.c_str());
-   
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("MaxStep"),
           mSolverData.maxStep.c_str());
-
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("AdditiveScaleFactor"),
           mSolverData.additiveScaleFactor.c_str());
-
+      
       //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("MultiplicativeScaleFactor"),
           mSolverData.multiplicativeScaleFactor.c_str());
-          
-      theGuiInterpreter->ValidateCommand(mVaryCommand);
+      
+      if (!theGuiInterpreter->ValidateCommand(mVaryCommand))
+          canClose = false;
+      
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("VaryPanel:SaveData() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
    
-   EnableUpdate(false);
-//   theApplyButton->Disable();
+   //EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -521,8 +551,7 @@ void VaryPanel::OnButton(wxCommandEvent& event)
          mVarNameTextCtrl->SetValue(newParamName);
          mSolverData.varName = newParamName;
          
-   EnableUpdate(true);
-//         theApplyButton->Enable(true);
+         EnableUpdate(true);
       }
    }
    else
