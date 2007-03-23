@@ -165,11 +165,9 @@ void GmatPanel::OnApply(wxCommandEvent &event)
       {
          mdichild->SetDirty(false);
          theGuiInterpreter->ConfigurationChanged(mObject, true);
+         EnableUpdate(false);
       }
    }
-   
-   //theApplyButton->Enable(!enableApply);
-   //theOkButton->Enable(!enableApply);
 }
 
 
@@ -198,9 +196,6 @@ void GmatPanel::OnOK(wxCommandEvent &event)
          theGuiInterpreter->ConfigurationChanged(mObject, true);
       }
    }
-   
-   //if (theApplyButton->IsEnabled())
-   //   OnApply(event);
    
    // Close page from main notebook    
    // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
@@ -419,9 +414,9 @@ bool GmatPanel::CheckVariable(const std::string &varName, Gmat::ObjectType owner
    if (retval == -1)
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "The variable \"" + varName + "\" does not exist.\n"
-          "Right click on the cell for the Parameter Dialog or\n"
-          "create from the Resource Tree.");
+         (Gmat::ERROR_, "The variable \"%s\" for field \"%s\" "
+          "does not exist.\nYou can create from the ParameterSelectDialog or\n"
+          "from the Resource Tree.", varName.c_str(), field.c_str());
       
       canClose = false;
       return false;
