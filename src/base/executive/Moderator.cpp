@@ -839,30 +839,33 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       // add default bodies
       if (type == "LibrationPoint")
       {
-         cp->SetStringParameter("Primary", "Sun");
-         cp->SetStringParameter("Point", "L1");
-         cp->SetStringParameter("Secondary", "Earth");
-         
-         #ifdef __CREATE_DEFAULT_BC__
-         // first create default Earth-Moon Barycenter
-         CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
-         
-         if (defBc == NULL)
-            defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
-         
-         cp->SetStringParameter("Secondary", "DefaultBC");
-         cp->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");         
-         #endif
-         
-         // Set body and J2000Body pointer, so that GUI can create LibrationPoint
-         // and use it in Coord.System conversion
-         SpacePoint *sun = (SpacePoint*)GetConfiguredObject("Sun");
-         SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
+         if (addDefaultBodies)
+         {
+            cp->SetStringParameter("Primary", "Sun");
+            cp->SetStringParameter("Point", "L1");
+            cp->SetStringParameter("Secondary", "Earth");
             
-         if (sun->GetJ2000Body() == NULL)
-            sun->SetJ2000Body(earth);
+            #ifdef __CREATE_DEFAULT_BC__
+            // first create default Earth-Moon Barycenter
+            CalculatedPoint *defBc = GetCalculatedPoint("DefaultBC");
             
-         cp->SetRefObject(sun, Gmat::SPACE_POINT, "Sun");
+            if (defBc == NULL)
+               defBc = CreateCalculatedPoint("Barycenter", "DefaultBC");
+            
+            cp->SetStringParameter("Secondary", "DefaultBC");
+            cp->SetRefObject(defBc, Gmat::SPACE_POINT, "DefaultBC");         
+            #endif
+            
+            // Set body and J2000Body pointer, so that GUI can create LibrationPoint
+            // and use it in Coord.System conversion
+            SpacePoint *sun = (SpacePoint*)GetConfiguredObject("Sun");
+            SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
+            
+            if (sun->GetJ2000Body() == NULL)
+               sun->SetJ2000Body(earth);
+            
+            cp->SetRefObject(sun, Gmat::SPACE_POINT, "Sun");
+         }
       }
       else if (type == "Barycenter")
       {
