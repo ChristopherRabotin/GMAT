@@ -1018,7 +1018,7 @@ bool Formation::TakeAction(const std::string &action,
 /*
  * Clears the list of spacecraft.
  *
- * @return true if the listwas cleared.
+ * @return true if the list was cleared.
  */
 //------------------------------------------------------------------------------
 bool Formation::ClearSpacecraftList()
