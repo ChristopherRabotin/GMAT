@@ -402,13 +402,19 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       opList.at(atIndex)    = ot;
       lhsList.at(atIndex)   = lhs;
       rhsList.at(atIndex)   = rhs;
-      ElementWrapper *ew;
-      ew = lhsWrappers.at(atIndex);
-      lhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
-      delete ew;
-      ew = rhsWrappers.at(atIndex);
-      rhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
-      delete ew;
+
+      // This section of code causing crash when lhs and rhs are set
+      // repetativly from the GUI
+      // We don't need to delete wrappers here, since all wrappers will be
+      // cleared in ClearWrappers() and set new wrappers
+      //ElementWrapper *ew;
+      //ew = lhsWrappers.at(atIndex);
+      //lhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
+      //delete ew;
+      //ew = rhsWrappers.at(atIndex);
+      //rhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
+      //delete ew;
+      
       #if DEBUG_CONDITIONS
          MessageInterface::ShowMessage
          ("ConditionalBranch::inserted condition into list\n");
@@ -1282,6 +1288,9 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
 //const StringArray& ConditionalBranch::GetStringArrayParameter(const std::string &label, 
 //                                                              const Integer index) const; 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
 const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
 {
    wrapperObjectNames.clear();
@@ -1301,11 +1310,23 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
           (*j)) == wrapperObjectNames.end())
          wrapperObjectNames.push_back((*j));
    }
-   
+
+
+   #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("ConditionalBranch::GetWrapperObjectNameArray() %s wrapper names are:\n",
+          cmd->GetTypeName().c_str());
+      for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
+   #endif
+      
    return wrapperObjectNames;
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
 bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper, 
                                           const std::string &withName)
 {
@@ -1324,11 +1345,18 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
    {
       if (lhsList.at(i) == withName)
       {
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage(
+            "   Found wrapper name \"%s\" in lhsList\n", withName.c_str());
+         #endif
          if (lhsWrappers.at(i) != NULL)
          {
             ew = lhsWrappers.at(i);
             lhsWrappers.at(i) = toWrapper;
-            delete ew;
+
+            // Delete if wrapper name not found in the rhsList
+            if (find(rhsList.begin(), rhsList.end(), withName) == rhsList.end())
+               delete ew;
          }
          else lhsWrappers.at(i) = toWrapper;
          retval = true;
@@ -1339,22 +1367,37 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
    {
       if (rhsList.at(i) == withName)
       {
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage(
+            "   Found wrapper name \"%s\" in rhsList\n", withName.c_str());
+         #endif
          if (rhsWrappers.at(i) != NULL)
          {
             ew = rhsWrappers.at(i);
             rhsWrappers.at(i) = toWrapper;
-            delete ew;
+            
+            // Delete if wrapper name not found in the lhsList
+            if (find(lhsList.begin(), lhsList.end(), withName) == lhsList.end())
+               delete ew;
          }
          else rhsWrappers.at(i) = toWrapper;
          retval = true;
       }
    }
-
+      
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void ClearWrappers()
+//------------------------------------------------------------------------------
 void ConditionalBranch::ClearWrappers()
 {
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("ConditionalBranch::ClearWrappers() entered\n");
+   #endif
+   
    std::vector<ElementWrapper*> temp;
    Integer sz = (Integer) lhsWrappers.size();
    for (Integer i=0; i<sz; i++)
@@ -1370,7 +1413,9 @@ void ConditionalBranch::ClearWrappers()
    {
       if (rhsWrappers.at(i) != NULL)
       {
-         temp.push_back(rhsWrappers.at(i));
+         // Add wrapper if it has not already added
+         if (find(temp.begin(), temp.end(), rhsWrappers.at(i)) == temp.end())
+            temp.push_back(rhsWrappers.at(i));
          rhsWrappers.at(i) = NULL;
       }
    }
@@ -1378,8 +1423,14 @@ void ConditionalBranch::ClearWrappers()
    for (UnsignedInt i = 0; i < temp.size(); ++i)
    {
       wrapper = temp[i];
-      delete wrapper;
+      if (wrapper != NULL)
+         delete wrapper;
+      wrapper = NULL;
    }
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage("ConditionalBranch::ClearWrappers() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
