@@ -704,6 +704,11 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = (GmatBase*)theModerator->CreateSubscriber(type, name);
    
    }
+
+   //@note
+   // Do throw exception if obj == NULL, since caller uses return pointer
+   // to test further.
+   
    
    #if DEBUG_CREATE_OBJECT
    if (obj != NULL)
@@ -1640,10 +1645,10 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
          InterpreterException ex("\"" + name + " is not an Array");
          HandleError(ex);
       }
-   
+      
       if (rowStr == "0" || colStr == "0" ||rowStr == "-1" || colStr == "-1")
       {
-         InterpreterException ex("Index must be greater than 0");
+         InterpreterException ex("Index exceeds matrix dimensions");
          HandleError(ex);
          return NULL;
       }
@@ -2761,7 +2766,7 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
       }
       catch (BaseException &e)
       {
-         InterpreterException ex("Index must be greater than 0");
+         InterpreterException ex("Index exceeds matrix dimensions");
          HandleError(ex);
          return false;
       }
@@ -2808,7 +2813,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    std::string valueToUse = value;
    CheckForSpecialCase(obj, id, valueToUse);
-      
+   
    #if DEBUG_SET
    MessageInterface::ShowMessage
       ("   propertyType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
@@ -2822,9 +2827,10 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       {
          Parameter *param = NULL;
          
-         // Try create Parameter first if it is not ObjectType (loj: 12/05/06)
+         // Try create Parameter first if it is not ObjectType
          if (!IsObjectType(value))
          {
+            // It is not object type so create parameter
             param = CreateParameter(value);
             
             #if DEBUG_SET
@@ -2834,6 +2840,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                    param->GetName().c_str(), param->GetTypeName().c_str(),
                    param->GetReturnType());
             #endif
+         }
+         else
+         {
+            // It is object type so get parameter (Bug 743 fix)
+            param = theModerator->GetParameter(value);
          }
          
          if (param != NULL)
@@ -2869,8 +2880,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                break;
             }
             
-            // Create Owned Object
-            GmatBase *ownedObj = CreateObject(value, "");
+            // Create Owned Object, if it is object type (loj: 3/27)
+            //GmatBase *ownedObj = CreateObject(value, "");
+            GmatBase *ownedObj = NULL;
+            if (IsObjectType(value))
+               ownedObj = CreateObject(value, "");
             
             #if DEBUG_SET
             if (ownedObj)
@@ -2904,9 +2918,11 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                   {
                      // Set as String parameter, so it can be caught in FinalPass()
                      obj->SetStringParameter(id, value);
+                     
                      //InterpreterException ex
                      //   ("*** Internal Error ***Cannot create " + value + "\n");
                      //HandleError(ex);
+                     //return false;
                   }
                }
             }
@@ -2923,7 +2939,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          {
             #if DEBUG_SET
             MessageInterface::ShowMessage
-               ("===> Calling SetIntegerParameter(%d, %d)\n", id, ival);
+               ("   Calling SetIntegerParameter(%d, %d)\n", id, ival);
             #endif
             
             obj->SetIntegerParameter(id, ival);
@@ -2943,7 +2959,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          {
             #if DEBUG_SET
             MessageInterface::ShowMessage
-               ("===> Calling SetUnsignedIntParameter(%d, %d, %d)\n", id, ival, index);
+               ("   Calling SetUnsignedIntParameter(%d, %d, %d)\n", id, ival, index);
             #endif
             
             obj->SetUnsignedIntParameter(id, ival, index);
@@ -2966,7 +2982,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             std::string rvalStr =
                GmatStringUtil::ToString(rval, false, false, 17, 16);
             MessageInterface::ShowMessage
-               ("===> Calling SetRealParameter(%d, %s)\n", id, rvalStr.c_str());
+               ("   Calling SetRealParameter(%d, %s)\n", id, rvalStr.c_str());
             #endif
 
             if (type == Gmat::REAL_TYPE)
@@ -3020,7 +3036,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          {
             #if DEBUG_SET
             MessageInterface::ShowMessage
-               ("===> Calling SetBooleanParameter(%d, %d)\n", id, tf);
+               ("   Calling SetBooleanParameter(%d, %d)\n", id, tf);
             #endif
             
             obj->SetBooleanParameter(id, tf);
@@ -3037,7 +3053,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       {
          #if DEBUG_SET
          MessageInterface::ShowMessage
-            ("===> Calling SetOnOffParameter(%d, %s)\n", id, valueToUse.c_str());
+            ("   Calling SetOnOffParameter(%d, %s)\n", id, valueToUse.c_str());
          #endif
          
          if (valueToUse == "On" || valueToUse == "Off")
