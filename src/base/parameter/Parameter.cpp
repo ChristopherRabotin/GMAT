@@ -126,6 +126,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    mExpr = "";
    mUnit = unit;
    mDepObjectName = "";
+   mCommentLine2 = "";
    mOwnerType = ownerType;
    mDepObj = depObj;
    mColor = 0; // black
@@ -171,6 +172,7 @@ Parameter::Parameter(const Parameter &copy)
    mDesc = copy.mDesc;
    mUnit = copy.mUnit;
    mDepObjectName = copy.mDepObjectName;
+   mCommentLine2 = copy.mCommentLine2;
    mOwnerType = copy.mOwnerType;
    mReturnType = copy.mReturnType;
    mDepObj = copy.mDepObj;
@@ -209,6 +211,7 @@ Parameter& Parameter::operator= (const Parameter& right)
    mDesc = right.mDesc;
    mUnit = right.mUnit;
    mDepObjectName = right.mDepObjectName;
+   mCommentLine2 = right.mCommentLine2;
    mOwnerType = right.mOwnerType;
    mReturnType = right.mReturnType;
    mDepObj = right.mDepObj;
@@ -849,7 +852,8 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 bool Parameter::IsParameterReadOnly(const Integer id) const
 {
    if ((id == DESCRIPTION) || (id == UNIT) ||
-       (id == DEP_OBJECT) || (id == COLOR))
+       (id == DEP_OBJECT) || (id == COLOR) ||
+       (id == EXPRESSION)) //loj: 3/27/07 added EXPRESSION
       return true;
 
    return GmatBase::IsParameterReadOnly(id);
@@ -1003,7 +1007,43 @@ bool Parameter::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
-//---------------------------------
-// protected methods
-//---------------------------------
+
+//---------------------------------------------------------------------------
+//  const std::string GetCommentLine(Integer which)
+//---------------------------------------------------------------------------
+/*
+ * This method retrives preface comments for Variable and Array.
+ *
+ * @param which Indicates which comment should be returned
+ *              1 = Preface comment from Create line
+ *              2 = Preface comment from Initialization line
+ * @return Preface comments
+ */
+//---------------------------------------------------------------------------
+const std::string Parameter::GetCommentLine(Integer which)
+{
+   if (which == 2)
+      return mCommentLine2;
+   else
+      return commentLine;
+}
+
+
+//---------------------------------------------------------------------------
+//  void SetCommentLine(const std::string &comment)
+//---------------------------------------------------------------------------
+/*
+ * This method sets preface comments for Variable and Array.
+ * Since preface comments from initialization overrides comments from
+ * Create line, there are two comments used in the Parameter class.
+ *
+ */
+//---------------------------------------------------------------------------
+void Parameter::SetCommentLine(const std::string &comment)
+{
+   if (mCommentLine2 == "")
+      mCommentLine2 = comment;
+   else
+      commentLine = comment;
+}
 

@@ -125,6 +125,10 @@ public:
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
+   
+   virtual const std::string  GetCommentLine(Integer which = 1);
+   virtual void               SetCommentLine(const std::string &comment);
+   
 protected:
 
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
@@ -134,6 +138,7 @@ protected:
    std::string   mUnit;
    std::string   mExpr;
    std::string   mDepObjectName;
+   std::string   mCommentLine2;
    
    Gmat::ObjectType   mOwnerType;
    Gmat::ParameterType mReturnType;
