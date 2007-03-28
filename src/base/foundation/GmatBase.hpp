@@ -192,19 +192,19 @@ public:
    virtual bool        SetOnOffParameter(const Integer id, 
                                          const std::string &value);
 
-   virtual const std::string  GetCommentLine();
-   virtual void               SetCommentLine(const std::string comment);
+   virtual const std::string  GetCommentLine() const;
+   virtual void               SetCommentLine(const std::string &comment);
    
-   virtual const std::string  GetInlineComment();
-   virtual void               SetInlineComment(const std::string comment);
+   virtual const std::string  GetInlineComment() const;
+   virtual void               SetInlineComment(const std::string &comment);
    
    virtual const std::string  GetAttributeCommentLine(Integer index);
    virtual void               SetAttributeCommentLine(Integer index, 
-                                const std::string comment);
+                                const std::string &comment);
 
    virtual const std::string  GetInlineAttributeComment(Integer index);
    virtual void               SetInlineAttributeComment(Integer index, 
-                                const std::string comment);
+                                const std::string &comment);
    
    virtual bool        GetBooleanParameter(const Integer id) const;
    virtual bool        SetBooleanParameter(const Integer id,
@@ -376,7 +376,6 @@ protected:
                                        std::stringstream &stream);
    void                WriteParameterValue(Integer id, 
                                            std::stringstream &stream);   
-private:
    /// String used to hold the comment line
    std::string         commentLine;
    /// String used to hold inline comment
@@ -385,6 +384,8 @@ private:
    StringArray         attributeCommentLines;
    /// String array used to hold the attribute inline comments
    StringArray         attributeInlineComments;
+   
+private:
    
    virtual void PrepCommentTables();
 };

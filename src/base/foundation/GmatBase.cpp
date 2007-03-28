@@ -1576,33 +1576,33 @@ bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
 
 
 //---------------------------------------------------------------------------
-//  const std::string GetCommentLine()
+//  const std::string GetCommentLine() const
 //---------------------------------------------------------------------------
-const std::string GmatBase::GetCommentLine()
+const std::string GmatBase::GetCommentLine() const
 {
    return commentLine;
 }
 
 //---------------------------------------------------------------------------
-//  void SetCommentLine(const std::string comment)
+//  void SetCommentLine(const std::string &comment)
 //---------------------------------------------------------------------------
-void GmatBase::SetCommentLine(const std::string comment)
+void GmatBase::SetCommentLine(const std::string &comment)
 {
    commentLine = comment;
 }
    
 //---------------------------------------------------------------------------
-//  const std::string GetInlineComment()
+//  const std::string GetInlineComment() const
 //---------------------------------------------------------------------------
-const std::string GmatBase::GetInlineComment()
+const std::string GmatBase::GetInlineComment() const
 {
    return inlineComment;
 }
 
 //---------------------------------------------------------------------------
-//  void SetInlineComment(const std::string comment)
+//  void SetInlineComment(const std::string &comment)
 //---------------------------------------------------------------------------
-void GmatBase::SetInlineComment(const std::string comment)
+void GmatBase::SetInlineComment(const std::string &comment)
 {
    inlineComment = comment;
 }
@@ -1614,26 +1614,27 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
-          #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
+      #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage
+         ("Attribute comment name:%s index:%d has not been retrieved.\n",
+          instanceName.c_str(), index);
       #endif
       return "";
    }
-   {
-      #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Getting Attribute comment name:%s index:%d - %s.\n",
-         instanceName.c_str(), index, attributeCommentLines[index].c_str());
-      #endif   
-      return attributeCommentLines[index];
-   }
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("Getting Attribute comment name:%s index:%d - %s.\n",
+       instanceName.c_str(), index, attributeCommentLines[index].c_str());
+   #endif   
+   return attributeCommentLines[index];
 }
 
 //---------------------------------------------------------------------------
-//  void SetAttributeCommentLine(Integer index, 
-//             const std::string comment)
+//  void SetAttributeCommentLine(Integer index, const std::string &comment)
 //---------------------------------------------------------------------------
 void GmatBase::SetAttributeCommentLine(Integer index, 
-                                const std::string comment)
+                                       const std::string &comment)
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
@@ -1643,14 +1644,14 @@ void GmatBase::SetAttributeCommentLine(Integer index,
       #endif
       return;
    }
-   else
-   {
-      #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Setting Attribute comment index:%d - %s.\n",
-         index, comment.c_str());
-      #endif 
-      attributeCommentLines[index] = comment;
-   }
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("Setting Attribute comment index:%d - %s.\n", index, comment.c_str());
+   #endif
+   
+   attributeCommentLines[index] = comment;
+
 }
 
 //---------------------------------------------------------------------------
@@ -1660,44 +1661,44 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-          #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Inline attribute comment name:%s index:%d has not been retrieved.\n", instanceName.c_str(), index);
+      #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage
+         ("Inline attribute comment name:%s index:%d has not been retrieved.\n",
+          instanceName.c_str(), index);
       #endif
       return "";
    }
-   else
-   {  
-          #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Getting Inline attribute comment name:%s index:%d - %s.\n",
-         instanceName.c_str(), index, attributeInlineComments[index].c_str());
-      #endif   
-      return attributeInlineComments[index];
-   }
+   
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("Getting Inline attribute comment name:%s index:%d - %s.\n",
+       instanceName.c_str(), index, attributeInlineComments[index].c_str());
+   #endif
+   
+   return attributeInlineComments[index];
 }
 
 //---------------------------------------------------------------------------
-//  void SetInlineAttributeComment(Integer index, 
-//            const std::string comment)
+//  void SetInlineAttributeComment(Integer index, const std::string &comment)
 //---------------------------------------------------------------------------
 void GmatBase::SetInlineAttributeComment(Integer index, 
-                                const std::string comment)
+                                         const std::string &comment)
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-          #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Inline attribute comment - %s - has not been set. Size=%d\n",
-         comment.c_str(), (Integer)attributeInlineComments.size());
+      #ifdef DEBUG_COMMENTS
+      MessageInterface::ShowMessage
+         ("Inline attribute comment - %s - has not been set. Size=%d\n",
+          comment.c_str(), (Integer)attributeInlineComments.size());
       #endif
       return;
    }
-   else
-   {  
-          #ifdef DEBUG_COMMENTS
-      MessageInterface::ShowMessage("Setting Inline attribute comment - %s.\n",
-         comment.c_str());
-      #endif 
-      attributeInlineComments[index] = comment;
-   }
+
+   #ifdef DEBUG_COMMENTS
+   MessageInterface::ShowMessage
+      ("Setting Inline attribute comment - %s.\n", comment.c_str());
+   #endif 
+   attributeInlineComments[index] = comment;
 }
 
 //---------------------------------------------------------------------------
@@ -2637,8 +2638,6 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          {
             // Skip unhandled types
             if (
-                //(parmType != Gmat::UNSIGNED_INTARRAY_TYPE) &&
-                //(parmType != Gmat::RVECTOR_TYPE) &&
                 (parmType != Gmat::RMATRIX_TYPE) &&
                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
                )
@@ -2761,10 +2760,12 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
    Integer precision = GmatGlobal::Instance()->GetDataPrecision();
-   
-   //MessageInterface::ShowMessage
-   //   ("===> %s, tid=%s\n", GetParameterText(id).c_str(),
-   //    PARAM_TYPE_STRING[tid].c_str());
+
+   #if DEBUG_WRITE_PARAM
+   MessageInterface::ShowMessage
+      ("===> %d, %s, tid=%s\n", id, GetParameterText(id).c_str(),
+       PARAM_TYPE_STRING[tid].c_str());
+   #endif
    
    switch (tid)
    {
@@ -2813,9 +2814,19 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          Integer col = GetIntegerParameter("NumCols");
          for (Integer i = 0; i < row; ++i)
          {
+//             for (Integer j = 0; j < col; ++j)
+//                stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+//                   ") = " << GetRealParameter(id, i, j) << ";\n";
+
+            //loj: Do not write if value is zero since default is zero(03/27/07)
             for (Integer j = 0; j < col; ++j)
-               stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
-                  ") = " << GetRealParameter(id, i, j) << ";\n";
+            {
+               if (GetRealParameter(id, i, j) != 0.0)
+               {
+                  stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+                     ") = " << GetRealParameter(id, i, j) << ";\n";
+               }
+            }
          }
       }
       break;
