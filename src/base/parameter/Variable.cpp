@@ -24,6 +24,8 @@
 #include "ParameterException.hpp"
 #include "ExpressionParser.hpp"
 #include "MessageInterface.hpp"
+#include "Linear.hpp"             // for ToString()
+#include <sstream>
 
 //#define DEBUG_VARIABLE 1
 
@@ -368,3 +370,40 @@ const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    return mParamDb->GetNamesOfParameters();
 }
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
+{   
+   //generatingString = GmatBase::GetGeneratingString();
+   Real rval = GetReal();
+   
+   // Write value if it is not zero (loj: 3/27/07)
+   if (rval != 0.0)
+   {
+      Integer prec = GetDataPrecision();
+      //generatingString = generatingString + "GMAT " + GetName() + " = " +
+      generatingString = "GMAT " + GetName() + " = " +
+         GmatRealUtil::ToString(rval, false, false, prec, 1);
+      generatingString = generatingString + inlineComment + "\n";
+   }
+   
+   return generatingString;
+}
+

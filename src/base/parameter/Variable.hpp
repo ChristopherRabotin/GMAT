@@ -56,10 +56,12 @@ public:
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-
-   //loj: 1/26/05 Replaced GetStringArrayParameter with GetRefObjectNameArray
+   
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
-
+   
+   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName);
 protected:
 
    ParameterDatabase *mParamDb;
