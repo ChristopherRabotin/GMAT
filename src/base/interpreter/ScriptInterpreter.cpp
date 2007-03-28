@@ -633,7 +633,9 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          
          if (obj == NULL)
          {
-            InterpreterException ex("\"" + type + "\" is unknown object type");
+            InterpreterException ex
+               ("Cannot create an object \"" + names[i] + "\". The \"" +
+                type + "\" is unknown object type");
             HandleError(ex);
             return false;
          }
