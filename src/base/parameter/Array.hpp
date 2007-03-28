@@ -53,15 +53,11 @@ public:
    virtual GmatBase* Clone() const;
    virtual void Copy(const GmatBase*);
    virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string str) const;
+   virtual Integer GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual bool IsParameterReadOnly(const Integer id) const;
-   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
-                                                  const std::string &prefix,
-                                                  const std::string &useName);
-
-
+   
    virtual Integer GetIntegerParameter(const Integer id) const;
    virtual Integer GetIntegerParameter(const std::string &label) const;
    virtual Integer SetIntegerParameter(const Integer id, const Integer value);
@@ -102,12 +98,21 @@ public:
                                               const Rvector &value,
                                               const Integer index);
    
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
+   
+   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName);
 protected:
 
    Integer mNumRows;
    Integer mNumCols;
    bool mSizeSet;
    Rmatrix mRmatValue;
+
+   std::string GetArrayDefString() const;
+   std::string GetInitialValueString() const;
    
    enum
    {
@@ -117,6 +122,7 @@ protected:
       SINGLE_VALUE,
       ROW_VALUE,
       COL_VALUE,
+      INITIAL_VALUE,
       ArrayParamCount
    };
    

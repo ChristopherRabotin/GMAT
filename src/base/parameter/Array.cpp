@@ -38,6 +38,7 @@ Array::PARAMETER_TEXT[ArrayParamCount - ParameterParamCount] =
    "SingleValue",
    "RowValue",
    "ColValue",
+   "InitialValue",
 }; 
 
 const Gmat::ParameterType
@@ -49,6 +50,7 @@ Array::PARAMETER_TYPE[ArrayParamCount - ParameterParamCount] =
    Gmat::REAL_ELEMENT_TYPE,  // was Gmat::REAL_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
+   Gmat::STRING_TYPE,
 };
 
 //---------------------------------
@@ -283,9 +285,9 @@ std::string Array::GetParameterText(const Integer id) const
 }
 
 //------------------------------------------------------------------------------
-// Integer GetParameterID(const std::string str) const
+// Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
-Integer Array::GetParameterID(const std::string str) const
+Integer Array::GetParameterID(const std::string &str) const
 {
    for (int i=ParameterParamCount; i<ArrayParamCount; i++)
    {
@@ -343,80 +345,6 @@ bool Array::IsParameterReadOnly(const Integer id) const
    return Parameter::IsParameterReadOnly(id);
 }
 
-
-//------------------------------------------------------------------------------
-// StringArray GetGeneratingString(Gmat::WriteMode mode,
-//                const std::string &prefix, const std::string &useName)
-//------------------------------------------------------------------------------
-/**
- * Produces a string, possibly multi-line, containing the text that produces an
- * object.
- * 
- * @param mode Specifies the type of serialization requested.
- * @param prefix Optional prefix appended to the object's name
- * @param useName Name that replaces the object's name.
- * 
- * @return A string containing the text.
- */
-//------------------------------------------------------------------------------
-const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
-                                              const std::string &prefix,
-                                              const std::string &useName)
-{
-   std::stringstream data;
-   std::stringstream value;
-
-   data.precision(18);   // Crank up data precision so we don't lose anything
-   std::string preface = "", nomme;
-
-   value.str("");
-   value.precision(18);
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT))
-      inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT)
-      inMatlabMode = true;
-   
-   if (useName != "")
-      nomme = useName;
-   else
-      nomme = instanceName;
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
-   {
-      std::string tname = typeName;
-      data << "Create " << tname << " " << nomme 
-           << "[" << mNumRows << ", " << mNumCols << "];\n";
-      preface = "GMAT ";
-   }
-
-   //loj: 11/22/06
-   // Writing REAL_ELEMENT_TYPE parameter is now handled in GmatBase
-//    // set value before changing nomme
-//    if (mRmatValue.IsSized())
-//    {
-//       for (Integer i=0; i<mNumRows; i++)
-//          for (Integer j=0; j<mNumCols; j++)
-//             value << "GMAT " << nomme << "(" <<i+1 <<", " <<j+1 <<") = " 
-//             <<mRmatValue.GetElement(i, j)  <<";\n";
-//    }
-   
-   nomme += ".";
-   
-   if (mode == Gmat::OWNED_OBJECT) {
-      preface = prefix;
-      nomme = "";
-   }
-   
-   preface += nomme;
-   
-   WriteParameters(mode, preface, data);
-   generatingString = data.str();   
-//    generatingString = generatingString + value.str();
-   
-   return generatingString;
-}
 
 
 //----- Integer parameter
@@ -801,4 +729,158 @@ Real Array::SetRealParameter(const std::string &label, const Real value,
    return SetRealParameter(GetParameterID(label), value, row, col);
 }
 
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/*
+ * Override this method to return array declaration string.
+ * Such as Arr1[2]
+ */
+//------------------------------------------------------------------------------
+std::string Array::GetStringParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case DESCRIPTION:
+      return GetArrayDefString();
+   case INITIAL_VALUE:
+      return GetInitialValueString();
+   default:
+      return Parameter::GetStringParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Array::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& Array::GetGeneratingString(Gmat::WriteMode mode,
+                                              const std::string &prefix,
+                                              const std::string &useName)
+{
+   std::stringstream data;
+   //std::stringstream value;
+   
+   // Crank up data precision so we don't lose anything
+   //data.precision(18);
+   data.precision(GetDataPrecision()); 
+   std::string preface = "", nomme;
+   
+   //value.str("");
+   //value.precision(18);
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT))
+   {
+      std::string tname = typeName;
+
+      // Add comment line (loj: 03/27/07)
+      if (GetCommentLine() != "")
+         data << GetCommentLine();
+      
+      data << "Create " << tname << " " << nomme 
+           << "[" << mNumRows << "," << mNumCols << "];\n";
+      
+      preface = "GMAT ";
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   
+   WriteParameters(mode, preface, data);
+   generatingString = data.str();   
+   
+   //MessageInterface::ShowMessage
+   //   ("===> Array::GetGeneratingString() return\n%s\n", generatingString.c_str());
+   
+   return generatingString;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetArrayDefString() const
+//------------------------------------------------------------------------------
+/*
+ * Returns array declaration string.
+ * Such as Arr1[2]
+ */
+//------------------------------------------------------------------------------
+std::string Array::GetArrayDefString() const
+{
+   std::stringstream data;
+   data << instanceName << "[" << mNumRows << "," << mNumCols << "]";
+   return data.str();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetInitialValueString()
+//------------------------------------------------------------------------------
+/*
+ * Returns array initial value string including inline comments.
+ *
+ * Such as GMAT Arr1[1,1] = 13.34; %% initialize
+ */
+//------------------------------------------------------------------------------
+std::string Array::GetInitialValueString() const
+{
+   std::stringstream data;
+   
+   Integer row = GetIntegerParameter("NumRows");
+   Integer col = GetIntegerParameter("NumCols");
+
+   for (Integer i = 0; i < row; ++i)
+   {
+      //loj: Do not write if value is zero since default is zero(03/27/07)
+      for (Integer j = 0; j < col; ++j)
+      {
+         if (GetRealParameter(SINGLE_VALUE, i, j) != 0.0)
+         {
+            data << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
+               ") = " << GetRealParameter(SINGLE_VALUE, i, j) << ";";
+            data << GetInlineComment() + "\n";
+         }
+      }
+   }
+   
+   return data.str();
+}
 
