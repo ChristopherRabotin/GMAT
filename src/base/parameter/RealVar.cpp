@@ -73,7 +73,8 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                isSettable, true, true)
 {  
-   mRealValue = REAL_PARAMETER_UNDEFINED;
+   //mRealValue = REAL_PARAMETER_UNDEFINED;
+   mRealValue = 0.0;
    Real rval;
    mIsNumberEquation = true;
    
