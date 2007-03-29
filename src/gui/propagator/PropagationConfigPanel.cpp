@@ -2734,10 +2734,14 @@ void PropagationConfigPanel::ParseGRVGravityFile(const wxString& fname)
       if (s[0] != '#')
       {
          lineStr >> firstStr;
+         std::string upperString = GmatStringUtil::ToUpper(firstStr);
          //VC++ error C3861: 'strcasecmp': identifier not found
-         if (strcmpi(firstStr.c_str(),"Degree") == 0)
+         // since using std::string, use GmatStringUtil and ==
+         //if (strcmpi(firstStr.c_str(),"Degree") == 0)
+         if (upperString == "DEGREE")
             lineStr >> fileDegree;
-         else if (strcmpi(firstStr.c_str(),"Order") == 0)
+         //else if (strcmpi(firstStr.c_str(),"Order") == 0)         
+         else if (upperString == "ORDER")
             lineStr >> fileOrder;
       }
    }

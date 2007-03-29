@@ -63,6 +63,7 @@
 #include "Rvector.hpp"
 #include "TimeTypes.hpp"
 #include "CoordinateConverter.hpp"
+#include "StringUtil.hpp"
 //#include "SolarSystemException.hpp"
 
 
@@ -71,6 +72,7 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GRAV_COORD_SYSTEM
 //#define DEBUG_BODY_STATE
+
 
 using namespace GmatMathUtil;
 
@@ -1507,22 +1509,31 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
          // Visual C++ doesn't know about strcasecmp()
          // So change to stricmp()
          //-----------------------------------------------------------
+         //note: 2007.03.29
+         // Since we're using std:: string, use StringUtil and ==
+         //-----------------------------------------------------------
+         std::string upperString = GmatStringUtil::ToUpper(firstStr);
          
          // ignore the stk version and blank lines
-         if ((stricmp(firstStr.c_str(),"Model") == 0) ||
-               (stricmp(firstStr.c_str(),"BEGIN") == 0))
+         //if ((stricmp(firstStr.c_str(),"Model") == 0) ||
+         //      (stricmp(firstStr.c_str(),"BEGIN") == 0))
+         if ((upperString == "MODEL") ||
+               (upperString =="BEGIN"))
          {
             // do nothing - we don't need to know this
          }
-         else if (stricmp(firstStr.c_str(),"Degree") == 0)
+         //else if (stricmp(firstStr.c_str(),"Degree") == 0)
+         else if (upperString == "DEGREE")
          {
             lineStr >> fileDegree;
          }
-         else if (stricmp(firstStr.c_str(),"Order") == 0)
+         //else if (stricmp(firstStr.c_str(),"Order") == 0)
+         else if (upperString == "ORDER")
          {
             lineStr >> fileOrder;
          }
-         else if (stricmp(firstStr.c_str(),"Gm") == 0)
+         //else if (stricmp(firstStr.c_str(),"Gm") == 0)
+         else if (upperString == "GM")
          {
             lineStr >> tmpMu;
             if (tmpMu == 0.0)
@@ -1530,7 +1541,8 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             else
                mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
          }
-         else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
+         //else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
+         else if (upperString == "REFDISTANCE")
          {
             lineStr >> tmpA;
             if (tmpA == 0.0)
@@ -1538,7 +1550,8 @@ bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
             else
                a = tmpA / 1000.0;  // -> Km
          }
-         else if (stricmp(firstStr.c_str(),"Normalized") == 0)
+         //else if (stricmp(firstStr.c_str(),"Normalized") == 0)
+         else if (upperString == "NORMALIZED")
          {
             lineStr >> isNormalized;
             if (isNormalized == "No")
