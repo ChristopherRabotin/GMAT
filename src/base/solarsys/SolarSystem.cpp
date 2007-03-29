@@ -523,7 +523,8 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
    Gmat::PosVelSource theSrc = Gmat::PosVelSourceCount;
    for (Integer i = 0; i < Gmat::PosVelSourceCount; i++)
    {
-      if (pvSrc == CelestialBody::POS_VEL_STRINGS[i]) 
+      //if (pvSrc == CelestialBody::POS_VEL_STRINGS[i]) 
+      if (pvSrc == Gmat::POS_VEL_SOURCE_STRINGS[i]) 
          theSrc = (Gmat::PosVelSource) i; 
    }
    if (theSrc == Gmat::PosVelSourceCount)
@@ -609,7 +610,8 @@ bool SolarSystem::SetAnalyticMethod(const std::string &aM)
    Gmat::AnalyticMethod theMethod = Gmat::AnalyticMethodCount;
    for (Integer i = 0; i < Gmat::AnalyticMethodCount; i++)
    {
-      if (aM == CelestialBody::ANALYTIC_METHOD_STRINGS[i]) 
+      //if (aM == CelestialBody::ANALYTIC_METHOD_STRINGS[i]) 
+      if (aM == Gmat::ANALYTIC_METHOD_STRINGS[i]) 
          theMethod = (Gmat::AnalyticMethod) i; 
    }
    if (theMethod == Gmat::AnalyticMethodCount)
@@ -653,13 +655,13 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
 bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 {
    if (intvl < 0.0)
-	{
-	   SolarSystemException sse;
-	   sse.SetDetails(errorMessageFormat.c_str(),
-	      GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
-	      "Ephemeris Update Interval", "Real Number >= 0.0");
-	   throw sse;
-	}
+        {
+           SolarSystemException sse;
+           sse.SetDetails(errorMessageFormat.c_str(),
+              GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
+              "Ephemeris Update Interval", "Real Number >= 0.0");
+           throw sse;
+        }
 //   throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
    // Set it for each of the bodies
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
