@@ -96,7 +96,7 @@ namespace Gmat
       "Comet",              // comets not yet implemented
       "KuiperBeltObject",   // KBOs not yet implemented
    };
-      
+   
    // types of environment models for a body
    enum ModelType
    {
@@ -121,6 +121,12 @@ namespace Gmat
       RotationDataSrcCount
    };
    
+   const std::string ROTATION_DATA_SOURCE_STRINGS[RotationDataSrcCount] = 
+   {
+      "DE405",
+      "IAU2002",
+      "NotApplicable",
+   };
 };
 
 /**
@@ -301,12 +307,12 @@ public:
      */
    //------------------------------------------------------------------------------
    //virtual CelestialBody* Clone(void) const = 0;
-
+   
    // strings representing the possible celestial body types
-   static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
-   static const std::string POS_VEL_STRINGS[Gmat::PosVelSourceCount];
-   static const std::string ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount];
-
+   //static const std::string BODY_TYPE_STRINGS[Gmat::BodyTypeCount];
+   //static const std::string POS_VEL_STRINGS[Gmat::PosVelSourceCount];
+   //static const std::string ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount];
+   
    // local constants
    static const Integer BUFSIZE               = 256;
    

@@ -126,8 +126,8 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    //Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
-//   Gmat::INTEGER_TYPE,		// RotationDataSource
-   Gmat::STRING_TYPE,		// RotationDataSource
+//   Gmat::INTEGER_TYPE,                // RotationDataSource
+   Gmat::STRING_TYPE,           // RotationDataSource
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,
@@ -139,21 +139,21 @@ CelestialBody::PARAMETER_TYPE[CelestialBodyParamCount - SpacePointParamCount] =
    Gmat::REAL_TYPE,
 };
 
+// These are already defined in the namespace Gmat in the header
+// const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
+// {
+//    "Star", "Planet", "Moon", "Asteroid", "Comet"
+// };
 
-const std::string CelestialBody::BODY_TYPE_STRINGS[Gmat::BodyTypeCount] =
-{
-   "Star", "Planet", "Moon", "Asteroid", "Comet"
-};
+// const std::string CelestialBody::POS_VEL_STRINGS[Gmat::PosVelSourceCount] =
+// {
+//    "Analytic", "SLP", "DE_200", "DE_405"   // add more as implemented
+// };
 
-const std::string CelestialBody::POS_VEL_STRINGS[Gmat::PosVelSourceCount] =
-{
-   "Analytic", "SLP", "DE_200", "DE_405"   // add more as implemented
-};
-
-const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount] =
-{
-   "NoAnalyticMethod", "KeplersProblem"
-};
+// const std::string CelestialBody::ANALYTIC_METHOD_STRINGS[Gmat::AnalyticMethodCount] =
+// {
+//    "NoAnalyticMethod", "KeplersProblem"
+// };
 
 const Real CelestialBody::JD_EPOCH_2000_TCB = 2451545.0;
 const Real CelestialBody::JD_EPOCH_2000_TT  = 2451545.0; // FIGURE THIS OUT!!!
@@ -234,7 +234,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
 //------------------------------------------------------------------------------
 CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    SpacePoint(Gmat::CELESTIAL_BODY,
-              CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name),
+              //CelestialBody::BODY_TYPE_STRINGS[itsBodyType], name),
+              Gmat::BODY_TYPE_STRINGS[itsBodyType], name),
    bodyType           (itsBodyType),
    mass               (5.9733319571407163e24),
    equatorialRadius   (6378.137),
@@ -276,7 +277,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    
    parameterCount = CelestialBodyParamCount;
    
-   InitializeBody(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
+   //InitializeBody(CelestialBody::BODY_TYPE_STRINGS[itsBodyType]);
+   InitializeBody(Gmat::BODY_TYPE_STRINGS[itsBodyType]);
 }
 
 //------------------------------------------------------------------------------
@@ -1467,13 +1469,13 @@ bool CelestialBody::SetOverrideTimeSystem(bool overrideIt)
 bool CelestialBody::SetEphemUpdateInterval(Real intvl)
 {
    if (intvl < 0.0)
-	{
-	   SolarSystemException sse;
-	   sse.SetDetails(errorMessageFormat.c_str(),
-	      GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
-	      "Ephemeris Update Interval", "Real Number >= 0.0");
-	   throw sse;
-	}
+        {
+           SolarSystemException sse;
+           sse.SetDetails(errorMessageFormat.c_str(),
+              GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
+              "Ephemeris Update Interval", "Real Number >= 0.0");
+           throw sse;
+        }
    ephemUpdateInterval = intvl;
    return true;
 }
@@ -2173,9 +2175,9 @@ Integer     CelestialBody::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 std::string CelestialBody::GetStringParameter(const Integer id) const
 {
-   if (id == BODY_TYPE)             return BODY_TYPE_STRINGS[bodyType];
-   if (id == POS_VEL_SOURCE)        return POS_VEL_STRINGS[posVelSrc];
-   if (id == ANALYTIC_METHOD)       return ANALYTIC_METHOD_STRINGS[analyticMethod];
+   if (id == BODY_TYPE)             return Gmat::BODY_TYPE_STRINGS[bodyType];
+   if (id == POS_VEL_SOURCE)        return Gmat::POS_VEL_SOURCE_STRINGS[posVelSrc];
+   if (id == ANALYTIC_METHOD)       return Gmat::ANALYTIC_METHOD_STRINGS[analyticMethod];
    if (id == SOURCE_FILENAME)       return sourceFilename;
    if (id == SOURCE_FILE)           return sourceFilename;
    if (id == POTENTIAL_FILE_NAME)   return potentialFileName;
@@ -2187,6 +2189,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
    if (id == CENTRAL_BODY)          return centralBody;
    if (id == ANALYTIC_DATE_FORMAT)  return analyticFormat;
    if (id == ANALYTIC_STATE_TYPE)   return analyticStateType;
+   if (id == ROTATION_DATA_SRC)     return Gmat::ROTATION_DATA_SOURCE_STRINGS[rotationSrc];
 
    return SpacePoint::GetStringParameter(id);
 }
@@ -2207,14 +2210,14 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
  *
  */
 //------------------------------------------------------------------------------
-bool        CelestialBody::SetStringParameter(const Integer id,
+bool CelestialBody::SetStringParameter(const Integer id,
                                        const std::string &value) // const?
 {
    int i;
    if (id == BODY_TYPE)
    {
       for (i=0;i<Gmat::BodyTypeCount;i++)
-         if (value == BODY_TYPE_STRINGS[i])
+         if (value == Gmat::BODY_TYPE_STRINGS[i])
          {
             bodyType = (Gmat::BodyType) i;
             return true;
@@ -2224,7 +2227,7 @@ bool        CelestialBody::SetStringParameter(const Integer id,
    if (id == POS_VEL_SOURCE)
    {
       for (i=0;i<Gmat::PosVelSourceCount;i++)
-         if (value == POS_VEL_STRINGS[i])
+         if (value == Gmat::POS_VEL_SOURCE_STRINGS[i])
          {
             posVelSrc = (Gmat::PosVelSource) i;
             return true;
@@ -2234,7 +2237,7 @@ bool        CelestialBody::SetStringParameter(const Integer id,
    if (id == ANALYTIC_METHOD)
    {
       for (i=0;i<Gmat::AnalyticMethodCount;i++)
-         if (value == ANALYTIC_METHOD_STRINGS[i])
+         if (value == Gmat::ANALYTIC_METHOD_STRINGS[i])
          {
             analyticMethod = (Gmat::AnalyticMethod) i;
             return true;
@@ -2319,21 +2322,28 @@ bool        CelestialBody::SetStringParameter(const Integer id,
    {
       MessageInterface::ShowMessage
          ("CelestialBody::SetStringParameter -> value = %s\n", value.c_str());
-      if (value == "DE405")
+      //if (value == "DE405")
+      if (value == Gmat::ROTATION_DATA_SOURCE_STRINGS[Gmat::DE_FILE])
          SetRotationDataSource(Gmat::DE_FILE);
-      else if (value == "IAU2002")
+      //else if (value == "IAU2002")
+      else if (value == Gmat::ROTATION_DATA_SOURCE_STRINGS[Gmat::IAU_DATA])
          SetRotationDataSource(Gmat::IAU_DATA);
       else
       {
          SolarSystemException sse;
+         std::string validStr;
+         for (int i = 0; i < Gmat::NOT_APPLICABLE; i++)
+            validStr = validStr + Gmat::ROTATION_DATA_SOURCE_STRINGS[i] + ", ";
+         
          sse.SetDetails(errorMessageFormat.c_str(), value.c_str(),
                         PARAMETER_TEXT[ROTATION_DATA_SRC - SpacePointParamCount].c_str(),
-                        "DE405, IAU2002");
+                        //"DE405, IAU2002");
+                        validStr.c_str());
          throw sse;
       }
       return true;
    }
-
+   
    return SpacePoint::SetStringParameter(id, value);
 }
 
@@ -2794,7 +2804,7 @@ void CelestialBody::InitializeBody(std::string withBodyType)
    int i;
    bodyType = Gmat::PLANET;  // default to Planet
    for (i = 0; i < (Integer) Gmat::BodyTypeCount; i++)
-      if (withBodyType == BODY_TYPE_STRINGS[i]) bodyType = (Gmat::BodyType) i;
+      if (withBodyType == Gmat::BODY_TYPE_STRINGS[i]) bodyType = (Gmat::BodyType) i;
    angularVelocity(0) = 0.0;
    angularVelocity(1) = 0.0;
    angularVelocity(2) = 7.29211585530e-5;  // should I do this here or in Planet??
