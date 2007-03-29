@@ -234,10 +234,19 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          
          // find keyword, and remove semicolon
          index2 = str.find_first_of(whiteSpace, index1);
-         if (str[index2-1] == ';')
-            keyword = str.substr(index1, index2-index1-1);
+         
+         //If white space found (Added for VC++)
+         if (index2 != str.npos)
+         {
+            if (str[index2-1] == ';')
+               keyword = str.substr(index1, index2-index1-1);
+            else
+               keyword = str.substr(index1, index2-index1);
+         }
          else
-            keyword = str.substr(index1, index2-index1);
+         {
+            keyword = str.substr(index1);
+         }
          
          // check for "Create" or Commands
          if (keyword == "Create")
