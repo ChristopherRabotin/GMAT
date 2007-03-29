@@ -226,7 +226,8 @@ bool TsPlot::Initialize()
    Subscriber::Initialize();
    
    #if DEBUG_TSPLOT_INIT
-   MessageInterface::ShowMessage("TsPlot::Initialize() active=%d\n", active);
+   MessageInterface::ShowMessage
+      ("TsPlot::Initialize() active=%d, mNumYParams=%d\n", active, mNumYParams);
    #endif
    
    bool status = false;
@@ -239,7 +240,8 @@ bool TsPlot::Initialize()
       
       // Create TsPlotWindow, if not exist
       #if DEBUG_TSPLOT_INIT
-      MessageInterface::ShowMessage("TsPlot::Initialize() calling CreateTsPlotWindow()\n");
+      MessageInterface::ShowMessage
+         ("TsPlot::Initialize() calling CreateTsPlotWindow()\n");
       #endif
       
       PlotInterface::CreateTsPlotWindow(instanceName, mOldName, mPlotTitle,
@@ -253,6 +255,11 @@ bool TsPlot::Initialize()
       int yOffset = 0; //loj: I don't know how this is used
       Real yMin = -40000.0; //loj: should parameter provide minimum value?
       Real yMax =  40000.0; //loj: should parameter provide maximum value?
+      
+      #if DEBUG_TSPLOT_INIT
+      MessageInterface::ShowMessage
+         ("TsPlot::Initialize() Get curveTitle and penColor\n");
+      #endif
       
       for (int i=0; i<mNumYParams; i++)
       {
@@ -289,7 +296,11 @@ bool TsPlot::Initialize()
          status = true;
       }
    }
-
+   
+   #if DEBUG_TSPLOT_INIT
+   MessageInterface::ShowMessage("TsPlot::Initialize() leaving stauts=%d\n", status);
+   #endif
+   
    return status;
 }
 

@@ -704,7 +704,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
       #if DEBUG_PLOTIF_XY
       MessageInterface::ShowMessage
          ("PlotInterface::CreateTsPlotWindow() Creating new "
-          "MdiChildXyFrame\n X Axis Title = %s  Y Axis Title = %s\n",
+          "MdiChildXyFrame\n   X Axis Title = %s  Y Axis Title = %s\n",
           xAxisTitle.c_str(), yAxisTitle.c_str());
       #endif
       
@@ -717,7 +717,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
                              wxString(yAxisTitle.c_str()),
                              wxPoint(-1, -1), wxSize(500, 350),
                              wxDEFAULT_FRAME_STYLE);
-                             
+      
       currPlotFrame->Show();
       
       GmatAppData::GetMainFrame()->Tile();
@@ -726,9 +726,14 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
 
       currPlotFrame->RedrawCurve();
    }
-
+   
    currPlotFrame->SetShowGrid(drawGrid);
    currPlotFrame->ResetZoom();
+   
+   #if DEBUG_PLOTIF_XY
+   MessageInterface::ShowMessage
+      ("PlotInterface::CreateTsPlotWindow() leaving\n");
+   #endif
    
    return true;
 #endif
@@ -1023,14 +1028,14 @@ bool PlotInterface::RefreshTsPlot(const std::string &plotName)
       
       for (int i=0; i<MdiTsPlot::numChildren; i++)
       {
-      	   //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(2)\n");
+         //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(2)\n");
          frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
          //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(3)\n");
          if (frame)   
          {         
             if (frame->GetPlotName().IsSameAs(owner.c_str()))
             {
-            	   //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(4)\n");
+               //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(4)\n");
                frame->RedrawCurve();
                //MessageInterface::ShowMessage("PlotInterface::RefreshTsPlot(5)\n");
                #if __WXMAC__  
