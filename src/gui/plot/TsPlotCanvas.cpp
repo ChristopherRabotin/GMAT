@@ -35,7 +35,10 @@ int  TsPlotCanvas::ySensitivity = 5;
 int  TsPlotCanvas::defaultLineWidth = 1;
 bool TsPlotCanvas::defaultLabels = false;
 
-// #define DEBUG_TS_CANVAS 1  //waw: Added 03/21/06
+//#define DEBUG_TS_CANVAS 1
+//#define DEBUG_INTERFACE 1
+//#define DEBUG_TS_CANVAS 1
+
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_PAINT         (TsPlotCanvas::OnPaint)
@@ -275,8 +278,8 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             MessageInterface::ShowMessage("Up at [%ld  %ld]; ", pt.x, pt.y);
             MessageInterface::ShowMessage("Rect is %ld by %ld\n",
                mouseRect.width, mouseRect.height);
-            MessageInterface::ShowMessage("Rectangle properties: [%ld %ld], "
-               "%ld by %ld\n", region.x, region.y, region.width, region.height);
+            //MessageInterface::ShowMessage("Rectangle properties: [%ld %ld], "
+            //   "%ld by %ld\n", region.x, region.y, region.width, region.height);
          #endif
 
          if (movingLegend)
@@ -356,6 +359,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
    else
       top = 20;
 
+   //MessageInterface::ShowMessage("===> Rescale(dc)\n");
    Rescale(dc);
 
    // Set region colors
@@ -403,6 +407,10 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
    
    //wx280deprecated->dc.EndDrawing();
    dataUpdated = false;
+   
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage("TsPlotCanvas::Refresh() leaving\n");
+   #endif
 }
 
 
@@ -455,13 +463,17 @@ void TsPlotCanvas::Rescale(wxDC &dc)
       delx = (xMax - xMin)*0.1;
       dely = (yMax - yMin)*0.1;
       rescaled = false;
-
+      
+      //MessageInterface::ShowMessage
+      //   ("===> no-zoom: xMin=%g, xMax=%g, yMin=%g, yMax=%g\n",
+      //    xMin, xMax, yMin, yMax);
+      
       if (xMax > plotXMax)
       {
          plotXMax = xMax + delx;
          rescaled = true;
       }
-
+      
       if (xMin < plotXMin)
       {
          #if DEBUG_TS_CANVAS
@@ -503,11 +515,15 @@ void TsPlotCanvas::Rescale(wxDC &dc)
          dely = 1.0;
       else
          dely = plotYMax - plotYMin;
-
+      
       currentXMin = plotXMin;
       currentXMax = plotXMax;
       currentYMin = plotYMin;
       currentYMax = plotYMax;
+      
+      //MessageInterface::ShowMessage
+      //   ("===> no-zoom: currentXMin=%g, currentXMax=%g, currentYMin=%g, "
+      //    "currentYMax=%g\n", currentXMin, currentXMax, currentYMin, currentYMax);
    }
    else
    {
@@ -523,12 +539,20 @@ void TsPlotCanvas::Rescale(wxDC &dc)
       currentXMax = zoomXMax;
       currentYMin = zoomYMin;
       currentYMax = zoomYMax;
-
+      
+      //MessageInterface::ShowMessage
+      //   ("===>    zoom: currentXMin=%f, currentXMax=%f, currentYMin=%f,"
+      //    "currentYMax=%f\n", currentXMin, currentXMax, currentYMin, currentYMax);
+      
       rescaled = true;
    }
-
+   
    xScale = w / delx;
    yScale = h / dely;
+   
+   //MessageInterface::ShowMessage
+   //   ("===> xScale=%g, yScale=%g, w=%d, h=%d, delx=%g, dely=%g\n",
+   //    xScale, yScale, w, h, delx, dely);
 }
 
 
@@ -582,7 +606,8 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
    double delta, step, logStep, factor, div, start;
    delta = currentXMax - currentXMin;
    #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("***XMin = %lf, XMax = %lf\n", currentXMin, currentXMax);
+      MessageInterface::ShowMessage
+         ("***XMin = %lf, XMax = %lf, delta=%lf\n", currentXMin, currentXMax, delta);
    #endif
    step = delta / (xticks+1.0);
    if (delta > 0.0)
@@ -613,6 +638,13 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       #endif
    }
    
+   // causing VC++ run time error, so just return
+   // @todo resolve this run time error later
+   #ifdef _MSC_VER
+   if (delta < 0)
+      return;
+   #endif
+   
    for (int i = 0; i <= xticks; ++i)
    {
       idx = (int)(i * dx + 0.5);
@@ -627,11 +659,11 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
       dc.GetTextExtent(label, &w, &h);
       dc.DrawText(label, xGridLoc[i] - w/2, y0 + h/2);
    }
-
+   
    delta = currentYMax - currentYMin;
    #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("***YMin = %lf, YMax = %lf\n", currentYMin,
-         currentYMax);
+      MessageInterface::ShowMessage("***YMin = %lf, YMax = %lf, delta=%g\n", currentYMin,
+         currentYMax, delta);
    #endif
    step = delta / (yticks+1.0);
    if (delta > 0.0)
@@ -661,7 +693,14 @@ void TsPlotCanvas::DrawAxes(wxDC &dc)
             delta);
       #endif
    }
-
+   
+   // causing VC++ run time error, so just return
+   // @todo resolve this run time error later
+   #ifdef _MSC_VER
+   if (delta < 0)
+      return;
+   #endif
+   
    for (int i = 0; i <= yticks; ++i)
    {
       idy = (int)(i * dy + 0.5);
@@ -744,6 +783,8 @@ void TsPlotCanvas::DrawLabels(wxDC &dc)
 
 void TsPlotCanvas::DrawGrid(wxDC &dc)
 {
+   // VC++ causing run time error here
+#ifndef _MSC_VER
    wxCoord w, h;
    dc.GetSize(&w, &h);
 
@@ -753,7 +794,13 @@ void TsPlotCanvas::DrawGrid(wxDC &dc)
        ym  = top;
 
    dc.SetPen(gridPen);
-
+   
+   //MessageInterface::ShowMessage
+   //   ("===> TsPlotCanvas::DrawGrid() xGridLoc.size()=%d, yGridLoc.size()=%d\n",
+   //    xGridLoc.size(), yGridLoc.size());
+   
+   // VC++ causing run time error
+   // @todo resolve this run time error later
    if (xGridLoc.size() > 0)
       for (unsigned int i = 0; i <= xGridLoc.size(); ++i)
          if ((xGridLoc[i] != x0) && (xGridLoc[i] != xm))
@@ -762,6 +809,7 @@ void TsPlotCanvas::DrawGrid(wxDC &dc)
       for (unsigned int i = 0; i <= yGridLoc.size(); ++i)
          if ((yGridLoc[i] != y0) && (yGridLoc[i] != ym))
             dc.DrawLine(xm - tickSize, yGridLoc[i], x0+tickSize, yGridLoc[i]);
+#endif
 }
 
 
@@ -1088,6 +1136,11 @@ void TsPlotCanvas::ClearAllCurveData()
 
    //wx280deprecated->dc.EndDrawing();
    dataUpdated = false;
+   
+   #if DEBUG_TS_CANVAS
+   MessageInterface::ShowMessage(
+      "TsPlotCanvas::ClearAllCurveData() leaving\n");
+   #endif
 }
 
 
