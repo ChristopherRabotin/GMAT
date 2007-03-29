@@ -422,13 +422,16 @@ bool Assignment::InterpretAction()
       parmName = component;
    else
       parmName = "";
-   
-   // Strip off trailing white space, if any
-   unsigned n = parmName.length() - 1;
-   while ((parmName[n] == ' ') || (parmName[n] == '\t'))
-      --n;
-   parmName = parmName.substr(0, n+1);
 
+   // Causing VC++ run time error
+   // Strip off trailing white space, if any
+   //unsigned n = parmName.length() - 1;
+   //while ((parmName[n] == ' ') || (parmName[n] == '\t'))
+   //   --n;
+   //parmName = parmName.substr(0, n+1);
+
+   parmName = GmatStringUtil::Strip(parmName);
+   
    value = rhs;
    
    #ifdef DEBUG_ASSIGNMENT_IA
