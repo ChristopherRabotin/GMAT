@@ -969,7 +969,7 @@ bool GmatBase::IsParameterReadOnly(const std::string &label) const
 Real GmatBase::GetRealParameter(const Integer id) const
 {
    std::stringstream indexString;
-   indexString << id;
+   indexString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get real parameter with ID " + 
                            indexString.str() + " on " + typeName + " named " + 
                            instanceName);
@@ -991,7 +991,7 @@ Real GmatBase::GetRealParameter(const Integer id) const
 Real GmatBase::SetRealParameter(const Integer id, const Real value)
 {
    std::stringstream indexString;
-   indexString << id;
+   indexString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set real parameter with ID " + 
                            indexString.str() + " on " + typeName + " named " + 
                            instanceName);
@@ -1012,7 +1012,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value)
 Real GmatBase::GetRealParameter(const Integer id, const Integer index) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot get real parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1037,7 +1037,7 @@ Real GmatBase::GetRealParameter(const Integer id, const Integer row,
                                 const Integer col) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << ", row " << row << " and column " << col;
    throw GmatBaseException("Cannot get real array element with ID " + 
                            idString.str() + indexString.str() + 
@@ -1091,7 +1091,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value,
                                 const Integer index)
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot set real parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1112,7 +1112,7 @@ Real GmatBase::SetRealParameter(const Integer id, const Real value,
 Integer GmatBase::GetIntegerParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get integer parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1135,7 +1135,7 @@ Integer GmatBase::GetIntegerParameter(const Integer id) const
 Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set integer parameter with ID " + 
                            idString.str() +
                            " on " + typeName + " named " + instanceName);
@@ -1156,7 +1156,7 @@ Integer GmatBase::GetIntegerParameter(const Integer id,
                                       const Integer index) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot get integer parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1184,7 +1184,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value,
                                       const Integer index)
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot set integer parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1205,7 +1205,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value,
 UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get unsigned integer parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1230,7 +1230,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
                                               const UnsignedInt value)
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set unsigned integer parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1252,7 +1252,7 @@ UnsignedInt GmatBase::GetUnsignedIntParameter(const Integer id,
                                               const Integer index) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot get unsigned integer parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1282,7 +1282,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
                                               const Integer index)
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot set unsigned integer parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1304,7 +1304,7 @@ UnsignedInt GmatBase::SetUnsignedIntParameter(const Integer id,
 const UnsignedIntArray& GmatBase::GetUnsignedIntArrayParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get unsigned integer array parameter with "
                            " ID " + idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1324,7 +1324,7 @@ const UnsignedIntArray& GmatBase::GetUnsignedIntArrayParameter(const Integer id)
 const Rvector& GmatBase::GetRvectorParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get Rvector parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1348,7 +1348,7 @@ const Rvector& GmatBase::SetRvectorParameter(const Integer id,
                                              const Rvector& value)
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set Rvector parameter with ID " + 
                            idString.str() + " on " + typeName + " named " + 
                            instanceName);
@@ -1367,7 +1367,7 @@ const Rvector& GmatBase::SetRvectorParameter(const Integer id,
 const Rmatrix& GmatBase::GetRmatrixParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get Rmatrix parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1408,7 +1408,7 @@ const Rmatrix& GmatBase::SetRmatrixParameter(const Integer id,
 std::string GmatBase::GetStringParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get string parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1429,7 +1429,7 @@ std::string GmatBase::GetStringParameter(const Integer id) const
 bool GmatBase::SetStringParameter(const Integer id, const std::string &value)
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set string parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1453,7 +1453,7 @@ std::string GmatBase::GetStringParameter(const Integer id,
                                          const Integer index) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot get string parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1479,7 +1479,7 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value,
                                   const Integer index)
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot set string parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1501,7 +1501,7 @@ bool GmatBase::SetStringParameter(const Integer id, const std::string &value,
 const StringArray& GmatBase::GetStringArrayParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get string array parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1525,7 +1525,7 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
                                                const Integer index) const
 {
    std::stringstream indexString, idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    indexString << index;
    throw GmatBaseException("Cannot get string array parameter with ID " + 
                            idString.str() + " and index " + indexString.str() + 
@@ -1547,7 +1547,7 @@ const StringArray& GmatBase::GetStringArrayParameter(const Integer id,
 std::string GmatBase::GetOnOffParameter(const Integer id) const
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot get On/Off parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
@@ -1568,7 +1568,7 @@ std::string GmatBase::GetOnOffParameter(const Integer id) const
 bool GmatBase::SetOnOffParameter(const Integer id, const std::string &value)
 {
    std::stringstream idString;
-   idString << id;
+   idString << id << ": \"" << GetParameterText(id) << "\"";
    throw GmatBaseException("Cannot set On/Off parameter with ID " + 
                            idString.str() + 
                            " on " + typeName + " named " + instanceName);
