@@ -337,8 +337,11 @@ bool BaseStopCondition::Initialize()
          
          for (int i=0; i<mBufferSize; i++)
          {
-            mEpochBuffer[i] = 0.0;
-            mValueBuffer[i] = 0.0;
+            // VC++ gives run time error
+            //mEpochBuffer[i] = 0.0;
+            //mValueBuffer[i] = 0.0;
+            mEpochBuffer.push_back(0.0);
+            mValueBuffer.push_back(0.0);
          }
          
          mNumValidPoints = 0;
