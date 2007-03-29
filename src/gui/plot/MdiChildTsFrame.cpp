@@ -78,13 +78,14 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
 
    for (int i=0; i<MAX_NUM_CURVE; i++)
       mHasFirstXSet[i] = false;
-    
-   //      MessageInterface::ShowMessage("MdiChildTsFrame::MdiChildTsFrame() "
-   //                                    "X Axis Title = %s  Y Axis Title = %s "
-   //                                    "isMainFrame = %d\n",
-   //                                    xAxisTitle.c_str(), yAxisTitle.c_str(),
-   //                                    isMainFrame);
-    
+   
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildTsFrame::MdiChildTsFrame()\n   X Axis Title = %s\n"
+       "   Y Axis Title = %s\n   isMainFrame = %d\n", xAxisTitle.c_str(),
+       yAxisTitle.c_str(), isMainFrame);
+   #endif
+   
    MdiTsPlot::mdiChildren.Append(this);
     
    // Give it an icon
@@ -97,14 +98,20 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    // Create XyPlotFrame
    int width, height;
    GetClientSize(&width, &height);
+   
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage("   Creating TsPlotCanvas\n");
+   #endif
+   
    TsPlotCanvas *frame =
-      new TsPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height), wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
+      new TsPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
+                       wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
-
+   
    mXyPlot = frame;
-    
+   
    wxBoxSizer *topSizer = new wxBoxSizer( wxVERTICAL );
-    
+   
    topSizer->Add(mXyPlot, 1, wxALIGN_CENTER |wxEXPAND);
    
    SetAutoLayout( TRUE ); //loj: this is called implicitly by SetSizer()
@@ -113,6 +120,10 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
    GmatAppData::GetMainFrame()->mdiChildren->Append(this);
+   
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage("MdiChildTsFrame::MdiChildTsFrame() leaving\n");
+   #endif
 }
 
 
@@ -365,7 +376,7 @@ void MdiChildTsFrame::RedrawCurve()
    if (mXyPlot)
    {
       Update(); // need Update to show plot as it runs
-
+      
       mXyPlot->DataUpdate();
       wxPaintEvent pvt;
       mXyPlot->OnPaint(pvt);
