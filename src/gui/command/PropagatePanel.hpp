@@ -92,9 +92,6 @@ private:
    Integer mPropCount;
    Integer mSpaceObjectCount;
    Integer mStopCondCount;
-   Integer mTempPropCount;
-   Integer mCurrPropRow;
-   Integer mCurrStopRow;
    PropType mTempProp[MAX_PROP_ROW];
    StopCondType mTempStopCond[MAX_STOPCOND_ROW];
    
@@ -113,22 +110,17 @@ private:
    // Layout & data handling methods
    void DisplayPropagator();
    void DisplayStopCondition();
-   void UpdateStopCondition();
-   void RemoveStopCondition();
-   void ClearStopCondition(Integer selRow);
-   void MoveUpPropData();
+   void UpdateStopCondition(Integer stopRow);
    
    wxString FormatStopCondDesc(const wxString &varName,
                                const wxString &relOpStr,
                                const wxString &goalStr);
    
    // event handling method
-   void OnCellLeftDoubleClick(wxGridEvent &event);
    void OnCellRightClick(wxGridEvent &event);
    void OnCellValueChange(wxGridEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent &event);
-   void OnKeyDown(wxKeyEvent& event);
 
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
