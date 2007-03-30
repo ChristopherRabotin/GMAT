@@ -21,6 +21,9 @@
 #include "AxisSystem.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_COORD_PANEL_LOAD 1
+//#define DEBUG_COORD_PANEL_SAVE 1
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -67,22 +70,13 @@ CoordSystemConfigPanel::~CoordSystemConfigPanel()
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::Create()
 {
-    Setup(this);    
-}
-
-
-//------------------------------------------------------------------------------
-// void Setup( wxWindow *parent)
-//------------------------------------------------------------------------------
-void CoordSystemConfigPanel::Setup( wxWindow *parent)
-{
    std::string coordSysName = theCoordSys->GetName();
 
    // if CoordinateSystem is non-default, allow user to edit
    if (theGuiInterpreter->IsDefaultCoordinateSystem(coordSysName))
       mCoordPanel = new CoordPanel(this, false);
    else
-      mCoordPanel = new CoordPanel(this, true); //loj: 6/2/05 allow user to edit
+      mCoordPanel = new CoordPanel(this, true);
    
    theMiddleSizer->Add( mCoordPanel, 0, wxALIGN_CENTRE|wxALL, 3);
 }
@@ -93,6 +87,13 @@ void CoordSystemConfigPanel::Setup( wxWindow *parent)
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::LoadData()
 {
+   #if DEBUG_COORD_PANEL_LOAD
+   MessageInterface::ShowMessage("CoordSystemConfigPanel::LoadData() entered\n");
+   #endif
+   
+   // Set the pointer for the "Show Script" button
+   mObject = theCoordSys;
+   
    epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
    intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
    
@@ -105,32 +106,41 @@ void CoordSystemConfigPanel::LoadData()
    xComboBox = mCoordPanel->GetXComboBox();
    yComboBox = mCoordPanel->GetYComboBox();
    zComboBox = mCoordPanel->GetZComboBox();
-   
+
    // get the data from the base
-   wxString origin = theCoordSys->GetStringParameter("Origin").c_str();
-   originComboBox->SetValue(origin);
-   
-   AxisSystem *axis =
-      (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
-   
-   if (axis != NULL)
+   try
    {
-      mCoordPanel->ShowAxisData(axis);
-      mEpochFormat = wxString(axis->GetEpochFormat().c_str());
+      std::string str = theCoordSys->GetStringParameter("Origin");
       
-      if (mEpochFormat == "")
-        mEpochFormat = "A1ModJulian";
+      #if DEBUG_COORD_PANEL_LOAD
+      MessageInterface::ShowMessage("   setting Origin to %s\n", str.c_str());
+      #endif
+      
+      originComboBox->SetValue(str.c_str());
+      
+      AxisSystem *axis =
+         (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+      
+      if (axis != NULL)
+      {
+         mCoordPanel->ShowAxisData(axis);
+         mEpochFormat = wxString(axis->GetEpochFormat().c_str());
+      
+         if (mEpochFormat == "")
+            mEpochFormat = "A1ModJulian";
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::LoadData() the AxisSystem of %s is NULL\n",
+             theCoordSys->GetName().c_str());
+      }
    }
-   else
+   catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("CoordSystemConfigPanel::LoadData() the AxisSystem of %s is NULL\n",
-          theCoordSys->GetName().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
-   mObject = theCoordSys;
-   
-   //theApplyButton->Enable(false);
 }
 
 
@@ -141,56 +151,70 @@ void CoordSystemConfigPanel::SaveData()
 {
    canClose = true;
    std::string originName = originComboBox->GetValue().Trim().c_str();
-
-   //-------------------------------------------------------
-   // set new origin
-   //-------------------------------------------------------
-   if (mOriginChanged)
-   { 
-      //MessageInterface::ShowMessage
-      //   ("===> originName = %s\n", originName.c_str());
-      
-      mOriginChanged = false;
-      theCoordSys->SetStringParameter("Origin", originName);
-      
-      // set coordinate system origin
-      SpacePoint *origin =
-         (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
-      theCoordSys->SetOrigin(origin);
-      
-      // set Earth as J000Body if NULL
-      if (origin->GetJ2000Body() == NULL)
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      //-------------------------------------------------------
+      // set new origin
+      //-------------------------------------------------------
+      if (mOriginChanged)
       {
-         SpacePoint *j2000body =
-            (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
-         origin->SetJ2000Body(j2000body);
+         #if DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() originName = %s\n",
+             originName.c_str());
+         #endif
+         
+         mOriginChanged = false;
+         theCoordSys->SetStringParameter("Origin", originName);
+         
+         // set coordinate system origin
+         SpacePoint *origin =
+            (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
+         theCoordSys->SetOrigin(origin);
+         
+         // set Earth as J000Body if NULL
+         if (origin->GetJ2000Body() == NULL)
+         {
+            SpacePoint *j2000body =
+               (SpacePoint*)theGuiInterpreter->GetConfiguredObject("Earth");
+            origin->SetJ2000Body(j2000body);
+         }
+      }
+   
+      //-------------------------------------------------------
+      // set new axis system
+      //-------------------------------------------------------
+      if (mObjRefChanged)
+      {
+         AxisSystem *axis = mCoordPanel->CreateAxis();
+         
+         if (axis != NULL)
+         {
+            AxisSystem *oldAxis =
+               (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+            
+            canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
+            
+            // delete old axis and set new axis
+            delete oldAxis;
+            theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("CoordSystemConfigPanel::SaveData() Cannot create AxisSystem.\n");
+            canClose = false;
+         }
       }
    }
-   
-   //-------------------------------------------------------
-   // set new axis system
-   //-------------------------------------------------------
-   if (mObjRefChanged)
+   catch (BaseException &e)
    {
-      AxisSystem *axis = mCoordPanel->CreateAxis();
-      
-      if (axis != NULL)
-      {
-         AxisSystem *oldAxis =
-            (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
-         
-         canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
-         
-         // delete old axis and set new axis
-         delete oldAxis;
-         theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
-      }
-      else
-      {
-         MessageInterface::ShowMessage
-            ("CoordSystemConfigPanel::SaveData() Cannot create AxisSystem.\n");
-         canClose = false;
-      }
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
 }
 

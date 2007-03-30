@@ -50,7 +50,7 @@ public:
    wxTextCtrl *GetEpochTextCtrl() {return epochTextCtrl;}
    wxTextCtrl *GetIntervalTextCtrl() {return intervalTextCtrl;}
    
-   void EnableOptions();
+   void EnableOptions(AxisSystem *axis = NULL);
    void SetDefaultAxis();
    void SetDefaultEpochRefAxis();
    void SetDefaultObjectRefAxis();

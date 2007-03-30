@@ -61,41 +61,45 @@ CoordPanel::~CoordPanel()
 
 
 //------------------------------------------------------------------------------
-// void EnableOptions()
+// void EnableOptions(AxisSystem *axis)
 //------------------------------------------------------------------------------
-void CoordPanel::EnableOptions()
+void CoordPanel::EnableOptions(AxisSystem *axis)
 {
    #if DEBUG_COORD_PANEL
-      MessageInterface::ShowMessage("CoordPanel::EnableOptions() type =%s\n",
-      typeComboBox->GetStringSelection().c_str());
+   MessageInterface::ShowMessage
+      ("CoordPanel::EnableOptions() axis=(%p)%s\n", axis,
+       typeComboBox->GetStringSelection().c_str());
    #endif
    
    // save epoch value locally
    epochValue = epochTextCtrl->GetValue();
    
    wxString typeStr = typeComboBox->GetStringSelection();
+   AxisSystem* tmpAxis = NULL;
    
    if (typeStr == "")
       typeStr = "MJ2000Eq";
-   
-   // create a temp axis to use flags
-   AxisSystem* tmpAxis = (AxisSystem *)theGuiInterpreter->
-      //CreateAxisSystem(std::string(typeStr.c_str()), "tmpAxis");
-      CreateObject(typeStr.c_str(), ""); // Use noname
+
+   if (axis == NULL)
+      // create a temp axis to use flags
+      tmpAxis = (AxisSystem *)theGuiInterpreter->
+         CreateObject(typeStr.c_str(), ""); // Use no name
+   else
+      tmpAxis = axis;
    
    if (tmpAxis == NULL)
       return;
-      
+   
    if (tmpAxis->UsesPrimary() == GmatCoordinate::NOT_USED)
       mShowPrimaryBody = false;
    else
       mShowPrimaryBody = true; 
-
+   
    if (tmpAxis->UsesSecondary() == GmatCoordinate::NOT_USED)
       mShowSecondaryBody = false;
    else
       mShowSecondaryBody = true; 
-      
+   
    if (tmpAxis->UsesEpoch() == GmatCoordinate::NOT_USED)
       mShowEpoch = false;
    else
@@ -111,7 +115,7 @@ void CoordPanel::EnableOptions()
       epochTextCtrl->SetValue(epochValue);
       formatComboBox->SetValue(epochFormatValue);
    }
-      
+   
    if ((tmpAxis->UsesXAxis() == GmatCoordinate::NOT_USED) &&
        (tmpAxis->UsesYAxis() == GmatCoordinate::NOT_USED) &&
        (tmpAxis->UsesZAxis() == GmatCoordinate::NOT_USED))
@@ -247,34 +251,38 @@ void CoordPanel::SetDefaultObjectRefAxis()
 //------------------------------------------------------------------------------
 void CoordPanel::ShowAxisData(AxisSystem *axis)
 {
+   #if DEBUG_COORD_PANEL
+   MessageInterface::ShowMessage
+      ("CoordPanel::ShowAxisData() axis=(%p)%s\n", axis,
+       axis->GetTypeName().c_str());
+   #endif
+   
    try
    {
       int sel = typeComboBox->FindString(axis->GetTypeName().c_str());
       typeComboBox->SetSelection(sel);
-      EnableOptions();
+      EnableOptions(axis);
       
-      if (GetShowPrimaryBody())
+      #if DEBUG_COORD_PANEL
+      MessageInterface::ShowMessage
+         ("mShowPrimaryBody=%d, mShowSecondaryBody=%d, mShowEpoch=%d, "
+          "mShowXyz=%d, mShowUpdate\n", mShowPrimaryBody, mShowSecondaryBody,
+          mShowEpoch, mShowXyz, mShowUpdate);
+      #endif
+      
+      if (mShowPrimaryBody)
       {
-         // Primary/Secondary edits to just get the names
-         SpacePoint *primaryObj = axis->GetPrimaryObject();
-         if (primaryObj != NULL)
-            primaryComboBox->SetStringSelection(primaryObj->GetName().c_str());
-         else
-            primaryComboBox->
-               SetStringSelection(axis->GetStringParameter("Primary").c_str());
+         primaryComboBox->
+            SetStringSelection(axis->GetStringParameter("Primary").c_str());
       }
       
-      if (GetShowSecondaryBody())
+      if (mShowSecondaryBody)
       {
-         SpacePoint *secondObj = axis->GetSecondaryObject();
-         if (secondObj != NULL)
-            secondaryComboBox->SetStringSelection(secondObj->GetName().c_str());
-         else
-            secondaryComboBox->
-               SetStringSelection(axis->GetStringParameter("Secondary").c_str());
+         secondaryComboBox->
+            SetStringSelection(axis->GetStringParameter("Secondary").c_str());
       }
       
-      if (GetShowEpoch())
+      if (mShowEpoch)
       {
          std::string epochFormat = axis->GetEpochFormat();
          formatComboBox->SetStringSelection(epochFormat.c_str());
@@ -283,18 +291,18 @@ void CoordPanel::ShowAxisData(AxisSystem *axis)
          epochTextCtrl->SetValue(theGuiManager->ToWxString(epoch));
       }
       
-      if (GetShowXyz())
+      if (mShowXyz)
       {
          xComboBox->SetStringSelection(axis->GetXAxis().c_str());
          yComboBox->SetStringSelection(axis->GetYAxis().c_str());
          zComboBox->SetStringSelection(axis->GetZAxis().c_str());
       }
       
-      if (GetShowUpdateInterval())
+      if (mShowUpdate)
       {
          /// @todo:
          Real updateInterval = axis->GetRealParameter("UpdateInterval");
-
+         
          wxString updateStr;
          std::stringstream buffer;
          buffer.precision(18);

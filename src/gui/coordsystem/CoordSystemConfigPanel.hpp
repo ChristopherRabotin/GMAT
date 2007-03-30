@@ -51,9 +51,7 @@ private:
    virtual void LoadData();
    virtual void SaveData();
    
-   // Layout & data handling methods
-   void Setup(wxWindow *parent);
-    
+   // data handling methods
    void OnTextUpdate(wxCommandEvent& event);
    void OnComboUpdate(wxCommandEvent& event);
 
