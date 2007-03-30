@@ -26,6 +26,7 @@
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
 //#define DEBUG_BRANCHCOMMAND_APPEND
 //#define DEBUG_BRANCHCOMMAND_INSERT
+//#define DEBUG_BRANCHCOMMAND_REMOVE 1
 //#define DEBUG_BRANCHCOMMAND_ADD
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
@@ -607,6 +608,10 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
+   #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+   ShowCommand("", "Remove() removing ", cmd);
+   #endif
+   
    if (cmd == this)
       return GmatCommand::Remove(cmd);    // Use base method to remove cmd
    
@@ -620,12 +625,23 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
       current = branch[which];
       tempNext = current->GetNext();
       
+      #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+      ShowCommand("", "Remove() current = ", current, ", tempNext = ", tempNext);
+      #endif
+      
       if (current != NULL)
       {
          fromBranch = current->Remove(cmd);
          
          if (fromBranch == current)
             branch[which] = tempNext;
+         
+         // set previous command
+         #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+         ShowCommand("", "setting previous of ", tempNext, " to ", fromBranch->GetPrevious());
+         #endif
+         
+         tempNext->ForceSetPrevious(fromBranch->GetPrevious());
          
          if (fromBranch != NULL)
             return fromBranch;

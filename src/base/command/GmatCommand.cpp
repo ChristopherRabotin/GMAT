@@ -1190,7 +1190,7 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 {
-   if (this->IsOfType("BranchEnd")) //loj: 6/29/05 Added
+   if (this->IsOfType("BranchEnd"))
       return NULL;
    
    if (this == cmd)
@@ -1206,7 +1206,19 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
    {
       GmatCommand *temp = next;
       next = next->GetNext();
+
+      // Set previous command
+      if (next != NULL)
+      {
+         #ifdef DEBUG_COMMAND_REMOVE
+         ShowCommand("", "setting previous of ", next, " to ", this);
+         #endif
+         
+         next->previous = this;
+      }
+      
       temp->Remove(cmd);
+      
       return temp;            
    }
    
