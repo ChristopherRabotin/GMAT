@@ -35,7 +35,8 @@ const Gmat::ParameterType
 CalculatedPoint::PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount] =
 {
    Gmat::INTEGER_TYPE,
-   Gmat::STRINGARRAY_TYPE,
+   Gmat::OBJECTARRAY_TYPE,
+//   Gmat::STRINGARRAY_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -687,4 +688,3 @@ bool CalculatedPoint::TakeAction(const std::string &action,
 // private methods
 //------------------------------------------------------------------------------
 // none at this time
-
