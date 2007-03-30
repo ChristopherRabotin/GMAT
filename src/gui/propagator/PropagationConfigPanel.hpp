@@ -262,7 +262,8 @@ private:
    bool isIntegratorChanged;
    bool isIntegratorDataChanged;
    bool isOriginChanged;
-
+   bool isErrControlChanged;
+   
    Propagator                     *thePropagator;
    PropSetup                      *thePropSetup;
    ForceModel                     *theForceModel;

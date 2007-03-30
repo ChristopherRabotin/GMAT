@@ -122,6 +122,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    isIntegratorChanged = false;
    isIntegratorDataChanged = false;
    isOriginChanged = false;
+   isErrControlChanged = false;
    
    canClose = true;
    
@@ -193,18 +194,17 @@ void PropagationConfigPanel::LoadData()
    {
       // Getting the origin
       propOriginName = theForceModel->GetStringParameter("CentralBody").c_str();
-   
+      
       // Getting the error control
       errorControlTypeName = theForceModel->GetStringParameter("ErrorControl").c_str();
-   
+      
       PhysicalModel *force;     
       Integer paramId;
       wxString wxBodyName;
       wxString tempStr;
       wxString useSRP;
-   
+      
       paramId = theForceModel->GetParameterID("SRP");
-      //useSRP = theForceModel->GetStringParameter(paramId).c_str();
       useSRP = theForceModel->GetOnOffParameter(paramId).c_str();
       
       for (Integer i = 0; i < numOfForces; i++)
@@ -559,6 +559,8 @@ void PropagationConfigPanel::SaveData()
    MessageInterface::ShowMessage("   isDegOrderChanged=%d\n", isDegOrderChanged);
    MessageInterface::ShowMessage("   isPotFileChanged=%d\n", isPotFileChanged);
    MessageInterface::ShowMessage("   isAtmosChanged=%d\n", isAtmosChanged);
+   MessageInterface::ShowMessage("   isOriginChanged=%d\n", isOriginChanged);
+   MessageInterface::ShowMessage("   isErrControlChanged=%d\n", isErrControlChanged);
    #endif
    
    canClose = true;
@@ -599,6 +601,9 @@ void PropagationConfigPanel::SaveData()
       #if DEBUG_PROP_SAVE
       ShowForceList("SaveData() BEFORE saving ForceModel");
       #endif
+
+      // save force model name for later use
+      std::string fmName = theForceModel->GetName();
       
       isForceModelChanged = false;
       ForceModel *newFm = new ForceModel();
@@ -740,7 +745,6 @@ void PropagationConfigPanel::SaveData()
                newFm->AddForce(theSRP);
                
                paramId= newFm->GetParameterID("SRP");
-               //newFm->SetStringParameter(paramId, "On");
                newFm->SetOnOffParameter(paramId, "On");
                
                #if DEBUG_PROP_SAVE
@@ -755,16 +759,17 @@ void PropagationConfigPanel::SaveData()
       }
       
       //----------------------------------------------------
-      // Saving the error control
+      // Saving the error control and Origin
       //----------------------------------------------------
       try
       {
-         newFm->SetStringParameter("ErrorControl", 
-                                   errorComboBox->GetStringSelection().c_str());
-      
-         //----------------------------------------------------
-         // Saving the Origin (Central Body)
-         //----------------------------------------------------
+         if (isErrControlChanged)
+         {
+            newFm->SetStringParameter("ErrorControl", 
+                                      errorComboBox->GetStringSelection().c_str());
+            isErrControlChanged = false;
+         }
+         
          if (isOriginChanged)
          {
             newFm->SetStringParameter("CentralBody", propOriginName.c_str());
@@ -788,6 +793,8 @@ void PropagationConfigPanel::SaveData()
       // Since the force model and it's physical models are cloned in the
       // base code, get new pointers
       theForceModel = thePropSetup->GetForceModel();
+      theForceModel->SetName(fmName);
+      
       PhysicalModel *pm;
       int size = forceList.size();
       for (int i=0; i<numOfForces; i++)
@@ -822,10 +829,17 @@ void PropagationConfigPanel::SaveData()
    else
    {
       //----------------------------------------------------
-      // Saving the Origin (Central Body)
+      // Saving Error Control and the Origin (Central Body)
       //----------------------------------------------------
       try
       {
+         if (isErrControlChanged)
+         {
+            theForceModel->SetStringParameter
+               ("ErrorControl", errorComboBox->GetStringSelection().c_str());
+            isErrControlChanged = false;
+         }
+         
          if (isOriginChanged)
          {
             theForceModel->SetStringParameter("CentralBody", propOriginName.c_str());
@@ -836,7 +850,7 @@ void PropagationConfigPanel::SaveData()
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       }
-
+      
       if (isDegOrderChanged)
          SaveDegOrder();
       
@@ -1445,7 +1459,7 @@ void PropagationConfigPanel::DisplayForceData()
    
    if (forceList.empty())
    {    
-           DisplayErrorControlData();
+      DisplayErrorControlData();
       return;  
    }
    
@@ -2117,7 +2131,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
       {
          forceList[currentBodyId]->potFilename = potFileTextCtrl->GetValue();
       }
-
+      
       #if DEBUG_GRAV_FIELD
       MessageInterface::ShowMessage
          ("OnGravitySelection() bodyName=%s, potFile=%s\n",
@@ -2127,7 +2141,7 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
       
       DisplayGravityFieldData(forceList[currentBodyId]->bodyName);
       
-      // We don't want to  set to true only if gravity model is changed
+      // We don't want to create a new ForceModel if only gravity model is changed
       //isForceModelChanged = true; 
       isPotFileChanged = true;
       EnableUpdate(true);
@@ -2149,7 +2163,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
    #endif
    
    dragTypeName = atmosComboBox->GetStringSelection();
-
+   
    // if we are creating new DragForce, set isForceModelChanged
    if (forceList[currentBodyId]->dragf == NULL)
       isForceModelChanged = true;
@@ -2166,6 +2180,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
       forceList[currentBodyId]->dragType = dragTypeName;
       DisplayAtmosphereModelData();
       
+      isForceModelChanged = true;  
       isAtmosChanged = true;
       EnableUpdate(true);
    }
@@ -2194,7 +2209,9 @@ void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
       errorControlTypeName = eType;
       DisplayErrorControlData();
       
-      isForceModelChanged = true;  
+      // We don't want to create a new ForceModel if only Error Control is changed
+      //isForceModelChanged = true;
+      isErrControlChanged = true;
       EnableUpdate(true);
    }
 }
@@ -2281,7 +2298,6 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
    for (Integer i = 0; i < (Integer)forceList.size(); i++)
    {
       name = forceList[i]->bodyName.c_str();
-//      bodyTextCtrl->AppendText(name + " ");
       bodyComboBox->Append(forceList[i]->bodyName.c_str());
       bodyComboBox->SetValue(forceList[i]->bodyName.c_str());
    }
