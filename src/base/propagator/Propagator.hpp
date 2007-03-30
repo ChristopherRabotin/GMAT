@@ -83,6 +83,10 @@ public:
     Propagator(const Propagator&);
     Propagator& operator=(const Propagator&);
 
+    virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName);
+   
     // Parameter accessor methods -- overridden from GmatBase   
     virtual std::string GetParameterText(const Integer id) const;
     virtual Integer GetParameterID(const std::string &str) const;

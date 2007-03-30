@@ -188,6 +188,29 @@ Propagator& Propagator::operator=(const Propagator& p)
     return *this;
 }
 
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames reference objects used in this class.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ * 
+ * @return true if object name changed, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Propagator::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   // There is nothing to check for now
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 // std::string Propagator::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
