@@ -864,7 +864,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 {
    #if DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::CreateCommand() type=%s, inCmd=%p, \n   desc=%s\n", type.c_str(),
+      ("Interpreter::CreateCommand() type='%s', inCmd=%p, \n   desc='%s'\n", type.c_str(),
        inCmd, desc.c_str());
    #endif
    
@@ -880,10 +880,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    if (type[0] == '[')
    {
       cmd = AppendCommand("CallFunction", retFlag, inCmd);
-      desc1 = type + desc;
+      desc1 = type +  "=" + desc; //loj: 4/2/07 Added equal sign
       cmd->SetGeneratingString(desc1);
    }
-   /// @TODO: This is a work around for a call function with
+   /// @TODO: This is a work around for a call function
    /// without any return parameters.  It should be updated in
    /// the design to handle this situation.
    else if ((desc1.find("=") == desc1.npos) && (desc != "")
@@ -1018,7 +1018,7 @@ bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
 
    #if DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::AssembleCommand() cmd=%s\n   desc=%s\n",
+      ("Interpreter::AssembleCommand() cmd='%s'\n   desc='%s'\n",
        type.c_str(), desc.c_str());
    #endif
    
@@ -1048,7 +1048,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    std::string lhs = desc.substr(0, index1);
    StringArray outArray;
 
-   // only get out parameters if there was an equal sign
+   // get out parameters if there was an equal sign
    if (index1 != lhs.npos)
    {   
       outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
@@ -1240,7 +1240,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
 {
    #if DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
-      ("Interpreter::AssembleForCommand() desc=<%s>\n", desc.c_str());
+      ("Interpreter::AssembleForCommand() desc='%s'\n", desc.c_str());
    #endif
    
    bool retval = true;
@@ -1338,7 +1338,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    
    #if DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
-      ("AssembleGeneralCommand() cmd=%s, desc=%s\n", cmd->GetTypeName().c_str(),
+      ("AssembleGeneralCommand() cmd='%s', desc='%s'\n", cmd->GetTypeName().c_str(),
        desc.c_str());
    WriteParts("AssembleGeneralCommand()", parts);
    #endif
