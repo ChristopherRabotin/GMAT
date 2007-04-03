@@ -245,19 +245,26 @@ void Moderator::Finalize()
    delete theLeapSecsFile;
    
    //clear resource and command sequence
-   ClearResource();
-   ClearCommandSeq();
+   try
+   {
+      ClearResource();
+      ClearCommandSeq();
    
-   delete theFactoryManager;
-   delete theGuiInterpreter;
+      delete theFactoryManager;
+      delete theGuiInterpreter;
    
-   //delete theConfigManager; (private)
-   //delete theScriptInterpreter; (private)
-   //delete thePublisher; (private)
+      //delete theConfigManager; (private)
+      //delete theScriptInterpreter; (private)
+      //delete thePublisher; (private)
    
-   //MessageInterface::ShowMessage("deleting internal objects\n");
-   //delete theDefaultSolarSystem;
-   //delete theInternalCoordSystem;
+      //MessageInterface::ShowMessage("deleting internal objects\n");
+      //delete theDefaultSolarSystem;
+      //delete theInternalCoordSystem;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
    
    #if DEBUG_FINALIZE
    MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
@@ -1289,7 +1296,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreatePropagator()\n" +
                                        e.GetFullMessage());
       }
-        
+      
       return prop;
    }
    else
@@ -1671,7 +1678,9 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          }
       }
       
-      param->SetStringParameter("Expression", name);
+      // loj: If type is Variable, don't set expression
+      if (type != "Variable")
+         param->SetStringParameter("Expression", name);
       
       // Set parameter owner and dependent object
       if (ownerName != "")
@@ -2782,6 +2791,15 @@ GmatCommand* Moderator::AppendCommand(const std::string &type,
 //------------------------------------------------------------------------------
 // bool InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
+/**
+ * Inserts command into the command sequence after previous command
+ * 
+ * @param cmd  Pointer to GmatCommand that is inserted
+ * @param prev Pointer to GmatCommand preceding this GmatCommand
+ *
+ * @return true on success, false on failure.
+ */
+//------------------------------------------------------------------------------
 bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
                               Integer sandboxNum)
 {
@@ -3405,21 +3423,24 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    MessageInterface::ShowMessage
       ("   Calling %s->RunComplete\n", cmd->GetTypeName().c_str());
    #endif
-   
+
    cmd->RunComplete();
    
    oldcmd = cmd->GetNext();
    DeleteCommand(cmd);
-   if (oldcmd) {
+   if (oldcmd)
+   {
       #ifdef DEBUG_SEQUENCE_CLEARING
          GmatCommand *current = oldcmd;
          MessageInterface::ShowMessage("\nClearing this command list:\n");
-         while (current) {
+         while (current)
+         {
             ShowCommand("   current = ", current);
             current = current->GetNext();
          }
          MessageInterface::ShowMessage("\n");
       #endif
+      
       delete oldcmd;
    }
    
@@ -3539,7 +3560,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetFullMessage());
+         MessageInterface::ShowMessage(e.GetFullMessage() + "\n");
          MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
          // assign status
          status = -2;
@@ -3720,12 +3741,12 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    MessageInterface::ShowMessage
       ("Moderator::InterpretScript() clearing both resource and command sequence...\n");
    #endif
-   
-   ClearResource();
-   ClearCommandSeq();
-   
+      
    try
    {
+      ClearResource();
+      ClearCommandSeq();
+      
       CreateSolarSystemInUse();
       
       // Need default CS's in case they are used in the script
@@ -3831,16 +3852,16 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    //MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
    MessageInterface::ShowMessage
       ("Interpreting scripts from the input stream\n");
-   
-   //clear both resource and command sequence
-   if (clearObjs)
-   {
-      ClearResource();
-      ClearCommandSeq();
-   }
-   
+      
    try
    {
+      //clear both resource and command sequence
+      if (clearObjs)
+      {
+         ClearResource();
+         ClearCommandSeq();
+      }
+      
       CreateSolarSystemInUse();
       CreateDefaultCoordSystems();
       
@@ -4979,7 +5000,7 @@ void Moderator::AddForceModelToSandbox(Integer index)
 {
    #if DEBUG_RUN
    MessageInterface::ShowMessage
-      ("Moderator::AddPropagatorToSandbox() entered\n");
+      ("Moderator::AddForceModelToSandbox() entered\n");
    #endif
    
    ForceModel *fm;
