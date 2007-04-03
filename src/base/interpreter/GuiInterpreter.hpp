@@ -62,10 +62,6 @@ public:
    // Parameter
    bool IsParameter(const std::string &type);
    Parameter* GetParameter(const std::string &name);
-   Parameter* CreateParameter(const std::string &type,
-                              const std::string &name,
-                              const std::string &ownerName = "",
-                              const std::string &depName = "");
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,

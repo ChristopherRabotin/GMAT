@@ -315,36 +315,6 @@ bool GuiInterpreter::IsParameter(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &type, const std::string &name,
-//                            const std::string &ownerName, const std::string &depName)
-//------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Parameter.
- * 
- * @param  type       Type of parameter requested
- * @param  name       Name for the parameter.
- * @param  ownerName  object name of parameter requested
- * @param  depName    Dependent object name of parameter requested
- * 
- * @return Pointer to the constructed Parameter.
- */
-//------------------------------------------------------------------------------
-Parameter* GuiInterpreter::CreateParameter(const std::string &type, 
-                                           const std::string &name,
-                                           const std::string &ownerName,
-                                           const std::string &depName)
-{
-   #if DEBUG_CREATE_PARAM
-   MessageInterface::ShowMessage
-      ("NewInterptr::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
-       type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
-   #endif
-   
-   return theModerator->CreateParameter(type, name, ownerName, depName);
-}
-
-
-//------------------------------------------------------------------------------
 // Subscriber* CreateSubscriber(const std::string &type,
 //                              const const std::string &name,
 //                              const std::string &filename = "",
