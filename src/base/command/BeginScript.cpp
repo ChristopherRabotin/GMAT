@@ -221,8 +221,7 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       }
       else
       {
-         //gen << prefix << "EndScript;\n";         
-         gen << prefix << "EndScript;";
+         gen << prefix << "EndScript;\n";         
          current = NULL;
       }
    }
