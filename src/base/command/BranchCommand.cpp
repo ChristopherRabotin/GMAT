@@ -810,6 +810,8 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    UnsignedInt prefixSize = prefix.size();   
    if (this->IsOfType("BranchCommand") && prefix != "")
       fullString = fullString.substr(prefixSize);
+//    else if (this->IsOfType("BranchCommand") && prefix == "")
+//       fullString = "\n" + fullString;
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    ShowCommand("GetGeneratingString() this = ", this);
@@ -831,10 +833,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
        commentLine.c_str(), inlineComment.c_str());
    #endif
    
-   // Handle comments   
-   //if (commentLine != "")
-   //   fullString = prefix + commentLine + fullString;
-   
    // Handle multiple line comments, we want to indent all lines.
    if (commentLine != "")
    {
@@ -853,7 +851,11 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       
       fullString = gen.str() + fullString;
    }
-
+   
+   // Add end-of-line before beginnig new outer branch command
+   if (this->IsOfType("BranchCommand") && prefix == "")
+      fullString = "\n" + fullString;
+   
    // Handle inline comment
    if (inlineComment != "")
       fullString = fullString + inlineComment;
@@ -897,6 +899,10 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
          current = current->GetNext();
       }
    }
+   
+   // Add end-of-line after outer branch command
+   if (prefix == "")
+      fullString = fullString + "\n";
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    MessageInterface::ShowMessage
