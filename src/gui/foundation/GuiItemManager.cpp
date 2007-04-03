@@ -110,12 +110,20 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       if (GmatStringUtil::ToReal(varName.c_str(), rval))
          return 2;
    }
-
+   
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
    
    if (obj == NULL)
-      return -1;
-   
+   {
+      // If name has a system Parameter type, create
+      if (theGuiInterpreter->IsParameter(varName))
+      {
+         theGuiInterpreter->CreateParameter(varName);
+         return 1;
+      }
+      else
+         return -1;
+   }
    
    Parameter *param = (Parameter*)obj;   
    bool isValid = false;
