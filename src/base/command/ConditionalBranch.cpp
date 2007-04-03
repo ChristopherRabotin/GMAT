@@ -1404,27 +1404,42 @@ void ConditionalBranch::ClearWrappers()
    {
       if (lhsWrappers.at(i) != NULL)
       {
-         temp.push_back(lhsWrappers.at(i));
+         // Add lhs wrapper if it has not already added
+         if (find(temp.begin(), temp.end(), lhsWrappers.at(i)) == temp.end())
+            temp.push_back(lhsWrappers.at(i));
+         
          lhsWrappers.at(i) = NULL;
       }
    }
+   
    sz = (Integer) rhsWrappers.size();
    for (Integer i=0; i<sz; i++)
    {
       if (rhsWrappers.at(i) != NULL)
       {
-         // Add wrapper if it has not already added
+         // Add rhs wrapper if it has not already added
          if (find(temp.begin(), temp.end(), rhsWrappers.at(i)) == temp.end())
             temp.push_back(rhsWrappers.at(i));
+         
          rhsWrappers.at(i) = NULL;
       }
    }
+   
    ElementWrapper *wrapper;
    for (UnsignedInt i = 0; i < temp.size(); ++i)
    {
       wrapper = temp[i];
+      
       if (wrapper != NULL)
+      {
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage
+            ("   deleting wrapper=(%p)'%s'\n", wrapper,
+             wrapper->GetDescription().c_str());
+         #endif
          delete wrapper;
+      }
+      
       wrapper = NULL;
    }
    
