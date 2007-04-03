@@ -92,6 +92,12 @@ public:
    //------------------------------------------------------------------------------
    virtual bool Build(Gmat::WriteMode mode) = 0;
    
+   Parameter* CreateParameter(const std::string &str);   
+   Parameter* CreateParameter(const std::string &type,
+                              const std::string &name,
+                              const std::string &ownerName = "",
+                              const std::string &depName = "");
+   
    GmatCommand* InterpretGMATFunction(const std::string &pathAndName);
    
    StringArray& GetListOfObjects(Gmat::ObjectType type);
@@ -145,11 +151,11 @@ protected:
    
    GmatBase* FindObject(const std::string &name);
    
-   Parameter* CreateParameter(const std::string &str);   
-   Parameter* CreateParameter(const std::string &type,
-                              const std::string &name,
-                              const std::string &ownerName = "",
-                              const std::string &depName = "");
+//    Parameter* CreateParameter(const std::string &str);   
+//    Parameter* CreateParameter(const std::string &type,
+//                               const std::string &name,
+//                               const std::string &ownerName = "",
+//                               const std::string &depName = "");
    Parameter* CreateArray( const std::string &arrayStr);   
    Parameter* GetArrayIndex(const std::string &arrayStr,
                             Integer &row, Integer &col);
