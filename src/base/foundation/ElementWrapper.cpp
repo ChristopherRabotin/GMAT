@@ -220,3 +220,26 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
    }
    return true;
 }
+
+Rmatrix ElementWrapper::EvaluateArray() const
+{
+   throw GmatBaseException(
+      "EvaluateArray() method not valid for wrapper of non-Array type.\n");
+}
+
+bool ElementWrapper::SetArray(const Rmatrix &toValue)
+{
+   throw GmatBaseException(
+      "SetArray() method not valid for wrapper of non-Array type.\n");
+}
+std::string ElementWrapper::EvaluateString() const
+{
+   throw GmatBaseException(
+      "EvaluateString() method not valid for wrapper of non-String type.\n");
+}
+
+bool ElementWrapper::SetString(const std::string &toValue)
+{
+   throw GmatBaseException(
+      "SetString() method not valid for wrapper of non-String type.\n");
+}
