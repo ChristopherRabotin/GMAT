@@ -27,7 +27,9 @@
 #include "ParameterWrapper.hpp"
 #include "VariableWrapper.hpp"
 #include "ObjectPropertyWrapper.hpp"
+#include "ArrayWrapper.hpp"
 #include "ArrayElementWrapper.hpp"
+#include "StringObjectWrapper.hpp"
 #include <sstream>         // for std::stringstream
 #include <fstream>         // for std::ifstream used bt GMAT functions
 #include <stack>
@@ -4497,6 +4499,26 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
                      "In Interpreter, created a VariableWrapper for \"%s\"\n",
+                     desc.c_str(), "\"\n");
+            #endif
+         }
+         else if ( (p) && p->IsOfType("Array") )
+         {
+            ew = new ArrayWrapper();
+            itsType = Gmat::ARRAY;
+            #ifdef DEBUG_WRAPPERS
+               MessageInterface::ShowMessage(
+                     "In Interpreter, created an ArrayWrapper for \"%s\"\n",
+                     desc.c_str(), "\"\n");
+            #endif
+         }
+         else if ( (p) && p->IsOfType("String") )
+         {
+            ew = new StringObjectWrapper();
+            itsType = Gmat::STRING_OBJECT;
+            #ifdef DEBUG_WRAPPERS
+               MessageInterface::ShowMessage(
+                     "In Interpreter, created a StringObjectWrapper for \"%s\"\n",
                      desc.c_str(), "\"\n");
             #endif
          }
