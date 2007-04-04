@@ -252,6 +252,7 @@ OBJECTS = \
     math/Transpose.o \
     parameter/AngularParameters.o \
     parameter/Array.o \
+    parameter/ArrayWrapper.o \
     parameter/ArrayElementWrapper.o \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
@@ -285,6 +286,7 @@ OBJECTS = \
     parameter/RefData.o \
     parameter/Rvec6Var.o \
     parameter/SphericalParameters.o \
+    parameter/StringObjectWrapper.o \
     parameter/StringVar.o \
     parameter/TimeData.o \
     parameter/TimeParameters.o \
