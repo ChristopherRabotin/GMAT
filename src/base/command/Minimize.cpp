@@ -578,6 +578,19 @@ bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &w
 
    if (toWrapper == NULL) return false;
    
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   {
+      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
+   if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   {
+      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
+   
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Minimize command\n", 
       withName.c_str());
