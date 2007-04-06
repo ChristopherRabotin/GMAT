@@ -104,10 +104,10 @@ StopCondition::~StopCondition()
 // virtual bool Evaluate()
 //------------------------------------------------------------------------------
 /**
- * @return true if sigle parameter value stopping condition has been met;
+ * @return true if single parameter value stopping condition has been met;
  *   false otherwise
  *
- * @exception <StopConditionException> thrown if unable to retrive parameter
+ * @exception <StopConditionException> thrown if unable to retrieve parameter
  *   value
  *
  * @note count for repeat stop count will be implemented in the next build.
