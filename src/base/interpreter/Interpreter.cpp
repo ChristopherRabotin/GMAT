@@ -779,6 +779,59 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
    return CheckUndefinedReference(cmd);
 }
 
+
+//------------------------------------------------------------------------------
+// bool ValidateSubscriber(GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Checks the input subscriber to make sure it wrappers are set up for it
+ * correctly, if necessary.
+ *
+ * @param <obj> the subscriber to validate
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::ValidateSubscriber(GmatBase *obj)
+{
+   // This method can be called from other than Interpreter, so check if
+   // object is SUBSCRIBER type
+   if (obj->GetType() != Gmat::SUBSCRIBER)
+   {
+      InterpreterException ex
+         ("ElementWrapper for \"" + obj->GetName() + "\" of type \"" +
+          obj->GetTypeName() + "\" cannot be created.");
+      HandleError(ex);
+      return false;
+   }
+   
+   Subscriber *sub = (Subscriber*)obj;
+   sub->ClearWrappers();
+   const StringArray wrapperNames = sub->GetWrapperObjectNameArray();
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage("In ValidateSubscriber, wrapper names are:\n");
+   for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
+      MessageInterface::ShowMessage("   %s\n", wrapperNames[ii].c_str());
+   #endif
+   
+   for (StringArray::const_iterator i = wrapperNames.begin();
+        i != wrapperNames.end(); ++i)
+   {
+      ElementWrapper *ew = CreateElementWrapper(*i, true);
+      
+      if (sub->SetElementWrapper(ew, *i) == false)
+      {
+         InterpreterException ex
+            ("ElementWrapper for \"" + (*i) +
+             "\" cannot be created for the Subscriber \"" + obj->GetName() + "\"");
+         HandleError(ex, false);
+         return false;
+      }
+   }
+   
+   return true;
+}
+
+
 //---------------------------------
 // protected
 //---------------------------------
@@ -3995,6 +4048,11 @@ bool Interpreter::FinalPass()
          // Set return flag to false if any check failed
          bool retval1 = CheckUndefinedReference(obj, false);
          retval = retval && retval1;
+         
+         // Subscribers uses ElementWrapper to handle Parameter, Variable,
+         // Array, Array elements, so create wrappers in ValidateSubscriber()
+         if (retval && obj->GetType() == Gmat::SUBSCRIBER)
+            retval = retval && ValidateSubscriber(obj);
       }
       else
       {
@@ -4360,17 +4418,21 @@ void Interpreter::WriteParts(const std::string &title, StringArray &parts)
 }
 
 //------------------------------------------------------------------------------
-// ElementWrapper* CreateElementWrapper(const std::string &desc)
+// ElementWrapper* CreateElementWrapper(const std::string &desc,
+//                                      bool forSubscriber = false)
 //------------------------------------------------------------------------------
 /**
  * Creates the appropriate ElementWrapper, based on the description.
  *
  * @param  <desc>  description string for the element required
+ * @param  <forSubscriber>  true if creating for subscriber to check
+ *                          for the Parameter first then Object Property
  *
  * @return pointer to the created ElementWrapper
  */
 //------------------------------------------------------------------------------
-ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
+ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
+                                                  bool forSubscriber)
 {
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
@@ -4381,9 +4443,9 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
    {
       ew = new NumberWrapper();
       #ifdef DEBUG_WRAPPERS
-               MessageInterface::ShowMessage(
-                     "In Interpreter, created a NumberWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
+         MessageInterface::ShowMessage(
+            "In Interpreter, created a NumberWrapper for \"%s\"\n",
+            desc.c_str(), "\"\n");
       #endif
    }
    else 
@@ -4414,51 +4476,40 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
       // check to see if it is an object property or a parameter
       else if (desc.find(".") != std::string::npos)
       {
-         // try to parse the string for an owner and type
-         // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
-         // check for object parameter first
-         std::string type, owner, dep;
-         GmatStringUtil::ParseParameter(desc, type, owner, dep);
-         // if it's not a valid object, then see if it's a parameter
-         GmatBase *theObj = theModerator->GetConfiguredObject(owner);
-         if (theObj == NULL)
+         // if creating for subscriber, always create parameter wrapper first
+         if (forSubscriber)
          {
-            bool isParm = theModerator->IsParameter(desc);
-            if (isParm)
+            Parameter *param = CreateParameter(desc);
+            if (param)
             {
-               ew = new ParameterWrapper();
-               itsType = Gmat::PARAMETER_OBJECT;
-               #ifdef DEBUG_WRAPPERS
-                  MessageInterface::ShowMessage(
-                        "In Interpreter, created a ParameterWrapper for \"%s\"\n",
-                        desc.c_str(), "\"\n");
-               #endif
+               CreateParameterWrapper(param, &ew, itsType);
             }
-            else // there is an error
+            else
             {
                InterpreterException ex("\"" + desc + "\"" + 
-                  " is not a valid object property or parameter");
+                   " is not a valid parameter");
                HandleError(ex);
                return NULL;
             }
          }
          else
          {
-            // if there are two dots, then treat it as a parameter
-            if (desc.find_first_of(".") != desc.find_last_of("."))
+            // try to parse the string for an owner and type
+            // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
+            // check for object parameter first
+            std::string type, owner, dep;
+            GmatStringUtil::ParseParameter(desc, type, owner, dep);
+            // if it's not a valid object, then see if it's a parameter
+            GmatBase *theObj = theModerator->GetConfiguredObject(owner);
+            if (theObj == NULL)
             {
-               Parameter *param = CreateParameter(desc);
                //bool isParm = theModerator->IsParameter(desc);
+               Parameter *param = CreateParameter(desc);
+            
                //if (isParm)
                if (param)
                {
-                  ew = new ParameterWrapper();
-                  itsType = Gmat::PARAMETER_OBJECT;
-                  #ifdef DEBUG_WRAPPERS
-                     MessageInterface::ShowMessage(
-                           "In Interpreter, created a ParameterWrapper for \"%s\"\n",
-                           desc.c_str(), "\"\n");
-                  #endif
+                  CreateParameterWrapper(param, &ew, itsType);
                }
                else // there is an error
                {
@@ -4470,27 +4521,15 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
             }
             else
             {
-              // if there is no such field for that object, it is a parameter
-              bool isValidProperty = true;
-              try
-              {
-                 theObj->GetParameterID(type);
-              }
-              catch (BaseException &be)
-              {
-                 isValidProperty = false;
-                 Parameter *param = CreateParameter(desc);
+               // if there are two dots, then treat it as a parameter
+               if (desc.find_first_of(".") != desc.find_last_of("."))
+               {
+                  Parameter *param = CreateParameter(desc);
                   //bool isParm = theModerator->IsParameter(desc);
                   //if (isParm)
                   if (param)
                   {
-                     ew = new ParameterWrapper();
-                     itsType = Gmat::PARAMETER_OBJECT;
-                     #ifdef DEBUG_WRAPPERS
-                        MessageInterface::ShowMessage(
-                              "In Interpreter, created a ParameterWrapper for \"%s\"\n",
-                              desc.c_str(), "\"\n");
-                     #endif
+                     CreateParameterWrapper(param, &ew, itsType);
                   }
                   else // there is an error
                   {
@@ -4499,17 +4538,44 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
                      HandleError(ex);
                      return NULL;
                   }
-              }
-              if (isValidProperty)
-              {
-               ew = new ObjectPropertyWrapper();
-               itsType = Gmat::OBJECT_PROPERTY;
-               #ifdef DEBUG_WRAPPERS
-                  MessageInterface::ShowMessage(
+               }
+               else
+               {
+                  // if there is no such field for that object, it is a parameter
+                  bool isValidProperty = true;
+                  try
+                  {
+                     theObj->GetParameterID(type);
+                  }
+                  catch (BaseException &be)
+                  {
+                     isValidProperty = false;
+                     Parameter *param = CreateParameter(desc);
+                     //bool isParm = theModerator->IsParameter(desc);
+                     //if (isParm)
+                     if (param)
+                     {
+                        CreateParameterWrapper(param, &ew, itsType);
+                     }
+                     else // there is an error
+                     {
+                        InterpreterException ex("\"" + desc + "\"" + 
+                           " is not a valid object property or parameter");
+                        HandleError(ex);
+                        return NULL;
+                     }
+                  }
+                  if (isValidProperty)
+                  {
+                     ew = new ObjectPropertyWrapper();
+                     itsType = Gmat::OBJECT_PROPERTY;
+                     #ifdef DEBUG_WRAPPERS
+                     MessageInterface::ShowMessage(
                         "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
                         desc.c_str(), "\"\n");
-               #endif
-              }
+                     #endif
+                  }
+               }
             }
          }
       }
@@ -4548,16 +4614,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
          }
          else if ( (p) && p->IsOfType("Parameter") )
          {
-            ew = new ParameterWrapper();
-            itsType = Gmat::PARAMETER_OBJECT;
-            #ifdef DEBUG_WRAPPERS
-               MessageInterface::ShowMessage(
-                     "In Interpreter, created a ParameterWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
-            #endif
+            CreateParameterWrapper(p, &ew, itsType);
          }
       }
    }
+
    if (ew)
    {
       // set the description string; this will also setup the wrapper
@@ -4574,5 +4635,47 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc)
       }
    }
    return ew;
+}
+
+
+//------------------------------------------------------------------------------
+// void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
+//                             Gmat::WrapperDataType &itsType)
+//------------------------------------------------------------------------------
+/*
+ * Creates ParameterWrapper.
+ *
+ * @param <param> Pointer to Paramter
+ * @param <ew> Adress of outpout ElementWrapper pointer
+ * @param <itsType> outpout wrapper type
+ */
+//------------------------------------------------------------------------------
+void Interpreter::CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
+                                         Gmat::WrapperDataType &itsType)
+{
+   *ew = NULL;
+   
+   if (param->IsOfType("String"))
+   {
+      *ew = new StringObjectWrapper();
+      itsType = Gmat::STRING_OBJECT;
+      
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("In Interpreter, created a StringObjectWrapper for \"%s\"\n",
+          param->GetName().c_str(), "\"\n");
+      #endif
+   }
+   else
+   {
+      *ew = new ParameterWrapper();
+      itsType = Gmat::PARAMETER_OBJECT;
+      
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage
+         ("In Interpreter, created a ParameterWrapper for \"%s\"\n",
+          param->GetName().c_str(), "\"\n");
+      #endif
+   }
 }
 

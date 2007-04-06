@@ -111,6 +111,8 @@ public:
    
    // to check commands
    bool ValidateCommand(GmatCommand *cmd);
+   // to check subscriber
+   bool ValidateSubscriber(GmatBase *obj);
    
 protected:
    
@@ -151,11 +153,6 @@ protected:
    
    GmatBase* FindObject(const std::string &name);
    
-//    Parameter* CreateParameter(const std::string &str);   
-//    Parameter* CreateParameter(const std::string &type,
-//                               const std::string &name,
-//                               const std::string &ownerName = "",
-//                               const std::string &depName = "");
    Parameter* CreateArray( const std::string &arrayStr);   
    Parameter* GetArrayIndex(const std::string &arrayStr,
                             Integer &row, Integer &col);
@@ -279,7 +276,11 @@ private:
    void WriteParts(const std::string &title, StringArray &parts);
    
    // for wrappers
-   ElementWrapper* CreateElementWrapper(const std::string &desc);
+   ElementWrapper* CreateElementWrapper(const std::string &desc,
+                                        bool forSubscriber = false);
+   void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
+                               Gmat::WrapperDataType &itsType);
+   
 };
 
 #endif // INTERPRETER_HPP
