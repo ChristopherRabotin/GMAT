@@ -127,7 +127,7 @@ TextEphemFile::TextEphemFile(const TextEphemFile &copy) :
       
    for (i = 0; i < BUFFER_SIZE; i++)
    {
-   	   mTimeBuffer[i] = copy.mTimeBuffer[i];
+           mTimeBuffer[i] = copy.mTimeBuffer[i];
       mXposBuffer[i] = copy.mXposBuffer[i];
       mYposBuffer[i] = copy.mYposBuffer[i];
       mZposBuffer[i] = copy.mZposBuffer[i];
@@ -181,7 +181,7 @@ TextEphemFile& TextEphemFile::operator=(const TextEphemFile& right)
       
    for (i = 0; i < BUFFER_SIZE; i++)
    {
-   	   mTimeBuffer[i] = right.mTimeBuffer[i];
+           mTimeBuffer[i] = right.mTimeBuffer[i];
       mXposBuffer[i] = right.mXposBuffer[i];
       mYposBuffer[i] = right.mYposBuffer[i];
       mZposBuffer[i] = right.mZposBuffer[i];
@@ -415,7 +415,7 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
    if (thePublisher->GetRunState() == Gmat::TARGETING)
       return true;
    
-   if (mNumVarParams > 0)
+   if (mNumParams > 0)
    {      
       if (!dstream.is_open())
          if (!OpenReportFile())
@@ -437,8 +437,8 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
          ("TextEphemFile::Distribute() first dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
           dat[2], dat[3], dat[4], dat[5], dat[6]);
          MessageInterface::ShowMessage
-            ("   mNumVarParams=%d, mOutputA1Mjd=%f, mIntervalInSec=%f\n",
-             mNumVarParams, mOutputA1Mjd, mIntervalInSec);
+            ("   mNumParams=%d, mOutputA1Mjd=%f, mIntervalInSec=%f\n",
+             mNumParams, mOutputA1Mjd, mIntervalInSec);
          #endif
       }
       
@@ -475,17 +475,17 @@ void TextEphemFile::WriteColumnTitle()
          return;
 
       // write heading for each item
-      for (int i=0; i < mNumVarParams; i++)
+      for (int i=0; i < mNumParams; i++)
       {
           if (!dstream.good())
              dstream.clear();
           
           // set longer width of param names or columnWidth
-          Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
-             mVarParamNames[i].length() : columnWidth;
+          Integer width = (Integer)mParamNames[i].length() > columnWidth ?
+             mParamNames[i].length() : columnWidth;
 
           // parameter name has Gregorian, minimum width is 24
-          if (mVarParamNames[i].find("Gregorian") != mVarParamNames[i].npos)
+          if (mParamNames[i].find("Gregorian") != mParamNames[i].npos)
              if (width < 24)
                 width = 24;
           
@@ -496,8 +496,11 @@ void TextEphemFile::WriteColumnTitle()
           
           if (leftJustify)
              dstream.setf(std::ios::left);
-
-          dstream << mVarParamNames[i] << "   ";
+          
+          if (zeroFill)
+             dstream.setf(std::ios::showpoint);
+          
+          dstream << mParamNames[i] << "   ";
 
           // save time width for writing data
           mColWidth[i] = width;
@@ -552,43 +555,43 @@ void TextEphemFile::WriteToBuffer()
       ("TextEphemFile::WriteToBuffer() mCurrA1Mjd=%f\n", mCurrA1Mjd);
    #endif
    
-   for (int i=1; i < mNumVarParams; i++)
+   for (int i=1; i < mNumParams; i++)
    {
       // assuming all real parameters
 
-      rval = mVarParams[i]->EvaluateReal();
+      rval = mParams[i]->EvaluateReal();
 
       #if DEBUG_EPHEMFILE_DATA
       MessageInterface::ShowMessage
          ("TextEphemFile::WriteToBuffer() i=%d, rval=%f\n", i, rval);
       #endif
       
-      if (i == 1) //(mVarParams[i]->GetName() == "X")
+      if (i == 1) //(mParams[i]->GetName() == "X")
       {
          mXposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[0] = rval;
       }
-      else if (i == 2) //(mVarParams[i]->GetName() == "Y")
+      else if (i == 2) //(mParams[i]->GetName() == "Y")
       {
          mYposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[1] = rval;
       }
-      else if (i == 3) //(mVarParams[i]->GetName() == "Z")
+      else if (i == 3) //(mParams[i]->GetName() == "Z")
       {
          mZposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[2] = rval;
       }
-      else if (i == 4) //(mVarParams[i]->GetName() == "VX")
+      else if (i == 4) //(mParams[i]->GetName() == "VX")
       {
          mXvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[3] = rval;
       }
-      else if (i == 5) //(mVarParams[i]->GetName() == "VY")
+      else if (i == 5) //(mParams[i]->GetName() == "VY")
       {
          mYvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[4] = rval;
       }
-      else if (i == 6) //(mVarParams[i]->GetName() == "VZ")
+      else if (i == 6) //(mParams[i]->GetName() == "VZ")
       {
          mZvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[5] = rval;
@@ -703,11 +706,10 @@ void TextEphemFile::WriteTime(Real epoch)
    dstream.fill(' ');
          
    if (leftJustify)
-   {
       dstream.setf(std::ios::left);
-      if (zeroFill)
-         dstream.fill('0');                 
-   }
+   
+   if (zeroFill)
+      dstream.setf(std::ios::showpoint);
    
    if (mIsGregorian)
    {
@@ -729,18 +731,17 @@ void TextEphemFile::WriteData()
 {
    WriteTime(mOutputA1Mjd);
    
-   for (int i=1; i<mNumVarParams; i++)
+   for (int i=1; i<mNumParams; i++)
    {
       dstream.width(mColWidth[i]);
       dstream.fill(' ');
-         
+      
       if (leftJustify)
-      {
          dstream.setf(std::ios::left);
-         if (zeroFill)
-            dstream.fill('0');                 
-      }
-         
+      
+      if (zeroFill)
+         dstream.setf(std::ios::showpoint);
+      
       dstream.precision(precision);
       dstream << mOutputVals[i-1] << "   "; 
    }
@@ -772,19 +773,18 @@ void TextEphemFile::WriteFirstData()
    // Write time in epoch format
    WriteTime(mCurrA1Mjd);
    
-   for (int i=1; i<mNumVarParams; i++)
+   for (int i=1; i<mNumParams; i++)
    {
-      rval = mVarParams[i]->EvaluateReal();
+      rval = mParams[i]->EvaluateReal();
       
       dstream.width(mColWidth[i]);
       dstream.fill(' ');
       
       if (leftJustify)
-      {
          dstream.setf(std::ios::left);
-         if (zeroFill)
-            dstream.fill('0');                 
-      }
+      
+      if (zeroFill)
+         dstream.setf(std::ios::showpoint);
       
       dstream.precision(precision);
       dstream << rval << "   "; 
