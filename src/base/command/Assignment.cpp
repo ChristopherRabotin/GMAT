@@ -868,6 +868,15 @@ bool Assignment::Execute()
             retval = true;
             break;
                
+         case Gmat::ON_OFF_TYPE:
+            #ifdef DEBUG_ASSIGNMENT_EXEC
+               MessageInterface::ShowMessage("Assignment::Execute setting "
+                  "string to %s\n", value.c_str());
+            #endif
+            parmOwner->SetOnOffParameter(parmID, value);
+            retval = true;
+            break;
+            
          case Gmat::BOOLEAN_TYPE:
             bool tf;
             if (value == "true")

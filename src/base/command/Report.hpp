@@ -84,7 +84,8 @@ protected:
    std::vector<Integer>       parmRows;
    /// Array of parameter column index
    std::vector<Integer>       parmCols;
-   
+
+   void WriteHeaders(std::stringstream &datastream, Integer colWidth);
 };
 
 #endif      // Report_hpp

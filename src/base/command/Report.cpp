@@ -271,12 +271,13 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       parmRows.push_back(row);
       parmCols.push_back(col);
       
+      #ifdef __SHOW_NAMES_IN_REPORTFILE__
       // For compare report column header
       if (reporter)
          reporter->AddParameterForTitleOnly(name);
       else
          throw CommandException("Report command has undefined ReportFile object.\n");
-      
+      #endif
    }
    
    #ifdef DEBUG_REPORTING
@@ -414,10 +415,10 @@ bool Report::Initialize()
       throw CommandException(
          "Object named \"" + rfName +
          "\" is not a ReportFile; Report command cannot execute\n");
-
-   if (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On")
-      needsHeaders = true;
-
+   
+   needsHeaders =
+      reporter->GetOnOffParameter(reporter->GetParameterID("WriteHeaders")) == "On";
+   
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
       object = ((*objectMap)[*i]);
@@ -457,53 +458,37 @@ bool Report::Execute()
    // Note that this is done here, rather than during initialization, in case
    // the user has changed the values during the run.
    datastream.precision(reporter->GetIntegerParameter(reporter->GetParameterID("Precision")));
-
+   
    bool leftJustify = false;
-   bool fillZero = false;
-   if (reporter->GetStringParameter(reporter->GetParameterID("LeftJustify")) == "On")
-   {
+   if (reporter->GetOnOffParameter(reporter->GetParameterID("LeftJustify")) == "On")
       leftJustify = true;
-      if (reporter->GetStringParameter(reporter->GetParameterID("ZeroFill")) == "On")
-         fillZero = true;
-   }
+   
+   bool zeroFill = false;
+   if (reporter->GetOnOffParameter(reporter->GetParameterID("ZeroFill")) == "On")
+      zeroFill = true;
    
    int colWidth = reporter->GetIntegerParameter(reporter->GetParameterID("ColumnWidth"));
-
-   if (needsHeaders && 
-       (reporter->GetStringParameter(reporter->GetParameterID("WriteHeaders")) == "On"))
-   {
-      reporter->TakeAction("ActivateForReport", "On");
-      //for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
-      for (StringArray::iterator i = actualParmNames.begin();
-           i != actualParmNames.end(); ++i)
-      {
-         if (leftJustify)
-            datastream.setf(std::ios::left);
-         
-         datastream.width(colWidth);
-         datastream << (*i);
-         datastream << "   ";
-      }
-      std::string header = datastream.str();
-      reporter->ReceiveData(header.c_str(), header.length());
-      datastream.str("");
-   }
-   needsHeaders = false;
    
+   if (leftJustify)
+      datastream.setf(std::ios::left);
+   
+   if (needsHeaders &&
+       reporter->GetOnOffParameter(reporter->GetParameterID("WriteHeaders")) == "On")
+      WriteHeaders(datastream, colWidth);
+   
+   // if zero fill, show decimal point
+   // showing decimal point automatically filles zero
+   if (zeroFill)
+      datastream.setf(std::ios::showpoint);
+   
+   std::string desc;
    for (std::vector<Parameter*>::iterator i = parms.begin(); i != parms.end(); ++i)
    {
       if (!(*i)->IsReportable())
          continue;
-            
-      if (leftJustify)
-      {
-         datastream.setf(std::ios::left);
-         if (fillZero)
-            datastream.fill('0');
-      }
       
       datastream.width(colWidth);
-
+      
       //MessageInterface::ShowMessage
       //   (">>>>> Report::Execute() parameter=%s, returnType=%d\n", (*i)->GetName().c_str(),
       //    (*i)->GetReturnType());
@@ -526,7 +511,7 @@ bool Report::Execute()
          datastream << (*i)->EvaluateString() << "   ";
       }
    }
-
+   
    // Publish it
 // This is how it should be done:
 //   reportID = reporter->GetProviderId();
@@ -545,4 +530,24 @@ bool Report::Execute()
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void WriteHeaders(std::stringstream &datastream, Integer colWidth)
+//------------------------------------------------------------------------------
+void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
+{
+   reporter->TakeAction("ActivateForReport", "On");
+   for (StringArray::iterator i = actualParmNames.begin();
+        i != actualParmNames.end(); ++i)
+   {
+      datastream.width(colWidth);
+      datastream << (*i);
+      datastream << "   ";
+   }
+   
+   std::string header = datastream.str();
+   reporter->ReceiveData(header.c_str(), header.length());
+   datastream.str("");
+   needsHeaders = false;
+}
 
