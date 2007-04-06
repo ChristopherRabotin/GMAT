@@ -703,6 +703,9 @@ bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
 void GmatStringUtil::ParseParameter(const std::string &str, std::string &type,
                                     std::string &owner, std::string &dep)
 {
+   type  = "";
+   owner = "";
+   dep   = "";
    //find owner.dep.type
    std::string str1 = str;
    std::string::size_type pos1 = str1.find(".");
