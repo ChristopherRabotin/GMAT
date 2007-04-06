@@ -71,6 +71,7 @@ StringVar::StringVar(const std::string &name, const std::string &typeStr,
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                false, false, true)
 {  
+   objectTypeNames.push_back("String");
    mStringValue = STRING_PARAMETER_UNDEFINED;
    mReturnType = Gmat::STRING_TYPE;
 }
