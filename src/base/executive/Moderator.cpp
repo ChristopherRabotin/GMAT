@@ -1587,6 +1587,7 @@ Burn* Moderator::GetBurn(const std::string &name)
 //------------------------------------------------------------------------------
 bool Moderator::IsParameter(const std::string &str)
 {
+   if (str == "") return false;
    StringArray sar = theFactoryManager->GetListOfItems(Gmat::PARAMETER);
    std::string type;
    
