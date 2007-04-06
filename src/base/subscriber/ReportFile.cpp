@@ -28,11 +28,12 @@
 #include <iomanip>
 #include <sstream>
 
-//#define DEBUG_REPORTFILE 1
 //#define DEBUG_REPORTFILE_OPEN 1
 //#define DEBUG_REPORTFILE_SET 1
+//#define DEBUG_REPORTFILE_INIT 1
 //#define DEBUG_REPORTFILE_DATA 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_WRAPPER_CODE 1
 
 //---------------------------------
 // static data
@@ -53,14 +54,14 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::OBJECTARRAY_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,        //"Filename",
+   Gmat::INTEGER_TYPE,       //"Precision",
+   Gmat::OBJECTARRAY_TYPE,   //"Add",
+   Gmat::ON_OFF_TYPE,        //"WriteHeaders",
+   Gmat::ON_OFF_TYPE,        //"LeftJustify",
+   Gmat::ON_OFF_TYPE,        //"ZeroFill",
+   Gmat::INTEGER_TYPE,       //"ColumnWidth",
+   Gmat::ON_OFF_TYPE,        //"SolverIterations",
 };
 
 
@@ -69,7 +70,7 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
 //            const std::string &fileName)
 //------------------------------------------------------------------------------
 ReportFile::ReportFile(const std::string &type, const std::string &name,
-                       const std::string &fileName, Parameter *firstVarParam) :
+                       const std::string &fileName, Parameter *firstParam) :
    Subscriber      (type, name),
    outputPath      (""),
    filename        (fileName),
@@ -82,10 +83,10 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    lastUsedProvider(-1),
    usedByReport    (false)
 {
-   mNumVarParams = 0;
+   mNumParams = 0;
 
-   if (firstVarParam != NULL)
-      AddVarParameter(firstVarParam->GetName(), mNumVarParams);
+   if (firstParam != NULL)
+      AddParameter(firstParam->GetName(), mNumParams);
    
    parameterCount = ReportFileParamCount;
    initial = true;
@@ -119,13 +120,10 @@ ReportFile::ReportFile(const ReportFile &rf) :
    usedByReport    (rf.usedByReport),
    calledByReport  (rf.calledByReport)
 {
-   //if (filename == "")
-   //   filename = "ReportFile.txt";
-
    filename = rf.filename;
-   mVarParams = rf.mVarParams; 
-   mNumVarParams = rf.mNumVarParams;
-   mVarParamNames = rf.mVarParamNames;
+   mParams = rf.mParams; 
+   mNumParams = rf.mNumParams;
+   mParamNames = rf.mParamNames;
    mAllRefObjectNames = rf.mAllRefObjectNames;
    
    parameterCount = ReportFileParamCount;
@@ -157,9 +155,9 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
    solverIterations = rf.solverIterations;
-   mVarParams = rf.mVarParams; 
-   mNumVarParams = rf.mNumVarParams;
-   mVarParamNames = rf.mVarParamNames;
+   mParams = rf.mParams; 
+   mNumParams = rf.mNumParams;
+   mParamNames = rf.mParamNames;
    mAllRefObjectNames = rf.mAllRefObjectNames;
    lastUsedProvider = rf.lastUsedProvider;
    usedByReport = rf.usedByReport;
@@ -180,10 +178,16 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
 //------------------------------------------------------------------------------
 bool ReportFile::Initialize()
 {
+   #if DEBUG_REPORTFILE_INIT
+   MessageInterface::ShowMessage
+      ("ReportFile::Initialize() active=%d, mNumParams=%d, usedByReport=%d\n",
+       active, mNumParams, usedByReport);
+   #endif
+   
    // Check if there are parameters selected for report
    if (active)
    {
-      if ((mNumVarParams == 0) && !usedByReport)
+      if ((mNumParams == 0) && !usedByReport)
       {
          MessageInterface::ShowMessage
             ("ReportFile::Initialize() ReportFile:%s will not be written.\n"
@@ -192,14 +196,14 @@ bool ReportFile::Initialize()
          active = false;
          return false;
       }
-
-      if ((mNumVarParams > 0))
-         if (mVarParams[0] == NULL)
+      
+      if ((mNumParams > 0))
+         if (mParams[0] == NULL)
          {
             MessageInterface::ShowMessage
                ("ReportFile::Initialize() ReportFile will not be created.\n"
                 "The first parameter:%s selected for the report file is NULL\n",
-                mVarParamNames[0].c_str());
+                mParamNames[0].c_str());
             
             active = false;
             return false;
@@ -218,6 +222,7 @@ bool ReportFile::Initialize()
    
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
@@ -253,7 +258,7 @@ bool ReportFile::TakeAction(const std::string &action,
 {
    if (action == "Clear")
    {
-      ClearVarParameters();
+      ClearParameters();
       return true;
    }
 
@@ -293,22 +298,22 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
    if (type == Gmat::PARAMETER)
    {
       // parameters
-      for (unsigned int i=0; i<mVarParamNames.size(); i++)
+      for (unsigned int i=0; i<mParamNames.size(); i++)
       {
-         if (mVarParamNames[i] == oldName)
-            mVarParamNames[i] = newName;
+         if (mParamNames[i] == oldName)
+            mParamNames[i] = newName;
       }
    }
    else
    {
       std::string::size_type pos;
       
-      for (unsigned int i=0; i<mVarParamNames.size(); i++)
+      for (unsigned int i=0; i<mParamNames.size(); i++)
       {
-         pos = mVarParamNames[i].find(oldName);
+         pos = mParamNames[i].find(oldName);
          
-         if (pos != mVarParamNames[i].npos)
-            mVarParamNames[i].replace(pos, oldName.size(), newName);
+         if (pos != mParamNames[i].npos)
+            mParamNames[i].replace(pos, oldName.size(), newName);
       }
    }
    
@@ -333,13 +338,13 @@ std::string ReportFile::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ReportFile::GetParameterID(const std::string &str) const
 {
-    for (Integer i = FILENAME; i < ReportFileParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - SubscriberParamCount])
-            return i;
-    }
-
-    return Subscriber::GetParameterID(str);
+   for (Integer i = FILENAME; i < ReportFileParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - SubscriberParamCount])
+         return i;
+   }
+   
+   return Subscriber::GetParameterID(str);
 }
 
 
@@ -366,6 +371,27 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
    else
       return Subscriber::GetParameterTypeString(id);
 
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool ReportFile::IsParameterReadOnly(const Integer id) const
+{
+   if (id == ZERO_FILL)
+      return true;
+   
+   return Subscriber::IsParameterReadOnly(id);
 }
 
 
@@ -429,35 +455,18 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
    {
-      return filename;
-   }
-   else if (id == WRITE_HEADERS)
-   {
-      if (writeHeaders)
-         return "On";
+      UnsignedInt index = filename.find_last_of("/\\");
+      if (index != filename.npos)
+         return filename;
       else
-         return "Off";
-   }
-   else if (id == LEFT_JUSTIFY)
-   {
-      if (leftJustify)
-         return "On";
-      else
-         return "Off";
-   }
-   else if (id == ZERO_FILL)
-   {
-      if (zeroFill)
-         return "On";
-      else
-         return "Off";
-   }
-   else if (id == SOLVER_ITERATIONS)
-   {
-      if (solverIterations)
-         return "On";
-      else
-         return "Off";
+      {
+         // if pathname is the same as the default path, just write name
+         std::string opath = filename.substr(0, index+1);
+         if (opath == outputPath)
+            return filename.substr(index+1);
+         else
+            return filename;
+      }
    }
    
    return Subscriber::GetStringParameter(id);
@@ -486,7 +495,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
          dstream.close();
          dstream.open(value.c_str());
       }
-
+      
       filename = value;
       
       if (filename.find("/") == filename.npos &&
@@ -497,73 +506,13 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value)
    }
    else if (id == ADD)
    {
-      #ifdef DEBUG_REPORTFILE
+      #ifdef DEBUG_REPORTFILE_SET
          MessageInterface::ShowMessage(
-            "ReportFile::SetStringParameter() Adding parameter '%s' to\n    "
+            "ReportFile::SetStringParameter() Adding parameter '%s' to "
             "ReportFile '%s'\n", value.c_str(), instanceName.c_str());
       #endif
-      return AddVarParameter(value, mNumVarParams);
+      return AddParameter(value, mNumParams);
    }
-   else if (id == WRITE_HEADERS)
-   {
-      if (strcmp(value.c_str(), "On") == 0)
-      {
-         writeHeaders = true;
-         return true;
-      }   
-      else if (strcmp(value.c_str(), "Off") == 0)
-      {
-         writeHeaders = false;
-         return true;
-      }
-      else
-         return false;   
-   }   
-   else if (id == LEFT_JUSTIFY)
-   {
-      if (strcmp(value.c_str(), "On") == 0)
-      {
-         leftJustify = true;
-         return true;
-      }   
-      else if (strcmp(value.c_str(), "Off") == 0)
-      {
-         leftJustify = false;
-         return true;
-      }
-      else
-         return false;   
-   }   
-   else if (id == ZERO_FILL)
-   {
-      if (strcmp(value.c_str(), "On") == 0)
-      {
-         zeroFill = true;
-         return true;
-      }   
-      else if (strcmp(value.c_str(), "Off") == 0)
-      {
-         zeroFill = false;
-         return true;
-      }
-      else
-         return false;   
-   }   
-   else if (id == SOLVER_ITERATIONS)
-   {
-      if (strcmp(value.c_str(), "On") == 0)
-      {
-         solverIterations = true;
-         return true;
-      }   
-      else if (strcmp(value.c_str(), "Off") == 0)
-      {
-         solverIterations = false;
-         return true;
-      }
-      else
-         return false;   
-   }   
    
    return Subscriber::SetStringParameter(id, value);
 }
@@ -590,7 +539,7 @@ bool ReportFile::SetStringParameter(const Integer id, const std::string &value,
    switch (id)
    {
    case ADD:
-      return AddVarParameter(value, index);
+      return AddParameter(value, index);
    default:
       return Subscriber::SetStringParameter(id, value, index);
    }
@@ -615,16 +564,16 @@ bool ReportFile::SetStringParameter(const std::string &label,
 //------------------------------------------------------------------------------
 const StringArray& ReportFile::GetStringArrayParameter(const Integer id) const
 {
-   #if DEBUG_REPORTFILE
+   #if DEBUG_REPORTFILE_GET
    MessageInterface::ShowMessage
-      ("ReportFile::GetStringArrayParameter(%d) mVarParamNames.size()=%d\n",
-       id, mVarParamNames.size());
+      ("ReportFile::GetStringArrayParameter(%d) mParamNames.size()=%d\n",
+       id, mParamNames.size());
    #endif
    
    switch (id)
    {
    case ADD:
-      return mVarParamNames;
+      return mParamNames;
    default:
       return Subscriber::GetStringArrayParameter(id);
    }
@@ -640,6 +589,77 @@ const StringArray& ReportFile::GetStringArrayParameter(const std::string &label)
 }
 
 
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+std::string ReportFile::GetOnOffParameter(const Integer id) const
+{
+   std::string retStr;
+   
+   switch (id)
+   {
+   case WRITE_HEADERS:
+      retStr = writeHeaders ? "On" : "Off";
+      return retStr;
+   case LEFT_JUSTIFY:
+      retStr = leftJustify ? "On" : "Off";
+      return retStr;
+   case ZERO_FILL:
+      retStr = zeroFill ? "On" : "Off";
+      return retStr;
+   case SOLVER_ITERATIONS:
+      retStr = solverIterations ? "On" : "Off";
+      return retStr;
+   default:
+      return Subscriber::GetOnOffParameter(id);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+bool ReportFile::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   switch (id)
+   {
+   case WRITE_HEADERS:
+      writeHeaders = (value == "On") ? true : false;
+      return true;
+   case LEFT_JUSTIFY:
+      leftJustify = (value == "On") ? true : false;
+      return true;
+   case ZERO_FILL:
+      zeroFill = (value == "On") ? true : false;
+      return true;
+   case SOLVER_ITERATIONS:
+      solverIterations = (value == "On") ? true : false;
+      return true;
+   default:
+      return Subscriber::SetOnOffParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ReportFile::GetOnOffParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string ReportFile::GetOnOffParameter(const std::string &label) const
+{
+   return GetOnOffParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool ReportFile::SetOnOffParameter(const std::string &label, 
+                                   const std::string &value)
+{
+   return SetOnOffParameter(GetParameterID(label), value);
+}
+
+
 //------------------------------------------------------------------------------
 // virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
 //                                const std::string &name)
@@ -647,10 +667,10 @@ const StringArray& ReportFile::GetStringArrayParameter(const std::string &label)
 GmatBase* ReportFile::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name)
 {
-   for (int i=0; i<mNumVarParams; i++)
+   for (int i=0; i<mNumParams; i++)
    {
-      if (mVarParamNames[i] == name)
-         return mVarParams[i];
+      if (mParamNames[i] == name)
+         return mParams[i];
    }
 
    throw SubscriberException("ReportFile::GetRefObject() the object name: " + name +
@@ -666,68 +686,35 @@ bool ReportFile::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
    #if DEBUG_REPORTFILE_SET
-   MessageInterface::ShowMessage("ReportFile::SetRefObject() name=%s\n",
-                                 name.c_str());
+   MessageInterface::ShowMessage
+      ("ReportFile::SetRefObject() obj=%p, name=%s, objtype=%s, objname=%s\n",
+       obj, name.c_str(), obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
    
    if (type == Gmat::PARAMETER)
    {
-      for (int i=0; i<mNumVarParams; i++)
+      SetWrapperReference(obj, name);
+      
+      for (int i=0; i<mNumParams; i++)
       {
-         // Handle array index
+         // Handle array elements
          Integer row, col;
-         std::string newName;
-         GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
+         std::string realName;
+         GmatStringUtil::GetArrayIndex(mParamNames[i], row, col, realName);
          
          #if DEBUG_REPORTFILE_SET
-         MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
+         MessageInterface::ShowMessage("   realName=%s\n", realName.c_str());
          #endif
          
-         if (newName == name)
-         {
-            mVarParams[i] = (Parameter*)obj;
-            
-            // Test see if it is reportable. Cannot test in AddVarParameter(),
-            // because it just addes the name.
-            if (!mVarParams[i]->IsReportable())
-            {
-               MessageInterface::ShowMessage
-                  ("*** WARNING *** The parameter:%s is not reportable so it "
-                   "will not be written to ReportFile.", name.c_str());
-            }
-            
-            return true;
-         }
+         if (realName == name)
+            mParams[i] = (Parameter*)obj;
       }
+      
+      return true;
    }
    
    return Subscriber::SetRefObject(obj, type, name);
 }
-
-
-// //------------------------------------------------------------------------------
-// // bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
-// //------------------------------------------------------------------------------
-// /**
-//  * Sets the reference objects that get saved.
-//  * 
-//  * @param type The type of the reference object.
-//  * @param name THe name of the reference object.
-//  * 
-//  * @return true on success, false on failure.
-//  */
-// //------------------------------------------------------------------------------
-// bool ReportFile::SetRefObjectName(const Gmat::ObjectType type,
-//                                   const std::string &name)
-// {
-//    if (name == "")
-//       return false;
-   
-//    if (type == Gmat::PARAMETER)
-//       return SetStringParameter(ADD, name);
-
-//    return Subscriber::SetRefObjectName(type, name);
-// }
 
 
 //------------------------------------------------------------------------------
@@ -744,11 +731,11 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
       {
          // Handle array index
          Integer row, col;
-         std::string newName;
-         for (int i=0; i<mNumVarParams; i++)
+         std::string realName;
+         for (int i=0; i<mNumParams; i++)
          {
-            GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
-            mAllRefObjectNames.push_back(newName);
+            GmatStringUtil::GetArrayIndex(mParamNames[i], row, col, realName);
+            mAllRefObjectNames.push_back(realName);
          }
       }
    default:
@@ -760,34 +747,38 @@ const StringArray& ReportFile::GetRefObjectNameArray(const Gmat::ObjectType type
 
 
 //------------------------------------------------------------------------------
-// Integer GetNumVarParameters()
+// Integer GetNumParameters()
 //------------------------------------------------------------------------------
-Integer ReportFile::GetNumVarParameters()
+Integer ReportFile::GetNumParameters()
 {
-   return mNumVarParams;
+   return mNumParams;
 }
 
 
 //------------------------------------------------------------------------------
-// bool AddVarParameter(const std::string &paramName, Integer index)
+// bool AddParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
-bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
+bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 {
-   #ifdef DEBUG_REPORTFILE
+   #ifdef DEBUG_REPORTFILE_SET
       MessageInterface::ShowMessage(
-         "ReportFile::AddVarParameter() Adding parameter '%s' to \n   "
+         "ReportFile::AddParameter() Adding parameter '%s' to "
          "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
    #endif
    
-   if (paramName != "" && index == mNumVarParams)
+   if (paramName != "" && index == mNumParams)
    {
       // if paramName not found, add
-      if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
-          mVarParamNames.end())
+      if (find(mParamNames.begin(), mParamNames.end(), paramName) ==
+          mParamNames.end())
       {
-         mVarParamNames.push_back(paramName);
-         mNumVarParams = mVarParamNames.size();
-         mVarParams.push_back(NULL);
+         mParamNames.push_back(paramName);
+         mNumParams = mParamNames.size();
+         mParams.push_back(NULL);
+         paramWrappers.push_back(NULL); //loj: 4/4/07 added
+         #ifdef DEBUG_REPORTFILE_SET
+         MessageInterface::ShowMessage("   '%s' added\n", paramName.c_str());
+         #endif
          return true;
       }
    }
@@ -801,7 +792,7 @@ bool ReportFile::AddVarParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
 bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
 {
-   #ifdef DEBUG_REPORTFILE
+   #ifdef DEBUG_REPORTFILE_SET
    MessageInterface::ShowMessage
       ("ReportFile::AddParameterForTitle() Adding parameter '%s' to \n   "
        "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
@@ -809,15 +800,35 @@ bool ReportFile::AddParameterForTitleOnly(const std::string &paramName)
    
    if (paramName != "")
    {
-      if (find(mVarParamNames.begin(), mVarParamNames.end(), paramName) ==
-          mVarParamNames.end())
+      if (find(mParamNames.begin(), mParamNames.end(), paramName) ==
+          mParamNames.end())
       {
-         mVarParamNames.push_back(paramName);
+         mParamNames.push_back(paramName);
          return true;
       }
    }
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+const StringArray& ReportFile::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+   wrapperObjectNames.insert(wrapperObjectNames.begin(), mParamNames.begin(),
+                             mParamNames.end());
+   
+   #ifdef DEBUG_WRAPPER_CODE
+   MessageInterface::ShowMessage
+      ("ReportFile::GetWrapperObjectNameArray() size=%d\n",  wrapperObjectNames.size());
+   for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", wrapperObjectNames[i].c_str());
+   #endif
+   
+   return wrapperObjectNames;
 }
 
 
@@ -852,18 +863,12 @@ bool ReportFile::OpenReportFile(void)
       throw SubscriberException("Cannot open report file: " + filename + "\n");
    }
    
-   dstream.precision(precision);
-   dstream.width(columnWidth);
-   dstream.setf(std::ios::showpoint);
-   dstream.fill(' ');
-
-   if (leftJustify)
-   {
-      dstream.setf(std::ios::left);
-   
-      if (zeroFill)
-         dstream.fill('0');
-   }
+   //dstream.precision(precision);
+   //dstream.width(columnWidth);
+   //dstream.setf(std::ios::showpoint);
+   //dstream.fill(' ');   
+   //if (leftJustify)
+   //   dstream.setf(std::ios::left);
    
    return true;
 }
@@ -926,7 +931,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    if (len == 0)
       return false;
    
-   if (mNumVarParams > 0)
+   if (mNumParams > 0)
    {
       Real rval = -9999.999;
       std::string sval;
@@ -941,59 +946,65 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
       if (!dstream.good())
          dstream.clear();
       
-      for (int i=0; i < mNumVarParams; i++)
+      std::string desc;
+      bool reportable = false;
+      
+      for (int i=0; i < mNumParams; i++)
       {
-         if (!mVarParams[i]->IsReportable())
+         desc = mParamNames[i];
+         reportable = mParams[i]->IsReportable();
+         
+         //MessageInterface::ShowMessage
+         //   ("===> \"%s\", reportable=%d\n", desc.c_str(), reportable);
+         
+         if (!reportable)
             continue;
          
          // set longer width of param names or columnWidth
-         Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
-            mVarParamNames[i].length() : columnWidth;
+         Integer width = (Integer)desc.length() > columnWidth ?
+            desc.length() : columnWidth;
          
          dstream.width(width);
          dstream.fill(' ');
-            
-         if (leftJustify)
-         {
-            dstream.setf(std::ios::left);
-            if (zeroFill)
-               dstream.fill('0');                 
-         }
          
-         if (mVarParams[i]->GetReturnType() == Gmat::REAL_TYPE)
+         // if zero fill, show decimal point
+         // showing decimal point automatically filles zero
+         if (zeroFill)
+            dstream.setf(std::ios::showpoint);
+         
+         if (leftJustify)
+            dstream.setf(std::ios::left);
+         
+         Gmat::WrapperDataType wrapperType = paramWrappers[i]->GetWrapperType();
+         
+         switch (wrapperType)
          {
-            rval = mVarParams[i]->EvaluateReal();
-            dstream.precision(precision);
-            dstream << rval << "   "; // give space between columns
-         }
-         else if (mVarParams[i]->GetReturnType() == Gmat::STRING_TYPE)
-         {
-            sval = mVarParams[i]->EvaluateString();
-            width = (Integer)sval.length() > width ? sval.length() : width;
-            dstream.width(width);
-            dstream << sval << "   "; // give space between columns
-         }
-         else if (mVarParams[i]->GetReturnType() == Gmat::RMATRIX_TYPE)
-         {
-            // Handle array index
-            Integer row, col;
-            std::string newName;
-            GmatStringUtil::GetArrayIndex(mVarParamNames[i], row, col, newName);
-            
-            if (row != -1 && col!= -1)
+         case Gmat::VARIABLE:
+         case Gmat::ARRAY_ELEMENT:
+         case Gmat::OBJECT_PROPERTY:
+         case Gmat::PARAMETER_OBJECT:
             {
-               rval = mVarParams[i]->EvaluateRmatrix().GetElement(row, col);
+               rval = paramWrappers[i]->EvaluateReal();
                dstream.precision(precision);
                dstream << rval << "   "; // give space between columns
+               break;
             }
-            else
+         case Gmat::ARRAY:
             {
-               std::stringstream ss("");
-               ss << "ReportFile::Distribute() Array has invalid index. row=" << row
-                  << " col=" << col << "\n";
-            
-               throw SubscriberException(ss.str());
+               Rmatrix rmat = paramWrappers[i]->EvaluateArray();
+               dstream << rmat.ToString(false, false, 16, 1, false);
+               break;
             }
+         case Gmat::STRING_OBJECT:
+            {
+               sval = paramWrappers[i]->EvaluateString();
+               width = (Integer)sval.length() > width ? sval.length() : width;
+               dstream.width(width);
+               dstream << sval << "   "; // give space between columns
+               break;
+            }
+         default:
+            break;
          }
       }
       
@@ -1023,13 +1034,16 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
 //------------------------------------------------------------------------------
 // void ClearYParameters()
 //------------------------------------------------------------------------------
-void ReportFile::ClearVarParameters()
+void ReportFile::ClearParameters()
 {
-   //MessageInterface::ShowMessage("==> ReportFile::ClearVarParameters() entered\n");
+   //MessageInterface::ShowMessage("==> ReportFile::ClearParameters() entered\n");
    
-   mVarParams.clear();
-   mVarParamNames.clear();
-   mNumVarParams = 0;
+   mParams.clear();
+   mParamNames.clear();
+   mNumParams = 0;
+   ClearWrappers();
+   depParamWrappers.clear();
+   paramWrappers.clear();
    initial = true;   
 }
 
@@ -1045,17 +1059,17 @@ void ReportFile::WriteHeaders()
          return;
 
       // write heading for each item
-      for (int i=0; i < mNumVarParams; i++)
+      for (int i=0; i < mNumParams; i++)
       {
           if (!dstream.good())
              dstream.clear();
           
           // set longer width of param names or columnWidth
-          Integer width = (Integer)mVarParamNames[i].length() > columnWidth ?
-             mVarParamNames[i].length() : columnWidth;
+          Integer width = (Integer)mParamNames[i].length() > columnWidth ?
+             mParamNames[i].length() : columnWidth;
 
           // parameter name has Gregorian, minimum width is 24
-          if (mVarParamNames[i].find("Gregorian") != mVarParamNames[i].npos)
+          if (mParamNames[i].find("Gregorian") != mParamNames[i].npos)
              if (width < 24)
                 width = 24;
           
@@ -1067,7 +1081,7 @@ void ReportFile::WriteHeaders()
           if (leftJustify)
              dstream.setf(std::ios::left);
 
-          dstream << mVarParamNames[i] << "   ";
+          dstream << mParamNames[i] << "   ";
       }
       
       dstream << std::endl;
@@ -1083,6 +1097,11 @@ void ReportFile::WriteHeaders()
 std::string ReportFile::GetFileName()
 {
    std::string fname = filename;
+
+   #if DEBUG_REPORTFILE_OPEN
+   MessageInterface::ShowMessage
+      ("ReportFile::GetFileName() fname=%s\n", fname.c_str());
+   #endif
    
    try
    {
@@ -1091,7 +1110,8 @@ std::string ReportFile::GetFileName()
       
       if (filename == "")
       {
-         fname = fm->GetFullPathname(FileManager::REPORT_FILE);
+         //fname = fm->GetFullPathname(FileManager::REPORT_FILE);
+         fname = outputPath + instanceName + ".txt";
       }
       else
       {
@@ -1106,10 +1126,16 @@ std::string ReportFile::GetFileName()
    catch (GmatBaseException &e)
    {
       if (filename == "")
-         fname = "ReportFile.txt";
+         //fname = "ReportFile.txt";
+         fname = instanceName + ".txt";
       
       MessageInterface::ShowMessage(e.GetFullMessage());
    }
+   
+   #if DEBUG_REPORTFILE_OPEN
+   MessageInterface::ShowMessage
+      ("ReportFile::GetFileName() returning fname=%s\n", fname.c_str());
+   #endif
    
    return fname;
 }

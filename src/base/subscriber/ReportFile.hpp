@@ -38,13 +38,15 @@ class ReportFile :
 public:
    ReportFile(const std::string &typeName, const std::string &name,
               const std::string &fileName = "", 
-              Parameter *firstVarParam = NULL);
+              Parameter *firstParam = NULL);
    
    virtual ~ReportFile(void);
    
    ReportFile(const ReportFile &);
    ReportFile& operator=(const ReportFile&);
-    
+   
+   std::string GetFileName();
+   
    // methods inherited from Subscriber
    virtual bool Initialize();
                       
@@ -63,6 +65,7 @@ public:
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool IsParameterReadOnly(const Integer id) const;
    
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
@@ -82,17 +85,26 @@ public:
    virtual const StringArray& GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
    
-
+   virtual std::string GetOnOffParameter(const Integer id) const;
+   virtual bool        SetOnOffParameter(const Integer id, 
+                                         const std::string &value);
+   virtual std::string GetOnOffParameter(const std::string &label) const;
+   virtual bool        SetOnOffParameter(const std::string &label, 
+                                         const std::string &value);
+   
    virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);
    virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                              const std::string &name = "");
-
+   
    virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
-
-   Integer GetNumVarParameters();
-   bool AddVarParameter(const std::string &paramName, Integer index);
+   
+   Integer GetNumParameters();
+   bool AddParameter(const std::string &paramName, Integer index);
    bool AddParameterForTitleOnly(const std::string &paramName);
+   
+   // methods for setting up the items to subscribe
+   virtual const StringArray& GetWrapperObjectNameArray();
    
 protected:
    /// Name of the output path
@@ -114,19 +126,18 @@ protected:
    
    /// output data stream
    std::ofstream       dstream;
-   std::vector<Parameter*> mVarParams;
+   std::vector<Parameter*> mParams;
 
-   Integer mNumVarParams;
-   StringArray mVarParamNames;
+   Integer mNumParams;
+   StringArray mParamNames;
    StringArray mAllRefObjectNames;
    Integer lastUsedProvider;
    bool usedByReport;
    bool calledByReport;
    bool initial;
    
-   void ClearVarParameters();
+   void ClearParameters();
    void WriteHeaders();
-   std::string GetFileName();
    
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);

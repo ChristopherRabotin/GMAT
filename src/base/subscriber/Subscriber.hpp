@@ -37,6 +37,7 @@
 
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "ElementWrapper.hpp"
 
 class GMAT_API Subscriber : public GmatBase
 {
@@ -62,7 +63,13 @@ public:
    
    virtual void SetProviderId(Integer id);
    virtual Integer GetProviderId();
-   virtual void SetInternalCoordSystem(CoordinateSystem *cs); //loj: 1/27/05 Added
+   virtual void SetInternalCoordSystem(CoordinateSystem *cs);
+   
+   // methods for setting up the items to subscribe
+   virtual const StringArray& GetWrapperObjectNameArray();
+   virtual bool SetElementWrapper(ElementWrapper* toWrapper,
+                                  const std::string &name);
+   virtual void ClearWrappers();
    
 protected:
    enum
@@ -79,6 +86,13 @@ protected:
    bool        isEndOfRun;
    Integer     currentProvider;
    
+   /// The list of names of Wrapper objects
+   StringArray wrapperObjectNames;
+   /// vector of pointers to ElementWrappers for the item
+   std::vector<ElementWrapper*> depParamWrappers;
+   std::vector<ElementWrapper*> paramWrappers;
+   
+   bool SetWrapperReference(GmatBase *obj, const std::string &name);
    virtual bool Distribute(Integer len) = 0;
    virtual bool Distribute(const Real *dat, Integer len);
    
