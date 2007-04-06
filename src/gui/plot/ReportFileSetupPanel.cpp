@@ -94,6 +94,7 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
    Create();
    Show();
    mUseUserParam = false;
+   mParamChanged = false;
    EnableUpdate(false);
 }
 
@@ -356,69 +357,79 @@ void ReportFileSetupPanel::LoadData()
    // load data from the core engine
    writeCheckBox->SetValue(reportFile->IsActive());
    
-   // load file name data from core engine
-   Integer id;
-   id = reportFile->GetParameterID("Filename");
-   std::string filename = reportFile->GetStringParameter(id);
-   fileTextCtrl->SetValue(wxT(filename.c_str()));
-
-   #if DEBUG_REPORTFILE_PANEL
-   MessageInterface::ShowMessage("ReportFileSetupPanel::LoadData() filename=%s\n",
-                                 filename.c_str());
-   #endif
-
-   id = reportFile->GetParameterID("WriteHeaders");
-   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
-      showHeaderCheckBox->SetValue(true);
-   else
-      showHeaderCheckBox->SetValue(false);                     
-   
-   id = reportFile->GetParameterID("LeftJustify");
-   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
-      leftJustifyCheckBox->SetValue(true);
-   else
-      leftJustifyCheckBox->SetValue(false);                     
-   
-   id = reportFile->GetParameterID("ZeroFill");
-   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
-      zeroFillCheckBox->SetValue(true);
-   else
-      zeroFillCheckBox->SetValue(false);                     
-
-   id = reportFile->GetParameterID("SolverIterations");
-   if (strcmp(reportFile->GetStringParameter(id).c_str(), "On") == 0)
-      solverIterationsCheckBox->SetValue(true);
-   else
-      solverIterationsCheckBox->SetValue(false);                     
-   
-   id = reportFile->GetParameterID("ColumnWidth");
-   wxString numSpacesValue;
-   numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(id));
-   colWidthTextCtrl->SetValue(numSpacesValue);
-   
-   id = reportFile->GetParameterID("Precision");
-   wxString precisionValue;
-   precisionValue.Printf("%d", reportFile->GetIntegerParameter(id));
-   precisionTextCtrl->SetValue(precisionValue);
-   
-   StringArray varParamList = reportFile->GetStringArrayParameter("Add");
-   mNumVarParams = varParamList.size();
-   
-   if (mNumVarParams > 0)
-   {      
-      wxString *varParamNames = new wxString[mNumVarParams];
-      Parameter *param;
+   try
+   {
+      // load file name data from core engine
+      //Note: Do not use GetStringParameter() since filename may be empty.
+      //      GetFileName() constructs filename if name is empty
+      std::string filename = reportFile->GetFileName();
       
-      for (int i=0; i<mNumVarParams; i++)
-      {
-         varParamNames[i] = varParamList[i].c_str();
-         param = (Parameter*)
-            theGuiInterpreter->GetConfiguredObject(varParamList[i]);
+      Integer id;
+      
+      fileTextCtrl->SetValue(wxT(filename.c_str()));
+      
+      #if DEBUG_REPORTFILE_PANEL
+      MessageInterface::ShowMessage
+         ("ReportFileSetupPanel::LoadData() filename=%s\n", filename.c_str());
+      #endif
+      
+      id = reportFile->GetParameterID("WriteHeaders");
+      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
+         showHeaderCheckBox->SetValue(true);
+      else
+         showHeaderCheckBox->SetValue(false);                     
+      
+      id = reportFile->GetParameterID("LeftJustify");
+      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
+         leftJustifyCheckBox->SetValue(true);
+      else
+         leftJustifyCheckBox->SetValue(false);                     
+      
+      id = reportFile->GetParameterID("ZeroFill");
+      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
+         zeroFillCheckBox->SetValue(true);
+      else
+         zeroFillCheckBox->SetValue(false);                     
+      
+      id = reportFile->GetParameterID("SolverIterations");
+      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
+         solverIterationsCheckBox->SetValue(true);
+      else
+         solverIterationsCheckBox->SetValue(false);                     
+      
+      id = reportFile->GetParameterID("ColumnWidth");
+      wxString numSpacesValue;
+      numSpacesValue.Printf("%d", reportFile->GetIntegerParameter(id));
+      colWidthTextCtrl->SetValue(numSpacesValue);
+      
+      id = reportFile->GetParameterID("Precision");
+      wxString precisionValue;
+      precisionValue.Printf("%d", reportFile->GetIntegerParameter(id));
+      precisionTextCtrl->SetValue(precisionValue);
+      
+      StringArray varParamList = reportFile->GetStringArrayParameter("Add");
+      mNumVarParams = varParamList.size();
+      
+      if (mNumVarParams > 0)
+      {      
+         wxString *varParamNames = new wxString[mNumVarParams];
+         Parameter *param;
+      
+         for (int i=0; i<mNumVarParams; i++)
+         {
+            varParamNames[i] = varParamList[i].c_str();
+            param = (Parameter*)
+               theGuiInterpreter->GetConfiguredObject(varParamList[i]);
+         }
+      
+         mVarSelectedListBox->Set(mNumVarParams, varParamNames);
+         mVarSelectedListBox->SetSelection(0);
+         delete [] varParamNames;
       }
-      
-      mVarSelectedListBox->Set(mNumVarParams, varParamNames);
-      mVarSelectedListBox->SetSelection(0);
-      delete [] varParamNames;
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
@@ -500,27 +511,27 @@ void ReportFileSetupPanel::SaveData()
       
       id = reportFile->GetParameterID("WriteHeaders");
       if (showHeaderCheckBox->IsChecked())
-         reportFile->SetStringParameter(id, "On");
+         reportFile->SetOnOffParameter(id, "On");
       else
-         reportFile->SetStringParameter(id, "Off");
+         reportFile->SetOnOffParameter(id, "Off");
       
       id = reportFile->GetParameterID("LeftJustify");
       if (leftJustifyCheckBox->IsChecked())
-         reportFile->SetStringParameter(id, "On");
+         reportFile->SetOnOffParameter(id, "On");
       else
-         reportFile->SetStringParameter(id, "Off");
+         reportFile->SetOnOffParameter(id, "Off");
       
       id = reportFile->GetParameterID("ZeroFill");
       if (zeroFillCheckBox->IsChecked())
-         reportFile->SetStringParameter(id, "On");
+         reportFile->SetOnOffParameter(id, "On");
       else
-         reportFile->SetStringParameter(id, "Off");
+         reportFile->SetOnOffParameter(id, "Off");
       
       id = reportFile->GetParameterID("SolverIterations");
       if (solverIterationsCheckBox->IsChecked())
-         reportFile->SetStringParameter(id, "On");
+         reportFile->SetOnOffParameter(id, "On");
       else
-         reportFile->SetStringParameter(id, "Off");
+         reportFile->SetOnOffParameter(id, "Off");
       
       // save file name data
       str = fileTextCtrl->GetValue();
@@ -538,23 +549,30 @@ void ReportFileSetupPanel::SaveData()
       
       id = reportFile->GetParameterID("Filename");
       reportFile->SetStringParameter(id, str.c_str());
-      
-      mNumVarParams = mVarSelectedListBox->GetCount();
-      
-      if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
+
+      // if parameter changed, clear the list and re-add parameters
+      if (mParamChanged)
       {
-         if (mNumVarParams == 0)
+         mParamChanged = false;
+         mNumVarParams = mVarSelectedListBox->GetCount();
+         
+         if (mNumVarParams >= 0) // >=0 because the list needs to be cleared
          {
-            MessageInterface::ShowMessage
-               ("\nWarning:  No variable in %s's \"Selected\"  selection box",
-                reportFile->GetName().c_str());
+            if (mNumVarParams == 0)
+            {
+               MessageInterface::ShowMessage
+                  ("\nWarning:  No variable in %s's \"Selected\"  selection box",
+                   reportFile->GetName().c_str());
+            }
+            reportFile->TakeAction("Clear");
+            for (int i=0; i<mNumVarParams; i++)
+            {
+               std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
+               reportFile->SetStringParameter("Add", selYName, i);
+            }
          }
-         reportFile->TakeAction("Clear");
-         for (int i=0; i<mNumVarParams; i++)
-         {
-            std::string selYName = std::string(mVarSelectedListBox->GetString(i).c_str());
-            reportFile->SetStringParameter("Add", selYName, i);
-         }
+         
+         theGuiInterpreter->ValidateSubscriber(mObject);
       }
    }
    catch (BaseException &e)
@@ -663,6 +681,7 @@ void ReportFileSetupPanel::OnAddVariable(wxCommandEvent& event)
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
          EnableUpdate(true);
+         mParamChanged = true;
       }
       else
       {
@@ -701,6 +720,7 @@ void ReportFileSetupPanel::OnRemoveVariable(wxCommandEvent& event)
    }
    
    EnableUpdate(true);
+   mParamChanged = true;
 }
 
 
@@ -711,6 +731,7 @@ void ReportFileSetupPanel::OnClearVariable(wxCommandEvent& event)
 {
    mVarSelectedListBox->Clear();
    EnableUpdate(true);
+   mParamChanged = true;
 }
 
 

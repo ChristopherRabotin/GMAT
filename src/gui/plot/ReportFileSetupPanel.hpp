@@ -39,7 +39,8 @@ protected:
    int  mNumImpBurnProperty;
    int  mNumVarParams;
    bool mUseUserParam;
-
+   bool mParamChanged;
+   
    wxString *mSpacecraftList;
    wxString *mImpBurnList;
    wxArrayString mSpacecraftPropertyList;
