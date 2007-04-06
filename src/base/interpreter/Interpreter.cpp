@@ -1197,11 +1197,21 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       // Try to create a parameter first if system parameter
       std::string type, ownerName, depObj;
       GmatStringUtil::ParseParameter(parts[i], type, ownerName, depObj);
+      #if DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
+      MessageInterface::ShowMessage
+         ("   lhs: type = %s, ownerName = %s, depObj = %s\n", 
+         type.c_str(), ownerName.c_str(), depObj.c_str());
+      #endif // ------------------------------------------------- end debug ----
       
       if (theModerator->IsParameter(type))
           CreateParameter(type, parts[i], ownerName, depObj);
       
       GmatStringUtil::ParseParameter(parts[i+2], type, ownerName, depObj);
+      #if DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
+      MessageInterface::ShowMessage
+         ("   rhs: type = %s, ownerName = %s, depObj = %s\n", 
+         type.c_str(), ownerName.c_str(), depObj.c_str());
+      #endif // ------------------------------------------------- end debug ----
       
       if (theModerator->IsParameter(type))
          CreateParameter(type, parts[i+2], ownerName, depObj);
@@ -3890,6 +3900,13 @@ bool Interpreter::FinalPass()
    
    // Initialize CoordinateSystem
    StringArray objList = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
+   #ifdef DEBUG_FINAL_PASS //---------------------------------------- debug ----
+   MessageInterface::ShowMessage("FinalPass:: CS objList =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+   {
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   }
+   #endif //----------------------------------------------------- end debug ----
    
    GmatBase *obj = NULL;
    GmatBase *refObj;
@@ -3908,6 +3925,13 @@ bool Interpreter::FinalPass()
    }
    
    objList = theModerator->GetListOfObjects(Gmat::UNKNOWN_OBJECT);
+   #ifdef DEBUG_FINAL_PASS //---------------------------------------- debug ----
+   MessageInterface::ShowMessage("FinalPass:: Unknown objList =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+   {
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   }
+   #endif //----------------------------------------------------- end debug ----
    
    // Check reference objects
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)

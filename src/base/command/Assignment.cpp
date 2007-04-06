@@ -484,6 +484,10 @@ bool Assignment::Initialize()
    {
       if (objectMap->find(value) != objectMap->end())
       {
+         #ifdef DEBUG_ASSIGNMENT_INIT
+         MessageInterface::ShowMessage
+            ("Assignment::Initialize() Found value \"" + value + "\" in objectMap\n");
+         #endif
          rhsObject = (*objectMap)[value];
          return true;
       }
@@ -786,9 +790,15 @@ bool Assignment::Execute()
             throw CommandException("Assignment command cannot find object \"" +
                value + "\"");
          if (parmOwner->GetTypeName() != rhsObject->GetTypeName())
-            throw CommandException("Mismatched object types between \"" +
-               parmOwner->GetName() + "\" and \"" + rhsObject->GetName() +
-               "\"");
+         {
+            std::string errmsg = "Mismatched object types between \"" +
+               parmOwner->GetName();
+            errmsg += "\" of type \"" + parmOwner->GetTypeName();
+            errmsg += "\" and \"" + rhsObject->GetName();
+            errmsg += "\" of type \"" + rhsObject->GetTypeName();
+            errmsg += "\"\n";
+            throw CommandException(errmsg);
+         }
 
          parmOwner->Copy(rhsObject);
          
