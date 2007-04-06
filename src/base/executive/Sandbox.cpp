@@ -812,7 +812,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
                #ifdef DEBUG_SANDBOX_INIT
                   MessageInterface::ShowMessage(
                      "RefObjectName " + oName + " not found; ignoring " +
-                     ex.GetMessage() + "\n");
+                     ex.GetFullMessage() + "\n");
                #endif
                //throw ex;
             }
@@ -823,7 +823,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
                #ifdef DEBUG_SANDBOX_INIT
                   MessageInterface::ShowMessage(
                      "RefObjectName not found; ignoring " +
-                     ex.GetMessage() + "\n");
+                     ex.GetFullMessage() + "\n");
                #endif
             }
          }
@@ -834,7 +834,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
                "RefObjectNameArray not found; ignoring " +
-               ex.GetMessage() + "\n");
+               ex.GetFullMessage() + "\n");
          #endif
          //throw ex;
       }
@@ -844,7 +844,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
          #ifdef DEBUG_SANDBOX_INIT
             MessageInterface::ShowMessage(
                "RefObjectNameArray not found; ignoring " +
-               ex.GetMessage() + "\n");
+               ex.GetFullMessage() + "\n");
          #endif
       }
 
@@ -869,7 +869,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
       // For now, post a message and -- otherwise -- ignore exceptions
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
-            ex.GetMessage() + "\n");
+            ex.GetFullMessage() + "\n");
       #endif
       //throw ex;
    }
@@ -878,7 +878,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
       // Post a message and -- otherwise -- ignore the exceptions
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
-            ex.GetMessage() + "\n");
+            ex.GetFullMessage() + "\n");
       #endif
    }
 
@@ -902,7 +902,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
                   "RefObjectName " + oName + " not found; ignoring " +
-                  ex.GetMessage() + "\n");
+                  ex.GetFullMessage() + "\n");
             #endif
             //throw ex;
          }
@@ -917,7 +917,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
                   "RefObjectName not found; ignoring " +
-                  ex.GetMessage() + "\n");
+                  ex.GetFullMessage() + "\n");
             #endif
          }
       }
@@ -928,7 +928,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(
             "RefObjectNameArray not found; ignoring " +
-            ex.GetMessage() + "\n");
+            ex.GetFullMessage() + "\n");
       #endif
       //throw ex;
    }
@@ -942,7 +942,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
       #ifdef DEBUG_SANDBOX_INIT
          MessageInterface::ShowMessage(
             "RefObjectNameArray not found; ignoring " +
-            ex.GetMessage() + "\n");
+            ex.GetFullMessage() + "\n");
       #endif
    }
 
