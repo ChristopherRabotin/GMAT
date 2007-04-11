@@ -22,7 +22,7 @@
 #include "LibrationPointPanel.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_LIBRATIONPOINT_PANEL 1
+#define DEBUG_LIBRATIONPOINT_PANEL 1
 
 //------------------------------
 // event tables for wxWindows
@@ -217,11 +217,9 @@ void LibrationPointPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel:LoadData() error occurred!\n%s\n",
-            e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage().c_str());
    }
-
+   
    // Activate "ShowScript"
    mObject = theLibrationPt;
 }
@@ -231,82 +229,97 @@ void LibrationPointPanel::LoadData()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::SaveData()
 {
-   // Save data to core engine
-   
    canClose = true;
-
-   // Primary body
+   
+   //-----------------------------------------------------------------
+   // check user input
+   //-----------------------------------------------------------------
    wxString primaryBodyString = primaryBodyCB->GetValue().Trim();
-   std::string spName = primaryBodyString.c_str();
-   int primaryBodyID = theLibrationPt->GetParameterID("Primary");
-   theLibrationPt->SetStringParameter(primaryBodyID, spName);
-   SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
-   theLibrationPt->SetRefObject(primary, Gmat::SPACE_POINT, spName);
-
-   // get Earth pointer
-   CelestialBody *j2000body = (CelestialBody*)theGuiInterpreter->
-      GetConfiguredObject("Earth");
-
-   // set Earth as J000Body of primary body if NULL
-   if (primary->GetJ2000Body() == NULL)
-      primary->SetJ2000Body(j2000body);
-   
-   #if DEBUG_LIBRATIONPOINT_PANEL
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel::SaveData() primary body ID = %d\n", 
-            primaryBodyID);
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel::SaveData() primary body = %s\n", 
-            primaryBodyString.c_str());
-   #endif
-
-   // Secondary body
    wxString secondaryBodyString = secondaryBodyCB->GetValue().Trim();
-   spName = secondaryBodyString.c_str();
-   int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
-   theLibrationPt->SetStringParameter(secondaryBodyID, spName);
-   SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
-   theLibrationPt->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
-   
-   // set Earth as J000Body of secondary body if NULL
-   if (secondary->GetJ2000Body() == NULL)
-      secondary->SetJ2000Body(j2000body);
-   
-   #if DEBUG_LIBRATIONPOINT_PANEL
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel::SaveData() secondary body ID = %d\n", 
-            secondaryBodyID);
-      MessageInterface::ShowMessage
-         ("LibrationPointPanel::SaveData() secondary body = %s\n", 
-            secondaryBodyString.c_str());
-   #endif
-   
-   // Check to make sure the primary body and secondary body are different          
-   if (strcmp(primaryBodyString.c_str(), secondaryBodyString.c_str()) == 0)
+
+   // Check to make sure the primary body and secondary body are different        
+   if (primaryBodyString == secondaryBodyString)
    {
       MessageInterface::PopupMessage
-      (Gmat::WARNING_, "Primary body and Secondary body are the same.\n"
-                       "Libration point updates have not been saved");
+         (Gmat::WARNING_, "Primary and Secondary bodies can not be the same");
       canClose = false;
-
+      
       return;
-   }    
-        
-   // Libration point
-   wxString librationPointString = librationPtCB->GetValue().Trim();
-   int librationPointID = theLibrationPt->GetParameterID("Point");
+   }
+   
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      std::string spName;
+      // get Earth pointer as j2000body
+      CelestialBody *j2000body =
+         (CelestialBody*)theGuiInterpreter->GetConfiguredObject("Earth");      
+      
+      // Primary body
+      spName = primaryBodyString.c_str();
+      int primaryBodyID = theLibrationPt->GetParameterID("Primary");
+      theLibrationPt->SetStringParameter(primaryBodyID, spName);
+      SpacePoint *primary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
+      theLibrationPt->SetRefObject(primary, Gmat::SPACE_POINT, spName);
+      
+      // set Earth as J000Body of primary body if NULL
+      if (primary->GetJ2000Body() == NULL)
+         primary->SetJ2000Body(j2000body);
+      
+      #if DEBUG_LIBRATIONPOINT_PANEL
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() primary body ID = %d\n", 
+          primaryBodyID);
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() primary body = %s\n", 
+          primaryBodyString.c_str());
+      #endif
+      
+      // Secondary body
+      spName = secondaryBodyString.c_str();
+      int secondaryBodyID = theLibrationPt->GetParameterID("Secondary");
+      theLibrationPt->SetStringParameter(secondaryBodyID, spName);
+      SpacePoint *secondary = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(spName);
+      theLibrationPt->SetRefObject(secondary, Gmat::SPACE_POINT, spName);
+      
+      // set Earth as J000Body of secondary body if NULL
+      if (secondary->GetJ2000Body() == NULL)
+         secondary->SetJ2000Body(j2000body);
+      
+      #if DEBUG_LIBRATIONPOINT_PANEL
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() secondary body ID = %d\n", 
+          secondaryBodyID);
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel::SaveData() secondary body = %s\n", 
+          secondaryBodyString.c_str());
+      #endif
 
-   #if DEBUG_LIBRATIONPOINT_PANEL
+      
+      // Libration point
+      wxString librationPointString = librationPtCB->GetValue().Trim();
+      int librationPointID = theLibrationPt->GetParameterID("Point");
+      
+      #if DEBUG_LIBRATIONPOINT_PANEL
       MessageInterface::ShowMessage
          ("LibrationPointPanel::SaveData() libration point ID = %d\n", 
-            librationPointID);
+          librationPointID);
       MessageInterface::ShowMessage
          ("LibrationPointPanel::SaveData() libration point = %s\n", 
-            librationPointString.c_str());
-   #endif
-
-   theLibrationPt->SetStringParameter(librationPointID, librationPointString.c_str());
-
-   EnableUpdate(false);
+          librationPointString.c_str());
+      #endif
+      
+      theLibrationPt->SetStringParameter(librationPointID, librationPointString.c_str());
+      
+      EnableUpdate(false);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage().c_str());
+      canClose = false;
+   }
 }
 
