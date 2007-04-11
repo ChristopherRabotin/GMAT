@@ -103,6 +103,11 @@ protected:
    
    SpacePoint  *primaryBody;
    SpacePoint  *secondaryBody;
+
+   /// flag indicating primary body was set through Set
+   bool primaryBodySet;
+   /// flag indicating secondary body was set through Set
+   bool secondaryBodySet;
    
 private:
       

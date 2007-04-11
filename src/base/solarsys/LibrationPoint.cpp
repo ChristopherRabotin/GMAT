@@ -71,7 +71,9 @@ primaryBodyName     (""),
 secondaryBodyName   (""),
 whichPoint          (""),
 primaryBody         (NULL),
-secondaryBody       (NULL)
+secondaryBody       (NULL),
+primaryBodySet      (false),
+secondaryBodySet    (false)
 {
    objectTypes.push_back(Gmat::LIBRATION_POINT);
    objectTypeNames.push_back("LibrationPoint");
@@ -94,7 +96,9 @@ primaryBodyName          (lp.primaryBodyName),
 secondaryBodyName        (lp.secondaryBodyName),
 whichPoint               (lp.whichPoint),
 primaryBody              (lp.primaryBody),
-secondaryBody            (lp.secondaryBody)
+secondaryBody            (lp.secondaryBody),
+primaryBodySet           (lp.primaryBodySet),
+secondaryBodySet         (lp.secondaryBodySet)
 {
 }
 
@@ -121,6 +125,8 @@ LibrationPoint& LibrationPoint::operator=(const LibrationPoint &lp)
    whichPoint          = lp.whichPoint;
    primaryBody         = lp.primaryBody;
    secondaryBody       = lp.secondaryBody;
+   primaryBodySet      = lp.primaryBodySet;
+   secondaryBodySet    = lp.secondaryBodySet;
    return *this;
 }
 
@@ -512,18 +518,28 @@ bool LibrationPoint::SetStringParameter(const Integer id,
 {     
    if (id == PRIMARY_BODY_NAME)             
    {
-      if (value == secondaryBodyName)
-         throw SolarSystemException(
-            "The primary body and secondary body can not be the same.");
+      //since we don't know the order of setting, use the flag
+      if (secondaryBodySet)
+      {
+         if (value == secondaryBodyName)
+            throw SolarSystemException(
+               "The primary and secondary bodies cannot be the same.");
+      }
       primaryBodyName = value;
+      primaryBodySet = true;
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
-      if (value == primaryBodyName)
-         throw SolarSystemException(
-            "The primary body and secondary body can not be the same.");
+      //since we don't know the order of setting, use the flag
+      if (primaryBodySet)
+      {
+         if (value == primaryBodyName)
+            throw SolarSystemException(
+               "The primary and secondary bodies cannot be the same.");
+      }
       secondaryBodyName = value;
+      secondaryBodySet = true;
       return true;
    }
    if (id == WHICH_POINT)             
@@ -584,7 +600,6 @@ bool  LibrationPoint::SetStringParameter(const Integer id,
                                           const std::string &value,
                                           const Integer index) 
 {
-   
    return CalculatedPoint::SetStringParameter(id, value, index);
 }
 
