@@ -671,9 +671,10 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
          obj = (GmatBase*)theModerator->CreateBurn(type, name);
       
       // Handle CalculatedPoint (Barycenter, LibrationPoint)
+      // Creates default Barycentor or LibrationPoint
       else if (find(calculatedPointList.begin(), calculatedPointList.end(), type) != 
                calculatedPointList.end())
-         obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, false);
+         obj =(GmatBase*) theModerator->CreateCalculatedPoint(type, name, true);
       
       // Handle Functions
       else if (find(functionList.begin(), functionList.end(), type) != 
@@ -3945,6 +3946,10 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
  * by the GUI.
  *
  * @return true if the references were set; false otherwise.
+ *
+ * @note: Most objects has reference objects already set in the SetObject*(),
+ *        if paramter type is OBJECT_TYPE, so not requiring additional call to
+ *        SetRefObject()
  */
 //------------------------------------------------------------------------------
 bool Interpreter::FinalPass()
