@@ -150,9 +150,9 @@ void GmatMenuBar::CreateMenu(int dataType)
    {
       wxMenu *scriptMenu = new wxMenu;
       scriptMenu->Append(MENU_SCRIPT_BUILD_OBJECT,
-            _T("&Build Object"));
+                         _T("&Build Object"));
       scriptMenu->Append(MENU_SCRIPT_BUILD_AND_RUN,
-            _T("&Build and Run"));
+                         _T("&Build and Run"));
       scriptMenu->Append(MENU_SCRIPT_RUN, _T("&Run"));
       this->Append(scriptMenu, wxT("Script"));
    }
@@ -162,84 +162,93 @@ void GmatMenuBar::CreateMenu(int dataType)
    //-------------------------------------------------------
    if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
    {
+      #ifdef __SHOW_PLOT_MENU__
       // Plot menu
-      wxMenu *plotMenu = new wxMenu;
-      wxMenu *mViewMenu;
-      wxMenu *mViewOptionMenu;
-      
+      wxMenu *plotMenu = new wxMenu;      
       plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
       plotMenu->AppendSeparator();
       plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
       this->Append(plotMenu, wxT("Plot"));
-
+      #endif
+      
+      
       // View menu
-//      wxMenu *mViewMenu = new wxMenu;
-      mViewMenu = new wxMenu;
-      mViewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Default\tCtrl-R"),
+      wxMenu *viewMenu = new wxMenu;
+      viewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Default\tCtrl-R"),
                        _("Reset to default view"));
-      mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
-      mViewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
-      mViewMenu->AppendSeparator();
-
+      viewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
+      viewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
+      viewMenu->AppendSeparator();
+      
       // View Option submenu
-      mViewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
-                        _T("Show View Option Dialog"),
-                        _T("Show view option dialog"), wxITEM_CHECK);
-
-      mViewOptionMenu = new wxMenu;
+      viewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
+                       _T("Show View Option Dialog"),
+                       _T("Show view option dialog"), wxITEM_CHECK);
+      
+      wxMenu *viewOptionMenu = new wxMenu;
       wxMenuItem *item =
-         new wxMenuItem(mViewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
-                        _T("Show bodies in wire frame"), wxITEM_NORMAL, mViewOptionMenu);
-      mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
-                             _T("Show Wire Frame"),
-                             _T("Show bodies in wire frame"), wxITEM_CHECK);
-      mViewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
-                             _T("Show Equatorial Plane"),
-                             _T("Show equatorial plane lines"), wxITEM_CHECK);
-
-      mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
-
-      mViewMenu->Append(item);
-
+         new wxMenuItem(viewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
+                        _T("Show bodies in wire frame"), wxITEM_NORMAL, viewOptionMenu);
+      viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
+                              _T("Show Wire Frame"),
+                              _T("Show bodies in wire frame"), wxITEM_CHECK);
+      viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
+                              _T("Show Equatorial Plane"),
+                              _T("Show equatorial plane lines"), wxITEM_CHECK);
+      
+      viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
+      
+      viewMenu->Append(item);
+      
       // Animation menu
-      mViewMenu->AppendSeparator();
-      mViewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
-      this->Append(mViewMenu, wxT("View"));
+      viewMenu->AppendSeparator();
+      viewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
+      this->Append(viewMenu, wxT("View"));
    }  
    
    if (dataType == GmatTree::OUTPUT_XY_PLOT)
    {
-       // Plot menu
-       wxMenu *plotMenu = new wxMenu;
+      #if __SHOW_PLOT_MENU__
+      // Plot menu
+      wxMenu *plotMenu = new wxMenu;
     
-       plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
-       plotMenu->AppendSeparator();
-       plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
-    
-       // View menu
-       wxMenu *viewMenu = new wxMenu;
-       viewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                        _("Reset to default view"));
-       viewMenu->AppendSeparator();
-    
-       // View Option submenu
-       wxMenu *mViewOptionMenu = new wxMenu;
-       wxMenuItem *item =
-          new wxMenuItem(viewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
-                         _T("view options"), wxITEM_NORMAL, mViewOptionMenu);
-       mViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
+      plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
+      plotMenu->AppendSeparator();
+      plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
+      #endif
+      
+      #if __SHOW_XY_VIEW_MENU__
+      // View menu
+      wxMenu *viewMenu = new wxMenu;
+      viewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
+                       _("Reset to default view"));
+      viewMenu->AppendSeparator();
+      
+      // View Option submenu
+      wxMenu *viewOptionMenu = new wxMenu;
+      wxMenuItem *item =
+         new wxMenuItem(viewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
+                        _T("view options"), wxITEM_NORMAL, viewOptionMenu);
+      viewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
                               _T("Draw Grid"),
                               _T("Draw Grid"), wxITEM_CHECK);
-       mViewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
+      viewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
                               _T("Draw dotted line"),
                               _T("Draw dotted line"), wxITEM_CHECK);
-    
-       mViewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
-       
-       viewMenu->Append(item);
-    
-       this->Append(plotMenu, _T("&Plot"));
-       this->Append(viewMenu, _T("&View"));
+      
+      viewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
+      
+      viewMenu->Append(item);
+      #endif
+      
+      
+      #if __SHOW_PLOT_MENU__
+      this->Append(plotMenu, _T("&Plot"));
+      #endif
+      
+      #ifdef __SHOW_XY_VIEW_MENU__
+      this->Append(viewMenu, _T("&View"));
+      #endif
    } 
    
    //-------------------------------------------------------
