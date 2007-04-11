@@ -141,6 +141,23 @@ LibrationPoint::~LibrationPoint()
 {
 }
 
+
+//---------------------------------------------------------------------------
+// void ResetBodies()
+//---------------------------------------------------------------------------
+/*
+ * Resets primary and secondary bodies set flags.
+ * This method is usally called from GUI to reset these flags to properly
+ * validate bodies.
+ */
+//---------------------------------------------------------------------------
+void LibrationPoint::ResetBodies()
+{
+   primaryBodySet = false;
+   secondaryBodySet = false;
+}
+
+
 //---------------------------------------------------------------------------
 //  const Rvector6 GetMJ2000State(const A1Mjd &atTime)
 //---------------------------------------------------------------------------

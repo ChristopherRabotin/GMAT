@@ -48,6 +48,8 @@ public:
    // destructor
    virtual ~LibrationPoint();
    
+   void ResetBodies();
+   
    // methods inherited from SpacePoint, that must be implemented here
    // in the derived class
    virtual const Rvector6           GetMJ2000State(const A1Mjd &atTime);
