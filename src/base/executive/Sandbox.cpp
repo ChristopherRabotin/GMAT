@@ -56,7 +56,9 @@ Sandbox::Sandbox() :
    sequence          (NULL),
    current           (NULL),
    moderator         (NULL),
-   state             (IDLE)
+   state             (IDLE),
+   interruptCount    (45),
+   pollFrequency     (50)
 {
    // List of the objects that can safely be cloned.  This list will be removed
    // when the cloning has been tested for all of GMAT's classes.
@@ -1213,27 +1215,31 @@ bool Sandbox::Execute()
 //------------------------------------------------------------------------------
 bool Sandbox::Interrupt()
 {
-   // Ask the moderator for the current RunState:
-   Gmat::RunState interruptType =  moderator->GetUserInterrupt();
-
-   switch (interruptType)
-   {
-      case Gmat::PAUSED:   // Pause
-         state = PAUSED;
-         break;
-
-      case Gmat::IDLE:     // Stop puts GMAT into the Idle state
-         state = STOPPED;
-         break;
-
-      case Gmat::RUNNING:   // Pause
-         state = RUNNING;
-         break;
-
-      default:
-         break;
+   // Ask the moderator for the current RunState; only check at fixed frequency
+   if (++interruptCount == pollFrequency)
+   {      
+      Gmat::RunState interruptType =  moderator->GetUserInterrupt();
+   
+      switch (interruptType)
+      {
+         case Gmat::PAUSED:   // Pause
+            state = PAUSED;
+            break;
+   
+         case Gmat::IDLE:     // Stop puts GMAT into the Idle state
+            state = STOPPED;
+            break;
+   
+         case Gmat::RUNNING:   // Pause
+            state = RUNNING;
+            break;
+   
+         default:
+            break;
+      }
+      interruptCount = 0;
    }
-
+   
    if ((state == PAUSED) || (state == STOPPED))
       return true;
 

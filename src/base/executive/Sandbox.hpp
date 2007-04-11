@@ -93,6 +93,10 @@ private:
    Moderator                         *moderator;
    /// Execution mode for the sandbox
    runMode                           state;
+   /// Counter for interrupt polling
+   Integer                           interruptCount;
+   /// Polling frequency
+   Integer                           pollFrequency;
    
    // Additions made for finite maneuvers
    /// List of FiniteThrust objects that are currently available
