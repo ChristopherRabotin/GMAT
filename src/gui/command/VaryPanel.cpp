@@ -72,7 +72,7 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
 VaryPanel::~VaryPanel()
 {
    mObjectTypeList.Clear();
-   theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
+   theGuiManager->UnregisterComboBox("Solver", mSolverComboBox);
 }
 
 //-------------------------------
@@ -90,43 +90,10 @@ void VaryPanel::Create()
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
-
-//    wxString emptyArray[] = 
-//    {
-//       wxT("No Solver Available")
-//    };
-
-//    StringArray solverNames;
-//    solverNames = theGuiInterpreter->GetListOfObjects(Gmat::SOLVER);
-//    int solverCount = solverNames.size();
-//    wxString *solverArray = new wxString[solverCount];
-
-   // for now it only shows BoundarySolvers such as DifferentialCorrector
+   
+   // Show all userdefined Solvers
    mSolverComboBox =
-      theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
-   
-   // When we are ready for Optimizer
-   //mSolverComboBox =
-   //   theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
-   
-//    for (int i=0; i<solverCount; i++)
-//    {
-//       solverArray[i] = solverNames[i].c_str();
-//    }
-
-//    if (solverCount > 0)
-//    {
-//       mSolverComboBox =
-//          new wxComboBox(this, ID_COMBO, wxT(solverArray[0]), wxDefaultPosition,
-//                         wxSize(180,-1), solverCount, solverArray,
-//                         wxCB_DROPDOWN|wxCB_READONLY);
-//    }
-//    else
-//    {
-//       mSolverComboBox =
-//          new wxComboBox(this, ID_COMBO, wxT(emptyArray[0]), wxDefaultPosition,
-//                         wxSize(180,-1), 1, emptyArray, wxCB_DROPDOWN|wxCB_READONLY);
-//    }
+      theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
    
    // Variable
    wxStaticText *varStaticText =
