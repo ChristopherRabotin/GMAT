@@ -28,7 +28,8 @@
 
 //#define DEBUG_PROP_PANEL_SETUP 1
 //#define DEBUG_PROP_PANEL 1
-//#define DEBUG_PROP_SAVE 1
+//#define DEBUG_PROP_PANEL_LOAD 1
+//#define DEBUG_PROP_PANEL_SAVE 1
 //#define DEBUG_PROP_INTEGRATOR 1
 //#define DEBUG_GRAV_FIELD 1
 
@@ -129,6 +130,7 @@ PropagationConfigPanel::PropagationConfigPanel(wxWindow *parent,
    EnableUpdate(false);
 }
 
+
 //------------------------------------------------------------------------------
 // ~PropagationConfigPanel()
 //------------------------------------------------------------------------------
@@ -174,6 +176,7 @@ void PropagationConfigPanel::Create()
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void LoadData()
 //------------------------------------------------------------------------------
@@ -182,7 +185,7 @@ void PropagationConfigPanel::LoadData()
    // Enable the "Show Script" button
    mObject = thePropSetup;
 
-   #if DEBUG_PROP_PANEL
+   #if DEBUG_PROP_PANEL_LOAD
    MessageInterface::ShowMessage("LoadData() entered\n");
    #endif
    
@@ -213,7 +216,7 @@ void PropagationConfigPanel::LoadData()
          
          if (force->GetTypeName() == "PointMassForce")
          {
-            #if DEBUG_PROP_PANEL_LOAD_DATA
+            #if DEBUG_PROP_PANEL_LOAD
             MessageInterface::ShowMessage("   Getting PointMassForce\n");
             #endif
             
@@ -242,7 +245,7 @@ void PropagationConfigPanel::LoadData()
          }
          else if (force->GetTypeName() == "GravityField")
          {
-            #if DEBUG_GRAV_FORCE
+            #if DEBUG_GRAV_FIELD
             MessageInterface::ShowMessage("   Getting GravityField force.\n");
             #endif
             
@@ -480,19 +483,12 @@ void PropagationConfigPanel::LoadData()
    #endif
    
    numOfBodies = (Integer)primaryBodiesArray.GetCount();
-   
-   #if DEBUG_PROP_PANEL_LOAD
-   ShowPropData("LoadData() exiting");
-   ShowForceList("LoadData() exiting");
-   #endif
-   
-   
    std::string propType = thePropagator->GetTypeName();
    
    #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage("propType=%s\n", propType.c_str());
    #endif
-
+   
    Integer typeId = 0;
    
    if (propType == "RungeKutta89")
@@ -541,7 +537,13 @@ void PropagationConfigPanel::LoadData()
       atmosComboBox->Enable(true);
       //magfComboBox->Enable(true);
       //srpCheckBox->Enable(true);       
-   } 
+   }
+   
+   #if DEBUG_PROP_PANEL_LOAD
+   ShowPropData("LoadData() exiting");
+   ShowForceList("LoadData() exiting");
+   #endif
+   
 }
 
 
@@ -550,7 +552,7 @@ void PropagationConfigPanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::SaveData()
 {
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("SaveData() thePropagatorName=%s\n", thePropagator->GetTypeName().c_str());
    MessageInterface::ShowMessage("   isIntegratorChanged=%d\n", isIntegratorChanged);
@@ -570,7 +572,7 @@ void PropagationConfigPanel::SaveData()
    //-------------------------------------------------------
    if (isIntegratorChanged)
    {
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       ShowPropData("SaveData() BEFORE saving Integrator");
       #endif
       
@@ -598,7 +600,7 @@ void PropagationConfigPanel::SaveData()
    //-------------------------------------------------------
    if (isForceModelChanged)
    {      
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       ShowForceList("SaveData() BEFORE saving ForceModel");
       #endif
 
@@ -633,17 +635,20 @@ void PropagationConfigPanel::SaveData()
                // if gravity force pointer is NULL then create.
                theGravForce = forceList[i]->gravf;
                bodyName = forceList[i]->bodyName.c_str();
-            
+               
                // Create new GravityField since ForceModel destructor will delete
                // all PhysicalModel
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                MessageInterface::ShowMessage
                   ("SaveData() Creating GravityField for %s\n", bodyName.c_str());
                #endif
-            
+               
                theGravForce = new GravityField("", bodyName);
                theGravForce->SetSolarSystem(theSolarSystem);
-               theGravForce->SetBodyName(bodyName);
+               //loj: changed to call SetStringParameter() since HarmonicFiled
+               // sets default potential file path for the body
+               //theGravForce->SetBodyName(bodyName);
+               theGravForce->SetStringParameter("BodyName", bodyName);
                theGravForce->SetStringParameter("PotentialFile",
                                                 forceList[i]->potFilename.c_str());
                forceList[i]->gravf = theGravForce;            
@@ -682,7 +687,7 @@ void PropagationConfigPanel::SaveData()
          {
             if (forceList[i]->dragType != dragModelArray[NONE_DM])
             {
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                ShowForceList("SaveData() BEFORE  saving DragForce");
                #endif
                
@@ -691,7 +696,7 @@ void PropagationConfigPanel::SaveData()
                theCelestialBody = theSolarSystem->GetBody(bodyName); 
                theAtmosphereModel = theCelestialBody->GetAtmosphereModel();
                
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                ShowForceList("Entering if (theAtmosphereModel == NULL)");
                #endif
                
@@ -700,14 +705,14 @@ void PropagationConfigPanel::SaveData()
                   theAtmosphereModel = (AtmosphereModel*)theGuiInterpreter->CreateObject
                      (forceList[i]->dragType.c_str(), forceList[i]->dragType.c_str());
                
-                  #if DEBUG_PROP_SAVE
+                  #if DEBUG_PROP_PANEL_SAVE
                   ShowForceList("Exiting if (theAtmosphereModel == NULL)");
                   #endif
                }
                
                theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);
                
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                ShowForceList("theDragForce->SetInternalAtmosphereModel(theAtmosphereModel);");
                #endif
                
@@ -718,7 +723,7 @@ void PropagationConfigPanel::SaveData()
                forceList[i]->dragf = theDragForce;
                newFm->AddForce(theDragForce);
                
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                ShowForceList("SaveData() AFTER  saving DragForce");
                #endif 
             }
@@ -747,7 +752,7 @@ void PropagationConfigPanel::SaveData()
                paramId= newFm->GetParameterID("SRP");
                newFm->SetOnOffParameter(paramId, "On");
                
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                ShowForceList("SaveData() AFTER  saving SRP");
                #endif
             }
@@ -801,7 +806,7 @@ void PropagationConfigPanel::SaveData()
       {
          pm = theForceModel->GetForce(i);
          
-         #if DEBUG_PROP_SAVE
+         #if DEBUG_PROP_PANEL_SAVE
          MessageInterface::ShowMessage
             ("===> pm=(%p)%s\n", pm, pm->GetTypeName().c_str());
          #endif
@@ -822,7 +827,7 @@ void PropagationConfigPanel::SaveData()
          }
       }
       
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       ShowForceList("SaveData() AFTER  saving ForceModel");
       #endif
    } // end if(isForceModelChange)
@@ -1348,10 +1353,8 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    
    //-----------------------------------------------------------------
-   // Disable components for future implementations
-   //-----------------------------------------------------------------
-   //atmosComboBox->Enable(true);
-   
+   // disable components for future implemenation
+   //-----------------------------------------------------------------   
    magfComboBox->Enable(false);
    magneticDegreeTextCtrl->Enable(false);
    magneticOrderTextCtrl->Enable(false);
@@ -1359,6 +1362,11 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    type3StaticText->Enable(false);
    degree2StaticText->Enable(false);
    order2StaticText->Enable(false);
+   
+   //-----------------------------------------------------------------
+   // initially disable components
+   //-----------------------------------------------------------------   
+   dragSetupButton->Enable(false);
    
    #if DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
@@ -1600,7 +1608,7 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
       ("DisplayAtmosphereModelData() currentBodyName=%s dragType=%s\n",
        currentBodyName.c_str(), forceList[currentBodyId]->dragType.c_str());
    #endif
-
+   
    // Set current drag force pointer
    theDragForce = forceList[currentBodyId]->dragf;
    
@@ -1691,7 +1699,7 @@ void PropagationConfigPanel::DisplayErrorControlData()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveIntegratorData()
 {
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveIntegratorData() entered\n");
    #endif
@@ -1761,7 +1769,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
          thePropagator->SetRealParameter(id, nomError);
       }
       
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       ShowPropData("SaveData() AFTER  saving Integrator");
       #endif
       
@@ -1781,7 +1789,7 @@ bool PropagationConfigPanel::SaveIntegratorData()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveDegOrder()
 {
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveDegOrder() entered\n");
    #endif
@@ -1810,7 +1818,7 @@ bool PropagationConfigPanel::SaveDegOrder()
    /// @todo ltr: implement < the maximum specified by the model validation 
    try
    {
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       MessageInterface::ShowMessage("   degree=%d, order=%d\n", degree, order);
       #endif
       
@@ -1829,7 +1837,7 @@ bool PropagationConfigPanel::SaveDegOrder()
       // save degree and order
       wxString bodyName = bodyComboBox->GetValue();
       
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       MessageInterface::ShowMessage("   bodyName=%s\n", bodyName.c_str());
       #endif
       
@@ -1864,7 +1872,7 @@ bool PropagationConfigPanel::SaveDegOrder()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SavePotFile()
 {
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SavePotFile() entered\n");
    #endif
@@ -1885,7 +1893,7 @@ bool PropagationConfigPanel::SavePotFile()
             theGravForce = forceList[i]->gravf;
             if (theGravForce != NULL)
             {
-               #if DEBUG_PROP_SAVE
+               #if DEBUG_PROP_PANEL_SAVE
                   MessageInterface::ShowMessage
                     ("SavePotFile() Saving Body:%s, potFile=%s\n",
                     forceList[i]->bodyName.c_str(), forceList[i]->potFilename.c_str());
@@ -1928,7 +1936,7 @@ bool PropagationConfigPanel::SavePotFile()
 //------------------------------------------------------------------------------
 bool PropagationConfigPanel::SaveAtmosModel()
 {
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("PropagationConfigPanel::SaveAtmosModel() entered\n");
    #endif
@@ -1942,7 +1950,7 @@ bool PropagationConfigPanel::SaveAtmosModel()
    wxString bodyName = bodyComboBox->GetValue();
    wxString dragType = atmosComboBox->GetValue();
    
-   #if DEBUG_PROP_SAVE
+   #if DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
       ("   bodyName=%s, dragType=%s\n", bodyName.c_str(), dragType.c_str());
    #endif
@@ -1974,7 +1982,7 @@ bool PropagationConfigPanel::SaveAtmosModel()
    
    if (theAtmosphereModel == NULL)  
    {
-      #if DEBUG_PROP_SAVE
+      #if DEBUG_PROP_PANEL_SAVE
       MessageInterface::ShowMessage
          ("PropagationConfigPanel::SaveAtmosModel() AtmosphereModel not found "
           "for body:%s\n", bodyName.c_str());
@@ -2023,7 +2031,7 @@ void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
       isIntegratorChanged = true;
       integratorString = integratorComboBox->GetStringSelection();
       DisplayIntegratorData(true);
-      isIntegratorDataChanged = false; //loj: 12/20/06
+      isIntegratorDataChanged = false;
       EnableUpdate(true);
    }
 }
@@ -2543,10 +2551,9 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::ShowPropData(const std::string& header)
 {
-   #if DEBUG_PROP_PANEL
    MessageInterface::ShowMessage(">>>>>=======================================\n");
    MessageInterface::ShowMessage("%s\n", header.c_str());
-   MessageInterface::ShowMessage("thePropSetup =%p name=%s\n",
+   MessageInterface::ShowMessage("thePropSetup =%p, name=%s\n",
                                  thePropSetup, thePropSetup->GetName().c_str());
    MessageInterface::ShowMessage("thePropagator=%p, name=%s\n", thePropagator,
                                  thePropagator->GetTypeName().c_str());
@@ -2554,7 +2561,6 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
                                  theForceModel->GetName().c_str());
    MessageInterface::ShowMessage("numOfForces=%d\n", numOfForces);
    
-   //Integer paramId;
    std::string forceType;
    std::string forceBody;
    PhysicalModel *force;
@@ -2563,24 +2569,15 @@ void PropagationConfigPanel::ShowPropData(const std::string& header)
    {
       force = theForceModel->GetForce(i);
       forceType = force->GetTypeName();
-
-      forceBody = force->GetStringParameter("BodyName");
       
-//       if (forceType == "DragForce")
-//       {
-//          forceBody = force->GetStringParameter("BodyName");
-//       }
-//       else 
-//       {
-//          forceBody = force->GetStringParameter("BodyName");
-//       }
+      forceBody = force->GetStringParameter("BodyName");
       
       MessageInterface::ShowMessage("forceBody=%s, forceType=%s\n", forceBody.c_str(),
                                     forceType.c_str());
    }
    MessageInterface::ShowMessage("============================================\n");
-   #endif
 }
+
 
 //------------------------------------------------------------------------------
 // void ShowForceList()
@@ -2785,33 +2782,33 @@ void PropagationConfigPanel::ParseCOFGravityFile(const wxString& fname)
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "Error reading gravity model file.");
-         return;
+      return;
    }
-
+   
    std::string s;
    std::string firstStr;
    
    while (!done)
    {
       getline(inFile,s);
-          
+      
       std::istringstream lineStr;
-          
+      
       lineStr.str(s);
-          
+      
       // ignore comment lines
       if (s[0] != 'C')
       {
          lineStr >> firstStr;
-                 
+         
          if (firstStr == "POTFIELD")
-                 {
+         {
             lineStr >> fileDegree >> fileOrder >> int1 >> real1 >> real2 >> real3;
-                        done = true;
-                 }
+            done = true;
+         }
       }
    }
-
+   
    // Save as string    
    forceList[currentBodyId]->gravDegree.Printf("%d", fileDegree);
    forceList[currentBodyId]->gravOrder.Printf("%d", fileOrder);

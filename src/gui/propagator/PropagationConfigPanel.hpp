@@ -152,7 +152,7 @@ private:
                 const wxString &drag = "None", const wxString &mag = "None")
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
-            gravDegree = "0"; gravOrder = "0"; magfDegree = "0"; 
+            gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
             magfOrder = "0"; potFilename = ""; pmf = NULL; gravf = NULL; 
             dragf = NULL; srpf = NULL; useSrp = false;
          }
