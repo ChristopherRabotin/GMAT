@@ -14,7 +14,7 @@
  */
 //------------------------------------------------------------------------------
 
-#include <wx/variant.h>
+#include <wx/variant.h> 
 #include "PropagatePanel.hpp"
 #include "ParameterSelectDialog.hpp"
 #include "SpaceObjectSelectDialog.hpp"
@@ -86,8 +86,8 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
       mTempStopCond[i].typeName = "";
       mTempStopCond[i].relOpStr = "";
       mTempStopCond[i].goalStr = "";
-      mTempStopCond[i].tol = BaseStopCondition::STOP_COND_TOL;
-      mTempStopCond[i].repeat = 1;
+//      mTempStopCond[i].tol = StopCondition::STOP_COND_TOL;
+//      mTempStopCond[i].repeat = 1;
       mTempStopCond[i].stopCondPtr = NULL;
    }
    
@@ -660,10 +660,9 @@ void PropagatePanel::LoadData()
    //----------------------------------
    // Backwards propagation
    //----------------------------------
-///@todo Need to be implemented in base code for Propagate Command
-//   Integer backPropId = thePropCmd->GetParameterID("BackProp");
-//   bool backProp = thePropCmd->GetBooleanParameter(backPropId);
-//   backPropCheckBox->SetValue(backProp);
+   Integer PropDirectionId = thePropCmd->GetParameterID("PropForward");
+   bool backProp = !thePropCmd->GetBooleanParameter(PropDirectionId);
+   backPropCheckBox->SetValue(backProp);
 
    //----------------------------------
    // propagator
@@ -677,7 +676,6 @@ void PropagatePanel::LoadData()
    StringArray soList;
    
    wxString name;
-   bool backProp = false;
    
    Integer scId = thePropCmd->GetParameterID( "Spacecraft" );
 
@@ -739,21 +737,21 @@ void PropagatePanel::LoadData()
          mTempProp[i].soNames += soList[soCount-1].c_str();
       }
       
-///@todo Will be remove when base code is changed -> LTR 1/18/07
-      // Check if backwards propagation
-      name = mTempProp[i].propName;
-      Integer x = name.Find("-");
-      
-      if (x == -1)
-      {
-         backProp = false;
-      }
-      else
-      {
-         backProp = true;
-         name.Replace("-", "", false);
-         mTempProp[i].propName = name; 
-      }            
+/////@todo Will be remove when base code is changed -> LTR 1/18/07
+//      // Check if backwards propagation
+//      name = mTempProp[i].propName;
+//      Integer x = name.Find("-");
+//      
+//      if (x == -1)
+//      {
+//         backProp = false;
+//      }
+//      else
+//      {
+//         backProp = true;
+//         name.Replace("-", "", false);
+//         mTempProp[i].propName = name; 
+//      }            
       
    } // for (Integer i=0; i<mPropCount; i++)
    
@@ -775,7 +773,7 @@ void PropagatePanel::LoadData()
    StopCondition  *stopCond;
    for ( Integer i=0; i<mStopCondCount; i++ )
    {
-      stopCond = (StopCondition *)stopArray[i];
+      stopCond = (StopCondition *)stopArray[i]; 
       
       #if DEBUG_PROPAGATE_PANEL
       MessageInterface::ShowMessage
@@ -794,8 +792,8 @@ void PropagatePanel::LoadData()
          mTempStopCond[i].typeName = wxT(stopCond->GetTypeName().c_str());
          mTempStopCond[i].goalStr = 
             stopCond->GetStringParameter("Goal").c_str();
-         mTempStopCond[i].tol = stopCond->GetRealParameter("Tol");
-         mTempStopCond[i].repeat = stopCond->GetIntegerParameter("Repeat");
+//         mTempStopCond[i].tol = stopCond->GetRealParameter("Tol");
+//         mTempStopCond[i].repeat = stopCond->GetIntegerParameter("Repeat");
          wxString str = FormatStopCondDesc(mTempStopCond[i].varName,
                                            mTempStopCond[i].relOpStr,
                                            mTempStopCond[i].goalStr);
@@ -877,18 +875,6 @@ void PropagatePanel::SaveData()
             (thePropCmd->GetParameterID("PropagateMode"), str.c_str());
       }
            
-//      //-------------------------------------------------------
-//      // Saving backward propragation
-//      //-------------------------------------------------------
-//        /// @todo Need to be implemented in base code for Propagate Command
-//        //   Integer backPropId = thePropCmd->GetParameterID("BackProp");
-//        //   bool backProp = backPropCheckBox->GetValue();
-//        //   thePropCmd->SetBooleanParameter(backPropId, backProp);
-//      #if DEBUG_PROPAGATE_PANEL
-//      MessageInterface::ShowMessage
-//         ("PropagatePanel::SaveData() Saving backward propragation \n");
-//      #endif
-           
       //---------------------------------------
       // Saving propagator and spacecraft
       //---------------------------------------
@@ -916,23 +902,25 @@ void PropagatePanel::SaveData()
                i,propGrid->GetCellValue(i, PROP_SOS_COL).c_str());
          #endif
 
+
+
 	      if ( (propGrid->GetCellValue(i, PROP_NAME_COL) != "") || 
 	           (propGrid->GetCellValue(i, PROP_SOS_COL) != "") )
 	      {
             mTempProp[mPropCount].propName = 
                propGrid->GetCellValue(i, PROP_NAME_COL).c_str(); 
 
-	         // backward propragation
-	         if (backPropCheckBox->IsChecked())
-	         {
-	            mTempProp[mPropCount].propName.Prepend("-");  
-	         }
-	         else
-	         {
-	            wxString name = mTempProp[mPropCount].propName;
-	            name.Replace("-", "", false);
-	            mTempProp[mPropCount].propName = name; 
-	         }
+//	         // backward propragation
+//	         if (backPropCheckBox->IsChecked())
+//	         {
+//	            mTempProp[mPropCount].propName.Prepend("-");  
+//	         }
+//	         else
+//	         {
+//	            wxString name = mTempProp[mPropCount].propName;
+//	            name.Replace("-", "", false);
+//	            mTempProp[mPropCount].propName = name; 
+//	         }
 	         #if DEBUG_PROPAGATE_PANEL
 	         MessageInterface::ShowMessage
 	            ("PropagatePanel::SaveData() propName[%d]=%s\n",
@@ -962,6 +950,11 @@ void PropagatePanel::SaveData()
 	         ++mPropCount;
 	      } // if
 	   } // for MAX_PROP_ROW
+
+      // Set the prop direction
+      thePropCmd->SetBooleanParameter("PropForward",
+         !(backPropCheckBox->IsChecked()));
+
 
       #if DEBUG_PROPAGATE_PANEL
       MessageInterface::ShowMessage
@@ -1001,11 +994,11 @@ void PropagatePanel::SaveData()
             mTempStopCond[mStopCondCount].stopCondPtr->
                SetStringParameter("Goal", mTempStopCond[i].goalStr.c_str());
             
-            mTempStopCond[mStopCondCount].stopCondPtr->
-               SetRealParameter("Tol", mTempStopCond[i].tol);
-            
-            mTempStopCond[mStopCondCount].stopCondPtr->
-               SetIntegerParameter("Repeat", mTempStopCond[i].repeat);
+//            mTempStopCond[mStopCondCount].stopCondPtr->
+//               SetRealParameter("Tol", mTempStopCond[i].tol);
+//            
+//            mTempStopCond[mStopCondCount].stopCondPtr->
+//               SetIntegerParameter("Repeat", mTempStopCond[i].repeat);
             
             thePropCmd->
                SetRefObject(mTempStopCond[mStopCondCount].stopCondPtr, 

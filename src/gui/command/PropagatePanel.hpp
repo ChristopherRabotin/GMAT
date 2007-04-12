@@ -63,8 +63,8 @@ private:
       wxString       typeName;
       wxString       relOpStr;
       wxString       goalStr;
-      Real           tol;
-      Integer        repeat;
+//      Real           tol;
+//      Integer        repeat;
       StopCondition *stopCondPtr;
    };
    
