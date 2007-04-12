@@ -169,6 +169,7 @@ public:
     */
    //---------------------------------------------------------------------------
    virtual bool        Execute() = 0;
+   virtual bool        SkipInterrupt();
    virtual void        RunComplete();
    
    bool                HasConfigurationChanged();

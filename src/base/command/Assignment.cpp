@@ -924,6 +924,20 @@ bool Assignment::Execute()
 
 
 //------------------------------------------------------------------------------
+//  bool SkipInterrupt()
+//------------------------------------------------------------------------------
+/**
+ * Allows select commands to avoid polling for user interrupts.
+ * 
+ * @return true if the command can skip polling; false if polling is needed.
+ */
+bool Assignment::SkipInterrupt()
+{
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //------------------------------------------------------------------------------

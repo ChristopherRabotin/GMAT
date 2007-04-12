@@ -21,7 +21,7 @@
 
 #include "BeginFunction.hpp"
 #include "MessageInterface.hpp"
-#include "BaseStopCondition.hpp"
+#include "StopCondition.hpp"
 #include "ForceModel.hpp"
 #include "PropSetup.hpp"
 
@@ -920,7 +920,7 @@ bool BeginFunction::Initialize()
 //
 //         for (unsigned int i=0; i<stopCond.size(); i++)
 //         {
-////            ((BaseStopCondition *)stopCond[i])->SetObjectMap(&localMap);
+////            ((StopCondition *)stopCond[i])->SetObjectMap(&localMap);
 //            stopCond[i]->SetSolarSystem(solarSys);
 //
 ////            for (unsigned int j=0; j<newParam.size(); j++)

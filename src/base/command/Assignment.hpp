@@ -47,6 +47,7 @@ public:
    virtual bool         Initialize();
    virtual bool         InterpretAction();
    virtual bool         Execute();
+   virtual bool         SkipInterrupt();
 
    // inherited from GmatBase
    virtual bool         RenameRefObject(const Gmat::ObjectType type,

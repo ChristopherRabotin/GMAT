@@ -24,7 +24,7 @@
 #include "StringUtil.hpp" // for Trim()
 #include "MessageInterface.hpp"
 
-#include <sstream>
+#include <sstream> 
 #include <cmath>
 
 //#define DEBUG_PROPAGATE_ASSEMBLE 1
@@ -46,8 +46,33 @@
 //---------------------------------
 std::string Propagate::PropModeList[PropModeCount] =
 {
-   "", "Synchronized"
+   "", "Synchronized", "BackProp"
 };
+
+const std::string
+Propagate::PARAMETER_TEXT[PropagateCommandParamCount - GmatCommandParamCount] =
+{
+   "AvailablePropModes",
+   "PropagateMode",
+   "InterruptFrequency",
+   "Spacecraft",
+   "Propagator",
+   "StopCondition",
+   "PropForward"
+};
+
+const Gmat::ParameterType
+Propagate::PARAMETER_TYPE[PropagateCommandParamCount - GmatCommandParamCount] =
+{
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRINGARRAY_TYPE,
+   Gmat::BOOLEAN_TYPE
+};
+
 
 #ifdef DEBUG_FIRST_CALL
 static bool firstStepFired = false;
@@ -66,6 +91,7 @@ static bool firstStepFired = false;
 //------------------------------------------------------------------------------
 Propagate::Propagate() :
    GmatCommand                 ("Propagate"),
+   direction                   (1.0),
    currentPropMode             (""),
    interruptCheckFrequency     (30),
    inProgress                  (false),
@@ -84,14 +110,14 @@ Propagate::Propagate() :
    currentMode                 (INDEPENDENT),
    stopCondEpochID             (-1),
    stopCondBaseEpochID         (-1),
-   stopCondStopVarID           (-1),
-   // Set the parameter IDs
-   availablePropModesID        (parameterCount),
-   propCoupledID               (parameterCount+1),
-   interruptCheckFrequencyID   (parameterCount+2),
-   satNameID                   (parameterCount+3),
-   propNameID                  (parameterCount+4),
-   stopWhenID                  (parameterCount+5)
+   stopCondStopVarID           (-1) //,
+//   // Set the parameter IDs
+//   availablePropModesID        (parameterCount),
+//   propCoupledID               (parameterCount+1),
+//   interruptCheckFrequencyID   (parameterCount+2),
+//   satNameID                   (parameterCount+3),
+//   propNameID                  (parameterCount+4),
+//   stopWhenID                  (parameterCount+5)
 {
    parameterCount += 5;
 }
@@ -163,14 +189,14 @@ Propagate::Propagate(const Propagate &prp) :
    currentMode                 (prp.currentMode),
    stopCondEpochID             (prp.stopCondEpochID),
    stopCondBaseEpochID         (prp.stopCondBaseEpochID),
-   stopCondStopVarID           (prp.stopCondStopVarID),
-   // Set the parameter IDs
-   availablePropModesID        (prp.availablePropModesID),
-   propCoupledID               (prp.propCoupledID),
-   interruptCheckFrequencyID   (prp.interruptCheckFrequencyID),
-   satNameID                   (prp.satNameID),
-   propNameID                  (prp.propNameID),
-   stopWhenID                  (prp.stopWhenID)
+   stopCondStopVarID           (prp.stopCondStopVarID)//,
+//   // Set the parameter IDs
+//   availablePropModesID        (prp.availablePropModesID),
+//   propCoupledID               (prp.propCoupledID),
+//   interruptCheckFrequencyID   (prp.interruptCheckFrequencyID),
+//   satNameID                   (prp.satNameID),
+//   propNameID                  (prp.propNameID),
+//   stopWhenID                  (prp.stopWhenID)
 {
    parameterCount = prp.parameterCount;
    initialized = false;
@@ -283,9 +309,7 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
       case Gmat::PROP_SETUP:
          propName.push_back(name);
          if (name[0] == '-')
-            direction.push_back(-1.0);
-         else
-            direction.push_back(1.0);
+            direction = -1.0;
          satName.push_back(new StringArray);
          return true;
    
@@ -418,6 +442,9 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
    
    // Construct the generating string
    UnsignedInt index = 0;
+   
+   if (direction < 0.0)
+      gen += (" BackProp");
    
    if (currentPropMode != "")
       gen += (" " + currentPropMode);
@@ -556,7 +583,6 @@ bool Propagate::SetRefObjectName(const Gmat::ObjectType type,
    switch (type) {
       // Propagator setups
       case Gmat::PROP_SETUP:
-         direction.push_back(1.0);
          propName.push_back(name);
          satName.push_back(new StringArray);
          return true;
@@ -753,20 +779,8 @@ ObjectArray& Propagate::GetRefObjectArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 std::string Propagate::GetParameterText(const Integer id) const
 {
-   if (id == propCoupledID)
-      return "PropagateMode";
-
-   if (id == interruptCheckFrequencyID)
-      return "InterruptFrequency";
-
-   if (id == satNameID)
-      return "Spacecraft";
-    
-   if (id == propNameID)
-      return "Propagator";
-    
-   if (id == stopWhenID)
-      return "StoppingConditions";
+   if ((id < PropagateCommandParamCount) && (id >= GmatCommandParamCount))
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
 
    return GmatCommand::GetParameterText(id);
 }
@@ -785,21 +799,12 @@ std::string Propagate::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagate::GetParameterID(const std::string &str) const
 {
-   if (str == "AvailablePropModes")
-      return availablePropModesID;
+   for (Integer i = GmatCommandParamCount; i < PropagateCommandParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
 
-   if (str == "PropagateMode")
-      return propCoupledID;
-
-   if (str == "InterruptFrequency")
-      return interruptCheckFrequencyID;
-
-   if (str == "Spacecraft")
-      return satNameID;
-    
-   if (str == "Propagator")
-      return propNameID;
-    
    return GmatCommand::GetParameterID(str);
 }
 
@@ -817,21 +822,9 @@ Integer Propagate::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 {
-   if (id == availablePropModesID)
-      return Gmat::STRINGARRAY_TYPE;
-
-   if (id == propCoupledID)
-      return Gmat::STRING_TYPE;
-
-   if (id == interruptCheckFrequencyID)
-      return Gmat::INTEGER_TYPE;
-
-   if (id == satNameID)
-      return Gmat::STRINGARRAY_TYPE;
-    
-   if (id == propNameID)
-      return Gmat::STRING_TYPE;
-    
+   if (id >= GmatCommandParamCount && id < PropagateCommandParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+      
    return GmatCommand::GetParameterType(id);
 }
 
@@ -849,22 +842,7 @@ Gmat::ParameterType Propagate::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Propagate::GetParameterTypeString(const Integer id) const
 {
-   if (id == availablePropModesID)
-      return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
-
-   if (id == propCoupledID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-
-   if (id == interruptCheckFrequencyID)
-      return PARAM_TYPE_STRING[Gmat::INTEGER_TYPE];
-
-   if (id == satNameID)
-      return PARAM_TYPE_STRING[Gmat::STRINGARRAY_TYPE];
-
-   if (id == propNameID)
-      return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-
-   return GmatCommand::GetParameterTypeString(id);
+   return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
 }
 
 
@@ -881,7 +859,7 @@ std::string Propagate::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagate::GetIntegerParameter(const Integer id) const
 {
-   if (id == interruptCheckFrequencyID)
+   if (id == INTERRUPT_FREQUENCY)
       return interruptCheckFrequency;
 
    return GmatCommand::GetIntegerParameter(id);
@@ -902,7 +880,7 @@ Integer Propagate::GetIntegerParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
 {
-   if (id == interruptCheckFrequencyID) {
+   if (id == INTERRUPT_FREQUENCY) {
       if (value >= 0)
          interruptCheckFrequency = value;
       return interruptCheckFrequency;
@@ -925,7 +903,7 @@ Integer Propagate::SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
 std::string Propagate::GetStringParameter(const Integer id) const
 {
-   if (id == propCoupledID)
+   if (id == PROP_COUPLED)
       return currentPropMode;
 
    return GmatCommand::GetStringParameter(id);
@@ -946,27 +924,48 @@ std::string Propagate::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == propCoupledID) {
-      const StringArray pmodes = GetStringArrayParameter(availablePropModesID);
-      if (find(pmodes.begin(), pmodes.end(), value) != pmodes.end()) {
-         currentPropMode = value;
-         for (Integer i = 0; i < PropModeCount; ++i)
-            if (value == pmodes[i]) {
-               currentMode = (PropModes)i;
-               return true;
-            }
+   if (id == PROP_COUPLED) 
+   {
+      const StringArray pmodes = GetStringArrayParameter(AVAILABLE_PROP_MODES);
+      if (find(pmodes.begin(), pmodes.end(), value) != pmodes.end()) 
+      {
+         // Back prop is a special case
+         if (value == "BackProp")
+         {
+            direction = -1.0;
+         }
+         else
+         {
+            currentPropMode = value;
+            for (Integer i = 0; i < PropModeCount; ++i)
+               if (value == pmodes[i]) 
+               {
+                  currentMode = (PropModes)i;
+                  return true;
+               }
+         }
       }
    }
  
-   if (id == satNameID) {
+   if (id == SAT_NAME) 
+   {
       Integer propNum = propName.size()-1;
       satName[propNum]->push_back(value);
       return true;
    }
 
-   if (id == propNameID) {
-      propName.push_back(value);
-      direction.push_back(1.0);
+   if (id == PROP_NAME) 
+   {
+      std::string propNameString = value;
+      if (propNameString[0] == '-')
+      {
+         direction = -1.0;
+         MessageInterface::ShowMessage("Please use the keyword \"BackProp\" to "
+            "set backwards propagation; the use of a minus sign in the string "
+            "\"%s\" is deprecated.\n", propNameString.c_str());
+         propNameString = propNameString.substr(1);
+      }
+      propName.push_back(propNameString);
       satName.push_back(new StringArray);
       return true;
    }
@@ -993,7 +992,7 @@ bool Propagate::SetStringParameter(const Integer id, const std::string &value)
 bool Propagate::SetStringParameter(const Integer id, const std::string &value,
                                    const Integer index)
 {   
-   if (id == satNameID) {
+   if (id == SAT_NAME) {
       if (index < (Integer)propName.size())
          satName[index]->push_back(value);
       else
@@ -1020,17 +1019,19 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 {
    static StringArray modeList;
    
-   if (id == availablePropModesID) {
+   if (id == AVAILABLE_PROP_MODES) {
       modeList.clear();
       for (Integer i = 0; i < PropModeCount; ++i)
-         modeList.push_back(PropModeList[i]);
+         // BackProp isn't really a prop sync mode
+         if (PropModeList[i] != "BackProp")
+            modeList.push_back(PropModeList[i]);
       return modeList;
    }
  
-   if (id == satNameID)
+   if (id == SAT_NAME)
       return *satName[0];
  
-   if (id == propNameID) {
+   if (id == PROP_NAME) {
       return propName;
    }
  
@@ -1053,11 +1054,114 @@ const StringArray& Propagate::GetStringArrayParameter(const Integer id) const
 const StringArray& Propagate::GetStringArrayParameter(const Integer id,
                                                const Integer index) const
 {
-   if (id == satNameID)
+   if (id == SAT_NAME)
       return *satName[index];
 
    return GmatCommand::GetStringArrayParameter(id, index);
 }
+
+
+//------------------------------------------------------------------------------
+// Integer GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the value for an Boolean parameter.
+ * 
+ * Propagate currently contains the following Boolean parameter:
+ * 
+ *    PROP_FORWARDS     Evaluates true if the prop direction is forward in time,
+ *                      false if propagating backwards.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::GetBooleanParameter(const Integer id) const
+{
+   if (id == PROP_FORWARD)
+      return (direction > 0.0 ? true : false);
+      
+   return GmatCommand::GetBooleanParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Set the value for an Boolean parameter.
+ * 
+ * Propagate currently contains the following Boolean parameter:
+ * 
+ *    PROP_FORWARDS     Set true if the prop direction is forward in time,
+ *                      false if propagating backwards.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The parameter setting
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::SetBooleanParameter(const Integer id, const bool value)
+{
+   if (id == PROP_FORWARD)
+   {
+      if (value == true)
+         direction = 1.0;
+      else
+         direction = -1.0;
+      return true;
+   }
+
+   return GmatCommand::SetBooleanParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve the value for an Boolean parameter.
+ * 
+ * Propagate currently contains the following Boolean label:
+ * 
+ *    "PropForward"     Evaluates true if the prop direction is forward in time,
+ *                      false if propagating backwards.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::GetBooleanParameter(const std::string &label) const
+{
+   return GetBooleanParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// Integer SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+/**
+ * Set the value for an Boolean parameter.
+ * 
+ * Propagate currently contains the following Boolean parameter:
+ * 
+ *    "PropForward"     Set true if the prop direction is forward in time,
+ *                      false if propagating backwards.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The parameter setting
+ *
+ * @return The parameter's value.
+ */
+//------------------------------------------------------------------------------
+bool Propagate::SetBooleanParameter(const std::string &label, const bool value)
+{
+   return SetBooleanParameter(GetParameterID(label), value);
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -1082,7 +1186,6 @@ bool Propagate::TakeAction(const std::string &action,
          for (Integer i = 0; i < (Integer)satName.size(); ++i)
          {
             delete satName[i];
-//            satName[i] = NULL;  // Paranoia sets in!
          }
          satName.clear();
 
@@ -1232,8 +1335,7 @@ const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
       }      
    }
    
-   if (type == Gmat::UNKNOWN_OBJECT ||
-       type == Gmat::SPACECRAFT)
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACECRAFT)
    {
       refObjectNames.insert(refObjectNames.end(), stopSatNames.begin(),
                             stopSatNames.end());
@@ -1312,16 +1414,28 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
                                 " for \"%s\" starting at loc=%d\n in \n\"%s\"",
                                 modeStr.c_str(), loc, generatingString.c_str());
       #endif
+      
       Integer end = generatingString.find(modeStr, loc);
       if (end != (Integer)std::string::npos) 
       {
-         currentMode = (PropModes)modeId;
-         currentPropMode = PropModeList[modeId];
-         #ifdef DEBUG_PROPAGATE_EXE
-            MessageInterface::ShowMessage("\nLocated at %d\n", end);
-            MessageInterface::ShowMessage("Mode is now %d\n", currentMode);
-         #endif
-
+         if (modeStr == "BackProp ")
+         {
+            #ifdef DEBUG_PROPAGATE_EXE
+               MessageInterface::ShowMessage("Direction is now %d\n", currentMode);
+            #endif
+   
+            direction = -1.0;
+         }
+         else
+         {
+            currentMode = (PropModes)modeId;
+            currentPropMode = PropModeList[modeId];
+            #ifdef DEBUG_PROPAGATE_EXE
+               MessageInterface::ShowMessage("\nLocated at %d\n", end);
+               MessageInterface::ShowMessage("Mode is now %d\n", currentMode);
+            #endif
+         }
+   
          if (end >= loc)
             loc = end + modeStr.length();
       }
@@ -1410,12 +1524,15 @@ void Propagate::FindSetupsAndStops(Integer &loc,
          throw CommandException("Propagate::AssemblePropagators: Propagate"
                                 " string does not identify propagator");
       
-      if (generatingString[currentLoc] == '-') {
-         direction.push_back(-1.0);
+      if (generatingString[currentLoc] == '-') 
+      {
+         direction = -1.0;
+         MessageInterface::ShowMessage("Please use the keyword \"BackProp\" to "
+            "set backwards propagation; the use of a minus sign in the string "
+            "\"%s\" is deprecated.\n", generatingString.c_str());
+         ++currentLoc;
       }
-      else
-         direction.push_back(1.0);
-         
+        
       tempString = generatingString.substr(currentLoc, end-currentLoc);
       // Remove stop condition here
       if (tempString.find("{", 0) != std::string::npos)
@@ -1453,15 +1570,6 @@ void Propagate::FindSetupsAndStops(Integer &loc,
       parmstart = generatingString.find("(", currentLoc);
       if (parmstart == (Integer)std::string::npos)
          scanning = false;
-   }
-   
-   // Flag mixed directions in the command
-   for (RealArray::iterator d = direction.begin(); d != direction.end(); ++d)
-   {
-      if ((*d) != direction[0])
-         throw CommandException(
-            "Mixed propagation directions are not allowed, but are specified "
-            "on the Propagate line\n'" + generatingString + "'");
    }
    
    // Now find the stopping conditions
@@ -1618,9 +1726,10 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
    
    // Now to work!
    std::string paramType, paramObj, paramSystem;
-   if (!InterpretParameter(lhs, paramType, paramObj, paramSystem))
-      throw CommandException("Cannot decipher the parameter string '" +
-         lhs + "' on the command line " + generatingString);
+//   if (!InterpretParameter(lhs, paramType, paramObj, paramSystem))
+//      throw CommandException("Cannot decipher the parameter string '" +
+//         lhs + "' on the command line " + generatingString);
+   GmatStringUtil::ParseParameter(lhs, paramType, paramObj, paramSystem);
 
    // Create the stop parameter
    Moderator *theModerator = Moderator::Instance();
@@ -1642,7 +1751,7 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
    }
    
    // Setup for backwards propagation
-   stopCond->SetPropDirection(direction[0]);  // Use direction of assoc'd prop
+   stopCond->SetPropDirection(direction);  // Use direction of props
    stopCond->SetStringParameter(stopCondStopVarID, paramName);
    SetObject(stopCond, Gmat::STOP_CONDITION);
    TakeAction("SetStopSpacecraft", paramObj);
@@ -1725,60 +1834,60 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
 }
 
 
-//------------------------------------------------------------------------------
-//  bool InterpretParameter(const std::string text, std::string &paramType,
-//                          std::string &paramObj, std::string &parmSystem)
-//------------------------------------------------------------------------------
-/**
- * Breaks apart a parameter declaration into its component pieces
- *
- * @param <text>       The string that gets decomposed.
- * @param <paramType>  Type of parameter that is needed.
- * @param <paramObj>   The Object used for the parameter calculations.
- * @param <parmSystem> The coordinate system or body used for the parameter
- *                     calculations (or the empty string if this piece is
- *                     unspecified).
- *
- * @return true if the decomposition worked.
- */
-//------------------------------------------------------------------------------
-bool Propagate::InterpretParameter(const std::string text,
-                                   std::string &paramType, 
-                                   std::string &paramObj, 
-                                   std::string &paramSystem)
-{
-   // Use GmatStringUtil to throw invalid parameter syntax
-   GmatStringUtil::ParseParameter(text, paramType, paramObj, paramSystem);
-
-   
-//    Integer start = 0, dotLoc = text.find(".", 0);
-//    if (dotLoc == (Integer)std::string::npos)
-//       throw CommandException("Propagate::InterpretParameter: Unable to "
-//                "interpret parameter object in the string " +
-//                text);
-   
-//    paramObj = text.substr(start, dotLoc - start);
-//    start = dotLoc + 1;
-//    dotLoc = text.find(".", start);
-//    if (dotLoc != (Integer)std::string::npos) {
-//       paramSystem = text.substr(start, dotLoc - start);
-//       start = dotLoc + 1;
-//    }
-//    else {
-//       paramSystem = "";
-//    }
-   
-//    paramType = text.substr(start);
-   
-   #ifdef DEBUG_PROPAGATE_INIT
-      MessageInterface::ShowMessage(
-         "Built parameter %s for object %s with CS %s\n",
-         paramType.c_str(), paramObj.c_str(), paramSystem.c_str());
-   #endif
-
-      
-   return true;
-}
+////------------------------------------------------------------------------------
+////  bool InterpretParameter(const std::string text, std::string &paramType,
+////                          std::string &paramObj, std::string &parmSystem)
+////------------------------------------------------------------------------------
+///**
+// * Breaks apart a parameter declaration into its component pieces
+// *
+// * @param <text>       The string that gets decomposed.
+// * @param <paramType>  Type of parameter that is needed.
+// * @param <paramObj>   The Object used for the parameter calculations.
+// * @param <parmSystem> The coordinate system or body used for the parameter
+// *                     calculations (or the empty string if this piece is
+// *                     unspecified).
+// *
+// * @return true if the decomposition worked.
+// */
+////------------------------------------------------------------------------------
+//bool Propagate::InterpretParameter(const std::string text,
+//                                   std::string &paramType, 
+//                                   std::string &paramObj, 
+//                                   std::string &paramSystem)
+//{
+//   // Use GmatStringUtil to throw invalid parameter syntax
+//   GmatStringUtil::ParseParameter(text, paramType, paramObj, paramSystem);
+//
+//   
+////    Integer start = 0, dotLoc = text.find(".", 0);
+////    if (dotLoc == (Integer)std::string::npos)
+////       throw CommandException("Propagate::InterpretParameter: Unable to "
+////                "interpret parameter object in the string " +
+////                text);
+//   
+////    paramObj = text.substr(start, dotLoc - start);
+////    start = dotLoc + 1;
+////    dotLoc = text.find(".", start);
+////    if (dotLoc != (Integer)std::string::npos) {
+////       paramSystem = text.substr(start, dotLoc - start);
+////       start = dotLoc + 1;
+////    }
+////    else {
+////       paramSystem = "";
+////    }
+//   
+////    paramType = text.substr(start);
+//   
+//   #ifdef DEBUG_PROPAGATE_INIT
+//      MessageInterface::ShowMessage(
+//         "Built parameter %s for object %s with CS %s\n",
+//         paramType.c_str(), paramObj.c_str(), paramSystem.c_str());
+//   #endif
+//
+//      
+//   return true;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1939,8 +2048,12 @@ bool Propagate::Initialize()
                                     generatingString.c_str());
       MessageInterface::ShowMessage("  Size of propName is %d\n",
                                     propName.size());
-      MessageInterface::ShowMessage("  Size of direction is %d\n",
-                                    direction.size());
+      for (UnsignedInt ind = 0; ind < propName.size(); ++ind)
+         MessageInterface::ShowMessage("     %d:  %s\n",
+                                    propName.size(), propName[ind].c_str());
+         
+      MessageInterface::ShowMessage("  Direction is %s\n",
+                                    (direction == 1.0?"Forwards":"Backwards"));
    #endif
 
    GmatCommand::Initialize();
@@ -1951,7 +2064,6 @@ bool Propagate::Initialize()
    sats.clear();
    SpaceObject *so;
    std::string pName;
-   Real dir;
 
    // Ensure that we are using fresh objects when buffering stops
    EmptyBuffer();
@@ -1972,19 +2084,13 @@ bool Propagate::Initialize()
          throw CommandException("Size mismatch for SpaceObject names\n");
          
       if ((*i)[0] == '-') 
-      {
          pName = i->substr(1);
-         dir = -1.0;
-      }
       else 
-      {
         pName = *i;
-        dir = 1.0;
-      }
 
       if (objectMap->find(pName) == objectMap->end())
          throw CommandException(
-            "Propagate command cannot find Propagator Setup\"" + (pName) +
+            "Propagate command cannot find Propagator Setup \"" + (pName) +
             "\"\n");
    
       if (satName[index]->empty())
@@ -2001,7 +2107,6 @@ bool Propagate::Initialize()
       // prop.push_back((PropSetup *)((*objectMap)[pName]));
       if (!prop[index])
          return false;
-      direction[index] = dir;
       
       Propagator *p = prop[index]->GetPropagator();
       if (!p)
@@ -2058,7 +2163,7 @@ bool Propagate::Initialize()
       streamID = publisher->RegisterPublishedData(owners, elements);
       p->SetPhysicalModel(fm);
       p->SetRealParameter("InitialStepSize", 
-         fabs(p->GetRealParameter("InitialStepSize"))*direction[index]);
+         fabs(p->GetRealParameter("InitialStepSize")) * direction);
       p->Initialize();
       ++index;
    } // End of loop through PropSetups
@@ -2137,11 +2242,10 @@ bool Propagate::Initialize()
    #ifdef DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage("Propagate::Initialize():"
                                     " Propagators Identified:\n");
-      std::vector<Real>::iterator j = direction.begin();
       for (StringArray::iterator i = propName.begin(); i != propName.end();
-           ++i, ++j)
+           ++i)
          MessageInterface::ShowMessage("   \"%s\" running %s\n", i->c_str(),
-         ((*j) > 0.0 ? "forwards" : "backwards"));
+         (direction > 0.0 ? "forwards" : "backwards"));
    #endif
 
    if (singleStepMode)
@@ -2247,7 +2351,7 @@ void Propagate::PrepareToPropagate()
          fm[n]->UpdateInitialData();
       
          p[n]->Initialize();
-         p[n]->Update(direction[n] > 0.0);
+         p[n]->Update(direction > 0.0);
          state = fm[n]->GetState();
       }   
 
@@ -2283,7 +2387,7 @@ void Propagate::PrepareToPropagate()
                (prop[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
                   ? "forwards" : "backwards"));
              MessageInterface::ShowMessage("   direction =  %lf.\n",
-               direction[n]);
+               direction);
          #endif
       }
    
@@ -2380,7 +2484,7 @@ void Propagate::PrepareToPropagate()
       fm[n]->UpdateInitialData();
    
       p[n]->Initialize();
-      p[n]->Update(direction[n] > 0.0);
+      p[n]->Update(direction > 0.0);
       state = fm[n]->GetState();
       dim += fm[n]->GetDimension();
    }   
@@ -2420,7 +2524,7 @@ void Propagate::PrepareToPropagate()
             (prop[n]->GetPropagator()->GetRealParameter("InitialStepSize") > 0.0
                ? "forwards" : "backwards"));
           MessageInterface::ShowMessage("   direction =  %lf.\n",
-            direction[n]);
+            direction);
       #endif
    }
 
@@ -2697,7 +2801,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
         current != p.end(); ++current)
       (*current)->SetAsFinalStep(true);
    
-   if (secsToStep * direction[trigger] > 0.0)
+   if (secsToStep * direction > 0.0)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(
@@ -3091,89 +3195,8 @@ std::string Propagate::CreateParameter(const std::string &name)
        name.c_str(), type.c_str(), owner.c_str(), dep.c_str());
    #endif
 
-   
    param = theModerator->CreateParameter(type, str, owner, dep);
-   
-//    if (type != "")
-//       param = theModerator->CreateParameter(type, str, owner, dep);
-//    else
-//       return str;
-   
-//    Moderator *theModerator = Moderator::Instance();
-//    std::string owner, dep, type;
-
-   //loj: this caused crash
-   // remove blanks
-   //    for (std::string::iterator i = str.begin(); i != str.end(); ++i)
-   //       if (*i == ' ')
-   //          str.erase(i);
-   
-//    str = GmatStringUtil::Trim(name, GmatStringUtil::BOTH);
-   
-//    #if DEBUG_PROPAGATE_OBJ
-//       MessageInterface::ShowMessage
-//          ("Propagate::CreateParameter() name=<%s>, str=<%s>\n",
-//           name.c_str(), str.c_str());
-//    #endif
-
-//    // if string is a number
-//    if (isdigit(str[0]) || str[0] == '.' || str[0] == '-')
-//       return str;
-
-//    // if parameter exist
-//    if (theModerator->GetParameter(str))
-//       return str;
-   
-//    std::string::size_type pos1 = str.find('.');
-   
-//    if (pos1 != str.npos)
-//       owner = str.substr(0, pos1);
-//    else
-//       return str;
-   
-//    std::string::size_type pos2 = str.find(pos1);
-//    if (pos2 != str.npos)
-//    {
-//       dep = str.substr(pos1, pos2-pos1);
-//       type = str.substr(pos2+1);
-//    }
-//    else
-//    {
-//       type = str.substr(pos1+1, pos2-pos1);
-//    }
-   
-//    #if DEBUG_PROPAGATE_OBJ
-//       MessageInterface::ShowMessage
-//          ("Propagate::CreateParameter() str=%s, owner=%s, dep=%s, type=%s\n",
-//           str.c_str(), owner.c_str(), dep.c_str(), type.c_str());
-//    #endif
-
-
-//    Parameter *param = theModerator->CreateParameter(type, str);
-//    param->SetRefObjectName(Gmat::SPACECRAFT, owner);
-   
-//    if (param->IsCoordSysDependent())
-//    {
-//       if (dep == "")
-//          dep = "EarthMJ2000Eq";
       
-//       param->SetStringParameter("DepObject", dep);
-//       param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, dep);
-//    }
-   
-//    if (param->IsOriginDependent())
-//    {
-//       if (dep == "")
-//          dep = "Earth";
-      
-//       param->SetStringParameter("DepObject", dep);
-//       param->SetRefObjectName(Gmat::SPACE_POINT, dep);
-      
-//       if (param->NeedCoordSystem())
-//          /// @todo Update coordinate system to better value for body parms
-//          param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
-//    }
-   
    #if DEBUG_PROPAGATE_OBJ
       MessageInterface::ShowMessage
          ("Propagate::CreateParameter() name=%s, owner=%s, dep=%s, type=%s\n",
@@ -3367,4 +3390,22 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
             "   Epoch of '%s' is %.12lf\n", (*i)->GetName().c_str(), 
             (*i)->GetRealParameter("A1Epoch"));
    #endif
+}
+
+//------------------------------------------------------------------------------
+// bool CheckFirstStep()
+//------------------------------------------------------------------------------
+/**
+ * Method used during the first prop step to ensure that a stop encountered on 
+ * this step is not repeating the last stop encountered.
+ * 
+ * @return true is the stop is a valid stop -- that is, if it is not a repeat of
+ * the last stop -- and false if it is a repeat.
+ * 
+ * @note: Not yet implemented; the method always returns true for now.
+ */
+//------------------------------------------------------------------------------
+bool                    CheckFirstStepStop()
+{
+   return true;
 }

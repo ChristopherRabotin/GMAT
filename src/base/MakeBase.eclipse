@@ -343,7 +343,6 @@ OBJECTS = \
     spacecraft/TextTrajectoryFile.o \
     spacecraft/Thruster.o \
     spacecraft/TimeConverter.o \
-    stopcond/BaseStopCondition.o \
     stopcond/StopCondition.o \
     subscriber/MatlabWs.o \
     subscriber/MessageWindow.o \
@@ -392,6 +391,7 @@ OBJECTS = \
     $(TCPIP_OBJECTS)
 
     # parameter/EquinoctialParameters.o \
+    # stopcond/BaseStopCondition.o \
 
 
 $(TARGET) : $(OBJECTS)

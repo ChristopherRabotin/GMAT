@@ -1379,6 +1379,20 @@ bool GmatCommand::HasPropStateChanged()
 
 
 //------------------------------------------------------------------------------
+//  bool SkipInterrupt()
+//------------------------------------------------------------------------------
+/**
+ * Allows select commands to avoid polling for user interrupts.
+ * 
+ * @return true if the command can skip polling; false if polling is needed.
+ */
+bool GmatCommand::SkipInterrupt()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 //  void RunComplete()
 //------------------------------------------------------------------------------
 /**

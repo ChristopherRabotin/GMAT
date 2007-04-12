@@ -102,7 +102,14 @@ public:
                        GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& 
                        GetStringArrayParameter(const Integer id, 
-                                               const Integer index) const; 
+                                               const Integer index) const;
+   virtual bool        GetBooleanParameter(const Integer id) const;
+   virtual bool        SetBooleanParameter(const Integer id,
+                                           const bool value);
+   virtual bool        GetBooleanParameter(const std::string &label) const;
+   virtual bool        SetBooleanParameter(const std::string &label,
+                                           const bool value);
+ 
    virtual bool        TakeAction(const std::string &action,  
                                   const std::string &actionData = "");
     
@@ -121,7 +128,7 @@ protected:
    /// Name of the propagator setup(s) used in this command
    StringArray             propName;
    /// Step direction multipliers used to switch btwn forwards & backwards prop
-   RealArray               direction;
+   Real                    direction;
    /// The (1 or more) spacecraft associated with this propagation, grouped by
    /// propagator
    std::vector<StringArray *>  
@@ -182,6 +189,7 @@ protected:
    {
       INDEPENDENT,
       SYNCHRONIZED,
+      BACK_PROP,
       PropModeCount
    };
 
@@ -203,7 +211,7 @@ protected:
    /// Variable that tracks the current propagation mode
    PropModes               currentMode;
    
-   // Stopping condition paramter IDs
+   // Stopping condition parameter IDs
    /// Epoch on the stopping condition
    Integer                 stopCondEpochID;
    /// Epoch on the stopping condition
@@ -211,24 +219,28 @@ protected:
    /// Epoch on the stopping condition
    Integer                 stopCondStopVarID;
 
-   // For convenience, set variables for the parameter IDs
-   /// @todo Replace these ID's with the newer ID setting scheme
-   
-   /// ID for available propagation modes
-   const Integer           availablePropModesID;
-   /// ID for the boolean flag used for the prop mode
-   const Integer           propCoupledID;
-   /// ID for the number of iterations before calling to check for interrupts
-   const Integer           interruptCheckFrequencyID;
-   /// ID for the satellite name array
-   const Integer           satNameID;
-   /// ID for the propagator name
-   const Integer           propNameID;
-   /// ID used to get the stopping conditions
-   const Integer           stopWhenID;
-    
+   /// Parameter IDs
+   enum
+   {
+      AVAILABLE_PROP_MODES = GmatCommandParamCount,
+      PROP_COUPLED,
+      INTERRUPT_FREQUENCY,
+      SAT_NAME,
+      PROP_NAME,
+      STOP_WHEN,
+      PROP_FORWARD,
+      PropagateCommandParamCount,
+   };
+
+   /// Parameter ID Types
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[PropagateCommandParamCount - GmatCommandParamCount];
+   /// Parameter ID strings
+   static const std::string
+      PARAMETER_TEXT[PropagateCommandParamCount - GmatCommandParamCount];
    /// Array of allowed propagation modes
    static std::string      PropModeList[PropModeCount];
+
    
    virtual void            SetNames(const std::string& name, 
                                     StringArray& owners, StringArray& elements);
@@ -246,10 +258,10 @@ protected:
    void                    CleanString(std::string &theString, 
                               const StringArray *extras = NULL);
 
-   bool                    InterpretParameter(const std::string text, 
-                                              std::string &paramType, 
-                                              std::string &paramObj, 
-                                              std::string &parmSystem);
+//   bool                    InterpretParameter(const std::string text, 
+//                                              std::string &paramType, 
+//                                              std::string &paramObj, 
+//                                              std::string &parmSystem);
    virtual void            PrepareToPropagate();
    virtual void            CheckStopConditions(Integer EpochID);
    virtual void            TakeFinalStep(Integer EpochID, Integer trigger);
@@ -264,6 +276,7 @@ protected:
    void                    AddToBuffer(SpaceObject *so);
    void                    EmptyBuffer();
    void                    BufferSatelliteStates(bool fillingBuffer = true);
+   bool                    CheckFirstStepStop();
    
 private:
     
