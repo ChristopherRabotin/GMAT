@@ -168,6 +168,43 @@ protected:
       TOTAL_MASS_ID, 
       SpacecraftParamCount
    };
+   
+   enum MultipleReps  // these are IDs for the different representations
+   {
+      CART_X = 10000,
+      CART_Y,
+      CART_Z,
+      CART_VX,
+      CART_VY,
+      CART_VZ,
+      KEPL_SMA,
+      KEPL_ECC,
+      KEPL_INC,
+      KEPL_RAAN,
+      KEPL_AOP,
+      KEPL_TA,
+      KEPL_EA,
+      KEPL_MA,
+      KEPL_HA,
+      MOD_KEPL_RADPER,
+      MOD_KEPL_RADAPO,
+      AZFPA_RMAG,
+      AZFPA_RA,
+      AZFPA_DEC,
+      AZFPA_VMAG,
+      AZFPA_AZI,
+      AZFPA_FPA,
+      RADEC_RAV,
+      RADEC_DECV,
+      EQ_PEY,
+      EQ_PEX,
+      EQ_PNY,
+      EQ_PNX,
+      EQ_MLONG, 
+      EndMultipleReps    
+   };
+   // these are the corresponding strings
+   static const std::string MULT_REP_STRINGS[EndMultipleReps - CART_X];
 
    /// Spacecraft parameter types
    static const Gmat::ParameterType 
@@ -175,7 +212,7 @@ protected:
    /// Spacecraft parameter labels
    static const std::string 
                   PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount];
-
+   
    enum STATE_REPS
    {
       CARTESIAN_ID = 0,
@@ -258,6 +295,7 @@ protected:
    Real              GetElement(const std::string &label);
    bool              SetElement(const std::string &label, const Real &value);
    Integer           LookUpLabel(const std::string &label, std::string &rep);
+   Integer           LookUpID(const Integer id, std::string &label, std::string &rep);
    void              BuildElementLabelMap();
 };
 

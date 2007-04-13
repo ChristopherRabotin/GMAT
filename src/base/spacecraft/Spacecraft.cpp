@@ -39,6 +39,7 @@
 //#define DEBUG_STATE_INTERFACE
 //#define DEBUG_SC_ATTITUDE
 //#define DEBUG_GET_REAL
+//#define DEBUG_SC_PARAMETER_TEXT
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -105,6 +106,40 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Thrusters", 
       "TotalMass", 
    };
+
+const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] = 
+{
+   "X",
+   "Y",
+   "Z",
+   "VX",
+   "VY",
+   "VZ",
+   "SMA",
+   "ECC",
+   "INC",
+   "RAAN",
+   "AOP",
+   "TA",
+   "EA",
+   "MA",
+   "HA",
+   "RadPer",
+   "RadApo",
+   "RMAG",
+   "RA",
+   "DEC",
+   "VMAG",
+   "AZI",
+   "FPA",
+   "RAV",
+   "DECV",
+   "PEY",
+   "PEX",
+   "PNY",
+   "PNX",
+   "MLONG",
+};
 
 
 //-------------------------------------
@@ -385,7 +420,8 @@ void Spacecraft::SetState(const Rvector6 &cartState)
 {
    #if DEBUG_SPACECRAFT_SET
       MessageInterface::ShowMessage("Spacecraft::SetState(Rvector6)\n");
-      ("Spacecraft::SetState(Rvector6) cartesianState=%s\n",
+      MessageInterface::ShowMessage(
+      "Spacecraft::SetState(Rvector6) cartesianState=%s\n",
        cartState.ToString().c_str());
    #endif
       
@@ -949,35 +985,73 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
    #ifdef DEBUG_PARM_PERFORMANCE
       MessageInterface::ShowMessage("Spacecraft::GetParameterID(%s)\n", str.c_str());
    #endif
+   #ifdef DEBUG_GET_REAL
+   MessageInterface::ShowMessage("In SC::GetParameterID, str = %s\n ",
+   str.c_str());
+   #endif
+   
+   // first check the multiple reps
+   Integer sz = EndMultipleReps - CART_X;
+   for (Integer ii = 0; ii < sz; ii++)
+      if (str == MULT_REP_STRINGS[ii])
+      {
+         #ifdef DEBUG_GET_REAL
+         MessageInterface::ShowMessage(
+         "In SC::GetParameterID, multiple reps found!! - str = %s and id = %d\n ",
+         str.c_str(), (ii + CART_X));
+         #endif
+         return ii + CART_X;
+      }
 
+   Integer retval = -1;
    if (str == "Element1" || str == "X" || str == "SMA" || str == "RadPer" ||
        str == "RMAG")  
-      return ELEMENT1_ID;
+      retval =  ELEMENT1_ID;
+      //return ELEMENT1_ID;
 
-   if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
+   else if (str == "Element2" || str == "Y" || str == "ECC" || str == "RadApo" ||
        str == "RA" || str == "PECCY") 
-      return ELEMENT2_ID;
+      retval =  ELEMENT2_ID;
+      //return ELEMENT2_ID;
 
-   if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
+   else if (str == "Element3" || str == "Z" || str == "INC" || str == "DEC" ||
        str == "PECCX")
-      return ELEMENT3_ID;
+      retval =  ELEMENT3_ID;
+      //return ELEMENT3_ID;
 
-   if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
+   else if (str == "Element4" || str == "VX" || str == "RAAN" || str == "VMAG" ||
        str == "PNY") 
-      return ELEMENT4_ID;
+      retval =  ELEMENT4_ID;
+      //return ELEMENT4_ID;
 
-   if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
+   else if (str == "Element5" || str == "VY" || str == "AOP" || str == "AZI" ||
        str == "RAV" || str == "PNX")
-      return ELEMENT5_ID;
+      retval =  ELEMENT5_ID;
+      //return ELEMENT5_ID;
 
-   if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
+   else if (str == "Element6" || str == "VZ" || str == "TA" || str == "MA" ||
        str == "EA" || str == "HA" || str == "FPA" || str == "DECV" || str == "MLONG") 
-      return ELEMENT6_ID;
+      retval =  ELEMENT6_ID;
+      //return ELEMENT6_ID;
 
+   #ifdef DEBUG_GET_REAL
+   MessageInterface::ShowMessage(
+   "In SC::GetParameterID, after checking for elements, id = %d\n ",
+   retval);
+   #endif
+   if (retval != -1) return retval;
+   
    for (Integer i = SpaceObjectParamCount; i < SpacecraftParamCount; ++i)
    {
       if (str == PARAMETER_LABEL[i - SpaceObjectParamCount])
+      {
+         #ifdef DEBUG_SPACECRAFT_SET
+         MessageInterface::ShowMessage(
+         "In SC::GetParameterID, setting id to %d for str = %s\n ",
+         i, str.c_str());
+         #endif
          return i;
+      }
    }
     
    return SpaceObject::GetParameterID(str);
@@ -1037,7 +1111,19 @@ bool Spacecraft::IsParameterReadOnly(const std::string &label) const
 
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
-   // Handle the dynamic labels for teh elements first
+   #ifdef DEBUG_SC_PARAMETER_TEXT
+   MessageInterface::ShowMessage("SC::GetParameterText - called with id = %d\n",
+   id);
+   #endif
+   if ((id >= CART_X) && (id < EndMultipleReps))
+   {
+      #ifdef DEBUG_SC_PARAMETER_TEXT
+      MessageInterface::ShowMessage("SC::GetParameterText - returning text = %s\n",
+      (MULT_REP_STRINGS[id-CART_X]).c_str());
+      #endif
+      return MULT_REP_STRINGS[id - CART_X];
+   }
+   // Handle the dynamic labels for the elements first
    if (id == ELEMENT1_ID || id == ELEMENT2_ID || id == ELEMENT3_ID 
        || id == ELEMENT4_ID || id == ELEMENT5_ID || id == ELEMENT6_ID)
       return stateElementLabel[id - ELEMENT1_ID];
@@ -1045,6 +1131,10 @@ std::string Spacecraft::GetParameterText(const Integer id) const
    if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
       return PARAMETER_LABEL[id - SpaceObjectParamCount];
 
+   #ifdef DEBUG_SC_PARAMETER_TEXT
+   MessageInterface::ShowMessage(
+   "SC::GetParameterText - calling through to base class .....\n");
+   #endif
    return SpaceObject::GetParameterText(id);
 }
 
@@ -1061,6 +1151,8 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
 {
+   if ((id >= CART_X) && (id < EndMultipleReps))
+      return Gmat::REAL_TYPE;
    if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
 
@@ -1098,20 +1190,32 @@ Real Spacecraft::GetRealParameter(const Integer id) const
 {
    #ifdef DEBUG_GET_REAL
       MessageInterface::ShowMessage(
-      "In SC::GetReal, asking for parameter %d\n", id);
-      for (Integer i=0; i<6;i++)
-         MessageInterface::ShowMessage("   state(%d) = %.12f\n",
-         i, state[i]);
-      MessageInterface::ShowMessage("    and stateType = %s\n",
-         stateType.c_str());
+      "In SC::GetReal, asking for parameter %d, whose string is \"%s\"\n", 
+      id, (GetParameterText(id)).c_str());
+      //for (Integer i=0; i<6;i++)
+      //   MessageInterface::ShowMessage("   state(%d) = %.12f\n",
+      //   i, state[i]);
+      //MessageInterface::ShowMessage("    and stateType = %s\n",
+      //   stateType.c_str());
    #endif
+
+  if ((id >= ELEMENT1_ID && id <= ELEMENT6_ID) ||
+      (id >= CART_X      && id < EndMultipleReps))
+  {  
+      #ifdef DEBUG_GET_REAL
+         MessageInterface::ShowMessage(
+         "In SC::GetReal, calling GetElement ....... \n");
+      #endif
+      return (const_cast<Spacecraft*>(this))->GetElement(GetParameterText(id));
+  }
+   /* OLD CODE
    if (id == ELEMENT1_ID) return state[0];
    if (id == ELEMENT2_ID) return state[1];
    if (id == ELEMENT3_ID) return state[2];
    if (id == ELEMENT4_ID) return state[3];
    if (id == ELEMENT5_ID) return state[4];
    if (id == ELEMENT6_ID) return state[5];
-   
+   */
    if (id == DRY_MASS_ID) return dryMass;
    if (id == CD_ID) return coeffDrag;
    if (id == CR_ID) return reflectCoeff;
@@ -1143,11 +1247,13 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
        return state.GetEpoch();
    
     // First check with anomaly
+    /* OLD CODE
     if (label == "TA" || label == "MA" || label == "EA" || label == "HA")
     {
        //return trueAnomaly.GetValue();
        return trueAnomaly.GetValue(label);
     }
+    */
     
     return GetRealParameter(GetParameterID(label));
 }
@@ -1167,6 +1273,15 @@ Real Spacecraft::GetRealParameter(const std::string &label) const
  */
 Real Spacecraft::SetRealParameter(const Integer id, const Real value)
 {
+   #ifdef DEBUG_SPACECRAFT_SET
+   MessageInterface::ShowMessage("In SC::SetRealParameter, id = %d and value = %.12f\n",
+   id, value);
+   #endif
+   if (id >= CART_X && id < EndMultipleReps)
+   {
+      std::string idString = MULT_REP_STRINGS[id - CART_X];
+      return SetRealParameter(idString,value);
+   }
    if (id == ELEMENT1_ID) return SetRealParameter(stateElementLabel[0],value); 
    if (id == ELEMENT2_ID) return SetRealParameter(stateElementLabel[1],value); 
    if (id == ELEMENT3_ID) return SetRealParameter(stateElementLabel[2],value); 
@@ -1222,6 +1337,11 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
  */
 Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
 {
+   #ifdef DEBUG_SPACECRAFT_SET
+   MessageInterface::ShowMessage(
+   "In SC::SetRealParameter(label), label = %s and value = %.12f\n",
+   label.c_str(), value);
+   #endif
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
@@ -2358,7 +2478,7 @@ void Spacecraft::UpdateElementLabels()
  * Code used to obtain a state in a non-Cartesian representation.
  */
 //------------------------------------------------------------------------------
-Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
+Rvector6 Spacecraft::GetStateInRepresentation(std::string rep) 
 {
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
@@ -2511,6 +2631,46 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
 //------------------------------------------------------------------------------
 Real Spacecraft::GetElement(const std::string &label)
 {
+   #ifdef DEBUG_GET_REAL
+      MessageInterface::ShowMessage(
+      "In SC::GetElement, asking for parameter %s\n", label.c_str());
+   #endif
+   Integer baseID;
+   std::string rep = "";
+   baseID = LookUpLabel(label,rep);
+   #ifdef DEBUG_GET_REAL
+   MessageInterface::ShowMessage(
+   "In SC::GetElement, after LookUpLabel, id = %d, its string = \"%s\",  and rep = \"%s\"\n",
+   baseID, (GetParameterText(baseID)).c_str(), rep.c_str());
+   #endif
+   Rvector6 stateInRep = GetStateInRepresentation(rep);
+   #ifdef DEBUG_GET_REAL
+      MessageInterface::ShowMessage(
+      "In SC::GetElement, stateInRep = \n");
+      for (Integer jj=0;jj<6;jj++)
+         MessageInterface::ShowMessage("    %.12f\n", stateInRep[jj]);
+   #endif
+   // check for Anomaly data first
+   if (label == "TA" || label == "EA" || 
+       label == "MA" || label == "HA")
+   {
+      Anomaly tmpAnomaly;
+      tmpAnomaly.SetSMA(stateInRep[0]);
+      tmpAnomaly.SetECC(stateInRep[1]);
+      tmpAnomaly.SetValue(stateInRep[5]);
+      return tmpAnomaly.GetValue(label);
+   }
+   else
+   {
+      if (baseID == ELEMENT1_ID) return stateInRep[0];
+      if (baseID == ELEMENT2_ID) return stateInRep[1];
+      if (baseID == ELEMENT3_ID) return stateInRep[2];
+      if (baseID == ELEMENT4_ID) return stateInRep[3];
+      if (baseID == ELEMENT5_ID) return stateInRep[4];
+      if (baseID == ELEMENT6_ID) return stateInRep[5];
+   }
+
+   /* OLD CODE
    std::string rep = "";
    Integer id = LookUpLabel(label, rep);
    Real retval = -9999999999.999999;
@@ -2520,8 +2680,10 @@ Real Spacecraft::GetElement(const std::string &label)
       Rvector6 tempState = GetStateInRepresentation(rep);
       retval = tempState[id];
    }
-   
+
    return retval;
+   */
+   return -9999999999.999999;  // some kind of error
 }
 
 
@@ -2539,8 +2701,19 @@ Real Spacecraft::GetElement(const std::string &label)
 //------------------------------------------------------------------------------
 bool Spacecraft::SetElement(const std::string &label, const Real &value)
 {
+   #ifdef DEBUG_SPACECRAFT_SET
+   MessageInterface::ShowMessage("In SC::SetElement, label = %s, value = %.12f\n",
+   label.c_str(), value);
+   #endif
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
+   #ifdef DEBUG_SPACECRAFT_SET
+   if (id >= 0)
+   MessageInterface::ShowMessage(
+   "In SC::SetElement, after LookUpLabel, id+ELEMENT1_ID = %d, its string = \"%s\",  and rep = \"%s\"\n",
+   id+ELEMENT1_ID, (GetParameterText(id+ELEMENT1_ID)).c_str(), rep.c_str());
+   #endif
+   
 
    if ((id == 5) && (!trueAnomaly.IsInvalid(label)))
       trueAnomaly.SetType(label);
@@ -2559,9 +2732,15 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          tempState[id] = value;
       }
       
+      #ifdef DEBUG_SPACECRAFT_SET
+      MessageInterface::ShowMessage("In SC::SetElement, returning TRUE\n");
+      #endif
       return true;
    }
    
+   #ifdef DEBUG_SPACECRAFT_SET
+   MessageInterface::ShowMessage("In SC::SetElement, returning FALSE\n");
+   #endif
    return false;
 }
 
@@ -2576,6 +2755,37 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
 Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
 {
    Integer retval = -1;
+   
+   if (label == "Element1")
+   {
+      rep = stateType;
+      return ELEMENT1_ID;
+   }
+   if (label == "Element2")
+   {
+      rep = stateType;
+      return ELEMENT2_ID;
+   }
+   if (label == "Element3")
+   {
+      rep = stateType;
+      return ELEMENT3_ID;
+   }
+   if (label == "Element4")
+   {
+      rep = stateType;
+      return ELEMENT4_ID;
+   }
+   if (label == "Element5")
+   {
+      rep = stateType;
+      return ELEMENT5_ID;
+   }
+   if (label == "Element6")
+   {
+      rep = stateType;
+      return ELEMENT6_ID;
+   }
    
    if (label == "X" || label == "SMA" || label == "RadPer" || label == "RMAG")
       retval = ELEMENT1_ID;
@@ -2606,6 +2816,18 @@ Integer Spacecraft::LookUpLabel(const std::string &label, std::string &rep)
    return retval;
 }
 
+Integer Spacecraft::LookUpID(const Integer id, std::string &label, std::string &rep)
+{
+   label = GetParameterText(id);
+   // if it's not one of the multiple reps IDs, just return the ID
+   if (id < CART_X) 
+   {
+      rep   = stateType;
+      return id;
+   }
+   // otherwise, figure out the base ID to use for the state data
+   return LookUpLabel(label, rep);
+}
 
 //------------------------------------------------------------------------------
 // void BuildElementLabelMap()
@@ -2633,6 +2855,7 @@ void Spacecraft::BuildElementLabelMap()
       elementLabelMap["TA"]   = "Keplerian";
       elementLabelMap["EA"]   = "Keplerian";
       elementLabelMap["MA"]   = "Keplerian";
+      elementLabelMap["HA"]   = "Keplerian";
 
       elementLabelMap["RadPer"] = "ModifiedKeplerian";
       elementLabelMap["RadApo"] = "ModifiedKeplerian";
