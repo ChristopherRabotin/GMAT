@@ -1578,6 +1578,11 @@ Parameter* Interpreter::CreateParameter(const std::string &str)
        parameterList.end())
    {
       param = CreateParameter(paramType, str, ownerName, depName);
+      #if DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage
+         ("   1) parameter created with paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
+          ownerName.c_str(), depName.c_str());
+      #endif
    }
    else
    {
@@ -1585,6 +1590,13 @@ Parameter* Interpreter::CreateParameter(const std::string &str)
       GmatBase *obj = FindObject(str);
       if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
          param = (Parameter*)obj;
+      #if DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage
+         ("   2) parameter created with str=%s, but obj = %s, and param = %s\n", 
+         str.c_str(),
+         (obj == NULL? "NULL!!" : "not NULL"),
+         (param == NULL? "NULL!!" : "not NULL"));
+      #endif
    }
    
    return param;

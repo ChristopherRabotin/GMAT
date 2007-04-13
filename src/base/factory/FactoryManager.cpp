@@ -19,7 +19,9 @@
 #include "FactoryManager.hpp"
 #include "Factory.hpp"
 #include "StringUtil.hpp"
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_FACTORY_CREATE
 
 /// initialize the only instance allowed for this singleton class
 FactoryManager* FactoryManager::onlyInstance = NULL;
@@ -882,6 +884,11 @@ FactoryManager::FactoryManager()
 Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
                                      const std::string &forType)
 {
+   #ifdef DEBUG_FACTORY_CREATE
+   MessageInterface::ShowMessage(
+   "Entering FactoryManager::FindFactory with type = %d and forType = %s\n",
+   (Integer) ofType, forType.c_str());
+   #endif
    // Search through factoryList for the factory that creates objects of type
    // ofType, specifically of type forType
    std::list<Factory*>::iterator f = factoryList.begin();
@@ -893,6 +900,11 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
          // Search through the list of creatable objects to see if one matches
          StringArray listObj = (*f)->GetListOfCreatableObjects();
          bool isCaseSensitive = (*f)->IsTypeCaseSensitive();
+         #ifdef DEBUG_FACTORY_CREATE
+         MessageInterface::ShowMessage(
+         "    isCaseSensitive = %s\n",
+         (isCaseSensitive?  "TRUE" : "False"));
+         #endif
          if (!listObj.empty())
          {
             StringArray::iterator s = listObj.begin();
@@ -902,6 +914,11 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
             
             while (s != listObj.end())
             {
+               #ifdef DEBUG_FACTORY_CREATE
+               MessageInterface::ShowMessage(
+               "    -> now comparing \"%s\" with \"%s\"\n",
+               (*s).c_str(), objType.c_str());
+               #endif
                //if ((*s).compare(forType) == 0)
                if ((*s).compare(objType) == 0)
                {
@@ -916,6 +933,10 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
       }
       ++f;
    }
+   #ifdef DEBUG_FACTORY_CREATE
+   MessageInterface::ShowMessage(
+   "At end of FactoryManager::FindFactory, returning NULL\n");
+   #endif
    return NULL;
 }
 
