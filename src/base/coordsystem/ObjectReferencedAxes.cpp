@@ -25,14 +25,18 @@
 #include "CoordinateSystemException.hpp"
 
 #include "MessageInterface.hpp"
-/*
+
+//#define DEBUG_OR_AXES
+
+#ifdef DEBUG_OR_AXES
 #include <iostream>
 using namespace std; // ***************************** for debug only
 
 #define DEBUG_ROT_MATRIX 1
 #define DEBUG_REFERENCE_SETTING
+#define DEBUG_CS_INIT 1
 static Integer visitCount = 0;
- */
+#endif
 
 //---------------------------------
 // static data
@@ -56,8 +60,10 @@ ObjectReferencedAxes::PARAMETER_TYPE[ObjectReferencedAxesParamCount - DynamicAxe
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE,
+   Gmat::OBJECT_TYPE,
+//    Gmat::STRING_TYPE,
+//    Gmat::STRING_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -636,7 +642,7 @@ GmatBase* ObjectReferencedAxes::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& ObjectReferencedAxes::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   if (type == Gmat::UNKNOWN_OBJECT)
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
       static StringArray refs;
       refs.clear();
