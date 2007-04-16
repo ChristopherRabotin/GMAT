@@ -376,22 +376,22 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
        raan = elem[3]*RAD_PER_DEG,
         per = elem[4]*RAD_PER_DEG,
        anom = elem[5]*RAD_PER_DEG;
-           
+   
    // **************
    // taken from old code above; necessary to avoid crash, but not in spec
-   if (anomalyType == CoordUtil::MA) //loj: 6/23/04 changed from TA
+   // if input keplerian anomaly is MA, convert to TA
+   if (anomalyType == CoordUtil::MA)
    {
       Real ma = elem[5]; 
-      ecc = elem[1];
-
-          Real ta;
-          Integer iter;
+      
+      Real ta;
+      Integer iter;
       Integer ret = CoordUtil::ComputeMeanToTrueAnomaly(ma, ecc, 1E-8, &ta, &iter);
       
       if (ret > 0)
-      {
          return ret;
-      }
+      else
+         anom = ta * RAD_PER_DEG;
    }
    // ***************
    
