@@ -391,7 +391,7 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
 
 //------------------------------------------------------------------------------
 // std::string ToString(const Real &rval, bool useCurrentFormat = true,
-//                      bool scientific = false,
+//                      bool scientific = false, bool showPoint = false,
 //                      Integer precision = GmatGlobal::DATA_PRECISION,
 //                      Integer width = GmatGlobal::INTEGER_WIDTH)
 //------------------------------------------------------------------------------
@@ -401,13 +401,14 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
  * @param  rval  Real value
  * @param  useCurrentFormat  Uses precision and width from GmatGlobal
  * @param  scientific  if true, formats using scientific notation
+ * @param  showPoint if true, shows decimal point
  * @param  precision  Precision to be used in formatting
  * @param  width  Width to be used in formatting
  */
 //------------------------------------------------------------------------------
 std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
-                                   bool scientific, Integer precision,
-                                   Integer width)
+                                   bool scientific, bool showPoint,
+                                   Integer precision, Integer width)
 {
    Integer p = precision;
    Integer w = width;
@@ -422,6 +423,9 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
    std::stringstream ss("");
    ss.width(w);
    ss.precision(p);
+   
+   if (showPoint)
+      ss.setf(std::ios::showpoint);
    
    if (scientific)
       ss.setf(std::ios::scientific);

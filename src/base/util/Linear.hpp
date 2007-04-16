@@ -63,7 +63,7 @@ namespace GmatRealUtil
    std::ostream& operator<< (std::ostream &output, const Rmatrix &a); 
    
    std::string ToString(const Real &rval, bool useCurrentFormat = true,
-                        bool scientific = false,
+                        bool scientific = false, bool showPoint = false,
                         Integer precision = GmatGlobal::DATA_PRECISION,
                         Integer width = GmatGlobal::DATA_WIDTH);
    
