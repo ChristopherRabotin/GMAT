@@ -224,13 +224,13 @@ void LibrationPointPanel::LoadData()
    mObject = theLibrationPt;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SaveData()
 //------------------------------------------------------------------------------
 void LibrationPointPanel::SaveData()
 {
    canClose = true;
-   theLibrationPt->ResetBodies();
    
    //-----------------------------------------------------------------
    // check user input
