@@ -55,6 +55,7 @@ Propagate::PARAMETER_TEXT[PropagateCommandParamCount - GmatCommandParamCount] =
    "AvailablePropModes",
    "PropagateMode",
    "InterruptFrequency",
+   "StopAccuracy",
    "Spacecraft",
    "Propagator",
    "StopCondition",
@@ -67,6 +68,7 @@ Propagate::PARAMETER_TYPE[PropagateCommandParamCount - GmatCommandParamCount] =
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::REAL_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRINGARRAY_TYPE,
@@ -99,12 +101,13 @@ Propagate::Propagate() :
    epochID                     (-1),
    stopInterval                (0.0),
    stopTrigger                 (-1),
-   hasStoppedOnce              (false),
+//   hasStoppedOnce              (false),
    stepsTaken                  (0),
    state                       (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (0.0),
+   stopAccuracy                (1.0e-7),
    dim                         (0),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT),
@@ -119,7 +122,7 @@ Propagate::Propagate() :
 //   propNameID                  (parameterCount+4),
 //   stopWhenID                  (parameterCount+5)
 {
-   parameterCount += 5;
+   parameterCount = PropagateCommandParamCount;
 }
 
 
@@ -177,12 +180,13 @@ Propagate::Propagate(const Propagate &prp) :
    objectArray                 (prp.objectArray),
    elapsedTime                 (prp.elapsedTime),
    currEpoch                   (prp.currEpoch),
-   hasStoppedOnce              (false),
+//   hasStoppedOnce              (false),
    stepsTaken                  (0),
    state                       (NULL),
    pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (prp.stopEpoch),
+   stopAccuracy                (prp.stopAccuracy),
    dim                         (prp.dim),
    singleStepMode              (prp.singleStepMode),
    transientForces             (NULL),
@@ -246,6 +250,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    pubdata                 = NULL;
    stopCondMet             = false;
    stopEpoch               = prp.stopEpoch;
+   stopAccuracy            = prp.stopAccuracy;
    dim                     = prp.dim;
    singleStepMode          = prp.singleStepMode;
    currentMode             = prp.currentMode;
@@ -262,7 +267,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
 //   stopWhenID                = prp.stopWhenID;
    
    initialized             = false;
-   hasStoppedOnce          = false;
+//   hasStoppedOnce          = false;
    stepsTaken              = 0;
        
    baseEpoch.clear();
@@ -309,7 +314,12 @@ bool Propagate::SetObject(const std::string &name, const Gmat::ObjectType type,
       case Gmat::PROP_SETUP:
          propName.push_back(name);
          if (name[0] == '-')
+         {
             direction = -1.0;
+            MessageInterface::ShowMessage("Please use the keyword \"BackProp\" "
+               "to set backwards propagation; the use of a minus sign in the "
+               "string \"%s\" is deprecated.\n", name.c_str());
+         }
          satName.push_back(new StringArray);
          return true;
    
@@ -1163,6 +1173,33 @@ bool Propagate::SetBooleanParameter(const std::string &label, const bool value)
 }
 
 
+Real Propagate::GetRealParameter(const Integer id) const
+{
+   if (id == STOP_ACCURACY)
+      return stopAccuracy;
+   return GmatCommand::GetRealParameter(id);
+}
+
+Real Propagate::SetRealParameter(const Integer id, const Real value)
+{
+   if (id == STOP_ACCURACY)
+   {
+      stopAccuracy = value;
+      return stopAccuracy;
+   }
+   return GmatCommand::SetRealParameter(id, value);
+}
+
+Real Propagate::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+Real Propagate::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // bool TakeAction(const std::string &action, const std::string &actionData)
@@ -1833,6 +1870,8 @@ void Propagate::CleanString(std::string &theString, const StringArray *extras)
    theString = theString.substr(0, loc+1);
 }
 
+
+// Removed because the method is no longer needed:
 
 ////------------------------------------------------------------------------------
 ////  bool InterpretParameter(const std::string text, std::string &paramType,
@@ -2823,8 +2862,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       memcpy(&pubdata[1], state, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
       
-      if (!stopWhen[stopTrigger]->IsTimeCondition())
-         hasStoppedOnce       = true;     // Only set for interpolated stops
+//      if (!stopWhen[stopTrigger]->IsTimeCondition())
+//         hasStoppedOnce       = true;     // Only set for interpolated stops
       stepsTaken              = 0;
          
       #if DEBUG_PROPAGATE_EXE
@@ -2883,29 +2922,32 @@ bool Propagate::Execute()
    // Parm used to check for interrupt in the propagation   
    Integer checkCount = 0, trigger = 0;
 
-   try {
+   try 
+   {
+      // If command is not reentering from checking interrupts, do final prep
       if (!inProgress)
       {
+         checkFirstStep = false;
          PrepareToPropagate();
 
          // Check for initial stop condition before first step in while loop
          // eg) elapsed time of 0
          if (publisher->GetRunState() == Gmat::RUNNING)
          {
+            // Evaluate Stop conditions to set initial values
             for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
-               if (stopWhen[i]->Evaluate())
+               stopWhen[i]->Reset();
+               stopWhen[i]->Evaluate();
+               // Set the flag to check the first step only if 
+               //    (1) the stop value is <= stopAccuracy and
+               //    (2) it was the last stop triggered
+               if (fabs(stopWhen[i]->GetStopValue()) < stopAccuracy)
                {
-                  stopInterval = stopWhen[i]->GetStopInterval();
-                  stopTrigger = i;
-                  stopCondMet = true;
-                  stopEpoch = (stopWhen[i]->GetStopEpoch());
-                  #if DEBUG_PROPAGATE_EXE
-                     MessageInterface::ShowMessage
-                        ("Propagate::Execute() %s met\n",
-                         stopWhen[i]->GetName().c_str());
-                  #endif
-                  break; // exit if any stop condition met
+                  if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()))
+                  {
+                     checkFirstStep = true;
+                  }
                }
             }
          }
@@ -2942,13 +2984,6 @@ bool Propagate::Execute()
          CheckStopConditions(epochID);
          ++stepsTaken;
          
-         /// @todo Make stop triggering more robust when using hasStoppedOnce.
-         // Ensure a step across a stopping condition if we already stopped once
-         if (hasStoppedOnce && (stepsTaken < 2))
-         {
-            stopCondMet = false;
-         }
-         
          if (!stopCondMet)
          {
             // Publish the data here
@@ -2981,9 +3016,8 @@ bool Propagate::Execute()
          }
       }
    }
-   catch (BaseException &ex) {
-      MessageInterface::ShowMessage
-         ("Propagate::Execute() setting inProgress to false\n");
+   catch (BaseException &ex) 
+   {
       inProgress = false;
       throw;
    }
@@ -3405,7 +3439,7 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
  * @note: Not yet implemented; the method always returns true for now.
  */
 //------------------------------------------------------------------------------
-bool                    CheckFirstStepStop()
+bool Propagate::CheckFirstStepStop()
 {
    return true;
 }

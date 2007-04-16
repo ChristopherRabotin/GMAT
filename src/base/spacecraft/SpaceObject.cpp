@@ -61,11 +61,12 @@ const Gmat::ParameterType SpaceObject::PARAMETER_TYPE[SpaceObjectParamCount -
 //------------------------------------------------------------------------------
 SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
                          const std::string &instName) :
-   SpacePoint       (typeId, typeStr, instName),
-   isManeuvering    (false),
-   originName       ("Earth"),
-   origin           (NULL),
-   parmsChanged     (true)
+   SpacePoint        (typeId, typeStr, instName),
+   isManeuvering     (false),
+   originName        ("Earth"),
+   origin            (NULL),
+   parmsChanged      (true),
+   lastStopTriggered ("")
 {
    objectTypes.push_back(Gmat::SPACEOBJECT);
    objectTypeNames.push_back("SpaceObject");
@@ -94,12 +95,13 @@ SpaceObject::~SpaceObject()
  */
 //------------------------------------------------------------------------------
 SpaceObject::SpaceObject(const SpaceObject& so) :
-   SpacePoint     (so),
-   state          (so.state),
-   isManeuvering  (so.isManeuvering),
-   originName     (so.originName),
-   origin         (so.origin),
-   parmsChanged   (true)
+   SpacePoint        (so),
+   state             (so.state),
+   isManeuvering     (so.isManeuvering),
+   originName        (so.originName),
+   origin            (so.origin),
+   parmsChanged      (true),
+   lastStopTriggered (so.lastStopTriggered)
 {
    j2000Body = so.j2000Body;
 }
@@ -538,4 +540,52 @@ Real SpaceObject::SetRealParameter(const Integer id, const Real value)
 Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearLastStopTriggered()
+//------------------------------------------------------------------------------
+/*
+ * Clears the name of the last stoppign condition that triggered a stop
+ */
+//------------------------------------------------------------------------------
+void SpaceObject::ClearLastStopTriggered()
+{
+   lastStopTriggered = "";
+}
+
+
+//------------------------------------------------------------------------------
+// void SetLastStopTriggered(const std::string &stopCondName)
+//------------------------------------------------------------------------------
+/*
+ * Sets the name of the last stopping condition that triggered a stop.
+ *
+ * @param  stopCondName  The name of the triggering stopping condition.
+ */
+//------------------------------------------------------------------------------
+void SpaceObject::SetLastStopTriggered(const std::string &stopCondName)
+{
+   lastStopTriggered = stopCondName;
+}
+
+
+//------------------------------------------------------------------------------
+// bool WasLastStopTriggered(const std::string &stopCondName)
+//------------------------------------------------------------------------------
+/*
+ * Compares the name of the last stopping condition that triggered with the 
+ * input stopping condition name.
+ *
+ * @param  stopCondName  The name of the stopping condition being compared.
+ * 
+ * @return true if the names match, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool SpaceObject::WasLastStopTriggered(const std::string &stopCondName)
+{
+   if (lastStopTriggered == stopCondName)
+      return true;
+   return false;
 }

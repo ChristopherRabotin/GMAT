@@ -113,7 +113,9 @@ public:
 
    // Accessors for the last condition evaluated
    virtual Real GetStopValue();
+   virtual Real GetStopDifference();
    virtual Real GetStopTime();
+
 protected:
 
    StringArray mAllRefObjectNames;

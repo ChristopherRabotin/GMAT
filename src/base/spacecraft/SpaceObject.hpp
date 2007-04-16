@@ -63,6 +63,10 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
+   void ClearLastStopTriggered();
+   void SetLastStopTriggered(const std::string &stopCondName);
+   bool WasLastStopTriggered(const std::string &stopCondName);
+   
 protected:
    /// The spacecraft state
    PropState         state;
@@ -74,6 +78,8 @@ protected:
    SpacePoint        *origin;
    /// Flag indicating if the force model parms have changed
    bool              parmsChanged;
+   /// The name of the last stoppiung condition that was triggered
+   std::string       lastStopTriggered;
 
    /// Enumerated parameter IDs   
    enum

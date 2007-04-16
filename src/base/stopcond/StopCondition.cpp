@@ -1665,7 +1665,23 @@ Real StopCondition::GetStopValue()
 
 
 //------------------------------------------------------------------------------
-// Real GetStopValue()
+// Real GetStopDifference()
+//------------------------------------------------------------------------------
+/**
+ * Used to access the difference between the last calculated stopping condition 
+ * value and the desired value.
+ * 
+ * @return The difference between the goal and achieved value (goal - achieved).
+ */ 
+//------------------------------------------------------------------------------
+Real StopCondition::GetStopDifference()
+{
+   return mGoal - previousValue;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetStopTime()
 //------------------------------------------------------------------------------
 /**
  * Used to access the last calculated stopping condition epoch.

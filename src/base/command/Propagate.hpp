@@ -32,6 +32,22 @@
 #include "StopCondition.hpp"
 
 
+/**
+ * The Propagate Command Class
+ * 
+ * The Propagate command controls the integrators and force modeling, and uses 
+ * those components to evolve the mission through time.  Propagation can proceed 
+ * in one of several different modes: 
+ * 
+ *  - In Synchronized mode, epochs remain synchronized for multiple PropSetups.
+ *  - In single step mode, the PropSetups take one integration step.  
+ *  - In BackProp mode, integration moves SpaceObjects backwards in time.
+ * 
+ * Logic associated with stopping propagation is also part of the Propagate 
+ * command.  It uses the StopCondition class and its embedded "not-a-knot" 
+ * interpolator (see KnotAKnotInterpolator) to generate an estimated stop epoch, 
+ * and then refines that epoch if necessary using a secant solver.
+ */
 class GMAT_API Propagate : public GmatCommand
 {
 public:
@@ -109,6 +125,12 @@ public:
    virtual bool        GetBooleanParameter(const std::string &label) const;
    virtual bool        SetBooleanParameter(const std::string &label,
                                            const bool value);
+   virtual Real        GetRealParameter(const Integer id) const;
+   virtual Real        SetRealParameter(const Integer id,
+                                        const Real value);
+   virtual Real        GetRealParameter(const std::string &label) const;
+   virtual Real        SetRealParameter(const std::string &label,
+                                        const Real value);
  
    virtual bool        TakeAction(const std::string &action,  
                                   const std::string &actionData = "");
@@ -180,7 +202,9 @@ protected:
    
    // Members used to flag most recent detected stop, so we don't stop multiple 
    // times at the same point
-   bool                     hasStoppedOnce;
+   /// Flag used to indicate that the first step logic must be executed
+   bool                     checkFirstStep;
+   /// Counter for the number of steps that have been taken
    Integer                  stepsTaken;
    
 
@@ -190,7 +214,7 @@ protected:
       INDEPENDENT,
       SYNCHRONIZED,
       BACK_PROP,
-      PropModeCount
+      PropModeCount 
    };
 
    /// The state that is propagated
@@ -201,6 +225,8 @@ protected:
    bool                    stopCondMet;
    /// Epoch used for stop
    Real                    stopEpoch;
+   /// Required accuracy for stopping with stop conditions
+   Real                    stopAccuracy;
    /// Dimension used for (local) state vector
    Integer                 dim;
    /// Identifies when the command is in single step mode
@@ -225,6 +251,7 @@ protected:
       AVAILABLE_PROP_MODES = GmatCommandParamCount,
       PROP_COUPLED,
       INTERRUPT_FREQUENCY,
+      STOP_ACCURACY,
       SAT_NAME,
       PROP_NAME,
       STOP_WHEN,

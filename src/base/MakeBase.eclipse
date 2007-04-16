@@ -386,20 +386,21 @@ OBJECTS = \
     util/TimeSystemConverter.o \
     util/TimeTypes.o \
     util/UtcDate.o \
-    solarsys/msise90_sub.o \
     $(BRIDGEOBJECTS) \
     $(TCPIP_OBJECTS)
+
+FORTRAN_OBJECTS = solarsys/msise90_sub.o
 
     # parameter/EquinoctialParameters.o \
     # stopcond/BaseStopCondition.o \
 
 
-$(TARGET) : $(OBJECTS)
+$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS)
 	mkdir -p lib
-	ar rs $(TARGET) $(OBJECTS)
+	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS)
 	ranlib $(TARGET)
 
-.cpp.o:
+$(OBJECTS): %.o: %.cpp %.hpp
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
 # Specific instructions for the fortran code
