@@ -136,8 +136,14 @@ FminconOptimizer::FminconOptimizer(std::string name) :
 FminconOptimizer::~FminconOptimizer()
 {
    FreeArrays();
-   CloseConnection();
+   
+   // loj: Let's leave it open (4/11/07)
+   // So that it will be automatically connected to the current running Matlab session.
+   // User has to manually close the Matlab session if we want to create a new session.
+   // This works on Windows, will this cause any problems on other platforms?
+   //CloseConnection();
 }
+
 
 FminconOptimizer::FminconOptimizer(const FminconOptimizer &opt) :
    ExternalOptimizer       (opt),
