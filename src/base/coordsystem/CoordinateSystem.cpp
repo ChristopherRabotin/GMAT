@@ -33,6 +33,7 @@
 //#define DEBUG_INPUTS_OUTPUTS
 //#define DEBUG_DESTRUCTION
 //#define DEBUG_CONSTRUCTION
+//#define DEBUG_CS_INIT 1
 
 //---------------------------------
 // static data
@@ -940,6 +941,23 @@ GmatBase* CoordinateSystem::GetOwnedObject(Integer whichOne)
 }
 
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& CoordinateSystem::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   return refObjectTypes;
+}
+
 
 // DJC added 5/9/05 to facilitate Sandbox initialization
 //------------------------------------------------------------------------------
@@ -957,7 +975,13 @@ GmatBase* CoordinateSystem::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   if (type == Gmat::UNKNOWN_OBJECT)
+   #if DEBUG_CS_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("CoordinateSystem::GetRefObjectNameArray() type=%d(%s)\n", type,
+       GetObjectTypeString(type).c_str());
+   #endif
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
       // Here we want the names of all named refence objects used in this
       // coordinate system.  (The axis system is not named, so we do not return
@@ -967,8 +991,10 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
       
       refs = CoordinateBase::GetRefObjectNameArray(type);
 
-      //for (unsigned int i=0; i<refs.size(); i++)
-      //   MessageInterface::ShowMessage("======> cs obj=%s\n", refs[i].c_str());
+      #if DEBUG_CS_REF_OBJECT
+      for (unsigned int i=0; i<refs.size(); i++)
+         MessageInterface::ShowMessage("   cs obj=%s\n", refs[i].c_str());
+      #endif
       
       if (axes)
       {
@@ -977,20 +1003,24 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
          
          axisRefs = axes->GetRefObjectNameArray(type);
          
-         //for (unsigned int i=0; i<axisRefs.size(); i++)
-         //   MessageInterface::ShowMessage("======> axisRef obj=%s\n", axisRefs[i].c_str());
+         #if DEBUG_CS_REF_OBJECT
+         for (unsigned int i=0; i<axisRefs.size(); i++)
+            MessageInterface::ShowMessage("   axisRef=%s\n", axisRefs[i].c_str());
+         #endif
          
          for (StringArray::iterator i = axisRefs.begin(); i != axisRefs.end(); ++i)
             if (find(refs.begin(), refs.end(), *i) == refs.end())
                if( (*i) != "")
                {
-                  //MessageInterface::ShowMessage("===> axis obj=%s\n", (*i).c_str());
+                  #if DEBUG_CS_REF_OBJECT
+                  MessageInterface::ShowMessage("      axis obj=%s\n", (*i).c_str());
+                  #endif
                   refs.push_back(*i);
                }
       }
       return refs;
    }
-
+   
    // Not handled here -- invoke the next higher GetRefObject call
    return CoordinateBase::GetRefObjectNameArray(type);
 }
@@ -1033,7 +1063,7 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // Set ref object on owned axis system
    if (obj->IsOfType(Gmat::SPACE_POINT))
       retval = CoordinateBase::SetRefObject(obj, type, name);
-
+   
    if (axes)
       retval |= axes->SetRefObject(obj, type, name);
 

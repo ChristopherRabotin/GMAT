@@ -130,7 +130,10 @@ public:
    virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
                                         const std::string &name);
    virtual GmatBase*       GetOwnedObject(Integer whichOne);
-   const StringArray&      GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual const ObjectTypeArray&
+                           GetRefObjectTypeArray();
+   virtual const StringArray&
+                           GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                         const std::string &name = "");
    
