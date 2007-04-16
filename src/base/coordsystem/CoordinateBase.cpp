@@ -561,7 +561,7 @@ GmatBase* CoordinateBase::GetRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   if (type == Gmat::UNKNOWN_OBJECT)
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
       static StringArray refs;
       refs.clear();
