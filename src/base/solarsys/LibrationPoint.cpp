@@ -46,8 +46,8 @@ LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCo
 const Gmat::ParameterType
 LibrationPoint::PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCount] =
 {
-   Gmat::OBJECT_TYPE, //loj: 2/23/07 Changed from STRING_TYPE
-   Gmat::OBJECT_TYPE, //loj: 2/23/07 Changed from STRING_TYPE
+   Gmat::OBJECT_TYPE,
+   Gmat::OBJECT_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -71,9 +71,7 @@ primaryBodyName     (""),
 secondaryBodyName   (""),
 whichPoint          (""),
 primaryBody         (NULL),
-secondaryBody       (NULL),
-primaryBodySet      (false),
-secondaryBodySet    (false)
+secondaryBody       (NULL)
 {
    objectTypes.push_back(Gmat::LIBRATION_POINT);
    objectTypeNames.push_back("LibrationPoint");
@@ -96,9 +94,7 @@ primaryBodyName          (lp.primaryBodyName),
 secondaryBodyName        (lp.secondaryBodyName),
 whichPoint               (lp.whichPoint),
 primaryBody              (lp.primaryBody),
-secondaryBody            (lp.secondaryBody),
-primaryBodySet           (lp.primaryBodySet),
-secondaryBodySet         (lp.secondaryBodySet)
+secondaryBody            (lp.secondaryBody)
 {
 }
 
@@ -125,8 +121,6 @@ LibrationPoint& LibrationPoint::operator=(const LibrationPoint &lp)
    whichPoint          = lp.whichPoint;
    primaryBody         = lp.primaryBody;
    secondaryBody       = lp.secondaryBody;
-   primaryBodySet      = lp.primaryBodySet;
-   secondaryBodySet    = lp.secondaryBodySet;
    return *this;
 }
 
@@ -139,22 +133,6 @@ LibrationPoint& LibrationPoint::operator=(const LibrationPoint &lp)
 //------------------------------------------------------------------------------
 LibrationPoint::~LibrationPoint()
 {
-}
-
-
-//---------------------------------------------------------------------------
-// void ResetBodies()
-//---------------------------------------------------------------------------
-/*
- * Resets primary and secondary bodies set flags.
- * This method is usally called from GUI to reset these flags to properly
- * validate bodies.
- */
-//---------------------------------------------------------------------------
-void LibrationPoint::ResetBodies()
-{
-   primaryBodySet = false;
-   secondaryBodySet = false;
 }
 
 
@@ -535,28 +513,16 @@ bool LibrationPoint::SetStringParameter(const Integer id,
 {     
    if (id == PRIMARY_BODY_NAME)             
    {
-      //since we don't know the order of setting, use the flag
-      if (secondaryBodySet)
-      {
-         if (value == secondaryBodyName)
-            throw SolarSystemException(
-               "The primary and secondary bodies cannot be the same.");
-      }
+      // since we don't know the order of setting, we cannot do the ckecking
+      // of primary and secondary bodies are the same
       primaryBodyName = value;
-      primaryBodySet = true;
       return true;
    }
    if (id == SECONDARY_BODY_NAME)             
    {
-      //since we don't know the order of setting, use the flag
-      if (primaryBodySet)
-      {
-         if (value == primaryBodyName)
-            throw SolarSystemException(
-               "The primary and secondary bodies cannot be the same.");
-      }
+      // since we don't know the order of setting, we cannot do the ckecking
+      // of primary and secondary bodies are the same
       secondaryBodyName = value;
-      secondaryBodySet = true;
       return true;
    }
    if (id == WHICH_POINT)             
