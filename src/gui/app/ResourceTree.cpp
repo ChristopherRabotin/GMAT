@@ -3059,7 +3059,7 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
    
    // Interpret script
    bool status = GmatAppData::GetMainFrame()->
-      InterpretScript(filename, readBack, savePath, false);
+      InterpretScript(filename, readBack, savePath, false, true);
    
    if (!status)
    {
