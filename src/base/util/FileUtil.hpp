@@ -45,7 +45,9 @@ namespace GmatFileUtil
                              const std::string &basefilename,
                              const std::string &filename1,
                              const std::string &filename2,
-                             const std::string &filename3);
+                             const std::string &filename3,
+                             int &file1DiffCount, int &file2DiffCount,
+                             int &file3DiffCount);
    
    bool SkipHeaderLines(std::ifstream &in, StringArray &tokens);
    

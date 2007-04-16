@@ -659,7 +659,9 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
                                         const std::string &basefilename,
                                         const std::string &filename1,
                                         const std::string &filename2,
-                                        const std::string &filename3)
+                                        const std::string &filename3,
+                                        int &file1DiffCount, int &file2DiffCount,
+                                        int &file3DiffCount)
 {
    textBuffer.clear();
    textBuffer.push_back("\n======================================== Compare Utility\n");
@@ -718,7 +720,9 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    char buffer[BUFFER_SIZE];
    std::string line0, line1, line2, line3;
-   int diff1Count = 0, diff2Count = 0, diff3Count = 0;
+   file1DiffCount = 0;
+   file2DiffCount = 0;
+   file3DiffCount = 0;
    int count = 1;
    
    
@@ -762,7 +766,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       #endif
 
       if (line0 != line1)
-         diff1Count++;
+         file1DiffCount++;
       
       //----------------------------------------------------
       // file 2
@@ -777,7 +781,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          #endif
 
          if (line0 != line2)
-            diff2Count++;
+            file2DiffCount++;
       }
       
       //----------------------------------------------------
@@ -793,7 +797,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          #endif
          
          if (line0 != line3)
-            diff3Count++;
+            file3DiffCount++;
       }
    }
    
@@ -806,7 +810,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
-   outLine = "File1 - Number of Lines different: " + ToString(diff1Count) + "\n";
+   outLine = "File1 - Number of Lines different: " + ToString(file1DiffCount) + "\n";
    textBuffer.push_back(outLine);
    
    #if DEBUG_COMPARE_REPORT
@@ -815,7 +819,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    if (numDirsToCompare >= 2)
    {
-      outLine = "File2 - Number of Lines different: " + ToString(diff2Count) + "\n";
+      outLine = "File2 - Number of Lines different: " + ToString(file2DiffCount) + "\n";
       textBuffer.push_back(outLine);
       
       #if DEBUG_COMPARE_REPORT
@@ -825,14 +829,14 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    if (numDirsToCompare >= 3)
    {
-      outLine = "File3 - Number of Lines different: " + ToString(diff3Count) + "\n";
+      outLine = "File3 - Number of Lines different: " + ToString(file3DiffCount) + "\n";
       textBuffer.push_back(outLine);
       
       #if DEBUG_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
-
+      
    textBuffer.push_back("\n");
    
    baseIn.close();
