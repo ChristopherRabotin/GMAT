@@ -112,7 +112,8 @@ PhysicalModel::PARAMETER_TYPE[PhysicalModelParamCount - GmatBaseParamCount] =
 {
    Gmat::REAL_TYPE,
    Gmat::REAL_TYPE,
-   Gmat::STRING_TYPE,
+   //Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE,
 };
 
 //---------------------------------
