@@ -626,9 +626,14 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
    if (filename2.empty())
       return;
    
+   int file1DiffCount = 0;
+   int file2DiffCount = 0;
+   int file3DiffCount = 0;
+   
    StringArray output =
-      GmatFileUtil::CompareLines(1, filename1.c_str(), filename2.c_str(), "", "");
-
+      GmatFileUtil::CompareLines(1, filename1.c_str(), filename2.c_str(), "", "",
+                                 file1DiffCount, file2DiffCount, file3DiffCount);
+   
    if (GmatAppData::theCompareWindow == NULL)
    {
       GmatAppData::theCompareWindow =
