@@ -960,7 +960,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       else if (!GmatStringUtil::IsValidName(type + desc))
       {
          InterpreterException ex
-            ("Found invalid function name \"" + type + "\"");
+            ("Found invalid function name \"" + type + desc + "\"");
          HandleError(ex);
       }
       else
@@ -3389,7 +3389,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
                InterpreterException ex("Unable to set body for force " + bodies[i]);
                HandleError(ex);
             }
-                                    
+            
             #if DEBUG_SET_FORCE_MODEL
             MessageInterface::ShowMessage
                ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
@@ -3968,49 +3968,32 @@ bool Interpreter::FinalPass()
 {
    bool retval = true;
    
-   // Initialize CoordinateSystem
-   StringArray objList = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
-   #ifdef DEBUG_FINAL_PASS //---------------------------------------- debug ----
-   MessageInterface::ShowMessage("FinalPass:: CS objList =\n");
-   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
-   {
-      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
-   }
-   #endif //----------------------------------------------------- end debug ----
-   
    GmatBase *obj = NULL;
    GmatBase *refObj;
    StringArray refNameList;
    std::string objName;
-   CoordinateSystem *cs;
-   
-   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
-   {
-      #ifdef DEBUG_FINAL_PASS
-      MessageInterface::ShowMessage("Setting up CoordinateSystem '%s'\n",
-                                    i->c_str());
-      #endif
-      cs = (CoordinateSystem*)GetConfiguredObject(*i);
-      cs->Initialize();
-   }
+   StringArray objList;
    
    objList = theModerator->GetListOfObjects(Gmat::UNKNOWN_OBJECT);
-   #ifdef DEBUG_FINAL_PASS //---------------------------------------- debug ----
-   MessageInterface::ShowMessage("FinalPass:: Unknown objList =\n");
-   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
-   {
-      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
-   }
-   #endif //----------------------------------------------------- end debug ----
    
+   #ifdef DEBUG_FINAL_PASS //------------------------------ debug ----
+   MessageInterface::ShowMessage("FinalPass:: All objList =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   #endif //------------------------------------------- end debug ----
+   
+   //----------------------------------------------------------------------
    // Check reference objects
+   //----------------------------------------------------------------------
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
    {
-      #ifdef DEBUG_FINAL_PASS
-      MessageInterface::ShowMessage("Checking ref. object on '%s'\n",
-                                    i->c_str());
-      #endif
       obj = GetConfiguredObject(*i);
+      
+      #ifdef DEBUG_FINAL_PASS
+      MessageInterface::ShowMessage
+         ("Checking ref. object on %s:%s\n", obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
+      #endif
       
       // check System Parameters seperately since it follows certain naming
       // convention.  "owner.dep.type" where owner can be either Spacecraft
@@ -4054,12 +4037,13 @@ bool Interpreter::FinalPass()
       //-----------------------------------------------------------------
       // Note: This section needs be modified as needed. 
       // GetRefObjectTypeArray() should be implemented if we want to
-      // add to this list.
+      // add to this list. This was added to write specific error messages.
       //-----------------------------------------------------------------
       
       else if (obj->GetType() == Gmat::BURN ||
                obj->GetType() == Gmat::SPACECRAFT ||
                obj->GetType() == Gmat::FORCE_MODEL ||
+               obj->GetType() == Gmat::COORDINATE_SYSTEM ||
                obj->GetType() == Gmat::SUBSCRIBER)
       {
          // Set return flag to false if any check failed
@@ -4101,6 +4085,69 @@ bool Interpreter::FinalPass()
             #ifdef DEBUG_FINAL_PASS
             MessageInterface::ShowMessage(e.GetFullMessage());
             #endif
+         }
+      }
+   }
+   
+   //----------------------------------------------------------------------
+   // Initialize CoordinateSystem
+   //----------------------------------------------------------------------
+   objList = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
+   
+   #ifdef DEBUG_FINAL_PASS //------------------------------ debug ----
+   MessageInterface::ShowMessage("FinalPass:: CS objList =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   #endif //------------------------------------------- end debug ----
+   
+   objList = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
+   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
+   {
+      CoordinateSystem *cs = (CoordinateSystem*)GetConfiguredObject(*i);
+      #ifdef DEBUG_FINAL_PASS
+      MessageInterface::ShowMessage("Initializing CoordinateSystem '%s'\n",
+                                    i->c_str());
+      #endif
+      cs->Initialize();         
+   }
+
+   
+   //-------------------------------------------------------------------
+   // Special check for LibrationPoint.
+   // Since the order of setting primary and secondary bodies can be
+   // different, it cannot check for the same bodies in the base code
+   // LibrationPoint::SetStringParameter(). Instead the checking is done
+   // in here.  This allows repeated setting of bodies as shown in the
+   // following script.
+   //    GMAT Libration1.Primary = Sun;
+   //    GMAT Libration1.Secondary = Earth;
+   //    GMAT Libration1.Primary = Earth;
+   //    GMAT Libration1.Secondary = Luna;
+   //-------------------------------------------------------------------
+   objList = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
+   
+   #ifdef DEBUG_FINAL_PASS
+   MessageInterface::ShowMessage("FinalPass:: CalculatedPoint objList =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   #endif
+   
+   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
+   {
+      obj = GetConfiguredObject(*i);
+      if (obj->GetTypeName() == "LibrationPoint")
+      {
+         std::string primary = obj->GetStringParameter("Primary");
+         std::string secondary = obj->GetStringParameter("Secondary");
+         //MessageInterface::ShowMessage("===> primary=%s, secondary=%s\n",
+         //                              primary.c_str(), secondary.c_str());
+         if (primary == secondary)
+         {
+            InterpreterException ex
+               ("The Primay and Secondary bodies cannot be the same in the "
+                "LibrationPoint \"" + obj->GetName() + "\"");
+            HandleError(ex, false);
+            retval = false;
          }
       }
    }
@@ -4256,11 +4303,11 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    
    #if DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("===> Interpreter::CheckUndefinedReference() obj=%s, %s, refTypes=\n",
+      ("Interpreter::CheckUndefinedReference() type='%s', name='%s', refTypes=\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str());
    for (UnsignedInt i=0; i<refTypes.size(); i++)
       MessageInterface::ShowMessage
-         ("   ===> %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
    #endif
    
    // Check if undefined ref. objects exist
@@ -4273,7 +4320,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          #if DEBUG_CHECK_OBJECT
          for (UnsignedInt j=0; j<refNames.size(); j++)
          MessageInterface::ShowMessage
-            ("      ===> %s\n", refNames[j].c_str());
+            ("      %s\n", refNames[j].c_str());
          #endif
          
          // Check System Parameters seperately since it follows certain naming
@@ -4340,10 +4387,15 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetFullMessage());
+         #ifdef DEBUG_CHECK_OBJECT
+         // since command handles setting reference object during initialization,
+         // skip if object is command
+         if (obj->GetType() != Gmat::COMMAND)
+            MessageInterface::ShowMessage(e.GetFullMessage());
+         #endif
       }
    }
-
+   
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage("CheckUndefinedReference() returning %d\n", retval);
    #endif
