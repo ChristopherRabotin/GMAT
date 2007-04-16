@@ -957,8 +957,8 @@ void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowSt
  * @see GetArrayIndexVar()
  *
  * @param  str  input array string
- * @param  row  output row integer index
- * @param  col  output column integer index
+ * @param  row  output row integer index, -1 if invalid index
+ * @param  col  output column integer index, -1 if invalid index
  * @param  name  output array name
  * @param  bracketPair  bracket pair used in the input array, such as "[]", "()"
  */
@@ -1969,7 +1969,7 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 //------------------------------------------------------------------------------
 /*
  * Returns true if string contains only alphanumeric characters and doesn't
- * start with number.
+ * start with number.  Underscore is allowed
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsValidName(const std::string &str)
@@ -1978,9 +1978,9 @@ bool GmatStringUtil::IsValidName(const std::string &str)
       return false;
    
    for (UnsignedInt i=1; i<str.size(); i++)
-      if (!isalnum(str[i]))
-          return false;
-
+      if (!isalnum(str[i]) && str[i] != '_')
+         return false;
+   
    return true;
 }
 
