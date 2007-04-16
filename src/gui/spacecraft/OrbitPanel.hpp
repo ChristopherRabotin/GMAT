@@ -50,6 +50,11 @@ public:
    bool CanClosePanel() { return canClose; }
    
 private:
+
+   /// valid state type in the StateConverter
+   StringArray mStateTypeNames;
+   /// valid anomaly type in the Anomaly
+   StringArray mAnomalyTypeNames;
    
    Anomaly mAnomaly;
    Anomaly mTrueAnomaly;
@@ -76,6 +81,7 @@ private:
    bool mIsStateModified[6]; // user typed in number
    bool mIsEpochChanged;
    bool mIsEpochModified;    // user typed in number
+   bool mShowFullStateTypeList;
    
    /// The spacecraft state in the internal coordinate system
    Rvector6 mCartState;
@@ -103,8 +109,9 @@ private:
 
    void InitializeCoordinateSystem(CoordinateSystem *cs);
    void SetLabelsUnits(const std::string &stateType);
-   
+
    void DisplayState();
+   void BuildValidStateTypes();
    void BuildState(const Rvector6 &inputState, bool isInternal = false);
    
    wxString ToString(Real rval);
@@ -118,6 +125,8 @@ private:
    bool CheckModKeplerian(Rvector6 &state);
    bool CheckSpherical(Rvector6 &state, const wxString &stateType);
    bool CheckEquinoctial(Rvector6 &state);
+   bool CheckAnomaly(Rvector6 &state);
+   bool ComputeTrueAnomaly(Rvector6 &state, const std::string &stateType);
    
    GmatPanel *theScPanel;
    
