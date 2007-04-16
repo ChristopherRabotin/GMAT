@@ -61,11 +61,17 @@ int MatlabInterface::accessCount = 0;
 int MatlabInterface::Open()
 {
 #if defined __USE_MATLAB__
-
+   
+   #ifdef DEBUG_MATLAB_OPEN_CLOSE
+   MessageInterface::ShowMessage
+      ("MatlabInterface::Open() enginePtrD=%p\n", enginePtrD);
+   #endif
+   
    if (enginePtrD == NULL)
       MessageInterface::ShowMessage("Please wait while MATLAB opens...\n");
-
+   
 #ifdef __WXMAC__
+
    /// Check if MATLAB is still running then doesn't need to re-launch
    if (enginePtrD != NULL)
    {
@@ -76,7 +82,7 @@ int MatlabInterface::Open()
       #endif
       return 1;
    }
-
+   
    // open the X11 application before launching the matlab
    system("open -a X11");
    // need to get IP address or hostname here
@@ -105,7 +111,19 @@ int MatlabInterface::Open()
       MessageInterface::ShowMessage("Failed to open MATLAB engine ...\n");
       return 0;
    }
+   
 #else
+
+   if (enginePtrD != NULL)
+   {
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+      MessageInterface::ShowMessage("Connecting to current MATLAB session\n");
+      #endif
+      
+      return 1;
+   }
+   
+   // open new MATLAB engine
    if ((enginePtrD = engOpen(NULL)))
    {
       accessCount++;
@@ -116,15 +134,19 @@ int MatlabInterface::Open()
       return 1;
    }
    else
+   {
+      MessageInterface::ShowMessage("Failed to open MATLAB engine ...\n");
       return 0;
+   }
 #endif  // End-ifdef __WXMAC__
 
-      return 0;
+   return 0;
 #endif // End-ifdef __USE_MATLAB__
-
+   
    return 0;
 
 } // end Open()
+
 
 //------------------------------------------------------------------------------
 //  int Close()
@@ -141,12 +163,15 @@ int MatlabInterface::Close()
    // Check if MATLAB is still running then close it.
    if (enginePtrD != NULL)
    {
-      //MessageInterface::ShowMessage("Please wait while MATLAB closes ...\n");
+      MessageInterface::ShowMessage
+         ("===> MatlabInterface::Close() enginePtrD=%p\n", enginePtrD);
+      
       accessCount--;
       #ifdef DEBUG_MATLAB_OPEN_CLOSE
          MessageInterface::ShowMessage(
          "Attempting to close MATLAB connection ... accessCount = %d\n", accessCount);
       #endif
+         
       //if (accessCount <= 0)
       //{
          #ifdef __WXMAC__
@@ -168,11 +193,14 @@ int MatlabInterface::Close()
    }
    else
    {
-      MessageInterface::ShowMessage(
-             "\nUnable to close MATLAB because it is not currently running\n");
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
+      MessageInterface::ShowMessage
+         ("\nUnable to close MATLAB because it is not currently running\n");
+      #endif
+      
       return 0;
    }
-
+   
 #endif
 
    return 1;
