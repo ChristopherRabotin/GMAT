@@ -338,10 +338,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
-#ifdef __WXMAC__             // Need to close MATLAB on Mac
+   // Need to close MATLAB connection on Windows also
+   //#ifdef __WXMAC__             // Need to close MATLAB on Mac
    MatlabInterface::Close();
-#endif
-
+   //#endif
+   
    if (mServer)
       delete mServer;
    
@@ -784,7 +785,8 @@ void GmatMainFrame::CloseCurrentProject()
 
 //------------------------------------------------------------------------------
 // bool InterpretScript(const wxString &filename, bool readBack = false,
-//                      const wxString &savePath = "", bool openScript = true)
+//                      const wxString &savePath = "", bool openScript = true,
+//                      bool multScripts = false)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
@@ -793,12 +795,14 @@ void GmatMainFrame::CloseCurrentProject()
  * @param <readBack> true will read scripts, save, and read back in
  * @param <newPath> new path to be used for saving scripts
  * @param <openScript> true if script file to be opened on error
+ * @param <multScripts> true if running scripts from the folder
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
-                                    const wxString &savePath, bool openScript)
+                                    const wxString &savePath, bool openScript,
+                                    bool multScripts)
 {
    wxString title;
    title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
@@ -841,11 +845,15 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
          // Update ResourceTree and MissionTree
          GmatAppData::GetResourceTree()->UpdateResource(true);
          GmatAppData::GetMissionTree()->UpdateMission(true);
+         
+         // if not running script folder, clear status
+         if (!multScripts)
+            SetStatusText("", 1);
       }
       else
       {
-         SetStatusText("Errors Found in the Script!!", 1);
-
+         SetStatusText("Errors were Found in the Script!!", 1);
+         
          // open script editor      
          if (openScript)
             OpenScript();
@@ -1047,6 +1055,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
    else
    {
+      #ifdef __CONFIRM_EXIT__
       wxMessageDialog *msgDlg =
          new wxMessageDialog(this, "Do you really want to exit?", "Exiting...",
                              wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
@@ -1055,8 +1064,9 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
       
       if (result == wxID_NO)
          return;
+      #endif
    }
-   
+      
    CloseAllChildren(true, true);
    
    // Let Moderator::Finalize() clear all resource and commands (loj: 6/13/06)
@@ -2393,7 +2403,11 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    wxString tempStr;
    int fileCount = 0;
    wxString baseFileName;
-      
+   int file1DiffCount = 0;
+   int file2DiffCount = 0;
+   int file3DiffCount = 0;
+   wxString summary;
+   
    // Now call compare utility
    for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
    {
@@ -2429,15 +2443,36 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       
       output =
          GmatFileUtil::CompareLines(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
-                                    filename2.c_str(), filename3.c_str());
+                                    filename2.c_str(), filename3.c_str(), file1DiffCount,
+                                    file2DiffCount, file3DiffCount);
+
+      wxString str;
+      // for summary array
+      if (file1DiffCount > 0)
+      {
+         str.Printf("%s: %d\n", filename1.c_str(), file1DiffCount);
+         summary = summary + str;
+      }
+      
+      if (file2DiffCount > 0)
+      {
+         str.Printf("%s: %d\n", filename2.c_str(), file2DiffCount);
+         summary = summary + str;
+      }
+      
+      if (file3DiffCount > 0)
+      {
+         str.Printf("%s: %d\n", filename3.c_str(), file3DiffCount);
+         summary = summary + str;
+      }
       
       // append text
       for (unsigned int i=0; i<output.size(); i++)
          textCtrl->AppendText(wxString(output[i].c_str()));
-
+      
       textCtrl->AppendText
          ("========================================================\n\n");
-
+      
       fileCount++;
    }
    
@@ -2448,6 +2483,13 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    }
    else
    {
+      // show summary report of compare
+      textCtrl->AppendText("The following files are different:\n\n");
+      textCtrl->AppendText(summary);
+      
+      textCtrl->AppendText
+         ("========================================================\n\n");
+      
       if (saveCompareResults)
          textCtrl->SaveFile(saveFileName);
    }
