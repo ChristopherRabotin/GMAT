@@ -45,6 +45,7 @@ using namespace GmatMathUtil;
 // static data
 //---------------------------------
 
+CoordinateConverter OrbitData::mCoordConverter = CoordinateConverter();
 
 const std::string
 OrbitData::VALID_OBJECT_TYPE_LIST[OrbitDataObjectCount] =
@@ -84,6 +85,9 @@ OrbitData::OrbitData()
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
+
+//    if (mCoordConverter == NULL)
+//       mCoordConverter = new CoordinateConverter;
 }
 
 
@@ -927,43 +931,6 @@ void OrbitData::InitializeRefObjects()
       throw ParameterException
          ("OrbitData::InitializeRefObjects() Cannot find internal "
           "CoordinateSystem object\n");
-   
-//    mOutCoordSystem =
-//       (CoordinateSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[COORD_SYSTEM]);
-   
-//    if (mOutCoordSystem == NULL)
-//    {
-//       #if DEBUG_ORBITDATA_INIT
-//       MessageInterface::ShowMessage
-//          ("OrbitData::InitializeRefObjects() Cannot find output "
-//           "CoordinateSystem object\n");
-//       #endif
-      
-//       throw ParameterException
-//          ("OrbitData::InitializeRefObjects() Cannot find coordinate system.\n");
-//    }
-
-   
-//    // Set origin to out coordinate system origin for CoordinateSystem
-//    // dependent parameter
-//    mOrigin = mOutCoordSystem->GetOrigin();
-   
-//    if (!mOrigin)
-//    {
-//       #if DEBUG_ORBITDATA_INIT
-//       MessageInterface::ShowMessage
-//          ("OrbitData::InitializeRefObjects() origin not found: " +
-//           mOutCoordSystem->GetOriginName() + "\n");
-//       #endif
-      
-//       throw ParameterException
-//          ("Coordinate system origin: " + mOutCoordSystem->GetOriginName() +
-//           " not found.");
-//    }
-   
-//    // get gravity constant if out coord system origin is CelestialBody
-//    if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
-//       mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    
    //-----------------------------------------------------------------
    // if dependent body name exist and it is a CelestialBody,

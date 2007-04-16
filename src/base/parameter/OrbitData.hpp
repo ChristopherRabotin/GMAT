@@ -103,7 +103,8 @@ protected:
    CoordinateSystem *mInternalCoordSystem;
    CoordinateSystem *mOutCoordSystem;
    
-   CoordinateConverter mCoordConverter;
+   // only one CoordinateConverter needed
+   static CoordinateConverter mCoordConverter;
    
    enum {PX, PY, PZ, VX, VY, VZ};
    enum {SMA, ECC, INC, RAAN, AOP, TA, MA, EA, HA, RADN};
