@@ -24,6 +24,12 @@
 #include "RealUtilities.hpp"
 #include "Linear.hpp"         // for GmatRealUtil::
 
+//#define DEBUG_MATH_UTIL
+
+#ifdef DEBUG_MATH_UTIL
+#include "MessageInterface.hpp"
+#endif
+
 using namespace GmatMathUtil;
 
 //------------------------------------------------------------------------------
@@ -364,20 +370,35 @@ Real GmatMathUtil::ASin (Real x, Real cycleInRad)
    return (cycleInRad/TWO_PI)*asin(x);
 }
 
+
 //------------------------------------------------------------------------------
-//  Real ACos (Real x, Real cycleInRad)
+//  Real ACos (Real x, Real tol=0.0, Real cycleInRad)
 //------------------------------------------------------------------------------
-Real GmatMathUtil::ACos (Real x, Real cycleInRad)
+Real GmatMathUtil::ACos (Real x, Real tol, Real cycleInRad)
 {
-   if (cycleInRad <= 0.0) 
+   if (cycleInRad <= 0.0)
       throw RealUtilitiesExceptions::ArgumentError("ACos(angle, cycle <= 0.0)\n");
-   else if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL) 
-      throw RealUtilitiesExceptions::ArgumentError
-         ("Absolute input radian is greater than 1 in ACos(" + GmatRealUtil::ToString(x) +
-          " > 1.0, cycle)\n");
+   
+   if ((fabs(x) - 1.0) > GmatRealConst::REAL_TOL)
+   {
+      #ifdef DEBUG_MATH_UTIL
+      MessageInterface::ShowMessage
+         ("ACos() checking additional tolerance for x=%.16f\n", x);
+      #endif
+      
+      if ((x > 1.0 - tol) && (x <= 1.0 + tol))
+         return 0.0;
+      else if ((x > -1.0 - tol) && (x <= -1.0 + tol))
+         return PI;
+      else
+         throw RealUtilitiesExceptions::ArgumentError
+            ("The input \"" + GmatRealUtil::ToString(x, true, true) +
+             "\" to ACos() is not within -1.0 and 1.0.");
+   }
    
    return (cycleInRad/TWO_PI)*acos(x);
 }
+
 
 //------------------------------------------------------------------------------
 //  Real ATan (Real y, Real x , Real cycleInRad)
@@ -390,6 +411,7 @@ Real GmatMathUtil::ATan (Real y, Real x , Real cycleInRad)
    return (cycleInRad/TWO_PI)*atan2(y,x);
 }
 
+
 //------------------------------------------------------------------------------
 //  Real ATan2 (Real y, Real x , Real cycleInRad)
 //------------------------------------------------------------------------------
@@ -400,6 +422,7 @@ Real GmatMathUtil::ATan2 (Real y, Real x , Real cycleInRad)
    
    return (cycleInRad/TWO_PI)*atan2(y,x);
 }
+
 
 //------------------------------------------------------------------------------
 //  Real ASinh (Real x, Real cycleInRad)
