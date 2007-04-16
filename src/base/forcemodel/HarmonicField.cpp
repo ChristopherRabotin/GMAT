@@ -50,7 +50,7 @@
 #include "HarmonicField.hpp"
 
 #include "PhysicalModel.hpp"
-//#include "ForceModelException.hpp"
+#include "ForceModelException.hpp"
 #include "StringUtil.hpp"     // for ToString()
 #include "RealUtilities.hpp"
 #include "Rvector.hpp"
@@ -68,6 +68,7 @@
 using namespace GmatMathUtil;
 
 //#define DEBUG_HARMONIC_FIELD
+//#define DEBUG_HARMONIC_FIELD_FILENAME
 
 //---------------------------------
 // static data
@@ -130,6 +131,7 @@ fileRead                (false),
 inputCSName             ("EarthMJ2000Eq"),
 fixedCSName             ("EarthFixed"),
 targetCSName            ("EarthMJ2000Eq"),
+potPath                 (""),
 offDiags                (NULL),
 abarCoeff1              (NULL),
 abarCoeff2              (NULL)
@@ -138,6 +140,10 @@ abarCoeff2              (NULL)
    objectTypeNames.push_back("HarmonicField");
    parameterCount = HarmonicFieldParamCount;
    r = s = t = u = 0.0;
+   
+   FileManager *fm = FileManager::Instance();
+   potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
+   
 }
 
 
@@ -216,6 +222,7 @@ fileRead                (false),
 inputCSName             (hf.inputCSName),
 fixedCSName             (hf.fixedCSName),
 targetCSName            (hf.targetCSName),
+potPath                 (hf.potPath),
 offDiags                (NULL),
 abarCoeff1              (NULL),
 abarCoeff2              (NULL)
@@ -255,6 +262,7 @@ HarmonicField& HarmonicField::operator=(const HarmonicField& hf)
    inputCSName    = hf.inputCSName;
    fixedCSName    = hf.fixedCSName;
    targetCSName   = hf.targetCSName;
+   potPath        = hf.potPath;
    offDiags       = NULL;
    abarCoeff1     = NULL;
    abarCoeff2     = NULL;
@@ -275,8 +283,6 @@ bool HarmonicField::Initialize()
 {
    if (!PhysicalModel::Initialize())
       return false;
-
-   //MessageInterface::ShowMessage("=====> HarmonicField::Initialize()\n");
 
    // Set body to use the same potential file (loj: 3/24/06)
    // if we want to use mu and radius from this file later
@@ -355,16 +361,13 @@ bool HarmonicField::SetDegreeOrder(Integer deg, Integer ord)
 //------------------------------------------------------------------------------
 bool HarmonicField::SetFilename(const std::string &fn)
 {
-   #ifdef DEBUG_HARMONIC_FIELD
-//       char str[1024];
-//       strcpy(str, fn.c_str());
-//       MessageInterface::ShowMessage
-//          ("HarmonicField::SetFilename() called with \"%s\"\n", str);
-       MessageInterface::ShowMessage ("HarmonicField::SetFilename()");
-       MessageInterface::ShowMessage
-          ("filename = %s\n fn = %s\n", filename.c_str(), fn.c_str());
+   #ifdef DEBUG_HARMONIC_FIELD_FILENAME
+   MessageInterface::ShowMessage
+      ("HarmonicField::SetFilename() for %s\n   filename = %s\n   newname  = %s\n",
+       bodyName.c_str(), filename.c_str(), fn.c_str());
+   MessageInterface::ShowMessage("   potPath  = %s\n", potPath.c_str());
    #endif
- 
+   
    if (filename != fn)
    {
       // Add default pathname if none specified
@@ -372,9 +375,6 @@ bool HarmonicField::SetFilename(const std::string &fn)
       {
          try
          {
-            FileManager *fm = FileManager::Instance();
-            std::string potPath =
-               fm->GetAbsPathname(bodyName + "_POT_PATH");
             filename = potPath + fn;
          }
          catch (GmatBaseException &e)
@@ -387,7 +387,7 @@ bool HarmonicField::SetFilename(const std::string &fn)
       {
          filename = fn;
       }
-
+      
       std::ifstream potfile(filename.c_str());
       if (!potfile) 
       {
@@ -399,8 +399,8 @@ bool HarmonicField::SetFilename(const std::string &fn)
          body->SetPotentialFilename(filename);
    }
    
-   #ifdef DEBUG_HARMONIC_FIELD
-   MessageInterface::ShowMessage("==> filename=%s\n", filename.c_str());
+   #ifdef DEBUG_HARMONIC_FIELD_FILENAME
+   MessageInterface::ShowMessage("   filename = %s\n", filename.c_str());
    #endif
    
    fileRead = false;
@@ -478,20 +478,6 @@ bool HarmonicField::legendreP_init()
       throw ForceModelException("legendreP_init: memory allocation failed for Abar!");
    }
 
-   // old code
-   //for (cc = 0; cc <= maxDegree+1; ++cc) {
-   //   if ( maxOrder >= cc )
-   //      Abar[cc] = new Real[cc+3];
-   //   else
-   //      Abar[cc] = new Real[maxOrder+3];
-
-   //   if ( !Abar[cc] ) {
-   //      throw ForceModelException("legendreP_init:  calloc failed!\a\n!");
-   //   }
-   //}
-
-   //loj: 1/13/05 allocate and initialize Abar
-   // new code
    Integer allocsize = 0;
    
    for (cc = 0; cc <= maxDegree+1; ++cc)
@@ -648,6 +634,7 @@ Integer HarmonicField::GetIntegerParameter(const Integer id) const
    return PhysicalModel::GetIntegerParameter(id);
 }
 
+
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const Integer id, const Integer value)
 //------------------------------------------------------------------------------
@@ -662,22 +649,8 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 {
    if (id == MAX_DEGREE)  return (maxDegree = value);
    if (id == MAX_ORDER)   return (maxOrder  = value);
-//   if (id == DEGREE)      return (degree    = value);
    if (id == DEGREE)
    {
-//	   if (value <= 0)
-//	   {
-//	      ForceModelException fme;
-//	      fme.SetDetails(errorMessageFormat.c_str(),
-//	         GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
-//	         GetParameterText(id).c_str(),
-//	         "Integer >= 0 and < the maximum specified by the model, Order <= Degree");
-//	      throw fme;
-//	   }
-//	   
-//	   degree = value;
-//	   return degree;
-
       if (value >= 0)
          degree = value;
       else
@@ -693,22 +666,8 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
       }
       return degree;
    }
-//   if (id == ORDER)       return (order     = value);
    if (id == ORDER)
    {
-//	   if (value <= 0)
-//	   {
-//	      ForceModelException fme;
-//	      fme.SetDetails(errorMessageFormat.c_str(),
-//	         GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
-//	         GetParameterText(id).c_str(),
-//	         "[Integer >= 0 and < the maximum specified by the model, Order <= Degree].");
-//	      throw fme;
-//	   }
-//	   
-//	   order = value;
-//	   return order;
-
       if (value >= 0)
          order = value;
       else
@@ -727,6 +686,7 @@ Integer HarmonicField::SetIntegerParameter(const Integer id, const Integer value
 
    return PhysicalModel::SetIntegerParameter(id, value);
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const std::string &label) const
@@ -773,7 +733,26 @@ Integer HarmonicField::SetIntegerParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string HarmonicField::GetStringParameter(const Integer id) const
 {
-   if (id == FILENAME)            return filename;
+   if (id == FILENAME)
+   {
+      //return filename;
+      UnsignedInt index = filename.find_last_of("/\\");
+      
+      // if path not found, just write filename
+      if (index == filename.npos)
+         return filename;
+      else
+      {
+         // if actual pathname is the same as the default path, write only name part
+         std::string actualPath = filename.substr(0, index+1);
+         std::string fname = filename;
+         if (potPath == actualPath)
+            fname = filename.substr(index+1);
+         
+         return fname;
+      }
+   }
+   
    if (id == INPUT_COORD_SYSTEM)  return inputCSName;
    if (id == FIXED_COORD_SYSTEM)  return fixedCSName;
    if (id == TARGET_COORD_SYSTEM) return targetCSName;
@@ -793,53 +772,9 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
 bool HarmonicField::SetStringParameter(const Integer id,
                                        const std::string &value)
 {
-//<<<<<<< HarmonicField.cpp
-//   if (id == BODY)
-//   {
-//// DJC: Channges that allow setting without a solar system instance
-////      if (!solarSystem) throw ForceModelException(
-////          "In HarmonicField, cannot set body, as no solar system has been set");
-//      if (value != bodyName)
-//      {
-////         body = solarSystem->GetBody(value);
-////         if (body)
-////         {
-////            bodyName = body->GetName();
-////            return true;
-////         }
-////         else      return false;
-//         bodyName = value;
-//         if (filename == "")
-//         {
-//            fileRead = false;
-//            filename = value;
-//            filename += ".grv";
-//         }
-//      }
-////      else return true;
-//      return true;
-//   }
-//=======
-//>>>>>>> 1.6
    if (id == FILENAME)
    {
-
-      //loj: 3/24/06 just call SetFilename()
-      return SetFilename(value);
-  
-//       if (filename != value)
-//       {
-//          #ifdef DEBUG_HARMONIC_FIELD
-//             char str[1024];
-//             strcpy(str, value.c_str());
-//            
-//             MessageInterface::ShowMessage("Setting file name to \"%s\"\n", str);
-//          #endif
-//       
-//          fileRead = false;
-//          filename = value;
-//       }
-//       return true;
+      return SetFilename(value);  
    }
    if (id == INPUT_COORD_SYSTEM)
    {
@@ -881,9 +816,18 @@ bool HarmonicField::SetStringParameter(const Integer id,
       return true;
    }
    if (id == BODY_NAME)
-   {
+   {      
       if (PhysicalModel::SetStringParameter(id, value))
-      {   
+      {
+         // set default potential file path for the body
+         FileManager *fm = FileManager::Instance();
+         potPath = fm->GetAbsPathname(bodyName + "_POT_PATH");
+         
+         #ifdef DEBUG_HARMONIC_FIELD
+         MessageInterface::ShowMessage
+            ("Setting potential file path to \"%s\"\n", potPath.c_str());
+         #endif
+         
          fixedCSName = value + "Fixed";
          return true;
       }

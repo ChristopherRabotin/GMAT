@@ -165,6 +165,7 @@ protected:
    std::string             inputCSName;
    std::string             fixedCSName;
    std::string             targetCSName;
+   std::string             potPath;
    
    CoordinateSystem        *inputCS;
    CoordinateSystem        *fixedCS;
