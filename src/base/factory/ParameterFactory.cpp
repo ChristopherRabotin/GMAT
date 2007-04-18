@@ -150,6 +150,10 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new SphRAV(withName);
    if (ofType == "DECV")
       return new SphDecV(withName);
+   if (ofType == "AZI")
+      return new SphAzi(withName);
+   if (ofType == "FPA")
+      return new SphFPA(withName);
    if (ofType == "SphericalRADEC") 
       return new SphRaDecElem(withName);
    if (ofType == "SphericalAZFPA") 
@@ -313,6 +317,8 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("VMAG");
       creatables.push_back("RAV");
       creatables.push_back("DECV");
+      creatables.push_back("AZI");
+      creatables.push_back("FPA");
       creatables.push_back("SphericalRADEC");
       creatables.push_back("SphericalAZFPA");
       creatables.push_back("Altitude");
