@@ -937,7 +937,9 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
       for (current = objs.begin(); current != objs.end(); ++current)
       {
          object = FindObject(*current);
-         if ((object->GetTypeName() == "Array") || (object->GetTypeName() == "Variable"))
+         if ((object->GetTypeName() == "Array") ||
+             (object->GetTypeName() == "Variable") ||
+             (object->GetTypeName() == "String"))
             foundVarsAndArrays = true;
       }
    }
@@ -1147,6 +1149,8 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    std::vector<GmatBase*> arrWithValList;
    std::vector<GmatBase*> varList;
    std::vector<GmatBase*> varWithValList;
+   std::vector<GmatBase*> strList;
+   std::vector<GmatBase*> strWithValList;
    std::string genStr;
    GmatBase *object =  NULL;
    
@@ -1154,7 +1158,10 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    theReadWriter->WriteText(sectionDelimiterString[0]);
    theReadWriter->WriteText(sectionDelimiterString[1] + "Parameters");
    theReadWriter->WriteText(sectionDelimiterString[2]);
-   
+
+   //-----------------------------------------------------------------
+   // Fill in proper arrays
+   //-----------------------------------------------------------------
    for (current = objs.begin(); current != objs.end(); ++current)
    {
       object = FindObject(*current);
@@ -1179,10 +1186,22 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
             if (genStr.find("=") != genStr.npos)
                varWithValList.push_back(object);
          }
+         else if (object->GetTypeName() == "String")
+         {
+            genStr = object->GetGeneratingString(mode);            
+            strList.push_back(object);
+            
+            // if initial value found
+            if (genStr.find("=") != genStr.npos)
+               strWithValList.push_back(object);
+         }
       }
    }
+
    
+   //-----------------------------------------------------------------
    // Write 10 Variables without initial values per line;
+   //-----------------------------------------------------------------
    Integer counter = 0;
    
    for (UnsignedInt i = 0; i<varList.size(); i++)
@@ -1203,20 +1222,25 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    }
    
    
+   //-----------------------------------------------------------------
    // Write Variables with initial values
-   theReadWriter->WriteText("\n");
+   //-----------------------------------------------------------------
    for (UnsignedInt i = 0; i<varWithValList.size(); i++)
    {
       if (i == 0)
+      {
+         theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)varWithValList[i])->GetCommentLine(1));
+      }
       
       theReadWriter->WriteText(varWithValList[i]->GetGeneratingString(mode));
    }
    
    
+   //-----------------------------------------------------------------
    // Write 10 Arrays without initial values per line;
+   //-----------------------------------------------------------------
    counter = 0;
-   theReadWriter->WriteText("\n");
    
    for (UnsignedInt i = 0; i<arrList.size(); i++)
    {
@@ -1224,7 +1248,10 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       // Write comment line
       if (counter == 1)
+      {
+         theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(2));
+      }
       
       if (counter == 1 || (counter % 11) == 0)
          theReadWriter->WriteText("Create Array ");
@@ -1235,15 +1262,61 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
          theReadWriter->WriteText("\n");
    }
    
+   //-----------------------------------------------------------------
    // Write Arrays with initial values
-   theReadWriter->WriteText("\n");
+   //-----------------------------------------------------------------
    for (UnsignedInt i = 0; i<arrWithValList.size(); i++)
    {
       if (i == 0)
+      {
+         theReadWriter->WriteText("\n");
          theReadWriter->WriteText(arrWithValList[0]->GetCommentLine());
+      }
       
       theReadWriter->WriteText(arrWithValList[i]->GetStringParameter("InitialValue"));
    }
+   
+   
+   //-----------------------------------------------------------------
+   // Write 10 Strings without initial values per line;
+   //-----------------------------------------------------------------
+   counter = 0;   
+   for (UnsignedInt i = 0; i<strList.size(); i++)
+   {
+      counter++;
+      
+      // Write comment line
+      if (counter == 1)
+      {
+         theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(2));
+      }
+      
+      if (counter == 1 || (counter % 11) == 0)
+         theReadWriter->WriteText("Create String ");
+      
+      theReadWriter->WriteText(strList[i]->GetName() + " ");
+      
+      if ((counter % 10) == 0)
+         theReadWriter->WriteText("\n");
+   }
+   
+   
+   //-----------------------------------------------------------------
+   // Write Strings with initial values
+   //-----------------------------------------------------------------
+   for (UnsignedInt i = 0; i<strWithValList.size(); i++)
+   {
+      if (i == 0)
+      {
+         theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)strWithValList[i])->GetCommentLine(1));
+      }
+      
+      theReadWriter->WriteText(strWithValList[i]->GetGeneratingString(mode));
+   }
+   
+   theReadWriter->WriteText("\n");
    
 }
 
