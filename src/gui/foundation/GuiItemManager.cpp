@@ -1750,7 +1750,7 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
          new wxListBox(parent, id, wxDefaultPosition, size, allUserParamCount,
                        allUserParamList, wxLB_SINGLE|wxLB_SORT);
                        
-      delete allUserParamList;
+      delete [] allUserParamList;
    }
    else
    {
@@ -1837,7 +1837,7 @@ wxListBox* GuiItemManager::GetUserStringListBox(wxWindow *parent, wxWindowID id,
          new wxListBox(parent, id, wxDefaultPosition, size, theNumUserString,
                        newUserStringList, wxLB_SINGLE|wxLB_SORT);
       
-      delete newUserStringList;
+      delete [] newUserStringList;
    }
    else
    {
@@ -1891,7 +1891,7 @@ wxListBox* GuiItemManager::GetUserArrayListBox(wxWindow *parent, wxWindowID id,
          new wxListBox(parent, id, wxDefaultPosition, size, theNumUserArray,
                        newUserArrayList, wxLB_SINGLE|wxLB_SORT);
       
-      delete newUserArrayList;
+      delete [] newUserArrayList;
    }
    else
    {
