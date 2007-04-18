@@ -339,7 +339,7 @@ bool Array::IsParameterReadOnly(const Integer id) const
    //   return true;
    
    if ((id == NUM_ROWS) || (id == NUM_COLS) || (id == RMAT_VALUE) ||
-       (id == ROW_VALUE) || (id == COL_VALUE))
+       (id == ROW_VALUE) || (id == COL_VALUE) || id == INITIAL_VALUE)
       return true;
    
    return Parameter::IsParameterReadOnly(id);
