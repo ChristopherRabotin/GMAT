@@ -3820,7 +3820,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    ResetConfigurationChanged();
    endOfInterpreter = true;
    
-   #if DEBUG_INTERPRET
+   #if DEBUG_INTERPRET > 1
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript());
@@ -4324,6 +4324,8 @@ void Moderator::CreateDefaultMission()
       CreateParameter("VMAG", "DefaultSC.EarthMJ2000Eq.VMAG");
       CreateParameter("RAV", "DefaultSC.EarthMJ2000Eq.RAV");
       CreateParameter("DECV", "DefaultSC.EarthMJ2000Eq.DECV");
+      CreateParameter("AZI", "DefaultSC.EarthMJ2000Eq.AZI");
+      CreateParameter("FPA", "DefaultSC.EarthMJ2000Eq.FPA");
       
       // Angular parameters
       CreateParameter("SemilatusRectum", "DefaultSC.Earth.SemilatusRectum");
