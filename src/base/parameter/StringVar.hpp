@@ -59,6 +59,9 @@ public:
    virtual bool SetStringParameter(const std::string &label,
                                    const std::string &value);
    
+   virtual const std::string& GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName);
 protected:
    
    enum
