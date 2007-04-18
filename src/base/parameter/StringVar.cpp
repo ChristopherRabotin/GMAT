@@ -316,3 +316,38 @@ bool StringVar::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label), value);
 }
 
+
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(...)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& StringVar::GetGeneratingString(Gmat::WriteMode mode,
+                                                  const std::string &prefix,
+                                                  const std::string &useName)
+{
+   // Note:
+   // Do not write "Create name" since multiple Strings will be written from
+   // the ScriptInterpreter
+   
+   std::string sval = GetString();
+
+   // Write value if it is not blank
+   if (sval != "")
+   {
+      generatingString = "GMAT " + GetName() + " = " + sval;
+      generatingString = generatingString + inlineComment + "\n";
+   }
+   
+   return generatingString;
+}
+
