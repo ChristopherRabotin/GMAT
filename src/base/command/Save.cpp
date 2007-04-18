@@ -17,8 +17,15 @@
 
 
 #include "Save.hpp"
+#include "FileManager.hpp"      // for GetPathname()
 #include "MessageInterface.hpp"
+#include "GmatGlobal.hpp"       // for GetDataPrecision()
 
+// for writing to single file per Save command, if not defined
+// it will create files per Save objects
+#define __USE_SINGLE_FILE__
+
+//#define DEBUG_SAVE_OUTPUT
 
 //------------------------------------------------------------------------------
 // Save()
@@ -29,7 +36,6 @@
 //------------------------------------------------------------------------------
 Save::Save() :
    GmatCommand   ("Save"),
-   filename      (""),
    appendData    (false),
    wasWritten    (false),
    writeVerbose  (false)
@@ -60,15 +66,15 @@ Save::~Save()
 //------------------------------------------------------------------------------
 Save::Save(const Save& sv) :
    GmatCommand   (sv),
-   filename      (sv.filename),
+   fileNameArray (sv.fileNameArray),
    appendData    (sv.appendData),     // should be false...
    wasWritten    (sv.wasWritten),
-   objName       (sv.objName),
+   objNameArray  (sv.objNameArray),
    writeVerbose  (sv.writeVerbose)
    //VC++ error, file is not a pointer
    //file          (NULL)
 {
-   obj.clear();
+   objArray.clear();
 }
 
 
@@ -88,13 +94,13 @@ Save& Save::operator=(const Save& sv)
    if (this == &sv)
       return *this;
         
-   filename     = sv.filename;
-   appendData   = sv.appendData;
-   wasWritten   = sv.wasWritten;
-   objName      = sv.objName;
-   writeVerbose = sv.writeVerbose;
-   obj.clear();
-    
+   fileNameArray = sv.fileNameArray;
+   appendData    = sv.appendData;
+   wasWritten    = sv.wasWritten;
+   objNameArray  = sv.objNameArray;
+   writeVerbose  = sv.writeVerbose;
+   objArray.clear();
+   
    return *this;
 }
 
@@ -112,10 +118,10 @@ Save& Save::operator=(const Save& sv)
 //------------------------------------------------------------------------------
 std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
 {
-   if (objName.size() == 0)
+   if (objNameArray.size() == 0)
       return "";
    else
-      return objName[0];
+      return objNameArray[0];
 }
 
 
@@ -133,7 +139,7 @@ std::string Save::GetRefObjectName(const Gmat::ObjectType type) const
 const StringArray& Save::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    // it can be any object, so ignore object type
-   return objName;
+   return objNameArray;
 }
 
 
@@ -156,7 +162,7 @@ bool Save::SetRefObjectName(const Gmat::ObjectType type,
       return false;
       
    // Save works for all types, so we don't check the type parameter
-   objName.push_back(name);
+   objNameArray.push_back(name);
    return true;
 }
 
@@ -172,24 +178,34 @@ bool Save::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Save::Initialize()
 {
+   bool retval = GmatCommand::Initialize();
+   
    wasWritten = false;
    appendData = false;
-   
-   bool retval = GmatCommand::Initialize();
-   filename = "";
-   
-   // Save specific initialization goes here:
-   StringArray::iterator i = objName.begin();
 
-   // If saving multiple objects, we want to append object names, so commented out
-//    if (objName.size() > 1)
-//    {
-//        filename = *i;
-//        ++i;
-//    }
-
-   for (/* i initialized above */; i != objName.end(); ++i)
-   {
+   FileManager *fm = FileManager::Instance();
+   std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
+   
+   #ifdef DEBUG_SAVE_OUTPUT
+   MessageInterface::ShowMessage
+      ("   outPath=%s\n", outPath.c_str());
+   #endif
+   
+   Integer objCount = objNameArray.size();
+   
+   #ifndef __USE_SINGLE_FILE__
+      for (Integer i=0; i<objCount; i++)
+         fileNameArray.push_back(outPath + objNameArray[i]);
+      fileArray = new std::ofstream[objCount];
+   #else
+      fileNameArray.push_back(outPath + objNameArray[0]);
+      fileArray = new std::ofstream[1];
+   #endif
+      
+   Integer index = 0;
+   
+   for (StringArray::iterator i = objNameArray.begin(); i != objNameArray.end(); ++i)
+   {         
       if (objectMap->find(*i) == objectMap->end())
       {
          // Maybe it's a solar system object
@@ -198,7 +214,7 @@ bool Save::Initialize()
             GmatBase *bod = solarSys->GetBody(*i);
             if (bod != NULL)
             {
-               obj.push_back(bod);
+               objArray.push_back(bod);
                return retval;
             }
          }
@@ -209,15 +225,39 @@ bool Save::Initialize()
          throw CommandException(errorString);
       }
       
-      // If saving multiple objects, we want to append object names.
-      if (distance(objName.begin(), i) > 0)
-         filename = filename + "_" + *i;
+      objArray.push_back((*objectMap)[*i]);
       
-      obj.push_back((*objectMap)[*i]);
+      // If saving multiple objects for single file,
+      // we want to append object names.
+      #ifdef __USE_SINGLE_FILE__
+         if (index > 0)
+            fileNameArray[0] = fileNameArray[0] + "_" + *i;
+         
+      #else
+         fileNameArray[index] += ("." + objArray[index]->GetTypeName() + ".data");
+         
+         #ifdef DEBUG_SAVE_OUTPUT
+         MessageInterface::ShowMessage
+            ("Save::Initialize() fileNameArray[%d]=%s\n", index,
+             fileNameArray[index].c_str());
+         #endif
+      #endif
+         
+      index++;
    }
    
-   if (objName.size() > 1)
-      filename = filename + ".data";
+   #ifdef __USE_SINGLE_FILE__
+      if (objCount > 1)
+         fileNameArray[0] += ".data";
+      else if (index == objCount)
+         fileNameArray[0] += ("." + objArray[0]->GetTypeName() + ".data");
+      
+      #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage
+         ("Save::Initialize() fileNameArray[%d]=%s\n", 0,
+          fileNameArray[0].c_str());
+      #endif
+   #endif
    
    return retval;
 }
@@ -235,43 +275,63 @@ bool Save::Initialize()
 //------------------------------------------------------------------------------
 bool Save::Execute()
 {
-   if (!obj[0])
+   Integer prec = GmatGlobal::Instance()->GetDataPrecision();
+   
+   if (!objArray[0])
       throw CommandException("Object not set for Save command");
-   
-   if (filename == "")
-   {
-      std::string objectname = obj[0]->GetName();
-      filename = objectname;
-      filename += ".";
-      filename += obj[0]->GetTypeName();
-   }
 
-   #ifdef DEBUG_SAVE_OUTPUT
-   MessageInterface::ShowMessage("Save::Execute() filename=%s\n",
-                                 filename.c_str());
+   #ifndef __USE_SINGLE_FILE__
+   
+      for (UnsignedInt i=0; i<objArray.size(); i++)
+      {
+         if (appendData && wasWritten)
+            fileArray[i].open(fileNameArray[i].c_str(), std::ios::app);
+         else
+            fileArray[i].open(fileNameArray[i].c_str());
+         
+         fileArray[i].precision(prec);
+      }
+      
+   #else
+      
+      if (appendData && wasWritten)
+         fileArray[0].open(fileNameArray[0].c_str(), std::ios::app);
+      else
+         fileArray[0].open(fileNameArray[0].c_str());
+      
+      fileArray[0].precision(prec);
+            
    #endif
-   
-   if (appendData && wasWritten)
-      file.open(filename.c_str(), std::ios::app);
-   else
-      file.open(filename.c_str());
-   
-   file.precision(18);        /// @todo Make output precision generic
-
-   for (ObjectArray::iterator i = obj.begin(); i != obj.end(); ++i)
-      WriteObject(*i);
+      
+      
+   for (UnsignedInt i=0; i<objArray.size(); i++)
+      WriteObject(i, objArray[i]);
    
    wasWritten = true;
-   file.close();
+   
+   
+   #ifndef __USE_SINGLE_FILE__   
+      for (UnsignedInt i=0; i<objArray.size(); i++)
+         fileArray[i].close();
+   #else
+      fileArray[0].close();
+   #endif
+      
+   delete [] fileArray;
    
    BuildCommandSummary(true);
+
    return true;
 }
 
 
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
 void Save::RunComplete()
 {
-   obj.clear();
+   fileNameArray.clear();
+   objArray.clear();
    GmatCommand::RunComplete();
 }
 
@@ -283,7 +343,7 @@ void Save::RunComplete()
  * Writes out the script snippet that is needed to recreate an object.
  */
 //------------------------------------------------------------------------------
-void Save::WriteObject(GmatBase *o)
+void Save::WriteObject(UnsignedInt i, GmatBase *o)
 {
    #ifdef DEBUG_SAVE_OUTPUT
       MessageInterface::ShowMessage("Save: %s has %d parameters\n", 
@@ -291,157 +351,40 @@ void Save::WriteObject(GmatBase *o)
    #endif
    
    std::string objectname = o->GetName();
+   std::string prefix = "";
 
+   /**
+    * @note:
+    * Since we are using GetGeneratingString() we don't need to write "Create"
+    * except Variables and Strings.  Variables and Strings are special case that
+    * they are written in group in the ScriptInterpreter.  For example,
+    * "Create Variable var1 var2 var3;" are written when save script.
+    * For Arrays, it needs to know the dimension of array so it is handled in the
+    * Array::GetGeneratingString().
+    */
+   
    // "Create Propagator" creates a PropSetup.  This code handles
    // that special case.
-   std::string tname = o->GetTypeName();
-   if (tname == "PropSetup")
-      tname = "Propagator";
-   file << "Create " << tname << " " << o->GetName() << "\n";
-
-   Integer i;
-   for (i = 0; i < o->GetParameterCount(); ++i)
-   {
-      #ifdef DEBUG_SAVE_OUTPUT
-         MessageInterface::ShowMessage("   %s has type %s\n", 
-            o->GetParameterText(i).c_str(), 
-            o->GetParameterTypeString(i).c_str());
-      #endif
-
-      if (o->GetParameterType(i) != Gmat::UNKNOWN_PARAMETER_TYPE)
-      {
-         if (o->GetParameterType(i) != Gmat::STRINGARRAY_TYPE)
-         {
-            // Fill in the l.h.s.
-            if (o->GetParameterType(i) == Gmat::STRING_TYPE)
-            {
-               std::string val = o->GetStringParameter(i);
-               // Only save string types if they are not empty or if verbose
-               if (writeVerbose || (val != ""))
-               {
-                  file << "GMAT " << objectname << "."
-                       << o->GetParameterText(i) << " = "
-                       << val << ";\n";
-               }
-            }
-            else
-            {
-               file << "GMAT " << objectname << "."
-                    << o->GetParameterText(i) << " = ";
-               WriteParameterValue(o, file, i);
-               file << ";\n";
-            }
-         }
-         else
-         {
-            // Fill in the l.h.s.
-            const StringArray dat = o->GetStringArrayParameter(i);
-            // Only save string array types if they are not empty
-            if (writeVerbose || (dat.size() > 0))
-            {
-               file << "GMAT " << objectname << "."
-                    << o->GetParameterText(i) << " = ";
-               std::string desc = "{";
-               for (StringArray::const_iterator i = dat.begin();
-                    i != dat.end(); ++i)
-               {
-                  if (desc != "{")
-                     desc += ", ";
-                  desc += (*i);
-               }
-               desc += "}";
-               file << desc << "\n";
-            }
-         }
-      }
-   }
-   file << "\n";
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteParameterValue(std::ofstream &file, Integer id)
-//------------------------------------------------------------------------------
-/**
- * Writes out the values of non-string parameters.
- * 
- * @param id The id for the parameter that is written.
- */
-//------------------------------------------------------------------------------
-void Save::WriteParameterValue(GmatBase *o, std::ofstream &file, Integer id)
-{
-   Gmat::ParameterType tid = o->GetParameterType(id);
-    
-   switch (tid)
-   {
-      case Gmat::OBJECT_TYPE:
-         file << o->GetName();
-         break;
-         
-      case Gmat::INTEGER_TYPE:
-         file << o->GetIntegerParameter(id);
-         break;
-            
-      case Gmat::REAL_TYPE:
-         file << o->GetRealParameter(id);
-         break;
-
-      // DJC, 06/15/05: Temporarily put an accessor in place to help debug the
-      // force model.  This piece may be replaced by a different call when epoch
-      // issues are updated in the Spacecraft/SpaceObject code.
-      case Gmat::TIME_TYPE:
-         if (o->IsOfType("CelestialBody"))
-            file << o->GetRealParameter(id);
-         break;
-
-      case Gmat::RVECTOR_TYPE:
-         {
-            Rvector st = o->GetRvectorParameter(id);
-            file << "[" << st.ToString() << "]";
-         }
-         break;
-
-      case Gmat::BOOLEAN_TYPE:
-         file << ((o->GetBooleanParameter(id)) ? "true" : "false");
-         break;
-            
-      case Gmat::UNSIGNED_INT_TYPE:
-         file << o->GetUnsignedIntParameter(id);
-         break;
-            
-      case Gmat::STRING_TYPE:
-         file << o->GetStringParameter(id);
-         break;
-            
-     case Gmat::RMATRIX_TYPE:
-         if (o->GetTypeName() == "Array")
-         {
-            file << "[";
-            Integer rows = o->GetIntegerParameter("NumRows");
-            Integer cols = o->GetIntegerParameter("NumCols");
-            for (Integer r = 0; r < rows; ++r)
-            {
-               for (Integer c = 0; c < cols; ++c)
-               {
-                  file << o->GetRealParameter("SingleValue", r, c);
-                  if (c < cols-1)
-                     file << " ";
-               }
-               if (r < rows - 1)
-                  file << "; ";
-            }
-            file << "]";
-         }
-         else
-            MessageInterface::ShowMessage("Unable to write RMatrix for "
-               "parameter %s on object %s\n",
-               o->GetParameterText(id).c_str(), o->GetName().c_str());
-
-         break;
-
-      default:
-         break;
-   }
+   //std::string tname = o->GetTypeName();
+   //if (tname == "PropSetup")
+   //   tname = "Propagator";   
+   //file << "Create " << tname << " " << o->GetName() << "\n";
+   
+   if (o->GetTypeName() == "Variable" || o->GetTypeName() == "String")
+      prefix = "Create " + o->GetTypeName() + " " + o->GetName() + "\n";
+   
+   #ifdef __USE_SINGLE_FILE__
+      fileArray[0] << prefix << o->GetGeneratingString();
+      fileArray[0] << std::endl;
+   #else
+      fileArray[i] << prefix << o->GetGeneratingString();
+      fileArray[i] << std::endl;
+   #endif
+      
+   #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage("Save:WriteObject() leaving\n");
+   #endif
+      
 }
 
 
@@ -488,7 +431,7 @@ const std::string& Save::GetGeneratingString(Gmat::WriteMode mode,
 {
    // Build the local string
    generatingString = prefix + "Save";
-   for (StringArray::iterator i = objName.begin(); i != objName.end(); ++i)
+   for (StringArray::iterator i = objNameArray.begin(); i != objNameArray.end(); ++i)
       generatingString += " " + *i;
    generatingString += ";";
 
@@ -520,7 +463,7 @@ bool Save::TakeAction(const std::string &action, const std::string &actionData)
    
    if (action == "Clear")
    {
-      objName.clear();
+      objNameArray.clear();
       return true;
    }
 
@@ -550,10 +493,10 @@ bool Save::RenameRefObject(const Gmat::ObjectType type,
    //if (type != Gmat::SPACECRAFT)
    //   return true;
    
-   for (Integer index = 0; index < (Integer)objName.size(); ++index)
+   for (Integer index = 0; index < (Integer)objNameArray.size(); ++index)
    {
-      if (objName[index] == oldName)
-         objName[index] = newName;
+      if (objNameArray[index] == oldName)
+         objNameArray[index] = newName;
    }
 
    return true;

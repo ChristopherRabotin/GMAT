@@ -58,23 +58,23 @@ public:
    
 protected:
    /// Name of the save file -- for now, it is objectName.objectType
-   std::string            filename;
+   //std::string            fileNameArray;
+   StringArray            fileNameArray;
    /// Toggle to allow multiple writes
    bool                   appendData;
    /// Toggle to tell if file was written this run
    bool                   wasWritten;
    /// Name of the objects that are written
-   StringArray            objName;
+   StringArray            objNameArray;
    /// Pointer to the objects
-   ObjectArray            obj;
+   ObjectArray            objArray;
    /// Toggle to show or hide emply fields
    bool                   writeVerbose;
    /// File stream used for the output
-   std::ofstream          file;
-
-   void                   WriteObject(GmatBase *o);
-   void                   WriteParameterValue(GmatBase *o, std::ofstream &file, 
-                                              Integer id);
+   //std::ofstream          file;
+   std::ofstream          *fileArray;
+   
+   void                   WriteObject(UnsignedInt i, GmatBase *o);
 };
 
 #endif // Save_hpp
