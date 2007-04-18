@@ -373,8 +373,9 @@ const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
-// StringArray GetGeneratingString(Gmat::WriteMode mode,
-//                const std::string &prefix, const std::string &useName)
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName
 //------------------------------------------------------------------------------
 /**
  * Produces a string, possibly multi-line, containing the text that produces an
@@ -391,16 +392,14 @@ const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &prefix,
                                                  const std::string &useName)
 {   
-   //generatingString = GmatBase::GetGeneratingString();
    Real rval = GetReal();
    
-   // Write value if it is not zero (loj: 3/27/07)
+   // Write value if it is not zero
    if (rval != 0.0)
    {
       Integer prec = GetDataPrecision();
-      //generatingString = generatingString + "GMAT " + GetName() + " = " +
       generatingString = "GMAT " + GetName() + " = " +
-         GmatRealUtil::ToString(rval, false, false, prec, 1);
+         GmatRealUtil::ToString(rval, false, false, false, prec, 1);
       generatingString = generatingString + inlineComment + "\n";
    }
    
