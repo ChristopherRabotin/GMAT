@@ -34,7 +34,7 @@ public:
     * @param <details> Message explaining why the exception was thrown.
     */
    //---------------------------------------------------------------------------
-   SpaceObjectException(const std::string &details) :
+   SpaceObjectException(const std::string &details = "") :
       BaseException("SpaceObject Exception Thrown: ", details)
    {
    }
