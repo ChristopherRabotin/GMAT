@@ -23,9 +23,11 @@
  */ 
 //------------------------------------------------------------------------------
 
+#include <sstream>
 #include "Spacecraft.hpp"
 #include "MessageInterface.hpp"
-#include <sstream>
+#include "SpaceObjectException.hpp"
+#include "StringUtil.hpp"
 
 // Do we want to write anomaly type?
 //#define __WRITE_ANOMALY_TYPE__
@@ -1595,7 +1597,11 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          throw SpaceObjectException("Unknown state element representation: " + 
             value);
       }
-
+      #ifdef DEFINE_SPACECRAFT_SET
+      MessageInterface::ShowMessage("SC::SetString - setting state type to %s\n",
+      value.c_str());
+      #endif
+      
       if ((value == "Keplerian") || (value == "ModifiedKeplerian"))
       {
          // Load trueAnomaly with the state data
@@ -2713,7 +2719,15 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    "In SC::SetElement, after LookUpLabel, id+ELEMENT1_ID = %d, its string = \"%s\",  and rep = \"%s\"\n",
    id+ELEMENT1_ID, (GetParameterText(id+ELEMENT1_ID)).c_str(), rep.c_str());
    #endif
-   
+   // parabolic and hyperbolic orbits not yet supported
+   if ((label == "ECC") && value >= 1.0)
+   {
+      SpaceObjectException se;
+      se.SetDetails(errorMessageFormat.c_str(),
+                    GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
+                    "Eccentricity", "0 <= Real Number < 1.0");
+      throw se;
+   }
 
    if ((id == 5) && (!trueAnomaly.IsInvalid(label)))
       trueAnomaly.SetType(label);
