@@ -1131,6 +1131,7 @@ void CallFunction::SendInParam(Parameter *param)
       else //if (param->GetTypeName() == "Variable")
       {
           std::ostringstream os;
+          os.precision(18);
           os << param->EvaluateReal();
 
 
@@ -1226,6 +1227,7 @@ void CallFunction::GetOutParams()
          //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
          param->SetReal(outArray[0]);
          std::ostringstream ss;
+         ss.precision(18);
          ss << outArray[0];
          param->SetStringParameter("Expression", ss.str());
 
