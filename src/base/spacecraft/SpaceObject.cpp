@@ -23,7 +23,7 @@
 
 
 // #define DEBUG_J2000_STATE 1
-
+// #define DEBUG_STOPCONDITION_TRACKING
 
 //---------------------------------
 // static data
@@ -553,6 +553,11 @@ Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
 void SpaceObject::ClearLastStopTriggered()
 {
    lastStopTriggered = "";
+
+   #ifdef DEBUG_STOPCONDITION_TRACKING
+      MessageInterface::ShowMessage("Cleared stop identifier from \"%s\"\n", 
+         instanceName.c_str());
+   #endif
 }
 
 
@@ -568,6 +573,11 @@ void SpaceObject::ClearLastStopTriggered()
 void SpaceObject::SetLastStopTriggered(const std::string &stopCondName)
 {
    lastStopTriggered = stopCondName;
+   
+   #ifdef DEBUG_STOPCONDITION_TRACKING
+      MessageInterface::ShowMessage("Set stop identifier on \"%s\" to \"%s\"\n", 
+         instanceName.c_str(), lastStopTriggered.c_str());
+   #endif
 }
 
 
@@ -585,6 +595,12 @@ void SpaceObject::SetLastStopTriggered(const std::string &stopCondName)
 //------------------------------------------------------------------------------
 bool SpaceObject::WasLastStopTriggered(const std::string &stopCondName)
 {
+   #ifdef DEBUG_STOPCONDITION_TRACKING
+      MessageInterface::ShowMessage(
+         "Checking to see if triggered stop \"%s\" on \"%s\" matches \"%s\"\n", 
+         lastStopTriggered.c_str(), instanceName.c_str(), stopCondName.c_str());
+   #endif
+
    if (lastStopTriggered == stopCondName)
       return true;
    return false;

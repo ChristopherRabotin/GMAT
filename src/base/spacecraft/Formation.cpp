@@ -1012,6 +1012,22 @@ bool Formation::TakeAction(const std::string &action,
 }
 
 
+void Formation::ClearLastStopTriggered()
+{
+   lastStopTriggered = "";
+   // Clear it on all members
+   for (std::vector <SpaceObject *>::iterator i = components.begin(); 
+        i != components.end(); ++i)
+      (*i)->ClearLastStopTriggered();
+      
+   #ifdef DEBUG_STOPCONDITION_TRACKING
+      MessageInterface::ShowMessage(
+         "Cleared stop identifier from Formation \"%s\"\n", 
+         instanceName.c_str());
+   #endif
+}
+
+
 //------------------------------------------------------------------------------
 // bool ClearSpacecraftList()
 //------------------------------------------------------------------------------

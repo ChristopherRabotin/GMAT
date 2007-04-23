@@ -88,6 +88,9 @@ public:
    virtual void         UpdateState();
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
+   virtual void ClearLastStopTriggered();
+   // virtual void SetLastStopTriggered(const std::string &stopCondName);
+   // virtual bool WasLastStopTriggered(const std::string &stopCondName);
 
 protected:
    /// List of the object names used in the formation

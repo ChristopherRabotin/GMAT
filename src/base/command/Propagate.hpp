@@ -176,8 +176,11 @@ protected:
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to unterpolate across
    Real                    stopInterval;
-   /// Index to the Stopcondition that triggered the stop
+   /// Index to the first StopCondition that triggered the stop
    Integer                 stopTrigger;
+   /// Array of triggers
+   std::vector <StopCondition*>
+                           triggers;
    /// Names of the spacecraft used in the stopping conditions
    StringArray             stopSatNames;
    /// The spacecraft used by the stopping conditions
@@ -204,9 +207,6 @@ protected:
    // times at the same point
    /// Flag used to indicate that the first step logic must be executed
    bool                     checkFirstStep;
-   /// Counter for the number of steps that have been taken
-   Integer                  stepsTaken;
-   
 
    /// Allowed modes of propagation
    enum PropModes
@@ -284,11 +284,6 @@ protected:
    void                    ConfigureStoppingCondition(std::string &stopDesc);
    void                    CleanString(std::string &theString, 
                               const StringArray *extras = NULL);
-
-//   bool                    InterpretParameter(const std::string text, 
-//                                              std::string &paramType, 
-//                                              std::string &paramObj, 
-//                                              std::string &parmSystem);
    virtual void            PrepareToPropagate();
    virtual void            CheckStopConditions(Integer EpochID);
    virtual void            TakeFinalStep(Integer EpochID, Integer trigger);
@@ -303,8 +298,14 @@ protected:
    void                    AddToBuffer(SpaceObject *so);
    void                    EmptyBuffer();
    void                    BufferSatelliteStates(bool fillingBuffer = true);
-   bool                    CheckFirstStepStop();
+   bool                    CheckFirstStepStop(Integer i);
    
+   Real                    InterpolateToStop(StopCondition *sc);
+   Real                    RefineFinalStep(Real secsToStep, 
+                                           StopCondition *stopper);
+   Real                    SecantToStop();
+   void                    UpdateSecantPoints();
+      
 private:
     
 };

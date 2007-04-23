@@ -63,9 +63,9 @@ public:
                        GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
 
-   void ClearLastStopTriggered();
-   void SetLastStopTriggered(const std::string &stopCondName);
-   bool WasLastStopTriggered(const std::string &stopCondName);
+   virtual void ClearLastStopTriggered();
+   virtual void SetLastStopTriggered(const std::string &stopCondName);
+   virtual bool WasLastStopTriggered(const std::string &stopCondName);
    
 protected:
    /// The spacecraft state

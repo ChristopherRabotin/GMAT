@@ -683,14 +683,19 @@ Real StopCondition::GetStopEpoch()
       
    Real stopEpoch = 0.0;
    
+   #if DEBUG_STOPCOND
+      MessageInterface::ShowMessage
+         ("StopCondition::Evaluate()\n   Ring buffer:\n");
+   #endif
+
    mInterpolator->Clear();
    for (int i=0; i<mBufferSize; i++)
    {
       
       #if DEBUG_STOPCOND
-      MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() i=%d, mValueBuffer=%f, "
-          "mEpochBuffer=%f\n", i, mValueBuffer[i], mEpochBuffer[i]);
+         MessageInterface::ShowMessage
+            ("      i=%d, mValueBuffer=%.12lf, "
+             "mEpochBuffer=%.12lf\n", i, mValueBuffer[i], mEpochBuffer[i]);
       #endif
       
       mInterpolator->AddPoint(mValueBuffer[i], &mEpochBuffer[i]);
@@ -700,6 +705,11 @@ Real StopCondition::GetStopEpoch()
       mStopEpoch = stopEpoch;
    else
       throw StopConditionException("Unable to interpolate a stop epoch");
+  
+      #if DEBUG_STOPCOND
+         MessageInterface::ShowMessage
+            ("   Interpolated epoch = %.12lf\n", mStopEpoch);
+      #endif
       
    return mStopEpoch;
 }
@@ -1676,7 +1686,33 @@ Real StopCondition::GetStopValue()
 //------------------------------------------------------------------------------
 Real StopCondition::GetStopDifference()
 {
-   return mGoal - previousValue;
+   Real goalValue;
+   if (mGoalParam)
+      goalValue = mGoalParam->EvaluateReal();
+   else
+      goalValue = mGoal;
+      
+   #ifdef DEBUG_STOPCOND
+      MessageInterface::ShowMessage("%s goal = %16.9lf, value = %16.9lf\n", 
+         instanceName.c_str(), goalValue, mStopParam->EvaluateReal());
+   #endif
+    
+   return goalValue - mStopParam->EvaluateReal();
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetStopGoal()
+//------------------------------------------------------------------------------
+/**
+ * Used to access the desired stopping value.
+ * 
+ * @return The goal value.
+ */ 
+//------------------------------------------------------------------------------
+Real StopCondition::GetStopGoal()
+{
+   return mGoal;
 }
 
 

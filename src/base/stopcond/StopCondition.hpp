@@ -114,6 +114,7 @@ public:
    // Accessors for the last condition evaluated
    virtual Real GetStopValue();
    virtual Real GetStopDifference();
+   virtual Real GetStopGoal();
    virtual Real GetStopTime();
 
 protected:
