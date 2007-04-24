@@ -49,6 +49,8 @@ class GMAT_API ConfigManager
 public:
    static ConfigManager*   Instance();
    
+   std::string         AddClone(const std::string &name);
+   
    void                AddPhysicalModel(PhysicalModel *pm);
    void                AddPropagator(Propagator *prop);
    void                AddForceModel(ForceModel *fm);
@@ -115,13 +117,14 @@ public:
    void                ConfigurationChanged(bool tf);
    
 private:
+   
+   void                AddObject(GmatBase* obj);
+   
    /// The singleton instance
    static ConfigManager*               theConfigManager;
    ConfigManager();
    ~ConfigManager();
-   
-   void                                AddObject(GmatBase* obj);
-   
+      
    /// The managed objects
    std::vector<GmatBase*>              objects;
    /// A list of the names of the managed objects

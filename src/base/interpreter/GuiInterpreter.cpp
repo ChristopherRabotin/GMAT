@@ -51,24 +51,6 @@ GuiInterpreter::~GuiInterpreter()
 }
 
 
-// //------------------------------------------------------------------------------
-// // bool GuiInterpreter::Interpret()
-// //------------------------------------------------------------------------------
-// bool GuiInterpreter::Interpret()
-// {
-//    return false;
-// }
-
-
-// //------------------------------------------------------------------------------
-// // bool GuiInterpreter::Build(Gmat::WriteMode mode)
-// //------------------------------------------------------------------------------
-// bool GuiInterpreter::Build(Gmat::WriteMode mode)
-// {
-//    return false;
-// }
-
-
 //------------------------------------------------------------------------------
 // bool Interpret(GmatBase *obj, const std::string generator)
 //------------------------------------------------------------------------------
@@ -173,8 +155,24 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
+// std::string AddClone(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Adds the clone of the named object to configuration.
+ * It gives new name by adding counter to the name to be cloned.
+ *
+ * return new name if object was cloned and added to configuration, blank otherwise
+ */
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::AddClone(const std::string &name)
+{
+   return theModerator->AddClone(name);
+}
+
+
+//------------------------------------------------------------------------------
 // bool RenameObject(Gmat::ObjectType type, const std::string &oldName
-//                           const std::string &newName)
+//                   const std::string &newName)
 //------------------------------------------------------------------------------
 /**
  * Renames item from the configured list.
@@ -311,6 +309,34 @@ Parameter* GuiInterpreter::GetParameter(const std::string &name)
 bool GuiInterpreter::IsParameter(const std::string &str)
 {
    return theModerator->IsParameter(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateParameter(const std::string &type, const std::string &name,
+//                            const std::string &ownerName, const std::string &depName)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a Parameter. We need this to create an array
+ * first and set size later when we create an array from the GUI.
+ * 
+ * @param  type       Type of parameter requested
+ * @param  name       Name for the parameter.
+ * @param  ownerName  object name of parameter requested
+ * @param  depName    Dependent object name of parameter requested
+ * 
+ * @return Pointer to the constructed Parameter.
+ *
+ * @Note We need this to create an array first and set size later when an array
+ *       is created the GUI.
+ */
+//------------------------------------------------------------------------------
+Parameter* GuiInterpreter::CreateParameter(const std::string &type, 
+                                           const std::string &name,
+                                           const std::string &ownerName,
+                                           const std::string &depName)
+{
+   return theModerator->CreateParameter(type, name, ownerName, depName);
 }
 
 

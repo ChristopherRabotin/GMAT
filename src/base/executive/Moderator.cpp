@@ -480,6 +480,25 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// std::string AddClone(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Adds the clone of the named object to configuration.
+ * It gives new name by adding counter to the name to be cloned.
+ *
+ * return new name if object was cloned and added to configuration, blank otherwise
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::AddClone(const std::string &name)
+{
+   if (name == "")
+      return false;
+
+   return theConfigManager->AddClone(name);
+}
+
+
+//------------------------------------------------------------------------------
 // bool RenameObject(Gmat::ObjectType type, const std::string &oldName
 //                           const std::string &newName)
 //------------------------------------------------------------------------------
@@ -505,7 +524,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    // let's check to make sure it is a valid name
    if (newName == "GMAT" || newName == "Create")
    {
-          MessageInterface::PopupMessage
+      MessageInterface::PopupMessage
          (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",
          newName.c_str());
       return false;
@@ -1041,19 +1060,10 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
    
    if (GetSpacecraft(name) == NULL)
    {
-      //SpaceObject *sc = theFactoryManager->CreateSpacecraft(type, name);
       Spacecraft *sc = (Spacecraft*)(theFactoryManager->CreateSpacecraft(type, name));
 
       if (sc == NULL)
-      {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Spacecraft type: %s.\n"
-         //    "Make sure %s is correct type and registered to SpacecraftFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
          throw GmatBaseException("Error Creating Spacecraft: " + type + "\n");
-      }
       
       if (type == "Spacecraft")
       {
@@ -1649,12 +1659,14 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    {
       Parameter *param = theFactoryManager->CreateParameter(type, name);
       
-      //MessageInterface::ShowMessage
-      //   ("===> Moderator::CreateParameter() param=%s, addr=%p\n",
-      //    param->GetName().c_str(), param);
+      #if DEBUG_CREATE_RESOURCE
+      MessageInterface::ShowMessage
+         ("   param=%s, addr=%p\n", param->GetName().c_str(), param);
+      #endif
       
       if (param == NULL)
-        throw GmatBaseException("Error Creating Parameter: " + type + " in " + name + "\n");
+        throw GmatBaseException("Error Creating Parameter: " + type + " in " +
+                                name + "\n");
       
       // We don't know the owner type the parameter before create,
       // so validate owner type after create.
@@ -1669,17 +1681,24 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             
             if (param->GetOwnerType() != obj->GetType())
             {
-               std::string paramOwnerType = GmatBase::GetObjectTypeString(param->GetOwnerType());
+               std::string paramOwnerType =
+                  GmatBase::GetObjectTypeString(param->GetOwnerType());
                delete param;
                param = NULL;
                
-               throw GmatBaseException("Parameter type: " + type + " should be property of " +
-                                       paramOwnerType);
+               if (paramOwnerType == "")
+                  throw GmatBaseException
+                     ("Cannot find the object type which has \"" + type +
+                      "\" as a Parameter type");
+               else
+                  throw GmatBaseException
+                     ("Parameter type: " + type + " should be property of " +
+                      paramOwnerType);
             }
          }
       }
       
-      // loj: If type is Variable, don't set expression
+      // If type is Variable, don't set expression
       if (type != "Variable")
          param->SetStringParameter("Expression", name);
       
@@ -1745,7 +1764,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                           name.c_str());
          }
       }
-            
+      
       // Manage it if it is a named parameter
       try
       {

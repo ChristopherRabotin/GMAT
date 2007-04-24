@@ -89,6 +89,7 @@ public:
    //----- configuration
    StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
+   std::string AddClone(const std::string &name);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name,

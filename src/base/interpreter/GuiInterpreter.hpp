@@ -45,6 +45,7 @@ public:
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    
    //----- configuration
+   std::string AddClone(const std::string &name);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);
    bool RemoveObject(Gmat::ObjectType type, const std::string &name);
@@ -62,6 +63,10 @@ public:
    // Parameter
    bool IsParameter(const std::string &type);
    Parameter* GetParameter(const std::string &name);
+   virtual Parameter* CreateParameter(const std::string &type,
+                                      const std::string &name,
+                                      const std::string &ownerName = "",
+                                      const std::string &depName = "");
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,

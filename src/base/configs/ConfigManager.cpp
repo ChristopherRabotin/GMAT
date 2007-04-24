@@ -22,6 +22,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CONFIG_SS 1
+//#define DEBUG_CONFIG_ADD_CLONE 1
 //#define DEBUG_CONFIG_MEMORY
 
 //---------------------------------
@@ -78,6 +79,54 @@ ConfigManager::~ConfigManager()
 {
    RemoveAllItems();
 }
+
+
+//------------------------------------------------------------------------------
+// std::string AddClone(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Adds the clone of the named object to configuration.
+ * It gives new name by adding counter to the name to be cloned.
+ *
+ * return new name if object was cloned and added to configuration,
+ *        blank otherwise
+ */
+//------------------------------------------------------------------------------
+std::string ConfigManager::AddClone(const std::string &name)
+{
+   if (name == "")
+      return "";
+   
+   GmatBase *obj1 = GetItem(name);
+   
+   // get initial new name
+   Integer counter = 0;
+   std::string baseName = GmatStringUtil::RemoveLastNumber(name, counter);
+   if (counter == 0)
+      counter = 2;
+   
+   std::string newName = baseName + GmatStringUtil::ToString(counter,1);
+   
+   // construct new name while it exists
+   while (GetItem(newName))
+   {
+      ++counter;
+      newName = baseName + GmatStringUtil::ToString(counter,1);
+   }
+   
+   GmatBase* obj2 = obj1->Clone();
+   obj2->SetName(newName);
+   AddObject(obj2);
+   
+   #if DEBUG_CONFIG_ADD_CLONE
+   MessageInterface::ShowMessage
+      ("ConfigManager::AddClone() newName = %s, type = %s\n", obj2->GetName().c_str(),
+       obj2->GetTypeName().c_str());
+   #endif
+   
+   return newName;
+}
+
 
 //------------------------------------------------------------------------------
 // void AddPhysicalModel(PhysicalModel *pm)
@@ -780,11 +829,11 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    }
    
    //----------------------------------------------------
-   // Rename system parameters
+   // Rename system parameters and expression of variables
    //----------------------------------------------------
       
    else if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
-            type == Gmat::CALCULATED_POINT || type == Gmat::BURN) //loj: 7/20/06 Added BURN
+            type == Gmat::CALCULATED_POINT || type == Gmat::BURN)
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
@@ -796,21 +845,21 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
          #if DEBUG_RENAME
          MessageInterface::ShowMessage("params[%d]=%s\n", i, params[i].c_str());
          #endif
-            
+         
          param = GetParameter(params[i]);
-            
-         // if system parameter
+         
+         // if system parameter, change it's own name
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
          {
             oldParamName = param->GetName();
             pos = oldParamName.find(oldName);
-               
+            
             // rename actual parameter name
             if (pos != oldParamName.npos)
             {
                newParamName = oldParamName;
                newParamName.replace(pos, oldName.size(), newName);
-                  
+               
                #if DEBUG_RENAME
                MessageInterface::ShowMessage
                   ("===> oldParamName=%s, newParamName=%s\n",
@@ -827,9 +876,14 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
                }
             }
          }
+         // if variable, need to change expression
+         else if (param->GetTypeName() == "Variable")
+         {
+            param->RenameRefObject(Gmat::PARAMETER, oldName, newName);
+         }
       }
    }
-
+   
    #if DEBUG_RENAME
    StringArray& allItems = GetListOfAllItems();
    for (UnsignedInt i=0; i<allItems.size(); i++)
@@ -837,7 +891,7 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    #endif
    
    objectChanged = true;
-      
+   
    return renamed;
 } // RenameItem()
 
