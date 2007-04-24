@@ -19,7 +19,7 @@
 //------------------------------
 
 //------------------------------------------------------------------------------
-// MissionTreeItemData(wxString desc, int type, const wxString &name,
+// MissionTreeItemData(wxString desc, GmatTree::ItemType type, const wxString &name,
 //                     GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
@@ -33,12 +33,12 @@
  * @note Creates the MissionTreeItemData object.
  */
 //------------------------------------------------------------------------------
-MissionTreeItemData::MissionTreeItemData(wxString desc, int type,
+MissionTreeItemData::MissionTreeItemData(wxString desc, GmatTree::ItemType type,
                                          const wxString &name, GmatCommand *cmd)
     : GmatTreeItemData(desc, type)
 {
-    theCommand = cmd;
-    theCommandName = name;
+   theCommand = cmd;
+   theCommandName = name;
 }
 
 //------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ MissionTreeItemData::MissionTreeItemData(wxString desc, int type,
 //------------------------------------------------------------------------------
 GmatCommand* MissionTreeItemData::GetCommand()
 {
-    return theCommand;
+   return theCommand;
 }
 
 //------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ GmatCommand* MissionTreeItemData::GetCommand()
 //------------------------------------------------------------------------------
 void MissionTreeItemData::SetCommand(GmatCommand* cmd)
 {
-    theCommand = cmd;
+   theCommand = cmd;
 }
 
 //------------------------------------------------------------------------------
@@ -74,6 +74,6 @@ void MissionTreeItemData::SetCommand(GmatCommand* cmd)
 //------------------------------------------------------------------------------
 wxString MissionTreeItemData::GetCommandName()
 {
-    return theCommandName;
+   return theCommandName;
 }
 
