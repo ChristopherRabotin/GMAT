@@ -58,6 +58,40 @@ std::string GmatStringUtil::RemoveAll(const std::string &str, char ch,
 
 
 //------------------------------------------------------------------------------
+// std::string RemoveLastNumber(const std::string &str, Integer &lastNumber)
+//------------------------------------------------------------------------------
+/* This method returns string without numbers appended to string.
+ * It will set lastNumber to 0 if there is no number appended.
+ *
+ * @param str input string
+ * @param lastNumber output number appended to string
+ *
+ * @return string without last number found
+ *
+ * For example,
+ *    justString will return justString and set lastNumber to 0
+ *    someString123 will return someString and set lastNumber to 123
+ *    some1String2 will return soma1String and set lastNumber to 2
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveLastNumber(const std::string &str,
+                                             Integer &lastNumber)
+{
+   lastNumber = 0;
+   UnsignedInt index = str.find_last_not_of("0123456789");
+   if (index == str.size())
+      return str;
+   
+   std::string str1 = str.substr(index+1);
+   
+   if (!ToInteger(str1, lastNumber))
+      lastNumber = 0;
+
+   return str.substr(0, index+1);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string RemoveSpaceInBrackets(const std::string &str,
 //                                   const std::string &bracketPair)
 //------------------------------------------------------------------------------

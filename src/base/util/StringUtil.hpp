@@ -32,6 +32,8 @@ namespace GmatStringUtil
    };
    
    std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
+   std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
+   
    std::string RemoveSpaceInBrackets(const std::string &str,
                                      const std::string &bracketPair);
    std::string Trim(const std::string &str, StripType stype = BOTH,
