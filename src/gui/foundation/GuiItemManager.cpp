@@ -118,7 +118,7 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
       // If name has a system Parameter type, create
       if (theGuiInterpreter->IsParameter(varName))
       {
-         theGuiInterpreter->CreateParameter(varName);
+         theGuiInterpreter->CreateSystemParameter(varName);
          return 1;
       }
       else
