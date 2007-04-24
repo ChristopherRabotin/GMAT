@@ -20,7 +20,7 @@
 
 //------------------------------------------------------------------------------
 // GmatTreeItemData::GmatTreeItemData(wxString desc,
-//                                   int dType)
+//                                    GmatTree::ItemType dType)
 //------------------------------------------------------------------------------
 /**
  * Constructs GmatTreeItemData object.
@@ -31,12 +31,12 @@
  * @note Creates the GmatTreeItemData object.
  */
 //------------------------------------------------------------------------------
-GmatTreeItemData::GmatTreeItemData(wxString desc,
-                                   int dType)
+GmatTreeItemData::GmatTreeItemData(wxString desc, GmatTree::ItemType type)
 {
    this->m_desc = desc;
-   this->dataType = dType;
+   this->dataType = type;
 }
+
 
 //------------------------------------------------------------------------------
 // wxString GetDesc()
@@ -49,11 +49,12 @@ GmatTreeItemData::GmatTreeItemData(wxString desc,
 //------------------------------------------------------------------------------
 wxString GmatTreeItemData::GetDesc()
 {
-  return m_desc;
+   return m_desc;
 }
 
+
 //------------------------------------------------------------------------------
-// int GetDataType()
+// GmatTree::ItemType GetDataType()
 //------------------------------------------------------------------------------
 /**
  * Gets the data type of the node.
@@ -61,10 +62,11 @@ wxString GmatTreeItemData::GetDesc()
  * @return int corresponding to the type of data.
  */
 //------------------------------------------------------------------------------
-int GmatTreeItemData::GetDataType()
+GmatTree::ItemType GmatTreeItemData::GetDataType()
 {
-  return dataType;
+   return dataType;
 }
+
 
 //------------------------------------------------------------------------------
 // int SetDesc(wxString description)
@@ -80,8 +82,9 @@ void GmatTreeItemData::SetDesc(wxString description)
    m_desc = description;
 }
 
+
 //------------------------------------------------------------------------------
-// int SetDataType(int type)
+// int SetDataType(GmatTree::ItemType type)
 //------------------------------------------------------------------------------
 /**
  * Set the data type of the node.
@@ -89,7 +92,7 @@ void GmatTreeItemData::SetDesc(wxString description)
  * @param <type> input int for data type of node.
  */
 //------------------------------------------------------------------------------
-void GmatTreeItemData::SetDataType(int type)
+void GmatTreeItemData::SetDataType(GmatTree::ItemType type)
 {
    dataType = type;
 }
@@ -104,7 +107,7 @@ void GmatTreeItemData::SetDataType(int type)
 //------------------------------------------------------------------------------
 GmatCommand* GmatTreeItemData::GetCommand()
 {
-    return NULL;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -116,6 +119,6 @@ GmatCommand* GmatTreeItemData::GetCommand()
 //------------------------------------------------------------------------------
 wxString GmatTreeItemData::GetCommandName()
 {
-    return "";
+   return "";
 }
 

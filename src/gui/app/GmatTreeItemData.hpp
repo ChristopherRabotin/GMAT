@@ -20,26 +20,6 @@
 
 #include "GmatCommand.hpp"
 
-class GmatTreeItemData : public wxTreeItemData
-{
-public:
-   GmatTreeItemData(const wxString desc, const int dType);
-   
-   int GetDataType();
-   wxString GetDesc();
-   
-   void SetDesc(wxString description);
-   void SetDataType(int type);
-   
-   virtual GmatCommand* GetCommand();
-   virtual wxString GetCommandName();
-    
-protected:
-private:
-   wxString m_desc;
-   int dataType;
-};
-
 namespace GmatTree
 {
    enum IconType
@@ -115,6 +95,8 @@ namespace GmatTree
    //----------------------------------------------------------------------
    enum ItemType
    {
+      UNKNOWN_ITEM = -1,
+      
       //---------- Resource Tree
       RESOURCES_FOLDER = 20000,
       SPACECRAFT_FOLDER,
@@ -136,29 +118,26 @@ namespace GmatTree
       SPECIAL_POINTS_FOLDER,
       PREDEFINED_FUNCTIONS_FOLDER,
       SCRIPTS_FOLDER,
-
+      FORMATION_FOLDER,
+      CONSTELLATION_FOLDER,
+      UNIVERSE_FOLDER,
+      END_OF_FOLDER,
+      
       // not openable
       INTERFACE,
       
-      // Temporary to show the panel
-      // loj: Do we want to delete this? It is used in MissionTree.cpp
       VIEW_SOLVER_VARIABLES,
       VIEW_SOLVER_GOALS,
       
-      // resource
+      // openable resource
       BEGIN_OF_RESOURCE,
       SPACECRAFT,
       FUELTANK,
       THRUSTER,
       
-      FORMATION_FOLDER,
       FORMATION_SPACECRAFT,
-      
-      CONSTELLATION_FOLDER,
       CONSTELLATION_SATELLITE,
-      
-      UNIVERSE_FOLDER,
-      
+            
       PROPAGATOR,
       
       IMPULSIVE_BURN,
@@ -247,7 +226,7 @@ namespace GmatTree
       //---------- NO panels will be created
       BEGIN_NO_PANEL,
       STOP,
-      SCRIPT_FOLDER,
+      ADDED_SCRIPT_FOLDER,
       END_TARGET,
       END_OPTIMIZE,
       ELSE_CONTROL,
@@ -259,4 +238,26 @@ namespace GmatTree
       END_NO_PANEL,
    };
 }
+
+
+class GmatTreeItemData : public wxTreeItemData
+{
+public:
+   GmatTreeItemData(const wxString desc, GmatTree::ItemType type);
+   
+   GmatTree::ItemType GetDataType();
+   wxString GetDesc();
+   
+   void SetDesc(wxString description);
+   void SetDataType(GmatTree::ItemType type);
+   
+   virtual GmatCommand* GetCommand();
+   virtual wxString GetCommandName();
+    
+protected:
+private:
+   wxString m_desc;
+   GmatTree::ItemType dataType;
+};
+
 #endif // GmatTreeItemData_hpp
