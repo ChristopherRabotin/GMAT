@@ -25,6 +25,7 @@
 //#define DEBUG_SCRIPT_WRITING
 //#define DEBUG_DELAYED_BLOCK 1
 //#define DEBUG_PARSE 1
+//#define DEBUG_SET_COMMENTS 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -645,7 +646,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
 
          SetComments(obj, preStr, inStr);
       }
-
+      
       // if not all objectes are created, return false
       if (objCounter < count)
       {
@@ -795,17 +796,13 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          obj = MakeAssignment(chunks[0], chunks[1]);
       
       if (obj == NULL)
-      {
          return false;
-      }
       
-      SetComments(obj, preStr, inStr);
-      
-      // paramID will be assigned from call to Interpreter class
+      // paramID will be assigned from call to Interpreter::FindPropertyID()
       if ( FindPropertyID(obj, chunks[0], &owner, paramID, paramType) )
       {
-         attrStr = theTextParser.GetPrefaceComment();
-         attrInLineStr = theTextParser.GetInlineComment();
+         attrStr = preStr;
+         attrInLineStr = inStr;
          
          if (attrStr != "")
             owner->SetAttributeCommentLine(paramID, attrStr);
@@ -822,6 +819,10 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          //   ("Owner===>%s\n", owner->GetGeneratingString(Gmat::SCRIPTING).c_str());
          //MessageInterface::ShowMessage
          //   ("\n\n\nObj===>%s\n", obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
+      }
+      else
+      {
+         SetComments(obj, preStr, inStr);
       }
       
       logicalBlockCount++;
@@ -846,6 +847,11 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
 {
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::WriteScript() entered\n");
+   #endif
+   
    if (outStream == NULL)
       return false;
    
@@ -994,20 +1000,25 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    else
       theReadWriter->WriteText("\n");
      
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::WriteScript() leaving\n");
+   #endif
+   
    return true;
 }
 
 
 //------------------------------------------------------------------------------
 // void SetComments(GmatBase *obj, const std::string &preStr,
-//                  const std::string &inStr)
+//                  const std::string &inStr, bool isAttributeComment)
 //------------------------------------------------------------------------------
 void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
                                     const std::string &inStr)
 {
    #if DEBUG_SET_COMMENTS
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::SetComments() preStr=%s, inStr=%s\n",
+      ("ScriptInterpreter::SetComments() \n   preStr=%s\n    inStr=%s\n",
        preStr.c_str(), inStr.c_str());
    #endif
    
@@ -1347,7 +1358,6 @@ void ScriptInterpreter::WriteSubscribers(StringArray &objs, Gmat::WriteMode mode
          {
             theReadWriter->WriteText(object->GetGeneratingString(mode));
             theReadWriter->WriteText("\n");
-         
          }
       }
    }
