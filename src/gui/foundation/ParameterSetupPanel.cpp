@@ -156,56 +156,55 @@ void ParameterSetupPanel::LoadData()
 {
    mParam =
       (Parameter*)theGuiInterpreter->GetConfiguredObject(mVarName.c_str());
-
+   
    // Set the pointer for the "Show Script" button
    mObject = mParam;
+   if (mParam == NULL)
+      return;
 
-   if (mParam != NULL)
-   {
-      
-      #if DEBUG_PARAM_PANEL
-      MessageInterface::ShowMessage
-         ("ParameterSetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
-      #endif
-      
-      try
-      {
-         // show expression
-         std::string varExp = mParam->GetStringParameter("Expression");
-         mVarNameTextCtrl->SetValue(mVarName);
-         mVarExpTextCtrl->SetValue(varExp.c_str());
          
-         UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
-         RgbColor color(intColor);
-         mColor.Set(color.Red(), color.Green(), color.Blue());
-         mColorButton->SetBackgroundColour(mColor);
-      }
-      catch (BaseException &e)
+   #if DEBUG_PARAM_PANEL
+   MessageInterface::ShowMessage
+      ("ParameterSetupPanel::LoadData() paramName=%s\n", mParam->GetName().c_str());
+   #endif
+   
+   try
+   {
+      // show expression
+      std::string varExp = mParam->GetStringParameter("Expression");
+      mVarNameTextCtrl->SetValue(mVarName);
+      mVarExpTextCtrl->SetValue(varExp.c_str());
+      
+      UnsignedInt intColor = mParam->GetUnsignedIntParameter("Color");
+      RgbColor color(intColor);
+      mColor.Set(color.Red(), color.Green(), color.Blue());
+      mColorButton->SetBackgroundColour(mColor);
+      
+      if (!mIsStringVar)
       {
-         wxLogError(wxT(e.GetFullMessage().c_str()));
-         wxLog::FlushActive();
+         // if expression is just a number, enable editing
+         double realVal;
+         if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
+            mVarExpTextCtrl->Enable();
+         else
+            mVarExpTextCtrl->Disable();
       }
-   }
-   
-   if (!mIsStringVar)
-   {
-      // if expression is just a number, enable editing
-      double realVal;
-      if (mVarExpTextCtrl->GetValue().ToDouble(&realVal))
-         mVarExpTextCtrl->Enable();
       else
-         mVarExpTextCtrl->Disable();
+      {
+         mVarExpTextCtrl->SetValue(mParam->GetStringParameter("Expression").c_str());
+         mExpStaticText->SetLabel("Value");
+         mColorStaticText->Hide();
+         mColorButton->Hide();
+      }
+      
+      mVarNameTextCtrl->Disable();
    }
-   else
+   catch (BaseException &e)
    {
-      mVarExpTextCtrl->SetValue(mParam->GetStringParameter("Expression").c_str());
-      mExpStaticText->SetLabel("Value");
-      mColorStaticText->Hide();
-      mColorButton->Hide();
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
-   
-   mVarNameTextCtrl->Disable();
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
@@ -213,32 +212,47 @@ void ParameterSetupPanel::LoadData()
 void ParameterSetupPanel::SaveData()
 {
    canClose = true;
+   std::string expr;
    
+   //-----------------------------------------------------------------
+   // check values from text field if variable
+   //-----------------------------------------------------------------
    if (mIsExpChanged)
    {
-      std::string strval = mVarExpTextCtrl->GetValue().c_str();
+      expr = mVarExpTextCtrl->GetValue().c_str();
       Real rval;
-      if (GmatStringUtil::ToReal(strval, &rval))
-      {
-         mIsExpChanged = false;
-         mParam->SetStringParameter("Expression",
-                                    std::string(mVarExpTextCtrl->GetValue().c_str()));
-      }
-      else
-      {
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_, "\"%s\" is not a valid Real number.", strval.c_str());
-         canClose = false;
-      }
+      if (mParam->GetTypeName() == "Variable")
+         CheckReal(rval, expr, "Expression", "Real Number");
    }
    
-   if (mIsColorChanged)
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
    {
-      mIsColorChanged = false;
-      RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-      mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
+      if (mIsExpChanged)
+      {
+         mIsExpChanged = false;
+         mParam->SetStringParameter("Expression", expr);
+      }
+      
+      if (mIsColorChanged)
+      {
+         mIsColorChanged = false;
+         RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
+         mParam->SetUnsignedIntParameter("Color", color.GetIntColor());
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnTextUpdate(wxCommandEvent& event)
