@@ -998,8 +998,10 @@ Radians Keplerian::TrueToHyperbolicAnomaly(Radians ta, Real ecc)
       ha = ATanh(sinhHa / coshHa);
    }
    
-   if (ha < 0.0)
-      ha = ha + TWO_PI;
+   // Per discussions April 23, 2007, HA falls between -180 and 180 deg, so the
+   // following lines are not needed:
+   //   if (ha < 0.0)
+   //      ha = ha + TWO_PI;
    
    #if DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToHyperbolicAnomaly() returning %f\n", ha);
