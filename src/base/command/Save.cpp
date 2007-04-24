@@ -52,6 +52,7 @@ Save::Save() :
 //------------------------------------------------------------------------------
 Save::~Save()
 {
+   delete [] fileArray;
 }
 
 
@@ -71,8 +72,6 @@ Save::Save(const Save& sv) :
    wasWritten    (sv.wasWritten),
    objNameArray  (sv.objNameArray),
    writeVerbose  (sv.writeVerbose)
-   //VC++ error, file is not a pointer
-   //file          (NULL)
 {
    objArray.clear();
 }
@@ -187,8 +186,7 @@ bool Save::Initialize()
    std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
    
    #ifdef DEBUG_SAVE_OUTPUT
-   MessageInterface::ShowMessage
-      ("   outPath=%s\n", outPath.c_str());
+   MessageInterface::ShowMessage("Save::Initialize() outPath=%s\n", outPath.c_str());
    #endif
    
    Integer objCount = objNameArray.size();
@@ -259,6 +257,11 @@ bool Save::Initialize()
       #endif
    #endif
    
+   #ifdef DEBUG_SAVE_OUTPUT
+   MessageInterface::ShowMessage
+      ("Save::Initialize() Saving %d object(s)\n", objArray.size());
+   #endif
+   
    return retval;
 }
 
@@ -275,11 +278,15 @@ bool Save::Initialize()
 //------------------------------------------------------------------------------
 bool Save::Execute()
 {
+   #ifdef DEBUG_SAVE_OUTPUT
+   MessageInterface::ShowMessage("Save::Execute() entered\n");
+   #endif
+   
    Integer prec = GmatGlobal::Instance()->GetDataPrecision();
    
    if (!objArray[0])
       throw CommandException("Object not set for Save command");
-
+   
    #ifndef __USE_SINGLE_FILE__
    
       for (UnsignedInt i=0; i<objArray.size(); i++)
@@ -293,14 +300,29 @@ bool Save::Execute()
       }
       
    #else
-      
-      if (appendData && wasWritten)
+
+      // Changed to append the data once data was written so that saving data
+      // within a loop won't overwrite old data (loj: 4/24/07)
+      //if (appendData && wasWritten)
+      if (appendData || wasWritten)
+      {
+         #ifdef DEBUG_SAVE_OUTPUT
+         MessageInterface::ShowMessage("   open %s as append\n", fileNameArray[0].c_str());
+         #endif
+         
          fileArray[0].open(fileNameArray[0].c_str(), std::ios::app);
+      }
       else
+      {
+         #ifdef DEBUG_SAVE_OUTPUT
+         MessageInterface::ShowMessage("   open %s as new\n", fileNameArray[0].c_str());
+         #endif
+         
          fileArray[0].open(fileNameArray[0].c_str());
+      }
       
       fileArray[0].precision(prec);
-            
+      
    #endif
       
       
@@ -309,18 +331,15 @@ bool Save::Execute()
    
    wasWritten = true;
    
-   
    #ifndef __USE_SINGLE_FILE__   
       for (UnsignedInt i=0; i<objArray.size(); i++)
          fileArray[i].close();
    #else
       fileArray[0].close();
    #endif
-      
-   delete [] fileArray;
    
    BuildCommandSummary(true);
-
+   
    return true;
 }
 
@@ -489,15 +508,11 @@ bool Save::RenameRefObject(const Gmat::ObjectType type,
                            const std::string &oldName,
                            const std::string &newName)
 {
-   // can change any objects (loj: 7/27/06)
-   //if (type != Gmat::SPACECRAFT)
-   //   return true;
-   
    for (Integer index = 0; index < (Integer)objNameArray.size(); ++index)
    {
       if (objNameArray[index] == oldName)
          objNameArray[index] = newName;
    }
-
+   
    return true;
 }
