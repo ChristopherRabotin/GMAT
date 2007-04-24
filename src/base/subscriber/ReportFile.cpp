@@ -388,9 +388,6 @@ std::string ReportFile::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool ReportFile::IsParameterReadOnly(const Integer id) const
 {
-   if (id == ZERO_FILL)
-      return true;
-   
    return Subscriber::IsParameterReadOnly(id);
 }
 
