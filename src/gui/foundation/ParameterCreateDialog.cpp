@@ -530,8 +530,6 @@ void ParameterCreateDialog::ShowCoordSystem()
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Coordinate System");
-//       mCoordSysComboBox->SetStringSelection
-//          (mCurrParam->GetStringParameter("DepObject").c_str());
       mCoordSysComboBox->Show();
       mCentralBodyComboBox->Hide();
       mDetailsBoxSizer->Remove(mCentralBodyComboBox);
@@ -541,8 +539,6 @@ void ParameterCreateDialog::ShowCoordSystem()
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
-//       mCentralBodyComboBox->SetStringSelection
-//          (mCurrParam->GetStringParameter("DepObject").c_str());
       mCentralBodyComboBox->Show();
       mCoordSysComboBox->Hide();
       mDetailsBoxSizer->Remove(mCoordSysComboBox);
@@ -557,57 +553,6 @@ void ParameterCreateDialog::ShowCoordSystem()
       mDetailsBoxSizer->Layout();
       mDetailsBoxSizer->Layout();
    }
-
-   
-   /*
-   // get parameter pointer
-   wxString paramName = GetParamName();
-   
-   #if DEBUG_PARAM_CREATE_DIALOG
-   MessageInterface::ShowMessage
-      ("ParameterCreateDialog::ShowCoordSystem() paramName=%s\n", paramName.c_str());
-   #endif
-
-   // get parameter pointer
-   mCurrParam = CreateParameter(paramName);
-   
-   if (!mCurrParam)
-   {
-      MessageInterface::ShowMessage("Cannot create a parameter:%s\n", paramName.c_str());
-      return;
-   }
-   
-   if (mCurrParam->IsCoordSysDependent())
-   {
-      mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Coordinate System");
-      mCoordSysComboBox->SetStringSelection
-         (mCurrParam->GetStringParameter("DepObject").c_str());
-      mCoordSysComboBox->Show();
-      mCentralBodyComboBox->Hide();
-      mDetailsBoxSizer->Remove(mCentralBodyComboBox);
-      mDetailsBoxSizer->Layout();
-   }
-   else if (mCurrParam->IsOriginDependent())
-   {
-      mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Central Body");
-      mCentralBodyComboBox->SetStringSelection
-         (mCurrParam->GetStringParameter("DepObject").c_str());
-      mCentralBodyComboBox->Show();
-      mCoordSysComboBox->Hide();
-      mDetailsBoxSizer->Remove(mCoordSysComboBox);
-      mDetailsBoxSizer->Layout();
-   }
-   else
-   {
-      mCoordSysLabel->Hide();
-      mCoordSysComboBox->Hide();
-      mCentralBodyComboBox->Hide();
-      mDetailsBoxSizer->Layout();
-   }
-   */
-
    
    #if DEBUG_PARAM_CREATE_DIALOG
    MessageInterface::ShowMessage("ParameterCreateDialog::ShowCoordSystem() exiting\n");
@@ -639,10 +584,10 @@ Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
    {
       depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
    }
-   // handle CoordinateSystem later, it is not ready yet.
-   //else if (mCoordSysComboBox->IsShown())
-   //{
-   //}
+   else if (mCoordSysComboBox->IsShown())
+   {
+      depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+   }
    
    Parameter *param = theGuiInterpreter->GetParameter(paramName);
    
@@ -750,106 +695,112 @@ void ParameterCreateDialog::CreateVariable()
       canClose = false;
       return;
    }
-   
-   // create a variable if rhs is a number
-   if (isRealNumber)
+
+   try
    {
-      param = theGuiInterpreter->CreateParameter("Variable", varName);  
-      param->SetStringParameter("Expression", varExpr);
-   }
-   else
-   {
-      // Parse the Parameter
-      StringTokenizer st(varExpr, "()*/+-^ ");
-      StringArray tokens = st.GetAllTokens();
-      StringArray paramArray;
-      
-      // Check if unexisting varibles used in expression
-      for (unsigned int i=0; i<tokens.size(); i++)
+      // create a variable if rhs is a number
+      if (isRealNumber)
       {
-         #if DEBUG_PARAM_CREATE_VAR
-         MessageInterface::ShowMessage("   token:<%s> \n", tokens[i].c_str());
-         #endif
-         
-         if (!GmatStringUtil::ToReal(tokens[i], realNum))
-         {
-            // create system parameter if it is NULL
-            if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
-            {
-               // check if it is system parameter
-               std::string type, owner, depObj;
-               GmatStringUtil::ParseParameter(tokens[i], type, owner, depObj);
-               if (theGuiInterpreter->IsParameter(type))
-               {
-                  #if DEBUG_PARAM_CREATE_VAR
-                  MessageInterface::ShowMessage
-                     ("type:%s is a system parameter\n", type.c_str());
-                  #endif
-                  
-                  Parameter *sysParam = 
-                     theGuiInterpreter->CreateParameter(type, tokens[i]);
-                  
-                  // set ref. object name
-                  sysParam->SetRefObjectName(sysParam->GetOwnerType(), owner);
-                  
-                  // set dependent object name
-                  if (depObj != "")
-                     sysParam->SetStringParameter("DepObject", depObj);
-                  
-               }
-               else
-               {
-                  MessageInterface::PopupMessage
-                     (Gmat::WARNING_, "The variable \"%s\" does not exist. "
-                      "It must be created first.", tokens[i].c_str());
-                  canClose = false;
-                  return;
-               }
-            }
-            
-            // create a variable
-            param = theGuiInterpreter->CreateParameter("Variable", varName);
-            param->SetStringParameter("Expression", varExpr);
-            
-            // set parameter names used in expression
-            param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
-            
-         }
-      }      
-   }
-   
-   
-   RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-   param->SetUnsignedIntParameter("Color", color.GetIntColor());
-      
-   #if DEBUG_PARAM_CREATE_VAR
-   MessageInterface::ShowMessage
-      ("ParameterCreateDialog::CreateVariable() The variable \"%s\" added\n",
-       varName.c_str());
-   #endif
-   
-   mParamNames.Add(varName.c_str());
-   mIsParamCreated = true;
-   theGuiManager->UpdateParameter();
-   
-   GmatAppData::GetResourceTree()->UpdateVariable();
-   mUserVarListBox->Append(varName.c_str());
-   
-   for (int i=0; i<mUserVarListBox->GetCount(); i++)
-   {
-      if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
-      {
-         mUserVarListBox->SetSelection(i);
-         break;
+         param = theGuiInterpreter->CreateParameter("Variable", varName);  
+         param->SetStringParameter("Expression", varExpr);
       }
+      else
+      {
+         // Parse the Parameter
+         StringTokenizer st(varExpr, "()*/+-^ ");
+         StringArray tokens = st.GetAllTokens();
+         StringArray paramArray;
+         
+         // Check if unexisting varibles used in expression
+         for (unsigned int i=0; i<tokens.size(); i++)
+         {
+            #if DEBUG_PARAM_CREATE_VAR
+            MessageInterface::ShowMessage("   token:<%s> \n", tokens[i].c_str());
+            #endif
+            
+            if (!GmatStringUtil::ToReal(tokens[i], realNum))
+            {
+               // create system parameter if it is NULL
+               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
+               {
+                  // check if it is system parameter
+                  std::string type, owner, depObj;
+                  GmatStringUtil::ParseParameter(tokens[i], type, owner, depObj);
+                  if (theGuiInterpreter->IsParameter(type))
+                  {
+                     #if DEBUG_PARAM_CREATE_VAR
+                     MessageInterface::ShowMessage
+                        ("type:%s is a system parameter\n", type.c_str());
+                     #endif
+                  
+                     Parameter *sysParam = 
+                        theGuiInterpreter->CreateParameter(type, tokens[i]);
+                  
+                     // set ref. object name
+                     sysParam->SetRefObjectName(sysParam->GetOwnerType(), owner);
+                  
+                     // set dependent object name
+                     if (depObj != "")
+                        sysParam->SetStringParameter("DepObject", depObj);
+                  
+                  }
+                  else
+                  {
+                     MessageInterface::PopupMessage
+                        (Gmat::WARNING_, "The variable \"%s\" does not exist. "
+                         "It must be created first.", tokens[i].c_str());
+                     canClose = false;
+                     return;
+                  }
+               }
+            
+               // create a variable
+               param = theGuiInterpreter->CreateParameter("Variable", varName);
+               param->SetStringParameter("Expression", varExpr);
+            
+               // set parameter names used in expression
+               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
+            
+            }
+         }      
+      }
+   
+   
+      RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
+      param->SetUnsignedIntParameter("Color", color.GetIntColor());
+      
+      #if DEBUG_PARAM_CREATE_VAR
+      MessageInterface::ShowMessage
+         ("ParameterCreateDialog::CreateVariable() The variable \"%s\" added\n",
+          varName.c_str());
+      #endif
+      
+      mParamNames.Add(varName.c_str());
+      mIsParamCreated = true;
+      theGuiManager->UpdateParameter();
+      
+      GmatAppData::GetResourceTree()->UpdateVariable();
+      mUserVarListBox->Append(varName.c_str());
+      
+      for (int i=0; i<mUserVarListBox->GetCount(); i++)
+      {
+         if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
+         {
+            mUserVarListBox->SetSelection(i);
+            break;
+         }
+      }
+      
+      // reset values 
+      mCreateVariable = false;
+      mCreateVariableButton->Disable();
+      mExprTextCtrl->SetValue("");
+      mVarNameTextCtrl->SetValue("");
    }
-   
-   // reset values 
-   mCreateVariable = false;
-   mCreateVariableButton->Disable();
-   mExprTextCtrl->SetValue("");
-   mVarNameTextCtrl->SetValue("");
-   
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
 }
 
 
@@ -861,44 +812,52 @@ void ParameterCreateDialog::CreateString()
    wxString wxstrName = mStringNameTextCtrl->GetValue().Trim();
    std::string strName = std::string(wxstrName);
    std::string strValue = std::string(mStringValueTextCtrl->GetValue().c_str());
-   
-   // if new user string to create
-   if (theGuiInterpreter->GetParameter(strName) == NULL)
+
+   try
    {
-      Parameter *param;
-      
-      param = theGuiInterpreter->CreateParameter("String", strName);
-      param->SetStringParameter("Expression", strValue);
-      
-      mParamNames.Add(strName.c_str());
-      mIsParamCreated = true;
-      theGuiManager->UpdateParameter();
-      
-      GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 7/21/05 Added
-      mUserStringListBox->Append(strName.c_str());
-      
-      for (int i=0; i<mUserStringListBox->GetCount(); i++)
+      // if new user string to create
+      if (theGuiInterpreter->GetParameter(strName) == NULL)
       {
-         if (mUserStringListBox->GetString(i).IsSameAs(strName.c_str()))
+         Parameter *param;
+      
+         param = theGuiInterpreter->CreateParameter("String", strName);
+         param->SetStringParameter("Expression", strValue);
+      
+         mParamNames.Add(strName.c_str());
+         mIsParamCreated = true;
+         theGuiManager->UpdateParameter();
+      
+         GmatAppData::GetResourceTree()->UpdateVariable();
+         mUserStringListBox->Append(strName.c_str());
+      
+         for (int i=0; i<mUserStringListBox->GetCount(); i++)
          {
-            mUserStringListBox->SetSelection(i);
-            break;
+            if (mUserStringListBox->GetString(i).IsSameAs(strName.c_str()))
+            {
+               mUserStringListBox->SetSelection(i);
+               break;
+            }
          }
+
+         EnableUpdate(true);
+      }
+      else
+      {
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "ParameterCreateDialog::CreateString()\nThe string: %s"
+             " cannot be created. It already exists.", strName.c_str());
       }
 
-      EnableUpdate(true);
+      mCreateString = false;
+      mCreateStringButton->Disable();
+      mStringNameTextCtrl->SetValue("");
+      mStringValueTextCtrl->SetValue("");
    }
-   else
+   catch (BaseException &e)
    {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "ParameterCreateDialog::CreateString()\nThe string: %s"
-          " cannot be created. It already exists.", strName.c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
-
-   mCreateString = false;
-   mCreateStringButton->Disable();
-   mStringNameTextCtrl->SetValue("");
-   mStringValueTextCtrl->SetValue("");
+   
 }
 
 
@@ -908,18 +867,20 @@ void ParameterCreateDialog::CreateString()
 void ParameterCreateDialog::CreateArray()
 {
    long row, col;
-   
+
    if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
        !(mArrColTextCtrl->GetValue().ToLong(&col)))
    {
       wxLogError(wxT("Row or Column is not a number"));
       wxLog::FlushActive();
+      return;
    }
-   else
+
+   try
    {
       wxString wxarrName = mArrNameTextCtrl->GetValue().Trim();
       std::string arrName = std::string(wxarrName.c_str());
-      
+
       // if new user array to create
       if (theGuiInterpreter->GetParameter(arrName) == NULL)
       {
@@ -932,10 +893,10 @@ void ParameterCreateDialog::CreateArray()
          mParamNames.Add(arrName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
-
-         GmatAppData::GetResourceTree()->UpdateVariable(); //loj: 7/21/05 Added
+         
+         GmatAppData::GetResourceTree()->UpdateVariable();
          mUserArrayListBox->Append(arrName.c_str());
-
+         
          for (int i=0; i<mUserArrayListBox->GetCount(); i++)
          {
             if (mUserArrayListBox->GetString(i).IsSameAs(arrName.c_str()))
@@ -944,7 +905,7 @@ void ParameterCreateDialog::CreateArray()
                break;
             }
          }
-
+         
          EnableUpdate(true);
       }
       else
@@ -959,6 +920,10 @@ void ParameterCreateDialog::CreateArray()
       mArrNameTextCtrl->SetValue("");
       mArrRowTextCtrl->SetValue("");
       mArrColTextCtrl->SetValue("");
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 
