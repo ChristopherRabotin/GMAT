@@ -43,6 +43,7 @@ public:
 private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   bool mScriptFolderRunning;
    bool mHasUserInterrupted;
    bool mScriptAdded;
 
@@ -66,7 +67,7 @@ private:
    wxTreeItemId mBoundarySolverItem;
    wxTreeItemId mOptimizerItem;
    wxTreeItemId mVariableItem;
-   wxTreeItemId mFunctItem;
+   wxTreeItemId mFunctionItem;
    wxTreeItemId mCoordSysItem;
    wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId mSpecialPointsItem;
@@ -94,6 +95,8 @@ private:
    int mNumLibration;
    
    GmatBase* GetObject(const std::string &name);
+   
+   void AddNode(GmatTree::ItemType, const wxString &name);
    
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
@@ -173,8 +176,10 @@ private:
 
    // menu
    wxMenu* CreatePopupMenu(Gmat::ObjectType type);
-   Gmat::ObjectType GetObjectType(int itemType);
-
+   Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType);
+   wxTreeItemId GetTreeItemId(GmatTree::ItemType type);
+   GmatTree::IconType GetTreeItemIcon(GmatTree::ItemType type);
+   
    // compare
    void CompareScriptRunResult(Real absTol, const wxString &replaceStr,
                                const wxString &dir1, const wxString &dir2,
