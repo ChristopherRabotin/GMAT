@@ -1458,7 +1458,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
                // next items are Parameters
                for (int i=1; i<count; i++)
                {
-                  obj = (GmatBase*)CreateParameter(parts[i]);
+                  obj = (GmatBase*)CreateSystemParameter(parts[i]);
                   if (obj != NULL)
                   {
                      cmd->SetRefObject(obj, Gmat::PARAMETER, parts[i], 0);
@@ -1550,17 +1550,26 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &str)
+// Parameter* CreateSystemParameter(const std::string &name)
 //------------------------------------------------------------------------------
 /**
- * Creates Parameter from the parameter string if it has a valid Parameter Type.
+ * Creates a system Parameter from the input parameter name. If the name contains
+ * dots, it consider it as a system parameter.  If it is not a system Parameter
+ * it checks if object by given name is a Parameter.
+ *
+ * @param name parameter name to be parsed for Parameter creation
+ *             Such as, sat1.Earth.ECC, sat1.SMA
+ *
+ * @return Created Paramteter pointer or pointer of the Parameter by given name
+ *         NULL if it is not a system Parameter nor named object is not a Parameter
+ *
  */
 //------------------------------------------------------------------------------
-Parameter* Interpreter::CreateParameter(const std::string &str)
+Parameter* Interpreter::CreateSystemParameter(const std::string &str)
 {
    #if DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Interpreter::CreateParameter() str=%s\n", str.c_str());
+      ("Interpreter::CreateSystemParameter() str=%s\n", str.c_str());
    #endif
    
    Parameter *param = NULL;
@@ -1573,29 +1582,31 @@ Parameter* Interpreter::CreateParameter(const std::string &str)
        ownerName.c_str(), depName.c_str());
    #endif
    
-   // Create parameter, if type is System Parameter, Variable, Array
+   // Create parameter, if type is a System Parameter
    if (find(parameterList.begin(), parameterList.end(), paramType) != 
        parameterList.end())
    {
       param = CreateParameter(paramType, str, ownerName, depName);
+      
       #if DEBUG_CREATE_PARAM
       MessageInterface::ShowMessage
-         ("   1) parameter created with paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
-          ownerName.c_str(), depName.c_str());
+         ("   1) parameter created with paramType=%s, ownerName=%s, depName=%s\n",
+          paramType.c_str(), ownerName.c_str(), depName.c_str());
       #endif
    }
    else
    {
-      // Find parameter
+      // Find the object and check if it is a Parameter
       GmatBase *obj = FindObject(str);
       if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
          param = (Parameter*)obj;
+   
       #if DEBUG_CREATE_PARAM
       MessageInterface::ShowMessage
          ("   2) parameter created with str=%s, but obj = %s, and param = %s\n", 
-         str.c_str(),
-         (obj == NULL? "NULL!!" : "not NULL"),
-         (param == NULL? "NULL!!" : "not NULL"));
+          str.c_str(),
+          (obj == NULL? "NULL!!" : "not NULL"),
+          (param == NULL? "NULL!!" : "not NULL"));
       #endif
    }
    
@@ -2049,8 +2060,8 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
    }
    catch (BaseException &e)
    {
-      // try if fromProp is a Parameter
-      rhsParam = CreateParameter(rhs);
+      // try if fromProp is a system Parameter
+      rhsParam = CreateSystemParameter(rhs);
       
       if (rhsParam == NULL)      //toType = toOwner->GetParameterType(toId);
 
@@ -2420,7 +2431,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
          ("   Parameter ID of '%s' not found. So create a parameter '%s'\n",
           toProp.c_str(), lhs.c_str());
       #endif
-      lhsParam = CreateParameter(lhs);
+      lhsParam = CreateSystemParameter(lhs);
    }
    
    //-----------------------------------
@@ -2428,7 +2439,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    //-----------------------------------
    // try create parameter first if rhs type is OBJECT_TYPE
    if (toType == Gmat::OBJECT_TYPE)
-      rhsParam = CreateParameter(rhs);
+      rhsParam = CreateSystemParameter(rhs);
    
    Integer fromId = -1;
    Gmat::ParameterType fromType = Gmat::UNKNOWN_PARAMETER_TYPE;
@@ -2908,8 +2919,8 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          // Try create Parameter first if it is not ObjectType
          if (!IsObjectType(value))
          {
-            // It is not object type so create parameter
-            param = CreateParameter(value);
+            // It is not a one of object types, so create parameter
+            param = CreateSystemParameter(value);
             
             #if DEBUG_SET
             if (param)
@@ -4548,7 +4559,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
          // if creating for subscriber, always create parameter wrapper first
          if (forSubscriber)
          {
-            Parameter *param = CreateParameter(desc);
+            Parameter *param = CreateSystemParameter(desc);
             if (param)
             {
                CreateParameterWrapper(param, &ew, itsType);
@@ -4573,7 +4584,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             if (theObj == NULL)
             {
                //bool isParm = theModerator->IsParameter(desc);
-               Parameter *param = CreateParameter(desc);
+               Parameter *param = CreateSystemParameter(desc);
             
                //if (isParm)
                if (param)
@@ -4593,7 +4604,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                // if there are two dots, then treat it as a parameter
                if (desc.find_first_of(".") != desc.find_last_of("."))
                {
-                  Parameter *param = CreateParameter(desc);
+                  Parameter *param = CreateSystemParameter(desc);
                   //bool isParm = theModerator->IsParameter(desc);
                   //if (isParm)
                   if (param)
@@ -4619,7 +4630,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   catch (BaseException &be)
                   {
                      isValidProperty = false;
-                     Parameter *param = CreateParameter(desc);
+                     Parameter *param = CreateSystemParameter(desc);
                      //bool isParm = theModerator->IsParameter(desc);
                      //if (isParm)
                      if (param)

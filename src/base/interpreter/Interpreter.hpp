@@ -92,11 +92,11 @@ public:
    //------------------------------------------------------------------------------
    virtual bool Build(Gmat::WriteMode mode) = 0;
    
-   Parameter* CreateParameter(const std::string &str);   
-   Parameter* CreateParameter(const std::string &type,
-                              const std::string &name,
-                              const std::string &ownerName = "",
-                              const std::string &depName = "");
+   virtual Parameter* CreateSystemParameter(const std::string &str);
+   virtual Parameter* CreateParameter(const std::string &type,
+                                      const std::string &name,
+                                      const std::string &ownerName = "",
+                                      const std::string &depName = "");
    
    GmatCommand* InterpretGMATFunction(const std::string &pathAndName);
    
