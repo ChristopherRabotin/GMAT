@@ -25,9 +25,11 @@
 #include "ExpressionParser.hpp"
 #include "MessageInterface.hpp"
 #include "Linear.hpp"             // for ToString()
+#include "StringUtil.hpp"         // for Replace()
 #include <sstream>
 
 //#define DEBUG_VARIABLE 1
+//#define DEBUG_RENAME 1
 
 //---------------------------------
 // public methods
@@ -229,6 +231,12 @@ bool Variable::RenameRefObject(const Gmat::ObjectType type,
    if (type != Gmat::PARAMETER && type != Gmat::COORDINATE_SYSTEM &&
        type != Gmat::SPACECRAFT && type != Gmat::CALCULATED_POINT)
       return true;
+   
+   // change expression if it has object name and .
+   std::string tmpOldName = oldName + ".";
+   std::string::size_type pos = mExpr.find(tmpOldName);
+   if (pos != mExpr.npos)
+      mExpr = GmatStringUtil::Replace(mExpr, oldName, newName);
    
    mParamDb->RenameParameter(oldName, newName);
    RealVar::RenameRefObject(type, oldName, newName);
