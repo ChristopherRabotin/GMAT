@@ -118,7 +118,6 @@ private:
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
-   void ShowMenu(wxTreeItemId id, const wxPoint& pt);
    void OnItemActivated(wxTreeEvent &event);
    void OnOpen(wxCommandEvent &event);
    void OnClose(wxCommandEvent &event);
@@ -175,7 +174,8 @@ private:
    void UpdateResourceCounter(wxTreeItemId itemId);
 
    // menu
-   wxMenu* CreatePopupMenu(Gmat::ObjectType type);
+   void ShowMenu(wxTreeItemId id, const wxPoint& pt);
+   wxMenu* CreatePopupMenu(GmatTree::ItemType type);
    Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType);
    wxTreeItemId GetTreeItemId(GmatTree::ItemType type);
    GmatTree::IconType GetTreeItemIcon(GmatTree::ItemType type);
@@ -206,6 +206,8 @@ private:
       POPUP_ADD_FINITE_BURN,
       
       POPUP_ADD_SOLVER,
+      POPUP_ADD_BOUNDARY_SOLVER,
+      POPUP_ADD_OPTIMIZER,
       POPUP_ADD_DIFF_CORR,
       POPUP_ADD_BROYDEN,
       POPUP_ADD_QUASI_NEWTON,
@@ -236,7 +238,6 @@ private:
       POPUP_REMOVE_SCRIPT_FOLDER,
       POPUP_BUILD_SCRIPT,
       POPUP_BUILD_AND_RUN_SCRIPT,
-      //POPUP_NEW_SCRIPT,
       POPUP_REMOVE_ALL_SCRIPTS,
       POPUP_REMOVE_SCRIPT,
 

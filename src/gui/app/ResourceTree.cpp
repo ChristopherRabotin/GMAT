@@ -204,7 +204,7 @@ void ResourceTree::ClearResource(bool leaveScripts)
    mSpecialPointsItem =
       AppendItem(mUniverseItem, wxT("Special Points"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Special Points"),
-                                      GmatTree::SPECIAL_POINTS_FOLDER));
+                                      GmatTree::SPECIAL_POINT_FOLDER));
 
    SetItemImage(mSpecialPointsItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
@@ -213,7 +213,7 @@ void ResourceTree::ClearResource(bool leaveScripts)
    mBoundarySolverItem =
       AppendItem(mSolverItem, wxT("Boundary Value Solvers"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Boundary Value Solvers"),
-                                      GmatTree::BOUNDARY_SOLVERS_FOLDER));
+                                      GmatTree::BOUNDARY_SOLVER_FOLDER));
 
    SetItemImage(mBoundarySolverItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
@@ -223,7 +223,7 @@ void ResourceTree::ClearResource(bool leaveScripts)
    mOptimizerItem =
       AppendItem(mSolverItem, wxT("Optimizers"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Optimizers"),
-                                      GmatTree::OPTIMIZERS_FOLDER));
+                                      GmatTree::OPTIMIZER_FOLDER));
 
    SetItemImage(mOptimizerItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
@@ -451,7 +451,7 @@ void ResourceTree::AddDefaultResources()
    mFormationItem =
       AppendItem(resource, wxT("Formations"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Formations"),
-                                      GmatTree::FORMATIONS_FOLDER));
+                                      GmatTree::FORMATION_FOLDER));
    
    SetItemImage(mFormationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -462,7 +462,7 @@ void ResourceTree::AddDefaultResources()
       AppendItem(resource,
                  wxT("Constellations"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Constellations"),
-                                      GmatTree::CONSTELLATIONS_FOLDER));
+                                      GmatTree::CONSTELLATION_FOLDER));
    
    SetItemImage(constellationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -472,7 +472,7 @@ void ResourceTree::AddDefaultResources()
    mBurnItem =
       AppendItem(resource, wxT("Burns"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Burns"),
-                                      GmatTree::BURNS_FOLDER));
+                                      GmatTree::BURN_FOLDER));
    
    SetItemImage(mBurnItem, GmatTree::ICON_OPENFOLDER, wxTreeItemIcon_Expanded);
 
@@ -482,7 +482,7 @@ void ResourceTree::AddDefaultResources()
       AppendItem(resource,
                  wxT("Propagators"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Propagators"),
-                                      GmatTree::PROPAGATORS_FOLDER));
+                                      GmatTree::PROPAGATOR_FOLDER));
    
    SetItemImage(mPropagatorItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -500,7 +500,7 @@ void ResourceTree::AddDefaultResources()
    mSolverItem =
       AppendItem(resource, wxT("Solvers"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Solvers"),
-                                      GmatTree::SOLVERS_FOLDER));
+                                      GmatTree::SOLVER_FOLDER));
    
    SetItemImage(mSolverItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -509,7 +509,7 @@ void ResourceTree::AddDefaultResources()
    mSubscriberItem =
       AppendItem(resource, wxT("Plots/Reports"), GmatTree::ICON_FOLDER,
                  -1, new GmatTreeItemData(wxT("Plots/Reports"),
-                                          GmatTree::SUBSCRIBERS_FOLDER));
+                                          GmatTree::SUBSCRIBER_FOLDER));
    
    SetItemImage(mSubscriberItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -518,59 +518,45 @@ void ResourceTree::AddDefaultResources()
    wxTreeItemId interfaceItem =
       AppendItem(resource, wxT("Interfaces"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Interfaces"),
-                                      GmatTree::INTERFACES_FOLDER));
+                                      GmatTree::INTERFACE_FOLDER));
    
    SetItemImage(interfaceItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
    
-   //----- Subscripts
+   //----- Scripts
    mScriptItem =
       AppendItem(resource, wxT("Scripts"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Scripts"),
-                                      GmatTree::SCRIPTS_FOLDER));
-
+                                      GmatTree::SCRIPT_FOLDER));
+   
    SetItemImage(mScriptItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
-// ag: commented out 3/25/05 to try adding scripts to main frame
-//   wxTreeItemId subscriptItem =
-//      AppendItem(resource, wxT("Subscripts"), GmatTree::ICON_FOLDER, -1,
-//                 new GmatTreeItemData(wxT("Subscripts"),
-//                                      GmatTree::SUBSCRIPTS_FOLDER));
-//
-//   SetItemImage(subscriptItem, GmatTree::ICON_OPENFOLDER,
-//                wxTreeItemIcon_Expanded);
-
+   
    //----- Vairables
    mVariableItem = 
       AppendItem(resource, wxT("Variables/Arrays"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Variables/Arrays"),
-                                      GmatTree::VARIABLES_FOLDER));
+                                      GmatTree::VARIABLE_FOLDER));
    // ag:  Should the GmatTree type of variableItem change?
-
+   
    SetItemImage(mVariableItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
+   
    //----- Coordinate System
    mCoordSysItem =
    AppendItem(resource, wxT("Coordinate Systems"), GmatTree::ICON_FOLDER,
               -1, new GmatTreeItemData(wxT("Coordinate Systems"),
-                                       GmatTree::COORD_SYS_FOLDER));
+                                       GmatTree::COORD_SYSTEM_FOLDER));
    SetItemImage(mCoordSysItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
+   
    //----- Functions
    mFunctionItem =
       AppendItem(resource, wxT("Functions"), GmatTree::ICON_FOLDER,
-              -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCT_FOLDER));
+              -1, new GmatTreeItemData(wxT("Functions"), GmatTree::FUNCTION_FOLDER));
    SetItemImage(mFunctionItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-                
-   //----- GroundStations
-//   AppendItem(resource, wxT("Ground Stations"), GmatTree::ICON_FOLDER, 
-//              -1, new GmatTreeItemData(wxT("Ground Stations"),
-//                                       GmatTree::GROUNDSTATIONS_FOLDER));
-
+   
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem);
@@ -592,6 +578,7 @@ void ResourceTree::AddDefaultResources()
    theGuiInterpreter->ResetConfigurationChanged(true, false);
 }
 
+
 //------------------------------------------------------------------------------
 // void AddDefaultBodies(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
@@ -609,12 +596,13 @@ void ResourceTree::AddDefaultBodies(wxTreeItemId itemId)
               new GmatTreeItemData(wxT("Mercury"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Venus"), GmatTree::ICON_VENUS, -1,
               new GmatTreeItemData(wxT("Venus"), GmatTree::CELESTIAL_BODY));
-
-   wxTreeItemId earth = AppendItem(itemId, wxT("Earth"), GmatTree::ICON_EARTH, -1,
-                                   new GmatTreeItemData(wxT("Earth"), GmatTree::CELESTIAL_BODY));
+   
+   wxTreeItemId earth =
+      AppendItem(itemId, wxT("Earth"), GmatTree::ICON_EARTH, -1,
+                 new GmatTreeItemData(wxT("Earth"), GmatTree::CELESTIAL_BODY));
    AppendItem(earth, wxT("Luna"), GmatTree::ICON_MOON, -1,
               new GmatTreeItemData(wxT("Luna"), GmatTree::CELESTIAL_BODY));
-
+   
    AppendItem(itemId, wxT("Mars"), GmatTree::ICON_MARS, -1,
               new GmatTreeItemData(wxT("Mars"), GmatTree::CELESTIAL_BODY));
    AppendItem(itemId, wxT("Jupiter"), GmatTree::ICON_JUPITER, -1,
@@ -1066,9 +1054,9 @@ void ResourceTree::AddDefaultInterfaces(wxTreeItemId itemId)
 {
    #ifdef __USE_MATLAB__
    AppendItem(itemId, wxT("Matlab"), GmatTree::ICON_DEFAULT, -1,
-              new GmatTreeItemData(wxT("Matlab"), GmatTree::INTERFACE));
+              new GmatTreeItemData(wxT("Matlab"), GmatTree::MATLAB_INTERFACE));
    AppendItem(itemId, wxT("Matlab Server"), GmatTree::ICON_DEFAULT, -1,
-              new GmatTreeItemData(wxT("Matlab Server"), GmatTree::INTERFACE));
+              new GmatTreeItemData(wxT("Matlab Server"), GmatTree::MATLAB_SERVER));
    #endif
    
    Expand(itemId);
@@ -1155,7 +1143,7 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
    mPredefinedFunctItem =
       AppendItem(itemId, wxT("Predefined Functions"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Functions"),
-                                      GmatTree::PREDEFINED_FUNCTIONS_FOLDER));
+                                      GmatTree::PREDEFINED_FUNCTION_FOLDER));
     
    SetItemImage(mPredefinedFunctItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
@@ -1285,206 +1273,6 @@ void ResourceTree::OnItemRightClick(wxTreeEvent& event)
    ShowMenu(event.GetItem(), event.GetPoint());
 }
 
-//------------------------------------------------------------------------------
-// void ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
-//------------------------------------------------------------------------------
-/**
- * Create the popup menu
- *
- * @param <itemId> tree item that was right clicked
- * @param <pt> location of right click
- */
-//------------------------------------------------------------------------------
-void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
-{
-   GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
-   wxString title = treeItem->GetDesc();
-   GmatTree::ItemType dataType = treeItem->GetDataType();
-   
-   //MessageInterface::ShowMessage
-   //   ("===> ResourceTree::ShowMenu() title=%s, dataType=%d\n", title.c_str(),
-   //    dataType);
-   
-#if wxUSE_MENUS
-   wxMenu menu;
-   
-   if (strcmp(title, wxT("Spacecraft")) == 0)
-      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft"));
-   else if (strcmp(title, wxT("Hardware")) == 0)
-   {
-      menu.Append(POPUP_ADD_HARDWARE, wxT("Add"), CreatePopupMenu(Gmat::HARDWARE));
-   }
-   else if (strcmp(title, wxT("Formations")) == 0)
-      menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation"));
-   else if (strcmp(title, wxT("Constellations")) == 0)
-   {
-      menu.Append(POPUP_ADD_CONSTELLATION, wxT("Add Constellation"));
-      menu.Enable(POPUP_ADD_CONSTELLATION, FALSE);
-   }   
-   else if (strcmp(title, wxT("Burns")) == 0)
-      menu.Append(POPUP_ADD_BURN, wxT("Add"), CreatePopupMenu(Gmat::BURN));
-   else if (strcmp(title, wxT("Propagators")) == 0)
-      menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator"));
-   else if (strcmp(title, wxT("Solvers")) == 0)
-      return;     //no menu
-//      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), CreatePopupMenu(Gmat::SOLVER));
-   else if (strcmp(title, wxT("Boundary Value Solvers")) == 0)
-   {
-      wxMenu *bvsMenu = new wxMenu;
-      bvsMenu->Append(POPUP_ADD_DIFF_CORR, wxT("DifferentialCorrector"));
-      bvsMenu->Append(POPUP_ADD_BROYDEN, wxT("Broyden"));
-      bvsMenu->Enable(POPUP_ADD_BROYDEN, false);
-      
-      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), bvsMenu);
-   }
-   else if (strcmp(title, wxT("Optimizers")) == 0)
-   {
-      wxMenu *oMenu = new wxMenu;
-      oMenu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
-      oMenu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
-      oMenu->Enable(POPUP_ADD_QUASI_NEWTON, false);
-      
-      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), oMenu);
-   }
-   else if (strcmp(title, wxT("Universe")) == 0)
-   {
-      menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
-      menu.Enable(POPUP_ADD_BODY, false);
-   }
-   
-   #ifdef __USE_MATLAB__
-   else if (strcmp(title, wxT("Matlab")) == 0)
-   {
-      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
-      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_CLOSE, wxT("Close"));
-   }
-   else if (strcmp(title, wxT("Matlab Server")) == 0)
-   {
-      menu.Append(GmatMenu::MENU_START_SERVER, wxT("Start"));
-      menu.Append(GmatMenu::MENU_STOP_SERVER, wxT("Stop"));
-   }
-   #endif
-   
-   else if (strcmp(title, wxT("Plots/Reports")) == 0)
-      menu.Append(POPUP_ADD_SUBSCRIBER, _T("Add"), CreatePopupMenu(Gmat::SUBSCRIBER));
-   else if (strcmp(title, wxT("Variables/Arrays")) == 0)
-      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable"));
-//   else if ((dataType == GmatTree::FORMATION_FOLDER)     ||
-//            (dataType == GmatTree::CONSTELLATION_FOLDER))
-//   {
-//      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft..."));
-//      menu.AppendSeparator();
-//      menu.Append(POPUP_OPEN, wxT("Open"));
-//      menu.Append(POPUP_CLOSE, wxT("Close"));
-//      menu.AppendSeparator();
-//      menu.Append(POPUP_RENAME, wxT("Rename"));
-//      menu.Append(POPUP_DELETE, wxT("Delete"));
-//   }
-//   else if (dataType == GmatTree::PROPAGATOR)
-//   {
-//      menu.Append(POPUP_OPEN, wxT("Open"));
-//      menu.Append(POPUP_CLOSE, wxT("Close"));
-//   }
-   else if (dataType == GmatTree::FUNCT_FOLDER)
-   {
-      wxMenu *fMenu = new wxMenu;
-      
-      #ifdef __USE_MATLAB__
-      fMenu->Append(POPUP_ADD_MATLAB_FUNCT, wxT("MATLAB Function"));
-      #endif
-      
-      fMenu->Append(POPUP_ADD_GMAT_FUNCT, wxT("GMAT Function"));
-
-      menu.Append(POPUP_ADD_SOLVER, wxT("Add"), fMenu);
-   }
-   //else if (strcmp(title, wxT("Scripts")) == 0
-   else if (dataType == GmatTree::SCRIPTS_FOLDER ||
-            dataType == GmatTree::ADDED_SCRIPT_FOLDER)
-   {
-      if (dataType == GmatTree::SCRIPTS_FOLDER)
-      {
-         menu.Append(POPUP_ADD_SCRIPT, wxT("Add Script"));
-         menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder"));
-         //menu.Append(POPUP_NEW_SCRIPT, wxT("New"));
-      }
-      
-      if (dataType == GmatTree::ADDED_SCRIPT_FOLDER)
-      {
-         menu.AppendSeparator();
-         menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
-         menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER,
-                     wxT("Quit Running Scripts"));
-         
-         if (mScriptFolderRunning)
-         {
-            menu.Enable(POPUP_RUN_SCRIPTS_FROM_FOLDER, false);
-            menu.Enable(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, true);
-         }
-         else
-         {
-            menu.Enable(POPUP_RUN_SCRIPTS_FROM_FOLDER, true);
-            menu.Enable(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, false);
-         }
-      }
-      
-      menu.AppendSeparator();
-      menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
-   }
-   else if (dataType == GmatTree::SCRIPT_FILE)
-   {
-      menu.Append(POPUP_OPEN, wxT("Open"));
-      menu.Append(POPUP_CLOSE, wxT("Close"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_BUILD_SCRIPT, wxT("Build"));
-      menu.Append(POPUP_BUILD_AND_RUN_SCRIPT, wxT("Build and Run"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_REMOVE_SCRIPT, wxT("Remove"));
-   }
-   else if (dataType == GmatTree::ADDED_SCRIPT_FOLDER)
-   {
-      menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
-      menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, wxT("Quit Running Scripts"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_REMOVE_SCRIPT_FOLDER, wxT("Remove"));
-   }
-   else if (dataType == GmatTree::COORD_SYS_FOLDER)
-   {
-      menu.Append(POPUP_ADD_COORD_SYS, wxT("Add Coordinate System"));
-      //menu.Enable(POPUP_ADD_COORD_SYS, FALSE);
-   }   
-   else if (strcmp(title, wxT("Special Points")) == 0)
-   {
-      wxMenu *spMenu = new wxMenu;
-      spMenu->Append(POPUP_ADD_BARYCENTER, wxT("Barycenter"));
-      spMenu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
-      menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"), spMenu);
-   }
-   else if (strcmp(title, wxT("Interfaces")) == 0)
-      return;     //no menu
-   else if (strcmp(title, wxT("Ground Stations")) == 0)
-      return;     //no menu
-   else if (dataType == GmatTree::CELESTIAL_BODY ||
-            dataType == GmatTree::COORD_SYSTEM)
-   {
-      menu.Append(POPUP_OPEN, wxT("Open"));
-      menu.Append(POPUP_CLOSE, wxT("Close"));
-   }
-   else
-   {
-      menu.Append(POPUP_OPEN, wxT("Open"));
-      menu.Append(POPUP_CLOSE, wxT("Close"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_RENAME, wxT("Rename"));
-      menu.Append(POPUP_DELETE, wxT("Delete"));
-      menu.AppendSeparator();
-      menu.Append(POPUP_CLONE, wxT("Clone"));
-
-      //menu.Enable(POPUP_DELETE, FALSE); //loj: 8/19/05 commented out
-   }
-   
-   PopupMenu(&menu, pt);
-#endif // wxUSE_MENUS
-}
 
 //------------------------------------------------------------------------------
 // void OnItemActivated(wxTreeEvent &event)
@@ -1505,6 +1293,7 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
+
 //------------------------------------------------------------------------------
 // void OnOpen(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -1521,6 +1310,7 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
    //    mainNotebook->CreatePage(item);
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnClose(wxCommandEvent &event)
@@ -1743,17 +1533,15 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
    bool isDefaultFolder = ((dataType == GmatTree::RESOURCES_FOLDER)      ||
                            (dataType == GmatTree::SPACECRAFT_FOLDER)     ||
                            (dataType == GmatTree::HARDWARE_FOLDER)       ||
-                           (dataType == GmatTree::FORMATIONS_FOLDER)     ||
-                           (dataType == GmatTree::CONSTELLATIONS_FOLDER) ||
-                           (dataType == GmatTree::BURNS_FOLDER)          ||
-                           (dataType == GmatTree::PROPAGATORS_FOLDER)    ||
+                           (dataType == GmatTree::FORMATION_FOLDER)     ||
+                           (dataType == GmatTree::CONSTELLATION_FOLDER) ||
+                           (dataType == GmatTree::BURN_FOLDER)          ||
+                           (dataType == GmatTree::PROPAGATOR_FOLDER)    ||
                            (dataType == GmatTree::UNIVERSE_FOLDER)       ||
-                           (dataType == GmatTree::SOLVERS_FOLDER)        ||
-                           (dataType == GmatTree::SUBSCRIBERS_FOLDER)    ||
-                           (dataType == GmatTree::INTERFACES_FOLDER)     ||
-                           (dataType == GmatTree::SUBSCRIPTS_FOLDER)     ||
-                           (dataType == GmatTree::VARIABLES_FOLDER)      ||
-                           (dataType == GmatTree::GROUNDSTATIONS_FOLDER));
+                           (dataType == GmatTree::SOLVER_FOLDER)        ||
+                           (dataType == GmatTree::SUBSCRIBER_FOLDER)    ||
+                           (dataType == GmatTree::INTERFACE_FOLDER)     ||
+                           (dataType == GmatTree::VARIABLE_FOLDER));
                          
    bool isDefaultItem = ((dataType == GmatTree::PROPAGATOR)  ||
                          (dataType == GmatTree::CELESTIAL_BODY)      ||
@@ -3300,74 +3088,201 @@ void ResourceTree::UpdateResourceCounter(wxTreeItemId itemId)
 
 
 //------------------------------------------------------------------------------
-// wxMenu* CreatePopupMenu(Gmat::ObjectType type)
+// void ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 //------------------------------------------------------------------------------
 /**
  * Create the popup menu
  *
- * @param <type> Type of object to create and add to tree
- * @return <wxMenu> Return popup menu
+ * @param <itemId> tree item that was right clicked
+ * @param <pt> location of right click
  */
 //------------------------------------------------------------------------------
-wxMenu* ResourceTree::CreatePopupMenu(Gmat::ObjectType type)
+void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
-   unsigned int i;
-   wxMenu *menu = new wxMenu;
-   StringArray items = theGuiInterpreter->GetListOfFactoryItems(type);
+   GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
+   wxString title = treeItem->GetDesc();
+   GmatTree::ItemType itemType = treeItem->GetDataType();
+   
+   //MessageInterface::ShowMessage
+   //   ("===> ResourceTree::ShowMenu() title=%s, itemType=%d\n", title.c_str(),
+   //    itemType);
+   
+#if wxUSE_MENUS
+   wxMenu menu;
 
-   switch (type)
+   switch (itemType)
    {
-   case Gmat::BURN:
-      for (i=0; i<items.size(); i++)
-      {        
-         if (items[i] == "ImpulsiveBurn")
-         {
-            menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
-         }
-         else if (items[i] == "FiniteBurn")
-         {
-            menu->Append(POPUP_ADD_FINITE_BURN, wxT("FiniteBurn"));
-         }
-      }
+   case GmatTree::SPACECRAFT_FOLDER:
+      menu.Append(POPUP_ADD_SC, wxT("Add Spacecraft"));
       break;
-   case Gmat::SOLVER:
-      for (i=0; i<items.size(); i++)
-      {        
-         if (items[i] == "DifferentialCorrector")
-         {
-            menu->Append(POPUP_ADD_DIFF_CORR, wxT("DifferentialCorrector"));
-         }
-         if (items[i] == "Sqp")
-         {
-            menu->Append(POPUP_ADD_SQP, wxT("Sqp"));
-         }
-      }
+   case GmatTree::HARDWARE_FOLDER:
+      menu.Append(POPUP_ADD_HARDWARE, wxT("Add"), CreatePopupMenu(itemType));
       break;
-   case Gmat::SUBSCRIBER:
-      for (i=0; i<items.size(); i++)
-      {        
-         if (items[i] == "ReportFile")
-         {
-            menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
-         }
-         else if (items[i] == "XYPlot")
-         {
-            menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
-         }
-         else if (items[i] == "OpenGLPlot")
-         {
-            menu->Append(POPUP_ADD_OPENGL_PLOT, wxT("OpenGLPlot"));
-         }
-      }
+   case GmatTree::FORMATION_FOLDER:
+      menu.Append(POPUP_ADD_FORMATION, wxT("Add Formation"));
       break;
-   case Gmat::HARDWARE:
-      menu->Append(POPUP_ADD_FUELTANK, wxT("Fuel Tank"));
-      menu->Append(POPUP_ADD_THRUSTER, wxT("Thruster"));
+   case GmatTree::BURN_FOLDER:
+      menu.Append(POPUP_ADD_BURN, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+   case GmatTree::PROPAGATOR_FOLDER:
+      menu.Append(POPUP_ADD_PROPAGATOR, wxT("Add Propagator"));
+      break;
+   case GmatTree::BOUNDARY_SOLVER_FOLDER:
+      menu.Append(POPUP_ADD_BOUNDARY_SOLVER, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+   case GmatTree::OPTIMIZER_FOLDER:
+      menu.Append(POPUP_ADD_OPTIMIZER, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+   case GmatTree::UNIVERSE_FOLDER:
+      menu.Append(POPUP_ADD_BODY, wxT("Add Body"));
+      menu.Enable(POPUP_ADD_BODY, false);
+      break;
+   case GmatTree::SPECIAL_POINT_FOLDER:
+      menu.Append(POPUP_ADD_SPECIAL_POINT, _T("Add"), CreatePopupMenu(itemType));
+      break;
+      
+   #ifdef __USE_MATLAB__
+   case GmatTree::MATLAB_INTERFACE:
+      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
+      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_CLOSE, wxT("Close"));
+      break;
+   case GmatTree::MATLAB_SERVER:
+      menu.Append(GmatMenu::MENU_START_SERVER, wxT("Start"));
+      menu.Append(GmatMenu::MENU_STOP_SERVER, wxT("Stop"));
+      break;
+   #endif
+      
+   case GmatTree::SUBSCRIBER_FOLDER:
+      menu.Append(POPUP_ADD_SUBSCRIBER, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+   case GmatTree::VARIABLE_FOLDER:
+      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable"));
+      break;
+   case GmatTree::FUNCTION_FOLDER:
+      menu.Append(POPUP_ADD_FUNCTION, wxT("Add"), CreatePopupMenu(itemType));
+      break;
+   case GmatTree::SCRIPT_FOLDER:
+      menu.Append(POPUP_ADD_SCRIPT, wxT("Add Script"));
+      menu.Append(POPUP_ADD_SCRIPT_FOLDER, wxT("Add Script Folder"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
+      break;
+   case GmatTree::ADDED_SCRIPT_FOLDER:
+      menu.AppendSeparator();
+      menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
+      menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, wxT("Quit Running Scripts"));
+      
+      if (mScriptFolderRunning)
+      {
+         menu.Enable(POPUP_RUN_SCRIPTS_FROM_FOLDER, false);
+         menu.Enable(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, true);
+      }
+      else
+      {
+         menu.Enable(POPUP_RUN_SCRIPTS_FROM_FOLDER, true);
+         menu.Enable(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, false);
+      }
+      menu.AppendSeparator();
+      menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
+      break;
+   case GmatTree::SCRIPT_FILE:
+      menu.Append(POPUP_OPEN, wxT("Open"));
+      menu.Append(POPUP_CLOSE, wxT("Close"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_BUILD_SCRIPT, wxT("Build"));
+      menu.Append(POPUP_BUILD_AND_RUN_SCRIPT, wxT("Build and Run"));
+      menu.AppendSeparator();
+      menu.Append(POPUP_REMOVE_SCRIPT, wxT("Remove"));
+      break;
+   case GmatTree::COORD_SYSTEM_FOLDER:
+      menu.Append(POPUP_ADD_COORD_SYS, wxT("Add Coordinate System"));
       break;
    default:
       break;
    }
    
+   // menu items applies to all non-folder items
+   if (itemType >= GmatTree::BEGIN_OF_RESOURCE &&
+       itemType <= GmatTree::END_OF_RESOURCE)
+   {
+      switch (itemType)
+      {
+      case GmatTree::CELESTIAL_BODY:
+      case GmatTree::COORD_SYSTEM:
+         menu.Append(POPUP_OPEN, wxT("Open"));
+         menu.Append(POPUP_CLOSE, wxT("Close"));
+         break;
+      default:
+         menu.Append(POPUP_OPEN, wxT("Open"));
+         menu.Append(POPUP_CLOSE, wxT("Close"));
+         menu.AppendSeparator();
+         menu.Append(POPUP_RENAME, wxT("Rename"));
+         menu.Append(POPUP_DELETE, wxT("Delete"));
+         menu.AppendSeparator();
+         menu.Append(POPUP_CLONE, wxT("Clone"));
+         break;
+      }
+   }
+   
+   PopupMenu(&menu, pt);
+#endif // wxUSE_MENUS
+}
+
+
+//------------------------------------------------------------------------------
+// wxMenu* CreatePopupMenu(GmatTree::ItemType itemType)
+//------------------------------------------------------------------------------
+/**
+ * Create the popup menu
+ *
+ * @param <itemType> Type of object to create and add to tree
+ * @return <wxMenu> Return popup menu
+ */
+//------------------------------------------------------------------------------
+wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType)
+{
+   wxMenu *menu = new wxMenu;
+   
+   switch (itemType)
+   {
+   case GmatTree::HARDWARE_FOLDER:
+      menu->Append(POPUP_ADD_FUELTANK, wxT("Fuel Tank"));
+      menu->Append(POPUP_ADD_THRUSTER, wxT("Thruster"));
+      break;
+   case GmatTree::BURN_FOLDER:
+      menu->Append(POPUP_ADD_IMPULSIVE_BURN, wxT("ImpulsiveBurn"));
+      menu->Append(POPUP_ADD_FINITE_BURN, wxT("FiniteBurn"));
+      break;
+   case GmatTree::BOUNDARY_SOLVER_FOLDER:
+      menu->Append(POPUP_ADD_DIFF_CORR, wxT("DifferentialCorrector"));
+      menu->Append(POPUP_ADD_BROYDEN, wxT("Broyden"));
+      menu->Enable(POPUP_ADD_BROYDEN, false);
+      break;
+   case GmatTree::OPTIMIZER_FOLDER:
+      menu->Append(POPUP_ADD_QUASI_NEWTON, wxT("Quasi-Newton"));
+      menu->Append(POPUP_ADD_SQP, wxT("SQP (fmincon)"));
+      menu->Enable(POPUP_ADD_QUASI_NEWTON, false);
+      break;
+   case GmatTree::SUBSCRIBER_FOLDER:
+      menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
+      menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
+      menu->Append(POPUP_ADD_OPENGL_PLOT, wxT("OpenGLPlot"));
+      break;
+   case GmatTree::FUNCTION_FOLDER:
+      #ifdef __USE_MATLAB__
+      menu->Append(POPUP_ADD_MATLAB_FUNCT, wxT("MATLAB Function"));
+      #endif
+      
+      menu->Append(POPUP_ADD_GMAT_FUNCT, wxT("GMAT Function"));
+      break;
+   case GmatTree::SPECIAL_POINT_FOLDER:
+      menu->Append(POPUP_ADD_BARYCENTER, wxT("Barycenter"));
+      menu->Append(POPUP_ADD_LIBRATION, wxT("Libration Point"));
+      break;
+   default:
+      break;
+   }
+
    return menu;
 }
 
@@ -3526,7 +3441,7 @@ GmatTree::IconType ResourceTree::GetTreeItemIcon(GmatTree::ItemType itemType)
       return GmatTree::ICON_DEFAULT;
    default:
       if (itemType >= GmatTree::RESOURCES_FOLDER &&
-          itemType <= GmatTree::END_OF_FOLDER)
+          itemType <= GmatTree::END_OF_RESOURCE_FOLDER)
          return GmatTree::ICON_FOLDER;
       else
          return GmatTree::ICON_DEFAULT;
