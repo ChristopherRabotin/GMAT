@@ -20,18 +20,19 @@
 #include <iostream>
 #include <sstream>
 #include "gmatdefs.hpp"
-#include "RealUtilities.hpp"    // for PI, TWO_PI, Sqrt()
+#include "RealUtilities.hpp"     // for PI, TWO_PI, ACos(), Sqrt(), Mod()
 #include "Keplerian.hpp"
 #include "Rvector.hpp"
 #include "UtilityException.hpp"
 #include "OrbitTypes.hpp"        // for KEP_TOL, KEP_ZERO_TOL
 #include "CoordUtil.hpp"         // for KeplerianToCartesian()
 #include "MessageInterface.hpp"
-#include <math.h>
 
 //#define DEBUG_KEPLERIAN 1
 //#define DEBUG_KEPLERIAN_TA 2
+//#define DEBUG_KEPLERIAN_AOP 1
 //#define DEBUG_ANOMALY 1
+//#define DEBUG_ECC_VEC 1
 
 using namespace GmatMathUtil;
 
@@ -397,6 +398,11 @@ Rvector3 Keplerian::CartesianToEccVector(Real mu, const Rvector3 &pos,
    Real vMag = vel.GetMagnitude();
    
    Rvector3 eVec = (1/mu)*((vMag*vMag - mu/rMag)*pos - (pos*vel)*vel);
+
+   #if DEBUG_ECC_VEC
+   MessageInterface::ShowMessage
+      ("CartesianToEccVector() returning\n   %s\n", eVec.ToString().c_str());
+   #endif
    
    return eVec;
 }
@@ -460,7 +466,7 @@ Real Keplerian::CartesianToINC(Real mu, const Rvector3 &pos,
    #if DEBUG_KEPLERIAN_INC
    MessageInterface::ShowMessage("returning %f\n", inc);
    #endif
-   
+      
    if (inRadian)
       return inc;
    else
@@ -533,6 +539,9 @@ Real Keplerian::CartesianToRAAN(Real mu, const Rvector3 &pos,
    MessageInterface::ShowMessage("returning %f\n", raan);
    #endif
    
+   // Convert 2pi to 0
+   raan = Mod(raan, TWO_PI);
+   
    if (inRadian)
       return raan;
    else
@@ -593,6 +602,9 @@ Real Keplerian::CartesianToAOP(Real mu, const Rvector3 &pos,
    #if DEBUG_KEPLERIAN_AOP
    MessageInterface::ShowMessage("returning %f\n", aop);
    #endif
+   
+   // Convert 2pi to 0
+   aop = Mod(aop, TWO_PI);
    
    if (inRadian)
       return aop;
@@ -695,6 +707,9 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
          ta = TWO_PI - ta;
    }
    
+   // Convert 2pi to 0
+   ta = Mod(ta, TWO_PI);
+   
    #if DEBUG_KEPLERIAN_TA
    MessageInterface::ShowMessage("CartesianToTA() returning %f\n", ta);
    #endif
@@ -777,7 +792,7 @@ Real Keplerian::CartesianToMA(Real mu, const Rvector3 &pos,
    #if DEBUG_ANOMALY_MA
    MessageInterface::ShowMessage("returning %f\n", ma);
    #endif
-      
+   
    if (inRadian)
       return ma;
    else
