@@ -42,6 +42,7 @@
 //#define DEBUG_SC_ATTITUDE
 //#define DEBUG_GET_REAL
 //#define DEBUG_SC_PARAMETER_TEXT
+//#define DEBUG_SC_KEPL_TO_CART
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -871,6 +872,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
                               const std::string &name)
 {
+
+   #ifdef DEBUG_SC_KEPL_TO_CART
+   MessageInterface::ShowMessage("Entering SC::SetRefObject\n");
+   #endif
    if (type == Gmat::HARDWARE) {
       std::string typeStr = obj->GetTypeName();
     
@@ -906,6 +911,10 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          coordinateSystem = cs;
          
       TakeAction("ApplyCoordinateSystem");
+      #if DEBUG_SPACECRAFT_CS
+         MessageInterface::ShowMessage
+            ("Spacecraft::SetRefObject() coordinateSystem applied ----------\n");
+      #endif
 
       return true;
    }
@@ -1706,6 +1715,10 @@ bool Spacecraft::SetStringParameter(const std::string &label,
 bool Spacecraft::TakeAction(const std::string &action, 
                             const std::string &actionData)
 {
+   #ifdef DEBUG_SC_KEPL_TO_CART
+   MessageInterface::ShowMessage("Entering SC::TakeAction with action = %s, and actionData = %s\n",
+   action.c_str(), actionData.c_str());
+   #endif
    if (action == "SetupHardware") 
    {
       // Attach tanks to thrusters
@@ -2604,6 +2617,10 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
    else
       //loj:csState = stateConverter.Convert(st, rep, "Cartesian", trueAnomaly);
       csState = stateConverter.Convert(st, rep, "Cartesian", anomalyType);
+   #ifdef DEBUG_STATE_INTERFACE
+      MessageInterface::ShowMessage(
+         "Spacecraft::SetStateFromRepresentation: state has been converted\n");
+   #endif
    
    // Then convert to the internal CS
    if (internalCoordSystem != coordinateSystem)
@@ -2617,7 +2634,8 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
    
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
-         "Spacecraft::SetStateFromRepresentation: State is now\n   %s"
+         //"Spacecraft::SetStateFromRepresentation: State is now\n   %s"
+         "Spacecraft::SetStateFromRepresentation: State is now\n"
          "%.9lf %.9lf %.9lf %.14lf %.14lf %.14lf\n", state[0], state[1], 
          state[2], state[3], state[4], state[5]);
    #endif
@@ -2720,12 +2738,12 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    id+ELEMENT1_ID, (GetParameterText(id+ELEMENT1_ID)).c_str(), rep.c_str());
    #endif
    // parabolic and hyperbolic orbits not yet supported
-   if ((label == "ECC") && value >= 1.0)
+   if ((label == "ECC") && value == 1.0)
    {
       SpaceObjectException se;
       se.SetDetails(errorMessageFormat.c_str(),
                     GmatStringUtil::ToString(value, GetDataPrecision()).c_str(),
-                    "Eccentricity", "0 <= Real Number < 1.0");
+                    "Eccentricity", "Real Number != 1.0");
       throw se;
    }
 
