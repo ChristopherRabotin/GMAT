@@ -1546,7 +1546,7 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    case GmatTree::THRUSTER:
       sizer->Add(new ThrusterConfigPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
-   case GmatTree::FORMATION_FOLDER:
+   case GmatTree::FORMATION:
       sizer->Add(new FormationSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::UNIVERSE_FOLDER:

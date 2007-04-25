@@ -133,9 +133,10 @@ namespace GmatTree
       FUELTANK,
       THRUSTER,
       
+      FORMATION,
       FORMATION_SPACECRAFT,
       CONSTELLATION_SATELLITE,
-            
+      
       PROPAGATOR,
       
       IMPULSIVE_BURN,

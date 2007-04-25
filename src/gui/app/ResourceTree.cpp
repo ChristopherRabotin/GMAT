@@ -741,7 +741,7 @@ void ResourceTree::AddDefaultFormations(wxTreeItemId itemId, bool restartCounter
       
       wxTreeItemId formationItem =
       AppendItem(itemId, wxT(objName), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::FORMATION_FOLDER));
+                 new GmatTreeItemData(wxT(objName), GmatTree::FORMATION));
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
       
@@ -1484,6 +1484,8 @@ void ResourceTree::OnClone(wxCommandEvent &event)
    GmatTree::ItemType itemType = selItem->GetDataType();
    
    if ( (itemType == GmatTree::SPACECRAFT) ||
+        (itemType == GmatTree::FUELTANK) ||
+        (itemType == GmatTree::THRUSTER) ||
         (itemType == GmatTree::IMPULSIVE_BURN) ||
         (itemType == GmatTree::FINITE_BURN) ||
         (itemType == GmatTree::PROPAGATOR) ||
@@ -1530,31 +1532,31 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
       GetItemData(event.GetItem());
                                
    int dataType = selItem->GetDataType();
-   bool isDefaultFolder = ((dataType == GmatTree::RESOURCES_FOLDER)      ||
-                           (dataType == GmatTree::SPACECRAFT_FOLDER)     ||
-                           (dataType == GmatTree::HARDWARE_FOLDER)       ||
+   bool isDefaultFolder = ((dataType == GmatTree::RESOURCES_FOLDER)     ||
+                           (dataType == GmatTree::SPACECRAFT_FOLDER)    ||
+                           (dataType == GmatTree::HARDWARE_FOLDER)      ||
                            (dataType == GmatTree::FORMATION_FOLDER)     ||
                            (dataType == GmatTree::CONSTELLATION_FOLDER) ||
                            (dataType == GmatTree::BURN_FOLDER)          ||
                            (dataType == GmatTree::PROPAGATOR_FOLDER)    ||
-                           (dataType == GmatTree::UNIVERSE_FOLDER)       ||
+                           (dataType == GmatTree::UNIVERSE_FOLDER)      ||
                            (dataType == GmatTree::SOLVER_FOLDER)        ||
                            (dataType == GmatTree::SUBSCRIBER_FOLDER)    ||
                            (dataType == GmatTree::INTERFACE_FOLDER)     ||
                            (dataType == GmatTree::VARIABLE_FOLDER));
                          
-   bool isDefaultItem = ((dataType == GmatTree::PROPAGATOR)  ||
-                         (dataType == GmatTree::CELESTIAL_BODY)      ||
-                         (dataType == GmatTree::DIFF_CORR)   ||
-                         (dataType == GmatTree::REPORT_FILE) ||
-                         (dataType == GmatTree::XY_PLOT)     ||
-                         (dataType == GmatTree::OPENGL_PLOT) ||
+   bool isDefaultItem = ((dataType == GmatTree::PROPAGATOR)      ||
+                         (dataType == GmatTree::CELESTIAL_BODY)  ||
+                         (dataType == GmatTree::DIFF_CORR)       ||
+                         (dataType == GmatTree::REPORT_FILE)     ||
+                         (dataType == GmatTree::XY_PLOT)         ||
+                         (dataType == GmatTree::OPENGL_PLOT)     ||
                          (dataType == GmatTree::INTERFACE));
-
+   
    //kind of redundant because OpenPage returns false for some
    //of the default folders
    if ((GmatAppData::GetMainFrame()->IsChildOpen(selItem))  ||
-       (isDefaultFolder)                                   ||
+       (isDefaultFolder)                                    ||
        (isDefaultItem))
    {
       event.Veto();
@@ -1659,7 +1661,7 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
    GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(itemDst);
    int destId = theItem->GetDataType();
 
-   if ((destId == GmatTree::FORMATION_FOLDER )  ||
+   if ((destId == GmatTree::FORMATION )  ||
        (destId == GmatTree::SPACECRAFT_FOLDER ))
    {
       wxString text = GetItemText(itemSrc);
@@ -1892,12 +1894,12 @@ void ResourceTree::OnAddFormation(wxCommandEvent &event)
   
       wxTreeItemId formationItem =
       AppendItem(item, newName, GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(newName, GmatTree::FORMATION_FOLDER));
+                 new GmatTreeItemData(newName, GmatTree::FORMATION));
       SetItemImage(formationItem, GmatTree::ICON_OPENFOLDER, 
                 wxTreeItemIcon_Expanded);
-
+      
       theGuiManager->UpdateFormation();
-  
+      
       Expand(item);
    }
 }
@@ -3201,7 +3203,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       break;
    }
    
-   // menu items applies to all non-folder items
+   // menu items applies to most non-folder items
    if (itemType >= GmatTree::BEGIN_OF_RESOURCE &&
        itemType <= GmatTree::END_OF_RESOURCE)
    {
@@ -3212,6 +3214,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
          menu.Append(POPUP_OPEN, wxT("Open"));
          menu.Append(POPUP_CLOSE, wxT("Close"));
          break;
+      case GmatTree::SCRIPT_FILE:
+         break; // nothing to add
       default:
          menu.Append(POPUP_OPEN, wxT("Open"));
          menu.Append(POPUP_CLOSE, wxT("Close"));
@@ -3299,7 +3303,7 @@ Gmat::ObjectType ResourceTree::GetObjectType(GmatTree::ItemType itemType)
    case GmatTree::SPACECRAFT:
       objType = Gmat::SPACECRAFT;
       break;
-   case GmatTree::FORMATION_FOLDER:
+   case GmatTree::FORMATION:
       objType = Gmat::FORMATION;
       break;
    case GmatTree::IMPULSIVE_BURN:
@@ -3361,7 +3365,7 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
    {
    case GmatTree::SPACECRAFT:
       return mSpacecraftItem;
-   case GmatTree::FORMATION_FOLDER:
+   case GmatTree::FORMATION:
       return mFormationItem;
    case GmatTree::IMPULSIVE_BURN:
    case GmatTree::FINITE_BURN:
