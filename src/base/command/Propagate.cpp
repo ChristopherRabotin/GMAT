@@ -3151,7 +3151,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
       x[1] = secsToStep;
       y[1] = stopParam->EvaluateReal();
 
-//      #ifdef DEBUG_STOPPING_CONDITIONS   
+      #ifdef DEBUG_STOPPING_CONDITIONS   
          MessageInterface::ShowMessage(
             "   Secant target: %16.12le\n"
             "   Secant data points:\n"
@@ -3159,7 +3159,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
             "      (%16.12le, %16.12le)\n"
             "   Secant timestep: %16.12lf\n",
             target, x[0], y[0], x[1], y[1], secsToStep);
-//      #endif
+      #endif
 
       // Check to see if accuracy is within tolerance
       if (fabs(stopper->GetStopDifference()) < stopAccuracy)
