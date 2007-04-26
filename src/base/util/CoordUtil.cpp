@@ -396,15 +396,20 @@ Integer CoordUtil::ComputeKeplToCart(Real grav, Real elem[6], Real r[3],
    // ***************
    
    // radius near infinite
-   if (1-ecc*Cos(anom) < 1E-30) {
-        return 1;
+   //if (1-ecc*Cos(anom) < 1E-30) {
+   if (1+ecc*Cos(anom) < 1E-30) 
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_,
+             "Warning::Radius is near infinite in keplerian to cartesian conversion.\n");
+      return 1;
    }
    
    // eqn 4.24; semilatus rectum
    Real p = sma*(1 - ecc*ecc);
    
    // orbit parabolic
-   if (Abs(p) < 1E-30) {
+   if (Abs(p) < 1E-30) 
+   {
         return 2;
    }
    
