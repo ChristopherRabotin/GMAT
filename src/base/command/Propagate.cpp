@@ -3110,16 +3110,16 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    {
       target = stopper->GetStopGoal();
       
-      // Restore the spacecraft and force models to the end state of the last step
-      BufferSatelliteStates(false);
-      for (UnsignedInt i = 0; i < fm.size(); ++i) 
-      {
-         fm[i]->UpdateFromSpaceObject();
-         fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
-      }
-      
       if (nextTimeThrough)
       {
+         // Restore the spacecraft and force models to the end state of the last step
+         BufferSatelliteStates(false);
+         for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         {
+            fm[i]->UpdateFromSpaceObject();
+            fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+         }
+      
          if (x[1] == x[0])
             throw CommandException("Error refining timestep for Propagate "
                "command: infinite slope; Exiting\n");

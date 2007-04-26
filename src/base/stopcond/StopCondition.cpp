@@ -706,10 +706,10 @@ Real StopCondition::GetStopEpoch()
    else
       throw StopConditionException("Unable to interpolate a stop epoch");
   
-      #if DEBUG_STOPCOND
-         MessageInterface::ShowMessage
-            ("   Interpolated epoch = %.12lf\n", mStopEpoch);
-      #endif
+   #if DEBUG_STOPCOND
+      MessageInterface::ShowMessage
+         ("   Interpolated epoch = %.12lf\n", mStopEpoch);
+   #endif
       
    return mStopEpoch;
 }
