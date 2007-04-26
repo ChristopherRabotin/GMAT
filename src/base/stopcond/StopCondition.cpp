@@ -396,11 +396,11 @@ bool StopCondition::Evaluate()
    if (mStopParam->IsTimeParameter())
    {
       #if DEBUG_STOPCOND > 1
-      MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
-          "mGoal = %f, currentParmValue = %f, previousEpoch = %f\n",  
-          mUseInternalEpoch, epoch, 
-          mGoal, currentParmValue, previousEpoch);
+         MessageInterface::ShowMessage
+            ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
+             "mGoal = %f, currentParmValue = %f, previousEpoch = %f\n",  
+             mUseInternalEpoch, epoch, 
+             mGoal, currentParmValue, previousEpoch);
       #endif
       
       // handler for time based stopping for backwards prop
