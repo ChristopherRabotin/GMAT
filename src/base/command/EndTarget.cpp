@@ -226,8 +226,12 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = prefix + "EndTarget;";
    if ((next) && (next->GetTypeName() == "Target"))
    {
-      generatingString += "  % For targeter ";
-      generatingString += next->GetRefObjectName(Gmat::SOLVER);
+      // To avoid keep appending, check for empty inline comment
+      if (GetInlineComment() == "")
+      {
+         generatingString += "  % For targeter ";
+         generatingString += next->GetRefObjectName(Gmat::SOLVER);
+      }
    }
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
