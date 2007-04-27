@@ -143,8 +143,12 @@ const std::string& EndOptimize::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = prefix + "EndOptimize;";
    if ((next) && (next->GetTypeName() == "Optimize"))
    {
-      generatingString += "  % For optimizer ";
-      generatingString += next->GetRefObjectName(Gmat::SOLVER);
+      // To avoid keep appending, check for empty inline comment
+      if (GetInlineComment() == "")
+      {
+         generatingString += "  % For optimizer ";
+         generatingString += next->GetRefObjectName(Gmat::SOLVER);
+      }
    }
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
