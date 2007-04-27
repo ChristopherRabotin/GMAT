@@ -1058,6 +1058,7 @@ GmatCommand* GmatCommand::GetPrevious()
 //------------------------------------------------------------------------------
 bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 {
+   //ShowCommand("GmatCommand::", "ForceSetNext() this = ", this, " toCmd = ", toCmd);
    next = toCmd;
    return true;
 }
@@ -1068,6 +1069,7 @@ bool GmatCommand::ForceSetNext(GmatCommand *toCmd) // dangerous!
 //------------------------------------------------------------------------------
 bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
 {
+   //ShowCommand("GmatCommand::", "ForceSetPrevious() this = ", this, " toCmd = ", toCmd);
    previous = toCmd;
    return true;
 }
@@ -1086,9 +1088,9 @@ bool GmatCommand::ForceSetPrevious(GmatCommand *toCmd) // dangerous!
 //------------------------------------------------------------------------------
 bool GmatCommand::Append(GmatCommand *cmd)
 {
-   #ifdef DEBUG_COMMAND_APPEND
-   ShowCommand("", "Append() this = ", this, " next = ", next);
-   ShowCommand("", "Append() cmd = ", cmd);
+   #if DEBUG_COMMAND_APPEND > 1
+   ShowCommand("GmatCommand::", "Append() this = ", this, " next = ", next);
+   ShowCommand("GmatCommand::", "Append() cmd = ", cmd);
    #endif
    
    if (cmd == this)
@@ -1097,12 +1099,7 @@ bool GmatCommand::Append(GmatCommand *cmd)
    if (next)
    {
       #ifdef DEBUG_COMMAND_APPEND
-//          MessageInterface::ShowMessage
-//             ("In GmatCommand::Append, appending %s to %s\n",
-//              (cmd->GetTypeName()).c_str(), GetTypeName().c_str());
-//          MessageInterface::ShowMessage("    and appending to next (%s)\n",
-//          (next->GetTypeName()).c_str());
-      ShowCommand("   ", "appending ", cmd, " to ", next);
+      ShowCommand("GmatCommand::", " appending ", cmd, " to ", next);
       #endif
       next->Append(cmd);
    }
@@ -1112,16 +1109,20 @@ bool GmatCommand::Append(GmatCommand *cmd)
       commandChanged = true;
       
       #ifdef DEBUG_COMMAND_APPEND
-      ShowCommand("   ", "setting next of ", this, " to ", cmd);
+      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", cmd);
       #endif
       
       next = cmd;
       
-      #ifdef DEBUG_COMMAND_APPEND
-      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
-      #endif
+      // Do not set previous command if this is branch end 
+      if (!this->IsOfType("BranchEnd"))
+      {
+         #ifdef DEBUG_COMMAND_APPEND
+         ShowCommand("GmatCommand::", " Setting previous of ", cmd, " to ", this);
+         #endif
          
-      cmd->previous = this;
+         cmd->previous = this;
+      }
    }
    
    return true;
@@ -1143,8 +1144,8 @@ bool GmatCommand::Append(GmatCommand *cmd)
 bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    #ifdef DEBUG_COMMAND_INSERT
-   ShowCommand("", "Insert() this = ", this, " next = ", next);
-   ShowCommand("", "Insert() cmd = ", cmd, " prev = ", prev);
+   ShowCommand("GmatCommand::", "Insert() this = ", this, " next = ", next);
+   ShowCommand("GmatCommand::", "Insert() cmd = ", cmd, " prev = ", prev);
    #endif
    
    if (this == prev)
@@ -1155,13 +1156,13 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
          return Append(cmd);
       
       #ifdef DEBUG_COMMAND_APPEND
-      ShowCommand("   ", "setting next of ", this, " to ", cmd);
+      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", cmd);
       #endif
       
       next = cmd;
       
       #if DEBUG_COMMAND_INSERT
-      ShowCommand("   ", "setting previous of ", cmd, " to ", prev);
+      ShowCommand("GmatCommand::", " Setting previous of ", cmd, " to ", prev);
       #endif
       
       cmd->previous = prev;
@@ -1190,8 +1191,15 @@ bool GmatCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 //------------------------------------------------------------------------------
 GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
 {
+   #ifdef DEBUG_COMMAND_REMOVE
+   ShowCommand("GmatCommand::", "Remove() this = ", this, " cmd = ", cmd);
+   ShowCommand("GmatCommand::", "Remove() next = ", next, " prev = ", previous);
+   #endif
+   
    if (this->IsOfType("BranchEnd"))
+   {
       return NULL;
+   }
    
    if (this == cmd)
    {  // NULL the next pointer
@@ -1201,17 +1209,22 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
    
    if (next == NULL)
       return NULL;
-      
+   
    if (next == cmd)
    {
       GmatCommand *temp = next;
+      
+      #ifdef DEBUG_COMMAND_REMOVE
+      ShowCommand("GmatCommand::", " Setting next of ", this, " to ", next->GetNext());
+      #endif
+      
       next = next->GetNext();
-
+      
       // Set previous command
       if (next != NULL)
       {
          #ifdef DEBUG_COMMAND_REMOVE
-         ShowCommand("", "setting previous of ", next, " to ", this);
+         ShowCommand("GmatCommand::", " Setting previous of ", next, " to ", this);
          #endif
          
          next->previous = this;
@@ -1219,7 +1232,7 @@ GmatCommand* GmatCommand::Remove(GmatCommand *cmd)
       
       temp->Remove(cmd);
       
-      return temp;            
+      return temp;
    }
    
    return next->Remove(cmd);
@@ -1703,24 +1716,28 @@ void GmatCommand::ShowCommand(const std::string &prefix,
    {
       if (cmd1 == NULL)
          MessageInterface::ShowMessage
-            ("%s%s::%s(%p)NULL\n", prefix.c_str(), this->GetTypeName().c_str(),
+            ("%s%s::%sNULL(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
              title1.c_str(), cmd1);
       else
          MessageInterface::ShowMessage
-            ("%s%s::%s(%p)%s\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1, cmd1->GetTypeName().c_str());
+            ("%s%s::%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1);
    }
    else
    {
-      if (cmd2 == NULL)
+      if (cmd1 == NULL)
          MessageInterface::ShowMessage
-            ("%s%s::%s(%p)NULL%s(%p)NULL\n", prefix.c_str(),
-             this->GetTypeName().c_str(), title1.c_str(), cmd1, title2.c_str(), cmd2);
+            ("%s%s::%sNULL(%p)%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1, title2.c_str(), cmd2->GetTypeName().c_str(), cmd2);
+      else if (cmd2 == NULL)
+         MessageInterface::ShowMessage
+            ("%s%s::%s%s(%p)%sNULL(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1, title2.c_str(), cmd2);
       else
          MessageInterface::ShowMessage
-            ("%s%s::%s(%p)%s%s(%p)%s\n", prefix.c_str(), this->GetTypeName().c_str(),
-             title1.c_str(), cmd1, cmd1->GetTypeName().c_str(),
-             title2.c_str(), cmd2, cmd2->GetTypeName().c_str());
+            ("%s%s::%s%s(%p)%s%s(%p)\n", prefix.c_str(), this->GetTypeName().c_str(),
+             title1.c_str(), cmd1->GetTypeName().c_str(), cmd1,
+             title2.c_str(), cmd2->GetTypeName().c_str(), cmd2);
    }
 }
 
