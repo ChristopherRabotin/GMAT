@@ -440,7 +440,7 @@ void CompareFilesDialog::OnButtonClick(wxCommandEvent& event)
       {
          mBaseDirectory = dialog.GetPath();
          mBaseDirTextCtrl->SetValue(mBaseDirectory);
-         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareResults.txt");
+         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareNumericResults.txt");
          UpdateFileInfo(0, true);
          
          #if DEBUG_COMPARE_FILES_DIALOG
