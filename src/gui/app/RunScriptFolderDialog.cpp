@@ -411,7 +411,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          mCurrOutDir = dialog.GetPath();
          mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
          mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + sep + "AutoSave");
-         mSaveFileTextCtrl->SetValue(mCurrOutDir + sep + "CompareResults.txt");
+         mSaveFileTextCtrl->SetValue(mCurrOutDir + sep + "CompareNumericResults.txt");
          mOutDirChanged = true;
          
          #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
