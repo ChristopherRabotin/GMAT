@@ -601,8 +601,8 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       
       #if DEBUG_MISSION_TREE_INSERT
       MessageInterface::ShowMessage
-         ("   setting previous of %s to %s\n", cmdTypeName.c_str(),
-          prevTypeName.c_str());
+         ("MissionTree::InsertCommand() Setting previous of %s to %s\n",
+          cmdTypeName.c_str(), prevTypeName.c_str());
       #endif
       
       cmd->ForceSetPrevious(prevCmd);
@@ -916,7 +916,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    
-   // Check if empty previous item then doesn't insert anything
+   // Do not insert anything if previous item is empty
    if (prevItem == NULL)
    {
       MessageInterface::ShowMessage
@@ -937,14 +937,6 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    //GmatCommand *prevCmd = prevItem->GetCommand();
    
-   //if (prevCmd == NULL)
-   //{
-   //   MessageInterface::ShowMessage
-   //      ("*** WARNING *** InsertBefore(%s) previous command is NULL. "
-   //       "Cannot insert the command.\n", cmdName.c_str());
-   //   return;
-   //}
-   
    if (currCmd == NULL)
    {
       MessageInterface::PopupMessage
@@ -955,7 +947,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("InsertBefore(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+      ("MissionTree::InsertBefore(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
        currCmd->GetTypeName().c_str(), currCmd);
    #endif
    
@@ -976,7 +968,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("InsertBefore(%s) prevCmd=%s, addr=%p\n",
+      ("MissionTree::InsertBefore(%s) prevCmd=%s, addr=%p\n",
        cmdName.c_str(), prevCmd->GetTypeName().c_str(), prevCmd);
    #endif
    
@@ -1003,7 +995,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
          cmd = theGuiInterpreter->
             CreateDefaultCommand(std::string(cmdName.c_str()));
       }
-
+      
       // Need to set previous command (loj: 12/15/06)
       cmd->ForceSetPrevious(prevCmd);
       
@@ -1075,7 +1067,7 @@ void MissionTree::InsertAfter(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("InsertAfter(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+      ("MissionTree::InsertAfter(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
        currCmd->GetTypeName().c_str(), currCmd);
    #endif
    
@@ -2027,13 +2019,29 @@ void MissionTree::OnDelete(wxCommandEvent &event)
    MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(itemId);
    if (missionItem == NULL)
       return;   // error
-     
+   
    GmatCommand *theCmd = missionItem->GetCommand();  
    if (theCmd == NULL)
       return;  //error 
    
    // save command type to check if there is no more of this command
    std::string cmdType = theCmd->GetTypeName();
+   
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("MissionTree::OnDelete() calling theGuiInterpreter->DeleteCommand(%s)\n",
+       theCmd->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("   Previous of %s is %s\n", theCmd->GetTypeName().c_str(),
+       theCmd->GetPrevious()->GetTypeName().c_str());
+   if (theCmd->GetNext() == NULL)
+      MessageInterface::ShowMessage
+         ("   Next of %s is NULL\n", theCmd->GetTypeName().c_str());
+   else
+      MessageInterface::ShowMessage
+         ("   Next of %s is %s\n", theCmd->GetTypeName().c_str(),
+          theCmd->GetNext()->GetTypeName().c_str());
+   #endif
    
    theGuiInterpreter->DeleteCommand(theCmd);
    delete theCmd;
