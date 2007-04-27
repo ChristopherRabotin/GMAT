@@ -2671,6 +2671,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    mBuildErrorCount = 0;
    mFailedScriptsList.Clear();
    mScriptFolderRunning = true;
+   wxArrayString failedToRunScripts;
    
    while (scriptId.IsOk())
    {     
@@ -2746,7 +2747,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
             
             if (builtOk)
             {
-               GmatAppData::GetMainFrame()->OnScriptRun(event);
+               // if run failed, save to report
+               if (!GmatAppData::GetMainFrame()->RunCurrentMission())
+                  failedToRunScripts.Add(filename);
+               
                if (compare)
                {
                   absTol = dlg.GetAbsTolerance();
@@ -2768,7 +2772,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       scriptId = GetNextChild(item, cookie);
       appendLog = true;
    }
-
+   
    mScriptFolderRunning = false;
    
    // save compare results to a file
@@ -2790,18 +2794,35 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    // Set batch mode to false
    GmatGlobal::Instance()->SetBatchMode(false);
-
+   
    // Popup errors found message
+   wxString msg1;
+   wxString msg2;
+   
    if (mBuildErrorCount > 0)
    {
-      wxString scriptNames;
-      for (int i=0; i<mBuildErrorCount; i++)
-         scriptNames = scriptNames + mFailedScriptsList[i] + "\n";
+      wxString scriptNames1;
+      msg1 = "Script errors were found in the following script(s):\n";
       
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Script errors were found in the following file(s):\n\n"
-          "%s", scriptNames.c_str());
+      for (int i=0; i<mBuildErrorCount; i++)
+         scriptNames1 = scriptNames1 + mFailedScriptsList[i] + "\n";
+
+      msg1 = msg1 + scriptNames1;
    }
+   
+   if (failedToRunScripts.GetCount() > 0)
+   {
+      wxString scriptNames2;
+      msg2 = "\nThe following script(s) failed to run to completion:\n";
+      
+      for (unsigned int i=0; i<failedToRunScripts.GetCount(); i++)
+         scriptNames2 = scriptNames2 + failedToRunScripts[i] + "\n";
+      
+      msg2 = msg2 + scriptNames2;
+   }
+   
+   if (msg1 != "" || msg2 != "")
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg1 + msg2);
    
 }
 
