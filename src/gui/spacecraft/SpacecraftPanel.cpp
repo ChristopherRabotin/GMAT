@@ -66,6 +66,7 @@ SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // ~SpacecraftPanel()
 //------------------------------------------------------------------------------
@@ -92,31 +93,39 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::Create() entered\n");
    #endif
-   
+
    SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    currentSpacecraft = new Spacecraft(*theSpacecraft);
-    
-   currentSpacecraft->SetInternalCoordSystem(theSpacecraft->GetInternalCoordSystem());    
-   currentSpacecraft->SetRefObject(theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
-                                   Gmat::COORDINATE_SYSTEM, "");
    
-   // Set object pointer for "Show Script"
-   mObject = currentSpacecraft;
-
+   try
+   {
+      currentSpacecraft->
+         SetInternalCoordSystem(theSpacecraft->GetInternalCoordSystem());    
+      currentSpacecraft->
+         SetRefObject(theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, ""), 
+                      Gmat::COORDINATE_SYSTEM, "");
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
+   
    // wxNotebook
-   spacecraftNotebook = new wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
-                                        wxDefaultSize, wxGROW );
+   spacecraftNotebook = new
+      wxNotebook( this, ID_NOTEBOOK, wxDefaultPosition,
+                  wxDefaultSize, wxGROW );
    spacecraftNotebook->SetBackgroundColour(GetBackgroundColour());
    spacecraftNotebook->SetForegroundColour(GetForegroundColour());
-
-   actuatorNotebook = new wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
-                                      wxDefaultSize, wxGROW );
+   
+   actuatorNotebook = new
+      wxNotebook( spacecraftNotebook, ID_NOTEBOOK, wxDefaultPosition,
+                  wxDefaultSize, wxGROW );
    actuatorNotebook->SetBackgroundColour(GetBackgroundColour());
    actuatorNotebook->SetForegroundColour(GetBackgroundColour());
    // wxNotebookSizer
    // spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
    // actuatorSizer = new wxNotebookSizer( actuatorNotebook );
-
+   
    // wxSizer
    // wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
    
@@ -179,11 +188,21 @@ void SpacecraftPanel::LoadData()
    MessageInterface::ShowMessage("SpacecraftPanel::LoadData() entered\n");
    #endif
    
-   theOrbitPanel->LoadData();
-   theBallisticMassPanel->LoadData();
-   theTankPanel->LoadData();
-   theThrusterPanel->LoadData();
-   theAttitudePanel->LoadData();
+   // Set object pointer for "Show Script"
+   mObject = currentSpacecraft;
+
+   try
+   {
+      theOrbitPanel->LoadData();
+      theBallisticMassPanel->LoadData();
+      theTankPanel->LoadData();
+      theThrusterPanel->LoadData();
+      theAttitudePanel->LoadData();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
    
    // explicitly disable apply button
    // it is turned on in each of the panels
