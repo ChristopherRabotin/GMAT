@@ -56,6 +56,7 @@
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_DEFAULT_COMMAND 1
+//#define DEBUG_COMMAND_APPEND 1
 //#define DEBUG_COMMAND_DELETE 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
@@ -2241,6 +2242,9 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                sub->SetStringParameter("Add", GetDefaultX()->GetName());
                sub->SetStringParameter("Add", GetDefaultY()->GetName());
                sub->Activate(true);
+               
+               // To validate and create element wrappers
+               theScriptInterpreter->ValidateSubscriber(sub);
             }
          }
       }
@@ -3499,13 +3503,26 @@ GmatBase* Moderator::GetInternalObject(const std::string &name, Integer sandboxN
 //------------------------------------------------------------------------------
 // Integer RunMission(Integer sandboxNum)
 //------------------------------------------------------------------------------
+/*
+ * Adds configured objects to sandbox and execute. The number of sandbox created
+ * is declared in ther header as Gmat::MAX_SANDBOX. But currently only 1 sandbox
+ * is used for running the mission.
+ *
+ * @param  sandboxNum  The sandbox number (1 to Gmat::MAX_SANDBOX)
+ *
+ * @return  0 if run was successful
+ *         -1 if sandbox number is invalid
+ *         -2 some unknown error occurred
+ *         -3 if exception thrown during the run
+ */
+//------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum)
 {
    //MessageInterface::ShowMessage("\n========================================\n");
    //MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    MessageInterface::ShowMessage("Running mission...\n");
    Integer status = 0;
-
+   
    clock_t t1 = clock(); // Should I clock after initilization?
    
    if (isRunReady)
@@ -4744,6 +4761,9 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VY");
       sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VZ");
       sub->Activate(true);
+      
+      // To validate and create element wrappers
+      theScriptInterpreter->ValidateSubscriber(sub);
    }
    else
    {
