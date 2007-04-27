@@ -118,3 +118,17 @@ GmatBase* Stop::Clone() const
 {
    return (new Stop(*this));
 }
+
+
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode,
+//                                        const std::string &prefix,
+//                                        const std::string &useName)
+//------------------------------------------------------------------------------
+const std::string& Stop::GetGeneratingString(Gmat::WriteMode mode,
+                                             const std::string &prefix,
+                                             const std::string &useName)
+{
+   generatingString = prefix + "Stop;";
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+}
