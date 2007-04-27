@@ -299,7 +299,7 @@ void CompareTextDialog::LoadData()
    mCompareDirs[1] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirs[2] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirsComboBox->SetSelection(0);
-   mSaveFileName = mBaseDirectory + "CompareResults.txt";
+   mSaveFileName = mBaseDirectory + "CompareTextResults.txt";
    mBaseDirTextCtrl->SetValue(mBaseDirectory);
    mCompareDirTextCtrl->SetValue(mCompareDirs[0]);
    mSaveFileTextCtrl->SetValue(mSaveFileName);
@@ -390,7 +390,7 @@ void CompareTextDialog::OnButtonClick(wxCommandEvent& event)
       {
          mBaseDirectory = dialog.GetPath();
          mBaseDirTextCtrl->SetValue(mBaseDirectory);
-         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareResults.txt");
+         mSaveFileTextCtrl->SetValue(mBaseDirectory + "/CompareTextResults.txt");
          UpdateFileInfo(0, true);
          
          #if DEBUG_COMPARE_TEXT_DIALOG
