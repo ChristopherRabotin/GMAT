@@ -267,9 +267,9 @@ bool BranchCommand::Initialize()
 void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
 {
    #ifdef DEBUG_BRANCHCOMMAND_ADD
-   ShowCommand("", "AddBranch() cmd = ", cmd);
+   ShowCommand("BranchCommand::", "AddBranch() cmd = ", cmd);
    MessageInterface::ShowMessage
-      ("     which=%d, branch.size=%d\n", which, branch.size());
+      ("   which=%d, branch.size=%d\n", which, branch.size());
    #endif
    
    // Increase the size of the vector if it's not big enough
@@ -282,13 +282,13 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "addging to branch ", cmd);
+      ShowCommand("BranchCommand::", "addging to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
-      
+
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
+      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetPrevious(this);
@@ -298,13 +298,13 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    else if (branch[which] == NULL)
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting branch.at(which) to ", cmd);
+      ShowCommand("BranchCommand::", " Setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
-      
+
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
+      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetPrevious(this);
@@ -314,13 +314,14 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    else
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "appending ", cmd, " to ", branch.at(which));
+      ShowCommand("BranchCommand::", " Appending ", cmd, " to ", branch.at(which));
       #endif
       
       (branch.at(which))->Append(cmd);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting previous of ",cmd, " to ", branch.at(which));
+      ShowCommand("BranchCommand::", " Setting previous of ",cmd, " to ",
+                  branch.at(which));
       #endif
       
       cmd->ForceSetPrevious(branch.at(which));
@@ -341,9 +342,9 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 {
    
    #ifdef DEBUG_BRANCHCOMMAND_ADD
-   ShowCommand("AddToFrontOfBranch() cmd = ", cmd);
+   ShowCommand("BranchCommand::", "AddToFrontOfBranch() cmd = ", cmd);
    MessageInterface::ShowMessage
-      ("     which=%d, branch.size=%d\n", which, branch.size());
+      ("   which=%d, branch.size=%d\n", which, branch.size());
    #endif
    
    // Increase the size of the vector if it's not big enough
@@ -353,21 +354,21 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "adding to branch ", cmd);
+      ShowCommand("BranchCommand::", " Adding to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
-      
+
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting previous of ", cmd, " to ", this);
+      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
       #endif
       
-      cmd->ForceSetPrevious(this);   
+      cmd->ForceSetPrevious(this);
    }
    else if (branch.at(which) == NULL)
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting branch.at(which) to ", cmd);
+      ShowCommand("BranchCommand::", " Setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
@@ -377,19 +378,19 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       GmatCommand *tmp = branch.at(which);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting branch.at(which) to ", cmd);
+      ShowCommand("BranchCommand::", " Setting branch.at(which) to ", cmd);
       #endif
       
       branch.at(which) = cmd;
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "appending ", tmp, " to ", cmd);
+      ShowCommand("BranchCommand::", " Appending ", tmp, " to ", cmd);
       #endif
       
       cmd->Append(tmp);
       
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("   ", "setting previous of ", tmp, " to ", cmd);
+      ShowCommand("BranchCommand::", " Setting previous of ", tmp, " to ", cmd);
       #endif
       
       tmp->ForceSetPrevious(cmd);
@@ -415,8 +416,8 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
 bool BranchCommand::Append(GmatCommand *cmd)
 {
    #ifdef DEBUG_BRANCHCOMMAND_APPEND
-   ShowCommand("Append() this = ", this, " next = ", next);
-   ShowCommand("Append() cmd = ", cmd);
+   ShowCommand("BranchCommand::", "Append() this = ", this, " next = ", next);
+   ShowCommand("BranchCommand::", "Append() cmd = ", cmd);
    #endif
    
    // If we are still filling in a branch, append on that branch
@@ -453,8 +454,8 @@ bool BranchCommand::Append(GmatCommand *cmd)
 bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 {
    #ifdef DEBUG_BRANCHCOMMAND_INSERT
-   ShowCommand("Insert() this = ", this, " next = ", next);
-   ShowCommand("Insert() cmd  = ", cmd, " prev = ", prev);
+   ShowCommand("BranchCommand::", "Insert() this = ", this, " next = ", next);
+   ShowCommand("BranchCommand::", "Insert() cmd  = ", cmd, " prev = ", prev);
    #endif
    
    GmatCommand *currentOne   = NULL;
@@ -483,15 +484,15 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       }
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("   ", "currentOne = ", currentOne, " branch[0] = ", branch[0]);
+      ShowCommand("BranchCommand::", "currentOne = ", currentOne, " branch[0] = ", branch[0]);
       #endif
-            
+      
       cmd->Append(currentOne);
       foundHere = true;
-            
+      
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("   ", "currentOne->GetPrevious() = ", currentOne->GetPrevious());
-      ShowCommand("   ", "currentOne->GetNext() = ", currentOne->GetNext());
+      ShowCommand("BranchCommand::", "currentOne->GetPrevious() = ", currentOne->GetPrevious());
+      ShowCommand("BranchCommand::", "currentOne->GetNext() = ", currentOne->GetNext());
       #endif
       
       //return true;
@@ -561,7 +562,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    
    #ifdef DEBUG_BRANCHCOMMAND_INSERT
    MessageInterface::ShowMessage
-      ("===> BranchCommand::Insert() newBranch=%d, foundHere=%d, toShift=%p\n",
+      ("BranchCommand::Insert() newBranch=%d, foundHere=%d, toShift=%p\n",
        newBranch, foundHere, toShift);
    #endif
    
@@ -570,13 +571,13 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       // make sure the new Else or ElseIf points back to the If command
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("   ", "setting next of ", cmd, " to ", this);
+      ShowCommand("BranchCommand::", " Setting next of ", cmd, " to ", this);
       #endif
       
       cmd->ForceSetNext(this);
       
       #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("   ", "setting previous of ", this, " to ", cmd);
+      ShowCommand("BranchCommand::", " Setting previous of ", this, " to ", cmd);
       #endif
       
       this->ForceSetPrevious(cmd);
@@ -589,7 +590,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
    }
    
    if (foundHere || hereOrNested) return true;
-   
+
    // Otherwise, just call the base class method
    return GmatCommand::Insert(cmd, prev);
 }
@@ -609,8 +610,12 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
 {
    #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-   ShowCommand("", "Remove() removing ", cmd);
+   ShowCommand("BranchCommand::", "Remove() this = ", this, " cmd = ", cmd);
+   ShowCommand("BranchCommand::", "Remove() next = ", next);
    #endif
+   
+   if (next == cmd)
+      return GmatCommand::Remove(cmd);    // Use base method to remove cmd
    
    if (cmd == this)
       return GmatCommand::Remove(cmd);    // Use base method to remove cmd
@@ -626,7 +631,7 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
       tempNext = current->GetNext();
       
       #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-      ShowCommand("", "Remove() current = ", current, ", tempNext = ", tempNext);
+      ShowCommand("BranchCommand::", "Remove() current = ", current, ", tempNext = ", tempNext);
       #endif
       
       if (current != NULL)
@@ -638,13 +643,15 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
          
          // set previous command
          #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-         ShowCommand("", "setting previous of ", tempNext, " to ", fromBranch->GetPrevious());
+         ShowCommand("BranchCommand::", " Setting previous of ", tempNext,
+                     " to ", fromBranch->GetPrevious());
          #endif
          
-         tempNext->ForceSetPrevious(fromBranch->GetPrevious());
-         
          if (fromBranch != NULL)
+         {
+            tempNext->ForceSetPrevious(fromBranch->GetPrevious());
             return fromBranch;
+         }
       }
    }
    
@@ -758,7 +765,7 @@ bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
       if (current != NULL)
       {
          #ifdef DEBUG_RENAME
-         ShowCommand("RenameRefObject() current = ", current);
+         ShowCommand("BranchCommand::", "RenameRefObject() current = ", current);
          #endif
          
          current->RenameRefObject(type, oldName, newName);
@@ -770,7 +777,7 @@ bool BranchCommand::RenameRefObject(const Gmat::ObjectType type,
                break;
             
             #ifdef DEBUG_RENAME
-            ShowCommand("RenameRefObject() current = ", current);
+            ShowCommand("BranchCommand::", "RenameRefObject() current = ", current);
             #endif
             
             current->RenameRefObject(type, oldName, newName);            
@@ -814,7 +821,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
 //       fullString = "\n" + fullString;
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
-   ShowCommand("GetGeneratingString() this = ", this);
+   ShowCommand("BranchCommand::", "GetGeneratingString() this = ", this);
    MessageInterface::ShowMessage
       ("   mode='%d', prefix='%s', useName='%s'\n", mode, prefix.c_str(),
        useName.c_str());
@@ -826,8 +833,8 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
    
-   #if DEBUG_BRANCHCOMMAND_GEN_STRING
-   ShowCommand("   ", "GmatCommand::GetGeneratingString() this = ", this);
+   #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
+   ShowCommand("BranchCommand::", "GmatCommand::GetGeneratingString() this = ", this);
    MessageInterface::ShowMessage
       ("===> commentLine=<%s>, inlineComment=<%s>\n",
        commentLine.c_str(), inlineComment.c_str());
@@ -873,7 +880,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       while ((current != NULL) && (current != this))
       {
          #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
-         ShowCommand("   ", "GetGeneratingString() current = ", current);
+         ShowCommand("BranchCommand::", "GetGeneratingString() current = ", current);
          MessageInterface::ShowMessage("   inTextMode=%d\n", inTextMode);
          #endif
          
@@ -1014,7 +1021,7 @@ typeName.c_str(), which);
 void BranchCommand::RunComplete()
 {
    #if DEBUG_RUN_COMPLETE
-   ShowCommand("", "BranchCommand::RunComplete() this = ", this);
+   ShowCommand("BranchCommand::", "BranchCommand::RunComplete() this = ", this);
    #endif
    
    current = NULL;
