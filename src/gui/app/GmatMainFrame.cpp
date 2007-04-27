@@ -223,6 +223,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mScriptFilename = "$gmattempscript$.script";
    scriptCounter =0;
    mInterpretFailed = false;
+   mRunSuccessful = false;
    
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
@@ -771,7 +772,8 @@ void GmatMainFrame::CloseCurrentProject()
    wxString statusText;
    statusText.Printf("GMAT - General Mission Analysis Tool");
    SetStatusText("", 1);
-   SetTitle(statusText);
+   //SetTitle(statusText);
+   UpdateTitle();
    
    // clear trees, message window
    theGuiInterpreter->ClearResource();
@@ -804,9 +806,11 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
                                     const wxString &savePath, bool openScript,
                                     bool multScripts)
 {
-   wxString title;
-   title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
-   SetTitle(title);
+   UpdateTitle(filename);
+   
+//    wxString title;
+//    title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
+//    SetTitle(title);
    
    bool success = false;
    
@@ -873,14 +877,16 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 
 
 //------------------------------------------------------------------------------
-// void RunCurrentMission()
+// bool RunCurrentMission()
 //------------------------------------------------------------------------------
-void GmatMainFrame::RunCurrentMission()
+bool GmatMainFrame::RunCurrentMission()
 {
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
+
+   bool status = false;
    
    if (mInterpretFailed)
    {
@@ -889,11 +895,11 @@ void GmatMainFrame::RunCurrentMission()
           "Please fix all errors listed in message window before running "
           "the mission.\n", mScriptFilename.c_str());
       
-      return;
+      return false;
    }
    
    wxToolBar* toolBar = GetToolBar();
-      
+   
    menuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
    UpdateMenus(FALSE);
    
@@ -917,8 +923,10 @@ void GmatMainFrame::RunCurrentMission()
    else
    {
       MinimizeChildren();
-      theGuiInterpreter->RunMission();
-   
+      Integer retval = theGuiInterpreter->RunMission();
+      if (retval == 0)
+         status = true;
+      
       menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
       UpdateMenus(TRUE);
       toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
@@ -929,6 +937,8 @@ void GmatMainFrame::RunCurrentMission()
       //put items in output tab
       GmatAppData::GetOutputTree()->UpdateOutput(false);
    }
+   
+   return status;
 } // end RunCurrentMission()
 
 
@@ -1127,8 +1137,10 @@ bool GmatMainFrame::SaveScriptAs()
       scriptSaved = false;
    }
    
+   #ifdef __CLOSE_CHILDREN_AFTER_SAVE__
    if (scriptSaved)
       CloseAllChildren();
+   #endif
    
    return scriptSaved;
 }
@@ -1249,6 +1261,11 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
       }
       else
       {
+         // Create backup file
+         wxString currFilename = mScriptFilename.c_str();
+         wxString backupFilename = currFilename + ".bak";
+         ::wxCopyFile(currFilename, backupFilename);
+         
          GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
          scriptSaved = true;
       }
@@ -1256,10 +1273,17 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
    
    if (scriptSaved)
    {
+      UpdateTitle(mScriptFilename.c_str());
+
+      #ifdef __CONFIRM_SAVE__
       MessageInterface::PopupMessage
          (Gmat::INFO_, "Scrpt saved to \"%s\"\n", mScriptFilename.c_str());
+      #endif
       
+      #ifdef __CLOSE_CHILDREN_AFTER_SAVE__
       CloseAllChildren();
+      #endif
+      
    }
 }
 
@@ -1278,13 +1302,7 @@ void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
    if (SaveScriptAs())
    {
       GmatAppData::GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
-      
-      // update title and status bar
-      wxString title;
-      title.Printf("%s - General Mission Analysis Tool (GMAT)",
-                        mScriptFilename.c_str());       
-      
-      SetTitle(title);
+      UpdateTitle(mScriptFilename.c_str());
    }
 }
 
@@ -1316,7 +1334,7 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 {
-   RunCurrentMission();
+   mRunSuccessful = RunCurrentMission();
 }
 
 
@@ -2669,7 +2687,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
    //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptRun()\n");
-   RunCurrentMission();
+   mRunSuccessful = RunCurrentMission();
 }
 
 
@@ -2828,3 +2846,19 @@ void GmatMainFrame::OpenScript()
    
    CreateChild(scriptItem);
 }
+
+
+//------------------------------------------------------------------------------
+// void UpdateTitle(const wxString &filename)
+//------------------------------------------------------------------------------
+void GmatMainFrame::UpdateTitle(const wxString &filename)
+{
+   wxString title;
+   if (filename == "")
+      title = "General Mission Analysis Tool (GMAT)";
+   else
+      title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());       
+   
+   SetTitle(title);
+}
+

@@ -68,7 +68,7 @@ public:
    bool InterpretScript(const wxString &filename, bool readBack = false,
                         const wxString &savePath = "", bool openScript = true,
                         bool multScripts = false);
-   void RunCurrentMission();
+   bool RunCurrentMission();
    void NotifyRunCompleted();
    void ProcessPendingEvent();
    void StartServer();
@@ -102,6 +102,7 @@ private:
    bool mRunPaused;
    bool mRunCompleted;
    bool mInterpretFailed;
+   bool mRunSuccessful;
    
    GmatServer *mServer;
    std::string mScriptFilename;
@@ -128,6 +129,7 @@ private:
    void InitToolBar(wxToolBar* toolBar);
    bool SaveScriptAs();
    void OpenScript();
+   void UpdateTitle(const wxString &filename = "");
    
    // event handling
    DECLARE_EVENT_TABLE();
