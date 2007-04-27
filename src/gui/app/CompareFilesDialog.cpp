@@ -103,7 +103,7 @@ void CompareFilesDialog::Create()
                     wxDefaultPosition, wxSize(60,20), 0);
    
    wxStaticText *baseStringLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Compare File Names Contain:"),
+      new wxStaticText(this, ID_TEXT, wxT("Compare Files Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mBaseStrTextCtrl =
@@ -175,7 +175,7 @@ void CompareFilesDialog::Create()
                     wxDefaultPosition, wxSize(60,20), 0);
    
    wxStaticText *compareStringLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Compare File Names Contain:"),
+      new wxStaticText(this, ID_TEXT, wxT("Compare Files Contain:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mCompareStrTextCtrl =
@@ -341,11 +341,11 @@ void CompareFilesDialog::LoadData()
    mCompareDirs[1] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirs[2] = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
    mCompareDirsComboBox->SetSelection(0);
-   mSaveFileName = mBaseDirectory + "CompareResults.txt";
+   mSaveFileName = mBaseDirectory + "CompareNumericResults.txt";
    mBaseDirTextCtrl->SetValue(mBaseDirectory);
    mCompareDirTextCtrl->SetValue(mCompareDirs[0]);
    mSaveFileTextCtrl->SetValue(mSaveFileName);
-
+   
    // update file info in directory 1 and 2
    UpdateFileInfo(0, true);
    UpdateFileInfo(1, false);

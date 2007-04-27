@@ -182,7 +182,7 @@ void RunScriptFolderDialog::Create()
                      wxDefaultPosition, wxSize(80,20), 0);
    
    wxStaticText *replaceLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Compare with filenames contain:"),
+      new wxStaticText(this, ID_TEXT, wxT("Compare files by replacing \"GMAT\" with:"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mReplaceTextCtrl =
@@ -192,7 +192,7 @@ void RunScriptFolderDialog::Create()
    wxStaticText *compDirLabel =
       new wxStaticText(this, ID_TEXT, wxT("Directory to compare:"),
                        wxDefaultPosition, wxDefaultSize, 0);
-
+   
    //---------- sizer
    wxFlexGridSizer *compareSizer = new wxFlexGridSizer(2, 0, 0);
    
@@ -202,7 +202,7 @@ void RunScriptFolderDialog::Create()
    compareSizer->Add(mAbsTolTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    compareSizer->Add(replaceLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    compareSizer->Add(mReplaceTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
-
+   
    mCompareDirTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(320,20), 0);
@@ -233,6 +233,7 @@ void RunScriptFolderDialog::Create()
    wxBoxSizer *compDirSizer = new wxBoxSizer(wxHORIZONTAL);
    compDirSizer->Add(compDirLabel, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
    compDirSizer->Add(mDirBrowseButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
    
    wxBoxSizer *saveDirSizer = new wxBoxSizer(wxHORIZONTAL);
    saveDirSizer->Add(saveFileLabel, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
@@ -276,7 +277,7 @@ void RunScriptFolderDialog::LoadData()
    mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + "AutoSave");
    mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
    mCompareDirTextCtrl->SetValue(mCompareDir);
-   mSaveFileTextCtrl->SetValue(mCompareDir + sep + "CompareResults.txt");
+   mSaveFileTextCtrl->SetValue(mCompareDir + sep + "CompareNumericResults.txt");
    
    mSaveResultCheckBox->Disable();
    mSaveFileTextCtrl->Disable();
