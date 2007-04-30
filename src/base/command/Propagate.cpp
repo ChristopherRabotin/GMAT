@@ -24,7 +24,7 @@
 #include "StringUtil.hpp" // for Trim()
 #include "MessageInterface.hpp"
 
-#include <sstream> 
+#include <sstream>
 #include <cmath>
 
 //#define DEBUG_PROPAGATE_ASSEMBLE 1
@@ -41,7 +41,7 @@
 
 //#define TIME_ROUNDOFF 1.0e-6
 
-//---------------------------------
+//--------------------------------- 
 // static data
 //---------------------------------
 std::string Propagate::PropModeList[PropModeCount] =
@@ -2443,6 +2443,7 @@ bool Propagate::Execute()
             {
                stopWhen[i]->Reset();
                stopWhen[i]->Evaluate();
+
                // Set the flag to check the first step only if 
                //    (1) the stop value is <= stopAccuracy and
                //    (2) it was (one of) the last stop(s) triggered
@@ -2500,13 +2501,23 @@ bool Propagate::Execute()
          }
          else
          {  
+            stopInterval = 0.0;
             for (UnsignedInt i = 0; i < fm.size(); ++i) 
             {
+               Real timestep = p[i]->GetStepTaken();
+               if (fabs(timestep) > fabs(stopInterval))
+                  stopInterval = timestep;
+               
                fm[i]->RevertSpaceObject();
                elapsedTime[i] = fm[i]->GetTime();
                currEpoch[i] = baseEpoch[i] +
                   elapsedTime[i] / GmatTimeUtil::SECS_PER_DAY;
             }
+            
+            #ifdef DEBUG_EPOCH_UPDATES
+               MessageInterface::ShowMessage("StopStep = %15.11lf\n", 
+                  stopInterval);
+            #endif
          }
          
          #if DEBUG_PROPAGATE_EXE
@@ -2703,8 +2714,9 @@ void Propagate::CheckStopConditions(Integer epochID)
    // loop through StopCondition list
    //------------------------------------------
    #ifdef DEBUG_STOPPING_CONDITIONS
-   try {
+      try {
    #endif
+   
       for (UnsignedInt i=0; i<stopWhen.size(); i++)
       {
          // StopCondition need epoch for the Interpolator
@@ -2745,14 +2757,14 @@ void Propagate::CheckStopConditions(Integer epochID)
       }
       
    #ifdef DEBUG_STOPPING_CONDITIONS
-   }
-   catch (BaseException &ex) {
-      MessageInterface::ShowMessage(
-         "Propagate::PrepareToPropagate() Exception while evaluating stopping "
-         "conditions\n");
-      inProgress = false;
-      throw;
-   }
+      }
+      catch (BaseException &ex) {
+         MessageInterface::ShowMessage(
+            "Propagate::PrepareToPropagate() Exception while evaluating stopping "
+            "conditions\n");
+         inProgress = false;
+         throw;
+      }
    #endif
 }
 
@@ -2837,8 +2849,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       // Get estimated time to reach this stop condition, dt
       if ((*i)->IsTimeCondition())
       {
-         dt = stopEpoch;//(*i)->GetStopGoal() - currEpoch[0];
-         
+         dt = (*i)->GetStopEpoch();
+                  
          #ifdef DEBUG_PROPAGATE_STEPSIZE         
             MessageInterface::ShowMessage("Stopping on time\n   current "
                "epoch = %.14lf\n   goal          = %.14lf\n   dt            = "

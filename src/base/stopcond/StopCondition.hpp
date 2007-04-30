@@ -39,7 +39,7 @@ public:
 
    StopCondition(const std::string &name = "",
                  const std::string &desc = "",
-                 Parameter *epochParam = NULL,
+                 Parameter *epochParam = NULL, 
                  Parameter *stopParam = NULL,
                  const Real &goal = GmatBase::REAL_PARAMETER_UNDEFINED,
                  const Real &tol = STOP_COND_TOL,
@@ -116,6 +116,7 @@ public:
    virtual Real GetStopDifference();
    virtual Real GetStopGoal();
    virtual Real GetStopTime();
+   virtual Real GetTimeMultiplier();
 
 protected:
 
@@ -168,6 +169,20 @@ protected:
    bool isAngleParameter;
    bool isPeriapse;
    bool isApoapse;
+   
+   enum TimeType
+   {
+      NOT_TIME_PARAM,
+      SECOND_PARAM,
+      MINUTE_PARAM,
+      HOUR_PARAM,
+      DAY_PARAM,
+      EPOCH_PARAM,
+      UNKNOWN_PARAM_TIME_TYPE
+   };
+   
+   TimeType stopParamTimeType;
+//   TimeType goalParamTimeType;
    
    enum
    {

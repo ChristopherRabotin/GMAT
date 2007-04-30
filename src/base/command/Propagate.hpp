@@ -174,7 +174,7 @@ protected:
    std::vector<SpaceObject *> sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
-   /// The time step that we need to unterpolate across
+   /// The time step that we need to interpolate across
    Real                    stopInterval;
    /// Index to the first StopCondition that triggered the stop
    Integer                 stopTrigger;

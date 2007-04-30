@@ -334,7 +334,7 @@ bool StopCondition::Evaluate()
       
    #ifdef DEBUG_BUFFER_FILLING
       MessageInterface::ShowMessage(
-         "StopCondition::Evaluate called;");
+         "StopCondition::Evaluate called\n");
    #endif
    
    // evaluate goal
@@ -381,74 +381,15 @@ bool StopCondition::Evaluate()
       }
    }
 
-   if (mNumValidPoints <= 2)
+   if (mNumValidPoints == 0)
    {
       previousValue = currentParmValue;
       previousEpoch = epoch;
       ++mNumValidPoints;
+      return false;
    }
    
-  
-// *****************************************************************************
-// Ignore update to time params for now 
-// *****************************************************************************
-   // for time data we don't need to interpolate
-   if (mStopParam->IsTimeParameter())
-   {
-      #if DEBUG_STOPCOND > 1
-         MessageInterface::ShowMessage
-            ("StopCondition::Evaluate() mUseInternalEpoch = %d, epoch = %f, "
-             "mGoal = %f, currentParmValue = %f, previousEpoch = %f\n",  
-             mUseInternalEpoch, epoch, 
-             mGoal, currentParmValue, previousEpoch);
-      #endif
-      
-      // handler for time based stopping for backwards prop
-      Real mult = (mGoal >= 0.0 ? 1.0 : -1.0);
-
-      #if DEBUG_STOPCOND > 1
-      MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() mult*currentParmValue=%g, mult*mGoal=%g, "
-          "diff=%g, mTolerance=%g\n",  mult*currentParmValue, mult*mGoal, 
-          Abs(mult*currentParmValue - mult*mGoal), mTolerance);
-      #endif
-
-      // use time tolerance = 1.0e-6 for equality test
-      //if (mult*currentParmValue >= mult*mGoal)
-      if ((Abs(mult*currentParmValue - mult*mGoal) <= 1.0e-6) ||
-          (mult*currentParmValue >= mult*mGoal))
-      {
-         std::string stopParamType = mStopParam->GetTypeName();
-         
-         if (stopParamType == "ElapsedSecs")
-            mStopEpoch = mBaseEpoch + mGoal/86400.0;
-         else if (stopParamType == "ElapsedDays")
-            mStopEpoch = mBaseEpoch + mGoal;
-         //else if (stopParamType == "CurrA1MJD")
-         else if (stopParamType == "A1ModJulian")
-            mStopEpoch = mGoal;
-         else
-            throw StopConditionException
-               ("StopCondition::Evaluate()::Unknown stop time param type:" +
-                stopParamType + "\n");
-         
-         goalMet = true;
-      }
-      else
-         previousEpoch = epoch;
-      
-
-      #if DEBUG_STOPCOND > 1
-      MessageInterface::ShowMessage
-         ("StopCondition::Evaluate() time goalMet = %d, mStopEpoch=%f, \n",
-          goalMet, mStopEpoch);
-      #endif
-      
-   }
-// *****************************************************************************
-// End of time parameter block
-// *****************************************************************************
-   else
+   if (!mStopParam->IsTimeParameter())
    {
       Real min, max;
       min = (currentParmValue<previousValue ? currentParmValue : previousValue);
@@ -468,8 +409,9 @@ bool StopCondition::Evaluate()
       
             #ifdef DEBUG_STOP_COND
                MessageInterface::ShowMessage(
-                  "Previous Epoch = %.12lf, Value = %.12lf\n", previousEpoch,
-                  previousValue);
+                  "Previous Epoch = %.12lf, Epoch  %.12lf, Value = %.12lf, "
+                  "StopInterval = %.12lf\n", previousEpoch, epoch,
+                  previousValue, mStopInterval);
             #endif
 
          }
@@ -481,11 +423,51 @@ bool StopCondition::Evaluate()
          }
       }
    }
+   else
+   // for time data we don't need to interpolate
+   {
+      Real prevGoalDiff = previousValue - mGoal,
+           currGoalDiff = currentParmValue - mGoal;
+                       
+      Real direction = 
+           (currGoalDiff - prevGoalDiff > 0.0 ? 1.0 : -1.0);
+
+      #if DEBUG_STOPCOND > 1
+         MessageInterface::ShowMessage(
+            "prev = %15.9lf, curr = %15.9lf, lhs = %15.9lf, rhs = %15.9lf, "
+            "direction = %15.9lf, \n", previousValue, currentParmValue, 
+            prevGoalDiff, currGoalDiff, direction);
+      #endif
+      
+      // Goal met if it falls between previous and current values
+      if ((currGoalDiff*direction >= 0.0) && 
+          (prevGoalDiff*direction <= 0.0))
+      {
+         goalMet = true;
+         
+         #if DEBUG_STOPCOND > 1
+            MessageInterface::ShowMessage
+               ("StopCondition::Evaluate() mUseInternalEpoch = %d, "
+               "epoch = %15.9lf, mGoal = %15.9lf, "
+               "currentParmValue = %15.9lf, "
+               "previousValue = %15.9lf, "
+               "GoalDiffs = [%15.9lf  %15.9lf]\n",  
+                mUseInternalEpoch, epoch, 
+                mGoal, currentParmValue, previousValue, 
+                prevGoalDiff, currGoalDiff);
+         #endif
+      }
+      else
+      {
+         previousValue = currentParmValue;
+         previousEpoch = epoch;
+      }
+   }
    
    #ifdef DEBUG_BUFFER_FILLING
       MessageInterface::ShowMessage(
-         "Value = %.12lf, Previous = %.12lf; Goal (%.12lf) %s\n", 
-         currentParmValue, previousValue, mGoal, (goalMet ? "met" : "not met"));
+         "Value = %.12lf, Previous = %.12lf; Goal (%.12lf) %s, epoch = %15.12lf\n", 
+         currentParmValue, previousValue, mGoal, (goalMet ? "met" : "not met"), epoch);
    #endif
    
    return goalMet;
@@ -676,9 +658,16 @@ Real StopCondition::GetStopEpoch()
 {
    if (IsTimeCondition())
    {
-      if (previousEpoch == 0.0)
-         return 0.0;
-      return (mStopEpoch - previousEpoch) * 86400.0;
+      
+      #if DEBUG_STOPCOND
+         MessageInterface::ShowMessage
+            ("StopCondition::GetStopEpoch()\n   Previous = %15.9lf\n   "
+            "Current = %15.9lf\n   Goal = %15.9lf", previousEpoch, previousValue, 
+            mGoal);
+      #endif
+
+      Real dt = (mGoal - previousValue) * GetTimeMultiplier();
+      return dt;
    }
       
    Real stopEpoch = 0.0;
@@ -919,6 +908,22 @@ bool StopCondition::Validate()
    if (mStopParam->IsTimeParameter())
    {
       mNeedInterpolator = false;
+      // Set time parameter type
+      std::string timeTypeName = mStopParam->GetTypeName();
+      if (timeTypeName == "ElapsedSecs")
+         stopParamTimeType = SECOND_PARAM;
+      else if (timeTypeName == "ElapsedDays")
+         stopParamTimeType = DAY_PARAM;
+      else if (timeTypeName.find("ModJulian") != std::string::npos)
+         stopParamTimeType = EPOCH_PARAM;
+      else
+         stopParamTimeType = UNKNOWN_PARAM_TIME_TYPE;
+         
+      #if DEBUG_BASE_STOPCOND_INIT   
+         MessageInterface::ShowMessage(
+            "Stop parameter \"%s\" has time type %d\n", timeTypeName.c_str(), 
+            stopParamTimeType);
+      #endif
    }
    else
    {
@@ -1728,6 +1733,41 @@ Real StopCondition::GetStopGoal()
 Real StopCondition::GetStopTime()
 {
    return previousEpoch;
+}
+
+
+//------------------------------------------------------------------------------
+// Real GetTimeMultiplier()
+//------------------------------------------------------------------------------
+/**
+ * Used to find the conversion factor for changing time paramters to seconds.
+ * 
+ * @return The factor.
+ */ 
+//------------------------------------------------------------------------------
+Real StopCondition::GetTimeMultiplier()
+{
+   switch (stopParamTimeType)
+   {
+      case MINUTE_PARAM:
+         return 60.0;
+
+      case HOUR_PARAM:
+         return 3600.0;
+      
+      case DAY_PARAM:
+      case EPOCH_PARAM:
+         return 86400.0;
+      
+      // All intentional fall-throughs
+      case SECOND_PARAM:
+      case NOT_TIME_PARAM:
+      case UNKNOWN_PARAM_TIME_TYPE:
+      default:
+         return 1.0;
+   };
+   
+   return 1.0;
 }
 
 
