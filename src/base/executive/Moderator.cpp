@@ -3510,10 +3510,11 @@ GmatBase* Moderator::GetInternalObject(const std::string &name, Integer sandboxN
  *
  * @param  sandboxNum  The sandbox number (1 to Gmat::MAX_SANDBOX)
  *
- * @return  0 if run was successful
+ * @return  1 if run was successful
  *         -1 if sandbox number is invalid
- *         -2 some unknown error occurred
+ *         -2 if execution interrupted by user
  *         -3 if exception thrown during the run
+ *         -4 if unknown error occurred
  */
 //------------------------------------------------------------------------------
 Integer Moderator::RunMission(Integer sandboxNum)
@@ -3521,7 +3522,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    //MessageInterface::ShowMessage("\n========================================\n");
    //MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    MessageInterface::ShowMessage("Running mission...\n");
-   Integer status = 0;
+   Integer status = 1;
    
    clock_t t1 = clock(); // Should I clock after initilization?
    
@@ -3597,10 +3598,14 @@ Integer Moderator::RunMission(Integer sandboxNum)
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage(e.GetFullMessage() + "\n");
-         MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+         std::string msg = e.GetFullMessage();
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg + "\n");
+         
          // assign status
-         status = -2;
+         if (msg.find("Execution interrupted") != msg.npos)
+            status = -2;
+         else
+            status = -3;
       }
       catch (...)
       {
@@ -3613,7 +3618,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Mission not Complete. Cannot Run Mission.\n");
-      status = -3;
+      status = -4;
    }
    
    runState = Gmat::IDLE;
@@ -3621,8 +3626,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
    thePublisher->NotifyEndOfRun();
    theGuiInterpreter->NotifyRunCompleted();
    
-   if (status == 0)
+   if (status == 1)
       MessageInterface::ShowMessage("Mission run completed.\n");
+   else if (status == -2)
+      MessageInterface::ShowMessage("*** Mission run interrupted.\n");
    else
       MessageInterface::ShowMessage("*** Mission run failed.\n");
    
