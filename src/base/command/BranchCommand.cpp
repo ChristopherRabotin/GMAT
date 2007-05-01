@@ -952,55 +952,74 @@ bool BranchCommand::Execute()
 //------------------------------------------------------------------------------
 bool BranchCommand::ExecuteBranch(Integer which)
 {
-#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
-MessageInterface::ShowMessage("In BranchCommand (%s), executing branch %d\n", 
-typeName.c_str(), which);
-#endif
+   #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+   MessageInterface::ShowMessage
+      ("In BranchCommand (%s), executing branch %d\n", typeName.c_str(), which);
+   #endif
    bool retval = true;
-      
+   
    if (current == NULL)
       current = branch[which];
-      
-#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+   
+   #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
    if (current != NULL)
    {
       std::string curName = current->GetTypeName();
       MessageInterface::ShowMessage
-      ("In ExecuteBranch (%s) - current = %s\n", 
+         ("In ExecuteBranch (%s) - current = %s\n", 
       typeName.c_str(), curName.c_str());
    }
    else
       MessageInterface::ShowMessage
          ("In ExecuteBranch (%s)  - current = NULL\n", typeName.c_str());
-#endif
+   #endif
+   
    if (current == this)
    {
-#ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+      #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
       MessageInterface::ShowMessage
-      ("In ExecuteBranch (%s) - current = this -> resetting\n", 
-      typeName.c_str());
+         ("In ExecuteBranch (%s) - current = this -> resetting\n", 
+          typeName.c_str());
       if (next)
-      MessageInterface::ShowMessage("...... and the next one is : %s\n",
-      (next->GetTypeName()).c_str());
+         MessageInterface::ShowMessage
+            ("...... and the next one is : %s\n", (next->GetTypeName()).c_str());
       else
-       MessageInterface::ShowMessage("...... and the next one is NULL!!!\n");
-#endif
+         MessageInterface::ShowMessage("...... and the next one is NULL!!!\n");
+      #endif
+      
       branchExecuting = false;
       //commandExecuting = false;  // ***********************
       //commandComplete  = true;   // ***********************
       current = NULL;
    }
-
+   
    //while ((current != NULL) && (current != this))
    if (current != NULL)
    {
-      if (current->Execute() == false)
+      #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+      MessageInterface::ShowMessage
+         ("   Calling %s->Execute()\n", current->GetTypeName().c_str());
+      #endif
+      
+      try
       {
-         retval = false;
-//         break;
+         if (current->Execute() == false)
+         {
+            retval = false;
+            //break;
+         }
+         // May need to add a test for user interruption here
+         current = current->GetNext();
       }
-      // May need to add a test for user interruption here
-      current = current->GetNext();
+      catch (BaseException &e)
+      {
+         #ifdef DEBUG_BRANCHCOMMAND_EXECUTION
+         MessageInterface::ShowMessage
+            ("   BranchCommand rethrowing %s\n", e.GetFullMessage().c_str());
+         #endif
+         
+         throw;
+      }
    }
    
    return retval;
