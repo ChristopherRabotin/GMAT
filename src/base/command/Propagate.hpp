@@ -227,6 +227,8 @@ protected:
    Real                    stopEpoch;
    /// Required accuracy for stopping with stop conditions
    Real                    stopAccuracy;
+   /// Required accuracy for stopping with stop conditions
+   Real                    timeAccuracy;
    /// Dimension used for (local) state vector
    Integer                 dim;
    /// Identifies when the command is in single step mode

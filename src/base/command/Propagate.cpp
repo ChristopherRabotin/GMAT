@@ -106,6 +106,7 @@ Propagate::Propagate() :
    stopCondMet                 (false),
    stopEpoch                   (0.0),
    stopAccuracy                (1.0e-7),
+   timeAccuracy                (1.0e-6),
    dim                         (0),
    singleStepMode              (false),
    currentMode                 (INDEPENDENT),
@@ -178,6 +179,7 @@ Propagate::Propagate(const Propagate &prp) :
    stopCondMet                 (false),
    stopEpoch                   (prp.stopEpoch),
    stopAccuracy                (prp.stopAccuracy),
+   timeAccuracy                (prp.timeAccuracy),
    dim                         (prp.dim),
    singleStepMode              (prp.singleStepMode),
    transientForces             (NULL),
@@ -235,6 +237,7 @@ Propagate& Propagate::operator=(const Propagate &prp)
    stopCondMet             = false;
    stopEpoch               = prp.stopEpoch;
    stopAccuracy            = prp.stopAccuracy;
+   timeAccuracy            = prp.timeAccuracy;
    dim                     = prp.dim;
    singleStepMode          = prp.singleStepMode;
    currentMode             = prp.currentMode;
@@ -2441,13 +2444,15 @@ bool Propagate::Execute()
             // Evaluate Stop conditions to set initial values
             for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
+               Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
+                                stopAccuracy);
                stopWhen[i]->Reset();
                stopWhen[i]->Evaluate();
 
                // Set the flag to check the first step only if 
                //    (1) the stop value is <= stopAccuracy and
                //    (2) it was (one of) the last stop(s) triggered
-               if (fabs(stopWhen[i]->GetStopValue()) < stopAccuracy)
+               if (fabs(stopWhen[i]->GetStopValue()) < accuracy)
                {
                   if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()))
                   {
@@ -2892,6 +2897,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
           stopEpoch, currEpoch[trigger]);
    #endif
 
+   Real accuracy = (stopper->IsTimeCondition() ? timeAccuracy : stopAccuracy);
+
    // If we are not at the final state, move to it
    if (fabs(secsToStep) > 0.0)
    {
@@ -2914,7 +2921,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
       stopper->Evaluate();
 
-      if (fabs(stopper->GetStopDifference()) > stopAccuracy)
+      if (fabs(stopper->GetStopDifference()) > accuracy)
       {
          #ifdef DEBUG_STOPPING_CONDITIONS   
             MessageInterface::ShowMessage("   Stop condition %s missed by %le; "
@@ -3109,75 +3116,144 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    bool nextTimeThrough = false;
    Integer attempts = 0;
 
-   if (stopper->IsTimeCondition())
-      return secsToStep;
-   
    Real x[2], y[2], slope, target, intercept;
-   Parameter *stopParam = stopper->GetStopParameter();
+   Parameter *stopParam = stopper->GetStopParameter(),
+             *targParam = stopper->GetGoalParameter();
    
    x[0] = x[1] = y[1] = 0.0;
    intercept = y[0] = stopParam->EvaluateReal();
 
-   while (!closeEnough && (attempts < 50))
+   if (stopper->IsTimeCondition())
    {
-      target = stopper->GetStopGoal();
+      Real prevStep = secsToStep;
       
-      if (nextTimeThrough)
+      while ((attempts < 50) && !closeEnough)
       {
          // Restore the spacecraft and force models to the end state of the last step
-         BufferSatelliteStates(false);
+         if (attempts > 0)
+         {
+            BufferSatelliteStates(false);
+            for (UnsignedInt i = 0; i < fm.size(); ++i) 
+            {
+               fm[i]->UpdateFromSpaceObject();
+               fm[i]->SetTime(fm[i]->GetTime() - prevStep);
+            }
+         }
+
+         if (!TakeAStep(secsToStep))
+            throw CommandException("Unable to take a good step while searching "
+               "for stopping step in command\n   \"" + GetGeneratingString() + 
+               "\"\n");
+      
+         // Update spacecraft for that step
          for (UnsignedInt i = 0; i < fm.size(); ++i) 
          {
-            fm[i]->UpdateFromSpaceObject();
-            fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+            fm[i]->UpdateSpaceObject(
+               baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
          }
-      
-         if (x[1] == x[0])
-            throw CommandException("Error refining timestep for Propagate "
-               "command: infinite slope; Exiting\n");
-         slope = (y[1] - y[0]) / (x[1] - x[0]);
-         if (slope == 0.0) 
+   
+         if (targParam != NULL)
+            target = targParam->EvaluateReal();
+         else
+            target = stopper->GetStopGoal();
+         
+         x[1] = secsToStep;
+         y[1] = stopParam->EvaluateReal();
+
+         #ifdef DEBUG_STOPPING_CONDITIONS   
+            MessageInterface::ShowMessage(
+               "[%d] Time based secant target: %16.12le\n"
+               "     BaseEpoch: %16.9lf    fmTime: %16.9lf\n"
+               "     Secant data points:\n"
+               "        (%16.12le, %16.12le)\n"
+               "        (%16.12le, %16.12le)\n"
+               "     Secant timestep: %16.12lf\n",
+               attempts, target, baseEpoch[0], fm[0]->GetTime(), x[0], y[0], 
+               x[1], y[1], secsToStep);
+         #endif
+         
+         if (fabs(target - y[1]) < timeAccuracy)
+            closeEnough = true;
+         else
          {
-            ++attempts;
-            throw CommandException("Error refining timestep for Propagate "
-               "command: zero slope; Exiting\n");
+            prevStep = secsToStep;
+            slope = (y[1] - y[0]) / (x[1] - x[0]);
+            secsToStep = (target - y[0]) / slope;
          }
-         secsToStep = (target - y[0]) / slope;
+         
+         ++attempts;
       }
-      else
+   }
+   else
+   {
+      while (!closeEnough && (attempts < 50))
       {
-         nextTimeThrough = true;
+         target = stopper->GetStopGoal();
+         
+         if (nextTimeThrough)
+         {
+            // Restore the spacecraft and force models to the end state of the last step
+            BufferSatelliteStates(false);
+            for (UnsignedInt i = 0; i < fm.size(); ++i) 
+            {
+               fm[i]->UpdateFromSpaceObject();
+               fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+            }
+         
+            if (x[1] == x[0])
+               throw CommandException("Error refining timestep for Propagate "
+                  "command: infinite slope; Exiting\n");
+            slope = (y[1] - y[0]) / (x[1] - x[0]);
+            if (slope == 0.0) 
+            {
+               ++attempts;
+               throw CommandException("Error refining timestep for Propagate "
+                  "command: zero slope; Exiting\n");
+            }
+            secsToStep = (target - y[0]) / slope;
+         }
+         else
+         {
+            nextTimeThrough = true;
+         }
+         
+         if (!TakeAStep(secsToStep))
+            throw CommandException("Unable to take a good step while searching for"
+               " stopping step in command\n   \"" + GetGeneratingString() + "\"\n");
+         
+         // Update spacecraft for that step
+         for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         {
+            fm[i]->UpdateSpaceObject(
+               baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
+         }
+   
+         x[1] = secsToStep;
+         y[1] = stopParam->EvaluateReal();
+   
+         #ifdef DEBUG_STOPPING_CONDITIONS   
+            MessageInterface::ShowMessage(
+               "   Secant target: %16.12le\n"
+               "   Secant data points:\n"
+               "      (%16.12le, %16.12le)\n"
+               "      (%16.12le, %16.12le)\n"
+               "   Secant timestep: %16.12lf\n",
+               target, x[0], y[0], x[1], y[1], secsToStep);
+         #endif
+   
+         // Check to see if accuracy is within tolerance
+         if (fabs(stopper->GetStopDifference()) < stopAccuracy)
+            closeEnough = true;
+   
+         ++attempts;
+   
+         #ifdef DEBUG_STOPPING_CONDITIONS   
+            MessageInterface::ShowMessage(
+               "   %d: secsToStep = %16.12lf, Stop diff = %16.12lf, "
+               "Accuracy = %16.12lf\n", attempts, secsToStep, 
+               stopper->GetStopDifference(), stopAccuracy);      
+         #endif
       }
-      
-      if (!TakeAStep(secsToStep))
-         throw CommandException("Unable to take a good step while searching for"
-            " stopping step in command\n   \"" + GetGeneratingString() + "\"\n");
-      
-      // Update spacecraft for that step
-      for (UnsignedInt i = 0; i < fm.size(); ++i) 
-      {
-         fm[i]->UpdateSpaceObject(
-            baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
-      }
-
-      x[1] = secsToStep;
-      y[1] = stopParam->EvaluateReal();
-
-      #ifdef DEBUG_STOPPING_CONDITIONS   
-         MessageInterface::ShowMessage(
-            "   Secant target: %16.12le\n"
-            "   Secant data points:\n"
-            "      (%16.12le, %16.12le)\n"
-            "      (%16.12le, %16.12le)\n"
-            "   Secant timestep: %16.12lf\n",
-            target, x[0], y[0], x[1], y[1], secsToStep);
-      #endif
-
-      // Check to see if accuracy is within tolerance
-      if (fabs(stopper->GetStopDifference()) < stopAccuracy)
-         closeEnough = true;
-      
-      ++attempts;
    }
       
    // Restore the spacecraft and force models to the end state of the last step

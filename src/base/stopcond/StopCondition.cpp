@@ -1090,6 +1090,15 @@ Parameter* StopCondition::GetStopParameter()
 
 
 //------------------------------------------------------------------------------
+// Parameter* GetStopParameter()
+//------------------------------------------------------------------------------
+Parameter* StopCondition::GetGoalParameter()
+{
+   return mGoalParam;
+}
+
+
+//------------------------------------------------------------------------------
 // Interpolator* GetInterpolator()
 //------------------------------------------------------------------------------
 Interpolator* StopCondition::GetInterpolator()

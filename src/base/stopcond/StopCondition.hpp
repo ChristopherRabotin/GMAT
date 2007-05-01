@@ -63,6 +63,7 @@ public:
    std::string& GetDescription();
    Parameter* GetEpochParameter();
    Parameter* GetStopParameter();
+   Parameter* GetGoalParameter();
    Interpolator* GetInterpolator();
 
 
