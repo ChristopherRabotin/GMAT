@@ -118,6 +118,7 @@
 
 //#define DEBUG_MAINFRAME 1
 //#define DEBUG_MAINFRAME_CLOSE 1
+//#define DEBUG_MAINFRAME_SAVE 1
 //#define DEBUG_FILE_COMPARE 1
 
 using namespace GmatMenu;
@@ -877,16 +878,26 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 
 
 //------------------------------------------------------------------------------
-// bool RunCurrentMission()
+// Integer RunCurrentMission()
 //------------------------------------------------------------------------------
-bool GmatMainFrame::RunCurrentMission()
+/*
+ * Executes current mission by calling GuiInterpreter::RunMission() which
+ * calls Moderator::RunMission()
+ *
+ * @return  1 if run was successful
+ *         -2 if execution interrupted by user
+ *         -3 if exception thrown during the run
+ *         -4 if unknown error occurred during the run
+ */
+//------------------------------------------------------------------------------ 
+Integer GmatMainFrame::RunCurrentMission()
 {
    #if DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
-
-   bool status = false;
+   
+   Integer retval = 1;
    
    if (mInterpretFailed)
    {
@@ -895,7 +906,8 @@ bool GmatMainFrame::RunCurrentMission()
           "Please fix all errors listed in message window before running "
           "the mission.\n", mScriptFilename.c_str());
       
-      return false;
+      //return false;
+      return 0;
    }
    
    wxToolBar* toolBar = GetToolBar();
@@ -923,9 +935,11 @@ bool GmatMainFrame::RunCurrentMission()
    else
    {
       MinimizeChildren();
-      Integer retval = theGuiInterpreter->RunMission();
-      if (retval == 0)
-         status = true;
+      retval = theGuiInterpreter->RunMission();
+      
+      if (retval != 1)
+         StopServer(); // stop server if running to avoid getting callback staus
+                       // when run stopped by user
       
       menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
       UpdateMenus(TRUE);
@@ -938,7 +952,8 @@ bool GmatMainFrame::RunCurrentMission()
       GmatAppData::GetOutputTree()->UpdateOutput(false);
    }
    
-   return status;
+   //return status;
+   return retval;
 } // end RunCurrentMission()
 
 
@@ -1265,6 +1280,12 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
          wxString currFilename = mScriptFilename.c_str();
          wxString backupFilename = currFilename + ".bak";
          ::wxCopyFile(currFilename, backupFilename);
+         
+         #if DEBUG_MAINFRAME_SAVE
+         MessageInterface::ShowMessage
+            ("GmatMainFrame::OnSaveScript() Created backup file: %s\n",
+             backupFilename.c_str());
+         #endif
          
          GmatAppData::GetGuiInterpreter()->SaveScript(mScriptFilename);
          scriptSaved = true;
