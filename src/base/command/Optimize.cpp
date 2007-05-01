@@ -402,9 +402,9 @@ bool Optimize::Execute()
 
    if (!commandExecuting) 
    {
-           #ifdef DEBUG_OPTIMIZE_COMMANDS
-           MessageInterface::ShowMessage(
-           "Entered Optimizer while command is not executing\n");
+      #ifdef DEBUG_OPTIMIZE_COMMANDS
+         MessageInterface::ShowMessage(
+         "Entered Optimizer while command is not executing\n");
       #endif
 
       FreeLoopData();
@@ -559,7 +559,8 @@ void Optimize::RunComplete()
 {
    if (optimizer != NULL)
       optimizer->Finalize();
-   GmatCommand::RunComplete();
+   
+   SolverBranchCommand::RunComplete();
 }
 
 
