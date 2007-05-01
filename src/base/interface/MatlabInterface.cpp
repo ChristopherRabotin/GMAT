@@ -130,8 +130,9 @@ int MatlabInterface::Open()
    {
       accessCount++;
       #ifdef DEBUG_MATLAB_OPEN_CLOSE
-         MessageInterface::ShowMessage(
-         "Attempting to open MATLAB connection ... accessCount = %d\n", accessCount);
+         MessageInterface::ShowMessage
+            ("Attempting to open MATLAB connection ... accessCount = %d, "
+             "enginePtrD=%p\n", accessCount, enginePtrD);
       #endif
       return 1;
    }
@@ -165,8 +166,10 @@ int MatlabInterface::Close()
    // Check if MATLAB is still running then close it.
    if (enginePtrD != NULL)
    {
+      #ifdef DEBUG_MATLAB_OPEN_CLOSE
       MessageInterface::ShowMessage
-         ("===> MatlabInterface::Close() enginePtrD=%p\n", enginePtrD);
+         ("MatlabInterface::Close() enginePtrD=%p\n", enginePtrD);
+      #endif
       
       accessCount--;
       #ifdef DEBUG_MATLAB_OPEN_CLOSE
@@ -181,9 +184,10 @@ int MatlabInterface::Close()
             MessageInterface::ShowMessage(
             "Closing connection to MATLAB ... please close X11 ...\n");
          #endif
+            
          if (engClose(enginePtrD) != 0)
-               MessageInterface::ShowMessage("\nError closing MATLAB\n");    
-         //engClose(enginePtrD);
+               MessageInterface::ShowMessage("\nError closing MATLAB\n");
+         
          enginePtrD = NULL;      // set to NULL, so it can be reopened
          MessageInterface::ShowMessage("MATLAB has been closed ...\n");
       //}

@@ -194,12 +194,13 @@ bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 {
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
-      "GI::RegisterCallbackServer being called with object %s...\n",
-      (callbackObject->GetName()).c_str());
+      "GI::RegisterCallbackServer being called with object %s \"%s\"...\n",
+      callbackObject->GetTypeName().c_str(), callbackObject->GetName().c_str());
    #endif
    callbackObj = callbackObject;
    return true;
 }
+
 
 //------------------------------------------------------------------------------
 // char* GetCallbackStatus()
@@ -228,7 +229,7 @@ char* GmatInterface::GetCallbackStatus()
       else
          sprintf(dataString, "%s", completedStr);
    }
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_TEST_CALLBACK
    MessageInterface::ShowMessage
       ("GmatInterface::GetCallbackStatus() dataString=<%s>\n", dataString);
    #endif
