@@ -27,6 +27,7 @@
 #include "GmatFunction.hpp"
 #include "CallFunction.hpp"
 #include "SubscriberException.hpp"
+#include "CommandUtil.hpp"         // for GetCommandSeqString()
 #include "MessageInterface.hpp"
 
 #include <algorithm>       // for find
@@ -1112,6 +1113,17 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
 bool Sandbox::Execute()
 {
 
+   #ifdef DEBUG_SANDBOX_RUN
+   MessageInterface::ShowMessage("Sandbox::Execute() Here is the current object map:\n");
+   for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
+        i != objectMap.end(); ++i)
+      MessageInterface::ShowMessage("   (%p) %s\n", i->second, i->first.c_str());
+
+   MessageInterface::ShowMessage("Sandbox::Execute() Here is the mission sequence:\n");
+   std::string seq = GmatCommandUtil::GetCommandSeqString(sequence);
+   MessageInterface::ShowMessage(seq);
+   #endif
+   
    bool rv = true;
 
    state = RUNNING;
@@ -1121,84 +1133,97 @@ bool Sandbox::Execute()
    if (!current)
       return false;
 
-
-   while (current)
+   try
    {
-      // First check to see if the run should be interrupted
-      if (Interrupt())
+      while (current)
       {
-         #ifdef DEBUG_MODERATOR_CALLBACK
+         // First check to see if the run should be interrupted
+         if (Interrupt())
+         {
+            #ifdef DEBUG_MODERATOR_CALLBACK
             MessageInterface::ShowMessage("   Interrupted in %s command\n",
-               current->GetTypeName().c_str());
-         #endif
-
-
-         if (state == PAUSED)
-         {
-            continue;
-         }
-         else
-         {
-            MessageInterface::ShowMessage("Sandbox::Execution interrupted.\n");
-            sequence->RunComplete();
+                                          current->GetTypeName().c_str());
+            #endif
             
-            // notify subscribers end of run
-            currentState = Gmat::IDLE;
-            publisher->SetRunState(currentState);
-            publisher->NotifyEndOfRun();
-            return rv;
+            
+            if (state == PAUSED)
+            {
+               continue;
+            }
+            else
+            {
+               //MessageInterface::ShowMessage("Sandbox::Execution interrupted.\n");
+               sequence->RunComplete();
+               
+               // notify subscribers end of run
+               currentState = Gmat::IDLE;
+               publisher->SetRunState(currentState);
+               publisher->NotifyEndOfRun();
+               
+               throw SandboxException("Execution interrupted");
+               //return rv;
+            }
          }
+         
+         #if DEBUG_SANDBOX_RUN
+         MessageInterface::ShowMessage
+            ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());
+         #endif
+                  
+         if (current->GetTypeName() == "Target")
+         {
+            if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
+               currentState = Gmat::RUNNING;
+            else
+               currentState = Gmat::TARGETING;
+         }
+         
+         if (currentState != runState)
+         {
+            publisher->SetRunState(currentState);
+            runState = currentState;
+         }
+         
+         rv = current->Execute();
+         
+         // Possible fix for displaying the last iteration...
+         if (current->GetTypeName() == "Target")
+         {
+            if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
+               currentState = Gmat::RUNNING;
+            else
+               currentState = Gmat::TARGETING;
+         }
+         
+         if (!rv)
+         {
+            std::string str = "\"" + current->GetTypeName() +
+               "\" Command failed to run to completion\nCommand Text is \"" +
+               current->GetGeneratingString() + "\"\n";
+            throw SandboxException(str);
+         }
+         current = current->GetNext();
       }
-
-      #if DEBUG_SANDBOX_RUN
-         MessageInterface::ShowMessage("Sandbox::Execution running %s\n",
-                                       current->GetTypeName().c_str());
-      #endif
-
-
-      if (current->GetTypeName() == "Target")
-      {
-         if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
-            currentState = Gmat::RUNNING;
-         else
-            currentState = Gmat::TARGETING;
-      }
-
-      if (currentState != runState)
-      {
-         publisher->SetRunState(currentState);
-         runState = currentState;
-      }
-
-      rv = current->Execute();
-
-      // Possible fix for displaying the last iteration...
-      if (current->GetTypeName() == "Target")
-      {
-         if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
-            currentState = Gmat::RUNNING;
-         else
-            currentState = Gmat::TARGETING;
-      }
-
-      if (!rv)
-      {
-         std::string str = "\"" + current->GetTypeName() +
-            "\" Command failed to run to completion\nCommand Text is \"" +
-            current->GetGeneratingString() + "\"\n";
-         throw SandboxException(str);
-      }
-      current = current->GetNext();
    }
-
+   catch (BaseException &e)
+   {
+      sequence->RunComplete();
+      
+      #if DEBUG_SANDBOX_RUN
+      MessageInterface::ShowMessage
+         ("   Sandbox rethrowing %s\n", e.GetFullMessage().c_str());
+      #endif
+      
+      throw;
+   }
+   
    sequence->RunComplete();
-
-
+   
    // notify subscribers end of run
    currentState = Gmat::IDLE;
    publisher->SetRunState(currentState);
    publisher->NotifyEndOfRun();
-
+   
    return rv;
 }
 
@@ -1217,7 +1242,7 @@ bool Sandbox::Interrupt()
 {
    // Ask the moderator for the current RunState; only check at fixed frequency
    if (++interruptCount == pollFrequency)
-   {      
+   {
       Gmat::RunState interruptType =  moderator->GetUserInterrupt();
    
       switch (interruptType)
