@@ -2672,6 +2672,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    mFailedScriptsList.Clear();
    mScriptFolderRunning = true;
    wxArrayString failedToRunScripts;
+   wxArrayString runInterruptedScripts;
    
    while (scriptId.IsOk())
    {     
@@ -2747,8 +2748,12 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
             
             if (builtOk)
             {
+               Integer retval = GmatAppData::GetMainFrame()->RunCurrentMission();
+               
                // if run failed, save to report
-               if (!GmatAppData::GetMainFrame()->RunCurrentMission())
+               if (retval == -2)
+                  runInterruptedScripts.Add(filename);
+               else if (retval <= -3)
                   failedToRunScripts.Add(filename);
                
                if (compare)
@@ -2798,6 +2803,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // Popup errors found message
    wxString msg1;
    wxString msg2;
+   wxString msg3;
    
    if (mBuildErrorCount > 0)
    {
@@ -2821,8 +2827,19 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       msg2 = msg2 + scriptNames2;
    }
    
-   if (msg1 != "" || msg2 != "")
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg1 + msg2);
+   if (runInterruptedScripts.GetCount() > 0)
+   {
+      wxString scriptNames3;
+      msg3 = "\nThe following script(s) were interrupted by user:\n";
+      
+      for (unsigned int i=0; i<runInterruptedScripts.GetCount(); i++)
+         scriptNames3 = scriptNames3 + runInterruptedScripts[i] + "\n";
+      
+      msg3 = msg3 + scriptNames3;
+   }
+   
+   if (msg1 != "" || msg2 != "" || msg3 != "")
+      MessageInterface::PopupMessage(Gmat::ERROR_, msg1 + msg2 + msg3);
    
 }
 
