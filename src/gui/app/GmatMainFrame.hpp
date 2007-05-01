@@ -68,7 +68,7 @@ public:
    bool InterpretScript(const wxString &filename, bool readBack = false,
                         const wxString &savePath = "", bool openScript = true,
                         bool multScripts = false);
-   bool RunCurrentMission();
+   Integer RunCurrentMission();
    void NotifyRunCompleted();
    void ProcessPendingEvent();
    void StartServer();
