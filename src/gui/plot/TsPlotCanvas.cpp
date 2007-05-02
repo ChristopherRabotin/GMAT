@@ -887,7 +887,7 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
    { 
       legendRect.x = plotArea.x + plotArea.width - legendRect.width + 5;
       legendRect.y = plotArea.y - 5;
-      initializeLegendLoc = false;
+//      initializeLegendLoc = false;  // Turn off static legend location
    }
 
    dc.SetClippingRegion(legendRect);
