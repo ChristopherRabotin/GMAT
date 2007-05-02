@@ -55,7 +55,7 @@ public:
    };
    
    /// Enumeration for solver progress report formats
-   enum ReportStyle
+   enum Report_Style
    {
       NORMAL_STYLE = 11001,
       CONCISE_STYLE,
