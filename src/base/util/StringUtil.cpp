@@ -293,7 +293,7 @@ std::string GmatStringUtil::Replace(const std::string &str, const std::string &f
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::ToString(const Real &val, Integer precision)
 {
-   return GmatRealUtil::ToString(val, false, false, precision, 0);
+   return GmatRealUtil::ToString(val, false, false, true, precision, 0);
 }
 
 
@@ -333,8 +333,8 @@ std::string GmatStringUtil::ToString(const Real &val, bool useCurrentFormat,
                                      bool scientific, Integer precision,
                                      Integer width)
 {
-   return GmatRealUtil::ToString(val, useCurrentFormat, scientific, precision,
-                                 width);
+   return GmatRealUtil::ToString(val, useCurrentFormat, scientific, true,
+                                 precision, width);
 }
 
 
