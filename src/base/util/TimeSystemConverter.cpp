@@ -28,6 +28,7 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_TIMECONVERTER_DETAILS
 //#define DEBUG_GREGORIAN
+//#define DEBUG_TIME_CONVERT
 
 #ifdef DEBUG_FIRST_CALL
    static bool firstCallFired = false;
@@ -505,6 +506,8 @@ Real TimeConverterUtil::ConvertGregorianToMjd(const std::string &greg)
             a1Date.GetHour(), a1Date.GetMinute(),a1Date.GetSecond());
        MessageInterface::ShowMessage("------ jules      = %s\n", 
           (gregorianDate.GetDate()).c_str());
+       MessageInterface::ShowMessage("------ jules (as Real)      = %.12f\n", 
+          jules);
     #endif
    }
    catch (Date::TimeRangeError& e)
@@ -542,7 +545,7 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
                                 const std::string &toType, Real &toMjd,
                                 std::string &toStr)
 {
-   #if DEBUG_TIME_CONVERT
+   #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
       ("TimeConverterUtil::Convert() entered fromType=%s, fromMjd=%f, fromStr=%s\n"
        "   toType=%s\n", fromType.c_str(), fromMjd, fromStr.c_str(), toType.c_str());
@@ -600,11 +603,17 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    }
    else
    {
+      #ifdef DEBUG_TIME_CONVERT
+      MessageInterface::ShowMessage("===> Converting %s from Gregorian to MJD\n",
+      fromStr.c_str());
+      #endif
       fromMjdVal = TimeConverterUtil::ConvertGregorianToMjd(fromStr);
    }
    
-   #if DEBUG_TIME_CONVERT
-   MessageInterface::ShowMessage("===> fromMjdVal=%f\n", fromMjdVal);
+   #ifdef DEBUG_TIME_CONVERT
+   MessageInterface::ShowMessage("===> fromMjdVal=%.12f\n", fromMjdVal);
+   MessageInterface::ShowMessage("===> fromType=%s\n", fromType.c_str());
+   MessageInterface::ShowMessage("===> toType=%s\n", toType.c_str());
    #endif
    
    //-------------------------------------------------------
@@ -619,7 +628,8 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    }
    else
    {
-      toMjd = fromMjd;
+      //toMjd = fromMjd;  // wcs 2007.05.01 A1ModJulian fix for Bug 807
+      toMjd = fromMjdVal;
    }
    
    //-------------------------------------------------------
@@ -630,7 +640,7 @@ void TimeConverterUtil::Convert(const std::string &fromType, Real fromMjd,
    else
       toStr = TimeConverterUtil::ConvertMjdToGregorian(toMjd);
    
-   #if DEBUG_TIME_CONVERT
+   #ifdef DEBUG_TIME_CONVERT
    MessageInterface::ShowMessage
       ("TimeConverterUtil::Convert() leaving toMjd=%f, toStr=%s\n", toMjd,
        toStr.c_str());
