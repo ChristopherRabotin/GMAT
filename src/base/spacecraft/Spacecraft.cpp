@@ -43,6 +43,7 @@
 //#define DEBUG_GET_REAL
 //#define DEBUG_SC_PARAMETER_TEXT
 //#define DEBUG_SC_KEPL_TO_CART
+#define DEBUG_SC_EPOCHSTR
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -160,7 +161,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
  */
 Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    SpaceObject          (Gmat::SPACECRAFT, typeStr, name),
-   scEpochStr           ("21545.000000000"),
+   scEpochStr           ("21545.000000000"), 
    dryMass              (850.0),
    coeffDrag            (2.2),
    dragArea             (15.0),
@@ -1847,6 +1848,14 @@ bool Spacecraft::TakeAction(const std::string &action,
             scEpochStr = timestream.str();
          }
       }
+      #ifdef DEBUG_SC_EPOCHSTR
+      MessageInterface::ShowMessage("In TakeAction, epochSystem = %s\n",
+      epochSystem.c_str());
+      MessageInterface::ShowMessage("In TakeAction, epochFormat = %s\n",
+      epochFormat.c_str());
+      MessageInterface::ShowMessage("In TakeAction, scEpochStr being set to %s\n",
+      scEpochStr.c_str());
+      #endif
 
       return true;
    }
@@ -1976,6 +1985,12 @@ void Spacecraft::SetEpoch(const std::string &ep)
       state.SetEpoch(outMjd);
       if (attitude) attitude->SetEpoch(outMjd);
    }
+   else
+   {
+      #ifdef DEBUG_DATE_FORMAT
+      MessageInterface::ShowMessage("Spacecraft::SetEpoch() oops!  outMjd = -999.999!!\n");
+      #endif
+   }
    
 }
 
@@ -1993,10 +2008,18 @@ void Spacecraft::SetEpoch(const std::string &ep)
 //------------------------------------------------------------------------------
 void Spacecraft::SetEpoch(const std::string &type, const std::string &ep, Real a1mjd)
 {
+   #ifdef DEBUG_SC_EPOCHSTR
+   MessageInterface::ShowMessage("In SC::SetEpoch, type = %s, ep = %s, a1mjd = %.12f\n",
+   type.c_str(), ep.c_str(), a1mjd);
+   #endif
    TimeConverterUtil::GetTimeSystemAndFormat(type, epochSystem, epochFormat);
    epochType = type;
    scEpochStr = ep;
    state.SetEpoch(a1mjd);   
+   #ifdef DEBUG_SC_EPOCHSTR
+   MessageInterface::ShowMessage("and in SC::SetEpoch, epochSystem = %s, epochFormat = %s\n",
+   epochSystem.c_str(), epochFormat.c_str());
+   #endif
 }
 
 
