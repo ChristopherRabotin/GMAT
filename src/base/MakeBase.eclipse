@@ -79,11 +79,11 @@ archclean :
 	rm -rf ../matlab/gmat_mex/src/*.o
 
 OBJECTS = \
-	attitude/Attitude.o \
-	attitude/AttitudeException.o \
-	attitude/CSFixed.o \
-	attitude/Kinematic.o \
-	attitude/Spinner.o \
+    attitude/Attitude.o \
+    attitude/AttitudeException.o \
+    attitude/CSFixed.o \
+    attitude/Kinematic.o \
+    attitude/Spinner.o \
     burn/BurnException.o \
     burn/Burn.o \
     burn/FiniteBurn.o \
