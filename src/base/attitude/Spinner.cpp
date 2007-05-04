@@ -174,4 +174,3 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 //---------------------------------
 // none 
 
- 

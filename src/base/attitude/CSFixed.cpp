@@ -172,4 +172,3 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 //---------------------------------
 // none 
 
- 
