@@ -21,6 +21,7 @@
 
 #include "SolverBranchCommand.hpp"
 #include "Spacecraft.hpp"
+#include "Formation.hpp"
 
 //------------------------------------------------------------------------------
 //  SolverBranchCommand(const std::string &typeStr)
@@ -127,6 +128,12 @@ void SolverBranchCommand::StoreLoopData()
          
          localStore.push_back(sc);
       }
+      if (obj->GetType() == Gmat::FORMATION)
+      {
+         Formation *orig = (Formation*)(obj);
+         Formation *form  = new Formation(*orig);
+         localStore.push_back(form);
+      }
       ++pair;
    }
 }
@@ -142,6 +149,7 @@ void SolverBranchCommand::StoreLoopData()
 void SolverBranchCommand::ResetLoopData()
 {
    Spacecraft *sc;
+   Formation  *fm;
    std::string name;
     
    for (std::vector<GmatBase *>::iterator i = localStore.begin();
@@ -149,8 +157,16 @@ void SolverBranchCommand::ResetLoopData()
       name = (*i)->GetName();
       GmatBase *gb = (*objectMap)[name];
       if (gb != NULL) {
-         sc = (Spacecraft*)gb;
-         *sc = *((Spacecraft*)(*i));
+         if (gb->GetType() == Gmat::SPACECRAFT)
+         {
+            sc = (Spacecraft*)gb;
+            *sc = *((Spacecraft*)(*i));
+         }
+         else if (gb->GetType() == Gmat::FORMATION)
+         {
+            fm = (Formation*)gb;
+            *fm = *((Formation*)(*i));
+         }
       }
    }
    // Reset the propagators so that propagations run identically loop to loop
