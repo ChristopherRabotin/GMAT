@@ -305,8 +305,8 @@ protected:
    Real                    InterpolateToStop(StopCondition *sc);
    Real                    RefineFinalStep(Real secsToStep, 
                                            StopCondition *stopper);
-   Real                    SecantToStop();
-   void                    UpdateSecantPoints();
+   
+   Real                    GetRangedAngle(const Real angle, const Real midpt);
       
 private:
     

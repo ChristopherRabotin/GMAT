@@ -29,7 +29,6 @@
 #include "Spacecraft.hpp"
 #include "Variable.hpp"
 
-//#include "BaseStopCondition.hpp"
 
 class GMAT_API StopCondition : public GmatBase
 {
@@ -118,6 +117,12 @@ public:
    virtual Real GetStopGoal();
    virtual Real GetStopTime();
    virtual Real GetTimeMultiplier();
+   virtual bool IsCyclicParameter();
+   virtual bool GetRange(Real &min, Real &max);
+   virtual Real PutInRange(const Real value, const Real min, const Real max, 
+                           const  bool isReflection = false);
+   virtual void SkipEvaluation(bool shouldSkip);
+   virtual void UpdateBuffer();
 
 protected:
 
@@ -126,13 +131,9 @@ protected:
    Real mBaseEpoch;
    Real mEpoch;
    Real mGoal;
-//   Real mTolerance;
-//   Real mEccTol;
-//   Real mRange;
    Integer mRepeatCount;
    SolarSystem *mSolarSystem;
    
-//   std::string mInterpolatorName;
    Interpolator *mInterpolator;
    std::string mDescription;
    std::string mStopParamType;
@@ -165,12 +166,27 @@ protected:
    bool mNeedInterpolator;
    bool mAllowGoalParam;
    bool mBackwardsProp;
+   bool activated;
    
    // Flags used to mark special cases
    bool isAngleParameter;
+   bool isCyclicCondition;
    bool isPeriapse;
    bool isApoapse;
    
+   enum CycleType
+   {
+      NOT_CYCLIC,
+      ZERO_90,
+      ZERO_180,
+      ZERO_360,
+      PLUS_MINUS_90,
+      PLUS_MINUS_180,
+      OTHER_CYCLIC
+   };
+   
+   CycleType scCycleType;
+
    enum TimeType
    {
       NOT_TIME_PARAM,
@@ -183,7 +199,6 @@ protected:
    };
    
    TimeType stopParamTimeType;
-//   TimeType goalParamTimeType;
    
    enum
    {
@@ -192,11 +207,7 @@ protected:
       EPOCH_VAR,
       STOP_VAR,
       GOAL,
-//      TOLERANCE,
-//      ECC_TOL,
-//      RANGE,
       REPEAT_COUNT,
-//      INTERPOLATOR,
       StopConditionParamCount,
    };
 
@@ -208,6 +219,7 @@ protected:
    bool CheckOnPeriapsis();
    bool CheckOnApoapsis();
    bool CheckOnAnomaly(Real &anomaly);
+   bool CheckCyclicCondition(Real &value);
 
 private:
    void CopyDynamicData(const StopCondition &stopCond);

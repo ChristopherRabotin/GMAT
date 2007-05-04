@@ -22,6 +22,7 @@
 #include "Moderator.hpp"
 #include "Parameter.hpp"
 #include "StringUtil.hpp" // for Trim()
+#include "AngleUtil.hpp" // for Trim()
 #include "MessageInterface.hpp"
 
 #include <sstream>
@@ -2452,11 +2453,23 @@ bool Propagate::Execute()
                // Set the flag to check the first step only if 
                //    (1) the stop value is <= stopAccuracy and
                //    (2) it was (one of) the last stop(s) triggered
-               if (fabs(stopWhen[i]->GetStopValue()) < accuracy)
+               if (fabs(stopWhen[i]->GetStopValue() - stopWhen[i]->GetStopGoal()) < accuracy)
                {
+                  #ifdef DEBUG_FIRST_STEP_STOP
+                     std::string scName = stopWhen[i]->GetName();
+                     MessageInterface::ShowMessage(
+                        "*** FirstStep: Value = %.12lf, goal = %.12lf\n*** "
+                        "Name = %s, WLST = %s\n", stopWhen[i]->GetStopValue(), 
+                        stopWhen[i]->GetStopGoal(), 
+                        scName.c_str(), 
+                        (stopSats[i]->WasLastStopTriggered(scName) ? 
+                         "true" : "false"));
+                  #endif
+   
                   if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()))
                   {
                      checkFirstStep = true;
+                     stopWhen[i]->SkipEvaluation(true);
                   }
                }
             }
@@ -2494,11 +2507,11 @@ bool Propagate::Execute()
 
          CheckStopConditions(epochID);
          
-         // No longer need to check stopping conditions at the first step
-         checkFirstStep = false;
-         
          if (!stopCondMet)
          {
+            // No longer need to check stopping conditions at the first step
+            checkFirstStep = false;
+         
             // Publish the data here
             pubdata[0] = currEpoch[0];
             memcpy(&pubdata[1], state, dim*sizeof(Real));
@@ -2722,7 +2735,7 @@ void Propagate::CheckStopConditions(Integer epochID)
       try {
    #endif
    
-      for (UnsignedInt i=0; i<stopWhen.size(); i++)
+      for (UnsignedInt i = 0; i < stopWhen.size(); i++)
       {
          // StopCondition need epoch for the Interpolator
          stopWhen[i]->SetRealParameter(stopCondEpochID,
@@ -2736,11 +2749,6 @@ void Propagate::CheckStopConditions(Integer epochID)
          
          if (stopWhen[i]->Evaluate())
          {
-            if (checkFirstStep)
-            {
-               if (!CheckFirstStepStop(i))
-                  continue;
-            }
             stopInterval = stopWhen[i]->GetStopInterval();
             if (stopInterval == 0.0)
             {
@@ -2754,10 +2762,36 @@ void Propagate::CheckStopConditions(Integer epochID)
    
             #if DEBUG_PROPAGATE_EXE
                MessageInterface::ShowMessage
-                  ("Propagate::CheckStopConditions() %s met\n", 
-                   stopWhen[i]->GetName().c_str());
+                  ("Propagate::CheckStopConditions() %s met for %d\n", 
+                   stopWhen[i]->GetName().c_str(), i);
             #endif
-            // break; // exit if any stop condition met
+         }
+         else if (checkFirstStep)
+         {
+            #ifdef DEBUG_FIRST_STEP_STOP
+               MessageInterface::ShowMessage("%d: ", i);
+            #endif
+
+            // Turn condition back on
+            stopWhen[i]->SkipEvaluation(false);
+            if (CheckFirstStepStop(i))
+            {
+               #ifdef DEBUG_FIRST_STEP_STOP
+                  MessageInterface::ShowMessage("***Continuing from %s\n", 
+                     stopWhen[i]->GetName().c_str());
+               #endif
+               
+               stopInterval = stopWhen[i]->GetStopInterval();
+               if (stopInterval == 0.0)
+               {
+                  stopEpoch = stopWhen[i]->GetStopEpoch();
+               }
+               stopCondMet = true;
+               if (stopTrigger < 0)
+                  stopTrigger = i;
+                           
+               triggers.push_back(stopWhen[i]);
+            }
          }
       }
       
@@ -2791,15 +2825,44 @@ void Propagate::CheckStopConditions(Integer epochID)
 //------------------------------------------------------------------------------
 bool Propagate::CheckFirstStepStop(Integer i)
 {
-   #ifdef DEBUG_STOPPING_CONDITIONS
+   #ifdef DEBUG_FIRST_STEP_STOP
       MessageInterface::ShowMessage(
-         "CheckFirstStepStop checking %s; returning %s\n", 
+         "CheckFirstStepStop checking %s; returning valid stop condition: %s\n", 
          stopWhen[i]->GetName().c_str(),
          (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()) ?
           "false" : "true"));
    #endif
    
-   return !(stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()));
+   if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()));
+   {
+      // Only report as triggered if outside of the stop accuracy
+      Real min, max, goal, temp;
+      min = stopWhen[i]->GetStopValue();
+      max = stopWhen[i]->GetStopParameter()->EvaluateReal();
+      if (min > max)
+      {
+         temp = min;
+         min = max;
+         max = temp;
+      }
+      goal = stopWhen[i]->GetStopGoal(); 
+      
+      temp = fabs(goal - min);
+      if (fabs(goal - max) < temp)
+         temp = fabs(goal - max);
+      
+      // Only report true if outside of tolerance
+      Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
+                                                        stopAccuracy);
+      if (temp > accuracy)
+         if ((goal > min) && (goal < max))
+            return true;
+      
+      // Fill buffer data in the sc
+      stopWhen[i]->UpdateBuffer();
+   }
+      
+   return false;
 }
 
 
@@ -2991,14 +3054,23 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
         it != sats.end(); ++it)
       (*it)->ClearLastStopTriggered();      
 
-	if(stopper != NULL)
+	if (stopper != NULL)
 	{
       // Save the stop condition and reset for next pass
       Integer stopperIndex = 0;
       for (std::vector<StopCondition*>::iterator i = stopWhen.begin(); i != stopWhen.end(); ++i)
       {
          if (*i == stopper)
+         {
+            #ifdef DEBUG_FIRST_STEP_STOP
+               MessageInterface::ShowMessage(
+                  "Setting stop name '%s' on sat '%s'\n", 
+                  stopper->GetName().c_str(), 
+                  stopSats[stopperIndex]->GetName().c_str());
+            #endif
+            
             stopSats[stopperIndex]->SetLastStopTriggered(stopper->GetName());
+         }
          ++stopperIndex;
       }
       triggers.clear();
@@ -3031,6 +3103,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
  * Routine that drives the cubic spline, filling the ring buffer and 
  * interpolating the time step needed to find the interval to the stop
  * condition.
+ * 
+ * @param <sc> The stopping condition that is used for the interpolation.
  * 
  * @return The time step to the stopping condition, as determined by the cubic
  * spline interpolator.
@@ -3104,10 +3178,11 @@ Real Propagate::InterpolateToStop(StopCondition *sc)
  * the stopping condition using secants until the step produced falls within the
  * desired accuracy.
  * 
+ * @param <secsToStep>  First guess at the duration needed for stopping.
+ * @param <stopper>     The stopping condition used for the refinement.
+ * 
  * @return The time step to the stopping condition, as determined by the secant
  * solver.
- * 
- * @note: Not yet implemented
  */
 //------------------------------------------------------------------------------
 Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
@@ -3121,6 +3196,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
              *targParam = stopper->GetGoalParameter();
    
    x[0] = x[1] = y[1] = 0.0;
+   
    intercept = y[0] = stopParam->EvaluateReal();
 
    if (stopper->IsTimeCondition())
@@ -3214,6 +3290,8 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
          }
          else
          {
+            if (stopper->IsCyclicParameter())
+               y[0] = GetRangedAngle(y[0], target);
             nextTimeThrough = true;
          }
          
@@ -3230,17 +3308,19 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    
          x[1] = secsToStep;
          y[1] = stopParam->EvaluateReal();
+         if (stopper->IsCyclicParameter())
+            y[1] = GetRangedAngle(y[1], target);
    
          #ifdef DEBUG_STOPPING_CONDITIONS   
             MessageInterface::ShowMessage(
-               "   Secant target: %16.12le\n"
+               "[%2d] Secant target: %16.12le\n"
                "   Secant data points:\n"
                "      (%16.12le, %16.12le)\n"
                "      (%16.12le, %16.12le)\n"
                "   Secant timestep: %16.12lf\n",
-               target, x[0], y[0], x[1], y[1], secsToStep);
+               attempts, target, x[0], y[0], x[1], y[1], secsToStep);
          #endif
-   
+    
          // Check to see if accuracy is within tolerance
          if (fabs(stopper->GetStopDifference()) < stopAccuracy)
             closeEnough = true;
@@ -3268,15 +3348,6 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
 }
 
 
-Real Propagate::SecantToStop()
-{
-   return 0.0;
-}
-
-void Propagate::UpdateSecantPoints()
-{
-}
-
 //------------------------------------------------------------------------------
 // void RunComplete()
 //------------------------------------------------------------------------------
@@ -3291,11 +3362,6 @@ void Propagate::RunComplete()
       
    inProgress = false;
    hasFired = false;
-//   
-//   for (std::vector<Propagator*>::iterator prop = p.begin(); prop != p.end(); 
-//        ++prop)
-//      (*prop)->ResetInitialData();
-//   
 
    #ifdef DEBUG_FIRST_CALL
       firstStepFired = false;
@@ -3654,4 +3720,32 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
             "   Epoch of '%s' is %.12lf\n", (*i)->GetName().c_str(), 
             (*i)->GetRealParameter("A1Epoch"));
    #endif
+}
+
+
+
+//------------------------------------------------------------------------------
+// Real GetRangedAngle(const Real angle, const Real midpt)
+//------------------------------------------------------------------------------
+/**
+ * Puts a cyclic parameter into its valid range.  Currently only implemented for 
+ * angles.
+ * 
+ * @param <angle> The parameter value.
+ * @param <midpt> The center of the range.
+ * @param <min>   The minimum of the nominal range.  Not yet implemented.
+ * @param <max>   The maximum of the nominal range.  Not yet implemented.
+ * 
+ * @return The ranged value.
+ */
+//------------------------------------------------------------------------------
+Real Propagate::GetRangedAngle(const Real angle, const Real midpt)
+{
+   #ifdef DEBUG_STOPPING_CONDITIONS
+      MessageInterface::ShowMessage(
+         "Setting angle range for %.12lf around %.12lf\n", angle, midpt);
+   #endif
+   
+   return AngleUtil::PutAngleInDegRange(angle, midpt - GmatMathUtil::PI_DEG, 
+                                    midpt + GmatMathUtil::PI_DEG);
 }

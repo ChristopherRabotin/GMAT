@@ -35,6 +35,8 @@
 //#define DEBUG_STOPCOND 2
 //#define DEBUG_STOPCOND_PERIAPSIS 1
 //#define DEBUG_BUFFER_FILLING
+//#define DEBUG_CYCLIC_PARAMETERS
+
 
 using namespace GmatMathUtil;
 
@@ -51,11 +53,7 @@ StopCondition::PARAMETER_TEXT[StopConditionParamCount - GmatBaseParamCount] =
    "EpochVar",
    "StopVar",
    "Goal",
-//   "Tol",
-//   "EccTol",
-//   "Range",
    "Repeat",
-//   "Interpolator",
 };
 
 const Gmat::ParameterType
@@ -66,11 +64,7 @@ StopCondition::PARAMETER_TYPE[StopConditionParamCount - GmatBaseParamCount] =
    Gmat::STRING_TYPE,  //"EpochVar",
    Gmat::STRING_TYPE,  //"StopVar",
    Gmat::STRING_TYPE,  //"Goal",
-//   Gmat::REAL_TYPE,    //"Tol",
-//   Gmat::REAL_TYPE,    //"EccTol",
-//   Gmat::REAL_TYPE,    //"Range",
    Gmat::INTEGER_TYPE, //"Repeat",
-//   Gmat::STRING_TYPE,  //"Interpolator",
 };
 
 //---------------------------------
@@ -96,9 +90,6 @@ StopCondition::StopCondition(const std::string &name, const std::string &desc,
      mBaseEpoch         (0.0),
      mEpoch             (0.0),
      mGoal              (goal),
-//     mTolerance         (tol),
-//     mEccTol            (1.0e-6),
-//     mRange             (100000.0),
      mRepeatCount       (repeatCount),
      mSolarSystem       (NULL),
      mInterpolator      (interp),
@@ -123,9 +114,12 @@ StopCondition::StopCondition(const std::string &name, const std::string &desc,
      mNeedInterpolator  (false),
      mAllowGoalParam    (false),
      mBackwardsProp     (false),
+     activated          (true),
      isAngleParameter   (false),
+     isCyclicCondition(false),
      isPeriapse         (false),
-     isApoapse          (false)
+     isApoapse          (false),
+     scCycleType        (NOT_CYCLIC)
 {
    objectTypeNames.push_back("StopCondition");
 
@@ -182,17 +176,14 @@ StopCondition::StopCondition(const StopCondition &copy)
      mNeedInterpolator  (copy.mNeedInterpolator),
      mAllowGoalParam    (copy.mAllowGoalParam),
      mBackwardsProp     (copy.mBackwardsProp),
+     activated          (copy.activated),
      
      isAngleParameter   (copy.isAngleParameter),
+     isCyclicCondition(copy.isCyclicCondition),
      isPeriapse         (copy.isPeriapse),
      isApoapse          (copy.isApoapse)
 {
    mAllRefObjectNames = copy.mAllRefObjectNames;  // Is this correct?
-
-   // No longer used:   
-   //   mTolerance = copy.mTolerance;
-   //   mEccTol = copy.mEccTol;
-   //   mRange = copy.mRange;
 
    if (copy.mInterpolator != NULL)
       if (copy.mInterpolator->GetName() == "InternalInterpolator")
@@ -225,11 +216,7 @@ StopCondition& StopCondition::operator= (const StopCondition &right)
       mBaseEpoch = right.mBaseEpoch;
       mEpoch = right.mEpoch;
       mGoal = right.mGoal;
-//      mTolerance = right.mTolerance;
-//      mEccTol = right.mEccTol;
-//      mRange = right.mRange;
       mRepeatCount = right.mRepeatCount;
-      //mInterpolator = right.mInterpolator;
    
       if (right.mInterpolator != NULL)
          if (right.mInterpolator->GetName() == "InternalInterpolator")
@@ -263,11 +250,13 @@ StopCondition& StopCondition::operator= (const StopCondition &right)
       mNeedInterpolator = right.mNeedInterpolator;
       mAllowGoalParam = right.mAllowGoalParam;
       mBackwardsProp = right.mBackwardsProp;
+      activated = right.activated;
       
       previousEpoch = -999999.999999;
       previousValue = -999999.999999;
       
       isAngleParameter = right.isAngleParameter;
+      isCyclicCondition = right.isCyclicCondition;
       isPeriapse       = right.isPeriapse;
       isApoapse        = right.isApoapse;
       
@@ -293,22 +282,14 @@ StopCondition::~StopCondition()
    if (mRmagParam != NULL)
       delete mRmagParam;
 
-// This is only needed if the members are static:
-//   // loj:04/26/06 Set to NULL  
-//   mEccParam = NULL;
-//   mRmagParam = NULL;
-
    if (mInterpolator != NULL)
    {
       if (mInterpolator->GetName() == "InternalInterpolator")
       {
          delete mInterpolator;
-// This is only needed if the member is static:
-//         mInterpolator = NULL;
       }
    }
 }
-
 
 //------------------------------------------------------------------------------
 // virtual bool Evaluate()
@@ -360,6 +341,16 @@ bool StopCondition::Evaluate()
          previousEpoch = epoch;
       }
    }
+   else if (isCyclicCondition)
+   {
+      readyToTest = CheckCyclicCondition(currentParmValue);
+      
+      if (!readyToTest)
+      {
+         previousValue = currentParmValue;
+         previousEpoch = epoch;
+      }
+   }
    
    if (isApoapse)
    {
@@ -402,20 +393,20 @@ bool StopCondition::Evaluate()
       
       if ((min != max) && readyToTest)
       {
-         if ((mGoal >= min) && (mGoal <= max))
+         if ((mGoal >= min) && (mGoal <= max) && activated)
          {
             goalMet = true;
             mStopInterval = (epoch - previousEpoch) * 86400.0;
       
             #ifdef DEBUG_STOP_COND
                MessageInterface::ShowMessage(
-                  "Previous Epoch = %.12lf, Epoch  %.12lf, Value = %.12lf, "
+                  "Previous Epoch = %.12lf, Epoch  %.12lf, Values = [%.12lf  %.12lf], "
                   "StopInterval = %.12lf\n", previousEpoch, epoch,
-                  previousValue, mStopInterval);
+                  previousValue, currentParmValue, mStopInterval);
             #endif
 
          }
-         else
+         else if (activated)
          {
             // Save the found values in for next time through
             previousEpoch = epoch;
@@ -438,10 +429,10 @@ bool StopCondition::Evaluate()
             "direction = %15.9lf, \n", previousValue, currentParmValue, 
             prevGoalDiff, currGoalDiff, direction);
       #endif
-      
+
       // Goal met if it falls between previous and current values
       if ((currGoalDiff*direction >= 0.0) && 
-          (prevGoalDiff*direction <= 0.0))
+          (prevGoalDiff*direction <= 0.0) && activated)
       {
          goalMet = true;
          
@@ -457,7 +448,7 @@ bool StopCondition::Evaluate()
                 prevGoalDiff, currGoalDiff);
          #endif
       }
-      else
+      else if (activated)
       {
          previousValue = currentParmValue;
          previousEpoch = epoch;
@@ -542,6 +533,12 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
       if (!CheckOnAnomaly(currentParmValue))
          return false;
    }
+   else if(isCyclicCondition)
+   {
+      mGoal = PutInRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
+      if (!CheckCyclicCondition(currentParmValue))
+         return false;
+   }
 
    #ifdef DEBUG_BUFFER_FILLING
       MessageInterface::ShowMessage(
@@ -576,8 +573,6 @@ bool StopCondition::AddToBuffer(bool isInitialPoint)
       mEpochBuffer[i] = mEpochBuffer[i+1];
       mValueBuffer[i] = mValueBuffer[i+1];
    }
-
-   // To do: handle the special cases: apsides and angles
 
    // Fill in the next data point
    mValueBuffer[mBufferSize-1] = currentParmValue;
@@ -680,7 +675,6 @@ Real StopCondition::GetStopEpoch()
    mInterpolator->Clear();
    for (int i=0; i<mBufferSize; i++)
    {
-      
       #if DEBUG_STOPCOND
          MessageInterface::ShowMessage
             ("      i=%d, mValueBuffer=%.12lf, "
@@ -806,6 +800,46 @@ bool StopCondition::CheckOnAnomaly(Real &anomaly)
 
 
 //------------------------------------------------------------------------------
+// bool CheckCyclicCondition(Real &value)
+//------------------------------------------------------------------------------
+/**
+ * Performs range setting for cyclic stopping conditions, and checks to see that
+ * the condition falls near the goal.
+ * 
+ * @param <value> Reference to the value of the parameter. On return from this 
+ *                call, the input variable is changed to fall in the valid range
+ *                for the variable, mapped around the current goal.
+ * 
+ * @return true if the stopping condition is near the goal, false otherwise.
+ */ 
+//------------------------------------------------------------------------------
+bool StopCondition::CheckCyclicCondition(Real &value)
+{
+   Real min, max;
+   bool retval = false;
+   
+   if (GetRange(min, max))
+   {
+      Real range2 = (max - min) / 2.0;
+      mGoal = PutInRange(mGoal, min, max);
+      value = PutInRange(value, mGoal - range2, 
+                   mGoal + range2);
+
+      #ifdef DEBUG_CYCLIC_PARAMETERS
+         MessageInterface::ShowMessage(
+            "Goal = %lf, currValue = %lf, prevValue = %lf\n            "
+            "ranged CV = %lf, ranged PV = %lf, ranged Goal = %lf\n",
+            mGoal, value, previousValue, cv, pv, tempGoal);
+      #endif
+             
+      if (fabs(mGoal - value) < (range2 / 2.0))
+         retval = true;
+   }
+   
+   return retval;
+}
+
+//------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 bool StopCondition::Initialize()
@@ -841,6 +875,20 @@ bool StopCondition::Initialize()
           mStopParamType == "EA")
       {
          isAngleParameter = true;
+      }
+      
+      std::string paramTypeName = mStopParam->GetTypeName();
+
+      if (paramTypeName == "TA" || paramTypeName == "MA" ||
+          paramTypeName == "EA" || paramTypeName == "Longitude")
+      {
+         isCyclicCondition = true;
+         
+         if (mStopParamType == "TA" || mStopParamType == "MA" ||
+             mStopParamType == "EA")
+            scCycleType = ZERO_360;
+         if (paramTypeName == "Longitude")
+            scCycleType = PLUS_MINUS_180;
       }
       
       if (mNeedInterpolator)
@@ -1749,7 +1797,7 @@ Real StopCondition::GetStopTime()
 // Real GetTimeMultiplier()
 //------------------------------------------------------------------------------
 /**
- * Used to find the conversion factor for changing time paramters to seconds.
+ * Used to find the conversion factor for changing time parameters to seconds.
  * 
  * @return The factor.
  */ 
@@ -1780,6 +1828,181 @@ Real StopCondition::GetTimeMultiplier()
 }
 
 
+//------------------------------------------------------------------------------
+// bool IsCyclicParameter()
+//------------------------------------------------------------------------------
+/**
+ * Access method used to determine if the stop parameter is cyclic.
+ * 
+ * @return true for cyclic parameters, false if the parameter is not cyclic.
+ */ 
+//------------------------------------------------------------------------------
+bool StopCondition::IsCyclicParameter()
+{
+   return isCyclicCondition;
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetRange(Real &min, Real &max)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the minimum and maximum values for the range variable.
+ * 
+ * @param <min> Reference to the variable that, upon return, contains the range 
+ *              minimum
+ * @param <max> Reference to the variable that, upon return, contains the range 
+ *              maximum
+ * 
+ * @return true if the references were filled in, false if there has a problem 
+ *         setting the range values.
+ */ 
+//------------------------------------------------------------------------------
+bool StopCondition::GetRange(Real &min, Real &max)
+{
+   bool retval = true;
+   if (!isCyclicCondition)
+      retval = false;
+   else
+   {
+      switch (scCycleType)
+      {
+         case ZERO_90:
+            min = 0.0;
+            max = 90.0;
+            break;
+            
+         case ZERO_180:
+            min = 0.0;
+            max = 180.0;
+            break;
+            
+         case ZERO_360:
+            min = 0.0;
+            max = 360.0;
+            break;
+            
+         case PLUS_MINUS_90:
+            min = -90.0;
+            max = 90.0;
+            break;
+            
+         case PLUS_MINUS_180:
+            min = -180.0;
+            max = 180.0;
+            break;
+            
+         case OTHER_CYCLIC:   // Intentional drop-through
+         case NOT_CYCLIC:     // Intentional drop-through
+         default:
+            retval = false;
+      };
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// Real PutInRange(const Real value, const Real min, const Real max, 
+//                 bool isReflection)
+//------------------------------------------------------------------------------
+/**
+ * Returns the parameter value that matches the input value for a cyclic 
+ * parameter, remapped to fall between the minimum and maximum values allowed.
+ * 
+ * @param <value>        The input value of the parameter
+ * @param <min>          The minimum value of the parameter
+ * @param <max>          The maximum value of the parameter
+ * @param <isReflection> Flag indicating if the parameter should be reflected 
+ *                       into the valid range.  This flag is not yet used.
+ * 
+ * @return the parameter value, mapped into the valid range.
+ */ 
+//------------------------------------------------------------------------------
+Real StopCondition::PutInRange(const Real value, const Real min, const Real max,
+                                bool isReflection)
+{
+   if (min >= max)
+      throw StopConditionException("PutInRange received bad range limits\n");
+   Real range = max - min, retval = value;
+   
+   while (retval < min)
+      retval += range;
+
+   while (retval > max)
+      retval -= range;
+      
+   if (isReflection)
+   {
+      // Not yet needed or implemented
+   }
+      
+   return retval;
+}
+
+//------------------------------------------------------------------------------
+// void SkipEvaluation(bool shouldSkip)
+//------------------------------------------------------------------------------
+/**
+ * Function used to toggle stopping conditions is active or inactive.
+ * 
+ * @param <shouldSkip> Flag indicating the status.  If this parameter is true,
+ *                     the stopping condition is deactivated; if false, it is
+ *                     activated. 
+ */ 
+//------------------------------------------------------------------------------
+void StopCondition::SkipEvaluation(bool shouldSkip)
+{
+   activated = !shouldSkip;
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateBuffer()
+//------------------------------------------------------------------------------
+/**
+ * Sets the most recent value of the stop parameter and epoch to be the 
+ * previously calculated values. 
+ */ 
+//------------------------------------------------------------------------------
+void StopCondition::UpdateBuffer()
+{
+   previousValue = mStopParam->EvaluateReal();
+
+   // evaluate goal in case needed for cyclics
+   if (mAllowGoalParam)
+      mGoal = mGoalParam->EvaluateReal();
+   
+   // set current epoch
+   Real epoch;
+   if (mUseInternalEpoch)
+      epoch = mEpoch;
+   else
+      epoch = mEpochParam->EvaluateReal();
+      
+      // Force anomalies to handle wrapping
+   if (isAngleParameter)
+   {
+      mGoal = AngleUtil::PutAngleInDegRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
+      CheckOnAnomaly(previousValue);
+   }
+   else if(isCyclicCondition)
+   {
+      mGoal = PutInRange(mGoal, 0.0, GmatMathUtil::TWO_PI_DEG);
+      CheckCyclicCondition(previousValue);
+   }
+   
+   previousEpoch = epoch;
+
+   #ifdef DEBUG_CYCLIC_PARAMETERS
+      MessageInterface::ShowMessage(
+         "Updated \"previous\" values to [previousValue  previousEpoch]"
+         " = [%.12lf  %.12lf]\n", previousValue, previousEpoch);
+   #endif
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------
@@ -1804,4 +2027,3 @@ void StopCondition::CopyDynamicData(const StopCondition &stopCond)
       mValueBuffer[i] = stopCond.mValueBuffer[i];
    }
 }
-
