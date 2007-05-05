@@ -2264,6 +2264,24 @@ void Propagate::PrepareToPropagate()
    // Reset the initialization data
    Initialize();
 
+   // Validate that all spacecraft coupled by a PropSetup have same epoch
+   // Comment this for loop to skip epoch matching checks
+   for (Integer n = 0; n < (Integer)prop.size(); ++n) {
+      StringArray *sar = satName[n];
+      GmatBase* sat1;
+      Real baseEp = 0.0;
+      for (StringArray::iterator s = sar->begin(); s != sar->end(); ++s)
+      {
+         sat1 = (*objectMap)[*s];
+         if (s == sar->begin())
+            baseEp = sat1->GetRealParameter(epochID);
+         else if (baseEp != sat1->GetRealParameter(epochID))
+            throw CommandException(
+               "Epochs are out of sync on Propagation line:\n\"" + 
+               GetGeneratingString() + "\"\n");
+      }
+   }
+   
    dim = 0;
    p.clear();
    fm.clear();
