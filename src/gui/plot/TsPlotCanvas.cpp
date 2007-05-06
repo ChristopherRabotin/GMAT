@@ -42,6 +42,7 @@ bool TsPlotCanvas::defaultLabels = false;
 
 BEGIN_EVENT_TABLE(TsPlotCanvas, wxWindow)
    EVT_PAINT         (TsPlotCanvas::OnPaint)
+   EVT_SIZE          (TsPlotCanvas::OnSize)
    EVT_MOUSE_EVENTS  (TsPlotCanvas::OnMouseEvent)
    EVT_MENU          (ID_TOGGLE_GRID, TsPlotCanvas::ToggleGrid)
    EVT_MENU          (ID_TOGGLE_LEGEND, TsPlotCanvas::ToggleLegend)
@@ -155,6 +156,12 @@ void TsPlotCanvas::OnPaint(wxPaintEvent& ev)
       drawAll = true;
 
    Refresh(dc, drawAll);
+}
+
+
+void TsPlotCanvas::OnSize(wxSizeEvent& ev)
+{
+   initializeLegendLoc = true;
 }
 
 
@@ -887,7 +894,7 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
    { 
       legendRect.x = plotArea.x + plotArea.width - legendRect.width + 5;
       legendRect.y = plotArea.y - 5;
-//      initializeLegendLoc = false;  // Turn off static legend location
+      initializeLegendLoc = false;  // Turn off static legend location
    }
 
    dc.SetClippingRegion(legendRect);

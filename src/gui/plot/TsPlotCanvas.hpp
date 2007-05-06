@@ -57,6 +57,7 @@ public:
                 const wxString& name = "");
 
    virtual void OnPaint(wxPaintEvent& ev);
+   virtual void OnSize(wxSizeEvent& ev);
    void OnMouseEvent(wxMouseEvent& event);
    
    void Refresh(wxDC &dc, bool drawAll);
