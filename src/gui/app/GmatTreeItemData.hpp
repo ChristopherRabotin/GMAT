@@ -116,7 +116,6 @@ namespace GmatTree
       PREDEFINED_FUNCTION_FOLDER,
       SCRIPT_FOLDER,
       CONSTELLATION_FOLDER,
-      UNIVERSE_FOLDER,
       END_OF_RESOURCE_FOLDER,
       
       // not openable
@@ -142,6 +141,7 @@ namespace GmatTree
       IMPULSIVE_BURN,
       FINITE_BURN,
       
+      UNIVERSE_FOLDER,
       CELESTIAL_BODY,
       BARYCENTER,
       LIBRATION_POINT,
