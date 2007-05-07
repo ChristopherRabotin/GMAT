@@ -273,7 +273,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    case B_VECTOR_MAG:
       return Sqrt(bDotT*bDotT + bDotR*bDotR);
    case B_VECTOR_ANGLE:
-      return ATan(bDotR, bDotT);
+      return ATan(bDotR, bDotT) * GmatMathUtil::DEG_PER_RAD;
    default:
       throw ParameterException
          ("BplaneData::GetBplaneReal() Unknown parameter ID: " +
