@@ -68,13 +68,13 @@
 #include "Anomaly.hpp"
 #include <sstream>
 
-//#define DEBUG_ORBIT_PANEL 1
-//#define DEBUG_ORBIT_PANEL_LOAD 1
-//#define DEBUG_ORBIT_PANEL_CONVERT 1
-//#define DEBUG_ORBIT_PANEL_COMBOBOX 1
-//#define DEBUG_ORBIT_PANEL_STATE_TYPE 1
-//#define DEBUG_ORBIT_PANEL_SAVE 1
-//#define DEBUG_ORBIT_PANEL_CHECK_RANGE 1
+//#define DEBUG_ORBIT_PANEL
+//#define DEBUG_ORBIT_PANEL_LOAD
+//#define DEBUG_ORBIT_PANEL_CONVERT
+//#define DEBUG_ORBIT_PANEL_COMBOBOX
+//#define DEBUG_ORBIT_PANEL_STATE_TYPE
+//#define DEBUG_ORBIT_PANEL_SAVE
+//#define DEBUG_ORBIT_PANEL_CHECK_RANGE
 
 //------------------------------
 // event tables for wxWindows
@@ -145,7 +145,7 @@ OrbitPanel::~OrbitPanel()
 //------------------------------------------------------------------------------
 void OrbitPanel::LoadData()
 {
-   #if DEBUG_ORBIT_PANEL_LOAD
+   #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage("OrbitPanel::LoadData() entered\n");
    #endif
       
@@ -160,7 +160,7 @@ void OrbitPanel::LoadData()
    }
    else
    {
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage(
             "   mInternalCoord=%s, addr=%d\n",
             mInternalCoord->GetName().c_str(), mInternalCoord);
@@ -181,7 +181,7 @@ void OrbitPanel::LoadData()
       std::string epochFormat = theSpacecraft->GetStringParameter("DateFormat");      
       mEpoch = theSpacecraft->GetRealParameter("A1Epoch");
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage
          ("   epochFormat=%s, mEpoch=%f\n", epochFormat.c_str(), mEpoch);
       #endif
@@ -195,11 +195,27 @@ void OrbitPanel::LoadData()
       // load the coordinate system
       std::string coordSystemStr =
          theSpacecraft->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      
       mCoordSysComboBox->SetValue(coordSystemStr.c_str());
       mFromCoordSysStr = coordSystemStr;
       
-      mOutCoord = (CoordinateSystem*)theGuiInterpreter->
-         GetConfiguredObject(coordSystemStr);
+      mOutCoord = (CoordinateSystem*)theSpacecraft->GetRefObject(Gmat::COORDINATE_SYSTEM, "");
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("   coordSystemStr=%s, mOutCoord=%p\n", coordSystemStr.c_str(), mOutCoord);
+      #endif
+      
+      if (mOutCoord == NULL)
+      {
+         mOutCoord = (CoordinateSystem*)theGuiInterpreter->
+            GetConfiguredObject(coordSystemStr);
+         
+         #ifdef DEBUG_ORBIT_PANEL_LOAD
+         MessageInterface::ShowMessage
+            ("   Get configured %s %p\n", coordSystemStr.c_str(), mOutCoord);
+         #endif
+         
+      }
       
       mFromCoord = mOutCoord;
       
@@ -210,7 +226,7 @@ void OrbitPanel::LoadData()
       }
       else
       {
-         #if DEBUG_ORBIT_PANEL_LOAD
+         #ifdef DEBUG_ORBIT_PANEL_LOAD
             MessageInterface::ShowMessage("   mOutCoord=%s, addr=%d\n",
                mOutCoord->GetName().c_str(), mOutCoord);
          #endif
@@ -224,7 +240,7 @@ void OrbitPanel::LoadData()
       std::string originName = mOutCoord->GetStringParameter("Origin");
       SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
             ("   origin=%s, addr=%d\n", originName.c_str(), origin);
       #endif
@@ -233,7 +249,7 @@ void OrbitPanel::LoadData()
       if (origin->IsOfType(Gmat::CELESTIAL_BODY))
          mFromStateTypeStr = theSpacecraft->GetStringParameter("StateType");
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
             ("   mFromStateTypeStr=%s\n", mFromStateTypeStr.c_str());
       #endif
@@ -245,7 +261,7 @@ void OrbitPanel::LoadData()
       // load the anomaly type - if state type is Keplerian or Modified Keplerian
       mAnomalyType = theSpacecraft->GetStringParameter("AnomalyType");
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage("   mAnomalyType = %s \n", mAnomalyType.c_str());   
       #endif
       
@@ -266,7 +282,7 @@ void OrbitPanel::LoadData()
          mFromAnomalyTypeStr = mAnomalyType;
       }
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage
          ("   mAnomaly=\n   [%s]\n", mAnomaly.ToString(16).c_str());
       #endif
@@ -276,7 +292,7 @@ void OrbitPanel::LoadData()
       mTempCartState = mCartState;
       mOutState = mCartState;
       
-      #if DEBUG_ORBIT_PANEL_LOAD
+      #ifdef DEBUG_ORBIT_PANEL_LOAD
       MessageInterface::ShowMessage
          ("   mCartState=\n   [%s]\n", mCartState.ToString(16).c_str());
       #endif
@@ -290,21 +306,13 @@ void OrbitPanel::LoadData()
          mAnomalyType = mAnomalyTypeNames[Anomaly::TA];
          mFromAnomalyTypeStr = mAnomalyType;
          
-         #if DEBUG_ORBIT_PANEL_LOAD
+         #ifdef DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
             ("   Computed TrueAnomaly =\n   [%s]\n", mTrueAnomaly.ToString(16).c_str());
          #endif
       }
       
       DisplayState();
-      
-//       // display initial state
-//       for (int i=0; i<6; i++)
-//          textCtrl[i]->SetValue(ToString(mOutState[i]));
-      
-//       // labels for elements, anomaly and units
-//       SetLabelsUnits(mFromStateTypeStr);
-//       ResetStateFlags(true);
       
    }
    catch (BaseException &e)
@@ -313,7 +321,7 @@ void OrbitPanel::LoadData()
          ("OrbitPanel:LoadData() error occurred!\n%s\n", e.GetFullMessage().c_str());
    }
    
-   #if DEBUG_ORBIT_PANEL_LOAD
+   #ifdef DEBUG_ORBIT_PANEL_LOAD
    MessageInterface::ShowMessage("OrbitPanel::LoadData() leaving\n");
    #endif
    
@@ -329,7 +337,7 @@ void OrbitPanel::LoadData()
 //------------------------------------------------------------------------------
 void OrbitPanel::SaveData()
 {
-   #if DEBUG_ORBIT_PANEL_SAVE
+   #ifdef DEBUG_ORBIT_PANEL_SAVE
    MessageInterface::ShowMessage
       ("OrbitPanel::SaveData() entered\n   mCartState=%s\n   "
        "mTempCartState=%s\n   mOutState=%s\n", mCartState.ToString(16).c_str(), 
@@ -354,7 +362,7 @@ void OrbitPanel::SaveData()
       Real taimjd = -999.999;
       std::string outStr;
       
-      #if DEBUG_ORBIT_PANEL_SAVE
+      #ifdef DEBUG_ORBIT_PANEL_SAVE
       MessageInterface::ShowMessage
          ("   newEpoch=%s, epochFormat=%s\n", newEpoch.c_str(), epochFormat.c_str());
       #endif
@@ -448,7 +456,7 @@ void OrbitPanel::SaveData()
       return;
    }
       
-   #if DEBUG_ORBIT_PANEL_SAVE
+   #ifdef DEBUG_ORBIT_PANEL_SAVE
    MessageInterface::ShowMessage
       ("OrbitPanel::SaveData() exiting\n   mCartState=%s\n"
        "   mTempCartState=%s\n   mOutState=%s\n", mCartState.ToString(16).c_str(),
@@ -471,7 +479,7 @@ void OrbitPanel::SaveData()
 //------------------------------------------------------------------------------
 void OrbitPanel::Create()
 {
-   #if DEBUG_ORBIT_PANEL
+   #ifdef DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage("In OrbitPanel::Create() \n");
    #endif
 
@@ -691,7 +699,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
    
-   #if DEBUG_ORBIT_PANEL_COMBOBOX
+   #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
    MessageInterface::ShowMessage
       ("OrbitPanel::OnComboBoxChange() coordSysStr=%s, stateTypeStr=%s\n",
        coordSysStr.c_str(), stateTypeStr.c_str());
@@ -705,7 +713,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       mIsEpochFormatChanged = true;
       std::string toEpochFormat = epochFormatComboBox->GetValue().c_str();    
       
-      #if DEBUG_ORBIT_PANEL_COMBOBOX
+      #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("   OnComboBoxChange() mFromEpochFormat=%s, "
           "toEpochFormat=%s\n   mEpochStr=%s, mIsEpochModified=%d\n",
@@ -751,7 +759,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    else if (event.GetEventObject() == mCoordSysComboBox ||
             event.GetEventObject() == stateTypeComboBox)
    {      
-      #if DEBUG_ORBIT_PANEL_COMBOBOX
+      #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("   OnComboBoxChange() mFromCoordSysStr=%s, mFromStateTypeStr=%s\n",
           mFromCoordSysStr.c_str(), mFromStateTypeStr.c_str());
@@ -782,20 +790,34 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          }
       }
       
+      CoordinateSystem *prevCoord = mOutCoord;
+      
       mOutCoord = (CoordinateSystem*)theGuiInterpreter->
          GetConfiguredObject(mCoordSysComboBox->GetValue().c_str());
       
       BuildValidStateTypes();
-      DisplayState();
       
-      if (event.GetEventObject() == mCoordSysComboBox)
-         mFromCoordSysStr = mCoordSysComboBox->GetValue().c_str();
-      
-      if (event.GetEventObject() == stateTypeComboBox)      
-         mFromStateTypeStr = stateTypeComboBox->GetValue().c_str();
-      
-      mFromCoord = mOutCoord;
-      theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+      try
+      {
+         DisplayState();
+         
+         if (event.GetEventObject() == mCoordSysComboBox)
+            mFromCoordSysStr = mCoordSysComboBox->GetValue().c_str();
+         
+         if (event.GetEventObject() == stateTypeComboBox)
+            mFromStateTypeStr = stateTypeComboBox->GetValue().c_str();
+         
+         mFromCoord = mOutCoord;
+         theSpacecraft->SetRefObject(mOutCoord, Gmat::COORDINATE_SYSTEM);
+      }
+      catch (BaseException &e)
+      {
+         mCoordSysComboBox->SetValue(mFromCoordSysStr.c_str());
+         stateTypeComboBox->SetValue(mFromStateTypeStr.c_str());
+         mOutCoord = prevCoord;
+         BuildValidStateTypes();
+         return;
+      }
    }
    //-----------------------------------------------------------------
    // anomaly type change 
@@ -806,7 +828,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       wxString description, stateValue;      
       mAnomalyType = anomalyComboBox->GetValue();
       
-      #if DEBUG_ORBIT_PANEL_COMBOBOX
+      #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
       MessageInterface::ShowMessage
          ("   OnComboBoxChange() mFromAnomalyTypeStr=%s, "
           "mAnomalyType=%s\n", mFromAnomalyTypeStr.c_str(),
@@ -831,15 +853,22 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          }
       }
       
-      DisplayState();
-
-      mFromAnomalyTypeStr = mAnomalyType;
+      try
+      {
+         DisplayState();
+         mFromAnomalyTypeStr = mAnomalyType;
+      }
+      catch (BaseException &e)
+      {
+         anomalyComboBox->SetValue(mFromAnomalyTypeStr.c_str());
+         return;
+      }
    }
    
    dataChanged = true;
    theScPanel->EnableUpdate(true);
    
-   #if DEBUG_ORBIT_PANEL_COMBOBOX
+   #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
    MessageInterface::ShowMessage
       ("OrbitPanel::OnComboBoxChange() leaving\n");
    #endif
@@ -923,11 +952,10 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
    if ( (stateType == mStateTypeNames[StateConverter::KEPLERIAN]) || 
         (stateType == mStateTypeNames[StateConverter::MOD_KEPLERIAN]) )
    {
-      // Anomaly is no longer saved to spacecraft on combobox change
-      description6->SetLabel(mAnomaly.GetTypeString().c_str());
+      wxString label = Anomaly::GetTypeString(mAnomalyType).c_str();
+      description6->SetLabel(label);
       anomalyStaticText->Show(true);
       anomalyComboBox->Show(true);
-      //anomalyComboBox->SetSelection(mAnomaly.GetType());
       anomalyComboBox->SetSelection(Anomaly::GetAnomalyType(mAnomalyType));
    }
    else
@@ -987,7 +1015,7 @@ void OrbitPanel::DisplayState()
    std::string coordSysStr  = mCoordSysComboBox->GetValue().c_str();
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
    
-   #if DEBUG_ORBIT_PANEL
+   #ifdef DEBUG_ORBIT_PANEL
    MessageInterface::ShowMessage
       ("OrbitPanel::DisplayState() coordSysStr = '%s', stateTypeStr='%s', "
        "mEpoch=%.11lf\n", coordSysStr.c_str(), stateTypeStr.c_str(), mEpoch);
@@ -1007,7 +1035,7 @@ void OrbitPanel::DisplayState()
             midState[i] = mOutState[i];
       }
       
-      #if DEBUG_ORBIT_PANEL
+      #ifdef DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage
          ("   state value modified\n   [%s]\n", midState.ToString(16).c_str());
       #endif
@@ -1028,7 +1056,7 @@ void OrbitPanel::DisplayState()
       midState = mCartState;
       isInternal = true;
       
-      #if DEBUG_ORBIT_PANEL
+      #ifdef DEBUG_ORBIT_PANEL
       MessageInterface::ShowMessage
          ("   using interval state\n   [%s]\n", midState.ToString(16).c_str());
       #endif
@@ -1036,7 +1064,7 @@ void OrbitPanel::DisplayState()
    
    BuildState(midState, isInternal);
    
-   #if DEBUG_ORBIT_PANEL_CONVERT
+   #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
       ("   DisplayState()--- after conversion, mOutState=\n   [%s]\n",
        mOutState.ToString(16).c_str());
@@ -1049,10 +1077,11 @@ void OrbitPanel::DisplayState()
    SetLabelsUnits(stateTypeStr);
    ResetStateFlags(true);
    
-   #if DEBUG_ORBIT_PANEL_CONVERT
+   #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
       ("OrbitPanel::DisplayState() leaving\n");
    #endif
+   
 }
 
 
@@ -1069,7 +1098,7 @@ void OrbitPanel::BuildValidStateTypes()
    std::string originName = mOutCoord->GetStringParameter("Origin");
    SpacePoint *origin = (SpacePoint*)theGuiInterpreter->GetConfiguredObject(originName);
    
-   #if DEBUG_ORBIT_PANEL_STATE_TYPE
+   #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
       ("   BuildValidStateTypes() origin=%s, addr=%d, mShowFullStateTypeList=%d\n",
        originName.c_str(), origin, mShowFullStateTypeList);
@@ -1083,7 +1112,7 @@ void OrbitPanel::BuildValidStateTypes()
    if (!rebuild)
       return;
    
-   #if DEBUG_ORBIT_PANEL_STATE_TYPE
+   #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage("   Building new state type list...\n");
    #endif
    
@@ -1136,7 +1165,7 @@ void OrbitPanel::BuildValidStateTypes()
       }
    }
    
-   #if DEBUG_ORBIT_PANEL_STATE_TYPE
+   #ifdef DEBUG_ORBIT_PANEL_STATE_TYPE
    MessageInterface::ShowMessage
       ("   BuildValidStateTypes() Setting state type to %s\n",
        mFromStateTypeStr.c_str());
@@ -1158,7 +1187,7 @@ void OrbitPanel::BuildValidStateTypes()
 //------------------------------------------------------------------------------ 
 void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
 {
-   #if DEBUG_ORBIT_PANEL_CONVERT
+   #ifdef DEBUG_ORBIT_PANEL_CONVERT
       Rvector6 tempState = inputState;
       MessageInterface::ShowMessage(
          "   BuildState() --- The input state (%s %s coordinates)"
@@ -1172,7 +1201,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
    
    std::string stateTypeStr = stateTypeComboBox->GetValue().c_str();
    
-   #if DEBUG_ORBIT_PANEL_CONVERT
+   #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
       ("   stateTypeStr=%s, mAnomalyType=%s\n", stateTypeStr.c_str(),
        mAnomalyType.c_str());
@@ -1187,7 +1216,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       }
       else
       {
-         #if DEBUG_ORBIT_PANEL_CONVERT
+         #ifdef DEBUG_ORBIT_PANEL_CONVERT
          MessageInterface::ShowMessage
             ("   mAnomaly = [%s]\n", mAnomaly.ToString(16).c_str());
          #endif
@@ -1202,7 +1231,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
                                  mInternalCoord);
       }
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage(
           "   BuildState() --- The internal CS representation is\n   [%s]\n",
           mCartState.ToString(16).c_str());
@@ -1212,7 +1241,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       mCoordConverter.Convert(A1Mjd(mEpoch), mCartState, mInternalCoord, midState, 
                               mOutCoord);
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
          ("   after mCoordConverter.Convert() midState=\n   [%s]\n",
           midState.ToString().c_str());
@@ -1222,7 +1251,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
       stateConverter.SetMu(mOutCoord);
       mOutState = stateConverter.FromCartesian(midState, stateTypeStr, mAnomalyType);
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
          ("   after FromCartesian() mOutState=\n   [%s]\n", mOutState.ToString().c_str());
       MessageInterface::ShowMessage("   OrbitPanel::BuildState() leaving\n");
@@ -1232,6 +1261,7 @@ void OrbitPanel::BuildState(const Rvector6 &inputState, bool isInternal)
    {
       MessageInterface::ShowMessage("**** ERROR in BuildState()\n");
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      throw;
    }
    
 }
@@ -1339,7 +1369,7 @@ bool OrbitPanel::CheckCartesian(Rvector6 &state)
    if (!theScPanel->CheckReal(state[5], mElements[5], "VZ", "Real Number"))
       retval = false;
    
-   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckCartesian() returning %d\n", retval);
    #endif
    
@@ -1428,7 +1458,7 @@ bool OrbitPanel::CheckKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckKeplerian() returning %d\n", retval);
    #endif
    
@@ -1491,7 +1521,7 @@ bool OrbitPanel::CheckModKeplerian(Rvector6 &state)
       retval = false;
    }
    
-   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckModKeplerian() returning %d\n", retval);
    #endif
    
@@ -1557,7 +1587,7 @@ bool OrbitPanel::CheckSpherical(Rvector6 &state, const wxString &stateType)
    if (!theScPanel->CheckReal(state[5], mElements[5], label6, "Real Number"))
       retval = false;
    
-   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckSpherical() returning %d\n", retval);
    #endif
    
@@ -1601,7 +1631,7 @@ bool OrbitPanel::CheckEquinoctial(Rvector6 &state)
    if (!theScPanel->CheckReal(state[5], mElements[5], "Mean Longitude", "Real Number"))
       retval = false;
    
-   #if DEBUG_ORBIT_PANEL_CHECK_RANGE
+   #ifdef DEBUG_ORBIT_PANEL_CHECK_RANGE
    MessageInterface::ShowMessage("CheckEquinoctial() returning %d\n", retval);
    #endif
    
@@ -1655,7 +1685,7 @@ bool OrbitPanel::CheckAnomaly(Rvector6 &state)
 //------------------------------------------------------------------------------
 bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTypeStr)
 {
-   #if DEBUG_ORBIT_PANEL_CONVERT
+   #ifdef DEBUG_ORBIT_PANEL_CONVERT
    MessageInterface::ShowMessage
       ("   OrbitPanel::ComputeTrueAnomaly() stateTypeStr=%s\n", stateTypeStr.c_str());
    #endif
@@ -1682,7 +1712,7 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
       Real ecc = mOutState[1];
       Real anomaly = mOutState[5];
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
          ("   before computing TA, SMA=%f, ECC=%f, %s:%f\n", sma, ecc,
           mAnomalyType.c_str(), anomaly);
@@ -1697,7 +1727,7 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
          ecc = kepl[1];
          anomaly = kepl[5];         
          
-         #if DEBUG_ORBIT_PANEL_CONVERT
+         #ifdef DEBUG_ORBIT_PANEL_CONVERT
          MessageInterface::ShowMessage
             ("   after convert to Keplerian, SMA=%f, ECC=%f, %s:%f\n", sma, ecc,
              mAnomalyType.c_str(), anomaly);
@@ -1707,7 +1737,7 @@ bool OrbitPanel::ComputeTrueAnomaly(Rvector6 &state, const std::string &stateTyp
       mAnomaly.Set(sma, ecc, anomaly, mAnomalyType);
       mTrueAnomaly = mAnomaly.ConvertToAnomaly(Anomaly::TA);
       
-      #if DEBUG_ORBIT_PANEL_CONVERT
+      #ifdef DEBUG_ORBIT_PANEL_CONVERT
       MessageInterface::ShowMessage
          ("   mAnomaly     = [%s]\n   mTrueAnomaly = [%s]\n",
           mAnomaly.ToString(16).c_str(), mTrueAnomaly.ToString(16).c_str());
