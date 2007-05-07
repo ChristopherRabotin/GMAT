@@ -189,8 +189,8 @@ void SpacecraftPanel::LoadData()
    #endif
    
    // Set object pointer for "Show Script"
-   mObject = currentSpacecraft;
-
+   mObject = theSpacecraft;
+   
    try
    {
       theOrbitPanel->LoadData();
@@ -215,9 +215,6 @@ void SpacecraftPanel::LoadData()
 //------------------------------------------------------------------------------
 void SpacecraftPanel::SaveData()
 {
-   //if (!theApplyButton->IsEnabled())
-   //   return;
-
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::SaveData() entered\n");
    MessageInterface::ShowMessage
@@ -242,13 +239,9 @@ void SpacecraftPanel::SaveData()
       canClose = canClose && theOrbitPanel->CanClosePanel();
    }
    
-   //enableApply = true;
-   
    if (!canClose)
    {
-      //EnableUpdate(false);
       EnableUpdate(true);
-      //enableApply = false;
       return;
    }
    
@@ -262,12 +255,8 @@ void SpacecraftPanel::SaveData()
       theAttitudePanel->SaveData();
    
    // copy the current info into theSpacecraft
-   delete(theSpacecraft); 
-   theSpacecraft = new Spacecraft(*currentSpacecraft);
+   theSpacecraft->Copy(currentSpacecraft);
    
-   // explicitly disable apply button
-   // it is turned on in each of the panels
-
    EnableUpdate(false);
 }
 
