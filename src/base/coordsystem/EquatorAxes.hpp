@@ -73,8 +73,8 @@ protected:
    
    virtual void CalculateRotationMatrix(const A1Mjd &atEpoch,
                                         bool forceComputation = false);
-
-   DeFile     *de;
+   
+   DeFile *theDeFile;
 
 };
 #endif // EquatorAxes_hpp

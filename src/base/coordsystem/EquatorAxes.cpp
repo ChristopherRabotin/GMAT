@@ -78,6 +78,7 @@ DynamicAxes("Equator",itsName)
 {
    objectTypeNames.push_back("EquatorAxes");
    parameterCount = EquatorAxesParamCount;
+   theDeFile = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -359,18 +360,21 @@ void EquatorAxes::CalculateRotationMatrix(const A1Mjd &atEpoch,
          MessageInterface::ShowMessage(
          "Entering Luna Equator calculations (DE file is source)\n");
       #endif // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ end debug ~~~~
-      if (!de)
+      if (!theDeFile)
       {
-         de = (DeFile*) ((CelestialBody*)origin)->GetSourceFile();
-         if (!de)
-         throw CoordinateSystemException(
+         theDeFile = (DeFile*) ((CelestialBody*)origin)->GetSourceFile();         
+         if (!theDeFile)
+         {
+            throw CoordinateSystemException(
                "No DE file specified - cannot get Moon data");
-         // should we automatically switch to IAU data here?
-         // De file is initialized in its constructor
+            // should we automatically switch to IAU data here?
+            // De file is initialized in its constructor
+         }
       }
       bool override = ((CelestialBody*)origin)->GetOverrideTimeSystem();
       Real librationAngles[3], andRates[3];
-      de->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
+      theDeFile->GetAnglesAndRates(atEpoch, librationAngles, andRates, override);
+      
       #ifdef DEBUG_EQ_LUNA // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
          MessageInterface::ShowMessage("Luna Equator: override flag = %s\n",
          (override? "true" : "false"));
