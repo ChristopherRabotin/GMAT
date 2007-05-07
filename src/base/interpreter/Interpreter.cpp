@@ -37,24 +37,25 @@
 //#define __ENABLE_ATTITUDE_LIST__
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
-//#define DEBUG_INIT 1
-//#define DEBUG_COMMAND_LIST 1
-//#define DEBUG_OBJECT_LIST 1
-//#define DEBUG_ARRAY_GET 1
-//#define DEBUG_CREATE_OBJECT 1
-//#define DEBUG_CREATE_PARAM 1
-//#define DEBUG_CREATE_ARRAY 1
-//#define DEBUG_CREATE_COMMAND 1
-//#define DEBUG_ASSIGNMENT 1
-//#define DEBUG_ASSEMBLE_COMMAND 1
-//#define DEBUG_ASSEMBLE_FOR 1
-//#define DEBUG_ASSEMBLE_CALL_FUNCTION 1
-//#define DEBUG_SET 1
-//#define DEBUG_SET_FORCE_MODEL 1
-//#define DEBUG_SET_SOLAR_SYS 1
-//#define DEBUG_FINAL_PASS 1
-//#define DEBUG_CHECK_OBJECT 1
-//#define DEBUG_CHECK_BRANCH 1
+//#define DEBUG_INIT
+//#define DEBUG_COMMAND_LIST
+//#define DEBUG_OBJECT_LIST
+//#define DEBUG_ARRAY_GET
+//#define DEBUG_CREATE_OBJECT
+//#define DEBUG_CREATE_PARAM
+//#define DEBUG_CREATE_ARRAY
+//#define DEBUG_CREATE_COMMAND
+//#define DEBUG_ASSIGNMENT
+//#define DEBUG_ASSEMBLE_COMMAND
+//#define DEBUG_ASSEMBLE_FOR
+//#define DEBUG_ASSEMBLE_CALL_FUNCTION
+//#define DEBUG_SET
+//#define DEBUG_SET_FORCE_MODEL
+//#define DEBUG_SET_SOLAR_SYS
+//#define DEBUG_FINAL_PASS
+//#define DEBUG_FINAL_PASS_CS
+//#define DEBUG_CHECK_OBJECT
+//#define DEBUG_CHECK_BRANCH
 //#define DEBUG_WRAPPERS
 
 
@@ -74,7 +75,7 @@ Interpreter::Interpreter()
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
    
-   #if DEBUG_INTERP
+   #ifdef DEBUG_INTERP
    MessageInterface::ShowMessage
       ("Interpreter::Interpreter() initialized=%d, theModerator=%p\n",
        initialized, theModerator);
@@ -104,7 +105,7 @@ Interpreter::~Interpreter()
 //------------------------------------------------------------------------------
 void Interpreter::Initialize()
 {
-   #if DEBUG_INIT
+   #ifdef DEBUG_INIT
    MessageInterface::ShowMessage
       ("Interpreter::Initialize() initialized=%d\n", initialized);
    #endif
@@ -122,7 +123,7 @@ void Interpreter::Initialize()
    StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
    copy(cmds.begin(), cmds.end(), back_inserter(commandList));
    
-   #if DEBUG_INIT
+   #ifdef DEBUG_INIT
    MessageInterface::ShowMessage("Number of commands = %d\n", cmds.size());
    #endif
    
@@ -569,7 +570,7 @@ GmatBase* Interpreter::GetConfiguredObject(const std::string &name)
 GmatBase* Interpreter::CreateObject(const std::string &type,
                                     const std::string &name)
 {
-   #if DEBUG_CREATE_OBJECT
+   #ifdef DEBUG_CREATE_OBJECT
    MessageInterface::ShowMessage
       ("Interpreter::CreateObject() type=%s, name=%s\n",
        type.c_str(), name.c_str());
@@ -713,7 +714,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    // to test further.
    
    
-   #if DEBUG_CREATE_OBJECT
+   #ifdef DEBUG_CREATE_OBJECT
    if (obj != NULL)
    {
       MessageInterface::ShowMessage
@@ -918,7 +919,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                                         const std::string &desc, bool &retFlag,
                                         GmatCommand *inCmd)
 {
-   #if DEBUG_CREATE_COMMAND
+   #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
       ("Interpreter::CreateCommand() type='%s', inCmd=%p, \n   desc='%s'\n", type.c_str(),
        inCmd, desc.c_str());
@@ -982,7 +983,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       return NULL;
    }
    
-   #if DEBUG_CREATE_COMMAND
+   #ifdef DEBUG_CREATE_COMMAND
    if (inCmd == NULL)
       MessageInterface::ShowMessage
          ("   => %s created.\n", cmd->GetTypeName().c_str());
@@ -1005,7 +1006,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          ////retFlag = CheckUndefinedReference(cmd);
          retFlag  = ValidateCommand(cmd);
          
-         #if DEBUG_CREATE_COMMAND
+         #ifdef DEBUG_CREATE_COMMAND
          MessageInterface::ShowMessage
             ("   ===> %s has InterpretAction() returning %p\n", type.c_str(), cmd);
          #endif
@@ -1053,7 +1054,7 @@ GmatCommand* Interpreter::AppendCommand(const std::string &type, bool &retFlag,
       GmatCommand *cmd = theModerator->CreateCommand(type, "", retFlag);
       inCmd->Append(cmd);
       
-      #if DEBUG_CREATE_COMMAND
+      #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
          ("===> Interpreter::AppendCommand() inCmd=%s, cmd=%s\n",
           inCmd->GetTypeName().c_str(), cmd->GetTypeName().c_str());
@@ -1072,7 +1073,7 @@ bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
    bool retval = false;
    std::string type = cmd->GetTypeName();
 
-   #if DEBUG_ASSEMBLE_COMMAND
+   #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
       ("Interpreter::AssembleCommand() cmd='%s'\n   desc='%s'\n",
        type.c_str(), desc.c_str());
@@ -1129,7 +1130,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    
    funcName = GmatStringUtil::Trim(funcName);
 
-   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting funcName=%s\n", funcName.c_str());
    #endif
    
@@ -1146,7 +1147,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       return false;
    }
    
-   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting input\n");
    WriteParts("CallFunction Input" , inArray);
    #endif
@@ -1156,7 +1157,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
       retval = cmd->SetStringParameter("AddInput", inArray[i]);
    
    // Set output to CallFunction
-   #if DEBUG_ASSEMBLE_CALL_FUNCTION
+   #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting output\n");
    WriteParts("CallFunction Output" , outArray);
    #endif
@@ -1222,7 +1223,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
          start = op + 1;
    }
    
-   #if DEBUG_ASSEMBLE_COMMAND
+   #ifdef DEBUG_ASSEMBLE_COMMAND
    WriteParts("After parsing conditions()" , parts);
    #endif
    
@@ -1242,7 +1243,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    
    for (int i=0; i<count; i+=4)
    {
-      #if DEBUG_ASSEMBLE_COMMAND
+      #ifdef DEBUG_ASSEMBLE_COMMAND
       MessageInterface::ShowMessage
          ("   lhs:%s, op:%s, rhs:%s\n", parts[i].c_str(), parts[i+1].c_str(),
           parts[i+2].c_str());
@@ -1251,7 +1252,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       // Try to create a parameter first if system parameter
       std::string type, ownerName, depObj;
       GmatStringUtil::ParseParameter(parts[i], type, ownerName, depObj);
-      #if DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
+      #ifdef DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
       MessageInterface::ShowMessage
          ("   lhs: type = %s, ownerName = %s, depObj = %s\n", 
          type.c_str(), ownerName.c_str(), depObj.c_str());
@@ -1261,7 +1262,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
           CreateParameter(type, parts[i], ownerName, depObj);
       
       GmatStringUtil::ParseParameter(parts[i+2], type, ownerName, depObj);
-      #if DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
+      #ifdef DEBUG_ASSEMBLE_COMMAND // --------------------------------- debug ----
       MessageInterface::ShowMessage
          ("   rhs: type = %s, ownerName = %s, depObj = %s\n", 
          type.c_str(), ownerName.c_str(), depObj.c_str());
@@ -1282,7 +1283,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       
       if (count > i+3)
       {
-         #if DEBUG_ASSEMBLE_COMMAND
+         #ifdef DEBUG_ASSEMBLE_COMMAND
          MessageInterface::ShowMessage("   logOp=%s\n", parts[i+3].c_str());
          #endif
          
@@ -1304,7 +1305,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
 //------------------------------------------------------------------------------
 bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
 {
-   #if DEBUG_ASSEMBLE_FOR
+   #ifdef DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
       ("Interpreter::AssembleForCommand() desc='%s'\n", desc.c_str());
    #endif
@@ -1344,7 +1345,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
       end = parts[2];
    }
    
-   #if DEBUG_ASSEMBLE_FOR
+   #ifdef DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
       ("Interpreter::AssembleForCommand() index=%s, start=<%s>, end=<%s>, "
        "step=<%s>\n", index.c_str(), start.c_str(), end.c_str(), step.c_str());
@@ -1382,7 +1383,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    //if (!SetCommandParameter(cmd, end, "For loop end index", true, true))
    //   retval = false;
    
-   #if DEBUG_ASSEMBLE_FOR
+   #ifdef DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
       ("Interpreter::AssembleForCommand() returning %d\n", retval);
    #endif
@@ -1402,7 +1403,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    StringArray parts = theTextParser.Decompose(desc, "()");
    Integer count = parts.size();
    
-   #if DEBUG_ASSEMBLE_COMMAND
+   #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
       ("AssembleGeneralCommand() cmd='%s', desc='%s'\n", cmd->GetTypeName().c_str(),
        desc.c_str());
@@ -1491,7 +1492,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          // Get FiniteBurn name
          parts = theTextParser.Decompose(desc, "()", false);
          
-         #if DEBUG_ASSEMBLE_COMMAND
+         #ifdef DEBUG_ASSEMBLE_COMMAND
          WriteParts(type, parts);
          #endif
          
@@ -1500,7 +1501,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          // Get Spacecraft names
          StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
          
-         #if DEBUG_ASSEMBLE_COMMAND
+         #ifdef DEBUG_ASSEMBLE_COMMAND
          WriteParts(type, subParts);
          #endif
          
@@ -1519,7 +1520,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       retval = false;
    }
    
-   #if DEBUG_ASSEMBLE_COMMAND
+   #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
       ("   AssembleGeneralCommand() leaving setting %s, retval=%d\n",
        type.c_str(), retval);
@@ -1538,7 +1539,7 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
                                                   const std::string &rhs,
                                                   bool &retFlag, GmatCommand *inCmd)
 {
-   #if DEBUG_CREATE_COMMAND
+   #ifdef DEBUG_CREATE_COMMAND
    MessageInterface::ShowMessage
       ("Interpreter::CreateAssignmentCommand() lhs=%s, rhs=%s\n", lhs.c_str(),
        rhs.c_str());
@@ -1567,7 +1568,7 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
 //------------------------------------------------------------------------------
 Parameter* Interpreter::CreateSystemParameter(const std::string &str)
 {
-   #if DEBUG_CREATE_PARAM
+   #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("Interpreter::CreateSystemParameter() str=%s\n", str.c_str());
    #endif
@@ -1576,7 +1577,7 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
    std::string paramType, ownerName, depName;
    GmatStringUtil::ParseParameter(str, paramType, ownerName, depName);
    
-   #if DEBUG_CREATE_PARAM
+   #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("   paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
        ownerName.c_str(), depName.c_str());
@@ -1588,7 +1589,7 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
    {
       param = CreateParameter(paramType, str, ownerName, depName);
       
-      #if DEBUG_CREATE_PARAM
+      #ifdef DEBUG_CREATE_PARAM
       MessageInterface::ShowMessage
          ("   1) parameter created with paramType=%s, ownerName=%s, depName=%s\n",
           paramType.c_str(), ownerName.c_str(), depName.c_str());
@@ -1601,7 +1602,7 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str)
       if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
          param = (Parameter*)obj;
    
-      #if DEBUG_CREATE_PARAM
+      #ifdef DEBUG_CREATE_PARAM
       MessageInterface::ShowMessage
          ("   2) parameter created with str=%s, but obj = %s, and param = %s\n", 
           str.c_str(),
@@ -1634,7 +1635,7 @@ Parameter* Interpreter::CreateParameter(const std::string &type,
                                         const std::string &ownerName,
                                         const std::string &depName)
 {
-   #if DEBUG_CREATE_PARAM
+   #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("Interpreter::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
        type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
@@ -1675,7 +1676,7 @@ Parameter* Interpreter::CreateArray(const std::string &arrayStr)
    
    Parameter *param = theModerator->CreateParameter("Array", name);
 
-   #if DEBUG_CREATE_ARRAY
+   #ifdef DEBUG_CREATE_ARRAY
    MessageInterface::ShowMessage
       ("Interpreter::CreateArray() row=%d, col=%d\n", row, col);
    #endif
@@ -1709,7 +1710,7 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
    if (name[0] == '-')
       name = name.substr(1);
    
-   #if DEBUG_ARRAY_GET
+   #ifdef DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
       ("Interpreter::GetArrayIndex() arrayStr=%s, name=%s, rowStr=%s, "
        "colStr=%s, row=%d, col=%d\n", arrayStr.c_str(), name.c_str(),
@@ -1793,7 +1794,7 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
       }
    }
    
-   #if DEBUG_ARRAY_GET
+   #ifdef DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
       ("   GetArrayIndex() row=%d, col=%d\n", row, col);
    #endif
@@ -1837,7 +1838,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    bool isRhsArray = false;
    currentBlock = lhs + " = " + rhs;
    
-   #if DEBUG_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT
    MessageInterface::ShowMessage
       ("Interpreter::MakeAssignment() lhs=%s, rhs=%s\n", lhs.c_str(), rhs.c_str());
    MessageInterface::ShowMessage
@@ -1883,7 +1884,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       }
    }
    
-   #if DEBUG_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT
    MessageInterface::ShowMessage
       ("   isLhsObject=%d, isLhsArray=%d, lhsPropName=%s\n",
        isLhsObject, isLhsArray, lhsPropName.c_str());
@@ -1899,7 +1900,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       {
          //throw InterpreterException("Cannot find RHS object: " + rhsObjName + "\n");
          
-         #if DEBUG_ASSIGNMENT
+         #ifdef DEBUG_ASSIGNMENT
          MessageInterface::ShowMessage
             ("   Cannot find RHS object: '%s'. It may be a string value\n",
              rhsObjName.c_str());
@@ -1985,7 +1986,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       HandleError(ex);
    }
    
-   #if DEBUG_ASSIGNMENT
+   #ifdef DEBUG_ASSIGNMENT
    MessageInterface::ShowMessage
       ("Interpreter::MakeAssignment() returning lhsObj=%p\n", lhsObj);
    #endif
@@ -2002,7 +2003,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
 //-------------------------------------------------------------------------------
 bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetObjectToObject() to=%s, from=%s\n",
        toObj->GetName().c_str(), fromObj->GetName().c_str());
@@ -2031,7 +2032,7 @@ bool Interpreter::SetObjectToObject(GmatBase *toObj, GmatBase *fromObj)
 bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
                                       const std::string &fromProp)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("SetPropertyToObject() toObj=%s, fromOwner=%s, fromProp=%s\n",
        toObj->GetName().c_str(), fromOwner->GetName().c_str(), fromProp.c_str());
@@ -2072,7 +2073,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
       
       fromType = rhsParam->GetReturnType();
       
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage
          ("SetPropertyToObject() rhs:%s is a parameter\n", rhs.c_str());
       #endif
@@ -2117,7 +2118,7 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
 //-------------------------------------------------------------------------------
 bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetArrayToObject() toObj=%s, fromArray=%s\n",
        toObj->GetName().c_str(), fromArray.c_str());
@@ -2139,7 +2140,7 @@ bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray
    if (param == NULL)
       return false;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   SetArrayToObject() row=%d, col=%d\n", row, col);
    #endif
@@ -2154,7 +2155,7 @@ bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray
    
    Real rval = GetArrayValue(fromArray, row, col);
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage("   SetArrayToObject() rval=%f\n", rval);
    #endif
 
@@ -2179,7 +2180,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
 {
    std::string objType = toObj->GetTypeName();
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetValueToObject() objType=%s, toObj=%s, value=%s\n",
        objType.c_str(), toObj->GetName().c_str(), value.c_str());
@@ -2198,7 +2199,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
    
    if (objType == "String")
    {
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage
          ("===> calling toObj->SetStringParameter(Value, %s)\n", value.c_str());
       #endif
@@ -2213,7 +2214,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
       {
          if (GmatStringUtil::ToReal(value, rval))
          {      
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage("   SetValueToObject() rval=%f\n", rval);
             #endif
          
@@ -2248,7 +2249,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
 bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toProp,
                                       GmatBase *fromObj)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetObjectToProperty() ownerType=%s, toOwner=%s, toProp=%s, "
        "fromObj=%s\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
@@ -2290,7 +2291,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
             std::string lineNumStr = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
             delayedBlockLineNumbers.push_back(lineNumStr);
             
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   ===> added to delayed blocks: line:%s, %s\n", lineNumStr.c_str(),
                 currentBlock.c_str());
@@ -2306,7 +2307,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          
          delayedBlocks.push_back(currentBlock);
          
-         #if DEBUG_SET
+         #ifdef DEBUG_SET
          MessageInterface::ShowMessage
             ("   ===> added to delayed blocks: %s\n", currentBlock.c_str());
          #endif
@@ -2316,7 +2317,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
       
       toType = toObj->GetParameterType(toId);
       
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage("   toId=%d, toType=%d\n", toId, toType);
       #endif
       
@@ -2361,7 +2362,7 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
       }
       else
       {
-         #if DEBUG_SET
+         #ifdef DEBUG_SET
          MessageInterface::ShowMessage
             ("   Setting objType=%s, objName=%s\n", fromObj->GetTypeName().c_str(),
              fromObj->GetName().c_str());
@@ -2396,7 +2397,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    errorMsg1 = "";
    errorMsg2 = "";
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("SetPropertyToProperty() toOwner=%s<%s>, toProp=%s, fromOwner=%s, fromProp=%s\n",
        toOwner->GetName().c_str(), toOwner->GetTypeName().c_str(), toProp.c_str(),
@@ -2411,7 +2412,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    Parameter *lhsParam = NULL;
    Parameter *rhsParam = NULL;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage("   lhs=%s, rhs=%s\n", lhs.c_str(), rhs.c_str());
    #endif
 
@@ -2426,7 +2427,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    }
    catch (BaseException &e)
    {
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage
          ("   Parameter ID of '%s' not found. So create a parameter '%s'\n",
           toProp.c_str(), lhs.c_str());
@@ -2457,7 +2458,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    }
    
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   toId=%d, toType=%d, fromId=%d, fromType=%d, lhsParam=%p, rhsParam=%p\n",
        toId, toType, fromId, fromType, lhsParam, rhsParam);
@@ -2549,7 +2550,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
 bool Interpreter::SetArrayToProperty(GmatBase *toOwner, const std::string &toProp,
                                      const std::string &fromArray)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetArrayToProperty() toOwner=%s, toProp=%s, fromArray=%s\n",
        toOwner->GetName().c_str(), toProp.c_str(), fromArray.c_str());
@@ -2582,7 +2583,7 @@ bool Interpreter::SetArrayToProperty(GmatBase *toOwner, const std::string &toPro
       return false;
    }
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetArrayToProperty() exiting. rval=%f, row=%d, col=%d, \n",
        rval, row, col);
@@ -2603,7 +2604,7 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
    errorMsg1 = "";
    errorMsg2 = "";
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetValueToProperty() objType=%s, objName=%s, toProp=%s, "
        "value=%s\n", toOwner->GetTypeName().c_str(), toOwner->GetName().c_str(),
@@ -2657,7 +2658,7 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
       }
    }
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetValueToProperty() returning retval=%d\n", retval);
    #endif
@@ -2673,7 +2674,7 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
 bool Interpreter::SetObjectToArray(GmatBase *toArrObj, const std::string &toArray,
                                    GmatBase *fromObj)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetObjectToArray() toArrObj=%s, toArray=%s, fromObj=%s\n",
        toArrObj->GetName().c_str(), toArray.c_str(), fromObj->GetName().c_str());
@@ -2697,7 +2698,7 @@ bool Interpreter::SetObjectToArray(GmatBase *toArrObj, const std::string &toArra
    if (param == NULL)
       return false;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   SetObjectToArray()rval=%f, row=%d, col=%d\n", rval, row, col);
    #endif
@@ -2723,7 +2724,7 @@ bool Interpreter::SetObjectToArray(GmatBase *toArrObj, const std::string &toArra
 bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toArray,
                                      GmatBase *fromOwner, const std::string &fromProp)
 {
-   #if DEBGU_SET
+   #ifdef DEBGU_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetPropertyToArray() toArrObj=%s, toArray=%s, fromOwner=%s, "
        "fromProp=%s\n", toArrObj->GetName().c_str(), toArray.c_str(),
@@ -2751,7 +2752,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toAr
    if (param == NULL)
       return false;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   SetPropertyToArray()rval=%f, row=%d, col=%d\n", rval, row, col);
    #endif
@@ -2777,7 +2778,7 @@ bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toAr
 bool Interpreter::SetArrayToArray(GmatBase *toArrObj, const std::string &toArray,
                                   GmatBase *fromArrObj, const std::string &fromArray)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetArrayToArray() toArrObj=%s, toArray=%s, "
        "fromArrObj=%s, fromArray=%s\n", toArrObj->GetName().c_str(),
@@ -2797,7 +2798,7 @@ bool Interpreter::SetArrayToArray(GmatBase *toArrObj, const std::string &toArray
    
    Real rval = GetArrayValue(fromArray, rowFrom, colFrom);
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   SetArrayToArray() rval=%f, rowFrom=%d, colFrom=%d, \n",
        rval, rowFrom, colFrom);
@@ -2829,7 +2830,7 @@ bool Interpreter::SetArrayToArray(GmatBase *toArrObj, const std::string &toArray
 bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
                                   const std::string &value)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetValueToArray() array=%s, toArray=%s, value=%s\n",
        array->GetName().c_str(), toArray.c_str(), value.c_str());
@@ -2844,7 +2845,7 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
    
    if (GmatStringUtil::ToReal(value, rval))
    {
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage
          ("   SetValueToArray() rval=%f, row=%d, col=%d\n", rval, row, col);
       #endif
@@ -2894,7 +2895,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
 {
    bool retval = false;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetPropertyValue() obj=%s, id=%d, type=%d, value=%s\n",
        obj->GetName().c_str(), id, type, value.c_str());
@@ -2903,7 +2904,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    std::string valueToUse = value;
    CheckForSpecialCase(obj, id, valueToUse);
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   propertyType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
    #endif
@@ -2922,7 +2923,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             // It is not a one of object types, so create parameter
             param = CreateSystemParameter(value);
             
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             if (param)
                MessageInterface::ShowMessage
                   ("   param=(%p)%s type=%s returnType=%d\n", param,
@@ -2942,7 +2943,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             if (param->GetReturnType() == Gmat::STRING_TYPE ||
                 obj->IsOfType(Gmat::SUBSCRIBER))
             {
-               #if DEBUG_SET
+               #ifdef DEBUG_SET
                MessageInterface::ShowMessage
                   ("   Calling SetStringParameter(%d, %s)\n", id, value.c_str());
                #endif
@@ -2969,13 +2970,12 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
                break;
             }
             
-            // Create Owned Object, if it is object type (loj: 3/27)
-            //GmatBase *ownedObj = CreateObject(value, "");
+            // Create Owned Object, if it is object type
             GmatBase *ownedObj = NULL;
             if (IsObjectType(value))
                ownedObj = CreateObject(value, "");
             
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             if (ownedObj)
                MessageInterface::ShowMessage
                   ("   Created ownedObjType: %s\n",
@@ -2984,13 +2984,13 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             
             if (ownedObj)
             {
-               #if DEBUG_SET
+               #ifdef DEBUG_SET
                MessageInterface::ShowMessage
-                  ("   Calling SetRefObject(%p, %d)\n", ownedObj,
-                   ownedObj->GetType());
+                  ("   Calling SetRefObject(%s(%p), %d)\n", ownedObj->GetTypeName().c_str(),
+                   ownedObj, ownedObj->GetType());
                #endif
                
-               obj->SetRefObject(ownedObj, ownedObj->GetType());
+               obj->SetRefObject(ownedObj, ownedObj->GetType(), ownedObj->GetName());
             }
             else
             {
@@ -3026,7 +3026,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          Integer ival;
          if (GmatStringUtil::ToInteger(valueToUse, ival))
          {
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   Calling SetIntegerParameter(%d, %d)\n", id, ival);
             #endif
@@ -3046,7 +3046,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          Integer ival;
          if (GmatStringUtil::ToInteger(valueToUse, ival))
          {
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   Calling SetUnsignedIntParameter(%d, %d, %d)\n", id, ival, index);
             #endif
@@ -3067,7 +3067,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          Real rval;
          if (GmatStringUtil::ToReal(valueToUse, rval))
          {
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             std::string rvalStr =
                GmatStringUtil::ToString(rval, false, false, 17, 16);
             MessageInterface::ShowMessage
@@ -3090,7 +3090,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::STRING_TYPE:
       {
-         #if DEBUG_SET
+         #ifdef DEBUG_SET
          MessageInterface::ShowMessage
             ("   Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
          #endif
@@ -3101,7 +3101,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::STRINGARRAY_TYPE:
       {
-         #if DEBUG_SET
+         #ifdef DEBUG_SET
          MessageInterface::ShowMessage
             ("   Calling SetStringParameter(%d, %s, %d)\n", id,
              valueToUse.c_str(), index);
@@ -3123,7 +3123,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
          bool tf;
          if (GmatStringUtil::ToBoolean(value, tf))
          {
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   Calling SetBooleanParameter(%d, %d)\n", id, tf);
             #endif
@@ -3140,7 +3140,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::ON_OFF_TYPE:
       {
-         #if DEBUG_SET
+         #ifdef DEBUG_SET
          MessageInterface::ShowMessage
             ("   Calling SetOnOffParameter(%d, %s)\n", id, valueToUse.c_str());
          #endif
@@ -3163,7 +3163,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       HandleError(ex);
    }
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetPropertyValue() returning retval=%d\n", retval);
    #endif
@@ -3244,7 +3244,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
                               const Gmat::ParameterType type,
                               const std::string &value)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetProperty() obj=%s, id=%d, type=%d, value=%s\n",
        obj->GetName().c_str(), id, type, value.c_str());
@@ -3255,7 +3255,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    std::string valueToUse = value;
    CheckForSpecialCase(obj, id, valueToUse);
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage("   propertyType=%d\n", obj->GetParameterType(id));
    #endif
    
@@ -3270,7 +3270,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    
    count = rhsValues.size();
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage("   count=%d\n", count);
    #endif
    
@@ -3284,7 +3284,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
       retval = SetPropertyValue(obj, id, type, value);
    }
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetProperty() returning retval=%d\n", retval);
    #endif
@@ -3300,7 +3300,7 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
 bool Interpreter::SetComplexProperty(GmatBase *obj, const std::string &prop,
                                      const std::string &value)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetComplexProperty() prop=%s, value=%s\n",
        prop.c_str(), value.c_str());
@@ -3356,7 +3356,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    std::string forceType = ForceModel::GetScriptAlias(pmType);
    std::string centralBodyName = forceModel->GetStringParameter("CentralBody");
    
-   #if DEBUG_SET_FORCE_MODEL
+   #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
       ("Interpreter::SetForceModelProperty() fm=%s, prop=%s, value=%s\n"
        "   pmType=%s, forceType=%s\n", obj->GetName().c_str(), prop.c_str(), value.c_str(),
@@ -3385,7 +3385,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
       
       for (UnsignedInt i=0; i<bodies.size(); i++)
       {
-         #if DEBUG_SET_FORCE_MODEL
+         #ifdef DEBUG_SET_FORCE_MODEL
          MessageInterface::ShowMessage("   bodies[%d]=%s\n", i, bodies[i].c_str());
          #endif
          
@@ -3401,7 +3401,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
                HandleError(ex);
             }
             
-            #if DEBUG_SET_FORCE_MODEL
+            #ifdef DEBUG_SET_FORCE_MODEL
             MessageInterface::ShowMessage
                ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
                 pm->GetTypeName().c_str(), pm->GetName().c_str(),
@@ -3461,7 +3461,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             pm->SetStringParameter("BodyName", centralBodyName);
             GmatBase *am = CreateObject(value, "");
             if (am)
-               pm->SetRefObject(am, Gmat::ATMOSPHERE);
+               pm->SetRefObject(am, Gmat::ATMOSPHERE, am->GetName());
             else
             {
                InterpreterException ex
@@ -3476,7 +3476,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          pm->SetStringParameter("BodyName", centralBodyName);
       }
             
-      #if DEBUG_SET_FORCE_MODEL
+      #ifdef DEBUG_SET_FORCE_MODEL
       MessageInterface::ShowMessage
          ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
           pm->GetTypeName().c_str(), pm->GetName().c_str(),
@@ -3497,7 +3497,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    forceType = ForceModel::GetScriptAlias(pmType);
    std::string propName = parts[count-1];
    
-   #if DEBUG_SET_FORCE_MODEL
+   #ifdef DEBUG_SET_FORCE_MODEL
    MessageInterface::ShowMessage
       ("   Setting pmType=%s, forceType=%s, propName=%s\n", pmType.c_str(),
        forceType.c_str(), propName.c_str());
@@ -3526,7 +3526,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
 bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
                                          const std::string &value)
 {
-   #if DEBUG_SET_SOLAR_SYS
+   #ifdef DEBUG_SET_SOLAR_SYS
    MessageInterface::ShowMessage
       ("Interpreter::SetSolarSystemProperty() type=%s, name=%s, prop=%s, value=%s\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), prop.c_str(), value.c_str());
@@ -3543,7 +3543,7 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       {
          StringArray ephems = theTextParser.SeparateBrackets(value, "{}", " ,");
       
-         #if DEBUG_SET_SOLAR_SYS
+         #ifdef DEBUG_SET_SOLAR_SYS
          for (StringArray::iterator i = ephems.begin(); i != ephems.end(); ++i)
             MessageInterface::ShowMessage("   Source = %s\n", i->c_str());
          #endif
@@ -3571,7 +3571,7 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       std::string bodyName = parts[0];
       std::string newProp = parts[count-1];
       
-      #if DEBUG_SET_SOLAR_SYS
+      #ifdef DEBUG_SET_SOLAR_SYS
       MessageInterface::ShowMessage
          ("   bodyName=%s, newProp=%s\n", bodyName.c_str(), newProp.c_str());
       #endif
@@ -3599,7 +3599,7 @@ bool Interpreter::SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
       }
    }
    
-   #if DEBUG_SET_SOLAR_SYS
+   #ifdef DEBUG_SET_SOLAR_SYS
    MessageInterface::ShowMessage
       ("Interpreter::SetSolarSystemProperty() prop=%s, retval=%d\n",
        prop.c_str(), retval);
@@ -3629,7 +3629,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
                                   GmatBase **ownedObj, Integer &id,
                                   Gmat::ParameterType &type)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::FindOwnedObject() owner=%s, toProp=%s\n",
        owner->GetName().c_str(), toProp.c_str());
@@ -3644,7 +3644,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
    id = -1;
    type = Gmat::UNKNOWN_PARAMETER_TYPE;
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage("   ownedObjCount=%d\n", ownedObjCount);
    #endif
    
@@ -3655,7 +3655,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
          tempObj = owner->GetOwnedObject(i);
          if (ownedObj)
          {
-            #if DEBUG_SET
+            #ifdef DEBUG_SET
             MessageInterface::ShowMessage
                ("   i=%d, ownedObj type=<%s>, name=<%s>\n", i,
                 tempObj->GetTypeName().c_str(), tempObj->GetName().c_str());
@@ -3698,7 +3698,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
       }
    }
    
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("   FindOwnedObject() returning retval=%d, ownedObj=%p\n",
        retval, *ownedObj);
@@ -3723,7 +3723,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
 Real Interpreter::GetArrayValue(const std::string &arrayStr,
                                 Integer &row, Integer &col)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::GetArrayValue arrayStr=%s\n", arrayStr.c_str());
    #endif
@@ -3756,7 +3756,7 @@ bool Interpreter::IsArrayElement(const std::string &str)
    
    retval = GmatStringUtil::IsParenPartOfArray(str);
 
-   #if DEBUG_ARRAY_GET
+   #ifdef DEBUG_ARRAY_GET
    MessageInterface::ShowMessage
       ("Interpreter::IsArrayElement() str=%s, array=%d\n", str.c_str(), retval);
    #endif
@@ -3835,7 +3835,7 @@ void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNu
    {
       errorList.push_back(msg);
       
-      #if DEBUG_SET
+      #ifdef DEBUG_SET
       MessageInterface::ShowMessage(msg + "\n");
       #endif
    }
@@ -3882,7 +3882,7 @@ bool Interpreter::IsBranchCommand(const std::string &str)
 bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
                                       const StringArray &lines)
 {
-   #if DEBUG_CHECK_BRANCH
+   #ifdef DEBUG_CHECK_BRANCH
    MessageInterface::ShowMessage("Interpreter::CheckBranchCommands()\n");
    for (UnsignedInt i=0; i<lines.size(); i++)
       MessageInterface::ShowMessage("%d: %s\n", lineNumbers[i], lines[i].c_str());
@@ -3894,7 +3894,7 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
    std::string expEndStr, str, str1;
    bool retval = true;
    
-   #if DEBUG_CHECK_BRANCH
+   #ifdef DEBUG_CHECK_BRANCH
    MessageInterface::ShowMessage("   Now start checking\n");
    #endif
    
@@ -3902,7 +3902,7 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
    {
       str = lines[i];
       
-      #if DEBUG_CHECK_BRANCH
+      #ifdef DEBUG_CHECK_BRANCH
       MessageInterface::ShowMessage
          ("   line=%d, str=%s\n", lineNumbers[i], str.c_str());
       #endif
@@ -3952,7 +3952,7 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
       }
    }
    
-   #if DEBUG_CHECK_BRANCH
+   #ifdef DEBUG_CHECK_BRANCH
    MessageInterface::ShowMessage
       ("Interpreter::CheckBranchCommands() returning %d\n", retval);
    #endif
@@ -4115,13 +4115,35 @@ bool Interpreter::FinalPass()
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
    {
       CoordinateSystem *cs = (CoordinateSystem*)GetConfiguredObject(*i);
-      #ifdef DEBUG_FINAL_PASS
+      #ifdef DEBUG_FINAL_PASS_CS
       MessageInterface::ShowMessage("Initializing CoordinateSystem '%s'\n",
                                     i->c_str());
       #endif
+      refNameList = cs->GetRefObjectNameArray(Gmat::SPACE_POINT);
+      for (UnsignedInt j = 0; j < refNameList.size(); j++)
+      {
+         #ifdef DEBUG_FINAL_PASS_CS
+         MessageInterface::ShowMessage
+            ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+         #endif
+         
+         refObj = GetConfiguredObject(refNameList[j]);
+         if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
+         {            
+            InterpreterException ex
+               ("Nonexistent SpacePoint \"" + refNameList[j] +
+                "\" referenced in \"" + obj->GetName() + "\"");
+            HandleError(ex, false);
+            retval = false;
+         }
+         else
+         {
+            cs->SetRefObject(refObj, Gmat::SPACE_POINT, refObj->GetName());
+         }
+      }
       cs->Initialize();         
    }
-
+   
    
    //-------------------------------------------------------------------
    // Special check for LibrationPoint.
@@ -4160,6 +4182,39 @@ bool Interpreter::FinalPass()
             HandleError(ex, false);
             retval = false;
          }
+      }
+   }
+   
+   //-------------------------------------------------------------------
+   // Special case for Spacecraft, we need to set CoordinateSyatem
+   // pointer in which initial state is represented.  So that
+   // Spacecraft can convert initial state in user representation to
+   // internal representation (EarthMJ2000Eq Cartesian).
+   //-------------------------------------------------------------------
+   objList = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
+
+   for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
+   {
+      obj = GetConfiguredObject(*i);
+      std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
+      GmatBase *csObj = GetConfiguredObject(csName);
+      #ifdef DEBUG_FINAL_PASS
+      MessageInterface::ShowMessage
+         ("   Calling SetRefObject(%s(%p), %d)\n", csObj->GetName().c_str(),
+          csObj, csObj->GetType());
+      #endif
+      
+      try
+      {
+         obj->SetRefObject(csObj, Gmat::COORDINATE_SYSTEM, csObj->GetName());
+      }
+      catch (BaseException &e)
+      {
+         InterpreterException ex
+            ("The Spacecraft \"" + obj->GetName() + "\" failed to set "
+             "CoordinateSystem: " + e.GetFullMessage());
+         HandleError(ex, false);
+         retval = false;
       }
    }
    
@@ -4312,7 +4367,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    ObjectTypeArray refTypes = obj->GetRefObjectTypeArray();
    StringArray refNames;
    
-   #if DEBUG_CHECK_OBJECT
+   #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
       ("Interpreter::CheckUndefinedReference() type='%s', name='%s', refTypes=\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str());
@@ -4328,7 +4383,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       {
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
          
-         #if DEBUG_CHECK_OBJECT
+         #ifdef DEBUG_CHECK_OBJECT
          for (UnsignedInt j=0; j<refNames.size(); j++)
          MessageInterface::ShowMessage
             ("      %s\n", refNames[j].c_str());
@@ -4424,7 +4479,7 @@ bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param
                                       const std::string &msg, bool isNumberAllowed,
                                       bool isArrayAllowed)
 {
-   #if DEBUG_SET
+   #ifdef DEBUG_SET
    MessageInterface::ShowMessage
       ("Interpreter::SetCommandParameter() cmd=%s, param=%s, isNumberAllowed=%d,"
        " isArrayAllowed=%d\n", cmd->GetTypeName().c_str(), param.c_str(),
