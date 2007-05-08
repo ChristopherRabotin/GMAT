@@ -56,7 +56,7 @@ public:
    
    bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
                       const std::string &field, const std::string &expRange,
-                      bool isNumberAllowed);
+                      bool allowNumber = true, bool allowNonPlottable = false);
    
    
 protected:

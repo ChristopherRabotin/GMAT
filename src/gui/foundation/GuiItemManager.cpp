@@ -85,7 +85,7 @@ wxString GuiItemManager::ToWxString(Real rval)
 
 //------------------------------------------------------------------------------
 // int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType,
-//                     bool isNumberAllowed = false)
+//                     bool allowNumber = false, bool allowNonPlottable = true)
 //------------------------------------------------------------------------------
 /*
  * Checks if input variable is a Variable, Array element, or plottable
@@ -93,6 +93,8 @@ wxString GuiItemManager::ToWxString(Real rval)
  *
  * @param  varName  input variable name
  * @param  ownerType  input owner type (such as Gmat::SPACECRAFT)
+ * @param  allowNumber  true if varName can be a Real number 
+ * @param  allowNonPlottable  true if varName can be a non-plottable
  *
  * @return -1 if varName NOT found in the configuration
  *          0 if varName found BUT not one of Variable, Array element, or parameter
@@ -101,10 +103,10 @@ wxString GuiItemManager::ToWxString(Real rval)
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
-                                    Gmat::ObjectType ownerType,
-                                    bool isNumberAllowed)
+                                    Gmat::ObjectType ownerType, bool allowNumber,
+                                    bool allowNonPlottable)
 {
-   if (isNumberAllowed)
+   if (allowNumber)
    {
       Real rval;
       if (GmatStringUtil::ToReal(varName.c_str(), rval))
@@ -148,9 +150,18 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    }
    else if (param->GetKey() == GmatParam::SYSTEM_PARAM)
    {
-      // check to see if it is parameter of owenerType
-      if (param->GetOwnerType() == ownerType && param->IsPlottable())
-         isValid = true;
+      if (allowNonPlottable)
+      {
+         // check to see if it is parameter of owenerType
+         if (param->GetOwnerType() == ownerType)
+            isValid = true;
+      }
+      else
+      {
+         // check to see if it is parameter of owenerType and plottable
+         if (param->GetOwnerType() == ownerType && param->IsPlottable())
+            isValid = true;
+      }
    }
    
    if (isValid)

@@ -386,7 +386,7 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
 //------------------------------------------------------------------------------
 // bool CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
 //                    const std::string &field, const std::string &expRange,
-//                    bool isNumberAllowed)
+//                    bool allowNumber  = true, bool allowNonPlottable = false)
 //------------------------------------------------------------------------------
 /*
  * Checks if input variable is a Number, Variable, Array element, or parameter of
@@ -396,7 +396,8 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
  * @param  ownerType  Input owner type (such as Gmat::SPACECRAFT)
  * @param  field      Field name should be used in the error message
  * @param  expRange   Expected value range to be used in the error message
- * @param  isNumberAllowed  true if varName can be a Real number 
+ * @param  allowNumber  true if varName can be a Real number 
+ * @param  allowNonPlottable  true if varName can be a non-plottable
  *
  * @return -1 if varName NOT found in the configuration
  *          0 if varName found BUT not one of Variable, Array element, or parameter
@@ -406,10 +407,11 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
                               const std::string &field, const std::string &expRange,
-                              bool isNumberAllowed)
+                              bool allowNumber, bool allowNonPlottable)
 {
    int retval = theGuiManager->
-      IsValidVariable(varName.c_str(), Gmat::SPACECRAFT, isNumberAllowed);
+      IsValidVariable(varName.c_str(), Gmat::SPACECRAFT, allowNumber,
+                      allowNonPlottable);
    
    if (retval == -1)
    {

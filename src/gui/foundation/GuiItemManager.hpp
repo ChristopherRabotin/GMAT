@@ -79,7 +79,7 @@ public:
    
    wxString ToWxString(Real rval);
    int IsValidVariable(const std::string &varName, Gmat::ObjectType ownerType,
-                       bool isNumberAllowed = false);
+                       bool allowNumber = false, bool allowNonPlottable = false);
    
    void UpdateAll();
    void UpdateCelestialPoint();
