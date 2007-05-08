@@ -20,6 +20,10 @@
 #include "MathParser.hpp"
 #include "StringUtil.hpp"      // for GmatStringUtil::
 
+// to allow object creation inside ScriptEvent
+//#define __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
+
+
 //#define DEBUG_READ_FIRST_PASS 1
 //#define DEBUG_SCRIPT_READING 1
 //#define DEBUG_SCRIPT_WRITING
@@ -590,15 +594,17 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
    }
    else if (currentBlockType == Gmat::DEFINITION_BLOCK)
    {
-      //loj: 11/21/06 Uncomment the lines when all scripts are ready
-      // Do not allow object creation on command mode
-      //if (inRealCommandMode)
-      //{
-      //   InterpreterException ex
-      //      ("Creating Object is not allowed in command mode");
-      //   HandleError(ex);
-      //   return false;
-      //}
+      // If object creation is not allowed in command mode
+      #ifndef __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
+      if (inRealCommandMode)
+      {
+         InterpreterException ex
+            ("GMAT currently requires that all object are created before the "
+             "mission sequence begins");
+         HandleError(ex, true, true);
+         return true; // just a warning, so return true
+      }
+      #endif
       
       if (count < 3)
       {
