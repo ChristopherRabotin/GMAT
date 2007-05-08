@@ -38,6 +38,7 @@
 //#define DEBUG_RENAME 1
 //#define DEBUG_PROP_PERFORMANCE
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_FIXED_STEP
 
 
 //#define TIME_ROUNDOFF 1.0e-6
@@ -2624,6 +2625,10 @@ bool Propagate::TakeAStep(Real propStep)
    bool retval = false;
    Real stepToTake;
  
+   #ifdef DEBUG_FIXED_STEP
+      std::vector<ForceModel *>::iterator fmod = fm.begin();
+   #endif
+
    std::vector<Propagator*>::iterator current = p.begin();
    if (propStep == 0.0) 
    {
@@ -2679,17 +2684,14 @@ bool Propagate::TakeAStep(Real propStep)
    }
    else 
    {
-      #ifdef DEBUG_FIXED_STEP
-         std::vector<ForceModel *>::iterator fmod = fm.begin();
-      #endif
-      
       // Step all of the propagators by the input amount
       while (current != p.end()) 
       {
          #ifdef DEBUG_FIXED_STEP
-            MessageInterface::ShowMessage("Stepping '%s' by %le seconds\n", 
-               (*current)->GetName().c_str(), propStep);
-
+            MessageInterface::ShowMessage("Stepping '%s' by %le seconds from "
+               "epoch = %16.11lf\n", (*current)->GetName().c_str(), propStep,
+               (*fmod)->GetRealParameter((*fmod)->GetParameterID("Epoch")));
+ 
             Integer fmSize = (*fmod)->GetDimension();
             MessageInterface::ShowMessage("Fmod has dim = %d\n", fmSize);
             MessageInterface::ShowMessage("   Pre Prop:  ");
@@ -2698,8 +2700,6 @@ bool Propagate::TakeAStep(Real propStep)
             for (Integer q = 0; q < fmSize; ++q)
                MessageInterface::ShowMessage(" %.12lf", fmState[q]);
             MessageInterface::ShowMessage("\n");
-            
-            ++fmod;
          #endif
 
          if (!(*current)->Step(propStep))
@@ -2712,6 +2712,8 @@ bool Propagate::TakeAStep(Real propStep)
          
 
          #ifdef DEBUG_FIXED_STEP
+            MessageInterface::ShowMessage("   Stepped to epoch = %16.11lf\n",
+               (*fmod)->GetRealParameter((*fmod)->GetParameterID("Epoch")));
             MessageInterface::ShowMessage("   Post Prop: ");
            
             for (Integer q = 0; q < fmSize; ++q)
@@ -2981,7 +2983,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    Real accuracy = (stopper->IsTimeCondition() ? timeAccuracy : stopAccuracy);
 
    // If we are not at the final state, move to it
-   if (fabs(secsToStep) > 0.0)
+   if (secsToStep != 0.0)
    {
       #if DEBUG_PROPAGATE_EXE
          MessageInterface::ShowMessage(

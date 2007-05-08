@@ -575,11 +575,13 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    satcount = dimension / stateSize; 
    
    if (stateSize * satcount != dimension)
-      throw ForceModelException("GravityField state dimension and state size do not match!");
+      throw ForceModelException(
+         "GravityField state dimension and state size do not match!");
 
    // Currently hardcoded for one spacecraft.  - remove this!!!!!!!!!!!!!!
    if (satcount < 1)
-      throw ForceModelException("GravityField requires at least one spacecraft.");
+      throw ForceModelException(
+         "GravityField requires at least one spacecraft.");
       
    //Real* satState;
    Real satState[6];
@@ -598,7 +600,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
 
    #ifdef DEBUG_GRAV_COORD_SYSTEM
        MessageInterface::ShowMessage(
-         "------ body = %s\n------ inputCS = %s\n------ targetCS = %s\n------ fixedCS = %s\n", 
+         "------ body = %s\n------ inputCS = %s\n------ targetCS = %s"
+         "\n------ fixedCS = %s\n", 
          body->GetName().c_str(),     inputCS->GetName().c_str(), 
          targetCS->GetName().c_str(), fixedCS->GetName().c_str());
    #endif
@@ -622,10 +625,11 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             "   Epoch = %.12lf\n   targetBody = %s\n   fixedBody = %s\n", 
             now.Get(), targetBody->GetName().c_str(), 
             fixedBody->GetName().c_str());
-       MessageInterface::ShowMessage(
-         "------ body = %s\n------ inputCS = %s\n------ targetCS = %s\n------ fixedCS = %s\n", 
-         body->GetName().c_str(),     inputCS->GetName().c_str(), 
-         targetCS->GetName().c_str(), fixedCS->GetName().c_str());
+         MessageInterface::ShowMessage(
+            "------ body = %s\n------ inputCS = %s\n------ targetCS = %s\n"
+            "------ fixedCS = %s\n", 
+            body->GetName().c_str(),     inputCS->GetName().c_str(), 
+            targetCS->GetName().c_str(), fixedCS->GetName().c_str());
       }
    #endif
 

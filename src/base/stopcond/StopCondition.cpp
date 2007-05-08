@@ -385,7 +385,7 @@ bool StopCondition::Evaluate()
       Real min, max;
       min = (currentParmValue<previousValue ? currentParmValue : previousValue);
       max = (currentParmValue>previousValue ? currentParmValue : previousValue);
-
+      
       #ifdef DEBUG_STOP_COND
          MessageInterface::ShowMessage(
             "Evaluating: min = %lf, max = %lf, goal = %lf\n", min, max, mGoal);
@@ -404,7 +404,6 @@ bool StopCondition::Evaluate()
                   "StopInterval = %.12lf\n", previousEpoch, epoch,
                   previousValue, currentParmValue, mStopInterval);
             #endif
-
          }
          else if (activated)
          {
@@ -430,6 +429,13 @@ bool StopCondition::Evaluate()
             prevGoalDiff, currGoalDiff, direction);
       #endif
 
+      if (mNumValidPoints == 1)
+         if (((2.0*mGoal - currentParmValue - previousValue) * direction) < 0.0)
+            MessageInterface::ShowMessage(
+               "Warning!  Time based stopping condition \"%s\" = %.10lf will "
+               "never be satisfied\n",
+               instanceName.c_str(), mGoal);
+      
       // Goal met if it falls between previous and current values
       if ((currGoalDiff*direction >= 0.0) && 
           (prevGoalDiff*direction <= 0.0) && activated)
@@ -461,6 +467,7 @@ bool StopCondition::Evaluate()
          currentParmValue, previousValue, mGoal, (goalMet ? "met" : "not met"), epoch);
    #endif
    
+   ++mNumValidPoints;
    return goalMet;
 }
 
@@ -1954,7 +1961,8 @@ Real StopCondition::PutInRange(const Real value, const Real min, const Real max,
 //------------------------------------------------------------------------------
 void StopCondition::SkipEvaluation(bool shouldSkip)
 {
-   activated = !shouldSkip;
+   if (mStopParam->GetName().find("ModJulian") == std::string::npos)
+      activated = !shouldSkip;
 }
 
 

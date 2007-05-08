@@ -700,6 +700,10 @@ bool DragForce::GetDerivatives(Real *state, Real dt, Integer order)
       dragdata << "density[0] = " << density[0] << "\n";
    #endif
    
+   #ifdef DEBUG_DRAGFORCE_EPOCH
+      MessageInterface::ShowMessage("Drag epoch = %16.11lf\n", now);
+   #endif
+   
    for (i = 0; i < satCount; ++i)
    {
       i6 = i * 6;

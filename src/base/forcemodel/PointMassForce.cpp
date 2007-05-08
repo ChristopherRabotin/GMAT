@@ -327,7 +327,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    #ifdef DEBUG_FORCE_ORIGIN
       MessageInterface::ShowMessage(
          "Epoch:  %15.9lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
-         now, orig.ToString().c_str(), bodyrv.ToString().c_str());
+         now.Get(), orig.ToString().c_str(), bodyrv.ToString().c_str());
       MessageInterface::ShowMessage(
          "Now = %16.11lf rbb3 = %16.11le rv = [%16lf %16lf %16lf]\n",
          now, rbb3, rv[0], rv[1], rv[2]);
