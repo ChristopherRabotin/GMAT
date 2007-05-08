@@ -3004,6 +3004,9 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
    // Perform stepsize rounding.  Note that the rounding precision can be set
    // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
    // 0.0 to prevent rounding.
+   //
+   // Note that this code makes the final propagated state match the granularity 
+   // given by other software (aka STK)
    if (TIME_ROUNDOFF != 0.0)
       secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
 
@@ -3082,9 +3085,12 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          // Generate a better time step
          secsToStep = RefineFinalStep(secsToStep, stopper);
          
-         // Perform stepsize rounding.  Note that the rounding precision can be set
-         // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
-         // 0.0 to prevent rounding.
+         // Perform stepsize rounding.  Note that the rounding precision can be 
+         // set by redefining the macro TIME_ROUNDOFF at the top of this file.  
+         // Set it to 0.0 to prevent rounding.
+         //
+         // Note that this code makes the final propagated state match the 
+         // granularity given by other software (aka STK)
          if (TIME_ROUNDOFF != 0.0)
             secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
       
