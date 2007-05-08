@@ -90,7 +90,7 @@ public:
     virtual T    GetElement(Integer index) const;
     virtual void SetElement(Integer index, const T& value);
     
-    const T* GetDataVector() {return elementD;}
+    const T* GetDataVector() const {return elementD;}
  
 protected:
     void init(Integer s);      // used internally for initialization
