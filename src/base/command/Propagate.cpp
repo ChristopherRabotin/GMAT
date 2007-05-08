@@ -39,9 +39,10 @@
 //#define DEBUG_PROP_PERFORMANCE
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_FIXED_STEP
+//#define DEBUG_EPOCH_SYNC
 
 
-//#define TIME_ROUNDOFF 1.0e-6
+#define TIME_ROUNDOFF 1.0e-6
 
 //--------------------------------- 
 // static data
@@ -2495,6 +2496,10 @@ bool Propagate::Execute()
          }
       }
       
+      #ifdef DEBUG_EPOCH_SYNC
+         MessageInterface::ShowMessage("Nominal steps executing:\n");
+      #endif
+      
       while (!stopCondMet)
       {
          // Update the epoch on the force models
@@ -2569,7 +2574,17 @@ bool Propagate::Execute()
             inProgress = true;
             return true;
          }
+
+         #ifdef DEBUG_EPOCH_SYNC
+            for (UnsignedInt i = 0; i < fm.size(); ++i) 
+               MessageInterface::ShowMessage("   Force model[%d] has base "
+                  "epoch %16.11lf, time dt = %.11lf\n",
+                  i, baseEpoch[i], fm[i]->GetTime());
+         #endif
       }
+         #ifdef DEBUG_EPOCH_SYNC
+            MessageInterface::ShowMessage("Nominal steps Finished\n");
+         #endif
    }
    catch (BaseException &ex) 
    {
@@ -2906,6 +2921,14 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
    Real secsToStep = 1.0e99 * direction, dt;
    StopCondition *stopper = NULL;
+
+   #ifdef DEBUG_EPOCH_SYNC
+      MessageInterface::ShowMessage("Top of final step code:\n");
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         MessageInterface::ShowMessage(
+            "   Force model[%d] has base epoch %16.11lf, time dt = %.11lf\n",
+            i, baseEpoch[i], fm[i]->GetTime());
+   #endif   
    
    // Toggle propagators into final step mode
    /// @note This code should be removed if the minimum step is removed from 
@@ -2924,6 +2947,14 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
       fm[i]->UpdateSpaceObject(currEpoch[i]);
    }
    BufferSatelliteStates(true);
+   
+   #ifdef DEBUG_EPOCH_SYNC
+      MessageInterface::ShowMessage("Prior to interpolation:\n");
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         MessageInterface::ShowMessage(
+            "   Force model[%d] has base epoch %16.11lf, time dt = %.11lf\n",
+            i, baseEpoch[i], fm[i]->GetTime());
+   #endif
    
    // Interpolate to get the stop epoch
    if (stopTrigger < 0)
@@ -2969,6 +3000,13 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          "Step = %.12lf sec, calculated off of %.12lf and  %.12lf\n", 
          secsToStep, stopEpoch, currEpoch[trigger]);
    #endif
+      
+   // Perform stepsize rounding.  Note that the rounding precision can be set
+   // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
+   // 0.0 to prevent rounding.
+   if (TIME_ROUNDOFF != 0.0)
+      secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
+
    #if defined DEBUG_PROPAGATE_STEPSIZE | defined DEBUG_PROPAGATE_DIRECTION
       MessageInterface::ShowMessage
          ("Propagate::TakeFinalStep secsToStep at stop = %16.10le\n",
@@ -2991,9 +3029,26 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
             secsToStep, 
             (baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY));
       #endif
-   
+
+         #ifdef DEBUG_EPOCH_SYNC
+            MessageInterface::ShowMessage("Before final step:\n");
+            for (UnsignedInt i = 0; i < fm.size(); ++i) 
+               MessageInterface::ShowMessage("   Force model[%d] has base "
+                  "epoch %16.11lf, time dt = %.11lf\n",
+                  i, baseEpoch[i], fm[i]->GetTime());
+            MessageInterface::ShowMessage("   step by time %.11lf\n", secsToStep);
+         #endif
+         
       if (!TakeAStep(secsToStep))
          throw CommandException("Propagator Failed to Step fixed interval\n");
+
+      #ifdef DEBUG_EPOCH_SYNC
+         MessageInterface::ShowMessage("After final step:\n");
+         for (UnsignedInt i = 0; i < fm.size(); ++i) 
+            MessageInterface::ShowMessage(
+               "   Force model[%d] has base epoch %16.11lf, time dt = %.11lf\n",
+               i, baseEpoch[i], fm[i]->GetTime());
+      #endif
 
       // Check the stopping accuracy
       for (UnsignedInt i = 0; i < fm.size(); ++i) 
@@ -3027,6 +3082,12 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          // Generate a better time step
          secsToStep = RefineFinalStep(secsToStep, stopper);
          
+         // Perform stepsize rounding.  Note that the rounding precision can be set
+         // by redefining the macro TIME_ROUNDOFF at the top of this file.  Set it to
+         // 0.0 to prevent rounding.
+         if (TIME_ROUNDOFF != 0.0)
+            secsToStep = std::floor(secsToStep / TIME_ROUNDOFF + 0.5) * TIME_ROUNDOFF;
+      
          // If a refined step was needed, we still need to take it; 
          // RefineFinalStep returns with the interpolated step backed out
          if (!TakeAStep(secsToStep))
