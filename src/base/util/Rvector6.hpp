@@ -68,14 +68,6 @@ public:
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
    
-   std::string ToString(Integer precision) const;
-   
-   std::string ToString(bool useCurrentFormat = true,
-                        bool scientific = false,
-                        Integer precision = GmatGlobal::DATA_PRECISION,
-                        Integer width = GmatGlobal::DATA_WIDTH,
-                        bool horizontal = true, Integer spacing = 1) const;
-   
    bool IsValid(const Real val);
    
    static const Real UTIL_REAL_UNDEFINED;

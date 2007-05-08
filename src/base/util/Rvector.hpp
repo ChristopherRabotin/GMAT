@@ -43,10 +43,11 @@ public:
    Rvector();
    Rvector(int size);
    Rvector(int size, Real a1, ... );  //Note: . is required for Real value. eg) 123., 100.
-   Rvector(const Rvector &v); 
+   Rvector(const Rvector &v);
    virtual ~Rvector();
-
+   
    void Set(int numElem, Real a1, ...);
+   void Set(Real *data, int size = 0);
    
    virtual Real GetMagnitude() const;          
    Rvector GetUnitRvector() const; 
@@ -74,13 +75,15 @@ public:
    virtual bool MakeZeroVector();
    Real Norm();
    
-   std::string ToString(Integer precision) const;
+   virtual std::string ToString(Integer precision, bool horizontal = true,
+                                const std::string &prefix = "") const;
    
-   std::string ToString(bool useCurrentFormat = true,
-                        bool scientific = false,
-                        Integer precision = GmatGlobal::DATA_PRECISION,
-                        Integer width = GmatGlobal::DATA_WIDTH,
-                        bool horizontal = true, Integer spacing = 1) const;
+   virtual std::string ToString(bool useCurrentFormat = true,
+                                bool scientific = false, bool showPoint = false,
+                                Integer precision = GmatGlobal::DATA_PRECISION,
+                                Integer width = GmatGlobal::DATA_WIDTH,
+                                bool horizontal = true, Integer spacing = 1,
+                                const std::string &prefix = "") const;
    
    friend Rvector operator*(Real s, const Rvector &v);
    friend Rmatrix Outerproduct(const Rvector &v1, const Rvector &v2);

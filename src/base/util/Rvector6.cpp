@@ -22,6 +22,7 @@
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "Linear.hpp"
+#include "MessageInterface.hpp"
 
 //---------------------------------
 //  static data
@@ -459,62 +460,6 @@ Integer Rvector6::GetNumData() const
 const std::string* Rvector6::GetDataDescriptions() const
 {
    return DATA_DESCRIPTIONS;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string ToString(Integer precision) const
-//------------------------------------------------------------------------------
-/*
- * Formats Rvector6 value to String.
- *
- * @param  precision  Precision to be used in formatting
- *
- * @return Formatted Rvector6 value string
- */
-//------------------------------------------------------------------------------
-std::string Rvector6::ToString(Integer precision) const
-{
-   GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, precision, 0, true, 1);
-   
-   std::stringstream ss("");
-   ss << *this;
-   return ss.str();
-}
-
-
-//------------------------------------------------------------------------------
-// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
-//                      Integer precision = GmatGlobal::DATA_PRECISION,
-//                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1) const
-//------------------------------------------------------------------------------
-/*
- * Formats Rvector6 value to String.
- *
- * @param  useCurrentFormat  Uses precision and width from GmatGlobal
- * @param  scientific  Formats using scientific notation if true
- * @param  precision  Precision to be used in formatting
- * @param  width  Width to be used in formatting
- * @param  horizontal  Format horizontally if true
- * @param  spacing  Spacing to be used in formatting
- *
- * @return Formatted Rvector6 value string
- */
-//------------------------------------------------------------------------------
-std::string Rvector6::ToString(bool useCurrentFormat, bool scientific,
-                               Integer precision, Integer width,
-                               bool horizontal, Integer spacing) const
-{
-   GmatGlobal *global = GmatGlobal::Instance();
-   
-   if (!useCurrentFormat)
-      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
-   
-   std::stringstream ss("");
-   ss << *this;
-   return ss.str();
 }
 
 

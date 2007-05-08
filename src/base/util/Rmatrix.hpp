@@ -115,13 +115,15 @@ public:
    const StringArray& GetStringVals(Integer p = GmatGlobal::DATA_PRECISION,
                                     Integer w = GmatGlobal::DATA_WIDTH);
    
-   std::string ToString(Integer precision) const;
+   virtual std::string ToString(Integer precision, bool horizontal = true,
+                                const std::string &prefix = "") const;
    
-   std::string ToString(bool useCurrentFormat = true,
-                        bool scientific = false,
-                        Integer precision = GmatGlobal::DATA_PRECISION,
-                        Integer width = GmatGlobal::DATA_WIDTH,
-                        bool horizontal = true, Integer spacing = 1) const;
+   virtual std::string ToString(bool useCurrentFormat = true,
+                                bool scientific = false, bool showPoint = false,
+                                Integer precision = GmatGlobal::DATA_PRECISION,
+                                Integer width = GmatGlobal::DATA_WIDTH,
+                                bool horizontal = true, Integer spacing = 1,
+                                const std::string &prefix = "") const;
    
 protected:   
    StringArray stringVals;

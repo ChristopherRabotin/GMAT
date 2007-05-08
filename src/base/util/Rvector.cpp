@@ -118,6 +118,32 @@ void Rvector::Set(int numElem, Real a1, ...)
 
 
 //------------------------------------------------------------------------------
+// void Set(Real *data, int size = 0)
+//------------------------------------------------------------------------------
+/*
+ * Sets elements.
+ *
+ * @param  data  Real data array
+ * @param  size  Number of data points to set
+ *               if size is 0, it set all elements
+ */
+//------------------------------------------------------------------------------
+void Rvector::Set(Real *data, int size)
+{
+   if (size > sizeD)
+      throw ArrayTemplateExceptions::IllegalSize();
+
+   int count = size;
+   if (size == 0)
+      count = sizeD;
+   
+   for (int i = 0; i < count; i++)
+      elementD[i] = data[i];
+   
+}
+
+
+//------------------------------------------------------------------------------
 //  Real GetMagnitude() const
 //------------------------------------------------------------------------------
 Real Rvector::GetMagnitude() const
@@ -592,20 +618,23 @@ Real Rvector::Norm()
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(Integer precision) const
+// std::string ToString(Integer precision, bool horizontal = true) const
 //------------------------------------------------------------------------------
 /*
  * Formats Rvector value to String.
  *
  * @param  precision  Precision to be used in formatting
+ * @param  horizontal  Format horizontally if true
+ * @param  prefix  Prefix to be used in vertical formatting
  *
  * @return Formatted Rvector value string
  */
 //------------------------------------------------------------------------------
-std::string Rvector::ToString(Integer precision) const
+std::string Rvector::ToString(Integer precision, bool horizontal,
+                              const std::string &prefix) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, precision, 0, true, 1);
+   global->SetActualFormat(false, false, precision, 0, horizontal, 1, prefix);
    
    std::stringstream ss("");
    ss << *this;
@@ -617,7 +646,8 @@ std::string Rvector::ToString(Integer precision) const
 // std::string ToString(bool useCurrentFormat = true, bool scientific = false,
 //                      Integer precision = GmatGlobal::DATA_PRECISION,
 //                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1) const
+//                      bool horizontal = false, Integer spacing = 1,
+//                      const std::string &indent = "") const
 //------------------------------------------------------------------------------
 /*
  * Formats Rvector value to String.
@@ -627,19 +657,22 @@ std::string Rvector::ToString(Integer precision) const
  * @param  precision  Precision to be used in formatting
  * @param  width  Width to be used in formatting
  * @param  horizontal  Format horizontally if true
- * @param  spacing  Spacing to be used in formatting
+ * @param  spacing  Spacing to be used in horozontal formatting
+ * @param  prefix  Prefix to be used in vertical formatting
  *
  * @return Formatted Rvector value
  */
 //------------------------------------------------------------------------------
 std::string Rvector::ToString(bool useCurrentFormat, bool scientific,
-                              Integer precision, Integer width,
-                              bool horizontal, Integer spacing) const
+                              bool showPoint, Integer precision, Integer width,
+                              bool horizontal, Integer spacing,
+                              const std::string &prefix) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
    
    if (!useCurrentFormat)
-      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
+      global->SetActualFormat(scientific, showPoint, precision, width, horizontal,
+                              spacing, prefix);
    
    std::stringstream ss("");
    ss << *this;

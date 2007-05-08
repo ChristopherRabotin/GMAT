@@ -369,68 +369,13 @@ Integer Rvector3::GetNumData() const
    return NUM_DATA;
 }
 
+
 //------------------------------------------------------------------------------
 // const std::string* GetDataDescriptions() const
 //------------------------------------------------------------------------------
 const std::string* Rvector3::GetDataDescriptions() const
 {
    return DATA_DESCRIPTIONS;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string ToString(Integer precision) const
-//------------------------------------------------------------------------------
-/*
- * Formats Rvector3 value to String.
- *
- * @param  precision  Precision to be used in formatting
- *
- * @return Formatted Rvector3 value string
- */
-//------------------------------------------------------------------------------
-std::string Rvector3::ToString(Integer precision) const
-{
-   GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, precision, 0, true, 1);
-   
-   std::stringstream ss("");
-   ss << *this;
-   return ss.str();
-}
-
-
-//------------------------------------------------------------------------------
-// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
-//                      Integer precision = GmatGlobal::DATA_PRECISION,
-//                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1) const
-//------------------------------------------------------------------------------
-/*
- * Formats Rvector3 value to String.
- *
- * @param  useCurrentFormat  Uses precision and width from GmatGlobal
- * @param  scientific  Formats using scientific notation if true
- * @param  precision  Precision to be used in formatting
- * @param  width  Width to be used in formatting
- * @param  horizontal  Format horizontally if true
- * @param  spacing  Spacing to be used in formatting
- *
- * @return Formatted Rvector3 value
- */
-//------------------------------------------------------------------------------
-std::string Rvector3::ToString(bool useCurrentFormat, bool scientific,
-                               Integer precision, Integer width,
-                               bool horizontal, Integer spacing) const
-{
-   GmatGlobal *global = GmatGlobal::Instance();
-   
-   if (!useCurrentFormat)
-      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
-   
-   std::stringstream ss("");
-   ss << *this;
-   return ss.str();
 }
 
 

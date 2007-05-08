@@ -1061,20 +1061,23 @@ const StringArray& Rmatrix::GetStringVals(Integer p, Integer w)
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(Integer precision) const
+// std::string ToString(Integer precision, bool horizontal = false,
+//                      const std::string &prefix = "") const
 //------------------------------------------------------------------------------
 /*
  * Formats Rmatrix value to String.
  *
  * @param  precision  Precision to be used in formatting
+ * @param  horizontal  Format horizontally if true
  *
  * @return Formatted Rmatrix value string
  */
 //------------------------------------------------------------------------------
-std::string Rmatrix::ToString(Integer precision) const
+std::string Rmatrix::ToString(Integer precision, bool horizontal,
+                              const std::string &prefix) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, precision, 0, true, 1);
+   global->SetActualFormat(false, false, precision, 0, horizontal, 1, prefix);
    
    std::stringstream ss("");
    ss << *this;
@@ -1086,13 +1089,15 @@ std::string Rmatrix::ToString(Integer precision) const
 // std::string ToString(bool useCurrentFormat = true, bool scientific = false,
 //                      Integer precision = GmatGlobal::DATA_PRECISION,
 //                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1) const
+//                      bool horizontal = false, Integer spacing = 1,
+//                      const std::string &prefix = "") const
 //------------------------------------------------------------------------------
 /*
  * Formats Rmatrix value to String.
  *
  * @param  useCurrentFormat  Uses precision and width from GmatGlobal
  * @param  scientific  Formats using scientific notation if true
+ * @param  showPoint  Formats using ios::showpoint if true
  * @param  precision  Precision to be used in formatting
  * @param  width  Width to be used in formatting
  * @param  horizontal  Format horizontally if true
@@ -1102,13 +1107,15 @@ std::string Rmatrix::ToString(Integer precision) const
  */
 //------------------------------------------------------------------------------
 std::string Rmatrix::ToString(bool useCurrentFormat, bool scientific,
-                              Integer precision, Integer width,
-                              bool horizontal, Integer spacing) const
+                              bool showPoint, Integer precision, Integer width,
+                              bool horizontal, Integer spacing,
+                              const std::string &prefix) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
    
    if (!useCurrentFormat)
-      global->SetActualFormat(scientific, precision, width, horizontal, spacing);
+      global->SetActualFormat(scientific, showPoint, precision, width, horizontal,
+                              spacing, prefix);
    
    std::stringstream ss("");
    ss << *this;

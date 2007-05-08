@@ -254,8 +254,12 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
    GmatGlobal *global = GmatGlobal::Instance();
    Integer size = a.GetSize();
    Integer p, w, spacing;
-   bool scientific, horizontal;
-   global->GetActualFormat(scientific, p, w, horizontal, spacing);
+   bool scientific, showPoint, horizontal;
+   std::string prefix;
+   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix);
+   
+   if (showPoint)
+      output.setf(std::ios::showpoint);
    
    if (scientific)
       output.setf(std::ios::scientific);
@@ -272,16 +276,24 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
          std::string spaces;
          spaces.append(spacing, ' ');
          
-         for (int i=0; i<size; i++) 
-            output << setw(w) << setprecision(p) << a[i] << spaces;
+         for (int i=0; i<size; i++)
+         {
+            output << setw(w) << setprecision(p) << a[i];
+            if (i < size-1)
+               output << spaces;
+         }
       } 
       else 
       {
-         for (int i=0; i<size; i++) 
-            output << setw(w) << setprecision(p) << a[i] << std::endl;
+         for (int i=0; i<size; i++)
+         {
+            output << setw(w) << setprecision(p) << prefix << a[i];
+            if (i < size-1)
+               output << std::endl;
+         }
       }
    }
-
+   
    // Reset to current format
    #ifdef __RESET_TO_CURRENT_FORMAT__
    global->SetToCurrentFormat();
@@ -341,8 +353,12 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
    int row = a.GetNumRows();
    int column = a.GetNumColumns();
    Integer p, w, spacing;
-   bool scientific, horizontal;
-   global->GetActualFormat(scientific, p, w, horizontal, spacing);
+   bool scientific, showPoint, horizontal;
+   std::string prefix;
+   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix);
+   
+   if (showPoint)
+      output.setf(std::ios::showpoint);
    
    if (scientific)
       output.setf(std::ios::scientific);
@@ -365,13 +381,14 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
          for (int i=0; i<row; i++) 
             for (int j=0; j<column; j++) 
                output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
-         
          output << std::endl;
       }
       else 
       {
          for (int i=0; i<row; i++)
          {
+            output << prefix;
+            
             for (int j=0; j<column; j++)
                output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
             
@@ -412,22 +429,26 @@ std::string GmatRealUtil::ToString(const Real &rval, bool useCurrentFormat,
 {
    Integer p = precision;
    Integer w = width;
+   bool isScientific = scientific;
+   bool isShowPointSet = showPoint;
    
    if (useCurrentFormat)
    {
       GmatGlobal *global = GmatGlobal::Instance();
       p = global->GetDataPrecision();
       w = global->GetDataWidth();
+      isScientific = global->IsScientific();
+      isShowPointSet = global->ShowPoint();
    }
    
    std::stringstream ss("");
    ss.width(w);
    ss.precision(p);
    
-   if (showPoint)
+   if (isShowPointSet)
       ss.setf(std::ios::showpoint);
    
-   if (scientific)
+   if (isScientific)
       ss.setf(std::ios::scientific);
    
    ss << rval;

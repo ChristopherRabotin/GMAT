@@ -68,15 +68,7 @@ public:
    
    Integer GetNumData() const;
    const std::string* GetDataDescriptions() const;
-   
-   std::string ToString(Integer precision) const;
-   
-   std::string ToString(bool useCurrentFormat = true,
-                        bool scientific = false,
-                        Integer precision = GmatGlobal::DATA_PRECISION,
-                        Integer width = GmatGlobal::DATA_WIDTH,
-                        bool horizontal = true, Integer spacing = 1) const;
-   
+      
 private:
    static const Integer NUM_DATA = 3;
    static const std::string DATA_DESCRIPTIONS[NUM_DATA];

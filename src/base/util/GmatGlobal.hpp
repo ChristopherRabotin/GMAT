@@ -54,29 +54,35 @@ public:
    
    // IO formatting
    bool IsScientific() { return actualFormat.mScientific; }
+   bool ShowPoint() { return actualFormat.mShowPoint; }
    bool IsHorizontal() { return actualFormat.mHorizontal; }
    bool IsBinaryIn() { return actualFormat.mBinaryIn; }
    bool IsBinaryOut() { return actualFormat.mBinaryOut; }
    Integer GetSpacing() { return currentFormat.mSpacing; }
    
    void SetScientific(bool flag) { actualFormat.mScientific = flag; }
+   void SetShowPoint(bool flag) { actualFormat.mShowPoint = flag; }
    void SetHorizontal(bool flag) { actualFormat.mHorizontal = flag; }
    void SetBinaryIn(bool flag) { actualFormat.mBinaryIn = flag; }
    void SetBinaryOut(bool flag) { actualFormat.mBinaryOut = flag; }
    void SetSpacing(Integer sp) { actualFormat.mSpacing = sp; }
+   void SetPrefix(const std::string &prefix) { actualFormat.mPrefix = prefix; }
    
    void SetDefaultFormat();
-   void SetCurrentFormat(bool scientific = false,
+   void SetCurrentFormat(bool scientific = false, bool showPoint = false,
                          Integer width = GmatGlobal::DATA_WIDTH,
                          Integer precision = GmatGlobal::DATA_PRECISION,
-                         bool horizontal = true, Integer spacing = 1, 
+                         bool horizontal = true, Integer spacing = 1,
+                         const std::string &prefix = "",
                          bool binaryIn = false, bool binaryOut = false);
    
-   void GetActualFormat(bool &scientific, Integer &precision, Integer &width,
-                        bool &horizontal, Integer &spacing); 
+   void GetActualFormat(bool &scientific, bool &showPoint, Integer &precision,
+                        Integer &width, bool &horizontal, Integer &spacing,
+                        std::string &prefix); 
    
-   void SetActualFormat(bool scientific, Integer precision, Integer width,
-                        bool horizontal = true, Integer spacing = 1);
+   void SetActualFormat(bool scientific, bool showPoint, Integer precision,
+                        Integer width, bool horizontal = true, Integer spacing = 1,
+                        const std::string &prefix = "");
    
    void SetToDefaultFormat() { actualFormat = defaultFormat; }
    void SetToCurrentFormat() { actualFormat = currentFormat; }
@@ -110,29 +116,33 @@ private:
    // I/O formatting   
    struct IoFormat
    {
-      IoFormat(bool scientific = false,
+      IoFormat(bool scientific = false, bool showPoint = false,
                Integer precision = GmatGlobal::DATA_PRECISION,
                Integer width = GmatGlobal::DATA_WIDTH,
                bool horizontal = true, Integer spacing = 1,
+               const std::string &prefix = "",
                bool binaryIn = false, bool binaryOut = false)
       {
          mScientific = scientific;
+         mShowPoint = showPoint;
          mPrecision = precision;
          mWidth = width;
          mHorizontal = horizontal;
          mSpacing = spacing;
+         mPrefix = prefix;
          mBinaryIn = binaryIn;
          mBinaryOut = binaryOut;
       };
       
       bool mScientific;    /// format using scientific notation
+      bool mShowPoint;     /// format using ios::showpoint
       Integer mPrecision;  /// the number of digits of precision
       Integer mWidth;      /// the field width
       bool mHorizontal;    /// format horizontally if true. Default is false
       Integer mSpacing;    /// determines number of spaces in between each element
       bool mBinaryIn;      /// read in binary if true. Default is false
       bool mBinaryOut;     /// print in binary if true. Default is false
-      
+      std::string mPrefix; /// prefix to be used for vertical formatting
    };
    
    Setting defaultSetting;
