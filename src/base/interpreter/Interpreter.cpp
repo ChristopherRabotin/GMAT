@@ -1446,8 +1446,8 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (obj != NULL)
          {
             cmd->SetRefObject(obj, Gmat::SUBSCRIBER, parts[0], 0);
-
-            //loj: 11/29/06 added for checking items to report
+            
+            // checking items to report
             if (count < 2)
             {
                InterpreterException ex ("There are no itmes to report");
@@ -1513,7 +1513,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    else if (type == "Save")
    {
       for (int i=0; i<count; i++)
-         cmd->SetRefObjectName(Gmat::SPACECRAFT, parts[i]);
+         cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, parts[i]);
    }
    else
    {
@@ -4375,6 +4375,26 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       MessageInterface::ShowMessage
          ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
    #endif
+   
+   // Save command can have any object type, so handle it first
+   if (obj->GetTypeName() == "Save")
+   {
+      refNames = obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
+      for (UnsignedInt j=0; j<refNames.size(); j++)
+      {
+         GmatBase *refObj = GetConfiguredObject(refNames[j]);
+         if (refObj == NULL)
+         {
+            InterpreterException ex
+               ("Nonexistent object \"" + refNames[j] + "\" referenced in the " +
+                obj->GetTypeName() + " command\"");
+            HandleError(ex, writeLine);
+            retval = false;
+         }
+      }
+      return retval;
+   }
+   
    
    // Check if undefined ref. objects exist
    for (UnsignedInt i=0; i<refTypes.size(); i++)
