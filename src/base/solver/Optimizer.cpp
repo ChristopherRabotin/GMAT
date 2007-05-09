@@ -392,11 +392,12 @@ std::string Optimizer::GetProgressString()
                      
             if (iterationsTaken > maxIterations)
                progress << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
-                     << "!!! WARNING: Optimizer did NOT converge!"
-                     << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-                     << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-
+                        << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+                        << "!!! WARNING: Optimizer did NOT converge in "
+                        << maxIterations << " iterations!"
+                        << "\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+                        << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+            
             progress << "\nFinal Variable values:\n";
             // Iterate through the variables, writing them to the string
             for (current = variableNames.begin(), i = 0;
