@@ -34,9 +34,9 @@
 
 //#define DEBUG_OPTIMIZER_PARSING
 //#define DEBUG_OPTIMIZE_COMMANDS
-//#define DEBUG_OPTIMIZER
 //#define DEBUG_CALLBACK
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
+//#define DEBUG_OPTIMIZE_INIT
 
 //------------------------------------------------------------------------------
 // static data
@@ -85,7 +85,7 @@ Optimize::Optimize(const Optimize& o) :
    optimizerConverged   (false),
    optimizerInDebugMode (o.optimizerInDebugMode)
 {
-        //parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
+   //parameterCount = OptimizeParamCount;  // this is set in GmatBase copy constructor
    #ifdef DEBUG_OPTIMIZE_CONSTRUCTION
       MessageInterface::ShowMessage("NOW creating (copying) Optimize command ...");
    #endif
@@ -308,7 +308,11 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Optimize::Initialize()
 {
-        if (objectMap->find(optimizerName) == objectMap->end()) 
+   #ifdef DEBUG_OPTIMIZE_INIT
+   ShowCommand("", "Initialize() this = ", this);
+   #endif
+   
+   if (objectMap->find(optimizerName) == objectMap->end()) 
    {
       std::string errorString = "Optimize command cannot find optimizer \"";
       errorString += optimizerName;
@@ -381,8 +385,13 @@ bool Optimize::Initialize()
 //------------------------------------------------------------------------------
 bool Optimize::Execute()
 {
+   // We need to re-initialize since only one MatlabEngine is running per GMAT
+   // session. This will allow to run back to back optimization.
+   if (!commandExecuting)
+      Initialize();
+   
    bool retval = true;
-
+   
    // Drive through the state machine.
    Solver::SolverState state = optimizer->GetState();
    
@@ -412,7 +421,7 @@ bool Optimize::Execute()
 
       retval = SolverBranchCommand::Execute();
 
-      #ifdef DEBUG_OPTIMIZER
+      #ifdef DEBUG_OPTIMIZE_COMMANDS
          MessageInterface::ShowMessage("Resetting the Optimizer\n");
       #endif
 
@@ -607,10 +616,10 @@ bool Optimize::ExecuteCallback()
    Solver::SolverState nState = optimizer->GetNestedState(); 
    if (nState == Solver::INITIALIZING)
    {
-   #ifdef DEBUG_CALLBACK
+      #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage(
          "Optimize::ExecuteCallback - state is INITIALIZING\n");
-   #endif
+      #endif
       StoreLoopData();
       // advance to NOMINAL
       callbackResults = optimizer->AdvanceNestedState(vars);
