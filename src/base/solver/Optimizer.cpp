@@ -706,4 +706,4 @@ void Optimizer::FreeArrays()
    eqConstraintValues.clear();
    ineqConstraintValues.clear();
     
-} 
+}
