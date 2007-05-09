@@ -116,10 +116,11 @@
 #define __USE_CHILD_BEST_SIZE__
 
 
-//#define DEBUG_MAINFRAME 1
-//#define DEBUG_MAINFRAME_CLOSE 1
-//#define DEBUG_MAINFRAME_SAVE 1
-//#define DEBUG_FILE_COMPARE 1
+//#define DEBUG_MAINFRAME
+//#define DEBUG_MAINFRAME_CLOSE
+//#define DEBUG_MAINFRAME_SAVE
+//#define DEBUG_FILE_COMPARE
+//#define DEBUG_SERVER
 
 using namespace GmatMenu;
 
@@ -216,7 +217,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                              const wxSize& size, long style)
    : wxMDIParentFrame(parent, id, title, pos, size, style)
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() entered\n");
    #endif
    
@@ -246,7 +247,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    SetStatusText(_T("Welcome to GMAT!"));
 #endif // wxUSE_STATUSBAR
 
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
    #endif
@@ -329,7 +330,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       MessageInterface::ShowMessage(e.GetFullMessage());
    }
    
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() exiting\n");
    #endif
 }
@@ -370,7 +371,7 @@ GmatMainFrame::~GmatMainFrame()
 //------------------------------------------------------------------------------
 GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() item=%s\n", item->GetDesc().c_str());
    #endif
@@ -383,7 +384,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    
    int dataType = item->GetDataType();
    
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateChild() name=%s, dataType=%d\n",
        item->GetDesc().c_str(), dataType);
@@ -423,7 +424,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    else
    {
       // do nothing
-      #if DEBUG_MAINFRAME
+      #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::CreateChild() Invalid item=%s dataType=%d entered\n",
           item->GetDesc().c_str(), dataType);
@@ -453,7 +454,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-      #if DEBUG_MAINFRAME
+      #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::IsChildOpen() title=%s\n   desc=%s\n",
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
@@ -482,7 +483,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::GetChild() name=%s\n", name.c_str());
    #endif
@@ -493,7 +494,7 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
    {
       theChild = (GmatMdiChildFrame *)node->GetData();
 
-      #if DEBUG_MAINFRAME
+      #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("   theChild=%s\n", theChild->GetTitle().c_str());
       #endif
@@ -528,7 +529,7 @@ bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
 //    {
 //       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-//       #if DEBUG_MAINFRAME
+//       #ifdef DEBUG_MAINFRAME
 //       MessageInterface::ShowMessage
 //          ("GmatMainFrame::RenameChild() child %s  this %s\n",
 //           theChild->GetTitle().c_str(), item->GetDesc().c_str());
@@ -573,7 +574,7 @@ bool GmatMainFrame::RenameChild(const wxString &oldName, const wxString &newName
 //    {
 //       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
 
-//       #if DEBUG_MAINFRAME
+//       #ifdef DEBUG_MAINFRAME
 //       MessageInterface::ShowMessage
 //          ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
 //           oldName.c_str(), newName.c_str());
@@ -622,7 +623,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, int dataType)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
       
-      #if DEBUG_MAINFRAME
+      #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::RemoveChild() title:%s\n   item:%s\n",
           theChild->GetTitle().c_str(), item.c_str());
@@ -662,7 +663,7 @@ void GmatMainFrame::CloseActiveChild()
 void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                                      wxString excludeTitle)
 {   
-   #if DEBUG_MAINFRAME_CLOSE
+   #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
       ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d\n   "
        "excludeTitle=%s\n", closeScriptWindow, closePlots, excludeTitle.c_str());
@@ -681,7 +682,7 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       title = theChild->GetTitle();
       type = theChild->GetDataType();
       
-      #if DEBUG_MAINFRAME_CLOSE
+      #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage("   title=%s, type=%d\n", title.c_str(), type);
       #endif
       
@@ -710,7 +711,7 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       
       if (canDelete)
       {
-         #if DEBUG_MAINFRAME_CLOSE
+         #ifdef DEBUG_MAINFRAME_CLOSE
          MessageInterface::ShowMessage("   ==>deleting child=%s\n", title.c_str());
          #endif
          
@@ -762,7 +763,7 @@ void GmatMainFrame::SetActiveChildDirty(bool dirty)
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseCurrentProject()
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
    #endif
    
@@ -892,7 +893,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 //------------------------------------------------------------------------------ 
 Integer GmatMainFrame::RunCurrentMission()
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
@@ -996,13 +997,19 @@ void GmatMainFrame::StartServer()
       // Create a new server
       mServer = new GmatServer;
       mServer->Create(service);
-      //MessageInterface::ShowMessage("Server started.\n");
+      
+      #ifdef DEBUG_SERVER
+      MessageInterface::ShowMessage("Server started.\n");
+      #endif
+      
       //mServerMenu->Enable(MENU_START_SERVER, false);
       //mServerMenu->Enable(MENU_STOP_SERVER, true);
    }
    else
    {
+      #ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has already started.\n");
+      #endif
    }
 }
 
@@ -1107,7 +1114,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
 //------------------------------------------------------------------------------
 bool GmatMainFrame::SaveScriptAs()
 {
-   #if DEBUG_MAINFRAME_SAVE
+   #ifdef DEBUG_MAINFRAME_SAVE
    MessageInterface::ShowMessage
       ("GmatMainFrame::SaveScriptAs() mScriptFilename=%s\n",
        mScriptFilename.c_str());
@@ -1126,7 +1133,7 @@ bool GmatMainFrame::SaveScriptAs()
       
       if (wxFileName::FileExists(mScriptFilename.c_str()))
       {
-         #if DEBUG_MAINFRAME_SAVE
+         #ifdef DEBUG_MAINFRAME_SAVE
          MessageInterface::ShowMessage
             ("The script file: \"%s\" exist\n", mScriptFilename.c_str());
          #endif
@@ -1249,7 +1256,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
 {
-   #if DEBUG_MAINFRAME_SAVE
+   #ifdef DEBUG_MAINFRAME_SAVE
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnSaveScript() mInterpretFailed=%d\n", mInterpretFailed);
    #endif
@@ -1281,7 +1288,7 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
          wxString backupFilename = currFilename + ".bak";
          ::wxCopyFile(currFilename, backupFilename);
          
-         #if DEBUG_MAINFRAME_SAVE
+         #ifdef DEBUG_MAINFRAME_SAVE
          MessageInterface::ShowMessage
             ("GmatMainFrame::OnSaveScript() Created backup file: %s\n",
              backupFilename.c_str());
@@ -1471,7 +1478,7 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 {
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() entered\n");
    #endif
    wxBitmap* bitmaps[15];
@@ -1547,7 +1554,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
       delete bitmaps[i];
    }
    
-   #if DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() exiting\n");
    #endif
 }
@@ -1561,7 +1568,7 @@ GmatMdiChildFrame*
 GmatMainFrame::CreateNewResource(const wxString &title,
                                  const wxString &name, int dataType)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #ifdef DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewResource() title=%s, name=%s, dataType=%d\n",
        title.c_str(), name.c_str(), dataType);
@@ -1991,7 +1998,7 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
    
    if (GmatAppData::GetResourceTree()->WasScriptAdded())
    {
-      #if DEBUG_MAINFRAME_OPEN
+      #ifdef DEBUG_MAINFRAME_OPEN
       MessageInterface::ShowMessage
          ("GmatMainFrame::OnOpenScript() mInterpretFailed=%d, "
           "HasConfigurationChanged=%d\n", mInterpretFailed,
@@ -2188,7 +2195,7 @@ void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
 
-   #if DEBUG_FILE_COMPARE
+   #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnFileCompare() baseDir=%s, compareStrs[0]=%s\n   "
        "compDirs[0]=%s\n", baseDir.c_str(), compareStrs[0].c_str(),
@@ -2381,7 +2388,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
 
-   #if DEBUG_FILE_COMPARE
+   #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnFileCompareText() baseDir=%s\n   "
        "compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
@@ -2625,7 +2632,7 @@ void GmatMainFrame::OnMainFrameSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 {
-   //#if DEBUG_MAINFRAME
+   //#ifdef DEBUG_MAINFRAME
    //MessageInterface::ShowMessage("GmatMainFrame::OnSetFocus() entered\n");
    //#endif
 
