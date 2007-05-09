@@ -360,3 +360,4 @@ GmatBase* ExponentialAtmosphere::Clone() const
 {
    return (new ExponentialAtmosphere(*this));
 }
+
