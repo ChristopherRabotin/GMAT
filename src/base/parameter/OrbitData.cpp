@@ -918,7 +918,8 @@ void OrbitData::InitializeRefObjects()
    }
    
    if (stateTypeId == -1)
-      stateTypeId = mSpacecraft->GetParameterID("StateType");
+      //stateTypeId = mSpacecraft->GetParameterID("StateType");
+      stateTypeId = mSpacecraft->GetParameterID("DisplayStateType");
    
    mSolarSystem =
       (SolarSystem*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SOLAR_SYSTEM]);

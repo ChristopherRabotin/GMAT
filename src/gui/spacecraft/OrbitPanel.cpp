@@ -247,7 +247,8 @@ void OrbitPanel::LoadData()
          
       mFromStateTypeStr = "Cartesian";
       if (origin->IsOfType(Gmat::CELESTIAL_BODY))
-         mFromStateTypeStr = theSpacecraft->GetStringParameter("StateType");
+         //mFromStateTypeStr = theSpacecraft->GetStringParameter("StateType");
+         mFromStateTypeStr = theSpacecraft->GetStringParameter("DisplayStateType");
       
       #ifdef DEBUG_ORBIT_PANEL_LOAD
          MessageInterface::ShowMessage
@@ -928,8 +929,10 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
    Integer baseLabel = theSpacecraft->GetParameterID("Element1");
    Integer baseUnit  = theSpacecraft->GetParameterID("Element1Units");
    
-   std::string st = theSpacecraft->GetStringParameter("StateType");
-   theSpacecraft->SetStringParameter("StateType", stateType);
+   //std::string st = theSpacecraft->GetStringParameter("StateType");
+   //theSpacecraft->SetStringParameter("StateType", stateType);   
+   std::string st = theSpacecraft->GetStringParameter("DisplayStateType");
+   theSpacecraft->SetStringParameter("DisplayStateType", stateType);
    
    description1->SetLabel(theSpacecraft->GetParameterText(baseLabel).c_str());
    unit1->SetLabel(theSpacecraft->GetStringParameter(baseUnit).c_str());
@@ -964,7 +967,8 @@ void OrbitPanel::SetLabelsUnits(const std::string &stateType)
       anomalyComboBox->Show(false);
    }
 
-   theSpacecraft->SetStringParameter("StateType", st);
+   //theSpacecraft->SetStringParameter("StateType", st);
+   theSpacecraft->SetStringParameter("DisplayStateType", st);
 }
 
 //------------------------------------------------------------------------------
