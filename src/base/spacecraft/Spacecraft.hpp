@@ -154,7 +154,8 @@ protected:
       ELEMENT4UNIT_ID, 
       ELEMENT5UNIT_ID, 
       ELEMENT6UNIT_ID, 
-      STATE_TYPE_ID, 
+      STATE_TYPE_ID,           // deprecated
+      DISPLAY_STATE_TYPE_ID, 
       ANOMALY_ID, 
       COORD_SYS_ID,
       DRY_MASS_ID,
@@ -171,13 +172,13 @@ protected:
    
    enum MultipleReps  // these are IDs for the different representations
    {
-      CART_X = 10000,
+      CART_X = 10000,      // Cartesian
       CART_Y,
       CART_Z,
       CART_VX,
       CART_VY,
       CART_VZ,
-      KEPL_SMA,
+      KEPL_SMA,            // Keplerian
       KEPL_ECC,
       KEPL_INC,
       KEPL_RAAN,
@@ -186,17 +187,17 @@ protected:
       KEPL_EA,
       KEPL_MA,
       KEPL_HA,
-      MOD_KEPL_RADPER,
+      MOD_KEPL_RADPER,     // Modified Keplerian
       MOD_KEPL_RADAPO,
-      AZFPA_RMAG,
+      AZFPA_RMAG,          // SphericalAZFPA
       AZFPA_RA,
       AZFPA_DEC,
       AZFPA_VMAG,
       AZFPA_AZI,
       AZFPA_FPA,
-      RADEC_RAV,
+      RADEC_RAV,           // SphericalRADEC
       RADEC_DECV,
-      EQ_PEY,
+      EQ_PEY,              // Equinoctial
       EQ_PEX,
       EQ_PNY,
       EQ_PNX,
@@ -245,6 +246,7 @@ protected:
    /// String specifying the epoch system and format used for scEpochStr (TAIModJulian, etc)
    std::string       epochType;
    std::string       stateType;
+   std::string       displayStateType;
    std::string       anomalyType;
    Anomaly           trueAnomaly;
    

@@ -68,6 +68,7 @@ const Gmat::ParameterType
       Gmat::STRING_TYPE,      // Element5Units
       Gmat::STRING_TYPE,      // Element6Units
       Gmat::STRING_TYPE,      // StateType
+      Gmat::STRING_TYPE,      // DisplayStateType
       Gmat::STRING_TYPE,      // AnomalyType
       Gmat::STRING_TYPE,      // CoordinateSystem
       Gmat::REAL_TYPE,        // DryMass
@@ -98,6 +99,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Element5Units", 
       "Element6Units", 
       "StateType", 
+      "DisplayStateType", 
       "AnomalyType", 
       "CoordinateSystem",
       "DryMass",
@@ -113,12 +115,14 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
 
 const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] = 
 {
+   // Cartesian
    "X",
    "Y",
    "Z",
    "VX",
    "VY",
    "VZ",
+   // Keplerian
    "SMA",
    "ECC",
    "INC",
@@ -128,16 +132,20 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "EA",
    "MA",
    "HA",
+   // Modified Keplerian
    "RadPer",
    "RadApo",
+   // Speherical AZFPA
    "RMAG",
    "RA",
    "DEC",
    "VMAG",
    "AZI",
    "FPA",
+   // Spherical RADEC
    "RAV",
    "DECV",
+   // Equinoctial
    "PEY",
    "PEX",
    "PNY",
@@ -171,6 +179,7 @@ Spacecraft::Spacecraft(const std::string &name, const std::string &typeStr) :
    epochFormat          ("ModJulian"),
    epochType            ("TAIModJulian"),  // Should be A1ModJulian?
    stateType            ("Cartesian"),
+   displayStateType     ("Cartesian"),
    anomalyType          ("TA"),
    internalCoordSystem  (NULL),
    coordinateSystem     (NULL),
@@ -270,6 +279,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    epochFormat          (a.epochFormat),
    epochType            (a.epochType),
    stateType            (a.stateType),
+   displayStateType     (a.displayStateType),
    anomalyType          (a.anomalyType),
    internalCoordSystem  (a.internalCoordSystem),
    coordinateSystem     (a.coordinateSystem),      // Check this one...
@@ -337,6 +347,7 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    epochFormat          = a.epochFormat;
    epochType            = a.epochType;
    stateType            = a.stateType;
+   displayStateType     = a.displayStateType;
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
    attitude             = a.attitude,        // correct?
@@ -462,7 +473,7 @@ void Spacecraft::SetState(const std::string &elementType, Real *instate)
 
    if (elementType != "Cartesian")
    {
-      stateType = "Cartesian";
+      stateType = "Cartesian";  // why not use SetStateFromRepresentation here?? wcs
       newState = stateConverter.Convert(instate, elementType, 
          stateType, trueAnomaly);
    }
@@ -1100,6 +1111,8 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
    
+   // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
+   
    return SpaceObject::IsParameterReadOnly(id);
 }
 
@@ -1503,7 +1516,19 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
        return epochType;
 
     if (id == STATE_TYPE_ID)
-       return stateType; 
+    {
+       MessageInterface::ShowMessage( "\"StateType\" is deprecated as the "
+          "string specifying the state type for display, and will be "
+          "removed from a future build; please use \"DisplayStateType\" "
+          "instead.\n" ); 
+       return displayStateType; 
+       //return stateType; 
+    }
+
+    if (id == DISPLAY_STATE_TYPE_ID)
+    {
+       return displayStateType; 
+    }
 
     if (id == ANOMALY_ID)
        return trueAnomaly.GetTypeString(); 
@@ -1597,8 +1622,14 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    {
       SetDateFormat(value);
    }
-   else if (id == STATE_TYPE_ID)
+   else if ((id == STATE_TYPE_ID) || (id == DISPLAY_STATE_TYPE_ID))
    {  
+      if (id == STATE_TYPE_ID)
+          MessageInterface::ShowMessage( "\"StateType\" is deprecated as the "
+          "string specifying the state type for display, and will be "
+          "removed from a future build; please use \"DisplayStateType\" "
+          "instead.\n" ); 
+      
       // Check for invalid input then return unknown value from GmatBase 
       if (value != "Cartesian" && value != "Keplerian" && 
           value != "ModifiedKeplerian" && value != "SphericalAZFPA" && 
@@ -1608,7 +1639,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
             value);
       }
       #ifdef DEFINE_SPACECRAFT_SET
-      MessageInterface::ShowMessage("SC::SetString - setting state type to %s\n",
+      MessageInterface::ShowMessage("SC::SetString - setting display state type to %s\n",
       value.c_str());
       #endif
       
@@ -1621,7 +1652,8 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          trueAnomaly.SetValue(kep[5]);
       }
       
-      stateType = value;
+      //stateType = value;
+      displayStateType = value;
       UpdateElementLabels();
    }
    else if (id == ANOMALY_ID)
@@ -1816,7 +1848,7 @@ bool Spacecraft::TakeAction(const std::string &action,
       if (csSet == false)
       {
          Rvector6 st(state.GetState());
-         SetStateFromRepresentation(stateType, st);
+         SetStateFromRepresentation(stateType, st); // this doesn't look right to me *****
          
          csSet = true;
       }
@@ -2042,7 +2074,8 @@ void Spacecraft::SetState(const std::string &type, const Rvector6 &cartState)
        cartState.ToString().c_str());
    #endif
    
-   stateType = type;
+   //stateType = type;
+   displayStateType = type;
    SetState(cartState[0], cartState[1], cartState[2],
             cartState[3], cartState[4], cartState[5]);
    UpdateElementLabels();
@@ -2063,7 +2096,7 @@ void Spacecraft::SetAnomaly(const std::string &type, const Anomaly &ta)
 {
    trueAnomaly = ta;
    anomalyType = Anomaly::GetTypeString(type);
-   stateElementLabel[5] = anomalyType;
+   stateElementLabel[5] = anomalyType;     // this assumes current display type is Keplerian/ModKep??
 
    #if DEBUG_SPACECRAFT_SET
    MessageInterface::ShowMessage
@@ -2216,7 +2249,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    parmOrder[parmIndex++] = DATE_FORMAT_ID;
    parmOrder[parmIndex++] = SC_EPOCH_ID;
    parmOrder[parmIndex++] = COORD_SYS_ID;
-   parmOrder[parmIndex++] = STATE_TYPE_ID;
+   //parmOrder[parmIndex++] = STATE_TYPE_ID;
+   parmOrder[parmIndex++] = DISPLAY_STATE_TYPE_ID;
    parmOrder[parmIndex++] = ANOMALY_ID;
    parmOrder[parmIndex++] = ELEMENT1_ID;
    parmOrder[parmIndex++] = ELEMENT2_ID;
@@ -2250,7 +2284,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             break;
          }
       }
-      if (!registered)
+      if (!registered) 
          parmOrder[parmIndex++] = i;
    }
    
@@ -2259,11 +2293,15 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //                           internalCoordSystem, 
 //                           genState, coordinateSystem);
    
-   Rvector6 repState = GetStateInRepresentation(stateType);
+   //Rvector6 repState = GetStateInRepresentation(stateType);
+   Rvector6 repState = GetStateInRepresentation(displayStateType);
    
 //    MessageInterface::ShowMessage("===> trueAnomaly=%s\n", trueAnomaly.ToString().c_str());
    #if DEBUG_SPACECRAFT_GEN_STRING
-   MessageInterface::ShowMessage("===> stateType=%s, repState=%s\n", stateType.c_str(),
+   //MessageInterface::ShowMessage("===> stateType=%s, repState=%s\n", stateType.c_str(),
+   //                              repState.ToString().c_str());
+   MessageInterface::ShowMessage("===> displayStateType=%s, repState=%s\n", 
+                                 displayStateType.c_str(),
                                  repState.ToString().c_str());
    #endif
    
@@ -2271,7 +2309,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    {
       if ((IsParameterReadOnly(parmOrder[i]) == false) &&
           (parmOrder[i] != J2000_BODY_NAME) &&
-          (parmOrder[i] != TOTAL_MASS_ID))
+          (parmOrder[i] != TOTAL_MASS_ID)   &&
+          (parmOrder[i] != STATE_TYPE_ID))       // deprecated
       {
          parmType = GetParameterType(parmOrder[i]);
          
@@ -2295,12 +2334,15 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   value << repState[parmOrder[i] - ELEMENT1_ID];
                   value.precision(GetDataPrecision()); 
                }
-               else if (parmOrder[i] == STATE_TYPE_ID)
+               //else if (parmOrder[i] == STATE_TYPE_ID)
+               else if (parmOrder[i] == DISPLAY_STATE_TYPE_ID)
                {
                   if (mode != Gmat::MATLAB_STRUCT)
-                     value << stateType;
+                     //value << stateType;
+                     value << displayStateType;
                   else
-                     value << "'" << stateType << "'"; 
+                     //value << "'" << stateType << "'"; 
+                     value << "'" << displayStateType << "'"; 
                }
                else if (parmOrder[i] == ANOMALY_ID)
                {
@@ -2395,7 +2437,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //------------------------------------------------------------------------------
 void Spacecraft::UpdateElementLabels()
 {
-   if (stateType == "Cartesian")
+   //if (stateType == "Cartesian")
+   if (displayStateType == "Cartesian")
    {
       stateElementLabel[0] = "X";
       stateElementLabel[1] = "Y";
@@ -2414,7 +2457,8 @@ void Spacecraft::UpdateElementLabels()
       return;
    }
 
-   if (stateType == "Keplerian")
+   //if (stateType == "Keplerian")
+   if (displayStateType == "Keplerian")
    {
       stateElementLabel[0] = "SMA";
       stateElementLabel[1] = "ECC";
@@ -2433,7 +2477,8 @@ void Spacecraft::UpdateElementLabels()
       return;
    }
 
-   if (stateType == "ModifiedKeplerian")
+   //if (stateType == "ModifiedKeplerian")
+   if (displayStateType == "ModifiedKeplerian")
    {
       stateElementLabel[0] = "RadPer";
       stateElementLabel[1] = "RadApo";
@@ -2452,7 +2497,8 @@ void Spacecraft::UpdateElementLabels()
       return;
    }
 
-   if (stateType == "SphericalAZFPA")
+   //if (stateType == "SphericalAZFPA")
+   if (displayStateType == "SphericalAZFPA")
    {
       stateElementLabel[0] = "RMAG";
       stateElementLabel[1] = "RA";
@@ -2471,7 +2517,8 @@ void Spacecraft::UpdateElementLabels()
       return;
    }
     
-   if (stateType == "SphericalRADEC")
+   //if (stateType == "SphericalRADEC")
+   if (displayStateType == "SphericalRADEC")
    {
       stateElementLabel[0] = "RMAG";
       stateElementLabel[1] = "RA";
@@ -2490,7 +2537,8 @@ void Spacecraft::UpdateElementLabels()
       return;
    }
       
-   if (stateType == "Equinoctial")
+   //if (stateType == "Equinoctial")
+   if (displayStateType == "Equinoctial")
    {
       stateElementLabel[0] = "SMA";
       stateElementLabel[1] = "h";
@@ -2545,7 +2593,7 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
    
    // Then convert to the desired representation
    if (rep == "")
-      rep = stateType;
+      rep = stateType;   // do I want displayStateType here?
    
    if (rep == "Cartesian")
       finalState = csState;
@@ -2754,6 +2802,22 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    #endif
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
+   ///////
+   if ((rep != "") && (stateType != rep))
+   {
+      //SetStringParameter(STATE_TYPE_ID, rep);
+      
+      if ((rep == "Keplerian") || (rep == "ModifiedKeplerian"))
+      {
+         // Load trueAnomaly with the state data
+         Rvector6 kep = GetStateInRepresentation("Keplerian");
+         trueAnomaly.SetSMA(kep[0]);
+         trueAnomaly.SetECC(kep[1]);
+         trueAnomaly.SetValue(kep[5]);
+      }
+      stateType = rep;
+   }
+   ///////
    #ifdef DEBUG_SPACECRAFT_SET
    if (id >= 0)
    MessageInterface::ShowMessage(
