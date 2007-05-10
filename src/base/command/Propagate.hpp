@@ -31,6 +31,8 @@
 #include "PropSetup.hpp"
 #include "StopCondition.hpp"
 
+//#define DUMP_PLANET_DATA
+
 
 /**
  * The Propagate Command Class
@@ -309,6 +311,12 @@ protected:
    Real                    GetRangedAngle(const Real angle, const Real midpt);
       
 private:
+
+   #ifdef DUMP_PLANET_DATA
+      static std::ofstream        planetData;
+      static CelestialBody        *body[11];
+      static Integer              bodiesDefined;      
+   #endif
     
 };
 

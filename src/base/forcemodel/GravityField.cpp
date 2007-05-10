@@ -585,7 +585,7 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       
    //Real* satState;
    Real satState[6];
-   Real f[3], rbb3, mu_rbb;
+   Real f[3]; //, rbb3, mu_rbb;
    Real aIndirect[3] = {0.0,0.0,0.0};
    Integer nOffset;
    bool sameCS = false;
@@ -607,8 +607,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    #endif
    
    
-   CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
-   CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
+//   CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
+//   CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
    //SpacePoint *targetBody = targetCS->GetOrigin();
    //SpacePoint *fixedBody = fixedCS->GetOrigin();
    //const Rvector6 rv = fixedBody->GetMJ2000State(now) - 
@@ -633,58 +633,60 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       }
    #endif
 
-   if (body->GetName() != targetCS->GetOriginName())  // or fixed?????
-   //if (rbb3 != 0.0) 
-   {
-      frv = fixedBody->GetState(now);
-      trv = targetBody->GetState(now);
-      
-      const Real *rvf = frv.GetDataVector();
-      const Real *rvt = trv.GetDataVector();
-      
-      //Real rvf[6];
-      //Real rvt[6];
-      
-      #ifdef DEBUG_BODY_STATE
-         MessageInterface::ShowMessage("*** About to call GetState ....\n");
-      #endif
-      //fixedBody->GetState(now, rvf);
-      //targetBody->GetState(now, rvt);
-      #ifdef DEBUG_BODY_STATE
-         MessageInterface::ShowMessage("*** DID call GetState ....\n");
-      #endif
-      
-      Real rv[3];
-      rv[0] = rvf[0] - rvt[0];
-      rv[1] = rvf[1] - rvt[1];
-      rv[2] = rvf[2] - rvt[2];
-      
-      // Precalculations for the indirect effect term
-      //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
-      rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
-      if (GmatMathUtil::Abs(rbb3) < 1.0e-14)
-         aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
-      else
-      {
-         rbb3 = rbb3 * sqrt(rbb3);
-         mu_rbb = mu / rbb3;
-         //aIndirect[0] = mu_rbb * (*rv)[0];
-         //aIndirect[1] = mu_rbb * (*rv)[1];
-         //aIndirect[2] = mu_rbb * (*rv)[2];
-         aIndirect[0] = mu_rbb * rv[0];
-         aIndirect[1] = mu_rbb * rv[1];
-         aIndirect[2] = mu_rbb * rv[2];
-      }
-      #ifdef DEBUG_GRAVITY_FIELD
-         MessageInterface::ShowMessage(
-            "Indirect calcs for body %s, target %s, and fixed  %s\n"
-            "   rv = [%lf %lf %lf]\n",
-            body->GetName().c_str(), targetCS->GetOriginName().c_str(), 
-            fixedCS->GetOriginName().c_str(), 
-            rv[0], rv[1], rv[2]);
-      #endif
-   }
-   else
+// The following code is a start on full field modeling at non-central bodies.  
+// It is not currently correct, and therefore disabled for the May 2007 beta.
+//   if (body->GetName() != targetCS->GetOriginName())  // or fixed?????
+//   //if (rbb3 != 0.0) 
+//   {
+//      frv = fixedBody->GetState(now);
+//      trv = targetBody->GetState(now);
+//      
+//      const Real *rvf = frv.GetDataVector();
+//      const Real *rvt = trv.GetDataVector();
+//      
+//      //Real rvf[6];
+//      //Real rvt[6];
+//      
+//      #ifdef DEBUG_BODY_STATE
+//         MessageInterface::ShowMessage("*** About to call GetState ....\n");
+//      #endif
+//      //fixedBody->GetState(now, rvf);
+//      //targetBody->GetState(now, rvt);
+//      #ifdef DEBUG_BODY_STATE
+//         MessageInterface::ShowMessage("*** DID call GetState ....\n");
+//      #endif
+//      
+//      Real rv[3];
+//      rv[0] = rvf[0] - rvt[0];
+//      rv[1] = rvf[1] - rvt[1];
+//      rv[2] = rvf[2] - rvt[2];
+//      
+//      // Precalculations for the indirect effect term
+//      //rbb3 = (*rv)[0] * (*rv)[0] + (*rv)[1] * (*rv)[1] + (*rv)[2] * (*rv)[2];
+//      rbb3 = (rv[0] * rv[0]) + (rv[1] * rv[1]) + (rv[2] * rv[2]);
+//      if (GmatMathUtil::Abs(rbb3) < 1.0e-14)
+//         aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
+//      else
+//      {
+//         rbb3 = rbb3 * sqrt(rbb3);
+//         mu_rbb = mu / rbb3;
+//         //aIndirect[0] = mu_rbb * (*rv)[0];
+//         //aIndirect[1] = mu_rbb * (*rv)[1];
+//         //aIndirect[2] = mu_rbb * (*rv)[2];
+//         aIndirect[0] = mu_rbb * rv[0];
+//         aIndirect[1] = mu_rbb * rv[1];
+//         aIndirect[2] = mu_rbb * rv[2];
+//      }
+//      #ifdef DEBUG_GRAVITY_FIELD
+//         MessageInterface::ShowMessage(
+//            "Indirect calcs for body %s, target %s, and fixed  %s\n"
+//            "   rv = [%lf %lf %lf]\n",
+//            body->GetName().c_str(), targetCS->GetOriginName().c_str(), 
+//            fixedCS->GetOriginName().c_str(), 
+//            rv[0], rv[1], rv[2]);
+//      #endif
+//   }
+//   else
       aIndirect[0] = aIndirect[1] = aIndirect[2] = 0.0;
 
    for (Integer n = 0; n < satcount; ++n) 
@@ -710,11 +712,11 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
             MessageInterface::ShowMessage(
                "      Epoch: %.12lf\n", now.Get());
             MessageInterface::ShowMessage(
-               "      input State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               "      input State  = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
                theState[0], theState[1], theState[2], theState[3], theState[4], 
                theState[5]);
             MessageInterface::ShowMessage(
-               "      outpt State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
+               "      output State = [%.10lf %.10lf %.10lf %.16lf %.16lf %.16lf]\n",
                outState[0], outState[1], outState[2], outState[3], outState[4], 
                outState[5]);
          }
@@ -829,10 +831,11 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
       if (firstCallFired == false)
       {
          MessageInterface::ShowMessage(
-            "   GravityField[%s] --> [%.10lf %.10lf %.10lf %.16lf"
-            " %.16lf %.16lf]\n",
-            instanceName.c_str(), deriv[0], deriv[1], deriv[2], deriv[3], 
-            deriv[4], deriv[5]);
+            "   GravityField[%s <> %s] --> mu = %lf, origin = %s, [%.10lf %.10lf "
+            "%.10lf %.16lf %.16lf %.16lf]\n",
+            instanceName.c_str(), body->GetName().c_str(), mu, 
+            targetCS->GetOriginName().c_str(), 
+            deriv[0], deriv[1], deriv[2], deriv[3], deriv[4], deriv[5]);
          firstCallFired = true;
       }
    #endif
@@ -1026,6 +1029,11 @@ bool GravityField::gravity_init(void)
       if (body == NULL) throw ForceModelException("Body \"" + bodyName + 
                                            "\" undefined for GravityField.");
    }
+
+   if (body->GetName() != targetCS->GetOriginName())
+      throw ForceModelException("Full field gravity is only supported for "
+         "the force model origin in current GMAT builds.");
+
 
 //   // delete arrays, if they have already been created (useful when reading
 //   // a new file)

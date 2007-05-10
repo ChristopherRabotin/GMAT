@@ -1081,7 +1081,7 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
          if (scriptSaved)
          {
             MessageInterface::PopupMessage
-               (Gmat::INFO_, "Scrpt saved to \"%s\"\n", mScriptFilename.c_str());
+               (Gmat::INFO_, "Script saved to \"%s\"\n", mScriptFilename.c_str());
          }
       }
    }

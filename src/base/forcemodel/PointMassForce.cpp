@@ -70,6 +70,7 @@
 
 //#define DEBUG_FORCE_MODEL
 //#define DEBUG_FORCE_ORIGIN
+//#define DUMP_PLANET_DATA
 
 //---------------------------------
 // static data
@@ -304,6 +305,17 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    Real relativePosition[3];
    bodyrv = body->GetState(now);
    orig = forceOrigin->GetState(now);
+   
+   #ifdef DUMP_PLANET_DATA
+      MessageInterface::ShowMessage("%s, %17.12lf, %17.12lf, %17.12lf, "
+         "%17.12lf, %17.16lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
+         "%17.12lf, %17.12lf, %17.16lf, %17.16lf, %s, %17.12lf, %17.12lf, "
+         "%17.12lf, %17.12lf, %17.16lf, %17.16lf\n", 
+         body->GetName().c_str(), now.Get(), bodyrv[0], bodyrv[1], bodyrv[2], 
+         bodyrv[3], bodyrv[4], bodyrv[5], "SC_Data", state[0], state[1], 
+         state[2], state[3], state[4], state[5], "origin", orig[0], orig[1],
+         orig[2], orig[3], orig[4], orig[5]);
+   #endif
 
    const Real *brv = bodyrv.GetDataVector(), *orv = orig.GetDataVector();
    Real rv[3];
@@ -326,7 +338,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
 
    #ifdef DEBUG_FORCE_ORIGIN
       MessageInterface::ShowMessage(
-         "Epoch:  %15.9lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
+         "Epoch:  %16.11lf\n  Origin:  [%s]\n  J2KBod:  [%s]\n",
          now.Get(), orig.ToString().c_str(), bodyrv.ToString().c_str());
       MessageInterface::ShowMessage(
          "Now = %16.11lf rbb3 = %16.11le rv = [%16lf %16lf %16lf]\n",
@@ -391,7 +403,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
       MessageInterface::ShowMessage(
          "%s%s%s%16.10lf%s%16.10lf, %16.10lf, %16.10lf%s%16.10lf, %16.10lf, "
          "%16.10lf%s%16.10le, %16.10le, %16.10le]\n",
-         "Point mass force for ", body->GetName().c_str(), " at epoch ", now,
+         "Point mass force for ", body->GetName().c_str(), " at epoch ", now.Get(),
          "\n   Sat position:  [", state[0], state[1], state[2],
          "]\n   Body position: [", rv[0], rv[1], rv[2],
          "]\n   Acceleration:  [", deriv[3], deriv[4], deriv[5]);

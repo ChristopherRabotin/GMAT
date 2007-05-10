@@ -78,6 +78,16 @@ Propagate::PARAMETER_TYPE[PropagateCommandParamCount - GmatCommandParamCount] =
    Gmat::BOOLEAN_TYPE
 };
 
+#ifdef DUMP_PLANET_DATA
+   std::ofstream Propagate::planetData;
+
+   CelestialBody* Propagate::body[11] = 
+   {
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL 
+   };
+   
+   Integer Propagate::bodiesDefined = 0;
+#endif
 
 #ifdef DEBUG_FIRST_CALL
 static bool firstStepFired = false;
@@ -118,6 +128,14 @@ Propagate::Propagate() :
    stopCondStopVarID           (-1)
 {
    parameterCount = PropagateCommandParamCount;
+
+   #ifdef DUMP_PLANET_DATA
+      if (!planetData.is_open())
+      {
+         planetData.open("PlanetaryEphem.csv");
+         planetData.precision(18);
+      }
+   #endif
 }
 
 
@@ -149,6 +167,11 @@ Propagate::~Propagate()
    for (std::vector<StringArray*>::iterator i = satName.begin(); 
         i != satName.end(); ++i)
       delete (*i);
+
+   #ifdef DUMP_PLANET_DATA
+      if (planetData.is_open())
+         planetData.close();
+   #endif
 }
 
 
@@ -2049,7 +2072,33 @@ bool Propagate::Initialize()
       commandSummary += typeName;
       commandSummary += " Command\nSummary not available in single step mode\n";
    }
-      
+
+   #ifdef DUMP_PLANET_DATA
+      if (body[0] == NULL)
+         body[0] = solarSys->GetBody("Earth");
+      if (body[1] == NULL)
+         body[1] = solarSys->GetBody("Sun");
+      if (body[2] == NULL)
+         body[2] = solarSys->GetBody("Luna");
+      if (body[3] == NULL)
+         body[3] = solarSys->GetBody("Mercury");
+      if (body[4] == NULL)
+         body[4] = solarSys->GetBody("Venus");
+      if (body[5] == NULL)
+         body[5] = solarSys->GetBody("Mars");
+      if (body[6] == NULL)
+         body[6] = solarSys->GetBody("Jupiter");
+      if (body[7] == NULL)
+         body[7] = solarSys->GetBody("Saturn");
+      if (body[8] == NULL)
+         body[8] = solarSys->GetBody("Uranus");
+      if (body[9] == NULL)
+         body[9] = solarSys->GetBody("Neptune");
+      if (body[10] == NULL)
+         body[10] = solarSys->GetBody("Pluto");
+   
+      bodiesDefined = 11;      
+   #endif
 
    return initialized;
 }
@@ -2748,6 +2797,26 @@ bool Propagate::TakeAStep(Real propStep)
          p[0]->GetStepTaken());
    #endif
    
+   #ifdef DUMP_PLANET_DATA
+      Real epoch = sats[0]->GetRealParameter("A1Epoch");
+      Rvector6 planetrv;
+      
+      for (Integer h = 0; h < bodiesDefined; ++h)
+      {
+         if (body[h] != NULL)
+         {
+            planetrv = body[h]->GetState(epoch);
+            planetData << (body[h]->GetName()) << "  " << epoch << "  " 
+                       << planetrv[0] << "  " 
+                       << planetrv[1] << "  " 
+                       << planetrv[2] << "  " 
+                       << planetrv[3] << "  " 
+                       << planetrv[4] << "  " 
+                       << planetrv[5] << "\n";
+         }
+      }
+   #endif
+
    return retval;
 }
 
