@@ -564,6 +564,9 @@ bool Optimize::Execute()
 }
 
 
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
 void Optimize::RunComplete()
 {
    if (optimizer != NULL)
@@ -573,6 +576,9 @@ void Optimize::RunComplete()
 }
 
 
+//------------------------------------------------------------------------------
+// bool ExecuteCallback()
+//------------------------------------------------------------------------------
 bool Optimize::ExecuteCallback()
 {
    #ifdef DEBUG_CALLBACK
@@ -646,10 +652,13 @@ bool Optimize::ExecuteCallback()
    }
    catch (BaseException &be)
    {
-      std::string errorStr = "Optimize:ExecuteCallback: ERROR - " +
-         be.GetFullMessage() + "\n";
-      throw CommandException(errorStr);
+      //Just rethrow since message is getting too long (loj: 2007.05.11)
+      //std::string errorStr = "Optimize:ExecuteCallback: ERROR - " +
+      //   be.GetFullMessage() + "\n";
+      //throw CommandException(errorStr);
+      throw;
    }
+   
    // this call should just advance the state back to NOMINAL
    // and return results
    #ifdef DEBUG_CALLBACK
@@ -673,6 +682,9 @@ bool Optimize::ExecuteCallback()
    return true;
 }
 
+//------------------------------------------------------------------------------
+// bool PutCallbackData(std::string &data)
+//------------------------------------------------------------------------------
 bool Optimize::PutCallbackData(std::string &data)
 {
    callbackData = data;
@@ -683,6 +695,9 @@ bool Optimize::PutCallbackData(std::string &data)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// std::string GetCallbackResults()
+//------------------------------------------------------------------------------
 std::string Optimize::GetCallbackResults()
 {
    std::string allResults;
