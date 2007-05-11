@@ -192,7 +192,7 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    referenceBodyNumber(0),
    sourceFilename     (""),
    theSourceFile      (NULL),
-   usePotentialFile   (true),  // wcs 2007.01.10
+   usePotentialFile   (false),  // wcs 2007.01.10; wcs 2007.05.11 - back to false
    potentialFileName  (""),
    hourAngle          (0.0),
    atmModel           (NULL),
@@ -251,7 +251,7 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    referenceBodyNumber(0),
    sourceFilename     (""),
    theSourceFile      (NULL),
-   usePotentialFile   (true),  // wcs 2007.01.10
+   usePotentialFile   (false),  // wcs 2007.01.10; wcs - 2007.05.11 - back to false
    potentialFileName  (""),
    hourAngle          (0.0),
    atmModel           (NULL),
@@ -2792,7 +2792,7 @@ void CelestialBody::InitializeBody(std::string withBodyType)
    // assuming derived classes will fill in all the specific things with
    // appropriate default values
    //usePotentialFile  = false; //loj: 3/23/06 set to false
-   usePotentialFile  = true; //wcs: 2007.01.10 set to true
+   usePotentialFile  = false; //wcs: 2007.01.10 set to true; wcs - 2007.05.11 - back to false
    potentialFileName = "";
    sourceFilename    = "";
    theSourceFile     = NULL;

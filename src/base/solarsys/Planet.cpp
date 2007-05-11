@@ -1008,7 +1008,7 @@ void Planet::InitializePlanet(const std::string &cBody)
 
    // Set use potential file to true if Earth
    //if (bodyIndex == EARTH)
-      usePotentialFile = true;
+      usePotentialFile = false;  // wcs - 2007.05.11  changed to false per S. Hughes
    //else
     //  usePotentialFile = false;
       
