@@ -3586,6 +3586,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
             ("Moderator::RunMission() after InitializeSandbox()\n");
          #endif
          
+         // reset user interrupt flag
+         GmatGlobal::Instance()->SetRunInterrupted(false);
+         
          // execute sandbox
          runState = Gmat::RUNNING;
          ExecuteSandbox(sandboxNum-1);
@@ -3677,12 +3680,16 @@ Integer Moderator::RunMission(Integer sandboxNum)
 Integer Moderator::ChangeRunState(const std::string &state, Integer sandboxNum)
 {
    #if DEBUG_USER_INTERRUPT
-   MessageInterface::ShowMessage("Moderator::ChangeRunState() entered\n");
+   MessageInterface::ShowMessage
+      ("Moderator::ChangeRunState(%s) entered\n", state.c_str());
    #endif
    
-   if (state == "Stop")   
+   if (state == "Stop")
+   {
       runState = Gmat::IDLE;
-
+      GmatGlobal::Instance()->SetRunInterrupted(true);
+   }
+   
    else if (state == "Pause")
       runState = Gmat::PAUSED;
    
