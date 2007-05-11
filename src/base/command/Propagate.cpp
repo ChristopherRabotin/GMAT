@@ -2329,7 +2329,7 @@ void Propagate::PrepareToPropagate()
          else if (baseEp != sat1->GetRealParameter(epochID))
             throw CommandException(
                "Epochs are out of sync on Propagation line:\n\"" + 
-               GetGeneratingString() + "\"\n");
+               generatingString + "\"\n");
       }
    }
    
