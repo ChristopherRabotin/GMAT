@@ -51,6 +51,8 @@ public:
    // Run mode
    bool IsBatchMode() { return isBatchMdoe; }
    void SetBatchMode(bool flag) { isBatchMdoe = flag; }
+   bool GetRunInterrupted() { return runInterrupted; }
+   void SetRunInterrupted(bool flag) { runInterrupted = flag; }
    
    // IO formatting
    bool IsScientific() { return actualFormat.mScientific; }
@@ -149,6 +151,7 @@ private:
    Setting currentSetting;
    
    bool isBatchMdoe;
+   bool runInterrupted;
    
    IoFormat defaultFormat;
    IoFormat currentFormat;
