@@ -1114,6 +1114,15 @@ void TsPlotCanvas::ClearAllCurveData()
         i != data.end(); ++i)
       (*i)->Clear();
 
+   plotXMin =  1e99; 
+   plotXMax = -1e99; 
+   plotYMin =  1e99; 
+   plotYMax = -1e99;
+   xMin     =  1e99;
+   xMax     = -1e99; 
+   yMin     =  1e99; 
+   yMax     = -1e99;
+
    #if DEBUG_TS_CANVAS
    MessageInterface::ShowMessage(
       "TsPlotCanvas::ClearAllCurveData() clearing dc\n");

@@ -374,6 +374,10 @@ bool TsPlot::TakeAction(const std::string &action,
    {
       return RemoveYParameter(actionData);
    }
+   else if (action == "ClearData")
+   {
+      return ResetYParameters();
+   }
    
    return false;
 }
@@ -1004,6 +1008,15 @@ bool TsPlot::RemoveYParameter(const std::string &name)
    #endif
    
    return false;
+}
+
+//------------------------------------------------------------------------------
+// bool ResetYParameters()
+//------------------------------------------------------------------------------
+bool TsPlot::ResetYParameters()
+{
+   PlotInterface::ClearTsPlotData(instanceName);
+   return true;
 }
 
 //------------------------------------------------------------------------------

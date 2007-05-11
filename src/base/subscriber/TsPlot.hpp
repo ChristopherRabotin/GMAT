@@ -95,6 +95,7 @@ protected:
    void BuildPlotTitle();
    bool ClearYParameters();
    bool RemoveYParameter(const std::string &name);
+   bool ResetYParameters();
    void DeletePlotCurves();
     
    Parameter *mXParam;

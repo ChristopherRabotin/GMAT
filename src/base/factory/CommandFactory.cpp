@@ -52,6 +52,8 @@
 #include "Minimize.hpp"       // for Minimize command
 #include "NonlinearConstraint.hpp" // for NonlinearConstraint command
 
+#include "ClearPlot.hpp"      // for ClearPlot command
+
 
 //---------------------------------
 //  public methods
@@ -136,6 +138,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new Minimize;
     else if (ofType == "NonlinearConstraint")
         return new NonlinearConstraint;
+    else if (ofType == "ClearPlot")
+        return new ClearPlot;
    // add more here .......
    else 
    {
@@ -190,6 +194,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("EndOptimize");
       creatables.push_back("Minimize");
       creatables.push_back("NonlinearConstraint");
+      creatables.push_back("ClearPlot");
    }
 }
 
@@ -254,6 +259,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("EndOptimize");
       creatables.push_back("Minimize");
       creatables.push_back("NonlinearConstraint");
+      creatables.push_back("ClearPlot");
    }
 }
 

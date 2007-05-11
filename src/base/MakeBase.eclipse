@@ -102,6 +102,7 @@ OBJECTS = \
     command/CommandException.o \
     command/GmatCommand.o \
     command/CommandUtil.o \
+    command/ClearPlot.o \
     command/ConditionalBranch.o \
     command/Else.o \
     command/EndFiniteBurn.o \
