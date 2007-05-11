@@ -1008,7 +1008,12 @@ bool BranchCommand::ExecuteBranch(Integer which)
             retval = false;
             //break;
          }
-         // May need to add a test for user interruption here
+         
+         // check for user interruption here (loj: 2007.05.11 Added)
+         if (GmatGlobal::Instance()->GetRunInterrupted())
+            throw CommandException
+               ("Branch command \"" + generatingString + "\" interrupted!");
+         
          current = current->GetNext();
       }
       catch (BaseException &e)
