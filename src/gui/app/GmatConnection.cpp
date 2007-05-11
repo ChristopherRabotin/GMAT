@@ -158,8 +158,10 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    MessageInterface::ShowMessage
       ("GmatConnection::OnRequest() %s\n", item.c_str());
    #endif
-
-   //loj: 3/2/05
+   
+   // Check for user interrupt first (loj: 2007.05.11 Added)
+   GmatInterface::Instance()->CheckUserInterrupt();
+   
    // How can I tell whether item is an object or a parameter?
    // For now GetGMATObject.m appends '.' for object name.
    
@@ -173,7 +175,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "RunState") //loj: 8/2/05 Added
    {
       data = GmatInterface::Instance()->GetRunState();
-      
+         
       #if DEBUG_CONNECTION
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
@@ -182,7 +184,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "CallbackStatus") //wcs: 2006.08.24 Added
    {
       data = GmatInterface::Instance()->GetCallbackStatus();
-      
+         
       #if DEBUG_CONNECTION
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
@@ -191,7 +193,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "CallbackResults") //wcs: 2006.09.21 Added
    {
       data = GmatInterface::Instance()->GetCallbackResults();
-      
+         
       #if DEBUG_CONNECTION
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
