@@ -417,6 +417,20 @@ char* GmatInterface::GetInternalObject(const std::string &name)
 }
 
 
+//------------------------------------------------------------------------------
+// void CheckUserInterrupt()
+//------------------------------------------------------------------------------
+/*
+ * Calls Moderator::GetUserInterrupt() to check if user interrupted the
+ * mission sequence.
+ */
+//------------------------------------------------------------------------------
+void GmatInterface::CheckUserInterrupt()
+{
+   Moderator::Instance()->GetUserInterrupt();
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------

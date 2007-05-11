@@ -47,6 +47,8 @@ public:
    char* GetInternalObject(const std::string &name);
    char* GetParameter(const std::string &name);
    
+   void CheckUserInterrupt();
+   
 private:
    static const int MAX_PARAM_VAL_STRING = 512;
    static const int MAX_OBJECT_VAL_STRING = 4096;
