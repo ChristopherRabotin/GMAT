@@ -2600,10 +2600,29 @@ bool Propagate::Execute()
                   stopInterval = timestep;
                
                fm[i]->RevertSpaceObject();
-               elapsedTime[i] = fm[i]->GetTime();
+               switch (currentMode)
+               {
+                  case SYNCHRONIZED:
+                     elapsedTime[i] = fm[0]->GetTime();
+                     fm[i]->SetTime(elapsedTime[i]);
+                     break;
+                     
+                  case INDEPENDENT:
+                  default:
+                     elapsedTime[i] = fm[i]->GetTime();
+               }
+               
                currEpoch[i] = baseEpoch[i] +
                   elapsedTime[i] / GmatTimeUtil::SECS_PER_DAY;
             }
+
+            #ifdef DEBUG_EPOCH_SYNC
+               for (UnsignedInt i = 0; i < fm.size(); ++i) 
+                  MessageInterface::ShowMessage(
+                     "   SC MET!  Force model[%d] has base epoch %16.11lf, "
+                     "time dt = %.11lf, elapsedTime = %.11lf\n", i, 
+                     baseEpoch[i], fm[i]->GetTime(), elapsedTime[i]);
+            #endif
             
             #ifdef DEBUG_EPOCH_UPDATES
                MessageInterface::ShowMessage("StopStep = %15.11lf\n", 
@@ -2858,6 +2877,7 @@ void Propagate::CheckStopConditions(Integer epochID)
             {
                stopEpoch = stopWhen[i]->GetStopEpoch();
             }
+            
             stopCondMet = true;
             if (stopTrigger < 0)
                stopTrigger = i;
@@ -2868,6 +2888,12 @@ void Propagate::CheckStopConditions(Integer epochID)
                MessageInterface::ShowMessage
                   ("Propagate::CheckStopConditions() %s met for %d\n", 
                    stopWhen[i]->GetName().c_str(), i);
+            #endif
+
+            #ifdef DEBUG_EPOCH_SYNC
+               for (UnsignedInt i = 0; i < fm.size(); ++i) 
+                  MessageInterface::ShowMessage("   *** SC[%d] (%s) MET! ***\n", 
+                     i, stopWhen[i]->GetName().c_str());
             #endif
          }
          else if (checkFirstStep)
@@ -2908,6 +2934,13 @@ void Propagate::CheckStopConditions(Integer epochID)
          inProgress = false;
          throw;
       }
+   #endif
+
+   #ifdef DEBUG_EPOCH_SYNC
+      for (UnsignedInt i = 0; i < stopWhen.size(); ++i)
+         if (stopWhen[i]->Evaluate())
+            MessageInterface::ShowMessage("   *** StopInterval[%d] = %.11lf\n", 
+               i, stopWhen[i]->GetStopInterval());
    #endif
 }
 
