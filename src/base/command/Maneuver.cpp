@@ -219,7 +219,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
           GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type != Gmat::SPACECRAFT && type != Gmat::BURN)
+   if (type != Gmat::SPACECRAFT && type != Gmat::IMPULSIVE_BURN)
       return true;
    
    if (type == Gmat::SPACECRAFT)
@@ -230,7 +230,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
          return true;
       }
    }
-   else if (type == Gmat::BURN)
+   else if (type == Gmat::IMPULSIVE_BURN)
    {
       if (burnName == oldName)
       {
@@ -255,7 +255,7 @@ bool Maneuver::RenameRefObject(const Gmat::ObjectType type,
 const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::BURN);
+   refObjectTypes.push_back(Gmat::IMPULSIVE_BURN);
    refObjectTypes.push_back(Gmat::SPACECRAFT);
    return refObjectTypes;
 }
@@ -276,10 +276,14 @@ const ObjectTypeArray& Maneuver::GetRefObjectTypeArray()
 //------------------------------------------------------------------------------
 const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #ifdef DEBUG_MANEUVER_REFOBJ
+   MessageInterface::ShowMessage("Maneuver::GetRefObjectNameArray(%d)\n", type);
+   #endif
+   
    refObjectNames.clear();
    
    if (type == Gmat::UNKNOWN_OBJECT ||
-       type == Gmat::BURN)
+       type == Gmat::IMPULSIVE_BURN)
    {
       refObjectNames.push_back(burnName);
    }
@@ -289,7 +293,13 @@ const StringArray& Maneuver::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       refObjectNames.push_back(satName);
    }
-
+   
+   #ifdef DEBUG_MANEUVER_REFOBJ
+   MessageInterface::ShowMessage("===> returning\n");
+   for (UnsignedInt i=0; i<refObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   %s\n", refObjectNames[i].c_str());
+   #endif
+   
    return refObjectNames;
 }
 
@@ -310,11 +320,11 @@ std::string Maneuver::GetParameterText(const Integer id) const
    if (id == burnNameID) {
       return "Burn";
    }
-    
+   
    else if (id == satNameID) {
       return "Spacecraft";
    }
-    
+   
    return GmatCommand::GetParameterText(id);
 }
 
@@ -435,12 +445,12 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
       burnName = value;
       return true;
    }
-    
+   
    if (id == satNameID) {
       satName = value;
       return true;
    }
-    
+   
    return GmatCommand::SetStringParameter(id, value);
 }
 
@@ -465,48 +475,22 @@ bool Maneuver::SetStringParameter(const Integer id, const std::string &value)
 bool Maneuver::InterpretAction()
 {
    StringArray chunks = InterpretPreface();
-
+   
    // Find and set the burn object name ...
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   
+   if (currentChunks.size() < 2)
+      throw CommandException("Missing Maneuver parameter. Expecting "
+                             "\"ImpulsiveBurnName(SpacecraftName)\"\n");
+   
    SetStringParameter(burnNameID, currentChunks[0]);
-
+   
    // ... and the spacecraft that is maneuvered
    currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
    SetStringParameter(satNameID, currentChunks[0]);
    
    return true;
 }
-
-
-//{   
-//   /// @todo: Clean up this hack for the Maneuver::InterpretAction method
-//   // Sample string:  "Maneuver prop(Sat1);"
-//   Integer loc = generatingString.find("Maneuver", 0) + 8, end;
-//   const char *str = generatingString.c_str();
-//   while (str[loc] == ' ')
-//      ++loc;
-//    
-//   end = generatingString.find("(", loc);
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Maneuver string does not identify burn");
-//    
-//   std::string component = generatingString.substr(loc, end-loc);
-//   if (component == "")
-//      throw CommandException("Maneuver string does not identify burn");
-//   SetStringParameter(burnNameID, component);
-//    
-//   loc = end + 1;
-//   end = generatingString.find(")", loc);
-//   if (end == (Integer)std::string::npos)
-//      throw CommandException("Maneuver string does not identify spacecraft");
-//    
-//   component = generatingString.substr(loc, end-loc);
-//   if (component == "")
-//      throw CommandException("Maneuver string does not identify spacecraft");
-//   SetStringParameter(satNameID, component);
-//    
-//   return true;
-//}
 
 
 //------------------------------------------------------------------------------

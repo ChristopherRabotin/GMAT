@@ -13,7 +13,7 @@
 // Created: 2005/05/27
 //
 /**
- * Implements Burn related data class.
+ * Implements ImpulsiveBurn related data class.
  */
 //------------------------------------------------------------------------------
 #include "gmatdefs.hpp"
@@ -36,7 +36,7 @@ using namespace GmatMathUtil;
 const std::string
 BurnData::VALID_OBJECT_TYPE_LIST[BurnDataObjectCount] =
 {
-   "Burn",
+   "ImpulsiveBurn",
    "SolarSystem",
    "CoordinateSystem",
    "Spacecraft"
@@ -272,7 +272,7 @@ void BurnData::InitializeRefObjects()
       ("BurnData::InitializeRefObjects() entered.\n");
    #endif
    
-   mImpBurn = (ImpulsiveBurn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[BURN]);
+   mImpBurn = (ImpulsiveBurn*)FindFirstObject(VALID_OBJECT_TYPE_LIST[IMPULSIVE_BURN]);
    
    if (mImpBurn == NULL)
    {
@@ -348,8 +348,8 @@ void BurnData::InitializeRefObjects()
    
    #if DEBUG_BURNDATA_INIT
    MessageInterface::ShowMessage
-      ("BurnData::InitializeRefObjects() mScOrignName=%s, mOriginName=%s\n",
-       mScOrigin->GetName().c_str(), mOrigin->GetName().c_str());
+      ("BurnData::InitializeRefObjects() mImpBurn=%s(%p)\n",
+       mImpBurn->GetName().c_str(), mImpBurn);
    #endif
 }
 

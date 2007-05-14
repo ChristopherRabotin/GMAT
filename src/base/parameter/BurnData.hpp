@@ -13,7 +13,7 @@
 // Created: 2004/01/09
 //
 /**
- * Declares Burn related data class.
+ * Declares ImpulsiveBurn related data class.
  */
 //------------------------------------------------------------------------------
 #ifndef BurnData_hpp
@@ -73,7 +73,7 @@ protected:
    
    enum
    {
-      BURN = 0,
+      IMPULSIVE_BURN,
       SOLAR_SYSTEM,
       COORD_SYSTEM,
       SPACECRAFT,
