@@ -22,7 +22,7 @@
 #include "Moderator.hpp"
 #include "Parameter.hpp"
 #include "StringUtil.hpp" // for Trim()
-#include "AngleUtil.hpp" // for Trim()
+#include "AngleUtil.hpp"  // for PutAngleInDegRange()
 #include "MessageInterface.hpp"
 
 #include <sstream>
@@ -1374,6 +1374,12 @@ const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 bool Propagate::InterpretAction()
 {
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+   MessageInterface::ShowMessage
+      ("Propagate::InterpretAction() genString = \"%s\"\n",
+       generatingString.c_str());
+   #endif
+   
    Integer loc = generatingString.find("Propagate", 0) + 9;
    const char *str = generatingString.c_str();
    
@@ -1413,9 +1419,9 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
       modeStr = PropModeList[modeId];
       modeStr += " ";
       
-      #ifdef DEBUG_PROPAGATE_EXE
-         MessageInterface::ShowMessage("\nPropagate::CheckForOptions() looking"
-                                " for \"%s\" starting at loc=%d\n in \n\"%s\"",
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage("Propagate::CheckForOptions() looking"
+                                " for \"%s\" starting at loc=%d in \n\"%s\"",
                                 modeStr.c_str(), loc, generatingString.c_str());
       #endif
       
@@ -1424,8 +1430,8 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
       {
          if (modeStr == "BackProp ")
          {
-            #ifdef DEBUG_PROPAGATE_EXE
-               MessageInterface::ShowMessage("Direction is now %d\n", currentMode);
+            #ifdef DEBUG_PROPAGATE_ASSEMBLE
+               MessageInterface::ShowMessage("\nDirection is now %d\n", currentMode);
             #endif
    
             direction = -1.0;
@@ -1434,7 +1440,7 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
          {
             currentMode = (PropModes)modeId;
             currentPropMode = PropModeList[modeId];
-            #ifdef DEBUG_PROPAGATE_EXE
+            #ifdef DEBUG_PROPAGATE_ASSEMBLE
                MessageInterface::ShowMessage("\nLocated at %d\n", end);
                MessageInterface::ShowMessage("Mode is now %d\n", currentMode);
             #endif
@@ -1442,6 +1448,12 @@ void Propagate::CheckForOptions(Integer &loc, std::string &generatingString)
    
          if (end >= loc)
             loc = end + modeStr.length();
+      }
+      else
+      {
+         #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage("\n");
+         #endif
       }
    }
 }
@@ -1522,11 +1534,13 @@ void Propagate::FindSetupsAndStops(Integer &loc,
    parmstart = generatingString.find("(", currentLoc);   
    while (scanning) 
    {
-      end = generatingString.find(")", parmstart)+1;
+      //end = generatingString.find(")", parmstart)+1;
+      end = generatingString.find(")", parmstart);
 
       if (end == (Integer)std::string::npos)
          throw CommandException("Propagate::AssemblePropagators: Propagate"
                                 " string does not identify propagator");
+      ++end;
       
       if (generatingString[currentLoc] == '-') 
       {
@@ -3243,8 +3257,8 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
         it != sats.end(); ++it)
       (*it)->ClearLastStopTriggered();      
 
-	if (stopper != NULL)
-	{
+        if (stopper != NULL)
+        {
       // Save the stop condition and reset for next pass
       Integer stopperIndex = 0;
       for (std::vector<StopCondition*>::iterator i = stopWhen.begin(); i != stopWhen.end(); ++i)
@@ -3263,7 +3277,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
          ++stopperIndex;
       }
       triggers.clear();
-	}
+        }
 
    for (std::vector<StopCondition *>::iterator i = stopWhen.begin(); 
         i != stopWhen.end(); ++i)
