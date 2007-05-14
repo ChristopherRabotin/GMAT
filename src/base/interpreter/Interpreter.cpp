@@ -57,7 +57,7 @@
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CHECK_BRANCH
 //#define DEBUG_WRAPPERS
-
+//#define DEBUG_HANDLE_ERROR
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -71,6 +71,7 @@ Interpreter::Interpreter()
    initialized = false;
    continueOnError = true;   
    parsingDelayedBlock = false;
+   ignoreError = false;
    
    theModerator  = Moderator::Instance();
    theReadWriter = ScriptReadWriter::Instance();
@@ -115,6 +116,7 @@ void Interpreter::Initialize()
    delayedBlockLineNumbers.clear();
    inCommandMode = false;
    parsingDelayedBlock = false;
+   ignoreError = false;
    
    if (initialized)
       return;
@@ -777,7 +779,7 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
          return false;
       }
    }
-   //return true;
+   
    return CheckUndefinedReference(cmd);
 }
 
@@ -1000,10 +1002,6 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // if command has its own InterpretAction(), jsut return cmd
       if (cmd->InterpretAction())
       {
-         //bool retval3  = ValidateCommand(cmd);
-         //bool retval2  = CheckUndefinedReference(cmd);
-         //retFlag = retval2 && retval3;
-         ////retFlag = CheckUndefinedReference(cmd);
          retFlag  = ValidateCommand(cmd);
          
          #ifdef DEBUG_CREATE_COMMAND
@@ -1017,20 +1015,16 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    catch (BaseException &e)
    {
       HandleError(e);
-      //loj: 11/29/06 We should return cmd since comand already created
-      //return NULL;
       retFlag = false;
+      // Return cmd since comand already created
       return cmd;
    }
    
    if (desc1 != "")
    {
       bool retval3 = true;
-      //loj: 11/29/06 added check for return code
       bool retval1  = AssembleCommand(cmd, desc1);
       if (retval1) retval3  = ValidateCommand(cmd);
-      //bool retval2  = CheckUndefinedReference(cmd);
-      //retFlag = retval1 && retval2 && retval3;
       retFlag = retval1  && retval3;
    }
 
@@ -1496,18 +1490,29 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          WriteParts(type, parts);
          #endif
          
-         cmd->SetRefObjectName(Gmat::BURN, parts[0]);
-         
-         // Get Spacecraft names
-         StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
-         
-         #ifdef DEBUG_ASSEMBLE_COMMAND
-         WriteParts(type, subParts);
-         #endif
-         
-         count = subParts.size();
-         for (int i=0; i<count; i++)
-            cmd->SetRefObjectName(Gmat::SPACECRAFT, subParts[i]);
+         if (parts.size() < 2)
+         {
+            InterpreterException ex
+               ("Missing " + cmd->GetTypeName() + " parameter. Expecting "
+                "\"FiniteBurnName(SpacecraftName)\"");
+            HandleError(ex);
+            retval = false;
+         }
+         else
+         {
+            cmd->SetRefObjectName(Gmat::FINITE_BURN, parts[0]);
+            
+            // Get Spacecraft names
+            StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
+            
+            #ifdef DEBUG_ASSEMBLE_COMMAND
+            WriteParts(type, subParts);
+            #endif
+            
+            count = subParts.size();
+            for (int i=0; i<count; i++)
+               cmd->SetRefObjectName(Gmat::SPACECRAFT, subParts[i]);
+         }
       }
    }
    else if (type == "Save")
@@ -2262,9 +2267,6 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
       bool retval = SetForceModelProperty(toOwner, toProp, objName, fromObj);
       if (!retval)
       {
-         //InterpreterException ex
-         //   ("Cannot set Object: \"" + objName + "\" to ForceModel: " +
-         //    toOwner->GetName() + "\n");
          InterpreterException ex
             ("The value of \"" + objName + "\" for field name\"" + toProp +
              "\" on ForceModel \"" + toOwner->GetName() + "\" is not an allowed value");
@@ -2640,7 +2642,7 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
       }
    }
    
-   if (retval == false)
+   if (retval == false && !ignoreError)
    {
       if (errorMsg1 == "")
       {
@@ -2657,6 +2659,9 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
          HandleError(ex);
       }
    }
+   
+   if (ignoreError)
+      ignoreError = false;
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
@@ -3451,8 +3456,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          if (!pm->SetStringParameter("AtmosphereModel", value))
          {
             InterpreterException ex
-               ("Unable to set AtmosphereModel for drag force.");
+               ("Unable to set AtmosphereModel for drag force");
             HandleError(ex);
+            ignoreError = true;
+            return false;
          }
          
          /// @todo Add the body name for drag at other bodies
@@ -3465,8 +3472,10 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
             else
             {
                InterpreterException ex
-                  ("Unable to create AtmosphereModel: " + value + " for drag force.");
+                  ("Unable to create AtmosphereModel \"" + value + "\" for drag force");
                HandleError(ex);
+               ignoreError = true;
+               return false;
             }
          }
       }
@@ -3475,7 +3484,7 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
          // Should we set SRP on ForceModel central body?
          pm->SetStringParameter("BodyName", centralBodyName);
       }
-            
+      
       #ifdef DEBUG_SET_FORCE_MODEL
       MessageInterface::ShowMessage
          ("   Adding type:<%s> name:<%s> to ForceModel:<%s>\n",
@@ -3835,7 +3844,7 @@ void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNu
    {
       errorList.push_back(msg);
       
-      #ifdef DEBUG_SET
+      #ifdef DEBUG_HANDLE_ERROR
       MessageInterface::ShowMessage(msg + "\n");
       #endif
    }
@@ -4371,9 +4380,6 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    MessageInterface::ShowMessage
       ("Interpreter::CheckUndefinedReference() type='%s', name='%s', refTypes=\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str());
-   for (UnsignedInt i=0; i<refTypes.size(); i++)
-      MessageInterface::ShowMessage
-         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
    #endif
    
    // Save command can have any object type, so handle it first
@@ -4399,14 +4405,19 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    // Check if undefined ref. objects exist
    for (UnsignedInt i=0; i<refTypes.size(); i++)
    {
+      #ifdef DEBUG_CHECK_OBJECT
+      MessageInterface::ShowMessage
+         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+      #endif
+      
       try
       {
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
          
          #ifdef DEBUG_CHECK_OBJECT
          for (UnsignedInt j=0; j<refNames.size(); j++)
-         MessageInterface::ShowMessage
-            ("      %s\n", refNames[j].c_str());
+            MessageInterface::ShowMessage
+               ("      %s\n", refNames[j].c_str());
          #endif
          
          // Check System Parameters seperately since it follows certain naming
@@ -4458,13 +4469,32 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          {
             for (UnsignedInt j=0; j<refNames.size(); j++)
             {
+               std::string objName = obj->GetTypeName();
+               if (obj->GetType() != Gmat::COMMAND)
+                  objName = objName + "\"" + objName + "\"";
+               
                GmatBase *refObj = GetConfiguredObject(refNames[j]);
-               if (refObj == NULL || !refObj->IsOfType(refTypes[i]))
+               
+               if (refObj == NULL)
                {
                   InterpreterException ex
                      ("Nonexistent " + GmatBase::GetObjectTypeString(refTypes[i]) +
-                      " \"" + refNames[j] + "\" referenced in the " +
-                      obj->GetTypeName() + " \"" + obj->GetName() + "\"");
+                      " \"" + refNames[j] + "\" referenced in the " + objName);
+                  HandleError(ex, writeLine);
+                  retval = false;
+               }
+               else if (!refObj->IsOfType(refTypes[i]))
+               {
+                  #ifdef DEBUG_CHECK_OBJECT
+                  MessageInterface::ShowMessage
+                     ("refObj->IsOfType(refTypes[i])=%d, %s\n", refTypes[i],
+                      GmatBase::GetObjectTypeString(refTypes[i]).c_str());
+                  #endif
+                  
+                  InterpreterException ex
+                     ("\"" + refNames[j] + "\" referenced in the " + objName +
+                      " is not an object of " +
+                      GmatBase::GetObjectTypeString(refTypes[i]));
                   HandleError(ex, writeLine);
                   retval = false;
                }

@@ -126,6 +126,7 @@ protected:
    bool         inRealCommandMode;
    bool         initialized;
    bool         parsingDelayedBlock;
+   bool         ignoreError;
    
    /// For handling delayed blocks
    StringArray  delayedBlocks;
