@@ -96,6 +96,9 @@ protected:
    bool ClearYParameters();
    bool RemoveYParameter(const std::string &name);
    bool ResetYParameters();
+   bool PenUp();
+   bool PenDown();
+   
    void DeletePlotCurves();
     
    Parameter *mXParam;

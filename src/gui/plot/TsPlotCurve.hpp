@@ -53,6 +53,9 @@ public:
    virtual double GetMaxY();
 
    virtual void PenUp();
+   virtual void PenDown();
+   
+   const std::vector<int>* GetPenUpLocations();
 
 protected:
    double minX;
@@ -75,7 +78,10 @@ protected:
    std::vector<wxColour> linecolor;
    /// Location for color changes
    std::vector<int>    colorChange;
+   /// Flag indicating that the curve is accepting data
+   bool penIsDown;
 
+   /// Index of the last point that was plotted
    unsigned int lastPointPlotted;
    
    friend class TsPlotCanvas; 

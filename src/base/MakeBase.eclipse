@@ -120,6 +120,8 @@ OBJECTS = \
     command/NonlinearConstraint.o \
     command/NoOp.o \
     command/Optimize.o \
+    command/PenDown.o \
+    command/PenUp.o \
     command/Propagate.o \
     command/Report.o \
     command/Save.o \
@@ -389,6 +391,7 @@ OBJECTS = \
     util/UtcDate.o \
     $(BRIDGEOBJECTS) \
     $(TCPIP_OBJECTS)
+
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o
 

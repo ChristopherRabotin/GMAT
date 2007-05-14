@@ -24,7 +24,7 @@
 
 #include "TsPlotCanvas.hpp"
 #include "MessageInterface.hpp"
-
+ 
 #include <cmath>
 #include <fstream>
 
@@ -830,21 +830,49 @@ void TsPlotCanvas::PlotData(wxDC &dc)
    if (data.size() > 0)
    {
       int n = 0;
+      int pupLoc = -1, pupIndex = -1, locCount = 0;
+      const std::vector<int> *pups;
+      
       for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
            curve != data.end(); ++curve)
       {
+         pups = (*curve)->GetPenUpLocations(); // penUpLocations(n);
+         locCount = pups->size();
+         if (locCount > 0)
+         {
+            pupIndex = 0;
+            pupLoc = (*pups)[pupIndex];
+         }
+         
          if ((*curve)->abscissa.size() > 0)
          {
             dc.SetPen(plotPens[n]);
+
+            if ((unsigned int)pupLoc < (*curve)->lastPointPlotted)
+            {
+               // Get the next penup
+               ++pupIndex;
+               if (pupIndex < locCount)
+                  pupLoc = (*pups)[pupIndex];
+            }
+            
             int j;
             for (j = (*curve)->lastPointPlotted;
                  j < (int)((*curve)->abscissa.size())-1; ++j)
             {
-               dc.DrawLine(
+               if (j != pupLoc)
+                  dc.DrawLine(
                      int(left+((*curve)->abscissa[j]-currentXMin)*xScale + 0.5),
                      int(top + (currentYMax-(*curve)->ordinate[j])*yScale + 0.5),
                      int(left+((*curve)->abscissa[j+1]-currentXMin)*xScale + 0.5),
                      int(top + (currentYMax-(*curve)->ordinate[j+1])*yScale+0.5));
+               else
+               {
+                  // Get the next penup
+                  ++pupIndex;
+                  if (pupIndex < locCount)
+                     pupLoc = (*pups)[pupIndex];
+               }
             }
             (*curve)->lastPointPlotted = j-1;
          }
@@ -979,6 +1007,7 @@ void TsPlotCanvas::SetLabel(const std::string &dataName,
 void TsPlotCanvas::AddData(TsPlotCurve *curve, wxColour startColor)
 {
    data.push_back(curve);
+   penUpLocations.push_back(curve->GetPenUpLocations());
 
    unsigned int varCount = data.size();
    wxPen *newPens = new wxPen[varCount];
@@ -1238,6 +1267,37 @@ void TsPlotCanvas::UnZoom()
       MessageInterface::ShowMessage("Unzoom!\n");
    #endif
    zoomed = false;
+}
+
+
+void TsPlotCanvas::PenUp(int index)
+{
+   if (index == -1)
+      for (std::vector<TsPlotCurve *>::iterator i = data.begin(); 
+           i != data.end(); ++i)
+         (*i)->PenUp();   
+   else
+      if ((index >= 0) && (data.size() < (unsigned int)index))
+         data[index]->PenUp();
+
+   for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
+        curve != data.end(); ++curve)
+      (*curve)->lastPointPlotted = 0;
+//   
+//   wxPaintDC dc(this);
+//   Refresh(dc, true);
+}
+
+
+void TsPlotCanvas::PenDown(int index)
+{
+   if (index == -1)
+      for (std::vector<TsPlotCurve *>::iterator i = data.begin(); 
+           i != data.end(); ++i)
+         (*i)->PenDown();   
+   else
+      if ((index >= 0) && (data.size() < (unsigned int)index))
+         data[index]->PenDown();
 }
 
 

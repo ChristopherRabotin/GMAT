@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                               ClearPlot
+//                                 PenUp
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -11,28 +11,28 @@
 // number NNG06CA54C
 //
 /**
- * Class implementation for the ClearPlot command
+ * Class implementation for the PenUp command
  */
 //------------------------------------------------------------------------------
 
 
-#ifndef ClearPlot_hpp
-#define ClearPlot_hpp
+#ifndef PenUp_hpp
+#define PenUp_hpp
 
 #include "GmatCommand.hpp"
 #include "TsPlot.hpp"
 
 
 /**
- * Command used to remove data from an XY plot during a run
+ * Command used to stop drawing data on an XY plot during a run.
  */
-class ClearPlot : public GmatCommand
+class PenUp : public GmatCommand
 {
 public:
-	ClearPlot();
-	virtual          ~ClearPlot();
-   ClearPlot(const ClearPlot &c);
-   ClearPlot&        operator=(const ClearPlot &c);
+	PenUp();
+	virtual          ~PenUp();
+   PenUp(const PenUp &c);
+   PenUp&        operator=(const PenUp &c);
    
    virtual GmatBase* Clone() const;
    
@@ -45,4 +45,4 @@ protected:
    TsPlot      *thePlot;
 };
 
-#endif /* ClearPlot_hpp */
+#endif /* PenUp_hpp */

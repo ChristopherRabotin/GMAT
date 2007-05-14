@@ -935,6 +935,64 @@ void PlotInterface::ClearTsPlotData(const std::string &plotName)
 }
 
 //------------------------------------------------------------------------------
+// void TsPlotPenUp(const std::string &plotName))
+//------------------------------------------------------------------------------
+void PlotInterface::TsPlotPenUp(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+
+   #if DEBUG_PLOTIF_XY
+      MessageInterface::ShowMessage
+         ("PlotInterface::TsPlotPenUp() numChildren = %d\n",
+          MdiTsPlot::numChildren);
+   #endif
+   
+   MdiChildTsFrame *frame = NULL;
+   
+   for (int i=0; i<MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      {
+         frame->PenUp();
+      }
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
+// void TsPlotPenDown(const std::string &plotName))
+//------------------------------------------------------------------------------
+void PlotInterface::TsPlotPenDown(const std::string &plotName)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+
+   #if DEBUG_PLOTIF_XY
+      MessageInterface::ShowMessage
+         ("PlotInterface::TsPlotPenUp() numChildren = %d\n",
+          MdiTsPlot::numChildren);
+   #endif
+   
+   MdiChildTsFrame *frame = NULL;
+   
+   for (int i=0; i<MdiTsPlot::numChildren; i++)
+   {
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(plotName.c_str()))
+      {
+         frame->PenDown();
+      }
+   }
+#endif
+}
+
+//------------------------------------------------------------------------------
 // void SetTsPlotTitle(const std::string &plotName, const std::string &plotTitle)
 //------------------------------------------------------------------------------
 void PlotInterface::SetTsPlotTitle(const std::string &plotName,

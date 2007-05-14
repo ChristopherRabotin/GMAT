@@ -76,6 +76,9 @@ public:
    TsPlotCurve*   GetPlotCurve(int index);
    void DeletePlotCurve(int index);
    
+   void PenUp(int index = -1);
+   void PenDown(int index = -1);
+   
 protected:
    /// borders
    int left, right, top, bottom;
@@ -91,6 +94,7 @@ protected:
    int axisLabelSize;
    
    std::vector<TsPlotCurve *> data;
+   std::vector<const std::vector<int>*> penUpLocations;
    
    wxPen *plotPens;
    std::vector <int> *plotDependent;

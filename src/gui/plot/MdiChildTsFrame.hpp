@@ -59,6 +59,8 @@ public:
    void DeletePlotCurve(int curveIndex);
    void AddDataPoints(int curveIndex, double xData, double yData);
    void ClearPlotData();
+   void PenUp();
+   void PenDown();
    void RedrawCurve();
     
    // getter

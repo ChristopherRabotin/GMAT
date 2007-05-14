@@ -27,6 +27,9 @@
 #include "MessageInterface.hpp"
 
 
+// #define DEBUG_PENUP_PENDOWN
+
+
 //------------------------------------------------------------------------------
 // TsPlotCurve(int offsetY, double startY, double endY, double defaultY)
 //------------------------------------------------------------------------------
@@ -38,6 +41,7 @@ TsPlotCurve::TsPlotCurve(int offsetY, double startY, double endY,
    maxY              (-1e99),
    rangeChanged      (false),
    domainChanged     (false),
+   penIsDown         (true),
    lastPointPlotted  (0)
 {
 //   mInterp = new LinearInterpolator();
@@ -63,49 +67,71 @@ TsPlotCurve::~TsPlotCurve()
 //------------------------------------------------------------------------------
 void TsPlotCurve::AddData(double x, double y)
 {
-   if (abscissa.size() == 0) 
-   {
-      #ifdef DEBUG_FIRST_POINT
-         MessageInterface::ShowMessage("Adding initial data: [%lf, %lf]\n", 
-            x, y);
-      #endif
-      
-      minX = maxX = x;
-      minY = maxY = y;
-      rangeChanged = true;
-      domainChanged = true;
-   }
-      
-   abscissa.push_back(x);
-   ordinate.push_back(y);
-   
-
-   if (x < minX)
-   {
-      minX = x;
-      domainChanged = true;
-   }
-   if (x > maxX)
-   {
-      maxX = x;
-      domainChanged = true;
-   }
-   if (y < minY)
-   {
-      minY = y;
-      rangeChanged = true;
-   }
-   if (y > maxY)
-   {
-      maxY = y;
-      rangeChanged = true;
-   }
-
-   #if DEBUG_XY_PLOT_CURVE_ADD
-      MessageInterface::ShowMessage
-         ("TsPlotCurve::AddData() size = %d, x = %lf, y = %lf\n",
-          abscissa.size(), abscissa.back(), ordinate.back());
+   #ifdef DEBUG_PENUP_PENDOWN
+      static Integer counter = 0;
+      if (abscissa.size() == 0) 
+         counter = 0;
+         
+      if (abscissa.size() == 80 && counter == 0)
+      {
+         counter = 1;
+         MessageInterface::ShowMessage("Pen up\n");
+         PenUp();
+      }
+      if (counter == 1) 
+      {
+         ++counter;
+         MessageInterface::ShowMessage("Pen down\n");
+         PenDown();
+      }
    #endif
+   
+   if (penIsDown)
+   {
+      if (abscissa.size() == 0) 
+      {
+         #ifdef DEBUG_FIRST_POINT
+            MessageInterface::ShowMessage("Adding initial data: [%lf, %lf]\n", 
+               x, y);
+         #endif
+         
+         minX = maxX = x;
+         minY = maxY = y;
+         rangeChanged = true;
+         domainChanged = true;
+      }
+         
+      abscissa.push_back(x);
+      ordinate.push_back(y);
+      
+   
+      if (x < minX)
+      {
+         minX = x;
+         domainChanged = true;
+      }
+      if (x > maxX)
+      {
+         maxX = x;
+         domainChanged = true;
+      }
+      if (y < minY)
+      {
+         minY = y;
+         rangeChanged = true;
+      }
+      if (y > maxY)
+      {
+         maxY = y;
+         rangeChanged = true;
+      }
+   
+      #if DEBUG_XY_PLOT_CURVE_ADD
+         MessageInterface::ShowMessage
+            ("TsPlotCurve::AddData() size = %d, x = %lf, y = %lf\n",
+             abscissa.size(), abscissa.back(), ordinate.back());
+      #endif
+   }
 }
 
 ////------------------------------------------------------------------------------
@@ -217,6 +243,24 @@ double TsPlotCurve::GetMaxY()
 void TsPlotCurve::PenUp()
 {
    penUpIndex.push_back(abscissa.size() - 1);
+   penIsDown = false;
+}
+
+//------------------------------------------------------------------------------
+// void PenDown()
+//------------------------------------------------------------------------------
+void TsPlotCurve::PenDown()
+{
+   penIsDown = true;
+}
+
+
+//------------------------------------------------------------------------------
+// const std::vector<int>* GetPenUpLocations()
+//------------------------------------------------------------------------------
+const std::vector<int>* TsPlotCurve::GetPenUpLocations()
+{
+   return &penUpIndex;
 }
 
 

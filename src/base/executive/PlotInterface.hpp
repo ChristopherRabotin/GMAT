@@ -125,6 +125,9 @@ public:
                                      const std::string &oldName);
    static bool DeleteTsPlotCurve(const std::string &plotName, int curveIndex);
    static void ClearTsPlotData(const std::string &plotName);
+   static void TsPlotPenUp(const std::string &plotName);
+   static void TsPlotPenDown(const std::string &plotName);
+   
    static void SetTsPlotTitle(const std::string &plotName,
                               const std::string &plotTitle);
    static void ShowTsPlotLegend(const std::string &plotName);

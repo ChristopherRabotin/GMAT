@@ -1,6 +1,6 @@
 //$Header$
 //------------------------------------------------------------------------------
-//                               ClearPlot
+//                                 PenUp
 //------------------------------------------------------------------------------
 // GMAT: Goddard Mission Analysis Tool.
 //
@@ -11,24 +11,24 @@
 // number NNG06CA54C
 //
 /**
- * Class implementation for the ClearPlot command
+ * Class implementation for the PenUp command
  */
 //------------------------------------------------------------------------------
 
 
-#include "ClearPlot.hpp"
+#include "PenUp.hpp"
 #include "MessageInterface.hpp"
 
 
 //------------------------------------------------------------------------------
-// ClearPlot()
+// PenUp()
 //------------------------------------------------------------------------------
 /**
  * Constructor
  */
 //------------------------------------------------------------------------------
-ClearPlot::ClearPlot() :
-   GmatCommand    ("ClearPlot"),
+PenUp::PenUp() :
+   GmatCommand    ("PenUp"),
    plotName       (""),
    thePlot        (NULL)
 {
@@ -36,27 +36,27 @@ ClearPlot::ClearPlot() :
 
 
 //------------------------------------------------------------------------------
-// ~ClearPlot()
+// ~PenUp()
 //------------------------------------------------------------------------------
 /**
  * Destructor
  */
 //------------------------------------------------------------------------------
-ClearPlot::~ClearPlot()
+PenUp::~PenUp()
 {
 }
 
 
 //------------------------------------------------------------------------------
-// ClearPlot(const ClearPlot &c)
+// PenUp(const PenUp &c)
 //------------------------------------------------------------------------------
 /**
- * Copy constructor
+ * Copy constructor.
  * 
- * @param <c> The command that gets copied.
+ * @param <c> The instance that gets copied.
  */
 //------------------------------------------------------------------------------
-ClearPlot::ClearPlot(const ClearPlot &c) :
+PenUp::PenUp(const PenUp &c) :
    GmatCommand    (c),
    plotName       (c.plotName),
    thePlot        (NULL)
@@ -65,7 +65,7 @@ ClearPlot::ClearPlot(const ClearPlot &c) :
 
 
 //------------------------------------------------------------------------------
-// ClearPlot& operator=(const ClearPlot &c)
+// PenUp& operator=(const PenUp &c)
 //------------------------------------------------------------------------------
 /**
  * Assignment operator
@@ -75,7 +75,7 @@ ClearPlot::ClearPlot(const ClearPlot &c) :
  * @return A reference to this instance.
  */
 //------------------------------------------------------------------------------
-ClearPlot& ClearPlot::operator=(const ClearPlot &c)
+PenUp& PenUp::operator=(const PenUp &c)
 {
    if (&c != this)
    {
@@ -96,18 +96,18 @@ ClearPlot& ClearPlot::operator=(const ClearPlot &c)
  * @return A new copy of this instance.
  */
 //------------------------------------------------------------------------------
-GmatBase* ClearPlot::Clone() const
+GmatBase* PenUp::Clone() const
 {
-   return new ClearPlot(*this);
+   return new PenUp(*this);
 }
 
 
 //------------------------------------------------------------------------------
 // bool InterpretAction()
 //------------------------------------------------------------------------------
-bool ClearPlot::InterpretAction()
+bool PenUp::InterpretAction()
 {
-   Integer loc = generatingString.find("ClearPlot", 0) + 9, end;
+   Integer loc = generatingString.find("PenUp", 0) + 5, end;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
@@ -116,7 +116,7 @@ bool ClearPlot::InterpretAction()
    end = generatingString.find(" ", loc);
    plotName = generatingString.substr(loc, end-loc);
    
-   #ifdef DEBUG_CLEARPLOT
+   #ifdef DEBUG_PENUP
       MessageInterface::ShowMessage("Plot to be cleared: %s\n", plotName.c_str());
    #endif
 
@@ -133,10 +133,10 @@ bool ClearPlot::InterpretAction()
  * @return true if initialization succeeds.
  */
 //------------------------------------------------------------------------------
-bool ClearPlot::Initialize()
+bool PenUp::Initialize()
 {
-   #ifdef DEBUG_CLEARPLOT
-      MessageInterface::ShowMessage("ClearPlot::Initialize() entered\n");
+   #ifdef DEBUG_PENUP
+      MessageInterface::ShowMessage("PenUp::Initialize() entered\n");
    #endif
       
    GmatCommand::Initialize();
@@ -151,13 +151,13 @@ bool ClearPlot::Initialize()
       else
          throw CommandException(
             "Object named \"" + plotName + "\" should be an XYPlot to use the "
-            "ClearPlot command for this object, but it is a " + 
+            "PenUp command for this object, but it is a " + 
             xy->GetTypeName());      
    }
    else 
    {
       MessageInterface::ShowMessage
-         ("ClearPlot command cannot find XY Plot \"%s\"; command has no effect."
+         ("PenUp command cannot find XY Plot \"%s\"; command has no effect."
          "\n", plotName.c_str());
       return false;
    }
@@ -179,9 +179,9 @@ bool ClearPlot::Initialize()
  *         occurs.
  */
 //---------------------------------------------------------------------------
-bool ClearPlot::Execute()
+bool PenUp::Execute()
 {
    if (thePlot)
-      thePlot->TakeAction("ClearData");
+      thePlot->TakeAction("PenUp");
    return true;
 }

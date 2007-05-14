@@ -378,6 +378,14 @@ bool TsPlot::TakeAction(const std::string &action,
    {
       return ResetYParameters();
    }
+   else if (action == "PenUp")
+   {
+      return PenUp();
+   }
+   else if (action == "PenDown")
+   {
+      return PenDown();
+   }
    
    return false;
 }
@@ -1016,6 +1024,24 @@ bool TsPlot::RemoveYParameter(const std::string &name)
 bool TsPlot::ResetYParameters()
 {
    PlotInterface::ClearTsPlotData(instanceName);
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool PenUp()
+//------------------------------------------------------------------------------
+bool TsPlot::PenUp()
+{
+   PlotInterface::TsPlotPenUp(instanceName);
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// bool PenDown()
+//------------------------------------------------------------------------------
+bool TsPlot::PenDown()
+{
+   PlotInterface::TsPlotPenDown(instanceName);
    return true;
 }
 
