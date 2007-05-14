@@ -1283,9 +1283,6 @@ void TsPlotCanvas::PenUp(int index)
    for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
         curve != data.end(); ++curve)
       (*curve)->lastPointPlotted = 0;
-//   
-//   wxPaintDC dc(this);
-//   Refresh(dc, true);
 }
 
 
@@ -1298,6 +1295,10 @@ void TsPlotCanvas::PenDown(int index)
    else
       if ((index >= 0) && (data.size() < (unsigned int)index))
          data[index]->PenDown();
+
+   for (std::vector<TsPlotCurve *>::iterator curve = data.begin(); 
+        curve != data.end(); ++curve)
+      (*curve)->lastPointPlotted = 0;
 }
 
 
