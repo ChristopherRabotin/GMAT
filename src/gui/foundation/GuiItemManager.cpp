@@ -2392,6 +2392,7 @@ void GuiItemManager::UpdatePropertyList()
    
    theNumScProperty = 0;
    //theNumImpBurnProperty = 0; //loj: 6/29/06 Until BurnParameter is defined
+   theNumImpBurnProperty = 0;
    Gmat::ObjectType objectType;
    ParameterInfo *theParamInfo = ParameterInfo::Instance();
    
@@ -2427,7 +2428,7 @@ void GuiItemManager::UpdatePropertyList()
                    "the maximum: %d", MAX_SC_PROPERTY);
             }
          }
-         else if (objectType == Gmat::BURN)
+         else if (objectType == Gmat::IMPULSIVE_BURN)
          {
             // update ImpulsiveBurn property list
             if (theNumImpBurnProperty < MAX_IB_PROPERTY)
@@ -3843,14 +3844,7 @@ GuiItemManager::GuiItemManager()
    theNumBoundarySolver = 0;
    theNumOptimizer = 0;
    theNumSpacePoint = 0;
-   
-   // 6/29/06: Currently creatable burn parameters are: Element1, Element2, Element3
-   // Add V, N, B. These are alias of Element1, Element2, Element3
-   theImpBurnPropertyList[0] = "V";
-   theImpBurnPropertyList[1] = "N";
-   theImpBurnPropertyList[2] = "B";
-   theNumImpBurnProperty = 3;
-   
+      
    // update property list
    UpdatePropertyList();
 }
