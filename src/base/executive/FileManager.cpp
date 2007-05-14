@@ -24,6 +24,8 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <stdlib.h>   // for MAX_PATH
+//#include <iostream.h> // for cout and cin
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -142,7 +144,63 @@ std::string FileManager::GetPathSeparator()
 
 
 //------------------------------------------------------------------------------
+// std::string GetCurrentPath()
+//------------------------------------------------------------------------------
+/*
+ * Note: This function calls getcwd() which is defiend in <dirent>. There is a
+ *       problem compling with VC++ compiler, so until it is resolved, it will
+ *       always return blank if it is compiled with VC++ compiler.
+ *
+ * @return  The current working directory, generally the application path.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetCurrentPath()
+{
+   std::string currPath;
+   
+#ifndef _MSC_VER  // if not Microsoft Visual C++
+   char buffer[_MAX_PATH];
+   getcwd(buffer, _MAX_PATH);
+   currPath = buffer;
+#endif
+   
+   return currPath;
+   
+//    // function to return the current working directory
+//    // this is generally the application path
+//    void GetCurrentPath(char* buffer)
+//       {
+//          getcwd(buffer, _MAX_PATH);
+//       }
+//    void main()
+//       {
+ 
+//          // _MAX_PATH is the maximum length allowed for a path
+//          char CurrentPath[_MAX_PATH];
+//          // use the function to get the path
+//          GetCurrentPath(CurrentPath);
+
+//          // display the path for demo purposes only
+//          char temp[_MAX_PATH];
+//          char temp[_MAX_PATH];
+//          cout << CurrentPath << endl;
+//          cout << "Press Enter to continue";
+//          cin.getline(temp,_MAX_PATH);
+//       } 
+}
+
+
+//------------------------------------------------------------------------------
 // bool DoesDirectoryExist(const std::string &dirPath)
+//------------------------------------------------------------------------------
+/*
+ * Note: This function calls opendir() which is defiend in <dirent>. There is a
+ *       problem compling with VC++ compiler, so until it is resolved, it will
+ *       always return false if it is compiled with VC++ compiler.
+ *
+ * @return  true  If directory exist, false otherwise
+ */
 //------------------------------------------------------------------------------
 bool FileManager::DoesDirectoryExist(const std::string &dirPath)
 {

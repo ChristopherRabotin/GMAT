@@ -79,6 +79,7 @@ public:
    ~FileManager();
    
    std::string GetPathSeparator();
+   std::string GetCurrentPath();
    bool DoesDirectoryExist(const std::string &dirPath);
    bool DoesFileExist(const std::string &filename);
    
