@@ -61,10 +61,11 @@ FiniteBurn::PARAMETER_TYPE[FiniteBurnParamCount - BurnParamCount] =
  */
 //------------------------------------------------------------------------------
 FiniteBurn::FiniteBurn(const std::string &nomme) :
-   Burn              ("FiniteBurn", nomme),
+   Burn              (Gmat::FINITE_BURN, "FiniteBurn", nomme),
    burnScaleFactor   (1.0),
    initialized       (false)
 {
+   objectTypes.push_back(Gmat::FINITE_BURN);
    objectTypeNames.push_back("FiniteBurn");
    parameterCount = FiniteBurnParamCount;
    
