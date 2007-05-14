@@ -275,8 +275,8 @@ private:
    CelestialBody                  *theCelestialBody;
    AtmosphereModel                *theAtmosphereModel;
    std::vector<PointMassForce *>  thePMForces;
-   std::vector<ForceType*> forceList;
-   std::vector<ForceType*> pmForceList;
+   std::vector<ForceType*> primaryBodyList;
+   std::vector<ForceType*> pointMassBodyList;
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -284,10 +284,13 @@ private:
    virtual void SaveData();
    
    // Layout & data handling methods
-   Integer FindBody(const wxString& bodyName,
-                    const wxString& gravType = "None",
-                    const wxString& dragType = "None",
-                    const wxString& magfType = "None");
+   Integer FindPrimaryBody(const wxString& bodyName, bool create = true,
+                           const wxString& gravType = "None",
+                           const wxString& dragType = "None",
+                           const wxString& magfType = "None");
+   
+   Integer FindPointMassBody(const wxString& bodyName);
+   
    void Initialize();
    void Setup(wxWindow *parent);
    void DisplayIntegratorData(bool integratorChanged);
