@@ -91,6 +91,8 @@ namespace Gmat
       SPACEOBJECT,
       GROUND_STATION,
       BURN,
+      IMPULSIVE_BURN,
+      FINITE_BURN,
       COMMAND,
       PROPAGATOR,
       FORCE_MODEL,

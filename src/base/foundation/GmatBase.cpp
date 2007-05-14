@@ -98,14 +98,15 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
 const std::string
 GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 {
-   "Spacecraft",    "Formation",     "SpaceObject",   "GroundStation",
-   "Burn",          "Command",       "Propagator",    "ForceModel",
-   "PhysicalModel", "TransientForce","Interpolator",  "SolarSystem",   
-   "SpacePoint",    "CelestialBody", "CalculatedPoint","LibrationPoint",
-   "Barycenter",    "Atmosphere",    "Parameter",     "StopCondition", 
-   "Solver",        "Subscriber",    "PropSetup",     "Function",
-   "FuelTank",      "Thruster",      "Hardware",      "CoordinateSystem",
-   "AxisSystem",    "Attitude",      "UnknownObject"
+   "Spacecraft",      "Formation",        "SpaceObject",   "GroundStation",
+   "Burn",            "ImpulsiveBurn",    "FiniteBurn",    "Command",
+   "Propagator",      "ForceModel",       "PhysicalModel", "TransientForce",
+   "Interpolator",    "SolarSystem",      "SpacePoint",    "CelestialBody",
+   "CalculatedPoint", "LibrationPoint",   "Barycenter",    "Atmosphere",
+   "Parameter",       "StopCondition",    "Solver",        "Subscriber",
+   "PropSetup",       "Function",         "FuelTank",      "Thruster",
+   "Hardware",        "CoordinateSystem", "AxisSystem",    "Attitude",
+   "UnknownObject"
 };
 
 
@@ -462,6 +463,7 @@ std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
                            " named \"" + instanceName + "\"\n");
 }
 
+
 //---------------------------------------------------------------------------
 //  const ObjectTypeArray& GetRefObjectTypeArray()
 //---------------------------------------------------------------------------
@@ -473,8 +475,10 @@ std::string GmatBase::GetRefObjectName(const Gmat::ObjectType type) const
  */
 const ObjectTypeArray& GmatBase::GetRefObjectTypeArray()
 {
+   // should return empty array
    return refObjectTypes;
 }
+
 
 //---------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -489,8 +493,9 @@ const ObjectTypeArray& GmatBase::GetRefObjectTypeArray()
  */
 const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   throw GmatBaseException("GetRefObjectNameArray() not defined for " + 
-                           typeName + " named \"" + instanceName + "\"\n");
+   throw GmatBaseException("GetRefObjectNameArray(" + GetObjectTypeString(type) +
+                           ") not defined for " + typeName + " named \"" +
+                           instanceName + "\"\n");
 }
 
 //---------------------------------------------------------------------------
@@ -508,9 +513,12 @@ const StringArray& GmatBase::GetRefObjectNameArray(const Gmat::ObjectType type)
 bool GmatBase::SetRefObjectName(const Gmat::ObjectType type,
                                 const std::string &name)
 {
-   throw GmatBaseException("Reference Object \"" + name + 
-                           "\" not defined for " + typeName + " named \"" + 
-                           instanceName + "\"\n");
+   std::string objName = typeName;
+   if (GetType() != Gmat::COMMAND)
+      objName = objName + " named \"" + instanceName + "\"";
+   
+   throw GmatBaseException("SetRefObjectName(" + GetObjectTypeString(type) +
+                           ", " + name + ") not defined for " + objName);
 }
 
 //---------------------------------------------------------------------------
@@ -552,9 +560,12 @@ bool GmatBase::RenameRefObject(const Gmat::ObjectType type,
 GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
                                  const std::string &name)
 {
-   throw GmatBaseException("Reference Object \"" + name + 
-                           "\" not defined for " + typeName + " named \"" + 
-                           instanceName + "\"\n");
+   std::string objName = typeName;
+   if (GetType() != Gmat::COMMAND)
+      objName = objName + " named \"" + instanceName + "\"";
+   
+   throw GmatBaseException("GetRefObject(" + GetObjectTypeString(type) +
+                           ", " + name + ") not defined for " + objName);
 }
 
 
@@ -577,10 +588,13 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
 {
    std::stringstream indexString;
    indexString << index;
-   throw GmatBaseException("Reference Object \"" + name + 
-                           "\" with index " + indexString.str() + 
-                           " not defined for " + typeName + " named \"" + 
-                           instanceName + "\"\n");
+   std::string objName = typeName;
+   if (GetType() != Gmat::COMMAND)
+      objName = objName + " named \"" + instanceName + "\"";
+   
+   throw GmatBaseException("GetRefObject(" + GetObjectTypeString(type) +
+                           ", " + name + ", " + indexString.str() +
+                           ") not defined for " + objName);
 }
 
 //---------------------------------------------------------------------------
@@ -600,9 +614,12 @@ GmatBase* GmatBase::GetRefObject(const Gmat::ObjectType type,
 bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                             const std::string &name)
 {
-   throw GmatBaseException("Cannot set reference object \"" + name + 
-                           "\" on " + typeName + " object named " + 
-                           instanceName);
+   std::string objName = typeName;
+   if (GetType() != Gmat::COMMAND)
+      objName = objName + " named \"" + instanceName + "\"";
+   
+   throw GmatBaseException("SetRefObject(*obj, " + GetObjectTypeString(type) +
+                           ", " + name + ") not defined for " + objName);
 }
 
 
@@ -626,9 +643,13 @@ bool GmatBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    std::stringstream indexString;
    indexString << index;
-   throw GmatBaseException("Cannot set reference object \"" + name + 
-                           "\" with index " + indexString.str() + " on " + 
-                           typeName + " object named " + instanceName);
+   std::string objName = typeName;
+   if (GetType() != Gmat::COMMAND)
+      objName = objName + " named \"" + instanceName + "\"";
+   
+   throw GmatBaseException("SetRefObject(*obj, " + GetObjectTypeString(type) +
+                           ", " + name + ", " + indexString.str() +
+                           ") not defined for " + objName);
 }
 
 
@@ -2637,10 +2658,8 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
              parmType != Gmat::OBJECTARRAY_TYPE)
          {
             // Skip unhandled types
-            if (
-                (parmType != Gmat::RMATRIX_TYPE) &&
-                (parmType != Gmat::UNKNOWN_PARAMETER_TYPE)
-               )
+            if ( (parmType != Gmat::RMATRIX_TYPE) &&
+                 (parmType != Gmat::UNKNOWN_PARAMETER_TYPE) )
             {
                // Fill in the l.h.s.
                value.str("");
@@ -2648,7 +2667,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                if (value.str() != "")
                {
                   std::string attCmtLn = GetAttributeCommentLine(i);
-                  
+
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn;
@@ -2662,6 +2681,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   
                   // overwrite tmp variable for attribute cmt line
                   attCmtLn = GetInlineAttributeComment(i);
+                  
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                       (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn << "\n";
