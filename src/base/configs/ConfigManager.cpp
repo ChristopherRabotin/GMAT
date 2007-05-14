@@ -687,7 +687,7 @@ StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
       (std::vector<GmatBase*>::iterator)(objects.begin());
    while (current != (std::vector<GmatBase*>::iterator)(objects.end()))
    {
-      if ((*current)->GetType() == itemType)
+      if ((*current)->IsOfType(itemType))
          listOfItems.push_back((*current)->GetName());
       ++current;
    }
@@ -1037,7 +1037,7 @@ PhysicalModel* ConfigManager::GetPhysicalModel(const std::string &name)
    PhysicalModel *physicalModel = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::PHYSICAL_MODEL)
+      if (mapping[name]->IsOfType(Gmat::PHYSICAL_MODEL))
       {
          physicalModel = (PhysicalModel *)mapping[name];
       }
@@ -1061,7 +1061,7 @@ Propagator* ConfigManager::GetPropagator(const std::string &name)
    Propagator *prop = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::PROPAGATOR)
+      if (mapping[name]->IsOfType(Gmat::PROPAGATOR))
       {
          prop = (Propagator *)mapping[name];
       }
@@ -1086,7 +1086,7 @@ ForceModel* ConfigManager::GetForceModel(const std::string &name)
    ForceModel *fm = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::FORCE_MODEL)
+      if (mapping[name]->IsOfType(Gmat::FORCE_MODEL))
       {
          fm = (ForceModel *)mapping[name];
       }
@@ -1111,8 +1111,8 @@ SpaceObject* ConfigManager::GetSpacecraft(const std::string &name)
    SpaceObject *sc = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if ((mapping[name]->GetType() == Gmat::SPACECRAFT) ||
-          (mapping[name]->GetType() == Gmat::FORMATION))
+      if ((mapping[name]->IsOfType(Gmat::SPACECRAFT)) ||
+          (mapping[name]->IsOfType(Gmat::FORMATION)))
       {
          sc = (SpaceObject *)mapping[name];
       }
@@ -1137,7 +1137,7 @@ Hardware* ConfigManager::GetHardware(const std::string &name)
    Hardware *hw = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::HARDWARE)
+      if (mapping[name]->IsOfType(Gmat::HARDWARE))
       {
          hw = (Hardware *)mapping[name];
       }
@@ -1162,7 +1162,7 @@ PropSetup* ConfigManager::GetPropSetup(const std::string &name)
    PropSetup *ps = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::PROP_SETUP)
+      if (mapping[name]->IsOfType(Gmat::PROP_SETUP))
       {
          ps = (PropSetup *)mapping[name];
       }
@@ -1187,7 +1187,7 @@ Subscriber* ConfigManager::GetSubscriber(const std::string &name)
    Subscriber *sub = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::SUBSCRIBER)
+      if (mapping[name]->IsOfType(Gmat::SUBSCRIBER))
       {
          sub = (Subscriber *)mapping[name];
       }
@@ -1256,7 +1256,7 @@ StopCondition* ConfigManager::GetStopCondition(const std::string &name)
    StopCondition *sc = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::STOP_CONDITION)
+      if (mapping[name]->IsOfType(Gmat::STOP_CONDITION))
       {
          sc = (StopCondition *)mapping[name];
       }
@@ -1281,7 +1281,7 @@ Parameter* ConfigManager::GetParameter(const std::string &name)
    Parameter *param = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::PARAMETER)
+      if (mapping[name]->IsOfType(Gmat::PARAMETER))
       {
          param = (Parameter *)mapping[name];
       }
@@ -1305,7 +1305,7 @@ Burn* ConfigManager::GetBurn(const std::string &name)
    Burn *burn = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::BURN)
+      if (mapping[name]->IsOfType(Gmat::BURN))
       {
          burn = (Burn *)mapping[name];
       }
@@ -1329,7 +1329,7 @@ Solver* ConfigManager::GetSolver(const std::string &name)
    Solver *solver = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::SOLVER)
+      if (mapping[name]->IsOfType(Gmat::SOLVER))
       {
          solver = (Solver *)mapping[name];
       }
@@ -1353,7 +1353,7 @@ AtmosphereModel* ConfigManager::GetAtmosphereModel(const std::string &name)
    AtmosphereModel *atmosModel = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::ATMOSPHERE)
+      if (mapping[name]->IsOfType(Gmat::ATMOSPHERE))
       {
          atmosModel = (AtmosphereModel *)mapping[name];
       }
@@ -1377,7 +1377,7 @@ Function* ConfigManager::GetFunction(const std::string &name)
    Function *function = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::FUNCTION)
+      if (mapping[name]->IsOfType(Gmat::FUNCTION))
       {
          function = (Function *)mapping[name];
       }
@@ -1401,7 +1401,7 @@ CoordinateSystem* ConfigManager::GetCoordinateSystem(const std::string &name)
    CoordinateSystem *cs = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::COORDINATE_SYSTEM)
+      if (mapping[name]->IsOfType(Gmat::COORDINATE_SYSTEM))
       {
          cs = (CoordinateSystem *)mapping[name];
       }
@@ -1426,7 +1426,7 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
    CalculatedPoint *cs = NULL;
    if (mapping.find(name) != mapping.end())
    {
-      if (mapping[name]->GetType() == Gmat::CALCULATED_POINT)
+      if (mapping[name]->IsOfType(Gmat::CALCULATED_POINT))
       {
          cs = (CalculatedPoint *)mapping[name];
       }
