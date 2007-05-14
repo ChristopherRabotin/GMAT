@@ -608,8 +608,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       
       if (count < 3)
       {
-         InterpreterException ex
-            ("Missing parameter creating object for");
+         InterpreterException ex("Missing parameter creating object for");
          HandleError(ex);
          return false;
       }
@@ -690,16 +689,27 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
              (logicBlock.find("BeginScript")   != logicBlock.npos) ||
              (logicBlock.find("Else")          != logicBlock.npos) ||
              (logicBlock.find("Stop")          != logicBlock.npos))
-            
+         {
             obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
+         }
          else if (isFunction)
          {
-            MessageInterface::ShowMessage("===> Creating CallFunction\n");
+            #ifdef DEBUG_PARSE
+            MessageInterface::ShowMessage("   Creating CallFunction\n");
+            #endif
+            
             obj = (GmatBase*)CreateCommand("CallFunction", chunks[0], retval, inCmd);
          }
          else
          {
-            InterpreterException ex("Missing parameter with command object: ");
+            #ifdef DEBUG_PARSE
+            MessageInterface::ShowMessage
+               ("*** ERROR *** Missing parameter with \"" + chunks[0] +
+                "\" command\n");
+            #endif
+            
+            InterpreterException ex
+               ("Missing parameter with \"" + chunks[0] + "\" command");
             HandleError(ex);
             return false;
          }

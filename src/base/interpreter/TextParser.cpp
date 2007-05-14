@@ -836,9 +836,8 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
       bracketFound = false;
       if (checkOuterBracket)
       {
-         sprintf(errorMsg, "TextParser::SeparateBrackets() text is not enclosed "
-                 "with brackets:%s in\n   \"%s\"\n", bracketPair.c_str(),
-                 str1.c_str());
+         sprintf(errorMsg, "TextParser::SeparateBrackets() \"%s\" is not enclosed "
+                 "with \"%s\"", str1.c_str(), bracketPair.c_str());
          throw InterpreterException(errorMsg);
       }
    }
