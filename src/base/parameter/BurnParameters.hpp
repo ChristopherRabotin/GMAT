@@ -36,7 +36,8 @@ class GMAT_API DeltaVDir1 : public BurnReal
 {
 public:
 
-   DeltaVDir1(const std::string &name = "", GmatBase *obj = NULL);
+   DeltaVDir1(const std::string &name = "", const std::string &typeName = "V",
+              GmatBase *obj = NULL);
    DeltaVDir1(const DeltaVDir1 &copy);
    DeltaVDir1& operator=(const DeltaVDir1 &right);
    virtual ~DeltaVDir1();
@@ -65,7 +66,8 @@ class GMAT_API DeltaVDir2 : public BurnReal
 {
 public:
    
-   DeltaVDir2(const std::string &name = "", GmatBase *obj = NULL);
+   DeltaVDir2(const std::string &name = "", const std::string &typeName = "N",
+              GmatBase *obj = NULL);
    DeltaVDir2(const DeltaVDir2 &copy);
    DeltaVDir2& operator=(const DeltaVDir2 &right);
    virtual ~DeltaVDir2();
@@ -93,7 +95,8 @@ class GMAT_API DeltaVDir3 : public BurnReal
 {
 public:
    
-   DeltaVDir3(const std::string &name = "", GmatBase *obj = NULL);
+   DeltaVDir3(const std::string &name = "", const std::string &typeName = "B",
+              GmatBase *obj = NULL);
    DeltaVDir3(const DeltaVDir3 &copy);
    DeltaVDir3& operator=(const DeltaVDir3 &right);
    virtual ~DeltaVDir3();
