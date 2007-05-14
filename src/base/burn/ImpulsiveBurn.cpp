@@ -35,8 +35,9 @@
  */
 //------------------------------------------------------------------------------
 ImpulsiveBurn::ImpulsiveBurn(const std::string &nomme) :
-    Burn            ("ImpulsiveBurn", nomme)
+    Burn(Gmat::IMPULSIVE_BURN, "ImpulsiveBurn", nomme)
 {
+   objectTypes.push_back(Gmat::IMPULSIVE_BURN);
    objectTypeNames.push_back("ImpulsiveBurn");
 }
 
@@ -168,6 +169,9 @@ bool ImpulsiveBurn::Fire(Real *burnData, Real epoch)
 }
 
 
+//------------------------------------------------------------------------------
+// void TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch)
+//------------------------------------------------------------------------------
 void ImpulsiveBurn::TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch)
 {
    if ((j2000Body == NULL) || (burnOrigin == NULL))
