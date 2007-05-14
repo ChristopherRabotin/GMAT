@@ -72,12 +72,14 @@ Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 /**
  * Constructs the Burn object (default constructor).
  * 
+ * @param <type>    Gmat::ObjectTypes enumeration for the object.
  * @param <typeStr> String text identifying the object type
  * @param <nomme>   Name for the object
  */
 //------------------------------------------------------------------------------
-Burn::Burn(const std::string &typeStr, const std::string &nomme) :
-   GmatBase        (Gmat::BURN, typeStr, nomme),
+Burn::Burn(Gmat::ObjectType type, const std::string &typeStr,
+           const std::string &nomme) :
+   GmatBase        (type, typeStr, nomme),
    coordAxes       ("Inertial"),
    vectorFormat    ("Cartesian"),
    coordinateSystem(""),
@@ -92,9 +94,9 @@ Burn::Burn(const std::string &typeStr, const std::string &nomme) :
 {
    objectTypes.push_back(Gmat::BURN);
    objectTypeNames.push_back("Burn");
-
+   
    parameterCount = BurnParamCount;
-    
+   
    deltaV[0] = deltaV[1] = deltaV[2] = 0.0;
    frameman = new ManeuverFrameManager;
 

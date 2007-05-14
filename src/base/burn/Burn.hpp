@@ -35,11 +35,12 @@
 class GMAT_API Burn : public GmatBase
 {
 public:
-   Burn(const std::string &typeStr, const std::string &nomme);
+   Burn(Gmat::ObjectType type, const std::string &typeStr,
+        const std::string &nomme);
    virtual ~Burn();
    Burn(const Burn &b);
    Burn&                   operator=(const Burn &b);
-    
+   
    // Inherited (GmatBase) methods
    virtual std::string     GetParameterText(const Integer id) const;
    virtual Integer         GetParameterID(const std::string &str) const;
