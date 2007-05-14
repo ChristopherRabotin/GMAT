@@ -2642,7 +2642,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       else if (type == "BeginFiniteBurn")
       {
          // set burn
-         cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
+         cmd->SetRefObjectName(Gmat::FINITE_BURN, GetDefaultBurn("FiniteBurn")->GetName());
          
          // set spacecraft
          cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
@@ -2653,7 +2653,8 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          if (refCmd)
          {
             // set burn
-            cmd->SetRefObjectName(Gmat::BURN, refCmd->GetRefObjectName(Gmat::BURN));
+            cmd->SetRefObjectName(Gmat::FINITE_BURN,
+                                  refCmd->GetRefObjectName(Gmat::FINITE_BURN));
             
             // set spacecraft
             StringArray scNames = refCmd->GetRefObjectNameArray(Gmat::SPACECRAFT);
@@ -2663,7 +2664,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          else
          {
             // set burn
-            cmd->SetRefObjectName(Gmat::BURN, GetDefaultBurn("FiniteBurn")->GetName());
+            cmd->SetRefObjectName(Gmat::FINITE_BURN, GetDefaultBurn("FiniteBurn")->GetName());
          
             // set spacecraft
             cmd->SetRefObjectName(Gmat::SPACECRAFT, GetDefaultSpacecraft()->GetName());
@@ -4316,6 +4317,9 @@ void Moderator::CreateDefaultMission()
       CreateParameter("Element1", "DefaultIB.Element1");
       CreateParameter("Element2", "DefaultIB.Element2");
       CreateParameter("Element3", "DefaultIB.Element3");
+      CreateParameter("V", "DefaultIB.V");
+      CreateParameter("N", "DefaultIB.N");
+      CreateParameter("B", "DefaultIB.B");
       //--------------------------------------------------------------
       
       // Time parameters
@@ -4434,7 +4438,7 @@ void Moderator::CreateDefaultMission()
                //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
                //param->SetStringParameter("Expression", param->GetName());
                param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
-
+               
                if (param->NeedCoordSystem())
                {
                   param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthMJ2000Eq");
@@ -4444,9 +4448,10 @@ void Moderator::CreateDefaultMission()
                      param->SetStringParameter("DepObject", "EarthMJ2000Eq");
                }
             }
-            else if (param->GetOwnerType() == Gmat::BURN)
+            else if (param->GetOwnerType() == Gmat::IMPULSIVE_BURN)
             {
-               param->SetRefObjectName(Gmat::BURN, "DefaultIB");
+               //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
+               param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
             }
          }
       }
@@ -4454,7 +4459,7 @@ void Moderator::CreateDefaultMission()
       #if DEBUG_DEFAULT_MISSION
       MessageInterface::ShowMessage("-->ref. object to parameters are set\n");
       #endif
-
+      
       // StopCondition
       StopCondition *stopOnElapsedSecs =
          CreateStopCondition("StopCondition", "StopOnDefaultSC.ElapsedSecs");
