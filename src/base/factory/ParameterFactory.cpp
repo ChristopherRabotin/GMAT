@@ -221,17 +221,17 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
    
    // ImpulsiveBurn parameters
    if (ofType == "Element1")
-      return new DeltaVDir1(withName);
+      return new DeltaVDir1(withName, ofType);
    if (ofType == "Element2")
-      return new DeltaVDir2(withName);
+      return new DeltaVDir2(withName, ofType);
    if (ofType == "Element3")
-      return new DeltaVDir3(withName);
+      return new DeltaVDir3(withName, ofType);
    if (ofType == "V")
-      return new DeltaVDir1(withName);
+      return new DeltaVDir1(withName, ofType);
    if (ofType == "N")
-      return new DeltaVDir2(withName);
+      return new DeltaVDir2(withName, ofType);
    if (ofType == "B")
-      return new DeltaVDir3(withName);
+      return new DeltaVDir3(withName, ofType);
    
    // Attitude parameters
    if (ofType == "Quat1")
