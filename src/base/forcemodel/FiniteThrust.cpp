@@ -70,8 +70,8 @@ FiniteThrust::FiniteThrust(const FiniteThrust& ft) :
    burnNames              (ft.burnNames),
    mySpacecraft           (ft.mySpacecraft)
 {
-	burns.clear();
-	scIndices.clear();
+        burns.clear();
+        scIndices.clear();
 }
 
 
@@ -97,7 +97,7 @@ FiniteThrust& FiniteThrust::operator=(const FiniteThrust& ft)
    mySpacecraft = ft.mySpacecraft;
    mySpacecraft = ft.mySpacecraft;
    burns.clear();
-	scIndices.clear();
+        scIndices.clear();
    spacecraft->clear();
       
    return *this;
@@ -166,7 +166,7 @@ bool FiniteThrust::SetRefObjectName(const Gmat::ObjectType type,
       return true;
    }
    
-   if (type == Gmat::BURN) {
+   if (type == Gmat::FINITE_BURN) {
       if (find(burnNames.begin(), burnNames.end(), name) == burnNames.end())
          burnNames.push_back(name);
       return true;
@@ -214,7 +214,7 @@ const StringArray& FiniteThrust::GetRefObjectNameArray(
 bool FiniteThrust::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
                                 const std::string &name)
 {
-   if (type == Gmat::BURN) {
+   if (type == Gmat::FINITE_BURN) {
       if (obj->GetTypeName() != "FiniteBurn")
          throw ForceModelException(
             "FiniteThrust::SetRefObject cannot use objects of type " + 

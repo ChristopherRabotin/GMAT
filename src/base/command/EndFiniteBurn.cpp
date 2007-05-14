@@ -162,7 +162,7 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type)
    {
-      case Gmat::BURN:
+      case Gmat::FINITE_BURN:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
                ("Getting EndFiniteBurn reference burn names\n");
@@ -234,7 +234,7 @@ bool EndFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
          satNames.push_back(name);
          return true;
       
-      case Gmat::BURN:
+      case Gmat::FINITE_BURN:
          #ifdef DEBUG_END_MANEUVER
             MessageInterface::ShowMessage
                ("Setting EndFiniteBurn reference burn \"%s\"\n", name.c_str());
@@ -289,7 +289,7 @@ bool EndFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
                                     const std::string &newName)
 {
    // EndFiniteBurn needs to know about Burn and Spacecraft only
-   if (type != Gmat::BURN && type != Gmat::SPACECRAFT)
+   if (type != Gmat::FINITE_BURN && type != Gmat::SPACECRAFT)
       return true;
    
    if (burnName == oldName)

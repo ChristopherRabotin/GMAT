@@ -159,7 +159,7 @@ std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 {
    switch (type)
    {
-      case Gmat::BURN:
+      case Gmat::FINITE_BURN:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
                ("Getting BeginFiniteBurn reference burn names\n");
@@ -187,7 +187,7 @@ std::string BeginFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 const ObjectTypeArray& BeginFiniteBurn::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
-   refObjectTypes.push_back(Gmat::BURN);
+   refObjectTypes.push_back(Gmat::FINITE_BURN);
    refObjectTypes.push_back(Gmat::SPACECRAFT);
    return refObjectTypes;
 }
@@ -217,7 +217,7 @@ const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
    }
    
    if (type == Gmat::UNKNOWN_OBJECT ||
-       type == Gmat::BURN)
+       type == Gmat::FINITE_BURN)
    {
       refObjectNames.push_back(burnName);
    }
@@ -253,7 +253,7 @@ const StringArray& BeginFiniteBurn::GetRefObjectNameArray(
  */
 //------------------------------------------------------------------------------
 bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type, 
-                                     const std::string &name)
+                                       const std::string &name)
 {
    switch (type)
    {
@@ -266,7 +266,7 @@ bool BeginFiniteBurn::SetRefObjectName(const Gmat::ObjectType type,
          satNames.push_back(name);
          return true;
       
-      case Gmat::BURN:
+      case Gmat::FINITE_BURN:
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage
                ("Setting BeginFiniteBurn reference burn \"%s\"\n", name.c_str());
@@ -360,7 +360,7 @@ bool BeginFiniteBurn::RenameRefObject(const Gmat::ObjectType type,
                                       const std::string &newName)
 {
    // BeginFiniteBurn needs to know about Burn and Spacecraft only
-   if (type != Gmat::BURN && type != Gmat::SPACECRAFT)
+   if (type != Gmat::FINITE_BURN && type != Gmat::SPACECRAFT)
       return true;
    
    if (burnName == oldName)
