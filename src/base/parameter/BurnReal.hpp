@@ -29,10 +29,10 @@ class GMAT_API BurnReal : public RealVar, public BurnData
 {
 public:
 
-   BurnReal(const std::string &name, const std::string &typeStr, 
-            GmatBase *obj, const std::string &desc,
-            const std::string &unit,  GmatParam::DepObject depObj,
-            bool isSettable);
+   BurnReal(const std::string &name, const std::string &typeStr,
+            Gmat::ObjectType ownerType, GmatBase *obj,
+            const std::string &desc, const std::string &unit,
+            GmatParam::DepObject depObj, bool isSettable);
    BurnReal(const BurnReal &copy);
    BurnReal& operator=(const BurnReal &right);
    virtual ~BurnReal();
