@@ -20,9 +20,10 @@
 
 #include "Function.hpp"
 #include "FileManager.hpp"       // for GetPathname()
+#include "StringUtil.hpp"        // for Trim()
 
-//#define #DEBUG_FUNCTION 1
-#if DEBUG_FUNCTION
+//#define DEBUG_FUNCTION
+#ifdef DEBUG_FUNCTION
 #include "MessageInterface.hpp"
 #endif
 
@@ -80,8 +81,8 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
    }
    catch (GmatBaseException &e)
    {
-      #if DEBUG_FUNCTION
-      MessageInterface::ShowMessage(e.GetMessage());
+      #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage(e.GetFullMessage());
       #endif
       
       try
@@ -92,8 +93,8 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
       }
       catch (GmatBaseException &e)
       {
-         #if DEBUG_FUNCTION
-         MessageInterface::ShowMessage(e.GetMessage());
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage(e.GetFullMessage());
          #endif
       }
    }
@@ -209,10 +210,10 @@ Integer Function::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Function::GetParameterType(const Integer id) const
 {
-    if (id >= FUNCTION_PATH&& id < FunctionParamCount)
-        return PARAMETER_TYPE[id - GmatBaseParamCount];
-    else
-        return GmatBase::GetParameterType(id);
+   if (id >= FUNCTION_PATH&& id < FunctionParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   else
+      return GmatBase::GetParameterType(id);
 }
 
 
@@ -271,7 +272,32 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == FUNCTION_PATH)
    {
-      functionPath = value;
+      // Compose full path if it has relative path.
+      // Assuming if first char has '.', it has relative path.
+      std::string temp = GmatStringUtil::Trim(value);
+      if (temp[0] == '.')
+      {
+         FileManager *fm = FileManager::Instance();
+         std::string currPath = fm->GetCurrentPath();
+         
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("Function::SetStringParameter() currPath=%s\n",
+             currPath.c_str());
+         #endif
+         
+         functionPath = currPath + temp.substr(1);
+      }
+      else
+      {
+         functionPath = value;
+      }
+
+      #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage
+         ("   functionPath = %s\n", functionPath.c_str());
+      #endif
+      
       return true;
    }
 
