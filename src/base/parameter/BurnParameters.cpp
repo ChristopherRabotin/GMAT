@@ -33,21 +33,21 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// DeltaVDir1(const std::string &name, GmatBase *obj)
+// DeltaVDir1(const std::string &name, const std::string &typeName, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
+ * @param <typeName> name of the parameter type
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-DeltaVDir1::DeltaVDir1(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "Element1", obj, "ImpulsiveBurn Element1", "Km/s",
-              GmatParam::NO_DEP, true)
+DeltaVDir1::DeltaVDir1(const std::string &name, const std::string &typeName,
+                       GmatBase *obj)
+   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
+              "ImpulsiveBurn Element1", "Km/s", GmatParam::NO_DEP, true)
 {
-//    mDepObjectName = "EarthMJ2000Eq";
-//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::RED32;
 }
 
@@ -165,21 +165,21 @@ GmatBase* DeltaVDir1::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// DeltaVDir2(const std::string &name, GmatBase *obj)
+// DeltaVDir2(const std::string &name, const std::string &typeName, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
+ * @param <typeName> name of the parameter type
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-DeltaVDir2::DeltaVDir2(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "Element2", obj, "Impulsive Burn Element2", "Km/s",
-              GmatParam::NO_DEP, true)
+DeltaVDir2::DeltaVDir2(const std::string &name, const std::string &typeName,
+                       GmatBase *obj)
+   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
+              "Impulsive Burn Element2", "Km/s", GmatParam::NO_DEP, true)
 {
-//    mDepObjectName = "EarthMJ2000Eq";
-//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::GREEN32;
 }
 
@@ -279,21 +279,21 @@ GmatBase* DeltaVDir2::Clone(void) const
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// DeltaVDir3(const std::string &name, GmatBase *obj)
+// DeltaVDir3(const std::string &name, const std::string &typeName, GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <name> name of the parameter
+ * @param <typeName> name of the parameter type
  * @param <obj> reference object pointer
  */
 //------------------------------------------------------------------------------
-DeltaVDir3::DeltaVDir3(const std::string &name, GmatBase *obj)
-   : BurnReal(name, "Element3", obj, "Impulsive Burn Element3", "Km/s",
-              GmatParam::NO_DEP, true)
+DeltaVDir3::DeltaVDir3(const std::string &name, const std::string &typeName,
+                       GmatBase *obj)
+   : BurnReal(name, typeName, Gmat::IMPULSIVE_BURN, obj,
+              "Impulsive Burn Element3", "Km/s", GmatParam::NO_DEP, true)
 {
-//    mDepObjectName = "EarthMJ2000Eq";
-//    SetRefObjectName(Gmat::COORDINATE_SYSTEM, mDepObjectName);
    mColor = GmatColor::BLUE32;
 }
 
