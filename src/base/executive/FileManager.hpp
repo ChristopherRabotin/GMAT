@@ -106,7 +106,6 @@ public:
    
 private:
 
-   static const Integer MAX_LENGTH = 512;
    static const std::string VERSION_DATE;
    
    struct FileInfo

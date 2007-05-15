@@ -21,11 +21,10 @@
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
 #include "StringUtil.hpp"
+#include "FileTypes.hpp" // GmatFile::MAX_PATH_LEN
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <stdlib.h>   // for MAX_PATH
-//#include <iostream.h> // for cout and cin
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -160,34 +159,13 @@ std::string FileManager::GetCurrentPath()
    std::string currPath;
    
 #ifndef _MSC_VER  // if not Microsoft Visual C++
-   char buffer[_MAX_PATH];
-   getcwd(buffer, _MAX_PATH);
+   char buffer[GmatFile::MAX_PATH_LEN];
+   getcwd(buffer, GmatFile::MAX_PATH_LEN);
    currPath = buffer;
 #endif
    
    return currPath;
    
-//    // function to return the current working directory
-//    // this is generally the application path
-//    void GetCurrentPath(char* buffer)
-//       {
-//          getcwd(buffer, _MAX_PATH);
-//       }
-//    void main()
-//       {
- 
-//          // _MAX_PATH is the maximum length allowed for a path
-//          char CurrentPath[_MAX_PATH];
-//          // use the function to get the path
-//          GetCurrentPath(CurrentPath);
-
-//          // display the path for demo purposes only
-//          char temp[_MAX_PATH];
-//          char temp[_MAX_PATH];
-//          cout << CurrentPath << endl;
-//          cout << "Press Enter to continue";
-//          cin.getline(temp,_MAX_PATH);
-//       } 
 }
 
 
@@ -258,7 +236,7 @@ bool FileManager::DoesFileExist(const std::string &filename)
 //------------------------------------------------------------------------------
 void FileManager::ReadStartupFile(const std::string &fileName)
 {   
-   char line[MAX_LENGTH] = "";
+   char line[GmatFile::MAX_LINE_LEN] = "";
    bool correctVersionFound = false;
    
    if (fileName != "")
