@@ -24,6 +24,9 @@ BEGIN_EVENT_TABLE(NonlinearConstraintPanel, GmatPanel)
 END_EVENT_TABLE()
 
 
+//------------------------------------------------------------------------------
+// NonlinearConstraintPanel(wxWindow *parent, GmatCommand *cmd)
+//------------------------------------------------------------------------------
 NonlinearConstraintPanel::NonlinearConstraintPanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
@@ -35,15 +38,20 @@ NonlinearConstraintPanel::NonlinearConstraintPanel(wxWindow *parent, GmatCommand
    Show();
    
    EnableUpdate(false);
-//   theApplyButton->Disable();
 }
 
+//------------------------------------------------------------------------------
+// ~NonlinearConstraintPanel()
+//------------------------------------------------------------------------------
 NonlinearConstraintPanel::~NonlinearConstraintPanel()
 {
    mObjectTypeList.Clear();
    theGuiManager->UnregisterComboBox("Optimizer", mSolverComboBox);
 }
 
+//------------------------------------------------------------------------------
+// void Create()
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::Create()
 {
    int bsize = 2; // bordersize
@@ -135,13 +143,18 @@ void NonlinearConstraintPanel::Create()
    theMiddleSizer->Add(panelSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
+
+//------------------------------------------------------------------------------
+// void LoadData()
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::LoadData()
 {
    #if DEBUG_ACHIEVE_PANEL
    MessageInterface::ShowMessage("NonlinearConstraintPanel::LoadData() entered\n");
-   MessageInterface::ShowMessage("Command=%s\n", mNonlinearConstraintCommand->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("Command=%s\n", mNonlinearConstraintCommand->GetTypeName().c_str());
    #endif
-
+   
    try
    {
       // Set the pointer for the "Show Script" button
@@ -178,81 +191,70 @@ void NonlinearConstraintPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("NonlinearConstraintPanel:LoadData() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
-
 }
 
+
+//------------------------------------------------------------------------------
+// void SaveData()
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::SaveData()
 {   
    #if DEBUG_NLC_PANEL
    MessageInterface::ShowMessage("NonlinearConstraintPanel::SaveData() entered\n");
    #endif
    
+   canClose = true;
+   std::string inputString;
+   
+   //-----------------------------------------------------------------
+   // check input values: Number, Variable, Array element, Parameter
+   //-----------------------------------------------------------------
+   inputString = mLHSTextCtrl->GetValue().c_str();
+   CheckVariable(inputString, Gmat::SPACECRAFT, "Constraint",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   inputString = mRHSTextCtrl->GetValue().c_str();
+   CheckVariable(inputString, Gmat::SPACECRAFT, "Constraint Value",
+                 "Real Number, Variable, Array element, plottable Parameter", true);
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
-      //Real rvalue;
-           canClose = true;
-              
-           std::string inputString;
-           std::string msg = "The value of \"%s\" for field \"%s\" on object \"" 
-                             + mNonlinearConstraintCommand->GetName() + 
-                             "\" is not an allowed value. \n"
-                             "The allowed values are: [%s].";                        
-  
-           //-------------------------------------------------------
-           // Saving Solver Data
-           //-------------------------------------------------------
-              
-           mNonlinearConstraintCommand->SetStringParameter
-              (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
-               mSolverComboBox->GetValue().c_str());
-        
-           mNonlinearConstraintCommand->SetStringParameter
-              (mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"),
-               mLHSTextCtrl->GetValue().c_str());
-        
-           mNonlinearConstraintCommand->SetStringParameter
-              (mNonlinearConstraintCommand->GetParameterID("Operator"),
-               mComparisonComboBox->GetValue().c_str());
-        
+      mNonlinearConstraintCommand->SetStringParameter
+         (mNonlinearConstraintCommand->GetParameterID("OptimizerName"),
+          mSolverComboBox->GetValue().c_str());
+      
+      mNonlinearConstraintCommand->SetStringParameter
+         (mNonlinearConstraintCommand->GetParameterID("ConstraintArg1"),
+          mLHSTextCtrl->GetValue().c_str());
+      
+      mNonlinearConstraintCommand->SetStringParameter
+         (mNonlinearConstraintCommand->GetParameterID("Operator"),
+          mComparisonComboBox->GetValue().c_str());
+      
       #if DEBUG_NLC_PANEL
       MessageInterface::ShowMessage("   about to save ConstraintArg2 value\n");
       #endif
-           mNonlinearConstraintCommand->SetStringParameter
-              (mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"),
-               mRHSTextCtrl->GetValue().c_str());
+      mNonlinearConstraintCommand->SetStringParameter
+         (mNonlinearConstraintCommand->GetParameterID("ConstraintArg2"),
+          mRHSTextCtrl->GetValue().c_str());
       #if DEBUG_NLC_PANEL
       MessageInterface::ShowMessage("   finished saving ConstraintArg2 value\n");
       #endif
-               
-           //inputString = mTolTextCtrl->GetValue();      
-        
-           // check to see if input is a real
-           //if ( (GmatStringUtil::ToDouble(inputString,&rvalue)) && (rvalue > 0.0) )
-           //   mNonlinearConstraintCommand->SetRealParameter
-           //      (mNonlinearConstraintCommand->GetParameterID("Tolerance"),
-           //       rvalue);
-           //else
-           //{
-           //   MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
-           //      inputString.c_str(), "Tolerance","Real Number > 0.0");
-        //
-           //   canClose = false;
-           //}
-           
-//         theApplyButton->Disable();
+      
       theGuiInterpreter->ValidateCommand(mNonlinearConstraintCommand);
       EnableUpdate(false);
    
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("NonlinearConstraintPanel:SaveData() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
       return;
    }
@@ -262,25 +264,28 @@ void NonlinearConstraintPanel::SaveData()
    #endif
 }
 
+
+//------------------------------------------------------------------------------
+// void OnTextChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::OnTextChange(wxCommandEvent& event)
 {
-        /* from AchievePanel
-   if (mGoalValueTextCtrl->IsModified())
-   {
-      mSolverData.goalValue = mGoalValueTextCtrl->GetValue();
-   }
-   
-   if (mToleranceTextCtrl->IsModified())
-      mSolverData.tolerance = atof(mToleranceTextCtrl->GetValue().c_str());
-*/
    EnableUpdate(true);
 }
 
+
+//------------------------------------------------------------------------------
+// void OnSolverSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::OnSolverSelection(wxCommandEvent &event)
 {
    EnableUpdate(true);
 }
 
+
+//------------------------------------------------------------------------------
+// void OnButtonClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
 void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mLeftChooseButton)
@@ -295,18 +300,15 @@ void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
          if (event.GetEventObject() == mLeftChooseButton)
          {
             mLHSTextCtrl->SetValue(newParamName);
-//            variableName = newParamName;
          }
          
          EnableUpdate(true);
-//         theApplyButton->Enable(true);
       }
    }
    else if (event.GetEventObject() == mRightChooseButton)
    {      
       // show dialog to select parameter
       ParameterSelectDialog paramDlg(this, mObjectTypeList);
-                   //GuiItemManager::SHOW_PLOTTABLE, true, true);
       paramDlg.ShowModal();
 
       if (paramDlg.IsParamSelected())
@@ -315,11 +317,9 @@ void NonlinearConstraintPanel::OnButtonClick(wxCommandEvent& event)
          if (event.GetEventObject() == mRightChooseButton)
          {
             mRHSTextCtrl->SetValue(newParamName);
-//            variableName = newParamName;
          }
          
-   EnableUpdate(true);
-//         theApplyButton->Enable(true);
+         EnableUpdate(true);
       }
    }
    else
