@@ -43,7 +43,7 @@
 //#define DEBUG_GET_REAL
 //#define DEBUG_SC_PARAMETER_TEXT
 //#define DEBUG_SC_KEPL_TO_CART
-#define DEBUG_SC_EPOCHSTR
+//#define DEBUG_SC_EPOCHSTR
 
 #if DEBUG_SPACECRAFT
 #include <iostream>

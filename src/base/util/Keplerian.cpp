@@ -30,9 +30,12 @@
 
 //#define DEBUG_KEPLERIAN 1
 //#define DEBUG_KEPLERIAN_TA 2
+//#define DEBUG_KEPLERIAN_ECC
+//#define DEBUG_ECC_VEC
 //#define DEBUG_KEPLERIAN_AOP 1
 //#define DEBUG_ANOMALY 1
 //#define DEBUG_ECC_VEC 1
+//#define DEBUG_ANOMALY_MA
 
 using namespace GmatMathUtil;
 
@@ -399,7 +402,7 @@ Rvector3 Keplerian::CartesianToEccVector(Real mu, const Rvector3 &pos,
    
    Rvector3 eVec = (1/mu)*((vMag*vMag - mu/rMag)*pos - (pos*vel)*vel);
 
-   #if DEBUG_ECC_VEC
+   #ifdef DEBUG_ECC_VEC
    MessageInterface::ShowMessage
       ("CartesianToEccVector() returning\n   %s\n", eVec.ToString().c_str());
    #endif
@@ -415,14 +418,14 @@ Rvector3 Keplerian::CartesianToEccVector(Real mu, const Rvector3 &pos,
 Real Keplerian::CartesianToECC(Real mu, const Rvector3 &pos,
                                const Rvector3 &vel)
 {
-   #if DEBUG_KEPLERIAN_ECC
+   #ifdef DEBUG_KEPLERIAN_ECC
    MessageInterface::ShowMessage("CartesianToECC() ");
    #endif
    
    Rvector3 eVec = CartesianToEccVector(mu, pos, vel);   
    Real eMag = eVec.GetMagnitude(); // ||e||
    
-   #if DEBUG_KEPLERIAN_ECC
+   #ifdef DEBUG_KEPLERIAN_ECC
    MessageInterface::ShowMessage("returning %f\n", eMag);
    #endif
    
@@ -620,7 +623,7 @@ Real Keplerian::CartesianToAOP(Real mu, const Rvector3 &pos,
 Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
                               const Rvector3 &vel, bool inRadian)
 {
-   #if DEBUG_KEPLERIAN_TA
+   #ifdef DEBUG_KEPLERIAN_TA
    MessageInterface::ShowMessage
       ("CartesianToTA() mu=%f, inRadian=%d\n   pos =%s\n   vel =%s\n", mu, inRadian,
        pos.ToString().c_str(), vel.ToString().c_str());
@@ -632,7 +635,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    Real rMag = pos.GetMagnitude();
    Real ta = 0.0;
    
-   #if DEBUG_KEPLERIAN_TA > 1
+   #ifdef DEBUG_KEPLERIAN_TA > 1
    MessageInterface::ShowMessage
       ("   eVec=%s,\n   inc=%f, ecc=%f, rMag=%f, ta=%f\n",
        eVec.ToString().c_str(), inc, ecc, rMag, ta);
@@ -641,16 +644,16 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    // Case 1:  Non-circular, Inclined Orbit
    if ((ecc >= GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
    {      
-      #if DEBUG_KEPLERIAN_TA
+      #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 1:  Non-circular, Inclined Orbit\n");
       #endif
       
       Real temp = (eVec*pos) / (ecc*rMag);
       ta = ACos(temp, GmatOrbit::KEP_TOL);
       
-      #if DEBUG_KEPLERIAN_TA > 1
-      MessageInterface::ShowMessage("   acos(%+.16f) = %+.16f\n", temp, acos(temp));      
-      MessageInterface::ShowMessage("   acos(%+.16f) = %+.16f\n", temp, ta);
+      #ifdef DEBUG_KEPLERIAN_TA > 1
+      MessageInterface::ShowMessage("   ACos(%+.16f) = %+.16f\n", temp, ACos(temp));      
+      MessageInterface::ShowMessage("   ACos(%+.16f) = %+.16f\n", temp, ta);
       #endif
       
       // Fix quadrant
@@ -665,7 +668,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    // Case 2: Non-circular, Equatorial Orbit
    else if ((ecc >= GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
    {
-      #if DEBUG_KEPLERIAN_TA
+      #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 2: Non-circular, Equatorial Orbit\n");
       #endif
       
@@ -679,7 +682,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    // Case 3: Circular, Inclined Orbit
    else if ((ecc < GmatOrbit::KEP_TOL) && (inc >= GmatOrbit::KEP_TOL))
    {
-      #if DEBUG_KEPLERIAN_TA
+      #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 3: Circular, Inclined Orbit\n");
       #endif
       
@@ -695,7 +698,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    // Case 4: Circular, Equatorial Orbit
    else if ((ecc < GmatOrbit::KEP_TOL) && (inc < GmatOrbit::KEP_TOL))
    {
-      #if DEBUG_KEPLERIAN_TA
+      #ifdef DEBUG_KEPLERIAN_TA
       MessageInterface::ShowMessage("   Case 4: Circular, Equatorial Orbit\n");
       #endif
       
@@ -710,7 +713,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    // Convert 2pi to 0
    ta = Mod(ta, TWO_PI);
    
-   #if DEBUG_KEPLERIAN_TA
+   #ifdef DEBUG_KEPLERIAN_TA
    MessageInterface::ShowMessage("CartesianToTA() returning %f\n", ta);
    #endif
    
@@ -781,7 +784,7 @@ Real Keplerian::CartesianToHA(Real mu, const Rvector3 &pos,
 Real Keplerian::CartesianToMA(Real mu, const Rvector3 &pos,
                               const Rvector3 &vel, bool inRadian)
 {
-   #if DEBUG_ANOMALY_MA
+   #ifdef DEBUG_ANOMALY_MA
    MessageInterface::ShowMessage("CartesianToMA() ");
    #endif
    
@@ -789,7 +792,7 @@ Real Keplerian::CartesianToMA(Real mu, const Rvector3 &pos,
    Real ecc = CartesianToECC(mu, pos, vel);   
    Real ma = TrueToMeanAnomaly(ta, ecc);
    
-   #if DEBUG_ANOMALY_MA
+   #ifdef DEBUG_ANOMALY_MA
    MessageInterface::ShowMessage("returning %f\n", ma);
    #endif
    
@@ -931,7 +934,7 @@ Rvector6 Keplerian::CartesianToKeplerian(Real mu, const Rvector6 &state,
 //------------------------------------------------------------------------------
 Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
 {
-   #if DEBUG_ANOMALY
+   #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage
       ("TrueToMeanAnomaly() ta=%f, ecc=%f\n", ta, ecc);
    #endif
@@ -949,7 +952,7 @@ Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
       ma = ecc * Sinh(ha) - ha;
    }
    
-   #if DEBUG_ANOMALY
+   #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToMeanAnomaly() returning %f\n", ma);
    #endif
    
