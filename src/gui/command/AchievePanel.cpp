@@ -158,12 +158,7 @@ void AchievePanel::LoadData()
    
    // We don't want user to edit this box
    mGoalNameTextCtrl->Disable();
-   
-   // When Parameter in commands is implemented, we can enable this
-   // according to Input Range Testing Table 3.8.
-   //loj: 03/23/07 Removed it since it is implemented now
-   //mViewToleranceButton->Disable();
-   
+      
    try
    {
       // Set the pointer for the "Show Script" button
@@ -212,7 +207,8 @@ void AchievePanel::LoadData()
 void AchievePanel::SaveData()
 {   
    #if DEBUG_ACHIEVE_PANEL_SAVE
-   MessageInterface::ShowMessage("AchievePanel::SaveData() entered\n");
+   MessageInterface::ShowMessage
+      ("AchievePanel::SaveData() entered, mIsTextModified=%d\n", mIsTextModified);
    #endif
    
    canClose = true;
@@ -231,10 +227,10 @@ void AchievePanel::SaveData()
       CheckVariable(inputString.c_str(), Gmat::SPACECRAFT, "Tolerance",
                     "Real Number, Variable, Array element, plottable Parameter", true);
    }
-      
+   
    if (!canClose)
       return;
-   
+      
    //-------------------------------------------------------
    // Saving Solver Data
    //-------------------------------------------------------
@@ -248,6 +244,12 @@ void AchievePanel::SaveData()
       
       if (mIsTextModified)
       {
+         #if DEBUG_ACHIEVE_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   Setting GoalValue to %s\n   Setting Tolerance to %s\n",
+             mGoalValue.c_str(), mTolerance.c_str());
+         #endif
+         
          mAchieveCommand->SetStringParameter
             (mAchieveCommand->GetParameterID("GoalValue"), mGoalValue.c_str());
          
@@ -261,11 +263,11 @@ void AchievePanel::SaveData()
       if (!theGuiInterpreter->ValidateCommand(mAchieveCommand))
          canClose = false;
       
-      //EnableUpdate(false);
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+      canClose = false;
    }
 }
 
@@ -324,13 +326,21 @@ void AchievePanel::OnButtonClick(wxCommandEvent& event)
       {
          mGoalNameTextCtrl->SetValue(newParamName);
          mGoalName = newParamName;
+         mIsTextModified = true;
       }
-      else
+      else if (event.GetEventObject() == mViewGoalValueButton)
       {
          mGoalValueTextCtrl->SetValue(newParamName);
          mGoalValue = newParamName;
+         mIsTextModified = true;
       }
-         
+      else if (event.GetEventObject() == mViewToleranceButton)
+      {
+         mToleranceTextCtrl->SetValue(newParamName);
+         mTolerance = newParamName;
+         mIsTextModified = true;
+      }
+      
       EnableUpdate(true);
    }
 }
