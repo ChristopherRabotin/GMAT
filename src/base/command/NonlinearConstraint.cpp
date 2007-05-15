@@ -17,10 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "NonlinearConstraint.hpp"
-/// @todo Rework command so it doesn't need the Moderator!!!
-//#include "Moderator.hpp" 
 #include "StringUtil.hpp"  // for ToReal()
 #include "MessageInterface.hpp"
 
@@ -85,13 +82,6 @@ NonlinearConstraint::NonlinearConstraint() :
    constraintValue         (-999.99),
    arg2Name                (""),
    arg2                    (NULL),
-   //nlcArrName              (""),
-   //nlcArrRowStr            (""),
-   //nlcArrColStr            (""),
-   //nlcArrRow               (0),
-   //nlcArrCol               (0),
-   //nlcArrRowParm           (NULL),
-   //nlcArrColParm           (NULL),
    isInequality            (false),
    isIneqString            ("EqConstraint"),
    desiredValue            (0.0),
@@ -99,8 +89,6 @@ NonlinearConstraint::NonlinearConstraint() :
    tolerance               (0.0),
    optimizerDataFinalized  (false),
    constraintId            (-1),
-   //isNlcParm               (false),
-   //isNlcArray              (false),
    interpreted             (false)
 {
    parameterCount = NonlinearConstraintParamCount;
@@ -127,13 +115,6 @@ NonlinearConstraint::NonlinearConstraint(const NonlinearConstraint& nlc) :
    constraintValue         (nlc.constraintValue),
    arg2Name                (nlc.arg2Name),
    arg2                    (NULL),
-   //nlcArrName              (nlc.nlcArrName),
-   //nlcArrRowStr            (nlc.nlcArrRowStr),
-   //nlcArrColStr            (nlc.nlcArrColStr),
-   //nlcArrRow               (nlc.nlcArrRow),
-   //nlcArrCol               (nlc.nlcArrCol),
-   //nlcArrRowParm           (NULL),
-   //nlcArrColParm           (NULL),
    isInequality            (nlc.isInequality),
    isIneqString            (nlc.isIneqString),
    desiredValue            (nlc.desiredValue),
@@ -141,8 +122,6 @@ NonlinearConstraint::NonlinearConstraint(const NonlinearConstraint& nlc) :
    tolerance               (nlc.tolerance),
    optimizerDataFinalized  (false),
    constraintId            (-1),
-   //isNlcParm               (nlc.isNlcParm),   // right?
-   //isNlcArray              (nlc.isNlcArray),  // right?
    interpreted             (false)
 {
    parameterCount = NonlinearConstraintParamCount;
@@ -173,13 +152,6 @@ NonlinearConstraint& NonlinearConstraint::operator=(const NonlinearConstraint& n
    constraintValue        = nlc.constraintValue;
    arg2Name               = nlc.arg2Name;
    arg2                   = NULL;
-   //nlcArrName             = nlc.nlcArrName;
-   //nlcArrRowStr           = nlc.nlcArrRowStr;
-   //nlcArrColStr           = nlc.nlcArrColStr;
-   //nlcArrRow              = nlc.nlcArrRow;
-   //nlcArrCol              = nlc.nlcArrCol;
-   //nlcArrRowParm          = NULL;
-   //nlcArrColParm          = NULL;
    isInequality           = nlc.isInequality;
    isIneqString           = nlc.isIneqString;
    desiredValue           = nlc.desiredValue;
@@ -187,8 +159,6 @@ NonlinearConstraint& NonlinearConstraint::operator=(const NonlinearConstraint& n
    tolerance              = nlc.tolerance;
    optimizerDataFinalized = false;
    constraintId           = -1;
-   //isNlcParm              = nlc.isNlcParm;  // right?
-   //isNlcArray             = nlc.isNlcArray; // right?
    interpreted            = false;
 
    return *this;
@@ -205,8 +175,6 @@ NonlinearConstraint::~NonlinearConstraint()
 {
    ClearWrappers();
 }
-
-    
 
 
 //------------------------------------------------------------------------------
@@ -247,24 +215,15 @@ bool NonlinearConstraint::RenameRefObject(const Gmat::ObjectType type,
       if (optimizerName == oldName)
          optimizerName = newName;
    }
-   //else if (type == Gmat::PARAMETER)
-   //{
-   //   if (constraintName == oldName)
-   //      constraintName = newName;
-   //   if (nlcParmName == oldName)
-   //      nlcParmName = newName;
-   //   if (nlcArrName == oldName)
-   //      nlcArrName = newName;
-   //}
    if (arg1) 
    {
       arg1->RenameObject(oldName, newName);
-       arg1Name  = arg1->GetDescription();
+      arg1Name  = arg1->GetDescription();
    }
    if (arg2) 
    {
       arg2->RenameObject(oldName, newName);
-       arg2Name  = arg2->GetDescription();
+      arg2Name  = arg2->GetDescription();
    }
    return true;
 }
@@ -409,8 +368,6 @@ std::string NonlinearConstraint::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real NonlinearConstraint::GetRealParameter(const Integer id) const
 {
-   //if (id == CONSTRAINT_VALUE)
-   //   return constraintValue;
    if (id == TOLERANCE)
       return tolerance;
 
@@ -445,12 +402,7 @@ Real NonlinearConstraint::SetRealParameter(const Integer id, const Real value)
       tolerance = value;
       return tolerance;
    }
-   //if (id == CONSTRAINT_VALUE)
-   //{
-   //   constraintValue = value;
-   //   return constraintValue;
-   //}
-    
+   
    return GmatCommand::SetRealParameter(id, value);
 }
 
@@ -581,23 +533,6 @@ bool NonlinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType typ
       }
       return false;
    }
-   /* don't want to be able to set these - don't need anyway with new PiC
-   if (type == Gmat::PARAMETER) 
-   {
-      if (constraintName == obj->GetName()) 
-      {
-         constraint = (Parameter*)obj;
-         return true;
-      }
-
-      if (nlcParmName == obj->GetName()) 
-      {
-         nlcParm = (Parameter*)obj;
-         return true;
-      }
-      return false;
-   }
-   */
    return GmatCommand::SetRefObject(obj, type, name);
 }
 
@@ -623,9 +558,6 @@ bool NonlinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType typ
 //------------------------------------------------------------------------------
 bool NonlinearConstraint::InterpretAction()
 {
-   /// @todo: Clean up this hack for the NonlinearConstraint::InterpretAction method
-   // Sample string:  "NonlinearConstraint myOpt(Sat1.SMA = 21545.0, {Tolerance = 0.1});"
-   
    // Clean out any old data
    wrapperObjectNames.clear();
    ClearWrappers();
@@ -752,152 +684,16 @@ bool NonlinearConstraint::InterpretAction()
          }
       }
    }
-   /// @todo Handle settables here, when Tolerance is added 
-   /* this is the old code
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-      MessageInterface::ShowMessage("NLC:InterpretAction: generatingString = %s\n",
-      generatingString.c_str());
-   #endif
-   // Set starting location to the space following the command string
-   //Integer loc = generatingString.find("NonlinearConstraint", 0) + 19, end, strend;
-   //const char *str = generatingString.c_str();
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-      //MessageInterface::ShowMessage("NLC:InterpretAction: str = %s\n", str);
-   #endif
    
-   // Skip white space
-   while (str[loc] == ' ')
-      ++loc;
-   
-   // Stop at the opening paren
-   end = generatingString.find("(", loc);
-   
-   std::string component = generatingString.substr(loc, end-loc);
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-      MessageInterface::ShowMessage("NLC:InterpretAction: setting optimizer to = %s\n",
-      component.c_str());
-   #endif
-   if (component == "")
-      throw CommandException("NonlinearConstraint string does specify the optimizer");
-   
-   SetStringParameter(OPTIMIZER_NAME, component);
-   
-   // Find the constraint
-   loc = end + 1;
-   // Skip white space
-   while (str[loc] == ' ')
-      ++loc;
-   // Find the operator
-   Integer goBack = 1;
-   if ((end = generatingString.find(">=", loc)) != (Integer) generatingString.npos)
-   {
-      op = GREATER_THAN_OR_EQUAL;
-      isInequality = true;
-      isIneqString = "IneqConstraint";
-      goBack       = 2;
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-         MessageInterface::ShowMessage("NLC:InterpretAction: greater_than_or_equal\n");
-      #endif
-   }
-   else if ((end = generatingString.find("<=", loc)) != (Integer) generatingString.npos)
-   {
-      op = LESS_THAN_OR_EQUAL;
-      isInequality = true;
-      isIneqString = "IneqConstraint";
-      goBack       = 2;
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-         MessageInterface::ShowMessage("NLC:InterpretAction: less_than_or_equal\n");
-      #endif
-   }
-   else
-   {
-      end = generatingString.find("=", loc);
-      op = EQUAL;
-      isInequality = false;
-      isIneqString = "EqConstraint";
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
-         MessageInterface::ShowMessage("NLC:InterpretAction: equal\n");
-      #endif
-   }
-   //strend = end-1;
-   strend = end - goBack;
-   // Drop trailing white space
-   while (str[strend] == ' ')
-      --strend;
-    
-   component = generatingString.substr(loc, strend-loc+1);
-   constraintName = component;
-
-   // Get an instance if this is a Parameter
-   Moderator *mod = Moderator::Instance();
-
-   #if DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("NonlinearConstraint::InterpretAction() constraintName = \"%s\"\n", 
-         constraintName.c_str());
-   #endif
-
-   //std::string parmObj, parmType, parmSystem;
-   //InterpretParameter(constraintName, parmType, parmObj, parmSystem);
-
-   //#if DEBUG_NONLINEAR_CONSTRAINT_PARSE
-   //   MessageInterface::ShowMessage
-   //      ("NonlinearConstraint::InterpretAction() parmObj=%s, parmType=%s, "
-   //       "parmSystem = \"%s\"\n", parmObj.c_str(),
-   //       parmType.c_str(), parmSystem.c_str());
-   //#endif
-
-   //constraint = mod->CreateParameter(parmType, constraintName, parmObj, parmSystem);
-
-   //if (!constraint)
-   //   throw CommandException("Unable to create Parameter " + constraintName);
-         
-
-   // Find the value
-   //loc = end + 1;
-   loc = end + goBack;
-   
-   // Constraint can be either a parameter or array or a number;
-   // ConstructConstraint determines this.
-   Real value;
-   //if (ConstructConstraint(&str[loc]))
-   //{
-   //   // It's a parameter; just set dummy value here -- gets reset on execution
-   //   value = 54321.0;
-   //   isNlcParm = true;
-   //}
-   //else
-   //{
-   //   //value = atof(nlcParmName.c_str());
-   //   bool isNum = GmatStringUtil::ToReal(nlcParmName.c_str(), &value);
-   //   if (!isNum)
-   //   {
-   //      std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
-   //         PARAMETER_TEXT[CONSTRAINT_VALUE - GmatCommandParamCount] + "\" on object \"" 
-   //         + instanceName +
-   //         "\" is not an allowed value.  The allowed values are: " +
-   //         " [Real number]."; 
-   //      throw CommandException(errMsg);
-   //   }
-   //   isNlcParm = false;
-   //}
-   
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("NonlinearConstraint::InterpretAction() parameter (rhs) = '%s'\n", 
-         nlcParmName.c_str());
-   #endif
-   
-   
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage("NonlinearConstraint::InterpretAction() exiting\n");
-   #endif
- */  
    interpreted = true;
   
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
 const StringArray& NonlinearConstraint::GetWrapperObjectNameArray()
 {
    wrapperObjectNames.clear();
@@ -912,7 +708,11 @@ const StringArray& NonlinearConstraint::GetWrapperObjectNameArray()
 }
 
 
-bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper,
+                                            const std::string &withName)
 {
    bool retval = false;
 
@@ -951,6 +751,10 @@ bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper, const std
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void ClearWrappers()
+//------------------------------------------------------------------------------
 void NonlinearConstraint::ClearWrappers()
 {
    std::vector<ElementWrapper*> temp;
@@ -977,240 +781,6 @@ void NonlinearConstraint::ClearWrappers()
 }
 
 
-
-//------------------------------------------------------------------------------
-// bool ConstructConstraint(const char* str)
-//------------------------------------------------------------------------------
-/**
- * Builds constraints -- either as a parameter or as a numeric value, 
- * depending on the script contents.
- * 
- * @return true on success, false on failure.  ??
- * @return true if it is a parameter, false otherwise.
- */
-//------------------------------------------------------------------------------
-/*
-bool NonlinearConstraint::ConstructConstraint(const char* str)
-{
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage("%s%s\"\n",
-         "NonlinearConstraint::ConstructConstraint() called with string \"", str);
-   #endif
-
-   Moderator *mod = Moderator::Instance();
-   
-   Real rval = 54321.12345;
-   // check to see if it is a number first
-   if (GmatStringUtil::ToReal(str, &rval))
-      return false;
-   
-   // Skip white space
-   Integer start = 0, dot, end;
-   while (str[start] == ' ')
-      ++start;
-   // Find last character in this piece
-   end = dot = start;
-   while ((str[end] != ' ') && (str[end] != ',') && (str[end] != '{') &&
-          (str[end] != ')'))
-   {
-      if ((str[end] == '.') && (dot == start))
-         dot = end;
-      ++end;
-   }
-   
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("   start=%d, dot=%d, end=%d\n", start, dot, end);
-   #endif
-
-   std::string sstr = str;
-   nlcParmName = sstr.substr(start, end-start);
-   
-   // Search for 2nd comma for array index
-   Integer comma;
-   if (str[end] == ',')
-   {
-      comma = sstr.find(',', end+1);
-      if ((UnsignedInt)comma != sstr.npos)
-      {
-         nlcParmName = sstr.substr(start, comma-start);
-         isNlcArray = true;
-      }
-   }
-   
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("%s%s\", isNlcArray=%d\n", "   nlcParmName is \"",
-          nlcParmName.c_str(), isNlcArray);
-      MessageInterface::ShowMessage
-         ("%s%s\"\n", "   Examining the substring \"",
-          sstr.substr(start, end-start).c_str());
-   #endif
-
-   if (isNlcArray)
-   {
-      GmatStringUtil::GetArrayIndex(nlcParmName, nlcArrRowStr,
-                                    nlcArrColStr, nlcArrRow,
-                                    nlcArrCol, nlcArrName);
-
-      nlcParmName = nlcArrName;
-      
-      #if DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("   nlcArrRowStr=%s, nlcArrColStr=%s, nlcArrRow=%d, "
-          "nlcArrCol=%d, nlcArrName=%s\n", nlcArrRowStr.c_str(),
-          nlcArrColStr.c_str(), nlcArrRow, nlcArrCol,
-          nlcArrName.c_str());
-      #endif
-      
-      // if variable index is used, make sure the variable is created
-      if (nlcArrRow == -1)
-         if (mod->GetParameter(nlcArrRowStr) == NULL)
-            throw CommandException("Cannot find array row index variable: " +
-                                   nlcArrRowStr + "\n");
-      
-      if (nlcArrCol == -1)   // this is wrong???
-         if (mod->GetParameter(nlcArrColStr) == NULL)
-            throw CommandException("Cannot find array column index variable: " +
-                                   nlcArrColStr + "\n");
-      
-      return true;
-   }
-   else if ((dot > start) && (dot < end)) // Could be a system parameter
-   {
-      
-      // try if Tolerance is missing
-      UnsignedInt index = nlcParmName.find(")");
-      if (index != nlcParmName.npos)
-         nlcParmName = nlcParmName.substr(0, index);
-      
-      std::string parmType, parmObj, parmSystem;
-      InterpretParameter(nlcParmName, parmType, parmObj, parmSystem);
-
-      #if DEBUG_NONLINEAR_CONSTRAINT_PARSE
-         MessageInterface::ShowMessage
-            ("   parmObj=%s, parmType=%s, parmSystem = \"%s\"\n",
-             parmObj.c_str(), parmType.c_str(), parmSystem.c_str());
-      #endif
-
-         //Moderator *mod = Moderator::Instance();
-
-      if (mod->IsParameter(parmType))
-      {
-         nlcParm =
-            mod->CreateParameter(parmType, nlcParmName, parmObj, parmSystem);
-        
-         if (!nlcParm)
-            throw CommandException("Unable to create parameter " + nlcParmName);
-
-         return true;
-      }
-      else
-      {
-         #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-         MessageInterface::ShowMessage
-            ("   \"%s\" is not a parameter\n", nlcParmName.c_str());
-         #endif
-      }
-   }
-
-   if (GmatStringUtil::ToReal(nlcParmName, &rval))
-   {
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("   \"%s\" is a number\n", nlcParmName.c_str());
-      #endif
-      return false;
-   }
-   else
-   {
-      if (nlcParmName.size() == 0)
-      {
-         #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-            MessageInterface::ShowMessage
-               ("NLC::Error!  Cannot parse \"%s\"\n", nlcParmName.c_str());
-         #endif
-         throw CommandException("NonlinearConstraint:: constraint value is empty\n");
-      }
-         
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage
-         ("   \"%s\" is a variable\n", nlcParmName.c_str());
-      #endif
-      return true;
-   }
-   
-   return false;
-}
-*/
-
-//------------------------------------------------------------------------------
-//  bool InterpretParameter(const std::string text, std::string &paramType,
-//                          std::string &paramObj, std::string &parmSystem)
-//------------------------------------------------------------------------------
-/**
- * Breaks apart a parameter declaration into its component pieces
- *
- * @param text The string that gets decomposed.
- * @param paramType Type of parameter that is needed.
- * @param paramObj The Object used for the parameter calculations.
- * @param parmSystem The coordinate system or body used for the parameter
- *                   calculations (or the empty string if this piece is
- *                   unspecified).
- *
- * @return true if the decomposition worked.
- */
-//------------------------------------------------------------------------------
-/*
-bool NonlinearConstraint::InterpretParameter(const std::string text,
-                                 std::string &paramType, 
-                                 std::string &paramObj, 
-                                 std::string &parmSystem)
-{
-
-   Real rval = 54321.12345;
-   // check to see if it is a number first
-   if (GmatStringUtil::ToReal(text, &rval))
-      return true;
-   
-   Integer start = 0, dotLoc = text.find(".", 0);
-   if (dotLoc == (Integer)std::string::npos)
-      //throw CommandException("NonlinearConstraint::InterpretParameter: Unable to "
-      //         "interpret parameter object in the string " +
-       //        text);
-   {
-      // this must be a variable
-      paramObj    = "";
-      paramType   = "Variable";
-      parmSystem  = "";
-      return true;
-   }
-   
-   paramObj = text.substr(start, dotLoc - start);
-   start = dotLoc + 1;
-   dotLoc = text.find(".", start);
-   if (dotLoc != (Integer)std::string::npos) 
-   {
-      parmSystem = text.substr(start, dotLoc - start);
-      start = dotLoc + 1;
-   }
-   else 
-   {
-      parmSystem = "";
-   }
-   
-   paramType = text.substr(start);
-   
-   #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARSE
-      MessageInterface::ShowMessage(
-         "NonlinearConstraint::InterpretParameter() Built parameter %s for object %s "
-         "with CS %s\n", paramType.c_str(), paramObj.c_str(), parmSystem.c_str());
-   #endif
-
-   return true;
-}
-
-*/
 //------------------------------------------------------------------------------
 //  bool Initialize()
 //------------------------------------------------------------------------------
@@ -1224,14 +794,16 @@ bool NonlinearConstraint::Initialize()
 {
    #if DEBUG_NONLINEAR_CONSTRAINT_INIT
    MessageInterface::ShowMessage
-      ("NonlinearConstraint::Initialize() entered. optimizer=%p, constraint=%p\n", 
-      optimizer, constraint);
+      ("NonlinearConstraint::Initialize() entered. interpreted=%d, optimizer=%p, "
+       "arg1=%p, arg2=%p\n", interpreted, optimizer, arg1, arg2);
    #endif
-   
-   if (!interpreted)
-      if (!InterpretAction())
-         throw CommandException(
-            "NonlinearConstraint: error interpreting input data\n");
+
+   // Commented out since this caused crash when this command created
+   // from the GUI and run (loj: 2007.05.15)
+   //if (!interpreted)
+   //   if (!InterpretAction())
+   //      throw CommandException(
+   //         "NonlinearConstraint: error interpreting input data\n");
    
    bool retval = GmatCommand::Initialize();
 
@@ -1239,55 +811,7 @@ bool NonlinearConstraint::Initialize()
       throw CommandException(
          "Optimizer not initialized for NonlinearConstraint command\n  \""
          + generatingString + "\"\n");
-
-   //Integer id = optimizer->GetParameterID("Goals");  // no clue
-   //optimizer->SetStringParameter(id, goalName);
-
-   // find constraintName
-   //GmatBase *obj = (*objectMap)[constraintName];
    
-   //if (obj == NULL) 
-   //{
-   //   std::string errorstr = "Could not find variable parameter ";
-   //   errorstr += constraintName;
-   //   throw CommandException(errorstr);
-   //}
-
-   //constraint = (Parameter*)obj;
-   
-   //constraintObject = obj;
-   //parmId = id;
-
-   // find right-hand-side parameter (or Real value)
-
-/*
-   if (isNlcParm)
-   {
-      #if DEBUG_NONLINEAR_CONSTRAINT_INIT
-      MessageInterface::ShowMessage
-         ("NonlinearConstraint::Initialize() Find right-hand-side parameter=%s from objectMap\n",
-          nlcParmName.c_str());
-      #endif
-      if (objectMap->find(nlcParmName) != objectMap->end())
-         nlcParm = (Parameter*)((*objectMap)[nlcParmName]);
-
-      if (isNlcArray)
-      {
-         // if variable index is used, get variable from the objectMap
-         if (nlcArrRow == -1)
-            if (objectMap->find(nlcArrRowStr) != objectMap->end())
-               nlcArrRowParm = (Parameter*)((*objectMap)[nlcArrRowStr]);
-            else
-               throw CommandException("Cannot find array row index variable\n");
-
-         if (nlcArrCol == -1)
-            if (objectMap->find(nlcArrColStr) != objectMap->end())
-               nlcArrColParm = (Parameter*)((*objectMap)[nlcArrColStr]);
-            else
-               throw CommandException("Cannot find array column index variable\n");
-      }
-   }
-*/
    // Set references for the wrappers   
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARAM
       MessageInterface::ShowMessage("Setting refs for arg1\n");
@@ -1330,18 +854,12 @@ bool NonlinearConstraint::Execute()
 {
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_EXEC
    MessageInterface::ShowMessage
-      ("NonlinearConstraint::Execute() optimizerDataFinalized=%d\n, optimizer=%s, arg1=%p, arg2=%p\n", 
-       optimizerDataFinalized, optimizer, arg1, arg2);
+      ("NonlinearConstraint::Execute() optimizerDataFinalized=%d\n, optimizer=%s, "
+       "arg1=%p, arg2=%p\n", optimizerDataFinalized, optimizer, arg1, arg2);
    MessageInterface::ShowMessage
       ("   arg1Name=%s\n", arg1Name.c_str());
    MessageInterface::ShowMessage
       ("   arg2Name=%s\n", arg2Name.c_str());
-   //if (nlcParm)
-   //   MessageInterface::ShowMessage("   nlcParm=%s\n", nlcParm->GetName().c_str());
-   //if (minVar)
-   //   MessageInterface::ShowMessage("   minVar=%s\n", minVar->GetName().c_str());
-   //if (goalObject)
-   //   MessageInterface::ShowMessage("   goalObject=%s\n", goalObject->GetName().c_str());
    #endif
    
    bool retval = true;
@@ -1357,65 +875,6 @@ bool NonlinearConstraint::Execute()
       return retval;
    }
    
-   /*
-   //desiredValue = -999.999;
-   // Evaluate the (in)equality constraint value and set it on the optimizer
-   if (!isNlcParm)
-   {
-      //desiredValue = atof(nlcParmName.c_str());  
-      bool isNum = GmatStringUtil::ToReal(nlcParmName.c_str(), &desiredValue);
-      if (!isNum)
-      {
-         std::string errMsg = "The value of \"" + nlcParmName + "\" for field \"" + 
-            PARAMETER_TEXT[CONSTRAINT_VALUE - GmatCommandParamCount] + "\" on object \"" 
-            + instanceName +
-            "\" is not an allowed value.  The allowed values are: " +
-            " [Real number]."; 
-         throw CommandException(errMsg);
-      }
-   }
-   else if (nlcParm != NULL)
-   {
-      if (nlcParm->GetReturnType() == Gmat::REAL_TYPE)
-      {
-         desiredValue = nlcParm->EvaluateReal();
-      }
-      // what if it's a vector type??? - need to add that here?
-      else if (nlcParm->GetReturnType() == Gmat::RMATRIX_TYPE)
-      {
-         Integer row = nlcArrRow;
-         Integer col = nlcArrCol;
-         
-         if (nlcArrRow == -1)
-            row = (Integer)(nlcArrRowParm->EvaluateReal()) - 1; // index starts at 0
-
-         if (nlcArrCol == -1)
-            col = (Integer)(nlcArrColParm->EvaluateReal()) - 1; // index starts at 0
-
-         #ifdef DEBUG_NONLINEAR_CONSTRAINT_EXEC
-         MessageInterface::ShowMessage("   row=%d, col=%d\n", row, col);
-         #endif
-         
-         if (row >= 0 || col >= 0)
-            desiredValue = nlcParm->EvaluateRmatrix().GetElement(row, col);
-         else
-            throw CommandException("Invalid row and column in NonlinearConstraint\n");
-      }
-      
-      #ifdef DEBUG_NONLINEAR_CONSTRAINT_EXEC
-      MessageInterface::ShowMessage("   Constraint: desiredValue = %lf\n", 
-      desiredValue);
-      #endif
-      
-      //targeter->UpdateSolverGoal(goalId, val);
-   }
-   else
-   {
-      throw CommandException(
-         "NonlinearConstraint: error computing constraint desired value\n");
-   }
-*/
-   //constraintValue = -999.999;
    //#ifdef DEBUG_NLC_VALUES
    //   MessageInterface::ShowMessage("NLC:Execute - desiredValue = %.12f\n",
    //      desiredValue);
@@ -1474,6 +933,10 @@ bool NonlinearConstraint::Execute()
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
 void NonlinearConstraint::RunComplete()
 {
    #ifdef DEBUG_NLC_EXECUTE
