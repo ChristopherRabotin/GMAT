@@ -55,7 +55,7 @@ OptimizePanel::OptimizePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 OptimizePanel::~OptimizePanel()
 {
-   theGuiManager->UnregisterComboBox("BoundarySolver", mSolverComboBox);
+   theGuiManager->UnregisterComboBox("Optimizer", mSolverComboBox);
 }
 
 //-------------------------------
@@ -77,7 +77,7 @@ void OptimizePanel::Create()
                        wxDefaultSize, 0);
    
    mSolverComboBox =
-      theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
+      theGuiManager->GetOptimizerComboBox(this, ID_COMBO, wxSize(180,-1));
    
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(2);
