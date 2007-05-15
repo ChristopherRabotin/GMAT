@@ -635,7 +635,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
    Real rMag = pos.GetMagnitude();
    Real ta = 0.0;
    
-   #ifdef DEBUG_KEPLERIAN_TA > 1
+   #if DEBUG_KEPLERIAN_TA > 1
    MessageInterface::ShowMessage
       ("   eVec=%s,\n   inc=%f, ecc=%f, rMag=%f, ta=%f\n",
        eVec.ToString().c_str(), inc, ecc, rMag, ta);
@@ -651,7 +651,7 @@ Real Keplerian::CartesianToTA(Real mu, const Rvector3 &pos,
       Real temp = (eVec*pos) / (ecc*rMag);
       ta = ACos(temp, GmatOrbit::KEP_TOL);
       
-      #ifdef DEBUG_KEPLERIAN_TA > 1
+      #if DEBUG_KEPLERIAN_TA > 1
       MessageInterface::ShowMessage("   ACos(%+.16f) = %+.16f\n", temp, ACos(temp));      
       MessageInterface::ShowMessage("   ACos(%+.16f) = %+.16f\n", temp, ta);
       #endif
