@@ -951,6 +951,14 @@ Radians Keplerian::TrueToMeanAnomaly(Radians ta, Real ecc)
       Real ha = TrueToHyperbolicAnomaly(ta, ecc);
       ma = ecc * Sinh(ha) - ha;
    }
+   else
+   {
+      std::string warn = 
+         "Warning: Orbit is near parabolic in mean anomaly calculation.  ";
+      warn += "Setting MA = 0\n";
+      MessageInterface::PopupMessage(Gmat::WARNING_, warn);
+      ma = 0.0;
+   }
    
    #ifdef DEBUG_ANOMALY
    MessageInterface::ShowMessage("TrueToMeanAnomaly() returning %f\n", ma);
