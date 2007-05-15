@@ -38,6 +38,8 @@
 //#define DEBUG_ORBITDATA_CONVERT 1
 //#define DEBUG_ORBITDATA_RUN 1
 //#define DEBUG_CLONE 1
+//#define DEBUG_MA
+//#define DEBUG_HA
 
 using namespace GmatMathUtil;
 
@@ -403,9 +405,19 @@ Real OrbitData::GetKepReal(Integer item)
    case EA:
       return Keplerian::CartesianToEA(mGravConst, pos, vel);
    case MA:
+   {
+      #ifdef DEBUG_MA
+      MessageInterface::ShowMessage("In OrbitData, computing MA -------\n");
+      #endif
       return Keplerian::CartesianToMA(mGravConst, pos, vel);
+   }
    case HA:
+   {
+      #ifdef DEBUG_HA
+      MessageInterface::ShowMessage("In OrbitData, computing HA -------\n");
+      #endif
       return Keplerian::CartesianToHA(mGravConst, pos, vel);
+   }
    case RAAN:
       return Keplerian::CartesianToRAAN(mGravConst, pos, vel);
    case RADN:
@@ -473,7 +485,10 @@ Real OrbitData::GetOtherKepReal(Integer item)
       else
          return GmatMathUtil::TWO_PI * Sqrt((sma * sma * sma)/ grav);
    case RAD_APOAPSIS:
-      return sma * (1.0 + ecc);
+      if (ecc > (1.0 - 1E-12)) // 2007.05.15 wcs - added - Bugs 192/224
+         return 0.0;
+      else
+         return sma * (1.0 + ecc);
    case RAD_PERIAPSIS:
       return sma * (1.0 - ecc);
    case C3_ENERGY:
