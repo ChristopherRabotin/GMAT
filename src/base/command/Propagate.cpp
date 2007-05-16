@@ -43,6 +43,7 @@
 
 
 #define TIME_ROUNDOFF 1.0e-6
+#define FIRST_STEP_TOLERANCE 1e-6
 
 //--------------------------------- 
 // static data
@@ -2528,8 +2529,11 @@ bool Propagate::Execute()
             // Evaluate Stop conditions to set initial values
             for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
+               // Fix for bug 910
+//               Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
+//                                stopAccuracy);
                Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
-                                stopAccuracy);
+                                FIRST_STEP_TOLERANCE);
                stopWhen[i]->Reset();
                stopWhen[i]->Evaluate();
 
@@ -3004,7 +3008,9 @@ bool Propagate::CheckFirstStepStop(Integer i)
       
       // Only report true if outside of tolerance
       Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
-                                                        stopAccuracy);
+                                                        FIRST_STEP_TOLERANCE);
+// Fix for 910                                                        
+//                                                        stopAccuracy);
       if (temp > accuracy)
          if ((goal > min) && (goal < max))
             return true;
