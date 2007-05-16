@@ -97,6 +97,7 @@ private:
    
    std::string mElements[6];
    std::string mEpochStr;
+   std::string mTaiMjdStr;
    std::string mAnomalyType;
    
    void Create();

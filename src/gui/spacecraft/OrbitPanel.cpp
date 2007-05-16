@@ -35,11 +35,18 @@
  * When EpochFormat change
  *   If epoch is modified by user
  *      Get epoch string value from the epoch text field.
+ *      If from format is not TAIModJulian,
+ *         Convert to TAIModJulian and save as mTaiMjdStr
+ *      Else
+ *         Save epoch string as mTaiMjdStr
+ *      EndIf
+ *      Call TimeConverterUtil::Convert() to convert from old to new format
+ *      Set epoch string value
+ *   Else
+ *      Call TimeConverterUtil::Convert() to convert from mTaiMjdStr to new format
+ *      Set epoch string value
  *   EndIf
  *
- *   Call TimeConverterUtil::Convert() to convert from old to new format
- *   Set epoch string value
- * 
  * When CoordinateSystem or StateType changed
  *    If state is modified
  *       Validate user input by calling CheckState()
@@ -111,7 +118,6 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
    theSpacecraft = spacecraft;
    theSolarSystem = solarsystem;
    
-   mIsEpochFormatChanged = false;
    mIsCoordSysChanged = false;
    mIsStateTypeChanged = false;
    mIsAnomalyTypeChanged = false;
@@ -191,6 +197,26 @@ void OrbitPanel::LoadData()
       
       mEpochStr = theSpacecraft->GetStringParameter("Epoch"); 
       epochValue->SetValue(wxT(mEpochStr.c_str()));
+      
+      // Save to TAIModJulian string to avoid keep reading the field
+      // and convert to proper format when ComboBox is changed.
+      if (epochFormat == "TAIModJulian")
+      {
+         mTaiMjdStr = mEpochStr;
+      }
+      else
+      {
+         Real fromMjd = -999.999;
+         Real outMjd;
+         std::string outStr;
+         TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+                                    "TAIModJulian", outMjd, outStr);
+         mTaiMjdStr = outStr;
+         
+         #ifdef DEBUG_ORBIT_PANEL_LOAD
+         MessageInterface::ShowMessage("   mTaiMjdStr=%s\n", mTaiMjdStr.c_str());
+         #endif
+      }
       
       // load the coordinate system
       std::string coordSystemStr =
@@ -355,7 +381,7 @@ void OrbitPanel::SaveData()
    //-----------------------------------------------------------
    // check and save epoch
    //-----------------------------------------------------------
-   if (mIsEpochFormatChanged || mIsEpochChanged)
+   if (mIsEpochChanged)
    {
       std::string newEpoch = epochValue->GetValue().c_str();
       std::string epochFormat = epochFormatComboBox->GetValue().c_str();
@@ -711,7 +737,7 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
    //-----------------------------------------------------------------
    if (event.GetEventObject() == epochFormatComboBox)
    {
-      mIsEpochFormatChanged = true;
+      mIsEpochChanged = true;
       std::string toEpochFormat = epochFormatComboBox->GetValue().c_str();    
       
       #ifdef DEBUG_ORBIT_PANEL_COMBOBOX
@@ -724,13 +750,29 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
       
       try
       {
+         Real fromMjd = -999.999;
+         Real outMjd;
+         std::string outStr;
+         
          // if modified by user, check if epoch is valid first
          if (mIsEpochModified)
          {
-            Real fromMjd = -999.999;
-            Real outMjd;
-            std::string outStr;
             mEpochStr = epochValue->GetValue().c_str();
+            
+            // Save to TAIModJulian string to avoid keep reading the field
+            // and convert to proper format when ComboBox is changed.
+            if (mFromEpochFormat == "TAIModJulian")
+            {
+               mTaiMjdStr = mEpochStr;
+            }
+            else
+            {
+               TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
+                                          "TAIModJulian", outMjd, outStr);
+               mTaiMjdStr = outStr;
+            }
+            
+            // Convert to desired format with new date
             TimeConverterUtil::Convert(mFromEpochFormat, fromMjd, mEpochStr,
                                        toEpochFormat, outMjd, outStr);
             
@@ -740,8 +782,14 @@ void OrbitPanel::OnComboBoxChange(wxCommandEvent& event)
          }
          else
          {
-            theSpacecraft->SetDateFormat(toEpochFormat);
-            epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+            //theSpacecraft->SetDateFormat(toEpochFormat);
+            //epochValue->SetValue(theSpacecraft->GetStringParameter("Epoch").c_str());
+            
+            // Convert to desired format using TAIModJulian date
+            TimeConverterUtil::Convert("TAIModJulian", fromMjd, mTaiMjdStr,
+                                       toEpochFormat, outMjd, outStr);
+            
+            epochValue->SetValue(outStr.c_str());
             mFromEpochFormat = toEpochFormat;
          }
       }
