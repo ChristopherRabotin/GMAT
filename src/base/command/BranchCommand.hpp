@@ -93,6 +93,7 @@ protected:
    GmatCommand             *current;
    
    bool  ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber);
+   void  SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev, bool skipBranchEnd);
 };
 
 #endif // BranchCommand_hpp

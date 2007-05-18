@@ -28,6 +28,7 @@
 //#define DEBUG_BRANCHCOMMAND_INSERT
 //#define DEBUG_BRANCHCOMMAND_REMOVE 1
 //#define DEBUG_BRANCHCOMMAND_ADD
+//#define DEBUG_BRANCHCOMMAND_PREV_CMD
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
 //#define DEBUG_RUN_COMPLETE 1
@@ -282,18 +283,12 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", "addging to branch ", cmd);
+      ShowCommand("BranchCommand::", "adding to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
-
-      #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
-      #endif
+      SetPreviousCommand(cmd, this, true);
       
-      cmd->ForceSetPrevious(this);
-      
-      //current.push_back(NULL);
    }
    else if (branch[which] == NULL)
    {
@@ -302,14 +297,9 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       #endif
       
       branch.at(which) = cmd;
-
-      #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
-      #endif
       
-      cmd->ForceSetPrevious(this);
-      
-      //current.at(which) = NULL;
+      // Usually this case is adding Branch command from the GUI
+      SetPreviousCommand(cmd, this, false);
    }
    else
    {
@@ -318,15 +308,11 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       #endif
       
       (branch.at(which))->Append(cmd);
+      SetPreviousCommand(cmd, branch.at(which), true);
       
-      #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Setting previous of ",cmd, " to ",
-                  branch.at(which));
-      #endif
-      
-      cmd->ForceSetPrevious(branch.at(which));
    }
-}
+} // AddBranch()
+
 
 //------------------------------------------------------------------------------
 // void AddToFrontOfBranch(GmatCommand *cmd, Integer which)
@@ -358,12 +344,8 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       #endif
       
       branch.push_back(cmd);
-
-      #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", this);
-      #endif
+      SetPreviousCommand(cmd, this, true);
       
-      cmd->ForceSetPrevious(this);
    }
    else if (branch.at(which) == NULL)
    {
@@ -388,14 +370,10 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
       #endif
       
       cmd->Append(tmp);
+      SetPreviousCommand(tmp, cmd, true);
       
-      #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Setting previous of ", tmp, " to ", cmd);
-      #endif
-      
-      tmp->ForceSetPrevious(cmd);
    }
-}
+} // AddToFrontOfBranch()
 
 
 //------------------------------------------------------------------------------
@@ -575,12 +553,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
       #endif
       
       cmd->ForceSetNext(this);
-      
-      #ifdef DEBUG_BRANCHCOMMAND_INSERT
-      ShowCommand("BranchCommand::", " Setting previous of ", this, " to ", cmd);
-      #endif
-      
-      this->ForceSetPrevious(cmd);
+      SetPreviousCommand(this, cmd, false);
       
       // shift all the later comamnds down one branch
       bool isOK = ShiftBranches(toShift, brNum);
@@ -593,7 +566,7 @@ bool BranchCommand::Insert(GmatCommand *cmd, GmatCommand *prev)
 
    // Otherwise, just call the base class method
    return GmatCommand::Insert(cmd, prev);
-}
+} // Insert()
 
 
 //------------------------------------------------------------------------------
@@ -638,26 +611,41 @@ GmatCommand* BranchCommand::Remove(GmatCommand *cmd)
       {
          fromBranch = current->Remove(cmd);
          
+         #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+         ShowCommand("BranchCommand::", "Remove() fromBranch = ", fromBranch);
+         #endif
+         
          if (fromBranch == current)
             branch[which] = tempNext;
          
-         // set previous command
-         #ifdef DEBUG_BRANCHCOMMAND_REMOVE
-         ShowCommand("BranchCommand::", " Setting previous of ", tempNext,
-                     " to ", fromBranch->GetPrevious());
-         #endif
-         
          if (fromBranch != NULL)
          {
+            // set previous command
+            #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+            ShowCommand("BranchCommand::", " Setting previous of ", tempNext,
+                        " to ", fromBranch->GetPrevious());
+            #endif
+            
             tempNext->ForceSetPrevious(fromBranch->GetPrevious());
+            
+            #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+            MessageInterface::ShowMessage("   Returning fromBranch\n");
+            #endif
+            
             return fromBranch;
          }
       }
    }
    
    // Not in the branches, so continue with the sequence
+   #ifdef DEBUG_BRANCHCOMMAND_REMOVE
+   MessageInterface::ShowMessage
+      ("   Not in the branches, so continue with the sequence\n");
+   #endif
+   
    return GmatCommand::Remove(cmd);
-}
+} // Remove()
+
 
 //------------------------------------------------------------------------------
 // bool InsertRightAfter(GmatCommand *cmd)
@@ -918,7 +906,7 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    return fullString;
-}
+} // GetGeneratingString()
 
 
 //------------------------------------------------------------------------------
@@ -1028,7 +1016,7 @@ bool BranchCommand::ExecuteBranch(Integer which)
    }
    
    return retval;
-}
+} // ExecuteBranch()
 
 
 //------------------------------------------------------------------------------
@@ -1103,7 +1091,42 @@ BranchCommand::ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber)
    return true;
 }
 
+
 //------------------------------------------------------------------------------
-// protected methods
+// void SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
+//                         bool skipBranchEnd)
 //------------------------------------------------------------------------------
-// none at this time
+/*
+ * Sets previous command of the command.
+ *
+ * @param  cmd   The command of which previous command to be set
+ * @param  prev  The previous command to set to command
+ * @param  skipBranchEnd  If true, it sets without checking for BranchEnd
+ *
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
+                                       bool skipBranchEnd)
+{
+   #ifdef DEBUG_BRANCHCOMMAND_PREV_CMD
+   ShowCommand
+      ("BranchCommand::SetPreviousCommand()", " cmd = ", cmd, " prev = ", prev);
+   #endif
+   
+   if (skipBranchEnd && cmd->IsOfType("BranchEnd"))
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_PREV_CMD
+      MessageInterface::ShowMessage
+         ("   cmd is of type \"BranchEnd\", so previous is not set\n");
+      #endif
+   }
+   else
+   {
+      #ifdef DEBUG_BRANCHCOMMAND_PREV_CMD
+      ShowCommand("BranchCommand::", " Setting previous of ", cmd, " to ", prev);
+      #endif
+      
+      cmd->ForceSetPrevious(prev);
+   }
+}
+
