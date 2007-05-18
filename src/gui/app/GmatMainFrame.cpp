@@ -815,6 +815,11 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 //    SetTitle(title);
    
    bool success = false;
+
+   // Always refresh the gui before new scritpes are read
+   CloseAllChildren(false, true, filename);
+   GmatAppData::GetResourceTree()->ClearResource(false);
+   GmatAppData::GetMissionTree()->ClearMission();
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -840,11 +845,6 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
          //   ("Error occurred during parsing.\nPlease check the syntax and try again\n");
          //wxLog::FlushActive();
       }
-      
-      // Always refresh the gui      
-      CloseAllChildren(false, true, filename);
-      GmatAppData::GetResourceTree()->ClearResource(false);
-      GmatAppData::GetMissionTree()->ClearMission();
       
       if (success)
       {
