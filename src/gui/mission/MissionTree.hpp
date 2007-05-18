@@ -89,6 +89,8 @@ private:
    
    void InitializeCounter();
    void UpdateCommand();
+   GmatCommand* CreateCommand(const wxString &cmdName);
+   
    wxTreeItemId& UpdateCommandTree(wxTreeItemId parent, GmatCommand *cmd);
    void ExpandChildCommand(wxTreeItemId parent, GmatCommand *baseCmd,
                            GmatCommand *cmd);
@@ -150,6 +152,10 @@ private:
    // for Debug
    void ShowCommands(const wxString &msg = "");
    void ShowSubCommands(GmatCommand* brCmd, Integer level);
+   void WriteCommand(const std::string &prefix,
+                     const std::string &title1, GmatCommand *cmd1,
+                     const std::string &title2 = "",
+                     GmatCommand *cmd2 = NULL);
    
    DECLARE_EVENT_TABLE();
    
