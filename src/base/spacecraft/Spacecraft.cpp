@@ -44,6 +44,7 @@
 //#define DEBUG_SC_PARAMETER_TEXT
 //#define DEBUG_SC_KEPL_TO_CART
 //#define DEBUG_SC_EPOCHSTR
+//#define DEBUG_WRITE_PARAMETERS
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -2095,13 +2096,18 @@ void Spacecraft::SetState(const std::string &type, const Rvector6 &cartState)
 void Spacecraft::SetAnomaly(const std::string &type, const Anomaly &ta)
 {
    trueAnomaly = ta;
-   anomalyType = Anomaly::GetTypeString(type);
+   anomalyType = Anomaly::GetTypeString(type); // why call a static here?? - wcs
+   // wcs 2007.05.18 - don't assume - only set the label if it's appropriate
+   if (displayStateType == "Keplerian" || displayStateType == "ModifiedKeplerian")
    stateElementLabel[5] = anomalyType;     // this assumes current display type is Keplerian/ModKep??
 
    #if DEBUG_SPACECRAFT_SET
    MessageInterface::ShowMessage
       ("===> Spacecraft::SetAnomaly() anomalyType=%s, value=%f\n", anomalyType.c_str(),
        trueAnomaly.GetValue());
+   MessageInterface::ShowMessage
+      ("===> Spacecraft::SetAnomaly() stateElementLabel[5] = %s\n", 
+      stateElementLabel[5].c_str());
    #endif
 }
 
@@ -2229,6 +2235,13 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
 void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
                                  std::stringstream &stream)
 {
+   #ifdef DEBUG_WRITE_PARAMETERS
+   MessageInterface::ShowMessage("--- Entering SC::WriteParameters ...\n");
+   MessageInterface::ShowMessage("--- mode = %d, prefix = %s\n",
+   (Integer) mode, prefix.c_str());
+   MessageInterface::ShowMessage(" --- stateType = %s, displayStateType = %s\n",
+   stateType.c_str(), displayStateType.c_str());
+   #endif
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
@@ -2330,6 +2343,12 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                if ((parmOrder[i] >= ELEMENT1_ID) && 
                    (parmOrder[i] <= ELEMENT6_ID))
                {
+                  #ifdef DEBUG_WRITE_PARAMETERS
+                   MessageInterface::ShowMessage("--- parmOrder[i] = %d\n",
+                  (Integer) parmOrder[i]);
+                  MessageInterface::ShowMessage(" --- and that is for element %s\n",
+                  (GetParameterText(parmOrder[i])).c_str());
+                  #endif
                   value.precision(GetDataPrecision()); 
                   value << repState[parmOrder[i] - ELEMENT1_ID];
                   value.precision(GetDataPrecision()); 
@@ -2358,6 +2377,13 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                }
                else
                {
+                  #ifdef DEBUG_WRITE_PARAMETERS
+                  MessageInterface::ShowMessage(
+                  "--- about to call WriteParameterValue with parmOrder[i] = %d\n",
+                  (Integer) parmOrder[i]);
+                  MessageInterface::ShowMessage("--- and the string associated with it is %s\n",
+                  GetParameterText(parmOrder[i]).c_str());
+                  #endif
                   WriteParameterValue(parmOrder[i], value);
                }
                
