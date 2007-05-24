@@ -2841,7 +2841,14 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
          trueAnomaly.SetECC(kep[1]);
          trueAnomaly.SetValue(kep[5]);
       }
-      stateType = rep;
+      // 2007.05.24 - wcs - Bug 875 - becasue some elements are the same for
+      // Keplerian and ModifiedKeplerian, make sure it only changes when it should
+      if ((stateType == "ModifiedKeplerian") && (rep == "Keplerian") && 
+          (label != "SMA") && (label != "ECC"))
+      {
+         // leave stateType as ModifiedKeplerian 
+      }
+      else  stateType = rep;
    }
    ///////
    #ifdef DEBUG_SPACECRAFT_SET
