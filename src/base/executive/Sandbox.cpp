@@ -662,7 +662,7 @@ bool Sandbox::Initialize()
          
       current->SetObjectMap(&objectMap);
       current->SetSolarSystem(solarSys);
-
+      current->SetTransientForces(&transientForces);
 
       // Handle GmatFunctions
       if (current->GetTypeName() == "CallFunction")
@@ -703,8 +703,6 @@ bool Sandbox::Initialize()
       if (!rv)
          return false;
 
-
-      current->SetTransientForces(&transientForces);
       current = current->GetNext();
    }
 

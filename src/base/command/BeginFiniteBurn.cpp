@@ -564,6 +564,9 @@ bool BeginFiniteBurn::Execute()
    // Tell active spacecraft that they are now firing
    for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)
       (*s)->IsManeuvering(true);
+
+   if (transientForces == NULL)
+      throw CommandException("Transient force list was NOT initialized; ABORTING RUN!!!\n\n");
       
    // Insert the force into the list of transient forces
    transientForces->push_back(burnForce);

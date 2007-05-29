@@ -61,6 +61,7 @@ public:
 
    virtual GmatCommand*    GetNext();
    virtual GmatCommand*    GetChildCommand(Integer whichOne = 0);
+   virtual void            SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual bool            Initialize();
    virtual bool            Execute();
    virtual void            RunComplete();

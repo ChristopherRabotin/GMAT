@@ -212,6 +212,34 @@ GmatCommand* BranchCommand::GetChildCommand(Integer whichOne)
    return branch[whichOne];
 }
 
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Tells the children about the transient forces.
+ *
+ * @param <tf> The transient force vector.
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   GmatCommand *currentPtr;
+   
+   std::vector<GmatCommand*>::iterator node;
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         currentPtr->SetTransientForces(tf);
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // bool Initialize()
