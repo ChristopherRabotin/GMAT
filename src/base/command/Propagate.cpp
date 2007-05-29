@@ -2202,6 +2202,32 @@ void Propagate::PrepareToPropagate()
    
    if (hasFired == true) 
    {
+      // Handle the transient forces
+      for (std::vector<SpaceObject *>::iterator sc = sats.begin(); 
+           sc != sats.end(); ++sc)
+      {
+         if ((*sc)->IsManeuvering())
+         {
+            #ifdef DEBUG_FINITE_MANEUVER
+               MessageInterface::ShowMessage(
+                  "SpaceObject %s is maneuvering\n", (*sc)->GetName().c_str());
+            #endif
+            
+            // Add the force
+            for (UnsignedInt index = 0; index < prop.size(); ++index)
+            {
+               for (std::vector<PhysicalModel*>::iterator i = transientForces->begin();
+                    i != transientForces->end(); ++i) 
+               {
+                  ForceModel *fm = prop[index]->GetForceModel();
+                  const StringArray sar = fm->GetRefObjectNameArray(Gmat::SPACEOBJECT);
+                  if (find(sar.begin(), sar.end(), (*sc)->GetName()) != sar.end()) 
+                     prop[index]->GetForceModel()->AddForce(*i);
+               }
+            }
+         }
+      }
+
       for (Integer n = 0; n < (Integer)prop.size(); ++n)
       {
          elapsedTime[n] = 0.0;

@@ -1295,9 +1295,12 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
    Integer satCount = dimension / stateSize, i, iOffset;
 
    #ifdef DEBUG_FORCEMODEL_EXE
-       MessageInterface::ShowMessage(
-          "  Input state = %le %le %le %le %le %le\n", state[0], state[1], 
-          state[2], state[3], state[4], state[5]);
+      for (i = 0; i < satCount; ++i)
+         MessageInterface::ShowMessage(
+            "  Input state = %le %le %le %le %le %le\n", state[i*stateSize + 0], 
+            state[i*stateSize + 1], state[i*stateSize + 2], 
+            state[i*stateSize + 3], state[i*stateSize + 4], 
+            state[i*stateSize + 5]);
    #endif
 
    #ifdef DEBUG_FORCEMODEL_EPOCHS
@@ -1333,11 +1336,12 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
          return false;
 
       #ifdef DEBUG_FORCEMODEL_EXE
-         MessageInterface::ShowMessage("  ddt(%s[%s]) = %le %le %le\n",
+      for (i = 0; i < satCount; ++i)
+         MessageInterface::ShowMessage("  ddt(%s[%s])[%d] = %le %le %le\n",
             (current->GetTypeName().c_str()), 
             (current->GetStringParameter(
-               current->GetParameterID("BodyName"))).c_str(), 
-            ddt[3], ddt[4], ddt[5]);
+               current->GetParameterID("BodyName"))).c_str(), i, 
+            ddt[i*stateSize + 3], ddt[i*stateSize + 4], ddt[i*stateSize + 5]);
       #endif
 
       for (i = 0; i < satCount; ++i) {
@@ -1355,8 +1359,9 @@ bool ForceModel::GetDerivatives(Real * state, Real dt, Integer order)
             deriv[iOffset+2] += ddt[iOffset+2];
          }
          #ifdef DEBUG_FORCEMODEL_EXE
-            MessageInterface::ShowMessage("  deriv = %le %le %le\n", deriv[3], 
-                                          deriv[4], deriv[5]);
+            MessageInterface::ShowMessage("  deriv[%d] = %le %le %le\n", i, 
+               deriv[iOffset + 3], deriv[iOffset + 4], 
+               deriv[iOffset + 5]);
          #endif
       }
 
@@ -1592,6 +1597,17 @@ const StringArray&
       return forceReferenceNames;
       //return BuildBodyList("PointMassForce");
       
+   }
+   
+   // Provide space object names for validation checking
+   if (type == Gmat::SPACEOBJECT)
+   {
+      for (std::vector<SpaceObject *>::iterator sc = spacecraft.begin(); 
+           sc != spacecraft.end(); ++sc)
+      {
+         forceReferenceNames.push_back((*sc)->GetName());
+      }
+      return forceReferenceNames;
    }
    
    // Always grab these two:

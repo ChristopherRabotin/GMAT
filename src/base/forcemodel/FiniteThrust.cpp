@@ -426,6 +426,29 @@ bool FiniteThrust::GetDerivatives(Real * state, Real dt, Integer order)
             deriv[i6+5] = 0.0; 
          }
       }
+      else
+      {
+         // Zero any burn contribution that is not made for this spacecraft
+         if (order == 1) 
+         {
+            // dr/dt = v
+            deriv[i6]     = state[3 + i6];
+            deriv[1 + i6] = state[4 + i6];
+            deriv[2 + i6] = state[5 + i6];
+            deriv[3 + i6] = 0.0;
+            deriv[4 + i6] = 0.0;
+            deriv[5 + i6] = 0.0;
+         } 
+         else  
+         {
+            deriv[ i6 ] = 0.0; 
+            deriv[i6+1] = 0.0; 
+            deriv[i6+2] = 0.0; 
+            deriv[i6+3] = 0.0; 
+            deriv[i6+4] = 0.0; 
+            deriv[i6+5] = 0.0; 
+         }
+      }
       ++i;
    }
 
