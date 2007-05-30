@@ -30,10 +30,10 @@ namespace GmatCommandUtil
    GmatCommand* GetMatchingEnd(GmatCommand *cmd);
    GmatCommand* GetParentCommand(GmatCommand *top, GmatCommand *cmd);
    GmatCommand* GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
-   std::string GetCommandSeqString(GmatCommand *cmd);
+   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true);
    bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
    void GetSubCommandString(GmatCommand* brCmd, Integer level,
-                            std::string &cmdseq);
+                            std::string &cmdseq, bool showAddr = true);
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
 }
