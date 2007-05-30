@@ -24,16 +24,18 @@
 #include "GuiItemManager.hpp"
 #include "GuiInterpreter.hpp"
 
+#ifdef __TEST_MISSION_TREE_ACTIONS__
+#include <fstream>            // for ofstream for saving actions
+#endif
+
 class MissionTree : public DecoratedTree
 {
 public:
-   // constructors
    MissionTree(wxWindow *parent, const wxWindowID id,
                const wxPoint& pos, const wxSize& size,
                long style);
-   // void SetMainNotebook (GmatMainNotebook *mainNotebook);
-   // GmatMainNotebook *GetMainNotebook();
-
+   ~MissionTree();
+   
    void ClearMission();
    void UpdateMission(bool resetCounter);
    
@@ -49,7 +51,6 @@ private:
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    
-   // GmatMainNotebook *mainNotebook;
    wxArrayString mCommandList;
    wxWindow *parent;
    
@@ -58,7 +59,6 @@ private:
    wxTreeItemId mFiniteBurnTreeId;
    wxTreeItemId mNewTreeId;
    
-   bool before;
    int mTempCounter;
    int mNumMissionSeq;
    int mNumPropagate;
@@ -82,7 +82,7 @@ private:
    int mNumStop;
    int mNumMinimize;
    int mNumNonlinearConstraint;
-
+   
    bool inScriptEvent;
    bool inFiniteBurn;
    int  mScriptEventCount;
@@ -105,6 +105,7 @@ private:
                               bool insertBefore);
    
    void Append(const wxString &cmdName);
+   void DeleteCommand(const wxString &cmdName);
    void InsertBefore(const wxString &cmdName);
    void InsertAfter(const wxString &cmdName);
    void UpdateGuiManager(const wxString &cmdName);
@@ -156,6 +157,28 @@ private:
                      const std::string &title1, GmatCommand *cmd1,
                      const std::string &title2 = "",
                      GmatCommand *cmd2 = NULL);
+   
+   //--------------------------------------------------
+   // for auto-testing of MissionTree actions
+   //--------------------------------------------------
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   bool mSaveActions;
+   bool mPlaybackActions;
+   std::string mActionsOutFile;
+   std::string mResultsFile;
+   std::ofstream mActionsOutStream;
+   std::ofstream mResultsStream;
+   std::ofstream mPlaybackResultsStream;
+   
+   void OnStartSaveActions(wxCommandEvent &event);
+   void OnStopSaveActions(wxCommandEvent &event);
+   void OnPlaybackActions(wxCommandEvent &event);
+   
+   void WriteActions(const wxString &str);
+   void WriteResults();
+   #endif
+   //--------------------------------------------------
+   
    
    DECLARE_EVENT_TABLE();
    
@@ -275,6 +298,10 @@ private:
       POPUP_RUN,
       POPUP_SHOW_SCRIPT,
       
+      //----- for auto testing actions
+      POPUP_START_SAVE_ACTIONS,
+      POPUP_STOP_SAVE_ACTIONS,
+      POPUP_READ_ACTIONS,
    };
 };
 

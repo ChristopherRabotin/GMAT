@@ -50,6 +50,17 @@
 // Should we enable multiple mission sequence?
 //#define__ENABLE_MULTIPLE_SEQUENCE__
 
+// If actions to be saved and playback for testing
+// Define this by setting the compiler parameter -D
+//#define __TEST_MISSION_TREE_ACTIONS__
+
+#ifdef __TEST_MISSION_TREE_ACTIONS__
+#include <fstream>
+#include "StringTokenizer.hpp"
+//#define DEBUG_MISSION_TREE_ACTIONS
+#endif
+
+// For debug output
 //#define DEBUG_MISSION_TREE_SHOW_CMD 1
 //#define DEBUG_MISSION_TREE_APPEND 1
 //#define DEBUG_MISSION_TREE_INSERT 1
@@ -102,6 +113,12 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
 
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   EVT_MENU(POPUP_START_SAVE_ACTIONS, MissionTree::OnStartSaveActions)
+   EVT_MENU(POPUP_STOP_SAVE_ACTIONS, MissionTree::OnStopSaveActions)
+   EVT_MENU(POPUP_READ_ACTIONS, MissionTree::OnPlaybackActions)
+   #endif
+   
 END_EVENT_TABLE()
 
 //------------------------------
@@ -163,6 +180,27 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    InitializeCounter();
    AddIcons();
    AddDefaultMission();
+   
+   // for auto-testing of MissionTree actions
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   mSaveActions = false;
+   mPlaybackActions = false;
+   mActionsOutFile = "MissionTreeActionsOut.txt";
+   mResultsFile = "MissionTreeResults.txt";
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// ~MissionTree()
+//------------------------------------------------------------------------------
+MissionTree::~MissionTree()
+{
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   mActionsOutStream.close();
+   mResultsStream.close();
+   mPlaybackResultsStream.close();
+   #endif
 }
 
 
@@ -202,12 +240,11 @@ void MissionTree::UpdateMission(bool resetCounter)
    #endif
    
    if (resetCounter)
-   {
-      InitializeCounter();      
-      inScriptEvent = false;
-      inFiniteBurn = false;
-   }
-
+      InitializeCounter();
+   
+//       inScriptEvent = false;
+//       inFiniteBurn = false;
+   
    ClearMission();
    
    UpdateCommand();
@@ -251,6 +288,9 @@ void MissionTree::InitializeCounter()
    mNumStop = 0;
    mNumMinimize = 0;
    mNumNonlinearConstraint = 0;
+   
+   inScriptEvent = false;
+   inFiniteBurn = false;
 }
 
 
@@ -498,7 +538,8 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
  * @param  prevCmd  Previous command pointer
  * @param  cmd  Command pointer to be inserted
  * @param  cmdCount  Command counter to be appended to command name
- * @param  insertBefore  true if inserting before, false if inserterting after
+ * @param  insertBefore  true if inserting before the current item,
+ *                       false if inserterting after current item
  */
 //------------------------------------------------------------------------------
 wxTreeItemId
@@ -508,6 +549,13 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                            GmatCommand *prevCmd, GmatCommand *cmd, int *cmdCount,
                            bool insertBefore)
 {
+   #if DEBUG_MISSION_TREE_INSERT
+   MessageInterface::ShowMessage
+      ("MissionTree::InsertCommand() parentId=%s, currId=%s, prevId=%s, "
+       "insertBefore=%d\n", GetItemText(parentId).c_str(), GetItemText(currId).c_str(),
+       GetItemText(prevId).c_str(), insertBefore);
+   #endif
+   
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(currId); 
    GmatCommand *currCmd = currItem->GetCommand();
    wxString currTypeName = currCmd->GetTypeName().c_str();
@@ -520,7 +568,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    bool cmdAdded = false;
    
    wxString prevTypeName = prevCmd->GetTypeName().c_str();
-
+   
    // Show "Equation" instead of "GMAT" to be more clear for user
    if (currTypeName == "GMAT")
       currTypeName = "Equation";
@@ -530,11 +578,6 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       prevTypeName = "Equation";
    
    #if DEBUG_MISSION_TREE_INSERT
-   MessageInterface::ShowMessage
-      ("MissionTree::InsertCommand() parentId=%s, currId=%s, prevId=%s, "
-       "insertBefore=%d\n", GetItemText(parentId).c_str(), GetItemText(currId).c_str(),
-       GetItemText(prevId).c_str(), insertBefore);
-   
    MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId); 
    GmatCommand *parentCmd = parentItem->GetCommand();
    MessageInterface::ShowMessage
@@ -614,15 +657,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       
       cmdAdded = cmd->Append(endCmd);
       
-      // Since GUI appends End command, reset previous command of cmd (loj: 12/14/06)
-      
       #if DEBUG_MISSION_TREE_INSERT
-      MessageInterface::ShowMessage
-         ("MissionTree::InsertCommand() Setting previous of %s to %s\n",
-          cmdTypeName.c_str(), prevTypeName.c_str());
+      WriteCommand("   ", "previous of ", endCmd , " is ", endCmd->GetPrevious());
       #endif
-      
-      cmd->ForceSetPrevious(prevCmd);
       
    }
    
@@ -647,7 +684,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    //------------------------------------------------------------
    
    #if DEBUG_MISSION_TREE_INSERT
-   WriteCommand("===> before appending/inserting ", "cmd->GetPrevious() = ",
+   WriteCommand("   ==> before appending/inserting: ", "previous of ", cmd, " is ",
                 cmd->GetPrevious());
    #endif
    
@@ -665,35 +702,31 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
       #if DEBUG_MISSION_TREE_INSERT
       MessageInterface::ShowMessage("   ==> Calling gui->InsertCommand()\n");
       #endif
-
+      
       cmdAdded = theGuiInterpreter->InsertCommand(cmd, prevCmd);
    }
    
    //------------------------------------------------------------
-   // Since Append/InsertCommand() resets previous command, we need
-   // to set real previous command after command is appended/inserted,
-   // if command is ScriptEvent. So when ScriptEvent is modified,
-   // the old ScriptEvent is deleted and new one can be insterted
-   // into correct place.
+   // We need to set real previous command after command is
+   // appended/inserted, since cmd->AppendCommand() or
+   // cmd->InsertCommand() resets previous command.
+   // So when ScriptEvent is modified, the old ScriptEvent is
+   // deleted and new one can be insterted into correct place.
    //------------------------------------------------------------
-   if (cmd->GetTypeName() == "BeginScript")
-   {
-      #if DEBUG_MISSION_TREE_INSERT
-      WriteCommand("===>", "Resetting previous of ", cmd, "to ", prevCmd);
-      #endif
+   #if DEBUG_MISSION_TREE_INSERT
+   WriteCommand("   ==>", " Resetting previous of ", cmd, "to ", prevCmd);
+   #endif
       
-      cmd->ForceSetPrevious(prevCmd);
-   }
+   cmd->ForceSetPrevious(prevCmd);
    
    #if DEBUG_MISSION_TREE_INSERT
-   WriteCommand("===> after appending/inserting ", "cmd->GetPrevious() = ",
+   WriteCommand("   ==> after  appending/inserting: ", "previous of ", cmd, " is ",
                 cmd->GetPrevious());
    #endif
    
-   //MessageInterface::ShowMessage("===> cmdAdded = %d\n", cmdAdded);   
+   //MessageInterface::ShowMessage("   ==> cmdAdded = %d\n", cmdAdded);   
    // Why returning false eventhough it inserted?
-   // It seems returning true all the time (loj: 2007.05.18)
-   //cmdAdded = true; 
+   cmdAdded = true; 
    
    //------------------------------------------------------------
    // Insert command to mission tree
@@ -705,45 +738,72 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
          node = AppendItem(currId, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
       }
-      //loj: 2007.05.18
-      //commented out so that EndFiniteBurn is inserted in the correct place
-      //else if (cmdTypeName == "EndFiniteBurn")
-      //{
-      //   node = AppendItem(parentId, nodeName, icon, -1,
-      //                     new MissionTreeItemData(nodeName, type, nodeName, cmd));
-      //}
       else if (prevTypeName == "NoOp"  || prevTypeName == "Target" ||
                prevTypeName == "For"   || prevTypeName == "While"  ||
-               prevTypeName == "If"    || prevTypeName == "Optimize")
+               prevTypeName == "If"    || prevTypeName == "Optimize" ||
+               prevTypeName == "Else")
       {
-         node = InsertItem(parentId, 0, nodeName, icon, -1,
-                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
-      }
-      else if (prevTypeName.Contains("End"))
-      {
-         wxString currTypeName = currCmd->GetTypeName().c_str();
+         wxTreeItemId realParentId = parentId;
          
          if (insertBefore)
-         {
-            node = InsertItem(parentId, GetPrevSibling(currId), nodeName, icon, -1,
-                              new MissionTreeItemData(nodeName, type, nodeName, cmd));
-         }
-         else
-         {
-            node = InsertItem(parentId, currId, nodeName, icon, -1,
-                              new MissionTreeItemData(nodeName, type, nodeName, cmd));
-         }
+            realParentId = prevId;
+         
+         #if DEBUG_MISSION_TREE_INSERT
+         MessageInterface::ShowMessage
+            ("   previous type is NoOp, BranchCommand or Else\n");
+         MessageInterface::ShowMessage
+            ("   ==> inserting %s after %s\n", nodeName.c_str(),
+             GetItemText(parentId).c_str());
+         #endif
+         
+         node = InsertItem(realParentId, 0, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
+         
+      }
+      else if (prevTypeName.Contains("End") && prevTypeName != "EndScript")
+      {
+         //wxTreeItemId realPrevId = currId;
+         wxTreeItemId realPrevId = GetItemParent(prevId);
+         
+         ////if (insertBefore)
+         ////   realPrevId = GetPrevSibling(currId);
+         
+         #if DEBUG_MISSION_TREE_INSERT
+         MessageInterface::ShowMessage("   previous type contains End\n");
+         MessageInterface::ShowMessage
+            ("   ==> inserting %s after %s->%s\n", nodeName.c_str(),
+             GetItemText(parentId).c_str(), GetItemText(realPrevId).c_str());
+         #endif
+         
+         node = InsertItem(parentId, realPrevId, nodeName, icon, -1,
+                           new MissionTreeItemData(nodeName, type, nodeName, cmd));
       }
       else
       {
+         wxTreeItemId realParentId = parentId;
+         wxTreeItemId realPrevId = prevId;
+         
+         if (insertBefore)
+         {
+            if (GetChildrenCount(GetItemParent(prevId)) > 0)
+            {
+               realParentId = GetItemParent(prevId);
+            }
+            else
+            {
+               realParentId = prevId;
+               realPrevId = GetLastChild(prevId);
+            }
+         }
+         
+         
          #if DEBUG_MISSION_TREE_INSERT
          MessageInterface::ShowMessage
-            ("   InsertItem(parentId=%s, prevId=%s, nodeName=%s)\n",
-             GetItemText(parentId).c_str(), GetItemText(prevId).c_str(),
-             nodeName.c_str());
+            ("   ==> inserting %s after %s->%s\n", nodeName.c_str(),
+             GetItemText(realParentId).c_str(), GetItemText(realPrevId).c_str());
          #endif
          
-         node = InsertItem(parentId, prevId, nodeName, icon, -1,
+         node = InsertItem(realParentId, realPrevId, nodeName, icon, -1,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
       }
       
@@ -795,6 +855,14 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
 //------------------------------------------------------------------------------
 // void Append(const wxString &cmdName)
 //------------------------------------------------------------------------------
+/*
+ * Appends a command to the end of the branch identified by parent.
+ * The parent is the current selection, assuming Append menu item only appears
+ * on branch command, such as Target, If, For, Optimize.
+ * It sets parent item id, current item id, and previous item id and pass them
+ * to InsertCommand() with insertBefore flag to true.
+ */
+//------------------------------------------------------------------------------
 void MissionTree::Append(const wxString &cmdName)
 {
    #if DEBUG_MISSION_TREE_SHOW_CMD
@@ -806,6 +874,15 @@ void MissionTree::Append(const wxString &cmdName)
    wxTreeItemId parentId = GetItemParent(itemId);
    wxTreeItemId currId = itemId;
    
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Append %s to %s\n", cmdName.c_str(), GetItemText(itemId).c_str());
+      WriteActions(str);
+   }
+   #endif
+   
    #if DEBUG_MISSION_TREE_APPEND
    MessageInterface::ShowMessage
       ("\nMissionTree::Append() cmdName=%s, itemId=%s, lastId=%s\n",
@@ -816,8 +893,7 @@ void MissionTree::Append(const wxString &cmdName)
    if (cmdName != "Else")
    {
       wxTreeItemId elseId = FindChild(itemId, "Else");
-
-      if (elseId.IsOk())
+      if (elseId.IsOk() && GetItemText(elseId) != "")
          lastId = elseId;
    }
    
@@ -826,7 +902,7 @@ void MissionTree::Append(const wxString &cmdName)
       ("   after FindChild(Else) itemId=<%s>, lastId=<%s>\n",
        GetItemText(itemId).c_str(), GetItemText(lastId).c_str());
    #endif
-
+   
    // Note:
    // Previous command is the 2nd last visible command from the current node
    // For example:
@@ -838,23 +914,85 @@ void MissionTree::Append(const wxString &cmdName)
    //    EndIf
    // EndTarget
    
-   wxTreeItemId prevId = GetPrevVisible(lastId);
+   wxTreeItemId prevId;
+   
+   if (lastId.IsOk() && GetItemText(lastId) != "")
+      prevId = GetPrevVisible(lastId);
+   else
+      prevId = currId;
+   
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *currCmd = currItem->GetCommand();
    GmatCommand *prevCmd = currCmd;
    GmatCommand *cmd = NULL;
    
+   #if DEBUG_MISSION_TREE_APPEND
+   WriteCommand("   ", "currCmd = ", currCmd, ", prevCmd = ", prevCmd);
+   #endif
+   
    // For BranchCommand, use GmatCommandUtil::GetMatchingEnd() to get
    // previous command, since there may be commands not shown on the tree.
    // Note: Make sure this works on other than Windows also (loj: 12/15/06)
    if (currCmd->IsOfType("BranchCommand"))
    {
-      #if DEBUG_MISSION_TREE_APPEND
-      MessageInterface::ShowMessage("   setting prevCmd to end->GetPrevious()\n");
-      #endif
+      parentId = itemId;
+      currId = GetLastChild(itemId);
+      
       GmatCommand *end = GmatCommandUtil::GetMatchingEnd(currCmd);
-      prevCmd = end->GetPrevious();
+      GmatCommand *realPrevCmd = end->GetPrevious();
+      std::string realPrevType = realPrevCmd->GetTypeName();
+      
+      #if DEBUG_MISSION_TREE_APPEND
+      WriteCommand("   ", "end = ", end, ", realPrevCmd = ", realPrevCmd);
+      #endif
+      
+      // Here is tricky one.
+      // We don't want to reset prevCmd if currCmd is If and previous of EndIf is Else,
+      // since EndIf->GetPrevious() will return Else if there is Else
+      if ((realPrevType != "Else") ||
+          (realPrevType == "Else" && currCmd->GetTypeName() == "Else"))
+      {
+         #if DEBUG_MISSION_TREE_APPEND
+         MessageInterface::ShowMessage("   setting prevCmd to end->GetPrevious()\n");
+         #endif
+         
+         prevCmd = realPrevCmd;
+      }
+      
+      #if DEBUG_MISSION_TREE_APPEND
+      WriteCommand("   ", "prevCmd = ", prevCmd);
+      #endif
+      
+      // If previous command is BranchCommand and not current command
+      if (prevCmd->IsOfType("BranchCommand") && prevCmd != currCmd)
+      {
+         #if DEBUG_MISSION_TREE_APPEND
+         MessageInterface::ShowMessage
+            ("   previous command is %s and not %s\n", 
+             prevCmd->GetTypeName().c_str(), currCmd->GetTypeName().c_str());
+         #endif
+         
+         prevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
+         
+         #if DEBUG_MISSION_TREE_APPEND
+         MessageInterface::ShowMessage
+            ("   so setting prevCmd to %s\n", prevCmd->GetTypeName().c_str(),
+             currCmd->GetTypeName().c_str(), prevCmd->GetTypeName().c_str());
+         #endif
+      }
+   }
+   else if (currId == mMissionSeqSubItem)
+   {
+      #if DEBUG_MISSION_TREE_APPEND
+      MessageInterface::ShowMessage("   current item is MissionSequence\n");
+      #endif
+      
+      parentId = itemId;
+      if (lastId.IsOk() && GetItemText(lastId) != "")
+         currId = lastId;
+      prevId = currId;
+      prevCmd = prevItem->GetCommand();
    }
    else
    {
@@ -890,23 +1028,29 @@ void MissionTree::Append(const wxString &cmdName)
    {
       UpdateGuiManager(cmdName);
       
+      if (currCmd->GetTypeName() == "NoOp")
+      {
+         // Use GetLastCommand() to get last command since some command
+         // doesn't appear on the tree, such as EndScript
+         prevCmd = GmatCommandUtil::GetLastCommand(prevCmd);
+         #if DEBUG_MISSION_TREE_APPEND
+         WriteCommand("   ==>", " new prevCmd = ", prevCmd);
+         #endif
+         
+         if (prevCmd->IsOfType("BranchCommand"))
+             prevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
+      }
+      
+      // Need to set previous command of new command
+      cmd->ForceSetPrevious(prevCmd);
+      
       #if DEBUG_MISSION_TREE_APPEND
       MessageInterface::ShowMessage("   ==> Calling InsertCommand(before)\n");
       #endif
       
-      if (currCmd->GetTypeName() == "NoOp")
-      {
-         prevCmd = GmatCommandUtil::GetLastCommand(prevCmd);
-         #if DEBUG_MISSION_TREE_APPEND
-         WriteCommand("   ===>", " new prevCmd = ", prevCmd);
-         #endif
-      }
-      
-      // Need to set previous command of new command(loj: 12/15/06)
-      cmd->ForceSetPrevious(prevCmd);
-      
+      // Always insert before
       wxTreeItemId node =
-         InsertCommand(itemId, itemId, prevId, GetIconId(cmdName),
+         InsertCommand(parentId, currId, prevId, GetIconId(cmdName),
                        GetCommandId(cmdName), cmdName, prevCmd, cmd,
                        GetCommandCounter(cmdName), true);
       
@@ -916,6 +1060,116 @@ void MissionTree::Append(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("After Append: " + cmdName);
+   #endif
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void DeleteCommand(const wxString &cmdName)
+//------------------------------------------------------------------------------
+/*
+ * Deletes a command from the tree and command sequence.
+ *
+ * @param  cmdName  Command name to be deleted
+ */
+//------------------------------------------------------------------------------
+void MissionTree::DeleteCommand(const wxString &cmdName)
+{
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("Before Delete(): " + cmdName);
+   #endif
+   
+   // get selected item
+   wxTreeItemId itemId = GetSelection();
+   wxTreeItemId parentId = GetItemParent(itemId);
+   
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("   itemId=%s, parentId=%s\n", GetItemText(itemId).c_str(),
+       GetItemText(parentId).c_str());
+   #endif
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Delete %s from %s\n", GetItemText(itemId).c_str(),
+                 GetItemText(parentId).c_str());
+      WriteActions(str);
+   }
+   #endif
+   
+   
+   // delete from gui interpreter
+   MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(itemId);
+   if (missionItem == NULL)
+   {
+      // write error message
+      MessageInterface::ShowMessage
+         ("\n*** ERROR *** could not delete %s due to NULL item\n",
+         cmdName.c_str());
+      return;
+   }
+   
+   GmatCommand *theCmd = missionItem->GetCommand();  
+   if (theCmd == NULL)
+   {
+      // write error message
+      MessageInterface::ShowMessage
+         ("\n*** ERROR *** could not delete %s due to NULL command\n",
+         cmdName.c_str());
+      return;
+   }
+   
+   // save command type to check if there is no more of this command
+   std::string cmdType = theCmd->GetTypeName();
+   
+   #if DEBUG_MISSION_TREE_DELETE
+   MessageInterface::ShowMessage
+      ("MissionTree::Delete() calling theGuiInterpreter->DeleteCommand(%s)\n",
+       theCmd->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("   Previous of %s is %s\n", theCmd->GetTypeName().c_str(),
+       theCmd->GetPrevious()->GetTypeName().c_str());
+   if (theCmd->GetNext() == NULL)
+      MessageInterface::ShowMessage
+         ("   Next of %s is NULL\n", theCmd->GetTypeName().c_str());
+   else
+      MessageInterface::ShowMessage
+         ("   Next of %s is %s\n", theCmd->GetTypeName().c_str(),
+          theCmd->GetNext()->GetTypeName().c_str());
+   #endif
+   
+   GmatCommand *tmp = theGuiInterpreter->DeleteCommand(theCmd);
+   if (tmp)
+      delete tmp;
+   
+   // reset counter if if there is no more of this command
+   std::string seqString = theGuiInterpreter->GetScript();
+   if (seqString.find(cmdType) == seqString.npos)
+   {
+      int *cmdCounter = GetCommandCounter(cmdType.c_str());
+      *cmdCounter = 0;
+   }
+   
+   // delete from tree - if parent only has 1 child collapse
+   if (GetChildrenCount(parentId) <= 1)
+      this->Collapse(parentId);
+   
+   this->Delete(itemId);
+   
+   #if DEBUG_MISSION_TREE_SHOW_CMD
+   ShowCommands("After Delete()");
+   #endif
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
    #endif
 }
 
@@ -938,6 +1192,15 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId parentId = GetItemParent(itemId);
 
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Insert %s before %s\n", cmdName.c_str(), GetItemText(itemId).c_str());
+      WriteActions(str);
+   }
+   #endif
+   
 #ifdef __WXMAC__
    wxTreeItemId prevId = GetPrevSibling(itemId);
 
@@ -972,9 +1235,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    // We want to use real previous command via cmd->GetPrevious(), not from
    // the tree, because some commands are not visible from the tree.
-   
-   //GmatCommand *prevCmd = prevItem->GetCommand();
-   
+      
    if (currCmd == NULL)
    {
       MessageInterface::PopupMessage
@@ -985,7 +1246,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("MissionTree::InsertBefore(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+      ("MissionTree::InsertBefore(%s) currCmd=%s(%p)\n", cmdName.c_str(),
        currCmd->GetTypeName().c_str(), currCmd);
    WriteCommand("   ", "prevCmd = ", prevCmd, ", realPrevCmd = ", realPrevCmd);
    #endif
@@ -1007,7 +1268,7 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("MissionTree::InsertBefore(%s) prevCmd=%s, addr=%p\n",
+      ("MissionTree::InsertBefore(%s) prevCmd=%s(%p)\n",
        cmdName.c_str(), prevCmd->GetTypeName().c_str(), prevCmd);
    #endif
    
@@ -1032,8 +1293,6 @@ void MissionTree::InsertBefore(const wxString &cmdName)
       
       if (cmd != NULL)
       {
-         // Need to set previous command
-         //cmd->ForceSetPrevious(prevCmd);
          // Set previous command to realPrevCmd (loj: 2007.05.16)
          cmd->ForceSetPrevious(realPrevCmd);
          
@@ -1048,6 +1307,8 @@ void MissionTree::InsertBefore(const wxString &cmdName)
                           GetCommandId(cmdName), cmdName, realPrevCmd, cmd,
                           GetCommandCounter(cmdName), true);
          
+         Expand(parentId);
+         Expand(prevId);
          Expand(node);
       }
    }
@@ -1056,8 +1317,9 @@ void MissionTree::InsertBefore(const wxString &cmdName)
    ShowCommands("After InsertBefore(): " + cmdName);
    #endif
    
-   #if DEBUG_MISSION_TREE_INSERT
-   WriteCommand("===> before exiting ", "cmd->GetPrevious() = ", cmd->GetPrevious());
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
    #endif
 } // InsertBefore()
 
@@ -1079,6 +1341,15 @@ void MissionTree::InsertAfter(const wxString &cmdName)
    
    wxTreeItemId itemId = GetSelection();
    wxTreeItemId parentId = GetItemParent(itemId);
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions)
+   {
+      wxString str;
+      str.Printf("Insert %s after %s\n", cmdName.c_str(), GetItemText(itemId).c_str());
+      WriteActions(str);
+   }
+   #endif
    
 #ifdef __WXMAC__
    wxTreeItemId prevId = GetPrevSibling(itemId);
@@ -1107,14 +1378,13 @@ void MissionTree::InsertAfter(const wxString &cmdName)
    
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
-      ("MissionTree::InsertAfter(%s) currCmd=%s, addr=%p\n", cmdName.c_str(),
+      ("MissionTree::InsertAfter(%s) currCmd=%s(%p)\n", cmdName.c_str(),
        currCmd->GetTypeName().c_str(), currCmd);
    #endif
-   
-   
-   GmatCommand *prevCmd = currCmd;
-   
+      
+   GmatCommand *prevCmd = currCmd;   
    GmatCommand *cmd = NULL;
+   
    if (currCmd != NULL)
    {
       cmd = CreateCommand(cmdName);
@@ -1123,7 +1393,9 @@ void MissionTree::InsertAfter(const wxString &cmdName)
       cmd->ForceSetPrevious(currCmd);
       
       // Set parentId, itemId, prevId properly to pass to InsertCommand()
-      if (currCmd->IsOfType("BranchCommand"))
+      //if (currCmd->IsOfType("BranchCommand"))
+      // Else is BranchEnd, but we want it to be parent when inserting (loj: 2007.05.22)
+      if (currCmd->IsOfType("BranchCommand") || currCmd->GetTypeName() == "Else")
       {
          parentId = itemId;
       }
@@ -1148,6 +1420,7 @@ void MissionTree::InsertAfter(const wxString &cmdName)
                           GetCommandId(cmdName), cmdName, prevCmd, cmd,
                           GetCommandCounter(cmdName), false);
          
+         Expand(parentId);
          Expand(node);
       }
    }
@@ -1155,7 +1428,12 @@ void MissionTree::InsertAfter(const wxString &cmdName)
    #if DEBUG_MISSION_TREE_SHOW_CMD
    ShowCommands("After InsertAfter(): " + cmdName);
    #endif
-}
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   if (mSaveActions || mPlaybackActions)
+      WriteResults();
+   #endif
+} // InsertAfter()
 
 
 //------------------------------------------------------------------------------
@@ -1379,7 +1657,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 // void OnDoubleClick(wxMouseEvent &event)
 //------------------------------------------------------------------------------
 /**
- * On a double click ...
+ * Handles double click on an item.
  *
  * @param <event> input event.
  */
@@ -1438,7 +1716,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    
 #if wxUSE_MENUS
    wxMenu menu;
-
+   
    if (dataType == GmatTree::MISSION_SEQ_TOP_FOLDER)
    {
       menu.Append(POPUP_ADD_MISSION_SEQ, wxT("Add Mission Sequence"));
@@ -1462,6 +1740,14 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_RUN, wxT("Run"));
       menu.AppendSeparator();
       menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
+      
+      //----- for auto testing actions
+      #ifdef __TEST_MISSION_TREE_ACTIONS__
+      menu.AppendSeparator();
+      menu.Append(POPUP_START_SAVE_ACTIONS, wxT("Start Save Actions"));
+      menu.Append(POPUP_STOP_SAVE_ACTIONS, wxT("Stop Save Actions"));
+      menu.Append(POPUP_READ_ACTIONS, wxT("Playback Actions"));
+      #endif
    }
    else
    {
@@ -1549,6 +1835,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    }
    
    PopupMenu(&menu, pt);
+   
+   
 #endif // wxUSE_MENUS
 }
 
@@ -1991,10 +2279,11 @@ wxMenu* MissionTree::CreateControlLogicPopupMenu(int type, ActionType action)
          parentId = GetItemParent(itemId);
       
       // show only one Else
-      if (FindChild(parentId, "Else").IsOk())
+      wxTreeItemId elseId = FindChild(parentId, "Else");
+      if (elseId.IsOk() && GetItemText(elseId) != "")
          addElse = false;
    }
-
+   
    switch (action)
    {
    case APPEND:
@@ -2045,61 +2334,13 @@ void MissionTree::OnDelete(wxCommandEvent &event)
 {
    // get selected item
    wxTreeItemId itemId = GetSelection();
+   wxString cmdName = GetItemText(itemId);
    
    // if panel is open close it
    OnClose(event);
    
-   // delete from gui interpreter
-   MissionTreeItemData *missionItem = (MissionTreeItemData *)GetItemData(itemId);
-   if (missionItem == NULL)
-      return;   // error
+   DeleteCommand(cmdName);
    
-   GmatCommand *theCmd = missionItem->GetCommand();  
-   if (theCmd == NULL)
-      return;  //error 
-   
-   // save command type to check if there is no more of this command
-   std::string cmdType = theCmd->GetTypeName();
-   
-   #if DEBUG_MISSION_TREE_DELETE
-   MessageInterface::ShowMessage
-      ("MissionTree::OnDelete() calling theGuiInterpreter->DeleteCommand(%s)\n",
-       theCmd->GetTypeName().c_str());
-   MessageInterface::ShowMessage
-      ("   Previous of %s is %s\n", theCmd->GetTypeName().c_str(),
-       theCmd->GetPrevious()->GetTypeName().c_str());
-   if (theCmd->GetNext() == NULL)
-      MessageInterface::ShowMessage
-         ("   Next of %s is NULL\n", theCmd->GetTypeName().c_str());
-   else
-      MessageInterface::ShowMessage
-         ("   Next of %s is %s\n", theCmd->GetTypeName().c_str(),
-          theCmd->GetNext()->GetTypeName().c_str());
-   #endif
-   
-   GmatCommand *tmp = theGuiInterpreter->DeleteCommand(theCmd);
-   if (tmp)
-      delete tmp;
-   
-   // reset counter if if there is no more of this command
-   std::string seqString = theGuiInterpreter->GetScript();
-   if (seqString.find(cmdType) == seqString.npos)
-   {
-      int *cmdCounter = GetCommandCounter(cmdType.c_str());
-      *cmdCounter = 0;
-   }
-   
-   // delete from tree - if parent only has 1 child collapse
-   wxTreeItemId parentId = GetItemParent(itemId);
-   if (GetChildrenCount(parentId) <= 1)
-      this->Collapse(parentId);
-   
-   this->Delete(itemId);
-   
-   #if DEBUG_MISSION_TREE_SHOW_CMD
-   MessageInterface::ShowMessage("MissionTree::OnDelete() leaving\n");
-   ShowCommands("InOnDelete()");
-   #endif
 }
 
 
@@ -2285,7 +2526,6 @@ void MissionTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   //    mainNotebook->CreatePage(item);
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
@@ -2338,6 +2578,7 @@ void MissionTree::OnClose(wxCommandEvent &event)
       GmatAppData::GetMainFrame()->CloseActiveChild();
    else
       return;
+   
 }
 
 
@@ -2660,6 +2901,13 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
 //------------------------------------------------------------------------------
 // wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd)
 //------------------------------------------------------------------------------
+/*
+ * Finds a item from the tree.
+ *
+ * @param <parentId> Parent item id
+ * @param <cmd> Name of the command to find
+ */
+//------------------------------------------------------------------------------
 wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
 {
    #if DEBUG_MISSION_TREE_FIND
@@ -2667,38 +2915,34 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
       ("\nMissionTree::FindChild() parentId=<%s>, cmd=<%s>\n",
        GetItemText(parentId).c_str(), cmd.c_str());
    #endif
-   
-   wxTreeItemIdValue cookie;
-   MissionTreeItemData *item;
-   wxTreeItemId childId = GetFirstChild(parentId, cookie);
 
-   #if DEBUG_MISSION_TREE_FIND
-   MessageInterface::ShowMessage 
-      ("MissionTree::FindChild() childId=<%s>\n", GetItemText(childId).c_str());
-   #endif
+   unsigned int itemCount = GetCount();
+   wxTreeItemId firstItem = GetFirstVisibleItem();
+   wxTreeItemId item = firstItem;
+   wxString itemText;
    
-   while (childId.IsOk())
+   for (unsigned int i=0; i<itemCount; i++)
    {
-      item = (MissionTreeItemData *)GetItemData(childId);
-       
-      #if DEBUG_MISSION_TREE
-      MessageInterface::ShowMessage("MissionTree::FindChild() while-loop, "
-                    "item->GetDesc(): \"%s\"\n",item->GetDesc().c_str());
-      #endif
-
-      if (item->GetDesc().Contains(cmd))
-         return childId;
-      
-      childId = GetNextChild(parentId, cookie);
+      itemText = GetItemText(item);
       
       #if DEBUG_MISSION_TREE_FIND > 1
-      MessageInterface::ShowMessage("MissionTree::FindChild() childId=<%s>\n", 
-                                    GetItemText(childId).c_str());
+      MessageInterface::ShowMessage("   item=<%s>\n", itemText.c_str());
       #endif
+      
+      if (itemText.Contains(cmd))
+         return item;
+      
+      item = GetNextVisible(item);
    }
    
-   return childId;
-
+   #if DEBUG_MISSION_TREE_FIND
+   MessageInterface::ShowMessage
+      ("MissionTree::FindChild() returning unknown child\n");
+   #endif
+   
+   wxTreeItemId nullId;
+   return nullId;
+   
 }
 
 
@@ -2801,4 +3045,297 @@ void MissionTree::WriteCommand(const std::string &prefix,
    }
 }
 
+
+#ifdef __TEST_MISSION_TREE_ACTIONS__
+//------------------------------------------------------------------------------
+// void OnStartSaveActions()
+//------------------------------------------------------------------------------
+/**
+ * Start saving actions on the tree to a text file for used in testing
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnStartSaveActions(wxCommandEvent &event)
+{
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage
+      ("MissionTree::OnStartSaveActions() mSaveActions=%d\n", mSaveActions);
+   #endif
+   
+   mSaveActions = true;
+   mPlaybackActions = false;
+   
+   if (mActionsOutStream.is_open())
+      mActionsOutStream.close();
+   
+   if (mResultsStream.is_open())
+      mResultsStream.close();
+   
+   mActionsOutStream.open(mActionsOutFile.c_str());
+   mResultsStream.open(mResultsFile.c_str());
+}
+
+
+//------------------------------------------------------------------------------
+// void OnStopSaveActions()
+//------------------------------------------------------------------------------
+/**
+ * Stops saving actions on the tree to a text file.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnStopSaveActions(wxCommandEvent &event)
+{
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage
+      ("MissionTree::OnStopSaveActions() mSaveActions=%d\n", mSaveActions);
+   #endif
+   
+   mSaveActions = false;
+   mActionsOutStream.close();
+   mResultsStream.close();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnPlaybackActions()
+//------------------------------------------------------------------------------
+/**
+ * Reads actions from a text file, parses, and initiate actions.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::OnPlaybackActions(wxCommandEvent &event)
+{
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage
+      ("MissionTree::OnPlaybackActions() mSaveActions=%d\n", mSaveActions);
+   #endif
+   
+   wxString actionsInFile =
+      wxFileSelector("Choose a file to save", "", "", "txt",
+                     "Text files (*.txt)|*.txt", wxOPEN);
+   
+   if (actionsInFile.empty())
+      return;
+   
+   // clear command sequence and mission tree first
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage
+      ("   clearing command sequence and mission tree\n");
+   #endif
+   ClearMission();
+   theGuiInterpreter->ClearCommandSeq();
+   InitializeCounter();
+   
+   wxString playbackResultsFile;
+   
+   // compose playback results file
+   int dot = actionsInFile.Find('.');
+   if (dot == wxNOT_FOUND)
+      playbackResultsFile = actionsInFile + "PbResults.txt";
+   else
+      playbackResultsFile = actionsInFile.Mid(0, dot) + "PbResults.txt";
+   
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage
+      ("   playback action file = %s\n   playback results file = %s\n",
+       actionsInFile.c_str(), playbackResultsFile.c_str());
+   #endif
+   
+   mSaveActions = false;
+   mPlaybackActions = true;
+   
+   // close output streams
+   if (mPlaybackResultsStream.is_open())
+      mPlaybackResultsStream.close();
+   
+   // open streams
+   mPlaybackResultsStream.open(playbackResultsFile.c_str());
+   std::ifstream actionsInStream(actionsInFile.c_str());
+   
+   if (!actionsInStream.is_open())
+   {
+      MessageInterface::ShowMessage
+         ("\n*** ERROR *** Playback stopped due to error opening the file %s\n",
+          actionsInFile.c_str());
+      return;
+   }
+   
+   //-----------------------------------------------------------------
+   // read in lines
+   //-----------------------------------------------------------------
+   char buffer[1024];
+   StringArray lines;
+   while (!actionsInStream.eof())
+   {
+      actionsInStream.getline(buffer, 1023);
+      
+      #ifdef DEBUG_MISSION_TREE_ACTIONS
+      MessageInterface::ShowMessage("   <%s>\n", buffer);
+      #endif
+      
+      if (buffer[0] != '\0')
+         lines.push_back(buffer);
+   }
+   
+   actionsInStream.close();
+   
+   //--------------------------------------------------------------
+   // Find the first item
+   //--------------------------------------------------------------
+   wxTreeItemId firstItemId = GetFirstVisibleItem();
+   
+   if (firstItemId.IsOk())
+   {
+      #ifdef DEBUG_MISSION_TREE_ACTIONS
+      MessageInterface::ShowMessage
+         ("   first item is <%s>\n", GetItemText(firstItemId).c_str());
+      #endif
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("\n*** ERROR *** Playback stopped due to first item not found\n");
+      return;
+   }
+   
+   //-----------------------------------------------------------------
+   // parse lines into actions
+   //-----------------------------------------------------------------
+   int lineCount = lines.size();
+   StringTokenizer stk;
+   StringArray actions;
+   
+   for (int i=0; i<lineCount; i++)
+   {
+      stk.Set(lines[i], " ");
+      actions = stk.GetAllTokens();
+      
+      #ifdef DEBUG_MISSION_TREE_ACTIONS
+      MessageInterface::ShowMessage("\n");
+      for (UnsignedInt i=0; i<actions.size(); i++)
+         MessageInterface::ShowMessage("<%s>", actions[i].c_str());
+      MessageInterface::ShowMessage("\n");
+      #endif
+      
+      //------------------------------------------
+      // Sample actions:
+      // Append Optimize to Mission Sequence
+      // Append If to Optimize1
+      // Append Equation to If1
+      // Append While to Optimize1
+      // Insert Maneuver after While1
+      // Delete Stop1 from Mission Sequence
+      // Delete Report2 from Optimize1
+      //------------------------------------------
+      
+      //--------------------------------------------------------------
+      // Find select item
+      //--------------------------------------------------------------
+      wxString selCmd = actions[3].c_str();
+      wxString cmd = actions[1].c_str();
+      
+      #ifdef DEBUG_MISSION_TREE_ACTIONS
+      MessageInterface::ShowMessage
+         ("   selCmd = %s, cmd = %s\n", selCmd.c_str(), cmd.c_str());
+      #endif
+      
+      bool itemFound = false;
+      wxTreeItemId itemId;
+      
+      //--------------------------------------------------------------
+      // Select item
+      //--------------------------------------------------------------
+      if (actions[0] == "Delete")
+      {
+         itemId = FindChild(firstItemId, cmd);
+      }
+      else
+      {
+         if (selCmd == "Mission")
+            itemId = firstItemId;
+         else
+            itemId = FindChild(firstItemId, selCmd);
+      }
+      
+      if (itemId.IsOk() && GetItemText(itemId) != "")
+      {
+         SelectItem(itemId);
+         itemFound = true;
+      }
+      
+      #ifdef DEBUG_MISSION_TREE_ACTIONS
+      wxTreeItemId selId = GetSelection();
+      MessageInterface::ShowMessage
+         ("   GetSelection()=%s\n", GetItemText(selId).c_str());
+      #endif
+      
+      
+      //--------------------------------------------------------------
+      // Do actions
+      //--------------------------------------------------------------
+      if (itemFound)
+      {
+         if (actions[0] == "Append")
+         {
+            Append(cmd);
+         }
+         else if (actions[0] == "Insert")
+         {
+            if (actions[2] == "before")
+               InsertBefore(cmd);
+            else
+               InsertAfter(cmd);
+         }
+         else if (actions[0] == "Delete")
+         {
+            DeleteCommand(cmd);
+         }
+         else
+         {
+            MessageInterface::ShowMessage
+               ("\n*** ERROR *** Playback stopped due to unknown action \"%s\"\n",
+                actions[0].c_str());
+         }
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("\n*** ERROR *** Playback stopped due to %s not found\n",
+             selCmd.c_str());
+         return;
+      }
+   }
+   
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   ShowCommands("After Playback");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteActions(const wxString &str)
+//------------------------------------------------------------------------------
+void MissionTree::WriteActions(const wxString &str)
+{
+   #ifdef DEBUG_MISSION_TREE_ACTIONS
+   MessageInterface::ShowMessage("\n..........%s", str.c_str());
+   #endif
+   
+   // write actions
+   mActionsOutStream << str;
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteResults()
+//------------------------------------------------------------------------------
+void MissionTree::WriteResults()
+{
+   // write results
+   GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
+   if (mSaveActions)
+      mResultsStream << GmatCommandUtil::GetCommandSeqString(cmd, false);
+   else if (mPlaybackActions)
+      mPlaybackResultsStream << GmatCommandUtil::GetCommandSeqString(cmd, false);
+}
+#endif
 
