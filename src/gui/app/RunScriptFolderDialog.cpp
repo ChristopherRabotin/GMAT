@@ -165,12 +165,12 @@ void RunScriptFolderDialog::Create()
    runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
-
+   
    //------------------------------------------------------
    // compare results
    //------------------------------------------------------
    mCompareCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Compare sesults"),
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Compare results"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
    wxStaticText *tolLabel =
