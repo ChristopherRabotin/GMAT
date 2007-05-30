@@ -179,7 +179,7 @@ const std::string& Optimize::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &prefix,
                                                  const std::string &useName)
 {
-   generatingString = "Optimize " + optimizerName + ";";
+   generatingString = prefix + "Optimize " + optimizerName + ";";
    return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
