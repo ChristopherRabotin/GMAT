@@ -30,29 +30,19 @@ class GMAT_API ScriptReadWriter
 public:
    static ScriptReadWriter* Instance();
    ~ScriptReadWriter();
-
-   void SetInStream(std::istream *is) { 
-      inStream = is; 
-      reachedEndOfFile = false;
-      readFirstBlock = false;  
-      currentLineNumber = 0;}
-   void SetOutStream(std::ostream *os) { outStream = os; }
    
-//    std::string GetScriptFilename();
-//    void SetScriptFilename(std::string fName);
+   void SetInStream(std::istream *is);
+   void SetOutStream(std::ostream *os) { outStream = os; }
    
    Integer GetLineWidth();
    void SetLineWidth(Integer width);
    
    Integer GetLineNumber();
    std::string GetCurrentLine() { return currentLine; }
-//    bool OpenScriptFile(bool readMode);
    
    std::string ReadLogicalBlock();
    bool WriteText(const std::string &textToWrite);
-   
-//    bool CloseScriptFile();
-   
+      
 protected:
 
 private:
@@ -60,19 +50,16 @@ private:
    // These data are not created here
    std::istream *inStream;
    std::ostream *outStream;
-
+   
    std::string currentLine;
    
-   //std::string fileName;
-   //std::fstream fileStream;
    Integer lineWidth;
    Integer currentLineNumber;
    bool writeGmatKeyword;
    bool reachedEndOfFile;
    bool readFirstBlock;
-
+   
    bool Initialize();
-   //std::string CrossPlatformGetLine(std::istream& in);
    std::string CrossPlatformGetLine();
    bool IsComment(const std::string &text);
    bool IsBlank(const std::string &text);
