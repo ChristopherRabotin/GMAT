@@ -3438,7 +3438,8 @@ wxTreeItemId ResourceTree::GetTreeItemId(GmatTree::ItemType itemType)
       break;
    }
    
-   return -1;
+   wxTreeItemId nullId;
+   return nullId;
    
 }
 
