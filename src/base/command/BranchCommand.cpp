@@ -311,12 +311,12 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", "adding to branch ", cmd);
+      ShowCommand("BranchCommand::", "::AddBranch() Adding to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
-      SetPreviousCommand(cmd, this, true);
-      
+      if (which - 1 >= 0)
+         SetPreviousCommand(cmd, branch.at(which-1), true);
    }
    else if (branch[which] == NULL)
    {
@@ -368,7 +368,7 @@ void BranchCommand::AddToFrontOfBranch(GmatCommand *cmd, Integer which)
    if (which == (Integer)(branch.size()))
    {
       #ifdef DEBUG_BRANCHCOMMAND_ADD
-      ShowCommand("BranchCommand::", " Adding to branch ", cmd);
+      ShowCommand("BranchCommand::", "::AddToFrontOfBranch() Adding to branch ", cmd);
       #endif
       
       branch.push_back(cmd);
@@ -1146,7 +1146,11 @@ void BranchCommand::SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
       #ifdef DEBUG_BRANCHCOMMAND_PREV_CMD
       MessageInterface::ShowMessage
          ("   cmd is of type \"BranchEnd\", so previous is not set\n");
+      ShowCommand("   ", " previous of ", cmd, " is ", cmd->GetPrevious());
       #endif
+      
+      if (cmd->GetPrevious() == NULL)
+         cmd->ForceSetPrevious(prev);
    }
    else
    {
