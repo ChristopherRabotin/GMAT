@@ -257,7 +257,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       //-----------------------------------
       // clear spacecraft object
       //-----------------------------------
-      for(int i=0; i<spaceObjSelectedListBox->GetCount(); i++)
+      for(unsigned int i=0; i<spaceObjSelectedListBox->GetCount(); i++)
          spaceObjAvailableListBox->Append(spaceObjSelectedListBox->GetString(i));
       
       spaceObjSelectedListBox->Clear();
@@ -286,7 +286,7 @@ void SpaceObjectSelectDialog::SaveData()
    #endif
    
    mSoNameList.Clear();
-   for(int i=0; i<spaceObjSelectedListBox->GetCount(); i++)
+   for(unsigned int i=0; i<spaceObjSelectedListBox->GetCount(); i++)
    {
       mSoNameList.Add(spaceObjSelectedListBox->GetString(i));
       

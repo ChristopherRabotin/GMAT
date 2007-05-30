@@ -322,7 +322,7 @@ void CelesBodySelectDialog::LoadData()
 void CelesBodySelectDialog::SaveData()
 {  
    mBodyNames.Clear();
-   for(int i=0; i<bodySelectedListBox->GetCount(); i++)
+   for(unsigned int i=0; i<bodySelectedListBox->GetCount(); i++)
    {
       mBodyNames.Add(bodySelectedListBox->GetString(i));
    }
