@@ -2859,7 +2859,7 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
       #endif
       
       #if DEBUG_COMMAND_DELETE
-      ShowCommand("Moderator::DeleteCommand() Returning ", remvCmd);
+      ShowCommand("==========> Moderator::DeleteCommand() Returning ", remvCmd);
       #endif
       
       return remvCmd;
@@ -2910,7 +2910,6 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
       ShowCommand("     current = ", current);
       #endif
       
-      //12/12 if (current->GetTypeName() == "EndScript")
       if (current == endScript)
          break;
       
@@ -2920,7 +2919,7 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
       ShowCommand("     removing and deleting ", current);
       #endif
       
-      remvCmd = cmd->Remove(current); //loj: 12/12/06
+      remvCmd = cmd->Remove(current);
       remvCmd->ForceSetNext(NULL);
       if (remvCmd != NULL)
          delete remvCmd;
@@ -2972,7 +2971,7 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
    std::string cmdString2 = GmatCommandUtil::GetCommandSeqString(first);
    MessageInterface::ShowMessage
       ("     ==> sequence after delete =%s\n", cmdString2.c_str());
-   ShowCommand("Moderator::DeleteCommand() Returning cmd = ", cmd);
+   ShowCommand("==========> Moderator::DeleteCommand() Returning cmd = ", cmd);
    #endif
    
    // Just return cmd, it should be deleted by the caller.
