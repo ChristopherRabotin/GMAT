@@ -831,12 +831,13 @@ bool StopCondition::CheckCyclicCondition(Real &value)
       mGoal = PutInRange(mGoal, min, max);
       value = PutInRange(value, mGoal - range2, 
                    mGoal + range2);
+      previousValue = PutInRange(previousValue, mGoal - range2, 
+                   mGoal + range2);
 
       #ifdef DEBUG_CYCLIC_PARAMETERS
          MessageInterface::ShowMessage(
-            "Goal = %lf, currValue = %lf, prevValue = %lf\n            "
-            "ranged CV = %lf, ranged PV = %lf, ranged Goal = %lf\n",
-            mGoal, value, previousValue, cv, pv, tempGoal);
+            "Cyclic condition: Goal = %lf, currValue = %lf, prevValue = %lf\n",
+            mGoal, value, previousValue);
       #endif
              
       if (fabs(mGoal - value) < (range2 / 2.0))
@@ -878,11 +879,11 @@ bool StopCondition::Initialize()
             isPeriapse = true;
       }
       
-      if (mStopParamType == "TA" || mStopParamType == "MA" ||
-          mStopParamType == "EA")
-      {
-         isAngleParameter = true;
-      }
+//      if (mStopParamType == "TA" || mStopParamType == "MA" ||
+//          mStopParamType == "EA")
+//      {
+//         isAngleParameter = true;
+//      }
       
       std::string paramTypeName = mStopParam->GetTypeName();
 
@@ -1762,8 +1763,10 @@ Real StopCondition::GetStopDifference()
       goalValue = mGoal;
       
    #ifdef DEBUG_STOPCOND
-      MessageInterface::ShowMessage("%s goal = %16.9lf, value = %16.9lf\n", 
-         instanceName.c_str(), goalValue, mStopParam->EvaluateReal());
+      MessageInterface::ShowMessage("%s goal (%s) = %16.9lf, value = %16.9lf\n", 
+         instanceName.c_str(), 
+         (mGoalParam ? mGoalParam->GetName().c_str() : "Fixed goal"), goalValue,
+         mStopParam->EvaluateReal());
    #endif
     
    return goalValue - mStopParam->EvaluateReal();
@@ -1781,7 +1784,13 @@ Real StopCondition::GetStopDifference()
 //------------------------------------------------------------------------------
 Real StopCondition::GetStopGoal()
 {
-   return mGoal;
+//   return mGoal;
+   Real goalValue;
+   if (mGoalParam)
+      goalValue = mGoalParam->EvaluateReal();
+   else
+      goalValue = mGoal;
+   return goalValue;
 }
 
 
