@@ -67,6 +67,7 @@
 //#define DEBUG_MISSION_TREE_DELETE 1
 //#define DEBUG_MISSION_TREE_CHILD 1
 //#define DEBUG_MISSION_TREE_FIND 2
+//#define DEBUG_FIND_ITEM_PARENT 2
 //#define DEBUG_MISSION_TREE_MENU 1
 
 //------------------------------
@@ -192,19 +193,6 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 
 
 //------------------------------------------------------------------------------
-// ~MissionTree()
-//------------------------------------------------------------------------------
-MissionTree::~MissionTree()
-{
-   #ifdef __TEST_MISSION_TREE_ACTIONS__
-   mActionsOutStream.close();
-   mResultsStream.close();
-   mPlaybackResultsStream.close();
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
 // void ClearMission()
 //------------------------------------------------------------------------------
 /**
@@ -223,6 +211,16 @@ void MissionTree::ClearMission()
    #endif
    
    DeleteChildren(mMissionSeqSubItem);
+   
+   #ifdef __TEST_MISSION_TREE_ACTIONS__
+   MessageInterface::ShowMessage("MissionTree::ClearMission() closing files...\n");
+   if (mActionsOutStream)
+      mActionsOutStream.close();
+   if (mResultsStream)
+      mResultsStream.close();
+   if (mPlaybackResultsStream)
+      mPlaybackResultsStream.close();
+   #endif
 }
 
 
@@ -242,11 +240,7 @@ void MissionTree::UpdateMission(bool resetCounter)
    if (resetCounter)
       InitializeCounter();
    
-//       inScriptEvent = false;
-//       inFiniteBurn = false;
-   
-   ClearMission();
-   
+   ClearMission();   
    UpdateCommand();
 }
 
@@ -760,13 +754,13 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
                            new MissionTreeItemData(nodeName, type, nodeName, cmd));
          
       }
-      else if (prevTypeName.Contains("End") && prevTypeName != "EndScript")
+      else if (prevTypeName.Contains("End") && prevTypeName != "EndScript" &&
+               prevTypeName != "EndFiniteBurn")
       {
-         //wxTreeItemId realPrevId = currId;
-         wxTreeItemId realPrevId = GetItemParent(prevId);
+         // Since EndScript and EndFiniteBurn is not part of branch command
+         // handle separately here
          
-         ////if (insertBefore)
-         ////   realPrevId = GetPrevSibling(currId);
+         wxTreeItemId realPrevId = GetItemParent(prevId);
          
          #if DEBUG_MISSION_TREE_INSERT
          MessageInterface::ShowMessage("   previous type contains End\n");
@@ -873,12 +867,14 @@ void MissionTree::Append(const wxString &cmdName)
    wxTreeItemId lastId = GetLastChild(itemId);
    wxTreeItemId parentId = GetItemParent(itemId);
    wxTreeItemId currId = itemId;
+   wxString itemText = GetItemText(itemId);
+   bool elseFound = false;
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mSaveActions)
    {
       wxString str;
-      str.Printf("Append %s to %s\n", cmdName.c_str(), GetItemText(itemId).c_str());
+      str.Printf("Append %s to %s\n", cmdName.c_str(), itemText.c_str());
       WriteActions(str);
    }
    #endif
@@ -889,12 +885,15 @@ void MissionTree::Append(const wxString &cmdName)
        cmdName.c_str(), GetItemText(itemId).c_str(), GetItemText(lastId).c_str());
    #endif
    
-   // Append command before Else, if there is Else
-   if (cmdName != "Else")
+   // Append command before Else, if there is Else and current selection is If
+   if (cmdName != "Else" && itemText.Contains("If"))
    {
       wxTreeItemId elseId = FindChild(itemId, "Else");
       if (elseId.IsOk() && GetItemText(elseId) != "")
+      {
          lastId = elseId;
+         elseFound = true;
+      }
    }
    
    #if DEBUG_MISSION_TREE_APPEND
@@ -921,10 +920,15 @@ void MissionTree::Append(const wxString &cmdName)
    else
       prevId = currId;
    
+   #if DEBUG_MISSION_TREE_APPEND
+   MessageInterface::ShowMessage("   prevId=%s\n", GetItemText(prevId).c_str());
+   #endif
+   
    MissionTreeItemData *currItem = (MissionTreeItemData *)GetItemData(itemId);
    MissionTreeItemData *prevItem = (MissionTreeItemData *)GetItemData(prevId);
    GmatCommand *currCmd = currItem->GetCommand();
-   GmatCommand *prevCmd = currCmd;
+   ////GmatCommand *prevCmd = currCmd;
+   GmatCommand *prevCmd = prevItem->GetCommand();
    GmatCommand *cmd = NULL;
    
    #if DEBUG_MISSION_TREE_APPEND
@@ -934,7 +938,7 @@ void MissionTree::Append(const wxString &cmdName)
    // For BranchCommand, use GmatCommandUtil::GetMatchingEnd() to get
    // previous command, since there may be commands not shown on the tree.
    // Note: Make sure this works on other than Windows also (loj: 12/15/06)
-   if (currCmd->IsOfType("BranchCommand"))
+   if (currCmd->IsOfType("BranchCommand") && !elseFound)
    {
       parentId = itemId;
       currId = GetLastChild(itemId);
@@ -1607,6 +1611,7 @@ void MissionTree::AddIcons()
 
 }
 
+
 //------------------------------------------------------------------------------
 // void OnItemRightClick(wxTreeEvent& event)
 //------------------------------------------------------------------------------
@@ -1618,8 +1623,11 @@ void MissionTree::AddIcons()
 //------------------------------------------------------------------------------
 void MissionTree::OnItemRightClick(wxTreeEvent& event)
 {
+   //wxWidgets-2.6.3 does not need this but wxWidgets-2.8.0 needs to SelectItem
+   SelectItem(event.GetItem());
    ShowMenu(event.GetItem(), event.GetPoint());
 }
+
 
 //------------------------------------------------------------------------------
 // void OnItemActivated(wxTreeEvent &event)
@@ -1706,8 +1714,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
    wxString title = treeItem->GetDesc();
    int dataType = treeItem->GetDataType();
    wxTreeItemId parent = GetItemParent(id);
-   MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parent);
-   int parentDataType = parentItem->GetDataType();
+   //MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parent);
+   //int parentDataType = parentItem->GetDataType();
    
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage
@@ -1758,7 +1766,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       if (dataType == GmatTree::TARGET)
       {
          menu.Append(POPUP_APPEND, wxT("Append"),
-                     CreateTargetPopupMenu(dataType, APPEND));         
+                     CreateTargetPopupMenu(dataType, APPEND));
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
                      CreatePopupMenu(dataType, INSERT_BEFORE));         
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
@@ -1767,7 +1775,7 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       else if (dataType == GmatTree::OPTIMIZE)
       {
          menu.Append(POPUP_APPEND, wxT("Append"),
-                     CreateOptimizePopupMenu(dataType, APPEND));         
+                     CreateOptimizePopupMenu(dataType, APPEND));
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
                      CreatePopupMenu(dataType, INSERT_BEFORE));         
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
@@ -1789,19 +1797,23 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       }
       else 
       {
-         if (parentDataType == GmatTree::TARGET)
+         GmatTree::ItemType itemType;
+         if (IsInsideSolver(id, itemType))
          {
-            menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                        CreateTargetPopupMenu(dataType, INSERT_BEFORE));
-            menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                        CreateTargetPopupMenu(dataType, INSERT_AFTER));
-         }
-         else if (parentDataType == GmatTree::OPTIMIZE)
-         {
-            menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                        CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
-            menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                        CreateOptimizePopupMenu(dataType, INSERT_AFTER));
+            if (itemType == GmatTree::TARGET)
+            {
+               menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                           CreateTargetPopupMenu(dataType, INSERT_BEFORE));
+               menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                           CreateTargetPopupMenu(dataType, INSERT_AFTER));
+            }
+            else if (itemType == GmatTree::OPTIMIZE)
+            {
+               menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
+                           CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
+               menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
+                           CreateOptimizePopupMenu(dataType, INSERT_AFTER));
+            }
          }
          else
          {
@@ -1818,8 +1830,25 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
           (dataType == GmatTree::FOR_CONTROL) ||
           (dataType == GmatTree::WHILE_CONTROL))
       {
-         menu.Append(POPUP_APPEND, wxT("Append"),
-                     CreatePopupMenu(dataType, APPEND));
+         GmatTree::ItemType itemType;
+         if (IsInsideSolver(id, itemType))
+         {
+            if (itemType == GmatTree::TARGET)
+            {
+               menu.Append(POPUP_APPEND, wxT("Append"),
+                           CreateTargetPopupMenu(dataType, APPEND));   
+            }
+            else if (itemType == GmatTree::OPTIMIZE)
+            {
+               menu.Append(POPUP_APPEND, wxT("Append"),
+                           CreateOptimizePopupMenu(dataType, APPEND));   
+            }
+            else
+            {
+               menu.Append(POPUP_APPEND, wxT("Append"),
+                           CreatePopupMenu(dataType, APPEND));
+            }
+         }
       }
       
       // Delete and Rename applies to all, except End branch
@@ -2902,7 +2931,7 @@ int* MissionTree::GetCommandCounter(const wxString &cmd)
 // wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd)
 //------------------------------------------------------------------------------
 /*
- * Finds a item from the tree.
+ * Finds a item from the parent node of the tree.
  *
  * @param <parentId> Parent item id
  * @param <cmd> Name of the command to find
@@ -2916,8 +2945,23 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
        GetItemText(parentId).c_str(), cmd.c_str());
    #endif
 
-   unsigned int itemCount = GetCount();
-   wxTreeItemId firstItem = GetFirstVisibleItem();
+   MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId);
+   GmatTree::ItemType parentType = parentItem->GetDataType();
+   unsigned int itemCount = 0;
+   wxTreeItemId firstItem;
+   
+   // if parent is top node, then get total count
+   if (parentType == GmatTree::MISSION_SEQ_SUB_FOLDER)
+   {
+      itemCount = GetCount();
+      firstItem = GetFirstVisibleItem();
+   }
+   else
+   {
+      itemCount = GetChildrenCount(parentId);
+      firstItem = parentId;
+   }
+   
    wxTreeItemId item = firstItem;
    wxString itemText;
    
@@ -2943,6 +2987,58 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
    wxTreeItemId nullId;
    return nullId;
    
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType)
+//------------------------------------------------------------------------------
+/*
+ * Checks if an item is inside of solver (Target, Optimize) branch.
+ *
+ */
+//------------------------------------------------------------------------------
+bool MissionTree::IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType)
+{
+   #if DEBUG_FIND_ITEM_PARENT
+   MessageInterface::ShowMessage
+      ("MissionTree::IsInsideSolver() itemId=%s\n", GetItemText(itemId).c_str());
+   #endif
+   
+   wxTreeItemId parentId = GetItemParent(itemId);
+   MissionTreeItemData *parentItem;
+   GmatTree::ItemType parentType;
+   
+   // go through parents
+   while (parentId.IsOk() && GetItemText(parentId) != "")
+   {
+      #if DEBUG_FIND_ITEM_PARENT > 1
+      MessageInterface::ShowMessage("   parent=%s\n", GetItemText(parentId).c_str());
+      #endif
+      
+      parentItem = (MissionTreeItemData *)GetItemData(parentId);
+      parentType = parentItem->GetDataType();
+      
+      if (parentType == GmatTree::TARGET || parentType == GmatTree::OPTIMIZE)
+      {
+         #if DEBUG_FIND_ITEM_PARENT
+         MessageInterface::ShowMessage
+            ("MissionTree::IsInsideSolver() returning true, parent=%s\n",
+             GetItemText(parentId).c_str());
+         #endif
+         
+         itemType = parentType;
+         return true;
+      }
+      
+      parentId = GetItemParent(parentId);
+   }
+   
+   #if DEBUG_FIND_ITEM_PARENT
+   MessageInterface::ShowMessage("MissionTree::IsInsideSolver() returning false\n");
+   #endif
+   
+   return false;
 }
 
 
@@ -3110,7 +3206,7 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
    #endif
    
    wxString actionsInFile =
-      wxFileSelector("Choose a file to save", "", "", "txt",
+      wxFileSelector("Choose a file to open", "", "", "txt",
                      "Text files (*.txt)|*.txt", wxOPEN);
    
    if (actionsInFile.empty())

@@ -34,7 +34,6 @@ public:
    MissionTree(wxWindow *parent, const wxWindowID id,
                const wxPoint& pos, const wxSize& size,
                long style);
-   ~MissionTree();
    
    void ClearMission();
    void UpdateMission(bool resetCounter);
@@ -149,6 +148,7 @@ private:
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    int* GetCommandCounter(const wxString &cmd);
    wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd);
+   bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
    
    // for Debug
    void ShowCommands(const wxString &msg = "");
