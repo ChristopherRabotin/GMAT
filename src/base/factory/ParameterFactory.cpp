@@ -234,18 +234,25 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new DeltaVDir3(withName, ofType);
    
    // Attitude parameters
-   if (ofType == "Quat1")
+   if (ofType == "Q1" || ofType == "q1")
       return new Quat1(withName);
-   if (ofType == "Quat2")
+   if (ofType == "Q2" || ofType == "q2")
       return new Quat2(withName);
-   if (ofType == "Quat3")
+   if (ofType == "Q3" || ofType == "q3")
       return new Quat3(withName);
-   if (ofType == "Quat4")
+   if (ofType == "Q4" || ofType == "q4")
       return new Quat4(withName);
    
    // add others here
+   
    else
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** Cannot create a parameter with unknown type \"%s\"\n",
+          ofType.c_str());
+      
       return NULL;
+   }
 }
 
 
@@ -366,10 +373,10 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("B");
       
       // Attitude parameters
-      creatables.push_back("Quat1");
-      creatables.push_back("Quat2");
-      creatables.push_back("Quat3");
-      creatables.push_back("Quat4");
+      creatables.push_back("Q1");
+      creatables.push_back("Q2");
+      creatables.push_back("Q3");
+      creatables.push_back("Q4");
    }
 }
 

@@ -235,7 +235,7 @@ void Moderator::Finalize()
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript().c_str());
-   MessageInterface::ShowMessage("deleting files\n");
+   MessageInterface::ShowMessage("...deleting files\n");
    #endif
    
    delete theFileManager;
@@ -250,10 +250,18 @@ void Moderator::Finalize()
    {
       ClearResource();
       ClearCommandSeq();
-   
+      
+      // only 1 sandbox for now
+      GmatCommand *cmd = commands[0];
+      #if DEBUG_FINALIZE
+      MessageInterface::ShowMessage("...deleting (%p)%s\n", cmd, cmd->GetTypeName().c_str());
+      #endif
+      delete cmd;
+      cmd = NULL;
+      
       delete theFactoryManager;
       delete theGuiInterpreter;
-   
+      
       //delete theConfigManager; (private)
       //delete theScriptInterpreter; (private)
       //delete thePublisher; (private)
@@ -1659,15 +1667,18 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    if (GetParameter(name) == NULL)
    {
       Parameter *param = theFactoryManager->CreateParameter(type, name);
-      
+         
       #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage
-         ("   param=%s, addr=%p\n", param->GetName().c_str(), param);
+      if (param == NULL)
+         MessageInterface::ShowMessage("   param = (NULL)\n");
+      else
+         MessageInterface::ShowMessage
+            ("   param = (%p)%s\n", param, param->GetName().c_str());
       #endif
       
       if (param == NULL)
-        throw GmatBaseException("Error Creating Parameter: " + type + " in " +
-                                name + "\n");
+        throw GmatBaseException
+           ("Error creating a parameter \"" + type + "\" named \"" + name + "\"\n");
       
       // We don't know the owner type the parameter before create,
       // so validate owner type after create.
@@ -2840,6 +2851,14 @@ bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
 //------------------------------------------------------------------------------
 // GmatCommand* DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 //------------------------------------------------------------------------------
+/*
+ * Removes a command from the command sequence. The caller has to delete the command.
+ *
+ * If deleting branch command,
+ * it will remove and delete all children from the branch. If deleting ScriptEvent,
+ * it will remove and delete all commands including EndScrpt between BeginScrint
+ * and EndScript.
+ */
 GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 {
    #if DEBUG_COMMAND_DELETE
@@ -3447,10 +3466,11 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    MessageInterface::ShowMessage
       ("   Calling %s->RunComplete\n", cmd->GetTypeName().c_str());
    #endif
-
+   
    cmd->RunComplete();
    
    oldcmd = cmd->GetNext();
+   // Set next of cmd to NULL
    DeleteCommand(cmd);
    if (oldcmd)
    {
@@ -3467,14 +3487,14 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
       
       delete oldcmd;
    }
+
+   // Leave current NoOp in the sequence
+   // The NoOp will be deleted in the Finalize()
+   //cmd = new NoOp; 
    
-   // djc: if you plan on adding the gui commands to the sandbox next, using 
-   // the same approach used when running a script.
-   cmd = new NoOp; 
-   
-   #ifdef DEBUG_SEQUENCE_CLEARING
-   ShowCommand("New NoOp created ", cmd);
-   #endif
+   //#ifdef DEBUG_SEQUENCE_CLEARING
+   //ShowCommand("   New NoOp created ", cmd);
+   //#endif
    
    return true;
 }
@@ -4405,10 +4425,10 @@ void Moderator::CreateDefaultMission()
       CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
       
       // Attitude parameters
-      CreateParameter("Quat1", "DefaultSC.Quat1");
-      CreateParameter("Quat2", "DefaultSC.Quat2");
-      CreateParameter("Quat3", "DefaultSC.Quat3");
-      CreateParameter("Quat4", "DefaultSC.Quat4");
+      CreateParameter("Q1", "DefaultSC.Q1");
+      CreateParameter("Q2", "DefaultSC.Q2");
+      CreateParameter("Q3", "DefaultSC.Q3");
+      CreateParameter("Q4", "DefaultSC.Q4");
       
       #ifdef DEBUG_CREATE_VAR
       // User variable
@@ -5245,7 +5265,6 @@ void Moderator::ShowCommand(const std::string &title1, GmatCommand *cmd1,
 //------------------------------------------------------------------------------
 Moderator::Moderator()
 {
-//    isInitialized = false;
    isRunReady = false;
    showFinalState = false;
    theDefaultSolarSystem = NULL;

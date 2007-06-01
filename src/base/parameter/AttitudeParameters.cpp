@@ -25,7 +25,7 @@
 // Quat1(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat1::Quat1(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Quat1", obj, "Quaternion 1", "")
+   : AttitudeReal(name, "Q1", obj, "Quaternion 1", "")
 {
    mColor = GmatColor::RED32;
 }
@@ -87,7 +87,7 @@ GmatBase* Quat1::Clone(void) const
 // Quat2(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat2::Quat2(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Quat2", obj, "Quaternion 2", "")
+   : AttitudeReal(name, "Q2", obj, "Quaternion 2", "")
 {
    mColor = GmatColor::YELLOW32;
 }
@@ -149,7 +149,7 @@ GmatBase* Quat2::Clone(void) const
 // Quat3(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat3::Quat3(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Quat3", obj, "Quaternion 3", "")
+   : AttitudeReal(name, "Q3", obj, "Quaternion 3", "")
 {
    mColor = GmatColor::BLUE32;
 }
@@ -211,7 +211,7 @@ GmatBase* Quat3::Clone(void) const
 // Quat4::Quat4(const std::string &name, GmatBase *obj)
 //------------------------------------------------------------------------------
 Quat4::Quat4(const std::string &name, GmatBase *obj)
-   : AttitudeReal(name, "Quat4", obj, "Quaternion 4", "")
+   : AttitudeReal(name, "Q4", obj, "Quaternion 4", "")
 {
    mColor = GmatColor::GREEN32;
 }
