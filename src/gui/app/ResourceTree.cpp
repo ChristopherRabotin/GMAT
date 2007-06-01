@@ -60,6 +60,7 @@
 #include "StringUtil.hpp"             // for GmatStringUtil::
 #include <sstream>
 #include <fstream>
+#include <ctime>                      // for clock()
 #include <wx/dir.h>
 #include <wx/filename.h>
 #include <wx/filedlg.h>
@@ -2674,6 +2675,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxArrayString failedToRunScripts;
    wxArrayString runInterruptedScripts;
    
+   clock_t t1 = clock();
+   
    while (scriptId.IsOk())
    {     
       if (GetItemImage(scriptId) == GmatTree::ICON_FOLDER)
@@ -2779,6 +2782,10 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    }
    
    mScriptFolderRunning = false;
+   
+   clock_t t2 = clock();
+   MessageInterface::ShowMessage
+      ("===> Grand Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
    
    // save compare results to a file
    if (compare && saveCompareResults)
