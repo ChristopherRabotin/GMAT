@@ -3570,6 +3570,11 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
          #endif
       }
    }
+   
+   if (attempts == 50)
+      MessageInterface::ShowMessage(
+         "WARNING: Failed to find a good stopping point for condition \"%s\" in"
+         " 50 attempts!\n", stopper->GetName().c_str());
       
    // Restore the spacecraft and force models to the end state of the last step
    BufferSatelliteStates(false);
