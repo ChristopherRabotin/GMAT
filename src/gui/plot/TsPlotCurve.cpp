@@ -2,28 +2,20 @@
 //------------------------------------------------------------------------------
 //                              TsPlotCurve
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
 //
-// Author: Darrel Conway
+// Author: Darrel Conway, Thinking Systems, Inc.
 // Created: 2005/05/20
 //
 // This code is Copyright (c) 2005, Thinking Systems, Inc.
 // Licensed under the Academic Free License version 3.0.
 /**
- * Declares TsPlotCurve for TsPlotCanvas's.
- *
- * @note The TsPlotCanvas subsystem is a generic plotting package developed by
- *       Thinking Systems using company resources.  Because the package was
- *       developed independently from the GMAT project, it uses native C++
- *       data types (e.g. int rather than Integer, double rather than Real), and
- *       in that respect will look different from other pieces of the GMAT code
- *       base.
+ * Implements the TsPlotCurves used on TsPlotCanvas's.
  */
 //------------------------------------------------------------------------------
  
 
 #include "TsPlotCurve.hpp"
-#include "LinearInterpolator.hpp"
+//#include "LinearInterpolator.hpp"
 #include "MessageInterface.hpp"
 
 

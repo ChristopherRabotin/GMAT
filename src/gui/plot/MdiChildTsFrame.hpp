@@ -16,7 +16,7 @@
 #define MdiChildTsFrame_hpp
 
 #include "GmatMdiChildFrame.hpp"
-#include "TsPlotCanvas.hpp"
+#include "TsPlotXYCanvas.hpp"
 
 // // For compilers that support precompilation, includes "wx/wx.h".
 // #include "wx/wxprec.h"

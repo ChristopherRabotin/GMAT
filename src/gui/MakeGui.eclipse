@@ -168,7 +168,9 @@ OBJECTS = \
     plot/ReportFileSetupPanel.o \
     plot/TrajPlotCanvas.o \
     plot/TsPlotCanvas.o \
+    plot/TsPlotXYCanvas.o \
     plot/TsPlotCurve.o \
+    plot/TsPlotOptionsDialog.o \
     plot/XyPlotSetupPanel.o \
     propagator/PropagationConfigPanel.o \
     propagator/PropagatorSelectDialog.o \

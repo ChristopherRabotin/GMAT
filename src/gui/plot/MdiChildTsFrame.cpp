@@ -17,7 +17,7 @@
 
 #include "MdiTsPlotData.hpp"
 #include "TsPlotCurve.hpp"
-#include "TsPlotCanvas.hpp"
+#include "TsPlotXYCanvas.hpp"
 #include "GmatAppData.hpp"
 #include "RealUtilities.hpp" // for Abs(), Min(), Max()
 #include <fstream>           // for ifstream (plot input file)
@@ -104,7 +104,7 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    #endif
    
    TsPlotCanvas *frame =
-      new TsPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
+      new TsPlotXYCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
                        wxTAB_TRAVERSAL,//wxPLOT_DEFAULT,
                        plotTitle);
    
