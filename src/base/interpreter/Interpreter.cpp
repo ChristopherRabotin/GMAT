@@ -34,7 +34,7 @@
 #include <fstream>         // for std::ifstream used bt GMAT functions
 #include <stack>
 
-//#define __ENABLE_ATTITUDE_LIST__
+#define __ENABLE_ATTITUDE_LIST__
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
 //#define DEBUG_INIT
