@@ -362,6 +362,7 @@ protected:
    bool                callbackExecuting;
    
    std::string         errorMessageFormat;
+   std::string         errorMessageFormatUnnamed;
    
    // DATA_PRECISION and TIME_PRECISION are now in GmatGlobal
    //static Integer      DATA_PRECISION;

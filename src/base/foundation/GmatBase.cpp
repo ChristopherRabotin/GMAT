@@ -189,12 +189,20 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
          "The value of \"%s\" for field \"%s\" on command \""
          + typeName +  "\" is not an allowed value. \n"
          "The allowed values are: [%s].";
+      errorMessageFormatUnnamed =
+         "The value of \"%s\" for field \"%s\" on a command of type \""
+         + typeName +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
    }
    else
    {
       errorMessageFormat =
          "The value of \"%s\" for field \"%s\" on object \""
          + instanceName +  "\" is not an allowed value. \n"
+         "The allowed values are: [%s].";
+      errorMessageFormatUnnamed =
+         "The value of \"%s\" for field \"%s\" on an object of type \""
+         + typeName +  "\" is not an allowed value. \n"
          "The allowed values are: [%s].";
    }
    
