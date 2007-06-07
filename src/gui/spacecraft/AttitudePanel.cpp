@@ -25,7 +25,7 @@
 
 // initial selections in combo boxes
 #define STARTUP_STATE_TYPE_SELECTION            EULER_ANGLES
-#define STARTUP_RATE_STATE_TYPE_SELECTION       EULER_ANGLES_RATES
+#define STARTUP_RATE_STATE_TYPE_SELECTION       EULER_ANGLE_RATES
 
 //#define DEBUG_ATTITUDE_PANEL 1
 
@@ -123,7 +123,7 @@ void AttitudePanel::Create()
 //   wxString *attitudeModeArray = new wxString;
 //   *attitudeModeArray = "Kinematic";
    wxString *attitudeModeArray = new wxString[2];
-   attitudeModeArray[0] = "CSFixed";
+   attitudeModeArray[0] = "CoordinateSystemFixed";
    attitudeModeArray[1] = "Spinner";
 
    config1StaticText =
@@ -143,7 +143,7 @@ void AttitudePanel::Create()
 
    //Kinematic Attitude Type
 //   wxString *kinematicAttitudeTypeArray = new wxString[2];
-//   kinematicAttitudeTypeArray[0] = "CSFixed";
+//   kinematicAttitudeTypeArray[0] = "CoordinateSystemFixed";
 //   kinematicAttitudeTypeArray[1] = "Spinner";
 //
 //   config3StaticText =
@@ -681,7 +681,7 @@ void AttitudePanel::LoadData()
    {
       DisplayEulerAngles();
    }
-   else if (STARTUP_STATE_TYPE_SELECTION == QUATERNIONS)
+   else if (STARTUP_STATE_TYPE_SELECTION == QUATERNION)
    {
       DisplayQuaternions();
    }
@@ -690,7 +690,7 @@ void AttitudePanel::LoadData()
       DisplayDCM();
    }
    
-   if (STARTUP_RATE_STATE_TYPE_SELECTION == EULER_ANGLES_RATES) 
+   if (STARTUP_RATE_STATE_TYPE_SELECTION == EULER_ANGLE_RATES) 
    {
       DisplayEulerAngleRates();
    }
@@ -770,7 +770,7 @@ void AttitudePanel::SaveData()
       }
       a->SetRvectorParameter(a->GetParameterID("InitialEulerAngles"), eulerAnglesRvector);
    }
-   else if (stateTypeStr == stateTypeArray[QUATERNIONS])
+   else if (stateTypeStr == stateTypeArray[QUATERNION])
    {
       Rvector  quaternionRvector(4);
       Real dQ;
@@ -810,7 +810,7 @@ void AttitudePanel::SaveData()
    }
 
    std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
    {
       Rvector3 eulerAngleRatesRvector;
       Real dEAR;
@@ -867,7 +867,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
       // else is not immediately shown
       
       std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-      if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+      if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
       {
          CalculateFromEulerAngleRates();
       }
@@ -875,7 +875,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
          CalculateFromAngularVelocity();
       }
    }
-   else if (stateTypeStr == stateTypeArray[QUATERNIONS])
+   else if (stateTypeStr == stateTypeArray[QUATERNION])
    {
       if (st1TextCtrl)
          quaternions[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
@@ -928,7 +928,7 @@ void AttitudePanel::OnStateTypeRateTextUpdate(wxCommandEvent &event)
    if (dontUpdate) return;
    
    std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
    {
       if (str1TextCtrl)
          eulerAngleRates[0]->Printf("%s", str1TextCtrl->GetValue().c_str());
@@ -971,7 +971,7 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
    std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
    if (stateTypeStr == stateTypeArray[EULER_ANGLES])
       DisplayEulerAngles();
-   else if (stateTypeStr == stateTypeArray[QUATERNIONS])
+   else if (stateTypeStr == stateTypeArray[QUATERNION])
       DisplayQuaternions();
    else if (stateTypeStr == stateTypeArray[DCM])
       DisplayDCM();
@@ -985,7 +985,7 @@ void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
 {
         std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
         
-        if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLES_RATES])
+        if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
            DisplayEulerAngleRates();
         else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
            DisplayAngularVelocity();

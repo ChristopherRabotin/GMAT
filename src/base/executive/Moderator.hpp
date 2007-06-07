@@ -31,6 +31,7 @@
 #include "FileManager.hpp"
 // core
 #include "AtmosphereModel.hpp"
+#include "Attitude.hpp"
 #include "AxisSystem.hpp"
 #include "Burn.hpp"
 #include "GmatCommand.hpp"
@@ -212,6 +213,10 @@ public:
    // MathNode
    MathNode* CreateMathNode(const std::string &type,
                             const std::string &name = "");
+
+   // AxisSystem
+   Attitude* CreateAttitude(const std::string &type,
+                            const std::string &name);
    
    // GmatCommand
    GmatCommand* InterpretGmatFunction(const std::string &functionFilename);

@@ -41,6 +41,7 @@
 #include "AxisSystem.hpp" 
 #include "CoordinateSystem.hpp"
 #include "MathNode.hpp"
+#include "Attitude.hpp"
 
 class GMAT_API Factory
 {
@@ -87,6 +88,8 @@ public:
    virtual CoordinateSystem* CreateCoordinateSystem(const std::string &ofType,
                                                     const std::string &withName = "");
    virtual MathNode*        CreateMathNode(const std::string &ofType,
+                                           const std::string &withName = "");
+   virtual Attitude*        CreateAttitude(const std::string &ofType,
                                            const std::string &withName = "");
 
    

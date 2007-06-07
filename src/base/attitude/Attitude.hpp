@@ -49,23 +49,6 @@
       EULER_ANGLE_RATES_TYPE
    };
    
-   enum EulerSequenceType
-   {
-      EULER_1_2_3 = 0,
-      EULER_2_3_1,
-      EULER_3_1_2,
-      EULER_1_3_2,
-      EULER_3_2_1,
-      EULER_2_1_3,
-      EULER_1_2_1,
-      EULER_2_3_2,
-      EULER_3_1_3,
-      EULER_1_3_1,
-      EULER_3_2_3,
-      EULER_2_1_2,
-   };
-   
- 
  };
  
 /**
@@ -105,7 +88,8 @@ public:
                                       Integer seq1, Integer seq2, 
                                       Integer seq3);
                                       
-   static StringArray GetEulerSequenceStrings();
+   static StringArray 
+                    GetEulerSequenceStrings();
    
 
    // Constructor
@@ -139,6 +123,9 @@ public:
    
    virtual const Rvector3&    GetAngularVelocity(Real atTime);
    virtual const Rvector3&    GetEulerAngleRates(Real atTime);
+   
+   // return the type of attitude model it is
+   std::string         GetAttitudeModelName() const;
    
    // methods to access object parameters
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
@@ -202,25 +189,64 @@ public:
                        GetStringArrayParameter(const Integer id) const; 
    virtual const StringArray& 
                        GetStringArrayParameter(const std::string &label) const;
+   virtual const std::string&  
+                       GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                           const std::string &prefix = "",
+                                           const std::string &useName = "");
 protected:
-   enum 
+   enum
    {
-       REFERENCE_COORDINATE_SYSTEM_NAME = GmatBaseParamCount,
+       REFERENCE_COORDINATE_SYSTEM = GmatBaseParamCount,
        INITIAL_EPOCH,                      // A1Mjd (Real)
-       EULER_SEQUENCE_LIST,
-       EULER_SEQUENCE_STRING,
+       Q_1,
+       Q_2,
+       Q_3,
+       Q_4,
+       EULER_ANGLE_SEQUENCE,
+       EULER_ANGLE_1,
+       EULER_ANGLE_2,
+       EULER_ANGLE_3,
+       DCM_11,
+       DCM_12,
+       DCM_13,
+       DCM_21,
+       DCM_22,
+       DCM_23,
+       DCM_31,
+       DCM_32,
+       DCM_33,
+       EULER_ANGLE_RATE_1,
+       EULER_ANGLE_RATE_2,
+       EULER_ANGLE_RATE_3,
+       ANGULAR_VELOCITY_X,
+       ANGULAR_VELOCITY_Y,
+       ANGULAR_VELOCITY_Z,    
+       AttitudeParamCount
+   };
+   
+   enum OtherReps
+   {
+       //REFERENCE_COORDINATE_SYSTEM_NAME = GmatBaseParamCount,
+       //INITIAL_EPOCH,                      // A1Mjd (Real)
+       EULER_SEQUENCE_LIST = 7000,
+       //EULER_SEQUENCE_STRING,
        INITIAL_EULER_SEQUENCE,
        INITIAL_EULER_ANGLES,               // degrees
        INITIAL_EULER_ANGLE_RATES,          // degrees/second
        INITIAL_QUATERNION,
        INITIAL_DIRECTION_COSINE_MATRIX,
        INITIAL_ANGULAR_VELOCITY,           // degrees/second
-       AttitudeParamCount
+       //AttitudeParamCount
+       EndOtherReps
    };
    
    static const std::string PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount];
    
    static const Gmat::ParameterType PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount];
+ 
+   static const std::string OTHER_REP_TEXT[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
+   
+   static const Gmat::ParameterType OTHER_REP_TYPE[EndOtherReps - 7000]; // OTHER_REPS_OFFSET
  
    static const std::string EULER_SEQ_LIST[12];
    //static StringArray eulerStrings;
@@ -228,6 +254,8 @@ protected:
    static const Real TESTACCURACY;
    
    static const Real ATTITUDE_TIME_TOLERANCE;
+   
+   static const Integer OTHER_REPS_OFFSET;
 
    
    GmatAttitude::AttitudeStateType
@@ -288,6 +316,8 @@ protected:
    Real      lastEulerAngleRatesTime;
    /// the last computed euler angle rates  (radians/second)
    Rvector3  lastEulerAngleRates;
+   
+   std::string attitudeModelName;
  
    // method to convert an euler axis and angle to a cosine matrix                     
    virtual Rmatrix33 EulerAxisAndAngleToDCM(
@@ -324,6 +354,8 @@ protected:
 private:
    // default constructor - not implemented
    Attitude(); 
-   
+   bool      ValidateCosineMatrix(const Rmatrix33 &mat);
+   bool      ValidateEulerSequence(const std::string &seq);
+   bool      ValidateEulerSequence(const UnsignedIntArray &eulAng);      
 };
 #endif /*Attitude_hpp*/

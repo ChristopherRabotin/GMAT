@@ -40,10 +40,11 @@
  */
 //------------------------------------------------------------------------------
 CSFixed::CSFixed(const std::string &itsName) : 
-   Kinematic("CSFixed",itsName)
+   Kinematic("CoordinateSystemFixed",itsName)
 {
    parameterCount = CSFixedParamCount;
-   objectTypeNames.push_back("CSFixed");
+   objectTypeNames.push_back("CoordinateSystemFixed");
+   attitudeModelName = "CoordinateSystemFixed";
  }
  
  //------------------------------------------------------------------------------

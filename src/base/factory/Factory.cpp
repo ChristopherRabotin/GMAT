@@ -595,6 +595,34 @@ MathNode* Factory::CreateMathNode(const std::string &ofType,
    ("Factory::CreateMathNode() must be implemented by the MathFactory\n");
 }
 
+//------------------------------------------------------------------------------
+//  Attitude* CreateAttitude(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Creates an Attitude object.
+ * 
+ * Must be implemented by derived classes that create Attitude objects -
+ * in that case, it returns a new Attitude object.  Otherwise, it
+ * throws an exception indicating that the class does not create objects of
+ * type Attitude.
+ *
+ * @param <ofType>   specific type of Attitude object to create.
+ * @param <withName> name to give to the newly created Attitude object.
+ *
+ * @return pointer to a new Attitude object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ *                               objects of type Attitude.
+ */
+//------------------------------------------------------------------------------
+Attitude* Factory::CreateAttitude(const std::string &ofType,
+                                  const std::string &withName)
+{
+   throw FactoryException
+   ("Factory::CreateAttitude() must be implemented by the AttitudeFactory\n");
+}
+
 
 //------------------------------------------------------------------------------
 //  StringArray GetListOfCreatableObjects(void) const

@@ -22,6 +22,7 @@
 
 // factories
 #include "AtmosphereFactory.hpp"
+#include "AttitudeFactory.hpp"
 #include "AxisSystemFactory.hpp"
 #include "BurnFactory.hpp"
 #include "CommandFactory.hpp"
@@ -130,6 +131,7 @@ bool Moderator::Initialize(bool fromGui)
             
       // Register factories
       theFactoryManager->RegisterFactory(new AtmosphereFactory());
+      theFactoryManager->RegisterFactory(new AttitudeFactory());
       theFactoryManager->RegisterFactory(new AxisSystemFactory());
       theFactoryManager->RegisterFactory(new BurnFactory());
       theFactoryManager->RegisterFactory(new CalculatedPointFactory());
@@ -2498,6 +2500,42 @@ MathNode* Moderator::CreateMathNode(const std::string &type,
       throw GmatBaseException("Error Creating MathNode: " + type + "\n");
    
    return mathNode;
+}
+
+//------------------------------------------------------------------------------
+// Attitude* CreateAttitude(const std::string &type,
+//                          const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Creates an Attitude object by given type and name.
+ *
+ * @param <type> object type
+ * @param <name> object name
+ *
+ * @return an Attitude object pointer
+ */
+//------------------------------------------------------------------------------
+Attitude* Moderator::CreateAttitude(const std::string &type,
+                                    const std::string &name)
+{
+   #if DEBUG_CREATE_RESOURCE
+   MessageInterface::ShowMessage("Moderator::CreateAttitude() type = %s, "
+                                 "name = %s\n", type.c_str(), name.c_str());
+   #endif
+   
+   Attitude *att = theFactoryManager->CreateAttitude(type, name);
+   
+   if (att == NULL)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Cannot create an Attitude type: %s.\n"
+          "Make sure %s is correct type and registered to AttitudeFactory.\n",
+          type.c_str(), type.c_str());
+      
+      return NULL;
+   }
+
+   return att;
 }
 
 
@@ -5288,4 +5326,3 @@ Moderator::Moderator()
 Moderator::~Moderator()
 {
 }
-

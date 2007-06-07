@@ -151,14 +151,14 @@ private:
    enum StateType
    {
       EULER_ANGLES= 0,
-      QUATERNIONS,
+      QUATERNION,
       DCM,
       StateTypeCount,
    };
    
    enum RateStateType
    {
-      EULER_ANGLES_RATES= 0,
+      EULER_ANGLE_RATES= 0,
       ANGULAR_VELOCITY,
       RateStateTypeCount,
    };

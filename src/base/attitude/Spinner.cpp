@@ -22,6 +22,9 @@
 #include "AttitudeException.hpp"
 #include "Spinner.hpp"
 #include "TimeTypes.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_SPINNER_INIT
 
 //---------------------------------
 // static data
@@ -45,6 +48,7 @@ Spinner::Spinner(const std::string &itsName) :
 {
    parameterCount = SpinnerParamCount;
    objectTypeNames.push_back("Spinner");
+   attitudeModelName = "Spinner";
  }
  
  //------------------------------------------------------------------------------
@@ -105,15 +109,60 @@ Spinner::~Spinner()
 //---------------------------------------------------------------------------
 bool Spinner::Initialize()
 {
+   #ifdef DEBUG_SPINNER_INIT
+   MessageInterface::ShowMessage(
+   "------- Entering Spinner::Initialize, and calling Kinematic::Initialize\n");
+   #endif
    Kinematic::Initialize();
-   // Compute the rotation matrix form inertial to Fi at the epoch time, t0
-   Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
-   Rvector bogus2 = refCS->FromMJ2000Eq(initialEpoch, bogus, true);
-   Rmatrix33 RiI  = (refCS->GetLastRotationMatrix()).Transpose();
+   #ifdef DEBUG_SPINNER_INIT
+   MessageInterface::ShowMessage(
+   "------- after calling Kinematic::Initialize\n");
+   #endif
+   Rmatrix33 RiI;
+   try
+   {
+      // Compute the rotation matrix form inertial to Fi at the epoch time, t0
+      Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
+      Rvector bogus2 = refCS->FromMJ2000Eq(initialEpoch, bogus, true);
+      RiI  = (refCS->GetLastRotationMatrix()).Transpose();
+   }
+   catch (BaseException &be)
+   {
+      #ifdef DEBUG_SPINNER_INIT
+      MessageInterface::ShowMessage(
+      "------- error initializing rotation matrix for Spinner\n");
+      #endif
+   }
+   #ifdef DEBUG_SPINNER_INIT
+   std::stringstream RBiStream;
+   RBiStream << RBi << std::endl;
+   MessageInterface::ShowMessage(
+   "------- RBi = %s\n", (RBiStream.str()).c_str());
+   std::stringstream RiIStream;
+   RiIStream << RiI << std::endl;
+   MessageInterface::ShowMessage(
+   "------- RiI = %s\n", (RiIStream.str()).c_str());
+   #endif
+   
    RB0I           = RBi * RiI;
    currentwIBB    = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
+   
+   #ifdef DEBUG_SPINNER_INIT
+   std::stringstream RB0IStream;
+   RB0IStream << RB0I << std::endl;
+   MessageInterface::ShowMessage(
+   "------- RB0I = %s\n", (RB0IStream.str()).c_str());
+   std::stringstream IBBStream;
+   IBBStream << currentwIBB << std::endl;
+   MessageInterface::ShowMessage(
+   "------- currentwIBB = %s\n", (IBBStream.str()).c_str());
+   #endif
+   
    initialwMag    = currentwIBB.GetMagnitude();
-   initialeAxis   = currentwIBB / initialwMag;
+   if (initialwMag != 0.0) initialeAxis   = currentwIBB / initialwMag;
+   else     // is this right?               
+      initialeAxis[0] = initialeAxis[1] = initialeAxis[2] = 0.0;
+   
    return true;
 }
 

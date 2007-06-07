@@ -44,7 +44,7 @@
 Attitude* AttitudeFactory::CreateAttitude(const std::string &ofType,
                                           const std::string &withName)
 {
-   if (ofType == "CSFixed")
+   if ((ofType == "CSFixed") || (ofType == "CoordinateSystemFixed"))
       return new CSFixed(withName);
    else if (ofType == "Spinner")
       return new Spinner(withName);
@@ -72,7 +72,8 @@ Factory(Gmat::ATTITUDE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("CSFixed");
+      //creatables.push_back("CSFixed");
+      creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
       //creatables.push_back("ThreeAxis");
       // others TBD
@@ -95,7 +96,8 @@ Factory(createList,Gmat::ATTITUDE)
 {
    if (creatables.empty())
    {
-      creatables.push_back("CSFixed");
+      //creatables.push_back("CSFixed");
+      creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
       //creatables.push_back("ThreeAxis");
       // others TBD
@@ -117,7 +119,8 @@ Factory(fact)
 {
    if (creatables.empty())
    {
-      creatables.push_back("CSFixed");
+      //creatables.push_back("CSFixed");
+      creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
       //creatables.push_back("ThreeAxis");
       // others TBD
@@ -142,7 +145,8 @@ AttitudeFactory& AttitudeFactory::operator= (const AttitudeFactory& fact)
    Factory::operator=(fact);
    if (creatables.empty())
    {
-      creatables.push_back("CSFixed");
+      //creatables.push_back("CSFixed");
+      creatables.push_back("CoordinateSystemFixed");
       creatables.push_back("Spinner");
       //creatables.push_back("ThreeAxis");
       // others TBD

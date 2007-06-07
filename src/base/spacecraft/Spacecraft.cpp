@@ -80,7 +80,8 @@ const Gmat::ParameterType
       Gmat::REAL_TYPE,        // SRPArea
       Gmat::STRINGARRAY_TYPE, // Tanks
       Gmat::STRINGARRAY_TYPE, // Thrusters
-      Gmat::REAL_TYPE         // TotalMass
+      Gmat::REAL_TYPE,        // TotalMass
+      Gmat::OBJECT_TYPE,      // Attitude 
    };
    
 const std::string 
@@ -112,6 +113,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Tanks", 
       "Thrusters", 
       "TotalMass", 
+      "Attitude",
    };
 
 const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] = 
@@ -154,6 +156,7 @@ const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] =
    "MLONG",
 };
 
+const Integer Spacecraft::ATTITUDE_ID_OFFSET = 20000;
 
 //-------------------------------------
 // public methods
@@ -633,8 +636,12 @@ Rmatrix33 Spacecraft::GetAttitude(Real a1mjdTime) const
 {
    if (attitude) return attitude->GetCosineMatrix(a1mjdTime);
    else 
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_, 
+      "No attitude defined for spacecraft %s, returning identity matrix.\n",
+      instanceName.c_str());
       return Rmatrix33();  // temporary - return identity matrix
-   //   throw SpaceObjectException("No attitude object set for spacecraft.");
+   }
 }
 
 
@@ -642,8 +649,12 @@ Rvector3  Spacecraft::GetAngularVelocity(Real a1mjdTime) const
 {
    if (attitude) return attitude->GetAngularVelocity(a1mjdTime);
    else 
+   {
+      MessageInterface::PopupMessage(Gmat::WARNING_, 
+      "No attitude defined for spacecraft %s, returning zero angular velocity vector.\n",
+      instanceName.c_str());
       return Rvector3(); // temporary - return zero vector
-   //   throw SpaceObjectException("No attitude object set for spacecraft.");
+   }
 }
 
 
@@ -773,10 +784,22 @@ const StringArray&
       Spacecraft::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    static StringArray fullList;  // Maintain scope if the full list is requested
+   fullList.clear();
+   if (attitude)
+   {
+      try
+      {
+         fullList.push_back(attitude->GetRefObjectName(type));
+      }
+      catch (GmatBaseException& be)
+      {
+         // ignore exceptions here
+      }
+   }
 
    if (type == Gmat::UNKNOWN_OBJECT)
    {
-      fullList.clear();      
+      //fullList.clear();      
       fullList.push_back(coordSysName);
       return fullList;      
    }
@@ -787,7 +810,8 @@ const StringArray&
       if (type == Gmat::THRUSTER)
          return thrusterNames;
 
-      if (type == Gmat::HARDWARE) {
+      if (type == Gmat::HARDWARE) 
+      {
          fullList.clear();
          fullList = tankNames;
          for (StringArray::iterator i = thrusterNames.begin();
@@ -798,7 +822,7 @@ const StringArray&
       
       if (type == Gmat::COORDINATE_SYSTEM)
       {
-         fullList.clear();
+         //fullList.clear();
          fullList.push_back(coordSysName);
          return fullList;
       }
@@ -889,6 +913,22 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    #ifdef DEBUG_SC_KEPL_TO_CART
    MessageInterface::ShowMessage("Entering SC::SetRefObject\n");
    #endif
+   // first, try setting it on the attitude (owned object)
+   if (attitude)
+   {
+      try
+      {
+         attitude->SetRefObject(obj, type, name);
+      }
+      catch (BaseException &be)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+         "------ error setting ref object %s on attitude\n",
+         name.c_str());
+         #endif
+      }
+   }
    if (type == Gmat::HARDWARE) {
       std::string typeStr = obj->GetTypeName();
     
@@ -937,6 +977,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          MessageInterface::ShowMessage("Setting attitude object on spacecraft %s\n",
          instanceName.c_str());
       #endif
+      if ((attitude != NULL) && (attitude != (Attitude*) obj)) delete attitude;
       attitude = (Attitude*) obj;
       // set epoch ...
       #ifdef DEBUG_SC_ATTITUDE
@@ -947,6 +988,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          instanceName.c_str());
       #endif
       attitude->SetEpoch(state.GetEpoch());
+      ownedObjectCount++;
       return true;
    }
    
@@ -1077,7 +1119,25 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
          return i;
       }
    }
-    
+   if (attitude)
+   {
+      try
+      {
+         Integer attId = attitude->GetParameterID(str);
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to get id for label %s\n",
+            str.c_str());
+            MessageInterface::ShowMessage(" ------ and the id = %d\n", attId);
+         #endif
+         return attId + ATTITUDE_ID_OFFSET;
+      }
+      catch (BaseException& be)
+      {
+         // continue - not an attitude parameter
+      }
+      
+   }
    return SpaceObject::GetParameterID(str);
 }
 
@@ -1096,6 +1156,11 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
 //---------------------------------------------------------------------------
 bool Spacecraft::IsParameterReadOnly(const Integer id) const
 {
+   if (id >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude) 
+         return attitude->IsParameterReadOnly(id - ATTITUDE_ID_OFFSET);
+   }
    if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
    {
       return true;
@@ -1156,6 +1221,12 @@ std::string Spacecraft::GetParameterText(const Integer id) const
 
    if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
       return PARAMETER_LABEL[id - SpaceObjectParamCount];
+      
+   if (id >= ATTITUDE_ID_OFFSET)
+   {
+      if (attitude) 
+         return attitude->GetParameterText(id - ATTITUDE_ID_OFFSET);
+   }
 
    #ifdef DEBUG_SC_PARAMETER_TEXT
    MessageInterface::ShowMessage(
@@ -1181,6 +1252,9 @@ Gmat::ParameterType Spacecraft::GetParameterType(const Integer id) const
       return Gmat::REAL_TYPE;
    if ((id >= SpaceObjectParamCount) && (id < SpacecraftParamCount))
       return PARAMETER_TYPE[id - SpaceObjectParamCount];
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude) 
+         return attitude->GetParameterType(id - ATTITUDE_ID_OFFSET);
 
     return SpaceObject::GetParameterType(id);
 }
@@ -1252,6 +1326,16 @@ Real Spacecraft::GetRealParameter(const Integer id) const
    { 
       return UpdateTotalMass();
    }
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to get real parameter for id =  %d\n",
+            id);
+         #endif
+         return attitude->GetRealParameter(id - ATTITUDE_ID_OFFSET);
+      }
    
    return SpaceObject::GetRealParameter(id);
 }
@@ -1344,6 +1428,10 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
     
    // We should not allow users to set this one -- it's a calculated parameter
    if (id == TOTAL_MASS_ID) return SetRealParameter("TotalMass",value);
+   
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude) 
+         return attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
 
    return SpaceObject::SetRealParameter(id, value);
 }
@@ -1368,6 +1456,11 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
    "In SC::SetRealParameter(label), label = %s and value = %.12f\n",
    label.c_str(), value);
    #endif
+   // first (really) see if it's a parameter for an owned object (i.e. attitude)
+   if (GetParameterID(label) >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+         return attitude->SetRealParameter(label, value);
+         
    // First try to set as a state element
    if (SetElement(label, value))
       return value;
@@ -1539,6 +1632,17 @@ std::string Spacecraft::GetStringParameter(const Integer id) const
 
     if ((id >= ELEMENT1UNIT_ID) && (id <= ELEMENT6UNIT_ID))
        return stateElementUnits[id - ELEMENT1UNIT_ID];
+       
+    if (id >= ATTITUDE_ID_OFFSET)
+       if (attitude)
+       {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to get string parameter for id =  %d\n",
+            id);
+         #endif
+          return attitude->GetStringParameter(id - ATTITUDE_ID_OFFSET);
+       }
 
     return SpaceObject::GetStringParameter(id); 
 }
@@ -1580,6 +1684,16 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
       return tankNames;
    if (id == THRUSTER_ID)
       return thrusterNames;
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to SET string parameter for id =  %d\n",
+            id);
+         #endif
+         return attitude->GetStringArrayParameter(id - ATTITUDE_ID_OFFSET);
+      }
    return SpaceObject::GetStringArrayParameter(id);
 }
 
@@ -1603,6 +1717,17 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          id, GetParameterText(id).c_str(), value.c_str());
    #endif
 
+   if (id >= ATTITUDE_ID_OFFSET)
+      if (attitude)
+      {
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+            "------ Now calling attitude to SET string parameter for id =  %d"
+            " and value = %s\n", id, value.c_str());
+         #endif
+         return attitude->SetStringParameter(id - ATTITUDE_ID_OFFSET, value);
+      }
+      
    if ((id < SpaceObjectParamCount) || (id >= SpacecraftParamCount))
       return SpaceObject::SetStringParameter(id, value);
       
@@ -1896,6 +2021,16 @@ bool Spacecraft::TakeAction(const std::string &action,
    return SpaceObject::TakeAction(action, actionData);
 }
 
+GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
+{
+   // only one owned object at the moment 
+   if (attitude) 
+      return attitude;
+   
+   return NULL;
+}
+
+
 
 //---------------------------------------------------------------------------
 //  bool Initialize()
@@ -1939,12 +2074,22 @@ bool Spacecraft::Initialize()
       //throw SpaceObjectException("Spacecraft has no attitude set.");
    }
    else
+   {
       #ifdef DEBUG_SC_ATTITUDE
          MessageInterface::ShowMessage(
          "Initializing attitude object for spacecraft %s\n",
          instanceName.c_str());
       #endif
       attitude->Initialize();
+      #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+         "***Finished initializing attitude object for spacecraft %s\n",
+         instanceName.c_str());
+      #endif
+   }
+   #if DEBUG_SPACECRAFT_CS
+      MessageInterface::ShowMessage("Spacecraft::Initialize() exiting ----------\n");
+   #endif
    
    return true;
 }
@@ -2048,7 +2193,8 @@ void Spacecraft::SetEpoch(const std::string &type, const std::string &ep, Real a
    TimeConverterUtil::GetTimeSystemAndFormat(type, epochSystem, epochFormat);
    epochType = type;
    scEpochStr = ep;
-   state.SetEpoch(a1mjd);   
+   state.SetEpoch(a1mjd); 
+   if (attitude) attitude->SetEpoch(a1mjd);  
    #ifdef DEBUG_SC_EPOCHSTR
    MessageInterface::ShowMessage("and in SC::SetEpoch, epochSystem = %s, epochFormat = %s\n",
    epochSystem.c_str(), epochFormat.c_str());
@@ -2323,7 +2469,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       if ((IsParameterReadOnly(parmOrder[i]) == false) &&
           (parmOrder[i] != J2000_BODY_NAME) &&
           (parmOrder[i] != TOTAL_MASS_ID)   &&
-          (parmOrder[i] != STATE_TYPE_ID))       // deprecated
+          (parmOrder[i] != STATE_TYPE_ID)   &&         // deprecated
+          (parmOrder[i] != ATTITUDE))
       {
          parmType = GetParameterType(parmOrder[i]);
          
@@ -2398,7 +2545,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                }
             }
          }
-         else
+         else 
          {
             // Handle StringArrays
             StringArray sar = GetStringArrayParameter(parmOrder[i]);
@@ -2419,6 +2566,15 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
             }
          }
       }
+      // handle ATTITUDE differently
+      else if (parmOrder[i] == ATTITUDE)
+      {
+         if (attitude)
+            stream << prefix << "Attitude = " << attitude->GetAttitudeModelName() << ";\n";
+         else 
+            ;// ignore
+      }      
+      
    }
 
    // Prep in case spacecraft "own" the attached hardware
@@ -2445,8 +2601,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
           
       if (nomme != "")
          newprefix += nomme + ".";
-      else if (GetType() == Gmat::FORCE_MODEL)
-         newprefix += ownedObject->GetTypeName();
+      //else if (GetType() == Gmat::FORCE_MODEL)  wcs - why is this here? GetType on s/c?
+      //   newprefix += ownedObject->GetTypeName();
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
    

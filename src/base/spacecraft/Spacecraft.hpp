@@ -124,6 +124,7 @@ public:
 
    virtual bool      TakeAction(const std::string &action, 
                         const std::string &actionData = "");
+   virtual GmatBase* GetOwnedObject(Integer whichOne);
 
 
    virtual const std::string&  
@@ -167,6 +168,7 @@ protected:
       FUEL_TANK_ID, 
       THRUSTER_ID, 
       TOTAL_MASS_ID, 
+      ATTITUDE,
       SpacecraftParamCount
    };
    
@@ -222,6 +224,8 @@ protected:
       SPHERICAL_AZFPA_ID,
       SPHERICAL_RADEC_ID
    };
+   
+   static const Integer ATTITUDE_ID_OFFSET;
 
    std::map <std::string, std::string> elementLabelMap;
    

@@ -454,6 +454,28 @@ FactoryManager::CreateMathNode(const std::string &ofType,
    return NULL;
 }
 
+//------------------------------------------------------------------------------
+//  Attitude* CreateAttitude(const std::string &ofType,
+//                           const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an Attitude object of type ofType, with the name withName.
+ *
+ * @param <ofType>   type name of the Attitude.
+ * @param <withName> name of the new Attitude object.
+ *
+ * @return pointer to the newly-created Attitude object
+ */
+//------------------------------------------------------------------------------
+Attitude* 
+FactoryManager::CreateAttitude(const std::string &ofType,
+                               const std::string &withName)
+{
+   Factory* f = FindFactory(Gmat::ATTITUDE, ofType);
+   if (f != NULL)
+      return f->CreateAttitude(ofType, withName);
+   return NULL;
+}
 
 //----- Just container
 //------------------------------------------------------------------------------
@@ -819,6 +841,20 @@ StringArray  FactoryManager::GetListOfCoordinateSystem()
 StringArray  FactoryManager::GetListOfMathNode()
 {
    return GetList(Gmat::MATH_NODE);
+}
+
+//------------------------------------------------------------------------------
+// StringArray  GetListOfAttitude()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of items of type Attitude that can be created.
+ *
+ * @return list of creatable items of type Attitude.
+ */
+//------------------------------------------------------------------------------
+StringArray  FactoryManager::GetListOfAttitude()
+{
+   return GetList(Gmat::ATTITUDE);
 }
 
 

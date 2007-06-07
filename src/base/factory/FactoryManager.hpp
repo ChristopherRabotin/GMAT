@@ -44,6 +44,7 @@
 #include "AxisSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include "MathNode.hpp"
+#include "Attitude.hpp"
 
 /**
  * GMAT Factory Manager Class, the interface between the Moderator and the
@@ -98,6 +99,8 @@ public:
                                            const std::string &withName = "");
    MathNode*              CreateMathNode(const std::string &ofType,
                                          const std::string &withName = "");
+   Attitude*              CreateAttitude(const std::string &ofType,
+                                         const std::string &withName = "");
 
    //----- Just container
    SolarSystem*           CreateSolarSystem(const std::string &withName = "");
@@ -130,6 +133,7 @@ public:
    StringArray            GetListOfAxisSystem();
    StringArray            GetListOfCoordinateSystem();
    StringArray            GetListOfMathNode();
+   StringArray            GetListOfAttitude();
 
    // class destructor
    ~FactoryManager();

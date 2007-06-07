@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_REF_SETTING
+//#define DEBUG_ATTITUDE_GEN_STRING
 
 //---------------------------------
 // static data
@@ -31,16 +32,31 @@
 const std::string
 Attitude::PARAMETER_TEXT[AttitudeParamCount - GmatBaseParamCount] =
 {
-   "ReferenceCoordinateSystemName",
+   "AttitudeCoordinateSystem",
    "Epoch",
-   "EulerSequenceList",
-   "EulerSequenceString",
-   "InitialEulerSequence",
-   "InitialEulerAngles",
-   "InitialEulerAngleRates",
-   "InitialQuaternion",
-   "InitialDirectionCosineMatrix",
-   "InitialAngularVelocity",
+   "Q1",
+   "Q2",
+   "Q3",
+   "Q4",
+   "EulerAngleSequence",
+   "EulerAngle1",
+   "EulerAngle2",
+   "EulerAngle3",
+   "DCM11",
+   "DCM12",
+   "DCM13",
+   "DCM21",
+   "DCM22",
+   "DCM23",
+   "DCM31",
+   "DCM32",
+   "DCM33",
+   "EulerAngleRate1",
+   "EulerAngleRate2",
+   "EulerAngleRate3",
+   "AngularVelocityX",
+   "AngularVelocityY",
+   "AngularVelocityZ",
 };
 
 const Gmat::ParameterType
@@ -48,8 +64,53 @@ Attitude::PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount] =
 {
    Gmat::STRING_TYPE,
    Gmat::REAL_TYPE,        // A1Mjd - should this be time_type?
-   Gmat::STRINGARRAY_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
    Gmat::STRING_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+   Gmat::REAL_TYPE,
+};
+
+const std::string
+Attitude::OTHER_REP_TEXT[EndOtherReps - 7000] =
+{
+   //"ReferenceCoordinateSystemName",
+   //"Epoch",
+   "EulerSequenceList",
+   //"EulerSequenceString", 
+   "EulerSequenceArray",     // was "InitialEulerSequence",
+   "EulerAngles",            // was "InitialEulerAngles",
+   "EulerAngleRates",        // was "InitialEulerAngleRates",
+   "Quaternion",             // was "InitialQuaternion",
+   "DirectionCosineMatrix",  // was "InitialDirectionCosineMatrix",
+   "AngularVelocity",        // was "InitialAngularVelocity",
+};
+
+const Gmat::ParameterType
+Attitude::OTHER_REP_TYPE[EndOtherReps - 7000] =
+{
+   //Gmat::STRING_TYPE,
+   //Gmat::REAL_TYPE,        // A1Mjd - should this be time_type?
+   Gmat::STRINGARRAY_TYPE,
+   //Gmat::STRING_TYPE,
    Gmat::UNSIGNED_INTARRAY_TYPE,
    Gmat::RVECTOR_TYPE,
    Gmat::RVECTOR_TYPE,
@@ -60,22 +121,23 @@ Attitude::PARAMETER_TYPE[AttitudeParamCount - GmatBaseParamCount] =
 
 const std::string Attitude::EULER_SEQ_LIST[12] = 
 {
-   "1 2 3",
-   "2 3 1",
-   "3 1 2",
-   "1 3 2",
-   "3 2 1",
-   "2 1 3",
-   "1 2 1",
-   "2 3 2",
-   "3 1 3",
-   "1 3 1",
-   "3 2 3",
-   "2 1 2"
+   "123",
+   "231",
+   "312",
+   "132",
+   "321",
+   "213",
+   "121",
+   "232",
+   "313",
+   "131",
+   "323",
+   "212"
 };
 
-const Real Attitude::TESTACCURACY            = 1.19209290E-07;
-const Real Attitude::ATTITUDE_TIME_TOLERANCE = 1.0E-09;
+const Real    Attitude::TESTACCURACY            = 1.19209290E-07;
+const Real    Attitude::ATTITUDE_TIME_TOLERANCE = 1.0E-09;
+const Integer Attitude::OTHER_REPS_OFFSET       = 7000;
 
 //------------------------------------------------------------------------------
 // static methods
@@ -923,6 +985,7 @@ StringArray Attitude::GetEulerSequenceStrings()
    return eulerStrings;
 }
 
+
 //------------------------------------------------------------------------------
 // public methods
 //------------------------------------------------------------------------------
@@ -937,7 +1000,7 @@ StringArray Attitude::GetEulerSequenceStrings()
 //------------------------------------------------------------------------------
 Attitude::Attitude(const std::string &typeStr, const std::string &itsName) : 
    GmatBase(Gmat::ATTITUDE, typeStr, itsName),
-   inputAttType            (GmatAttitude::QUATERNION_TYPE),
+   inputAttType            (GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE),
    inputAttRateType        (GmatAttitude::ANGULAR_VELOCITY_TYPE),
    isInitialized           (false),
    initialEpoch            (0.0),
@@ -949,16 +1012,17 @@ Attitude::Attitude(const std::string &typeStr, const std::string &itsName) :
    lastQuaternionTime      (0.0),
    lastQuaternion          (Rvector(4,0.0,0.0,0.0,1.0)),
    lastEulerAngleTime      (0.0),
-   lastEulerAngleRatesTime (0.0)
+   lastEulerAngleRatesTime (0.0),
+   attitudeModelName       ("")
 {
    parameterCount = AttitudeParamCount;
    objectTypes.push_back(Gmat::ATTITUDE);
    objectTypeNames.push_back("Attitude");
    
-   unsigned int defSeq = 0;
-   initialEulerSeq.push_back(defSeq);
-   initialEulerSeq.push_back(defSeq);
-   initialEulerSeq.push_back(defSeq);
+   unsigned int defSeq[3] = {3, 1, 2};
+   initialEulerSeq.push_back(defSeq[0]);
+   initialEulerSeq.push_back(defSeq[1]);
+   initialEulerSeq.push_back(defSeq[2]);
    
    for (Integer i = 0; i < 12; i++)
       eulerSequenceList.push_back(EULER_SEQ_LIST[i]);
@@ -1000,7 +1064,8 @@ Attitude::Attitude(const Attitude& att) :
    lastEulerAngleTime      (0.0),
    lastEulerAngles         (att.lastEulerAngles),
    lastEulerAngleRatesTime (0.0),
-   lastEulerAngleRates     (att.lastEulerAngleRates)
+   lastEulerAngleRates     (att.lastEulerAngleRates),
+   attitudeModelName       (att.attitudeModelName)
 {
 
 }
@@ -1045,6 +1110,7 @@ Attitude& Attitude::operator=(const Attitude& att)
    lastEulerAngles         = att.lastEulerAngles;
    lastEulerAngleRatesTime = att.lastEulerAngleRatesTime;
    lastEulerAngleRates     = att.lastEulerAngleRates;
+   attitudeModelName       = att.attitudeModelName;
    return *this;
 }
 
@@ -1076,23 +1142,23 @@ bool Attitude::Initialize()
 { 
    if (isInitialized) return true;
    GmatBase::Initialize();
-   if (!refCS) throw AttitudeException(
-      "Reference coordinate system not defined for attitude " + 
-      instanceName);
-   
+   std::string attEx  = "Reference coordinate system not defined for attitude of type \"";
+   attEx             += typeName + "\"";
+   if (!refCS) throw AttitudeException(attEx);
+    
    // compute cosine matrix and angular velocity from inputs
    switch (inputAttType)
    {
-      case GmatAttitude::QUATERNION_TYPE: 
+      case GmatAttitude::QUATERNION_TYPE:
+         initialQuaternion.Normalize(); 
          RBi = Attitude::ToCosineMatrix(initialQuaternion);
          break;
       case GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE: 
+         ValidateCosineMatrix(initialDcm);
          RBi = initialDcm;
          break;
       case GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE:
-         if (initialEulerSeq.size()  != 3)
-            throw AttitudeException(
-               "Euler Sequence ill-defined - cannot convert input\n");
+         ValidateEulerSequence(initialEulerSeq);
          RBi = Attitude::ToCosineMatrix(
                          initialEulerAng * GmatMathUtil::RAD_PER_DEG, 
                          (Integer) initialEulerSeq.at(0),
@@ -1108,6 +1174,7 @@ bool Attitude::Initialize()
          wIBi = initialAngVel * GmatMathUtil::RAD_PER_DEG;
          break;
       case GmatAttitude::EULER_ANGLE_RATES_TYPE:
+         ValidateEulerSequence(initialEulerSeq);
          wIBi = Attitude::ToAngularVelocity(
                           initialEulerAngRates * GmatMathUtil::RAD_PER_DEG, 
                           initialEulerAng * GmatMathUtil::RAD_PER_DEG, 
@@ -1366,6 +1433,21 @@ const Rvector3& Attitude::GetEulerAngleRates(Real atTime)
    return lastEulerAngleRates;
 }
 
+
+//---------------------------------------------------------------------------
+//  std::string   GetAttitudeModelName()
+//---------------------------------------------------------------------------
+ /**
+ * Returns the name of the attitude model.
+ *
+ * @return the name of the attitude model (e.g. "Spinner").  
+ */
+//---------------------------------------------------------------------------
+std::string Attitude::GetAttitudeModelName() const
+{
+   return attitudeModelName;
+}
+
 //------------------------------------------------------------------------------
 //   std::string GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
@@ -1502,13 +1584,21 @@ bool Attitude::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (name == refCSName)
       {
-         #ifdef DEBUG_REF_SETTING
-            MessageInterface::ShowMessage(
-               "Setting %s as reference coordinate system for attitude %s\n",
-               name.c_str(), instanceName.c_str());
-         #endif
+            #ifdef DEBUG_REF_SETTING
+            if (refCS != NULL)
+               MessageInterface::ShowMessage(
+                  "The reference coordinate system for attitude is %s\n",
+                  (refCS->GetName()).c_str());
+            else
+               MessageInterface::ShowMessage("   refCS == NULL!\n");
+            #endif
          if (refCS != (CoordinateSystem*) obj)
          {
+            #ifdef DEBUG_REF_SETTING
+               MessageInterface::ShowMessage(
+                  "Setting %s as reference coordinate system for attitude %s\n",
+                  name.c_str(), instanceName.c_str());
+            #endif
             isInitialized = false;
             refCS = (CoordinateSystem*) obj;
          }
@@ -1538,6 +1628,8 @@ std::string Attitude::GetParameterText(const Integer id) const
 {
    if (id >= GmatBaseParamCount && id < AttitudeParamCount)
       return PARAMETER_TEXT[id - GmatBaseParamCount];
+   else if (id >= OTHER_REPS_OFFSET && id < EndOtherReps)
+      return OTHER_REP_TEXT[id - OTHER_REPS_OFFSET];
    return GmatBase::GetParameterText(id);
 }
 
@@ -1558,6 +1650,12 @@ Integer Attitude::GetParameterID(const std::string &str) const
    for (Integer i = GmatBaseParamCount; i < AttitudeParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+   // otherwise, check for other reps
+   for (Integer i = OTHER_REPS_OFFSET; i < EndOtherReps; i++)
+   {
+      if (str == OTHER_REP_TEXT[i - OTHER_REPS_OFFSET])
          return i;
    }
    
@@ -1582,6 +1680,8 @@ Gmat::ParameterType
 {
    if (id >= GmatBaseParamCount && id < AttitudeParamCount)
       return PARAMETER_TYPE[id - GmatBaseParamCount];
+   else if (id >= OTHER_REPS_OFFSET && id < EndOtherReps)
+      return OTHER_REP_TYPE[id - OTHER_REPS_OFFSET];
       
    return GmatBase::GetParameterType(id);
 }
@@ -1619,6 +1719,45 @@ bool Attitude::IsParameterReadOnly(const Integer id) const
 {
    if (id == EULER_SEQUENCE_LIST)
       return true;
+   if (id == INITIAL_EPOCH)
+      return true;
+   if (inputAttType == GmatAttitude::QUATERNION_TYPE)
+   {
+      if ((id == EULER_ANGLE_1) || (id == EULER_ANGLE_2) ||
+          (id == EULER_ANGLE_3) || (id == DCM_11)        || (id == DCM_12) ||
+          (id == DCM_13)        || (id == DCM_21)        || (id == DCM_22) ||
+          (id == DCM_23)        || (id == DCM_31)        || (id == DCM_32) ||
+          (id == DCM_33))
+         return true;
+   }
+   else if (inputAttType == GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE)
+   {
+      if ((id == Q_1) || (id == Q_2) || (id == Q_3) || (id == Q_4)    ||
+          (id == EULER_ANGLE_1) || (id == EULER_ANGLE_2) ||
+          (id == EULER_ANGLE_3))
+         return true;
+   }
+   else  // EULER_ANGLES_AND_SEQUENCE_TYPE
+   {
+      if ((id == Q_1) || (id == Q_2) || (id == Q_3) || (id == Q_4)    ||
+          (id == DCM_11)        || (id == DCM_12)   || (id == DCM_13) || 
+          (id == DCM_21)        || (id == DCM_22)   || (id == DCM_23) || 
+          (id == DCM_31)        || (id == DCM_32)   || (id == DCM_33))
+         return true;
+   }
+   
+   if (inputAttRateType == GmatAttitude::ANGULAR_VELOCITY_TYPE)
+   {
+      if ((id == EULER_ANGLE_RATE_1) || (id == EULER_ANGLE_RATE_2) ||
+          (id == EULER_ANGLE_RATE_3))
+         return true;
+   }
+   else // EULER_ANGLE_RATES_TYPE
+   {
+      if ((id == ANGULAR_VELOCITY_X) || (id == ANGULAR_VELOCITY_Y) ||
+          (id == ANGULAR_VELOCITY_Z))
+         return true;
+   }
 
    return GmatBase::IsParameterReadOnly(id);
 }
@@ -1654,7 +1793,29 @@ bool Attitude::IsParameterReadOnly(const std::string &label) const
 //------------------------------------------------------------------------------
 Real Attitude::GetRealParameter(const Integer id) const
 {
-   if (id == INITIAL_EPOCH) return initialEpoch;
+   if (id == INITIAL_EPOCH)      return initialEpoch;
+   if (id == Q_1)                return initialQuaternion[0];
+   if (id == Q_2)                return initialQuaternion[1];
+   if (id == Q_3)                return initialQuaternion[2];
+   if (id == Q_4)                return initialQuaternion[3];
+   if (id == EULER_ANGLE_1)      return initialEulerAng[0];
+   if (id == EULER_ANGLE_2)      return initialEulerAng[1];
+   if (id == EULER_ANGLE_3)      return initialEulerAng[2];
+   if (id == DCM_11)             return initialDcm(0,0);
+   if (id == DCM_12)             return initialDcm(0,1);
+   if (id == DCM_13)             return initialDcm(0,2);
+   if (id == DCM_21)             return initialDcm(1,0);
+   if (id == DCM_22)             return initialDcm(1,1);
+   if (id == DCM_23)             return initialDcm(1,2);
+   if (id == DCM_31)             return initialDcm(2,0);
+   if (id == DCM_32)             return initialDcm(2,1);
+   if (id == DCM_33)             return initialDcm(2,2);
+   if (id == EULER_ANGLE_RATE_1) return initialEulerAngRates[0];
+   if (id == EULER_ANGLE_RATE_2) return initialEulerAngRates[1];
+   if (id == EULER_ANGLE_RATE_3) return initialEulerAngRates[2];
+   if (id == ANGULAR_VELOCITY_X) return initialAngVel[0];
+   if (id == ANGULAR_VELOCITY_Y) return initialAngVel[1];
+   if (id == ANGULAR_VELOCITY_Z) return initialAngVel[2];
    
    return GmatBase::GetRealParameter(id);
 }
@@ -1699,6 +1860,182 @@ Real Attitude::SetRealParameter(const Integer id,
          initialEpoch = value;
       }
       return true;
+   }
+   if (id == Q_1)
+   {
+      // check for valid value here .....   
+      initialQuaternion(0) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::QUATERNION_TYPE;
+      return initialQuaternion(0);
+   }
+   if (id == Q_2)
+   {
+      // check for valid value here .....   
+      initialQuaternion(1) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::QUATERNION_TYPE;
+      return initialQuaternion(1);
+   }
+   if (id == Q_3)
+   {
+      // check for valid value here .....   
+      initialQuaternion(2) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::QUATERNION_TYPE;
+      return initialQuaternion(2);
+   }
+   if (id == Q_4)
+   {
+      // check for valid value here .....   
+      initialQuaternion(3) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::QUATERNION_TYPE;
+      return initialQuaternion(3);
+   }
+   if (id == EULER_ANGLE_1)
+   {
+      // check for valid value here .....   
+      initialEulerAng(0) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE;
+      return initialEulerAng(0);
+   }
+   if (id == EULER_ANGLE_2)
+   {
+      // check for valid value here .....   
+      initialEulerAng(1) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE;
+      return initialEulerAng(1);
+   }
+   if (id == EULER_ANGLE_3)
+   {
+      // check for valid value here .....   
+      initialEulerAng(2) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE;
+      return initialEulerAng(2);
+   }
+   if (id == DCM_11)
+   {
+      // check for valid value here .....   
+      initialDcm(0,0) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(0,0);
+   }
+   if (id == DCM_12)
+   {
+      // check for valid value here .....   
+      initialDcm(0,1) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(0,1);
+   }
+   if (id == DCM_13)
+   {
+      // check for valid value here .....   
+      initialDcm(0,2) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(0,2);
+   }
+   if (id == DCM_21)
+   {
+      // check for valid value here .....   
+      initialDcm(1,0) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(1,0);
+   }
+   if (id == DCM_22)
+   {
+      // check for valid value here .....   
+      initialDcm(1,1) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(1,1);
+   }
+   if (id == DCM_23)
+   {
+      // check for valid value here .....   
+      initialDcm(1,2) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(1,2);
+   }
+   if (id == DCM_31)
+   {
+      // check for valid value here .....   
+      initialDcm(2,0) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(2,0);
+   }
+   if (id == DCM_32)
+   {
+      // check for valid value here .....   
+      initialDcm(2,1) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(2,1);
+   }
+   if (id == DCM_33)
+   {
+      // check for valid value here .....   
+      initialDcm(2,2) = value;
+      isInitialized = false;
+      inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
+      return initialDcm(2,2);
+   }
+   if (id == EULER_ANGLE_RATE_1)
+   {
+      // check for valid value here .....   
+      initialEulerAngRates(0) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::EULER_ANGLE_RATES_TYPE;
+      return initialEulerAngRates(0);
+   }
+   if (id == EULER_ANGLE_RATE_2)
+   {
+      // check for valid value here .....   
+      initialEulerAngRates(1) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::EULER_ANGLE_RATES_TYPE;
+      return initialEulerAngRates(1);
+   }
+   if (id == EULER_ANGLE_RATE_3)
+   {
+      // check for valid value here .....   
+      initialEulerAngRates(2) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::EULER_ANGLE_RATES_TYPE;
+      return initialEulerAngRates(2);
+   }
+   if (id == ANGULAR_VELOCITY_X)
+   {
+      // check for valid value here .....   
+      initialAngVel(0) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
+      return initialAngVel(0);
+   }
+   if (id == ANGULAR_VELOCITY_Y)
+   {
+      // check for valid value here .....   
+      initialAngVel(1) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
+      return initialAngVel(1);
+   }
+   if (id == ANGULAR_VELOCITY_Z)
+   {
+      // check for valid value here .....   
+      initialAngVel(2) = value;
+      isInitialized = false;
+      inputAttRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
+      return initialAngVel(2);
    }
    
    return GmatBase::SetRealParameter(id, value);
@@ -1990,9 +2327,12 @@ const Rmatrix& Attitude::SetRmatrixParameter(const Integer id,
       if ((r != 3) || (c != 3))
          throw AttitudeException(
          "Incorrectly sized Rmatrix passed in for direction cosine matrix.");
+      Rmatrix33 inValue;
       for (Integer i = 0; i < 3; i++) // compiler didn't like op=here ???
          for (Integer j = 0; j < 3; j++)
-            initialDcm(i,j) = value(i,j);
+            inValue(i,j) = value(i,j);
+      ValidateCosineMatrix(inValue);
+      initialDcm = inValue;
       isInitialized = false;
       inputAttType = GmatAttitude::DIRECTION_COSINE_MATRIX_TYPE;
       return initialDcm;
@@ -2037,8 +2377,9 @@ const Rmatrix&    Attitude::SetRmatrixParameter(const std::string &label,
 //------------------------------------------------------------------------------
 std::string Attitude::GetStringParameter(const Integer id) const
 {
-   if (id == REFERENCE_COORDINATE_SYSTEM_NAME) return refCSName;
-   if (id == EULER_SEQUENCE_STRING)            return eulerSeqString;
+   if (id == REFERENCE_COORDINATE_SYSTEM)      return refCSName;
+   //if (id == EULER_SEQUENCE_STRING)            return eulerSeqString;
+   if (id == EULER_ANGLE_SEQUENCE)             return eulerSeqString;
    return GmatBase::GetStringParameter(id);
 }
 
@@ -2075,13 +2416,15 @@ std::string Attitude::GetStringParameter(const std::string &label) const
 bool Attitude::SetStringParameter(const Integer id, 
                                   const std::string &value)
 {
-   if (id == REFERENCE_COORDINATE_SYSTEM_NAME)
+   if (id == REFERENCE_COORDINATE_SYSTEM)
    {
        refCSName = value;
        return true;
    }
-   if (id == EULER_SEQUENCE_STRING)
+   //if (id == EULER_SEQUENCE_STRING)
+   if (id == EULER_ANGLE_SEQUENCE)
    {
+      ValidateEulerSequence(value);
       eulerSeqString = value;
       SetEulerSequence(eulerSeqString);
       isInitialized = false;
@@ -2143,6 +2486,81 @@ const StringArray&
             Attitude::GetStringArrayParameter(const std::string &label) const
 {
    return GetStringArrayParameter(GetParameterID(label));
+}
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingString(Gmat::WriteMode mode,
+//                const std::string &prefix, const std::string &useName)
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ *
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ *
+ * @return A string containing the text.
+ *
+ */
+//------------------------------------------------------------------------------
+const std::string& Attitude::GetGeneratingString(Gmat::WriteMode mode,
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
+{
+   #ifdef DEBUG_ATTITUDE_GEN_STRING
+   MessageInterface::ShowMessage
+      ("Attitude::GetGeneratingString() this=%p, mode=%d, prefix=%s, "
+       "useName=%s\n", this, mode, prefix.c_str(), useName.c_str());
+   #endif
+   
+   std::stringstream data;
+
+   data.precision(18);   // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
+      inMatlabMode = true;
+
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+/* DON'T NEED THIS, I THINK
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
+       (mode == Gmat::EPHEM_HEADER))
+   {
+      std::string tname = typeName;
+      if (mode == Gmat::EPHEM_HEADER)
+      {
+         data << tname << " = " << "'" << nomme << "';\n";
+         preface = "";
+      }
+      else
+      {
+         data << "Create " << tname << " " << nomme << ";\n";
+         preface = "GMAT ";
+      }
+      
+      //data << "Create " << tname << " " << nomme << ";\n";
+      //preface = "GMAT ";
+   }
+*/
+   nomme += ".";
+
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+
+   generatingString = data.str();
+   return generatingString;
 }
  
  
@@ -2234,8 +2652,9 @@ bool Attitude::SetEulerSequenceString(const UnsignedIntArray &eulerArray)
 {
    std::ostringstream eulS;
    eulS.str(eulerSeqString);  // may need a char[] here ???????????
-   eulS << eulerArray.at(0) << " " << eulerArray.at(1)
-        << " " << eulerArray.at(2);
+   //eulS << eulerArray.at(0) << " " << eulerArray.at(1)
+   //     << " " << eulerArray.at(2);  // wcs 2007.05.29 leave out blanks
+   eulS << eulerArray.at(0) << eulerArray.at(1) << eulerArray.at(2);
    return true;
 }
 //------------------------------------------------------------------------------
@@ -2259,15 +2678,58 @@ bool Attitude::SetEulerSequence(const std::string &seqStr)
    else if (tmpStr[0] == '3') initialEulerSeq[0] = 3;
    else
    throw AttitudeException("Invalid character in euler sequence string.");
-   if (tmpStr[2] == '1')      initialEulerSeq[1] = 1;
-   else if (tmpStr[2] == '2') initialEulerSeq[1] = 2;
-   else if (tmpStr[2] == '3') initialEulerSeq[1] = 3;
+   if (tmpStr[1] == '1')      initialEulerSeq[1] = 1;
+   else if (tmpStr[1] == '2') initialEulerSeq[1] = 2;
+   else if (tmpStr[1] == '3') initialEulerSeq[1] = 3;
    else
    throw AttitudeException("Invalid character in euler sequence string.");
-   if (tmpStr[4] == '1')      initialEulerSeq[2] = 1;
-   else if (tmpStr[4] == '2') initialEulerSeq[2] = 2;
-   else if (tmpStr[4] == '3') initialEulerSeq[2] = 3;
+   if (tmpStr[2] == '1')      initialEulerSeq[2] = 1;
+   else if (tmpStr[2] == '2') initialEulerSeq[2] = 2;
+   else if (tmpStr[2] == '3') initialEulerSeq[2] = 3;
    else
    throw AttitudeException("Invalid character in euler sequence string.");
    return true;
 }
+
+bool Attitude::ValidateCosineMatrix(const Rmatrix33 &mat)
+{
+   if (!mat.IsOrthogonal()) //return false;
+   {
+      AttitudeException ae;
+      ae.SetDetails(errorMessageFormatUnnamed.c_str(),
+                    (mat.ToString(GetDataPrecision(),true)).c_str(),
+                    "DCM", "Orthogonal matrix");
+      throw ae;
+   }
+   return true;
+}
+
+bool Attitude::ValidateEulerSequence(const std::string &seq)
+{
+   for (Integer i=0; i<12; i++)
+      if (seq == EULER_SEQ_LIST[i])  return true;
+   AttitudeException ae;
+   std::ostringstream eulSeqs;
+   eulSeqs << "One of ";
+   for (Integer i=0; i<12; i++)
+      eulSeqs << " " << EULER_SEQ_LIST[i];
+   ae.SetDetails(errorMessageFormatUnnamed.c_str(),
+                 seq.c_str(),
+                 "EulerAngleSequence", 
+                 (eulSeqs.str()).c_str());
+   throw ae;
+   //return false;
+}
+
+bool Attitude::ValidateEulerSequence(const UnsignedIntArray &eulAng)
+{
+   if (eulAng.size()  != 3)
+      throw AttitudeException(
+         "Euler Sequence contains too few/many components - cannot convert input\n");
+   std::string        eulStr;
+   std::ostringstream eulS;
+   eulS.str(eulStr); 
+   eulS << eulAng[0] << eulAng[1] << eulAng[2];
+   return ValidateEulerSequence(eulStr);
+}
+
