@@ -299,6 +299,14 @@ std::string Thruster::GetParameterText(const Integer id) const
 {
    if (id >= HardwareParamCount && id < ThrusterParamCount)
       return PARAMETER_TEXT[id - HardwareParamCount];
+      
+   if (id == DIRECTION_X)
+      return "Element1";
+   if (id == DIRECTION_Y)
+      return "Element2";
+   if (id == DIRECTION_Z)
+      return "Element3";
+   
    return Hardware::GetParameterText(id);
 }
 
@@ -322,6 +330,35 @@ Integer Thruster::GetParameterID(const std::string &str) const
          return i;
    }
    
+   if (str == "Element1")
+      return DIRECTION_X;
+   if (str == "Element2")
+      return DIRECTION_Y;
+   if (str == "Element3")
+      return DIRECTION_Z;
+   
+   if (str == "X_Direction")
+   { 
+      MessageInterface::ShowMessage("\"X_Direction\" thruster orientations "
+         "are deprecated and will be removed from a future build; please use "
+         "\"Element1\" instead.\n");
+      return DIRECTION_X;
+   }
+   if (str == "Y_Direction")
+   { 
+      MessageInterface::ShowMessage("\"Y_Direction\" thruster orientations "
+         "are deprecated and will be removed from a future build; please use "
+         "\"Element2\" instead.\n");
+      return DIRECTION_Y;
+   }
+   if (str == "Z_Direction")
+   { 
+      MessageInterface::ShowMessage("\"Z_Direction\" thruster orientations "
+         "are deprecated and will be removed from a future build; please use "
+         "\"Element3\" instead.\n");
+      return DIRECTION_Z;
+   }
+      
    return Hardware::GetParameterID(str);
 }
 
@@ -459,7 +496,7 @@ Real Thruster::GetRealParameter(const Integer id) const
          return kCoefficients[13];
       case THRUST_SCALE_FACTOR:
          return thrustScaleFactor;
-
+         
       default:
          break;   // Default just drops through
    }
