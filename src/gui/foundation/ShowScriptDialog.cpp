@@ -37,7 +37,8 @@
 ShowScriptDialog::ShowScriptDialog(wxWindow *parent, wxWindowID id, 
                                     const wxString& title, GmatBase *obj, 
                                     bool isSingleton) :
-   GmatDialog(parent, id, title),
+   GmatDialog(parent, id, title, NULL, wxDefaultPosition, wxDefaultSize, 
+      wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
    theObject(obj),
    showAsSingleton(isSingleton)
 {
@@ -80,7 +81,7 @@ void ShowScriptDialog::Create()
    theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
    theScript->SetFont( GmatAppData::GetFont() );
-   theMiddleSizer->Add(theScript, 0, wxALIGN_CENTRE|wxALL, 3);
+   theMiddleSizer->Add(theScript, 1, wxGROW|wxALL, 3);
 }
 
 

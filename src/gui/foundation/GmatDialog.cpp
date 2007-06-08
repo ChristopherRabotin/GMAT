@@ -311,7 +311,7 @@ void GmatDialog::ShowData()
 {
    // add items to middle sizer
     
-   theDialogSizer->Add(theMiddleSizer, 0, wxGROW | wxALL, 1);
+   theDialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
    
    // tells the enclosing window to adjust to the size of the sizer
