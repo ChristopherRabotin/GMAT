@@ -852,8 +852,7 @@ void DifferentialCorrector::RunPerturbation()
    // Calculate the perts, one at a time
    if (pertNumber != -1)
       // Back out the last pert applied
-      //variable[pertNumber] -= perturbation[pertNumber];
-      variable.at(pertNumber) -= perturbation.at(pertNumber);
+      variable.at(pertNumber) = lastUnperturbedValue;
    ++pertNumber;
 
    if (pertNumber == variableCount)  // Current set of perts have been run
@@ -863,8 +862,21 @@ void DifferentialCorrector::RunPerturbation()
       return;
    }
 
-   //variable[pertNumber] += perturbation[pertNumber];
+   lastUnperturbedValue = variable.at(pertNumber);
    variable.at(pertNumber) += perturbation.at(pertNumber);
+   pertDirection.at(pertNumber) = 1.0;
+   
+   if (variable[pertNumber] > variableMaximum[pertNumber])
+   {
+      pertDirection.at(pertNumber) = -1.0;
+      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+   }    
+   if (variable[pertNumber] < variableMinimum[pertNumber])
+   {
+      pertDirection.at(pertNumber) = -1.0;
+      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+   }
+       
    WriteToTextFile();
 }
 
@@ -891,10 +903,6 @@ void DifferentialCorrector::CalculateParameters()
             delta += inverseJacobian[j][i] * (goal[j] - nominal[j]);
 
         // Ensure that delta is not larger than the max allowed step
-        //if (fabs(delta) > variableMaximumStep[i])
-        //   delta = ((delta > 0.0) ? variableMaximumStep[i] :
-        //                           -variableMaximumStep[i]);
-        //variable[i] += delta;
         try
         {
            if (fabs(delta) > variableMaximumStep.at(i))
@@ -902,11 +910,7 @@ void DifferentialCorrector::CalculateParameters()
                                       -variableMaximumStep.at(i));
            variable.at(i) += delta;
 
-        // Ensure that variable[i] is in the allowed range
-        //if (variable[i] < variableMinimum[i])
-        //   variable[i] = variableMinimum[i];
-        //if (variable[i] > variableMaximum[i])
-        //   variable[i] = variableMaximum[i];
+           // Ensure that variable[i] is in the allowed range
            if (variable.at(i) < variableMinimum.at(i))
               variable.at(i) = variableMinimum.at(i);
            if (variable.at(i) > variableMaximum.at(i))
@@ -927,7 +931,7 @@ void DifferentialCorrector::CalculateParameters()
 //  void CheckCompletion()
 //------------------------------------------------------------------------------
 /**
- * Determine whether or not teh targeting run has converged.
+ * Determine whether or not the targeting run has converged.
  */
 //------------------------------------------------------------------------------
 void DifferentialCorrector::CheckCompletion()
@@ -988,8 +992,7 @@ void DifferentialCorrector::CalculateJacobian()
       for (j = 0; j < goalCount; ++j)
       {
           jacobian[i][j] = achieved[i][j] - nominal[j];
-          //jacobian[i][j] /= perturbation[i];
-          jacobian[i][j] /= perturbation.at(i);
+          jacobian[i][j] /= (pertDirection.at(i) * perturbation.at(i));
       }
    }
 }

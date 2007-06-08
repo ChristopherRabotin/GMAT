@@ -224,44 +224,20 @@ bool Solver::Initialize()
          localVariableCount);
    #endif
 
-   //FreeArrays();
-   
-   //variable            = new Real[localVariableCount];
-   //perturbation        = new Real[localVariableCount];
-   //variableMinimum     = new Real[localVariableCount];
-   //variableMaximum     = new Real[localVariableCount];
-   //variableMaximumStep = new Real[localVariableCount];
-
    try
    {
-      //variable.reserve(localVariableCount);
-      //perturbation.reserve(localVariableCount);
-      //variableMinimum.reserve(localVariableCount);
-      //variableMaximum.reserve(localVariableCount);
-      //variableMaximumStep.reserve(localVariableCount);
-   
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
          "In Solver::Initialize - about to set default values\n");
    #endif
       for (Integer i = 0; i < localVariableCount; ++i)
       {
-         // Set default values for min and max parameters
-         //variable[i]            =  0.0;
-         //variableMinimum[i]     = -9.999e300;
-         //variableMaximum[i]     =  9.999e300;
-         //variableMaximumStep[i] =  9.999e300;
-         //perturbation[i]        =  1.0e-04;
-         //variable.at(i)            =  0.0;
-         //variableMinimum.at(i)     = -9.999e300;
-         //variableMaximum.at(i)     =  9.999e300;
-         //variableMaximumStep.at(i) =  9.999e300;
-         //perturbation.at(i)        =  1.0e-04;
          variable.push_back(0.0);
          variableMinimum.push_back(-9.999e300);
          variableMaximum.push_back(9.999e300);
          variableMaximumStep.push_back(9.999e300);
          perturbation.push_back(1.0e-04);
+         pertDirection.push_back(1.0);
       }
    }
    catch(const std::exception &re)
@@ -1132,5 +1108,6 @@ void Solver::FreeArrays()
    variableMinimum.clear();
    variableMaximum.clear();
    variableMaximumStep.clear();
+   pertDirection.clear();
 }
 

@@ -193,6 +193,10 @@ protected:
    std::vector<Real>    variableMaximumStep;
    /// Current perturbation being run.
    Integer              pertNumber;
+   /// Unperturbed value for the most recent applied pert, used to restore
+   Real                 lastUnperturbedValue;
+   /// Used to keep Jacobian calculations tracking when we bump into a limit
+   std::vector<Real>    pertDirection;
 
    /// Flag used to ensure the targeter is ready to go
    bool                 initialized;
