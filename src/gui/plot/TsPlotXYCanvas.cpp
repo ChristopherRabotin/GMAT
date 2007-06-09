@@ -57,28 +57,30 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
    
    wxString label;
    
-   if ((int)xGridLoc.size() != xticks+1)
-   {
-      xGridLoc.clear();
-      for (int i = 0; i <= xticks; ++i)
-         xGridLoc.push_back(0);
-   }
-   if ((int)yGridLoc.size() != yticks+1)
-   {
-      xGridLoc.clear();
-      for (int i = 0; i <= yticks; ++i)
-         yGridLoc.push_back(0);
-   }
+   //if ((int)xGridLoc.size() != xticks+1)
+   //{
+   //   xGridLoc.clear();
+      //for (int i = 0; i <= xticks; ++i)
+      //   xGridLoc.push_back(0);
+   //}
+   //if ((int)yGridLoc.size() != yticks+1)
+   //{
+   //   xGridLoc.clear();
+      //for (int i = 0; i <= yticks; ++i)
+      //   yGridLoc.push_back(0);
+   //}
 
    dc.SetFont(labelFont);
 
    // x-Axis first
    double delta, step, logStep, factor, div, start;
    delta = currentXMax - currentXMin;
+
    #ifdef DEBUG_INTERFACE
       MessageInterface::ShowMessage
          ("***XMin = %lf, XMax = %lf, delta=%lf\n", currentXMin, currentXMax, delta);
    #endif
+
    step = delta / (xticks+1.0);
    if (delta > 0.0)
    {
@@ -108,13 +110,6 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
       #endif
    }
    
-   // causing VC++ run time error, so just return
-   // @todo resolve this run time error later
-   #ifdef _MSC_VER
-   if (delta < 0)
-      return;
-   #endif
-   
    for (int i = 0; i <= xticks; ++i)
    {
       idx = (int)(i * dx + 0.5);
@@ -131,10 +126,12 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
    }
 
    delta = currentYMax - currentYMin;
+
    #ifdef DEBUG_INTERFACE
       MessageInterface::ShowMessage("***YMin = %lf, YMax = %lf, delta=%g\n", currentYMin,
          currentYMax, delta);
    #endif
+   
    step = delta / (yticks+1.0);
    if (delta > 0.0)
    {
@@ -163,13 +160,6 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
             delta);
       #endif
    }
-   
-   // causing VC++ run time error, so just return
-   // @todo resolve this run time error later
-   #ifdef _MSC_VER
-   if (delta < 0)
-      return;
-   #endif
    
    for (int i = 0; i <= yticks; ++i)
    {
@@ -251,38 +241,6 @@ void TsPlotXYCanvas::DrawLabels(wxDC &dc)
 }
 
 
-//void TsPlotXYCanvas::DrawGrid(wxDC &dc)
-//{
-//   // VC++ causing run time error here
-//#ifndef _MSC_VER
-//   wxCoord w, h;
-//   dc.GetSize(&w, &h);
-//
-//   int x0  = left,
-//       y0  = h-(bottom),
-//       xm  = w-right,
-//       ym  = top;
-//
-//   dc.SetPen(gridPen);
-//   
-//   //MessageInterface::ShowMessage
-//   //   ("===> TsPlotCanvas::DrawGrid() xGridLoc.size()=%d, yGridLoc.size()=%d\n",
-//   //    xGridLoc.size(), yGridLoc.size());
-//   
-//   // VC++ causing run time error
-//   // @todo resolve this run time error later
-//   if (xGridLoc.size() > 0)
-//      for (unsigned int i = 0; i <= xGridLoc.size(); ++i)
-//         if ((xGridLoc[i] != x0) && (xGridLoc[i] != xm))
-//            dc.DrawLine(xGridLoc[i], y0 - tickSize, xGridLoc[i], ym + tickSize);
-//   if (yGridLoc.size() > 0)
-//      for (unsigned int i = 0; i <= yGridLoc.size(); ++i)
-//         if ((yGridLoc[i] != y0) && (yGridLoc[i] != ym))
-//            dc.DrawLine(xm - tickSize, yGridLoc[i], x0+tickSize, yGridLoc[i]);
-//#endif
-//}
-
-
 void TsPlotXYCanvas::PlotData(wxDC &dc)
 {
    wxCoord w, h;
@@ -300,7 +258,7 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
            curve != data.end(); ++curve)
       {
          pups = (*curve)->GetPenUpLocations(); // penUpLocations(n);
-         locCount = pups->size();
+         locCount = (int)pups->size();
          if (locCount > 0)
          {
             pupIndex = 0;

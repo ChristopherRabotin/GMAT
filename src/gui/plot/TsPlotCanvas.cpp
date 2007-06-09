@@ -20,6 +20,7 @@
  
 #include <cmath>
 #include <fstream>
+#include <algorithm>
 
 
 // Define the static data
@@ -386,8 +387,7 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
    if (hasGrid && (rescaled || drawAll))
       DrawGrid(dc);
 
-//   if (hasData)
-      PlotData(dc);
+   PlotData(dc);
 
    if (rescaled || drawAll)
    {
@@ -406,8 +406,6 @@ void TsPlotCanvas::Refresh(wxDC &dc, bool drawAll)
 
 void TsPlotCanvas::DrawGrid(wxDC &dc)
 {
-   // VC++ causing run time error here
-#ifndef _MSC_VER
    wxCoord w, h;
    dc.GetSize(&w, &h);
 
@@ -418,21 +416,18 @@ void TsPlotCanvas::DrawGrid(wxDC &dc)
 
    dc.SetPen(gridPen);
    
-   //MessageInterface::ShowMessage
-   //   ("===> TsPlotCanvas::DrawGrid() xGridLoc.size()=%d, yGridLoc.size()=%d\n",
-   //    xGridLoc.size(), yGridLoc.size());
-   
-   // VC++ causing run time error
-   // @todo resolve this run time error later
-   if (xGridLoc.size() > 0)
-      for (unsigned int i = 0; i <= xGridLoc.size(); ++i)
+//   if (xGridLoc.size() > 0)
+//      for (unsigned int i = 0; i <= xGridLoc.size(); ++i)
+   if (xticks > 0)
+      for (int i = 0; i <= xticks; ++i)
          if ((xGridLoc[i] != x0) && (xGridLoc[i] != xm))
             dc.DrawLine(xGridLoc[i], y0 - tickSize, xGridLoc[i], ym + tickSize);
-   if (yGridLoc.size() > 0)
-      for (unsigned int i = 0; i <= yGridLoc.size(); ++i)
+//   if (yGridLoc.size() > 0)
+//      for (unsigned int i = 0; i <= yGridLoc.size(); ++i)
+   if (yticks > 0)
+      for (int i = 0; i <= yticks; ++i)
          if ((yGridLoc[i] != y0) && (yGridLoc[i] != ym))
             dc.DrawLine(xm - tickSize, yGridLoc[i], x0+tickSize, yGridLoc[i]);
-#endif
 }
 
 
@@ -443,7 +438,7 @@ void TsPlotCanvas::DrawLegend(wxDC &dc)
       ("TsPlotCanvas::DrawLegend() names.size=%d\n", names.size());
    #endif
    
-   int j = 0, h, w, labelCount = (int)names.size();
+   int j = 0, h = 16, w = 16, labelCount = (int)names.size();
    wxString label;
    int xloc, yloc, rowCount = 1, colCount;
 
@@ -562,7 +557,7 @@ void TsPlotCanvas::AddData(TsPlotCurve *curve, wxColour startColor)
    data.push_back(curve);
    penUpLocations.push_back(curve->GetPenUpLocations());
 
-   unsigned int varCount = data.size();
+   unsigned int varCount = (unsigned int)data.size();
    wxPen *newPens = new wxPen[varCount];
    
    for (unsigned int i = 0; i < varCount-1; ++i)

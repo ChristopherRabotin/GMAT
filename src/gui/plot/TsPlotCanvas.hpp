@@ -118,8 +118,11 @@ protected:
    int yticks;
    int xMinorTicks;
    int yMinorTicks;
-   std::vector <int> xGridLoc;
-   std::vector <int> yGridLoc;
+   // This construct doesn't work in Visual C++???  So switched to static arrays
+   //std::vector <int> xGridLoc;
+   //std::vector <int> yGridLoc;
+   int xGridLoc[64];
+   int yGridLoc[64];
    int tickSize;
    int minorTickSize;
    int varCount;

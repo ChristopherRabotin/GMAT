@@ -236,7 +236,7 @@ double TsPlotCurve::GetMaxY()
 //------------------------------------------------------------------------------
 void TsPlotCurve::PenUp()
 {
-   penUpIndex.push_back(abscissa.size() - 1);
+   penUpIndex.push_back((int)abscissa.size() - 1);
    penIsDown = false;
 }
 
@@ -261,7 +261,7 @@ const std::vector<int>* TsPlotCurve::GetPenUpLocations()
 void TsPlotCurve::SetColour(wxColour rgb)
 {
    linecolor.push_back(rgb);
-   colorChange.push_back(abscissa.size());
+   colorChange.push_back((int)abscissa.size());
 }
 
 void TsPlotCurve::SetWidth(int w)
