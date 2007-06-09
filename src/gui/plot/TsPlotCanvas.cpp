@@ -78,6 +78,8 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    xMax           (-1e99), 
    yMin           (1e99), 
    yMax           (-1e99),
+   xName          ("X"), 
+   yName          ("Y"),
    hasData        (false),
    rescaled       (true),
    zoomed         (false),
@@ -89,7 +91,9 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    hasGrid        (true),
    hasLegend      (true),
    initializeLegendLoc (true),
-   legendColumns  (1)
+   legendColumns  (1),
+   xLabelPrecision(6), 
+   yLabelPrecision(6)
 {
    wxPaintDC dc(this);
 
@@ -779,10 +783,17 @@ void TsPlotCanvas::ToggleLegend(wxCommandEvent& event)
 
 void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 {
-   TsPlotOptionsDialog dlg(this, -1, "Plot options");
+   TsPlotOptionsDialog dlg(xName, yName, this, -1, "Plot options");
    dlg.SetPlotTitle(plotTitle);
    dlg.SetXLabel(xLabel);
    dlg.SetYLabel(yLabel);
+   if (data.size() > 0)
+      dlg.SetWidth(data[0]->GetWidth());
+   else
+      dlg.SetWidth(1);
+      
+   dlg.SetXPrecision(xLabelPrecision);
+   dlg.SetXPrecision(yLabelPrecision);
    
    if (dlg.ShowModal() == wxID_OK)
    {
@@ -794,7 +805,13 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
       xLabel = dlg.GetXLabel();
       yLabel = dlg.GetYLabel();
       labelAxes = ((xLabel != "") | (yLabel != ""));
-      
+
+      // Line properties
+      SetLineWidth(dlg.GetWidth());
+
+      xLabelPrecision = dlg.GetXPrecision();
+      yLabelPrecision = dlg.GetXPrecision();
+            
       wxClientDC dc(this);
       Refresh(dc, true);
    }
@@ -877,29 +894,68 @@ void TsPlotCanvas::PenDown(int index)
 }
 
 
+void TsPlotCanvas::SetLineWidth(int w,  int lineId)
+{
+   if (lineId == -1)
+      for (std::vector<TsPlotCurve *>::iterator i = data.begin(); 
+           i != data.end(); ++i)
+         (*i)->SetWidth(w);
+   else
+      if (lineId < data.size())
+         data[lineId]->SetWidth(w);
+
+   // Finally, refresh the display
+   for (std::vector<TsPlotCurve *>::iterator i = data.begin(); i != data.end(); ++i)
+      (*i)->lastPointPlotted = 0;
+   wxClientDC dc(this);
+   Refresh(dc, true);
+}
+
+
+void TsPlotCanvas::SetLineStyle(int ls, int lineId)
+{
+   if (lineId == -1)
+   {
+      int j = 0;
+      for (std::vector<TsPlotCurve *>::iterator i = data.begin(); 
+           i != data.end(); ++i)
+         (*i)->SetStyle(ls);
+   }
+   else
+      if (lineId < data.size())
+         data[lineId]->SetStyle(ls);
+
+   // Finally, refresh the display
+   for (std::vector<TsPlotCurve *>::iterator i = data.begin(); i != data.end(); ++i)
+      (*i)->lastPointPlotted = 0;
+   wxClientDC dc(this);
+   Refresh(dc, true);
+}
+
+
 //==============================================================================
 // Helper methods
 //==============================================================================
 
-int TsPlotCanvas::GetXLocation(double val)
+int TsPlotCanvas::GetXLocation(double val, double val2)
 {
    return (int)(left + (val - currentXMin) * xScale);
 }
 
 
-int TsPlotCanvas::GetYLocation(double val)
+int TsPlotCanvas::GetYLocation(double val, double val2)
 {
    return (int)(top + (currentYMax - val) * yScale);
 }
 
 
-double TsPlotCanvas::GetActualXValue(int x)
+double TsPlotCanvas::GetActualXValue(int x, int y)
 {
    return currentXMin + (x - left) / xScale;
 }
 
 
-double TsPlotCanvas::GetActualYValue(int y)
+double TsPlotCanvas::GetActualYValue(int y, int x)
 {
    return currentYMax - (y - top) / yScale;
 }

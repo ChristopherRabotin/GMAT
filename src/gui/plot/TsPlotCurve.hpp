@@ -35,6 +35,10 @@ public:
    
    void AddData(double x, double y);
    void SetColour(wxColour rgb);
+   void SetWidth(int w);
+   int  GetWidth();
+   void SetStyle(int ls);
+   int  GetStyle();
    
    virtual void   Clear();
 
@@ -61,15 +65,19 @@ protected:
    // Interpolator *mInterp;
    
    /// Independent data
-   std::vector<double> abscissa;
+   std::vector<double>  abscissa;
    /// Dependent data
-   std::vector<double> ordinate;
+   std::vector<double>  ordinate;
    /// Location for "pen up" commands
-   std::vector<int>    penUpIndex;
-   /// Location for "pen up" commands
+   std::vector<int>     penUpIndex;
+   /// vector of line colors
    std::vector<wxColour> linecolor;
    /// Location for color changes
-   std::vector<int>    colorChange;
+   std::vector<int>     colorChange;
+   /// Line width.  This parameter is set for the entire line
+   int                  lineWidth;
+   /// Line style.  This parameter is set for the entire line
+   int                  lineStyle;
    /// Flag indicating that the curve is accepting data
    bool penIsDown;
 

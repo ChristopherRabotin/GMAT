@@ -34,7 +34,9 @@ TsPlotCurve::TsPlotCurve(int offsetY, double startY, double endY,
    rangeChanged      (false),
    domainChanged     (false),
    penIsDown         (true),
-   lastPointPlotted  (0)
+   lastPointPlotted  (0),
+   lineWidth         (1),
+   lineStyle         (wxSOLID)
 {
 //   mInterp = new LinearInterpolator();
    ordinate.clear();
@@ -260,4 +262,37 @@ void TsPlotCurve::SetColour(wxColour rgb)
 {
    linecolor.push_back(rgb);
    colorChange.push_back(abscissa.size());
+}
+
+void TsPlotCurve::SetWidth(int w)
+{
+   lineWidth = w;
+}
+
+int TsPlotCurve::GetWidth()
+{
+   return lineWidth;
+}
+
+
+/**
+ * Line styles defined in wxWidgets
+ *    wxSOLID  Solid style.
+ *    wxTRANSPARENT  No pen is used.
+ *    wxDOT    Dotted style.
+ *    wxLONG_DASH    Long dashed style.
+ *    wxSHORT_DASH   Short dashed style.
+ *    wxDOT_DASH  Dot and dash style.
+ *    wxSTIPPLE   Use the stipple bitmap.
+ *    wxUSER_DASH    Use the user dashes: see wxPen::SetDashes.
+ */
+void TsPlotCurve::SetStyle(int ls)
+{
+   lineStyle = ls;
+}
+
+
+int TsPlotCurve::GetStyle()
+{
+   return lineStyle;
 }

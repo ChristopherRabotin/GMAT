@@ -309,6 +309,8 @@ void TsPlotXYCanvas::PlotData(wxDC &dc)
          
          if ((*curve)->abscissa.size() > 0)
          {
+            plotPens[n].SetWidth((*curve)->GetWidth());
+            plotPens[n].SetStyle((*curve)->GetStyle());
             dc.SetPen(plotPens[n]);
 
             if ((unsigned int)pupLoc < (*curve)->lastPointPlotted)

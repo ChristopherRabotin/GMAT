@@ -16,11 +16,15 @@
 
 #include "TsPlotOptionsDialog.hpp"
 
-TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id, 
+TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel, 
+                                     const std::string yLabel, 
+                                     wxWindow* parent, wxWindowID id, 
                                      const wxString& title, const wxPoint& pos, 
                                      const wxSize& size, long style, 
                                      const wxString& name) :
-   wxDialog(parent, id, title, pos, size, style, name)
+   wxDialog       (parent, id, title, pos, size, style, name),
+   xName          (xLabel),
+   yName          (yLabel)
 {
    wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
    
@@ -29,14 +33,10 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
 
    wxStaticBoxSizer *leftSizer = new wxStaticBoxSizer(wxVERTICAL, this, "");
    wxStaticBoxSizer *xAxisSizer = new wxStaticBoxSizer(wxVERTICAL, this, 
-      "X-Axis Properties");
+      (xName + "-Axis Properties").c_str());
    wxStaticBoxSizer *yAxisSizer = new wxStaticBoxSizer(wxVERTICAL, this, 
-      "Y-Axis Properties");
+      (yName + "-Axis Properties").c_str());
    
-   sideSizer->Add(leftSizer, 0, wxALL, 2);
-   sideSizer->Add(xAxisSizer, 0, wxALL, 2);
-   sideSizer->Add(yAxisSizer, 0, wxALL, 2);
-
    // Set up the two panels that appear on the left of the dialog
    wxStaticBoxSizer *labelSizer = new wxStaticBoxSizer(wxVERTICAL, this, 
       "Plot Labels");
@@ -48,26 +48,43 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
 
    // Set up the plot labels   
    wxBoxSizer *titleBox = new wxBoxSizer(wxHORIZONTAL);
+
+   std::string xLabelStr = xName + " Label:";
+   std::string yLabelStr = yName + " Label:";
+   long int w, h, wid;
+
+   wxClientDC dc(this);
+   dc.GetTextExtent(wxString(xLabelStr.c_str()), &w, &h);
+   wid = w;
+   dc.GetTextExtent(wxString(yLabelStr.c_str()), &w, &h);
+   if (w > wid)
+      wid = w;
+   dc.GetTextExtent(wxString("Plot Title:"), &w, &h);
+   if (w > wid)
+      wid = w;
+
+   wxSize lExtent(w,h);
+
    titleBox->Add(new wxStaticText(this, -1, "Plot Title:", 
-      wxDefaultPosition, wxSize(50,16), wxALIGN_RIGHT), 0, 
+      wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
-   titleBox->AddStretchSpacer();
+   //titleBox->AddStretchSpacer();
    plotTitle = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
    titleBox->Add(plotTitle, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xlabelBox = new wxBoxSizer(wxHORIZONTAL);
-   xlabelBox->Add(new wxStaticText(this, -1, "X Label:", 
-      wxDefaultPosition, wxSize(50,16), wxALIGN_RIGHT), 0, 
+   xlabelBox->Add(new wxStaticText(this, -1, xLabelStr.c_str(), 
+      wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
-   xlabelBox->AddStretchSpacer();
+   //xlabelBox->AddStretchSpacer();
    xAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
    xlabelBox->Add(xAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *ylabelBox = new wxBoxSizer(wxHORIZONTAL);
-   ylabelBox->Add(new wxStaticText(this, -1, "Y Label:", 
-      wxDefaultPosition, wxSize(50,16), wxALIGN_RIGHT), 0, 
+   ylabelBox->Add(new wxStaticText(this, -1, yLabelStr.c_str(), 
+      wxDefaultPosition, lExtent, wxALIGN_RIGHT), 0, 
       wxALL | wxALIGN_CENTER_VERTICAL, 5);
-   ylabelBox->AddStretchSpacer();
+   //ylabelBox->AddStretchSpacer();
    yAxisLabel = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxSize(150,22));
    ylabelBox->Add(yAxisLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
@@ -79,8 +96,8 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    wxBoxSizer *lineWidthBox = new wxBoxSizer(wxHORIZONTAL);
    lineWidthBox->Add(new wxStaticText(this, -1, "Line Width:"), 0, 
                                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
-   lineWidth = new wxTextCtrl(this, -1);
-   lineWidth->Enable(false);
+   lineWidth = new wxSpinCtrl(this, -1, "1");
+   lineWidth->SetRange(1,10);
    lineWidthBox->Add(lineWidth, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *lineStyleBox = new wxBoxSizer(wxHORIZONTAL);
@@ -95,7 +112,7 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    
    // Set up the X-axis options
    wxBoxSizer *xminBox = new wxBoxSizer(wxHORIZONTAL);
-   userXMinimum = new wxCheckBox(this, -1, "X Minimum:  ");
+   userXMinimum = new wxCheckBox(this, -1, (xName + " Minimum:  ").c_str());
    userXMinimum->Enable(false);
    xminBox->Add(userXMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xMinimum = new wxTextCtrl(this, -1, "0.0");
@@ -103,32 +120,44 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    xminBox->Add(xMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xmaxBox = new wxBoxSizer(wxHORIZONTAL);
-   userXMaximum = new wxCheckBox(this, -1, "X Maximum:  ");
+   userXMaximum = new wxCheckBox(this, -1, (xName + " Maximum:  ").c_str());
    userXMaximum->Enable(false);
    xmaxBox->Add(userXMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xMaximum = new wxTextCtrl(this, -1, "10.0");
    xMaximum->Enable(false);
    xmaxBox->Add(xMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
-   xLogScale = new wxCheckBox(this, -1, "Logarithmic X Axis");
+   xLogScale = new wxCheckBox(this, -1, 
+                              ("Logarithmic " + xName + " Axis").c_str());
    xLogScale->Enable(false);
 
    wxBoxSizer *xTickBox = new wxBoxSizer(wxHORIZONTAL);
-   xTickBox->Add(new wxStaticText(this, -1, "Number of X Ticks:"), 0, 
-                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   xTickBox->Add(new wxStaticText(this, -1, 
+                                  ("Number of " + xName + " Ticks:").c_str()), 
+                                  0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xTickCount = new wxTextCtrl(this, -1);
    xTickCount->Enable(false);
    xTickBox->Add(xTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xMinorTickBox = new wxBoxSizer(wxHORIZONTAL);
-   xMinorTickBox->Add(new wxStaticText(this, -1, "# of Minor X Ticks:"), 0, 
-                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   xMinorTickBox->Add(new wxStaticText(this, -1, 
+                                   ("# of Minor " + xName + " Ticks:").c_str()), 
+                                   0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xMinorTickCount = new wxTextCtrl(this, -1);
    xMinorTickCount->Enable(false);
    xMinorTickBox->Add(xMinorTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
-   xMinorTickLines = new wxCheckBox(this, -1, "Draw Minor X Lines");
+   xMinorTickLines = new wxCheckBox(this, -1, 
+                                    ("Draw Minor " + xName + " Lines").c_str());
    xMinorTickLines->Enable(false);
+
+   wxBoxSizer *xPrecisionBox = new wxBoxSizer(wxHORIZONTAL);
+   xPrecisionBox->Add(new wxStaticText(this, -1, 
+                                   (xName + " Label Precision:").c_str()), 0, 
+                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   xPrecision = new wxSpinCtrl(this, -1, "6");
+   xPrecision->SetRange(2,16);
+   xPrecisionBox->Add(xPrecision, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
 
    xAxisSizer->Add(xminBox, 0, wxALL, 5);
    xAxisSizer->Add(xmaxBox, 0, wxALL, 5);
@@ -136,10 +165,11 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    xAxisSizer->Add(xTickBox, 0, wxALL, 5);
    xAxisSizer->Add(xMinorTickBox, 0, wxALL, 5);
    xAxisSizer->Add(xMinorTickLines, 0, wxALL, 5);
+   xAxisSizer->Add(xPrecisionBox, 0, wxALL, 5);
 
    // Set up the Y-axis options
    wxBoxSizer *yminBox = new wxBoxSizer(wxHORIZONTAL);
-   userYMinimum = new wxCheckBox(this, -1, "Y Minimum:  ");
+   userYMinimum = new wxCheckBox(this, -1, (yName + " Minimum:  ").c_str());
    userYMinimum->Enable(false);
    yminBox->Add(userYMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yMinimum = new wxTextCtrl(this, -1, "0.0");
@@ -147,32 +177,44 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    yminBox->Add(yMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *ymaxBox = new wxBoxSizer(wxHORIZONTAL);
-   userYMaximum = new wxCheckBox(this, -1, "Y Maximum:  ");
+   userYMaximum = new wxCheckBox(this, -1, (yName + " Maximum:  ").c_str());
    userYMaximum->Enable(false);
    ymaxBox->Add(userYMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yMaximum = new wxTextCtrl(this, -1, "10.0");
    yMaximum->Enable(false);
    ymaxBox->Add(yMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
-   yLogScale = new wxCheckBox(this, -1, "Logarithmic Y Axis");
+   yLogScale = new wxCheckBox(this, -1, 
+                              ("Logarithmic " + yName + " Axis").c_str());
    yLogScale->Enable(false);
 
    wxBoxSizer *yTickBox = new wxBoxSizer(wxHORIZONTAL);
-   yTickBox->Add(new wxStaticText(this, -1, "Number of Y Ticks:"), 0, 
-                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   yTickBox->Add(new wxStaticText(this, -1, 
+                                  ("Number of " + yName + " Ticks:").c_str()), 0, 
+                                  wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yTickCount = new wxTextCtrl(this, -1);
    yTickCount->Enable(false);
    yTickBox->Add(yTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *yMinorTickBox = new wxBoxSizer(wxHORIZONTAL);
-   yMinorTickBox->Add(new wxStaticText(this, -1, "# of Minor Y Ticks:"), 0, 
-                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   yMinorTickBox->Add(new wxStaticText(this, -1, 
+                                   ("# of Minor " + yName + " Ticks:").c_str()), 
+                                   0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yMinorTickCount = new wxTextCtrl(this, -1);
    yMinorTickCount->Enable(false);
    yMinorTickBox->Add(yMinorTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
-   yMinorTickLines = new wxCheckBox(this, -1, "Draw Minor Y Lines");
+   yMinorTickLines = new wxCheckBox(this, -1, 
+                                    ("Draw Minor " + yName + " Lines").c_str());
    yMinorTickLines->Enable(false);
+
+   wxBoxSizer *yPrecisionBox = new wxBoxSizer(wxHORIZONTAL);
+   yPrecisionBox->Add(new wxStaticText(this, -1, 
+                                   (yName + " Label Precision:").c_str()), 0, 
+                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
+   yPrecision = new wxSpinCtrl(this, -1, "6");
+   yPrecision->SetRange(2,16);
+   yPrecisionBox->Add(yPrecision, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
 
    yAxisSizer->Add(yminBox, 0, wxALL, 5);
    yAxisSizer->Add(ymaxBox, 0, wxALL, 5);
@@ -180,27 +222,35 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(wxWindow* parent, wxWindowID id,
    yAxisSizer->Add(yTickBox, 0, wxALL, 5);
    yAxisSizer->Add(yMinorTickBox, 0, wxALL, 5);
    yAxisSizer->Add(yMinorTickLines, 0, wxALL, 5);
+   yAxisSizer->Add(yPrecisionBox, 0, wxALL, 5);
 
    // Pull it all together and put buttons at the bottom   
-   topSizer->Add(sideSizer, 0, wxALL, 5);
-   topSizer->AddStretchSpacer();
-   
+   sideSizer->Add(leftSizer, 0, wxALL, 2);
+   sideSizer->Add(xAxisSizer, 1, wxALL, 2);
+   sideSizer->Add(yAxisSizer, 1, wxALL, 2);
+
+   // Configure buttons for bottom of dialog
    wxStaticBoxSizer *buttons = new wxStaticBoxSizer(wxHORIZONTAL, this);
    buttons->AddStretchSpacer();
-   buttons->Add(CreateButtonSizer(wxOK), 0, wxALL, 5);
+   buttons->Add(CreateButtonSizer(wxOK), 0, wxALL | wxALIGN_CENTER, 5);
+   buttons->Add(80, 0, 0);
+   buttons->Add(CreateButtonSizer(wxCANCEL), 0, wxALL | wxALIGN_CENTER, 5);
    buttons->AddStretchSpacer();
-   buttons->Add(CreateButtonSizer(wxCANCEL), 0, wxALL, 5);
-   buttons->AddStretchSpacer();
-   topSizer->Add(buttons, 0, wxALIGN_BOTTOM | wxALIGN_CENTER_HORIZONTAL, 15);
-   topSizer->AddSpacer(10);
+
+   topSizer->Add(sideSizer, 1, wxALL | wxGROW, 5);
+   topSizer->Add(buttons, 0, wxALL | wxGROW, 5);
 
    SetSizer(topSizer);
+   topSizer->Fit(this);
 }
 
 TsPlotOptionsDialog::~TsPlotOptionsDialog()
 {
 }
 
+void TsPlotOptionsDialog::UpdateLabels()
+{
+}
 
 std::string TsPlotOptionsDialog::GetPlotTitle()
 {
@@ -232,3 +282,51 @@ void TsPlotOptionsDialog::SetYLabel(const std::string &str)
    yAxisLabel->SetValue(str.c_str());
 }
 
+int TsPlotOptionsDialog::GetWidth()
+{
+   return lineWidth->GetValue();
+}
+
+int TsPlotOptionsDialog::GetStyle()
+{
+   return wxSOLID;
+}
+
+void TsPlotOptionsDialog::SetWidth(int lw)
+{
+   lineWidth->SetValue(lw);
+}
+
+void TsPlotOptionsDialog::SetStyle(int ls)
+{
+}
+
+void TsPlotOptionsDialog::SetXPrecision(int xPrec)
+{
+   xPrecision->SetValue(xPrec);
+}
+
+void TsPlotOptionsDialog::SetYPrecision(int yPrec)
+{
+   yPrecision->SetValue(yPrec);
+}
+
+int TsPlotOptionsDialog::GetXPrecision()
+{
+   return xPrecision->GetValue();
+}
+
+int TsPlotOptionsDialog::GetYPrecision()
+{
+   return yPrecision->GetValue();
+}
+
+void TsPlotOptionsDialog::SetXName(std::string nomme)
+{
+   xName = nomme;
+}
+
+void TsPlotOptionsDialog::SetYName(std::string nomme)
+{
+   yName = nomme;
+}

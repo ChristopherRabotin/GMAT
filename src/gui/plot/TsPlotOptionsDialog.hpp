@@ -18,10 +18,7 @@
 #define PLOTOPTIONSDIALOG_HPP_
 
 #include <wx/wx.h>
-//#include <wx/statline.h>
-//#include <wx/button.h>
-//#include <wx/sizer.h>
-//#include <wx/textctrl.h>
+#include <wx/spinctrl.h>
 
 #include <string>
 
@@ -29,10 +26,11 @@
 class TsPlotOptionsDialog : public wxDialog
 {
 public:
-	TsPlotOptionsDialog(wxWindow* parent, wxWindowID id, 
+	TsPlotOptionsDialog(const std::string xLabel, const std::string yLabel,
+                     wxWindow* parent, wxWindowID id, 
                      const wxString& title = "TS Plot Options", 
                      const wxPoint& pos = wxDefaultPosition, 
-                     const wxSize& size = wxSize(720,380), 
+                     const wxSize& size = wxSize(780,380), 
                      long style = wxDEFAULT_DIALOG_STYLE, 
                      const wxString& name = "TSPlotOptions");
 	virtual ~TsPlotOptionsDialog();
@@ -41,9 +39,22 @@ public:
    std::string       GetPlotTitle();
    std::string       GetXLabel();
    std::string       GetYLabel();
+   int               GetWidth();
+   int               GetStyle();
    void              SetPlotTitle(const std::string &str);
    void              SetXLabel(const std::string &str);
    void              SetYLabel(const std::string &str);
+   void              SetWidth(int lw);
+   void              SetStyle(int ls);
+   
+   void              SetXPrecision(int xPrec);
+   void              SetYPrecision(int yPrec);
+   int               GetXPrecision();
+   int               GetYPrecision();
+   
+   void              SetXName(std::string nomme);
+   void              SetYName(std::string nomme);
+   void              UpdateLabels();
    
 protected:
 //   wxBoxSizer           *labels;
@@ -52,7 +63,7 @@ protected:
    wxTextCtrl           *plotTitle;
    wxTextCtrl           *xAxisLabel;
    wxTextCtrl           *yAxisLabel;
-   wxTextCtrl           *lineWidth;
+   wxSpinCtrl           *lineWidth;
    wxTextCtrl           *lineStyle;
    
    // X axis options
@@ -64,6 +75,7 @@ protected:
    wxTextCtrl           *xTickCount;
    wxTextCtrl           *xMinorTickCount;
    wxCheckBox           *xMinorTickLines;
+   wxSpinCtrl           *xPrecision;
 
    // Y axis options
    wxCheckBox           *userYMinimum;
@@ -74,6 +86,10 @@ protected:
    wxTextCtrl           *yTickCount;
    wxTextCtrl           *yMinorTickCount;
    wxCheckBox           *yMinorTickLines;
+   wxSpinCtrl           *yPrecision;
+   
+   std::string          xName;
+   std::string          yName;
 };
 
 #endif /*PLOTOPTIONSDIALOG_HPP_*/

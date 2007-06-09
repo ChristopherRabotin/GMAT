@@ -72,6 +72,9 @@ public:
    void PenUp(int index = -1);
    void PenDown(int index = -1);
    
+   void SetLineWidth(int w,  int lineId = -1);
+   void SetLineStyle(int ls, int lineId = -1);
+   
 protected:
    /// borders
    int left, right, top, bottom;
@@ -122,6 +125,7 @@ protected:
    int varCount;
    
    double xMin, xMax, yMin, yMax;
+   std::string xName, yName;
    
    int currentId;
    bool hasData;
@@ -139,6 +143,7 @@ protected:
    bool initializeLegendLoc;
 
    long zoomLeft, zoomTop, zoomWidth, zoomHeight;
+   int  xLabelPrecision, yLabelPrecision;
    
    virtual void DrawAxes(wxDC &dc) = 0;
    virtual void DrawLabels(wxDC &dc) = 0;
@@ -153,13 +158,13 @@ protected:
    virtual void SetOptions(wxCommandEvent& event);
    void SaveData(wxCommandEvent& event);
 
-   void Zoom(const wxRect &region);
-   void UnZoom();
+   virtual void Zoom(const wxRect &region);
+   virtual void UnZoom();
    
-   int GetXLocation(double val);
-   int GetYLocation(double val);
-   double GetActualXValue(int x);
-   double GetActualYValue(int y);
+   virtual int GetXLocation(double val, double val2 = 0.0);
+   virtual int GetYLocation(double val, double val2 = 0.0);
+   virtual double GetActualXValue(int x, int y = 0);
+   virtual double GetActualYValue(int y, int x = 0);
 
    // Statics to let us set global properties
    static int  xSensitivity, ySensitivity;
