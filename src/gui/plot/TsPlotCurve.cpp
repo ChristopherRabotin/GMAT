@@ -33,10 +33,10 @@ TsPlotCurve::TsPlotCurve(int offsetY, double startY, double endY,
    maxY              (-1e99),
    rangeChanged      (false),
    domainChanged     (false),
-   penIsDown         (true),
-   lastPointPlotted  (0),
    lineWidth         (1),
-   lineStyle         (wxSOLID)
+   lineStyle         (wxSOLID),
+   penIsDown         (true),
+   lastPointPlotted  (0)
 {
 //   mInterp = new LinearInterpolator();
    ordinate.clear();

@@ -91,9 +91,9 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    hasGrid        (true),
    hasLegend      (true),
    initializeLegendLoc (true),
-   legendColumns  (1),
    xLabelPrecision(6), 
-   yLabelPrecision(6)
+   yLabelPrecision(6),
+   legendColumns  (1)
 {
    wxPaintDC dc(this);
 
@@ -240,7 +240,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             dc.DrawLine(oldX, mouseRect.y, oldX, oldY);
             dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
          }
-         else
+         else if (movingLegend)
          {
             dc.DrawLine(mouseRect.x, mouseRect.y, oldX, oldY);
             oldX = pt.x;
@@ -304,13 +304,12 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
             dc.DrawLine(mouseRect.x, oldY, oldX, oldY);
             dc.SetLogicalFunction(logfun);
             
-            if (plotArea.wxRECT_CONTAINS(pt))
-               if ((mouseRect.width > xSensitivity) &&
-                   (mouseRect.height > ySensitivity))
-               {
-                  Zoom(mouseRect);
-                  changed = true;
-               }
+            if ((mouseRect.width > xSensitivity) &&
+                (mouseRect.height > ySensitivity))
+            {
+               Zoom(mouseRect);
+               changed = true;
+            }
          }
       }
    }
@@ -824,14 +823,31 @@ void TsPlotCanvas::SaveData(wxCommandEvent& event)
 }
 
 
-void TsPlotCanvas::Zoom(const wxRect &region)
+void TsPlotCanvas::Zoom(wxRect &region)
 {
-   #ifdef DEBUG_INTERFACE
-      MessageInterface::ShowMessage("Zoom to [%d %d; %d %d]!\n",
-         region.GetX(), region.GetY(), region.GetX()+region.GetWidth(),
-         region.GetY()+region.GetHeight());
-   #endif
+   wxClientDC dc(this);
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   wxCoord wid = w - right, ht = h - bottom;
    
+   if (region.GetX() < left)
+      region.SetX(left);
+   if (region.GetX()+region.GetWidth() > wid)
+      region.SetWidth(wid-region.GetX());
+
+   if (region.GetY() < top)
+      region.SetY(top);
+   if (region.GetY()+region.GetHeight() > ht)
+      region.SetHeight(ht-region.GetY());
+
+   #ifdef DEBUG_INTERFACE
+      MessageInterface::ShowMessage("Zoom to [%d %d; %d %d]!\n"
+                                    "BoundBox is [%d %d; %d %d]",
+         region.GetX(), region.GetY(), region.GetX()+region.GetWidth(),
+         region.GetY()+region.GetHeight(), left, top, wid, ht);
+   #endif
+
+
    zoomXMin = GetActualXValue(region.x);
    zoomXMax = GetActualXValue(region.x + region.width);
    zoomYMin = GetActualYValue(region.y + region.height);
@@ -901,7 +917,7 @@ void TsPlotCanvas::SetLineWidth(int w,  int lineId)
            i != data.end(); ++i)
          (*i)->SetWidth(w);
    else
-      if (lineId < data.size())
+      if (lineId < (int)data.size())
          data[lineId]->SetWidth(w);
 
    // Finally, refresh the display
@@ -916,13 +932,12 @@ void TsPlotCanvas::SetLineStyle(int ls, int lineId)
 {
    if (lineId == -1)
    {
-      int j = 0;
       for (std::vector<TsPlotCurve *>::iterator i = data.begin(); 
            i != data.end(); ++i)
          (*i)->SetStyle(ls);
    }
    else
-      if (lineId < data.size())
+      if (lineId < (int)data.size())
          data[lineId]->SetStyle(ls);
 
    // Finally, refresh the display

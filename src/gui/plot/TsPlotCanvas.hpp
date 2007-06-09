@@ -158,7 +158,7 @@ protected:
    virtual void SetOptions(wxCommandEvent& event);
    void SaveData(wxCommandEvent& event);
 
-   virtual void Zoom(const wxRect &region);
+   virtual void Zoom(wxRect &region);
    virtual void UnZoom();
    
    virtual int GetXLocation(double val, double val2 = 0.0);
