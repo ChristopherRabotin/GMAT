@@ -610,7 +610,10 @@ bool Optimize::ExecuteCallback()
    // ask Matlab for the value of X
    Integer     n = optimizer->GetIntegerParameter(
                    optimizer->GetParameterID("NumberOfVariables"));
-   Real X[n];
+   
+   //Real X[n];
+   Real *X = new Real[n];
+   
    // read X values from the callback data string here
    std::stringstream ins(callbackData.c_str());
    for (Integer i=0; i<n; i++)
@@ -618,6 +621,9 @@ bool Optimize::ExecuteCallback()
    std::vector<Real> vars;
    for (Integer i=0;i<n;i++)
       vars.push_back(X[i]);
+   
+   delete [] X;
+   
    // get the state of the Optimizer
    Solver::SolverState nState = optimizer->GetNestedState(); 
    if (nState == Solver::INITIALIZING)

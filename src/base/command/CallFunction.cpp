@@ -1175,22 +1175,21 @@ void CallFunction::GetOutParams()
          int numRows = array->GetIntegerParameter("NumRows");
          int numCols = array->GetIntegerParameter("NumCols");
          int totalCells = numRows * numCols;
-
-
-         double outArray[totalCells];
+         
+         //msvc++ change (loj: 2007.06.11)
+         //double outArray[totalCells];
+         double *outArray = new double[totalCells];
+         
          //status =
          MatlabInterface::GetVariable(varName, totalCells, outArray);
-
-
+         
          // create rmatrix
          Rmatrix rmatrix = Rmatrix (numRows, numCols);
-
-
+         
          for (int j=0; j<numCols; j++)
             for (int k=0; k<numRows; k++)
                rmatrix(k, j) = outArray[(j*numRows) + k];
-
-
+         
          #ifdef DEBUG_USE_ARRAY
             for (int j=0; j<numRows; j++)
             {
@@ -1203,17 +1202,17 @@ void CallFunction::GetOutParams()
 
          // assign rmatrix to array
          array->SetRmatrixParameter("RmatValue", rmatrix);
+         
+         delete [] outArray;
+         
       }
       else if (param->GetTypeName() == "String")
       {
-         // need to output string value to buffer
-         //double buffer[128];
-         //MatlabInterface::OutputBuffer((char *)buffer, 128);
-         
+         // need to output string value to buffer         
          char buffer[512];
          MatlabInterface::OutputBuffer(buffer, 512);
          EvalMatlabString(varName);
-
+         
          // get rid of "var ="
          char *ptr = strtok((char *)buffer, "=");
          ptr = strtok(NULL, "\n");
@@ -1222,9 +1221,10 @@ void CallFunction::GetOutParams()
       }
       else if (param->GetTypeName() == "Variable")
       {
-         //double outArray[500];   // array size???
-         double outArray[1];   // array size???
-
+         //msvc++ change (loj: 2007.06.11)
+         //double outArray[1];
+         double *outArray = new double[1];
+         
          MatlabInterface::GetVariable(varName, 1, outArray);
          //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
          param->SetReal(outArray[0]);
@@ -1232,13 +1232,15 @@ void CallFunction::GetOutParams()
          ss.precision(18);
          ss << outArray[0];
          param->SetStringParameter("Expression", ss.str());
-
+         
          #ifdef DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage
                ("The EvaluateReal is %f\n",  param->EvaluateReal());
             MessageInterface::ShowMessage
                ("The GetReal is %f\n", param->GetReal());
          #endif
+            
+         delete [] outArray;
       }
       else // objects
       {
