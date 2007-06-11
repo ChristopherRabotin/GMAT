@@ -181,7 +181,7 @@ void TsPlotCanvas::OnMouseEvent(wxMouseEvent& event)
       menu.AppendSeparator();
       menu.Append(ID_PLOT_DETAILS, "Set Plot Options...");
       menu.AppendSeparator();
-      menu.Append(ID_PLOT_SAVE, "Save Plot");
+      menu.Append(ID_PLOT_SAVE, "Save Plot...");
       
       menu.Check(ID_TOGGLE_GRID, hasGrid);
       menu.Check(ID_TOGGLE_LEGEND, hasLegend);
@@ -814,7 +814,19 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 
 void TsPlotCanvas::SaveData(wxCommandEvent& event)
 {
-   DumpData("");
+   wxFileDialog dlg(this, "Select save file name", "", "PlotData.txt", "*.*", 
+      wxFILE_SAVE_FLAG | wxFILE_OVERWRITE_FLAG);
+      
+   if (dlg.ShowModal() == wxID_OK)
+   {
+      std::string filename;
+      filename = dlg.GetPath().c_str();
+      #ifdef DEBUG_INTERFACE
+         MessageInterface::ShowMessage("Selected file name: %s", 
+            filename.c_str());
+      #endif
+      DumpData(filename);
+   }
 }
 
 

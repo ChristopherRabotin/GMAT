@@ -26,12 +26,16 @@
     #define wxRECT_CONTAINS Contains
     #define wxBEGIN_DRAWING
     #define wxEND_DRAWING  
+    #define wxFILE_SAVE_FLAG wxFD_SAVE
+    #define wxFILE_OVERWRITE_FLAG wxFD_OVERWRITE_PROMPT
 
 #else // replacement code for old version
     
     #define wxRECT_CONTAINS Inside
     #define wxBEGIN_DRAWING dc.BeginDrawing();
     #define wxEND_DRAWING   dc.BeginDrawing();
+    #define wxFILE_SAVE_FLAG wxSAVE
+    #define wxFILE_OVERWRITE_FLAG wxOVERWRITE_PROMPT
 
 #endif
 
