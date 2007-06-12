@@ -41,6 +41,7 @@ public:
    bool InitGL();
    
    // getters
+   wxGLContext* GetGLContext() {return mGlContext;}
    bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
@@ -64,6 +65,7 @@ public:
    wxString GetGotoObjectName();
    
    // setters
+   void SetGLContext(wxGLContext *glContext) { SetCurrent(*glContext); }
    void SetEndOfRun(bool flag = true);
    void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
@@ -86,7 +88,7 @@ public:
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbitNormalMap);
    void UpdateObjectList(const wxArrayString &bodyNames,
                          const wxStringColorMap &bodyColors);
-
+   
    // actions
    void ClearPlot();
    void RedrawPlot(bool viewAnimation);
@@ -163,10 +165,12 @@ private:
    static const float RADIUS_ZOOM_RATIO;// = 2.2;
    static const float DEFAULT_DIST;// = 30000.0;
    static const int UNKNOWN_OBJ_ID;// = -999;
-
-   #ifdef __USE_WX280__
+   
+   // initialization
+   bool mGlInitialized;
+   
+   // for the newer (wx 2.7.x+) version of wxGLCanvas
    wxGLContext *mGlContext;
-   #endif
    
    GuiInterpreter *theGuiInterpreter;
    wxStatusBar *theStatusBar;
@@ -189,10 +193,10 @@ private:
 
    // DJC added for "Up"   
    GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
-
+   
    // view model
    bool mUseGluLookAt;
-
+   
    // performance
    bool mRedrawLastPointsOnly;
    int  mNumPointsToRedraw;
@@ -279,13 +283,16 @@ private:
    
    // data
    int  mNumData;
+   int  mTotalPoints;
+   int  mBegIndex;
    bool mIsEndOfData;
    bool mIsEndOfRun;
    bool mIsFirstRun;
    
    // time
    Real mTime[MAX_DATA];
-
+   Real mFinalTime;
+   
    // object rotation
    Real mInitialLongitude;
    Real mInitialMha;
@@ -317,21 +324,19 @@ private:
    int mObjectCount;
    
    Real mObjectDefaultRadius;
-   Real mObjectRadius[MAX_OBJECT];
-   Real mObjMaxZoomIn[MAX_OBJECT];
    
-   int   mObjLastFrame[MAX_OBJECT];
-   bool  mShowObjectFlag[MAX_OBJECT];
+   Real *mObjectRadius;            // [mObjectCount]
+   Real *mObjMaxZoomIn;            // [mObjectCount]
+   int  *mObjLastFrame;            // [mObjectCount]
+   bool *mDrawOrbitFlag;           // [mObjectCount][MAX_DATA]
+   UnsignedInt *mObjectOrbitColor; // [mObjectCount][MAX_DATA];
    
-   bool  mDrawOrbitFlag[MAX_OBJECT][MAX_DATA];
-   UnsignedInt mObjectOrbitColor[MAX_OBJECT][MAX_DATA];
-   
-   Real mObjectGciPos[MAX_OBJECT][MAX_DATA][3];
-   Real mObjectInitialPos[MAX_OBJECT][MAX_DATA][3];
-   Real mObjectTempPos[MAX_OBJECT][MAX_DATA][3];
-   Real mObjectGciVel[MAX_OBJECT][MAX_DATA][3];
-   Real mObjectInitialVel[MAX_OBJECT][MAX_DATA][3];
-   Real mObjectTempVel[MAX_OBJECT][MAX_DATA][3];
+   Real *mObjectGciPos;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectGciVel;            // [mObjectCount][MAX_DATA][3];   
+   Real *mObjectIniPos;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectIniVel;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectTmpPos;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectTmpVel;            // [mObjectCount][MAX_DATA][3];
    
    // coordinate system
    wxString mInternalCoordSysName;
@@ -384,7 +389,6 @@ private:
    bool SetPixelFormatDescriptor();
    void SetDefaultGLFont();
    
-   // initialization
    // texture
    bool LoadGLTextures();
    bool LoadBodyTextures();
@@ -405,7 +409,8 @@ private:
    void DrawFrame();
    void DrawPlot();
    void DrawSphere(GLdouble radius, GLint slices, GLint stacks, GLenum style,
-                   GLenum orientation = GLU_OUTSIDE);
+                   GLenum orientation = GLU_OUTSIDE, GLenum normals = GL_SMOOTH,
+                   GLenum textureCoords = GL_TRUE);
    void DrawObject(const wxString &objName, int frame);
    void DrawObjectOrbit(int frame);
    void DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color);
@@ -414,8 +419,10 @@ private:
    void DrawEclipticPlane(UnsignedInt color);
    void DrawESLines(int frame);
    void DrawAxes();
-   void DrawStatus(const wxString &label, int frame, double time);
-
+   void DrawStatus(const wxString &label1, int frame, const wxString &label2,
+                   double time, int xpos = 0, int ypos = 0,
+                   const wxString &label3 = "");
+   
    // for rotation
    void ApplyEulerAngles();
    
@@ -426,6 +433,8 @@ private:
    
    // for object
    int GetObjectId(const wxString &name);
+   void ClearObjectArrays();
+   bool CreateObjectArrays();
    
    // for coordinate system
    bool TiltOriginZAxis();
