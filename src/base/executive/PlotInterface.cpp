@@ -22,7 +22,7 @@
 #include "gmatwxdefs.hpp"
 #include "gmatwxrcs.hpp"
 #include "GmatAppData.hpp"
-#include <wx/settings.h>    // for wxSYS_SCREEN_Y
+//#include <wx/settings.h>    // for wxSYS_SCREEN_Y
 // for OpenGL plot
 #include "MdiGlPlotData.hpp"
 #include "MdiChildTrajFrame.hpp"
@@ -113,27 +113,27 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    bool createNewFrame = true;
    wxString currPlotName;
-   MdiChildTrajFrame *currPlotFrame = NULL;
+   MdiChildTrajFrame *frame = NULL;
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() MdiGlPlot::numChildren=%d, plotName=%s\n",
        MdiGlPlot::numChildren, plotName.c_str());
    #endif
-     
+   
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
-      currPlotFrame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
       
-      if (currPlotFrame)  //waw: Added null pointer check 03/23/06
-         currPlotName = currPlotFrame->GetPlotName();
+      if (frame)
+         currPlotName = frame->GetPlotName();
       else
          break;
-         
+      
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
          ("PlotInterface::CreateGlPlotWindow() currPlotName[%d]=%s, addr=%d\n",
-          i, currPlotName.c_str(), currPlotFrame);
+          i, currPlotName.c_str(), frame);
       #endif
       
       if (currPlotName.IsSameAs(plotName.c_str()))
@@ -144,7 +144,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       else if (currPlotName.IsSameAs(oldName.c_str()))
       {
          // change plot name
-         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
+         frame->SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
       }
@@ -160,28 +160,28 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
          ("PlotInterface::CreateGlPlotWindow() Creating MdiChildTrajFrame "
           "%s\n", plotName.c_str());
       #endif
-
-      currPlotFrame =
-         new MdiChildTrajFrame(GmatAppData::GetMainFrame(), true,
+      
+      frame =
+         new MdiChildTrajFrame(GmatAppData::GetMainFrame(), 
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
                                wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
                                ssPtr);
-                               
-      if (currPlotFrame)  //waw: Added null pointer check 03/23/06
-         currPlotFrame->Show(); 
+      
+      if (frame)
+         frame->Show();
       else
          return false;
       
       #if __WXMAC__  
-         currPlotFrame->SetSize(499, 349);
+         frame->SetSize(499, 349);
       #endif
       
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
          ("PlotInterface::CreateGlPlotWindow() frame->GetPlotName()=%s\n",
-          currPlotFrame->GetPlotName().c_str());
+          frame->GetPlotName().c_str());
       #endif
       
       GmatAppData::GetMainFrame()->Tile();
@@ -200,21 +200,21 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() setting view options for %s\n",
-       currPlotFrame->GetPlotName().c_str());
+       frame->GetPlotName().c_str());
    #endif
    
-   currPlotFrame->SetDrawXyPlane(drawXyPlane);
-   currPlotFrame->SetDrawEcPlane(drawEcPlane);
-   currPlotFrame->SetDrawWireFrame(drawWireFrame);
-   currPlotFrame->SetDrawAxes(drawAxes);
-   currPlotFrame->SetDrawGrid(drawGrid);
-   currPlotFrame->SetDrawESLines(drawESLines);
+   frame->SetDrawXyPlane(drawXyPlane);
+   frame->SetDrawEcPlane(drawEcPlane);
+   frame->SetDrawWireFrame(drawWireFrame);
+   frame->SetDrawAxes(drawAxes);
+   frame->SetDrawGrid(drawGrid);
+   frame->SetDrawESLines(drawESLines);
    
-   currPlotFrame->SetOverlapPlot(overlapPlot);
-   currPlotFrame->SetUseInitialViewDef(usevpInfo);
-   currPlotFrame->SetUsePerspectiveMode(usepm);
-   currPlotFrame->SetViewCoordSystem(wxString(csName.c_str()));
-   currPlotFrame->SetNumPointsToRedraw(numPtsToRedraw);
+   frame->SetOverlapPlot(overlapPlot);
+   frame->SetUseInitialViewDef(usevpInfo);
+   frame->SetUsePerspectiveMode(usepm);
+   frame->SetViewCoordSystem(wxString(csName.c_str()));
+   frame->SetNumPointsToRedraw(numPtsToRedraw);
    
    #if DEBUG_PLOTIF_GL
    MessageInterface::ShowMessage
@@ -244,7 +244,7 @@ void PlotInterface::SetGlObject(const std::string &plotName,
    #endif
    
    wxString owner = wxString(plotName.c_str());
-
+   
    MdiChildTrajFrame *frame = NULL;
    for (int i=0; i<MdiGlPlot::numChildren; i++)
    {
@@ -507,12 +507,13 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
    if (GmatAppData::GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_GL
-         MessageInterface::ShowMessage
-            ("PlotInterface::RefreshGlPlot() plotName=%s\n",plotName.c_str());
+      MessageInterface::ShowMessage
+         ("PlotInterface::RefreshGlPlot() plotName=%s\n",plotName.c_str());
       #endif
+      
       wxString owner = wxString(plotName.c_str());
-
       MdiChildTrajFrame *frame = NULL;
+      
       for (int i=0; i<MdiGlPlot::numChildren; i++)
       {
          frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
@@ -596,13 +597,6 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
    bool updated = false;
    wxString owner = wxString(plotName.c_str());
 
-   //loj: 4/21/05 This code not needed. new OpenGL window is created from OpenGlPlot
-   //    if (GmatAppData::GetMainFrame() == NULL)
-   //    {
-   //       if (!CreateGlPlotWindow(plotName, oldName, csName))
-   //          return false;
-   //    }
-   
    MdiChildTrajFrame *frame = NULL;
    
    for (int i=0; i<MdiGlPlot::numChildren; i++)
@@ -615,21 +609,20 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
           "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
       #endif
       
-      if (frame)  //waw: Added null pointer check 03/23/06
+      if (frame)
       {
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
             //MessageInterface::ShowMessage
             //   ("PlotInterface::UpdateGlPlot() now updating GL plot...\n");
-         
             frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                           scColors, updateCanvas); //loj: 6/13/05 Added velocity
-         
+                              scColors, updateCanvas);
+            
             updated = true;
          }
       }
    }
-
+   
    return updated;
    
 #endif
@@ -666,12 +659,12 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
    //-------------------------------------------------------
    bool createNewFrame = true;
    wxString currPlotName;
-   MdiChildTsFrame *currPlotFrame = NULL;
+   MdiChildTsFrame *frame = NULL;
    
    for (int i=0; i<MdiTsPlot::numChildren; i++)
    {
-      currPlotFrame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-      currPlotName = currPlotFrame->GetPlotName();
+      frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
+      currPlotName = frame->GetPlotName();
 
       if (currPlotName.IsSameAs(plotName.c_str()))
       {
@@ -687,9 +680,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
          #endif
          
          // change plot name
-//          ((MdiChildTsFrame*)MdiTsPlot::mdiChildren[i])-> //loj: 5/19/05
-//             SetPlotName(wxString(plotName.c_str()));
-         currPlotFrame->SetPlotName(wxString(plotName.c_str()));
+         frame->SetPlotName(wxString(plotName.c_str()));
          createNewFrame = false;
          break;
       }
@@ -709,7 +700,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
       #endif
       
       // create a frame, containing a XY plot canvas
-      currPlotFrame =
+      frame =
          new MdiChildTsFrame(GmatAppData::GetMainFrame(), true,
                              wxString(plotName.c_str()),
                              wxString(plotTitle.c_str()),
@@ -718,17 +709,17 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
                              wxPoint(-1, -1), wxSize(500, 350),
                              wxDEFAULT_FRAME_STYLE);
       
-      currPlotFrame->Show();
+      frame->Show();
       
       GmatAppData::GetMainFrame()->Tile();
 
       ++MdiTsPlot::numChildren;
 
-      currPlotFrame->RedrawCurve();
+      frame->RedrawCurve();
    }
    
-   currPlotFrame->SetShowGrid(drawGrid);
-   currPlotFrame->ResetZoom();
+   frame->SetShowGrid(drawGrid);
+   frame->ResetZoom();
    
    #if DEBUG_PLOTIF_XY
    MessageInterface::ShowMessage
@@ -840,7 +831,6 @@ bool PlotInterface::DeleteAllTsPlotCurves(const std::string &plotName,
    return true;
 #else
 
-   //loj: 6/15/05 Uncommented the code
    #if DEBUG_PLOTIF_XY
    MessageInterface::ShowMessage
       ("PlotInterface::DeleteAllPlotCurve() plotName = %s "
@@ -877,7 +867,6 @@ bool PlotInterface::DeleteTsPlotCurve(const std::string &plotName, int curveInde
    return true;
 #else
    
-   //loj: 6/15/05 Uncommented the code
    #if DEBUG_PLOTIF_XY
    MessageInterface::ShowMessage
       ("PlotInterface::DeleteTsPlotCurve() entered plotName = %s "
@@ -913,7 +902,6 @@ void PlotInterface::ClearTsPlotData(const std::string &plotName)
    return;
 #else
 
-   //loj: 6/15/05 Uncommented the code
    #if DEBUG_PLOTIF_XY
    MessageInterface::ShowMessage
       ("PlotInterface::ClearTsPlotData() numChildren = %d\n",
