@@ -213,12 +213,11 @@ void MissionTree::ClearMission()
    DeleteChildren(mMissionSeqSubItem);
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
-   MessageInterface::ShowMessage("MissionTree::ClearMission() closing files...\n");
-   if (mActionsOutStream)
+   if (mActionsOutStream.is_open())
       mActionsOutStream.close();
-   if (mResultsStream)
+   if (mResultsStream.is_open())
       mResultsStream.close();
-   if (mPlaybackResultsStream)
+   if (mPlaybackResultsStream.is_open())
       mPlaybackResultsStream.close();
    #endif
 }
@@ -3245,6 +3244,15 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
    
    // open streams
    mPlaybackResultsStream.open(playbackResultsFile.c_str());
+   
+   if (!mPlaybackResultsStream.is_open())
+   {
+      MessageInterface::ShowMessage
+         ("\n*** ERROR *** Playback stopped due to error opening the file %s\n",
+          playbackResultsFile.c_str());
+      return;
+   }
+   
    std::ifstream actionsInStream(actionsInFile.c_str());
    
    if (!actionsInStream.is_open())
@@ -3401,6 +3409,9 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
       }
    }
    
+   // close playback results stream
+   mPlaybackResultsStream.close();
+   
    #ifdef DEBUG_MISSION_TREE_ACTIONS
    ShowCommands("After Playback");
    #endif
@@ -3428,6 +3439,7 @@ void MissionTree::WriteResults()
 {
    // write results
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
+   
    if (mSaveActions)
       mResultsStream << GmatCommandUtil::GetCommandSeqString(cmd, false);
    else if (mPlaybackActions)
