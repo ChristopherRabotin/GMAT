@@ -37,11 +37,7 @@
 class MdiChildTrajFrame: public GmatMdiChildFrame
 {
 public:
-   TrajPlotCanvas *mCanvas;
-   
-   bool mIsMainFrame;
-   
-   MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
+   MdiChildTrajFrame(wxMDIParentFrame *parent,
                      const wxString& plotName, const wxString& title,
                      const wxPoint& pos, const wxSize& size,
                      const long style, const wxString &csName = "",
@@ -49,8 +45,10 @@ public:
    ~MdiChildTrajFrame();
    
    // getters
-   wxString GetPlotName() {return mPlotName;}
-   bool GetOverlapPlot() {return mOverlapPlot;}
+   wxString GetPlotName() { return mPlotName; }
+   bool GetOverlapPlot() { return mOverlapPlot; }
+   TrajPlotCanvas* GetGlCanvas() { return mCanvas; }
+   wxGLContext* GetGLContext() { return mCanvas->GetGLContext(); }
    bool GetUseViewPointInfo();
    bool GetUsePerspectiveMode();
    bool GetDrawWireFrame();
@@ -70,6 +68,7 @@ public:
    CoordinateSystem* GetViewCoordSystem();
    
    // setters
+   void SetGLContext(wxGLContext *glContext) { mCanvas->SetGLContext(glContext); }
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
    void SetOverlapPlot(bool overlap);
@@ -97,7 +96,7 @@ public:
    // actions
    void DrawInOtherCoordSystem(const wxString &csName);
    void RedrawPlot(bool viewAnimation);
-
+   
    // menu actions
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
@@ -153,6 +152,7 @@ public:
    
 protected:
 
+   TrajPlotCanvas *mCanvas;
    OpenGlOptionDialog *mOptionDialog;
    
    wxString mPlotName;

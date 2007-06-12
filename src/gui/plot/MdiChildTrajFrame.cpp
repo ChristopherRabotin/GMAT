@@ -50,19 +50,15 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 // MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& title, ...)
 //------------------------------------------------------------------------------
-MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
+MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
                                      const long style, const wxString &csName,
                                      SolarSystem *solarSys)
-//    : GmatMdiChildFrame(parent, -1, title, pos, size,
-//                        style | wxNO_FULL_REPAINT_ON_RESIZE, plotName,
-//                        GmatTree::OUTPUT_OPENGL_PLOT)
    : GmatMdiChildFrame(parent, plotName, title, GmatTree::OUTPUT_OPENGL_PLOT, -1,
                        pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
    mCanvas = (TrajPlotCanvas *) NULL;
-   mIsMainFrame = isMainFrame;
    mPlotName = plotName;
    mPlotTitle = plotName;
    
@@ -87,20 +83,14 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent, bool isMainFrame,
 #else
    SetIcon(wxIcon( mondrian_xpm ));
 #endif
-
-   // Associate the menu bar with the frame
-   //SetMenuBar(GmatAppData::GetMainFrame()->CreateMainMenu(GmatTree::OUTPUT_OPENGL_PLOT));
-
-   // status bar
-   //CreateStatusBar();
-   //SetStatusText(title);
-      
+   
+   
    // Create GLCanvas
    int width, height;
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
-      new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height),
-                         csName, solarSys, plotName); //loj: 1/9/06 added plotName
+      new TrajPlotCanvas(this, -1, wxPoint(0, 0),
+                         wxSize(width, height), csName, solarSys, plotName);
    
    mCanvas = canvas;
    
@@ -897,37 +887,6 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnClose(wxCloseEvent& event)
-//------------------------------------------------------------------------------
-//void MdiChildTrajFrame::OnClose(wxCloseEvent& event)
-//{
-//   #if DEBUG_CHILDTRAJ_FRAME
-//   MessageInterface::ShowMessage
-//      ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
-//   #endif
-//
-////    if (mIsMainFrame)
-////    {
-////       MessageInterface::ShowMessage
-////          ("MdiChildTrajFrame::OnClose() this->PlotName=%s\n", mPlotName.c_str());
-//
-////       //GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
-//
-////    }
-//
-//   //MdiGlPlot::numChildren--; //loj: 5/18/05 moved to destructor
-//
-////    if (MdiGlPlot::numChildren == 0)
-////    {
-//// //       GmatAppData::GetMainFrame()->trajMainSubframe = NULL;
-////       GmatAppData::GetMainFrame()->trajSubframe = NULL;
-////    }
-//
-//   event.Skip();
-//}
-
-
-//------------------------------------------------------------------------------
 // void SetGlObject(const StringArray &objNames, ...
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetGlObject(const StringArray &objNames,
@@ -1094,6 +1053,4 @@ void MdiChildTrajFrame::DeletePlot()
 {
    // This will call OnClose()
    Close(TRUE);
-   //if (mIsMainFrame)
-   //   GmatAppData::GetMainFrame()->trajMainSubframe->Close();
 }
