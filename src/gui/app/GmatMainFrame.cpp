@@ -225,7 +225,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mScriptFilename = "$gmattempscript$.script";
    scriptCounter =0;
    mInterpretFailed = false;
-   mRunSuccessful = false;
+   mRunStatus = 0;
    
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
@@ -674,6 +674,8 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    bool canDelete;
    
    wxNode *node = mdiChildren->GetFirst();
+   wxNode *temp = NULL;
+   
    while (node)
    {
       canDelete = false;
@@ -712,14 +714,17 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       if (canDelete)
       {
          #ifdef DEBUG_MAINFRAME_CLOSE
-         MessageInterface::ShowMessage("   ==>deleting child=%s\n", title.c_str());
+         MessageInterface::ShowMessage("   ==> deleting child=%s\n", title.c_str());
          #endif
          
          delete theChild;
-         delete node;
+         temp = node;
       }
       
       node = node->GetNext();
+      if (canDelete)
+         delete temp;
+      
       wxSafeYield();
    }
    wxSafeYield();
@@ -1362,7 +1367,7 @@ void GmatMainFrame::OnProjectExit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnRun(wxCommandEvent& WXUNUSED(event))
 {
-   mRunSuccessful = RunCurrentMission();
+   mRunStatus = RunCurrentMission();
 }
 
 
@@ -2715,7 +2720,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
    //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptRun()\n");
-   mRunSuccessful = RunCurrentMission();
+   mRunStatus = RunCurrentMission();
 }
 
 

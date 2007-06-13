@@ -102,7 +102,7 @@ private:
    bool mRunPaused;
    bool mRunCompleted;
    bool mInterpretFailed;
-   bool mRunSuccessful;
+   Integer mRunStatus;
    
    GmatServer *mServer;
    std::string mScriptFilename;
