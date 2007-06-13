@@ -65,7 +65,6 @@ public:
    wxString GetGotoObjectName();
    
    // setters
-   void SetGLContext(wxGLContext *glContext) { SetCurrent(*glContext); }
    void SetEndOfRun(bool flag = true);
    void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
@@ -86,8 +85,7 @@ public:
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbitNormalMap);
-   void UpdateObjectList(const wxArrayString &bodyNames,
-                         const wxStringColorMap &bodyColors);
+   void SetGLContext(wxGLContext *glContext);
    
    // actions
    void ClearPlot();

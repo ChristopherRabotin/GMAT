@@ -611,6 +611,19 @@ void TrajPlotCanvas::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap)
 
 
 //------------------------------------------------------------------------------
+// void SetGLContext(wxGLContext *glContext)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetGLContext(wxGLContext *glContext)
+{
+   #ifdef __USE_WX280_GL__
+   SetCurrent(*glContext);
+   #else
+   SetCurrent();
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void ClearPlot()
 //------------------------------------------------------------------------------
 /**
@@ -3264,19 +3277,24 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       else
          DrawSphere(mObjectRadius[objId], 50, 50, GLU_FILL);
       
+      glDisable(GL_TEXTURE_2D);
+      
       //----------------------------------------------------
       // draw grid on option
       //----------------------------------------------------
       if (mDrawGrid && objName == "Earth")
       {
+         // This makes lines thicker
+         //glEnable(GL_LINE_SMOOTH);
+         //glLineWidth(1.5);
+         
          // Just draw a wireframe sphere little bigger to show grid
          //glColor3f(0.20, 0.20, 0.50); // dark blue
-         glColor3f(0.50, 0.10, 0.20); // maroon
-         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.01;
+         glColor3f(0.0, 0.0, 0.0);      // black
+         //glColor3f(0.50, 0.10, 0.20); // maroon
+         GLdouble radius = mObjectRadius[objId] + mObjectRadius[objId] * 0.03;
          DrawSphere(radius, 36, 18, GLU_LINE, GLU_OUTSIDE, GL_NONE, GL_FALSE);
       }
-      
-      glDisable(GL_TEXTURE_2D);
    }
    else
    {
