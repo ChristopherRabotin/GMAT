@@ -92,7 +92,7 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    hasGrid        (true),
    hasLegend      (true),
    initializeLegendLoc (true),
-   xLabelPrecision(6), 
+   xLabelPrecision(8), 
    yLabelPrecision(6),
    legendColumns  (1)
 {

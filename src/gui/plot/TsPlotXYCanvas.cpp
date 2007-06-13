@@ -14,6 +14,8 @@
 
 
 #include "TsPlotXYCanvas.hpp"
+#include <sstream>
+
 
 TsPlotXYCanvas::TsPlotXYCanvas(wxWindow* parent, wxWindowID id, 
      const wxPoint& pos, const wxSize& size, long style, const wxString& name) :
@@ -56,6 +58,7 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
    dyval = (currentYMax-currentYMin) / (double)yticks;
    
    wxString label;
+   std::stringstream labelStream;
    
    //if ((int)xGridLoc.size() != xticks+1)
    //{
@@ -110,6 +113,7 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
       #endif
    }
    
+   labelStream.precision(xLabelPrecision);
    for (int i = 0; i <= xticks; ++i)
    {
       idx = (int)(i * dx + 0.5);
@@ -119,8 +123,9 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
       xGridLoc[i] = GetXLocation(fval);  //x0 + idx;
       dc.DrawLine(xGridLoc[i], y0, xGridLoc[i], y0 - tickSize);
       dc.DrawLine(xGridLoc[i], ym, xGridLoc[i], ym + tickSize);
-      label.Clear();
-      label << fval;
+      labelStream.str("");
+      labelStream << fval;
+      label = labelStream.str().c_str();
       dc.GetTextExtent(label, &w, &h);
       dc.DrawText(label, xGridLoc[i] - w/2, y0 + h/2);
    }
@@ -161,6 +166,7 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
       #endif
    }
    
+   labelStream.precision(yLabelPrecision);
    for (int i = 0; i <= yticks; ++i)
    {
       idy = (int)(i * dy + 0.5);
@@ -169,8 +175,9 @@ void TsPlotXYCanvas::DrawAxes(wxDC &dc)
       yGridLoc[i] = GetYLocation(fval);
       dc.DrawLine(xm, yGridLoc[i], xm - tickSize, yGridLoc[i]);
       dc.DrawLine(x0, yGridLoc[i], x0 + tickSize, yGridLoc[i]);
-      label.Clear();
-      label << fval;
+      labelStream.str("");
+      labelStream << fval;
+      label = labelStream.str().c_str();
       dc.GetTextExtent(label, &w, &h);
       dc.DrawText(label, x0 - w - 4, yGridLoc[i] - h/2);
    }
