@@ -11,8 +11,8 @@
 // number NNG04CC06P.
 //
 //
-// Author: Waka Waktola
-// Created: 2006/03/01
+// Author: Waka Waktola (and heavily modified by Wendy C. Shoan)
+// Created: 2006/03/01 (2007.06.12)
 /**
  * This class contains information needed to setup users spacecraft attitude
  * parameters.
@@ -76,7 +76,7 @@ private:
    wxTextCtrl *str1TextCtrl;
    wxTextCtrl *str2TextCtrl;
    wxTextCtrl *str3TextCtrl;
-   /* for some weird reason, these members cause a crash on exiting the panel
+
    wxStaticText *attUnits1;
    wxStaticText *attUnits2;
    wxStaticText *attUnits3;
@@ -84,7 +84,7 @@ private:
    wxStaticText *rateUnits1;
    wxStaticText *rateUnits2;
    wxStaticText *rateUnits3;
-   */
+
    wxComboBox *config1ComboBox;
    wxComboBox *config2ComboBox;
    wxComboBox *config3ComboBox;
@@ -94,7 +94,7 @@ private:
 
    GmatPanel *theScPanel;
    
-   StringArray modeArray;
+   StringArray modelArray;
    StringArray coordSysArray;
    StringArray kinematicArray;
    StringArray eulerAngleArray;
@@ -103,14 +103,15 @@ private:
    
    void Create();
    void DisplayEulerAngles();
-   void DisplayQuaternions();
+   void DisplayQuaternion();
    void DisplayDCM();
    void DisplayEulerAngleRates();
    void DisplayAngularVelocity();
    
+   wxString *attitudeModelArray; 
    wxString *cosineMatrix[9];
    wxString *eulerAngles[3];
-   wxString *quaternions[4];
+   wxString *quaternion[4];
    wxString *eulerAngleRates[3];
    wxString *angVel[3];
    
@@ -124,17 +125,39 @@ private:
    void OnConfigurationSelection(wxCommandEvent &event);
    void OnStateTypeSelection(wxCommandEvent &event);
    void OnStateTypeRateSelection(wxCommandEvent &event);
+   void OnEulerSequenceSelection(wxCommandEvent &event);
+   void OnAttitudeModelSelection(wxCommandEvent &event);
    
    void CalculateFromEulerAngles();
-   void CalculateFromQuaternions();
+   void CalculateFromQuaternion();
    void CalculateFromCosineMatrix();
    
    void CalculateFromEulerAngleRates();
    void CalculateFromAngularVelocity();
+
+   bool IsStateModified();
+   void ResetStateFlags(bool discardEdits = false);
    
-   Spacecraft *theSpacecraft;
+   Spacecraft     *theSpacecraft;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
+   Attitude       *theAttitude;
+   
+   std::string      attStateType;
+   std::string      attRateStateType;
+   std::string      attitudeModel;
+   std::string      attitudeType;   // for later use - Kinematic, etc.
+   std::string      attCoordSystem;
+   std::string      eulerSequence;
+
+   std::string      loadedAttStateType;
+   std::string      loadedAttRateStateType;
+   std::string      loadedAttitudeModel;
+   //std::string      loadedAttitudeType;   // for later use - Kinematic, etc.
+   std::string      loadedAttCoordSystem;
+   std::string      loadedEulerSequence;
+
+   UnsignedIntArray seq;
    
    // IDs for the controls and the menu commands
    enum
@@ -145,7 +168,10 @@ private:
       ID_CB_CONFIG,
       ID_CB_ST,
       ID_CB_STR,
-      ID_BUTTON
+      ID_BUTTON,
+      ID_CB_EAS,
+      ID_CB_COORDSYS,
+      ID_CB_MODE
    };
    
    enum StateType

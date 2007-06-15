@@ -11,17 +11,19 @@
 // number NNG04CC06P.
 //
 //
-// Author: Waka Waktola
-// Created: 2006/03/01
+// Author: Waka Waktola (and heavily modified by Wendy C. Shoan)
+// Created: 2006/03/01 (2007.06.12)
 /**
  * This class contains information needed to setup users spacecraft attitude
  * parameters.
  */
 //------------------------------------------------------------------------------
+#include "gmatdefs.hpp"
 #include "AttitudePanel.hpp"
 #include "AttitudeFactory.hpp"
 #include "MessageInterface.hpp"
 #include "GmatAppData.hpp"
+#include "GmatBaseException.hpp"
 
 // initial selections in combo boxes
 #define STARTUP_STATE_TYPE_SELECTION            EULER_ANGLES
@@ -34,11 +36,13 @@
 // event tables for wxWindows
 //------------------------------
 BEGIN_EVENT_TABLE(AttitudePanel, wxPanel)
-   EVT_TEXT(ID_TEXTCTRL_ST, AttitudePanel::OnStateTypeTextUpdate)
-   EVT_TEXT(ID_TEXTCTRL_STR, AttitudePanel::OnStateTypeRateTextUpdate)
-   EVT_COMBOBOX(ID_CB_CONFIG, AttitudePanel::OnConfigurationSelection)
+//   EVT_COMBOBOX(ID_CB_ST, AttitudePanel::OnStateTypeTextUpdate)
+//   EVT_COMBOBOX(ID_CB_STR, AttitudePanel::OnStateTypeRateTextUpdate)
+   EVT_COMBOBOX(ID_CB_COORDSYS, AttitudePanel::OnConfigurationSelection)
+   EVT_COMBOBOX(ID_CB_MODE, AttitudePanel::OnAttitudeModelSelection)
    EVT_COMBOBOX(ID_CB_ST, AttitudePanel::OnStateTypeSelection)
    EVT_COMBOBOX(ID_CB_STR, AttitudePanel::OnStateTypeRateSelection)
+   EVT_COMBOBOX(ID_CB_EAS, AttitudePanel::OnEulerSequenceSelection)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -66,12 +70,24 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
-   modeArray.clear();
+   modelArray.clear();
    coordSysArray.clear();
    kinematicArray.clear();
    eulerAngleArray.clear();
    stateTypeArray.clear();
    stateTypeRateArray.clear();
+   
+   unsigned int defSeq[3] = {3, 1, 2};
+   seq.push_back(defSeq[0]);
+   seq.push_back(defSeq[1]);
+   seq.push_back(defSeq[2]);
+   
+   attStateType        = "";
+   attRateStateType    = "";
+   attitudeModel       = "";
+   attitudeType        = "";  // currently not used
+   attCoordSystem      = "";
+   eulerSequence       = "312";
 
    dataChanged = false;
    Create();
@@ -108,63 +124,53 @@ void AttitudePanel::Create()
    {
       eulerAngles[x] = new wxString();
       eulerAngleRates[x] = new wxString();
-      quaternions[x] = new wxString();
+      quaternion[x] = new wxString();
       cosineMatrix[x] = new wxString();
       angVel[x] = new wxString();
    }
-   quaternions[3] = new wxString();
+   quaternion[3] = new wxString();
    cosineMatrix[3] = new wxString();
    for (x = 4; x < 9; ++x)
    {
       cosineMatrix[x] = new wxString();
    }
       
-   // Mode
-//   wxString *attitudeModeArray = new wxString;
-//   *attitudeModeArray = "Kinematic";
-   wxString *attitudeModeArray = new wxString[2];
-   attitudeModeArray[0] = "CoordinateSystemFixed";
-   attitudeModeArray[1] = "Spinner";
+   // gt list of models and put them into the combo box
+   modelArray = theGuiInterpreter->GetListOfFactoryItems(Gmat::ATTITUDE);
+   unsigned int modelSz = modelArray.size();
+   attitudeModelArray = new wxString[modelSz];
+   for (x = 0; x < modelSz; ++x)
+      attitudeModelArray[x] = wxT(modelArray[x].c_str());
+   //attitudeModelArray[0] = "CoordinateSystemFixed";
+   //attitudeModelArray[1] = "Spinner";
 
    config1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Mode"),
+      new wxStaticText( this, ID_TEXT, wxT("Attitude Model"),
                         wxDefaultPosition, wxDefaultSize, 0);
    config1ComboBox = 
-      new wxComboBox( this, ID_CB_CONFIG, wxT(attitudeModeArray[0]), 
-         wxDefaultPosition, wxDefaultSize, 2, attitudeModeArray, 
+      new wxComboBox( this, ID_CB_MODE, wxT(attitudeModelArray[0]), 
+         wxDefaultPosition, wxDefaultSize, modelSz, attitudeModelArray, 
          wxCB_DROPDOWN|wxCB_READONLY );
 
    // Coordinate System
    config2StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Coordinate System"),
          wxDefaultPosition, wxDefaultSize, 0);
-   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_CONFIG, 
+   config2ComboBox =  theGuiManager->GetCoordSysComboBox(this, ID_CB_COORDSYS, 
       wxDefaultSize);
-
-   //Kinematic Attitude Type
-//   wxString *kinematicAttitudeTypeArray = new wxString[2];
-//   kinematicAttitudeTypeArray[0] = "CoordinateSystemFixed";
-//   kinematicAttitudeTypeArray[1] = "Spinner";
-//
-//   config3StaticText =
-//      new wxStaticText( this, ID_TEXT, wxT("Kinematic Attitude Type"),
-//                        wxDefaultPosition, wxDefaultSize, 0);
-//   config3ComboBox = 
-//      new wxComboBox( this, ID_CB_CONFIG, wxT(kinematicAttitudeTypeArray[0]),
-//         wxDefaultPosition, wxDefaultSize, 2,
-//         kinematicAttitudeTypeArray, wxCB_DROPDOWN|wxCB_READONLY );
 
    //Euler Angle Sequence
    StringArray eulerSequenceStringArray = Attitude::GetEulerSequenceStrings();
+   Integer eulerSeqSz = eulerSequenceStringArray.size();
    
-   wxString *estArray = new wxString[12];  // Euler sequence types
-   for (Integer i=0; i<12; i++)
+   wxString *estArray = new wxString[eulerSeqSz];  // Euler sequence types
+   for (Integer i=0; i<eulerSeqSz; i++)
       estArray[i] = eulerSequenceStringArray[i].c_str();
 
    config4StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Euler Angle Sequence"),
                         wxDefaultPosition, wxDefaultSize, 0);
-   config4ComboBox = new wxComboBox( this, ID_CB_CONFIG, wxT(estArray[0]),
+   config4ComboBox = new wxComboBox( this, ID_CB_EAS, wxT(estArray[0]),
                       wxDefaultPosition, wxDefaultSize, 12,
                       estArray, wxCB_DROPDOWN|wxCB_READONLY );
 
@@ -173,9 +179,9 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Attitude State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
 
-   stateTypeArray.push_back("Euler Angles");
-   stateTypeArray.push_back("Quaternions");
-   stateTypeArray.push_back("DCM");
+   stateTypeArray.push_back("EulerAngles");
+   stateTypeArray.push_back("Quaternion");
+   stateTypeArray.push_back("DirectionCosineMatrix");
 
    wxString *stArray = new wxString[StateTypeCount];
    for (Integer i=0; i<StateTypeCount; i++)
@@ -243,8 +249,8 @@ void AttitudePanel::Create()
       new wxStaticText( this, ID_TEXT, wxT("Attitude Rate State Type"),
                         wxDefaultPosition, wxDefaultSize, 0);
 
-   stateTypeRateArray.push_back("Euler Angles Rates");
-   stateTypeRateArray.push_back("Angular Velocity");
+   stateTypeRateArray.push_back("EulerAngleRates");
+   stateTypeRateArray.push_back("AngularVelocity");
    
    wxString *strArray = new wxString[RateStateTypeCount];
    for (Integer i=0; i<RateStateTypeCount; i++)
@@ -276,9 +282,9 @@ void AttitudePanel::Create()
       new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""), wxDefaultPosition, 
          wxSize(100,-1), 0 );                
 
-   wxStaticText *rateUnits1 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-   wxStaticText *rateUnits2 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-   wxStaticText *rateUnits3 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   rateUnits1 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   rateUnits2 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   rateUnits3 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
@@ -287,12 +293,12 @@ void AttitudePanel::Create()
    
    //wxTextCtrl
                   
-/*
-        attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
-        attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
-        attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
 
-*/
+    attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+    attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+    attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+
+
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
@@ -307,7 +313,6 @@ void AttitudePanel::Create()
    
 #if __WXMAC__   
    Integer bsize = 6; // border size
-                            
    // wx*Sizers   
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxHORIZONTAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
@@ -317,7 +322,7 @@ void AttitudePanel::Create()
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
-   wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 0 );
+   wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 0 );        
    
    wxStaticText *state1StaticText =
       new wxStaticText( this, ID_TEXT, wxT("Attitude Initial Conditions"),
@@ -329,58 +334,58 @@ void AttitudePanel::Create()
                                              false, _T(""), wxFONTENCODING_SYSTEM));
    state24StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
                                              false, _T(""), wxFONTENCODING_SYSTEM));
-                       
+                               
    // Add to wx*Sizers
    flexGridSizer1->Add(config1StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config1ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
+   flexGridSizer1->Add(config1ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );        
    flexGridSizer1->Add(config2StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config2ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config3StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config3ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
+   flexGridSizer1->Add(config2ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );         
+   //flexGridSizer1->Add(config3StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
+   //flexGridSizer1->Add(config3ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );        
    flexGridSizer1->Add(config4StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
-   flexGridSizer1->Add(config4ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
+   flexGridSizer1->Add(config4ComboBox, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );         
    
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    flexGridSizer2->Add(col1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(col2StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(col3StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(col3StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );         
       
    flexGridSizer2->Add(st1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st5TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(st6TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(st8TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );          
    
    flexGridSizer2->Add(st2StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(st7TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(st8TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(st6TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(st9TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );        
    
    flexGridSizer2->Add(st3StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(st9TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer2->Add(st10TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(st7TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer2->Add(st10TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );       
    
    flexGridSizer2->Add(st4StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(st4TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   flexGridSizer2->Add(20, 20, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);        
    
    flexGridSizer3->Add(str1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str1TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str2StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str2TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str3StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
-   flexGridSizer3->Add(str3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
+   flexGridSizer3->Add(str3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );        
    
    boxSizer4->Add(state1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer4->Add(stateTypeStaticText , 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer4->Add(stateTypeComboBox , 0, wxALIGN_LEFT|wxALL, bsize);  
-   boxSizer4->Add(flexGridSizer2, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);  
+   boxSizer4->Add(flexGridSizer2, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);            
    
    boxSizer5->Add(state24StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer5->Add(stateTypeRate4StaticText , 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer5->Add(stateTypeRateComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   boxSizer5->Add(flexGridSizer3, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);  
+   boxSizer5->Add(flexGridSizer3, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);         
    
    boxSizer2->Add(flexGridSizer1, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    
@@ -389,11 +394,13 @@ void AttitudePanel::Create()
    
    boxSizer1->Add( boxSizer2, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    boxSizer1->Add( boxSizer3, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+        
    
    this->SetAutoLayout( true );  
    this->SetSizer( boxSizer1 );
    boxSizer1->Fit( this );
-   boxSizer1->SetSizeHints( this );
+   boxSizer1->SetSizeHints( this );        
+   
 #else  
    Integer bsize = 3;
    Integer text_bsize = 1;
@@ -468,13 +475,13 @@ void AttitudePanel::Create()
    
    gSRateState->Add(str1StaticText, 0, wxALL, bsize);
    gSRateState->Add(str1TextCtrl, 0, wxALL, bsize);
-   gSRateState->Add(rateUnits1, 0, wxALL, bsize);
+   //gSRateState->Add(rateUnits1, 0, wxALL, bsize);
    gSRateState->Add(str2StaticText, 0, wxALL, bsize);
    gSRateState->Add(str2TextCtrl, 0, wxALL, bsize);
-   gSRateState->Add(rateUnits2, 0, wxALL, bsize);
+   //gSRateState->Add(rateUnits2, 0, wxALL, bsize);
    gSRateState->Add(str3StaticText, 0, wxALL, bsize);
    gSRateState->Add(str3TextCtrl, 0, wxALL, bsize);
-   gSRateState->Add(rateUnits3, 0, wxALL, bsize);
+   //gSRateState->Add(rateUnits3, 0, wxALL, bsize);
    
    gSConfig->Add(config1StaticText, 0, wxALL, bsize);
    gSConfig->Add(  config1ComboBox, 0, wxEXPAND|wxALL, bsize);
@@ -516,6 +523,9 @@ void AttitudePanel::Create()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayEulerAngles()
 {
+   stateTypeComboBox->
+      SetValue(wxT("EulerAngles"));
+   attStateType = "EulerAngles";
    col1StaticText->Show(false);
    col2StaticText->Show(false);
    col3StaticText->Show(false);
@@ -550,10 +560,13 @@ void AttitudePanel::DisplayEulerAngles()
 }
 
 //------------------------------------------------------------------------------
-// void DisplayQuaternions()
+// void DisplayQuaternion()
 //------------------------------------------------------------------------------
-void AttitudePanel::DisplayQuaternions()
+void AttitudePanel::DisplayQuaternion()
 {
+   stateTypeComboBox->
+      SetValue(wxT("Quaternion"));
+   attStateType = "Quaternion";
    col1StaticText->Show(false);
    col2StaticText->Show(false);
    col3StaticText->Show(false);
@@ -582,10 +595,10 @@ void AttitudePanel::DisplayQuaternions()
    st4StaticText->SetLabel(wxT("q4"));
 
    dontUpdate=true;
-   st1TextCtrl->SetValue(*quaternions[0]);
-   st2TextCtrl->SetValue(*quaternions[1]);
-   st3TextCtrl->SetValue(*quaternions[2]);
-   st4TextCtrl->SetValue(*quaternions[3]);
+   st1TextCtrl->SetValue(*quaternion[0]);
+   st2TextCtrl->SetValue(*quaternion[1]);
+   st3TextCtrl->SetValue(*quaternion[2]);
+   st4TextCtrl->SetValue(*quaternion[3]);
    dontUpdate=false;
 }
 
@@ -594,6 +607,9 @@ void AttitudePanel::DisplayQuaternions()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayDCM()
 {
+   stateTypeComboBox->
+      SetValue(wxT("DirectionCosineMatrix"));
+   attStateType = "DirectionCosineMatrix";
    col1StaticText->Show(true);
    col2StaticText->Show(true);
    col3StaticText->Show(true);
@@ -621,6 +637,7 @@ void AttitudePanel::DisplayDCM()
    st3StaticText->SetLabel(wxT("Row 3"));
 
    dontUpdate=true;
+   /*
    st1TextCtrl->SetValue(*cosineMatrix[0]);
    st2TextCtrl->SetValue(*cosineMatrix[1]);
    st3TextCtrl->SetValue(*cosineMatrix[2]);
@@ -629,6 +646,16 @@ void AttitudePanel::DisplayDCM()
    st7TextCtrl->SetValue(*cosineMatrix[5]);
    st8TextCtrl->SetValue(*cosineMatrix[6]);
    st9TextCtrl->SetValue(*cosineMatrix[7]);
+   st10TextCtrl->SetValue(*cosineMatrix[8]);
+   */
+   st1TextCtrl->SetValue(*cosineMatrix[0]);
+   st2TextCtrl->SetValue(*cosineMatrix[3]);
+   st3TextCtrl->SetValue(*cosineMatrix[6]);
+   st5TextCtrl->SetValue(*cosineMatrix[1]);
+   st6TextCtrl->SetValue(*cosineMatrix[4]);
+   st7TextCtrl->SetValue(*cosineMatrix[7]);
+   st8TextCtrl->SetValue(*cosineMatrix[2]);
+   st9TextCtrl->SetValue(*cosineMatrix[5]);
    st10TextCtrl->SetValue(*cosineMatrix[8]);
    
    dontUpdate=false;
@@ -640,6 +667,9 @@ void AttitudePanel::DisplayDCM()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayEulerAngleRates()
 {
+   stateTypeRateComboBox->
+      SetValue(wxT("EulerAngleRates"));
+   attRateStateType = "EulerAngleRates";
    str1StaticText->SetLabel(wxT("Euler Angle Rate 1"));
    str2StaticText->SetLabel(wxT("Euler Angle Rate 2"));
    str3StaticText->SetLabel(wxT("Euler Angle Rate 3"));
@@ -656,7 +686,10 @@ void AttitudePanel::DisplayEulerAngleRates()
 //------------------------------------------------------------------------------
 void AttitudePanel::DisplayAngularVelocity()
 {
-        str1StaticText->SetLabel(wxT("Angular Velocity X"));
+   stateTypeRateComboBox->
+      SetValue(wxT("AngularVelocity"));
+   attRateStateType = "AngularVelocity";
+   str1StaticText->SetLabel(wxT("Angular Velocity X"));
    str2StaticText->SetLabel(wxT("Angular Velocity Y"));
    str3StaticText->SetLabel(wxT("Angular Velocity Z"));
 
@@ -677,25 +710,69 @@ void AttitudePanel::LoadData()
       MessageInterface::ShowMessage("AttitudePanel::LoadData() entered\n");
    #endif
    
-   if (STARTUP_STATE_TYPE_SELECTION == EULER_ANGLES)
+   unsigned int x, y;
+   // check to see if the spacecrat has an attitude object
+   theAttitude = (Attitude*) theSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
+   if (theAttitude == NULL)   // no attitude yet
    {
+      theAttitude = (Attitude *)theGuiInterpreter->
+         CreateObject((attitudeModelArray[0]).c_str(), ""); // Use no name
+   }
+   if (theAttitude == NULL)
+   {
+      std::string ex = "ERROR- unable to find or create an attitude object for ";
+      ex += theSpacecraft->GetName() + "\n";
+      throw GmatBaseException(ex);
+   }
+   
+   attStateType     = 
+          theAttitude->GetStringParameter("AttitudeDisplayStateType");
+   attRateStateType = 
+          theAttitude->GetStringParameter("AttitudeRateDisplayStateType");
+   attitudeModel    = theAttitude->GetAttitudeModelName();
+   config1ComboBox->SetValue(wxT(attitudeModel.c_str()));
+   
+   eulerSequence  = theAttitude->GetStringParameter("EulerAngleSequence");
+   config4ComboBox->SetValue(wxT(eulerSequence.c_str()));
+   
+   attCoordSystem = theAttitude->GetStringParameter("AttitudeCoordinateSystem");
+   config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
+   
+   if (attStateType == "EulerAngles")
+   {
+      Rvector ea = theAttitude->GetRvectorParameter("EulerAngles");
+      for (x = 0; x < 3; ++x)
+         *eulerAngles[x] = theGuiManager->ToWxString(ea[x]);
       DisplayEulerAngles();
    }
-   else if (STARTUP_STATE_TYPE_SELECTION == QUATERNION)
+   else if (attStateType == "Quaternion")
    {
-      DisplayQuaternions();
+      Rvector q = theAttitude->GetRvectorParameter("Quaternion");
+      for (x = 0; x < 4; ++x)
+         *quaternion[x] = theGuiManager->ToWxString(q[x]);
+      DisplayQuaternion();
    }
-   else
+   else // "DirectionCosineMatrix
    {
+      Rmatrix mat = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
+      for (x = 0; x < 3; ++x)
+         for (y = 0; y < 3; ++y)
+            *cosineMatrix[x*3+y] = theGuiManager->ToWxString(mat(x,y));
       DisplayDCM();
    }
    
-   if (STARTUP_RATE_STATE_TYPE_SELECTION == EULER_ANGLE_RATES) 
+   if (attRateStateType == "EulerAngleRates") 
    {
+      Rvector ear = theAttitude->GetRvectorParameter("EulerAngleRates");
+      for (x = 0; x < 3; ++x)
+         *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
       DisplayEulerAngleRates();
    }
-   else
+   else // AngularVelocity
    {
+      Rvector av = theAttitude->GetRvectorParameter("AngularVelocity");
+      for (x = 0; x < 3; ++x)
+         *angVel[x] = theGuiManager->ToWxString(av[x]);
       DisplayAngularVelocity();
    }
 
@@ -713,23 +790,23 @@ void AttitudePanel::SaveData()
       MessageInterface::ShowMessage("Attitude creation via the GUI is not implemented yet\n");
    #endif
       
-   wxString mode = config1ComboBox->GetValue();
-   wxString typeVal = config3ComboBox->GetValue();
+   wxString model = config1ComboBox->GetValue();
+   //wxString typeVal = config3ComboBox->GetValue();
    
    #ifdef DEBUG_ATTITUDE_PANEL
-      MessageInterface::ShowMessage("Attitude creation: mode = %s\n", mode.c_str());
-      MessageInterface::ShowMessage("Attitude creation: type = %s\n", typeVal.c_str());
+      MessageInterface::ShowMessage("Attitude creation: model = %s\n", model.c_str());
+      //MessageInterface::ShowMessage("Attitude creation: type = %s\n", typeVal.c_str());
    #endif
    AttitudeFactory af;
    
-   //Attitude* a = af.CreateAttitude(mode.c_str(), "");
-   Attitude* a = af.CreateAttitude(typeVal.c_str(), "");
+   //Attitude* a = af.CreateAttitude(model.c_str(), "");
+   //Attitude* a = af.CreateAttitude(typeVal.c_str(), "");
 
-   if (a == NULL)
-   {
-      MessageInterface::ShowMessage("Attitude object made is null\n");
-      return;
-   }
+   //if (a == NULL)
+   //{
+   //   MessageInterface::ShowMessage("Attitude object made is null\n");
+   //   return;
+   //}
    
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("Attitude creation: a != NULL\n");
@@ -750,7 +827,7 @@ void AttitudePanel::SaveData()
    
    std::string selectedEulerSeq = config4ComboBox->GetValue().c_str();
    
-   a->SetStringParameter("EulerSequenceString", selectedEulerSeq);
+   theAttitude->SetStringParameter("EulerAngleSequence", selectedEulerSeq);
            
    std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -768,7 +845,8 @@ void AttitudePanel::SaveData()
             eulerAnglesRvector[x] = dEA;
          }
       }
-      a->SetRvectorParameter(a->GetParameterID("InitialEulerAngles"), eulerAnglesRvector);
+      theAttitude->SetRvectorParameter(
+                   theAttitude->GetParameterID("EulerAngles"), eulerAnglesRvector);
    }
    else if (stateTypeStr == stateTypeArray[QUATERNION])
    {
@@ -776,7 +854,7 @@ void AttitudePanel::SaveData()
       Real dQ;
       for (unsigned int x = 0; x < 4; ++x)
       {
-         if (quaternions[x]->ToDouble(&dQ))
+         if (quaternion[x]->ToDouble(&dQ))
          {
             #ifdef DEBUG_ATTITUDE_PANEL
                 MessageInterface::ShowMessage("q[%u] = %f\n", x, dQ);
@@ -785,11 +863,12 @@ void AttitudePanel::SaveData()
          }
          else 
          {
-                MessageInterface::ShowMessage("failed with: \"%s\"\n", quaternions[x]->c_str());
+                MessageInterface::ShowMessage("failed with: \"%s\"\n", quaternion[x]->c_str());
          }
                 
       }
-      a->SetRvectorParameter(a->GetParameterID("InitialQuaternion"), quaternionRvector);
+      theAttitude->SetRvectorParameter(
+                   theAttitude->GetParameterID("Quaternion"), quaternionRvector);
    }
    else if (stateTypeStr == stateTypeArray[DCM])
    {
@@ -806,7 +885,8 @@ void AttitudePanel::SaveData()
             }
         }
       }
-          a->SetRmatrixParameter(a->GetParameterID("InitialDirectionCosineMatrix"), cosRmatrix);
+          theAttitude->SetRmatrixParameter(
+                       theAttitude->GetParameterID("DirectionCosineMatrix"), cosRmatrix);
    }
 
    std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
@@ -821,7 +901,8 @@ void AttitudePanel::SaveData()
             eulerAngleRatesRvector[x] = dEAR;
          }
       }
-      a->SetRvectorParameter(a->GetParameterID("InitialEulerAngleRates"), eulerAngleRatesRvector);
+      theAttitude->SetRvectorParameter(
+                   theAttitude->GetParameterID("EulerAngleRates"), eulerAngleRatesRvector);
    }
    else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
    {
@@ -834,9 +915,11 @@ void AttitudePanel::SaveData()
             angularVelocityRvector[x] = dAV;
          }
       }
-      a->SetRvectorParameter(a->GetParameterID("InitialAngularVelocity"), angularVelocityRvector);
+      theAttitude->SetRvectorParameter(
+                   theAttitude->GetParameterID("AngularVelocity"), angularVelocityRvector);
    }
 
+   theSpacecraft->SetRefObject(theAttitude, Gmat::ATTITUDE, "");
    dataChanged = false;
    
    #ifdef DEBUG_ATTITUDE_PANEL
@@ -862,7 +945,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
          eulerAngles[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
       
       CalculateFromEulerAngles(); // use this new information to
-      // calculate the quaternions,
+      // calculate the quaternion,
       // the cosine matrix, and whatever
       // else is not immediately shown
       
@@ -878,15 +961,15 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
    else if (stateTypeStr == stateTypeArray[QUATERNION])
    {
       if (st1TextCtrl)
-         quaternions[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
+         quaternion[0]->Printf("%s", st1TextCtrl->GetValue().c_str());
       else if (st2TextCtrl)
-         quaternions[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
+         quaternion[1]->Printf("%s", st2TextCtrl->GetValue().c_str());
       else if (st3TextCtrl)
-         quaternions[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
+         quaternion[2]->Printf("%s", st3TextCtrl->GetValue().c_str());
       else if (st4TextCtrl)
-         quaternions[3]->Printf("%s", st4TextCtrl->GetValue().c_str());
+         quaternion[3]->Printf("%s", st4TextCtrl->GetValue().c_str());
       
-      CalculateFromQuaternions(); // use this new information to
+      CalculateFromQuaternion(); // use this new information to
       // calculate the Euler angles and
       // the cosine matrix
    }
@@ -912,7 +995,7 @@ void AttitudePanel::OnStateTypeTextUpdate(wxCommandEvent &event)
          cosineMatrix[8]->Printf("%s", st10TextCtrl->GetValue().c_str());
       
       CalculateFromCosineMatrix(); // use this new information to
-      // calculate the quaternions and
+      // calculate the quaternion and
       // the Euler angles
    }
    
@@ -964,17 +1047,55 @@ void AttitudePanel::OnConfigurationSelection(wxCommandEvent &event)
 }
 
 //------------------------------------------------------------------------------
+// void OnAttitudeModelSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnAttitudeModelSelection(wxCommandEvent &event)
+{
+   // if the user changes the attitude model, we will need to create a new one
+   //currentModel = stateTypeComboBox->GetValue().c_str();
+;
+   
+}
+
+//------------------------------------------------------------------------------
+// void OnEulerSequenceSelection(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void AttitudePanel::OnEulerSequenceSelection(wxCommandEvent &event)
+{
+   // if the user changes the euler sequence, we must recompute the 
+   // euler angles and euler angle rates, if they are shown
+}
+
+
+//------------------------------------------------------------------------------
 // void OnStateTypeSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
 {
+   unsigned int x, y;
    std::string stateTypeStr = stateTypeComboBox->GetStringSelection().c_str();
    if (stateTypeStr == stateTypeArray[EULER_ANGLES])
+   {
+      Rvector ea = theAttitude->GetRvectorParameter("EulerAngles");
+      for (x = 0; x < 3; ++x)
+         *eulerAngles[x] = theGuiManager->ToWxString(ea[x]);
       DisplayEulerAngles();
+   }
    else if (stateTypeStr == stateTypeArray[QUATERNION])
-      DisplayQuaternions();
+   {
+      Rvector q = theAttitude->GetRvectorParameter("Quaternion");
+      for (x = 0; x < 4; ++x)
+         *quaternion[x] = theGuiManager->ToWxString(q[x]);
+      DisplayQuaternion();
+   }
    else if (stateTypeStr == stateTypeArray[DCM])
+   {
+      Rmatrix mat = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
+      for (x = 0; x < 3; ++x)
+         for (y = 0; y < 3; ++y)
+            *cosineMatrix[x*3+y] = theGuiManager->ToWxString(mat(x,y));
       DisplayDCM();
+   }
 }
 
 
@@ -983,12 +1104,23 @@ void AttitudePanel::OnStateTypeSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void AttitudePanel::OnStateTypeRateSelection(wxCommandEvent &event)
 {
-        std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
-        
-        if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
-           DisplayEulerAngleRates();
-        else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
-           DisplayAngularVelocity();
+   unsigned int x;
+   std::string stateTypeRateStr = stateTypeRateComboBox->GetStringSelection().c_str();
+  
+   if (stateTypeRateStr == stateTypeRateArray[EULER_ANGLE_RATES])
+   {
+      Rvector ear = theAttitude->GetRvectorParameter("EulerAngleRates");
+      for (x = 0; x < 3; ++x)
+         *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
+      DisplayEulerAngleRates();
+   }
+   else if (stateTypeRateStr == stateTypeRateArray[ANGULAR_VELOCITY])
+   {
+      Rvector av = theAttitude->GetRvectorParameter("AngularVelocity");
+      for (x = 0; x < 3; ++x)
+         *angVel[x] = theGuiManager->ToWxString(av[x]);
+      DisplayAngularVelocity();
+   }
 }
 
 
@@ -1032,23 +1164,23 @@ void AttitudePanel::CalculateFromEulerAngles()
    Rvector q = Attitude::ToQuaternion(ea, esA, esB, esC);
                 
    for (x = 0; x < 4; ++x) {
-      //quaternions[x]->Printf("%.1f", q[x]);
-      *quaternions[x] = theGuiManager->ToWxString(q[x]);
+      //quaternion[x]->Printf("%.1f", q[x]);
+      *quaternion[x] = theGuiManager->ToWxString(q[x]);
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void CalculateFromQuaternions()
+// void CalculateFromQuaternion()
 //------------------------------------------------------------------------------
-void AttitudePanel::CalculateFromQuaternions()
+void AttitudePanel::CalculateFromQuaternion()
 {
    Rvector q(4);
    unsigned int x,y;
    for (x = 0; x < 4; ++x) {
       Real dQ_x;
                 
-      if (quaternions[x]->ToDouble(&dQ_x)) {  // will return false on bad input
+      if (quaternion[x]->ToDouble(&dQ_x)) {  // will return false on bad input
          q[x] = dQ_x;
       }
       else
@@ -1108,8 +1240,8 @@ void AttitudePanel::CalculateFromCosineMatrix()
    Rvector q = Attitude::ToQuaternion(cm);
 
    for (c = 0; c < 4; ++c) {
-      //quaternions[c]->Printf("%.1f", q[c]);
-      *quaternions[c] = theGuiManager->ToWxString(q[c]);
+      //quaternion[c]->Printf("%.1f", q[c]);
+      *quaternion[c] = theGuiManager->ToWxString(q[c]);
    }
    
    Integer esA, esB, esC;  // Euler sequence
@@ -1230,3 +1362,31 @@ void AttitudePanel::CalculateFromAngularVelocity()
       *eulerAngleRates[x] = theGuiManager->ToWxString(ear[x]);
    }
 }
+
+//------------------------------------------------------------------------------
+// bool IsStateModified()
+//------------------------------------------------------------------------------
+bool AttitudePanel::IsStateModified()
+{
+   //for (int i=0; i<6; i++)
+   //   if (mIsStateModified[i])
+   //      return true;
+
+   return false;
+}
+
+
+
+//------------------------------------------------------------------------------
+// void ResetStateFlags(bool discardEdits = false)
+//------------------------------------------------------------------------------
+void AttitudePanel::ResetStateFlags(bool discardEdits)
+{
+   //for (int i=0; i<6; i++)
+   //   mIsStateModified[i] = false;
+
+   //if (discardEdits)
+   //   for (int i=0; i<6; i++)
+    //     textCtrl[i]->DiscardEdits();
+}
+
