@@ -45,6 +45,7 @@
 //#define DEBUG_SC_KEPL_TO_CART
 //#define DEBUG_SC_EPOCHSTR
 //#define DEBUG_WRITE_PARAMETERS
+//#define DEBUG_SC_ATTITUDE
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -260,6 +261,7 @@ Spacecraft::~Spacecraft()
       delete *i;
    for (ObjectArray::iterator i = thrusters.begin(); i < thrusters.end(); ++i)
       delete *i;
+   if (attitude) delete attitude;
 }
 
 
@@ -288,7 +290,6 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    internalCoordSystem  (a.internalCoordSystem),
    coordinateSystem     (a.coordinateSystem),      // Check this one...
    coordSysName         (a.coordSysName),
-   attitude             (a.attitude),              // Check this one too ...
    stateConverter       (a.stateConverter),
    coordConverter       (a.coordConverter),
    totalMass            (a.totalMass),
@@ -300,6 +301,9 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    parameterCount = a.parameterCount;
 
    state.SetEpoch(a.state.GetEpoch());
+   // clone the attitude
+   if (a.attitude) attitude = (Attitude*) a.attitude->Clone();
+   else            attitude = NULL;
    
    state[0] = a.state[0];
    state[1] = a.state[1];
@@ -354,7 +358,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    displayStateType     = a.displayStateType;
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
-   attitude             = a.attitude,        // correct?
+   //attitude             = a.attitude,        // correct?
+   //attitude             = (Attitude*) a.attitude->Clone(),        // correct?
    stateConverter       = a.stateConverter;
    coordConverter       = a.coordConverter;
    totalMass            = a.totalMass;
@@ -389,6 +394,9 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    representations   = a.representations;
    tankNames         = a.tankNames;
    thrusterNames     = a.thrusterNames;
+   if (attitude) delete attitude;  // right?
+   if (a.attitude)  attitude = (Attitude*) a.attitude->Clone();
+   else             attitude = NULL;
    
    BuildElementLabelMap();
    
@@ -637,9 +645,9 @@ Rmatrix33 Spacecraft::GetAttitude(Real a1mjdTime) const
    if (attitude) return attitude->GetCosineMatrix(a1mjdTime);
    else 
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_, 
-      "No attitude defined for spacecraft %s, returning identity matrix.\n",
-      instanceName.c_str());
+      //MessageInterface::PopupMessage(Gmat::WARNING_, 
+      //"No attitude defined for spacecraft %s, returning identity matrix.\n",
+      //instanceName.c_str());
       return Rmatrix33();  // temporary - return identity matrix
    }
 }
@@ -650,9 +658,9 @@ Rvector3  Spacecraft::GetAngularVelocity(Real a1mjdTime) const
    if (attitude) return attitude->GetAngularVelocity(a1mjdTime);
    else 
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_, 
-      "No attitude defined for spacecraft %s, returning zero angular velocity vector.\n",
-      instanceName.c_str());
+      //MessageInterface::PopupMessage(Gmat::WARNING_, 
+      //"No attitude defined for spacecraft %s, returning zero angular velocity vector.\n",
+      //instanceName.c_str());
       return Rvector3(); // temporary - return zero vector
    }
 }
@@ -749,6 +757,7 @@ std::string Spacecraft::GetRefObjectName(const Gmat::ObjectType type) const
    {
       return coordSysName;
    }
+   if (type == Gmat::ATTITUDE)   return "";   // Attitude objects don't have names
    return SpaceObject::GetRefObjectName(type);
 }
 
@@ -767,6 +776,7 @@ const ObjectTypeArray& Spacecraft::GetRefObjectTypeArray()
 {
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::COORDINATE_SYSTEM);
+   refObjectTypes.push_back(Gmat::ATTITUDE);
    return refObjectTypes;
 }
 
@@ -869,6 +879,10 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          return coordinateSystem;
          
       case Gmat::ATTITUDE:
+         #ifdef DEBUG_SC_ATTITUDE
+         MessageInterface::ShowMessage(
+         "In SC::GetRefObject - returning Attitude poinetr\n");
+         #endif
 //MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return attitude;
          

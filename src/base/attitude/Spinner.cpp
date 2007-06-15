@@ -123,7 +123,7 @@ bool Spinner::Initialize()
    {
       // Compute the rotation matrix form inertial to Fi at the epoch time, t0
       Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
-      Rvector bogus2 = refCS->FromMJ2000Eq(initialEpoch, bogus, true);
+      Rvector bogus2 = refCS->FromMJ2000Eq(epoch, bogus, true);
       RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    }
    catch (BaseException &be)
@@ -145,7 +145,7 @@ bool Spinner::Initialize()
    #endif
    
    RB0I           = RBi * RiI;
-   currentwIBB    = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
+   angVel         = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
    
    #ifdef DEBUG_SPINNER_INIT
    std::stringstream RB0IStream;
@@ -153,13 +153,13 @@ bool Spinner::Initialize()
    MessageInterface::ShowMessage(
    "------- RB0I = %s\n", (RB0IStream.str()).c_str());
    std::stringstream IBBStream;
-   IBBStream << currentwIBB << std::endl;
+   IBBStream << angVel << std::endl;
    MessageInterface::ShowMessage(
-   "------- currentwIBB = %s\n", (IBBStream.str()).c_str());
+   "------- angVel = %s\n", (IBBStream.str()).c_str());
    #endif
    
-   initialwMag    = currentwIBB.GetMagnitude();
-   if (initialwMag != 0.0) initialeAxis   = currentwIBB / initialwMag;
+   initialwMag    = angVel.GetMagnitude();
+   if (initialwMag != 0.0) initialeAxis   = angVel / initialwMag;
    else     // is this right?               
       initialeAxis[0] = initialeAxis[1] = initialeAxis[2] = 0.0;
    
@@ -206,14 +206,14 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    // now, RB0I and currentwIBB have been computed by Initialize
    
    // Calculate RBIt, where t = atTime
-   Real      dt             = (atTime - initialEpoch) * 
+   Real      dt             = (atTime - epoch) * 
                               GmatTimeUtil::SECS_PER_DAY;
    // Compute the Euler angle
    Real      theEAngle      = initialwMag * dt;
    Rmatrix33 RBB0t          = EulerAxisAndAngleToDCM(
                               initialeAxis, theEAngle);
    
-   currentRBI               = RBB0t * RB0I;
+   cosMat                   = RBB0t * RB0I;
    // currentwIBB already computed in Initialize 
 }
 

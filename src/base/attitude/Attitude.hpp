@@ -151,6 +151,7 @@ public:
    
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        GetRealParameter(const std::string &label) const;
+   
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
    virtual Real        SetRealParameter(const std::string &label,
@@ -161,9 +162,9 @@ public:
    virtual const UnsignedIntArray& 
                        GetUnsignedIntArrayParameter(
                        const std::string &label) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value,
-                                               const Integer index);
+   //virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
+   //                                            const UnsignedInt value,
+   //                                            const Integer index);
                                                
    virtual const Rvector&    GetRvectorParameter(const Integer id) const;
    virtual const Rvector&    GetRvectorParameter(const std::string &label) const;
@@ -196,8 +197,10 @@ public:
 protected:
    enum
    {
-       REFERENCE_COORDINATE_SYSTEM = GmatBaseParamCount,
-       INITIAL_EPOCH,                      // A1Mjd (Real)
+       ATTITUDE_DISPLAY_STATE_TYPE = GmatBaseParamCount,   
+       ATTITUDE_RATE_DISPLAY_STATE_TYPE,   
+       REFERENCE_COORDINATE_SYSTEM,
+       EPOCH,                      // A1Mjd (Real)
        Q_1,
        Q_2,
        Q_3,
@@ -220,7 +223,7 @@ protected:
        EULER_ANGLE_RATE_3,
        ANGULAR_VELOCITY_X,
        ANGULAR_VELOCITY_Y,
-       ANGULAR_VELOCITY_Z,    
+       ANGULAR_VELOCITY_Z, 
        AttitudeParamCount
    };
    
@@ -230,12 +233,12 @@ protected:
        //INITIAL_EPOCH,                      // A1Mjd (Real)
        EULER_SEQUENCE_LIST = 7000,
        //EULER_SEQUENCE_STRING,
-       INITIAL_EULER_SEQUENCE,
-       INITIAL_EULER_ANGLES,               // degrees
-       INITIAL_EULER_ANGLE_RATES,          // degrees/second
-       INITIAL_QUATERNION,
-       INITIAL_DIRECTION_COSINE_MATRIX,
-       INITIAL_ANGULAR_VELOCITY,           // degrees/second
+       EULER_SEQUENCE,
+       EULER_ANGLES,               // degrees
+       EULER_ANGLE_RATES,          // degrees/second
+       QUATERNION,
+       DIRECTION_COSINE_MATRIX,
+       ANGULAR_VELOCITY,           // degrees/second
        //AttitudeParamCount
        EndOtherReps
    };
@@ -263,30 +266,33 @@ protected:
    GmatAttitude::AttitudeRateStateType
                          inputAttRateType;
                          
+   std::string           attitudeDisplayType; 
+   std::string           attitudeRateDisplayType;
+                         
    bool                  isInitialized;
    /// the list of possible euler sequences
    StringArray eulerSequenceList;
    
    /// initial user-supplied epoch as an A1Mjd time (as Real)
-   Real                  initialEpoch; 
+   Real                  epoch;   // was initialEpoch; 
     
    /// the reference coordinate system name
    std::string           refCSName;
    /// pointer to the reference coordinate system
    CoordinateSystem      *refCS;
-   std::string           eulerSeqString;
+   std::string           eulerSequence;
    /// initial user-supplied euler sequence
-   UnsignedIntArray      initialEulerSeq;
+   UnsignedIntArray      eulerSequenceArray;     // was initialEulerSeq;
    /// initial user-supplied euler angles (degrees) [defaults to zeros]
-   Rvector3              initialEulerAng; 
+   //Rvector3              initialEulerAng; 
    /// initial user-supplied cosince matrix [defaults to identity matrix]
-   Rmatrix33             initialDcm; 
+   //Rmatrix33             initialDcm; 
    /// initial user-supplied euler angle rates (deg/sec) [defaults to zeros]
-   Rvector3              initialEulerAngRates; 
+   //Rvector3              initialEulerAngRates; 
    /// initial user-supplied angular velocity (deg/sec)  [defaults to zeros]
-   Rvector3              initialAngVel;          // deg.sec 
+   //Rvector3              initialAngVel;          // deg.sec 
    /// initial user-supplied quaternion
-   Rvector               initialQuaternion;
+   //Rvector               initialQuaternion;
    
    /// the input rotation matrix (from Fi to Fb) computed, on
    /// initialization (from quaternion or euler angles/sequence 
@@ -297,25 +303,25 @@ protected:
    Rvector3  wIBi;   
    
    /// the current rotation matrix (from inertial to body)
-   Rmatrix33 currentRBI;
+   Rmatrix33 cosMat;   // was currentRBI;
    /// the current angular velocity, with respect to the inertial frame
    /// (radians/second)
-   Rvector3  currentwIBB;
+   Rvector3  angVel;   // was currentwIBB;
    /// last time that the CosineMatrix and angular velocity
    /// were computed                     
-   Real      currentAttitudeTime; 
+   Real      attitudeTime;   // was currentAttitudeTime; 
    /// last time that the quaternion was computed
-   Real      lastQuaternionTime;
+   Real      quaternionTime;        // was lastQuaternionTime;
    /// the last computed quaternion
-   Rvector   lastQuaternion;
+   Rvector   quaternion;            // was lastQuaternion;
    /// last time that the euler angles were computed
-   Real      lastEulerAngleTime;
+   Real      eulerAngleTime;        // was lastEulerAngleTime;
    /// the last computed euler angles (radians)
-   Rvector3  lastEulerAngles;
+   Rvector3  eulerAngles;           // was lastEulerAngles;
    /// last time that the euler angle rates were computed
-   Real      lastEulerAngleRatesTime;
+   Real      eulerAngleRatesTime;   // waslastEulerAngleRatesTime;
    /// the last computed euler angle rates  (radians/second)
-   Rvector3  lastEulerAngleRates;
+   Rvector3  eulerAngleRates;       // lastEulerAngleRates;
    
    std::string attitudeModelName;
  
@@ -328,11 +334,11 @@ protected:
                                             
    // method to set the euler sequence string to match the input
    // euler sequence array                        
-   bool  SetEulerSequenceString(const UnsignedIntArray &eulerArray);
+   //bool  SetEulerSequenceString(const UnsignedIntArray &eulerArray);
    // method to set the euler sequence array to match the input
    // euler sequence string; assumes string is of the form
    // "N M P" where N, M, and P are Integers
-   bool  SetEulerSequence(const std::string &seqStr);
+   UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
    
    
    //------------------------------------------------------------------------------
@@ -356,6 +362,7 @@ private:
    Attitude(); 
    bool      ValidateCosineMatrix(const Rmatrix33 &mat);
    bool      ValidateEulerSequence(const std::string &seq);
-   bool      ValidateEulerSequence(const UnsignedIntArray &eulAng);      
+   bool      ValidateEulerSequence(const UnsignedIntArray &eulAng); 
+   void      UpdateState(const std::string &rep);
 };
 #endif /*Attitude_hpp*/

@@ -145,26 +145,24 @@ GmatBase* CSFixed::Clone(void) const
 //------------------------------------------------------------------------------
 void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
-   if (!isInitialized) 
-   {
-      Initialize();
-   }
+   //if (!isInitialized)  Initialize();
+
    // We know RBi, since it is computed on initialization
    // Get the rotation matrix from the reference coordinate system
    Rvector bogus(6,100.0,200.0,300.0,400.0,500.0,600.0);
    Rvector bogus2 = refCS->FromMJ2000Eq(atTime, bogus, true);
    Rmatrix33 RiI  = (refCS->GetLastRotationMatrix()).Transpose();
    // compute current attitude matrix
-   currentRBI     = RBi * RiI;
+   cosMat     = RBi * RiI;
    // Get the rotation dot matrix from the reference coordinate system
    // (it was computed on the last call to FromMJ2000Eq)
    Rmatrix33 RiIDot = (refCS->GetLastRotationDotMatrix()).Transpose();
    
-   Rmatrix33 wxIBB  = - RBi * (RiIDot * (currentRBI.Transpose()));
+   Rmatrix33 wxIBB  = - RBi * (RiIDot * (cosMat.Transpose()));
    // set current angular velocity from this matrix
-   currentwIBB(0)   = wxIBB(2,1);
-   currentwIBB(1)   = wxIBB(0,2);
-   currentwIBB(2)   = wxIBB(1,0);
+   angVel(0)   = wxIBB(2,1);
+   angVel(1)   = wxIBB(0,2);
+   angVel(2)   = wxIBB(1,0);
 }
 
 
