@@ -251,8 +251,10 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
    #endif
-   
-   CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
+
+   // Why not showing separator with wxNO_BORDER | wxTB_HORIZONTAL ?
+   //CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
+   CreateToolBar();
    InitToolBar(GetToolBar());
    
    // used to store the list of open children
@@ -520,31 +522,6 @@ bool GmatMainFrame::RenameChild(GmatTreeItemData *item, wxString newName)
 {
    wxString oldName = item->GetDesc();
    return RenameChild(oldName, newName);
-
-   //loj: 1/17/06 commented out because the code is replaced by
-   // RenameChild(wxString oldName, wxString newName)
-   
-//    wxNode *node = mdiChildren->GetFirst();
-//    while (node)
-//    {
-//       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
-//       #ifdef DEBUG_MAINFRAME
-//       MessageInterface::ShowMessage
-//          ("GmatMainFrame::RenameChild() child %s  this %s\n",
-//           theChild->GetTitle().c_str(), item->GetDesc().c_str());
-//       #endif
-    
-//       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str()))&&
-//           (theChild->GetDataType() == item->GetDataType()))
-//       {
-//          theChild->SetTitle(newName);
-//          return TRUE;
-//       }
-//       node = node->GetNext();
-//    }
- 
-//    return FALSE;
 }
 
 
@@ -568,30 +545,8 @@ bool GmatMainFrame::RenameChild(const wxString &oldName, const wxString &newName
    }
 
    return FALSE;
-   
-//    wxNode *node = mdiChildren->GetFirst();
-//    while (node)
-//    {
-//       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
-//       #ifdef DEBUG_MAINFRAME
-//       MessageInterface::ShowMessage
-//          ("GmatMainFrame::RenameChild() oldName=%s, newName=%s\n",
-//           oldName.c_str(), newName.c_str());
-//       #endif
-
-//       if (theChild->GetTitle().IsSameAs(oldName))
-//       {
-//          theChild->SetTitle(newName);
-//          return TRUE;
-//       }
-//       node = node->GetNext();
-//    }
-
-//    /// @todo: need to rename item in tree?
-
-//    return FALSE;
 }
+
 
 //------------------------------------------------------------------------------
 // bool RenameActiveChild(const wxString &newName)
@@ -815,12 +770,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 {
    UpdateTitle(filename);
    
-//    wxString title;
-//    title.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());          
-//    SetTitle(title);
-   
    bool success = false;
-
+   
    // Always refresh the gui before new scritpes are read
    CloseAllChildren(false, true, filename);
    GmatAppData::GetResourceTree()->ClearResource(false);
@@ -844,11 +795,6 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
          
          theGuiInterpreter->ClearResource();
          theGuiInterpreter->ClearCommandSeq();
-         
-         // I think PopupMessage can replace this (loj: 2/9/07)
-         //wxLogError
-         //   ("Error occurred during parsing.\nPlease check the syntax and try again\n");
-         //wxLog::FlushActive();
       }
       
       if (success)
@@ -1027,14 +973,18 @@ void GmatMainFrame::StopServer()
    if (mServer)
    {
       delete mServer;
+      
+      #ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server terminated.\n");
-//      mServerMenu->Enable(MENU_START_SERVER, true);
-//      mServerMenu->Enable(MENU_STOP_SERVER, false);
+      #endif
+      
       mServer = NULL;
    }
    else
    {
+      #ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has not started.\n");
+      #endif
    }
 }
 
@@ -1105,10 +1055,6 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    }
       
    CloseAllChildren(true, true);
-   
-   // Let Moderator::Finalize() clear all resource and commands (loj: 6/13/06)
-   //theGuiInterpreter->ClearResource();
-   //theGuiInterpreter->ClearCommandSeq();
    
    event.Skip();
 }
@@ -1543,8 +1489,6 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    // now realize to make tools appear
    toolBar->Realize();
    
-   //loj: Why separators are not showing on Windows?
-
    // disable tools
    toolBar->EnableTool(3, FALSE); // copy
    toolBar->EnableTool(4, FALSE); // cut
@@ -2236,7 +2180,7 @@ void GmatMainFrame::OnFileCompareNumeric(wxCommandEvent& event)
    int w, h;
    textFrame->GetSize(&w, &h);
    textFrame->SetSize(w+1, h+1);
-
+   
    // Get files in the base directory
    wxDir dir(baseDir);
    wxString filename;
@@ -2637,32 +2581,7 @@ void GmatMainFrame::OnMainFrameSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 {
-   //#ifdef DEBUG_MAINFRAME
-   //MessageInterface::ShowMessage("GmatMainFrame::OnSetFocus() entered\n");
-   //#endif
-
-
-//   wxObject *obj = event.GetEventObject();
-//   bool isGmatMdiChild = obj->IsKindOf(CLASSINFO(wxMDIChildFrame));
-//
-//   if (isGmatMdiChild)
-//   {
-//      // need to find out its type
-//      GmatMdiChildFrame *childFrame = (GmatMdiChildFrame *)obj;
-//
-//      if (childFrame->GetDataType() == GmatTree::SCRIPT_FILE)
-//         MessageInterface::ShowMessage("ScriptFile brought into focus\n");
-//      // set the menu
-//   }
-
-   //loj: GmatMainFrame is not getting Focus when iconized
-   
    wxYield();
-   
-//    MessageInterface::ShowMessage
-//       ("GmatMainFrame::OnSetFocus()  IsIconized=%d, IsEnabled=%d\n",
-//        IsIconized(), IsEnabled());
-   
    event.Skip(true);
 }
 
@@ -2835,20 +2754,15 @@ void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnFont(wxCommandEvent& event)
 {
-//  GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-//  wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
-
   wxFontData data;
   data.SetInitialFont(GmatAppData::GetFont());
-//  data.SetColour(canvasTextColour);
-
-  //wxWidgets2.6.3:deprecated->wxFontDialog dialog(this, &data);
+  
   wxFontDialog dialog(this, data);
   if (dialog.ShowModal() == wxID_OK)
   {
     wxFontData retData = dialog.GetFontData();
     wxFont newFont = retData.GetChosenFont();
-
+    
     // change all script windows to new font
     wxNode *node = mdiChildren->GetFirst();
     while (node)
@@ -2863,7 +2777,7 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
       }
       node = node->GetNext();
     }
-
+    
     GmatAppData::SetFont(newFont);
   }
 }
