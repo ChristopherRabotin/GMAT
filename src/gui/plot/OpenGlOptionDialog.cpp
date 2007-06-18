@@ -44,8 +44,6 @@ BEGIN_EVENT_TABLE(OpenGlOptionDialog, wxDialog)
    EVT_BUTTON(ID_ECPLANE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
    EVT_BUTTON(ID_SUNLINE_COLOR_BUTTON, OpenGlOptionDialog::OnColorButtonClick)
    EVT_BUTTON(ID_OBJECT_COLOR_BUTTON, OpenGlOptionDialog::OnObjectColorButtonClick)
-//    EVT_BUTTON(ID_ADD_BODY_BUTTON, OpenGlOptionDialog::OnAddBodyButtonClick)
-
    EVT_CLOSE(OpenGlOptionDialog::OnClose)
 END_EVENT_TABLE()
 
@@ -73,7 +71,6 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    theGuiManager = GuiItemManager::GetInstance();
    mTrajFrame = (MdiChildTrajFrame*)parent;
    
-   mHasRotateAboutXYChanged = false;
    mHasUseViewPointSpecChanged = false;
    mHasUsePerspModeChanged = false;
    mHasDistanceChanged = false;
@@ -84,19 +81,16 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasDrawXyPlaneChanged = false;
    mHasDrawAxesChanged = false;
    mHasDrawEcPlaneChanged = false;
-   mHasDrawESLineChanged = false;
+   mHasDrawSunLineChanged = false;
    
    mHasXyPlaneColorChanged = false;
    mHasEcPlaneColorChanged = false;
-   mHasESLineColorChanged = false;
+   mHasSunLineColorChanged = false;
    mHasObjectColorChanged = false;
    
    mHasShowObjectChanged = false;
    mHasShowOrbitNormalChanged = false;
 
-   mDistance = 30000;
-   mGotoObjectName = "";
-   
    mObjectCount = objectNames.GetCount();
    
    mObjectColorMap.clear();
@@ -121,7 +115,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    
    mXyPlaneColor = wxColor("GREY");
    mEcPlaneColor = wxColor("DARK SLATE BLUE");
-   mESLinesColor = wxColor("BROWN");
+   mSunLineColor = wxColor("BROWN");
    
    Create();
    ShowData();
@@ -133,20 +127,6 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
 //------------------------------------------------------------------------------
 OpenGlOptionDialog::~OpenGlOptionDialog()
 {
-   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetDistance(float dist)
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetDistance(float dist)
-{
-   wxString strVal;
-   mDistance = dist;
-   strVal.Printf("%g", mDistance);
-   mDistanceTextCtrl->SetValue(strVal);
-   theApplyButton->Disable(); //loj: 5/23/05 We don't want to enable it here.
 }
 
 
@@ -178,37 +158,11 @@ void OpenGlOptionDialog::SetDrawAxes(bool flag)
 
 
 //------------------------------------------------------------------------------
-// void SetDrawEarthSunLines(bool flag)
+// void SetDrawSunLine(bool flag)
 //------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetDrawEarthSunLines(bool flag)
+void OpenGlOptionDialog::SetDrawSunLine(bool flag)
 {
-   mESLinesCheckBox->SetValue(flag);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGotoObjectName(const wxString &objName)
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetGotoObjectName(const wxString &objName)
-{
-   mGotoObjectComboBox->SetStringSelection(objName);
-   mGotoObjectName = objName;
-   
-   // We don't want to enable this
-   theApplyButton->Disable();
-}
-
-
-//------------------------------------------------------------------------------
-// void SetCoordSysName(const wxString &csName)
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::SetCoordSysName(const wxString &csName)
-{
-   mCoordSysComboBox->SetStringSelection(csName);
-   mCoordSysName = csName;
-   
-   // We don't want to enable this
-   theApplyButton->Disable();
+   mSunLineCheckBox->SetValue(flag);
 }
 
 
@@ -248,8 +202,6 @@ void OpenGlOptionDialog::UpdateObjectList(const wxArrayString &objNames,
       #endif
    }
 
-   UpdateCoordSysComboBox();
-   UpdateObjectComboBox();
    UpdateObjectListBox();
 }
 
@@ -291,13 +243,24 @@ void OpenGlOptionDialog::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(60, -1), 0);
    
+   wxStaticText *frameStaticText =
+      new wxStaticText(this, -1, wxT("Frame Increment"),
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mFrameIncTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(60, -1), 0);
+   
    mViewAnimationButton =
       new wxButton(this, ID_BUTTON, "View Animation", wxDefaultPosition,
                    wxSize(-1, -1), 0);
    
-   wxBoxSizer *updateSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxFlexGridSizer *updateSizer = new wxFlexGridSizer(2, 0, 0);
    updateSizer->Add(animationStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
    updateSizer->Add(mAnimationUpdIntTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
+   updateSizer->Add(frameStaticText, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
+                    borderSize);
+   updateSizer->Add(mFrameIncTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
    
    wxBoxSizer *animationBoxSizer = new wxBoxSizer(wxVERTICAL);
    animationBoxSizer->Add(mUseInitialViewDefCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
@@ -316,78 +279,10 @@ void OpenGlOptionDialog::Create()
    MessageInterface::ShowMessage
       ("OpenGlOptionDialog::Create() animationSizer created.\n");
    #endif
-   
-   //-----------------------------------------------------------------
-   // view mode
-   //-----------------------------------------------------------------
-   mUsePerspModeCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Perspective Mode"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-   
-   //-----------------------------------------------------------------
-   // view option
-   //-----------------------------------------------------------------
-   wxStaticText *distanceStaticText =
-      new wxStaticText(this, -1, wxT("Distance (Km)"),
-                       wxDefaultPosition, wxSize(-1, -1), 0);
-   mDistanceTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                     wxDefaultPosition, wxSize(105, -1), 0);
-   wxStaticText *centerOfViewStaticText =
-      new wxStaticText(this, -1, wxT("Go To"),
-                       wxDefaultPosition, wxSize(-1, -1), 0);
-   //VC++ error C2057: expected constant expression 
-   //wxString strObjectArray[mObjectCount];
-   wxArrayString strObjectArray;
-   for (int i=0; i<mObjectCount; i++)
-      //strObjectArray[i] = mObjectNames[i];
-      strObjectArray.Add(mObjectNames[i]);
-   
-   mGotoObjectComboBox = new wxComboBox
-      (this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(105,-1), //mObjectCount,
-       strObjectArray, wxCB_DROPDOWN);
-   
-   mGotoObjectComboBox->SetStringSelection("Earth");
-   
-   wxStaticText *coordSysStaticText =
-      new wxStaticText(this, -1, wxT("Coord System"),
-                       wxDefaultPosition, wxSize(-1, -1), 0);
-   mCoordSysComboBox =
-      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(105, -1));
-   
-   wxFlexGridSizer *viewGridSizer = new wxFlexGridSizer(2, 0, 0);
-   viewGridSizer->Add(distanceStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(mDistanceTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(centerOfViewStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(mGotoObjectComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(coordSysStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewGridSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
-   
-   #if DEBUG_GLOPTION_CREATE
-   MessageInterface::ShowMessage("OpenGlOptionDialog::Create() viewGridSizer created.\n");
-   #endif
-   
-   wxStaticBox *viewOptionStaticBox =
-      new wxStaticBox(this, -1, wxT("View Options"));
-   
-   wxStaticBoxSizer *viewOptionSizer
-      = new wxStaticBoxSizer(viewOptionStaticBox, wxVERTICAL);
-   
-   viewOptionSizer->Add(mUsePerspModeCheckBox, 0, wxALIGN_LEFT|wxALL, borderSize);
-   viewOptionSizer->Add(viewGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   
-   #if DEBUG_GLOPTION_CREATE
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::Create() viewOptionSizer created.\n");
-   #endif
-   
+      
    //-----------------------------------------------------------------
    // drawing option
    //-----------------------------------------------------------------
-   mRotateAboutXYCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Rotate XY"),
-                     wxDefaultPosition, wxSize(150, -1), 0);
-
    mWireFrameCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Wire Frame"),
                      wxDefaultPosition, wxSize(150, -1), 0);
@@ -396,36 +291,26 @@ void OpenGlOptionDialog::Create()
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw XY Plane"),
                      wxDefaultPosition, wxSize(150, -1), 0);
    
-   mEcPlaneCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Ecliptic Plane"),
-                     wxDefaultPosition, wxSize(150, -1), 0);
-   
    mAxesCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Axes"),
                      wxDefaultPosition, wxSize(150, -1), 0);
 
-   mESLinesCheckBox =
-      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Earth Sun Lines"),
+   mSunLineCheckBox =
+      new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Sun Lines"),
                      wxDefaultPosition, wxSize(150, -1), 0);
-
+   
    // equatorial plane color
    mXyPlaneColorButton =
       new wxButton(this, ID_EQPLANE_COLOR_BUTTON, "", wxDefaultPosition,
                    wxSize(20, 15), 0);
    mXyPlaneColorButton->SetBackgroundColour(mXyPlaneColor);
    
-   // ecliptic plane color
-   mEcPlaneColorButton =
-      new wxButton(this, ID_ECPLANE_COLOR_BUTTON, "", wxDefaultPosition,
-                   wxSize(20, 15), 0);
-   mEcPlaneColorButton->SetBackgroundColour(mEcPlaneColor);
-
    // Sun line color
-   mESLinesColorButton =
+   mSunLineColorButton =
       new wxButton(this, ID_SUNLINE_COLOR_BUTTON, "", wxDefaultPosition,
                    wxSize(20, 15), 0);
-   mESLinesColorButton->SetBackgroundColour(mESLinesColor);
-
+   mSunLineColorButton->SetBackgroundColour(mSunLineColor);
+   
    wxStaticBox *drawingOptionStaticBox =
       new wxStaticBox(this, -1, wxT("Drawing Options"));
    
@@ -434,18 +319,14 @@ void OpenGlOptionDialog::Create()
    
    borderSize = 2;
    wxFlexGridSizer *drawGridSizer = new wxFlexGridSizer(2, 0, 0);
-   drawGridSizer->Add(mRotateAboutXYCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mWireFrameCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mAxesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mXyPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    drawGridSizer->Add(mXyPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mEcPlaneCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mEcPlaneColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mESLinesCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   drawGridSizer->Add(mESLinesColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mSunLineCheckBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   drawGridSizer->Add(mSunLineColorButton, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage
@@ -506,7 +387,6 @@ void OpenGlOptionDialog::Create()
    //-----------------------------------------------------------------
    wxBoxSizer *topViewSizer = new wxBoxSizer(wxVERTICAL);
    topViewSizer->Add(animationSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   topViewSizer->Add(viewOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    topViewSizer->Add(drawingOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
 
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(1, 0, 0);
@@ -548,7 +428,6 @@ void OpenGlOptionDialog::LoadData()
    
    // view mode
    mUseInitialViewDefCheckBox->SetValue(mTrajFrame->GetUseViewPointInfo());
-   mUsePerspModeCheckBox->SetValue(mTrajFrame->GetUsePerspectiveMode());
 
    #if DEBUG_GLOPTION_LOAD
    MessageInterface::ShowMessage
@@ -559,62 +438,28 @@ void OpenGlOptionDialog::LoadData()
    strVal.Printf("%d", mTrajFrame->GetAnimationUpdateInterval());
    mAnimationUpdIntTextCtrl->SetValue(strVal);
    
-   #if DEBUG_GLOPTION_LOAD
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::LoadData() setting mDistanceTextCtrl.\n");
-   #endif
+   strVal.Printf("%d", mTrajFrame->GetAnimationFrameIncrement());
+   mFrameIncTextCtrl->SetValue(strVal);
    
-   // distance
-   mDistance = mTrajFrame->GetDistance();
-   strVal.Printf("%g", mDistance);
-   mDistanceTextCtrl->SetValue(strVal);
-   
-   #if DEBUG_GLOPTION_LOAD
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::LoadData() setting mGotoObjectComboBox.\n");
-   #endif
-   
-   // goto object
-   mGotoObjectComboBox->
-      SetStringSelection(mTrajFrame->GetGotoObjectName());
-      
-   #if DEBUG_GLOPTION_LOAD
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::LoadData() setting mCoordSysComboBox.\n");
-   #endif
-   
-   // coordinate system
-   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetViewCoordSysName());
-   
-   // equatorial plane, eclitic plane, Earth-Sun line
+   // equatorial plane, Sun line
    mXyPlaneCheckBox->SetValue(mTrajFrame->GetDrawXyPlane());
    RgbColor rgb(mTrajFrame->GetXyPlaneColor());
    mXyPlaneColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
    mXyPlaneColorButton->SetBackgroundColour(mXyPlaneColor);
    
-   mEcPlaneCheckBox->SetValue(mTrajFrame->GetDrawEcPlane());
-   rgb.Set(mTrajFrame->GetEcPlaneColor());
-   mEcPlaneColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
-   mEcPlaneColorButton->SetBackgroundColour(mEcPlaneColor);
-   
-   mESLinesCheckBox->SetValue(mTrajFrame->GetDrawESLines());
-   rgb.Set(mTrajFrame->GetESLineColor());
-   mESLinesColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
-   mESLinesColorButton->SetBackgroundColour(mESLinesColor);
+   mSunLineCheckBox->SetValue(mTrajFrame->GetDrawSunLine());
+   rgb.Set(mTrajFrame->GetSunLineColor());
+   mSunLineColor.Set(rgb.Red(), rgb.Green(), rgb.Blue());
+   mSunLineColorButton->SetBackgroundColour(mSunLineColor);
    
    // wire frame, axes, rotation axis
    mWireFrameCheckBox->SetValue(mTrajFrame->GetDrawWireFrame());
-   mRotateAboutXYCheckBox->SetValue(mTrajFrame->GetRotateAboutXY());
-   mAxesCheckBox->SetValue(mTrajFrame->GetDrawAxes()); //loj: 7/27/05 Added
+   mAxesCheckBox->SetValue(mTrajFrame->GetDrawAxes());
    
    // view object
    mObjectListBox->SetSelection(0);
    ShowSpacePointOption(mObjectListBox->GetStringSelection());
 
-   mEcPlaneCheckBox->Enable();
-   mEcPlaneColorButton->Enable();
-   mUsePerspModeCheckBox->Enable();
-   
    #if DEBUG_GLOPTION_LOAD
    MessageInterface::ShowMessage("OpenGlOptionDialog::LoadData() exiting.\n");
    #endif
@@ -653,44 +498,10 @@ void OpenGlOptionDialog::ShowData()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::SaveData()
 {
-
-   if (mHasRotateAboutXYChanged)
-   {
-      mHasRotateAboutXYChanged = false;
-      if (mRotateAboutXYCheckBox->GetValue())
-         mTrajFrame->SetRotateAboutXY(true);
-      else
-         mTrajFrame->SetRotateAboutXY(false);
-   }
-   
    if (mHasUseViewPointSpecChanged)
    {
       mHasUseViewPointSpecChanged = false;
       mTrajFrame->SetUseInitialViewDef(mUseInitialViewDefCheckBox->GetValue());
-   }
-   
-   if (mHasUsePerspModeChanged)
-   {
-      mHasUsePerspModeChanged = false;
-      mTrajFrame->SetUsePerspectiveMode(mUsePerspModeCheckBox->GetValue());
-   }
-   
-   if (mHasDistanceChanged)
-   {
-      mHasDistanceChanged = false;
-      mTrajFrame->SetDistance(mDistance);
-   }
-   
-   if (mHasCoordSysChanged)
-   {
-      mHasCoordSysChanged = false;
-      mTrajFrame->DrawInOtherCoordSystem(mCoordSysName);
-   }
-   
-   if (mHasGotoObjectChanged)
-   {
-      mHasGotoObjectChanged = false;
-      mTrajFrame->SetGotoObjectName(mGotoObjectName);
    }
    
    if (mHasDrawXyPlaneChanged)
@@ -698,17 +509,11 @@ void OpenGlOptionDialog::SaveData()
       mHasDrawXyPlaneChanged = false;
       mTrajFrame->SetDrawXyPlane(mXyPlaneCheckBox->GetValue());
    }
-   
-   if (mHasDrawEcPlaneChanged)
+      
+   if (mHasDrawSunLineChanged)
    {
-      mHasDrawEcPlaneChanged = false;
-      mTrajFrame->SetDrawEcPlane(mEcPlaneCheckBox->GetValue());
-   }
-   
-   if (mHasDrawESLineChanged)
-   {
-      mHasDrawESLineChanged = false;
-      mTrajFrame->SetDrawESLines(mESLinesCheckBox->GetValue());
+      mHasDrawSunLineChanged = false;
+      mTrajFrame->SetDrawSunLine(mSunLineCheckBox->GetValue());
    }
    
    if (mHasDrawWireFrameChanged)
@@ -730,18 +535,11 @@ void OpenGlOptionDialog::SaveData()
       mTrajFrame->SetXyPlaneColor(rgb.GetIntColor());      
    }
    
-   if (mHasEcPlaneColorChanged)
+   if (mHasSunLineColorChanged)
    {
-      mHasEcPlaneColorChanged = false;
-      RgbColor rgb(mEcPlaneColor.Red(), mEcPlaneColor.Green(), mEcPlaneColor.Blue());
-      mTrajFrame->SetEcPlaneColor(rgb.GetIntColor());      
-   }
-   
-   if (mHasESLineColorChanged)
-   {
-      mHasESLineColorChanged = false;
-      RgbColor rgb(mESLinesColor.Red(), mESLinesColor.Green(), mESLinesColor.Blue());
-      mTrajFrame->SetESLineColor(rgb.GetIntColor());      
+      mHasSunLineColorChanged = false;
+      RgbColor rgb(mSunLineColor.Red(), mSunLineColor.Green(), mSunLineColor.Blue());
+      mTrajFrame->SetSunLineColor(rgb.GetIntColor());      
    }
    
    if (mHasShowObjectChanged)
@@ -759,7 +557,7 @@ void OpenGlOptionDialog::SaveData()
    if (mHasObjectColorChanged)
    {
       mHasObjectColorChanged = false;
-      RgbColor rgb(mESLinesColor.Red(), mESLinesColor.Green(), mESLinesColor.Blue());
+      RgbColor rgb(mSunLineColor.Red(), mSunLineColor.Green(), mSunLineColor.Blue());
       mTrajFrame->SetObjectColors(mObjectColorMap);      
    }
    
@@ -782,45 +580,6 @@ void OpenGlOptionDialog::ResetData()
 
 
 //------------------------------------------------------------------------------
-// void UpdateCoordSysComboBox()
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::UpdateCoordSysComboBox()
-{
-   #ifdef DEBUG_GLOPTION_OBJECT
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::UpdateCoordSysComboBox() mObjectCount=%d\n", mObjectCount);
-   #endif
-   
-   mCoordSysComboBox->Clear();
-   
-   for (int i=0; i<mValidCSCount; i++)
-      mCoordSysComboBox->Append(mValidCSNames[i]);
-
-   mCoordSysComboBox->SetStringSelection(mTrajFrame->GetViewCoordSysName());
-
-}
-
-
-//------------------------------------------------------------------------------
-// void UpdateObjectComboBox()
-//------------------------------------------------------------------------------
-void OpenGlOptionDialog::UpdateObjectComboBox()
-{
-   #ifdef DEBUG_GLOPTION_OBJECT
-   MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::UpdateObjectComboBox() mObjectCount=%d\n", mObjectCount);
-   #endif
-   
-   mGotoObjectComboBox->Clear();
-   
-   for (int i=0; i<mObjectCount; i++)
-      mGotoObjectComboBox->Append(mObjectNames[i]);
-
-   mGotoObjectComboBox->SetStringSelection(mTrajFrame->GetGotoObjectName());
-}
-
-
-//------------------------------------------------------------------------------
 // void UpdateObjectListBox()
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::UpdateObjectListBox()
@@ -834,10 +593,10 @@ void OpenGlOptionDialog::UpdateObjectListBox()
    
    for (int i=0; i<mObjectCount; i++)
       mObjectListBox->Append(mObjectNames[i]);
-
-   mObjectListBox->SetStringSelection(mGotoObjectComboBox->GetStringSelection());
+   
+   mObjectListBox->SetSelection(0);
    ShowSpacePointOption(mObjectListBox->GetStringSelection());
-
+   
 }
 
 
@@ -880,6 +639,7 @@ bool OpenGlOptionDialog::ShowColorDialog(wxColor &oldColor, wxButton *button)
    return false;
 }
 
+
 //------------------------------------------------------------------------------
 // void OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
@@ -889,16 +649,6 @@ bool OpenGlOptionDialog::ShowColorDialog(wxColor &oldColor, wxButton *button)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnTextChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mDistanceTextCtrl)
-   {
-      if (mDistanceTextCtrl->IsModified())
-      {
-         mHasDistanceChanged = true;
-         mDistance = atof(mDistanceTextCtrl->GetValue());
-      }
-   
-      theApplyButton->Enable();
-   }
 }
 
 
@@ -913,20 +663,14 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mUseInitialViewDefCheckBox)
       mHasUseViewPointSpecChanged = true;
-   else if (event.GetEventObject() == mUsePerspModeCheckBox)
-      mHasUsePerspModeChanged = true;
    else if (event.GetEventObject() == mXyPlaneCheckBox)
       mHasDrawXyPlaneChanged = true;
-   else if (event.GetEventObject() == mEcPlaneCheckBox)
-      mHasDrawEcPlaneChanged = true;
-   else if (event.GetEventObject() == mESLinesCheckBox)
-      mHasDrawESLineChanged = true;
+   else if (event.GetEventObject() == mSunLineCheckBox)
+      mHasDrawSunLineChanged = true;
    else if (event.GetEventObject() == mWireFrameCheckBox)
       mHasDrawWireFrameChanged = true;
    else if (event.GetEventObject() == mAxesCheckBox)
       mHasDrawAxesChanged = true;
-   else if (event.GetEventObject() == mRotateAboutXYCheckBox)
-      mHasRotateAboutXYChanged = true;
    else if (event.GetEventObject() == mShowObjectCheckBox)
    {
       mShowObjectMap[mObjectListBox->GetStringSelection()] =
@@ -954,38 +698,6 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mGotoObjectComboBox)
-   {
-      if (!mCoordSysName.IsSameAs(mGotoObjectComboBox->GetStringSelection()))
-      {
-         mHasGotoObjectChanged = true;
-         mGotoObjectName = mGotoObjectComboBox->GetStringSelection();
-         theApplyButton->Enable();
-      }
-   }
-   else if (event.GetEventObject() == mCoordSysComboBox)
-   {
-      if (!mCoordSysName.IsSameAs(mCoordSysComboBox->GetStringSelection()))
-      {
-         mHasCoordSysChanged = true;
-         mHasDrawEcPlaneChanged = true;
-         
-         // if coordinate system is other than EarthMJ2000Eq,
-         // uncheck and disable draw ecliptic plane CheckBox
-         if (mCoordSysComboBox->GetValue() == "EarthMJ2000Eq")
-         {
-            mEcPlaneCheckBox->Enable();
-         }
-         else
-         {
-            mEcPlaneCheckBox->SetValue(false);
-            mEcPlaneCheckBox->Disable();
-         }
-         
-         mCoordSysName = mCoordSysComboBox->GetStringSelection();
-         theApplyButton->Enable();
-      }
-   }
 }
 
 
@@ -1002,13 +714,9 @@ void OpenGlOptionDialog::OnColorButtonClick(wxCommandEvent& event)
    {
       mHasXyPlaneColorChanged = ShowColorDialog(mXyPlaneColor, mXyPlaneColorButton);
    }
-   else if (event.GetEventObject() == mEcPlaneColorButton)
+   else if (event.GetEventObject() == mSunLineColorButton)
    {
-      mHasEcPlaneColorChanged = ShowColorDialog(mEcPlaneColor, mEcPlaneColorButton);
-   }
-   else if (event.GetEventObject() == mESLinesColorButton)
-   {
-      mHasESLineColorChanged = ShowColorDialog(mESLinesColor, mESLinesColorButton);
+      mHasSunLineColorChanged = ShowColorDialog(mSunLineColor, mSunLineColorButton);
    }
 }
 
@@ -1063,7 +771,9 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
    {
       mTrajFrame->SetUseInitialViewDef(mUseInitialViewDefCheckBox->GetValue());
       mAnimationUpdInt = atoi(mAnimationUpdIntTextCtrl->GetValue());
+      mAnimationFrameInc = atoi(mFrameIncTextCtrl->GetValue());
       mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
+      mTrajFrame->SetAnimationFrameIncrement(mAnimationFrameInc);
       mTrajFrame->RedrawPlot(true);
    }
 }
@@ -1090,16 +800,6 @@ void OpenGlOptionDialog::OnClose(wxCloseEvent& event)
 {
    Hide();
    mTrajFrame->ResetShowViewOption();
-
-   //loj: 4/21/05 allow to hdie this dialog
-//    if ( event.CanVeto() )
-//    {
-//       wxMessageBox(_T("Use the menu item to close this dialog"),
-//                    _T("Modeless dialog"),
-//                    wxOK | wxICON_INFORMATION, this);
-      
-//       event.Veto();
-//    }
 }
 
 

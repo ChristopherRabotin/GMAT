@@ -46,14 +46,11 @@ public:
       { return mObjectNames; }
    UnsignedIntArray& GetObjectColors()
       { return mObjectIntColors; }
-
-   void SetDistance(float dist);
+   
    void SetDrawXyPlane(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetDrawAxes(bool flag);
-   void SetDrawEarthSunLines(bool flag);
-   void SetGotoObjectName(const wxString &objName);
-   void SetCoordSysName(const wxString &csName);
+   void SetDrawSunLine(bool flag);
    
    void UpdateObjectList(const wxArrayString &objectNames,
                          const wxArrayString &validCSNames,
@@ -77,21 +74,18 @@ protected:
    bool mHasDrawAxesChanged;
    bool mHasDrawXyPlaneChanged;
    bool mHasDrawEcPlaneChanged;
-   bool mHasDrawESLineChanged;
+   bool mHasDrawSunLineChanged;
    
    bool mHasXyPlaneColorChanged;
    bool mHasEcPlaneColorChanged;
-   bool mHasESLineColorChanged;
+   bool mHasSunLineColorChanged;
    bool mHasObjectColorChanged;
    
    bool mHasShowObjectChanged;
    bool mHasShowOrbitNormalChanged;
 
    int   mAnimationUpdInt;
-   float mDistance;
-   
-   wxString mGotoObjectName;
-   wxString mCoordSysName;
+   int   mAnimationFrameInc;
    
    wxArrayString mObjectNames;
    wxArrayString mValidCSNames;
@@ -104,41 +98,32 @@ protected:
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
    
-   wxTextCtrl *mDistanceTextCtrl;
    wxTextCtrl *mAnimationUpdIntTextCtrl;
-   
-   wxComboBox *mGotoObjectComboBox;
-   wxComboBox *mCoordSysComboBox;
-   
+   wxTextCtrl *mFrameIncTextCtrl;
+      
    wxListBox *mObjectListBox;
    
    wxCheckBox *mUseInitialViewDefCheckBox;
-   wxCheckBox *mUsePerspModeCheckBox;
    
-   wxCheckBox *mRotateAboutXYCheckBox;
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mXyPlaneCheckBox;
-   wxCheckBox *mEcPlaneCheckBox;
    wxCheckBox *mAxesCheckBox;
-   wxCheckBox *mESLinesCheckBox;
+   wxCheckBox *mSunLineCheckBox;
    
    wxCheckBox *mShowObjectCheckBox;
    wxCheckBox *mShowOrbitNormalCheckBox;
 
    wxButton *mViewAnimationButton;
    wxButton *mXyPlaneColorButton;
-   wxButton *mEcPlaneColorButton;
-   wxButton *mESLinesColorButton;
+   wxButton *mSunLineColorButton;
    
    wxButton *mObjectColorButton;
-   wxButton *mAddObjectButton;
-   wxButton *mAddSatButton;
    wxButton *theApplyButton;
    
    wxColor mXyPlaneColor;
    wxColor mEcPlaneColor;
-   wxColor mESLinesColor;
-   wxColour mObjectColor;
+   wxColor mSunLineColor;
+   wxColor mObjectColor;
    
    wxBoxSizer *theDialogSizer;
    wxStaticBoxSizer *mViewObjectSizer;
@@ -150,8 +135,6 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
-   void UpdateCoordSysComboBox();
-   void UpdateObjectComboBox();
    void UpdateObjectListBox();
    bool ShowColorDialog(wxColor &oldColor, wxButton *button);
    void ShowSpacePointOption(const wxString &name);

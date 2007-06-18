@@ -176,6 +176,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
 {
    mGlInitialized = false;
    mGlContext = NULL;
+   mPlotName = name;
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
@@ -281,12 +282,13 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mDrawOrbitNormal = true;
    mXyPlaneColor = GmatColor::SKYBLUE;
    mEcPlaneColor = GmatColor::CHESTNUT;
-   mESLinecolor = GmatColor::GOLDTAN;
+   mSunLineColor = GmatColor::GOLDTAN;
    
    // animation
    mViewAnimation = false;
    mHasUserInterrupted = false;
-   mUpdateInterval = 50;
+   mUpdateInterval = 1;
+   mFrameInc = 1;
    
    // message
    mShowMaxWarning = true;
@@ -372,6 +374,7 @@ TrajPlotCanvas::~TrajPlotCanvas()
       delete mGlContext;
    
    ClearObjectArrays();
+   
 }
 
 
@@ -663,7 +666,7 @@ void TrajPlotCanvas::RedrawPlot(bool viewAnimation)
    }
 
    if (viewAnimation)
-      ViewAnimation(mUpdateInterval);
+      ViewAnimation(mUpdateInterval, mFrameInc);
    else
       Refresh(false);
    
@@ -932,18 +935,20 @@ void TrajPlotCanvas::GotoOtherBody(const wxString &body)
 
 
 //---------------------------------------------------------------------------
-// void ViewAnimation(int interval)
+// void ViewAnimation(int interval, int frameInc)
 //---------------------------------------------------------------------------
-void TrajPlotCanvas::ViewAnimation(int interval)
+void TrajPlotCanvas::ViewAnimation(int interval, int frameInc)
 {
    #ifdef DEBUG_TRAJCANVAS_ANIMATION
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::ViewAnimation() interval=%d\n", interval);
+      ("TrajPlotCanvas::ViewAnimation() interval=%d, frameInc=%d\n",
+       interval, frameInc);
    #endif
    
    this->SetFocus(); // so that it can get key interrupt
    mViewAnimation = true;
    mUpdateInterval = interval;
+   mFrameInc = frameInc;
    mHasUserInterrupted = false;
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1873,7 +1878,7 @@ void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
 {
-   
+     
    //MessageInterface::ShowMessage
    //   ("===> OnMouse() mUseInitialViewPoint=%d, mIsEndOfData=%d\n",
    //    mUseInitialViewPoint, mIsEndOfData);
@@ -2985,7 +2990,8 @@ void TrajPlotCanvas::DrawFrame()
    mIsEndOfData = false;
    mIsEndOfRun = false;
    
-   for (int frame=1; frame<numberOfData; frame++)
+   // refresh every 50 points (Allow user to set frame this increment?)
+   for (int frame=1; frame<numberOfData; frame+=mFrameInc)
    {
       // wxYield() yields control to pending messages in the windowing system.
       
@@ -3011,6 +3017,9 @@ void TrajPlotCanvas::DrawFrame()
       
       Refresh(false);
    }
+   
+   // final refresh, in case number of points is less than 50
+   Refresh(false);
    
    mNumData = numberOfData;
    mIsEndOfData = true;
@@ -3106,8 +3115,8 @@ void TrajPlotCanvas::DrawPlot()
    DrawObjectOrbit(mNumData-1);
    
    // draw Earth-Sun line
-   if (mDrawESLines)
-      DrawESLines(mNumData-1);
+   if (mDrawSunLine)
+      DrawSunLine(mNumData-1);
    
    glFlush();
    SwapBuffers();
@@ -3830,13 +3839,13 @@ void TrajPlotCanvas::DrawEclipticPlane(UnsignedInt color)
 
 
 //------------------------------------------------------------------------------
-//  void DrawESLines(int frame)
+//  void DrawSunLine(int frame)
 //------------------------------------------------------------------------------
 /**
  * Draws Earth Sun lines.
  */
 //------------------------------------------------------------------------------
-void TrajPlotCanvas::DrawESLines(int frame)
+void TrajPlotCanvas::DrawSunLine(int frame)
 {
    
    if (frame <= 0)
@@ -3863,7 +3872,7 @@ void TrajPlotCanvas::DrawESLines(int frame)
    //--------------------------------
    
    // set color
-   *sIntColor = mESLinecolor;
+   *sIntColor = mSunLineColor;
    glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
    
    glBegin(GL_LINES);
@@ -3924,7 +3933,7 @@ void TrajPlotCanvas::DrawESLines(int frame)
                 sunPos[1]/mag*distance/2.2,
                 sunPos[2]/mag*distance/2.2);
    
-} // end DrawESLines()
+} // end DrawSunLine()
 
 
 //---------------------------------------------------------------------------

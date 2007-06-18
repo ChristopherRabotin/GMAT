@@ -47,15 +47,16 @@ public:
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
    bool  GetDrawXyPlane() {return mDrawXyPlane;}
    bool  GetDrawEcPlane() {return mDrawEcPlane;}
-   bool  GetDrawESLines() {return mDrawESLines;}
+   bool  GetDrawSunLine() {return mDrawSunLine;}
    bool  GetDrawAxes() {return mDrawAxes;}
    bool  GetDrawGrid() {return mDrawGrid;}
    bool  GetRotateAboutXY() {return mRotateXy;}
    unsigned int GetXyPlaneColor() {return mXyPlaneColor;}
    unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
-   unsigned int GetESLineColor() {return mESLinecolor;}
+   unsigned int GetSunLineColor() {return mSunLineColor;}
    float GetDistance() {return mAxisLength;}
    int GetAnimationUpdateInterval() {return mUpdateInterval;}
+   int GetAnimationFrameIncrement() {return mFrameInc;}
    wxString GetViewCoordSysName() {return mViewCoordSysName;}
    CoordinateSystem* GetViewCoordSystem() {return mViewCoordSystem;}
    const wxArrayString& GetObjectNames() {return mObjectNames;}
@@ -69,17 +70,18 @@ public:
    void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
    void SetDistance(float dist) {mAxisLength = dist;}
    void SetUseInitialViewDef(bool flag) {mUseInitialViewPoint = flag;}
-   void SetAnimationUpdateInterval(int interval) {mUpdateInterval = interval;}
+   void SetAnimationUpdateInterval(int value) {mUpdateInterval = value;}
+   void SetAnimationFrameIncrement(int value) {mFrameInc = value;}
    void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
    void SetDrawXyPlane(bool flag) {mDrawXyPlane = flag;}
    void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
-   void SetDrawESLines(bool flag) {mDrawESLines = flag;}
+   void SetDrawSunLine(bool flag) {mDrawSunLine = flag;}
    void SetDrawAxes(bool flag) {mDrawAxes = flag;}
    void SetDrawGrid(bool flag) {mDrawGrid = flag;}
    void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
    void SetXyPlaneColor(unsigned int color) {mXyPlaneColor = color;}
    void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
-   void SetESLineColor(unsigned int color) {mESLinecolor = color;}
+   void SetSunLineColor(unsigned int color) {mSunLineColor = color;}
    void SetViewCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
@@ -101,7 +103,7 @@ public:
    void DrawInOtherCoordSystem(const wxString &csName);
    void GotoObject(const wxString &objName);
    void GotoOtherBody(const wxString &bodyName);
-   void ViewAnimation(int interval);
+   void ViewAnimation(int interval, int frameInc = 30);
    
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
@@ -166,6 +168,7 @@ private:
    
    // initialization
    bool mGlInitialized;
+   wxString mPlotName;
    
    // for the newer (wx 2.7.x+) version of wxGLCanvas
    wxGLContext *mGlContext;
@@ -174,7 +177,7 @@ private:
    wxStatusBar *theStatusBar;
    TextTrajectoryFile *mTextTrajFile;
    TrajectoryArray mTrajectoryData;
-
+   
    // Data members used by the mouse
    GLfloat mfStartX, mfStartY;
    
@@ -206,7 +209,7 @@ private:
    bool mDrawXyPlane;
    bool mDrawEcPlane;
    bool mDrawEclipticPlane;
-   bool mDrawESLines;
+   bool mDrawSunLine;
    bool mDrawAxes;
    bool mDrawGrid;
    bool mDrawOrbitNormal;
@@ -214,7 +217,7 @@ private:
    // color
    unsigned int mXyPlaneColor;
    unsigned int mEcPlaneColor;
-   unsigned int mESLinecolor;
+   unsigned int mSunLineColor;
 
    // texture
    std::map<wxString, GLuint> mObjectTextureIdMap;
@@ -378,7 +381,8 @@ private:
    bool mViewAnimation;
    bool mHasUserInterrupted;
    int mUpdateInterval;
-
+   int mFrameInc;
+   
    // message
    bool mShowMaxWarning;
    int  mOverCounter;
@@ -415,7 +419,7 @@ private:
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawEquatorialPlane(UnsignedInt color);
    void DrawEclipticPlane(UnsignedInt color);
-   void DrawESLines(int frame);
+   void DrawSunLine(int frame);
    void DrawAxes();
    void DrawStatus(const wxString &label1, int frame, const wxString &label2,
                    double time, int xpos = 0, int ypos = 0,
