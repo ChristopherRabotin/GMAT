@@ -50,22 +50,16 @@ public:
    TrajPlotCanvas* GetGlCanvas() { return mCanvas; }
    wxGLContext* GetGLContext() { return mCanvas->GetGLContext(); }
    bool GetUseViewPointInfo();
-   bool GetUsePerspectiveMode();
    bool GetDrawWireFrame();
    bool GetDrawXyPlane();
    bool GetDrawEcPlane();
-   bool GetDrawESLines();
+   bool GetDrawSunLine();
    bool GetDrawAxes();
    bool GetDrawGrid();
-   bool GetRotateAboutXY();
    UnsignedInt GetXyPlaneColor();
-   UnsignedInt GetEcPlaneColor();
-   UnsignedInt GetESLineColor();
-   float GetDistance();
+   UnsignedInt GetSunLineColor();
    Integer GetAnimationUpdateInterval();
-   wxString GetGotoObjectName();
-   wxString GetViewCoordSysName();
-   CoordinateSystem* GetViewCoordSystem();
+   Integer GetAnimationFrameIncrement();
    
    // setters
    void SetGLContext(wxGLContext *glContext) { mCanvas->SetGLContext(glContext); }
@@ -74,19 +68,16 @@ public:
    void SetOverlapPlot(bool overlap);
    void SetUseInitialViewDef(bool flag);
    void SetUsePerspectiveMode(bool flag);
-   void SetAnimationUpdateInterval(Integer interval);
+   void SetAnimationUpdateInterval(Integer value);
+   void SetAnimationFrameIncrement(Integer value);
    void SetDrawWireFrame(bool flag);
    void SetDrawXyPlane(bool flag);
    void SetDrawEcPlane(bool flag);
-   void SetDrawESLines(bool flag);
+   void SetDrawSunLine(bool flag);
    void SetDrawAxes(bool flag);
    void SetDrawGrid(bool flag);
-   void SetRotateAboutXY(bool flag);
    void SetXyPlaneColor(UnsignedInt color);
-   void SetEcPlaneColor(UnsignedInt color);
-   void SetESLineColor(UnsignedInt color);
-   void SetDistance(float dist);
-   void SetGotoObjectName(const wxString &bodyName);
+   void SetSunLineColor(UnsignedInt color);
    void SetViewCoordSystem(const wxString &csName);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
@@ -94,32 +85,22 @@ public:
    void SetNumPointsToRedraw(Integer numPoints);
    
    // actions
-   void DrawInOtherCoordSystem(const wxString &csName);
    void RedrawPlot(bool viewAnimation);
    
    // menu actions
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
    void OnShowDefaultView(wxCommandEvent& event);
-   void OnZoomIn(wxCommandEvent& event);
-   void OnZoomOut(wxCommandEvent& event);
    
    void OnShowOptionDialog(wxCommandEvent& event);
    void OnDrawWireFrame(wxCommandEvent& event);
    void OnDrawXyPlane(wxCommandEvent& event);
    
-   //void OnAddBody(wxCommandEvent& event);
-   //void OnGotoStdBody(wxCommandEvent& event);
-   //void OnGotoOtherBody(wxCommandEvent& event);
-   void OnViewAnimation(wxCommandEvent& event);
-   
-   void OnHelpView(wxCommandEvent& event);
    void OnQuit(wxCommandEvent& event);
    
    void OnActivate(wxActivateEvent& event);
    void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
-//   void OnClose(wxCloseEvent& event);
 
    // drawing
    void SetGlObject(const StringArray &objNames,
@@ -161,9 +142,6 @@ protected:
 
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyColors;
-
-//    wxMenu* CreateGotoBodyMenu();
-//    int GetMenuId(const wxString &body);
    
    DECLARE_EVENT_TABLE();
 };

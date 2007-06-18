@@ -30,21 +30,12 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_CHANGE_TITLE, MdiChildTrajFrame::OnChangeTitle)
    EVT_MENU(GmatPlot::MDI_GL_CLEAR_PLOT, MdiChildTrajFrame::OnClearPlot)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
-   EVT_MENU(GmatPlot::MDI_GL_ZOOM_IN, MdiChildTrajFrame::OnZoomIn)
-   EVT_MENU(GmatPlot::MDI_GL_ZOOM_OUT, MdiChildTrajFrame::OnZoomOut)
-
    EVT_MENU(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, MdiChildTrajFrame::OnShowOptionDialog)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawXyPlane)
-
-   EVT_MENU(GmatPlot::MDI_GL_VIEW_ANIMATION, MdiChildTrajFrame::OnViewAnimation)
-
-   EVT_MENU(GmatPlot::MDI_GL_HELP_VIEW, MdiChildTrajFrame::OnHelpView)
-
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
    EVT_SIZE(MdiChildTrajFrame::OnTrajSize)
    EVT_MOVE(MdiChildTrajFrame::OnMove)
-//   EVT_CLOSE(MdiChildTrajFrame::OnClose)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -64,13 +55,9 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
    
    mOverlapPlot = false;
    
-   // add Sun, Earth, Luan as default body
-   //mBodyNames.Add("Sun");
+   // add Earth as default body
    mBodyNames.Add("Earth");
-   //mBodyNames.Add("Luna");
-   //mBodyColors.push_back(GmatColor::YELLOW32);
    mBodyColors.push_back(GmatColor::GREEN32);
-   //mBodyColors.push_back(GmatColor::L_BROWN32);
    
    MdiGlPlot::mdiChildren.Append(this);
    
@@ -135,36 +122,12 @@ bool MdiChildTrajFrame::GetUseViewPointInfo()
 
 
 //------------------------------------------------------------------------------
-// bool GetUsePerspectiveMode()
-//------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetUsePerspectiveMode()
-{
-   if (mCanvas)
-      return mCanvas->GetUsePerspectiveMode();
-
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
 // bool GetDrawWireFrame()
 //------------------------------------------------------------------------------
 bool MdiChildTrajFrame::GetDrawWireFrame()
 {
    if (mCanvas)
       return mCanvas->GetDrawWireFrame();
-
-   return false;
-}
-
-
-//------------------------------------------------------------------------------
-// bool GetRotateAboutXY()
-//------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetRotateAboutXY()
-{
-   if (mCanvas)
-      return mCanvas->GetRotateAboutXY();
 
    return false;
 }
@@ -181,6 +144,7 @@ bool MdiChildTrajFrame::GetDrawXyPlane()
    return false;
 }
 
+
 //------------------------------------------------------------------------------
 // bool GetDrawEcPlane()
 //------------------------------------------------------------------------------
@@ -194,12 +158,12 @@ bool MdiChildTrajFrame::GetDrawEcPlane()
 
 
 //------------------------------------------------------------------------------
-// bool GetDrawESLines()
+// bool GetDrawSunLine()
 //------------------------------------------------------------------------------
-bool MdiChildTrajFrame::GetDrawESLines()
+bool MdiChildTrajFrame::GetDrawSunLine()
 {
    if (mCanvas)
-      return mCanvas->GetDrawESLines();
+      return mCanvas->GetDrawSunLine();
 
    return false;
 }
@@ -241,38 +205,15 @@ UnsignedInt MdiChildTrajFrame::GetXyPlaneColor()
 
 
 //------------------------------------------------------------------------------
-// UnsignedInt GetEcPlaneColor()
+// UnsignedInt GetSunLineColor()
 //------------------------------------------------------------------------------
-UnsignedInt MdiChildTrajFrame::GetEcPlaneColor()
+UnsignedInt MdiChildTrajFrame::GetSunLineColor()
 {
    if (mCanvas)
-      return mCanvas->GetEcPlaneColor();
+      return mCanvas->GetSunLineColor();
 
    return 0;
 }
-
-//------------------------------------------------------------------------------
-// UnsignedInt GetESLineColor()
-//------------------------------------------------------------------------------
-UnsignedInt MdiChildTrajFrame::GetESLineColor()
-{
-   if (mCanvas)
-      return mCanvas->GetESLineColor();
-
-   return 0;
-}
-
-//------------------------------------------------------------------------------
-// float GetDistance()
-//------------------------------------------------------------------------------
-float MdiChildTrajFrame::GetDistance()
-{
-   if (mCanvas)
-      return mCanvas->GetDistance();
-
-   return 50000;
-}
-
 
 //------------------------------------------------------------------------------
 // Integer GetAnimationUpdateInterval()
@@ -287,55 +228,15 @@ Integer MdiChildTrajFrame::GetAnimationUpdateInterval()
 
 
 //------------------------------------------------------------------------------
-// wxString GetGotoObjectName()
+// Integer GetAnimationFrameIncrement()
 //------------------------------------------------------------------------------
-wxString MdiChildTrajFrame::GetGotoObjectName()
+Integer MdiChildTrajFrame::GetAnimationFrameIncrement()
 {
    if (mCanvas)
-   {
-     return mCanvas->GetGotoObjectName();
-   }
-   
-   return "Unknown";
+      return mCanvas->GetAnimationFrameIncrement();
+
+   return 0;
 }
-
-
-//------------------------------------------------------------------------------
-// wxString GetViewCoordSysName()
-//------------------------------------------------------------------------------
-wxString MdiChildTrajFrame::GetViewCoordSysName()
-{
-   if (mCanvas)
-      return mCanvas->GetViewCoordSysName();
-
-   return "Unknown";
-}
-
-
-//------------------------------------------------------------------------------
-// CoordinateSystem* GetViewCoordSystem()
-//------------------------------------------------------------------------------
-CoordinateSystem* MdiChildTrajFrame::GetViewCoordSystem()
-{
-   if (mCanvas)
-      return mCanvas->GetViewCoordSystem();
-
-   return NULL;
-}
-
-
-// //------------------------------------------------------------------------------
-// // const StringArray& GetBodyNamesInUse()
-// //------------------------------------------------------------------------------
-// const StringArray& MdiChildTrajFrame::GetBodyNamesInUse()
-// {
-//    static StringArray tempArray;
-   
-//    if (mCanvas)
-//       return mCanvas->GetBodyNamesInUse();
-
-//    return tempArray;
-// }
 
 
 //------------------------------------------------------------------------------
@@ -389,9 +290,7 @@ void MdiChildTrajFrame::SetOverlapPlot(bool overlap)
 void MdiChildTrajFrame::SetUseInitialViewDef(bool flag)
 {
    if (mCanvas)
-   {
       mCanvas->SetUseInitialViewDef(flag);
-   }
 }
 
 
@@ -401,21 +300,27 @@ void MdiChildTrajFrame::SetUseInitialViewDef(bool flag)
 void MdiChildTrajFrame::SetUsePerspectiveMode(bool flag)
 {
    if (mCanvas)
-   {
       mCanvas->SetUsePerspectiveMode(flag);
-   }
 }
 
 
 //------------------------------------------------------------------------------
-// void SetAnimationUpdateInterval(nt interval)
+// void SetAnimationUpdateInterval(nt value)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetAnimationUpdateInterval(int interval)
+void MdiChildTrajFrame::SetAnimationUpdateInterval(int value)
 {
    if (mCanvas)
-   {
-      mCanvas->SetAnimationUpdateInterval(interval);
-   }
+      mCanvas->SetAnimationUpdateInterval(value);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetAnimationFrameIncrement(nt val)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetAnimationFrameIncrement(int value)
+{
+   if (mCanvas)
+      mCanvas->SetAnimationFrameIncrement(value);
 }
 
 
@@ -426,7 +331,6 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
-      //loj: 5/18/05 Why this failing when this frame is closed?
       menuBar->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
       mCanvas->SetDrawWireFrame(flag);
    }
@@ -440,7 +344,6 @@ void MdiChildTrajFrame::SetDrawXyPlane(bool flag)
 {
    if (mCanvas)
    {
-      //loj: 5/18/05 Why this failing when this frame is closed?
       menuBar->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);   
       mCanvas->SetDrawXyPlane(flag);
    }
@@ -453,25 +356,17 @@ void MdiChildTrajFrame::SetDrawXyPlane(bool flag)
 void MdiChildTrajFrame::SetDrawEcPlane(bool flag)
 {
    if (mCanvas)
-   {
-      //loj: the event ID is not in the GmatPlot yet
-      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_PLANE, flag);
       mCanvas->SetDrawEcPlane(flag);
-   }
 }
 
 
 //------------------------------------------------------------------------------
-// void SetDrawESLines(bool flag)
+// void SetDrawSunLine(bool flag)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDrawESLines(bool flag)
+void MdiChildTrajFrame::SetDrawSunLine(bool flag)
 {
    if (mCanvas)
-   {
-      //loj: the event ID is not in the GmatPlot yet
-      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_ECLIPTIC_LINE, flag);
-      mCanvas->SetDrawESLines(flag);
-   }
+      mCanvas->SetDrawSunLine(flag);
 }
 
 
@@ -481,11 +376,7 @@ void MdiChildTrajFrame::SetDrawESLines(bool flag)
 void MdiChildTrajFrame::SetDrawAxes(bool flag)
 {
    if (mCanvas)
-   {
-      //loj: the event ID is not in the GmatPlot yet
-      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_AXES, flag);
       mCanvas->SetDrawAxes(flag);
-   }
 }
 
 
@@ -495,25 +386,7 @@ void MdiChildTrajFrame::SetDrawAxes(bool flag)
 void MdiChildTrajFrame::SetDrawGrid(bool flag)
 {
    if (mCanvas)
-   {
-      //loj: the event ID is not in the GmatPlot yet
-      //mViewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_GRID, flag);
       mCanvas->SetDrawGrid(flag);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetRotateAboutXY(bool flag)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetRotateAboutXY(bool flag)
-{
-   if (mCanvas)
-   {
-      //loj: the event ID is not in the GmatPlot yet
-      //mViewOptionMenu->Check(GmatPlot::MDI_GL_ROTATE_ABOUT_XY, flag);
-      mCanvas->SetRotateAboutXY(flag);
-   }
 }
 
 
@@ -523,55 +396,7 @@ void MdiChildTrajFrame::SetRotateAboutXY(bool flag)
 void MdiChildTrajFrame::SetXyPlaneColor(UnsignedInt color)
 {
    if (mCanvas)
-   {
       mCanvas->SetXyPlaneColor(color);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetEcPlaneColor(UnsignedInt color)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetEcPlaneColor(UnsignedInt color)
-{
-   if (mCanvas)
-   {
-      mCanvas->SetEcPlaneColor(color);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetESLineColor(UnsignedInt color)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetESLineColor(UnsignedInt color)
-{
-   if (mCanvas)
-   {
-      mCanvas->SetESLineColor(color);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetDistance(float dist)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetDistance(float dist)
-{
-   if (mCanvas)
-      return mCanvas->SetDistance(dist);
-}
-
-
-//------------------------------------------------------------------------------
-// void SetGotoObjectName(const wxString &bodyName)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetGotoObjectName(const wxString &bodyName)
-{
-   if (mCanvas)
-   {
-      mCanvas->GotoObject(bodyName);
-   }
 }
 
 
@@ -581,9 +406,17 @@ void MdiChildTrajFrame::SetGotoObjectName(const wxString &bodyName)
 void MdiChildTrajFrame::SetViewCoordSystem(const wxString &csName)
 {
    if (mCanvas)
-   {
       mCanvas->SetViewCoordSystem(csName);
-   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSunLineColor(UnsignedInt color)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetSunLineColor(UnsignedInt color)
+{
+   if (mCanvas)
+      mCanvas->SetSunLineColor(color);
 }
 
 
@@ -593,9 +426,7 @@ void MdiChildTrajFrame::SetViewCoordSystem(const wxString &csName)
 void MdiChildTrajFrame::SetNumPointsToRedraw(Integer numPoints)
 {
    if (mCanvas)
-   {
       mCanvas->SetNumPointsToRedraw(numPoints);
-   }
 }
 
 
@@ -631,20 +462,6 @@ void MdiChildTrajFrame::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMa
 
 // actions
 //------------------------------------------------------------------------------
-// void DrawInOtherCoordSystem(const wxString &csName)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
-{
-   if (mCanvas)
-   {
-      mCanvas->DrawInOtherCoordSystem(csName);
-   }
-   
-   mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
-}
-
-
-//------------------------------------------------------------------------------
 // void RedrawPlot(bool viewAnimation)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
@@ -655,10 +472,6 @@ void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
    
    if (mCanvas)
       mCanvas->RedrawPlot(viewAnimation);
-
-   mOptionDialog->SetDistance(mCanvas->GetDistance());
-   mOptionDialog->SetCoordSysName(mCanvas->GetViewCoordSysName());
-   mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
 }
 
 
@@ -678,9 +491,6 @@ void MdiChildTrajFrame::OnClearPlot(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
 {
-   //#if wxUSE_TEXTDLG
-   //static wxString s_title = _T("Canvas Frame");
-
    wxString title = wxGetTextFromUser(_T("Enter the new title for MDI child"),
                                       _T(""),
                                       mPlotTitle, //s_title,
@@ -689,10 +499,7 @@ void MdiChildTrajFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
       return;
 
    mPlotTitle = title;
-   //s_title = title;
-   //SetTitle(s_title);
    SetTitle(title);
-   //#endif
 }
 
 
@@ -703,24 +510,6 @@ void MdiChildTrajFrame::OnShowDefaultView(wxCommandEvent& event)
 {
    if (mCanvas)
       mCanvas->ShowDefaultView();
-}
-
-//------------------------------------------------------------------------------
-// void OnZoomIn(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnZoomIn(wxCommandEvent& event)
-{
-   if (mCanvas)
-      mCanvas->ZoomIn();
-}
-
-//------------------------------------------------------------------------------
-// void OnZoomOut(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnZoomOut(wxCommandEvent& event)
-{
-   if (mCanvas)
-      mCanvas->ZoomOut();
 }
 
 
@@ -784,49 +573,6 @@ void MdiChildTrajFrame::OnDrawXyPlane(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnViewAnimation(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnViewAnimation(wxCommandEvent& event)
-{
-   //loj: How do I know the body name from the event?
-   if (mCanvas)
-   {
-      wxString strInterval = "10";
-      strInterval = wxGetTextFromUser(wxT("Enter Interval (milli-secs): "
-                                          "<Press ESC for interrupt>"),
-                                      wxT("Update Interval"),
-                                      strInterval, this);
-      
-      // 10/17/2006 - arg:  put in to fix bug 400                                
-      if (strInterval == "")
-         return; 
-         
-      long interval;
-      strInterval.ToLong(&interval);
-      
-      // set maximum interval to 100 milli seconds
-      if (interval > 100)
-         interval = 100;
-      
-      mCanvas->ViewAnimation(interval);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void OnHelpView(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnHelpView(wxCommandEvent& event)
-{
-   wxMessageBox(_T("Use Left mouse button to rotate \n"
-                   "Right mouse button to zoom \n"
-                   "Shift left mouse button to translate"),
-                _T("Help View"),
-                wxOK | wxICON_INFORMATION, this);
-}
-
-
-//------------------------------------------------------------------------------
 // void OnQuit(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
@@ -846,6 +592,7 @@ void MdiChildTrajFrame::OnActivate(wxActivateEvent& event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnMove(wxMoveEvent& event)
 //------------------------------------------------------------------------------
@@ -857,7 +604,6 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
    wxPoint pos1 = event.GetPosition();
    wxPoint pos2 = GetPosition();
 
-   //loj: 8/4/05 Commented out
    //wxLogStatus(GmatAppData::GetMainFrame(),
    //            wxT("position from event: (%d, %d), from frame (%d, %d)"),
    //            pos1.x, pos1.y, pos2.x, pos2.y);
@@ -877,7 +623,6 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
    wxSize size2 = GetSize();
    wxSize size3 = GetClientSize();
 
-   //loj: 8/4/05 commented out
    //wxLogStatus(GmatAppData::GetMainFrame(),
    //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
    //            size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
@@ -894,9 +639,7 @@ void MdiChildTrajFrame::SetGlObject(const StringArray &objNames,
                                     const std::vector<SpacePoint*> &objArray)
 {
    if (mCanvas)
-   {         
       mCanvas->SetGlObject(objNames, objOrbitColors, objArray);
-   }
 }
 
 
@@ -943,9 +686,7 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 void MdiChildTrajFrame::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 {
    if (mCanvas)
-   {
       mCanvas->SetGlDrawOrbitFlag(drawArray);
-   }
 }
 
 
@@ -955,9 +696,7 @@ void MdiChildTrajFrame::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
 void MdiChildTrajFrame::SetGlShowObjectFlag(const std::vector<bool> &showArray)
 {
    if (mCanvas)
-   {
       mCanvas->SetGlShowObjectFlag(showArray);
-   }
 }
 
 
@@ -967,9 +706,7 @@ void MdiChildTrajFrame::SetGlShowObjectFlag(const std::vector<bool> &showArray)
 void MdiChildTrajFrame::SetGlUpdateFrequency(Integer updFreq)
 {
    if (mCanvas)
-   {
       mCanvas->SetUpdateFrequency(updFreq);
-   }
 }
 
 
@@ -992,13 +729,15 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
       {
          //MessageInterface::ShowMessage
          //   ("===> MdiChildTrajFrame::UpdatePlot() time=%f\n", time);
-         
-         //loj: 9/2/05
-         // Added mCanvas->Refresh(false) here since Refresh() is removed from the
-         // TrajPlotCanvas::UpdatePlot(). The UpdateFrequency was not actually used
-         // since TrajPlotCanvas::UpdatePlot() always called Refresh().
+
+         //-----------------------------------------------------------
+         // Notes:
+         // Added mCanvas->Refresh(false) here since Refresh() is
+         // removed from the TrajPlotCanvas::UpdatePlot().
+         // The UpdateFrequency was not actually used since
+         // rajPlotCanvas::UpdatePlot() always called Refresh().
          // The correct use UpdateFrequency will improve performance.
-         
+         //-----------------------------------------------------------
          mCanvas->Refresh(false);
          Update();
          
