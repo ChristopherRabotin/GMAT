@@ -18,6 +18,9 @@
 #include "MdiTsPlotData.hpp"
 #include "MessageInterface.hpp"
 
+// for more GL view option menu
+//#define _SHOW_GL_VIEW_MENU__
+
 //#define DEBUG_MENUBAR 1
 
 using namespace GmatMenu;
@@ -100,7 +103,7 @@ void GmatMenuBar::CreateMenu(int dataType)
 
    fileMenu->Append(MENU_PROJECT_PREFERENCES,
                         wxT("Preferences"), prefMenu, wxT(""));
-
+   
    fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths and Log Level"),
                     wxT(""), FALSE);
    fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""), FALSE);
@@ -174,17 +177,11 @@ void GmatMenuBar::CreateMenu(int dataType)
       
       // View menu
       wxMenu *viewMenu = new wxMenu;
-      viewMenu->Append(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, _T("Default\tCtrl-R"),
-                       _("Reset to default view"));
-      viewMenu->Append(GmatPlot::MDI_GL_ZOOM_IN, _T("Zoom &in\tCtrl-I"), _("Zoom in"));
-      viewMenu->Append(GmatPlot::MDI_GL_ZOOM_OUT, _T("Zoom &out\tCtrl-O"), _("Zoom out"));
-      viewMenu->AppendSeparator();
-      
-      // View Option submenu
       viewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
                        _T("Show View Option Dialog"),
                        _T("Show view option dialog"), wxITEM_CHECK);
       
+      #ifdef __SHOW_GL_VIEW_MENU__
       wxMenu *viewOptionMenu = new wxMenu;
       wxMenuItem *item =
          new wxMenuItem(viewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
@@ -199,10 +196,8 @@ void GmatMenuBar::CreateMenu(int dataType)
       viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
       
       viewMenu->Append(item);
+      #endif
       
-      // Animation menu
-      viewMenu->AppendSeparator();
-      viewMenu->Append(GmatPlot::MDI_GL_VIEW_ANIMATION, _T("Animation"));
       this->Append(viewMenu, wxT("View"));
    }  
    
@@ -266,10 +261,6 @@ void GmatMenuBar::CreateMenu(int dataType)
    //-------------------------------------------------------
    wxMenu *helpMenu = new wxMenu;
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-      helpMenu->Append(GmatPlot::MDI_GL_HELP_VIEW, _T("Plot View"), _T("View mouse control"));
-   else if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      helpMenu->Append(GmatPlot::MDI_TS_HELP_VIEW, _T("View"), _T("View mouse control"));
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
  
