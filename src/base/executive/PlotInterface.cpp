@@ -71,7 +71,7 @@ PlotInterface::~PlotInterface()
 //  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
 //                          const std::string &csName, SolarSystem *ssPtr,
 //                          bool drawEcPlane, bool drawXyPlane, bool drawWireFrame,
-//                          bool drawAxes, bool drawGrid, bool drawEarthSunLines,
+//                          bool drawAxes, bool drawGrid, bool drawEarthSunLine,
 //                          bool overlapPlot, bool usevpInfo, bool usepm,
 //                          bool Integer numPtsToRedraw)
 //------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ PlotInterface::~PlotInterface()
  * @param <drawWirePlane>  true if draw wire frame
  * @param <drawAxes>  true if draw axes
  * @param <drawGrid>  true if draw grid
- * @param <drawESLine>  true if draw earth sun lines
+ * @param <drawSunLine>  true if draw earth sun lines
  * @param <overlapPlot>  true if overlap plot without clearing the plot
  * @param <usevpInfo>  true if use viewpoint info to draw plot
  * @param <usepm>  true if use perspective projection mode
@@ -100,7 +100,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        SolarSystem *ssPtr,
                                        bool drawEcPlane, bool drawXyPlane,
                                        bool drawWireFrame, bool drawAxes,
-                                       bool drawGrid, bool drawESLines,
+                                       bool drawGrid, bool drawSunLine,
                                        bool overlapPlot, bool usevpInfo, bool usepm,
                                        Integer numPtsToRedraw)
 {    
@@ -208,7 +208,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    frame->SetDrawWireFrame(drawWireFrame);
    frame->SetDrawAxes(drawAxes);
    frame->SetDrawGrid(drawGrid);
-   frame->SetDrawESLines(drawESLines);
+   frame->SetDrawSunLine(drawSunLine);
    
    frame->SetOverlapPlot(overlapPlot);
    frame->SetUseInitialViewDef(usevpInfo);
