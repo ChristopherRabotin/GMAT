@@ -703,10 +703,14 @@ void TsPlotCanvas::ClearAllCurveData()
         i != data.end(); ++i)
       (*i)->Clear();
 
-   plotXMin =  1e99; 
-   plotXMax = -1e99; 
-   plotYMin =  1e99; 
-   plotYMax = -1e99;
+   if (!userXMin)
+      plotXMin =  1e99; 
+   if (!userXMax)
+      plotXMax = -1e99; 
+   if (!userYMin)
+      plotYMin =  1e99; 
+   if (!userYMax)
+      plotYMax = -1e99;
    xMin     =  1e99;
    xMax     = -1e99; 
    yMin     =  1e99; 
