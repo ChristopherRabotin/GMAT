@@ -1017,6 +1017,94 @@ void TsPlotCanvas::SetLineStyle(int ls, int lineId)
 }
 
 
+void TsPlotCanvas::SetAxisLimit(std::string axisEnd, bool automatic, 
+                                double value)
+{
+   if (axisEnd == "xMinimum")
+   {
+      if (automatic)
+      {
+         // Only reset if override was previously used
+         if (overrideXMin)
+         {
+            overrideXMin = false;
+            plotXMin = 1e99;
+            ResetRanges();
+         }
+      }
+      else
+      {
+         overrideXMin = true;
+         plotXMin = value;
+         ResetRanges();
+      }
+   }
+   else if (axisEnd == "xMaximum")
+   {
+      if (automatic)
+      {
+         // Only reset if override was previously used
+         if (overrideXMax)
+         {
+            overrideXMax = false;
+            plotXMax = 1e99;
+            ResetRanges();
+         }
+      }
+      else
+      {
+         overrideXMax = true;
+         plotXMax = value;
+         ResetRanges();
+      }
+   }
+   else if (axisEnd == "yMinimum")
+   {
+      if (automatic)
+      {
+         // Only reset if override was previously used
+         if (overrideYMin)
+         {
+            overrideYMin = false;
+            plotYMin = 1e99;
+            ResetRanges();
+         }
+      }
+      else
+      {
+         overrideYMin = true;
+         plotYMin = value;
+         ResetRanges();
+      }
+   }
+   else if (axisEnd == "yMaximum")
+   {
+      if (automatic)
+      {
+         // Only reset if override was previously used
+         if (overrideYMax)
+         {
+            overrideYMax = false;
+            plotYMax = 1e99;
+            ResetRanges();
+         }
+      }
+      else
+      {
+         overrideYMax = true;
+         plotYMax = value;
+         ResetRanges();
+      }
+   }
+   else
+   {
+      MessageInterface::ShowMessage("Axis override failed; specify axes using "
+         "the names \"xMinimum\", \"xMaximum\", \"yMinimum\", or "
+         "\"yMaximum\".\n");
+   }
+}
+
+
 //==============================================================================
 // Helper methods
 //==============================================================================

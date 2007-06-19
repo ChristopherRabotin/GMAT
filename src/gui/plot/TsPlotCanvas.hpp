@@ -74,6 +74,8 @@ public:
    
    void SetLineWidth(int w,  int lineId = -1);
    void SetLineStyle(int ls, int lineId = -1);
+   void SetAxisLimit(std::string axisEnd, bool automatic = false, 
+                     double value = 0.0);
    
 protected:
    /// borders
@@ -146,10 +148,6 @@ protected:
    bool overrideYMin;
    bool overrideYMax;
    
-//   bool   automaticXMin;
-//   bool   automaticXMax;
-//   bool   automaticYMin;
-//   bool   automaticYMax;
    double userXMin;
    double userXMax;
    double userYMin;
