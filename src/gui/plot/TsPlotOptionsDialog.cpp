@@ -15,6 +15,15 @@
 
 
 #include "TsPlotOptionsDialog.hpp"
+#include <sstream>
+
+BEGIN_EVENT_TABLE(TsPlotOptionsDialog, wxDialog)
+   EVT_CHECKBOX(ID_XMIN_CHECKBOX, TsPlotOptionsDialog::OnSettableXMinimum)
+   EVT_CHECKBOX(ID_XMAX_CHECKBOX, TsPlotOptionsDialog::OnSettableXMaximum)
+   EVT_CHECKBOX(ID_YMIN_CHECKBOX, TsPlotOptionsDialog::OnSettableYMinimum)
+   EVT_CHECKBOX(ID_YMAX_CHECKBOX, TsPlotOptionsDialog::OnSettableYMaximum)
+END_EVENT_TABLE()
+
 
 TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel, 
                                      const std::string yLabel, 
@@ -112,19 +121,17 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
    
    // Set up the X-axis options
    wxBoxSizer *xminBox = new wxBoxSizer(wxHORIZONTAL);
-   userXMinimum = new wxCheckBox(this, -1, (xName + " Minimum:  ").c_str());
-   userXMinimum->Enable(false);
+   userXMinimum = new wxCheckBox(this, ID_XMIN_CHECKBOX, 
+                                 (xName + " Minimum:  ").c_str());
    xminBox->Add(userXMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xMinimum = new wxTextCtrl(this, -1, "0.0");
-   xMinimum->Enable(false);
    xminBox->Add(xMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xmaxBox = new wxBoxSizer(wxHORIZONTAL);
-   userXMaximum = new wxCheckBox(this, -1, (xName + " Maximum:  ").c_str());
-   userXMaximum->Enable(false);
+   userXMaximum = new wxCheckBox(this, ID_XMAX_CHECKBOX, 
+                                 (xName + " Maximum:  ").c_str());
    xmaxBox->Add(userXMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    xMaximum = new wxTextCtrl(this, -1, "10.0");
-   xMaximum->Enable(false);
    xmaxBox->Add(xMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    xLogScale = new wxCheckBox(this, -1, 
@@ -169,19 +176,17 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
 
    // Set up the Y-axis options
    wxBoxSizer *yminBox = new wxBoxSizer(wxHORIZONTAL);
-   userYMinimum = new wxCheckBox(this, -1, (yName + " Minimum:  ").c_str());
-   userYMinimum->Enable(false);
+   userYMinimum = new wxCheckBox(this, ID_YMIN_CHECKBOX, 
+                                 (yName + " Minimum:  ").c_str());
    yminBox->Add(userYMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yMinimum = new wxTextCtrl(this, -1, "0.0");
-   yMinimum->Enable(false);
    yminBox->Add(yMinimum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *ymaxBox = new wxBoxSizer(wxHORIZONTAL);
-   userYMaximum = new wxCheckBox(this, -1, (yName + " Maximum:  ").c_str());
-   userYMaximum->Enable(false);
+   userYMaximum = new wxCheckBox(this, ID_YMAX_CHECKBOX, 
+                                 (yName + " Maximum:  ").c_str());
    ymaxBox->Add(userYMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
    yMaximum = new wxTextCtrl(this, -1, "10.0");
-   yMaximum->Enable(false);
    ymaxBox->Add(yMaximum, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    yLogScale = new wxCheckBox(this, -1, 
@@ -321,6 +326,122 @@ int TsPlotOptionsDialog::GetYPrecision()
    return yPrecision->GetValue();
 }
 
+bool TsPlotOptionsDialog::GetXMinState()
+{
+   return userXMinimum->IsChecked();
+}
+
+bool TsPlotOptionsDialog::GetXMaxState()
+{
+   return userXMaximum->IsChecked();
+}
+
+bool TsPlotOptionsDialog::GetYMinState()
+{
+   return userYMinimum->IsChecked();
+}
+
+bool TsPlotOptionsDialog::GetYMaxState()
+{
+   return userYMaximum->IsChecked();
+}
+
+void TsPlotOptionsDialog::SetXMinState(bool st)
+{
+   userXMinimum->SetValue(st);
+   xMinimum->Enable(st);
+}
+
+void TsPlotOptionsDialog::SetXMaxState(bool st)
+{
+   userXMaximum->SetValue(st);
+   xMaximum->Enable(st);
+}
+
+void TsPlotOptionsDialog::SetYMinState(bool st)
+{
+   userYMinimum->SetValue(st);
+   yMinimum->Enable(st);
+}
+
+void TsPlotOptionsDialog::SetYMaxState(bool st)
+{
+   userYMaximum->SetValue(st);
+   yMaximum->Enable(st);
+}
+
+double TsPlotOptionsDialog::GetXMin()
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   double rv;
+   str << xMinimum->GetValue().c_str();
+   str >> rv;
+   return rv;
+}
+
+double TsPlotOptionsDialog::GetXMax()
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   double rv;
+   str << xMaximum->GetValue().c_str();
+   str >> rv;
+   return rv;
+}
+
+double TsPlotOptionsDialog::GetYMin()
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   double rv;
+   str << yMinimum->GetValue().c_str();
+   str >> rv;
+   return rv;
+}
+
+double TsPlotOptionsDialog::GetYMax()
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   double rv;
+   str << yMaximum->GetValue().c_str();
+   str >> rv;
+   return rv;
+}
+
+void TsPlotOptionsDialog::SetXMin(double st)
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   str << st;
+   xMinimum->SetValue(str.str().c_str());
+}
+
+void TsPlotOptionsDialog::SetXMax(double st)
+{
+   std::stringstream str;
+   str.precision(xPrecision->GetValue());
+   str << st;
+   xMaximum->SetValue(str.str().c_str());
+}
+
+void TsPlotOptionsDialog::SetYMin(double st)
+{
+   std::stringstream str;
+   str.precision(yPrecision->GetValue());
+   str << st;
+   yMinimum->SetValue(str.str().c_str());
+}
+
+void TsPlotOptionsDialog::SetYMax(double st)
+{
+   std::stringstream str;
+   str.precision(yPrecision->GetValue());
+   str << st;
+   yMaximum->SetValue(str.str().c_str());
+}
+
 void TsPlotOptionsDialog::SetXName(std::string nomme)
 {
    xName = nomme;
@@ -329,4 +450,25 @@ void TsPlotOptionsDialog::SetXName(std::string nomme)
 void TsPlotOptionsDialog::SetYName(std::string nomme)
 {
    yName = nomme;
+}
+
+
+void TsPlotOptionsDialog::OnSettableXMinimum(wxCommandEvent &event)
+{
+   xMinimum->Enable(userXMinimum->GetValue());
+}
+
+void TsPlotOptionsDialog::OnSettableXMaximum(wxCommandEvent &event)
+{
+   xMaximum->Enable(userXMaximum->GetValue());
+}
+
+void TsPlotOptionsDialog::OnSettableYMinimum(wxCommandEvent &event)
+{
+   yMinimum->Enable(userYMinimum->GetValue());
+}
+
+void TsPlotOptionsDialog::OnSettableYMaximum(wxCommandEvent &event)
+{
+   yMaximum->Enable(userYMaximum->GetValue());
 }

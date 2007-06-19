@@ -127,7 +127,10 @@ protected:
    int minorTickSize;
    int varCount;
    
-   double xMin, xMax, yMin, yMax;
+   double xMin;
+   double xMax;
+   double yMin;
+   double yMax;
    std::string xName, yName;
    
    int currentId;
@@ -137,6 +140,20 @@ protected:
    bool zooming;
    bool movingLegend;
    bool dataUpdated;
+   
+   bool overrideXMin;
+   bool overrideXMax;
+   bool overrideYMin;
+   bool overrideYMax;
+   
+//   bool   automaticXMin;
+//   bool   automaticXMax;
+//   bool   automaticYMin;
+//   bool   automaticYMax;
+   double userXMin;
+   double userXMax;
+   double userYMin;
+   double userYMax;
    
    // Appearance parms
    bool showTitle;
@@ -159,6 +176,7 @@ protected:
    virtual void ToggleLegend(wxCommandEvent& event);
 
    virtual void SetOptions(wxCommandEvent& event);
+   virtual void ResetRanges();
    void SaveData(wxCommandEvent& event);
 
    virtual void Zoom(wxRect &region);

@@ -367,13 +367,13 @@ void TsPlotXYCanvas::Rescale(wxDC &dc)
       //   ("===> no-zoom: xMin=%g, xMax=%g, yMin=%g, yMax=%g\n",
       //    xMin, xMax, yMin, yMax);
       
-      if (xMax > plotXMax)
+      if (!overrideXMax && (xMax > plotXMax))
       {
          plotXMax = xMax + delx;
          rescaled = true;
       }
 
-      if (xMin < plotXMin)
+      if (!overrideXMin && (xMin < plotXMin))
       {
          #if DEBUG_TS_CANVAS
             MessageInterface::ShowMessage(
@@ -387,13 +387,13 @@ void TsPlotXYCanvas::Rescale(wxDC &dc)
          #endif
       }
 
-      if (yMin < plotYMin)
+      if (!overrideYMin && (yMin < plotYMin))
       {
          plotYMin = yMin - dely;
          rescaled = true;
       }
 
-      if (yMax > plotYMax)
+      if (!overrideYMax && (yMax > plotYMax))
       {
          plotYMax = yMax + dely;
          rescaled = true;

@@ -87,6 +87,18 @@ TsPlotCanvas::TsPlotCanvas(wxWindow* parent, wxWindowID id, const wxPoint& pos,
    zooming        (false),
    movingLegend   (false),
    dataUpdated    (false),
+   overrideXMin   (false),
+   overrideXMax   (false),
+   overrideYMin   (false),
+   overrideYMax   (false),
+//   automaticXMin  (true),
+//   automaticXMax  (true),
+//   automaticYMin  (true),
+//   automaticYMax  (true),
+   userXMin       (0.0),
+   userXMax       (8600.0),
+   userYMin       (-4000.0),
+   userYMax       (7000.0),
    showTitle      (false),
    labelAxes      (false),
    hasGrid        (true),
@@ -789,6 +801,16 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
    dlg.SetXPrecision(xLabelPrecision);
    dlg.SetXPrecision(yLabelPrecision);
    
+   dlg.SetXMin(userXMin);
+   dlg.SetXMax(userXMax);
+   dlg.SetYMin(userYMin);
+   dlg.SetYMax(userYMax);
+   
+   dlg.SetXMinState(overrideXMin);
+   dlg.SetXMaxState(overrideXMax);
+   dlg.SetYMinState(overrideYMin);
+   dlg.SetYMaxState(overrideYMax);
+   
    if (dlg.ShowModal() == wxID_OK)
    {
       // Plot title
@@ -805,10 +827,50 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
 
       xLabelPrecision = dlg.GetXPrecision();
       yLabelPrecision = dlg.GetXPrecision();
-            
+      
+      overrideXMin = dlg.GetXMinState();
+      overrideXMax = dlg.GetXMaxState();
+      overrideYMin = dlg.GetYMinState();
+      overrideYMax = dlg.GetYMaxState();
+      
+      if (overrideXMin)
+         userXMin = dlg.GetXMin();
+      else
+         plotXMin = 1e99;
+
+      if (overrideXMax)
+         userXMax = dlg.GetXMax();
+      else
+         plotXMax = -1e99;
+
+      if (overrideYMin)
+         userYMin = dlg.GetYMin();
+      else
+         plotYMin = 1e99;
+
+      if (overrideYMax)
+         userYMax = dlg.GetYMax();
+      else
+         plotYMax = -1e99;
+
+      ResetRanges();
+      
       wxClientDC dc(this);
       Refresh(dc, true);
    }
+}
+
+
+void TsPlotCanvas::ResetRanges()
+{
+   if (overrideXMin)
+      plotXMin = userXMin;
+   if (overrideXMax)
+      plotXMax = userXMax;
+   if (overrideYMin)
+      plotYMin = userYMin;
+   if (overrideYMax)
+      plotYMax = userYMax;
 }
 
 

@@ -19,6 +19,7 @@
 
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
+#include <wx/checkbox.h>
 
 #include <string>
 
@@ -51,6 +52,26 @@ public:
    void              SetYPrecision(int yPrec);
    int               GetXPrecision();
    int               GetYPrecision();
+   
+   bool              GetXMinState();
+   bool              GetXMaxState();
+   bool              GetYMinState();
+   bool              GetYMaxState();
+   
+   void              SetXMinState(bool st);
+   void              SetXMaxState(bool st);
+   void              SetYMinState(bool st);
+   void              SetYMaxState(bool st);
+   
+   double            GetXMin();
+   double            GetXMax();
+   double            GetYMin();
+   double            GetYMax();
+   
+   void              SetXMin(double st);
+   void              SetXMax(double st);
+   void              SetYMin(double st);
+   void              SetYMax(double st);
    
    void              SetXName(std::string nomme);
    void              SetYName(std::string nomme);
@@ -90,6 +111,24 @@ protected:
    
    std::string          xName;
    std::string          yName;
+   
+   void OnSettableXMinimum(wxCommandEvent &event);
+   void OnSettableXMaximum(wxCommandEvent &event);
+   void OnSettableYMinimum(wxCommandEvent &event);
+   void OnSettableYMaximum(wxCommandEvent &event);
+
+//private:
+   DECLARE_EVENT_TABLE()
+   
+      // IDs for the controls and the menu commands
+   enum
+   {     
+      ID_XMIN_CHECKBOX = 44400,
+      ID_XMAX_CHECKBOX,
+      ID_YMIN_CHECKBOX,
+      ID_YMAX_CHECKBOX
+   };
+   
 };
 
 #endif /*PLOTOPTIONSDIALOG_HPP_*/
