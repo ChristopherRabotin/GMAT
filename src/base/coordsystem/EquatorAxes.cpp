@@ -94,6 +94,7 @@ DynamicAxes("Equator",itsName)
 EquatorAxes::EquatorAxes(const EquatorAxes &eqAxes) :
 DynamicAxes(eqAxes)
 {
+   theDeFile = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -109,11 +110,13 @@ DynamicAxes(eqAxes)
 //------------------------------------------------------------------------------
 const EquatorAxes& EquatorAxes::operator=(const EquatorAxes &eqAxes)
 {
+   theDeFile = NULL;
    if (&eqAxes == this)
       return *this;
    DynamicAxes::operator=(eqAxes);  
    return *this;
 }
+
 //------------------------------------------------------------------------------
 //  ~EquatorAxes(void)
 //------------------------------------------------------------------------------
@@ -125,18 +128,27 @@ EquatorAxes::~EquatorAxes()
 {
 }
 
+//------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesEopFile() const
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesEopFile() const
 {
    if (originName == SolarSystem::EARTH_NAME) return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesItrfFile() const
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesItrfFile() const
 {
    if (originName == SolarSystem::EARTH_NAME) return GmatCoordinate::REQUIRED;
    return GmatCoordinate::NOT_USED;
 }
 
+//------------------------------------------------------------------------------
+// GmatCoordinate::ParameterUsage UsesNutationUpdateInterval() const
+//------------------------------------------------------------------------------
 GmatCoordinate::ParameterUsage EquatorAxes::UsesNutationUpdateInterval() const
 {
    if (originName == SolarSystem::EARTH_NAME) 
