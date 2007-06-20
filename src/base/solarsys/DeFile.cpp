@@ -39,7 +39,8 @@
 #include <fstream> //for debug output
 #endif
 
-//#define DEBUG_DEFILE 1
+//#define DEBUG_DEFILE
+//#define DEBUG_DEFILE_READ
 
 // DE file code from JPL/JSC (Hoffman) includes
 #include <stdio.h>
@@ -108,14 +109,10 @@ DeFile::DeFile(Gmat::DeFileType ofType, std::string fileName,
 PlanetaryEphem(fileName)
 {
    defType = ofType;
-   try
-   {
-      InitializeDeFile(fileName, fmt);
-   }
-   catch (PlanetaryEphemException &pe)
-   {
-      throw PlanetaryEphemException(pe.GetFullMessage());
-   }
+   theFileFormat = fmt;
+   theFileName = fileName;
+   
+   Initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -201,6 +198,27 @@ DeFile::~DeFile()
 {
    // nothing to do ... la la la la la
 }
+
+
+//------------------------------------------------------------------------------
+// void Initialize()
+//------------------------------------------------------------------------------
+void DeFile::Initialize()
+{
+   #ifdef DEBUG_DEFILE_INIT
+   MessageInterface::ShowMessage("DeFile::Initialize() entered\n");
+   #endif
+   
+   try
+   {
+      InitializeDeFile(theFileName, theFileFormat);
+   }
+   catch (PlanetaryEphemException &pe)
+   {
+      throw PlanetaryEphemException(pe.GetFullMessage());
+   }
+}
+
 
 //------------------------------------------------------------------------------
 //  Integer GetBodyID(std::string bodyName)
@@ -422,12 +440,18 @@ void  DeFile::GetAnglesAndRates(A1Mjd atTime, Real* angles, Real* rates,
       absJD        = mjdTT + GmatTimeUtil::JD_JAN_5_1941;
    }
    else
-    {
+   {
        double mjdTDB = (double) TimeConverterUtil::Convert(atTime.Get(),
                        TimeConverterUtil::A1MJD, TimeConverterUtil::TDBMJD, 
                        GmatTimeUtil::JD_JAN_5_1941);
       absJD         = mjdTDB + GmatTimeUtil::JD_JAN_5_1941;
-    }
+   }
+
+   #ifdef DEBUG_DEFILE_LIB
+   MessageInterface::ShowMessage
+      ("DeFile::GetAnglesAndRates() Calling Interpolate_Libration(%.9f)\n", absJD);
+   #endif
+   
    Interpolate_Libration(absJD, 12, angles, rates);
 }
 
@@ -502,6 +526,12 @@ std::string DeFile::Convert(std::string deFileNameAscii)
 //------------------------------------------------------------------------------
 void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
 {
+   #ifdef DEBUG_DEFILE_INIT
+   MessageInterface::ShowMessage
+      ("DeFile::InitializeDeFile() entered\n   file=%s, fileFormat=%d\n",
+       fName.c_str(), fileFmt);
+   #endif
+   
    if (fileFmt == Gmat::DE_ASCII)
    {
       asciiFileName  = fName;
@@ -540,10 +570,15 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
    g_pef_dcb.recl                      = arraySize;
    if (Ephemeris_File)  g_pef_dcb.fptr = Ephemeris_File;
    jdMjdOffset          = (double) DeFile::JD_MJD_OFFSET;
-
+   
    // store file begin time (loj: 9/15/05 Added)
    mFileBeg = T_beg;
 
+   #ifdef DEBUG_DEFILE_INIT
+   MessageInterface::ShowMessage("   T_beg=%.9f, addr=%p\n", T_beg, &T_beg);
+   MessageInterface::ShowMessage("   T_end=%.9f, addr=%p\n", T_end, &T_end);
+   MessageInterface::ShowMessage("DeFile::InitializeDeFile() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -598,8 +633,17 @@ void DeFile::InitializeDeFile(std::string fName, Gmat::DeFileFormat fileFmt)
 
 void DeFile::Read_Coefficients( double Time )
 {
+   #ifdef DEBUG_DEFILE_READ
+   MessageInterface::ShowMessage("DeFile::Read_Coefficients() Time=%.9f)\n", Time);
+   #endif
+   
   double  T_delta = 0.0;
   int     Offset  =  0 ;
+
+  #ifdef DEBUG_DEFILE_READ
+  MessageInterface::ShowMessage
+     ("DeFile::Read_Coefficients() T_beg=%f, T_end=%f\n", T_beg, T_end);
+  #endif
 
   /*--------------------------------------------------------------------------*/
   /*  Find ephemeris data that record contains input time. Note that one, and */
@@ -625,8 +669,8 @@ void DeFile::Read_Coefficients( double Time )
 
   //fseek(Ephemeris_File,(Offset-1)*ARRAY_SIZE*sizeof(double),SEEK_CUR);
   //fread(&Coeff_Array,sizeof(double),ARRAY_SIZE,Ephemeris_File);
-
-  #if DEBUG_DEFILE
+  
+  #ifdef DEBUG_DEFILE_READ
   MessageInterface::ShowMessage
      ("DeFile::Read_Coefficients() Offset=%d\n", Offset);
   #endif
@@ -676,6 +720,12 @@ void DeFile::Read_Coefficients( double Time )
 
 int DeFile::Initialize_Ephemeris( char *fileName )
 {
+   #ifdef DEBUG_DEFILE_INIT
+   MessageInterface::ShowMessage("DeFile::Initialize_Ephemeris() entered\n");
+   MessageInterface::ShowMessage
+      ("   fileName=%s, arraySize=%d\n", fileName, arraySize);
+   #endif
+   
   int headerID;
   
   /*--------------------------------------------------------------------------*/
@@ -683,7 +733,7 @@ int DeFile::Initialize_Ephemeris( char *fileName )
   /*--------------------------------------------------------------------------*/
 
   //loj: Ephemeris_File = fopen(fileName,"r");
-  Ephemeris_File = fopen(fileName,"rb"); // loj: 4/14/04
+  Ephemeris_File = fopen(fileName,"rb");
 
 
   /*--------------------------------------------------------------------------*/
@@ -710,7 +760,6 @@ int DeFile::Initialize_Ephemeris( char *fileName )
        /*...............................Store header data in global variables */
        
        R1 = H1.data;
-
               
        /*..........................................Set current time variables */
 
@@ -799,10 +848,17 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
                                     double Libration[3], double rates[3] )
 {
   double    A[50] , Cp[50]  , Up[50], sum[3] , rateSum[3];
-  double    T_break , T_seg = 0.0 , T_sub , Tc = 0.0;
+  double    T_break , T_seg = 0.0 , T_sub = 0.0 , Tc = 0.0;
   int       i , j;
   long int  C , G , N , offset = 0;
 
+  #ifdef DEBUG_DEFILE_LIB
+  MessageInterface::ShowMessage
+     ("DeFile::Interpolate_Libration(%.9f, %d)\n", Time, Target);
+  MessageInterface::ShowMessage("   addr T_beg=%p\n", &T_beg);
+  MessageInterface::ShowMessage("   addr T_end=%p\n", &T_end);
+  #endif
+  
   /*--------------------------------------------------------------------------*/
   /* This function only computes librations.                                  */
   /*--------------------------------------------------------------------------*/
@@ -821,23 +877,32 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
       {
         A[i] = 0.0;
       }
-
+  
   /*--------------------------------------------------------------------------*/
   /* Determine if a new record needs to be input (if so, get it).             */
   /*--------------------------------------------------------------------------*/
-
-  if ( Time < T_beg || Time > T_end ) Read_Coefficients(Time);
-
+  
+  if ( Time < T_beg || Time > T_end )
+  {
+     #ifdef DEBUG_DEFILE_LIB
+     MessageInterface::ShowMessage
+        ("DeFile::Interpolate_Libration() Calling Read_Coefficients(%.9f)\n",
+         Time);
+     #endif
+     
+     Read_Coefficients(Time);
+  }
+  
   /*--------------------------------------------------------------------------*/
   /* Read the coefficients from the binary record.                            */
   /*--------------------------------------------------------------------------*/
-  
+    
   C = R1.libratPtr[0] - 1;                   /* Coefficient array entry point */
   N = R1.libratPtr[1];                       /*        Number of coefficients */
   G = R1.libratPtr[2];                       /*    Granules in current record */
 
   /*...................................................Debug print (optional) */
-
+    
   //if ( Debug )
   //   {
   //     printf("\n  In: Interpolate_Libration\n");
@@ -855,6 +920,7 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
   /*  to load the coefficients.                                               */
   /*--------------------------------------------------------------------------*/
 
+  //MessageInterface::ShowMessage("===> Compute the normalized time\n");
   if ( G == 1 ) 
      {
        Tc = 2.0*(Time - T_beg) / T_span - 1.0;
@@ -887,6 +953,10 @@ void DeFile::Interpolate_Libration( double Time , int Target ,
 
   /*...................................................Debug print (optional) */
 
+  //MessageInterface::ShowMessage
+  //   ("===> C = %4d, offset = %4d, Time = %12.7f, T_sub = %12.7f, T_seg = %12.7f, "
+  //    "Tc = %12.7f\n", C, offset, Time, T_sub, T_seg, Tc);
+  
   //if ( Debug )
   //   {
   //     printf("\n  C      = %4d (after)",C);
@@ -1300,7 +1370,7 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   /* Determine if a new record needs to be input.                             */
   /*--------------------------------------------------------------------------*/
 
-  #if DEBUG_DEFILE
+  #ifdef DEBUG_DEFILE_INTERPOLATE
   MessageInterface::ShowMessage
      ("DeFile::Interpolate_State() before Read_Coefficients()\nTime=%f, T_beg=%f, "
       "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);
@@ -1308,7 +1378,7 @@ void DeFile::Interpolate_State(double Time , int Target, stateType *p)
   
   if (Time < T_beg || Time > T_end)  Read_Coefficients(Time);
   
-  #if DEBUG_DEFILE
+  #ifdef DEBUG_DEFILE_INTERPOLATE
   MessageInterface::ShowMessage
      ("DeFile::Interpolate_State() after  Read_Coefficients()\nTime=%f, T_beg=%f, "
       "T_end=%f T_span=%f\n", Time, T_beg, T_end, T_span);

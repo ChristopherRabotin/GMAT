@@ -52,10 +52,10 @@ public:
    // destructor
    ~DeFile();
 
-    //loj: added so that constructor won't throw an exception
+   //loj: added so that constructor won't throw an exception
    // method to initialize the DeFile - must be done before De file can be read
-   bool Initialize();
-
+   void Initialize();
+   
    // method to return the body ID for the requested body
    Integer  GetBodyID(std::string bodyName);
 
@@ -239,6 +239,9 @@ protected:
 
 private:
 
+   std::string theFileName;
+   Gmat::DeFileFormat theFileFormat;
+   
    /// ASCII file name - will be unknown if DeFile created with binary file
    std::string asciiFileName;
 
