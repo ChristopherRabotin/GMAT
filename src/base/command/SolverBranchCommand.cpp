@@ -170,13 +170,14 @@ void SolverBranchCommand::ResetLoopData()
       }
    }
    // Reset the propagators so that propagations run identically loop to loop
-   GmatCommand *cmd = branch[0];
-   while (cmd != this)
-   {
-      if (cmd->GetTypeName() == "Propagate")
-         cmd->TakeAction("ResetLoopData");
-      cmd = cmd->GetNext();
-   }
+   BranchCommand::TakeAction("ResetLoopData");
+//   GmatCommand *cmd = branch[0];
+//   while (cmd != this)
+//   {
+//      if (cmd->GetTypeName() == "Propagate")
+//         cmd->TakeAction("ResetLoopData");
+//      cmd = cmd->GetNext();
+//   }
 }
 
 

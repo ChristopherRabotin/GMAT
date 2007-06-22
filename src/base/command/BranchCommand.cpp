@@ -938,6 +938,53 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
 
 
 //------------------------------------------------------------------------------
+// bool TakeAction(const std::string &action, const std::string &actionData)
+//------------------------------------------------------------------------------
+/**
+ * Interface used to support user actions.
+ *
+ * @param <action> The string descriptor for the requested action.
+ * @param <actionData> Optional data used for the action.
+ *
+ * @return true if the action was performed, false if not.
+ */
+//------------------------------------------------------------------------------
+bool BranchCommand::TakeAction(const std::string &action,
+                           const std::string &actionData)
+{
+   #ifdef DEBUG_BRANCHCOMMAND_ACTIONS
+      MessageInterface::ShowMessage("%s: Executing the action \"%s\"\n", 
+         GetGeneratingString().c_str(), action.c_str());
+   #endif
+      
+   if (action == "ResetLoopData")
+   {
+      GmatCommand *cmd; 
+      for (std::vector<GmatCommand *>::iterator br = branch.begin(); 
+           br != branch.end(); ++br)
+      {
+         cmd = *br;
+         while (cmd != this)
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_ACTIONS
+               MessageInterface::ShowMessage("   Applying action to \"%s\"\n", 
+                  cmd->GetGeneratingString().c_str());
+            #endif
+               
+            if ((cmd->GetTypeName() == "Propagate") || 
+                (cmd->IsOfType("BranchCommand")))
+               cmd->TakeAction("ResetLoopData");
+            cmd = cmd->GetNext();
+         }
+      }      
+      return true;
+   }
+   
+   return GmatCommand::TakeAction(action, actionData);
+}
+
+
+//------------------------------------------------------------------------------
 // bool Execute()
 //------------------------------------------------------------------------------
 /**

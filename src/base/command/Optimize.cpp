@@ -640,6 +640,7 @@ bool Optimize::ExecuteCallback()
    if (nState != Solver::NOMINAL)
       throw CommandException(
          "Optimize::ExecuteCallback - error in optimizer state");
+
    // this call should just advance the state to CALCULATING
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage(
@@ -647,6 +648,7 @@ bool Optimize::ExecuteCallback()
    #endif
    callbackResults = optimizer->AdvanceNestedState(vars);
    ResetLoopData();
+
    try
    {
       branchExecuting = true;
@@ -707,8 +709,12 @@ bool Optimize::PutCallbackData(std::string &data)
 std::string Optimize::GetCallbackResults()
 {
    std::string allResults;
-   for (Integer i=0; i< (Integer) callbackResults.size(); i++)
+
+   for (Integer i=0; i < (Integer) callbackResults.size(); ++i)
+   {
       allResults += callbackResults.at(i) + ";";
+   }
+   
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage("Exiting Optimize::GetCallbackResults\n");
       MessageInterface::ShowMessage("-- callback results are: %s\n",

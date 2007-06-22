@@ -413,29 +413,8 @@ std::string Vary::GetParameterText(const Integer id) const
 {
    if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
       return PARAMETER_TEXT[id - GmatCommandParamCount];
-      /*
-    if (id == solverNameID)
-        return "SolverName";
-        
-    if (id == variableNameID)
-        return "Variable";
-        
-    if (id == initialValueID)
-        return "InitialValue";
-        
-    if (id == perturbationID)
-        return "Perturbation";
-        
-    if (id == variableMinimumID)
-        return "MinimumValue";
-        
-    if (id == variableMaximumID)
-        return "MaximumValue";
-        
-    if (id == variableMaximumStepID)
-        return "MaximumChange";
-   */
-    return GmatCommand::GetParameterText(id);
+
+   return GmatCommand::GetParameterText(id);
 }
 
 
@@ -449,29 +428,8 @@ Integer Vary::GetParameterID(const std::string &str) const
       if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
          return i;
    }
-   /*
-    if (str == "SolverName")
-        return solverNameID;
-        
-    if (str == "Variable")
-        return variableNameID;
-        
-    if (str == "InitialValue")
-        return initialValueID;
-        
-    if (str == "Perturbation")
-        return perturbationID;
-        
-    if (str == "MinimumValue")
-        return variableMinimumID;
-        
-    if (str == "MaximumValue")
-        return variableMaximumID;
-        
-    if (str == "MaximumChange")
-        return variableMaximumStepID;
-   */
-    return GmatCommand::GetParameterID(str);
+
+   return GmatCommand::GetParameterID(str);
 }
 
 
@@ -482,28 +440,7 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 {
    if ((id >= GmatCommandParamCount) && (id < VaryParamCount))
       return PARAMETER_TYPE[id - GmatCommandParamCount];
-    /*
-    if (id == solverNameID)
-        return Gmat::STRING_TYPE;
-        
-    if (id == variableNameID)
-        return Gmat::STRING_TYPE;
-        
-    if (id == initialValueID)
-        return Gmat::REAL_TYPE;
-        
-    if (id == perturbationID)
-        return Gmat::REAL_TYPE;
-        
-    if (id == variableMinimumID)
-        return Gmat::REAL_TYPE;
-        
-    if (id == variableMaximumID)
-        return Gmat::REAL_TYPE;
-        
-    if (id == variableMaximumStepID)
-        return Gmat::REAL_TYPE;
-   */
+
     return GmatCommand::GetParameterType(id);
 }
 
@@ -514,34 +451,6 @@ Gmat::ParameterType Vary::GetParameterType(const Integer id) const
 std::string Vary::GetParameterTypeString(const Integer id) const
 {
    return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
-   /*
-    if (id == solverNameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == solverNameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == variableNameID)
-        return PARAM_TYPE_STRING[Gmat::STRING_TYPE];
-        
-    if (id == initialValueID)
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == perturbationID)
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == variableMinimumID)
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == variableMaximumID)
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-        
-    if (id == variableMaximumStepID)
-        return PARAM_TYPE_STRING[Gmat::REAL_TYPE];
-
-
-    return GmatCommand::GetParameterTypeString(id);
-    */
 }
 
 
@@ -592,87 +501,6 @@ Real Vary::SetRealParameter(const Integer id, const Real value)
       "Vary::Setting value of %f for parameter %s\n", value,
       (GetParameterText(id)).c_str());
    #endif
-
-/**
- * Old code:
-
-
-//   if (id == INITIAL_VALUE)
-//   {
-//      if (initialValue)
-//         initialValue->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + initialValueName +
-//            "\" in the command \"" + generatingString + "\"\n");
-//      return value;
-//   }
-//            
-//   if (id == PERTURBATION) 
-//   {
-//      if (perturbation)
-//         perturbation->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + perturbationName +
-//            "\" in the command \"" + generatingString + "\"\n");
-//      return value;
-//   }
-//        
-//   if (id == VARIABLE_MINIMUM)
-//   {
-//      if (variableMinimum)
-//         variableMinimum->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + variableMinimumName +
-//            "\" in the command \"" + generatingString + "\"\n");
-//      return value;
-//   }
-//        
-//    //if (id == variableMaximumID) 
-//    if (id == VARIABLE_MAXIMUM)
-//    {
-//        if (variableMaximum)
-//            variableMaximum->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + variableMaximumName +
-//            "\" in the command \"" + generatingString + "\"\n");
-//      return value;
-//    }
-//        
-//    //if (id == variableMaximumStepID) 
-//    if (id == VARIABLE_MAXIMUM_STEP)
-//    {
-//        if (variableMaximumStep)
-//            variableMaximumStep->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + 
-//            variableMaximumStepName + "\" in the command \"" + 
-//            generatingString + "\"\n");
-//      return value;
-//    }
-//    
-//   if (id == ADDITIVE_SCALE_FACTOR)
-//   {
-//      if (additiveScaleFactor)
-//         additiveScaleFactor->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + 
-//            additiveScaleFactorName + "\" in the command \"" + 
-//            generatingString + "\"\n");
-//      return value;
-//   }
-//
-//   if (id == MULTIPLICATIVE_SCALE_FACTOR)
-//   {
-//      if (multiplicativeScaleFactor)
-//         multiplicativeScaleFactor->SetReal(value);
-//      else
-//         throw CommandException("Wrapper not set for \"" + 
-//            multiplicativeScaleFactorName + "\" in the command \"" + 
-//            generatingString + "\"\n");
-//      return value;
-//   }
-
-*/
 
    return GmatCommand::SetRealParameter(id, value);
 }
@@ -949,196 +777,6 @@ bool Vary::InterpretAction()
    return true;
 }
 
-/**
- * Here is the old code:
-
-bool Vary::InterpretAction()
-{
-   parser.EvaluateBlock(generatingString);
-   StringArray blocks = parser.DecomposeBlock(generatingString);
-   StringArray chunks = parser.ChunkLine();
-   
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage("Vary::InterpretAction() block list:\n");
-      for (StringArray::iterator i = blocks.begin(); i != blocks.end(); ++i)
-         MessageInterface::ShowMessage("   %s\n", i->c_str());
-      MessageInterface::ShowMessage("Vary::InterpretAction() chunk list:\n");
-      for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
-         MessageInterface::ShowMessage("   %s\n", i->c_str());
-   #endif      
-
-   // First comes the keyword, "Vary"
-   if (chunks[0] != typeName)
-      throw CommandException(
-         "Line '" + generatingString + 
-         "'\n should be a Vary command, but the '" + typeName + 
-         "' keyword is not the opening token in the line.\n");  
-
-   StringArray currentChunks = parser.Decompose(chunks[1], "()");
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage("   Vary::InterpretAction() 1st level:\n");
-      for (StringArray::iterator i = currentChunks.begin(); 
-           i != currentChunks.end(); ++i)
-         MessageInterface::ShowMessage("      %s\n", i->c_str());
-   #endif
-   // The leading string is the Solver name
-   SetStringParameter(SOLVER_NAME, currentChunks[0]);
-   
-   // Next break out the variables from the settings
-   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage(
-         "      Vary::InterpretAction() 2nd level:\n");
-      for (StringArray::iterator i = currentChunks.begin(); 
-           i != currentChunks.end(); ++i)
-         MessageInterface::ShowMessage("         %s\n", i->c_str());
-   #endif
-   
-   // First chunk is the variable and initial value
-   StringArray nameval = parser.SeparateBy(currentChunks[0], "= ");
-   variableName.push_back(nameval[0]);
-   variableId.push_back(-1);
-   // This part needs to be changed to handle all of the types
-   Real value = atof(nameval[1].c_str());
-   SetRealParameter(INITIAL_VALUE, value);
-   
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage(
-         "         Vary::InterpretAction() Variable:\n");
-      for (StringArray::iterator i = nameval.begin(); 
-           i != nameval.end(); ++i)
-         MessageInterface::ShowMessage("            %s\n", i->c_str());
-   #endif
-   
-   // then the bracketed list of settings, if not using defaults
-   if (currentChunks.size() > 1)
-   {
-      currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ", ");
-   
-      #ifdef DEBUG_VARY_PARSING
-         MessageInterface::ShowMessage(
-            "         Vary::InterpretAction() Settings:\n");
-         for (StringArray::iterator i = currentChunks.begin(); 
-              i != currentChunks.end(); ++i)
-            MessageInterface::ShowMessage("            %s\n", i->c_str());
-      #endif
-      
-      // For each case here, the atof needs to be reset to handle the allowed types
-      for (StringArray::iterator i = currentChunks.begin(); 
-           i != currentChunks.end(); ++i)
-      {
-         nameval = parser.SeparateBy(*i, "= ");
-         if ((nameval[0] == "Pert") || (nameval[0] == "Perturbation")) 
-         {
-            if (nameval[0] == "Pert")
-            {
-               MessageInterface::ShowMessage( "\"Pert\" is deprecated as the "
-                  "string specifying variable perturbations, and will be "
-                  "removed from a future build; please use \"Perturbation\" "
-                  "instead.\n" ); 
-            }
-            bool retval = GmatStringUtil::ToReal(nameval[1], value);
-            if ((retval == false) || (value <= 0.0))
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ] "
-                  "which evaluates > 0. ");
-            SetRealParameter(PERTURBATION, value);
-         }
-         else if (nameval[0] == "Lower")
-         {
-            if (GmatStringUtil::ToReal(nameval[1], value) == false)
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ] "
-                  "which evaluates such that Lower < Upper. ");
-            SetRealParameter(VARIABLE_MINIMUM, value);
-         }
-         else if (nameval[0] == "Upper")
-         {
-            if (GmatStringUtil::ToReal(nameval[1], value) == false)
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ] "
-                  "which evaluates such that Lower < Upper. ");
-            SetRealParameter(VARIABLE_MAXIMUM, value);
-         }
-         else if (nameval[0] == "MaxStep")
-         {
-            bool retval = GmatStringUtil::ToReal(nameval[1], value);
-            if ((retval == false) || (value <= 0.0))
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ] "
-                  "which evaluates > 0. ");
-            SetRealParameter(VARIABLE_MAXIMUM_STEP, value);
-         }
-         else if (nameval[0] == "AdditiveScaleFactor")
-         {
-            if (GmatStringUtil::ToReal(nameval[1], value) == false)
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [  Real Number, Variable, Array Element, or Parameter ]. ");
-            SetRealParameter(ADDITIVE_SCALE_FACTOR, value);
-         }
-         else if (nameval[0] == "MultiplicativeScaleFactor")
-         {
-            if (GmatStringUtil::ToReal(nameval[1], value) == false)
-               throw CommandException(
-                  "The value of \"" + nameval[1] + "\" for field \"" + 
-                  nameval[0] + "\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. ");
-            SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, value);
-         }
-         else
-         {
-            //std::string msg = "On the line \n'" + generatingString +
-            //   "'\nthe setting '" + (*i) + 
-            //   "' does not match the available options for the Vary command";
-            std::string msg = "The setting \"" + (*i) + 
-               "\" does not match any field name for the Vary command";
-            //MessageInterface::ShowMessage(msg);
-            throw CommandException(msg); 
-         }
-      }
-   }
-   
-   // Ensure that there is a value for each component the variable might use,
-   // because these values are passed generically to the Solvers
-   UnsignedInt varCount = initialValue.size();
-   
-   if (perturbation.size() < varCount)
-      SetRealParameter(PERTURBATION, 1.0e-6);
-
-   if (variableMinimum.size() < varCount)
-      SetRealParameter(VARIABLE_MINIMUM, -9.999e300);
-
-   if (variableMaximum.size() < varCount)
-      SetRealParameter(VARIABLE_MAXIMUM, 9.999e300);
-   
-   if (variableMaximumStep.size() < varCount)
-      SetRealParameter(VARIABLE_MAXIMUM_STEP, 9.999e300);
-   
-   if (additiveScaleFactor.size() < varCount)
-      SetRealParameter(ADDITIVE_SCALE_FACTOR, 0.0);
-   
-   if (multiplicativeScaleFactor.size() < varCount)
-      SetRealParameter(MULTIPLICATIVE_SCALE_FACTOR, 1.0);
-      
-   return true;
-}
-*/
 
 const StringArray& Vary::GetWrapperObjectNameArray()
 {
@@ -1399,26 +1037,6 @@ bool Vary::Initialize()
    return retval;
 }
 
-/**
- * Here is the old code:
-
-{
-    bool retval = GmatCommand::Initialize();
-
-    if (solver == NULL)
-       throw CommandException("solver not initialized for Vary command\n  \""
-                              + generatingString + "\"\n");
-
-    Integer id = solver->GetParameterID("Variables");
-    if (!variableName.empty())
-        solver->SetStringParameter(id, variableName[0]);
-        
-    // The solver cannot be finalized until all of the loop is initialized
-    solverDataFinalized = false;
-
-    return retval;
-}
- */
 
 //------------------------------------------------------------------------------
 //  bool Execute()
@@ -1493,7 +1111,7 @@ bool Vary::Execute()
     
     #ifdef DEBUG_VARIABLE_RANGES
        MessageInterface::ShowMessage(
-          "Setting %s to %lf; allowed range is [%lf, %lf]\n",
+          "Setting %s to %.12le; allowed range is [%.12le, %.12le]\n",
           variableName.c_str(), var, variableMinimum->EvaluateReal(), 
           variableMaximum->EvaluateReal());
           //variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
@@ -1510,118 +1128,6 @@ bool Vary::Execute()
     return retval;
 }
 
-/**
- * Here is the old code:
-{
-    bool retval = true;
-
-    #if DEBUG_VARY_EXECUTE
-    MessageInterface::ShowMessage
-       ("Vary::Execute() solverDataFinalized=%d\n", solverDataFinalized);
-    #endif
-    
-    if (!solverDataFinalized) 
-    {
-        // First time through, tell the solver about the variables
-        Real varData[5];
-        //for (Integer i = 0; i < variableName.size(); ++i) {
-        Integer i = 0;
-        { 
-            varData[0] = initialValue[i];                // Initial value
-            // scale by using Eq. 13.5 of Architecture document
-            varData[0] = (varData[0] + additiveScaleFactor[i]) / 
-                         multiplicativeScaleFactor[i];
-            varData[1] = (perturbation[i]) / 
-                         multiplicativeScaleFactor[i];   // pert
-            varData[2] = (variableMinimum[i] + additiveScaleFactor[i]) / 
-                         multiplicativeScaleFactor[i];   // minimum
-            varData[3] = (variableMaximum[i] + additiveScaleFactor[i]) / 
-                         multiplicativeScaleFactor[i];   // maximum
-            varData[4] = (variableMaximumStep[i]) / 
-                         multiplicativeScaleFactor[i];   // largest allowed step
-            
-            if (variableId.empty())
-               variableId.push_back(-1);
-            variableId[i] = solver->SetSolverVariables(varData, variableName[i]);
-        }
-        
-        // Break component into the object and its parameter
-        std::string objectName, parmName, varName;
-        varName = variableName[0];
-        Integer loc = varName.find(".");
-        objectName = varName.substr(0, loc);
-        parmName = varName.substr(loc+1, varName.length() - (loc+1));
-        GmatBase *obj = (*objectMap)[objectName];
-        
-        #if DEBUG_VARY_EXECUTE
-        MessageInterface::ShowMessage
-           ("Vary::Execute() varName=%s, objectName=%s, parmName=%s\n",
-            varName.c_str(), objectName.c_str(), parmName.c_str());
-        #endif
-        
-        if (obj == NULL) {
-            std::string errorstr = "Could not find object ";
-            errorstr += objectName;
-            throw CommandException(errorstr + "\n");
-        }
-        
-        Integer id;
-        
-        if (obj->GetTypeName() == "Variable")
-        {
-            id = -1;
-        }
-        else
-        {
-            id = obj->GetParameterID(parmName);
-    
-            if (id == -1) {
-                std::string errorstr = "Could not find parameter ";
-                errorstr += parmName;
-                errorstr += " on object ";
-                errorstr += objectName;
-                throw CommandException(errorstr + "\n");
-            } 
-        
-            Gmat::ParameterType type = obj->GetParameterType(id);
-            if (type != Gmat::REAL_TYPE) {
-                std::string errorstr = "The solver variable ";
-                errorstr += parmName;
-                errorstr += " on object ";
-                errorstr += objectName;
-                errorstr += " is not Real.";
-                throw CommandException(errorstr + "\n");
-            }
-        }
-         
-        pobject.push_back(obj);
-        parmId.push_back(id);
-        
-        solverDataFinalized = true;
-        BuildCommandSummary(true);
-        return retval;
-    }
-    
-    Real var = solver->GetSolverVariable(variableId[0]);
-    // scale using Eq. 13.6 of Architecture document
-    var = var * multiplicativeScaleFactor[0] - additiveScaleFactor[0];
-    
-    #ifdef DEBUG_VARIABLE_RANGES
-       MessageInterface::ShowMessage(
-          "Setting %s to %lf; allowed range is [%lf, %lf]\n",
-          variableName[0].c_str(), var, variableMinimum[0], variableMaximum[0]);
-    #endif
-
-    if (pobject[0]->GetTypeName() == "Variable")
-       ((Parameter*)pobject[0])->SetReal(var);
-    else
-       pobject[0]->SetRealParameter(parmId[0], var);
-
-    BuildCommandSummary(true);
-    return retval;
-}
-
-*/
 
 void Vary::RunComplete()
 {
