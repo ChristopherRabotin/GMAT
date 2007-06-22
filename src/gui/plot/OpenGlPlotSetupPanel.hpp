@@ -70,7 +70,7 @@ protected:
    wxCheckBox *mUseFixedFovCheckBox;
    wxCheckBox *mAxesCheckBox;
    wxCheckBox *mGridCheckBox;
-   wxCheckBox *mEarthSunLinesCheckBox;
+   wxCheckBox *mOriginSunLineCheckBox;
    wxCheckBox *mShowObjectCheckBox;
    
    wxTextCtrl *mDataCollectFreqTextCtrl;

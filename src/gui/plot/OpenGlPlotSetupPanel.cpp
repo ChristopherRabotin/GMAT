@@ -252,8 +252,8 @@ void OpenGlPlotSetupPanel::Create()
    mGridCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw Grid"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
-   mEarthSunLinesCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Earth Sun Lines"),
+   mOriginSunLineCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Sun Line"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    mShowObjectCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Show Object"),
@@ -486,7 +486,7 @@ void OpenGlPlotSetupPanel::Create()
    drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mEarthSunLinesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mOriginSunLineCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    drawOptionStaticSizer->Add(drawOptionStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -662,7 +662,7 @@ void OpenGlPlotSetupPanel::Create()
    drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mEarthSunLinesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionBoxSizer->Add(mOriginSunLineCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
    
    drawOptionStaticSizer->Add(drawOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -804,7 +804,7 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetOnOffParameter("Axes") == "On");
       mGridCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("Grid") == "On");
-      mEarthSunLinesCheckBox->
+      mOriginSunLineCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("EarthSunLines") == "On");
       mUseInitialViewCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("UseInitialView") == "On");
@@ -1068,8 +1068,6 @@ void OpenGlPlotSetupPanel::SaveData()
                  mOpenGlPlot->GetName() + "\" is not an allowed value.  "
                  "\nThe allowed values are: [ %s ].";
       
-      //loj: 9/26/06 theOkButton->Disable();
-      
       inputString[0] = mDataCollectFreqTextCtrl->GetValue();
       inputString[1] = mUpdatePlotFreqTextCtrl->GetValue();
       for (Integer i=0; i < 2; ++i)
@@ -1128,7 +1126,7 @@ void OpenGlPlotSetupPanel::SaveData()
       else
          mOpenGlPlot->SetOnOffParameter("Grid", "Off");
       
-      if (mEarthSunLinesCheckBox->IsChecked())
+      if (mOriginSunLineCheckBox->IsChecked())
          mOpenGlPlot->SetOnOffParameter("EarthSunLines", "On");
       else
          mOpenGlPlot->SetOnOffParameter("EarthSunLines", "Off");
@@ -1162,7 +1160,7 @@ void OpenGlPlotSetupPanel::SaveData()
          return;
       }
       mOpenGlPlot->SetRealParameter("FixedFovAngle", fov);
-
+      
       //--------------------------------------------------------------
       // save spacecraft list
       //--------------------------------------------------------------
@@ -1180,19 +1178,10 @@ void OpenGlPlotSetupPanel::SaveData()
             ("OpenGlPlotSetupPanel::SaveData() mScCount=%d, mNonScCount=%d\n",
              mScCount, mNonScCount);
          #endif
-
-         //loj: 12/13/05
-         // it is checked in OpenGlPlot, so we don't want to duplicate the message
-         //if (mScCount == 0 && mPlotCheckBox->IsChecked())
-         //{
-         //   wxLogMessage(wxT("Spacecraft not selected. "
-         //                    "The plot will not be activated."));
-         //   mOpenGlPlot->Activate(false);
-         //}
-
+         
          // clear the list first
          mOpenGlPlot->TakeAction("Clear");
-
+         
          // add spacecraft
          for (int i=0; i<mScCount; i++)
          {
@@ -1206,8 +1195,7 @@ void OpenGlPlotSetupPanel::SaveData()
             
             mOpenGlPlot->
                SetStringParameter("Add", mSelSpName, i);
-         }
-         
+         }         
          
          // add non-spacecraft
          for (int i=0; i<mNonScCount; i++)
@@ -1219,6 +1207,7 @@ void OpenGlPlotSetupPanel::SaveData()
                ("OpenGlPlotSetupPanel::SaveData() NonSc[%d] = %s\n", i,
                 mSelSpName.c_str());
             #endif
+            
             
             mOpenGlPlot->
                SetStringParameter("Add", mSelSpName, mScCount+i);
@@ -1426,6 +1415,16 @@ void OpenGlPlotSetupPanel::SaveData()
             ("ViewUpAxis",
              std::string(mViewUpAxisComboBox->GetStringSelection().c_str()));
       }
+      
+      //--------------------------------------------------------------
+      // Just warning message
+      //--------------------------------------------------------------
+      // Check if Sun was added to draw Sun line
+      if (mOriginSunLineCheckBox->IsChecked() &&
+          mSelectedObjListBox->FindString("Sun") == wxNOT_FOUND)
+         MessageInterface::PopupMessage
+            (Gmat::WARNING_, "\"Sun\" needs to be added to the view object list "
+             "to draw Sun line");
       
       EnableUpdate(false);
       canClose = true;
