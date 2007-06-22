@@ -44,7 +44,7 @@ class Parameter;
 class GmatCommand;
 class CoordinateSystem;
 class AxisSystem;
-class Publisher;
+//class Publisher;
 class Subscriber;
 class Burn;
 
