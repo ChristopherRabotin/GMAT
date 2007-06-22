@@ -796,6 +796,8 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
       
    if (initialized)
    {
+      std::stringstream message;
+
       switch (trigger)
       {
          case INITIALIZING:
@@ -806,14 +808,14 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                Integer localVariableCount = variableNames.size();
                Integer localEqCount = eqConstraintNames.size();
                Integer localIneqCount = ineqConstraintNames.size();
-               textFile << "************************************************"
+               message << "************************************************"
                         << "********\n"
                         << "*** Optimizer Text File\n"
                         << "*** \n"
                         << "*** Using Fmincon Optimization\n***\n";
 
                // Write out the setup data
-               textFile << "*** " << localVariableCount << " variables\n*** "
+               message << "*** " << localVariableCount << " variables\n*** "
                         << localEqCount << " equality constraints\n***\n*** "
                         << localIneqCount << " inequality constraints\n***\n*** "
                         << "Variables:\n***    ";
@@ -823,40 +825,40 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
                for (current = variableNames.begin(), i = 0;
                     current != variableNames.end(); ++current)
                {
-                  textFile << *current << "\n***    ";
+                  message << *current << "\n***    ";
                }
                  
-               textFile << "\n*** Equality Constraints:\n***    ";
+               message << "\n*** Equality Constraints:\n***    ";
                  
                for (current = eqConstraintNames.begin(), i = 0;
                     current != eqConstraintNames.end(); ++current)
                {
-                  textFile << *current << "\n***    ";
+                  message << *current << "\n***    ";
                }
                  
-               textFile << "\n*** Inequality Constraints:\n***    ";
+               message << "\n*** Inequality Constraints:\n***    ";
                  
                for (current = ineqConstraintNames.begin(), i = 0;
                     current != ineqConstraintNames.end(); ++current)
                {
-                  textFile << *current << "\n***    ";
+                  message << *current << "\n***    ";
                }
-               textFile << "\n****************************"
+               message << "\n****************************"
                         << "****************************\n"
                         << std::endl;
             }
             break;
             
          case NOMINAL:
-            textFile << "Iteration " << iterationsTaken
+            message << "Iteration " << iterationsTaken
                      << "\n   Variable Values: [";
             // Iterate through the variables, writing them to the file
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               textFile << " " << variable[i++] << " ";
+               message << " " << variable[i++] << " ";
             }
-            textFile << "]" << std::endl;
+            message << "]" << std::endl;
             break;
             
 //         case PERTURBING:
@@ -900,25 +902,25 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             
          case CALCULATING:
             if (textFileMode == "Verbose")
-               textFile << "In the Calculating state" << std::endl;
+               message << "In the Calculating state" << std::endl;
             if (ineqConstraintCount > 0)
             {
-               textFile << "   Inequality Constraint Values: [";
+               message << "   Inequality Constraint Values: [";
                for (std::vector<Real>::iterator i = ineqConstraintValues.begin();
                     i != ineqConstraintValues.end(); ++i)
-                  textFile << " " << (*i) << " ";
-               textFile << "]" << std::endl;
+                  message << " " << (*i) << " ";
+               message << "]" << std::endl;
             }
             if (eqConstraintCount > 0)
             {
-               textFile << "   Equality Constraint Values: [";
+               message << "   Equality Constraint Values: [";
 
                for (std::vector<Real>::iterator i = eqConstraintValues.begin();
                     i != eqConstraintValues.end(); ++i)
-                  textFile << " " << (*i) << " ";
-               textFile << "]" << std::endl;
+                  message << " " << (*i) << " ";
+               message << "]" << std::endl;
             }
-            textFile << "   Objective function value:  " << cost << std::endl;
+            message << "   Objective function value:  " << cost << std::endl;
             break;
             
 //         case CHECKINGRUN:
@@ -942,7 +944,7 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
 //            break;
             
          case FINISHED:
-            textFile << "\n****************************"
+            message << "\n****************************"
                      << "****************************\n"
                      << "*** Optimization Completed in " << iterationsTaken
                      << " iterations"
@@ -953,15 +955,15 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             break;
             
          case RUNEXTERNAL:
-            textFile << "Iteration " << iterationsTaken+1
+            message << "Iteration " << iterationsTaken+1
                      << "\nExternal Run\nVariables:\n   ";
             // Iterate through the variables, writing them to the file
             for (current = variableNames.begin(), i = 0;
                  current != variableNames.end(); ++current)
             {
-               textFile << *current << " = " << variable[i++] << "\n   ";
+               message << *current << " = " << variable[i++] << "\n   ";
             }
-            textFile << std::endl;
+            message << std::endl;
             break;
             
          default:
@@ -971,6 +973,8 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
             //throw SolverException(
             //   "Solver state not supported for the Fmincon optimizer");
       }
+      textFile << message.str();
+      MessageInterface::ShowMessage("%s", message.str().c_str());
    }
 }
    
