@@ -41,9 +41,14 @@
 // define SKIP_DEVIL if devil is not supported
 //#define SKIP_DEVIL
 #ifndef SKIP_DEVIL
-#  include <IL/il.h>
-#  include <IL/ilu.h>
-#  include <IL/ilut.h>
+// Include without IL/ so different versions of IL can be used without modifying
+// the directory
+// #  include <IL/il.h>
+// #  include <IL/ilu.h>
+// #  include <IL/ilut.h>
+#  include <il.h>
+#  include <ilu.h>
+#  include <ilut.h>
 #endif
 
 
@@ -100,7 +105,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_UPDATE_OBJECT 2
 //#define DEBUG_TRAJCANVAS_ACTION 1
 //#define DEBUG_TRAJCANVAS_CONVERT 1
-//#define DEBUG_TRAJCANVAS_DRAW 1
+//#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
 //#define DEBUG_TRAJCANVAS_OBJECT 1
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
@@ -175,23 +180,18 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    #endif
 {
    mGlInitialized = false;
-   mGlContext = NULL;
    mPlotName = name;
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas() csName=%s, name=%s\n", csName.c_str(), name.c_str());
+      ("TrajPlotCanvas() csName=%s, name=%s, size.X=%d, size.Y=%d\n",
+       csName.c_str(), name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    
    #ifdef __USE_WX280_GL__
-   mGlContext = new wxGLContext(this);
    // Note:
-   // SetCurrent here makes first default plot small ellipse earth at the
-   // left botton corner and shows incomple orbit.
-   // On rerun, plot is automacally zoomed in.
-   // If SetCurrent is commented out, shows normal size plot but incomplete
-   // orbit. On rerun plot is automacally zoomed in.
-   //SetCurrent(*mGlContext);
+   // Use wxGLCanvas::m_glContext, otherwise resize will not work
+   m_glContext = new wxGLContext(this);
    #endif
    
    // initalize data members
@@ -199,12 +199,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    theStatusBar = GmatAppData::GetMainFrame()->GetStatusBar();
    mTextTrajFile = NULL;
    mGlList = 0;
-   mNumData = 0;
-   mTotalPoints = 0;
-   mBegIndex = 0;
-   mIsEndOfData = false;
-   mIsEndOfRun = false;
    mIsFirstRun = true;
+   
+   ResetPlotInfo();
    
    // projection
    mUsePerspectiveMode = false;
@@ -338,10 +335,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    else
       mNeedInitialConversion = false;
    
-   //loj: 2007.06.11
-   // Initialize view from InitGL() since arrays are allocated dynamically 
-   //SetDefaultView();
-   
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
       ("   mInternalCoordSystem=%p, mViewCoordSystem=%p\n", mInternalCoordSystem,
@@ -352,7 +345,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    if (mViewCoordSystem)
       MessageInterface::ShowMessage
          ("   mViewCoordSystem=%s\n", mViewCoordSystem->GetName().c_str());
-   MessageInterface::ShowMessage("TrajPlotCanvas() exiting\n");
+   MessageInterface::ShowMessage("TrajPlotCanvas() constructor exiting\n");
    #endif
    
 }
@@ -370,8 +363,8 @@ TrajPlotCanvas::~TrajPlotCanvas()
    if (mTextTrajFile)
       delete mTextTrajFile;
 
-   if (mGlContext)
-      delete mGlContext;
+   // Note:
+   // deleting m_glContext is handled in wxGLCanvas
    
    ClearObjectArrays();
    
@@ -386,7 +379,7 @@ TrajPlotCanvas::~TrajPlotCanvas()
  */
 //------------------------------------------------------------------------------
 bool TrajPlotCanvas::InitGL()
-{   
+{
    // remove back faces
    glDisable(GL_CULL_FACE);
    
@@ -423,27 +416,15 @@ bool TrajPlotCanvas::InitGL()
    // pixel format
    if (!SetPixelFormatDescriptor())
    {
-      //return false;
       throw SubscriberException("SetPixelFormatDescriptor failed\n");
    }
    
    // font
    SetDefaultGLFont();
-   
+
    mShowMaxWarning = true;
-   mNumData = 0;
-   mTotalPoints = 0;
-   mBegIndex = 0;
-   mOverCounter = 0;
-   mIsEndOfData = false;
-   mIsEndOfRun = false;
    mViewAnimation = false;
    
-   // Initialize view
-   if (mUseInitialViewPoint)
-      SetDefaultView();
-   
-   mGlInitialized = true;
    return true;
 }
 
@@ -454,6 +435,19 @@ bool TrajPlotCanvas::InitGL()
 wxString TrajPlotCanvas::GetGotoObjectName()
 {
    return mObjectNames[mViewObjId];
+}
+
+
+//------------------------------------------------------------------------------
+// wxGLContext* GetGLContext()
+//------------------------------------------------------------------------------
+/*
+ * Return current GLContext pointer.
+ */
+//------------------------------------------------------------------------------
+wxGLContext* TrajPlotCanvas::GetGLContext()
+{
+   return m_glContext;
 }
 
 
@@ -470,7 +464,7 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
    
    mIsEndOfRun = flag;
    mIsEndOfData = flag;
-
+   
    if (mNumData < 1)
    {
       Refresh(false);
@@ -619,7 +613,10 @@ void TrajPlotCanvas::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap)
 void TrajPlotCanvas::SetGLContext(wxGLContext *glContext)
 {
    #ifdef __USE_WX280_GL__
-   SetCurrent(*glContext);
+   if (glContext == NULL)
+      SetCurrent(*m_glContext);
+   else
+      SetCurrent(*glContext);
    #else
    SetCurrent();
    #endif
@@ -639,10 +636,33 @@ void TrajPlotCanvas::ClearPlot()
    glClearColor(0.0, 0.0, 0.0, 1);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    glFlush();
+   
+   // In wxWidgets-2.8.4, this shows previous plot
+   #ifndef __USE_WX280_GL__
    SwapBuffers();
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void ResetPlotInfo()
+//------------------------------------------------------------------------------
+/**
+ * Resets ploting infomation.
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::ResetPlotInfo()
+{
    mNumData = 0;
    mTotalPoints = 0;
    mBegIndex = 0;
+   mOverCounter = 0;
+   mIsEndOfData = false;
+   mIsEndOfRun = false;
+   
+   // Initialize view
+   if (mUseInitialViewPoint)
+      SetDefaultView();
 }
 
 
@@ -1389,7 +1409,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       
       #if DEBUG_TRAJCANVAS_LONGITUDE
       MessageInterface::ShowMessage
-         ("===> time=%f, mNumData=%d, mha=%f, longitude=%f, lst = %f\n",
+         ("   time=%f, mNumData=%d, mha=%f, longitude=%f, lst = %f\n",
           mTime[mNumData], mNumData, mha, longitude, lst);
       #endif
       
@@ -1403,9 +1423,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
              mInitialLongitude, mInitialMha);
          #endif
       }
-      
-      //MessageInterface::ShowMessage("===> UpdatePlot() update spacecrafts\n");
-      
+            
       //-------------------------------------------------------
       // update spacecraft position
       //-------------------------------------------------------
@@ -1496,8 +1514,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #endif
          }
       }
-      
-      //MessageInterface::ShowMessage("===> UpdatePlot() update other objects\n");
       
       //----------------------------------------------------
       // update object position
@@ -1626,7 +1642,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
       }
    }
    
-   //MessageInterface::ShowMessage("===> UpdatePlot() exiting\n");
 }
 
 
@@ -1703,10 +1718,12 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
    
    // Always initialize GL before run, InitGL() is called in OnPaint()
    // if using 2.6.3 or later version
+   // For 2.6.3 version initialize GL here
    #ifndef __USE_WX280_GL__
    InitGL();
    #endif
    
+   ResetPlotInfo();
    ClearPlot();
    
 } //AddObjectList()
@@ -1796,9 +1813,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
-{
-   //MessageInterface::ShowMessage("===> TrajPlotCanvas::OnPaint() called\n");
-   
+{   
    // must always be here
    wxPaintDC dc(this);
    
@@ -1809,14 +1824,17 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
    #endif
    
    #ifdef __USE_WX280_GL__
-   SetCurrent(*mGlContext);
+   SetCurrent(*m_glContext);
    #else
    SetCurrent();
    #endif
    
    #ifdef __USE_WX280_GL__
    if (!mGlInitialized)
+   {
       InitGL();
+      mGlInitialized = true;
+   }
    #endif
    
    if (mDrawWireFrame)
@@ -1859,12 +1877,13 @@ void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
       ChangeProjection(nWidth, nHeight, mAxisLength);
       
       #ifdef __USE_WX280_GL__
-      SetCurrent(*mGlContext);
+      SetCurrent(*m_glContext);
       #else
       SetCurrent();
       #endif
       
       glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
+      
    }
 }
 
@@ -2018,14 +2037,14 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
          
             #if DEBUG_ROTATE
             MessageInterface::ShowMessage
-               ("===> event.LeftIsDown() mCurrRotXYZAngle=%f, %f, %f\n",
+               ("   event.LeftIsDown() mCurrRotXYZAngle=%f, %f, %f\n",
                 mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
             #endif
             
             // if end-of-run compute new mfCamRotXYZAngle by calling ChangeView()
             if (mIsEndOfRun)
                ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
-
+            
             ComputeView(fEndX, fEndY);
             ChangeView(mCurrRotXAngle, mCurrRotYAngle, mCurrRotZAngle);
 
@@ -2268,7 +2287,7 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
    try
    {
       textureFile = fm->GetFullPathname(filename);
-   
+      
       #ifndef SKIP_DEVIL
          ILboolean status = ilLoadImage((char*)textureFile.c_str());
          if (!status)
@@ -2280,6 +2299,8 @@ GLuint TrajPlotCanvas::BindTexture(const wxString &objName)
          }
          else
          {
+            //ilutGLLoadImage((char*)textureFile.c_str());
+            //ret = 1;
             ret = ilutGLBindTexImage();
          }
       #else
@@ -2326,12 +2347,13 @@ void TrajPlotCanvas::SetDefaultView()
    mfCamRotXAngle = 0;
    mfCamRotYAngle = 0;
    mfCamRotZAngle = 0;
-
+   
    #ifdef USE_TRACKBALL
    ToQuat(mQuat, 0.0f, 0.0f, 0.0f, 0.0);
    #endif
    
-   mOriginId = GetObjectId("Earth");      
+   //mOriginId = GetObjectId("Earth");
+   
 }
 
 
@@ -2446,14 +2468,14 @@ void TrajPlotCanvas::SetupWorld()
       // Setup how we view the world
       glOrtho(mfLeftPos, mfRightPos, mfBottomPos, mfTopPos, mfViewNear, mfViewFar);
    }
-
+   
    //-----------------------------------------------------------------
    // Note: mouse rotation is applied in TransformView as MODELVIEW mode
    //-----------------------------------------------------------------
    
    //camera moves opposite direction to center on object
    //this is the point of rotation
-
+   
    int index = mViewObjId * MAX_DATA * 3 + (mNumData-1) * 3;
    glTranslatef(mObjectTmpPos[index+0], mObjectTmpPos[index+1],
                 -mObjectTmpPos[index+2]);
@@ -3201,8 +3223,8 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
    
    #if DEBUG_TRAJCANVAS_DRAW > 1
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawObject() mObjectTextureIdMap[%s]=%d\n",
-       objName.c_str(), mObjectTextureIdMap[objName]);
+      ("   mObjectTextureIdMap[%s]=%d\n", objName.c_str(),
+       mObjectTextureIdMap[objName]);
    #endif
    
    //-------------------------------------------------------
@@ -3233,7 +3255,7 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
          #if DEBUG_TRAJCANVAS_DRAW > 1
          if (!mIsEndOfRun)
             MessageInterface::ShowMessage
-               ("===> mha=%f, earthRotAngle=%f\n", mha, earthRotAngle);
+               ("   mha=%f, earthRotAngle=%f\n", mha, earthRotAngle);
          #endif
          
       }
@@ -3255,10 +3277,9 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       
       #if DEBUG_TRAJCANVAS_DRAW > 1
       if (!mIsEndOfRun)
-         MessageInterface::ShowMessage
-            ("===> backwards=%d, earthRotAngle=%f\n", backwards, earthRotAngle);
+         MessageInterface::ShowMessage("   earthRotAngle=%f\n", earthRotAngle);
       #endif
-
+      
       glRotatef(earthRotAngle, 0.0, 0.0, 1.0);
    }
    
@@ -3426,7 +3447,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             {
                #if DEBUG_SHOW_SKIP
                MessageInterface::ShowMessage
-                  ("===> plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
+                  ("   plot=%s, i1=%d, i2=%d, time1=%f, time2=%f\n   r1=%s, r2=%s\n",
                    GetName().c_str(), i-1, i, mTime[i-1], mTime[i], r1.ToString().c_str(),
                    r2.ToString().c_str());
                #endif
@@ -3517,7 +3538,6 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       //---------------------------------------------------------
       //draw object with texture
       //---------------------------------------------------------
-      //loj: 4/25/05 Why is spcacecraft rotaing itself?
       
       if (frame > 0)
       {
@@ -3531,8 +3551,8 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
                 mObjLastFrame[objId]);
             MessageInterface::ShowMessage
                ("   mObjectTmpPos=%f, %f, %f\n",
-                mObjectTmpPos[index1+0], mObjectTmpPos[index+1],
-                mObjectTmpPos[index+2]);
+                mObjectTmpPos[index1+0], mObjectTmpPos[index1+1],
+                mObjectTmpPos[index1+2]);
             #endif
             
             glPushMatrix();
@@ -3541,7 +3561,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             glTranslatef(-mObjectTmpPos[index1+0],
                          -mObjectTmpPos[index1+1],
                           mObjectTmpPos[index1+2]);
-
+            
             // first disable GL_TEXTURE_2D to show lines clearly
             // without this, lines are drawn dim (loj: 2007.06.11)
             glDisable(GL_TEXTURE_2D);
@@ -3842,7 +3862,7 @@ void TrajPlotCanvas::DrawEclipticPlane(UnsignedInt color)
 //  void DrawSunLine(int frame)
 //------------------------------------------------------------------------------
 /**
- * Draws Earth Sun lines.
+ * Draws Origin to Sun lines.
  */
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::DrawSunLine(int frame)
@@ -3851,24 +3871,18 @@ void TrajPlotCanvas::DrawSunLine(int frame)
    if (frame <= 0)
       return;
    
-   int earthId = GetObjectId("Earth");
    int sunId = GetObjectId("Sun");
    
-   // check for Earth and Sun
-   if (earthId == UNKNOWN_OBJ_ID || sunId == UNKNOWN_OBJ_ID)
+   // check for Sun
+   if (sunId == UNKNOWN_OBJ_ID)
       return;
    
-   Real earthPos[3], sunPos[3];
+   Real originPos[3], sunPos[3];
    Real distance = (Real)mAxisLength;
    Real mag;
-
-   int numSkip = frame/12; // draw 24 lines (12*2)
-   if (numSkip == 0)
-      numSkip = 1;
-   
    
    //--------------------------------
-   // draw sun lines
+   // draw sun line
    //--------------------------------
    
    // set color
@@ -3878,49 +3892,22 @@ void TrajPlotCanvas::DrawSunLine(int frame)
    glBegin(GL_LINES);
    int index = 0;
    
-   //for (int i=0; i<mNumData; i+=numSkip)
-   for (int i=1; i<=frame; i+=numSkip)
-   {
-      index = earthId * MAX_DATA * 3 + i * 3;
-      earthPos[0] = -mObjectTmpPos[index+0];
-      earthPos[1] = -mObjectTmpPos[index+1];
-      earthPos[2] =  mObjectTmpPos[index+2];
-      
-      index = sunId * MAX_DATA * 3 + i * 3;
-      sunPos[0] = -mObjectTmpPos[index+0];
-      sunPos[1] = -mObjectTmpPos[index+1];
-      sunPos[2] =  mObjectTmpPos[index+2];
-      
-      if (mOriginName == "Earth")
-      {
-         // show lines beyond the Sun
-         mag = sqrt(sunPos[0]*sunPos[0] + sunPos[1]*sunPos[1] +
-                    sunPos[2]*sunPos[2]);
-         glVertex3f(sunPos[0]/mag*distance, sunPos[1]/mag*distance,
-                    sunPos[2]/mag*distance);
-         glVertex3f(-sunPos[0]/mag*distance, -sunPos[1]/mag*distance,
-                    -sunPos[2]/mag*distance);
-      }
-      else if (mOriginName == "Sun")
-      {
-         // show lines beyond the Earth
-         mag = sqrt(earthPos[0]*earthPos[0] + earthPos[1]*earthPos[1] +
-                    earthPos[2]*earthPos[2]);
-         glVertex3f(earthPos[0]/mag*distance, earthPos[1]/mag*distance,
-                    earthPos[2]/mag*distance);
-         glVertex3f(-earthPos[0]/mag*distance, -earthPos[1]/mag*distance,
-                    -earthPos[2]/mag*distance);
-      }
-      else
-      {
-         // show lines between Sun and Earth and to -Sun
-         glVertex3f(earthPos[0], earthPos[1], earthPos[2]);
-         glVertex3f(sunPos[0], sunPos[1], sunPos[2]);
-         glVertex3f(earthPos[0], earthPos[1], earthPos[2]);
-         glVertex3f(-sunPos[0], -sunPos[1], -sunPos[2]);
-      }
-      
-   }
+   // draw one line from origin to Sun
+   index = mOriginId * MAX_DATA * 3 + frame * 3;
+   originPos[0] = -mObjectTmpPos[index+0];
+   originPos[1] = -mObjectTmpPos[index+1];
+   originPos[2] =  mObjectTmpPos[index+2];
+   
+   index = sunId * MAX_DATA * 3 + frame * 3;
+   sunPos[0] = -mObjectTmpPos[index+0];
+   sunPos[1] = -mObjectTmpPos[index+1];
+   sunPos[2] =  mObjectTmpPos[index+2];
+   
+   // show lines between Sun and Earth and to -Sun
+   glVertex3f(originPos[0], originPos[1], originPos[2]);
+   glVertex3f(sunPos[0], sunPos[1], sunPos[2]);
+   glVertex3f(originPos[0], originPos[1], originPos[2]);
+   glVertex3f(-sunPos[0], -sunPos[1], -sunPos[2]);
    
    glEnd();
    
@@ -4803,8 +4790,8 @@ bool TrajPlotCanvas::LoadImage(char *fileName)
    
    #if DEBUG_TRAJCANVAS_INIT
    int size = width * height * 3;
-   MessageInterface::ShowMessage("===> width=%d, height=%d, size=%d\n",
-                                 width, height, size);
+   MessageInterface::ShowMessage
+      ("   width=%d, height=%d, size=%d\n", width, height, size);
    #endif
    
    // Why is image upside down?

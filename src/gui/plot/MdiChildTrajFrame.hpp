@@ -62,7 +62,7 @@ public:
    Integer GetAnimationFrameIncrement();
    
    // setters
-   void SetGLContext(wxGLContext *glContext) { mCanvas->SetGLContext(glContext); }
+   void SetGLContext(wxGLContext *glContext = NULL) { mCanvas->SetGLContext(glContext); }
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
    void SetOverlapPlot(bool overlap);

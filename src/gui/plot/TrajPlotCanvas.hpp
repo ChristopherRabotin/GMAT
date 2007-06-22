@@ -41,7 +41,6 @@ public:
    bool InitGL();
    
    // getters
-   wxGLContext* GetGLContext() {return mGlContext;}
    bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
    bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
    bool  GetDrawWireFrame() {return mDrawWireFrame;}
@@ -64,6 +63,7 @@ public:
    const wxStringBoolMap& GetShowObjectMap() {return mShowObjectMap;}
    const wxStringColorMap& GetObjectColorMap() {return mObjectColorMap;}
    wxString GetGotoObjectName();
+   wxGLContext* GetGLContext();
    
    // setters
    void SetEndOfRun(bool flag = true);
@@ -87,10 +87,11 @@ public:
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbitNormalMap);
-   void SetGLContext(wxGLContext *glContext);
+   void SetGLContext(wxGLContext *glContext = NULL);
    
    // actions
    void ClearPlot();
+   void ResetPlotInfo();
    void RedrawPlot(bool viewAnimation);
    void ShowDefaultView();
    void ZoomIn();
@@ -169,9 +170,6 @@ private:
    // initialization
    bool mGlInitialized;
    wxString mPlotName;
-   
-   // for the newer (wx 2.7.x+) version of wxGLCanvas
-   wxGLContext *mGlContext;
    
    GuiInterpreter *theGuiInterpreter;
    wxStatusBar *theStatusBar;

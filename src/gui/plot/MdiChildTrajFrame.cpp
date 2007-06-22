@@ -729,14 +729,11 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
       {
          //MessageInterface::ShowMessage
          //   ("===> MdiChildTrajFrame::UpdatePlot() time=%f\n", time);
-
+         
          //-----------------------------------------------------------
          // Notes:
          // Added mCanvas->Refresh(false) here since Refresh() is
          // removed from the TrajPlotCanvas::UpdatePlot().
-         // The UpdateFrequency was not actually used since
-         // rajPlotCanvas::UpdatePlot() always called Refresh().
-         // The correct use UpdateFrequency will improve performance.
          //-----------------------------------------------------------
          mCanvas->Refresh(false);
          Update();
