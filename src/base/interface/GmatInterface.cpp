@@ -176,7 +176,7 @@ void GmatInterface::RunScript()
 bool GmatInterface::ExecuteCallback()
 {
    #ifdef DEBUG_TEST_CALLBACK
-      MessageInterface::ShowMessage("GI::ExecuteCallback being called ...\n");
+      MessageInterface::ShowMessage("GmatInterface::ExecuteCallback being called ...\n");
    #endif
    if (callbackObj)
    {
@@ -194,7 +194,7 @@ bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 {
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
-      "GI::RegisterCallbackServer being called with object %s \"%s\"...\n",
+      "GmatInterface::RegisterCallbackServer being called with object %s \"%s\"...\n",
       callbackObject->GetTypeName().c_str(), callbackObject->GetName().c_str());
    #endif
    callbackObj = callbackObject;
@@ -213,7 +213,7 @@ char* GmatInterface::GetCallbackStatus()
 {
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
-      "GI::GetCallbackStatus being called ...\n");
+      "GmatInterface::GetCallbackStatus being called ...\n");
    #endif
    static char dataString[MAX_PARAM_VAL_STRING];
    static char *executingStr = "Executing\0";
@@ -246,7 +246,7 @@ void  GmatInterface::PutCallbackData(std::string &data)
 {
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
-      "GI::PutCallbackData being called with data = %s\n", data.c_str());
+      "GmatInterface::PutCallbackData being called with data = %s\n", data.c_str());
    #endif
    if (callbackObj)
    {
@@ -267,7 +267,7 @@ char* GmatInterface::GetCallbackResults()
 {
    #ifdef DEBUG_TEST_CALLBACK
       MessageInterface::ShowMessage(
-      "GI::GetCallbackResults being called ...\n");
+      "GmatInterface::GetCallbackResults being called ...\n");
    #endif
    static char dataString[MAX_CALLBACK_DATA_VAL_STRING];
    static char *errorStr = "ERROR!!\0";
