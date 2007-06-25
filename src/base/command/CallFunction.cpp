@@ -1158,107 +1158,117 @@ void CallFunction::SendInParam(Parameter *param)
 void CallFunction::GetOutParams()
 {
 #ifdef __USE_MATLAB__
-   for (unsigned int i=0; i<mOutputList.size(); i++)
+   try
    {
-      Parameter *param = (Parameter *)mOutputList[i];
-      std::string varName = param->GetName();
-
-      #ifdef DEBUG_GET_OUTPUT
-      MessageInterface::ShowMessage
-         ("CallFunction::GetOutParams() OutParamType=%s, name=%s\n",
-          param->GetTypeName().c_str(), varName.c_str());
-      #endif
-      
-      if (param->GetTypeName() == "Array")
+      for (unsigned int i=0; i<mOutputList.size(); i++)
       {
-         Array *array = (Array *)param;
-         int numRows = array->GetIntegerParameter("NumRows");
-         int numCols = array->GetIntegerParameter("NumCols");
-         int totalCells = numRows * numCols;
+         Parameter *param = (Parameter *)mOutputList[i];
+         std::string varName = param->GetName();
          
-         //msvc++ change (loj: 2007.06.11)
-         //double outArray[totalCells];
-         double *outArray = new double[totalCells];
+         #ifdef DEBUG_GET_OUTPUT
+         MessageInterface::ShowMessage
+            ("CallFunction::GetOutParams() OutParamType=%s, name=%s\n",
+             param->GetTypeName().c_str(), varName.c_str());
+         #endif
          
-         //status =
-         MatlabInterface::GetVariable(varName, totalCells, outArray);
-         
-         // create rmatrix
-         Rmatrix rmatrix = Rmatrix (numRows, numCols);
-         
-         for (int j=0; j<numCols; j++)
-            for (int k=0; k<numRows; k++)
-               rmatrix(k, j) = outArray[(j*numRows) + k];
-         
-         #ifdef DEBUG_USE_ARRAY
+         if (param->GetTypeName() == "Array")
+         {
+            Array *array = (Array *)param;
+            int numRows = array->GetIntegerParameter("NumRows");
+            int numCols = array->GetIntegerParameter("NumCols");
+            int totalCells = numRows * numCols;
+            
+            //msvc++ change (loj: 2007.06.11)
+            //double outArray[totalCells];
+            double *outArray = new double[totalCells];
+            
+            //status =
+            MatlabInterface::GetVariable(varName, totalCells, outArray);
+            
+            // create rmatrix
+            Rmatrix rmatrix = Rmatrix (numRows, numCols);
+            
+            for (int j=0; j<numCols; j++)
+               for (int k=0; k<numRows; k++)
+                  rmatrix(k, j) = outArray[(j*numRows) + k];
+            
+            #ifdef DEBUG_USE_ARRAY
             for (int j=0; j<numRows; j++)
             {
                for (int k=0; k<numCols; k++)
                   MessageInterface::ShowMessage("%f\t", rmatrix(j, k));
                MessageInterface::ShowMessage("\n");
             }
-         #endif
-
-
-         // assign rmatrix to array
-         array->SetRmatrixParameter("RmatValue", rmatrix);
-         
-         delete [] outArray;
-         
-      }
-      else if (param->GetTypeName() == "String")
-      {
-         // need to output string value to buffer         
-         char buffer[512];
-         MatlabInterface::OutputBuffer(buffer, 512);
-         EvalMatlabString(varName);
-         
-         // get rid of "var ="
-         char *ptr = strtok((char *)buffer, "=");
-         ptr = strtok(NULL, "\n");
-
-         param->SetStringParameter("Expression", ptr);
-      }
-      else if (param->GetTypeName() == "Variable")
-      {
-         //msvc++ change (loj: 2007.06.11)
-         //double outArray[1];
-         double *outArray = new double[1];
-         
-         MatlabInterface::GetVariable(varName, 1, outArray);
-         //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
-         param->SetReal(outArray[0]);
-         std::ostringstream ss;
-         ss.precision(18);
-         ss << outArray[0];
-         param->SetStringParameter("Expression", ss.str());
-         
-         #ifdef DEBUG_UPDATE_VAR
+            #endif
+            
+            // assign rmatrix to array
+            array->SetRmatrixParameter("RmatValue", rmatrix);
+            
+            delete [] outArray;
+            
+         }
+         else if (param->GetTypeName() == "String")
+         {
+            // need to output string value to buffer         
+            char buffer[512];
+            MatlabInterface::OutputBuffer(buffer, 512);
+            EvalMatlabString(varName);
+            
+            // get rid of "var ="
+            char *ptr = strtok((char *)buffer, "=");
+            ptr = strtok(NULL, "\n");
+            
+            param->SetStringParameter("Expression", ptr);
+         }
+         else if (param->GetTypeName() == "Variable")
+         {
+            //msvc++ change (loj: 2007.06.11)
+            //double outArray[1];
+            double *outArray = new double[1];
+            
+            MatlabInterface::GetVariable(varName, 1, outArray);
+            //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
+            param->SetReal(outArray[0]);
+            std::ostringstream ss;
+            ss.precision(18);
+            ss << outArray[0];
+            param->SetStringParameter("Expression", ss.str());
+            
+            #ifdef DEBUG_UPDATE_VAR
             MessageInterface::ShowMessage
                ("The EvaluateReal is %f\n",  param->EvaluateReal());
             MessageInterface::ShowMessage
                ("The GetReal is %f\n", param->GetReal());
-         #endif
+            #endif
             
-         delete [] outArray;
-      }
-      else // objects
-      {
-         //MessageInterface::ShowMessage("==>Handle Object\n");
-         
-         char buffer[8192];
-         MatlabInterface::OutputBuffer(buffer, 8192);
-         
-         // need to output string value to buffer
-         EvalMatlabString(varName);
-         
-         //MessageInterface::ShowMessage("==>buffer=\n%s\n", buffer);
-
-         // assign new value to object
-         UpdateObject(param, buffer);
-         
+            delete [] outArray;
+         }
+         else // objects
+         {
+            //MessageInterface::ShowMessage("==>Handle Object\n");
+            
+            char buffer[8192];
+            MatlabInterface::OutputBuffer(buffer, 8192);
+            
+            // need to output string value to buffer
+            EvalMatlabString(varName);
+            
+            //MessageInterface::ShowMessage("==>buffer=\n%s\n", buffer);
+            
+            // assign new value to object
+            UpdateObject(param, buffer);
+         }
       }
    }
+   catch (BaseException &e)
+   {
+      std::string moreMsg = e.GetFullMessage() + " in \n" +
+         GetGeneratingString(Gmat::SCRIPTING);
+      e.SetMessage("");
+      e.SetDetails(moreMsg);
+      throw;
+   }
+   
 #endif  //__USE_MATLAB__
 }
 
