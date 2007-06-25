@@ -28,7 +28,7 @@ class InterfaceException : public BaseException
 {
    public:
       // class constructor
-      InterfaceException(const std::string &details);
+      InterfaceException(const std::string &details = "");
       // class destructor
       ~InterfaceException();
       // Copy constructor
