@@ -215,27 +215,30 @@ int MatlabInterface::Close()
 
 
 //------------------------------------------------------------------------------
-//  int PutVariable(const std::string &matlabVarName, int numElements, double inArray[])
+// int PutVariable(const std::string &matlabVarName, int numElements,
+// double inArray[])
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Put arrays to Matlab workspace.
-//
-//  Returns:
-//     1 = no error, 0 = error
+/**
+ * Put arrays to Matlab workspace.
+ *
+ * @param <matlabVarName> variable name in the MATLAB workspace
+ * @param <numElements> number of elements to put to MATLAB workspace
+ * @return 1 = no error, 0 = error
+ */
 //------------------------------------------------------------------------------
-int MatlabInterface::PutVariable(const std::string &matlabVarName, int numElements,
-                        double inArray[])
+int MatlabInterface::PutVariable(const std::string &matlabVarName,
+                                 int numElements, double inArray[])
 {
 #if defined __USE_MATLAB__
 
    // create a matlab variable
    mxArrayInputPtrD = mxCreateDoubleMatrix(1, numElements, mxREAL);
-
+   
    memcpy((char*)mxGetPr(mxArrayInputPtrD), (char*)inArray, numElements*sizeof(double));
-
+   
    // place the variable mxArrayInputPtrD into the MATLAB workspace
    engPutVariable(enginePtrD, matlabVarName.c_str(), mxArrayInputPtrD);
-//   engPutArray(enginePtrD, mxArrayInputPtrD);
+   
 #endif
 
    return 1;
@@ -244,46 +247,61 @@ int MatlabInterface::PutVariable(const std::string &matlabVarName, int numElemen
 
 
 //------------------------------------------------------------------------------
-//  int GetVariable(const std::string &matlabVarName, double outArray[])
+//  int GetVariable(const std::string &matlabVarName, int numElements,
+//                  double outArray[])
 //------------------------------------------------------------------------------
-//  Purpose:
-//     Get arrays from Matlab workspace.
-//
-//  Returns:
-//     1 = no error, 0 = error
+/**
+ * Get arrays from Matlab workspace.
+ *
+ * @param <matlabVarName> variable name in the MATLAB workspace
+ * @param <numElements> number of elements to receive from MATLAB
+ * @Return 1 = no error, 0 = error
+ * @exception <InterfaceException> thrown if empty output was received
+ */
 //------------------------------------------------------------------------------
-int MatlabInterface::GetVariable(const std::string &matlabVarName, int numElements,
-                           double outArray[])
+int MatlabInterface::GetVariable(const std::string &matlabVarName,
+                                 int numElements, double outArray[])
 {
 #if defined __USE_MATLAB__
-//   int i;
-   //mxArrayOutputPtrD = NULL;
    // create a matlab variable into which to put the data
    mxArrayInputPtrD = mxCreateDoubleMatrix(1, numElements, mxREAL);
+   
    #ifdef DEBUG_MATLAB_GET
-   MessageInterface::ShowMessage("Entering MatlabInterface::GetVariable\n");
+   MessageInterface::ShowMessage
+      ("Entering MatlabInterface::GetVariable() matlabVarName=%s, numElements=%d, "
+       "mxArrayInputPtrD=%p\n", matlabVarName.c_str(), numElements, mxArrayInputPtrD);
    #endif
+   
    // set precision to long
-   EvalString("format long");      
+   EvalString("format long");
+   
    // get the variable from the MATLAB workspace
    mxArrayOutputPtrD = engGetVariable(enginePtrD, matlabVarName.c_str());
    
    if (mxArrayOutputPtrD == NULL)
    {
-//      MessageInterface::ShowMessage("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
-      // printf("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
+      #ifdef DEBUG_MATLAB_GET
+      MessageInterface::ShowMessage
+         ("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
+      #endif
       return 0;
    }
    else
    {
-      memcpy((char*)outArray, (char*)mxGetPr(mxArrayOutputPtrD), numElements*sizeof(double));
-      //printf("MatlabInterface::GetArray():output value[0:2] = %g, %g, %g\n",
-      //       outArray[0], outArray[1], outArray[2]);
+      // If real numeric pointer is NULL, throw an exception
+      double *realPtr = mxGetPr(mxArrayOutputPtrD);
+      if (realPtr == NULL)
+         throw InterfaceException("Received empty output from MATLAB");
+      
+      memcpy((char*)outArray, (char*)mxGetPr(mxArrayOutputPtrD),
+             numElements*sizeof(double));
+      
       #ifdef DEBUG_MATLAB_GET
       MessageInterface::ShowMessage("      outArray  = \n");
       for (Integer ii=0; ii < numElements; ii++)
          MessageInterface::ShowMessage("         %.12f\n", outArray[ii]);
       #endif
+      
       mxDestroyArray(mxArrayOutputPtrD);
       return 1;
    }
