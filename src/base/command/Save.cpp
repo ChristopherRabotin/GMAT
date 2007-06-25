@@ -40,6 +40,7 @@ Save::Save() :
    wasWritten    (false),
    writeVerbose  (false)
 {
+   fileArray = NULL;
 }
 
 
@@ -52,7 +53,8 @@ Save::Save() :
 //------------------------------------------------------------------------------
 Save::~Save()
 {
-   delete [] fileArray;
+   if (fileArray)
+      delete [] fileArray;
 }
 
 
