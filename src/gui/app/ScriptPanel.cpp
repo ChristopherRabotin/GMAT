@@ -85,7 +85,8 @@ void ScriptPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    
    mLineNumberTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(50, -1), 0);
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(50, -1),
+                     wxTE_PROCESS_ENTER);
       
 #ifndef __WXMSW__
    mFileContentsTextCtrl = new
@@ -137,6 +138,10 @@ void ScriptPanel::Create()
 //------------------------------------------------------------------------------
 void ScriptPanel::LoadData()
 {
+   #if DEBUG_SCRIPT_PANEL
+   MessageInterface::ShowMessage("ScriptPanel::LoadData() entered\n");
+   #endif
+   
    wxFile *file = new wxFile();
    bool mFileExists = file->Exists(mScriptFilename);
       
@@ -155,6 +160,9 @@ void ScriptPanel::LoadData()
    
    mOldLastPos = mFileContentsTextCtrl->GetLastPosition();
    
+   #if DEBUG_SCRIPT_PANEL
+   MessageInterface::ShowMessage("ScriptPanel::LoadData() exiting\n");
+   #endif
 }
 
 
