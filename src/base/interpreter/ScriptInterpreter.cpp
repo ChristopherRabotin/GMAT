@@ -542,11 +542,11 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
+bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCmd)
 {
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::Parse() logicBlock = %s\n", logicBlock.c_str());
+      ("ScriptInterpreter::Parse() logicalBlock = %s\n", logicalBlock.c_str());
    #endif
 
    bool retval = true;
@@ -559,7 +559,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       ("   currentBlockType=%d, inCommandMode=%d, inRealCommandMode=%d\n",
        currentBlockType, inCommandMode, inRealCommandMode);
    for (UnsignedInt i=0; i<sarray.size(); i++)
-      MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, sarray[i].c_str());
+      MessageInterface::ShowMessage("   sarray[%d]=%s\n", i, sarray[i].c_str());
    #endif
    
    // check for empty chunks
@@ -574,7 +574,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
    // for comments
    std::string preStr = ""; 
    std::string inStr = ""; 
-      
+   
    preStr = theTextParser.GetPrefaceComment();
    inStr = theTextParser.GetInlineComment();
    
@@ -583,13 +583,18 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
    count = chunks.size();
    GmatBase *obj = NULL;
    
+   #ifdef DEBUG_PARSE
+   for (int i=0; i<count; i++)
+      MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
+   #endif
+   
    if (currentBlockType == Gmat::COMMENT_BLOCK)
    {
       if (logicalBlockCount == 0)
          headerComment = currentBlock;
       else
          footerComment = currentBlock;
-         
+      
       // More to do here for a block of comments (See page 35)
    }
    else if (currentBlockType == Gmat::DEFINITION_BLOCK)
@@ -684,11 +689,11 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       
       if (count < 2)
       {
-         if ((logicBlock.find("End")           != logicBlock.npos  &&
-              logicBlock.find("EndFiniteBurn") == logicBlock.npos) ||
-             (logicBlock.find("BeginScript")   != logicBlock.npos) ||
-             (logicBlock.find("Else")          != logicBlock.npos) ||
-             (logicBlock.find("Stop")          != logicBlock.npos))
+         if ((logicalBlock.find("End")           != logicalBlock.npos  &&
+              logicalBlock.find("EndFiniteBurn") == logicalBlock.npos) ||
+             (logicalBlock.find("BeginScript")   != logicalBlock.npos) ||
+             (logicalBlock.find("Else")          != logicalBlock.npos) ||
+             (logicalBlock.find("Stop")          != logicalBlock.npos))
          {
             obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
          }
@@ -729,14 +734,14 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       logicalBlockCount++;
    }
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
-   {
+   {      
       if (count < 2)
       {
          InterpreterException ex("Missing parameter assigning object for: ");
          HandleError(ex);
          return false;
       }
-      
+            
       GmatBase *owner = NULL;
       std::string attrStr = ""; 
       std::string attrInLineStr = ""; 
@@ -785,7 +790,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
       
       bool createAssignment = true;
-
+      
       if (inCommandMode)
       {
          // If LHS is CoordinateSystem property or Subscriber Call MakeAssignment.
@@ -804,7 +809,7 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
       }
       else
          createAssignment = false;
-
+      
       
       if (createAssignment)
          obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1], retval, inCmd);
@@ -812,7 +817,12 @@ bool ScriptInterpreter::Parse(const std::string &logicBlock, GmatCommand *inCmd)
          obj = MakeAssignment(chunks[0], chunks[1]);
       
       if (obj == NULL)
+      {
+         #if DEBUG_PARSE
+         MessageInterface::ShowMessage("   obj is NULL, so just return false\n");
+         #endif
          return false;
+      }
       
       // paramID will be assigned from call to Interpreter::FindPropertyID()
       if ( FindPropertyID(obj, chunks[0], &owner, paramID, paramType) )
