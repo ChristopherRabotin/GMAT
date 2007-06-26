@@ -210,6 +210,9 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       
       // Remove leading and trailing blank spaces and ending semi-colon
       str = GmatStringUtil::Trim(str, GmatStringUtil::BOTH, true);
+
+      // Remove trailing space after removing semi-colon
+      str = GmatStringUtil::Trim(str, GmatStringUtil::TRAILING);
       
       length = str.size();
       
@@ -465,8 +468,13 @@ StringArray TextParser::ChunkLine()
       index1 = str.find("Create");
       if (index1 == str.npos)
       {
+         #if DEBUG_TP_CHUNK_LINE
          sprintf(errorMsg, "TextParser::ChunkLine() keyword \"Create\" not "
                  "found in the definition block\n   \"%s\"\n", str.c_str());
+         MessageInterface::ShowMessage("%s", errorMsg);
+         #endif
+         
+         sprintf(errorMsg, "The keyword \"Create\" not found in the definition block");
          throw InterpreterException(errorMsg);
       }
       else
@@ -479,8 +487,13 @@ StringArray TextParser::ChunkLine()
          
          if (index1 == str.npos)
          {
+            #if DEBUG_TP_CHUNK_LINE
             sprintf(errorMsg, "TextParser::ChunkLine() object type not "
                     "found in the definition block\n   \"%s\"\n", str.c_str());
+            MessageInterface::ShowMessage("%s", errorMsg);
+            #endif
+            
+            sprintf(errorMsg, "Object type not found in the definition block");
             throw InterpreterException(errorMsg);
          }
          else
@@ -492,8 +505,13 @@ StringArray TextParser::ChunkLine()
             
             if (index1 == str.npos)
             {
+               #if DEBUG_TP_CHUNK_LINE
                sprintf(errorMsg, "TextParser::ChunkLine() object name not "
                        "found in the definition block\n   \"%s\"\n", str.c_str());
+               MessageInterface::ShowMessage("%s", errorMsg);
+               #endif
+               
+               sprintf(errorMsg, "Object name not found in the definition block");
                throw InterpreterException(errorMsg);
             }
             else
@@ -511,8 +529,13 @@ StringArray TextParser::ChunkLine()
       index1 = str.find_first_not_of(whiteSpace);
       if (index1 == str.npos)
       {
+         #if DEBUG_TP_CHUNK_LINE
          sprintf(errorMsg, "TextParser::ChunkLine() command name not found "
                  "in the command block\n   \"%s\"\n", str.c_str());
+         MessageInterface::ShowMessage("%s", errorMsg);
+         #endif
+         
+         sprintf(errorMsg, "Command name not found in the command block");
          throw InterpreterException(errorMsg);
       }
       else
@@ -544,8 +567,13 @@ StringArray TextParser::ChunkLine()
       
       if (index1 == str.npos)
       {
+         #if DEBUG_TP_CHUNK_LINE
          sprintf(errorMsg, "TextParser::ChunkLine() no assignment expression "
                  "found in the assignment block\n   \"%s\"\n", str.c_str());
+         MessageInterface::ShowMessage("%s", errorMsg);
+         #endif
+         
+         sprintf(errorMsg, "No assignment expression found in the assignment block");
          throw InterpreterException(errorMsg);
       }
       else
@@ -567,8 +595,13 @@ StringArray TextParser::ChunkLine()
             
             if (index3 == str.npos || index2 == 0)
             {
+               #if DEBUG_TP_CHUNK_LINE
                sprintf(errorMsg, "TextParser::ChunkLine() LHS of = not found in "
                        "the assignment block\n   \"%s\"\n", str.c_str());
+               MessageInterface::ShowMessage("%s", errorMsg);
+               #endif
+               
+               sprintf(errorMsg, "LHS of \"=\" not found in the assignment block");
                throw InterpreterException(errorMsg);
             }
             else
@@ -579,8 +612,13 @@ StringArray TextParser::ChunkLine()
                
                if (index1 == str.npos)
                {
+                  #if DEBUG_TP_CHUNK_LINE
                   sprintf(errorMsg, "TextParser::ChunkLine() RHS of = not found in "
                           "the assignment block\n   \"%s\"\n", str.c_str());
+                  MessageInterface::ShowMessage("%s", errorMsg);
+                  #endif
+                  
+                  sprintf(errorMsg, "RHS of \"=\" not found in the assignment block");
                   throw InterpreterException(errorMsg);
                }
                else
@@ -838,6 +876,9 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
       {
          sprintf(errorMsg, "TextParser::SeparateBrackets() \"%s\" is not enclosed "
                  "with \"%s\"", str1.c_str(), bracketPair.c_str());
+         MessageInterface::ShowMessage("%s", errorMsg);
+         sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
+                 bracketPair.c_str());
          throw InterpreterException(errorMsg);
       }
    }
