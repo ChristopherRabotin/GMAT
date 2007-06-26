@@ -109,49 +109,49 @@ void VaryPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Initial Value"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mInitialTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                     wxDefaultPosition, wxSize(80,-1), 0);
+                                     wxDefaultPosition, wxSize(100,-1), 0);
 
    // Perturbation
    pertStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Perturbation"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mPertTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                  wxDefaultPosition, wxSize(80,-1), 0);
+                                  wxDefaultPosition, wxSize(100,-1), 0);
 
    // Lower
    wxStaticText *minValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Lower"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
+                                   wxDefaultPosition, wxSize(100,-1), 0);
 
    // Upper
    wxStaticText *maxValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Upper"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
+                                   wxDefaultPosition, wxSize(100,-1), 0);
 
    // Max Step
    maxStepStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Max Step"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMaxStepTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                 wxDefaultPosition, wxSize(80,-1), 0);
+                                 wxDefaultPosition, wxSize(100,-1), 0);
 
    // Additive Scale Factor
    additiveStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Additive Scale Factor"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mAdditiveTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
+                                   wxDefaultPosition, wxSize(100,-1), 0);
 
    // Multiplicative Scale Factor
    multiplicativeStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Multiplicative Scale Factor"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMultiplicativeTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
-                                   wxDefaultPosition, wxSize(80,-1), 0);
+                                   wxDefaultPosition, wxSize(100,-1), 0);
    
    // wx*Sizers
    wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
