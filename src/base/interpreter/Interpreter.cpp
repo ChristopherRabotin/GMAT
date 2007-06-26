@@ -1860,7 +1860,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       {
          if (lhs == "")
          {
-            InterpreterException ex("==>1 Object field assignment is imcomplelte");
+            InterpreterException ex("Object field assignment is imcomplelte");
             HandleError(ex);
          }
          else
