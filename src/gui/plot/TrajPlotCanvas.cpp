@@ -1045,7 +1045,9 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    // So that spapcecraft won't overlap each other.
    //@todo: need better way to scale spacecraft size.
    if (viewCs->GetOrigin()->IsOfType(Gmat::SPACECRAFT))
-      mScRadius = 50;
+      mScRadius = 30;
+   else if (viewCs->GetOrigin()->IsOfType(Gmat::CELESTIAL_BODY))
+      mScRadius = mObjectRadius[mOriginId] * 0.03;
    
    // set center view object as origin of the CoordinateSystem if view direction
    // is not an object
