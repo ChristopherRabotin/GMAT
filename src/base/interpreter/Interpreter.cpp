@@ -1177,8 +1177,19 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    Integer length = desc.size();
    std::string str1 = desc;
    if (desc[0] == '(' && desc[length-1] == ')')
+   {
       str1 = desc.substr(1, length-2);
-   
+   }
+   else
+   {
+      if (!GmatStringUtil::IsParenBalanced(desc))
+      {
+         InterpreterException ex("The Command has unbalanced parenthesis");
+         HandleError(ex);
+         return false;
+      }
+   }
+      
    UnsignedInt start = 0;
    UnsignedInt right = 0;
    UnsignedInt op = 0;
@@ -1192,21 +1203,20 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       op = str1.find_first_of(opStr, start);
       if (op == str1.npos)
       {
-         // Add final right of operator
+         // Add final right of operator, if not blank
          str2 = GmatStringUtil::Trim(str1.substr(start));
-         parts.push_back(str2);
+         if (str2 != "")
+            parts.push_back(str2);
          break;
       }
       
       // Add left of operator
       str2 = GmatStringUtil::Trim(str1.substr(start, op-start));
-      //parts.push_back(str1.substr(start, op-start));
       parts.push_back(str2);
 
       // Add operator
       right = str1.find_first_not_of(opStr, op);      
       str2 = GmatStringUtil::Trim(str1.substr(op, right-op));
-      //parts.push_back(str1.substr(op, right-op));
       parts.push_back(str2);
       
       start = op + 1;
@@ -1226,9 +1236,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    // assuming there is no boolean argument
    if (count < 3 || ((count-3)%4) != 0)
    {
-      InterpreterException ex
-         ("The Command has invalid number of conditions in " + type + " " +
-          desc + "\n");
+      InterpreterException ex("The Command has invalid number of conditions");
       HandleError(ex);
       return false;
    }
@@ -1266,14 +1274,6 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
          CreateParameter(type, parts[i+2], ownerName, depObj);
       
       cb->SetCondition(parts[i], parts[i+1], parts[i+2]);
-      
-      // Set 1st variable in condition, if exist
-      //if (!SetCommandParameter(cmd, parts[i], "The variable in Condition", true, true))
-      //   retval = false;
-      
-      // Set 2nd variable in condition, if exist
-      //if (!SetCommandParameter(cmd, parts[i+2], "The variable in Condition", true, true))
-      //   retval = false;
       
       if (count > i+3)
       {
@@ -1858,9 +1858,17 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       
       if (lhsObj == NULL)
       {
-         InterpreterException ex
-            ("Cannot find LHS object named \"" + lhsObjName + "\"");
-         HandleError(ex);
+         if (lhs == "")
+         {
+            InterpreterException ex("==>1 Object field assignment is imcomplelte");
+            HandleError(ex);
+         }
+         else
+         {
+            InterpreterException ex
+               ("Cannot find LHS object named \"" + lhsObjName + "\"");
+            HandleError(ex);
+         }
          return NULL;
       }
       
@@ -1884,8 +1892,17 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       }
       else
       {
-         InterpreterException ex("Cannot find LHS object \"" + lhs + "\"");
-         HandleError(ex);
+         if (lhs == "")
+         {
+            InterpreterException ex("Missing equal sign in object field assignment");
+            HandleError(ex);
+         }
+         else
+         {
+            InterpreterException ex("Cannot find LHS object named \"" + lhs + "\"");
+            HandleError(ex);
+         }
+         return NULL;
       }
    }
    
@@ -3997,7 +4014,7 @@ bool Interpreter::FinalPass()
    objList = theModerator->GetListOfObjects(Gmat::UNKNOWN_OBJECT);
    
    #ifdef DEBUG_FINAL_PASS //------------------------------ debug ----
-   MessageInterface::ShowMessage("FinalPass:: All objList =\n");
+   MessageInterface::ShowMessage("FinalPass:: All object list =\n");
    for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
       MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
    #endif //------------------------------------------- end debug ----
@@ -4115,7 +4132,7 @@ bool Interpreter::FinalPass()
    objList = theModerator->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
    
    #ifdef DEBUG_FINAL_PASS //------------------------------ debug ----
-   MessageInterface::ShowMessage("FinalPass:: CS objList =\n");
+   MessageInterface::ShowMessage("FinalPass:: CoordinateSystem list =\n");
    for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
       MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
    #endif //------------------------------------------- end debug ----
@@ -4169,7 +4186,7 @@ bool Interpreter::FinalPass()
    objList = theModerator->GetListOfObjects(Gmat::CALCULATED_POINT);
    
    #ifdef DEBUG_FINAL_PASS
-   MessageInterface::ShowMessage("FinalPass:: CalculatedPoint objList =\n");
+   MessageInterface::ShowMessage("FinalPass:: CalculatedPoint list =\n");
    for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
       MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
    #endif
@@ -4202,11 +4219,23 @@ bool Interpreter::FinalPass()
    //-------------------------------------------------------------------
    objList = theModerator->GetListOfObjects(Gmat::SPACECRAFT);
 
+   #ifdef DEBUG_FINAL_PASS
+   MessageInterface::ShowMessage("FinalPass:: Spacecraft list =\n");
+   for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
+      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+   #endif
+   
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
    {
       obj = GetConfiguredObject(*i);
+      
       std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       GmatBase *csObj = GetConfiguredObject(csName);
+
+      // To catch as many errors we can, continue with next object
+      if (csObj == NULL)
+         continue;
+      
       #ifdef DEBUG_FINAL_PASS
       MessageInterface::ShowMessage
          ("   Calling SetRefObject(%s(%p), %d)\n", csObj->GetName().c_str(),
@@ -4438,7 +4467,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                   {
                      InterpreterException ex
                         ("Nonexistent object \"" + refNames[j] + 
-                         "\" referenced in the " + obj->GetTypeName() + "\"" +
+                         "\" referenced in the " + obj->GetTypeName() + "\" " +
                          obj->GetName() + "\"");
                      HandleError(ex, writeLine);
                      retval = false;
@@ -4471,7 +4500,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
             {
                std::string objName = obj->GetTypeName();
                if (obj->GetType() != Gmat::COMMAND)
-                  objName = objName + "\"" + objName + "\"";
+                  objName = objName + " \"" + obj->GetName() + "\"";
                
                GmatBase *refObj = GetConfiguredObject(refNames[j]);
                
