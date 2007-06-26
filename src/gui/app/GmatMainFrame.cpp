@@ -182,6 +182,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_SIZE(GmatMainFrame::OnMainFrameSize)
    EVT_CLOSE(GmatMainFrame::OnClose)
    EVT_SET_FOCUS(GmatMainFrame::OnSetFocus)
+   EVT_KEY_DOWN(GmatMainFrame::OnKeyDown)
    
    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
@@ -910,6 +911,29 @@ Integer GmatMainFrame::RunCurrentMission()
 
 
 //------------------------------------------------------------------------------
+// void StopRunningMission()
+//------------------------------------------------------------------------------
+/*
+ * Stops running mission and updates tool bar accordingly.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::StopRunningMission()
+{
+   wxToolBar* toolBar = GetToolBar();
+   toolBar->EnableTool(TOOL_STOP, FALSE);
+   wxYield();
+   
+   theGuiInterpreter->ChangeRunState("Stop");
+   mRunPaused = false;
+   
+   menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
+   UpdateMenus(TRUE);
+   toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
+   toolBar->EnableTool(TOOL_RUN, TRUE);
+}
+
+
+//------------------------------------------------------------------------------
 // void NotifyRunCompleted()
 //------------------------------------------------------------------------------
 /*
@@ -1354,17 +1378,7 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 {
-   wxToolBar* toolBar = GetToolBar();
-   toolBar->EnableTool(TOOL_STOP, FALSE);
-   wxYield();
-   
-   theGuiInterpreter->ChangeRunState("Stop");
-   mRunPaused = false;
-   
-   menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
-   UpdateMenus(TRUE);
-   toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
-   toolBar->EnableTool(TOOL_RUN, TRUE);
+   StopRunningMission();
 }
 
 
@@ -2587,6 +2601,21 @@ void GmatMainFrame::OnSetFocus(wxFocusEvent& event)
 
 
 //------------------------------------------------------------------------------
+// void OnKeyDown(wxKeyEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Processes wxKeyEvent.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnKeyDown(wxKeyEvent &event)
+{
+   int keyDown = event.GetKeyCode();
+   if (keyDown == WXK_ESCAPE)
+      StopRunningMission();
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateMenus(bool openOn)
 //------------------------------------------------------------------------------
 void GmatMainFrame::UpdateMenus(bool openOn)
@@ -2598,7 +2627,6 @@ void GmatMainFrame::UpdateMenus(bool openOn)
       theChild->menuBar->Enable(MENU_FILE_OPEN_SCRIPT, openOn);
       node = node->GetNext();
    }
-
 }
 
 
@@ -2644,11 +2672,27 @@ void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
-// void SetScriptFileName(const std::string &filename)
+// bool SetScriptFileName(const std::string &filename)
 //------------------------------------------------------------------------------
-void GmatMainFrame::SetScriptFileName(const std::string &filename)
+/*
+ * Sets current script file name.
+ *
+ * @param  filename  The script file name
+ * @return true if script file name set to new one, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::SetScriptFileName(const std::string &filename)
 {
+   if (!mRunCompleted)
+   {
+      wxMessageBox(wxT("GMAT is still running the mission.\n"
+                       "Please STOP before reading a new script."),
+                   wxT("GMAT Warning"));
+      return false;
+   }
+   
    mScriptFilename = filename;
+   return true;
 }
 
 

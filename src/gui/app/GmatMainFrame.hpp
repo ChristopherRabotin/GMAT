@@ -69,6 +69,7 @@ public:
                         const wxString &savePath = "", bool openScript = true,
                         bool multScripts = false);
    Integer RunCurrentMission();
+   void StopRunningMission();
    void NotifyRunCompleted();
    void ProcessPendingEvent();
    void StartServer();
@@ -89,7 +90,7 @@ public:
    void OnScriptBuildAndRun(wxCommandEvent& event);
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
    
-   void SetScriptFileName(const std::string &filename);
+   bool SetScriptFileName(const std::string &filename);
    
    MdiChildTrajFrame *trajSubframe;
    MdiChildTsFrame *tsSubframe;
@@ -175,6 +176,7 @@ private:
    void OnMsgSashDrag(wxSashEvent &event);
    void OnMainFrameSize(wxSizeEvent &event);
    void OnSetFocus(wxFocusEvent &event);
+   void OnKeyDown(wxKeyEvent &event);
 };
 
 namespace GmatMenu
