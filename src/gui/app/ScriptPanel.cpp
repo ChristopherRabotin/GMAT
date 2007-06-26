@@ -309,8 +309,8 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       
       if ( mFileContentsTextCtrl->GetValue() != "")
       {
-         GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str());
-         GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+         if (GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+            GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
       }
       else
       {
@@ -339,8 +339,8 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       
       if ( mFileContentsTextCtrl->GetValue() != "")
       {
-         GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str());
-         GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+         if (GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+            GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
       }
       else
       {

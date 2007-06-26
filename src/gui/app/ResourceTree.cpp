@@ -2912,19 +2912,24 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
    #endif
    
    // Set the filename to mainframe, so save will not bring up the file dialog
-   GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
+   bool fileSet = GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
    
-   // Interpret script
-   bool status = GmatAppData::GetMainFrame()->
-      InterpretScript(filename, readBack, savePath, false, true);
-   
-   if (!status)
+   if (fileSet)
    {
-      mBuildErrorCount++;
-      mFailedScriptsList.Add(filename);
+      // Interpret script
+      bool status = GmatAppData::GetMainFrame()->
+         InterpretScript(filename, readBack, savePath, false, true);
+   
+      if (!status)
+      {
+         mBuildErrorCount++;
+         mFailedScriptsList.Add(filename);
+      }
+      
+      return status;
    }
    
-   return status;
+   return false;
 }
 
 
@@ -3215,7 +3220,6 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_REMOVE_ALL_SCRIPTS, wxT("Remove All"));
       break;
    case GmatTree::ADDED_SCRIPT_FOLDER:
-      menu.AppendSeparator();
       menu.Append(POPUP_RUN_SCRIPTS_FROM_FOLDER, wxT("Run Scripts"));
       menu.Append(POPUP_QUIT_RUN_SCRIPTS_FROM_FOLDER, wxT("Quit Running Scripts"));
       
