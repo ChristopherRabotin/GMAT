@@ -416,7 +416,7 @@ bool TrajPlotCanvas::InitGL()
    // pixel format
    if (!SetPixelFormatDescriptor())
    {
-      throw SubscriberException("SetPixelFormatDescriptor failed\n");
+      //throw SubscriberException("SetPixelFormatDescriptor failed\n");
    }
    
    // font
@@ -2167,7 +2167,8 @@ bool TrajPlotCanvas::SetPixelFormatDescriptor()
       0,                     // shift bit ignored
       0,                     // no accumulation buffer
       0, 0, 0, 0,            // accum bits ignored
-      32,                    // 32-bit z-buffer
+      //32,                    // 32-bit z-buffer
+      16,                    // 32-bit z-buffer
       0,                     // no stencil buffer
       0,                     // no auxiliary buffer
       PFD_MAIN_PLANE,        // main layer
@@ -2195,7 +2196,7 @@ bool TrajPlotCanvas::SetPixelFormatDescriptor()
    if (!SetPixelFormat(hdc, pixelFormatId, &pfd))
    {
       MessageInterface::ShowMessage
-         ("**** ERROR **** Failed to set pixel format id %dn", pixelFormatId);
+         ("**** ERROR **** Failed to set pixel format id %d\n", pixelFormatId);
       return false;
    }
    
