@@ -20,6 +20,7 @@
 #include "AttitudeData.hpp"
 #include "Attitude.hpp"
 #include "Linear.hpp"              // for GmatRealUtil::ToString()
+#include "RealUtilities.hpp"
 #include "ParameterException.hpp"
 #include "MessageInterface.hpp"
 
@@ -91,7 +92,9 @@ Real AttitudeData::GetAttitudeReal(Integer item)
    Real epoch = mSpacecraft->GetRealParameter(mEpochId);
    
    Rmatrix33 cosMat = mSpacecraft->GetAttitude(epoch);
-   Rvector quat = Attitude::ToQuaternion(cosMat);
+   Rvector   quat   = Attitude::ToQuaternion(cosMat);
+   Rvector3  angVel = mSpacecraft->GetAngularVelocity(epoch) 
+                      * GmatMathUtil::DEG_PER_RAD;
    
    switch (item)
    {
@@ -103,6 +106,12 @@ Real AttitudeData::GetAttitudeReal(Integer item)
       return quat[2];
    case QUAT4:
       return quat[3];
+   case ANGVELX:
+      return angVel[0];
+   case ANGVELY:
+      return angVel[1];
+   case ANGVELZ:
+      return angVel[2];
    default:
       throw ParameterException
          ("AttitudeData::GetAttitudeReal() Unknown parameter id: " +

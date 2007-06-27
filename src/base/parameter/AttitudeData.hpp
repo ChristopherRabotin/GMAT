@@ -50,7 +50,7 @@ protected:
    Spacecraft *mSpacecraft;
    Integer mEpochId;
    
-   enum {QUAT1, QUAT2, QUAT3, QUAT4};
+   enum {QUAT1, QUAT2, QUAT3, QUAT4, ANGVELX, ANGVELY, ANGVELZ};
    
    enum
    {

@@ -267,3 +267,186 @@ GmatBase* Quat4::Clone(void) const
 {
    return new Quat4(*this);
 }
+
+//------------------------------------------------------------------------------
+// AngVelX::AngVelX(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+AngVelX::AngVelX(const std::string &name, GmatBase *obj)
+   : AttitudeReal(name, "AngularVelocityX", obj, "Angular Velocity X", "deg/sec")
+{
+   mColor = GmatColor::RED32;
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelX(const AngVelX &copy)
+//------------------------------------------------------------------------------
+AngVelX::AngVelX(const AngVelX &copy)
+   : AttitudeReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelX& operator=(const AngVelX &right)
+//------------------------------------------------------------------------------
+AngVelX& AngVelX::operator=(const AngVelX &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~AngVelX()
+//------------------------------------------------------------------------------
+AngVelX::~AngVelX()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool AngVelX::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(ANGVELX);
+    
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* AngVelX::Clone(void) const
+{
+   return new AngVelX(*this);
+}
+
+//------------------------------------------------------------------------------
+// AngVelY::AngVelY(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+AngVelY::AngVelY(const std::string &name, GmatBase *obj)
+   : AttitudeReal(name, "AngularVelocityY", obj, "Angular Velocity Y", "deg/sec")
+{
+   mColor = GmatColor::YELLOW32;
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelY(const AngVelY &copy)
+//------------------------------------------------------------------------------
+AngVelY::AngVelY(const AngVelY &copy)
+   : AttitudeReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelY& operator=(const AngVelY &right)
+//------------------------------------------------------------------------------
+AngVelY& AngVelY::operator=(const AngVelY &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~AngVelY()
+//------------------------------------------------------------------------------
+AngVelY::~AngVelY()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool AngVelY::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(ANGVELY);
+    
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* AngVelY::Clone(void) const
+{
+   return new AngVelY(*this);
+}
+
+//------------------------------------------------------------------------------
+// AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
+//------------------------------------------------------------------------------
+AngVelZ::AngVelZ(const std::string &name, GmatBase *obj)
+   : AttitudeReal(name, "AngularVelocityZ", obj, "Angular Velocity Z", "deg/sec")
+{
+   mColor = GmatColor::BLUE32;
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelZ(const AngVelZ &copy)
+//------------------------------------------------------------------------------
+AngVelZ::AngVelZ(const AngVelZ &copy)
+   : AttitudeReal(copy)
+{
+}
+
+
+//------------------------------------------------------------------------------
+// AngVelZ& operator=(const AngVelZ &right)
+//------------------------------------------------------------------------------
+AngVelZ& AngVelZ::operator=(const AngVelZ &right)
+{
+   if (this != &right)
+      AttitudeReal::operator=(right);
+
+   return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// ~AngVelZ()
+//------------------------------------------------------------------------------
+AngVelZ::~AngVelZ()
+{
+}
+
+
+//------------------------------------------------------------------------------
+// bool Evaluate()
+//------------------------------------------------------------------------------
+bool AngVelZ::Evaluate()
+{
+   mRealValue = AttitudeData::GetAttitudeReal(ANGVELZ);
+    
+   if (mRealValue == AttitudeData::ATTITUDE_REAL_UNDEFINED)
+      return false;
+   else
+      return true;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* Clone(void) const
+//------------------------------------------------------------------------------
+GmatBase* AngVelZ::Clone(void) const
+{
+   return new AngVelZ(*this);
+}

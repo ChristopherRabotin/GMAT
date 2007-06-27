@@ -104,4 +104,62 @@ protected:
 };
 
 
+class GMAT_API AngVelX : public AttitudeReal
+{
+public:
+
+   AngVelX(const std::string &name = "", GmatBase *obj = NULL);
+   AngVelX(const AngVelX &copy);
+   AngVelX& operator=(const AngVelX &right);
+   virtual ~AngVelX();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+class GMAT_API AngVelY : public AttitudeReal
+{
+public:
+
+   AngVelY(const std::string &name = "", GmatBase *obj = NULL);
+   AngVelY(const AngVelY &copy);
+   AngVelY& operator=(const AngVelY &right);
+   virtual ~AngVelY();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+class GMAT_API AngVelZ : public AttitudeReal
+{
+public:
+
+   AngVelZ(const std::string &name = "", GmatBase *obj = NULL);
+   AngVelZ(const AngVelZ &copy);
+   AngVelZ& operator=(const AngVelZ &right);
+   virtual ~AngVelZ();
+   
+   // methods inherited from Parameter
+   virtual bool Evaluate();
+   
+   // methods inherited from GmatBase
+   virtual GmatBase* Clone(void) const;
+   
+protected:
+
+};
+
+
 #endif /*ATTITUDEPARAMETERS_HPP_*/

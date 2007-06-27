@@ -242,6 +242,13 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new Quat3(withName);
    if (ofType == "Q4" || ofType == "q4")
       return new Quat4(withName);
+      
+   if (ofType == "AngularVelocityX" || ofType == "AngVelX")
+      return new AngVelX(withName);
+   if (ofType == "AngularVelocityY" || ofType == "AngVelY")
+      return new AngVelY(withName);
+   if (ofType == "AngularVelocityZ" || ofType == "AngVelZ")
+      return new AngVelZ(withName);
    
    // add others here
    
@@ -377,6 +384,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("Q2");
       creatables.push_back("Q3");
       creatables.push_back("Q4");
+      creatables.push_back("AngularVelocityX");
+      creatables.push_back("AngularVelocityY");
+      creatables.push_back("AngularVelocityZ");
    }
 }
 
