@@ -21,6 +21,7 @@
 #include "GmatCommand.hpp"          // class's header file
 #include "MessageInterface.hpp" // MessageInterface
 #include "Spacecraft.hpp"
+#include "StringUtil.hpp"       // for ToString
 
 #include <sstream>              // for command summary generation
 #include <cmath>                // for Cartesian to Keplerian conversion; 
@@ -1834,8 +1835,8 @@ bool GmatCommand::SeparateEquals(const std::string &description,
       std::string msg = "Error decomposing the string \"";
       msg += description;
       msg += "\"\nTrying to separate into lhs and rhs on \"=\" sign, but found ";
-      msg += sides.size();
-      msg += " pieces separated by equanls or spaces.\n";
+      msg += GmatStringUtil::ToString((Integer) (sides.size()), 4);
+      msg += " pieces separated by equals or spaces.\n";
       throw CommandException(msg);
    }
 
