@@ -24,21 +24,20 @@
 #include "bitmaps/openglplot.xpm"
 #include "bitmaps/xyplot.xpm"
 #include "bitmaps/default.xpm"
-#include <wx/string.h> // for wxArrayString
+#include <wx/string.h>        // for wxArrayString
 
 #include "GmatAppData.hpp"
 #include "OutputTree.hpp"
 #include "GmatTreeItemData.hpp"
-//#include "GmatMainFrame.hpp"
 #include "ViewTextFrame.hpp"
 
 #include "GuiInterpreter.hpp"
 #include "Subscriber.hpp"
 #include "ReportFile.hpp"
-#include "FileUtil.hpp"    // for GmatFileUtil::Compare()
+#include "FileUtil.hpp"       // for GmatFileUtil::Compare()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_RESOURCE_TREE 1
+//#define DEBUG_OUTPUT_TREE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -52,11 +51,6 @@ BEGIN_EVENT_TABLE(OutputTree, wxTreeCtrl)
    EVT_TREE_END_LABEL_EDIT(-1, OutputTree::OnEndLabelEdit)
    EVT_MENU(POPUP_COMPARE_NUMERIC_VALUES, OutputTree::OnCompareNumericValues)
    EVT_MENU(POPUP_COMPARE_TEXT_LINES, OutputTree::OnCompareTextLines)
-   
-//   EVT_MENU(POPUP_OPEN, OutputTree::OnOpen)
-//   EVT_MENU(POPUP_CLOSE, OutputTree::OnClose)
-//   EVT_MENU(POPUP_RENAME, OutputTree::OnRename)
-//   EVT_MENU(POPUP_DELETE, OutputTree::OnDelete)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -76,39 +70,44 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
    : wxTreeCtrl(parent, id, pos, size, style)
 {
-   //mainNotebook = GmatAppData::GetMainNotebook();
-   //mainFrame = GmatAppData::GetMainFrame();
-   //MessageInterface::ShowMessage("got main notebook\n");
-  
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
- 
+   
    AddIcons();
    AddDefaultResources();
-
+   
    theGuiManager->UpdateAll();
 }
 
+
 //------------------------------------------------------------------------------
-// void UpdateOutput()
+// void UpdateOutput(bool resetTree)
 //------------------------------------------------------------------------------
 /**
+ * Updates output tree.
+ *
+ * @param  resetTree  true if just clearing tree
  */
 //------------------------------------------------------------------------------
 void OutputTree::UpdateOutput(bool resetTree)
 {
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage
+      ("OutputTree::UpdateOutput() resetTree=%d\n", resetTree);
+   #endif
+   
    Collapse(mReportItem);
    Collapse(mOpenGlItem);
    Collapse(mXyPlotItem);
-
+   
    // delete all old children
    DeleteChildren(mReportItem);
    DeleteChildren(mOpenGlItem);
    DeleteChildren(mXyPlotItem);
-
+   
    if (resetTree)    // do not load subscribers
       return;
-
+   
    // get list of report files, opengl plots, and xy plots
    StringArray listOfSubs = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
 
@@ -118,7 +117,7 @@ void OutputTree::UpdateOutput(bool resetTree)
       Subscriber *sub = (Subscriber*)theGuiInterpreter->GetConfiguredObject(listOfSubs[i]);
       wxString objName = wxString(listOfSubs[i].c_str());
       wxString objTypeName = wxString(sub->GetTypeName().c_str());
-
+      
       if (objTypeName.Trim() == "ReportFile")
          AppendItem(mReportItem, objName, GmatTree::ICON_FILE, -1,
                  new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
@@ -129,7 +128,10 @@ void OutputTree::UpdateOutput(bool resetTree)
          AppendItem(mXyPlotItem, objName, GmatTree::ICON_FILE, -1,
                  new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
    }
-
+   
+   Expand(mReportItem);
+   Expand(mOpenGlItem);
+   Expand(mXyPlotItem);
 }
 
 //------------------------------------------------------------------------------
@@ -204,23 +206,16 @@ void OutputTree::OnItemRightClick(wxTreeEvent& event)
 void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
-   //wxString title = treeItem->GetDesc();
    theSubscriberName = treeItem->GetDesc();
    int dataType = treeItem->GetDataType();
-
-   //MessageInterface::ShowMessage
-   //   ("===> OutputTree::ShowMenu() theSubscriberName=%s\n", theSubscriberName.c_str());
+   
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage
+      ("OutputTree::ShowMenu() theSubscriberName=%s\n", theSubscriberName.c_str());
+   #endif
    
 #if wxUSE_MENUS
    wxMenu menu;
-   
-//      menu.Append(POPUP_OPEN, wxT("Open"));
-//      menu.Append(POPUP_CLOSE, wxT("Close"));
-//      menu.AppendSeparator();
-//      menu.Append(POPUP_RENAME, wxT("Rename"));
-//      menu.Append(POPUP_DELETE, wxT("Delete"));
-//
-//      menu.Enable(POPUP_DELETE, FALSE);
    
    if (dataType == GmatTree::OUTPUT_REPORT)
    {
@@ -231,6 +226,7 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
    PopupMenu(&menu, pt);
 #endif // wxUSE_MENUS
 }
+
 
 //------------------------------------------------------------------------------
 // void OnItemActivated(wxTreeEvent &event)
@@ -246,8 +242,6 @@ void OutputTree::OnItemActivated(wxTreeEvent &event)
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
-
-   //    mainNotebook->CreatePage(item);
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
@@ -264,7 +258,6 @@ void OutputTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   //    mainNotebook->CreatePage(item);
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
 
@@ -284,7 +277,6 @@ void OutputTree::OnClose(wxCommandEvent &event)
    
    // if its open, its activated
    if (GmatAppData::GetMainFrame()->IsChildOpen(item))
-      // close the window
       GmatAppData::GetMainFrame()->CloseActiveChild();
    else
       return;
@@ -301,25 +293,24 @@ void OutputTree::OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void OutputTree::OnRename(wxCommandEvent &event)
 {
-   //MessageInterface::ShowMessage("OutputTree::OnRename() entered\n");
-
-
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage("OutputTree::OnRename() entered\n");
+   #endif
+   
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
    wxString oldName = selItem->GetDesc();
-//   int dataType = selItem->GetDataType();
-
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
-
-   //if newName != oldName
+   
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
-
+      
    }
 
 }
+
 
 //------------------------------------------------------------------------------
 // void OnDelete(wxCommandEvent &event)
@@ -334,18 +325,8 @@ void OutputTree::OnRename(wxCommandEvent &event)
 void OutputTree::OnDelete(wxCommandEvent &event)
 {
    event.Skip();
-   //    wxTreeItemId item = GetSelection();
-   //    wxTreeItemId parentId = GetPrevVisible(item);
-   //    this->Collapse(parentId);
-   //    
-   //    // delete from gui interpreter
-   //    GmatTreeItemData *gmatItem = (GmatTreeItemData *)GetItemData(item);
-   ////    theGuiInterpreter->RemoveObject("Spacecraft", gmatItem->GetDesc());
-   //    
-   //    this->Delete(item);
-   //    
-   //
 }
+
 
 //------------------------------------------------------------------------------
 // void OnBeginLabelEdit(wxTreeEvent &event)
@@ -362,17 +343,14 @@ void OutputTree::OnBeginLabelEdit(wxTreeEvent &event)
    GmatTreeItemData *selItem = (GmatTreeItemData *)
       GetItemData(event.GetItem());
                                
-//   int dataType = selItem->GetDataType();
-
    //kind of redundant because OpenPage returns false for some
    //of the default folders
-   if (GmatAppData::GetMainFrame()->IsChildOpen(selItem))  //||
-//       (isDefaultFolder)                                   ||
-//       (isDefaultItem))
+   if (GmatAppData::GetMainFrame()->IsChildOpen(selItem))
    {
       event.Veto();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnEndLabelEdit(wxTreeEvent &event)
@@ -386,16 +364,14 @@ void OutputTree::OnBeginLabelEdit(wxTreeEvent &event)
 void OutputTree::OnEndLabelEdit(wxTreeEvent &event)
 {
    wxString newLabel = event.GetLabel();
-  
+   
    // check to see if label is a single word
    if (newLabel.IsWord())
    {
       GmatTreeItemData *selItem = (GmatTreeItemData *)
          GetItemData(GetSelection());
-
+      
       wxString oldLabel = selItem->GetDesc();
-//      int itemType = selItem->GetDataType();
-
       selItem->SetDesc(newLabel);
    }
    else
@@ -403,6 +379,7 @@ void OutputTree::OnEndLabelEdit(wxTreeEvent &event)
       event.Veto();
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void AddIcons()
@@ -432,15 +409,11 @@ void OutputTree::AddIcons()
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
       if ( size == sizeOrig )
-      {
          images->Add(icons[i]);
-      }
       else
-      {
          images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
-      }
    }
-
+   
    AssignImageList(images);
 
 }
@@ -474,6 +447,7 @@ void OutputTree::OnAddReportFile(wxCommandEvent &event)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // void OnAddXyPlot(wxCommandEvent &event)
 //------------------------------------------------------------------------------
@@ -499,6 +473,7 @@ void OutputTree::OnAddXyPlot(wxCommandEvent &event)
       Expand(item);
    }
 }
+
 
 //------------------------------------------------------------------------------
 // void OnAddOpenGlPlot(wxCommandEvent &event)
