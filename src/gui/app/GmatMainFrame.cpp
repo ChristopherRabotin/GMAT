@@ -724,7 +724,7 @@ void GmatMainFrame::SetActiveChildDirty(bool dirty)
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseCurrentProject()
 {
-   #ifdef DEBUG_MAINFRAME
+   #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
    #endif
    
@@ -735,7 +735,6 @@ void GmatMainFrame::CloseCurrentProject()
    wxString statusText;
    statusText.Printf("GMAT - General Mission Analysis Tool");
    SetStatusText("", 1);
-   //SetTitle(statusText);
    UpdateTitle();
    
    // clear trees, message window
@@ -745,6 +744,7 @@ void GmatMainFrame::CloseCurrentProject()
    
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
+   GmatAppData::GetOutputTree()->UpdateOutput(true); //loj: 2006.06.26
 }
 
 
@@ -777,6 +777,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    CloseAllChildren(false, true, filename);
    GmatAppData::GetResourceTree()->ClearResource(false);
    GmatAppData::GetMissionTree()->ClearMission();
+   GmatAppData::GetOutputTree()->UpdateOutput(true); //loj: 2006.06.26
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -905,7 +906,6 @@ Integer GmatMainFrame::RunCurrentMission()
       GmatAppData::GetOutputTree()->UpdateOutput(false);
    }
    
-   //return status;
    return retval;
 } // end RunCurrentMission()
 
@@ -1214,6 +1214,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    mScriptFilename = "$gmattempscript$.script";
    theGuiInterpreter->LoadDefaultMission();
    
+   // Update trees
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
    GmatAppData::GetOutputTree()->UpdateOutput(true);
