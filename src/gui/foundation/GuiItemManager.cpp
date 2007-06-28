@@ -1329,7 +1329,7 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
    wxCheckListBox *checkListBox =
       new wxCheckListBox(parent, id, wxDefaultPosition, size, //0,
                          emptyList, wxLB_SINGLE|wxLB_SORT);
-
+   
    if (excList != NULL && excList->GetCount() > 0)
    {
       for (int i=0; i<theNumSpacecraft; i++)
@@ -1350,7 +1350,8 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
    mSpacecraftCLBList.push_back(checkListBox);
    mSpacecraftExcList.push_back(excList);
    
-   checkListBox->SetSelection(0);
+   //We don't need to set selection (loj: 2007.06.26)
+   //checkListBox->SetSelection(0);
    return checkListBox;
 }
 
@@ -2684,12 +2685,40 @@ void GuiItemManager::UpdateSpacecraftList()
       (*pos)->SetSelection(theNumSpacecraft - 1);
    }
    
+   //-------------------------------------------------------
+   // update registered Spacecraft CheckListBox
+   //-------------------------------------------------------
+   wxArrayString itemCheckedArray;
+   for (std::vector<wxCheckListBox*>::iterator pos = mSpacecraftCLBList.begin();
+        pos != mSpacecraftCLBList.end(); ++pos)
+   {
+      if ((*pos) == NULL)
+         continue;
+
+      itemCheckedArray.Clear();
+      
+      // save checked item
+      int count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if ((*pos)->IsChecked(i))
+            itemCheckedArray.Add((*pos)->GetString(i));
+      
+      (*pos)->Clear();
+      (*pos)->Append(scNames);
+      
+      // restore checked item
+      count = (*pos)->GetCount();
+      for (int i=0; i<count; i++)
+         if (itemCheckedArray.Index((*pos)->GetString(i)) != wxNOT_FOUND)
+            (*pos)->Check(i);
+   }
+   
    #if DEBUG_GUI_ITEM_SP
    MessageInterface::ShowMessage
       ("GuiItemManager::UpdateSpacecraftList() exiting. theNumSpacecraft=%d\n",
        theNumSpacecraft);
    #endif
-
+   
    
    AddToAllObjectList();
    
