@@ -18,7 +18,7 @@
 
 #include <wx/file.h> // for wxFile
 
-#define DEBUG_REPORT_FILE_PANEL
+//#define DEBUG_REPORT_FILE_PANEL
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
