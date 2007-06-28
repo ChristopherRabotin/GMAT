@@ -156,7 +156,6 @@ void EndFiniteBurnPanel::Create()
    
    // create spacecraft combo box
    mSatCheckListBox = theGuiManager->
-      //GetSpacecraftCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
       GetSpacecraftCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,100));
    
    // add spacecraft label and combobox to spacecraft sizer
@@ -180,27 +179,34 @@ void EndFiniteBurnPanel::LoadData()
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
    
-   // Get FiniteBurn from the command
-   std::string burnName = theCommand->GetRefObjectName(Gmat::BURN);
-
-   #if DEBUG_BEGIN_FINITE_BURN
-   MessageInterface::ShowMessage
-      ("EndFiniteBurnPanel::LoadData() burnName=<%s>\n", burnName.c_str());
-   #endif
-   
-   mFiniteBurnComboBox->SetValue(burnName.c_str());
-   
-   // Get spacecraft list from the command
-   StringArray scNames = theCommand->GetRefObjectNameArray(Gmat::SPACECRAFT);
-   int item;
-   for (UnsignedInt i=0; i<scNames.size(); i++)
+   try
    {
+      // Get FiniteBurn from the command
+      std::string burnName = theCommand->GetRefObjectName(Gmat::FINITE_BURN);
+      
       #if DEBUG_BEGIN_FINITE_BURN
-      MessageInterface::ShowMessage("   scName=<%s>\n", scNames[i].c_str());
+      MessageInterface::ShowMessage
+         ("EndFiniteBurnPanel::LoadData() burnName=<%s>\n", burnName.c_str());
       #endif
       
-      item = mSatCheckListBox->FindString(scNames[i].c_str());
-      mSatCheckListBox->Check(item);
+      mFiniteBurnComboBox->SetValue(burnName.c_str());
+      
+      // Get spacecraft list from the command
+      StringArray scNames = theCommand->GetRefObjectNameArray(Gmat::SPACECRAFT);
+      int item;
+      for (UnsignedInt i=0; i<scNames.size(); i++)
+      {
+         #if DEBUG_BEGIN_FINITE_BURN
+         MessageInterface::ShowMessage("   scName=<%s>\n", scNames[i].c_str());
+         #endif
+         
+         item = mSatCheckListBox->FindString(scNames[i].c_str());
+         mSatCheckListBox->Check(item);
+      }
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 
@@ -210,22 +216,52 @@ void EndFiniteBurnPanel::LoadData()
 //------------------------------------------------------------------------------
 void EndFiniteBurnPanel::SaveData()
 {
-   // save finite burn
-   wxString burnString = mFiniteBurnComboBox->GetValue();
-   theCommand->SetRefObjectName(Gmat::BURN, burnString.c_str());
+   canClose = true;
    
-   // save spacecrafts
+   //-----------------------------------------------------------------
+   // check empty spacecraft list
+   //-----------------------------------------------------------------
    int count = mSatCheckListBox->GetCount();
    wxString scName;
-   
-   theCommand->TakeAction("Clear");
+   wxArrayString scList;
    
    for (int i=0; i<count; i++)
    {
       if (mSatCheckListBox->IsChecked(i))
       {
          scName = mSatCheckListBox->GetString(i);
-         theCommand->SetRefObjectName(Gmat::SPACECRAFT, scName.c_str());
+         scList.Add(scName);
       }
+   }
+   
+   if (scList.IsEmpty())
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Please select Spacecraft to end maneuver\n");
+      canClose = false;
+   }
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
+   try
+   {
+      // save finite burn
+      wxString burnString = mFiniteBurnComboBox->GetValue();
+      theCommand->SetRefObjectName(Gmat::FINITE_BURN, burnString.c_str());
+      
+      // save spacecrafts
+      count = scList.Count();
+      theCommand->TakeAction("Clear");
+      
+      for (int i=0; i<count; i++)
+         theCommand->SetRefObjectName(Gmat::SPACECRAFT, scList[i].c_str());
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
