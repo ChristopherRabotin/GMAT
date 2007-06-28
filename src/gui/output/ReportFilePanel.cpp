@@ -18,6 +18,8 @@
 
 #include <wx/file.h> // for wxFile
 
+#define DEBUG_REPORT_FILE_PANEL
+
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
@@ -149,8 +151,8 @@ void ReportFilePanel::LoadData()
    
    wxFile *file = new wxFile();
    bool mFileExists = file->Exists(filename.c_str());
-
-   #if DEBUG_REPORT_PANEL
+   
+   #ifdef DEBUG_REPORT_FILE_PANEL
    MessageInterface::ShowMessage
       ("===> %p, ReportFilePanel::LoadData() filename=%s, mFileExists=%d\n",
        theReport, filename.c_str(), mFileExists);
