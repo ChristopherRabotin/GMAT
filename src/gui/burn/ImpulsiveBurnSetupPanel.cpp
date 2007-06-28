@@ -425,9 +425,7 @@ void ImpulsiveBurnSetupPanel::LoadData()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("ImpulsiveBurnSetupPanel:LoadData() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
 }
 
