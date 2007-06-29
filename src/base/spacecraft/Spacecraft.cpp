@@ -665,6 +665,18 @@ Rvector3  Spacecraft::GetAngularVelocity(Real a1mjdTime) const
    }
 }
 
+UnsignedIntArray Spacecraft::GetEulerAngleSequence() const
+{
+   if (attitude) 
+      return attitude->GetUnsignedIntArrayParameter("EulerSequenceArray");
+   else
+   {
+      std::string errmsg = 
+         "Error attempting to retrieve Euler Angle Sequence for spacecraft \"";
+      errmsg += instanceName + "\", for which no attitude has been set.\n";
+      throw SpaceObjectException(errmsg);
+   }
+}
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
