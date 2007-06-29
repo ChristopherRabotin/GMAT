@@ -2417,6 +2417,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    int file2DiffCount = 0;
    int file3DiffCount = 0;
    wxString summary;
+   wxString cannotOpen;
    
    // Now call compare utility
    for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
@@ -2455,7 +2456,16 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
          GmatFileUtil::CompareLines(numDirsToCompare, baseFileName.c_str(), filename1.c_str(),
                                     filename2.c_str(), filename3.c_str(), file1DiffCount,
                                     file2DiffCount, file3DiffCount);
-
+      
+      for (UnsignedInt i=0; i<output.size(); i++)
+      {
+         if (output[i].find("Cannot open") != std::string::npos)
+         {
+            cannotOpen = cannotOpen + output[i];
+            break;
+         }
+      }
+      
       wxString str;
       // for summary array
       if (file1DiffCount > 0)
@@ -2496,6 +2506,13 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       // show summary report of compare
       textCtrl->AppendText("The following files are different:\n\n");
       textCtrl->AppendText(summary);
+      
+      // show non-existant reports
+      if (cannotOpen != "")
+      {
+         textCtrl->AppendText("\n\n");
+         textCtrl->AppendText(cannotOpen);
+      }
       
       textCtrl->AppendText
          ("========================================================\n\n");
