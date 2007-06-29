@@ -2954,11 +2954,30 @@ bool Attitude::ValidateCosineMatrix(const Rmatrix33 &mat)
 {
    if (!mat.IsOrthogonal()) //return false;
    {
-      AttitudeException ae;
-      ae.SetDetails(errorMessageFormatUnnamed.c_str(),
-                    (mat.ToString(GetDataPrecision(),true)).c_str(),
-                    "DCM", "Orthogonal matrix");
-      throw ae;
+      AttitudeException attex;
+      std::ostringstream matS;
+      matS.str("");
+      matS << "[";
+      for (Integer ii = 0; ii < 3; ii++)
+         for (Integer jj = 0; jj < 3; jj++)
+         {
+            matS << mat(ii,jj) ;
+            if (!(ii ==3 && jj==3))  matS << " ";
+         }
+      matS << "]";
+      std::string errMsg = "The value of \"" + matS.str();
+      errMsg += "\" for field \"" + OTHER_REP_TEXT[DIRECTION_COSINE_MATRIX - OTHER_REPS_OFFSET];
+      errMsg += "\" on an object of type \"" + typeName;
+      errMsg += "\" is not an allowed value.\n";
+      errMsg += "The allowed values are: [orthogonal matrix].";
+      // argh! this is not working ..... why not?????
+      //std::string orthogonal = "Orthogonal matrix";
+      //attex.SetDetails(errorMessageFormatUnnamed.c_str(),
+      //           (matS.str()).c_str(), // tried ToString() on mat as well here
+      //           OTHER_REP_TEXT[DIRECTION_COSINE_MATRIX - OTHER_REPS_OFFSET].c_str(), 
+      //           orthogonal.c_str());
+      attex.SetDetails(errMsg);
+      throw attex;
    }
    return true;
 }
