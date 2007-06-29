@@ -11,7 +11,7 @@
 // number NNG04CC06P.
 //
 //
-// Author: Waka Waktola (and heavily modified by Wendy C. Shoan)
+// Author: Waka Waktola (and then later, heavily modified by Wendy C. Shoan)
 // Created: 2006/03/01 (2007.06.12)
 /**
  * This class contains information needed to setup users spacecraft attitude
@@ -24,6 +24,7 @@
 #include "MessageInterface.hpp"
 #include "GmatAppData.hpp"
 #include "GmatBaseException.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 // initial selections in combo boxes
 #define STARTUP_STATE_TYPE_SELECTION            EULER_ANGLES
@@ -282,9 +283,9 @@ void AttitudePanel::Create()
       new wxTextCtrl( this, ID_TEXTCTRL_STR, wxT(""), wxDefaultPosition, 
          wxSize(100,-1), 0 );                
 
-   rateUnits1 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-   rateUnits2 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
-   rateUnits3 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   //rateUnits1 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   //rateUnits2 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
+   //rateUnits3 = new wxStaticText( this, ID_TEXT, wxT("deg/sec"));
 
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage
@@ -294,9 +295,9 @@ void AttitudePanel::Create()
    //wxTextCtrl
                   
 
-    attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
-    attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
-    attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+    //attUnits1 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+    //attUnits2 = new wxStaticText(this,ID_TEXT,wxT("deg"));
+    //attUnits3 = new wxStaticText(this,ID_TEXT,wxT("deg"));
 
 
 
@@ -311,29 +312,33 @@ void AttitudePanel::Create()
          "AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
    
-#if __WXMAC__   
    Integer bsize = 6; // border size
    // wx*Sizers   
-   wxBoxSizer *boxSizer1 = new wxBoxSizer( wxHORIZONTAL );
-   wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
-   wxBoxSizer *boxSizer3 = new wxBoxSizer( wxVERTICAL );
-   wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
-   wxBoxSizer *boxSizer5 = new wxBoxSizer( wxVERTICAL );
+   //wxBoxSizer *boxSizer1 = new wxBoxSizer( wxHORIZONTAL );
+   //wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
+   //wxBoxSizer *boxSizer3 = new wxBoxSizer( wxVERTICAL );
+   //wxBoxSizer *boxSizer4 = new wxBoxSizer( wxVERTICAL );
+   //wxBoxSizer *boxSizer5 = new wxBoxSizer( wxVERTICAL );
+   GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
+   GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   GmatStaticBoxSizer *boxSizer3 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
+   GmatStaticBoxSizer *boxSizer4 = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Initial Conditions" );
+   GmatStaticBoxSizer *boxSizer5 = new GmatStaticBoxSizer( wxVERTICAL, this, "Attitude Rate Initial Conditions" );
    
    wxFlexGridSizer *flexGridSizer1 = new wxFlexGridSizer( 2, 0, 0 );
    wxFlexGridSizer *flexGridSizer2 = new wxFlexGridSizer( 4, 0, 0 );
    wxFlexGridSizer *flexGridSizer3 = new wxFlexGridSizer( 2, 0, 0 );        
    
-   wxStaticText *state1StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude Initial Conditions"),
-                        wxDefaultPosition, wxSize(200,20), wxST_NO_AUTORESIZE);
-   wxStaticText *state24StaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Attitude Rate Initial Conditions"),
-                        wxDefaultPosition, wxSize(200,20), wxST_NO_AUTORESIZE);   
-   state1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                             false, _T(""), wxFONTENCODING_SYSTEM));
-   state24StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                             false, _T(""), wxFONTENCODING_SYSTEM));
+//    wxStaticText *state1StaticText =
+//       new wxStaticText( this, ID_TEXT, wxT("Attitude Initial Conditions"),
+//                         wxDefaultPosition, wxSize(200,20), wxST_NO_AUTORESIZE);
+//    wxStaticText *state24StaticText =
+//       new wxStaticText( this, ID_TEXT, wxT("Attitude Rate Initial Conditions"),
+//                         wxDefaultPosition, wxSize(200,20), wxST_NO_AUTORESIZE);   
+//    state1StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+//                                              false, _T(""), wxFONTENCODING_SYSTEM));
+//    state24StaticText->SetFont(wxFont(14, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
+//                                              false, _T(""), wxFONTENCODING_SYSTEM));
                                
    // Add to wx*Sizers
    flexGridSizer1->Add(config1StaticText, 0, wxGROW|wxALIGN_CENTER_HORIZONTAL|wxALL, bsize );
@@ -377,12 +382,12 @@ void AttitudePanel::Create()
    flexGridSizer3->Add(str3StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );
    flexGridSizer3->Add(str3TextCtrl, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize );        
    
-   boxSizer4->Add(state1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//    boxSizer4->Add(state1StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer4->Add(stateTypeStaticText , 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer4->Add(stateTypeComboBox , 0, wxALIGN_LEFT|wxALL, bsize);  
    boxSizer4->Add(flexGridSizer2, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);            
    
-   boxSizer5->Add(state24StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+//    boxSizer5->Add(state24StaticText, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer5->Add(stateTypeRate4StaticText , 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
    boxSizer5->Add(stateTypeRateComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    boxSizer5->Add(flexGridSizer3, 0, wxGROW|wxALIGN_RIGHT|wxALL, bsize);         
@@ -399,120 +404,8 @@ void AttitudePanel::Create()
    this->SetAutoLayout( true );  
    this->SetSizer( boxSizer1 );
    boxSizer1->Fit( this );
-   boxSizer1->SetSizeHints( this );        
-   
-#else  
-   Integer bsize = 3;
-   Integer text_bsize = 1;
-  
-   wxBoxSizer *bSMain = new wxBoxSizer( wxVERTICAL );  
-   
-   wxBoxSizer *bSInitCond = new wxBoxSizer( wxHORIZONTAL );
-   
-   wxGridSizer *gSConfig = new wxGridSizer( 2 );  // four rows by two columns
-   
-   wxStaticBox *staticBoxAttInitCond = new wxStaticBox( this, -1, wxT("Attitude Initial Conditions") );
-   wxStaticBoxSizer *sBSAttInitCond = new wxStaticBoxSizer( staticBoxAttInitCond, wxVERTICAL );
-   wxStaticBox *staticBoxRateInitCond = new wxStaticBox( this, -1, wxT("Attitude Rate Initial Conditions") );
-   wxStaticBoxSizer *sBSRateInitCond = new wxStaticBoxSizer( staticBoxRateInitCond, wxVERTICAL );
-   
-   wxGridSizer *gSAttState = new wxGridSizer( 4 );  // four by four
-/* Alternate layout in the works
-   wxFlexGridSizer *gSAttState = new wxFlexGridSizer( 2 );  // two by two
-   wxBoxSizer *bSColumnLabels = new wxBoxSizer( wxHORIZONTAL );
-   wxBoxSizer *bSRowLabels = new wxBoxSizer( wxVERTICAL );
-   wxFlexGridSizer *fGSAttEntriesAndUnits = new wxFlexGridSizer( 4 );  // four by four
-   */
-   wxFlexGridSizer *gSRateState = new wxFlexGridSizer( 3 );  // three rows by three columns
-   /*
-   bSColumnLabels->Add(col1StaticText, 0, wxALL, text_bsize);
-   bSColumnLabels->Add(col2StaticText, 0, wxALL, text_bsize);
-   bSColumnLabels->Add(col3StaticText, 0, wxALL, text_bsize);
-
-   bSRowLabels->Add( st1StaticText, 0, wxLEFT, text_bsize);
-   bSRowLabels->Add( st2StaticText, 0, wxLEFT, text_bsize);
-   bSRowLabels->Add( st3StaticText, 0, wxLEFT, text_bsize);
-   bSRowLabels->Add( st4StaticText, 0, wxLEFT, text_bsize);
-   
-   fGSAttEntriesAndUnits->Add(st1TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st5TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st8TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(attUnits1, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st2TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st6TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st9TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(attUnits2, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st3TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st7TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st10TextCtrl, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(attUnits3, 0, wxALL, text_bsize);
-   fGSAttEntriesAndUnits->Add(st4TextCtrl, 0, wxALL, text_bsize);
-
-   gSAttState->AddSpacer(20);
-   gSAttState->Add(bSColumnLabels, 0, wxALL, text_bsize);
-   gSAttState->Add(bSRowLabels, 0, wxALL, text_bsize);
-   gSAttState->Add(fGSAttEntriesAndUnits, 0, wxALL, text_bsize);
-   */
-   
-   gSAttState->AddSpacer(20);  // blank space
-   gSAttState->Add(col1StaticText, 0, wxALL, text_bsize);
-   gSAttState->Add(col2StaticText, 0, wxALL, text_bsize);
-   gSAttState->Add(col3StaticText, 0, wxALL, text_bsize);
-   gSAttState->Add( st1StaticText, 0, wxLEFT, text_bsize);
-   gSAttState->Add(   st1TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(   st5TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(   st8TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add( st2StaticText, 0, wxLEFT, text_bsize);
-   gSAttState->Add(   st2TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(   st6TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(   st9TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add( st3StaticText, 0, wxLEFT, text_bsize);
-   gSAttState->Add(   st3TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(   st7TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add(  st10TextCtrl, 0, wxALL, text_bsize);
-   gSAttState->Add( st4StaticText, 0, wxLEFT, text_bsize);
-   gSAttState->Add(   st4TextCtrl, 0, wxALL, text_bsize);
-   
-   gSRateState->Add(str1StaticText, 0, wxALL, bsize);
-   gSRateState->Add(str1TextCtrl, 0, wxALL, bsize);
-   //gSRateState->Add(rateUnits1, 0, wxALL, bsize);
-   gSRateState->Add(str2StaticText, 0, wxALL, bsize);
-   gSRateState->Add(str2TextCtrl, 0, wxALL, bsize);
-   //gSRateState->Add(rateUnits2, 0, wxALL, bsize);
-   gSRateState->Add(str3StaticText, 0, wxALL, bsize);
-   gSRateState->Add(str3TextCtrl, 0, wxALL, bsize);
-   //gSRateState->Add(rateUnits3, 0, wxALL, bsize);
-   
-   gSConfig->Add(config1StaticText, 0, wxALL, bsize);
-   gSConfig->Add(  config1ComboBox, 0, wxEXPAND|wxALL, bsize);
-   gSConfig->Add(config2StaticText, 0, wxALL, bsize);
-   gSConfig->Add(  config2ComboBox, 0, wxEXPAND|wxALL, bsize);
-//   gSConfig->Add(config3StaticText, 0, wxALL, bsize);
-//   gSConfig->Add(  config3ComboBox, 0, wxEXPAND|wxALL, bsize);
-   gSConfig->Add(config4StaticText, 0, wxALL, bsize);
-   gSConfig->Add(  config4ComboBox, 0, wxEXPAND|wxALL, bsize);
-   
-   sBSAttInitCond->Add(stateTypeStaticText, 0, wxTOP|wxLEFT|wxRIGHT, bsize);
-   sBSAttInitCond->Add(stateTypeComboBox, 0, wxALL, bsize);
-   sBSAttInitCond->Add(gSAttState, 0, wxALL, bsize);
-
-   sBSRateInitCond->Add(stateTypeRate4StaticText, 0, wxTOP|wxLEFT|wxRIGHT, bsize);
-   sBSRateInitCond->Add(stateTypeRateComboBox, 0, wxALL, bsize);
-   sBSRateInitCond->Add(gSRateState, 0, wxALL, bsize);
-
-   bSInitCond->Add(sBSAttInitCond, 0, wxALL, bsize);
-   bSInitCond->Add(sBSRateInitCond, 0, wxALL, bsize);
-   
-   bSMain->Add(gSConfig, 0, wxALIGN_CENTER|wxALL, bsize);
-   bSMain->Add(bSInitCond, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   this->SetAutoLayout( true );  
-   this->SetSizer( bSMain );
-   bSMain->Fit( this );
-   bSMain->SetSizeHints( this );
-   
-#endif
-   
+   boxSizer1->SetSizeHints( this );  
+         
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage("AttitudePanel::Create() exiting\n");
    #endif
