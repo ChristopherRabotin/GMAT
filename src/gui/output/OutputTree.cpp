@@ -526,15 +526,16 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
       return;
    }
    
-   std::string filename1 = theReport->GetStringParameter("Filename");
+   std::string filename1 = theReport->GetFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename2 =
       wxFileSelector("Choose a file to open", "", "", "report",
-                     "Report files (*.report)|*.report|Text files (*.txt)|*.txt");
-
+                     "Report files (*.report)|*.report|"
+                     "Text files (*.txt)|*.txt|All files (*.*)|*.*");
+   
    if (filename2.empty())
       return;
-
+   
    Real tol = GmatFileUtil::CompareAbsTol;
    wxString tolStr;
    tolStr.Printf("%e", tol);
@@ -563,7 +564,6 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
    GmatAppData::theCompareWindow->Show(true);
    
    for (unsigned int i=0; i<output.size(); i++)
-      //textFrame->AppendText(wxString(output[i].c_str()));
       GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
 }
 
@@ -583,7 +583,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
 
    ReportFile *theReport =
       (ReportFile*) theGuiInterpreter->GetConfiguredObject(theSubscriberName.c_str());
-
+   
    if (!theReport)
    {
       MessageInterface::ShowMessage
@@ -592,12 +592,13 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       return;
    }
    
-   std::string filename1 = theReport->GetStringParameter("Filename");
+   std::string filename1 = theReport->GetFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename2 =
       wxFileSelector("Choose a file to open", "", "", "report",
-                     "Report files (*.report)|*.report|Text files (*.txt)|*.txt");
-
+                     "Report files (*.report)|*.report|"
+                     "Text files (*.txt)|*.txt|All files (*.*)|*.*");
+   
    if (filename2.empty())
       return;
    
