@@ -16,8 +16,8 @@
  * Declares Attitude related data class.
  */
 //------------------------------------------------------------------------------
-#ifndef ATTITUDEDATA_HPP_
-#define ATTITUDEDATA_HPP_
+#ifndef AttitudeData_hpp
+#define AttitudeData_hpp
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
@@ -50,7 +50,31 @@ protected:
    Spacecraft *mSpacecraft;
    Integer mEpochId;
    
-   enum {QUAT1, QUAT2, QUAT3, QUAT4, ANGVELX, ANGVELY, ANGVELZ};
+   enum 
+   {
+      DCM1_1,
+      DCM1_2,
+      DCM1_3,
+      DCM2_1,
+      DCM2_2,
+      DCM2_3,
+      DCM3_1,
+      DCM3_2,
+      DCM3_3,
+      QUAT1, 
+      QUAT2, 
+      QUAT3, 
+      QUAT4, 
+      EULERANGLE1,
+      EULERANGLE2,
+      EULERANGLE3,
+      ANGVELX, 
+      ANGVELY, 
+      ANGVELZ,
+      EULERANGLERATE1,
+      EULERANGLERATE2,
+      EULERANGLERATE3,
+   };
    
    enum
    {
@@ -61,4 +85,4 @@ protected:
    static const std::string VALID_OBJECT_TYPE_LIST[AttitudeDataObjectCount];
 };
 
-#endif /*ATTITUDEDATA_HPP_*/
+#endif /*AttitudeData_hpp*/

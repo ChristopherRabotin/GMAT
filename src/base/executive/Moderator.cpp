@@ -4463,6 +4463,18 @@ void Moderator::CreateDefaultMission()
       CreateParameter("BVectorAngle", "DefaultSC.Earth.BVectorAngle");
       
       // Attitude parameters
+      CreateParameter("DCM11", "DefaultSC.DCM11");
+      CreateParameter("DCM12", "DefaultSC.DCM12");
+      CreateParameter("DCM13", "DefaultSC.DCM13");
+      CreateParameter("DCM21", "DefaultSC.DCM21");
+      CreateParameter("DCM22", "DefaultSC.DCM22");
+      CreateParameter("DCM23", "DefaultSC.DCM23");
+      CreateParameter("DCM31", "DefaultSC.DCM31");
+      CreateParameter("DCM32", "DefaultSC.DCM32");
+      CreateParameter("DCM33", "DefaultSC.DCM33");
+      CreateParameter("EulerAngle1", "DefaultSC.EulerAngle1");
+      CreateParameter("EulerAngle2", "DefaultSC.EulerAngle2");
+      CreateParameter("EulerAngle3", "DefaultSC.EulerAngle3");
       CreateParameter("Q1", "DefaultSC.Q1");
       CreateParameter("Q2", "DefaultSC.Q2");
       CreateParameter("Q3", "DefaultSC.Q3");
@@ -4470,6 +4482,9 @@ void Moderator::CreateDefaultMission()
       CreateParameter("AngularVelocityX", "DefaultSC.AngularVelocityX");
       CreateParameter("AngularVelocityY", "DefaultSC.AngularVelocityY");
       CreateParameter("AngularVelocityZ", "DefaultSC.AngularVelocityZ");
+      CreateParameter("EulerAngleRate1", "DefaultSC.EulerAngleRate1");
+      CreateParameter("EulerAngleRate2", "DefaultSC.EulerAngleRate2");
+      CreateParameter("EulerAngleRate3", "DefaultSC.EulerAngleRate3");
       
       #ifdef DEBUG_CREATE_VAR
       // User variable

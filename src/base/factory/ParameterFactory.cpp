@@ -234,6 +234,30 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new DeltaVDir3(withName, ofType);
    
    // Attitude parameters
+   if (ofType == "DCM11" || ofType == "DirectionCosineMatrix11")
+      return new DCM11(withName);
+   if (ofType == "DCM12" || ofType == "DirectionCosineMatrix12")
+      return new DCM12(withName);
+   if (ofType == "DCM13" || ofType == "DirectionCosineMatrix13")
+      return new DCM13(withName);
+   if (ofType == "DCM21" || ofType == "DirectionCosineMatrix21")
+      return new DCM21(withName);
+   if (ofType == "DCM22" || ofType == "DirectionCosineMatrix22")
+      return new DCM22(withName);
+   if (ofType == "DCM23" || ofType == "DirectionCosineMatrix23")
+      return new DCM23(withName);
+   if (ofType == "DCM31" || ofType == "DirectionCosineMatrix31")
+      return new DCM31(withName);
+   if (ofType == "DCM32" || ofType == "DirectionCosineMatrix32")
+      return new DCM32(withName);
+   if (ofType == "DCM33" || ofType == "DirectionCosineMatrix33")
+      return new DCM33(withName);
+   if (ofType == "EulerAngle1")
+      return new EulerAngle1(withName);
+   if (ofType == "EulerAngle2")
+      return new EulerAngle2(withName);
+   if (ofType == "EulerAngle3")
+      return new EulerAngle3(withName);
    if (ofType == "Q1" || ofType == "q1")
       return new Quat1(withName);
    if (ofType == "Q2" || ofType == "q2")
@@ -249,6 +273,12 @@ Parameter* ParameterFactory::CreateParameter(const std::string &ofType,
       return new AngVelY(withName);
    if (ofType == "AngularVelocityZ" || ofType == "AngVelZ")
       return new AngVelZ(withName);
+   if (ofType == "EulerAngleRate1")
+      return new EulerAngleRate1(withName);
+   if (ofType == "EulerAngleRate2")
+      return new EulerAngleRate2(withName);
+   if (ofType == "EulerAngleRate3")
+      return new EulerAngleRate3(withName);
    
    // add others here
    
@@ -380,6 +410,18 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("B");
       
       // Attitude parameters
+      creatables.push_back("DCM11");
+      creatables.push_back("DCM12");
+      creatables.push_back("DCM13");
+      creatables.push_back("DCM21");
+      creatables.push_back("DCM22");
+      creatables.push_back("DCM23");
+      creatables.push_back("DCM31");
+      creatables.push_back("DCM32");
+      creatables.push_back("DCM33");
+      creatables.push_back("EulerAngle1");
+      creatables.push_back("EulerAngle2");
+      creatables.push_back("EulerAngle3");
       creatables.push_back("Q1");
       creatables.push_back("Q2");
       creatables.push_back("Q3");
@@ -387,6 +429,9 @@ ParameterFactory::ParameterFactory()
       creatables.push_back("AngularVelocityX");
       creatables.push_back("AngularVelocityY");
       creatables.push_back("AngularVelocityZ");
+      creatables.push_back("EulerAngleRate1");
+      creatables.push_back("EulerAngleRate2");
+      creatables.push_back("EulerAngleRate3");
    }
 }
 

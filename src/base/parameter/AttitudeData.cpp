@@ -91,32 +91,60 @@ Real AttitudeData::GetAttitudeReal(Integer item)
 
    Real epoch = mSpacecraft->GetRealParameter(mEpochId);
    
-   Rmatrix33 cosMat = mSpacecraft->GetAttitude(epoch);
-   Rvector   quat   = Attitude::ToQuaternion(cosMat);
-   Rvector3  angVel = mSpacecraft->GetAngularVelocity(epoch) 
-                      * GmatMathUtil::DEG_PER_RAD;
+   // get the basics - cosine matrix, angular velocity, euler angle sequence
+   Rmatrix33        cosMat        = mSpacecraft->GetAttitude(epoch);
+   Rvector3         angVel        = mSpacecraft->GetAngularVelocity(epoch) 
+                                    * GmatMathUtil::DEG_PER_RAD;
+   UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
+   Rvector3         euler;
+
+   if (item == DCM1_1)   return cosMat(0,0);                  
+   if (item == DCM1_2)   return cosMat(0,1);                  
+   if (item == DCM1_3)   return cosMat(0,2);                  
+   if (item == DCM2_1)   return cosMat(1,0);                  
+   if (item == DCM2_2)   return cosMat(1,1);                  
+   if (item == DCM2_3)   return cosMat(1,2);                  
+   if (item == DCM3_1)   return cosMat(2,0);                  
+   if (item == DCM3_2)   return cosMat(2,1);                  
+   if (item == DCM3_3)   return cosMat(2,2);
+   if (item == ANGVELX) return angVel[0];                
+   if (item == ANGVELY) return angVel[1];                
+   if (item == ANGVELZ) return angVel[2]; 
    
-   switch (item)
+   // do conversions if necessary
+   if ((item >= QUAT1) && (item <= QUAT4))
    {
-   case QUAT1:
-      return quat[0];
-   case QUAT2:
-      return quat[1];
-   case QUAT3:
-      return quat[2];
-   case QUAT4:
-      return quat[3];
-   case ANGVELX:
-      return angVel[0];
-   case ANGVELY:
-      return angVel[1];
-   case ANGVELZ:
-      return angVel[2];
-   default:
-      throw ParameterException
-         ("AttitudeData::GetAttitudeReal() Unknown parameter id: " +
-          GmatRealUtil::ToString(item));
-   }
+      Rvector quat = Attitude::ToQuaternion(cosMat);
+      return quat[item - QUAT1];
+   }    
+   if ((item >= EULERANGLE1) && (item <= EULERANGLE3))
+   {
+      euler = Attitude::ToEulerAngles(cosMat, 
+              (Integer) seq[0], 
+              (Integer) seq[1], 
+              (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+      return euler[item - EULERANGLE1];
+   }           
+   if ((item >= EULERANGLERATE1) && (item <= EULERANGLERATE3))
+   {
+      euler = Attitude::ToEulerAngles(cosMat, 
+              (Integer) seq[0], 
+              (Integer) seq[1], 
+              (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+      Rvector3 eulerRates = Attitude::ToEulerAngleRates(
+                            angVel * GmatMathUtil::RAD_PER_DEG, 
+                            euler  * GmatMathUtil::RAD_PER_DEG,
+                            (Integer) seq[0], 
+                            (Integer) seq[1], 
+                            (Integer) seq[2]) * GmatMathUtil::DEG_PER_RAD;
+      return eulerRates[item - EULERANGLERATE1];
+   }        
+   
+   // otherwise, there is an error   
+   throw ParameterException
+      ("AttitudeData::GetAttitudeReal() Unknown parameter id: " +
+       GmatRealUtil::ToString(item));
+
 }
 
 //-------------------------------------
