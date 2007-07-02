@@ -2511,7 +2511,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       if (cannotOpen != "")
       {
          textCtrl->AppendText("\n\n");
-         textCtrl->AppendText(cannotOpen);
+         textCtrl->AppendText(cannotOpen.c_str());
       }
       
       textCtrl->AppendText
