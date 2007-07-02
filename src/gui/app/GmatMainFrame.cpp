@@ -2417,7 +2417,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    int file2DiffCount = 0;
    int file3DiffCount = 0;
    wxString summary;
-   wxString cannotOpen;
+   std::string cannotOpen;
    
    // Now call compare utility
    for (UnsignedInt i=0; i<baseFileNameArray.size(); i++)
