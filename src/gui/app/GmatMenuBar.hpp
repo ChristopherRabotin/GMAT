@@ -16,17 +16,19 @@
 #define GmatMenuBar_hpp
 
 #include "gmatwxdefs.hpp"
+#include "GmatTreeItemData.hpp"  // for GmatTree::
 
 class GmatMenuBar : public wxMenuBar
 {
 public:
    // constructors
-   GmatMenuBar(int dataType, long style = 0 );
-       
+   GmatMenuBar(GmatTree::ItemType itemType, wxMenu *windowMenu, long style = 0);
+   
 protected:
 private:
-  void CreateMenu(int dataType);
-  DECLARE_EVENT_TABLE();
+   void CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu);
+   
+   DECLARE_EVENT_TABLE();
 
 };
 

@@ -13,13 +13,15 @@
  */
 //------------------------------------------------------------------------------
 #include "GmatMenuBar.hpp"
-#include "GmatAppData.hpp"
-#include "GmatMainFrame.hpp"
-#include "MdiTsPlotData.hpp"
+#include "GmatTreeItemData.hpp"
+#include "GmatMainFrame.hpp"     // for namespace GmatMenu
+#include "MdiGlPlotData.hpp"     // for MDI_GL_*
+#include "MdiTsPlotData.hpp"     // for MDI_TS_*
+#include "GmatAppData.hpp"       // for GetMainFrame()
 #include "MessageInterface.hpp"
 
-// for more GL view option menu
-//#define _SHOW_GL_VIEW_MENU__
+
+#define __ADD_CLOSE_TO_WINDOW__
 
 //#define DEBUG_MENUBAR 1
 
@@ -38,32 +40,44 @@ BEGIN_EVENT_TABLE(GmatMenuBar, wxMenuBar)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// GmatMenuBar( long style)
+// GmatMenuBar(GmatTree::ItemType itemType, wxMenu *windowMenu,
+//             wxMenu *newWinMenu, long style)
 //------------------------------------------------------------------------------
-GmatMenuBar::GmatMenuBar(int dataType, long style)
+GmatMenuBar::GmatMenuBar(GmatTree::ItemType itemType, wxMenu *windowMenu,
+                         long style)
    : wxMenuBar(style)
 {
-  CreateMenu(dataType);
+   CreateMenu(itemType, windowMenu);
 }
 
+
 //------------------------------------------------------------------------------
-// void CreateMenu(int dataType)
+// void CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
 //------------------------------------------------------------------------------
 /**
  * Adds items to the menu.
  *
+ * @param <itemType> input item type from GmatTree::ItemType
+ * @param <windowMenu> input Window menu pointer. This is available on Windows only
+ *
  */
 //------------------------------------------------------------------------------
-void GmatMenuBar::CreateMenu(int dataType)
+void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
 {
-   //-------------------------------------------------------
+   #if DEBUG_MENUBAR
+   MessageInterface::ShowMessage
+      ("GmatMenuBar::CreateMenu() itemType=%d, windowMenu=%p\n",
+       itemType, windowMenu);
+   #endif
+   
+   //-----------------------------------------------------------------
    // File menu
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
    wxMenu *fileMenu = new wxMenu;
    fileMenu->Append(MENU_FILE_NEW_SCRIPT, wxT("&New Script"));  
    fileMenu->Append(MENU_FILE_OPEN_SCRIPT, wxT("&Open Script"), wxT(""), FALSE);  
-
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
+   
+   if (itemType == GmatTree::OUTPUT_OPENGL_PLOT)
    {
       // chances are that script will be running when plot is first opened...
       fileMenu->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
@@ -71,7 +85,7 @@ void GmatMenuBar::CreateMenu(int dataType)
       fileMenu->Enable(GmatPlot::MDI_GL_OPEN_TRAJECTORY_FILE, false);
    }
    
-   if (dataType == GmatTree::OUTPUT_XY_PLOT)
+   if (itemType == GmatTree::OUTPUT_XY_PLOT)
    {
        fileMenu->Append(GmatPlot::MDI_TS_OPEN_PLOT_FILE, _T("&Open XY Plot File"));
    }
@@ -79,20 +93,8 @@ void GmatMenuBar::CreateMenu(int dataType)
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""), FALSE);
    fileMenu->Append(MENU_FILE_SAVE_AS_SCRIPT, wxT("Save to Script As"),
                      wxT(""), FALSE);  
-
-   fileMenu->AppendSeparator();
-   fileMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"),
-                     wxT(""), FALSE);
-                     
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
-      fileMenu->Append(GmatPlot::MDI_GL_CHILD_QUIT, _T("&Close Plot"), _T("Close this window"));
-   else if (dataType == GmatTree::OUTPUT_XY_PLOT)
-      fileMenu->Append(GmatPlot::MDI_TS_CHILD_QUIT, _T("&Close"),
-         _T("Close this window")); 
-   else
-      fileMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close this Child"),
-                     wxT(""), FALSE);                     
-
+   
+   
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
                      wxT(""), FALSE);   
@@ -117,13 +119,13 @@ void GmatMenuBar::CreateMenu(int dataType)
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_PROJECT_PRINT, FALSE);
    this->Append(fileMenu, wxT("&File"));
-
-   //-------------------------------------------------------
+   
+   //-----------------------------------------------------------------
    // Edit menu
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
    wxMenu *editMenu = new wxMenu;
 
-   if (dataType == GmatTree::SCRIPT_FILE)
+   if (itemType == GmatTree::SCRIPT_FILE)
    {
       editMenu->Append(MENU_EDIT_UNDO, wxT("Undo\tCtrl-Z"), wxT(""), FALSE);
       editMenu->Append(MENU_EDIT_REDO, wxT("Redo\tShift-Ctrl-Z"), wxT(""), FALSE);
@@ -138,7 +140,7 @@ void GmatMenuBar::CreateMenu(int dataType)
       editMenu->Append(MENU_EDIT_UNCOMMENT, wxT("Uncomment\tCtrl-M"), wxT(""), FALSE);
       editMenu->AppendSeparator();
    }
-
+   
    editMenu->Append(MENU_EDIT_RESOURCES, wxT("Resources"), wxT(""), FALSE);
    editMenu->Append(MENU_EDIT_MISSION, wxT("Mission"), wxT(""), FALSE);
 
@@ -146,10 +148,10 @@ void GmatMenuBar::CreateMenu(int dataType)
    editMenu->Enable(MENU_EDIT_MISSION, FALSE);
    this->Append(editMenu, wxT("Edit"));
    
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
    // Script menu
-   //-------------------------------------------------------
-   if (dataType == GmatTree::SCRIPT_FILE)
+   //-----------------------------------------------------------------
+   if (itemType == GmatTree::SCRIPT_FILE)
    {
       wxMenu *scriptMenu = new wxMenu;
       scriptMenu->Append(MENU_SCRIPT_BUILD_OBJECT,
@@ -160,111 +162,109 @@ void GmatMenuBar::CreateMenu(int dataType)
       this->Append(scriptMenu, wxT("Script"));
    }
    
-   //-------------------------------------------------------
-   // Plot menu
-   //-------------------------------------------------------
-   if (dataType == GmatTree::OUTPUT_OPENGL_PLOT)
+   //-----------------------------------------------------------------
+   // View menu
+   //-----------------------------------------------------------------
+   if (itemType == GmatTree::OUTPUT_OPENGL_PLOT)
    {
-      #ifdef __SHOW_PLOT_MENU__
-      // Plot menu
-      wxMenu *plotMenu = new wxMenu;      
-      plotMenu->Append(GmatPlot::MDI_GL_CLEAR_PLOT, _T("Clear Plot"));
-      plotMenu->AppendSeparator();
-      plotMenu->Append(GmatPlot::MDI_GL_CHANGE_TITLE, _T("Change &title..."));
-      this->Append(plotMenu, wxT("Plot"));
-      #endif
-      
-      
-      // View menu
       wxMenu *viewMenu = new wxMenu;
       viewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
-                       _T("Show View Option Dialog"),
-                       _T("Show view option dialog"), wxITEM_CHECK);
-      
-      #ifdef __SHOW_GL_VIEW_MENU__
-      wxMenu *viewOptionMenu = new wxMenu;
-      wxMenuItem *item =
-         new wxMenuItem(viewMenu, GmatPlot::MDI_GL_VIEW_OPTION, _T("Option"),
-                        _T("Show bodies in wire frame"), wxITEM_NORMAL, viewOptionMenu);
-      viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_WIRE_FRAME,
-                              _T("Show Wire Frame"),
-                              _T("Show bodies in wire frame"), wxITEM_CHECK);
-      viewOptionMenu->Append(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE,
-                              _T("Show Equatorial Plane"),
-                              _T("Show equatorial plane lines"), wxITEM_CHECK);
-      
-      viewOptionMenu->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, true);
-      
-      viewMenu->Append(item);
-      #endif
+                       _T("Show OpenGL Option Dialog"),
+                       _T("Show OpenGL Option Dialog"), wxITEM_CHECK);
       
       this->Append(viewMenu, wxT("View"));
-   }  
+   }
    
-   if (dataType == GmatTree::OUTPUT_XY_PLOT)
-   {
-      #if __SHOW_PLOT_MENU__
-      // Plot menu
-      wxMenu *plotMenu = new wxMenu;
-    
-      plotMenu->Append(GmatPlot::MDI_TS_CLEAR_PLOT, _T("Clear Plot"));
-      plotMenu->AppendSeparator();
-      plotMenu->Append(GmatPlot::MDI_TS_CHANGE_TITLE, _T("Change &title..."));
-      #endif
-      
-      #if __SHOW_XY_VIEW_MENU__
-      // View menu
-      wxMenu *viewMenu = new wxMenu;
-      viewMenu->Append(GmatPlot::MDI_TS_SHOW_DEFAULT_VIEW, _T("Reset\tCtrl-R"),
-                       _("Reset to default view"));
-      viewMenu->AppendSeparator();
-      
-      // View Option submenu
-      wxMenu *viewOptionMenu = new wxMenu;
-      wxMenuItem *item =
-         new wxMenuItem(viewMenu, GmatPlot::MDI_TS_VIEW_OPTION, _T("Option"),
-                        _T("view options"), wxITEM_NORMAL, viewOptionMenu);
-      viewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_GRID,
-                              _T("Draw Grid"),
-                              _T("Draw Grid"), wxITEM_CHECK);
-      viewOptionMenu->Append(GmatPlot::MDI_TS_DRAW_DOTTED_LINE,
-                              _T("Draw dotted line"),
-                              _T("Draw dotted line"), wxITEM_CHECK);
-      
-      viewOptionMenu->Check(GmatPlot::MDI_TS_DRAW_DOTTED_LINE, false);
-      
-      viewMenu->Append(item);
-      #endif
-      
-      
-      #if __SHOW_PLOT_MENU__
-      this->Append(plotMenu, _T("&Plot"));
-      #endif
-      
-      #ifdef __SHOW_XY_VIEW_MENU__
-      this->Append(viewMenu, _T("&View"));
-      #endif
-   } 
-   
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
    // Tools menu
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
    wxMenu *toolsMenu = new wxMenu;
    toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_NUMERIC, wxT("Compare Numeric Valus"), wxT(""));
    toolsMenu->Append(MENU_TOOLS_FILE_COMPARE_TEXT, wxT("Compare Text Lines"), wxT(""));
    toolsMenu->Append(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, wxT("Generate Text Ephemeris File"), wxT(""));
    
    this->Append(toolsMenu, wxT("Tools"));
-
-   //-------------------------------------------------------
+   
+   
+   //-----------------------------------------------------------------
    // Help menu
-   //-------------------------------------------------------
+   //-----------------------------------------------------------------
+   
    wxMenu *helpMenu = new wxMenu;
    helpMenu->Append(MENU_HELP_TOPICS, wxT("Topics"), wxT(""), FALSE);
    helpMenu->AppendSeparator();
    helpMenu->Append(MENU_HELP_ABOUT, wxT("About"), wxT(""), FALSE);
- 
+   
    helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
    this->Append(helpMenu, wxT("Help"));
+
+   
+   //-----------------------------------------------------------------
+   // Windows menu
+   //-----------------------------------------------------------------
+   // @note: It needs to figure out why it does not work for
+   //        MdiChildFrame windows
+   #ifdef __ADD_CLOSE_TO_WINDOW__
+   //-------------------------------------------------------
+   // If on Windows, use Window menu from MdiParenentFrame
+   // otherwise, create Window menu
+   //-------------------------------------------------------
+   
+   wxMenu *winMenu = (wxMenu*)NULL;
+   bool createWindowMenu = true;
+   bool prependClose = false;
+   
+   #ifdef __WXMSW__
+   if (windowMenu != NULL)
+   {
+      createWindowMenu = false;
+      winMenu = windowMenu;
+      if (winMenu->FindItem("Close All") == wxNOT_FOUND)
+         prependClose = true;
+   }
+   #endif
+   
+   if (createWindowMenu)
+   {
+      //MessageInterface::ShowMessage("===> creating Window menu\n");
+      winMenu = new wxMenu;
+      winMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"), wxT(""), FALSE);
+      winMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close"), wxT(""), FALSE);
+
+      // Insert before Help menu
+      int helpPos = FindMenu("Help");
+      this->Insert(helpPos, winMenu, wxT("Window"));
+   }
+   else if (prependClose)
+   {
+      //MessageInterface::ShowMessage("===> prepending Close menu item\n");
+      winMenu->PrependSeparator();
+      winMenu->Prepend(TOOL_CLOSE_CURRENT, wxT("Close"), wxT(""), FALSE);      
+      winMenu->Prepend(TOOL_CLOSE_CHILDREN, wxT("Close All"), wxT(""), FALSE);
+   }
+   else
+   {
+      int winMenuIndex = this->FindMenu("Windows");
+      #if DEBUG_MENUBAR
+      MessageInterface::ShowMessage("===> winMenuIndex=%d\n", winMenuIndex);
+      #endif
+      
+      // Why I need to have this part to work for MdiChildFrame Window menu?
+      // This is just workaround. The trick is to append blank menu to the
+      // end of menu bar
+      
+      if (winMenuIndex == wxNOT_FOUND)
+      {
+         //MessageInterface::ShowMessage("===> creating Window menu\n");
+         winMenu = new wxMenu;
+         winMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"), wxT(""), FALSE);
+         winMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close"), wxT(""), FALSE);
+         
+         // Append to very last so it won't show blank menu
+         this->Append(winMenu, wxT(""));
+      }
+   }
+   #endif
+   
 }
 
