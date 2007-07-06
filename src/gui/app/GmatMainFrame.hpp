@@ -58,9 +58,9 @@ public:
    bool RenameChild(GmatTreeItemData *item, wxString newName);
    bool RenameChild(const wxString &oldName, const wxString &newName);
    bool RenameActiveChild(const wxString &newName);
-   void RemoveChild(const wxString &item, int dataType);
+   void RemoveChild(const wxString &item, GmatTree::ItemType itemType);
    void CloseActiveChild();
-   void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
+   bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          wxString excludeTitle = "");
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
@@ -84,17 +84,21 @@ public:
    //void OnOpenTrajectoryFile(wxCommandEvent& event);
    //void OnZoomIn(wxCommandEvent& event);
    //void OnZoomOut(wxCommandEvent& event);
+   
    void UpdateMenus(bool openOn);
+   void EnableMenuAndToolBar(bool enable);
    
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);
    void OnScriptRun(wxCommandEvent& WXUNUSED(event));
+   void OnCloseAll(wxCommandEvent &event);
+   void OnCloseActive(wxCommandEvent &event);
    
    bool SetScriptFileName(const std::string &filename);
    
    MdiChildTrajFrame *trajSubframe;
    MdiChildTsFrame *tsSubframe;
-   wxList *mdiChildren;
+   wxList *theMdiChildren;
 
 protected:
 
@@ -116,16 +120,20 @@ private:
    ViewTextFrame *mTextFrame;
    wxMenu *mServerMenu;
    wxStatusBar *theStatusBar;
-   GmatMenuBar *menuBar;   
+   GmatMenuBar *theMenuBar;
    
    GmatMdiChildFrame* CreateNewResource(const wxString &title,
-                                        const wxString &name, int dataType);
-   GmatMdiChildFrame* CreateNewCommand(int dataType, GmatTreeItemData *item);
+                                        const wxString &name,
+                                        GmatTree::ItemType itemType);
+   GmatMdiChildFrame* CreateNewCommand(GmatTree::ItemType itemType,
+                                       GmatTreeItemData *item);
    GmatMdiChildFrame* CreateNewControl(const wxString &title,
-                                       const wxString &name, int dataType,
+                                       const wxString &name,
+                                       GmatTree::ItemType itemType,
                                        GmatCommand *cmd);
    GmatMdiChildFrame* CreateNewOutput(const wxString &title,
-                                      const wxString &name, int dataType);
+                                      const wxString &name,
+                                      GmatTree::ItemType itemType);
    
    void InitToolBar(wxToolBar* toolBar);
    bool SaveScriptAs();
@@ -142,8 +150,6 @@ private:
    void OnRun(wxCommandEvent &event);
    void OnPause(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
-   void OnCloseChildren(wxCommandEvent &event);
-   void OnCloseCurrent(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
 
    void OnNewScript(wxCommandEvent &event);
@@ -159,15 +165,12 @@ private:
    void OnFont(wxCommandEvent& event);
    void OnSelectAll(wxCommandEvent& event);
    
-   void OnGlPlotTrajectoryFile(wxCommandEvent &event);
-   void OnXyPlotTrajectoryFile(wxCommandEvent &event);
-      
    void OnStartServer(wxCommandEvent& event);
    void OnStopServer(wxCommandEvent& event);
-
+   
    void OnOpenMatlab(wxCommandEvent& event);
    void OnCloseMatlab(wxCommandEvent& event);
-   void OnMatlabInteractive(wxCommandEvent& WXUNUSED(event));
+   
    void OnFileCompareNumeric(wxCommandEvent& event);
    void OnFileCompareText(wxCommandEvent& event);
    void OnGenerateTextEphemFile(wxCommandEvent& event);
@@ -235,14 +238,13 @@ namespace GmatMenu
       MENU_TOOLS_SWINGBY,
       MENU_TOOLS_MATLAB,
       MENU_TOOLS_MATLAB_OPEN,
-      MENU_TOOLS_MATLAB_INTERACTIVE,
       MENU_TOOLS_MATLAB_CLOSE,
       MENU_TOOLS_FILE_COMPARE_NUMERIC,
       MENU_TOOLS_FILE_COMPARE_TEXT,
       MENU_TOOLS_GEN_TEXT_EPHEM_FILE,
       
       MENU_HELP_TOPICS,
-
+      
       TOOL_RUN,
       TOOL_PAUSE,
       TOOL_RESUME,
@@ -252,7 +254,7 @@ namespace GmatMenu
       TOOL_CLOSE_CHILDREN,
       TOOL_CLOSE_CURRENT,
       TOOL_SCRIPT,
-
+      
       MENU_START_SERVER,
       MENU_STOP_SERVER,
 

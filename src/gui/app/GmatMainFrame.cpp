@@ -74,7 +74,6 @@
 #include "FormationSetupPanel.hpp"
 #include "CallFunctionPanel.hpp"
 #include "CoordSystemConfigPanel.hpp"
-#include "InteractiveMatlabDialog.hpp"
 #include "FunctionSetupPanel.hpp"
 #include "MatlabFunctionSetupPanel.hpp"
 #include "AssignmentPanel.hpp"
@@ -121,6 +120,7 @@
 //#define DEBUG_MAINFRAME_SAVE
 //#define DEBUG_FILE_COMPARE
 //#define DEBUG_SERVER
+//#define DEBUG_REMOVE_CHILD
 
 using namespace GmatMenu;
 
@@ -147,13 +147,11 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
    EVT_MENU(TOOL_PAUSE, GmatMainFrame::OnPause)
    EVT_MENU(TOOL_STOP, GmatMainFrame::OnStop)
-   EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseChildren)
-   EVT_MENU(TOOL_CLOSE_CURRENT, GmatMainFrame::OnCloseCurrent)
+   EVT_MENU(TOOL_CLOSE_CHILDREN, GmatMainFrame::OnCloseAll)
+   EVT_MENU(TOOL_CLOSE_CURRENT, GmatMainFrame::OnCloseActive)
    
    EVT_MENU(MENU_HELP_ABOUT, GmatMainFrame::OnHelpAbout)
-//   EVT_MENU(MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE, GmatMainFrame::OnGlPlotTrajectoryFile)
-//   EVT_MENU(MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE, GmatMainFrame::OnXyPlotTrajectoryFile)
-
+   
    EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnNewScript)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnOpenScript)
    
@@ -174,8 +172,7 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_TOOLS_FILE_COMPARE_NUMERIC, GmatMainFrame::OnFileCompareNumeric)
    EVT_MENU(MENU_TOOLS_FILE_COMPARE_TEXT, GmatMainFrame::OnFileCompareText)
    EVT_MENU(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, GmatMainFrame::OnGenerateTextEphemFile)
-//   EVT_MENU(MENU_TOOLS_MATLAB_INTERACTIVE, GmatMainFrame::OnMatlabInteractive)
-
+   
    EVT_SASH_DRAGGED(ID_SASH_WINDOW, GmatMainFrame::OnSashDrag) 
    EVT_SASH_DRAGGED(ID_MSG_SASH_WINDOW, GmatMainFrame::OnMsgSashDrag) 
    
@@ -210,9 +207,6 @@ END_EVENT_TABLE()
  *       for the right hand side and the left hand side.
  */
 //------------------------------------------------------------------------------
-//GmatMainFrame::GmatMainFrame(const wxString& title, const wxPoint& pos,
-//                             const wxSize& size, long style)
-//              : wxFrame(NULL, -1, title, pos, size, style)
 GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
                              const wxString& title, const wxPoint& pos, 
                              const wxSize& size, long style)
@@ -233,11 +227,17 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    tsSubframe = (MdiChildTsFrame *)NULL;
 
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-  
+   
 #if wxUSE_MENUS
-   // create a menu bar 
-   menuBar = new GmatMenuBar(0);
-   SetMenuBar(menuBar);
+   // create a menu bar
+   // pass Window menu if Windows
+   #ifdef __WXMSW__
+   theMenuBar = new GmatMenuBar(GmatTree::UNKNOWN_ITEM, GetWindowMenu());
+   #else
+   theMenuBar = new GmatMenuBar(GmatTree::UNKNOWN_ITEM, NULL);
+   #endif
+   
+   SetMenuBar(theMenuBar);
 #endif // wxUSE_MENUS
 
 #if wxUSE_STATUSBAR
@@ -259,7 +259,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    InitToolBar(GetToolBar());
    
    // used to store the list of open children
-   mdiChildren = new wxList();
+   theMdiChildren = new wxList();
    
    int w, h;
    GetClientSize(&w, &h);
@@ -344,19 +344,14 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
-   // Need to close MATLAB connection on Windows also
-   //#ifdef __WXMAC__             // Need to close MATLAB on Mac
+   // Close MATLAB connection
    MatlabInterface::Close();
-   //#endif
    
    if (mServer)
       delete mServer;
    
    if (GmatAppData::GetMessageWindow() != NULL)
       GmatAppData::GetMessageWindow()->Close();
-   
-//    MessageInterface::ShowMessage("==========> Closing GmatMainFrame\n");
-//    CloseAllChildren(true, true);
    
    if (theGuiInterpreter)
       theGuiInterpreter->Finalize();
@@ -385,52 +380,52 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    if (IsChildOpen(item))
       return NULL;
    
-   int dataType = item->GetDataType();
+   GmatTree::ItemType itemType = item->GetItemType();
    
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateChild() name=%s, dataType=%d\n",
-       item->GetDesc().c_str(), dataType);
+      ("GmatMainFrame::CreateChild() name=%s, itemType=%d\n",
+       item->GetDesc().c_str(), itemType);
    #endif
    
    //----------------------------------------------------------------------
    // create a mdi child
    // Note: Do not change the order of ItemType in GmatTreeItemData.hpp.
-   // The wrong order of dataType will not work properly.
+   // The wrong order of itemType will not work properly.
    //----------------------------------------------------------------------
-   if (dataType >= GmatTree::BEGIN_OF_RESOURCE &&
-       dataType <= GmatTree::END_OF_RESOURCE)
+   if (itemType >= GmatTree::BEGIN_OF_RESOURCE &&
+       itemType <= GmatTree::END_OF_RESOURCE)
    {
-      newChild = CreateNewResource(item->GetDesc(), item->GetDesc(), dataType);
+      newChild = CreateNewResource(item->GetDesc(), item->GetDesc(), itemType);
    }
-   else if (dataType >= GmatTree::BEGIN_OF_COMMAND &&
-            dataType <= GmatTree::END_OF_COMMAND)
+   else if (itemType >= GmatTree::BEGIN_OF_COMMAND &&
+            itemType <= GmatTree::END_OF_COMMAND)
    {
-      //newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), dataType,
+      //newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), itemType,
       //                            item->GetCommand());
-      newChild = CreateNewCommand(dataType, item);
+      newChild = CreateNewCommand(itemType, item);
    }
-   else if (dataType >= GmatTree::BEGIN_OF_CONTROL &&
-            dataType <= GmatTree::END_OF_CONTROL)
+   else if (itemType >= GmatTree::BEGIN_OF_CONTROL &&
+            itemType <= GmatTree::END_OF_CONTROL)
    {
-      newChild = CreateNewControl(item->GetDesc(), item->GetDesc(), dataType,
+      newChild = CreateNewControl(item->GetDesc(), item->GetDesc(), itemType,
                                   item->GetCommand());
    }
-   else if (dataType >= GmatTree::BEGIN_OF_OUTPUT &&
-            dataType <= GmatTree::END_OF_OUTPUT)
+   else if (itemType >= GmatTree::BEGIN_OF_OUTPUT &&
+            itemType <= GmatTree::END_OF_OUTPUT)
    {
       // Create panel if Report or Compare Report
-      if (dataType == GmatTree::OUTPUT_REPORT ||
-          dataType == GmatTree::COMPARE_REPORT)
-         newChild = CreateNewOutput(item->GetDesc(), item->GetDesc(), dataType);
+      if (itemType == GmatTree::OUTPUT_REPORT ||
+          itemType == GmatTree::COMPARE_REPORT)
+         newChild = CreateNewOutput(item->GetDesc(), item->GetDesc(), itemType);
    }
    else
    {
       // do nothing
       #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
-         ("GmatMainFrame::CreateChild() Invalid item=%s dataType=%d entered\n",
-          item->GetDesc().c_str(), dataType);
+         ("GmatMainFrame::CreateChild() Invalid item=%s itemType=%d entered\n",
+          item->GetDesc().c_str(), itemType);
       #endif
    }
 
@@ -452,7 +447,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
 //------------------------------------------------------------------------------
 bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
 {
-   wxNode *node = mdiChildren->GetFirst();
+   wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
@@ -464,7 +459,7 @@ bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
       #endif
     
       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str())) &&
-          (theChild->GetDataType() == item->GetDataType()))
+          (theChild->GetItemType() == item->GetItemType()))
       {
          // move child to the front
          theChild->Activate();
@@ -492,7 +487,7 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
    #endif
    
    GmatMdiChildFrame *theChild = NULL;
-   wxNode *node = mdiChildren->GetFirst();
+   wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
       theChild = (GmatMdiChildFrame *)node->GetData();
@@ -569,76 +564,142 @@ bool GmatMainFrame::RenameActiveChild(const wxString &newName)
     return FALSE;    
 }
 
+
 //------------------------------------------------------------------------------
-// void GmatMainFrame::RemoveChild(const wxString &item, int dataTpe)
+// void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
-void GmatMainFrame::RemoveChild(const wxString &item, int dataType)
+/*
+ * Removes and deletes child frame from the list.
+ *
+ * @param <item> Name of the child frame
+ * @param <item> Item type of the child frame
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemType)
 {
-   wxNode *node = mdiChildren->GetFirst();
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::RemoveChild() item=%s\n", item.c_str());
+   #endif
+   
+   wxNode *node = theMdiChildren->GetFirst();
+   bool childRemoved = false;
+   
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
       
-      #ifdef DEBUG_MAINFRAME
-      MessageInterface::ShowMessage
-         ("GmatMainFrame::RemoveChild() title:%s\n   item:%s\n",
-          theChild->GetTitle().c_str(), item.c_str());
-      #endif
-      
       if ((theChild->GetTitle().IsSameAs(item.c_str())) &&
-           (theChild->GetDataType() == dataType))
+          (theChild->GetItemType() == itemType))
       {
-         delete theChild;
+         //------------------------------------------------------
+         // Notes:
+         // OpenGL and XYPlot is added to it's own list of in
+         // addition to theMdiChildren in this main frame.
+         // (MdiGlPlot::mdiChildren and MdiTsPlot::mdiChildren)
+         // These are used in the PlotInterface.
+         // The count is decremented and object is deleted in the
+         // destructors
+         //------------------------------------------------------
+         
+         #ifdef DEBUG_REMOVE_CHILD
+         MessageInterface::ShowMessage
+            ("   removing title:%s, item: %s\n", theChild->GetTitle().c_str(),
+             item.c_str());
+         #endif
+         
+         if (theChild->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT &&
+             theChild->GetItemType() != GmatTree::OUTPUT_XY_PLOT)
+         {
+            #ifdef DEBUG_REMOVE_CHILD
+            MessageInterface::ShowMessage("   ==> deleting this child\n");
+            #endif
+            delete theChild;
+         }
+         
          delete node;
+         childRemoved = true;
          break;
       }
+      
       node = node->GetNext();
    }
+   
+   // If plot was removed, remove it from the OutputTree also
+   if (childRemoved)
+   {
+      if (GmatAppData::GetOutputTree() != NULL)
+         GmatAppData::GetOutputTree()->RemoveItem(itemType, item);
+      else
+         MessageInterface::ShowMessage
+            ("===> GmatMainFrame::RemoveChild() GmatAppData::GetOutputTree() is NULL\n");
+   }
 }
+
 
 //------------------------------------------------------------------------------
 // void CloseActiveChild()
 //------------------------------------------------------------------------------
 void GmatMainFrame::CloseActiveChild()
 {
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage("GmatMainFrame::CloseActiveChild() entered\n");
+   #endif
+   
    GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
    
    if (theChild != NULL)
    {
-      wxCloseEvent event;
-      theChild->OnClose(event);
+      theChild->Close();
       wxSafeYield();
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
+// bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
 //                       wxString excludeTitle = "")
 //------------------------------------------------------------------------------
-void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
+/*
+ * Closes all mdi children frames.
+ *
+ * @param <closeScriptWindow> true to close script window
+ * @param <closePlots> true to close all plot windows
+ * @param <excludeTitle> name of the frame to be excluded from closing
+ * @return true if all frames is closed false otherwise
+ */
+//------------------------------------------------------------------------------ 
+bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
                                      wxString excludeTitle)
 {   
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d\n   "
-       "excludeTitle=%s\n", closeScriptWindow, closePlots, excludeTitle.c_str());
+      ("GmatMainFrame::CloseAllChildren() closeScriptWindow = %d, closePlots = %d"
+       "\n   excludeTitle = %s\n", closeScriptWindow, closePlots, excludeTitle.c_str());
+   MessageInterface::ShowMessage
+      ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
    
    wxString title;
    int type;
    bool canDelete;
    
-   wxNode *node = mdiChildren->GetFirst();
-   wxNode *temp = NULL;
+   wxNode *node = theMdiChildren->GetFirst();
    
+   //-------------------------------------------------------
+   // delete child frames
+   //-------------------------------------------------------
    while (node)
    {
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage("   node = %p\n", node);
+      #endif
+      
       canDelete = false;
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
       
       title = theChild->GetTitle();
-      type = theChild->GetDataType();
+      type = theChild->GetItemType();
       
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage("   title=%s, type=%d\n", title.c_str(), type);
@@ -647,7 +708,7 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
           (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
       {
-         // delete resource child
+         // delete resource and command child
          if (type == GmatTree::SCRIPT_FILE)
          {
             if (closeScriptWindow)
@@ -664,26 +725,49 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       {
          // delete output child except compare
          if (closePlots && type != GmatTree::COMPARE_REPORT)
+         {
+            GmatAppData::GetOutputTree()->UpdateOutput(true);
             canDelete = true;
+         }
       }
       
       if (canDelete)
       {
          #ifdef DEBUG_MAINFRAME_CLOSE
-         MessageInterface::ShowMessage("   ==> deleting child=%s\n", title.c_str());
+         MessageInterface::ShowMessage("   ==> closing child=%s\n", title.c_str());
          #endif
          
-         delete theChild;
-         temp = node;
+         //-------------------------------------------------
+         // delete child if frame can be closed
+         // Note: GmatMdiChildFrame::OnClose() calls RemoveChild()
+         //-------------------------------------------------
+         theChild->Close();
+         
+         if (!theChild->CanClose())
+         {
+            #ifdef DEBUG_MAINFRAME_CLOSE
+            MessageInterface::ShowMessage("   ==> cannot close this child\n");
+            #endif
+            
+            canDelete = false;
+            return false;
+         }
       }
       
-      node = node->GetNext();
-      if (canDelete)
-         delete temp;
-      
+      //-------------------------------------------------
+      // Note: The node is deleted from RemoveChild()
+      //-------------------------------------------------
+      node = theMdiChildren->GetFirst();
       wxSafeYield();
+      
+      #ifdef DEBUG_MAINFRAME_CLOSE
+      MessageInterface::ShowMessage("   next node = %p\n", node);
+      #endif
+      
    }
+   
    wxSafeYield();
+   return true;
 }
 
 
@@ -693,13 +777,13 @@ void GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
 void GmatMainFrame::MinimizeChildren()
 {
    // do not need to check if script window is open
-   wxNode *node = mdiChildren->GetFirst();
+   wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if (theChild->GetDataType() != GmatTree::OUTPUT_OPENGL_PLOT &&
-          theChild->GetDataType() != GmatTree::OUTPUT_XY_PLOT &&
-          theChild->GetDataType() != GmatTree::COMPARE_REPORT)
+      if (theChild->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT &&
+          theChild->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
+          theChild->GetItemType() != GmatTree::COMPARE_REPORT)
          theChild->Iconize(TRUE);
       node = node->GetNext();
    }
@@ -866,7 +950,7 @@ Integer GmatMainFrame::RunCurrentMission()
    
    wxToolBar* toolBar = GetToolBar();
    
-   menuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
+   theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
    UpdateMenus(FALSE);
    
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, FALSE);
@@ -895,7 +979,7 @@ Integer GmatMainFrame::RunCurrentMission()
          StopServer(); // stop server if running to avoid getting callback staus
                        // when run stopped by user
       
-      menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
+      theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
       UpdateMenus(TRUE);
       toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
       toolBar->EnableTool(TOOL_RUN, TRUE);
@@ -926,7 +1010,7 @@ void GmatMainFrame::StopRunningMission()
    theGuiInterpreter->ChangeRunState("Stop");
    mRunPaused = false;
    
-   menuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
+   theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
    UpdateMenus(TRUE);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
    toolBar->EnableTool(TOOL_RUN, TRUE);
@@ -1077,10 +1161,12 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
          return;
       #endif
    }
-      
-   CloseAllChildren(true, true);
+
+   if (CloseAllChildren(true, true))
+      event.Skip();
+   else
+      event.Veto();
    
-   event.Skip();
 }
 
 
@@ -1360,7 +1446,7 @@ void GmatMainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
    theGuiInterpreter->ChangeRunState("Pause");
    MessageInterface::ShowMessage("Execution paused.\n");
   
-   menuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
+   theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
    UpdateMenus(FALSE);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, FALSE);
    toolBar->EnableTool(TOOL_RUN, TRUE);
@@ -1384,7 +1470,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 
 
 //------------------------------------------------------------------------------
-// void OnCloseChildren(wxCommandEvent& WXUNUSED(event))
+// void OnCloseAll(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
  * Handles closing all open children.
@@ -1392,14 +1478,15 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
    CloseAllChildren();
    wxSafeYield();
 }
 
+
 //------------------------------------------------------------------------------
-// void OnCloseCurrent(wxCommandEvent& WXUNUSED(event))
+// void OnCloseActive(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 /**
  * Handles closing all open children.
@@ -1407,7 +1494,7 @@ void GmatMainFrame::OnCloseChildren(wxCommandEvent& WXUNUSED(event))
  * @param <event> input event.
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::OnCloseCurrent(wxCommandEvent& WXUNUSED(event))
+void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
 {
    CloseActiveChild();
    wxSafeYield();
@@ -1432,6 +1519,7 @@ void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 
    wxMessageBox(msg, _T("About GMAT"), wxOK | wxICON_INFORMATION, this);
 }
+
 
 //------------------------------------------------------------------------------
 // void InitToolBar(wxToolBar* toolBar)
@@ -1465,7 +1553,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[13] = new wxBitmap(script_xpm);
    bitmaps[14] = new wxBitmap(build_xpm);
    
-  
+   
    // add project tools
    toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *bitmaps[0], _T("New Script"));
    toolBar->AddTool(MENU_FILE_OPEN_SCRIPT, _T("Open"), *bitmaps[1], _T("Open Script"));
@@ -1525,24 +1613,24 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
 
 
 //------------------------------------------------------------------------------
-// GmatMdiChildFrame* CreateNewResource(const wxString &title,
-//                                   const wxString &name, int dataType)
+// GmatMdiChildFrame* CreateNewResource(const wxString &title, const wxString &name
+//                                      GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-GmatMainFrame::CreateNewResource(const wxString &title,
-                                 const wxString &name, int dataType)
+GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
+                                 GmatTree::ItemType itemType)
 {
    #ifdef DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateNewResource() title=%s, name=%s, dataType=%d\n",
-       title.c_str(), name.c_str(), dataType);
+      ("GmatMainFrame::CreateNewResource() title=%s, name=%s, itemType=%d\n",
+       title.c_str(), name.c_str(), itemType);
    #endif
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);   
-   GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, title, name, dataType);   
+   GmatMdiChildFrame *newChild = new GmatMdiChildFrame(this, title, name, itemType);   
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    
-   switch (dataType)
+   switch (itemType)
    {
    case GmatTree::SPACECRAFT:
       sizer->Add(new SpacecraftPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
@@ -1562,7 +1650,7 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    case GmatTree::UNIVERSE_FOLDER:
       sizer->Add(new UniversePanel(scrolledWin), 0, wxGROW|wxALL, 0);
       break;
-      //case dataType == GmatTree::BODY:
+      //case itemType == GmatTree::BODY:
       //sizer->Add(new SolarSystemWindow(scrolledWin), 0, wxGROW|wxALL, 0);      
       //break;
    case GmatTree::IMPULSIVE_BURN:
@@ -1638,7 +1726,7 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    sizer->SetSizeHints(scrolledWin);
    
    #ifdef __USE_CHILD_BEST_SIZE__
-   if (dataType != GmatTree::SCRIPT_FILE)
+   if (itemType != GmatTree::SCRIPT_FILE)
    {
       wxSize bestSize = newChild->GetBestSize();
       newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
@@ -1653,7 +1741,7 @@ GmatMainFrame::CreateNewResource(const wxString &title,
    #endif
    
    // list of open children
-   mdiChildren->Append(newChild);
+   theMdiChildren->Append(newChild);
    
    // djc: Under linux, force the new child to display
 #ifndef __WXMSW__
@@ -1664,29 +1752,27 @@ GmatMainFrame::CreateNewResource(const wxString &title,
 }
 
 //------------------------------------------------------------------------------
-// GmatMdiChildFrame* CreateNewCommand(const wxString &title,
-//                                     const wxString &name, int dataType,
-//                                     GmatCommand *cmd)
+// GmatMdiChildFrame* CreateNewCommand(GmatTree::ItemType itemType, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
+GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *item)
 {
    wxString title = item->GetDesc();
    wxString name = item->GetDesc();
    GmatCommand *cmd = item->GetCommand();
    
    //MessageInterface::ShowMessage
-   //   ("===> title=%s, name=%s, dataType=%d\n", title.c_str(), name.c_str(),
-   //    dataType);
+   //   ("===> title=%s, name=%s, itemType=%d\n", title.c_str(), name.c_str(),
+   //    itemType);
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
    GmatMdiChildFrame *newChild =
-      new GmatMdiChildFrame(this, title, name, dataType);
-
+      new GmatMdiChildFrame(this, title, name, itemType);
+   
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
 
-   switch (dataType)
+   switch (itemType)
    {
    case GmatTree::PROPAGATE:
       sizer->Add(new PropagatePanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
@@ -1756,7 +1842,7 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
    sizer->SetSizeHints(scrolledWin);
    
    #ifdef __USE_CHILD_BEST_SIZE__
-   if (dataType != GmatTree::SCRIPT_EVENT)
+   if (itemType != GmatTree::SCRIPT_EVENT)
    {
       wxSize bestSize = newChild->GetBestSize();
       newChild->SetSize(bestSize.GetWidth(), bestSize.GetHeight());
@@ -1771,7 +1857,7 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
    #endif
    
    // list of open children
-   mdiChildren->Append(newChild);
+   theMdiChildren->Append(newChild);
 
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
@@ -1783,22 +1869,21 @@ GmatMainFrame::CreateNewCommand(int dataType, GmatTreeItemData *item)
 
 
 //------------------------------------------------------------------------------
-// GmatMdiChildFrame* CreateNewControl(const wxString &title,
-//                                   const wxString &name, int dataType)
+// GmatMdiChildFrame* CreateNewControl(const wxString &title, const wxString &name,
+//                                     GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-GmatMainFrame::CreateNewControl(const wxString &title,
-                                const wxString &name, int dataType,
-                                GmatCommand *cmd)
+GmatMainFrame::CreateNewControl(const wxString &title, const wxString &name,
+                                GmatTree::ItemType itemType, GmatCommand *cmd)
 {
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
    GmatMdiChildFrame *newChild =
-      new GmatMdiChildFrame(this, title, name, dataType);
+      new GmatMdiChildFrame(this, title, name, itemType);
    
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    
-   switch (dataType)
+   switch (itemType)
    {
       break;
    case GmatTree::IF_CONTROL:
@@ -1835,7 +1920,7 @@ GmatMainFrame::CreateNewControl(const wxString &title,
    #endif
    
    // list of open children
-   mdiChildren->Append(newChild);
+   theMdiChildren->Append(newChild);
 
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
@@ -1847,25 +1932,25 @@ GmatMainFrame::CreateNewControl(const wxString &title,
 
 
 //------------------------------------------------------------------------------
-// GmatMdiChildFrame* CreateNewOutput(const wxString &title,
-//                                    const wxString &name, int dataType)
+// GmatMdiChildFrame* CreateNewOutput(const wxString &title, const wxString &name,
+//                                    GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
 GmatMdiChildFrame*
-GmatMainFrame::CreateNewOutput(const wxString &title,
-                               const wxString &name, int dataType)
+GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
+                               GmatTree::ItemType itemType)
 {
    //MessageInterface::ShowMessage
-   //   ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, dataType=%d\n",
-   //    title.c_str(), name.c_str(), dataType);
+   //   ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, itemType=%d\n",
+   //    title.c_str(), name.c_str(), itemType);
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
    GmatMdiChildFrame *newChild =
-      new GmatMdiChildFrame(this, title, name, dataType);
+      new GmatMdiChildFrame(this, title, name, itemType);
    
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    
-   switch (dataType)
+   switch (itemType)
    {
    case GmatTree::OUTPUT_REPORT:
       {
@@ -1892,7 +1977,7 @@ GmatMainFrame::CreateNewOutput(const wxString &title,
    sizer->SetSizeHints(scrolledWin);
    
    // list of open children
-   mdiChildren->Append(newChild);
+   theMdiChildren->Append(newChild);
    
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
@@ -1937,7 +2022,7 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
        sizer->SetSizeHints(scrolledWin);
 
        // list of open children
-       mdiChildren->Append(newChild);
+       theMdiChildren->Append(newChild);
 
        // djc: Under linux, force the new child to display
        #ifndef __WXMSW__
@@ -1992,68 +2077,7 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles opening trajectory file and draws 3D OpenGl plot.
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnGlPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
-{
-//   if (MdiGlPlot::mdiParentGlFrame == NULL)
-//   {
-//      MdiGlPlot::mdiParentGlFrame =
-//         new MdiParentGlFrame((wxFrame *)NULL, -1, _T("MDI OpenGL Window"),
-//                              wxPoint(300, 200), wxSize(600, 500),
-//                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-//   }
-//
-//   // Give it an icon
-//#ifdef __WXMSW__
-//   MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(_T("mdi_icn")));
-//#else
-//   MdiGlPlot::mdiParentGlFrame->SetIcon(wxIcon(mondrian_xpm));
-//#endif
-//
-//   MdiGlPlot::mdiParentGlFrame->Show(TRUE);
-//   //SetTopWindow(MdiGlPlot::mdiParentGlFrame);
-}
-
-//------------------------------------------------------------------------------
-// void OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles opening trajectory file and draws XY plot. It draws position againt
- * time.
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnXyPlotTrajectoryFile(wxCommandEvent& WXUNUSED(event))
-{
-//   if (MdiXyPlot::mdiParentXyFrame == NULL)
-//   {
-//      MdiXyPlot::mdiParentXyFrame =
-//         new MdiParentXyFrame((wxFrame *)NULL, -1, _T("MDI XY Window"),
-//                              wxPoint(300, 200), wxSize(700, 600),
-//                              wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-//   }
-
-   // Give it an icon
-//#ifdef __WXMSW__
-//   MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(_T("mdi_icn")));
-//#else
-//   MdiXyPlot::mdiParentXyFrame->SetIcon(wxIcon(mondrian_xpm));
-//#endif
-//
-//   MdiXyPlot::mdiParentXyFrame->Show(TRUE);
-   //SetTopWindow(MdiXyPlot::mdiParentXyFrame);
-}
-
-//------------------------------------------------------------------------------
-// void OnStartServer(wxCommandEvent& WXUNUSED(event))
+// void OnStartServer(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 /**
  * Handles starting server from the menu bar.
@@ -2096,6 +2120,7 @@ void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
    wxEndBusyCursor();
 }
 
+
 //------------------------------------------------------------------------------
 // void OnCloseMatlab(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
@@ -2108,21 +2133,6 @@ void GmatMainFrame::OnOpenMatlab(wxCommandEvent& event)
 void GmatMainFrame::OnCloseMatlab(wxCommandEvent& event)
 {
    MatlabInterface::Close();
-}
-
-//------------------------------------------------------------------------------
-// void OnMatlabInteractive(wxCommandEvent& WXUNUSED(event))
-//------------------------------------------------------------------------------
-/**
- * Handles interactivly evaluating a matlab expression
- *
- * @param <event> input event.
- */
-//------------------------------------------------------------------------------
-void GmatMainFrame::OnMatlabInteractive(wxCommandEvent& event)
-{
-   InteractiveMatlabDialog interactiveMatlabDlg(this);
-   interactiveMatlabDlg.ShowModal();
 }
 
 
@@ -2488,7 +2498,10 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       
       // append text
       for (unsigned int i=0; i<output.size(); i++)
+      {
          textCtrl->AppendText(wxString(output[i].c_str()));
+         textCtrl->AppendText("");
+      }
       
       textCtrl->AppendText
          ("========================================================\n\n");
@@ -2636,15 +2649,63 @@ void GmatMainFrame::OnKeyDown(wxKeyEvent &event)
 //------------------------------------------------------------------------------
 // void UpdateMenus(bool openOn)
 //------------------------------------------------------------------------------
+/*
+ * Enanbles or disables menu File->Open item
+ */
+//------------------------------------------------------------------------------
 void GmatMainFrame::UpdateMenus(bool openOn)
 {
-   wxNode *node = mdiChildren->GetFirst();
+   wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      theChild->menuBar->Enable(MENU_FILE_OPEN_SCRIPT, openOn);
+      theChild->GetMenuBar()->Enable(MENU_FILE_OPEN_SCRIPT, openOn);
       node = node->GetNext();
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void EnableMenuAndToolBar(bool enable)
+//------------------------------------------------------------------------------
+/*
+ * @param <enable> true to enable the menu and tool icons, false to disable them
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::EnableMenuAndToolBar(bool enable)
+{
+   wxToolBar *toolBar = GetToolBar();
+   toolBar->EnableTool(TOOL_RUN, enable);
+   toolBar->EnableTool(TOOL_CLOSE_CHILDREN, enable);
+   toolBar->EnableTool(TOOL_CLOSE_CURRENT, enable);
+   
+   toolBar->EnableTool(MENU_FILE_NEW_SCRIPT, enable);
+   toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, enable);
+   toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, enable);
+   toolBar->EnableTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, enable);
+
+   //-----------------------------------
+   // Enable child mdi menu bar first
+   //-----------------------------------
+   GmatMdiChildFrame *child = (GmatMdiChildFrame*)GetActiveChild();
+   wxMenuBar *childMenuBar = child->GetMenuBar();
+   int childMenuCount = childMenuBar->GetMenuCount();
+   
+   for (int i=0; i<childMenuCount; i++)
+      childMenuBar->EnableTop(i, enable);
+   
+   childMenuBar->Update();
+   
+   //-----------------------------------
+   // Enable parent mdi menu bar second
+   //-----------------------------------
+   int parentMenuCount = theMenuBar->GetMenuCount();
+   
+   for (int i=0; i<parentMenuCount; i++)
+      theMenuBar->EnableTop(i, enable);
+   
+   theMenuBar->Update();
+   
 }
 
 
@@ -2826,14 +2887,14 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
     wxFont newFont = retData.GetChosenFont();
     
     // change all script windows to new font
-    wxNode *node = mdiChildren->GetFirst();
+    wxNode *node = theMdiChildren->GetFirst();
     while (node)
     {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if ((theChild->GetDataType() == GmatTree::SCRIPT_FILE)   ||
-         (theChild->GetDataType() == GmatTree::OUTPUT_REPORT)  ||
-         (theChild->GetDataType() == GmatTree::SCRIPT_EVENT) ||
-         (theChild->GetDataType() == GmatTree::GMAT_FUNCTION))
+      if ((theChild->GetItemType() == GmatTree::SCRIPT_FILE)   ||
+         (theChild->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
+         (theChild->GetItemType() == GmatTree::SCRIPT_EVENT) ||
+         (theChild->GetItemType() == GmatTree::GMAT_FUNCTION))
       {
          theChild->GetScriptTextCtrl()->SetFont(newFont);
       }
