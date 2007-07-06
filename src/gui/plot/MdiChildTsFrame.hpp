@@ -41,13 +41,13 @@ public:
    wxMenu         *mViewOptionMenu;
    
    bool mIsMainFrame;
-        
+   
    MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
                    const wxString &plotName, const wxString& plotTitle,
                    const wxString& xAxisTitle, const wxString& yAxisTitle,
                    const wxPoint& pos, const wxSize& size, const long style);
-   ~MdiChildTsFrame();
-
+   virtual ~MdiChildTsFrame();
+   
    int  ReadXyPlotFile(const wxString &filename);
    bool DeletePlot();
    void SetPlotTitle(const wxString &title);
@@ -69,7 +69,7 @@ public:
    wxString GetXAxisTitle() {return mXAxisTitle;}
    wxString GetYAxisTitle() {return mYAxisTitle;}
    int GetCurveCount() {return mXyPlot->GetCurveCount();}
-//   bool GetShowGrid() {return mXyPlot->GetShowGrid();}
+   //bool GetShowGrid() {return mXyPlot->GetShowGrid();}
    
    // setter
    void SetPlotName(const wxString &name);
@@ -93,9 +93,9 @@ public:
    void OnActivate(wxActivateEvent& event);
    void OnSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
-   //void OnClose(wxCloseEvent& event);
-
-    
+   void OnClose(wxCloseEvent& event);
+   
+   
 protected:
    
    void AdjustYScale();

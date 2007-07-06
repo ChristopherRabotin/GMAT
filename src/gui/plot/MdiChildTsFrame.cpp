@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(MdiChildTsFrame, GmatMdiChildFrame)
    EVT_ACTIVATE(MdiChildTsFrame::OnActivate)
    EVT_SIZE(MdiChildTsFrame::OnSize)
    EVT_MOVE(MdiChildTsFrame::OnMove)
-//    EVT_CLOSE(MdiChildTsFrame::OnClose)
+   EVT_CLOSE(MdiChildTsFrame::OnClose)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
-   GmatAppData::GetMainFrame()->mdiChildren->Append(this);
+   GmatAppData::GetMainFrame()->theMdiChildren->Append(this);
    
    #if DEBUG_MDI_TS_FRAME
    MessageInterface::ShowMessage("MdiChildTsFrame::MdiChildTsFrame() leaving\n");
@@ -139,6 +139,10 @@ MdiChildTsFrame::~MdiChildTsFrame()
    
    MdiTsPlot::mdiChildren.DeleteObject(this);
    MdiTsPlot::numChildren--;
+   
+   #if DEBUG_MDI_TS_FRAME
+   MessageInterface::ShowMessage("~MdiChildTsFrame() exiting\n");
+   #endif
 }
 
 
@@ -445,7 +449,7 @@ void MdiChildTsFrame::SetShowGrid(bool show)
 {
    if (mXyPlot)
    {
-      menuBar->Check(GmatPlot::MDI_TS_DRAW_GRID, show);
+      theMenuBar->Check(GmatPlot::MDI_TS_DRAW_GRID, show);
       mXyPlot->ShowGrid(show);
    }
 }
@@ -623,21 +627,18 @@ void MdiChildTsFrame::OnSize(wxSizeEvent& event)
    event.Skip();
 }
 
-// //------------------------------------------------------------------------------
-// // void OnClose(wxCloseEvent& event)
-// //------------------------------------------------------------------------------
-// void MdiChildTsFrame::OnClose(wxCloseEvent& event)
-// {
-// //   MdiTsPlot::numChildren--;
+
+//------------------------------------------------------------------------------
+// void OnClose(wxCloseEvent& event)
+//------------------------------------------------------------------------------
+void MdiChildTsFrame::OnClose(wxCloseEvent& event)
+{
+   // Add any check before closing
    
-// //   if (mIsMainFrame)
-// //      GmatAppData::GetMainFrame()->xyMainSubframe = NULL;
-    
-// //   if (MdiTsPlot::numChildren == 0)
-// //      GmatAppData::GetMainFrame()->tsSubframe = NULL;
-    
-//    event.Skip();
-// }
+   GmatMdiChildFrame::OnClose(event);
+   event.Skip();
+}
+
 
 //---------------------------------
 // protected methods
