@@ -47,6 +47,9 @@ public:
    UnsignedIntArray& GetObjectColors()
       { return mObjectIntColors; }
    
+   void EnableAnimation(bool flag)
+      { mViewAnimationButton->Enable(flag); }
+   
    void SetDrawXyPlane(bool flag);
    void SetDrawWireFrame(bool flag);
    void SetDrawAxes(bool flag);
