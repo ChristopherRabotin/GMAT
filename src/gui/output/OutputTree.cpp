@@ -81,6 +81,92 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
 
 
 //------------------------------------------------------------------------------
+// void RemoveItem(GmatTree::ItemType type, const wxString &name)
+//------------------------------------------------------------------------------
+/*
+ * Removes item from the output tree.
+ *
+ * @param <type> The item type to removed
+ * @param <name> The name of the node to be removed
+ */
+//------------------------------------------------------------------------------
+void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
+{
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage
+      ("OutputTree::RemoveItem() type=%d, name=%s\n", type, name.c_str());
+   #endif
+   
+   wxTreeItemId parentId;
+   
+   if (type == GmatTree::OUTPUT_OPENGL_PLOT)
+      parentId = mOpenGlItem;
+   else if (type == GmatTree::OUTPUT_XY_PLOT)
+      parentId = mXyPlotItem;
+   else
+      return;
+   
+   wxTreeItemId itemId = FindItem(parentId, name);
+   
+   if (itemId.IsOk())
+   {
+      // We need to collapse first and delete
+      if (GetChildrenCount(parentId) == 1)
+         Collapse(parentId);
+      
+      Delete(itemId);
+      
+      #if DEBUG_OUTPUT_TREE
+      MessageInterface::ShowMessage
+         ("   type=%d, name=%s removed\n", type, name.c_str());
+      #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// wxTreeItemId FindItem(wxTreeItemId parentId, const wxString &name)
+//------------------------------------------------------------------------------
+/*
+ * Finds item from the output tree.
+ *
+ * @param <parentId> The parent node item
+ * @param <name> The name of item to find from the parent node
+ *
+ * @return id of the item if found, uninitialized itemId otherwise
+ */
+//------------------------------------------------------------------------------
+wxTreeItemId OutputTree::FindItem(wxTreeItemId parentId, const wxString &name)
+{
+   #if DEBUG_OUTPUT_TREE
+   MessageInterface::ShowMessage
+      ("OutputTree::FindItem() parentId=%s, name=%s\n",
+       GetItemText(parentId).c_str(), name.c_str());
+   #endif
+   
+   wxTreeItemId itemId;
+   
+   if (ItemHasChildren(parentId))
+   {
+      wxString itemText;
+      wxTreeItemIdValue cookie;
+      wxTreeItemId childId = GetFirstChild(parentId, cookie);
+      
+      while (childId.IsOk())
+      {
+         itemText = GetItemText(childId);
+         if (itemText == name)
+            return childId;
+         
+         childId = GetNextChild(parentId, cookie);
+      }
+   }
+   
+   return itemId;
+}
+
+
+//------------------------------------------------------------------------------
 // void UpdateOutput(bool resetTree)
 //------------------------------------------------------------------------------
 /**
@@ -146,25 +232,25 @@ void OutputTree::AddDefaultResources()
    wxTreeItemId output =
       AddRoot(wxT("Output"), -1, -1,
               new GmatTreeItemData(wxT("Output"), GmatTree::OUTPUT_FOLDER));
-
+   
    //----- Reports
    mReportItem =
       AppendItem(output, wxT("Reports"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("Reports"),
                                       GmatTree::REPORTS_FOLDER));
-    
+   
    SetItemImage(mReportItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
+   
    //----- OpenGL Plots
-    mOpenGlItem =
+   mOpenGlItem =
       AppendItem(output, wxT("OpenGL Plots"), GmatTree::ICON_FOLDER, -1,
                  new GmatTreeItemData(wxT("OpenGL PLOTS"),
                                       GmatTree::OPENGL_PLOTS_FOLDER));
-    
+   
    SetItemImage(mOpenGlItem, GmatTree::ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
-
+   
    //----- XY Plots
    mXyPlotItem =
       AppendItem(output, wxT("XY Plots"), GmatTree::ICON_FOLDER, -1,
@@ -190,8 +276,11 @@ void OutputTree::AddDefaultResources()
 //------------------------------------------------------------------------------
 void OutputTree::OnItemRightClick(wxTreeEvent& event)
 {
+   //wxWidgets-2.6.3 does not need this but wxWidgets-2.8.0 needs to SelectItem
+   SelectItem(event.GetItem());
    ShowMenu(event.GetItem(), event.GetPoint());
 }
+
 
 //------------------------------------------------------------------------------
 // void ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
@@ -207,7 +296,7 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
    theSubscriberName = treeItem->GetDesc();
-   int dataType = treeItem->GetDataType();
+   GmatTree::ItemType itemType = treeItem->GetItemType();
    
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
@@ -217,7 +306,7 @@ void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 #if wxUSE_MENUS
    wxMenu menu;
    
-   if (dataType == GmatTree::OUTPUT_REPORT)
+   if (itemType == GmatTree::OUTPUT_REPORT)
    {
       menu.Append(POPUP_COMPARE_NUMERIC_VALUES, wxT("Compare Numeric Values"));
       menu.Append(POPUP_COMPARE_TEXT_LINES, wxT("Compare Text Lines"));
@@ -244,6 +333,7 @@ void OutputTree::OnItemActivated(wxTreeEvent &event)
    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
+
 
 //------------------------------------------------------------------------------
 // void OnOpen(wxCommandEvent &event)
