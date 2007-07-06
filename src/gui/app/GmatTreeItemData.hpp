@@ -98,7 +98,7 @@ namespace GmatTree
       UNKNOWN_ITEM = -1,
       
       //---------- Resource Tree
-      RESOURCES_FOLDER = 20000,
+      RESOURCES_FOLDER = 10000,
       SPACECRAFT_FOLDER,
       HARDWARE_FOLDER,
       FORMATION_FOLDER,
@@ -127,7 +127,7 @@ namespace GmatTree
       VIEW_SOLVER_GOALS,
       
       // openable resource
-      BEGIN_OF_RESOURCE,
+      BEGIN_OF_RESOURCE = 11000,
       SPACECRAFT,
       FUELTANK,
       THRUSTER,
@@ -170,13 +170,13 @@ namespace GmatTree
       // Note: MissionTree uses EVT_MENU_RANGE
       //------------------------------------------
       //---------- Mission Tree
-      MISSIONS_FOLDER,
+      MISSIONS_FOLDER = 20000,
       MISSION_SEQ_TOP_FOLDER,
       MISSION_SEQ_SUB_FOLDER,
       MISSION_SEQ_COMMAND,
       
       // command
-      BEGIN_OF_COMMAND,
+      BEGIN_OF_COMMAND = 21000,
       PROPAGATE,
       MANEUVER,
       BEGIN_FINITE_BURN,
@@ -208,13 +208,13 @@ namespace GmatTree
       END_OF_CONTROL,
       
       //---------- Output Tree
-      OUTPUT_FOLDER,
+      OUTPUT_FOLDER = 30000,
       REPORTS_FOLDER,
       OPENGL_PLOTS_FOLDER,
       XY_PLOTS_FOLDER,
       
       // for output
-      BEGIN_OF_OUTPUT,
+      BEGIN_OF_OUTPUT = 31000,
       OUTPUT_REPORT,
       OUTPUT_OPENGL_PLOT,
       OUTPUT_XY_PLOT,
@@ -222,7 +222,7 @@ namespace GmatTree
       END_OF_OUTPUT,
       
       //---------- NO panels will be created
-      BEGIN_NO_PANEL,
+      BEGIN_NO_PANEL = 40000,
       STOP,
       ADDED_SCRIPT_FOLDER,
       END_TARGET,
@@ -243,19 +243,19 @@ class GmatTreeItemData : public wxTreeItemData
 public:
    GmatTreeItemData(const wxString desc, GmatTree::ItemType type);
    
-   GmatTree::ItemType GetDataType();
-   wxString GetDesc();
+   GmatTree::ItemType GetItemType() { return mItemType; }
+   wxString GetDesc() { return mDesc; }
    
-   void SetDesc(wxString description);
-   void SetDataType(GmatTree::ItemType type);
+   void SetDesc(wxString desc) { mDesc = desc; }
+   void SetItemType(GmatTree::ItemType type) { mItemType = type; }
    
    virtual GmatCommand* GetCommand();
    virtual wxString GetCommandName();
     
 protected:
 private:
-   wxString m_desc;
-   GmatTree::ItemType dataType;
+   wxString mDesc;
+   GmatTree::ItemType mItemType;
 };
 
 #endif // GmatTreeItemData_hpp

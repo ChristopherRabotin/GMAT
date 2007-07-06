@@ -1354,7 +1354,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
    wxString oldName = selItem->GetDesc();
-   GmatTree::ItemType dataType = selItem->GetDataType();
+   GmatTree::ItemType itemType = selItem->GetItemType();
    
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
@@ -1362,7 +1362,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
-      Gmat::ObjectType objType = GetObjectType(dataType);
+      Gmat::ObjectType objType = GetObjectType(itemType);
       
       #if DEBUG_RENAME
       MessageInterface::ShowMessage
@@ -1432,7 +1432,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
-   GmatTree::ItemType itemType = selItem->GetDataType();
+   GmatTree::ItemType itemType = selItem->GetItemType();
    
    Gmat::ObjectType objType = GetObjectType(itemType);
    if (objType == Gmat::UNKNOWN_OBJECT)
@@ -1482,7 +1482,7 @@ void ResourceTree::OnClone(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
    wxString name = selItem->GetDesc();
-   GmatTree::ItemType itemType = selItem->GetDataType();
+   GmatTree::ItemType itemType = selItem->GetItemType();
    
    if ( (itemType == GmatTree::SPACECRAFT) ||
         (itemType == GmatTree::FUELTANK) ||
@@ -1532,27 +1532,27 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
    GmatTreeItemData *selItem = (GmatTreeItemData *)
       GetItemData(event.GetItem());
                                
-   int dataType = selItem->GetDataType();
-   bool isDefaultFolder = ((dataType == GmatTree::RESOURCES_FOLDER)     ||
-                           (dataType == GmatTree::SPACECRAFT_FOLDER)    ||
-                           (dataType == GmatTree::HARDWARE_FOLDER)      ||
-                           (dataType == GmatTree::FORMATION_FOLDER)     ||
-                           (dataType == GmatTree::CONSTELLATION_FOLDER) ||
-                           (dataType == GmatTree::BURN_FOLDER)          ||
-                           (dataType == GmatTree::PROPAGATOR_FOLDER)    ||
-                           (dataType == GmatTree::UNIVERSE_FOLDER)      ||
-                           (dataType == GmatTree::SOLVER_FOLDER)        ||
-                           (dataType == GmatTree::SUBSCRIBER_FOLDER)    ||
-                           (dataType == GmatTree::INTERFACE_FOLDER)     ||
-                           (dataType == GmatTree::VARIABLE_FOLDER));
+   int itemType = selItem->GetItemType();
+   bool isDefaultFolder = ((itemType == GmatTree::RESOURCES_FOLDER)     ||
+                           (itemType == GmatTree::SPACECRAFT_FOLDER)    ||
+                           (itemType == GmatTree::HARDWARE_FOLDER)      ||
+                           (itemType == GmatTree::FORMATION_FOLDER)     ||
+                           (itemType == GmatTree::CONSTELLATION_FOLDER) ||
+                           (itemType == GmatTree::BURN_FOLDER)          ||
+                           (itemType == GmatTree::PROPAGATOR_FOLDER)    ||
+                           (itemType == GmatTree::UNIVERSE_FOLDER)      ||
+                           (itemType == GmatTree::SOLVER_FOLDER)        ||
+                           (itemType == GmatTree::SUBSCRIBER_FOLDER)    ||
+                           (itemType == GmatTree::INTERFACE_FOLDER)     ||
+                           (itemType == GmatTree::VARIABLE_FOLDER));
                          
-   bool isDefaultItem = ((dataType == GmatTree::PROPAGATOR)      ||
-                         (dataType == GmatTree::CELESTIAL_BODY)  ||
-                         (dataType == GmatTree::DIFF_CORR)       ||
-                         (dataType == GmatTree::REPORT_FILE)     ||
-                         (dataType == GmatTree::XY_PLOT)         ||
-                         (dataType == GmatTree::OPENGL_PLOT)     ||
-                         (dataType == GmatTree::INTERFACE));
+   bool isDefaultItem = ((itemType == GmatTree::PROPAGATOR)      ||
+                         (itemType == GmatTree::CELESTIAL_BODY)  ||
+                         (itemType == GmatTree::DIFF_CORR)       ||
+                         (itemType == GmatTree::REPORT_FILE)     ||
+                         (itemType == GmatTree::XY_PLOT)         ||
+                         (itemType == GmatTree::OPENGL_PLOT)     ||
+                         (itemType == GmatTree::INTERFACE));
    
    //kind of redundant because OpenPage returns false for some
    //of the default folders
@@ -1584,7 +1584,7 @@ void ResourceTree::OnEndLabelEdit(wxTreeEvent &event)
          GetItemData(GetSelection());
 
       wxString oldLabel = selItem->GetDesc();
-      int itemType = selItem->GetDataType();
+      int itemType = selItem->GetItemType();
 
       selItem->SetDesc(newLabel);
        
@@ -1628,7 +1628,7 @@ void ResourceTree::OnBeginDrag(wxTreeEvent& event)
         
       // Get info from selected item
       GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(mDraggedItem);
-      int draggedId = theItem->GetDataType();
+      int draggedId = theItem->GetItemType();
         
       if ((draggedId == GmatTree::SPACECRAFT )            ||
           (draggedId == GmatTree::FORMATION_SPACECRAFT ))
@@ -1660,7 +1660,7 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
 
    // Get info from selected item
    GmatTreeItemData *theItem = (GmatTreeItemData *) GetItemData(itemDst);
-   int destId = theItem->GetDataType();
+   int destId = theItem->GetItemType();
 
    if ((destId == GmatTree::FORMATION )  ||
        (destId == GmatTree::SPACECRAFT_FOLDER ))
@@ -2424,10 +2424,11 @@ void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
    {
       wxTreeItemId lastChild = GetLastChild(item);
       wxString name = ((GmatTreeItemData *)GetItemData(lastChild))->GetDesc();
-      int dataType = ((GmatTreeItemData *)GetItemData(lastChild))->GetDataType();
+      GmatTree::ItemType itemType =
+         ((GmatTreeItemData *)GetItemData(lastChild))->GetItemType();
       
       // close window
-      GmatAppData::GetMainFrame()->RemoveChild(name, dataType);
+      GmatAppData::GetMainFrame()->RemoveChild(name, itemType);
       
       // delete item
       Delete(lastChild);
@@ -2450,13 +2451,13 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
    wxString name = ((GmatTreeItemData *)GetItemData(item))->GetDesc();
-   int dataType = ((GmatTreeItemData *)GetItemData(item))->GetDataType();
+   GmatTree::ItemType itemType = ((GmatTreeItemData *)GetItemData(item))->GetItemType();
    wxTreeItemId parentItem = GetItemParent(item);
    
    //Collapse(parentItem); //loj: 8/4/05 Do we really want to collapse and expand?
    
    // close window
-   GmatAppData::GetMainFrame()->RemoveChild(name, dataType);
+   GmatAppData::GetMainFrame()->RemoveChild(name, itemType);
    // delete item
    Delete(item);
    
@@ -3153,7 +3154,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
    wxString title = treeItem->GetDesc();
-   GmatTree::ItemType itemType = treeItem->GetDataType();
+   GmatTree::ItemType itemType = treeItem->GetItemType();
    
    //MessageInterface::ShowMessage
    //   ("===> ResourceTree::ShowMenu() title=%s, itemType=%d\n", title.c_str(),

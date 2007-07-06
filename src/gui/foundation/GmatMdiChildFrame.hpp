@@ -17,6 +17,7 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatMenuBar.hpp"
+#include "GmatTreeItemData.hpp"  // for namespace GmatTree::
 
 class GmatMdiChildFrame : public wxMDIChildFrame
 {
@@ -25,7 +26,7 @@ public:
    GmatMdiChildFrame(wxMDIParentFrame *parent, 
                      const wxString &title = "", 
                      const wxString &name = "",
-                     const int type = 20000,
+                     const GmatTree::ItemType type = GmatTree::UNKNOWN_ITEM,
                      wxWindowID id = -1, 
                      const wxPoint &pos = wxDefaultPosition, 
                      const wxSize &size = wxDefaultSize, 
@@ -36,15 +37,17 @@ public:
    wxString GetTitle();
    void SetTitle(wxString newTitle);
 #endif
+
+   wxMenuBar* GetMenuBar() { return theMenuBar; }
+   wxTextCtrl *GetScriptTextCtrl() { return theScriptTextCtrl; }
+   GmatTree::ItemType GetItemType() { return mItemType; }
+   void SetDataType(GmatTree::ItemType type) {mItemType = type;}
+   void SetScriptTextCtrl(wxTextCtrl *scriptTC) { theScriptTextCtrl = scriptTC; }
+   void SetDirty(bool dirty) { mDirty = dirty; }
+   bool IsDirty() { return mDirty; }
+   bool CanClose() { return mCanClose; }
    
-   GmatMenuBar *menuBar;
-   int GetDataType();
-   void SetDataType(int type) {dataType = type;};
-   void OnClose(wxCloseEvent &event);
-   void SetScriptTextCtrl(wxTextCtrl *scriptTC) {theScriptTextCtrl = scriptTC;};
-   wxTextCtrl *GetScriptTextCtrl(){return theScriptTextCtrl;};
-   void SetDirty(bool dirty);
-   bool IsDirty();
+   virtual void OnClose(wxCloseEvent &event);
    
 protected:
    
@@ -53,17 +56,15 @@ protected:
 #endif
    
    bool mDirty;
-   int dataType;
+   bool mCanClose;
+   GmatTree::ItemType mItemType;
    wxTextCtrl *theScriptTextCtrl;
+   GmatMenuBar *theMenuBar;
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-   
-   // IDs for the controls and the menu commands
-   enum
-   {     
-   };
-   
+      
 };
+
 
 #endif // GmatMdiChildFrame_hpp

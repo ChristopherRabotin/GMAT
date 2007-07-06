@@ -20,7 +20,9 @@
 #include "MessageInterface.hpp"
 #include "GuiItemManager.hpp"
 
-using namespace GmatMenu;
+//#define DEBUG_MDI_CHILD_FRAME
+
+//using namespace GmatMenu;
 
 //------------------------------
 // event tables for wxWindows
@@ -45,7 +47,7 @@ END_EVENT_TABLE()
 GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent, 
                                      const wxString &title, 
                                      const wxString &name,
-                                     const int type,
+                                     const GmatTree::ItemType type,
                                      wxWindowID id, 
                                      const wxPoint &pos, 
                                      const wxSize &size, 
@@ -53,14 +55,22 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    : wxMDIChildFrame(parent, id, title, pos, size, style, name)
 {
    mDirty = false;
-   dataType = type;
+   mItemType = type;
+   mCanClose = true;
    
    #ifdef __WXMAC__
    childTitle = title;
    #endif
    
-   menuBar = new GmatMenuBar(dataType);
-   SetMenuBar(menuBar);
+   // create a menu bar
+   // pass Window menu if Windows
+   #ifdef __WXMSW__
+   theMenuBar = new GmatMenuBar(mItemType, parent->GetWindowMenu());
+   #else
+   theMenuBar = new GmatMenuBar(mItemType, NULL);
+   #endif
+   
+   SetMenuBar(theMenuBar);
    
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
@@ -95,6 +105,12 @@ GmatMdiChildFrame::~GmatMdiChildFrame()
 //------------------------------------------------------------------------------
 void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
 {
+   #ifdef DEBUG_MDI_CHILD_FRAME
+   MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() entered\n");
+   #endif
+   
+   mCanClose = true;
+   
    // check if window is dirty?
    if (mDirty)
    {
@@ -102,16 +118,20 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
                         _T("Please confirm"), wxICON_QUESTION | wxYES_NO) != wxYES )
       {
          event.Veto();
+         mCanClose = false;
          return;
       }
    }
    
    // remove from list of frames
-   GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), dataType);
-   
-   //event.Skip();
+   GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), mItemType);   
    wxSafeYield();
+   
+   #ifdef DEBUG_MDI_CHILD_FRAME
+   MessageInterface::ShowMessage("GmatMdiChildFrame::OnClose() exiting\n");
+   #endif
 }
+
 
 #ifdef __WXMAC__
 //------------------------------------------------------------------------------
@@ -135,30 +155,4 @@ wxString GmatMdiChildFrame::GetTitle()
 }
 #endif
 
-
-//------------------------------------------------------------------------------
-// int GetDataType()
-//------------------------------------------------------------------------------
-int GmatMdiChildFrame::GetDataType()
-{
-   return dataType;
-}
-
-
-//------------------------------------------------------------------------------
-// void SetDirty(bool dirty)
-//------------------------------------------------------------------------------
-void GmatMdiChildFrame::SetDirty(bool dirty)
-{
-   mDirty = dirty;
-}
-
-
-//------------------------------------------------------------------------------
-// bool IsDirty()
-//------------------------------------------------------------------------------
-bool GmatMdiChildFrame::IsDirty()
-{
-    return mDirty;
-}
 

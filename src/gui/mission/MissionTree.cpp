@@ -1652,9 +1652,9 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
 
    // Since VaryPanel is used for both Target and Optimize,
    // set proper id indicating Optimize Vary
-   if ((item->GetDataType() == GmatTree::VARY) &&
-       (parent->GetDataType() == GmatTree::OPTIMIZE))
-      item->SetDataType(GmatTree::OPTIMIZE_VARY);
+   if ((item->GetItemType() == GmatTree::VARY) &&
+       (parent->GetItemType() == GmatTree::OPTIMIZE))
+      item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    GmatAppData::GetMainFrame()->CreateChild(item);
 }
@@ -1686,9 +1686,9 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
    
    // Since VaryPanel is used for both Target and Optimize,
    // set proper id indicating Optimize Vary
-   if ((item->GetDataType() == GmatTree::VARY) &&
-       (parent->GetDataType() == GmatTree::OPTIMIZE))
-      item->SetDataType(GmatTree::OPTIMIZE_VARY);
+   if ((item->GetItemType() == GmatTree::VARY) &&
+       (parent->GetItemType() == GmatTree::OPTIMIZE))
+      item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    // Show panel here. because OnItemActivated() always collapse the node.
    GmatAppData::GetMainFrame()->CreateChild(item);
@@ -1711,30 +1711,30 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 {
    MissionTreeItemData *treeItem = (MissionTreeItemData *)GetItemData(id);
    wxString title = treeItem->GetDesc();
-   int dataType = treeItem->GetDataType();
+   GmatTree::ItemType itemType = treeItem->GetItemType();
    wxTreeItemId parent = GetItemParent(id);
    //MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parent);
-   //int parentDataType = parentItem->GetDataType();
+   //int parentDataType = parentItem->GetItemType();
    
    #if DEBUG_MISSION_TREE_MENU
    MessageInterface::ShowMessage
-      ("MissionTree::ShowMenu() dataType=%d\n", dataType);
+      ("MissionTree::ShowMenu() itemType=%d\n", itemType);
    #endif
    
 #if wxUSE_MENUS
    wxMenu menu;
    
-   if (dataType == GmatTree::MISSION_SEQ_TOP_FOLDER)
+   if (itemType == GmatTree::MISSION_SEQ_TOP_FOLDER)
    {
       menu.Append(POPUP_ADD_MISSION_SEQ, wxT("Add Mission Sequence"));
       menu.Enable(POPUP_ADD_MISSION_SEQ, FALSE);
    }
-   else if (dataType == GmatTree::MISSION_SEQ_SUB_FOLDER)
+   else if (itemType == GmatTree::MISSION_SEQ_SUB_FOLDER)
    {
       menu.Append(POPUP_COLLAPSE, wxT("Collapse"));
       menu.Append(POPUP_EXPAND, wxT("Expand"));
       menu.AppendSeparator();
-      menu.Append(POPUP_APPEND, wxT("Append"), CreatePopupMenu(dataType, APPEND));
+      menu.Append(POPUP_APPEND, wxT("Append"), CreatePopupMenu(itemType, APPEND));
       
       // If multiple sequence is enabled
       #ifdef __ENABLE_MULTIPLE_SEQUENCE__
@@ -1762,37 +1762,37 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(POPUP_CLOSE, wxT("Close"));
       menu.AppendSeparator();
       
-      if (dataType == GmatTree::TARGET)
+      if (itemType == GmatTree::TARGET)
       {
          menu.Append(POPUP_APPEND, wxT("Append"),
-                     CreateTargetPopupMenu(dataType, APPEND));
+                     CreateTargetPopupMenu(itemType, APPEND));
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                     CreatePopupMenu(dataType, INSERT_BEFORE));         
+                     CreatePopupMenu(itemType, INSERT_BEFORE));         
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                     CreateTargetPopupMenu(dataType, INSERT_AFTER));
+                     CreateTargetPopupMenu(itemType, INSERT_AFTER));
       }
-      else if (dataType == GmatTree::OPTIMIZE)
+      else if (itemType == GmatTree::OPTIMIZE)
       {
          menu.Append(POPUP_APPEND, wxT("Append"),
-                     CreateOptimizePopupMenu(dataType, APPEND));
+                     CreateOptimizePopupMenu(itemType, APPEND));
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                     CreatePopupMenu(dataType, INSERT_BEFORE));         
+                     CreatePopupMenu(itemType, INSERT_BEFORE));         
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                     CreateOptimizePopupMenu(dataType, INSERT_AFTER));         
+                     CreateOptimizePopupMenu(itemType, INSERT_AFTER));         
       }
-      else if (dataType == GmatTree::END_TARGET)
+      else if (itemType == GmatTree::END_TARGET)
       {
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                     CreateTargetPopupMenu(dataType, INSERT_BEFORE));
+                     CreateTargetPopupMenu(itemType, INSERT_BEFORE));
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                     CreatePopupMenu(dataType, INSERT_AFTER));
+                     CreatePopupMenu(itemType, INSERT_AFTER));
       }
-      else if (dataType == GmatTree::END_OPTIMIZE)
+      else if (itemType == GmatTree::END_OPTIMIZE)
       {
          menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                     CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
+                     CreateOptimizePopupMenu(itemType, INSERT_BEFORE));
          menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                     CreatePopupMenu(dataType, INSERT_AFTER));
+                     CreatePopupMenu(itemType, INSERT_AFTER));
       }
       else 
       {
@@ -1802,32 +1802,32 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             if (itemType == GmatTree::TARGET)
             {
                menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                           CreateTargetPopupMenu(dataType, INSERT_BEFORE));
+                           CreateTargetPopupMenu(itemType, INSERT_BEFORE));
                menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                           CreateTargetPopupMenu(dataType, INSERT_AFTER));
+                           CreateTargetPopupMenu(itemType, INSERT_AFTER));
             }
             else if (itemType == GmatTree::OPTIMIZE)
             {
                menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                           CreateOptimizePopupMenu(dataType, INSERT_BEFORE));
+                           CreateOptimizePopupMenu(itemType, INSERT_BEFORE));
                menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                           CreateOptimizePopupMenu(dataType, INSERT_AFTER));
+                           CreateOptimizePopupMenu(itemType, INSERT_AFTER));
             }
          }
          else
          {
             menu.Append(POPUP_INSERT_BEFORE, wxT("Insert Before"),
-                        CreatePopupMenu(dataType, INSERT_BEFORE));
+                        CreatePopupMenu(itemType, INSERT_BEFORE));
             menu.Append(POPUP_INSERT_AFTER, wxT("Insert After"),
-                        CreatePopupMenu(dataType, INSERT_AFTER));
+                        CreatePopupMenu(itemType, INSERT_AFTER));
          }
       }
       
       // Append is allowed for the control logic
-      if ((dataType == GmatTree::IF_CONTROL) ||
-          (dataType == GmatTree::ELSE_CONTROL) ||
-          (dataType == GmatTree::FOR_CONTROL) ||
-          (dataType == GmatTree::WHILE_CONTROL))
+      if ((itemType == GmatTree::IF_CONTROL) ||
+          (itemType == GmatTree::ELSE_CONTROL) ||
+          (itemType == GmatTree::FOR_CONTROL) ||
+          (itemType == GmatTree::WHILE_CONTROL))
       {
          GmatTree::ItemType itemType;
          if (IsInsideSolver(id, itemType))
@@ -1835,23 +1835,23 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
             if (itemType == GmatTree::TARGET)
             {
                menu.Append(POPUP_APPEND, wxT("Append"),
-                           CreateTargetPopupMenu(dataType, APPEND));   
+                           CreateTargetPopupMenu(itemType, APPEND));   
             }
             else if (itemType == GmatTree::OPTIMIZE)
             {
                menu.Append(POPUP_APPEND, wxT("Append"),
-                           CreateOptimizePopupMenu(dataType, APPEND));   
+                           CreateOptimizePopupMenu(itemType, APPEND));   
             }
             else
             {
                menu.Append(POPUP_APPEND, wxT("Append"),
-                           CreatePopupMenu(dataType, APPEND));
+                           CreatePopupMenu(itemType, APPEND));
             }
          }
       }
       
       // Delete and Rename applies to all, except End branch
-      if (dataType < GmatTree::END_TARGET)
+      if (itemType < GmatTree::END_TARGET)
       {
          menu.AppendSeparator();
          menu.Append(POPUP_RENAME, wxT("Rename"));
@@ -2414,12 +2414,12 @@ bool MissionTree::CheckClickIn(wxPoint position)
    // to compare the event click with the position of the box
    while (missionTreeItemData != NULL)
    {
-      int dataType = missionTreeItemData->GetDataType();
+      GmatTree::ItemType itemType = missionTreeItemData->GetItemType();
       // don't have to open any panels for top folders
-      if ((dataType != GmatTree::MISSIONS_FOLDER)       &&
-          (dataType != GmatTree::MISSION_SEQ_TOP_FOLDER)&&
-          (dataType != GmatTree::MISSION_SEQ_SUB_FOLDER)&&
-          (dataType != GmatTree::MISSION_SEQ_COMMAND))
+      if ((itemType != GmatTree::MISSIONS_FOLDER)       &&
+          (itemType != GmatTree::MISSION_SEQ_TOP_FOLDER)&&
+          (itemType != GmatTree::MISSION_SEQ_SUB_FOLDER)&&
+          (itemType != GmatTree::MISSION_SEQ_COMMAND))
       {
          // get the surrounding box to compare click and commands
          wxRect bound;
@@ -2945,7 +2945,7 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
    #endif
 
    MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId);
-   GmatTree::ItemType parentType = parentItem->GetDataType();
+   GmatTree::ItemType parentType = parentItem->GetItemType();
    unsigned int itemCount = 0;
    wxTreeItemId firstItem;
    
@@ -3016,7 +3016,7 @@ bool MissionTree::IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemTy
       #endif
       
       parentItem = (MissionTreeItemData *)GetItemData(parentId);
-      parentType = parentItem->GetDataType();
+      parentType = parentItem->GetItemType();
       
       if (parentType == GmatTree::TARGET || parentType == GmatTree::OPTIMIZE)
       {
