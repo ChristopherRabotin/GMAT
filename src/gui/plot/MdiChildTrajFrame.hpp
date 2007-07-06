@@ -42,13 +42,14 @@ public:
                      const wxPoint& pos, const wxSize& size,
                      const long style, const wxString &csName = "",
                      SolarSystem *solarSys = NULL);
-   ~MdiChildTrajFrame();
+   virtual ~MdiChildTrajFrame();
    
    // getters
    wxString GetPlotName() { return mPlotName; }
    bool GetOverlapPlot() { return mOverlapPlot; }
    TrajPlotCanvas* GetGlCanvas() { return mCanvas; }
    wxGLContext* GetGLContext() { return mCanvas->GetGLContext(); }
+   OpenGlOptionDialog* GetOptionDialog() { return mOptionDialog; }
    bool GetUseViewPointInfo();
    bool GetDrawWireFrame();
    bool GetDrawXyPlane();
@@ -62,7 +63,9 @@ public:
    Integer GetAnimationFrameIncrement();
    
    // setters
-   void SetGLContext(wxGLContext *glContext = NULL) { mCanvas->SetGLContext(glContext); }
+   void SetGLContext(wxGLContext *glContext = NULL)
+      { mCanvas->SetGLContext(glContext); }
+   
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
    void SetOverlapPlot(bool overlap);
@@ -101,7 +104,8 @@ public:
    void OnActivate(wxActivateEvent& event);
    void OnTrajSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
-
+   void OnClose(wxCloseEvent &event);
+   
    // drawing
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
@@ -130,6 +134,9 @@ public:
    void RefreshPlot();
    void SetEndOfRun();
    void DeletePlot();
+   
+   // OptionDialog
+   void EnableAnimation(bool enable);
    
 protected:
 

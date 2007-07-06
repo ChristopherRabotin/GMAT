@@ -19,11 +19,11 @@
 #include "CelesBodySelectDialog.hpp"
 #include "OpenGlOptionDialog.hpp"
 #include "GmatAppData.hpp"
-
+#include "GmatMainFrame.hpp"      // for namespace GmatMenu
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
-//#define DEBUG_CHILDTRAJ_FRAME 1
+//#define DEBUGMDI_TRAJ_FRAME 1
 
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
@@ -36,6 +36,7 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
    EVT_SIZE(MdiChildTrajFrame::OnTrajSize)
    EVT_MOVE(MdiChildTrajFrame::OnMove)
+   EVT_CLOSE(MdiChildTrajFrame::OnClose) 
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -83,7 +84,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
    
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
-   GmatAppData::GetMainFrame()->mdiChildren->Append(this);
+   GmatAppData::GetMainFrame()->theMdiChildren->Append(this);
 }
 
 
@@ -97,15 +98,17 @@ MdiChildTrajFrame::~MdiChildTrajFrame()
    
    mOptionDialog = (OpenGlOptionDialog*)NULL;
    
-   #if DEBUG_CHILDTRAJ_FRAME
+   #if DEBUG_MDI_TRAJ_FRAME
    MessageInterface::ShowMessage
-      ("~MdiChildTrajFrame mPlotName=%s\n", mPlotName.c_str());
+      ("~MdiChildTrajFrame() mPlotName=%s\n", mPlotName.c_str());
    #endif
    
    MdiGlPlot::mdiChildren.DeleteObject(this);
-   
    MdiGlPlot::numChildren--;
-
+   
+   #if DEBUG_MDI_TRAJ_FRAME
+   MessageInterface::ShowMessage("~MdiChildTrajFrame() exiting\n");
+   #endif
 }
 
 
@@ -244,7 +247,7 @@ Integer MdiChildTrajFrame::GetAnimationFrameIncrement()
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetPlotName(const wxString &name)
 {
-   #if DEBUG_CHILDTRAJ_FRAME
+   #if DEBUG_MDI_TRAJ_FRAME
       MessageInterface::ShowMessage
          ("MdiChildTrajFrame::SetPlotName() name=%s\n", name.c_str());
    #endif
@@ -260,12 +263,12 @@ void MdiChildTrajFrame::SetPlotName(const wxString &name)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::ResetShowViewOption()
 {
-   #if DEBUG_CHILDTRAJ_FRAME
+   #if DEBUG_MDI_TRAJ_FRAME
    MessageInterface::ShowMessage
       ("MdiChildTrajFrame::ResetShowViewOption()\n");
    #endif
 
-    menuBar->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
+    theMenuBar->Check(GmatPlot::MDI_GL_SHOW_OPTION_PANEL, false);
 }
 
 
@@ -331,7 +334,7 @@ void MdiChildTrajFrame::SetDrawWireFrame(bool flag)
 {
    if (mCanvas)
    {
-      menuBar->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
+      theMenuBar->Check(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, flag);
       mCanvas->SetDrawWireFrame(flag);
    }
 }
@@ -344,7 +347,7 @@ void MdiChildTrajFrame::SetDrawXyPlane(bool flag)
 {
    if (mCanvas)
    {
-      menuBar->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);   
+      theMenuBar->Check(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, flag);   
       mCanvas->SetDrawXyPlane(flag);
    }
 }
@@ -466,7 +469,7 @@ void MdiChildTrajFrame::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMa
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
 {
-   #ifdef DEBUG_CHILDTRAJ_FRAME
+   #ifdef DEBUG_MDI_TRAJ_FRAME
    MessageInterface::ShowMessage("MdiChildTrajFrame::RedrawPlot() entered.\n");
    #endif
    
@@ -517,7 +520,10 @@ void MdiChildTrajFrame::OnShowDefaultView(wxCommandEvent& event)
 // void OnShowOptionDialog(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
-{   
+{
+   //MessageInterface::ShowMessage
+   //   ("===> MdiChildTrajFrame::OnShowOptionDialog() entered\n");
+   
    if (event.IsChecked())
    {
       if (mOptionDialog == NULL)
@@ -594,24 +600,6 @@ void MdiChildTrajFrame::OnActivate(wxActivateEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnMove(wxMoveEvent& event)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
-{
-   // VZ: here everything is totally wrong under MSW, the positions are
-   //     different and both wrong (pos2 is off by 2 pixels for me which seems
-   //     to be the width of the MDI canvas border)
-   wxPoint pos1 = event.GetPosition();
-   wxPoint pos2 = GetPosition();
-
-   //wxLogStatus(GmatAppData::GetMainFrame(),
-   //            wxT("position from event: (%d, %d), from frame (%d, %d)"),
-   //            pos1.x, pos1.y, pos2.x, pos2.y);
-   
-   event.Skip();
-}
-
-//------------------------------------------------------------------------------
 // void OnTrajSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
@@ -627,6 +615,58 @@ void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
    //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
    //            size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
    
+   event.Skip();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnMove(wxMoveEvent& event)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
+{
+   // VZ: here everything is totally wrong under MSW, the positions are
+   //     different and both wrong (pos2 is off by 2 pixels for me which seems
+   //     to be the width of the MDI canvas border)
+   wxPoint pos1 = event.GetPosition();
+   wxPoint pos2 = GetPosition();
+   
+   //wxLogStatus(GmatAppData::GetMainFrame(),
+   //            wxT("position from event: (%d, %d), from frame (%d, %d)"),
+   //            pos1.x, pos1.y, pos2.x, pos2.y);
+   
+   event.Skip();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnClose(wxCloseEvent &event)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnClose(wxCloseEvent &event)
+{
+   if (mCanvas)
+   {
+      mCanClose = true;
+
+      #ifdef DEBUG_MDI_TRAJ_FRAME
+      MessageInterface::ShowMessage
+         ("MdiChildTrajFrame::OnClose() IsAnimationRunning=%d\n",
+          mCanvas->IsAnimationRunning());
+      #endif
+      
+      wxSafeYield();
+      
+      if (mCanvas->IsAnimationRunning())
+      {
+         wxMessageBox(_T("The animation is running.\n"
+                         "Please stop the animation first."),
+                      _T("GMAT Warning"));
+         event.Veto();
+         mCanClose = false;
+         return;
+      }
+   }
+   
+   GmatMdiChildFrame::OnClose(event);
    event.Skip();
 }
 
@@ -668,7 +708,7 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 {
    if (mCanvas)
    {
-      #if DEBUG_CHILDTRAJ_FRAME
+      #if DEBUG_MDI_TRAJ_FRAME
          MessageInterface::ShowMessage
             ("MdiChildTrajFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
       #endif
@@ -790,3 +830,14 @@ void MdiChildTrajFrame::DeletePlot()
    // This will call OnClose()
    Close(TRUE);
 }
+
+
+//------------------------------------------------------------------------------
+// void EnableAnimationButton(bool enable)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::EnableAnimation(bool enable)
+{
+   if (mOptionDialog)
+      mOptionDialog->EnableAnimation(enable);
+}
+
