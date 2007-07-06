@@ -693,27 +693,27 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    
    if (!baseIn)
    {
-      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n\n");
+      textBuffer.push_back("Cannot open base file: " +  basefilename + "\n");
       return textBuffer;
    }
    
    if (!in1)
    {
-      textBuffer.push_back("Cannot open first file: " + filename1 + "\n\n");
+      textBuffer.push_back("Cannot open first file: " + filename1 + "\n");
       return textBuffer;
    }
    
    if (numDirsToCompare >= 2)
       if (!in2)
       {
-         textBuffer.push_back("Cannot open second file: " + filename2 + "\n\n");
+         textBuffer.push_back("Cannot open second file: " + filename2 + "\n");
          return textBuffer;
       }
    
    if (numDirsToCompare >= 3)
       if (!in3)
       {
-         textBuffer.push_back("Cannot open third file: " + filename3 + "\n\n");
+         textBuffer.push_back("Cannot open third file: " + filename3 + "\n");
          return textBuffer;
       }
 
