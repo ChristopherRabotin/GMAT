@@ -41,53 +41,55 @@ public:
    bool InitGL();
    
    // getters
-   bool  GetUseViewPointInfo() {return mUseInitialViewPoint;}
-   bool  GetUsePerspectiveMode() {return mUsePerspectiveMode;}
-   bool  GetDrawWireFrame() {return mDrawWireFrame;}
-   bool  GetDrawXyPlane() {return mDrawXyPlane;}
-   bool  GetDrawEcPlane() {return mDrawEcPlane;}
-   bool  GetDrawSunLine() {return mDrawSunLine;}
-   bool  GetDrawAxes() {return mDrawAxes;}
-   bool  GetDrawGrid() {return mDrawGrid;}
-   bool  GetRotateAboutXY() {return mRotateXy;}
-   unsigned int GetXyPlaneColor() {return mXyPlaneColor;}
-   unsigned int GetEcPlaneColor() {return mEcPlaneColor;}
-   unsigned int GetSunLineColor() {return mSunLineColor;}
-   float GetDistance() {return mAxisLength;}
-   int GetAnimationUpdateInterval() {return mUpdateInterval;}
-   int GetAnimationFrameIncrement() {return mFrameInc;}
-   wxString GetViewCoordSysName() {return mViewCoordSysName;}
-   CoordinateSystem* GetViewCoordSystem() {return mViewCoordSystem;}
-   const wxArrayString& GetObjectNames() {return mObjectNames;}
-   const wxArrayString& GetValidCSNames() {return mValidCSNames;}
-   const wxStringBoolMap& GetShowObjectMap() {return mShowObjectMap;}
-   const wxStringColorMap& GetObjectColorMap() {return mObjectColorMap;}
+   bool  GetUseViewPointInfo() { return mUseInitialViewPoint; }
+   bool  GetUsePerspectiveMode() { return mUsePerspectiveMode; }
+   bool  GetDrawWireFrame() { return mDrawWireFrame; }
+   bool  GetDrawXyPlane() { return mDrawXyPlane; }
+   bool  GetDrawEcPlane() { return mDrawEcPlane; }
+   bool  GetDrawSunLine() { return mDrawSunLine; }
+   bool  GetDrawAxes() { return mDrawAxes; }
+   bool  GetDrawGrid() { return mDrawGrid; }
+   bool  GetRotateAboutXY() { return mRotateXy; }
+   bool  IsAnimationRunning() { return mIsAnimationRunning; }
+   unsigned int GetXyPlaneColor() { return mXyPlaneColor; }
+   unsigned int GetEcPlaneColor() { return mEcPlaneColor; }
+   unsigned int GetSunLineColor() { return mSunLineColor; }
+   float GetDistance() { return mAxisLength; }
+   int GetAnimationUpdateInterval() { return mUpdateInterval; }
+   int GetAnimationFrameIncrement() { return mFrameInc; }
+   wxString GetViewCoordSysName() { return mViewCoordSysName; }
+   CoordinateSystem* GetViewCoordSystem() { return mViewCoordSystem; }
+   const wxArrayString& GetObjectNames() { return mObjectNames; }
+   const wxArrayString& GetValidCSNames() { return mValidCSNames; }
+   const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
+   const wxStringColorMap& GetObjectColorMap() { return mObjectColorMap; }
    wxString GetGotoObjectName();
    wxGLContext* GetGLContext();
    
    // setters
    void SetEndOfRun(bool flag = true);
-   void SetEndOfData(bool flag = true) {mIsEndOfData = flag;}
-   void SetDistance(float dist) {mAxisLength = dist;}
-   void SetUseInitialViewDef(bool flag) {mUseInitialViewPoint = flag;}
-   void SetAnimationUpdateInterval(int value) {mUpdateInterval = value;}
-   void SetAnimationFrameIncrement(int value) {mFrameInc = value;}
-   void SetDrawWireFrame(bool flag) {mDrawWireFrame = flag;}
-   void SetDrawXyPlane(bool flag) {mDrawXyPlane = flag;}
-   void SetDrawEcPlane(bool flag) {mDrawEcPlane = flag;}
-   void SetDrawSunLine(bool flag) {mDrawSunLine = flag;}
-   void SetDrawAxes(bool flag) {mDrawAxes = flag;}
-   void SetDrawGrid(bool flag) {mDrawGrid = flag;}
-   void SetRotateAboutXY(bool flag) {mRotateXy = flag;}
-   void SetXyPlaneColor(unsigned int color) {mXyPlaneColor = color;}
-   void SetEcPlaneColor(unsigned int color) {mEcPlaneColor = color;}
-   void SetSunLineColor(unsigned int color) {mSunLineColor = color;}
+   void SetEndOfData(bool flag = true) { mIsEndOfData = flag; }
+   void SetDistance(float dist) { mAxisLength = dist; }
+   void SetUseInitialViewDef(bool flag) { mUseInitialViewPoint = flag; }
+   void SetAnimationUpdateInterval(int value) { mUpdateInterval = value; }
+   void SetAnimationFrameIncrement(int value) { mFrameInc = value; }
+   void SetDrawWireFrame(bool flag) { mDrawWireFrame = flag; }
+   void SetDrawXyPlane(bool flag) { mDrawXyPlane = flag; }
+   void SetDrawEcPlane(bool flag) { mDrawEcPlane = flag; }
+   void SetDrawSunLine(bool flag) { mDrawSunLine = flag; }
+   void SetDrawAxes(bool flag) { mDrawAxes = flag; }
+   void SetDrawGrid(bool flag) { mDrawGrid = flag; }
+   void SetRotateAboutXY(bool flag) { mRotateXy = flag; }
+   void SetXyPlaneColor(unsigned int color) { mXyPlaneColor = color; }
+   void SetEcPlaneColor(unsigned int color) { mEcPlaneColor = color; }
+   void SetSunLineColor(unsigned int color) { mSunLineColor = color; }
    void SetViewCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbitNormalMap);
    void SetGLContext(wxGLContext *glContext = NULL);
+   void SetUserInterrupt() { mHasUserInterrupted = true; }
    
    // actions
    void ClearPlot();
@@ -168,6 +170,7 @@ private:
    static const int UNKNOWN_OBJ_ID;// = -999;
    
    // initialization
+   wxWindow *mParent;
    bool mGlInitialized;
    wxString mPlotName;
    
@@ -376,7 +379,7 @@ private:
    float mCurrViewDist;
    
    // animation
-   bool mViewAnimation;
+   bool mIsAnimationRunning;
    bool mHasUserInterrupted;
    int mUpdateInterval;
    int mFrameInc;

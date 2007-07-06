@@ -181,6 +181,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
 {
    mGlInitialized = false;
    mPlotName = name;
+   mParent = parent;
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
@@ -282,7 +283,7 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mSunLineColor = GmatColor::GOLDTAN;
    
    // animation
-   mViewAnimation = false;
+   mIsAnimationRunning = false;
    mHasUserInterrupted = false;
    mUpdateInterval = 1;
    mFrameInc = 1;
@@ -423,7 +424,7 @@ bool TrajPlotCanvas::InitGL()
    SetDefaultGLFont();
 
    mShowMaxWarning = true;
-   mViewAnimation = false;
+   mIsAnimationRunning = false;
    
    return true;
 }
@@ -966,13 +967,22 @@ void TrajPlotCanvas::ViewAnimation(int interval, int frameInc)
    #endif
    
    this->SetFocus(); // so that it can get key interrupt
-   mViewAnimation = true;
+   mIsAnimationRunning = true;
    mUpdateInterval = interval;
    mFrameInc = frameInc;
    mHasUserInterrupted = false;
    
+   GmatAppData::GetMainFrame()->EnableMenuAndToolBar(false);
+   ((MdiChildTrajFrame*)mParent)->GetOptionDialog()->EnableAnimation(false);
+   
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    DrawFrame();
+   
+   GmatAppData::GetMainFrame()->EnableMenuAndToolBar(true);
+   ((MdiChildTrajFrame*)mParent)->GetOptionDialog()->EnableAnimation(true);
+   
+   mIsAnimationRunning = false;
+   
 }
 
 
@@ -1908,7 +1918,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    int width, height;
    int mouseX, mouseY;
    
-   mViewAnimation = false;
+   mIsAnimationRunning = false;
    
    GetClientSize(&width, &height);
    ChangeProjection(width, height, mAxisLength);
@@ -3018,6 +3028,8 @@ void TrajPlotCanvas::DrawFrame()
    // refresh every 50 points (Allow user to set frame this increment?)
    for (int frame=1; frame<numberOfData; frame+=mFrameInc)
    {
+      mIsAnimationRunning = true;
+      
       // wxYield() yields control to pending messages in the windowing system.
       
       // wxSafeYield() is similar to wxYield() except it disables the user
