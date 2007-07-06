@@ -397,8 +397,8 @@ void ReportPanel::OnMoveUpVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportPanel::OnMoveDownVariable(wxCommandEvent& event)
 {
-   int sel = mVarSelectedListBox->GetSelection();
-
+   unsigned int sel = mVarSelectedListBox->GetSelection();
+   
    if (sel+1 >= 1 && (sel+1) < mVarSelectedListBox->GetCount())
    {
       wxString rearString = mVarSelectedListBox->GetString(sel+1);

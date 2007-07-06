@@ -638,7 +638,7 @@ void ReportFileSetupPanel::OnMoveUpVariable(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnMoveDownVariable(wxCommandEvent& event)
 {
-   int sel = mVarSelectedListBox->GetSelection();
+   unsigned int sel = mVarSelectedListBox->GetSelection();
 
    if (sel+1 >= 1 && (sel+1) < mVarSelectedListBox->GetCount())
    {

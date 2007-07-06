@@ -782,7 +782,7 @@ void ParameterCreateDialog::CreateVariable()
       GmatAppData::GetResourceTree()->UpdateVariable();
       mUserVarListBox->Append(varName.c_str());
       
-      for (int i=0; i<mUserVarListBox->GetCount(); i++)
+      for (unsigned int i=0; i<mUserVarListBox->GetCount(); i++)
       {
          if (mUserVarListBox->GetString(i).IsSameAs(varName.c_str()))
          {
@@ -830,7 +830,7 @@ void ParameterCreateDialog::CreateString()
          GmatAppData::GetResourceTree()->UpdateVariable();
          mUserStringListBox->Append(strName.c_str());
       
-         for (int i=0; i<mUserStringListBox->GetCount(); i++)
+         for (unsigned int i=0; i<mUserStringListBox->GetCount(); i++)
          {
             if (mUserStringListBox->GetString(i).IsSameAs(strName.c_str()))
             {
@@ -897,7 +897,7 @@ void ParameterCreateDialog::CreateArray()
          GmatAppData::GetResourceTree()->UpdateVariable();
          mUserArrayListBox->Append(arrName.c_str());
          
-         for (int i=0; i<mUserArrayListBox->GetCount(); i++)
+         for (unsigned int i=0; i<mUserArrayListBox->GetCount(); i++)
          {
             if (mUserArrayListBox->GetString(i).IsSameAs(arrName.c_str()))
             {

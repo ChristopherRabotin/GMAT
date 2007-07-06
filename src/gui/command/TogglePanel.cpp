@@ -146,7 +146,7 @@ void TogglePanel::LoadData()
    // Initialize check list box
    std::string name;
    std::string subName;
-   for (int i=0; i<mSubsCheckListBox->GetCount(); i++)
+   for (UnsignedInt i=0; i<mSubsCheckListBox->GetCount(); i++)
    {
       name = mSubsCheckListBox->GetString(i).c_str();
       for (int j=0; j<subsize; j++)

@@ -318,7 +318,7 @@ void ParameterSelectDialog::SaveData()
       mIsParamSelected = true;
       mParamName = mVarSelectedListBox->GetString(0);
       
-      for(int i=0; i<mVarSelectedListBox->GetCount(); i++)
+      for(unsigned int i=0; i<mVarSelectedListBox->GetCount(); i++)
       {
          mParamNameArray.Add(mVarSelectedListBox->GetString(i));
       }
