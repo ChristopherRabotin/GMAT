@@ -120,6 +120,7 @@
 //#define DEBUG_MAINFRAME_SAVE
 //#define DEBUG_FILE_COMPARE
 //#define DEBUG_SERVER
+//#define DEBUG_CREATE_CHILD
 //#define DEBUG_REMOVE_CHILD
 
 using namespace GmatMenu;
@@ -604,7 +605,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
          
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage
-            ("   removing title:%s, item: %s\n", theChild->GetTitle().c_str(),
+            ("   removing title:%s\n   item: %s\n", theChild->GetTitle().c_str(),
              item.c_str());
          #endif
          
@@ -612,7 +613,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
              theChild->GetItemType() != GmatTree::OUTPUT_XY_PLOT)
          {
             #ifdef DEBUG_REMOVE_CHILD
-            MessageInterface::ShowMessage("   ==> deleting this child\n");
+            MessageInterface::ShowMessage("   ==> deleting the child\n");
             #endif
             delete theChild;
          }
@@ -692,7 +693,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    while (node)
    {
       #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage("   node = %p\n", node);
+      MessageInterface::ShowMessage("   node = %p, ", node);
       #endif
       
       canDelete = false;
@@ -757,13 +758,16 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       //-------------------------------------------------
       // Note: The node is deleted from RemoveChild()
       //-------------------------------------------------
-      node = theMdiChildren->GetFirst();
-      wxSafeYield();
+      wxNode *nextNode = theMdiChildren->GetFirst();
       
       #ifdef DEBUG_MAINFRAME_CLOSE
-      MessageInterface::ShowMessage("   next node = %p\n", node);
+      MessageInterface::ShowMessage("   next node = %p\n", nextNode);
       #endif
       
+      if (node == nextNode)
+         break;
+      
+      node = nextNode;
    }
    
    wxSafeYield();
@@ -828,7 +832,7 @@ void GmatMainFrame::CloseCurrentProject()
    
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
-   GmatAppData::GetOutputTree()->UpdateOutput(true); //loj: 2006.06.26
+   GmatAppData::GetOutputTree()->UpdateOutput(true);
 }
 
 
@@ -853,6 +857,13 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
                                     const wxString &savePath, bool openScript,
                                     bool multScripts)
 {
+   #ifdef DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::InterpretScript()\n   filename=%s, readBack=%d\n   "
+       "savePath=%s openScript=%d, multScripts=%d\n", filename.c_str(), readBack,
+       savePath.c_str(), openScript, multScripts);
+   #endif
+   
    UpdateTitle(filename);
    
    bool success = false;
@@ -861,7 +872,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    CloseAllChildren(false, true, filename);
    GmatAppData::GetResourceTree()->ClearResource(false);
    GmatAppData::GetMissionTree()->ClearMission();
-   GmatAppData::GetOutputTree()->UpdateOutput(true); //loj: 2006.06.26
+   GmatAppData::GetOutputTree()->UpdateOutput(true);
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -944,7 +955,6 @@ Integer GmatMainFrame::RunCurrentMission()
           "Please fix all errors listed in message window before running "
           "the mission.\n", mScriptFilename.c_str());
       
-      //return false;
       return 0;
    }
    
@@ -1620,7 +1630,7 @@ GmatMdiChildFrame*
 GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
                                  GmatTree::ItemType itemType)
 {
-   #ifdef DEBUG_CREATE_RESOURCE
+   #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
       ("GmatMainFrame::CreateNewResource() title=%s, name=%s, itemType=%d\n",
        title.c_str(), name.c_str(), itemType);
@@ -1761,9 +1771,11 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    wxString name = item->GetDesc();
    GmatCommand *cmd = item->GetCommand();
    
-   //MessageInterface::ShowMessage
-   //   ("===> title=%s, name=%s, itemType=%d\n", title.c_str(), name.c_str(),
-   //    itemType);
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateNewCommand() title=%s, name=%s, itemType=%d\n",
+       title.c_str(), name.c_str(), itemType);
+   #endif
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
@@ -1939,9 +1951,12 @@ GmatMdiChildFrame*
 GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
                                GmatTree::ItemType itemType)
 {
-   //MessageInterface::ShowMessage
-   //   ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, itemType=%d\n",
-   //    title.c_str(), name.c_str(), itemType);
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateNewOutput() title=%s, name=%s, itemType=%d\n",
+       title.c_str(), name.c_str(), itemType);
+   #endif
+   
    
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    
@@ -2729,8 +2744,8 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
    
    wxString filename = mScriptFilename.c_str();
    
-   if (InterpretScript(filename))
-      OnRun(event);
+   if (InterpretScript(filename))      
+      mRunStatus = RunCurrentMission();
 }
 
 
