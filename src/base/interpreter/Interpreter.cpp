@@ -579,10 +579,8 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #endif
    
    GmatBase *obj = NULL;
-   
-   // let's check object name
-   if (name == "GMAT" || name == "Create" || name == "=" ||
-       name == ":" || name == ";" || name == "." || name == ",")
+
+   if (!GmatStringUtil::IsValidName(name))
    {
       InterpreterException ex
           (type + " object can not be named to \"" + name + "\"");
@@ -642,7 +640,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       obj = (GmatBase*)theModerator->CreateForceModel(name);
    
    else if (type == "CoordinateSystem") 
-      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name);
+      obj = (GmatBase*)theModerator->CreateCoordinateSystem(name, true);
    
    else
    {
@@ -889,6 +887,11 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
       if (FindOwnedObject(obj, prop, owner, id, type))
          retval = true;
    }
+   
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::FindPropertyID() returning owner=%p, retval=%d\n", owner, retval);
+   #endif
    
    return retval;
 }
@@ -1412,7 +1415,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       if (type == "Target")
       {
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
-
+         
          // Check if the Solver exist
          GmatBase *obj = FindObject(parts[0]);
          if (obj == NULL)
@@ -2652,10 +2655,33 @@ bool Interpreter::SetValueToProperty(GmatBase *toOwner, const std::string &toPro
          GmatBase *toObj = NULL;
          Integer toId = -1;
          Gmat::ParameterType toType;
-         if (FindPropertyID(toOwner, toProp, &toObj, toId, toType))
+         
+         FindPropertyID(toOwner, toProp, &toObj, toId, toType);
+         
+         if (toObj == NULL)
          {
-            retval = SetProperty(toObj, toId, toType, value);
+            if (parsingDelayedBlock)
+               return false;
+            
+            delayedBlocks.push_back(currentBlock);
+            std::string lineNumStr = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
+            delayedBlockLineNumbers.push_back(lineNumStr);
+            
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   ===> added to delayed blocks: line:%s, %s\n", lineNumStr.c_str(),
+                currentBlock.c_str());
+            #endif
+            
+            return true;
          }
+         
+         retval = SetProperty(toObj, toId, toType, value);
+         
+//          if (FindPropertyID(toOwner, toProp, &toObj, toId, toType))
+//          {
+//             retval = SetProperty(toObj, toId, toType, value);
+//          }
       }
    }
    
@@ -4222,7 +4248,7 @@ bool Interpreter::FinalPass()
    #ifdef DEBUG_FINAL_PASS
    MessageInterface::ShowMessage("FinalPass:: Spacecraft list =\n");
    for (Integer ii = 0; ii < (Integer) objList.size(); ii++)
-      MessageInterface::ShowMessage("    %s\n", (objList.at(ii)).c_str());
+      MessageInterface::ShowMessage("   %s\n", (objList.at(ii)).c_str());
    #endif
    
    for (StringArray::iterator i = objList.begin(); i != objList.end(); ++i)
@@ -4430,6 +4456,18 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       return retval;
    }
    
+   // If Axis is NULL, create default MJ2000Eq
+   if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
+   {
+      if (obj->GetRefObject(Gmat::AXIS_SYSTEM, "") == NULL)
+      {
+         CreateAxisSystem("MJ2000Eq", obj);
+         InterpreterException ex
+            ("The CoordinateSystem \"" + obj->GetName() +
+             "\" has empty AxisSystem, so default MJ2000Eq was created");
+         HandleError(ex, writeLine, true);
+      }
+   }
    
    // Check if undefined ref. objects exist
    for (UnsignedInt i=0; i<refTypes.size(); i++)
