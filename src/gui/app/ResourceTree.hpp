@@ -46,15 +46,11 @@ private:
    bool mScriptFolderRunning;
    bool mHasUserInterrupted;
    bool mScriptAdded;
-
+   
    // for script error log
    int mBuildErrorCount;
    wxArrayString mFailedScriptsList;
    
-   //GmatMainNotebook *mainNotebook;
-   //GmatMainFrame *mainFrame;
-   
-   //wxWindow *parent;
    wxTreeItemId mDraggedItem;
    wxTreeItemId mSpacecraftItem;
    wxTreeItemId mHardwareItem;
@@ -74,26 +70,7 @@ private:
    wxTreeItemId mScriptItem;
    wxTreeItemId mScriptFolderItem;
    wxTreeItemId mUniverseItem;
-   
-   int mNumSpacecraft;
-   int mNumFuelTank;
-   int mNumThruster;
-   int mNumFormation;
-   int mNumPropagator;
-   int mNumImpulsiveBurn;
-   int mNumFiniteBurn;
-   int mNumDiffCorr;
-   int mNumSqp;
-   int mNumReportFile;
-   int mNumXyPlot;
-   int mNumOpenGlPlot;
-   int mNumVariable;
-   int mNumFunct;
-   int mNumCoordSys;
-   int mNumScripts;
-   int mNumBarycenter;
-   int mNumLibration;
-   
+      
    GmatBase* GetObject(const std::string &name);
    
    void AddNode(GmatTree::ItemType, const wxString &name);
@@ -169,10 +146,6 @@ private:
    bool BuildScript(const wxString &filename, bool readBack = false,
                     const wxString &savePath = "");
    
-   // resource counter
-   void ResetResourceCounter();
-   void UpdateResourceCounter(wxTreeItemId itemId);
-
    // menu
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
    wxMenu* CreatePopupMenu(GmatTree::ItemType type);
