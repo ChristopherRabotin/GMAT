@@ -179,8 +179,10 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
             str2.erase(str2.size()-1, 1);
    }
    
-   //MessageInterface::ShowMessage
-   //   ("===> GmatStringUtil::Trim() returning:\n   %s\n", str2.c_str());
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("==> GmatStringUtil::Trim() returning:\n   %s\n", str2.c_str());
+   #endif
    
    return str2;
 }
@@ -2000,15 +2002,29 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-// bool IsValidName(const std::string &str)
+// bool IsValidName(const std::string &str, bool isObject)
 //------------------------------------------------------------------------------
 /*
- * Returns true if string contains only alphanumeric characters and doesn't
- * start with number.  Underscore is allowed
+ * If validating for object, it returns true if it is not the same as some keywords.
+ *
+ * If validating for non-Object (variable name) returns true if string contains
+ * only alphanumeric characters and doesn't start with number.
+ * Underscore is allowed.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsValidName(const std::string &str)
+bool GmatStringUtil::IsValidName(const std::string &str, bool isObject)
 {
+   // check for valid object name
+   if (isObject)
+   {
+      if (str == "GMAT" || str == "Create" || str == "=" ||
+          str == ":" || str == ";" || str == "." || str == ",")
+         return false;
+      else
+         return true;
+   }
+   
+   // check for valid variable name
    if (!isalpha(str[0]))
       return false;
    
