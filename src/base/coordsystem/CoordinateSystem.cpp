@@ -1043,37 +1043,45 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
 //------------------------------------------------------------------------------
 bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name)
-{ 
+{
+   if (obj == NULL)
+      return false;
+   
    bool retval = false;
    
    switch (type)
    {
       case Gmat::AXIS_SYSTEM:
       {
-         axes = (AxisSystem*) obj;
+//          MessageInterface::ShowMessage
+//             ("===> CoordinateSystem::SetRefObject() %s, before axes=%p, obj=%p\n",
+//              GetName().c_str(), axes, obj);
+
+         AxisSystem *oldAxis = axes;
+         
+         axes = (AxisSystem*) obj->Clone();
          axes->SetName("");
          ownedObjectCount = 1;
+         
+//          MessageInterface::ShowMessage
+//             ("===> CoordinateSystem::SetRefObject() %s, after axes=%p\n",
+//              GetName().c_str(), axes);
+
+         if (oldAxis)
+            delete oldAxis;
+         
          return true;
       }
       default:
          break;
    }
    
-   // DJC added 5/9/05
    // Set ref object on owned axis system
    if (obj->IsOfType(Gmat::SPACE_POINT))
       retval = CoordinateBase::SetRefObject(obj, type, name);
    
    if (axes)
       retval |= axes->SetRefObject(obj, type, name);
-
-   
-//    if (obj->IsOfType(Gmat::SPACE_POINT))
-//    {
-//       retval = CoordinateBase::SetRefObject(obj, type, name);
-//       if (axes)
-//          retval |= axes->SetRefObject(obj, type, name);
-//    }
    
    if (retval)
       return true;
