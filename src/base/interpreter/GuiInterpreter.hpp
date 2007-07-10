@@ -31,10 +31,7 @@ public:
    ~GuiInterpreter();
 
    // Interpreter abstract methods
-   // virtual bool Interpret();
-   virtual bool Interpret(GmatBase *obj, const std::string generator);
    virtual bool Interpret(GmatCommand *inCmd, std::istringstream *ss);
-   // virtual bool Build(Gmat::WriteMode mode);
    
    void Finalize();
    
@@ -45,6 +42,7 @@ public:
    StringArray GetListOfFactoryItems(Gmat::ObjectType type);
    
    //----- configuration
+   std::string GetNewName(const std::string &name, Integer startCount);
    std::string AddClone(const std::string &name);
    bool RenameObject(Gmat::ObjectType type, const std::string &oldName,
                      const std::string &newName);

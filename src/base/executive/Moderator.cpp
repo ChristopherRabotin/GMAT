@@ -491,6 +491,26 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// std::string GetNewName(const std::string &name, Integer startCount)
+//------------------------------------------------------------------------------
+/*
+ * It gives new name by adding counter to the input name.
+ *
+ * @param <name> Base name to used to generate new name
+ * @param <startCount> Starting counter
+ * @return new name
+ */
+//------------------------------------------------------------------------------
+std::string Moderator::GetNewName(const std::string &name, Integer startCount)
+{
+   if (name == "")
+      return "";
+   
+   return theConfigManager->GetNewName(name, startCount);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string AddClone(const std::string &name)
 //------------------------------------------------------------------------------
 /*
@@ -503,7 +523,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
 std::string Moderator::AddClone(const std::string &name)
 {
    if (name == "")
-      return false;
+      return "";
 
    return theConfigManager->AddClone(name);
 }
@@ -533,7 +553,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #endif
    
    // let's check to make sure it is a valid name
-   if (newName == "GMAT" || newName == "Create")
+   if (!GmatStringUtil::IsValidName(newName))
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",
@@ -2199,7 +2219,6 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
                                         const std::string &fileName,
                                         bool createDefault)
 {
-   //loj: 12/16/05 added fileName
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
       ("Moderator::CreateSubscriber() entered: type=%s, name=%s, fileName=%s\n"
@@ -3481,6 +3500,10 @@ bool Moderator::ClearResource()
    theConfigManager->RemoveAllItems();
    ClearAllSandboxes();
    
+   #if DEBUG_RUN
+   MessageInterface::ShowMessage("Moderator::ClearResource() leaving\n");
+   #endif
+   
    return true;
 }
 
@@ -3660,13 +3683,19 @@ Integer Moderator::RunMission(Integer sandboxNum)
       catch (BaseException &e)
       {
          std::string msg = e.GetFullMessage();
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg + "\n");
          
          // assign status
          if (msg.find("Execution interrupted") != msg.npos)
+         {
             status = -2;
+         }
          else
+         {
             status = -3;
+            msg = "**** ERROR **** " + msg;
+         }
+         
+         MessageInterface::PopupMessage(Gmat::ERROR_, msg + "\n");
       }
       catch (...)
       {

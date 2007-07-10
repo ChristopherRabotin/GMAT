@@ -51,62 +51,62 @@ GuiInterpreter::~GuiInterpreter()
 }
 
 
-//------------------------------------------------------------------------------
-// bool Interpret(GmatBase *obj, const std::string generator)
-//------------------------------------------------------------------------------
-/**
- * Reads the generatingString for an object and builds the corresponding data.
- *
- * This method is used to rebuild pieces of a mission sequence when a user makes
- * changes on a ScriptEvent panel, and to build the commands that are encoded
- * in a BeginScript/EndScript block.
- *
- * @param <obj>         The object that is being reinterpreted.
- * @param <generator>   The string that gets interpreted.
- *
- * @return true on success, false on failure.
- *
- * @note Interpret only works for GmatCommands at this time.
- */
-//------------------------------------------------------------------------------
-bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
-{
-   if (obj->GetType() != Gmat::COMMAND)
-      throw InterpreterException(
-         "Interpret(GmatBase*) currently only supports GmatCommands.");
+// //------------------------------------------------------------------------------
+// // bool Interpret(GmatBase *obj, const std::string generator)
+// //------------------------------------------------------------------------------
+// /**
+//  * Reads the generatingString for an object and builds the corresponding data.
+//  *
+//  * This method is used to rebuild pieces of a mission sequence when a user makes
+//  * changes on a ScriptEvent panel, and to build the commands that are encoded
+//  * in a BeginScript/EndScript block.
+//  *
+//  * @param <obj>         The object that is being reinterpreted.
+//  * @param <generator>   The string that gets interpreted.
+//  *
+//  * @return true on success, false on failure.
+//  *
+//  * @note Interpret only works for GmatCommands at this time.
+//  */
+// //------------------------------------------------------------------------------
+// bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
+// {
+//    if (obj->GetType() != Gmat::COMMAND)
+//       throw InterpreterException(
+//          "Interpret(GmatBase*) currently only supports GmatCommands.");
 
-   #ifdef DEBUG_INTERPRET
-      MessageInterface::ShowMessage(
-         "%s\n%s\n\"%s\"\n",
-         "\nInterpret(GmatBase*)is under construction.  Please be patient!",
-         "String that is interpreted:", obj->GetGeneratingString().c_str());
-   #endif
+//    #ifdef DEBUG_INTERPRET
+//       MessageInterface::ShowMessage(
+//          "%s\n%s\n\"%s\"\n",
+//          "\nInterpret(GmatBase*)is under construction.  Please be patient!",
+//          "String that is interpreted:", obj->GetGeneratingString().c_str());
+//    #endif
    
-   if (obj->GetTypeName() == "BeginScript")
-   {
-      #ifdef DEBUG_INTERPRET
-      MessageInterface::ShowMessage
-         ("Parsing in-line text:\n%s\n", generator.c_str());
-      #endif
+//    if (obj->GetTypeName() == "BeginScript")
+//    {
+//       #ifdef DEBUG_INTERPRET
+//       MessageInterface::ShowMessage
+//          ("Parsing in-line text:\n%s\n", generator.c_str());
+//       #endif
       
-      //return InterpretTextBlock((GmatCommand*)obj, generator);
-      //loj: need work
-      return false;
-   }
-   else
-   {
-      #ifdef DEBUG_INTERPRET
-      MessageInterface::ShowMessage
-         ("Resetting command using\n%s\n", generator.c_str());
-      #endif
+//       //return InterpretTextBlock((GmatCommand*)obj, generator);
+//       //loj: need work
+//       return false;
+//    }
+//    else
+//    {
+//       #ifdef DEBUG_INTERPRET
+//       MessageInterface::ShowMessage
+//          ("Resetting command using\n%s\n", generator.c_str());
+//       #endif
       
-      //AssembleCommand(generator, (GmatCommand*)obj);
-      //loj: need work
-      return false;
-   }
+//       //AssembleCommand(generator, (GmatCommand*)obj);
+//       //loj: need work
+//       return false;
+//    }
    
-   return true;
-}
+//    return true;
+// }
 
 
 //------------------------------------------------------------------------------
@@ -155,13 +155,30 @@ StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 
 
 //------------------------------------------------------------------------------
+// std::string GetNewName(const std::string &name, Integer startCount)
+//------------------------------------------------------------------------------
+/*
+ * It gives new name by adding counter to the input name.
+ *
+ * @param <name> Base name to used to generate new name
+ * @param <startCount> Starting counter
+ * @return new name
+ */
+//------------------------------------------------------------------------------
+std::string GuiInterpreter::GetNewName(const std::string &name, Integer startCount)
+{
+   return theModerator->GetNewName(name, startCount);
+}
+
+
+//------------------------------------------------------------------------------
 // std::string AddClone(const std::string &name)
 //------------------------------------------------------------------------------
 /*
  * Adds the clone of the named object to configuration.
  * It gives new name by adding counter to the name to be cloned.
  *
- * return new name if object was cloned and added to configuration, blank otherwise
+ * @return new name if object was cloned and added to configuration, blank otherwise
  */
 //------------------------------------------------------------------------------
 std::string GuiInterpreter::AddClone(const std::string &name)
@@ -185,8 +202,8 @@ std::string GuiInterpreter::AddClone(const std::string &name)
  */
 //------------------------------------------------------------------------------
 bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
-                                          const std::string &oldName,
-                                          const std::string &newName)
+                                  const std::string &oldName,
+                                  const std::string &newName)
 {
    return theModerator->RenameObject(type, oldName, newName);
 }
@@ -205,7 +222,7 @@ bool GuiInterpreter::RenameObject(Gmat::ObjectType type,
  */
 //------------------------------------------------------------------------------
 bool GuiInterpreter::RemoveObject(Gmat::ObjectType type,
-                                          const std::string &name)
+                                  const std::string &name)
 {
    return theModerator->RemoveObject(type, name, false);
 }

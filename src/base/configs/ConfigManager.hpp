@@ -50,6 +50,7 @@ public:
    static ConfigManager*   Instance();
    
    std::string         AddClone(const std::string &name);
+   std::string         GetNewName(const std::string &name, Integer startCount);
    
    void                AddPhysicalModel(PhysicalModel *pm);
    void                AddPropagator(Propagator *prop);

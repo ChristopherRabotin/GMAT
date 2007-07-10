@@ -82,6 +82,51 @@ ConfigManager::~ConfigManager()
 
 
 //------------------------------------------------------------------------------
+// std::string GetNewName(const std::string &name, Integer startCount)
+//------------------------------------------------------------------------------
+/*
+ * It gives new name by adding counter to the input name.
+ *
+ * @param <name> Base name to used to generate new name
+ * @param <startCount> Starting counter
+ * @return new name
+ */
+//------------------------------------------------------------------------------
+std::string ConfigManager::GetNewName(const std::string &name, Integer startCount)
+{
+   #if DEBUG_CONFIG_NEW_NAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::GetNewName() name = %s\n", name.c_str());
+   #endif
+   
+   if (name == "")
+      return "";
+   
+   // get initial new name
+   Integer counter = 0;
+   std::string baseName = GmatStringUtil::RemoveLastNumber(name, counter);
+   if (counter == 0)
+      counter = startCount;
+   
+   std::string newName = baseName + GmatStringUtil::ToString(counter, 1);
+   
+   // construct new name while it exists
+   while (GetItem(newName))
+   {
+      ++counter;
+      newName = baseName + GmatStringUtil::ToString(counter,1);
+   }
+   
+   #if DEBUG_CONFIG_NEW_NAME
+   MessageInterface::ShowMessage
+      ("ConfigManager::GetNewName() newName = %s\n", newName.c_str());
+   #endif
+   
+   return newName;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string AddClone(const std::string &name)
 //------------------------------------------------------------------------------
 /*
@@ -98,21 +143,7 @@ std::string ConfigManager::AddClone(const std::string &name)
       return "";
    
    GmatBase *obj1 = GetItem(name);
-   
-   // get initial new name
-   Integer counter = 0;
-   std::string baseName = GmatStringUtil::RemoveLastNumber(name, counter);
-   if (counter == 0)
-      counter = 2;
-   
-   std::string newName = baseName + GmatStringUtil::ToString(counter,1);
-   
-   // construct new name while it exists
-   while (GetItem(newName))
-   {
-      ++counter;
-      newName = baseName + GmatStringUtil::ToString(counter,1);
-   }
+   std::string newName = GetNewName(name, 2);
    
    GmatBase* obj2 = obj1->Clone();
    obj2->SetName(newName);
@@ -831,9 +862,9 @@ bool ConfigManager::RenameItem(Gmat::ObjectType type,
    //----------------------------------------------------
    // Rename system parameters and expression of variables
    //----------------------------------------------------
-      
+   
    else if (type == Gmat::SPACECRAFT || type == Gmat::COORDINATE_SYSTEM ||
-            type == Gmat::CALCULATED_POINT || type == Gmat::BURN)
+            type == Gmat::CALCULATED_POINT || type == Gmat::IMPULSIVE_BURN)
    {
       StringArray params = GetListOfItems(Gmat::PARAMETER);
       std::string oldParamName, newParamName;
