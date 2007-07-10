@@ -184,7 +184,7 @@ void CoordSystemConfigPanel::SaveData()
             origin->SetJ2000Body(j2000body);
          }
       }
-   
+      
       //-------------------------------------------------------
       // set new axis system
       //-------------------------------------------------------
@@ -194,14 +194,17 @@ void CoordSystemConfigPanel::SaveData()
          
          if (axis != NULL)
          {
-            AxisSystem *oldAxis =
-               (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+            //loj: 2007.07.10
+            // old axis is deleted in the base CoordianteSyatem::SetRefObject();
+            //AxisSystem *oldAxis =
+            //   (AxisSystem *)theCoordSys->GetRefObject(Gmat::AXIS_SYSTEM, "");
+            // delete old axis and set new axis
+            //delete oldAxis;
             
             canClose = mCoordPanel->SaveData(theCoordSys->GetName(), axis, mEpochFormat);
             
-            // delete old axis and set new axis
-            delete oldAxis;
             theCoordSys->SetRefObject(axis, Gmat::AXIS_SYSTEM, "");
+            theCoordSys->Initialize();
          }
          else
          {
