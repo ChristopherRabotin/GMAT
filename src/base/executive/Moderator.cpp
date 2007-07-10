@@ -553,7 +553,7 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
    #endif
    
    // let's check to make sure it is a valid name
-   if (!GmatStringUtil::IsValidName(newName))
+   if (!GmatStringUtil::IsValidName(newName, true))
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "'%s' is not a valid object name.\nPlease enter a different name.\n",

@@ -580,7 +580,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    
    GmatBase *obj = NULL;
 
-   if (!GmatStringUtil::IsValidName(name))
+   if (!GmatStringUtil::IsValidName(name, true))
    {
       InterpreterException ex
           (type + " object can not be named to \"" + name + "\"");
