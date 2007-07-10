@@ -609,15 +609,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
              item.c_str());
          #endif
          
-         if (theChild->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT &&
-             theChild->GetItemType() != GmatTree::OUTPUT_XY_PLOT)
-         {
-            #ifdef DEBUG_REMOVE_CHILD
-            MessageInterface::ShowMessage("   ==> deleting the child\n");
-            #endif
-            delete theChild;
-         }
-         
+         delete theChild;         
          delete node;
          childRemoved = true;
          break;
@@ -651,7 +643,10 @@ void GmatMainFrame::CloseActiveChild()
    
    if (theChild != NULL)
    {
-      theChild->Close();
+      // Note: theChild->Close() will not process OnClose() correctly
+      // so use OnClose(event) instead
+      wxCloseEvent event;
+      theChild->OnClose(event);
       wxSafeYield();
    }
 }
@@ -686,6 +681,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    bool canDelete;
    
    wxNode *node = theMdiChildren->GetFirst();
+   wxCloseEvent event;
    
    //-------------------------------------------------------
    // delete child frames
@@ -741,8 +737,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          //-------------------------------------------------
          // delete child if frame can be closed
          // Note: GmatMdiChildFrame::OnClose() calls RemoveChild()
+         //       theChild->Close() will not process OnClose() correctly
+         //       So use OnClose(event) instead
          //-------------------------------------------------
-         theChild->Close();
+         theChild->OnClose(event);
          
          if (!theChild->CanClose())
          {
