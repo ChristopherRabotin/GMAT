@@ -146,7 +146,7 @@ std::string ConfigManager::AddClone(const std::string &name)
    std::string newName = GetNewName(name, 2);
    
    GmatBase* obj2 = obj1->Clone();
-   obj2->SetName(newName);
+   obj2->SetName(newName, newName);
    AddObject(obj2);
    
    #if DEBUG_CONFIG_ADD_CLONE
