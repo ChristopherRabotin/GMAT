@@ -727,7 +727,11 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             canDelete = true;
          }
       }
-      
+
+      //--------------------------------------------------------------
+      // delete chilren by theChild->OnClose()
+      //--------------------------------------------------------------
+      #ifdef __WXMSW__
       if (canDelete)
       {
          #ifdef DEBUG_MAINFRAME_CLOSE
@@ -737,8 +741,8 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          //-------------------------------------------------
          // delete child if frame can be closed
          // Note: GmatMdiChildFrame::OnClose() calls RemoveChild()
-         //       theChild->Close() will not process OnClose() correctly
-         //       So use OnClose(event) instead
+         // theChild->Close() will not process OnClose() correctly
+         // So use OnClose(event) instead
          //-------------------------------------------------
          theChild->OnClose(event);
          
@@ -766,6 +770,32 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          break;
       
       node = nextNode;
+      
+      //--------------------------------------------------------------
+      // delete chilren need more work on platforms other than Windows
+      //--------------------------------------------------------------
+      #else
+      
+      wxNode *temp = NULL;
+      if (canDelete)
+      {
+         #ifdef DEBUG_MAINFRAME_CLOSE
+         MessageInterface::ShowMessage
+            ("   ==> deleting child=%s\n", title.c_str());
+         #endif
+         
+         delete theChild;
+         temp = node;
+      }
+      
+      node = node->GetNext();
+      if (canDelete)
+         delete temp;
+      
+      #endif
+      //--------------------------------------------------------------
+      // endif  __WXMSW__
+      //--------------------------------------------------------------
    }
    
    wxSafeYield();
