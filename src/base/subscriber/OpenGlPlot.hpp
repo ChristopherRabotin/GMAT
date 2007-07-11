@@ -47,7 +47,8 @@ public:
    
    // methods inherited from GmatBase
    virtual GmatBase* Clone(void) const;
-   virtual bool SetName(const std::string &who);
+   virtual bool SetName(const std::string &who,
+                        const std::string &oldName = "");
    
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");

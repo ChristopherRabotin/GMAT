@@ -686,7 +686,7 @@ GmatBase* OpenGlPlot::Clone(void) const
 
 
 //------------------------------------------------------------------------------
-// bool SetName(const std::string &who)
+// bool SetName(const std::string &who, const std;:string &oldName = "")
 //------------------------------------------------------------------------------
 /**
  * Set the name for this instance.
@@ -695,13 +695,19 @@ GmatBase* OpenGlPlot::Clone(void) const
  *
  */
 //------------------------------------------------------------------------------
-bool OpenGlPlot::SetName(const std::string &who)
+bool OpenGlPlot::SetName(const std::string &who, const std::string &oldName)
 {
    #if DEBUG_RENAME
-   MessageInterface::ShowMessage("OpenGlPlot::SetName() newName=%s\n", who.c_str());
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetName() newName=%s, oldName=%s\n", who.c_str(),
+       oldName.c_str());
    #endif
    
-   mOldName = instanceName;
+   if (oldName == "")
+      mOldName = instanceName;
+   else
+      mOldName = oldName;
+   
    return GmatBase::SetName(who);
 }
 

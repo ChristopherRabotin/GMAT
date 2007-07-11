@@ -325,7 +325,7 @@ GmatBase* TsPlot::Clone(void) const
 
 
 //------------------------------------------------------------------------------
-// bool SetName(const std::string &who)
+// bool SetName(const std::string &who, const std;:string &oldName = "")
 //------------------------------------------------------------------------------
 /**
  * Set the name for this instance.
@@ -334,13 +334,17 @@ GmatBase* TsPlot::Clone(void) const
  *
  */
 //------------------------------------------------------------------------------
-bool TsPlot::SetName(const std::string &who)
+bool TsPlot::SetName(const std::string &who, const std::string &oldName)
 {
    #if DEBUG_RENAME
    MessageInterface::ShowMessage("TsPlot::SetName() newName=%s\n", who.c_str());
    #endif
    
-   mOldName = instanceName;
+   if (oldName == "")
+      mOldName = instanceName;
+   else
+      mOldName = oldName;
+   
    return GmatBase::SetName(who);
 }
 
