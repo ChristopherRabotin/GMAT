@@ -397,6 +397,46 @@ GmatBase* ResourceTree::GetObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
+// void UpdateGuiItem(GmatTree::ItemType itemType)
+//------------------------------------------------------------------------------
+void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
+{
+   switch (itemType)
+   {
+   case GmatTree::SPACECRAFT:
+      theGuiManager->UpdateSpacecraft();
+      break;
+   case GmatTree::FUELTANK:
+   case GmatTree::THRUSTER:
+      theGuiManager->UpdateHardware();
+      break;
+   case GmatTree::IMPULSIVE_BURN:
+   case GmatTree::FINITE_BURN:
+      theGuiManager->UpdateBurn();
+      break;
+   case GmatTree::REPORT_FILE:
+   case GmatTree::XY_PLOT:
+   case GmatTree::OPENGL_PLOT:
+      theGuiManager->UpdateSubscriber();
+      break;
+   case GmatTree::DIFF_CORR:
+   case GmatTree::SQP:
+      theGuiManager->UpdateSolver();
+      break;
+   case GmatTree::BARYCENTER:
+   case GmatTree::LIBRATION_POINT:
+      theGuiManager->UpdateCelestialPoint();
+      break;
+   case GmatTree::VARIABLE:
+      theGuiManager->UpdateParameter();
+      break;
+   default:
+      break;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // void AddNode(GmatTree::ItemType itemType, const wxString &name)
 //------------------------------------------------------------------------------
 /**
@@ -1365,7 +1405,10 @@ void ResourceTree::OnClone(wxCommandEvent &event)
       std::string newName = theGuiInterpreter->AddClone(stdName);
       
       if (newName != "")
+      {
          AddNode(itemType, newName.c_str());
+         UpdateGuiItem(itemType);
+      }
       else
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Cannot clone %s.\n", stdName.c_str());      

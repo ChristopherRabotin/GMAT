@@ -70,9 +70,12 @@ private:
    wxTreeItemId mScriptItem;
    wxTreeItemId mScriptFolderItem;
    wxTreeItemId mUniverseItem;
-      
-   GmatBase* GetObject(const std::string &name);
    
+   // objects
+   GmatBase* GetObject(const std::string &name);
+   void UpdateGuiItem(GmatTree::ItemType itemType);
+   
+   // resource tree
    void AddNode(GmatTree::ItemType, const wxString &name);
    
    void AddDefaultResources();
