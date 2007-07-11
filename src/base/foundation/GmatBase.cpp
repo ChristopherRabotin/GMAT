@@ -332,18 +332,18 @@ Gmat::ObjectType GmatBase::GetType(void) const
 */
 
 //---------------------------------------------------------------------------
-//  bool SetName(std::string &who)
+//  bool SetName(std::string &who, const std;:string &oldName = "")
 //---------------------------------------------------------------------------
 /**
 * Set the name for this instance.
  *
  * @param <who> the object's name.
- *
+ * @param <oldName> the object's old name to be set mainly for subscribers
  * @return true if the name was changed, false if an error was encountered.
  *
  * @note Some classes are unnamed.
  */
-bool GmatBase::SetName(const std::string &who)
+bool GmatBase::SetName(const std::string &who, const std::string &oldName)
 {
    instanceName = who;
    return true;

@@ -72,9 +72,10 @@ public:
                        GetType() const;
    inline std::string  GetTypeName() const;
    inline std::string  GetName() const;
-   virtual bool        SetName(const std::string &who);
+   virtual bool        SetName(const std::string &who,
+                               const std::string &oldName = "");
    virtual Integer     GetParameterCount() const;
-
+   
    bool                IsOfType(Gmat::ObjectType ofType);
    bool                IsOfType(std::string typeDescription);
 
