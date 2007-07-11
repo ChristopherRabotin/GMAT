@@ -76,7 +76,12 @@ public:
    void SetLineStyle(int ls, int lineId = -1);
    void SetAxisLimit(std::string axisEnd, bool automatic = false, 
                      double value = 0.0);
-   
+                     
+   void SetTickCount(int count, bool isXAxis = true);
+   int  GetTickCount(bool isXAxis = true);
+   void SetMinorTickCount(int count, bool isXAxis = true);
+   int  GetMinorTickCount(bool isXAxis = true);
+      
 protected:
    /// borders
    int left, right, top, bottom;

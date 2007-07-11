@@ -815,6 +815,9 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
    dlg.SetYMinState(overrideYMin);
    dlg.SetYMaxState(overrideYMax);
    
+   dlg.SetXTickCount(xticks);
+   dlg.SetYTickCount(yticks);
+   
    if (dlg.ShowModal() == wxID_OK)
    {
       // Plot title
@@ -857,6 +860,9 @@ void TsPlotCanvas::SetOptions(wxCommandEvent& event)
       else
          plotYMax = -1e99;
 
+      xticks = dlg.GetXTickCount();
+      yticks = dlg.GetYTickCount();
+      
       ResetRanges();
       
       wxClientDC dc(this);
@@ -1106,6 +1112,38 @@ void TsPlotCanvas::SetAxisLimit(std::string axisEnd, bool automatic,
          "the names \"xMinimum\", \"xMaximum\", \"yMinimum\", or "
          "\"yMaximum\".\n");
    }
+}
+
+
+void TsPlotCanvas::SetTickCount(int count, bool isXAxis)
+{
+   if (isXAxis)
+      xticks = count;
+   yticks = count;
+}
+
+
+int  TsPlotCanvas::GetTickCount(bool isXAxis)
+{
+   if (isXAxis)
+      return xticks;
+   return yticks;
+}
+
+
+void TsPlotCanvas::SetMinorTickCount(int count, bool isXAxis)
+{
+   if (isXAxis)
+      xMinorTicks = count;
+   yMinorTicks = count;
+}
+
+
+int TsPlotCanvas::GetMinorTickCount(bool isXAxis)
+{
+   if (isXAxis)
+      return xMinorTicks;
+   return yMinorTicks;
 }
 
 

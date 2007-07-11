@@ -142,8 +142,8 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
    xTickBox->Add(new wxStaticText(this, -1, 
                                   ("Number of " + xName + " Ticks:").c_str()), 
                                   0, wxALL | wxALIGN_CENTER_VERTICAL, 0);
-   xTickCount = new wxTextCtrl(this, -1);
-   xTickCount->Enable(false);
+   xTickCount = new wxSpinCtrl(this, -1, "6");
+   xTickCount->SetRange(1,20);
    xTickBox->Add(xTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *xMinorTickBox = new wxBoxSizer(wxHORIZONTAL);
@@ -197,8 +197,8 @@ TsPlotOptionsDialog::TsPlotOptionsDialog(const std::string xLabel,
    yTickBox->Add(new wxStaticText(this, -1, 
                                   ("Number of " + yName + " Ticks:").c_str()), 0, 
                                   wxALL | wxALIGN_CENTER_VERTICAL, 0);
-   yTickCount = new wxTextCtrl(this, -1);
-   yTickCount->Enable(false);
+   yTickCount = new wxSpinCtrl(this, -1, "4");
+   yTickCount->SetRange(1,25);
    yTickBox->Add(yTickCount, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
 
    wxBoxSizer *yMinorTickBox = new wxBoxSizer(wxHORIZONTAL);
@@ -453,20 +453,47 @@ void TsPlotOptionsDialog::SetYName(std::string nomme)
 }
 
 
+void TsPlotOptionsDialog::SetXTickCount(int count)
+{
+   xTickCount->SetValue(count);
+}
+
+
+int TsPlotOptionsDialog::GetXTickCount()
+{
+   return xTickCount->GetValue();
+}
+
+
+void TsPlotOptionsDialog::SetYTickCount(int count)
+{
+   yTickCount->SetValue(count);
+}
+
+
+int TsPlotOptionsDialog::GetYTickCount()
+{
+   return yTickCount->GetValue();
+}
+
+
 void TsPlotOptionsDialog::OnSettableXMinimum(wxCommandEvent &event)
 {
    xMinimum->Enable(userXMinimum->GetValue());
 }
+
 
 void TsPlotOptionsDialog::OnSettableXMaximum(wxCommandEvent &event)
 {
    xMaximum->Enable(userXMaximum->GetValue());
 }
 
+
 void TsPlotOptionsDialog::OnSettableYMinimum(wxCommandEvent &event)
 {
    yMinimum->Enable(userYMinimum->GetValue());
 }
+
 
 void TsPlotOptionsDialog::OnSettableYMaximum(wxCommandEvent &event)
 {

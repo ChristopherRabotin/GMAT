@@ -76,6 +76,14 @@ public:
    void              SetXName(std::string nomme);
    void              SetYName(std::string nomme);
    void              UpdateLabels();
+
+   void              SetXTickCount(int count);
+   int               GetXTickCount();
+   void              SetYTickCount(int count);
+   int               GetYTickCount();
+   
+//   void              SetXMin(double st);
+//   void              SetXMax(double st);
    
 protected:
 //   wxBoxSizer           *labels;
@@ -93,7 +101,7 @@ protected:
    wxCheckBox           *userXMaximum;
    wxTextCtrl           *xMaximum;
    wxCheckBox           *xLogScale;
-   wxTextCtrl           *xTickCount;
+   wxSpinCtrl           *xTickCount;
    wxTextCtrl           *xMinorTickCount;
    wxCheckBox           *xMinorTickLines;
    wxSpinCtrl           *xPrecision;
@@ -104,7 +112,7 @@ protected:
    wxCheckBox           *userYMaximum;
    wxTextCtrl           *yMaximum;
    wxCheckBox           *yLogScale;
-   wxTextCtrl           *yTickCount;
+   wxSpinCtrl           *yTickCount;
    wxTextCtrl           *yMinorTickCount;
    wxCheckBox           *yMinorTickLines;
    wxSpinCtrl           *yPrecision;
