@@ -52,9 +52,7 @@ TsPlot::PARAMETER_TEXT[TsPlotParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
 {
-//    Gmat::STRING_TYPE,
    Gmat::OBJECT_TYPE,
-//    Gmat::STRINGARRAY_TYPE,
    Gmat::OBJECTARRAY_TYPE,
    Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
@@ -286,15 +284,12 @@ bool TsPlot::Initialize()
    }
    else
    {
-      if (mIsTsPlotWindowSet)
-      {        
-         mIsTsPlotWindowSet = false;
-         status = PlotInterface::DeleteTsPlot(true);
-      }
-      else
-      {
-         status = true;
-      }
+      #if DEBUG_TSPLOT_INIT
+      MessageInterface::ShowMessage("TsPlot::Initialize() DeleteTsPlot()\n");
+      #endif
+      
+      status =  PlotInterface::DeleteTsPlot(instanceName);
+      
    }
    
    #if DEBUG_TSPLOT_INIT
