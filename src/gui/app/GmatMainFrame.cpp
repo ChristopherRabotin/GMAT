@@ -402,8 +402,6 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
    else if (itemType >= GmatTree::BEGIN_OF_COMMAND &&
             itemType <= GmatTree::END_OF_COMMAND)
    {
-      //newChild = CreateNewCommand(item->GetDesc(), item->GetDesc(), itemType,
-      //                            item->GetCommand());
       newChild = CreateNewCommand(itemType, item);
    }
    else if (itemType >= GmatTree::BEGIN_OF_CONTROL &&
@@ -549,7 +547,7 @@ bool GmatMainFrame::RenameChild(const wxString &oldName, const wxString &newName
 // bool RenameActiveChild(const wxString &newName)
 //------------------------------------------------------------------------------
 /**
- *
+ * Gives active child a new name.
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::RenameActiveChild(const wxString &newName)
@@ -567,20 +565,21 @@ bool GmatMainFrame::RenameActiveChild(const wxString &newName)
 
 
 //------------------------------------------------------------------------------
-// void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemType)
+// void RemoveChild(const wxString &item, GmatTree::ItemType itemType)
 //------------------------------------------------------------------------------
 /*
  * Removes and deletes child frame from the list.
  *
  * @param <item> Name of the child frame
- * @param <item> Item type of the child frame
+ * @param <itemType> Item type of the child frame
  */
 //------------------------------------------------------------------------------
 void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemType)
 {
    #ifdef DEBUG_REMOVE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::RemoveChild() item=%s\n", item.c_str());
+      ("GmatMainFrame::RemoveChild() item=%s, itemType=%d\n", item.c_str(),
+       itemType);
    #endif
    
    wxNode *node = theMdiChildren->GetFirst();
@@ -588,10 +587,10 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
    
    while (node)
    {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
       
-      if ((theChild->GetTitle().IsSameAs(item.c_str())) &&
-          (theChild->GetItemType() == itemType))
+      if ((child->GetTitle().IsSameAs(item.c_str())) &&
+          (child->GetItemType() == itemType))
       {
          //------------------------------------------------------
          // Notes:
@@ -605,11 +604,11 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
          
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage
-            ("   removing title:%s\n   item: %s\n", theChild->GetTitle().c_str(),
+            ("   removing title:%s\n   item: %s\n", child->GetTitle().c_str(),
              item.c_str());
          #endif
          
-         delete theChild;         
+         delete child;
          delete node;
          childRemoved = true;
          break;
@@ -621,11 +620,85 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
    // If plot was removed, remove it from the OutputTree also
    if (childRemoved)
    {
+      #ifdef DEBUG_REMOVE_CHILD
+      MessageInterface::ShowMessage("   %s removed\n", item.c_str());
+      #endif
+      
       if (GmatAppData::GetOutputTree() != NULL)
+      {
+         #ifdef DEBUG_REMOVE_CHILD
+         MessageInterface::ShowMessage("   calling GetOutputTree()->RemoveItem()\n");
+         #endif
+         
          GmatAppData::GetOutputTree()->RemoveItem(itemType, item);
-      else
-         MessageInterface::ShowMessage
-            ("===> GmatMainFrame::RemoveChild() GmatAppData::GetOutputTree() is NULL\n");
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void CloseChild(const wxString &item, GmatTree::ItemType itemType)
+//------------------------------------------------------------------------------
+/*
+ * Closes child frame of given item name and type.
+ *
+ * @param <item> Name of the child frame
+ * @param <itemType> Item type of the child frame
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::CloseChild(const wxString &item, GmatTree::ItemType itemType)
+{
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CloseChild() item=%s, itemType=%d\n", item.c_str(),
+       itemType);
+   #endif
+   
+   wxNode *node = theMdiChildren->GetFirst();
+   
+   while (node)
+   {
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      
+      if ((child->GetTitle().IsSameAs(item.c_str())) &&
+          (child->GetItemType() == itemType))
+      {
+         wxCloseEvent event;
+         child->OnClose(event);
+         break;
+      }
+      
+      node = node->GetNext();
+   }
+   
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage("GmatMainFrame::CloseChild() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void CloseChild(GmatMdiChildFrame *child)
+//------------------------------------------------------------------------------
+/*
+ * Closes child.
+ *
+ * @param <child> The child frame pointer
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::CloseChild(GmatMdiChildFrame *child)
+{
+   #ifdef DEBUG_REMOVE_CHILD
+   MessageInterface::ShowMessage("GmatMainFrame::CloseChild() child=%p\n", child);
+   #endif
+   
+   if (child != NULL)
+   {
+      // Note: child->Close() will not process OnClose() correctly
+      // so use OnClose(event) instead
+      wxCloseEvent event;
+      child->OnClose(event);
+      wxSafeYield();
    }
 }
 
@@ -639,16 +712,17 @@ void GmatMainFrame::CloseActiveChild()
    MessageInterface::ShowMessage("GmatMainFrame::CloseActiveChild() entered\n");
    #endif
    
-   GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
+   GmatMdiChildFrame *child = (GmatMdiChildFrame *)GetActiveChild();
+   CloseChild(child);
    
-   if (theChild != NULL)
-   {
-      // Note: theChild->Close() will not process OnClose() correctly
-      // so use OnClose(event) instead
-      wxCloseEvent event;
-      theChild->OnClose(event);
-      wxSafeYield();
-   }
+//    if (child != NULL)
+//    {
+//       // Note: child->Close() will not process OnClose() correctly
+//       // so use OnClose(event) instead
+//       wxCloseEvent event;
+//       child->OnClose(event);
+//       wxSafeYield();
+//    }
 }
 
 
@@ -693,10 +767,10 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       #endif
       
       canDelete = false;
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
       
-      title = theChild->GetTitle();
-      type = theChild->GetItemType();
+      title = child->GetTitle();
+      type = child->GetItemType();
       
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage("   title=%s, type=%d\n", title.c_str(), type);
@@ -710,7 +784,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          {
             if (closeScriptWindow)
                canDelete = true;
-            else if (theChild->GetTitle() != excludeTitle)
+            else if (child->GetTitle() != excludeTitle)
                canDelete = true;
          }
          else
@@ -729,7 +803,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       }
 
       //--------------------------------------------------------------
-      // delete chilren by theChild->OnClose()
+      // delete chilren by child->OnClose()
       //--------------------------------------------------------------
       #ifdef __WXMSW__
       if (canDelete)
@@ -741,12 +815,12 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          //-------------------------------------------------
          // delete child if frame can be closed
          // Note: GmatMdiChildFrame::OnClose() calls RemoveChild()
-         // theChild->Close() will not process OnClose() correctly
+         // child->Close() will not process OnClose() correctly
          // So use OnClose(event) instead
          //-------------------------------------------------
-         theChild->OnClose(event);
+         child->OnClose(event);
          
-         if (!theChild->CanClose())
+         if (!child->CanClose())
          {
             #ifdef DEBUG_MAINFRAME_CLOSE
             MessageInterface::ShowMessage("   ==> cannot close this child\n");
@@ -784,7 +858,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             ("   ==> deleting child=%s\n", title.c_str());
          #endif
          
-         delete theChild;
+         delete child;
          temp = node;
       }
       
@@ -812,11 +886,11 @@ void GmatMainFrame::MinimizeChildren()
    wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if (theChild->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT &&
-          theChild->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
-          theChild->GetItemType() != GmatTree::COMPARE_REPORT)
-         theChild->Iconize(TRUE);
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      if (child->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT &&
+          child->GetItemType() != GmatTree::OUTPUT_XY_PLOT &&
+          child->GetItemType() != GmatTree::COMPARE_REPORT)
+         child->Iconize(TRUE);
       node = node->GetNext();
    }
 
@@ -828,10 +902,10 @@ void GmatMainFrame::MinimizeChildren()
 //------------------------------------------------------------------------------
 void GmatMainFrame::SetActiveChildDirty(bool dirty)
 {
-   GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)GetActiveChild();
+   GmatMdiChildFrame *child = (GmatMdiChildFrame *)GetActiveChild();
    
-   if (theChild != NULL)
-      theChild->SetDirty(dirty); 
+   if (child != NULL)
+      child->SetDirty(dirty); 
 }
 
 
@@ -2701,8 +2775,8 @@ void GmatMainFrame::UpdateMenus(bool openOn)
    wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      theChild->GetMenuBar()->Enable(MENU_FILE_OPEN_SCRIPT, openOn);
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      child->GetMenuBar()->Enable(MENU_FILE_OPEN_SCRIPT, openOn);
       node = node->GetNext();
    }
 }
@@ -2823,8 +2897,8 @@ bool GmatMainFrame::SetScriptFileName(const std::string &filename)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnUndo(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   theChild->GetScriptTextCtrl()->Undo();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   child->GetScriptTextCtrl()->Undo();
 //   theSaveButton->Enable(true);
 }
 
@@ -2834,8 +2908,8 @@ void GmatMainFrame::OnUndo(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnRedo(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   theChild->GetScriptTextCtrl()->Redo();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   child->GetScriptTextCtrl()->Redo();
 //   theSaveButton->Enable(true);
 }
 
@@ -2845,8 +2919,8 @@ void GmatMainFrame::OnRedo(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCut(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   theChild->GetScriptTextCtrl()->Cut();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   child->GetScriptTextCtrl()->Cut();
 //   theSaveButton->Enable(true);
 }
 
@@ -2855,8 +2929,8 @@ void GmatMainFrame::OnCut(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCopy(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   theChild->GetScriptTextCtrl()->Copy();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   child->GetScriptTextCtrl()->Copy();
 //   theSaveButton->Enable(true);
 }
 
@@ -2865,8 +2939,8 @@ void GmatMainFrame::OnCopy(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnPaste(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   theChild->GetScriptTextCtrl()->Paste();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   child->GetScriptTextCtrl()->Paste();
 //   theSaveButton->Enable(true);
 }
 
@@ -2875,8 +2949,8 @@ void GmatMainFrame::OnPaste(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnComment(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
    selString.Replace("\n", "\n%");
    selString = "%" + selString;
@@ -2893,8 +2967,8 @@ void GmatMainFrame::OnComment(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnUncomment(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    wxString selString = scriptTC->GetStringSelection();
 
    if (selString.StartsWith("%"))  // gets rid of first %
@@ -2909,8 +2983,8 @@ void GmatMainFrame::OnUncomment(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
 {
-   GmatMdiChildFrame* theChild = (GmatMdiChildFrame *)GetActiveChild();
-   wxTextCtrl *scriptTC = theChild->GetScriptTextCtrl();
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   wxTextCtrl *scriptTC = child->GetScriptTextCtrl();
    scriptTC->SetSelection(-1, -1);
 }
 
@@ -2933,13 +3007,13 @@ void GmatMainFrame::OnFont(wxCommandEvent& event)
     wxNode *node = theMdiChildren->GetFirst();
     while (node)
     {
-      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-      if ((theChild->GetItemType() == GmatTree::SCRIPT_FILE)   ||
-         (theChild->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
-         (theChild->GetItemType() == GmatTree::SCRIPT_EVENT) ||
-         (theChild->GetItemType() == GmatTree::GMAT_FUNCTION))
+      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+      if ((child->GetItemType() == GmatTree::SCRIPT_FILE)   ||
+          (child->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
+          (child->GetItemType() == GmatTree::SCRIPT_EVENT) ||
+          (child->GetItemType() == GmatTree::GMAT_FUNCTION))
       {
-         theChild->GetScriptTextCtrl()->SetFont(newFont);
+         child->GetScriptTextCtrl()->SetFont(newFont);
       }
       node = node->GetNext();
     }

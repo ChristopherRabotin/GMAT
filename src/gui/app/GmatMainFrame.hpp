@@ -59,6 +59,8 @@ public:
    bool RenameChild(const wxString &oldName, const wxString &newName);
    bool RenameActiveChild(const wxString &newName);
    void RemoveChild(const wxString &item, GmatTree::ItemType itemType);
+   void CloseChild(const wxString &item, GmatTree::ItemType itemType);
+   void CloseChild(GmatMdiChildFrame *child);
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
                          wxString excludeTitle = "");
