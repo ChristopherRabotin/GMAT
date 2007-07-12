@@ -439,18 +439,19 @@ bool OpenGlPlot::Initialize()
    
    #if DEBUG_OPENGL_INIT
    MessageInterface::ShowMessage
-      ("OpenGlPlot::Initialize() isEndOfReceive = %d, mAllSpCount = %d\n",
-       isEndOfReceive, mAllSpCount);
+      ("OpenGlPlot::Initialize() %s, isEndOfReceive = %d, mAllSpCount = %d\n",
+       GetName().c_str(), isEndOfReceive, mAllSpCount);
    #endif
 
    bool foundSc = false;
+   bool retval = false;
    
    if (mAllSpCount > 0)
    {
       // check for spacecaft is included in the plot
       for (int i=0; i<mAllSpCount; i++)
       {
-         #if DEBUG_OPENGL_INIT
+         #if DEBUG_OPENGL_INIT > 1
          MessageInterface::ShowMessage
             ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
              i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
@@ -513,11 +514,11 @@ bool OpenGlPlot::Initialize()
          // add non-spacecraft plot objects to the list
          for (int i=0; i<mAllSpCount; i++)
          {
-            //#if DEBUG_OPENGL_INIT
-            //MessageInterface::ShowMessage
-            //   ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-            //    i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
-            //#endif
+            #if DEBUG_OPENGL_INIT > 1
+            MessageInterface::ShowMessage
+               ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
+                i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
+            #endif
             
             if (mAllSpArray[i])
             {
@@ -544,8 +545,9 @@ bool OpenGlPlot::Initialize()
             else
             {
                MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\nIt will be "
-                   "removed from the OpenGL plot.\n", mAllSpNameArray[i].c_str());
+                  (Gmat::WARNING_, "The SpacePoint name: %s has NULL pointer.\n"
+                   "It will be removed from the OpenGL plot.\n",
+                   mAllSpNameArray[i].c_str());
             }
          }
          
@@ -579,7 +581,7 @@ bool OpenGlPlot::Initialize()
          if (mViewDirectionObj != NULL)
             UpdateObjectList(mViewDirectionObj);
          
-         #if DEBUG_OPENGL_INIT
+         #if DEBUG_OPENGL_INIT > 1
          MessageInterface::ShowMessage
             ("   mScNameArray.size=%d, mScOrbitColorArray.size=%d\n",
              mScNameArray.size(), mScOrbitColorArray.size());
@@ -642,12 +644,12 @@ bool OpenGlPlot::Initialize()
          //--------------------------------------------------------
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
-         
-         return true;
+
+         retval = true;
       }
       else
       {
-         return false;
+         retval = false;
       }
    }
    else
@@ -656,12 +658,14 @@ bool OpenGlPlot::Initialize()
       MessageInterface::ShowMessage("OpenGlPlot::Initialize() DeleteGlPlot()\n");
       #endif
       
-      return PlotInterface::DeleteGlPlot();
+      retval =  PlotInterface::DeleteGlPlot(instanceName);
    }
-
+   
    #if DEBUG_OPENGL_INIT
    MessageInterface::ShowMessage("OpenGlPlot::Initialize() exiting\n");
    #endif
+   
+   return retval;
 }
 
 
@@ -2095,7 +2099,7 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
       mObjectCount = mObjectNameArray.size();
    }
    
-   #if DEBUG_OPENGL_INIT
+   #if DEBUG_OPENGL_INIT > 1
    Integer draw, showObj;
    MessageInterface::ShowMessage
       ("OpenGlPlot::UpdateObjectList() instanceName=%s\n", instanceName.c_str());
