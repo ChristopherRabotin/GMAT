@@ -121,6 +121,13 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
          ("   type=%d, name=%s removed\n", type, name.c_str());
       #endif
    }
+   else
+   {
+      #if DEBUG_OUTPUT_TREE
+      MessageInterface::ShowMessage
+         ("   type=%d, name=%s NOT found\n", type, name.c_str());
+      #endif
+   }
 }
 
 
@@ -196,23 +203,33 @@ void OutputTree::UpdateOutput(bool resetTree)
    
    // get list of report files, opengl plots, and xy plots
    StringArray listOfSubs = theGuiInterpreter->GetListOfObjects(Gmat::SUBSCRIBER);
-
+   
    // put each subscriber in the proper folder
    for (unsigned int i=0; i<listOfSubs.size(); i++)
    {
-      Subscriber *sub = (Subscriber*)theGuiInterpreter->GetConfiguredObject(listOfSubs[i]);
+      Subscriber *sub =
+         (Subscriber*)theGuiInterpreter->GetConfiguredObject(listOfSubs[i]);
+      
       wxString objName = wxString(listOfSubs[i].c_str());
       wxString objTypeName = wxString(sub->GetTypeName().c_str());
       
       if (objTypeName.Trim() == "ReportFile")
+      {
          AppendItem(mReportItem, objName, GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
-      else if (objTypeName.Trim() == "OpenGLPlot")
+                    new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
+      }
+      else if (objTypeName.Trim() == "OpenGLPlot" &&
+               sub->GetBooleanParameter("ShowPlot"))
+      {
          AppendItem(mOpenGlItem, objName, GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(objName, GmatTree::OUTPUT_OPENGL_PLOT));
-      else if (objTypeName.Trim() == "XYPlot")
+                    new GmatTreeItemData(objName, GmatTree::OUTPUT_OPENGL_PLOT));
+      }
+      else if (objTypeName.Trim() == "XYPlot" &&
+               sub->GetBooleanParameter("ShowPlot"))
+      {
          AppendItem(mXyPlotItem, objName, GmatTree::ICON_FILE, -1,
-                 new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
+                    new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
+      }
    }
    
    Expand(mReportItem);
