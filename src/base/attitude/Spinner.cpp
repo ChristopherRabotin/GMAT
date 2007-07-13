@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_SPINNER_INIT
+//#define DEBUG_SPINNER
 
 //---------------------------------
 // static data
@@ -116,7 +117,9 @@ bool Spinner::Initialize()
    Kinematic::Initialize();
    #ifdef DEBUG_SPINNER_INIT
    MessageInterface::ShowMessage(
-   "------- after calling Kinematic::Initialize\n");
+   "------- after calling Kinematic::Initialize, angVel = %.12f %.12f %.12f\n",
+   angVel[0] * GmatMathUtil::DEG_PER_RAD,angVel[1] * GmatMathUtil::DEG_PER_RAD, 
+   angVel[2] * GmatMathUtil::DEG_PER_RAD);
    #endif
    Rmatrix33 RiI;
    try
@@ -145,7 +148,7 @@ bool Spinner::Initialize()
    #endif
    
    RB0I           = RBi * RiI;
-   angVel         = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
+   //angVel         = RBi * wIBi; // doesn't change  (spec mod per Steve 2006.04.05)
    
    #ifdef DEBUG_SPINNER_INIT
    std::stringstream RB0IStream;
@@ -153,7 +156,7 @@ bool Spinner::Initialize()
    MessageInterface::ShowMessage(
    "------- RB0I = %s\n", (RB0IStream.str()).c_str());
    std::stringstream IBBStream;
-   IBBStream << angVel << std::endl;
+   IBBStream << angVel * GmatMathUtil::DEG_PER_RAD << std::endl;
    MessageInterface::ShowMessage(
    "------- angVel = %s\n", (IBBStream.str()).c_str());
    #endif
@@ -202,6 +205,12 @@ GmatBase* Spinner::Clone(void) const
 //------------------------------------------------------------------------------
 void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
+   #ifdef DEBUG_SPINNER
+   MessageInterface::ShowMessage(
+   "Entering Spinner::Compute ... angVel = %.12f %.12f %.12f\n",
+   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
+   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   #endif
    if (!isInitialized) Initialize();
    // now, RB0I and currentwIBB have been computed by Initialize
    
@@ -215,6 +224,12 @@ void Spinner::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    
    cosMat                   = RBB0t * RB0I;
    // currentwIBB already computed in Initialize 
+   #ifdef DEBUG_SPINNER
+   MessageInterface::ShowMessage(
+   "EXITING Spinner::Compute ... angVel = %.12f %.12f %.12f\n",
+   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
+   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   #endif
 }
 
 
