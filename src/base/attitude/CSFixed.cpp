@@ -21,6 +21,9 @@
 #include "Attitude.hpp"
 #include "AttitudeException.hpp"
 #include "CSFixed.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_CSFIXED
 
 //---------------------------------
 // static data
@@ -146,6 +149,12 @@ GmatBase* CSFixed::Clone(void) const
 void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
 {
    //if (!isInitialized)  Initialize();
+   #ifdef DEBUG_CSFIXED
+   MessageInterface::ShowMessage(
+   "Entering CSFixed::Compute ... angVel = %.12f %.12f %.12f\n",
+   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
+   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   #endif
 
    // We know RBi, since it is computed on initialization
    // Get the rotation matrix from the reference coordinate system
@@ -163,6 +172,12 @@ void CSFixed::ComputeCosineMatrixAndAngularVelocity(Real atTime)
    angVel(0)   = wxIBB(2,1);
    angVel(1)   = wxIBB(0,2);
    angVel(2)   = wxIBB(1,0);
+   #ifdef DEBUG_CSFIXED
+   MessageInterface::ShowMessage(
+   "EXITING CSFixed::Compute ... angVel = %.12f %.12f %.12f\n",
+   angVel[0] * GmatMathUtil::DEG_PER_RAD, angVel[1] * GmatMathUtil::DEG_PER_RAD, 
+   angVel[2] * GmatMathUtil::DEG_PER_RAD);
+   #endif
 }
 
 
