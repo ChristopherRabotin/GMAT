@@ -88,8 +88,8 @@ public:
                                       Integer seq1, Integer seq2, 
                                       Integer seq3);
                                       
-   static StringArray 
-                    GetEulerSequenceStrings();
+   static StringArray       GetEulerSequenceStrings();
+   static UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
    
 
    // Constructor
@@ -337,8 +337,7 @@ protected:
    //bool  SetEulerSequenceString(const UnsignedIntArray &eulerArray);
    // method to set the euler sequence array to match the input
    // euler sequence string; assumes string is of the form
-   // "N M P" where N, M, and P are Integers
-   UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr);
+   // "NMP" where N, M, and P are Integers
    
    
    //------------------------------------------------------------------------------

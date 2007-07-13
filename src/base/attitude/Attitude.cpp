@@ -1007,6 +1007,40 @@ StringArray Attitude::GetEulerSequenceStrings()
    return eulerStrings;
 }
 
+//------------------------------------------------------------------------------
+//  UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the state data for the euler sequence array, given
+ * the input string representation of the euler sequnce. 
+ *
+ * @param <eulerArray>  string representation of euler sequence.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+UnsignedIntArray Attitude::ExtractEulerSequence(const std::string &seqStr)
+{
+   UnsignedIntArray intSeq;
+   const char *tmpStr = seqStr.c_str();
+   if (tmpStr[0] == '1')      intSeq.push_back(1);
+   else if (tmpStr[0] == '2') intSeq.push_back(2);
+   else if (tmpStr[0] == '3') intSeq.push_back(3);
+   else
+   throw AttitudeException("Invalid character in euler sequence string.");
+   if (tmpStr[1] == '1')      intSeq.push_back(1);
+   else if (tmpStr[1] == '2') intSeq.push_back(2);
+   else if (tmpStr[1] == '3') intSeq.push_back(3);
+   else
+   throw AttitudeException("Invalid character in euler sequence string.");
+   if (tmpStr[2] == '1')      intSeq.push_back(1);
+   else if (tmpStr[2] == '2') intSeq.push_back(2);
+   else if (tmpStr[2] == '3') intSeq.push_back(3);
+   else
+   throw AttitudeException("Invalid character in euler sequence string.");
+   return intSeq;
+}
 
 //------------------------------------------------------------------------------
 // public methods
@@ -2382,13 +2416,24 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
       inputAttType = GmatAttitude::EULER_ANGLES_AND_SEQUENCE_TYPE;
       return eulerAngles;
    }
+   if (id == QUATERNION)
+   {
+      if (sz != 4) throw AttitudeException(
+                  "Incorrectly sized Rvector passed in for quaternion.");
+      for (i=0;i<4;i++) 
+         quaternion(i) = value(i);
+      quaternion.Normalize();
+      cosMat = Attitude::ToCosineMatrix(quaternion);
+      inputAttType = GmatAttitude::QUATERNION_TYPE;
+      return quaternion;
+   }
    if (id == EULER_ANGLE_RATES)
    {
       if (sz != 3) throw AttitudeException(
                   "Incorrectly sized Rvector passed in for euler angle rates.");
       for (i=0;i<3;i++) 
          eulerAngleRates(i) = value(i) * GmatMathUtil::RAD_PER_DEG;
-      cosMat = Attitude::ToCosineMatrix(eulerAngles, 
+      angVel = Attitude::ToAngularVelocity(eulerAngleRates, eulerAngles, 
                          eulerSequenceArray.at(0),
                          eulerSequenceArray.at(1),
                          eulerSequenceArray.at(2));                         
@@ -2403,17 +2448,6 @@ const Rvector& Attitude::SetRvectorParameter(const Integer id,
          angVel(i) = value(i) * GmatMathUtil::RAD_PER_DEG;
       inputAttRateType = GmatAttitude::ANGULAR_VELOCITY_TYPE;
       return angVel;
-   }
-   if (id == QUATERNION)
-   {
-      if (sz != 4) throw AttitudeException(
-                  "Incorrectly sized Rvector passed in for quaternion.");
-      for (i=0;i<4;i++) 
-         quaternion(i) = value(i);
-      quaternion.Normalize();
-      cosMat = Attitude::ToCosineMatrix(quaternion);
-      inputAttType = GmatAttitude::QUATERNION_TYPE;
-      return quaternion;
    }
 
    return GmatBase::SetRvectorParameter(id,value);
@@ -2629,7 +2663,7 @@ bool Attitude::SetStringParameter(const Integer id,
    if (id == EULER_ANGLE_SEQUENCE)
    {
       ValidateEulerSequence(value);
-      UnsignedIntArray newSeq = ExtractEulerSequence(value);
+      UnsignedIntArray newSeq = Attitude::ExtractEulerSequence(value);
       Rvector3 currentEulerAngles = Attitude::ToEulerAngles(cosMat,
                                     eulerSequenceArray.at(0),
                                     eulerSequenceArray.at(1),
@@ -2915,40 +2949,6 @@ void Attitude::DCMToEulerAxisAndAngle(const Rmatrix33 &cosMat,
 //   eulS << eulerArray.at(0) << eulerArray.at(1) << eulerArray.at(2);
  //  return true;
 //}
-//------------------------------------------------------------------------------
-//  UnsignedIntArray  ExtractEulerSequence(const std::string &seqStr)
-//------------------------------------------------------------------------------
-/**
- * This method sets the state data for the euler sequence array, given
- * the input string representation of the euler sequnce. 
- *
- * @param <eulerArray>  string representation of euler sequence.
- *
- * @return  success flag.
- *
- */
-//------------------------------------------------------------------------------
-UnsignedIntArray Attitude::ExtractEulerSequence(const std::string &seqStr)
-{
-   UnsignedIntArray intSeq;
-   const char *tmpStr = seqStr.c_str();
-   if (tmpStr[0] == '1')      intSeq.push_back(1);
-   else if (tmpStr[0] == '2') intSeq.push_back(2);
-   else if (tmpStr[0] == '3') intSeq.push_back(3);
-   else
-   throw AttitudeException("Invalid character in euler sequence string.");
-   if (tmpStr[1] == '1')      intSeq.push_back(1);
-   else if (tmpStr[1] == '2') intSeq.push_back(2);
-   else if (tmpStr[1] == '3') intSeq.push_back(3);
-   else
-   throw AttitudeException("Invalid character in euler sequence string.");
-   if (tmpStr[2] == '1')      intSeq.push_back(1);
-   else if (tmpStr[2] == '2') intSeq.push_back(2);
-   else if (tmpStr[2] == '3') intSeq.push_back(3);
-   else
-   throw AttitudeException("Invalid character in euler sequence string.");
-   return intSeq;
-}
 
 bool Attitude::ValidateCosineMatrix(const Rmatrix33 &mat)
 {
