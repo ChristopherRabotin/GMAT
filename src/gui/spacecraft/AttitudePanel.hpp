@@ -25,10 +25,13 @@
 #include "Attitude.hpp"
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
+#include "CoordinateConverter.hpp"
+#include "CoordinateSystem.hpp"
 
 #include "gmatwxdefs.hpp"
 #include "GuiItemManager.hpp"
 #include "GmatPanel.hpp"
+#include "MessageInterface.hpp"  // *************
 
 class AttitudePanel: public wxPanel
 {
@@ -38,7 +41,8 @@ public:
    void SaveData();
    void LoadData();
 
-   bool IsDataChanged() { return dataChanged; }
+   bool IsDataChanged() { return dataChanged; };
+   bool CanClosePanel() { return canClose;    };
    
 private:    
 
@@ -90,17 +94,80 @@ private:
    wxComboBox *config3ComboBox;
    wxComboBox *config4ComboBox;
    wxComboBox *stateTypeComboBox;
-   wxComboBox *stateTypeRateComboBox;
+   wxComboBox *stateRateTypeComboBox;
 
-   GmatPanel *theScPanel;
+   // objects needed
+   GmatPanel      *theScPanel;
+   Spacecraft     *theSpacecraft;
+   GuiInterpreter *theGuiInterpreter;
+   GuiItemManager *theGuiManager;
+   Attitude       *theAttitude;
    
+   // coordinate system and converter data
+   CoordinateConverter cc;
+   CoordinateSystem    *attCS;
+   CoordinateSystem    *toCS;
+   CoordinateSystem    *fromCS;
+   
+   // arrays of strings needed as input to the combo boxes
    StringArray modelArray;
-   StringArray coordSysArray;
-   StringArray kinematicArray;
-   StringArray eulerAngleArray;
+   StringArray eulerSeqArray;
    StringArray stateTypeArray;
-   StringArray stateTypeRateArray;
+   StringArray stateRateTypeArray;
+   //StringArray coordSysArray;
+   //StringArray kinematicArray;
+
+   // those strings as wxString arrays for the combo boxes
+   wxString *attitudeModelArray; 
+   wxString *eulerSequenceArray;
+   wxString *stateArray;
+   wxString *stateRateArray;
    
+   // string versions of values in text boxes
+   wxString *cosineMatrix[9];
+   wxString *quaternion[4];
+   wxString *eulerAngles[3];
+   wxString *angVel[3];
+   wxString *eulerAngleRates[3];
+   
+   // string versions of current data on combo boxes
+   std::string      attitudeModel;
+   std::string      attCoordSystem;
+   std::string      eulerSequence;
+   std::string      attStateType;
+   std::string      attRateStateType;
+   //std::string      attitudeType;   // for later use - Kinematic, etc.
+
+   // flags for data modification
+   bool dataChanged;
+   bool canClose;
+   
+   // local values of attitude data
+   // NOTE - only currently-displayed representations will be up-to-date;
+   // conversions occur on state (or state rate) type changes
+   UnsignedIntArray seq;
+   Rmatrix33        mat;
+   Rvector          q;
+   Rvector3         ea;
+   Rvector3         av;
+   Rvector3         ear;
+   Real             epoch;
+   
+   /// modification flags
+   bool             stateTypeModified;
+   bool             rateStateTypeModified;
+   bool             stateModified;
+   bool             stateRateModified;
+   bool             csModified;
+   bool             seqModified;
+   bool             modelModified;
+
+   bool             matModified[9];
+   bool             qModified[4];
+   bool             eaModified[3];
+   bool             avModified[3];
+   bool             earModified[3];
+
    void Create();
    void DisplayEulerAngles();
    void DisplayQuaternion();
@@ -108,86 +175,73 @@ private:
    void DisplayEulerAngleRates();
    void DisplayAngularVelocity();
    
-   wxString *attitudeModelArray; 
-   wxString *cosineMatrix[9];
-   wxString *eulerAngles[3];
-   wxString *quaternion[4];
-   wxString *eulerAngleRates[3];
-   wxString *angVel[3];
+   void UpdateEulerAngles();
+   void UpdateQuaternion();
+   void UpdateCosineMatrix();
+   void UpdateEulerAngleRates();
+   void UpdateAngularVelocity();
+      
+   bool IsStateModified(const std::string which = "Both");
+   void ResetStateFlags(const std::string which = "Both",
+                        bool discardEdits = false);
+   bool ValidateState(const std::string which = "Both");
    
-   bool dontUpdate;  // true while writing to textCtrls
-   bool dataChanged;
+   wxString ToString(Real rval); // ??
    
    // Event Handling
    DECLARE_EVENT_TABLE();
-   void OnStateTypeTextUpdate(wxCommandEvent &event);
-   void OnStateTypeRateTextUpdate(wxCommandEvent &event);
-   void OnConfigurationSelection(wxCommandEvent &event);
+   /// when user types in a new state value
+   void OnStateTextUpdate(wxCommandEvent &event);
+   /// when user types in a new state rate value
+   void OnStateRateTextUpdate(wxCommandEvent &event);
+   /// when user selects state type from combo box
    void OnStateTypeSelection(wxCommandEvent &event);
+   /// when user selects state rate type from combo box
    void OnStateTypeRateSelection(wxCommandEvent &event);
+   /// when user selects an euler sequence from comb box
    void OnEulerSequenceSelection(wxCommandEvent &event);
+   /// when user selects a reference coordinate system from combo box
+   void OnCoordinateSystemSelection(wxCommandEvent &event);
+   /// when user selects a attitude model from combo box
    void OnAttitudeModelSelection(wxCommandEvent &event);
    
-   void CalculateFromEulerAngles();
-   void CalculateFromQuaternion();
-   void CalculateFromCosineMatrix();
-   
-   void CalculateFromEulerAngleRates();
-   void CalculateFromAngularVelocity();
-
-   bool IsStateModified();
-   void ResetStateFlags(bool discardEdits = false);
-   
-   Spacecraft     *theSpacecraft;
-   GuiInterpreter *theGuiInterpreter;
-   GuiItemManager *theGuiManager;
-   Attitude       *theAttitude;
-   
-   std::string      attStateType;
-   std::string      attRateStateType;
-   std::string      attitudeModel;
-   std::string      attitudeType;   // for later use - Kinematic, etc.
-   std::string      attCoordSystem;
-   std::string      eulerSequence;
-
-   std::string      loadedAttStateType;
-   std::string      loadedAttRateStateType;
-   std::string      loadedAttitudeModel;
-   //std::string      loadedAttitudeType;   // for later use - Kinematic, etc.
-   std::string      loadedAttCoordSystem;
-   std::string      loadedEulerSequence;
-
-   UnsignedIntArray seq;
    
    // IDs for the controls and the menu commands
    enum
    {     
       ID_TEXT = 50000,
-      ID_TEXTCTRL_ST,
-      ID_TEXTCTRL_STR,
-      ID_CB_CONFIG,
-      ID_CB_ST,
-      ID_CB_STR,
-      ID_BUTTON,
-      ID_CB_EAS,
+      ID_TEXTCTRL_STATE,
+      ID_TEXTCTRL_STATE_RATE,
+      ID_CB_STATE,
+      ID_CB_STATE_RATE,
+      ID_CB_SEQ,
       ID_CB_COORDSYS,
-      ID_CB_MODE
+      ID_CB_MODEL,
    };
    
+   // IDs for state type
    enum StateType
    {
-      EULER_ANGLES= 0,
+      EULER_ANGLES = 0,
       QUATERNION,
       DCM,
       StateTypeCount,
    };
    
+   // IDs for state rate type
    enum RateStateType
    {
-      EULER_ANGLE_RATES= 0,
+      EULER_ANGLE_RATES = 0,
       ANGULAR_VELOCITY,
-      RateStateTypeCount,
+      StateRateTypeCount,
    };
+      
+   static const std::string STATE_TEXT[StateTypeCount];
+   static const std::string STATE_RATE_TEXT[StateRateTypeCount];
+   
+   static const Integer STARTUP_STATE_TYPE_SELECTION;
+   static const Integer STARTUP_RATE_STATE_TYPE_SELECTION;
+   
 };
 #endif
 

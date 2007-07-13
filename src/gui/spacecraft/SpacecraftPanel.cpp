@@ -138,6 +138,12 @@ void SpacecraftPanel::Create()
    MessageInterface::ShowMessage("   OrbitPanel created\n");
    #endif
    
+   theAttitudePanel = new AttitudePanel
+      (this, spacecraftNotebook, currentSpacecraft);
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   AttitudePanel created\n");
+   #endif
+   
    theBallisticMassPanel = new BallisticsMassPanel
       (this, spacecraftNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
@@ -154,12 +160,6 @@ void SpacecraftPanel::Create()
       (this, actuatorNotebook, currentSpacecraft);
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   ThrusterPanel created\n");
-   #endif
-   
-   theAttitudePanel = new AttitudePanel
-      (this, spacecraftNotebook, currentSpacecraft);
-   #if DEBUG_SPACECRAFT_PANEL
-   MessageInterface::ShowMessage("   AttitudePanel created\n");
    #endif
    
    // visuals = new wxPanel( mainNotebook, -1 );
@@ -194,10 +194,10 @@ void SpacecraftPanel::LoadData()
    try
    {
       theOrbitPanel->LoadData();
+      theAttitudePanel->LoadData();
       theBallisticMassPanel->LoadData();
       theTankPanel->LoadData();
       theThrusterPanel->LoadData();
-      theAttitudePanel->LoadData();
    }
    catch (BaseException &e)
    {
@@ -239,6 +239,12 @@ void SpacecraftPanel::SaveData()
       canClose = canClose && theOrbitPanel->CanClosePanel();
    }
    
+   if (theAttitudePanel->IsDataChanged())
+   {
+      theAttitudePanel->SaveData();
+      canClose = canClose && theAttitudePanel->CanClosePanel();
+   }
+   
    if (!canClose)
    {
       EnableUpdate(true);
@@ -250,9 +256,6 @@ void SpacecraftPanel::SaveData()
    
    if (theThrusterPanel->IsDataChanged())
       theThrusterPanel->SaveData();
-   
-   if (theAttitudePanel->IsDataChanged())
-      theAttitudePanel->SaveData();
    
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);
