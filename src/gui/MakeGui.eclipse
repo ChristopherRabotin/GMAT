@@ -215,7 +215,7 @@ macosx:
 	-e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-	cp -f $(WX_MAC_ICONS) $(MAC_ICONS) 
+	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 
 
 .cpp.o:
