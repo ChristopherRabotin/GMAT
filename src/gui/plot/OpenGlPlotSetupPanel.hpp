@@ -47,7 +47,7 @@ protected:
    std::string mSelSpName;
    std::map<std::string, RgbColor> mOrbitColorMap;
    std::map<std::string, RgbColor> mTargetColorMap;
-   std::map<std::string, bool> mShowObjectMap;
+   std::map<std::string, bool> mDrawObjectMap;
    
    wxArrayString mExcludedScList;
    
@@ -60,7 +60,7 @@ protected:
    wxStaticText *mViewPointVecStaticText;
    wxStaticText *mViewDirStaticText;
    
-   wxCheckBox *mPlotCheckBox;
+   wxCheckBox *mShowPlotCheckBox;
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mEclipticPlaneCheckBox;
@@ -71,7 +71,7 @@ protected:
    wxCheckBox *mAxesCheckBox;
    wxCheckBox *mGridCheckBox;
    wxCheckBox *mOriginSunLineCheckBox;
-   wxCheckBox *mShowObjectCheckBox;
+   wxCheckBox *mDrawObjectCheckBox;
    
    wxTextCtrl *mDataCollectFreqTextCtrl;
    wxTextCtrl *mUpdatePlotFreqTextCtrl;
@@ -106,14 +106,12 @@ protected:
    wxComboBox *mViewUpCsComboBox;
    wxComboBox *mViewUpAxisComboBox;
    
-   wxFlexGridSizer *mObjectGridSizer;
+   wxFlexGridSizer *mObjectSizer;
    wxFlexGridSizer *mViewDefSizer;
-   wxBoxSizer *mScOptionBoxSizer;
+   wxBoxSizer *mScOptionSizer;
    wxBoxSizer *mViewPointRefSizer;
    wxBoxSizer *mViewPointVectorSizer;
    wxBoxSizer *mViewDirVectorSizer;
-   wxBoxSizer *mTopViewSizer;
-   wxBoxSizer *mBottomViewSizer;
    
    // methods inherited from GmatPanel
    virtual void Create();

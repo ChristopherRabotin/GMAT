@@ -17,12 +17,16 @@
 //------------------------------------------------------------------------------
 
 #include "OpenGlPlotSetupPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "StringUtil.hpp"
 
 #include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
 #include "wx/colordlg.h"            // for wxColourDialog
+
+// To enable perspective mode
+//#define __ENABLE_GL_PERSPECTIVE__
 
 //#define DEBUG_OPENGL_PANEL 1
 //#define DEBUG_OPENGL_PANEL_CREATE 1
@@ -133,29 +137,37 @@ OpenGlPlotSetupPanel::~OpenGlPlotSetupPanel()
 void OpenGlPlotSetupPanel::Create()
 {
    #if DEBUG_OPENGL_PANEL_CREATE
-      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entering...\n");
+      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() entered\n");
    #endif
    
    Integer bsize = 2; // border size
    
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxString\n");
-   #endif
-   
-   // wxString
-   //causing VC++ error => wxString emptyList[] = {};
+   // create axis array
    wxArrayString emptyList;
-   wxString axisArray[] = {"X", "-X", "Y", "-Y", "Z", "-Z"};
-   
+   wxString axisArray[] = {"X", "-X", "Y", "-Y", "Z", "-Z"};   
    wxArrayString empty;
+   wxStaticText *emptyStaticText =
+      new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );   
    
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxStaticText\n");
+   
+   //-----------------------------------------------------------------
+   // platform dependent button size
+   //-----------------------------------------------------------------
+   int arrowW = 20;
+   int colorW = 25;
+   #ifdef __WXMAC__
+   arrowW = 40;
+   colorW = 10;
+   #else
+   arrowW = 20;
+   colorW = 25;
    #endif
    
-   // wxStaticText
-   wxStaticText *emptyStaticText =
-      new wxStaticText( this, -1, wxT("  "), wxDefaultPosition, wxDefaultSize, 0 );
+   //-----------------------------------------------------------------
+   // Data collect and update frequency
+   //-----------------------------------------------------------------
+   wxBoxSizer *plotOptionSizer = new wxBoxSizer(wxVERTICAL);
+   
    wxStaticText *dataCollectFreqLabel1 =
       new wxStaticText(this, -1, wxT("Collect data every "),
                        wxDefaultPosition, wxSize(-1,-1), 0);
@@ -168,72 +180,98 @@ void OpenGlPlotSetupPanel::Create()
    wxStaticText *updatePlotFreqLabel2 =
       new wxStaticText(this, -1, wxT("cycle"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *scAvailableLabel =
-      new wxStaticText(this, -1, wxT("Spacecraft"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *coAvailableLabel =
-      new wxStaticText(this, -1, wxT("Celestial Object"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *titleSelectedSc =
-      new wxStaticText(this, -1, wxT("Selected Spacecraft"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *titleSelectedObj =
-      new wxStaticText(this, -1, wxT("Selected Celestial Object"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *orbitColorLabel =
-      new wxStaticText(this, -1, wxT("Orbit Color"),
-                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-   wxStaticText *coordSysLabel =
-      new wxStaticText(this, -1, wxT("Coordinate System"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewPointRefLabel =
-      new wxStaticText(this, -1, wxT("View Point Reference"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewPointVectorLabel =
-      new wxStaticText(this, -1, wxT("View Point Vector"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewDirectionLabel =
-      new wxStaticText(this, -1, wxT("View Direction"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewScaleFactorLabel =
-      new wxStaticText(this, -1, wxT("View Scale Factor"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *upCsLabel =
-      new wxStaticText(this, -1, wxT("Coordinate System"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *upAxisLabel =
-      new wxStaticText(this, -1, wxT("Axis"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *numPointsToRedrawLabel1 =
-      new wxStaticText(this, -1, wxT("Number of points to redraw"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *numPointsToRedrawLabel2 =
-      new wxStaticText(this, -1, wxT("(Enter 0 to redraw whole plot)"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   mFovLabel =
-      new wxStaticText(this, -1, wxT("Field Of View (deg): "),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   mTargetColorLabel =
-      new wxStaticText(this, -1, wxT("Target Color"),
-                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
-
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxComboBox\n");
-   #endif
    
-   // wxCheckBox
-   mPlotCheckBox =
+   mDataCollectFreqTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0);
+   
+   mUpdatePlotFreqTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, 20), 0);
+   
+   wxBoxSizer *colFreqSizer = new wxBoxSizer(wxHORIZONTAL);
+   colFreqSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   colFreqSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   colFreqSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxBoxSizer *updFreqSizer = new wxBoxSizer(wxHORIZONTAL);
+   updFreqSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
+   updFreqSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   updFreqSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   plotOptionSizer->Add(colFreqSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   plotOptionSizer->Add(updFreqSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticText *numPointsToRedrawLabel1 =
+      new wxStaticText(this, -1, wxT("Number of points to redraw\n"
+                                     "(Enter 0 to redraw whole plot)"),
+                       wxDefaultPosition, wxSize(-1, 30), 0);
+   mNumPointsToRedrawTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(30, 20), 0);
+   
+   wxBoxSizer *numPointsSizer = new wxBoxSizer(wxHORIZONTAL);
+   numPointsSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, 0);
+   numPointsSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
+   
+   plotOptionSizer->Add(numPointsSizer, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // Show plot
+   //-----------------------------------------------------------------
+   mShowPlotCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Show Plot"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxSize(-1, -1), bsize);
+   
+   plotOptionSizer->AddSpacer(10);
+   plotOptionSizer->Add(mShowPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   GmatStaticBoxSizer *plotOptionStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Plot Option");
+   
+   plotOptionStaticSizer->Add(plotOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // View option
+   //-----------------------------------------------------------------
+   wxBoxSizer *viewOptionSizer = new wxBoxSizer(wxVERTICAL);
+   
    mUseInitialViewCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Use Initial View Def."),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
+                     wxDefaultPosition, wxSize(-1, -1), bsize);
+   
+   viewOptionSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   #ifdef __ENABLE_GL_PERSPECTIVE__
+   
    mPerspectiveModeCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Use Perspective Mode"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    mUseFixedFovCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Use Fixed FOV Angle"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   viewOptionSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   viewOptionSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mFovLabel =
+      new wxStaticText(this, -1, wxT("Field Of View (deg): "),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mFixedFovTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0);
+   
+   wxBoxSizer *fovSizer = new wxBoxSizer(wxHORIZONTAL);
+   fovSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, 0);
+   fovSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
+   viewOptionSizer->Add(fovSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   #endif
+   
+   GmatStaticBoxSizer *viewOptionStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "View Option");
+   viewOptionStaticSizer->Add(viewOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // Drawing option
+   //-----------------------------------------------------------------
+   wxBoxSizer *drawOptionSizer = new wxBoxSizer(wxVERTICAL);
+      
    mWireFrameCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw WireFrame"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
@@ -255,25 +293,120 @@ void OpenGlPlotSetupPanel::Create()
    mOriginSunLineCheckBox =
       new wxCheckBox(this, CHECKBOX, wxT("Draw Sun Line"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
-   mShowObjectCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Show Object"),
+   
+   drawOptionSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(mOriginSunLineCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   drawOptionSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   GmatStaticBoxSizer *drawOptionStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Drawing Option");
+   drawOptionStaticSizer->Add(drawOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // Available spcecrafts and objects
+   //-----------------------------------------------------------------
+   wxStaticText *scAvailableLabel =
+      new wxStaticText(this, -1, wxT("Spacecraft"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mSpacecraftListBox = theGuiManager->
+      GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
+   wxStaticText *coAvailableLabel =
+      new wxStaticText(this, -1, wxT("Celestial Object"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mCelesObjectListBox = theGuiManager->
+      GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
+   
+   wxBoxSizer *availObjSizer = new wxBoxSizer(wxVERTICAL);
+   availObjSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjSizer->Add(mSpacecraftListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjSizer->Add(coAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   availObjSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // add, remove, clear buttons
+   //-----------------------------------------------------------------
+   addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
+                              wxDefaultPosition, wxSize(arrowW, 20), 0);
+   removeScButton = new wxButton(this, REMOVE_SP_BUTTON, wxT("<--"),
+                                 wxDefaultPosition, wxSize(arrowW ,20), 0);
+   clearScButton = new wxButton(this, CLEAR_SP_BUTTON, wxT("<="),
+                                wxDefaultPosition, wxSize(arrowW, 20), 0);
+   
+   wxBoxSizer *arrowButtonsSizer = new wxBoxSizer(wxVERTICAL);
+   arrowButtonsSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arrowButtonsSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // Selected spacecraft and objects
+   //-----------------------------------------------------------------
+   wxStaticText *titleSelectedSc =
+      new wxStaticText(this, -1, wxT("Selected Spacecraft"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   wxStaticText *titleSelectedObj =
+      new wxStaticText(this, -1, wxT("Selected Celestial Object"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mSelectedScListBox =
+      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+                    emptyList, wxLB_SINGLE);
+   mSelectedObjListBox =
+      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
+                    emptyList, wxLB_SINGLE);
+   
+   wxBoxSizer *mObjSelectedSizer = new wxBoxSizer(wxVERTICAL);
+   mObjSelectedSizer->Add(titleSelectedSc, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedSizer->Add(mSelectedScListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedSizer->Add(titleSelectedObj, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjSelectedSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // Draw object, orbit and target color
+   //-----------------------------------------------------------------
+   mDrawObjectCheckBox =
+      new wxCheckBox(this, CHECKBOX, wxT("Draw Object"),
                      wxDefaultPosition, wxSize(-1, -1), 0);
    
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxTextCtrl\n");
-   #endif
+   wxStaticText *orbitColorLabel =
+      new wxStaticText(this, -1, wxT("Orbit Color"),
+                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
+   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
+                                     wxDefaultPosition, wxSize(colorW, 20), 0);
+   mTargetColorLabel =
+      new wxStaticText(this, -1, wxT("Target Color"),
+                       wxDefaultPosition, wxSize(-1,-1), wxALIGN_CENTRE);
+   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
+                                    wxDefaultPosition, wxSize(colorW, 20), 0);
    
-   // wxTextCtrl
-   mDataCollectFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0);
-   mUpdatePlotFreqTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0);
-   mNumPointsToRedrawTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(40, -1), 0);
-   mFixedFovTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(35, -1), 0);
-   mViewScaleFactorTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
+   wxFlexGridSizer *scOptionSizer1 = new wxFlexGridSizer(1, 0, 0);
+   scOptionSizer1->Add(mDrawObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionSizer1->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   scOptionSizer1->Add(mTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mScOptionSizer = new wxBoxSizer(wxVERTICAL);
+   mScOptionSizer->Add(scOptionSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mObjectSizer = new wxFlexGridSizer(5, 0, 0);
+   mObjectSizer->Add(availObjSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectSizer->Add(arrowButtonsSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectSizer->Add(mObjSelectedSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   mObjectSizer->Add(mScOptionSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   GmatStaticBoxSizer *viewObjectStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "View Object");
+   viewObjectStaticSizer->Add(mObjectSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // View point reference
+   //-----------------------------------------------------------------
    mViewPointRef1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointRef2TextCtrl =
@@ -282,16 +415,37 @@ void OpenGlPlotSetupPanel::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointRefStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
-
+   
+   mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // View point vector
+   //-----------------------------------------------------------------
    mViewPointVec1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec2TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewPointVec3TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("30000"), wxDefaultPosition, wxSize(60,-1), 0);
+   
    mViewPointVecStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
-
+   
+   mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // View direction
+   //-----------------------------------------------------------------
+   mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
+   
    mViewDir1TextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("0"), wxDefaultPosition, wxSize(60,-1), 0);
    mViewDir2TextCtrl =
@@ -301,468 +455,123 @@ void OpenGlPlotSetupPanel::Create()
    mViewDirStaticText = new wxStaticText(this, -1, wxT("km"),
      wxDefaultPosition, wxSize(-1,-1), 0);
 
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxListBox\n");
-   #endif
+   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   // wxListBox
-   mSpacecraftListBox = theGuiManager->
-      GetSpacecraftListBox(this, ID_LISTBOX, wxSize(150,65), &mExcludedScList);
-   mCelesObjectListBox = theGuiManager->
-      GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150,65), empty);
-   mSelectedScListBox =
-      new wxListBox(this, SC_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
-                    emptyList, wxLB_SINGLE);
-   mSelectedObjListBox =
-      new wxListBox(this, OBJ_SEL_LISTBOX, wxDefaultPosition, wxSize(150,65), //0,
-                    emptyList, wxLB_SINGLE);
-
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxButton\n");
-   #endif
-   
-   // wxButton
-   //-----------------------------------------------------------------
-   #if __WXMAC__
-   //-----------------------------------------------------------------
-   addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(40,20), 0);
-   removeScButton = new wxButton(this, REMOVE_SP_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(40,20), 0);
-   clearScButton = new wxButton(this, CLEAR_SP_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(40,20), 0);
-   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
-                                    wxDefaultPosition, wxSize(10,20), 0);
-   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
-                                     wxDefaultPosition, wxSize(10,20), 0);
-   //-----------------------------------------------------------------
-   #else
-   //-----------------------------------------------------------------
-   addScButton = new wxButton(this, ADD_SP_BUTTON, wxT("-->"),
-                              wxDefaultPosition, wxSize(20,20), 0);
-   removeScButton = new wxButton(this, REMOVE_SP_BUTTON, wxT("<--"),
-                                 wxDefaultPosition, wxSize(20,20), 0);
-   clearScButton = new wxButton(this, CLEAR_SP_BUTTON, wxT("<="),
-                                wxDefaultPosition, wxSize(20,20), 0);
-   mOrbitColorButton = new wxButton(this, ORBIT_COLOR_BUTTON, "",
-                                    wxDefaultPosition, wxSize(25,20), 0);
-   mTargetColorButton = new wxButton(this, TARGET_COLOR_BUTTON, "",
-                                     wxDefaultPosition, wxSize(25,20), 0);
-   //-----------------------------------------------------------------
-   #endif
-   //-----------------------------------------------------------------
-
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxComboBox\n");
-   #endif
-   
-   // wxComboBox
+   wxStaticText *coordSysLabel =
+      new wxStaticText(this, -1, wxT("Coordinate System"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mCoordSysComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
+   
+   wxStaticText *viewPointRefLabel =
+      new wxStaticText(this, -1, wxT("View Point Reference"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mViewPointRefComboBox =
       theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+   
+   wxStaticText *viewPointVectorLabel =
+      new wxStaticText(this, -1, wxT("View Point Vector"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mViewPointVectorComboBox =
       theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+   
+   //-----------------------------------------------------------------
+   // Add to view definitin sizer
+   //-----------------------------------------------------------------
+   mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
+   mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+
+   mViewDefSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   mViewDefSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticText *viewScaleFactorLabel =
+      new wxStaticText(this, -1, wxT("View Scale Factor"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
+   mViewScaleFactorTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, wxSize(120,-1), 0);
+
+   mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   wxStaticText *viewDirectionLabel =
+      new wxStaticText(this, -1, wxT("View Direction"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mViewDirectionComboBox =
       theGuiManager->GetSpacePointComboBox(this, ID_COMBOBOX, wxSize(120,-1), true);
+   
+   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
+   mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   GmatStaticBoxSizer *viewDefStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "View Definition");
+   viewDefStaticSizer->Add(mViewDefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   
+   //-----------------------------------------------------------------
+   // View up definition
+   //-----------------------------------------------------------------
+   wxStaticText *upCsLabel =
+      new wxStaticText(this, -1, wxT("Coordinate System"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mViewUpCsComboBox =
       theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120,-1));
+   wxStaticText *upAxisLabel =
+      new wxStaticText(this, -1, wxT("Axis"),
+                       wxDefaultPosition, wxSize(-1,-1), 0);
    mViewUpAxisComboBox =
       new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, 
-                     wxSize(120,-1),6, axisArray, wxCB_READONLY);
-                     
-                  
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxSizers\n");
-   #endif
+                     wxSize(50,-1),6, axisArray, wxCB_READONLY);
    
-   // wxSizers
-   mScOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mObjectGridSizer = new wxFlexGridSizer(5, 0, 0);
-   mViewPointRefSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewPointVectorSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewDirVectorSizer = new wxBoxSizer(wxHORIZONTAL);
-   mViewDefSizer = new wxFlexGridSizer(3, 0, 0);
-   mTopViewSizer = new wxBoxSizer(wxHORIZONTAL);
-   mBottomViewSizer = new wxBoxSizer(wxHORIZONTAL);
-
+   wxBoxSizer *viewUpSizer = new wxBoxSizer(wxHORIZONTAL);
+   viewUpSizer->Add(upCsLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   viewUpSizer->Add(mViewUpCsComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   viewUpSizer->AddSpacer(20);
+   viewUpSizer->Add(upAxisLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   viewUpSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   GmatStaticBoxSizer *upDefStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "View Up Definition");
+   
+   upDefStaticSizer->Add(viewUpSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+      
    //-----------------------------------------------------------------
-   #if __WXMAC__
+   // Add to page sizer
    //-----------------------------------------------------------------
    
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxSizers for Mac\n");
-   #endif
+   wxFlexGridSizer *pageSizer1 = new wxFlexGridSizer(3, 2, 0, 0);
+   pageSizer1->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   pageSizer1->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
    
-   wxStaticText *plotOptionStaticBox = new wxStaticText(this, -1, wxT("Plot Option"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewOptionStaticBox = new wxStaticText(this, -1, wxT("View Option"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *drawOptionStaticBox = new wxStaticText(this, -1, wxT("Drawing Option"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewObjectStaticBox = new wxStaticText(this, -1, wxT("View Object"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *viewDefStaticBox = new wxStaticText(this, -1, wxT("View Definition"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
-   wxStaticText *upDefStaticBox = new wxStaticText(this, -1, wxT("View Up Definition"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+   pageSizer1->Add(drawOptionStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);   
+   pageSizer1->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
    
-   plotOptionStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                       true, _T(""), wxFONTENCODING_SYSTEM));
-   viewOptionStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                       true, _T(""), wxFONTENCODING_SYSTEM));
-   drawOptionStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                       true, _T(""), wxFONTENCODING_SYSTEM));
-   viewObjectStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                       true, _T(""), wxFONTENCODING_SYSTEM));
-   viewDefStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                    true, _T(""), wxFONTENCODING_SYSTEM));
-   upDefStaticBox->SetFont(wxFont(12, wxSWISS, wxFONTFAMILY_TELETYPE, wxFONTWEIGHT_BOLD,
-                                  true, _T(""), wxFONTENCODING_SYSTEM));
-   
-   // wxSizers
-   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *colFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *updFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *viewOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *fovBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *drawOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *availObjBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *mObjSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   //wxBoxSizer *topViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-   wxFlexGridSizer *scOptionBoxSizer1 = new wxFlexGridSizer(1, 0, 0);
-   
-   wxBoxSizer *plotOptionStaticSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *viewOptionStaticSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *drawOptionStaticSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *viewObjectStaticSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *viewDefStaticSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *upDefStaticSizer = new wxBoxSizer(wxVERTICAL);
-   
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() Adding objects to sizers for Mac\n");
-   #endif
-   
-   // Adding objects to wxSizers
-   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   plotOptionStaticSizer->Add(plotOptionStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   colFreqBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   colFreqBoxSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   colFreqBoxSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   updFreqBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   updFreqBoxSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   updFreqBoxSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   plotOptionBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(numPointsToRedrawLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewOptionBoxSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   fovBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, 0);
-   fovBoxSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
-   
-   viewOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewOptionStaticSizer->Add(viewOptionStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewOptionStaticSizer->Add(viewOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mOriginSunLineCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   drawOptionStaticSizer->Add(drawOptionStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionStaticSizer->Add(drawOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   availObjBoxSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mSpacecraftListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(coAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   mObjSelectedBoxSizer->Add(titleSelectedSc, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(mSelectedScListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(titleSelectedObj, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   scOptionBoxSizer1->Add(mShowObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mScOptionBoxSizer->Add(scOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mObjectGridSizer->Add(availObjBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(mObjSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(mScOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   viewObjectStaticSizer->Add(viewObjectStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewObjectStaticSizer->Add(mObjectGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   mViewDefSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewDefStaticSizer->Add(viewDefStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewDefStaticSizer->Add(mViewDefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   upDefStaticSizer->Add(upDefStaticBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(upCsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(mViewUpCsComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(upAxisLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_LEFT|wxALL, bsize); 
-   
-   mTopViewSizer->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mTopViewSizer->Add(drawOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mTopViewSizer->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   mBottomViewSizer->Add(viewOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mBottomViewSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mBottomViewSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   pageBoxSizer->Add(mTopViewSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(mBottomViewSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() Exiting sizers for Mac\n");
-   #endif
+   pageSizer1->Add(viewOptionStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   pageSizer1->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
    
    //-----------------------------------------------------------------
-   #else
+   // Add to middle sizer
    //-----------------------------------------------------------------
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   pageSizer->Add(pageSizer1, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() wxSizers for Windows\n");
-   #endif
-   
-   // wxSizers
-   wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *colFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *updFreqBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *viewOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *fovBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *drawOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *availObjBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *mObjSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   //wxBoxSizer *topViewBoxSizer = new wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-   wxFlexGridSizer *scOptionBoxSizer1 = new wxFlexGridSizer(1, 0, 0);
-   
-   wxStaticBox *plotOptionStaticBox = new wxStaticBox(this, -1, wxT("Plot Option"));
-   wxStaticBox *viewOptionStaticBox = new wxStaticBox(this, -1, wxT("View Option"));
-   wxStaticBox *drawOptionStaticBox = new wxStaticBox(this, -1, wxT("Drawing Option"));
-   wxStaticBox *viewObjectStaticBox = new wxStaticBox(this, -1, wxT("View Object"));
-   wxStaticBox *viewDefStaticBox = new wxStaticBox(this, -1, wxT("View Definition"));
-   wxStaticBox *upDefStaticBox = new wxStaticBox(this, -1, wxT("View Up Definition"));
-   
-   wxStaticBoxSizer *upDefStaticSizer = new wxStaticBoxSizer(upDefStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *plotOptionStaticSizer = new wxStaticBoxSizer(plotOptionStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *viewOptionStaticSizer = new wxStaticBoxSizer(viewOptionStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *drawOptionStaticSizer = new wxStaticBoxSizer(drawOptionStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *viewObjectStaticSizer = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
-   wxStaticBoxSizer *viewDefStaticSizer = new wxStaticBoxSizer(viewDefStaticBox, wxVERTICAL);
-     
-   #if DEBUG_OPENGL_PANEL_CREATE
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::Create() Adding objects to sizers for Windows\n");
-   #endif
-   
-   // Adding objects to wxSizers
-   plotOptionBoxSizer->Add(mPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionStaticSizer->Add(plotOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   colFreqBoxSizer->Add(dataCollectFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   colFreqBoxSizer->Add(mDataCollectFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   colFreqBoxSizer->Add(dataCollectFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   updFreqBoxSizer->Add(updatePlotFreqLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   updFreqBoxSizer->Add(mUpdatePlotFreqTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   updFreqBoxSizer->Add(updatePlotFreqLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   plotOptionBoxSizer->Add(colFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(updFreqBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(numPointsToRedrawLabel1, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(numPointsToRedrawLabel2, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(mNumPointsToRedrawTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewOptionBoxSizer->Add(mUseInitialViewCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewOptionBoxSizer->Add(mPerspectiveModeCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   viewOptionBoxSizer->Add(mUseFixedFovCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   fovBoxSizer->Add(mFovLabel, 0, wxALIGN_LEFT|wxALL, 0);
-   fovBoxSizer->Add(mFixedFovTextCtrl, 0, wxALIGN_LEFT|wxALL, 0);
-   
-   viewOptionBoxSizer->Add(fovBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewOptionStaticSizer->Add(viewOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mWireFrameCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mTargetStatusCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mEclipticPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mXYPlaneCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mAxesCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(mOriginSunLineCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   drawOptionBoxSizer->Add(20, 2, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   drawOptionStaticSizer->Add(drawOptionBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   availObjBoxSizer->Add(scAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mSpacecraftListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(coAvailableLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   availObjBoxSizer->Add(mCelesObjectListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(removeScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arrowButtonsBoxSizer->Add(clearScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   mObjSelectedBoxSizer->Add(titleSelectedSc, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(mSelectedScListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(titleSelectedObj, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjSelectedBoxSizer->Add(mSelectedObjListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   scOptionBoxSizer1->Add(mShowObjectCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(20, 10, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(orbitColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mOrbitColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mTargetColorLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   scOptionBoxSizer1->Add(mTargetColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mScOptionBoxSizer->Add(scOptionBoxSizer1, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mObjectGridSizer->Add(availObjBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(arrowButtonsBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(mObjSelectedBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mObjectGridSizer->Add(mScOptionBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   viewObjectStaticSizer->Add(mObjectGridSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewPointRefSizer->Add(mViewPointRef1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRef3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointRefSizer->Add(mViewPointRefStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewPointVectorSizer->Add(mViewPointVec1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVec3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewPointVectorSizer->Add(mViewPointVecStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDirVectorSizer->Add(mViewDir1TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir2TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDir3TextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDirVectorSizer->Add(mViewDirStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   mViewDefSizer->Add(coordSysLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-
-   mViewDefSizer->Add(viewPointRefLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointRefComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointRefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewPointVectorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointVectorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewPointVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewScaleFactorLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewScaleFactorTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(emptyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   mViewDefSizer->Add(viewDirectionLabel, 0, wxALIGN_RIGHT|wxALL, bsize);
-   mViewDefSizer->Add(mViewDirectionComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   mViewDefSizer->Add(mViewDirVectorSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   viewDefStaticSizer->Add(mViewDefSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   upDefStaticSizer->Add(upCsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(mViewUpCsComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(upAxisLabel, 0, wxALIGN_LEFT|wxALL, bsize);
-   upDefStaticSizer->Add(mViewUpAxisComboBox, 0, wxALIGN_LEFT|wxALL, bsize); 
-   
-   mTopViewSizer->Add(plotOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mTopViewSizer->Add(drawOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mTopViewSizer->Add(viewObjectStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   mBottomViewSizer->Add(viewOptionStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mBottomViewSizer->Add(viewDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mBottomViewSizer->Add(upDefStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   pageBoxSizer->Add(mTopViewSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(mBottomViewSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage
       ("OpenGlPlotSetupPanel::Create() Exiting sizers for Windows\n");
    #endif
    
-   //-----------------------------------------------------------------
-   #endif
-   //-----------------------------------------------------------------
-   
-   mObjectGridSizer->Show(mScOptionBoxSizer, false);
-
    #if DEBUG_OPENGL_PANEL_CREATE
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::Create() exiting...\n");
    #endif
@@ -791,7 +600,7 @@ void OpenGlPlotSetupPanel::LoadData()
       str.Printf("%d", mOpenGlPlot->GetIntegerParameter("NumPointsToRedraw"));
       mNumPointsToRedrawTextCtrl->SetValue(str);
       
-      mPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
+      mShowPlotCheckBox->SetValue(mOpenGlPlot->IsActive());
       mXYPlaneCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("XYPlane") == "On");
       mEclipticPlaneCheckBox->
@@ -808,13 +617,15 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetOnOffParameter("EarthSunLines") == "On");
       mUseInitialViewCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("UseInitialView") == "On");
+
+      #ifdef __ENABLE_GL_PERSPECTIVE__
       mPerspectiveModeCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("PerspectiveMode") == "On");
       mUseFixedFovCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("UseFixedFov") == "On");
-      
       rval = mOpenGlPlot->GetRealParameter("FixedFovAngle");
       mFixedFovTextCtrl->SetValue(theGuiManager->ToWxString(rval));
+      #endif
       
       mCoordSysComboBox->SetStringSelection
          (mOpenGlPlot->GetStringParameter("CoordinateSystem").c_str());
@@ -900,7 +711,7 @@ void OpenGlPlotSetupPanel::LoadData()
       }
       
       // set layout
-      mBottomViewSizer->Layout();
+      //mBottomViewSizer->Layout();
 
       //--------------------------------------------------------------
       // get SpacePoint list to plot
@@ -951,7 +762,7 @@ void OpenGlPlotSetupPanel::LoadData()
          {
             scNames[i] = scNameArray[i].c_str();
             
-            mShowObjectMap[scNameArray[i]] =
+            mDrawObjectMap[scNameArray[i]] =
                mOpenGlPlot->GetShowObject(scNameArray[i]);
             mOrbitColorMap[scNameArray[i]]
                = RgbColor(mOpenGlPlot->GetColor("Orbit", scNameArray[i]));
@@ -978,7 +789,7 @@ void OpenGlPlotSetupPanel::LoadData()
          {
             nonScNames[i] = nonScNameArray[i].c_str();
          
-            mShowObjectMap[nonScNameArray[i]] =
+            mDrawObjectMap[nonScNameArray[i]] =
                mOpenGlPlot->GetShowObject(nonScNameArray[i]);
             mOrbitColorMap[nonScNameArray[i]]
                = RgbColor(mOpenGlPlot->GetColor("Orbit", nonScNameArray[i]));
@@ -1006,18 +817,20 @@ void OpenGlPlotSetupPanel::LoadData()
    // deselect available object list
    mSpacecraftListBox->Deselect(mSpacecraftListBox->GetSelection());
    mCelesObjectListBox->Deselect(mCelesObjectListBox->GetSelection());
-   
+
+   #ifdef __ENABLE_GL_PERSPECTIVE__
    mPerspectiveModeCheckBox->Enable();
+   #endif
+   
    EnableUpdate(false);
    
+   #ifdef __ENABLE_GL_PERSPECTIVE__
    if (!mUseFixedFovCheckBox->IsChecked())
    {
       mFovLabel->Disable();
       mFixedFovTextCtrl->Disable();
    }
-   
-   //5.13.mViewUpAxisComboBox->SetSelection(0);
-   
+
    // if perspective mode, enalbe fov
    if (mPerspectiveModeCheckBox->IsChecked())
    {
@@ -1039,7 +852,8 @@ void OpenGlPlotSetupPanel::LoadData()
       mFovLabel->Disable();
       mFixedFovTextCtrl->Disable();
    }
-
+   #endif
+   
    
    #if DEBUG_OPENGL_PANEL_LOAD
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting...\n");
@@ -1092,9 +906,10 @@ void OpenGlPlotSetupPanel::SaveData()
                  inputString[0].c_str(), "NumPointsToRedraw","Integer >= 0");
          return;
       }
+      
       mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", intVal[0]);
       
-      mOpenGlPlot->Activate(mPlotCheckBox->IsChecked());
+      mOpenGlPlot->Activate(mShowPlotCheckBox->IsChecked());
       
       if (mXYPlaneCheckBox->IsChecked())
          mOpenGlPlot->SetOnOffParameter("XYPlane", "On");
@@ -1141,6 +956,8 @@ void OpenGlPlotSetupPanel::SaveData()
       else
          mOpenGlPlot->SetOnOffParameter("UseInitialView", "Off");
       
+      
+      #ifdef __ENABLE_GL_PERSPECTIVE__
       if (mPerspectiveModeCheckBox->IsChecked())
          mOpenGlPlot->SetOnOffParameter("PerspectiveMode", "On");
       else
@@ -1160,6 +977,8 @@ void OpenGlPlotSetupPanel::SaveData()
          return;
       }
       mOpenGlPlot->SetRealParameter("FixedFovAngle", fov);
+      #endif
+
       
       //--------------------------------------------------------------
       // save spacecraft list
@@ -1227,7 +1046,7 @@ void OpenGlPlotSetupPanel::SaveData()
             mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
          
             mOpenGlPlot->
-               SetShowObject( mSelSpName, mShowObjectMap[mSelSpName]);
+               SetShowObject( mSelSpName, mDrawObjectMap[mSelSpName]);
          }
          
          // change draw non-spacecraft
@@ -1236,7 +1055,7 @@ void OpenGlPlotSetupPanel::SaveData()
             mSelSpName = std::string(mSelectedObjListBox->GetString(i).c_str());
          
             mOpenGlPlot->
-               SetShowObject(mSelSpName, mShowObjectMap[mSelSpName]);
+               SetShowObject(mSelSpName, mDrawObjectMap[mSelSpName]);
          }
       }
       
@@ -1463,7 +1282,7 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
          // deselect selected other object
          mSelectedObjListBox->Deselect(mSelectedObjListBox->GetSelection());
          
-         mShowObjectMap[s.c_str()] = true;
+         mDrawObjectMap[s.c_str()] = true;
          ShowSpacePointOption(s, true, true, GmatColor::RED32);
          mHasSpChanged = true;
          EnableUpdate(true);
@@ -1487,7 +1306,7 @@ void OpenGlPlotSetupPanel::OnAddSpacePoint(wxCommandEvent& event)
          // deselect selected spacecraft
          mSelectedScListBox->Deselect(mSelectedScListBox->GetSelection());
          
-         mShowObjectMap[s.c_str()] = true;
+         mDrawObjectMap[s.c_str()] = true;
          ShowSpacePointOption(s, true, false, GmatColor::L_BROWN32);
          mHasSpChanged = true;
          EnableUpdate(true);
@@ -1602,6 +1421,7 @@ void OpenGlPlotSetupPanel::OnSelectOtherObject(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
 {
+   #ifdef __ENABLE_GL_PERSPECTIVE__
    if (event.GetEventObject() == mPerspectiveModeCheckBox)
    {
       if (mPerspectiveModeCheckBox->IsChecked())
@@ -1638,25 +1458,28 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
          mFixedFovTextCtrl->Disable();
       }
    }
-   else if (event.GetEventObject() == mShowObjectCheckBox)
+   #endif
+   
+   
+   if (event.GetEventObject() == mDrawObjectCheckBox)
    {
       if (mSelectedScListBox->GetSelection() != -1)
       {
          mSelSpName = std::string(mSelectedScListBox->GetStringSelection().c_str());
-         mShowObjectMap[mSelSpName] = mShowObjectCheckBox->GetValue();
+         mDrawObjectMap[mSelSpName] = mDrawObjectCheckBox->GetValue();
          mHasShowObjectChanged = true;
       }
       else if (mSelectedObjListBox->GetSelection() != -1)
       {
          mSelSpName = std::string(mSelectedObjListBox->GetStringSelection().c_str());
-         mShowObjectMap[mSelSpName] = mShowObjectCheckBox->GetValue();
+         mDrawObjectMap[mSelSpName] = mDrawObjectCheckBox->GetValue();
          mHasShowObjectChanged = true;
       }
       
       #if DEBUG_OPENGL_PANEL_CHECKBOX
       MessageInterface::ShowMessage
          ("OpenGlPlotSetupPanel::OnCheckBoxChange() mSelSpName=%s, show=%d\n",
-          mSelSpName.c_str(), mShowObjectMap[mSelSpName]);
+          mSelSpName.c_str(), mDrawObjectMap[mSelSpName]);
       #endif
    }
    
@@ -1802,7 +1625,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       else
          mViewDefSizer->Show(mViewPointRefSizer, false);
       
-      mBottomViewSizer->Layout();
+      //mBottomViewSizer->Layout();
    }
    else if (event.GetEventObject() == mViewPointVectorComboBox)
    {
@@ -1813,7 +1636,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       else
          mViewDefSizer->Show(mViewPointVectorSizer, false);
       
-      mBottomViewSizer->Layout();      
+      //mBottomViewSizer->Layout();      
    }
    else if (event.GetEventObject() == mViewDirectionComboBox)
    {
@@ -1824,7 +1647,7 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       else
          mViewDefSizer->Show(mViewDirVectorSizer, false);
       
-      mBottomViewSizer->Layout();      
+      //mBottomViewSizer->Layout();      
    }
    
    EnableUpdate(true);
@@ -1884,7 +1707,7 @@ void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show,
           orbColor.GetIntColor(), targColor.GetIntColor());
       #endif
       
-      mShowObjectCheckBox->SetValue(mShowObjectMap[mSelSpName]);
+      mDrawObjectCheckBox->SetValue(mDrawObjectMap[mSelSpName]);
       
       mOrbitColor.Set(orbColor.Red(), orbColor.Green(), orbColor.Blue());
       mTargetColor.Set(targColor.Red(), targColor.Green(), targColor.Blue());
@@ -1905,13 +1728,11 @@ void OpenGlPlotSetupPanel::ShowSpacePointOption(const wxString &name, bool show,
          mTargetColorButton->Disable();
       }
       
-      mObjectGridSizer->Show(mScOptionBoxSizer, show);
+      mObjectSizer->Show(mScOptionSizer, show);
    }
    else
    {
-      mObjectGridSizer->Show(mScOptionBoxSizer, false);
+      mObjectSizer->Show(mScOptionSizer, false);
    }
-   
-   mTopViewSizer->Layout();
 }
 

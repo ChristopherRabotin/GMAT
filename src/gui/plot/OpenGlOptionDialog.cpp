@@ -239,7 +239,7 @@ void OpenGlOptionDialog::Create()
       new wxStaticText(this, -1, wxT("Update Interval (msec)\n<Esc> to interrupt"),
                        wxDefaultPosition, wxSize(-1, -1), 0);
    
-   mAnimationUpdIntTextCtrl =
+   mUpdateIntTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
                      wxDefaultPosition, wxSize(60, -1), 0);
    
@@ -257,7 +257,7 @@ void OpenGlOptionDialog::Create()
    
    wxFlexGridSizer *updateSizer = new wxFlexGridSizer(2, 0, 0);
    updateSizer->Add(animationStaticText, 0, wxALIGN_LEFT|wxALL, borderSize);
-   updateSizer->Add(mAnimationUpdIntTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
+   updateSizer->Add(mUpdateIntTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
    updateSizer->Add(frameStaticText, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL|wxALL,
                     borderSize);
    updateSizer->Add(mFrameIncTextCtrl, 0, wxALIGN_LEFT|wxALL, borderSize);
@@ -431,12 +431,12 @@ void OpenGlOptionDialog::LoadData()
 
    #if DEBUG_GLOPTION_LOAD
    MessageInterface::ShowMessage
-      ("OpenGlOptionDialog::LoadData() setting mAnimationUpdIntTextCtrl.\n");
+      ("OpenGlOptionDialog::LoadData() setting mUpdateIntTextCtrl.\n");
    #endif
    
    // animiation
    strVal.Printf("%d", mTrajFrame->GetAnimationUpdateInterval());
-   mAnimationUpdIntTextCtrl->SetValue(strVal);
+   mUpdateIntTextCtrl->SetValue(strVal);
    
    strVal.Printf("%d", mTrajFrame->GetAnimationFrameIncrement());
    mFrameIncTextCtrl->SetValue(strVal);
@@ -770,11 +770,35 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mViewAnimationButton)
    {
       mTrajFrame->SetUseInitialViewDef(mUseInitialViewDefCheckBox->GetValue());
-      mAnimationUpdInt = atoi(mAnimationUpdIntTextCtrl->GetValue());
-      mAnimationFrameInc = atoi(mFrameIncTextCtrl->GetValue());
-      mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
-      mTrajFrame->SetAnimationFrameIncrement(mAnimationFrameInc);
-      mTrajFrame->RedrawPlot(true);
+      bool valid = true;
+      
+      // Check animation update interval and frame increment
+      std::string str = mUpdateIntTextCtrl->GetValue().c_str();
+      if (!GmatStringUtil::ToInteger(str, mAnimationUpdInt))
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "\"%s\" is invalid value for \"Update Interval\"."
+             "\nPlease enter Integer value >= 0", str.c_str());
+         valid = false;
+      }
+      
+      str = mFrameIncTextCtrl->GetValue().c_str();
+      bool validInc = GmatStringUtil::ToInteger(str, mAnimationFrameInc);
+      
+      if (!validInc || mAnimationFrameInc < 1)
+      {
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "\"%s\" is invalid value for \"Frame Increment\"."
+             "\nPlease enter Integer value > 0", str.c_str());
+         valid = false;
+      }
+      
+      if (valid)
+      {
+         mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
+         mTrajFrame->SetAnimationFrameIncrement(mAnimationFrameInc);
+         mTrajFrame->RedrawPlot(true);
+      }
    }
 }
 

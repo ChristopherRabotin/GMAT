@@ -101,9 +101,9 @@ protected:
    wxStringBoolMap  mShowObjectMap;
    wxStringBoolMap  mShowOrbitNormalMap;
    
-   wxTextCtrl *mAnimationUpdIntTextCtrl;
+   wxTextCtrl *mUpdateIntTextCtrl;
    wxTextCtrl *mFrameIncTextCtrl;
-      
+   
    wxListBox *mObjectListBox;
    
    wxCheckBox *mUseInitialViewDefCheckBox;
