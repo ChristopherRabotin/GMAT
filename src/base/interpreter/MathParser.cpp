@@ -31,6 +31,7 @@
 #endif
 
 //#define DEBUG_PARSE 1
+//#define DEBUG_PARSE_EQUATION 1
 //#define DEBUG_MATH_PARSER 2
 //#define DEBUG_DECOMPOSE 1
 //#define DEBUG_PARENTHESIS 1
@@ -143,6 +144,11 @@ MathParser::~MathParser()
 //------------------------------------------------------------------------------
 bool MathParser::IsEquation(const std::string &str)
 {
+   #if DEBUG_PARSE_EQUATION
+   MessageInterface::ShowMessage
+      ("MathParser::IsEquation() str=%s\n", str.c_str());
+   #endif
+   
    bool isEq = false;
    std::string left, right;
    Real rval;
@@ -160,12 +166,12 @@ bool MathParser::IsEquation(const std::string &str)
    {
       isEq = true;
    }
-
+   
    // Check ' for matrix transpose and ^(-1) for inverse
    if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
       isEq = true;
 
-   #if DEBUG_MATH_PARSER
+   #if DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage
       ("MathParser::IsEquation(%s) returning %u\n", str.c_str(), isEq);
    #endif
@@ -1801,9 +1807,9 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
    {
       functionIndex = str.find(list[i] + "(");
       
-      // Try Capitalized function name
+      // Try function name with first letter capitalized
       if (functionIndex == str.npos)
-         functionIndex = str.find(GmatStringUtil::Capitalize(list[i]));
+         functionIndex = str.find(GmatStringUtil::Capitalize(list[i]) + "(");
       
       if (functionIndex != str.npos)
       {
