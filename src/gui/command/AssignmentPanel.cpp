@@ -50,10 +50,6 @@ AssignmentPanel::AssignmentPanel( wxWindow *parent, GmatCommand *cmd)
    {
       Create();
       Show();
-      
-      // force to call SaveData() for empty LHS and RHS checking
-      mIsTextModified = true;
-      EnableUpdate(true);
    }
 }
 
@@ -117,9 +113,18 @@ void AssignmentPanel::LoadData()
    
    mObject = theCommand;
    
-   mLhsTextCtrl->SetValue(theCommand->GetLHS().c_str());
-   mRhsTextCtrl->SetValue(theCommand->GetRHS().c_str());
+   wxString lhs = theCommand->GetLHS().c_str();
+   wxString rhs = theCommand->GetRHS().c_str();
    
+   mLhsTextCtrl->SetValue(lhs);
+   mRhsTextCtrl->SetValue(rhs);
+   
+   if (lhs == "" || rhs == "")
+   {
+      // force to call SaveData() for empty LHS and RHS checking
+      mIsTextModified = true;
+      EnableUpdate(true);
+   }
 }
 
 
