@@ -69,9 +69,6 @@ GmatApp::GmatApp()
 bool GmatApp::OnInit()
 {
    bool status = false;
-   wxDateTime now = wxDateTime::Now();
-   wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
-   std::string nowStr = wxNowStr.c_str();
    
    try
    {      
@@ -168,19 +165,31 @@ bool GmatApp::OnInit()
       // loop and the application will run. If we returned FALSE here, the
       // application would exit immediately.
       
-      MessageInterface::LogMessage(nowStr + "GMAT GUI successfully launched.\n\n");
+      wxDateTime now = wxDateTime::Now();
+      wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+      std::string nowStr = wxNowStr.c_str();
       
+      MessageInterface::LogMessage(nowStr + "GMAT GUI successfully launched.\n");
       return status;
    }
    catch (BaseException &e)
    {
+      wxDateTime now = wxDateTime::Now();
+      wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+      std::string nowStr = wxNowStr.c_str();
+      
       MessageInterface::LogMessage
          (nowStr + "Error encounted while launching GMAT GUI.\n\n");
+      
       MessageInterface::LogMessage(e.GetFullMessage());
       return false;
    }
    catch (...)
    {
+      wxDateTime now = wxDateTime::Now();
+      wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+      std::string nowStr = wxNowStr.c_str();
+      
       MessageInterface::LogMessage
          (nowStr + "Unknown error encounted while launching GMAT GUI.\n\n");
       return false;

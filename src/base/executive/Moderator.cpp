@@ -215,8 +215,18 @@ bool Moderator::Initialize(bool fromGui)
                                      "Unknown Error occured during initialization");
       return false;
    }
+
+   // Let's put current time out
+   time_t rawtime;
+   struct tm * timeinfo;
    
-   MessageInterface::ShowMessage("Moderator successfully created core engine\n");
+   time(&rawtime);
+   timeinfo = localtime(&rawtime);
+   char timestr[80];
+   strftime(timestr, 80, "%Y-%m-%d %H:%M:%S",timeinfo);
+   
+   MessageInterface::ShowMessage
+      ("%s GMAT Moderator successfully created core engine\n", timestr);
    
    return true;;
 }
@@ -3869,17 +3879,15 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    runState = Gmat::IDLE;
    
    //MessageInterface::ShowMessage("========================================\n");
-   //MessageInterface::ShowMessage("Moderator::InterpretScript() entered\n"
-   //                              "***** file: " + filename + "\n");
    MessageInterface::ShowMessage
-      ("Interpreting scripts from the file.\n***** file: " + filename + "\n");
+      ("\nInterpreting scripts from the file.\n***** file: " + filename + "\n");
    
    //clear both resource and command sequence
    #if DEBUG_RUN
    MessageInterface::ShowMessage
       ("Moderator::InterpretScript() clearing both resource and command sequence...\n");
    #endif
-      
+   
    try
    {
       ClearResource();
@@ -3987,10 +3995,9 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
    runState = Gmat::IDLE;
    
    //MessageInterface::ShowMessage("========================================\n");
-   //MessageInterface::ShowMessage("Moderator::InterpretScript(ss) entered\n");
    MessageInterface::ShowMessage
-      ("Interpreting scripts from the input stream\n");
-      
+      ("\nInterpreting scripts from the input stream\n");
+   
    try
    {
       //clear both resource and command sequence
