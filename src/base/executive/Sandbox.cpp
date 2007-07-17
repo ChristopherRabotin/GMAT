@@ -135,10 +135,6 @@ Sandbox::~Sandbox()
  *  copies can be manipulated without affecting the objects managed by the
  *  ConfigurationManager.
  *
- *  @note Cloning is not yet fully functional in GMAT.  Oncew cloning is
- *        completed, this method will be simplified to clone every object added
- *        to the Sandbox.
- *
  *  @param <obj> The object that needs to be included in the Sandbox.
  *
  *  @return true if the object was added to the Sandbox's container, false if
@@ -371,31 +367,6 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 }
 
 
-
-//------------------------------------------------------------------------------
-// Spacecraft* GetSpacecraft(std::string name)
-//------------------------------------------------------------------------------
-/**
- *  Accesses the local copy of a Spacecraft managed by this Sandbox.
- *
- *  @param <name> The name of the Spacecraft.
- *
- *  @return The pointer to the Spacecraft.
- */
-//------------------------------------------------------------------------------
-Spacecraft* Sandbox::GetSpacecraft(std::string name)
-{
-   Spacecraft *sc = NULL;
-   GmatBase* obj = GetInternalObject(name, Gmat::SPACECRAFT);
-
-   if (obj)
-      sc = (Spacecraft*)(obj);
-
-   return sc;
-}
-
-
-
 //------------------------------------------------------------------------------
 // Execution methods
 //------------------------------------------------------------------------------
@@ -477,19 +448,16 @@ bool Sandbox::Initialize()
       }
    }
 
-
-
-   // Per Linda's request, the initialization order is:
-   // 1. CoordinateSystem
-   // 2. Spacecraft
-   // 3. PropSetup and others
-   // 4. System Parameters
-   // 5. Other Parameters
-   // 6. Subscribers.
-
+   // The initialization order is:
+   //
+   //  1. CoordinateSystem
+   //  2. Spacecraft
+   //  3. PropSetup and others
+   //  4. System Parameters
+   //  5. Other Parameters
+   //  6. Subscribers.
 
    // Set reference objects
-
 
    // Coordinate Systems
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
@@ -722,7 +690,7 @@ bool Sandbox::Initialize()
 // void BuildReferences()
 //------------------------------------------------------------------------------
 /**
- *  Sets all refence objects for the input object.
+ *  Sets all reference objects for the input object.
  */
 //------------------------------------------------------------------------------
 void Sandbox::BuildReferences(GmatBase *obj)
@@ -987,13 +955,10 @@ void Sandbox::InitializeInternalObjects()
       sp->SetJ2000Body(j2kBod);
    }
 
-
    // set ref object for internal coordinate system
    internalCoordSys->SetSolarSystem(solarSys);
 
-
    BuildReferences(internalCoordSys);
-
 
    // Set reference origin for internal coordinate system.
    oName = internalCoordSys->GetStringParameter("Origin");

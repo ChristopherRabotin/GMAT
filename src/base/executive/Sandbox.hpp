@@ -55,7 +55,6 @@ public:
     
    GmatBase* GetInternalObject(std::string name,
                                Gmat::ObjectType type = Gmat::UNKNOWN_OBJECT);
-   Spacecraft* GetSpacecraft(std::string name);
    
    // Execution methods
    bool Initialize();
