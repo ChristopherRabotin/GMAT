@@ -47,7 +47,6 @@ HEADERS = -Iinclude \
           -Iinterface \
           -Iparameter \
           -Iconfigs \
-          -Irefframe \
           -Iburn \
           -Isolver \
           -Ifunction \
