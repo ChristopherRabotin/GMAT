@@ -102,8 +102,9 @@ public:
    void OnQuit(wxCommandEvent& event);
    
    void OnActivate(wxActivateEvent& event);
-   void OnTrajSize(wxSizeEvent& event);
+   void OnPlotSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
+   void OnPlotClose(wxCloseEvent &event);
    void OnClose(wxCloseEvent &event);
    
    // drawing
@@ -149,6 +150,8 @@ protected:
 
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyColors;
+
+   void CheckFrame();
    
    DECLARE_EVENT_TABLE();
 };

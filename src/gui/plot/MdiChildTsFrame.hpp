@@ -93,6 +93,7 @@ public:
    void OnActivate(wxActivateEvent& event);
    void OnSize(wxSizeEvent& event);
    void OnMove(wxMoveEvent& event);
+   void OnPlotClose(wxCloseEvent& event);
    void OnClose(wxCloseEvent& event);
    
    

@@ -50,7 +50,7 @@ BEGIN_EVENT_TABLE(MdiChildTsFrame, GmatMdiChildFrame)
    EVT_ACTIVATE(MdiChildTsFrame::OnActivate)
    EVT_SIZE(MdiChildTsFrame::OnSize)
    EVT_MOVE(MdiChildTsFrame::OnMove)
-   EVT_CLOSE(MdiChildTsFrame::OnClose)
+   EVT_CLOSE(MdiChildTsFrame::OnPlotClose)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ int MdiChildTsFrame::ReadXyPlotFile(const wxString &filename)
    double tempData[7]; //loj: time, x, y, z, vx, vy, vz for build 2
    int numData = 0;
    double startTime;
-    
+   
    if (filename != "")
    {       
       inStream.open(filename.c_str());
@@ -238,7 +238,7 @@ void MdiChildTsFrame::ShowPlotLegend()
       mXyPlot->ShowLegend();
 }
 
-//loj: 7/13/04 changed penColor type
+
 //------------------------------------------------------------------------------   
 // void AddPlotCurve(int curveIndex, int yOffset, double yMin, double yMax,
 //                   const wxString &curveTitle, UnsignedInt penColor)
@@ -271,7 +271,7 @@ void MdiChildTsFrame::AddPlotCurve(int curveIndex, int yOffset, double yMin,
       #if DEBUG_MDI_TS_FRAME
             MessageInterface::ShowMessage
                ("MdiChildTsFrame::AddPlotCurve() curve count = %d added\n",
-                mXyPlot->GetCurveCount()); //loj: 6/16/05 Changed from GetCount()
+                mXyPlot->GetCurveCount());
       #endif
    }
    else
@@ -493,10 +493,6 @@ void MdiChildTsFrame::OnChangeTitle(wxCommandEvent& WXUNUSED(event))
                                          GetParent()->GetParent());
       if ( !newTitle )
          return;
-
-      //s_title = title;
-      //SetTitle(s_title);
-      //SetTitle(newTitle);//loj: 11/19/04 - commented out
       
       mXyPlot->SetLabel(newTitle.c_str(), TsPlotCanvas::PLOT_TITLE);
    }
@@ -624,6 +620,19 @@ void MdiChildTsFrame::OnSize(wxSizeEvent& event)
    //                  wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
    //                  size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
 
+   event.Skip();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnPlotClose(wxCloseEvent& event)
+//------------------------------------------------------------------------------
+void MdiChildTsFrame::OnPlotClose(wxCloseEvent& event)
+{
+   // Add any check before closing
+   
+   // remove from list of frames but do not delte
+   GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
    event.Skip();
 }
 

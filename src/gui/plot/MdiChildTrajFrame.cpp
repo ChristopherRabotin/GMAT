@@ -23,7 +23,8 @@
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
-//#define DEBUGMDI_TRAJ_FRAME 1
+//#define DEBUG_MDI_TRAJ_FRAME 1
+//#define DEBUG_MDI_CHILD_FRAME_CLOSE 1
 
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_CHILD_QUIT, MdiChildTrajFrame::OnQuit)
@@ -34,9 +35,9 @@ BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_WIRE_FRAME, MdiChildTrajFrame::OnDrawWireFrame)
    EVT_MENU(GmatPlot::MDI_GL_SHOW_EQUATORIAL_PLANE, MdiChildTrajFrame::OnDrawXyPlane)
    EVT_ACTIVATE(MdiChildTrajFrame::OnActivate)
-   EVT_SIZE(MdiChildTrajFrame::OnTrajSize)
+   EVT_SIZE(MdiChildTrajFrame::OnPlotSize)
    EVT_MOVE(MdiChildTrajFrame::OnMove)
-   EVT_CLOSE(MdiChildTrajFrame::OnClose) 
+   EVT_CLOSE(MdiChildTrajFrame::OnPlotClose) 
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -98,7 +99,7 @@ MdiChildTrajFrame::~MdiChildTrajFrame()
    
    mOptionDialog = (OpenGlOptionDialog*)NULL;
    
-   #if DEBUG_MDI_TRAJ_FRAME
+   #if DEBUG_MDI_CHILD_FRAME_CLOSE
    MessageInterface::ShowMessage
       ("~MdiChildTrajFrame() mPlotName=%s\n", mPlotName.c_str());
    #endif
@@ -106,8 +107,10 @@ MdiChildTrajFrame::~MdiChildTrajFrame()
    MdiGlPlot::mdiChildren.DeleteObject(this);
    MdiGlPlot::numChildren--;
    
-   #if DEBUG_MDI_TRAJ_FRAME
-   MessageInterface::ShowMessage("~MdiChildTrajFrame() exiting\n");
+   #if DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage
+      ("~MdiChildTrajFrame() exiting MdiGlPlot::numChildren=%d\n",
+       MdiGlPlot::numChildren);
    #endif
 }
 
@@ -600,9 +603,9 @@ void MdiChildTrajFrame::OnActivate(wxActivateEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnTrajSize(wxSizeEvent& event)
+// void OnPlotSize(wxSizeEvent& event)
 //------------------------------------------------------------------------------
-void MdiChildTrajFrame::OnTrajSize(wxSizeEvent& event)
+void MdiChildTrajFrame::OnPlotSize(wxSizeEvent& event)
 {
    // VZ: under MSW the size event carries the client size (quite
    //     unexpectedly) *except* for the very first one which has the full
@@ -639,35 +642,56 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
 
 
 //------------------------------------------------------------------------------
+// void OnPlotClose(wxCloseEvent &event)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::OnPlotClose(wxCloseEvent &event)
+{
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::OnPlotClose() entered\n");
+   #endif
+   
+   CheckFrame();
+   if (mCanClose)
+   {
+      // remove from list of frames but do not delete
+      GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
+      event.Skip();
+   }
+   else
+   {
+      event.Veto();
+   }
+   
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::OnPlotClose() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void OnClose(wxCloseEvent &event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnClose(wxCloseEvent &event)
 {
-   if (mCanvas)
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::OnClose() entered\n");
+   #endif
+   
+   CheckFrame();
+   
+   if (mCanClose)
    {
-      mCanClose = true;
-
-      #ifdef DEBUG_MDI_TRAJ_FRAME
-      MessageInterface::ShowMessage
-         ("MdiChildTrajFrame::OnClose() IsAnimationRunning=%d\n",
-          mCanvas->IsAnimationRunning());
-      #endif
-      
-      wxSafeYield();
-      
-      if (mCanvas->IsAnimationRunning())
-      {
-         wxMessageBox(_T("The animation is running.\n"
-                         "Please stop the animation first."),
-                      _T("GMAT Warning"));
-         event.Veto();
-         mCanClose = false;
-         return;
-      }
+      GmatMdiChildFrame::OnClose(event);
+      event.Skip();
+   }
+   else
+   {
+      event.Veto();
    }
    
-   GmatMdiChildFrame::OnClose(event);
-   event.Skip();
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::OnClose() exiting\n");
+   #endif
 }
 
 
@@ -840,4 +864,42 @@ void MdiChildTrajFrame::EnableAnimation(bool enable)
    if (mOptionDialog)
       mOptionDialog->EnableAnimation(enable);
 }
+
+
+//------------------------------------------------------------------------------
+// void CheckFrame()
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::CheckFrame()
+{
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::CheckFrame() entered\n");
+   #endif
+   
+   if (mCanvas)
+   {
+      mCanClose = true;
+
+      #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+      MessageInterface::ShowMessage
+         ("MdiChildTrajFrame::OnClose() IsAnimationRunning=%d\n",
+          mCanvas->IsAnimationRunning());
+      #endif
+      
+      wxSafeYield();
+      
+      if (mCanvas->IsAnimationRunning())
+      {
+         wxMessageBox(_T("The animation is running.\n"
+                         "Please stop the animation first."),
+                      _T("GMAT Warning"));
+         mCanClose = false;
+      }
+   }
+   
+   #ifdef DEBUG_MDI_CHILD_FRAME_CLOSE
+   MessageInterface::ShowMessage("MdiChildTrajFrame::CheckFrame() exiting\n");
+   #endif
+   
+}
+
 
