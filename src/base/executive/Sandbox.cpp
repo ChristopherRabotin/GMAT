@@ -36,6 +36,7 @@
 
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 1
+//#define DEBUG_SANDBOX_INIT_CS 1
 //#define DEBUG_SANDBOX_INIT_PARAM 1
 //#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
@@ -68,6 +69,8 @@ Sandbox::Sandbox() :
    clonable.push_back(Gmat::SPACEOBJECT);
    clonable.push_back(Gmat::GROUND_STATION);
    clonable.push_back(Gmat::BURN);
+   clonable.push_back(Gmat::IMPULSIVE_BURN);
+   clonable.push_back(Gmat::FINITE_BURN);
    clonable.push_back(Gmat::COMMAND);
    clonable.push_back(Gmat::PROPAGATOR);
    clonable.push_back(Gmat::FORCE_MODEL);
@@ -465,7 +468,7 @@ bool Sandbox::Initialize()
       obj = omi->second;
       if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
       {
-         #ifdef DEBUG_SC_INIT
+         #ifdef DEBUG_SC_INIT_CS
             MessageInterface::ShowMessage("Initializing CS %s\n",
                obj->GetName().c_str());
          #endif
@@ -1076,7 +1079,7 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
 bool Sandbox::Execute()
 {
 
-   #ifdef DEBUG_SANDBOX_RUN
+   #if DEBUG_SANDBOX_RUN > 1
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the current object map:\n");
    for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
         i != objectMap.end(); ++i)
@@ -1130,9 +1133,10 @@ bool Sandbox::Execute()
          
          #if DEBUG_SANDBOX_RUN
          MessageInterface::ShowMessage
-            ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());
+            ("Sandbox::Execution running %s\n   %s\n", current->GetTypeName().c_str(),
+             current->GetGeneratingString().c_str());
          #endif
-                  
+         
          if (current->GetTypeName() == "Target")
          {
             if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
