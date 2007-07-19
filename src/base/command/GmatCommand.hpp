@@ -201,7 +201,7 @@ protected:
    bool                 initialized;
    /// Pointer to the next GmatCommand in the sequence; NULL at the end
    GmatCommand          *next;
-   /// Pointer to the previous GmatCommand in the sequence; NULL passed begining
+   /// Pointer to the previous GmatCommand in the sequence; NULL if at the start
    GmatCommand          *previous;
    /// Indicator of the current nesting level
    Integer              level;
