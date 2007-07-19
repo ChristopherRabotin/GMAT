@@ -60,6 +60,7 @@ HEADERS = -I../base/include \
           -I../base/coordsystem \
           -Iinclude \
           -Iinclude/bitmaps \
+          -Iinclude/il \
           -Iapp \
           -Iburn \
           -Icommand \
