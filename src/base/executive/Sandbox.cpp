@@ -62,39 +62,40 @@ Sandbox::Sandbox() :
    interruptCount    (45),
    pollFrequency     (50)
 {
-   // List of the objects that can safely be cloned.  This list will be removed
-   // when the cloning has been tested for all of GMAT's classes.
-   clonable.push_back(Gmat::SPACECRAFT);
-   clonable.push_back(Gmat::FORMATION);
-   clonable.push_back(Gmat::SPACEOBJECT);
-   clonable.push_back(Gmat::GROUND_STATION);
-   clonable.push_back(Gmat::BURN);
-   clonable.push_back(Gmat::IMPULSIVE_BURN);
-   clonable.push_back(Gmat::FINITE_BURN);
-   clonable.push_back(Gmat::COMMAND);
-   clonable.push_back(Gmat::PROPAGATOR);
-   clonable.push_back(Gmat::FORCE_MODEL);
-   clonable.push_back(Gmat::PHYSICAL_MODEL);
-   clonable.push_back(Gmat::TRANSIENT_FORCE);
-   clonable.push_back(Gmat::INTERPOLATOR);
-   clonable.push_back(Gmat::SPACE_POINT);
-   clonable.push_back(Gmat::CELESTIAL_BODY);
-   clonable.push_back(Gmat::CALCULATED_POINT);
-   clonable.push_back(Gmat::LIBRATION_POINT);
-   clonable.push_back(Gmat::BARYCENTER);
-   clonable.push_back(Gmat::ATMOSPHERE);
-   clonable.push_back(Gmat::PARAMETER);
-   clonable.push_back(Gmat::STOP_CONDITION);
-   clonable.push_back(Gmat::SOLVER);
-   clonable.push_back(Gmat::SUBSCRIBER);
-   clonable.push_back(Gmat::PROP_SETUP);
-   clonable.push_back(Gmat::FUNCTION);
-   clonable.push_back(Gmat::FUEL_TANK);
-   clonable.push_back(Gmat::THRUSTER);
-   clonable.push_back(Gmat::HARDWARE);
-   clonable.push_back(Gmat::COORDINATE_SYSTEM);
-   clonable.push_back(Gmat::AXIS_SYSTEM);
-
+   #ifdef DEBUG_SANDBOX_CLONING
+      // List of the objects that can safely be cloned.  This list will be removed
+      // when the cloning has been tested for all of GMAT's classes.
+      clonable.push_back(Gmat::SPACECRAFT);
+      clonable.push_back(Gmat::FORMATION);
+      clonable.push_back(Gmat::SPACEOBJECT);
+      clonable.push_back(Gmat::GROUND_STATION);
+      clonable.push_back(Gmat::BURN);
+      clonable.push_back(Gmat::IMPULSIVE_BURN);
+      clonable.push_back(Gmat::FINITE_BURN);
+      clonable.push_back(Gmat::COMMAND);
+      clonable.push_back(Gmat::PROPAGATOR);
+      clonable.push_back(Gmat::FORCE_MODEL);
+      clonable.push_back(Gmat::PHYSICAL_MODEL);
+      clonable.push_back(Gmat::TRANSIENT_FORCE);
+      clonable.push_back(Gmat::INTERPOLATOR);
+      clonable.push_back(Gmat::SPACE_POINT);
+      clonable.push_back(Gmat::CELESTIAL_BODY);
+      clonable.push_back(Gmat::CALCULATED_POINT);
+      clonable.push_back(Gmat::LIBRATION_POINT);
+      clonable.push_back(Gmat::BARYCENTER);
+      clonable.push_back(Gmat::ATMOSPHERE);
+      clonable.push_back(Gmat::PARAMETER);
+      clonable.push_back(Gmat::STOP_CONDITION);
+      clonable.push_back(Gmat::SOLVER);
+      clonable.push_back(Gmat::SUBSCRIBER);
+      clonable.push_back(Gmat::PROP_SETUP);
+      clonable.push_back(Gmat::FUNCTION);
+      clonable.push_back(Gmat::FUEL_TANK);
+      clonable.push_back(Gmat::THRUSTER);
+      clonable.push_back(Gmat::HARDWARE);
+      clonable.push_back(Gmat::COORDINATE_SYSTEM);
+      clonable.push_back(Gmat::AXIS_SYSTEM);
+   #endif
 
    // SolarSystem instances are handled separately from the other objects
    // clonable.push_back(Gmat::SOLAR_SYSTEM);
@@ -110,10 +111,11 @@ Sandbox::Sandbox() :
 //------------------------------------------------------------------------------
 Sandbox::~Sandbox()
 {
-#ifndef DISABLE_SOLAR_SYSTEM_CLONING   
-   if (solarSys)
-      delete solarSys;
-#endif
+   #ifndef DISABLE_SOLAR_SYSTEM_CLONING   
+      if (solarSys)
+         delete solarSys;
+   #endif
+   
    if (sequence)
       delete sequence;
 
@@ -152,9 +154,11 @@ bool Sandbox::AddObject(GmatBase *obj)
           obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
 
-   if (state == INITIALIZED)
-      state = IDLE;
+   if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
 
+   state = IDLE;
 
    std::string name = obj->GetName();
    if (name == "")
@@ -165,9 +169,11 @@ bool Sandbox::AddObject(GmatBase *obj)
    if (objectMap.find(name) == objectMap.end())
    {
       // If not, store the new object pointer
+      #ifdef DEBUG_SANDBOX_CLONING
       if (find(clonable.begin(), clonable.end(), obj->GetType()) !=
-             clonable.end())
+          clonable.end())
       {
+      #endif
          #ifdef DEBUG_SANDBOX_OBJECT_MAPS
             MessageInterface::ShowMessage(
                "Cloning object %s of type %s\n", obj->GetName().c_str(),
@@ -185,9 +191,11 @@ bool Sandbox::AddObject(GmatBase *obj)
             if (solarSys)
                ((Spacecraft*)(obj))->SetSolarSystem(solarSys);
          }
+      #ifdef DEBUG_SANDBOX_CLONING
       }
       else
          objectMap[name] = obj;
+      #endif
    }
    else
    {
@@ -215,8 +223,12 @@ bool Sandbox::AddObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 bool Sandbox::AddCommand(GmatCommand *cmd)
 {
-   if (state == INITIALIZED)
-      state = IDLE;
+
+   if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+
+  state = IDLE;
 
 
    if (!cmd)
@@ -248,8 +260,11 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
 //------------------------------------------------------------------------------
 bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
-   if (state == INITIALIZED)
-      state = IDLE;
+   if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+   state = IDLE;
+
    if (!ss)
       return false;
 
@@ -277,8 +292,11 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 {
-   if (state == INITIALIZED)
-      state = IDLE;
+   if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+
+   state = IDLE;
 
    if (!cs)
       return false;
@@ -304,8 +322,11 @@ bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 bool Sandbox::SetPublisher(Publisher *pub)
 {
-   if (state == INITIALIZED)
-      state = IDLE;
+
+   if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+   state = IDLE;
 
 
    if (pub) {
@@ -683,6 +704,8 @@ bool Sandbox::Initialize()
          "Sandbox::Initialize() Successfully initialized\n");
    #endif
 
+   state = INITIALIZED;
+   
    //MessageInterface::ShowMessage("=====> Initialize successful\n");
    return rv;
 }
@@ -1185,6 +1208,7 @@ bool Sandbox::Execute()
    }
    
    sequence->RunComplete();
+   state = STOPPED;
    
    // notify subscribers end of run
    currentState = Gmat::IDLE;
@@ -1222,7 +1246,7 @@ bool Sandbox::Interrupt()
             state = STOPPED;
             break;
    
-         case Gmat::RUNNING:   // Pause
+         case Gmat::RUNNING:   // MCS is running
             state = RUNNING;
             break;
    
@@ -1251,7 +1275,6 @@ void Sandbox::Clear()
 {
    sequence  = NULL;
    current   = NULL;
-   state     = IDLE;
 
    // Delete the all cloned objects
    std::map<std::string, GmatBase *>::iterator omi;
@@ -1277,8 +1300,10 @@ void Sandbox::Clear()
             (omi->first).c_str());
       #endif
 
-      if (find(clonable.begin(), clonable.end(),
-          (omi->second)->GetType()) != clonable.end())
+      #ifdef DEBUG_SANDBOX_CLONING
+         if (find(clonable.begin(), clonable.end(),
+             (omi->second)->GetType()) != clonable.end())
+      #endif
       {
          #ifdef DEBUG_SANDBOX_OBJECT_MAPS
             MessageInterface::ShowMessage("Deleting '%s'\n",
@@ -1303,6 +1328,13 @@ void Sandbox::Clear()
 
    objectMap.clear();
    transientForces.clear();
+
+   // Update the sandbox state
+   if ((state != STOPPED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+
+   state     = IDLE;
 }
 
 
@@ -1320,6 +1352,11 @@ void Sandbox::Clear()
 //------------------------------------------------------------------------------
 bool Sandbox::AddSubscriber(Subscriber *subsc)
 {
+   if ((state != STOPPED) && (state != INITIALIZED) && (state != IDLE))
+	  MessageInterface::ShowMessage(
+	     "Unexpected state transition in the Sandbox\n");
+   state     = IDLE;
+
    Subscriber *sub = (Subscriber *)(subsc->Clone());
    #if DEBUG_SANDBOX_OBJ
       MessageInterface::ShowMessage

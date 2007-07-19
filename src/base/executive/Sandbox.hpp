@@ -37,6 +37,10 @@
 //  #include "Solver.hpp"
 #include "Burn.hpp"
 
+
+//#define DEBUG_SANDBOX_CLONING
+
+
 class Moderator;        // Forward reference for the moderator pointer
 
 class GMAT_API Sandbox
@@ -116,8 +120,9 @@ private:
    void                              BuildAssociations(GmatBase * obj);
    SpacePoint *                      FindSpacePoint(const std::string &spName);
    
-   /// Temporary construct used until cloning is correct for all objects
-   std::vector<Gmat::ObjectType>       clonable;
+   #ifdef DEBUG_SANDBOX_CLONING
+      std::vector<Gmat::ObjectType>  clonable;
+   #endif
 };
 
 #endif
