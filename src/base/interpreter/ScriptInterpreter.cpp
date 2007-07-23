@@ -587,7 +587,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
-   
+      
    if (currentBlockType == Gmat::COMMENT_BLOCK)
    {
       if (logicalBlockCount == 0)
@@ -653,7 +653,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
          
          objCounter++;     
          obj->FinalizeCreation();
-
+         
          SetComments(obj, preStr, inStr);
       }
       
@@ -721,6 +721,14 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       }
       else
       {
+         // check for .. in the command block
+         if (chunks[1].find("..") != logicalBlock.npos)
+         {
+            InterpreterException ex("Found invalid syntax \"..\"");
+            HandleError(ex);
+            return false;
+         }
+         
          obj = (GmatBase*)CreateCommand(chunks[0], chunks[1], retval, inCmd);
       }
       
@@ -735,13 +743,22 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    }
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
    {      
+      // check for .. in the command block
+      if (chunks[0].find("..") != chunks[0].npos ||
+          chunks[1].find("..") != chunks[1].npos)
+      {
+         InterpreterException ex("Found invalid syntax \"..\"");
+         HandleError(ex);
+         return false;
+      }
+      
       if (count < 2)
       {
          InterpreterException ex("Missing parameter assigning object for: ");
          HandleError(ex);
          return false;
       }
-            
+      
       GmatBase *owner = NULL;
       std::string attrStr = ""; 
       std::string attrInLineStr = ""; 
@@ -762,6 +779,8 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
             
             if (mp.IsEquation(chunks[1]))
             {
+               //MessageInterface::ShowMessage("   ===> Has equal sign\n");
+               
                // check if LHS is object.property
                if (FindPropertyID(obj, chunks[0], &owner, paramID, paramType))
                {
