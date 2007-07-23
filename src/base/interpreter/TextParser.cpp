@@ -876,7 +876,11 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
       {
          sprintf(errorMsg, "TextParser::SeparateBrackets() \"%s\" is not enclosed "
                  "with \"%s\"", str1.c_str(), bracketPair.c_str());
-         MessageInterface::ShowMessage("%s", errorMsg);
+         
+         #if DEBUG_TP_SEP_BRACKETS
+         MessageInterface::ShowMessage("%s\n", errorMsg);
+         #endif
+         
          sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
                  bracketPair.c_str());
          throw InterpreterException(errorMsg);
