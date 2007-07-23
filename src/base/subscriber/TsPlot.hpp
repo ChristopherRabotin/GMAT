@@ -101,28 +101,27 @@ protected:
    bool PenDown();
    
    void DeletePlotCurves();
-    
+   
    Parameter *mXParam;
    std::vector<Parameter*> mYParams;
-
+   
    Integer mNumXParams;
    Integer mNumYParams;
-
+   
    std::string mXParamName;
    StringArray mYParamNames;
    StringArray mAllParamNames;
-
+   
    std::string mOldName;
    std::string mPlotTitle;
    std::string mXAxisTitle;
    std::string mYAxisTitle;
    bool mDrawGrid;
-   bool mDrawTarget;
    bool mIsTsPlotWindowSet;
-    
+   
    Integer mDataCollectFrequency;
    Integer mUpdatePlotFrequency;
-    
+   
    Integer mNumDataPoints;
    Integer mNumCollected;
    
@@ -134,7 +133,6 @@ protected:
       X_AXIS_TITLE,
       Y_AXIS_TITLE,
       DRAW_GRID,
-      TARGET_STATUS,
       DATA_COLLECT_FREQUENCY,
       UPDATE_PLOT_FREQUENCY,
       SHOW_PLOT,

@@ -43,7 +43,6 @@ TsPlot::PARAMETER_TEXT[TsPlotParamCount - SubscriberParamCount] =
    "XAxisTitle",
    "YAxisTitle",
    "Grid",
-   "TargetStatus",
    "DataCollectFrequency",
    "UpdatePlotFrequency",
    "ShowPlot",
@@ -52,16 +51,15 @@ TsPlot::PARAMETER_TEXT[TsPlotParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
 {
-   Gmat::OBJECT_TYPE,
-   Gmat::OBJECTARRAY_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::BOOLEAN_TYPE,
+   Gmat::OBJECT_TYPE,      // "IndVar",
+   Gmat::OBJECTARRAY_TYPE, // "Add",
+   Gmat::STRING_TYPE,      // "PlotTitle",
+   Gmat::STRING_TYPE,      // "XAxisTitle",
+   Gmat::STRING_TYPE,      // "YAxisTitle",
+   Gmat::STRING_TYPE,      // "Grid",
+   Gmat::INTEGER_TYPE,     // "DataCollectFrequency",
+   Gmat::INTEGER_TYPE,     // "UpdatePlotFrequency",
+   Gmat::BOOLEAN_TYPE,     // "ShowPlot",
 };
 
 //---------------------------------
@@ -84,16 +82,15 @@ TsPlot::TsPlot(const std::string &name, Parameter *xParam,
    parameterCount = TsPlotParamCount;
     
    mDrawGrid = drawGrid;
-   mDrawTarget = false;
    mNumYParams = 0;
-
+   
    mXParamName = "";
    mNumXParams = 0;
-    
+   
    mXParam = xParam;
    if (firstYParam != NULL)
       AddYParameter(firstYParam->GetName(), mNumYParams);
-
+   
    mOldName = instanceName;
    mPlotTitle = plotTitle;
    mXAxisTitle = xAxisTitle;
@@ -127,7 +124,6 @@ TsPlot::TsPlot(const TsPlot &copy) :
    mXAxisTitle = copy.mXAxisTitle;
    mYAxisTitle = copy.mYAxisTitle;
    mDrawGrid = copy.mDrawGrid;
-   mDrawTarget = copy.mDrawTarget;
    mIsTsPlotWindowSet = copy.mIsTsPlotWindowSet;
    
    mDataCollectFrequency = copy.mDataCollectFrequency;
@@ -473,7 +469,7 @@ Integer TsPlot::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType TsPlot::GetParameterType(const Integer id) const
 {
-   if (id >= 0 && id < TsPlotParamCount)
+   if (id >= SubscriberParamCount && id < TsPlotParamCount)
       return PARAMETER_TYPE[id - SubscriberParamCount];
    else
       return Subscriber::GetParameterType(id);
@@ -508,7 +504,7 @@ bool TsPlot::IsParameterReadOnly(const Integer id) const
    if ((id == PLOT_TITLE) || (id == X_AXIS_TITLE) || (id == Y_AXIS_TITLE) ||
        (id == DATA_COLLECT_FREQUENCY) || (id == UPDATE_PLOT_FREQUENCY))
       return true;
-
+   
    return Subscriber::IsParameterReadOnly(id);
 }
 
@@ -586,11 +582,6 @@ std::string TsPlot::GetStringParameter(const Integer id) const
          return "On";
       else
          return "Off";
-   case TARGET_STATUS:
-      if (mDrawTarget)
-         return "On";
-      else
-         return "Off";
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -640,16 +631,6 @@ bool TsPlot::SetStringParameter(const Integer id, const std::string &value)
       if (value == "On" || value == "Off")
       {
          mDrawGrid = (value == "On");
-         return true;
-      }
-      else
-      {
-         return false;
-      }
-   case TARGET_STATUS:
-      if (value == "On" || value == "Off")
-      {
-         mDrawTarget = (value == "On");
          return true;
       }
       else
@@ -871,17 +852,19 @@ const ObjectTypeArray& TsPlot::GetRefObjectTypeArray()
 const StringArray& TsPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllParamNames.clear();
-
+   
    switch (type)
    {
    case Gmat::UNKNOWN_OBJECT:
    case Gmat::PARAMETER:
       // add x parameter
-      mAllParamNames.push_back(mXParamName);
-   
+      if (mXParamName != "")
+         mAllParamNames.push_back(mXParamName);
+      
       // add y parameters
       for (int i=0; i<mNumYParams; i++)
-         mAllParamNames.push_back(mYParamNames[i]);
+         if (mYParamNames[i] != "")
+            mAllParamNames.push_back(mYParamNames[i]);
       break;
    default:
       break;
@@ -1077,16 +1060,18 @@ bool TsPlot::Distribute(const Real * dat, Integer len)
    
    if (isEndOfReceive)
    {
-      // if targetting and draw target is off, just return
-      if (!mDrawTarget && (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+      // if targetting and draw target is None, just return
+      if (mSolverIterations == "None" &&
+          (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
          return true;
       
       if (active)
          return PlotInterface::RefreshTsPlot(instanceName);
    }
    
-   // if targetting and draw target is off, just return
-   if (!mDrawTarget && (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+   // if targetting and draw target is None, just return
+   if (mSolverIterations == "None" &&
+       (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
       return true;
    
    if (len > 0)

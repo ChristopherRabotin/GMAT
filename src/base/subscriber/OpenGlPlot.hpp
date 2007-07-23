@@ -42,11 +42,14 @@ public:
    bool GetShowObject(const std::string &name);
    void SetShowObject(const std::string &name, bool value);
    
+   Rvector3 GetVector(const std::string &which);
+   void SetVector(const std::string &which, const Rvector3 &value);
+   
    // methods inherited from Subscriber
    virtual bool Initialize();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    virtual bool SetName(const std::string &who,
                         const std::string &oldName = "");
    
@@ -57,6 +60,7 @@ public:
                                 const std::string &oldName,
                                 const std::string &newName);
    
+   // methods for parameters
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
@@ -138,6 +142,10 @@ protected:
    
    void ClearDynamicArrays();
    void UpdateObjectList(SpacePoint *sp, bool show = false);
+   void PutRvector3Value(Rvector3 &rvec3, Integer id,
+                         const std::string &sval, Integer index = -1);
+
+   void WriteDeprecatedMessage(Integer id) const;
    
    SolarSystem *mSolarSystem;
    CoordinateSystem *mViewCoordSystem;
@@ -154,25 +162,27 @@ protected:
    std::string mEclipticPlane;
    std::string mXYPlane;
    std::string mWireFrame;
-   std::string mTargetStatus;
    std::string mOverlapPlot;
    std::string mUseInitialView;
    std::string mPerspectiveMode;
    std::string mUseFixedFov;
    std::string mAxes;
    std::string mGrid;
-   std::string mEarthSunLines;
+   std::string mSunLine;
    
    std::string mOldName;
    std::string mViewCoordSysName;
    std::string mViewPointRefName;
-   std::string mViewPointName;
+   std::string mViewPointRefType;
+   std::string mViewPointVecName;
+   std::string mViewPointVecType;
    std::string mViewDirectionName;
+   std::string mViewDirectionType;
    std::string mViewUpCoordSysName;
    std::string mViewUpAxisName;
    
    Rvector3 mViewPointRefVector;
-   Rvector3 mViewPointVector;
+   Rvector3 mViewPointVecVector;
    Rvector3 mViewDirectionVector;
    
    Real mViewScaleFactor;
@@ -216,10 +226,14 @@ protected:
       //TARGET_COLOR,
       COORD_SYSTEM,
       VIEWPOINT_REF,
+      VIEWPOINT_REFERENCE,
+      VIEWPOINT_REF_TYPE,
       VIEWPOINT_REF_VECTOR,
-      VIEWPOINT,
       VIEWPOINT_VECTOR,
+      VIEWPOINT_VECTOR_TYPE,
+      VIEWPOINT_VECTOR_VECTOR,
       VIEW_DIRECTION,
+      VIEW_DIRECTION_TYPE,
       VIEW_DIRECTION_VECTOR,
       VIEW_SCALE_FACTOR,
       FIXED_FOV_ANGLE,
@@ -228,10 +242,10 @@ protected:
       CELESTIAL_PLANE,
       XY_PLANE,
       WIRE_FRAME,
-      TARGET_STATUS,
       AXES,
       GRID,
       EARTH_SUN_LINES,
+      SUN_LINE,
       OVERLAP_PLOT,
       USE_INITIAL_VIEW,
       PERSPECTIVE_MODE,
