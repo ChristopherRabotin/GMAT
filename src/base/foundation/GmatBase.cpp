@@ -43,7 +43,7 @@
 //#define DEBUG_OBJECT_TYPE_CHECKING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_COMMENTS
-
+//#define DEBUG_WRITE_PARAM
 
 /// Set the static "undefined" parameters
 const Real        GmatBase::REAL_PARAMETER_UNDEFINED = -987654321.0123e-45;
@@ -187,23 +187,23 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    {
       errorMessageFormat =
          "The value of \"%s\" for field \"%s\" on command \""
-         + typeName +  "\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
+         + typeName +  "\" is not an allowed value. "
+         "The allowed values are: [%s]";
       errorMessageFormatUnnamed =
          "The value of \"%s\" for field \"%s\" on a command of type \""
-         + typeName +  "\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
+         + typeName +  "\" is not an allowed value. "
+         "The allowed values are: [%s]";
    }
    else
    {
       errorMessageFormat =
          "The value of \"%s\" for field \"%s\" on object \""
-         + instanceName +  "\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
+         + instanceName +  "\" is not an allowed value. "
+         "The allowed values are: [%s]";
       errorMessageFormatUnnamed =
          "The value of \"%s\" for field \"%s\" on an object of type \""
-         + typeName +  "\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
+         + typeName +  "\" is not an allowed value. "
+         "The allowed values are: [%s]";
    }
    
    // one more instance - add to the instanceCount
@@ -2789,9 +2789,9 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    Gmat::ParameterType tid = GetParameterType(id);
    Integer precision = GmatGlobal::Instance()->GetDataPrecision();
 
-   #if DEBUG_WRITE_PARAM
+   #ifdef DEBUG_WRITE_PARAM
    MessageInterface::ShowMessage
-      ("===> %d, %s, tid=%s\n", id, GetParameterText(id).c_str(),
+      ("===> %d, %s, type=%s\n", id, GetParameterText(id).c_str(),
        PARAM_TYPE_STRING[tid].c_str());
    #endif
    
@@ -2862,7 +2862,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::RVECTOR_TYPE:
       {
          Rvector rv = GetRvectorParameter(id);
-         stream << "[ " << rv.ToString(precision) << "]";
+         stream << "[ " << rv.ToString(precision) << " ]";
       }
       break;
       
