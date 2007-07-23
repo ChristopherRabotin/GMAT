@@ -39,6 +39,32 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_WRAPPER_CODE 1
+//#define DEBUG_SUBSCRIBER_PARAM 1
+
+//---------------------------------
+// static data
+//---------------------------------
+
+const std::string
+Subscriber::SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount] =
+{
+   "All", "Last", "None",
+};
+
+const std::string
+Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
+{
+   "SolverIterations",
+   "TargetStatus",
+};
+
+const Gmat::ParameterType
+Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
+{
+   Gmat::STRING_TYPE,            // "SolverIterations"
+   Gmat::ON_OFF_TYPE,            // "TargetStatus"
+};
+
 
 //---------------------------------
 //  public methods
@@ -58,6 +84,8 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
+   
+   mSolverIterations = "None";
 }
 
 
@@ -76,32 +104,34 @@ Subscriber::Subscriber(const Subscriber &copy) :
    wrapperObjectNames(copy.wrapperObjectNames),
    paramWrappers(copy.paramWrappers)
 {
+   mSolverIterations = copy.mSolverIterations;
 }
 
 
 //------------------------------------------------------------------------------
-// Subscriber& Subscriber::operator=(const Subscriber& sub)
+// Subscriber& Subscriber::operator=(const Subscriber& rhs)
 //------------------------------------------------------------------------------
 /**
  * The assignment operator
  */
 //------------------------------------------------------------------------------
-Subscriber& Subscriber::operator=(const Subscriber& sub)
+Subscriber& Subscriber::operator=(const Subscriber& rhs)
 {
-   if (this == &sub)
+   if (this == &rhs)
       return *this;
 
-   GmatBase::operator=(sub);
+   GmatBase::operator=(rhs);
     
-   data = sub.data;
-   next = sub.next;
-   active = sub.active;
-   isEndOfReceive = sub.isEndOfReceive;
-   isEndOfRun = sub.isEndOfRun;
-   currentProvider = sub.currentProvider;
+   data = rhs.data;
+   next = rhs.next;
+   active = rhs.active;
+   isEndOfReceive = rhs.isEndOfReceive;
+   isEndOfRun = rhs.isEndOfRun;
+   currentProvider = rhs.currentProvider;
    internalCoordSystem = NULL;
-   wrapperObjectNames = sub.wrapperObjectNames;
-   paramWrappers = sub.paramWrappers;
+   wrapperObjectNames = rhs.wrapperObjectNames;
+   paramWrappers = rhs.paramWrappers;
+   mSolverIterations = rhs.mSolverIterations;
    
    return *this;
 }
@@ -501,13 +531,308 @@ void Subscriber::ClearWrappers()
       paramWrappers[i] = NULL;
    }
    
-//    depParamWrappers.clear();
-//    paramWrappers.clear();
-   
    #ifdef DEBUG_WRAPPER_CODE
    MessageInterface::ShowMessage("Subscriber::ClearWrappers() leaving\n");
    #endif
 }
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Subscriber::IsParameterReadOnly(const Integer id) const
+{
+   if (id == TARGET_STATUS)
+      return true;
+   
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Subscriber::GetParameterText(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < SubscriberParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   else
+      return GmatBase::GetParameterText(id);
+    
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer Subscriber::GetParameterID(const std::string &str) const
+{
+   for (int i=GmatBaseParamCount; i<SubscriberParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+   
+   return GmatBase::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType Subscriber::GetParameterType(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < SubscriberParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   else
+      return GmatBase::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Subscriber::GetParameterTypeString(const Integer id) const
+{
+   if (id >= GmatBaseParamCount && id < SubscriberParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - GmatBaseParamCount)];
+   else
+      return GmatBase::GetParameterTypeString(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Subscriber::GetStringParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case SOLVER_ITERATIONS:
+      return mSolverIterations;
+   default:
+      return GmatBase::GetStringParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Subscriber::GetStringParameter(const std::string &label) const
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::GetStringParameter() label = %s\n", label.c_str());
+   #endif
+   
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::SetStringParameter() id = %d, value = %s \n", id,
+       value.c_str());
+   #endif
+   
+   switch (id)
+   {
+   case SOLVER_ITERATIONS:
+      {
+         bool itemFound = false;
+         for (int i=0; i<SolverIterOptionCount; i++)
+         {
+            if (value == SOLVER_ITER_OPTION_TEXT[i])
+            {
+               itemFound = true;
+               break;
+            }
+         }
+         
+         if (itemFound)
+         {
+            mSolverIterations = value;
+            return true;
+         }
+         else
+         {
+            SubscriberException se;
+            se.SetDetails(errorMessageFormat.c_str(), value.c_str(),
+                          PARAMETER_TEXT[id - GmatBaseParamCount].c_str(),
+                          "All, Last, None");
+            
+            if (value == "On" || value == "Off")
+            {
+               MessageInterface::ShowMessage
+                  ("*** WARNING *** %s.\n", se.GetFullMessage().c_str());
+               
+               if (value == "On")
+               {
+                  mSolverIterations = "All";
+                  MessageInterface::ShowMessage
+                     ("The value \"On\" has automatically switched to \"All\" but "
+                      "this will cause an error in a future build.\n\n");
+               }
+               else
+               {
+                  mSolverIterations = "None";
+                  MessageInterface::ShowMessage
+                     ("The value \"Off\" has automatically switched to \"None\" but "
+                      "this will cause an error in a future build.\n\n");
+               }
+               
+               return true;
+            }
+            else
+            {
+               throw se;
+            }
+         }
+      }
+   default:
+      return GmatBase::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool Subscriber::SetStringParameter(const std::string &label,
+                                    const std::string &value)
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::SetStringParameter() label = %s, value = %s \n",
+       label.c_str(), value.c_str());
+   #endif
+   
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool Subscriber::SetStringParameter(const Integer id, const std::string &value,
+                                    const Integer index)
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::SetStringParameter() id = %d, value = %s, index = %d\n",
+       id, value.c_str(), index);
+   #endif
+   
+   return GmatBase::SetStringParameter(id, value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool Subscriber::SetStringParameter(const std::string &label,
+                                    const std::string &value,
+                                    const Integer index)
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::SetStringParameter() label = %s, value = %s, index = %d\n",
+       label.c_str(), value.c_str(), index);
+   #endif
+   
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+std::string Subscriber::GetOnOffParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case TARGET_STATUS:
+      return mSolverIterations;
+   default:
+      return GmatBase::GetOnOffParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string Subscriber::GetOnOffParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Subscriber::GetOnOffParameter(const std::string &label) const
+{
+   return GetOnOffParameter(GetParameterID(label));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+bool Subscriber::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   #if DEBUG_SUBSCRIBER_PARAM
+   MessageInterface::ShowMessage
+      ("Subscriber::SetOnOffParameter() id = %d, value = %s \n", id,
+       value.c_str());
+   #endif
+   
+   // Write only one message per session
+   static bool writeTargetStatus = true;
+   
+   switch (id)
+   {
+   case TARGET_STATUS:
+      if (writeTargetStatus)
+      {
+         MessageInterface::ShowMessage
+            ("*** WARNING *** \"TargetStatus\" is deprecated and will be "
+             "removed from a future build; please use \"SolverIterations\" "
+             "instead.\n");
+         writeTargetStatus = false;
+      }
+      
+      if (value == "On")
+         mSolverIterations = "All";
+      else
+         mSolverIterations = "None";
+      
+      return true;
+      
+   default:
+      return GmatBase::SetOnOffParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool Subscriber::SetOnOffParameter(const std::string &label, 
+                                   const std::string &value)
+{
+   return SetOnOffParameter(GetParameterID(label), value);
+}
+
 
 //---------------------------------
 //  protected methods
@@ -520,3 +845,13 @@ bool Subscriber::Distribute(const double *dat, int len)
 {
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// const std::string* GetSolverIterOptionList()
+//------------------------------------------------------------------------------
+const std::string* Subscriber::GetSolverIterOptionList()
+{
+   return SOLVER_ITER_OPTION_TEXT;
+}
+

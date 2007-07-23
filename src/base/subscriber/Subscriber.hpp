@@ -39,6 +39,7 @@
 #include "CoordinateSystem.hpp"
 #include "ElementWrapper.hpp"
 
+
 class GMAT_API Subscriber : public GmatBase
 {
 public:
@@ -71,11 +72,46 @@ public:
                                   const std::string &name);
    virtual void ClearWrappers();
    
-protected:
-   enum
+   // methods for parameters
+   virtual bool IsParameterReadOnly(const Integer id) const;
+   virtual std::string GetParameterText(const Integer id) const;
+   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string GetParameterTypeString(const Integer id) const;
+   
+   virtual std::string GetStringParameter(const Integer id) const;
+   virtual std::string GetStringParameter(const std::string &label) const;
+   virtual bool SetStringParameter(const Integer id,
+                                   const std::string &value);
+   virtual bool Subscriber::SetStringParameter(const std::string &label,
+                                               const std::string &value);
+   virtual bool SetStringParameter(const Integer id, const std::string &value,
+                                   const Integer index);
+   virtual bool SetStringParameter(const std::string &label,
+                                   const std::string &value,
+                                   const Integer index);
+   
+   virtual std::string GetOnOffParameter(const Integer id) const;
+   virtual bool        SetOnOffParameter(const Integer id, 
+                                         const std::string &value);
+   virtual std::string GetOnOffParameter(const std::string &label) const;
+   virtual bool        SetOnOffParameter(const std::string &label, 
+                                         const std::string &value);
+   
+   enum SolverIterOption
    {
-      SubscriberParamCount = GmatBaseParamCount,
+      SI_ALL,
+      SI_LAST,
+      SI_NONE,
+      SolverIterOptionCount
    };
+   
+   static Integer GetSolverIterOptionCount() { return SolverIterOptionCount; }
+   static const std::string* GetSolverIterOptionList();
+   
+protected:
+   
+   std::string mSolverIterations;
    
    const char *data;
    Subscriber *next;
@@ -96,8 +132,22 @@ protected:
    virtual bool Distribute(Integer len) = 0;
    virtual bool Distribute(const Real *dat, Integer len);
    
+   enum
+   {
+      SOLVER_ITERATIONS = GmatBaseParamCount,
+      TARGET_STATUS,
+      SubscriberParamCount,
+   };
+   
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount];
+   static const std::string
+      PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount];
+   
 private:
-
+   
+   static const std::string SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount];
+   
 };
 #endif // Subscribe_hpp
 
