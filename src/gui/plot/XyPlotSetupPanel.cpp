@@ -184,7 +184,7 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
          mYSelectedListBox->Append(newParam);
          mYSelectedListBox->SetStringSelection(newParam);
          ShowParameterOption(newParam, true);
-         //Show next parameter (loj: 8/9/05 Added)
+         //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
          mYParamChanged = true;
@@ -195,14 +195,14 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
          wxLogMessage("Selected Y parameter:%s is not plottable.\nPlease select "
                       "another parameter.\n", newParam.c_str());
          
-         //Show next parameter (loj: 8/9/05 Added)
+         //Show next parameter
          mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
          OnSelectProperty(event);
       }
    }
    else
    {
-      //Show next parameter (loj: 8/9/05 Added)
+      //Show next parameter
       mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
       OnSelectProperty(event);
    }
@@ -343,6 +343,10 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    {
       mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
    }
+   else
+   {
+      EnableUpdate(true);
+   }
 }
 
 
@@ -409,7 +413,6 @@ void XyPlotSetupPanel::OnLineColorClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::Create()
 {
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
    Integer bsize = 1; // border size
    
@@ -584,14 +587,27 @@ void XyPlotSetupPanel::Create()
       new wxCheckBox(this, CHECKBOX, wxT("Show Grid"),
                      wxDefaultPosition, wxSize(100, -1), 0);
    
-   targetStatusCheckBox =
-      new wxCheckBox(this, CHECKBOX, wxT("Draw Targeting"),
-                     wxDefaultPosition, wxSize(100, -1), 0);
+   // Solver Iteration ComboBox
+   wxStaticText *solverIterLabel =
+      new wxStaticText(this, -1, wxT("Solver Iterations"),
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mSolverIterComboBox =
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1));
+   
+   // Get Solver Iteration option list from the Subscriber
+   const std::string *solverIterList = Subscriber::GetSolverIterOptionList();
+   int count = Subscriber::GetSolverIterOptionCount();
+   for (int i=0; i<count; i++)
+      mSolverIterComboBox->Append(solverIterList[i].c_str());
+   wxBoxSizer *solverIterOptionSizer = new wxBoxSizer(wxHORIZONTAL);
+   solverIterOptionSizer->Add(solverIterLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   solverIterOptionSizer->Add(mSolverIterComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    wxBoxSizer *plotOptionBoxSizer = new wxBoxSizer(wxVERTICAL);
    plotOptionBoxSizer->Add(showPlotCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    plotOptionBoxSizer->Add(showGridCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
-   plotOptionBoxSizer->Add(targetStatusCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   plotOptionBoxSizer->Add(solverIterOptionSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
    //------------------------------------------------------
    // put in the order
@@ -635,7 +651,8 @@ void XyPlotSetupPanel::LoadData()
       
       showPlotCheckBox->SetValue(mXyPlot->IsActive());
       showGridCheckBox->SetValue(mXyPlot->GetStringParameter("Grid") == "On");
-      targetStatusCheckBox->SetValue(mXyPlot->GetStringParameter("TargetStatus") == "On");
+      mSolverIterComboBox->
+         SetValue(mXyPlot->GetStringParameter("SolverIterations").c_str());
       
       // get X parameter
       wxString *xParamNames = new wxString[1];
@@ -675,10 +692,7 @@ void XyPlotSetupPanel::LoadData()
             #endif
             yParamNames[i] = yParamList[i].c_str();
             
-            // get parameter color
-            //mColorMap[yParamList[i]]
-            //   = RgbColor(mXyPlot->GetUnsignedIntParameter("Color", yParamList[i]));
-            
+            // get parameter color            
             param = (Parameter*)theGuiInterpreter->GetConfiguredObject(yParamList[i]);
             if (param != NULL)
             {
@@ -735,11 +749,9 @@ void XyPlotSetupPanel::SaveData()
       mXyPlot->SetStringParameter("Grid", "On");
    else
       mXyPlot->SetStringParameter("Grid", "Off");
-
-   if (targetStatusCheckBox->IsChecked())
-      mXyPlot->SetStringParameter("TargetStatus", "On");
-   else
-      mXyPlot->SetStringParameter("TargetStatus", "Off");
+   
+   mXyPlot->SetStringParameter("SolverIterations",
+                               mSolverIterComboBox->GetValue().c_str());
    
    // set X parameter
    if (mXParamChanged)
@@ -749,8 +761,6 @@ void XyPlotSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "X parameter not selected. "
              "The plot will not be activated.");
-         //MessageInterface::ShowMessage("Warning: X parameter not selected. "
-         //                              "The plot will not be activated.");
          mXyPlot->Activate(false);
       }
       else
@@ -774,8 +784,6 @@ void XyPlotSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_,"Y parameters not selected. "
              "The plot will not be activated.");
-         //MessageInterface::ShowMessage("Warning: Y parameter not selected. "
-         //                              "The plot will not be activated.");
          mXyPlot->Activate(false);
       }
       else if (numYParams > GmatPlot::MAX_XY_CURVE)
@@ -783,10 +791,6 @@ void XyPlotSetupPanel::SaveData()
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Selected Y parameter count is greater than 6.\n"
              "First 6 parameters will be plotted.");
-         
-         //wxLogMessage("Selected Y parameter count is greater than %d.\n"
-         //             "First %d parameters will be plotted.",
-         //             GmatPlot::MAX_XY_CURVE, GmatPlot::MAX_XY_CURVE);
          
          mNumYParams = GmatPlot::MAX_XY_CURVE;
       }
@@ -914,9 +918,6 @@ void XyPlotSetupPanel::ShowCoordSystem()
    {
       mCoordSysLabel->Show();
       mCoordSysLabel->SetLabel("Central Body");
-      
-      //Set Origin to last one selected
-      //mCentralBodyComboBox->SetStringSelection("Earth");
       
       mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Remove(mCoordSysComboBox);

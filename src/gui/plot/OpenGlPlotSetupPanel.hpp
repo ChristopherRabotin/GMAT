@@ -62,7 +62,6 @@ protected:
    
    wxCheckBox *mShowPlotCheckBox;
    wxCheckBox *mWireFrameCheckBox;
-   wxCheckBox *mTargetStatusCheckBox;
    wxCheckBox *mEclipticPlaneCheckBox;
    wxCheckBox *mXYPlaneCheckBox;
    wxCheckBox *mUseInitialViewCheckBox;
@@ -99,6 +98,7 @@ protected:
    wxButton *mOrbitColorButton;
    wxButton *mTargetColorButton;
    
+   wxComboBox *mSolverIterComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mViewPointRefComboBox;
    wxComboBox *mViewPointVectorComboBox;

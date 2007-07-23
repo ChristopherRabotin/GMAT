@@ -280,10 +280,23 @@ void ReportFileSetupPanel::Create()
       new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Zero Fill"),
                      wxDefaultPosition, wxDefaultSize, 0);
    
-   solverIterationsCheckBox =
-      new wxCheckBox(this, RF_WRITE_CHECKBOX, wxT("Solver Iterations"),
-                     wxDefaultPosition, wxSize(-1, -1), 0);
-
+   // Solver Iteration ComboBox
+   wxStaticText *solverIterLabel =
+      new wxStaticText(this, -1, wxT("Solver Iterations"),
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   
+   mSolverIterComboBox =
+      new wxComboBox(this, ID_COMBOBOX, wxT(""), wxDefaultPosition, wxSize(65, -1));
+   
+   // Get Solver Iteration option list from the Subscriber
+   const std::string *solverIterList = Subscriber::GetSolverIterOptionList();
+   int count = Subscriber::GetSolverIterOptionCount();
+   for (int i=0; i<count; i++)
+      mSolverIterComboBox->Append(solverIterList[i].c_str());
+   wxBoxSizer *solverIterOptionSizer = new wxBoxSizer(wxHORIZONTAL);
+   solverIterOptionSizer->Add(solverIterLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   solverIterOptionSizer->Add(mSolverIterComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   
    wxStaticText *colWidthText =
       new wxStaticText(this, -1, wxT("Column Width"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -305,8 +318,7 @@ void ReportFileSetupPanel::Create()
    reportOptionSizer->Add(showHeaderCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(leftJustifyCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionSizer->Add(zeroFillCheckBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   reportOptionSizer->Add(solverIterationsCheckBox, 0, wxALIGN_CENTER|wxALL, 
-                          bsize);
+   reportOptionColPrecSizer->Add(solverIterOptionSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionColPrecSizer->Add(colWidthText, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionColPrecSizer->Add(colWidthTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    reportOptionColPrecSizer->Add(precisionText, 0, wxALIGN_CENTER|wxALL, bsize);
@@ -392,10 +404,9 @@ void ReportFileSetupPanel::LoadData()
          zeroFillCheckBox->SetValue(false);                     
       
       id = reportFile->GetParameterID("SolverIterations");
-      if (strcmp(reportFile->GetOnOffParameter(id).c_str(), "On") == 0)
-         solverIterationsCheckBox->SetValue(true);
-      else
-         solverIterationsCheckBox->SetValue(false);                     
+      
+      mSolverIterComboBox->
+         SetValue(reportFile->GetStringParameter("SolverIterations").c_str());
       
       id = reportFile->GetParameterID("ColumnWidth");
       wxString numSpacesValue;
@@ -528,10 +539,8 @@ void ReportFileSetupPanel::SaveData()
          reportFile->SetOnOffParameter(id, "Off");
       
       id = reportFile->GetParameterID("SolverIterations");
-      if (solverIterationsCheckBox->IsChecked())
-         reportFile->SetOnOffParameter(id, "On");
-      else
-         reportFile->SetOnOffParameter(id, "Off");
+      reportFile->
+         SetStringParameter(id, mSolverIterComboBox->GetValue().c_str());
       
       // save file name data
       str = fileTextCtrl->GetValue();
@@ -823,6 +832,10 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
    else if(event.GetEventObject() == mCoordSysComboBox)
    {
       mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
+   }
+   else
+   {
+      EnableUpdate(true);
    }
 }
 

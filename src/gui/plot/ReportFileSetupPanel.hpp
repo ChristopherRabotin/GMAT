@@ -62,8 +62,8 @@ protected:
    wxCheckBox *showHeaderCheckBox;
    wxCheckBox *leftJustifyCheckBox;
    wxCheckBox *zeroFillCheckBox;
-   wxCheckBox *solverIterationsCheckBox;
    
+   wxComboBox *mSolverIterComboBox;
    wxComboBox *mObjectTypeComboBox;
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;

@@ -59,6 +59,7 @@ protected:
    
    wxColour mLineColor;
    
+   wxComboBox *mSolverIterComboBox;
    wxComboBox *mObjectTypeComboBox;
    wxComboBox *mObjectComboBox;
    wxComboBox *mCoordSysComboBox;
@@ -75,13 +76,12 @@ protected:
    
    wxCheckBox *showPlotCheckBox;
    wxCheckBox *showGridCheckBox;
-   wxCheckBox *targetStatusCheckBox;
    
    wxFlexGridSizer *mFlexGridSizer;
    wxBoxSizer *mParamOptionBoxSizer;
    wxBoxSizer *mCoordSysSizer;
    wxBoxSizer *mParamBoxSizer;
-
+   
    void OnAddX(wxCommandEvent& event);
    void OnAddY(wxCommandEvent& event);
    void OnRemoveX(wxCommandEvent& event);
