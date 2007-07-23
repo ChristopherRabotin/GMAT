@@ -31,7 +31,7 @@
 #include "ArrayElementWrapper.hpp"
 #include "StringObjectWrapper.hpp"
 #include <sstream>         // for std::stringstream
-#include <fstream>         // for std::ifstream used bt GMAT functions
+#include <fstream>         // for std::ifstream used in GMAT functions
 #include <stack>
 
 #define __ENABLE_ATTITUDE_LIST__
@@ -863,6 +863,12 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
                                  GmatBase **owner, Integer &id,
                                  Gmat::ParameterType &type)
 {
+   #ifdef DEBUG_SET
+   MessageInterface::ShowMessage
+      ("Interpreter::FindPropertyID() obj = %p, chunk = <%s>\n", obj,
+       chunk.c_str());
+   #endif
+   
    if (obj == NULL)
       return false;
    
@@ -2307,7 +2313,13 @@ bool Interpreter::SetObjectToProperty(GmatBase *toOwner, const std::string &toPr
          if (toObj == NULL)
          {
             if (parsingDelayedBlock)
+            {
+               InterpreterException ex
+                  ("The field name \"" + toProp + "\" on object " + toOwner->GetName() +
+                   " is not permitted");
+               HandleErrorMessage(ex, lineNumber, currentLine, true);
                return false;
+            }
             
             delayedBlocks.push_back(currentBlock);
             std::string lineNumStr = GmatStringUtil::ToString(theReadWriter->GetLineNumber());
@@ -2945,8 +2957,8 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyValue() obj=%s, id=%d, type=%d, value=%s\n",
-       obj->GetName().c_str(), id, type, value.c_str());
+      ("Interpreter::SetPropertyValue() obj=%s, id=%d, type=%d, value=%s, index=%d\n",
+       obj->GetName().c_str(), id, type, value.c_str(), index);
    #endif
    
    std::string valueToUse = value;
@@ -3138,13 +3150,25 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
       }
    case Gmat::STRING_TYPE:
       {
-         #ifdef DEBUG_SET
-         MessageInterface::ShowMessage
-            ("   Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
-         #endif
-
-         retval = obj->SetStringParameter(id, valueToUse);
-         
+         if (index >= 0)
+         {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Calling SetStringParameter(%d, %s, %d)\n", id,
+                valueToUse.c_str(), index);
+            #endif
+            
+            retval = obj->SetStringParameter(id, valueToUse, index);
+         }
+         else
+         {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Calling SetStringParameter(%d, %s)\n", id, valueToUse.c_str());
+            #endif
+            
+            retval = obj->SetStringParameter(id, valueToUse);
+         }
          break;
       }
    case Gmat::STRINGARRAY_TYPE:
@@ -3311,9 +3335,9 @@ bool Interpreter::SetProperty(GmatBase *obj, const Integer id,
    Integer count = 0;
    
    // if value has braces, setting multiple values
-   if (value.find("{") != value.npos)
+   if (value.find("{") != value.npos || value.find("{") != value.npos)
       rhsValues = theTextParser.SeparateBrackets(value, "{}", " ,");
-   else if (value.find("[") != value.npos)
+   else if (value.find("[") != value.npos || value.find("]") != value.npos)
       rhsValues = theTextParser.SeparateBrackets(value, "[]", " ,");
    
    count = rhsValues.size();
@@ -4257,7 +4281,7 @@ bool Interpreter::FinalPass()
       
       std::string csName = obj->GetRefObjectName(Gmat::COORDINATE_SYSTEM);
       GmatBase *csObj = GetConfiguredObject(csName);
-
+      
       // To catch as many errors we can, continue with next object
       if (csObj == NULL)
          continue;
@@ -4267,6 +4291,16 @@ bool Interpreter::FinalPass()
          ("   Calling SetRefObject(%s(%p), %d)\n", csObj->GetName().c_str(),
           csObj, csObj->GetType());
       #endif
+      
+      if (csObj->GetType() != Gmat::COORDINATE_SYSTEM)
+      {
+         InterpreterException ex
+            ("The Spacecraft \"" + obj->GetName() + "\" failed to set "
+             "\"CoordinateSystem\" to \"" + csName + "\"");
+         HandleError(ex, false);
+         retval = false;
+         continue;
+      }
       
       try
       {
@@ -4279,6 +4313,7 @@ bool Interpreter::FinalPass()
              "CoordinateSystem: " + e.GetFullMessage());
          HandleError(ex, false);
          retval = false;
+         continue;
       }
    }
    
