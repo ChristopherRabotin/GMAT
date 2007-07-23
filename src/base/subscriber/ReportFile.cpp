@@ -48,7 +48,6 @@ ReportFile::PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount] =
    "LeftJustify",
    "ZeroFill",
    "ColumnWidth",
-   "SolverIterations",
 };
 
 const Gmat::ParameterType
@@ -61,7 +60,6 @@ ReportFile::PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount] =
    Gmat::ON_OFF_TYPE,        //"LeftJustify",
    Gmat::ON_OFF_TYPE,        //"ZeroFill",
    Gmat::INTEGER_TYPE,       //"ColumnWidth",
-   Gmat::ON_OFF_TYPE,        //"SolverIterations",
 };
 
 
@@ -79,7 +77,6 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    writeHeaders    (true),
    leftJustify     (true),
    zeroFill        (false),
-   solverIterations(false),
    lastUsedProvider(-1),
    usedByReport    (false)
 {
@@ -115,7 +112,6 @@ ReportFile::ReportFile(const ReportFile &rf) :
    writeHeaders    (rf.writeHeaders),
    leftJustify     (rf.leftJustify),
    zeroFill        (rf.zeroFill),
-   solverIterations(rf.solverIterations),
    lastUsedProvider(-1),
    usedByReport    (rf.usedByReport),
    calledByReport  (rf.calledByReport)
@@ -154,7 +150,6 @@ ReportFile& ReportFile::operator=(const ReportFile& rf)
    writeHeaders = rf.writeHeaders;
    leftJustify = rf.leftJustify;
    zeroFill = rf.zeroFill;
-   solverIterations = rf.solverIterations;
    mParams = rf.mParams; 
    mNumParams = rf.mNumParams;
    mParamNames = rf.mParamNames;
@@ -326,7 +321,7 @@ bool ReportFile::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string ReportFile::GetParameterText(const Integer id) const
 {
-    if (id >= FILENAME && id < ReportFileParamCount)
+    if (id >= SubscriberParamCount && id < ReportFileParamCount)
         return PARAMETER_TEXT[id - SubscriberParamCount];
     else
         return Subscriber::GetParameterText(id);
@@ -338,7 +333,7 @@ std::string ReportFile::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ReportFile::GetParameterID(const std::string &str) const
 {
-   for (Integer i = FILENAME; i < ReportFileParamCount; i++)
+   for (Integer i = SubscriberParamCount; i < ReportFileParamCount; i++)
    {
       if (str == PARAMETER_TEXT[i - SubscriberParamCount])
          return i;
@@ -353,7 +348,7 @@ Integer ReportFile::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 {
-    if (id >= FILENAME && id < ReportFileParamCount)
+    if (id >= SubscriberParamCount && id < ReportFileParamCount)
         return PARAMETER_TYPE[id - SubscriberParamCount];
     else
         return Subscriber::GetParameterType(id);
@@ -366,7 +361,7 @@ Gmat::ParameterType ReportFile::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ReportFile::GetParameterTypeString(const Integer id) const
 {
-   if (id >= FILENAME && id < ReportFileParamCount)
+   if (id >= SubscriberParamCount && id < ReportFileParamCount)
       return Subscriber::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return Subscriber::GetParameterTypeString(id);
@@ -604,9 +599,6 @@ std::string ReportFile::GetOnOffParameter(const Integer id) const
    case ZERO_FILL:
       retStr = zeroFill ? "On" : "Off";
       return retStr;
-   case SOLVER_ITERATIONS:
-      retStr = solverIterations ? "On" : "Off";
-      return retStr;
    default:
       return Subscriber::GetOnOffParameter(id);
    }
@@ -628,9 +620,6 @@ bool ReportFile::SetOnOffParameter(const Integer id, const std::string &value)
       return true;
    case ZERO_FILL:
       zeroFill = (value == "On") ? true : false;
-      return true;
-   case SOLVER_ITERATIONS:
-      solverIterations = (value == "On") ? true : false;
       return true;
    default:
       return Subscriber::SetOnOffParameter(id, value);
