@@ -19,7 +19,7 @@
 
 
 #include "ShowScriptDialog.hpp"
-
+#include "MessageInterface.hpp"
 
 //------------------------------------------------------------------------------
 //  ShowScriptDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
@@ -64,24 +64,34 @@ void ShowScriptDialog::Create()
    GetTextExtent(text, &w, &h);
 
    wxSize scriptPanelSize(500, 32);
-   if (theObject != NULL) {
-      std::string genstring = theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
-      if (showAsSingleton)
+
+   try
+   {      
+      if (theObject != NULL)
       {
-         // remove the "Create" line
-         Integer loc = genstring.find("\n");
-         genstring = genstring.substr(loc+1);
+         std::string genstring =
+            theObject->GetGeneratingString(Gmat::SHOW_SCRIPT).c_str();
+         if (showAsSingleton)
+         {
+            // remove the "Create" line
+            Integer loc = genstring.find("\n");
+            genstring = genstring.substr(loc+1);
+         }
+         text = genstring.c_str();   
+         StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
+         Integer size = sar.size();
+         scriptPanelSize.Set(500, 32 + (size+1) * h);
       }
-      text = genstring.c_str();   
-      StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
-      Integer size = sar.size();
-      scriptPanelSize.Set(500, 32 + (size+1) * h);
+      
+      theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
+                                 wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
+      theScript->SetFont( GmatAppData::GetFont() );
+      theMiddleSizer->Add(theScript, 1, wxGROW|wxALL, 3);
    }
-   
-   theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
-                      wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
-   theScript->SetFont( GmatAppData::GetFont() );
-   theMiddleSizer->Add(theScript, 1, wxGROW|wxALL, 3);
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
 }
 
 
