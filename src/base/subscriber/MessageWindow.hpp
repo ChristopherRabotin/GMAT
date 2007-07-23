@@ -30,7 +30,7 @@ public:
    virtual ~MessageWindow(void);
    
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase* Clone() const;
    
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;
@@ -52,8 +52,10 @@ protected:
       MessageWindowParamCount
    };
    
-   static const Gmat::ParameterType PARAMETER_TYPE[MessageWindowParamCount];
-   static const std::string PARAMETER_TEXT[MessageWindowParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[MessageWindowParamCount - SubscriberParamCount];
+   static const std::string
+      PARAMETER_TEXT[MessageWindowParamCount - SubscriberParamCount];
    
    virtual bool Distribute(Integer len);
    virtual bool Distribute(const Real * dat, Integer len);

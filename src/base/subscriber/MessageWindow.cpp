@@ -24,13 +24,13 @@
 // static data
 //---------------------------------
 const std::string
-MessageWindow::PARAMETER_TEXT[MessageWindowParamCount] =
+MessageWindow::PARAMETER_TEXT[MessageWindowParamCount - SubscriberParamCount] =
 {
    "Precision"
 }; 
 
 const Gmat::ParameterType
-MessageWindow::PARAMETER_TYPE[MessageWindowParamCount] =
+MessageWindow::PARAMETER_TYPE[MessageWindowParamCount - SubscriberParamCount] =
 {
    Gmat::INTEGER_TYPE,
 };
@@ -39,8 +39,8 @@ MessageWindow::PARAMETER_TYPE[MessageWindowParamCount] =
 // MessageWindow(const MessageWindow &mw)
 //------------------------------------------------------------------------------
 MessageWindow::MessageWindow(const MessageWindow &mw)
-: Subscriber      (mw),
-precision         (mw.precision)
+   : Subscriber (mw),
+     precision  (mw.precision)
 {
    // GmatBase data
    //parameterCount = MessageWindowParamCount;
@@ -52,8 +52,8 @@ precision         (mw.precision)
 // MessageWindow(const std::string &name)
 //------------------------------------------------------------------------------
 MessageWindow::MessageWindow(const std::string &name)
-: Subscriber      ("MessageWindow", name),
-precision       (10)
+   : Subscriber ("MessageWindow", name),
+     precision  (10)
 {
    // GmatBase data
    parameterCount = MessageWindowParamCount;
@@ -115,7 +115,7 @@ bool MessageWindow::Distribute(const Real * dat, Integer len)
 }
 
 //------------------------------------------------------------------------------
-//  GmatBase* Clone(void) const
+//  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
  * This method returns a clone of the MessageWindow.
@@ -124,66 +124,62 @@ bool MessageWindow::Distribute(const Real * dat, Integer len)
  *
  */
 //------------------------------------------------------------------------------
-GmatBase* MessageWindow::Clone(void) const
+GmatBase* MessageWindow::Clone() const
 {
    return (new MessageWindow(*this));
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 std::string MessageWindow::GetParameterText(const Integer id) const
 {
-   switch (id)
-   {
-   case PRECISION:
-      return PARAMETER_TEXT[id];
-   default:
+   if (id >= SubscriberParamCount && id < MessageWindowParamCount)
+      return PARAMETER_TEXT[id - MessageWindowParamCount];
+   else
       return Subscriber::GetParameterText(id);
-   }
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Integer MessageWindow::GetParameterID(const std::string &str) const
 {
-   for (int i=0; i<MessageWindowParamCount; i++)
+   for (int i=SubscriberParamCount; i<MessageWindowParamCount; i++)
    {
-      if (str == PARAMETER_TEXT[i])
-          return i;
+      if (str == PARAMETER_TEXT[i - SubscriberParamCount])
+         return i;
    }
    
    return Subscriber::GetParameterID(str);
 }
+
 
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType MessageWindow::GetParameterType(const Integer id) const
 {
-    switch (id)
-    {
-    case PRECISION:
-      return MessageWindow::PARAMETER_TYPE[id];
-    default:
-        return Subscriber::GetParameterType(id);
-    }
+   if (id >= SubscriberParamCount && id < MessageWindowParamCount)
+      return PARAMETER_TYPE[id - SubscriberParamCount];
+   else
+      return Subscriber::GetParameterType(id);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string MessageWindow::GetParameterTypeString(const Integer id) const
 {
-   switch (id)
-   {
-   case PRECISION:
-       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-   default:
-       return Subscriber::GetParameterTypeString(id);
-   }
+   if (id >= SubscriberParamCount && id < MessageWindowParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - SubscriberParamCount)];
+   else
+      return Subscriber::GetParameterTypeString(id);
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetIntegerParameter(const Integer id) const
@@ -198,6 +194,7 @@ Integer MessageWindow::GetIntegerParameter(const Integer id) const
         return Subscriber::GetIntegerParameter(id);
     }
 }
+
 
 //------------------------------------------------------------------------------
 // Integer SetIntegerParameter(const Integer id, const Integer value)
