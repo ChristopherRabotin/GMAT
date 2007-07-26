@@ -25,6 +25,27 @@
 //---------------------------------
 
 //------------------------------------------------------------------------------
+//GmatBase* CreateObject(const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Returns a GmatBase object pointer to a new object. 
+ *
+ * @param <ofType>   specific type of Spacecraft object to create.
+ * @param <withName> name to give to the newly created Spacecraft object.
+ *
+ * @return pointer to a new Spacecraft object.
+ *
+ * @exception <FactoryException> thrown if the factory does not create
+ * objects of the requested type.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Factory::CreateObject(const std::string &ofType,
+                                const std::string &withName)
+{
+   throw FactoryException("Generic factory creation method not implemented");
+}
+
+//------------------------------------------------------------------------------
 //  Spacecraft* CreateSpacecraft(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------
 /**

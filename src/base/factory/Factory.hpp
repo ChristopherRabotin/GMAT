@@ -46,6 +46,10 @@
 class GMAT_API Factory
 {
 public:
+   // method to return objects as generic type
+   virtual GmatBase*        CreateObject(const std::string &ofType,
+                                         const std::string &withName = "");        
+
    // methods to return objects of specified types
    virtual SpaceObject*     CreateSpacecraft(const std::string &ofType,
                                              const std::string &withName = "");        

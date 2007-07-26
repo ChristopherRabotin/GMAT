@@ -271,7 +271,7 @@ void Moderator::Finalize()
       delete cmd;
       cmd = NULL;
       
-      delete theFactoryManager;
+//      delete theFactoryManager;
       delete theGuiInterpreter;
       
       //delete theConfigManager; (private)
@@ -1030,18 +1030,18 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
          throw GmatBaseException("Error Creating CelestialBody: " + type + "\n");
       }
       
-      // Manage it if it is a named body
-      //loj: Do we want to add bodies that are not in the default solar system?
-      try
-      {
-         if (body->GetName() != "")
-            theConfigManager->AddCelestialBody(body);
-      }
-      catch (BaseException &e)
-      {
-         MessageInterface::ShowMessage("Moderator::CreateCelestialBody()\n" +
-                                       e.GetFullMessage());
-      }
+//      // Manage it if it is a named body
+//      //loj: Do we want to add bodies that are not in the default solar system?
+//      try
+//      {
+//         if (body->GetName() != "")
+//            theConfigManager->AddCelestialBody(body);
+//      }
+//      catch (BaseException &e)
+//      {
+//         MessageInterface::ShowMessage("Moderator::CreateCelestialBody()\n" +
+//                                       e.GetFullMessage());
+//      }
     
       return body;
    }
@@ -1070,10 +1070,10 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
 //------------------------------------------------------------------------------
 CelestialBody* Moderator::GetCelestialBody(const std::string &name)
 {
-   if (name == "")
+//   if (name == "")
       return NULL;
-   else
-      return theConfigManager->GetCelestialBody(name);
+//   else
+//      return theConfigManager->GetCelestialBody(name);
 }
 
 

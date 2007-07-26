@@ -108,24 +108,19 @@ public:
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
    
-   // Methods I'm not sure we need
-   void                AddCelestialBody(CelestialBody* body);
-   void                AddCommand(GmatCommand *cmd);
-   CelestialBody*      GetCelestialBody(const std::string &name);
-   GmatCommand*        GetCommand(const std::string name);
+   // Methods we don't currently need -- uncomment and implement when needed
+//   void                AddCelestialBody(CelestialBody* body);
+//   void                AddCommand(GmatCommand *cmd);
+//   CelestialBody*      GetCelestialBody(const std::string &name);
+//   GmatCommand*        GetCommand(const std::string name);
    
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);
    
 private:
    
-   void                AddObject(GmatBase* obj);
-   
    /// The singleton instance
    static ConfigManager*               theConfigManager;
-   ConfigManager();
-   ~ConfigManager();
-      
    /// The managed objects
    std::vector<GmatBase*>              objects;
    /// A list of the names of the managed objects
@@ -135,13 +130,20 @@ private:
    /// Flag indicating that a managed object has been changed by a user
    bool                                objectChanged;
    
-   // Treat default and in use separately until we can manage solar system by name.
-   // All sollar system names are "SolarSystem" for now.
+   // Treat default and in use solar system separately until we can manage solar 
+   // system by name.  All solar system names are "SolarSystem" for now.
    
    /// Default Solar Systems 
    SolarSystem *defaultSolarSystem;
    /// Solar Systems in use
    SolarSystem *solarSystemInUse;
+
+   void                AddObject(GmatBase* obj);
+   
+   // Hide the default constructor and destructor to preserve singleton status
+   ConfigManager();
+   ~ConfigManager();
+   
 };
 
 

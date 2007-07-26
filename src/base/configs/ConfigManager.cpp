@@ -1466,72 +1466,72 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
 }
 
 //=================================
-// Methods I'm not sure we need
+// Methods we do not currently need
 //=================================
 
-//------------------------------------------------------------------------------
-// void AddCelestialBody(CelestialBody* body)
-//------------------------------------------------------------------------------
-/**
- * Adds a CelestialBody to the configuration.
- *
- * @param body Pointer to the CelestialBody instance.
- */
-//------------------------------------------------------------------------------
-void ConfigManager::AddCelestialBody(CelestialBody* body)
-{
-   throw ConfigManagerException
-      ("ConfigManager::AddCelestialBody() has not been implemented.\n");
-}
-
-//------------------------------------------------------------------------------
-// void AddCommand(GmatCommand *cmd)
-//------------------------------------------------------------------------------
-/**
- * Adds a GmatCommand to the configuration.
- *
- * @param cmd Pointer to the PhysicalModel instance.
- */
-//------------------------------------------------------------------------------
-void ConfigManager::AddCommand(GmatCommand *cmd)
-{
-   throw ConfigManagerException
-      ("ConfigManager::AddCommand() has not been implemented.\n");
-}
-
-//------------------------------------------------------------------------------
-// CelestialBody* GetCelestialBody(const std::string &name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a CelestialBody object.
- *
- * @param name The name of the object.
- *
- * @return A pointer to the object.
- */
-//------------------------------------------------------------------------------
-CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
-{
-   throw ConfigManagerException
-      ("ConfigManager::GetCelestialBody() has not been implemented.\n");
-}
-
-//------------------------------------------------------------------------------
-// GmatCommand* GetCommand(const std::string name)
-//------------------------------------------------------------------------------
-/**
- * Retrieves a GmatCommand object.
- *
- * @param name The name of the object.
- *
- * @return A pointer to the object.
- */
-//------------------------------------------------------------------------------
-GmatCommand* ConfigManager::GetCommand(const std::string name)
-{
-   throw ConfigManagerException
-      ("ConfigManager::GetCommand() has not been implemented.\n");
-}
+////------------------------------------------------------------------------------
+//// void AddCelestialBody(CelestialBody* body)
+////------------------------------------------------------------------------------
+///**
+// * Adds a CelestialBody to the configuration.
+// *
+// * @param body Pointer to the CelestialBody instance.
+// */
+////------------------------------------------------------------------------------
+//void ConfigManager::AddCelestialBody(CelestialBody* body)
+//{
+//   throw ConfigManagerException
+//      ("ConfigManager::AddCelestialBody() has not been implemented.\n");
+//}
+//
+////------------------------------------------------------------------------------
+//// void AddCommand(GmatCommand *cmd)
+////------------------------------------------------------------------------------
+///**
+// * Adds a GmatCommand to the configuration.
+// *
+// * @param cmd Pointer to the PhysicalModel instance.
+// */
+////------------------------------------------------------------------------------
+//void ConfigManager::AddCommand(GmatCommand *cmd)
+//{
+//   throw ConfigManagerException
+//      ("ConfigManager::AddCommand() has not been implemented.\n");
+//}
+//
+////------------------------------------------------------------------------------
+//// CelestialBody* GetCelestialBody(const std::string &name)
+////------------------------------------------------------------------------------
+///**
+// * Retrieves a CelestialBody object.
+// *
+// * @param name The name of the object.
+// *
+// * @return A pointer to the object.
+// */
+////------------------------------------------------------------------------------
+//CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
+//{
+//   throw ConfigManagerException
+//      ("ConfigManager::GetCelestialBody() has not been implemented.\n");
+//}
+//
+////------------------------------------------------------------------------------
+//// GmatCommand* GetCommand(const std::string name)
+////------------------------------------------------------------------------------
+///**
+// * Retrieves a GmatCommand object.
+// *
+// * @param name The name of the object.
+// *
+// * @return A pointer to the object.
+// */
+////------------------------------------------------------------------------------
+//GmatCommand* ConfigManager::GetCommand(const std::string name)
+//{
+//   throw ConfigManagerException
+//      ("ConfigManager::GetCommand() has not been implemented.\n");
+//}
 
 
 bool ConfigManager::HasConfigurationChanged()

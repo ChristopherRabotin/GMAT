@@ -83,6 +83,32 @@ bool FactoryManager::RegisterFactory(Factory* fact)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+//  GmatBase* CreateObject(const Gmat::ObjectType generalType,
+//               const std::string &ofType, const std::string &withName)
+//------------------------------------------------------------------------------
+/**
+ * Create an generic object, with the name withName.
+ *
+ * @param <ofType> type of the new Spacecraft object (currently defaults
+ *                 to "Spacecraft")
+ * @param <withName> name of the new Spacecraft object.
+ *
+ * @return pointer to the newly-created Spacecraft object
+ */
+//------------------------------------------------------------------------------
+GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
+		                               const std::string &ofType,
+                                       const std::string &withName)
+{
+   Factory* f = FindFactory(generalType, ofType);
+   if (f != NULL)
+      return f->CreateObject(ofType,withName);
+   return NULL;
+}
+
+
 //------------------------------------------------------------------------------
 //  Spacecraft* CreateSpacecraft(const std::string &ofType, const std::string &withName)
 //------------------------------------------------------------------------------

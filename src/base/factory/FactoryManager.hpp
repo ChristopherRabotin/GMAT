@@ -64,6 +64,11 @@ public:
    // all factories must be registered via this method
    bool                   RegisterFactory(Factory* fact);
 
+   // Generic method to create an object
+   GmatBase*              CreateObject(const Gmat::ObjectType generalType,
+		                               const std::string &ofType,
+                                       const std::string &withName = "");
+   
    // methods to create and return objects of the various types
    SpaceObject*           CreateSpacecraft(const std::string &ofType,
                                            const std::string &withName = "");
@@ -135,17 +140,11 @@ public:
    StringArray            GetListOfMathNode();
    StringArray            GetListOfAttitude();
 
-   // class destructor
-   ~FactoryManager();
-    
 protected:
    StringArray            entireList;
 
 private:
 
-   // default constructor
-   FactoryManager();
-    
    // private class data
    /// the list of factories that have been registered and which are available
    /// to create objects
@@ -154,10 +153,14 @@ private:
    static FactoryManager* onlyInstance;
    
    // private methods 
-   Factory* FindFactory(Gmat::ObjectType ofType, const std::string &forType);
-   StringArray  GetList(Gmat::ObjectType ofType);
+   Factory*               FindFactory(Gmat::ObjectType ofType, const std::string &forType);
+   StringArray            GetList(Gmat::ObjectType ofType);
 
+   // Hide the default constructor and destructor to preserve singleton status
+   // default constructor
+   FactoryManager();
+   // class destructor
+   ~FactoryManager();
 };
 
 #endif // FactoryManager_hpp
-
