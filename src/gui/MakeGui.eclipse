@@ -201,7 +201,8 @@ $(WXTARGET) : $(OBJECTS) $(LIBS)
 
 macrez:
 	echo "linking Carbon and wx resource files ......."
-	$(REZ) -o $(WXTARGET)
+#	$(REZ) -o $(WXTARGET)
+	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
 	cp -f $(WXTARGET) ../bin/.
 	@chmod -R 755 ../bin
 
@@ -211,12 +212,14 @@ macosx:
 	mkdir -p $(CONTENTS_DIR)
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
+	mkdir -p $(LIBS_DIR)
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
 	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" \
 	-e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
+	./install_libs_into_bundle
 
 
 .cpp.o:
