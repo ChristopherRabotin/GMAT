@@ -27,8 +27,7 @@
 class GMAT_API Publisher
 {
 public:
-   static Publisher*
-   Instance(void);
+   static Publisher*    Instance();
 
    bool Subscribe(Subscriber *s);
    bool Unsubscribe(Subscriber *s);
@@ -51,7 +50,7 @@ public:
    void                 SetRunState(const Gmat::RunState state);
    inline Gmat::RunState GetRunState();
 
-protected:
+private:
    /// The singleton
    static Publisher        *instance;
    /// List of the subscribers
@@ -69,11 +68,11 @@ protected:
 
    void                 UpdateProviderID(Integer newId);
    // default constructor
-   Publisher(void);
+   Publisher();
    // assignment operator
    Publisher& operator=(const Publisher &right);
    // destructor
-   virtual ~Publisher(void);
+   virtual ~Publisher();
 };
 
 

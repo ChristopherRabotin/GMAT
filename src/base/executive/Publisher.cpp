@@ -30,7 +30,7 @@ Publisher* Publisher::instance = NULL;
 //------------------------------------------------------------------------------
 // Publisher* Instance(void)
 //------------------------------------------------------------------------------
-Publisher* Publisher::Instance(void)
+Publisher* Publisher::Instance()
 {
    if (instance == NULL)
       instance = new Publisher;
@@ -40,7 +40,7 @@ Publisher* Publisher::Instance(void)
 //------------------------------------------------------------------------------
 // Publisher(void)
 //------------------------------------------------------------------------------
-Publisher::Publisher(void) :
+Publisher::Publisher() :
    providerCount     (0),
    currentProvider   (-1),
    runState          (Gmat::IDLE)
@@ -50,7 +50,7 @@ Publisher::Publisher(void) :
 //------------------------------------------------------------------------------
 // ~Publisher(void)
 //------------------------------------------------------------------------------
-Publisher::~Publisher(void)
+Publisher::~Publisher()
 {
    subs.clear();
 }
