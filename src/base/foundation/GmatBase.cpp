@@ -212,12 +212,12 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
 
 
 //---------------------------------------------------------------------------
-//  ~GmatBase(void)
+//  ~GmatBase()
 //---------------------------------------------------------------------------
 /**
  * Destructor.
  */
-GmatBase::~GmatBase(void)
+GmatBase::~GmatBase()
 {
    // subtract this instance from the instanceCount
    --instanceCount;
@@ -288,35 +288,35 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
 
 
 //---------------------------------------------------------------------------
-//  Gmat::ObjectTypes GetType(void) const
+//  Gmat::ObjectTypes GetType() const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the enumerated base type for the object
  *
  * @return Enumeration value for this object
  */
-Gmat::ObjectType GmatBase::GetType(void) const
+Gmat::ObjectType GmatBase::GetType() const
 {
    return type;
 }
 
 
 //---------------------------------------------------------------------------
-//  std::string GetTypeName(void) const
+//  std::string GetTypeName() const
 //---------------------------------------------------------------------------
 /**
  * Retrieve the script string used for this class.
  *
  * @return The string used in the scripting for this type of object.
  */
-/*std::string GmatBase::GetTypeName(void) const
+/*std::string GmatBase::GetTypeName() const
 {
    return typeName;
 }
 
 */
 //---------------------------------------------------------------------------
-//  std::string GetName(void) const
+//  std::string GetName() const
 //---------------------------------------------------------------------------
 /**
 * Retrieve the name of the instance.
@@ -325,7 +325,7 @@ Gmat::ObjectType GmatBase::GetType(void) const
  *
  * @note Some classes are unnamed.
  */
-/*std::string GmatBase::GetName(void) const
+/*std::string GmatBase::GetName() const
 {
    return instanceName;
 }
@@ -350,14 +350,14 @@ bool GmatBase::SetName(const std::string &who, const std::string &oldName)
 }
 
 //---------------------------------------------------------------------------
-//  Integer GetParameterCount(void) const
+//  Integer GetParameterCount() const
 //---------------------------------------------------------------------------
 /**
  * Find out how many parameters are accessible for this object.
  *
  * @return The number of parameters.
  */
-Integer GmatBase::GetParameterCount(void) const
+Integer GmatBase::GetParameterCount() const
 {
    return parameterCount;
 }
@@ -1785,9 +1785,6 @@ bool GmatBase::SetBooleanParameter(const Integer id, const bool value)
  *
  * @return the boolean value for this parameter, or false if the parameter is
  *         not boolean.
- *
- * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
- *       parameter accesses.
  */
 bool GmatBase::GetBooleanParameter(const Integer id, const Integer index) const
 {
@@ -2341,9 +2338,6 @@ const StringArray& GmatBase::GetStringArrayParameter(const std::string &label,
  *
  * @return the boolean value for this parameter, or false if the parameter is
  *         not boolean.
- *
- * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
- *       parameter accesses.
  */
 bool GmatBase::GetBooleanParameter(const std::string &label) const
 {
@@ -2381,9 +2375,6 @@ bool GmatBase::SetBooleanParameter(const std::string &label, const bool value)
  *
  * @return the boolean value for this parameter, or false if the parameter is
  *         not boolean.
- *
- * @todo Setup the GmatBase Get/Set methods to throw exceptions for invalid
- *       parameter accesses.
  */
 bool GmatBase::GetBooleanParameter(const std::string &label, 
                                    const Integer index) const
@@ -2896,9 +2887,57 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    }
 }
 
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//  void FinalizeCreation()
+//------------------------------------------------------------------------------
+/**
+ * Completes any post-construction steps needed before the object can be used.
+ * 
+ * This method performs initialization of GmatBase properties that depend on the
+ * features of the derived classes.  Derived classes touch some of the base 
+ * class properties -- the parameterCount, for example.  This method is called
+ * after the object creation process is complete, so that any of the object's 
+ * base-class properties can be updated to reflect the object's actual 
+ * properties.
+ */
+void GmatBase::FinalizeCreation()
+{
+   PrepCommentTables();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetErrorMessageFormat()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the error message format string.
+ * 
+ * @return The format string.
+ */
+std::string GmatBase::GetErrorMessageFormat()
+{
+   return errorMessageFormat;
+}
+
+//------------------------------------------------------------------------------
+// void SetErrorMessageFormat(const std::string &fmt)
+//------------------------------------------------------------------------------
+/**
+ * Sets the error message format string.
+ * 
+ * @param fmt The format string.
+ */
+void GmatBase::SetErrorMessageFormat(const std::string &fmt)
+{
+   errorMessageFormat = fmt;
+}
+
+//------------------------------------------------------------------------------
 //  void PrepCommentTables()
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+/**
+ * Sets the size and initializes the parameter-by-parameter comment tables.
+ */
 void GmatBase::PrepCommentTables()
 {
    attributeCommentLines.resize(parameterCount);
@@ -2908,30 +2947,4 @@ void GmatBase::PrepCommentTables()
       attributeCommentLines[i] = "";
       attributeInlineComments[i] = "";
    }
-}
-
-//---------------------------------------------------------------------------
-//  void FinalizeCreation()
-//---------------------------------------------------------------------------
-void GmatBase::FinalizeCreation()
-{
-   PrepCommentTables();
-}
-
-
-//---------------------------------------------------------------------------
-// std::string GetErrorMessageFormat()
-//---------------------------------------------------------------------------
-std::string GmatBase::GetErrorMessageFormat()
-{
-   return errorMessageFormat;
-}
-
-
-//---------------------------------------------------------------------------
-// void SetErrorMessageFormat(const std::string &fmt)
-//---------------------------------------------------------------------------
-void GmatBase::SetErrorMessageFormat(const std::string &fmt)
-{
-   errorMessageFormat = fmt;
 }

@@ -109,7 +109,7 @@ public:
    virtual bool        PutCallbackData(std::string &data);
    virtual std::string GetCallbackResults();
    
-   // Method to return the current number of instantaited objects
+   // Method to return the current number of instantiated objects
    static Integer      GetInstanceCount();
 
    // required method for all subclasses
@@ -392,10 +392,30 @@ private:
    virtual void PrepCommentTables();
 };
 
+
+
+//------------------------------------------------------------------------------
+//  std::string GetTypeName() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the type name (i.e. the type used in scripting) for the object.
+ * 
+ * @return The type name.
+ */
 std::string GmatBase::GetTypeName() const
 {
    return typeName;
 }
+
+
+//------------------------------------------------------------------------------
+//  std::string GetName() const
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the object's name.
+ * 
+ * @return The name.
+ */
 std::string GmatBase::GetName() const
 {
    return instanceName;
