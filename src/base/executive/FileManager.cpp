@@ -235,8 +235,8 @@ bool FileManager::DoesFileExist(const std::string &filename)
  */
 //------------------------------------------------------------------------------
 void FileManager::ReadStartupFile(const std::string &fileName)
-{   
-   char line[GmatFile::MAX_LINE_LEN] = "";
+{
+   std::string line;
    bool correctVersionFound = false;
    
    if (fileName != "")
@@ -255,16 +255,15 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    while (!mInStream.eof())
    {
-      line[0] = '\0';
-      mInStream.getline(line, 512);
+      // Use global function getline()
+      getline(mInStream, line);
       
       #if DEBUG_FILE_MANAGER
       MessageInterface::ShowMessage("line=%s\n", line);
       #endif
       
-      if (line[0] == '\0')
-         break;
-      if (line[0] == '#')
+      // Skip empty line or comment line
+      if (line[0] == '\0' || line[0] == '#')
          continue;
       
       std::string type, equal, name;
@@ -368,26 +367,128 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    //---------------------------------------------
    // write ROOT_PATH first
    outStream << setw(20) << "ROOT_PATH" << " = " << mPathMap["ROOT_PATH"] << "\n";
+   outStream << setw(20) << "OUTPUT_PATH" << " = " << mPathMap["OUTPUT_PATH"] << "\n";
    
+   //---------------------------------------------
+   // write the DE, SLP path first
+   //---------------------------------------------
    for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
         pos != mPathMap.end(); ++pos)
    {
-      if (pos->first != "ROOT_PATH")
+      if (pos->first != "ROOT_PATH" && pos->first != "OUTPUT_PATH" &&
+          pos->first.find("_FUNCTION_") == std::string::npos &&
+          pos->first.find("_POT_") == std::string::npos)
+         
          outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
    }
    
    outStream << "#-----------------------------------------------------------\n";
    
    //---------------------------------------------
-   // write files
+   // write FUNCTION_PATH next
+   //---------------------------------------------
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      if (pos->first == "FUNCTION_PATH")
+      {
+         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         break;
+      }
+   }
+      
+   //---------------------------------------------
+   // write GMAT_FUNCTION_PATH next
+   //---------------------------------------------
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      if (pos->first == "GMAT_FUNCTION_PATH")
+      {
+         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         break;
+      }
+   }
+      
+   //---------------------------------------------
+   // write MATLAB_FUNCTION_PATH next
+   //---------------------------------------------
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      if (pos->first == "MATLAB_FUNCTION_PATH")
+      {
+         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         break;
+      }
+   }
+   
+   outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write *_POT_PATH next
+   //---------------------------------------------
+   for (std::map<std::string, std::string>::iterator pos = mPathMap.begin();
+        pos != mPathMap.end(); ++pos)
+   {
+      if (pos->first.find("_POT_") != std::string::npos)
+      {
+         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+      }
+   }
+   
+   outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write non POT or TEXTURE files first
    //---------------------------------------------
    for (std::map<std::string, FileInfo*>::iterator pos = mFileMap.begin();
         pos != mFileMap.end(); ++pos)
    {
-      if (pos->second)
+      if (pos->first.find("_POT_") == std::string::npos &&
+          pos->first.find("_TEXTURE_") == std::string::npos)
       {
-         outStream << setw(20) << pos->first << " = " << pos->second->mPath << "/"
-                   << pos->second->mFile << "\n";
+         if (pos->second)
+         {
+            outStream << setw(20) << pos->first << " = " << pos->second->mPath << "/"
+                      << pos->second->mFile << "\n";
+         }
+      }
+   }
+   
+   outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write POT files next
+   //---------------------------------------------
+   for (std::map<std::string, FileInfo*>::iterator pos = mFileMap.begin();
+        pos != mFileMap.end(); ++pos)
+   {
+      if (pos->first.find("_POT_") != std::string::npos)
+      {
+         if (pos->second)
+         {
+            outStream << setw(20) << pos->first << " = " << pos->second->mPath << "/"
+                      << pos->second->mFile << "\n";
+         }
+      }
+   }
+   
+   outStream << "#-----------------------------------------------------------\n";
+   
+   //---------------------------------------------
+   // write texture files next
+   //---------------------------------------------
+   for (std::map<std::string, FileInfo*>::iterator pos = mFileMap.begin();
+        pos != mFileMap.end(); ++pos)
+   {
+      if (pos->first.find("_TEXTURE_") != std::string::npos)
+      {
+         if (pos->second)
+         {
+            outStream << setw(20) << pos->first << " = " << pos->second->mPath << "/"
+                      << pos->second->mFile << "\n";
+         }
       }
    }
    
