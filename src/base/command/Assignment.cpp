@@ -26,21 +26,17 @@
 
 
 #include "Assignment.hpp"
-#include "MessageInterface.hpp"
-#include "Parameter.hpp"
-#include "Variable.hpp"
-#include "Array.hpp"
 #include "MathParser.hpp"
 #include "StringUtil.hpp"
-/// @todo Rework command so it doesn't need the Moderator!!!
-#include "Moderator.hpp" 
+#include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME 1
 //#define DEBUG_EVAL_RHS
 //#define DEBUG_ASSIGNMENT_IA 1
 //#define DEBUG_ASSIGNMENT_INIT 1
-//#define DEBUG_ASSIGNMENT_EXEC 1
+//define DEBUG_ASSIGNMENT_EXEC 1
 //#define DEBUG_EQUATION 1
+//#define DEBUG_ASSIGNMENT_WRAPPER 1
 
 //------------------------------------------------------------------------------
 //  Assignment()
@@ -53,29 +49,10 @@ Assignment::Assignment  () :
    GmatCommand          ("GMAT"),
    lhs                  (""),
    rhs                  ("Not_Set"),
-   ownerName            (""),
-   parmName             (""),
-   parmOwner            (NULL),
-   rhsObject            (NULL),
-   rhsType              (NUMBER),
-   rhsParmName          (""),
-   objToObj             (false),
-   parmID               (-1),
-   parmType             (Gmat::UNKNOWN_PARAMETER_TYPE),
-   value                ("Not_Set"),
-   mathTree             (NULL),
-   row                  (0),
-   col                  (0),
-   rowObj               (NULL),
-   colObj               (NULL),
-   lrow                 (""),
-   lcol                 (""),
-   lrowObj              (NULL),
-   lcolObj              (NULL),
-   rowIndex             (0),
-   colIndex             (0),
-   isLhsArray           (false)
+   mathTree             (NULL)
 {
+   lhsWrapper = NULL;
+   rhsWrapper = NULL;
 }
 
 
@@ -106,29 +83,10 @@ Assignment::~Assignment()
 //------------------------------------------------------------------------------
 Assignment::Assignment  (const Assignment& a) :
    GmatCommand          (a),
-   ownerName            (a.ownerName),
-   parmName             (a.parmName),
-   parmOwner            (a.parmOwner),
-   rhsObject            (a.rhsObject),
-   rhsType              (a.rhsType),
-   rhsParmName          (a.rhsParmName),
-   objToObj             (a.objToObj),
-   parmID               (a.parmID),
-   parmType             (a.parmType),
-   value                (a.value),
-   mathTree             (a.mathTree),
-   row                  (a.row),
-   col                  (a.col),
-   rowObj               (NULL),
-   colObj               (NULL),
-   lrow                 (a.lrow),
-   lcol                 (a.lcol),
-   lrowObj              (NULL),
-   lcolObj              (NULL),
-   rowIndex             (a.rowIndex),
-   colIndex             (a.colIndex),
-   isLhsArray           (a.isLhsArray)
+   mathTree             (a.mathTree)
 {
+   lhsWrapper = NULL;
+   rhsWrapper = NULL;
 }
 
 
@@ -148,29 +106,11 @@ Assignment& Assignment::operator=(const Assignment& a)
    if (this == &a)
       return *this;
         
-   ownerName   = a.ownerName;
-   parmName    = a.parmName;
-   parmOwner   = a.parmOwner;
-   rhsObject   = a.rhsObject;
-   rhsType     = a.rhsType;
-   rhsParmName = a.rhsParmName;
-   objToObj    = a.objToObj;
-   parmID      = a.parmID;
-   parmType    = a.parmType;
-   value       = a.value;
    mathTree    = a.mathTree;
-   row         = a.row;
-   col         = a.col;
-   rowObj      = NULL;
-   colObj      = NULL;
-   lrow        = a.lrow;
-   lcol        = a.lcol;
-   lrowObj     = NULL;
-   lcolObj     = NULL;
-   rowIndex    = a.rowIndex;
-   colIndex     =a.colIndex;
-   isLhsArray  = a.isLhsArray;
-
+   
+   lhsWrapper = NULL;
+   rhsWrapper = NULL;
+   
    return *this;
 }
 
@@ -200,94 +140,25 @@ Assignment& Assignment::operator=(const Assignment& a)
 bool Assignment::InterpretAction()
 {
    #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage(
-         "Assignment::InterpretAction entered\n");
+   MessageInterface::ShowMessage("\nAssignment::InterpretAction() entered\n");
    #endif
-
-   Integer end = generatingString.find("%");
-   std::string genString = generatingString.substr(0, end);
+   
+   StringArray chunks = InterpretPreface();
    
    #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage(
-         "Comment-free generating string is %s\n", genString.c_str());
+      MessageInterface::ShowMessage("Preface chunks as\n");
+      for (StringArray::iterator i = chunks.begin(); i != chunks.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
    #endif
       
-   Integer loc = genString.find("GMAT", 0) + 4;
-   const char *str = genString.c_str();
-   while (str[loc] == ' ')
-      ++loc;
+   lhs = chunks[0];
+   rhs = chunks[1];
    
-   // lhs and rhs are now member data so that GUI can display it
-   // through GetLHS() and GetRHS()(loj:1/26/07)
-   //std::string lhs, rhs;
-   UnsignedInt eqloc = genString.find("=", loc), lend, rstart;
-   
-   // Check to be sure equal sign is in place
-   if (eqloc == std::string::npos)
-      throw CommandException("Assignment string does not set value\n");
-   
-   lend = eqloc;
-   rstart = eqloc;
-   while ((str[lend] == '=') || (str[lend] == ' '))
-      --lend;
-   while ((str[rstart] == '=') || (str[rstart] == ' '))
-      ++rstart;
-   lhs = genString.substr(loc, lend - loc + 1);
-   rhs = genString.substr(rstart);
-   isLhsArray = false;
-   
-   if (lhs.find("(", 0) != std::string::npos)
-      isLhsArray = true;
-
-   if ((lhs.find("[", 0) != std::string::npos) ||
-       (lhs.find("]", 0) != std::string::npos) ||
-       (rhs.find("[", 0) != std::string::npos) ||
-       (rhs.find("]", 0) != std::string::npos))
-      throw CommandException("Syntax error in the assignment \"" +
-                             generatingString + "\n");
-   
-   // Strip off trailing spaces and semicolon from RHS
-   end = rhs.find(";");
-   rhs = rhs.substr(0, end);
-   lend = rhs.length() - 1;
-   while (rhs[lend] == ' ')
-      --lend;
-   rhs = rhs.substr(0, lend + 1);
-   
-   #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage(
-         "Left side is \"%s\"\nRight side is \"%s\"\nLeft side %s an array\n",
-         lhs.c_str(), rhs.c_str(), (isLhsArray ? "is" : "is not"));
-   #endif
-
-
-   // Check if rhs is equation
+   // Check if rhs is an equation
    MathParser mp = MathParser();
-   bool isRhsEquation = false;
    if (mp.IsEquation(rhs))
-      isRhsEquation = true;
-   
-   end = genString.find(".", loc);
-   
-   if ((end == (Integer)std::string::npos) && !isLhsArray && !isRhsEquation)
    {
-      // Script line is set to make one object the same as another, or to set a
-      // value on a variable
-      ownerName = lhs;
-      value = rhs;
-      objToObj = true;
-      
-      #if DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage("objToObj = %s\n", (objToObj ? "true" : "false"));
-      #endif
-      
-      return true;
-   }
-   
-   
-   // Parse RHS if equation
-   if (isRhsEquation)
-   {
+      // Parse RHS if equation
       #if DEBUG_EQUATION
       MessageInterface::ShowMessage
          ("Assignment::InterpretAction() %s is an equation\n", rhs.c_str());
@@ -298,148 +169,17 @@ bool Assignment::InterpretAction()
       #if DEBUG_EQUATION
       if (topNode)
          MessageInterface::ShowMessage
-            ("topNode=%s\n", topNode->GetTypeName().c_str());
+            ("   topNode=%s\n", topNode->GetTypeName().c_str());
       #endif
       
       mathTree = new MathTree("MathTree", rhs);
       mathTree->SetTopNode(topNode);
-      ownerName = lhs;
-      
-      ////return true;
    }
-   else
-   {
-      UnsignedInt dot = rhs.find(".", 0);
-      // if rhs is a system parameter
-      if (dot != rhs.npos)
-      {
-         Real rval;
-         if (!GmatStringUtil::ToReal(rhs, &rval))
-         {
-            // Get an instance if this is a Parameter
-            Moderator *mod = Moderator::Instance();
-
-            #ifdef DEBUG_ASSIGNMENT_IA
-            MessageInterface::ShowMessage
-               ("=====> Assignment::InterpretAction() Creating RHS as parameter: %s\n",
-                rhs.c_str());
-            #endif
-            
-            std::string parmObj, parmType, parmDep;
-            GmatStringUtil::ParseParameter(rhs, parmType, parmObj, parmDep);
-            try
-            {
-               mod->CreateParameter(parmType, rhs, parmObj, parmDep);
-            }
-            catch (BaseException &ex)
-            {
-               #ifdef DEBUG_ASSIGNMENT_IA
-                  MessageInterface::ShowMessage
-                     ("=====> Assignment::InterpretAction() Creating RHS not a "
-                     "parameter; trying object member data: '%s' on '%s'\n", 
-                     parmType.c_str(), parmObj.c_str());
-               #endif
-                             
-               //throw;
-            }
-         }
-      }
-   }
-   
-   // Parse array handling elements
-   if (isLhsArray)
-   {
-      // Break apart the array text into owner, row, and column
-      UnsignedInt paren, comma, closeparen, temp;
-      paren = lhs.find("(");
-      comma = lhs.find(",");
-      closeparen = lhs.find(")");
-
-      if ((comma == std::string::npos) || (closeparen == std::string::npos))
-         throw CommandException("Syntax error in the assignment \"" +
-            generatingString +
-            "\"\nArray assignments must specify row and column, separated by" +
-            " a comma, in parentheses.\n");
-
-      ownerName = lhs.substr(0, paren);
-      lrow      = lhs.substr(paren + 1, comma - (paren + 1));
-      lcol      = lhs.substr(comma + 1, closeparen - (comma + 1));
-      
-      // Trim the white space
-      temp = 0;
-      while (ownerName[temp] == ' ')
-         ++temp;
-      ownerName = ownerName.substr(temp);
-      temp = ownerName.length();
-      while (ownerName[temp] == ' ')
-         --temp;
-      ownerName = ownerName.substr(0, temp);
-
-      temp = 0;
-      while (lrow[temp] == ' ')
-         ++temp;
-      lrow = lrow.substr(temp);
-      temp = lrow.length();
-      while (lrow[temp] == ' ')
-         --temp;
-      lrow = lrow.substr(0, temp+1);
-
-      temp = 0;
-      while (lcol[temp] == ' ')
-         ++temp;
-      lcol = lcol.substr(temp);
-      temp = lcol.length();
-      while (lcol[temp] == ' ')
-         --temp;
-      lcol = lcol.substr(0, temp+1);
-
-      value = rhs;
-
-      #ifdef DEBUG_ARRAY_INTERPRETING
-         MessageInterface::ShowMessage(
-            "\n   Array is \"%s\", row \"%s\", column \"%s\"\n",
-            ownerName.c_str(), lrow.c_str(), lcol.c_str());
-      #endif
-
-      return true;
-   }
-
-   
-   end = lhs.find(".", 0);
-   std::string component = lhs.substr(0, end);
-   if (component == "")
-      throw CommandException("Assignment string does not identify object\n");
-   
-   ownerName = component;
-   loc = end + 1;
-
-   component = lhs.substr(loc);
-   if (component == "")
-      throw CommandException("Assignment string does not identify parameter\n");
-   
-   /// @todo A hack for variables -- needs testing!
-   if (ownerName != component)
-      parmName = component;
-   else
-      parmName = "";
-
-   // Causing VC++ run time error
-   // Strip off trailing white space, if any
-   //unsigned n = parmName.length() - 1;
-   //while ((parmName[n] == ' ') || (parmName[n] == '\t'))
-   //   --n;
-   //parmName = parmName.substr(0, n+1);
-
-   parmName = GmatStringUtil::Strip(parmName);
-   
-   value = rhs;
    
    #ifdef DEBUG_ASSIGNMENT_IA
-      MessageInterface::ShowMessage(
-         "\nOwner is \"%s\"\nParameter is \"%s\"\nValue is \"%s\"\n",
-         ownerName.c_str(), parmName.c_str(), value.c_str());
+   MessageInterface::ShowMessage("Assignment::InterpretAction() leaving\n");
    #endif
-
+   
    return true;
 }
 
@@ -456,69 +196,32 @@ bool Assignment::InterpretAction()
 bool Assignment::Initialize()
 {
    #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage
-         ("Assignment::Initialize() entered. ownerName=%s, value=%s\n",
-          ownerName.c_str(), value.c_str());
+   MessageInterface::ShowMessage
+      ("Assignment::Initialize() entered for %s\n", generatingString.c_str());
    #endif
-      
+   
    if (GmatCommand::Initialize() == false)
       return false;
-
-   if (objectMap->find(ownerName) != objectMap->end())
-      parmOwner = (*objectMap)[ownerName];
+   
+   // if rhs is not an equation, set ref obj on both lhs and rhs wrappers
+   if (mathTree == NULL)
+   {
+      // Set references for the wrappers   
+      if (SetWrapperReferences(*lhsWrapper) == false)
+         return false;
+      
+      if (SetWrapperReferences(*rhsWrapper) == false)
+         return false;
+   }
    else
-      throw CommandException
-         ("Assignment command cannot find LHS object \"" +
-          ownerName + "\" for line \n   " + generatingString + "\n");
-   
-   if (parmOwner)
    {
-      #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage
-         ("Assignment::Initialize() parmOwner=%s, %s, %p\n",
-          parmOwner->GetTypeName().c_str(), parmOwner->GetName().c_str(), parmOwner);
-      #endif
-   }
-   
-   if (objToObj)
-   {
-      if (objectMap->find(value) != objectMap->end())
-      {
-         #ifdef DEBUG_ASSIGNMENT_INIT
-         MessageInterface::ShowMessage
-            ("Assignment::Initialize() Found value \"" + value + "\" in objectMap\n");
-         #endif
-         rhsObject = (*objectMap)[value];
-         return true;
-      }
-      else
-      {
-         if (parmOwner->GetTypeName() == "Variable")
-         {
-            parmName = "Expression";
-            objToObj = false;
-            #ifdef DEBUG_ASSIGNMENT_INIT
-               MessageInterface::ShowMessage(
-                  "Assignment::Initialize has owner %s, name %s, and val %s\n",
-                  ownerName.c_str(), parmName.c_str(), value.c_str());
-            #endif
-         }
-         else
-            throw CommandException("Assignment command cannot find object \"" +
-                     value + "\" for line \n   " + generatingString + "\n");
-      }
-   }
-   
-   // Find the object
-   if (objectMap->find(ownerName) == objectMap->end())
-      throw CommandException("Assignment command cannot find object \"" +
-                             ownerName + "\" for line \n   " + generatingString + "\n");
-
-   // Initialize RHS MathTree
-   if (mathTree != NULL)
-   {
+      // Set references for the wrappers   
+      if (SetWrapperReferences(*lhsWrapper) == false)
+         return false;
+      
+      // Initialize mathTree
       MathNode *topNode = mathTree->GetTopNode();
-
+      
       #if DEBUG_EQUATION
       MessageInterface::ShowMessage
          ("Assignment::Initialize() Initializing topNode=%s, %s\n",
@@ -538,64 +241,8 @@ bool Assignment::Initialize()
       }
    }
    
+   return true;
    
-   if (isLhsArray)
-   {
-      //MessageInterface::ShowMessage("=====> process isLhsArray part\n");
-      
-      if (parmOwner->GetTypeName() != "Array")
-         throw CommandException(
-            "Attemping to treat " + parmOwner->GetTypeName() + " named " +
-            parmOwner->GetName() + " like an Array object.\n");
-
-      // Build row index
-      if (lrow == ":")
-         rowIndex = -1;
-      else
-      {
-         if (objectMap->find(lrow) == objectMap->end())
-         {
-            rowIndex = atoi(lrow.c_str());
-            if (rowIndex < 0)
-               throw CommandException(
-                  "Attempting to use an invalid (negative) row index for " +
-                  ownerName + "\n");
-            if (rowIndex == 0)
-               throw CommandException(
-                  "Attempting to use an invalid row index (0 -- arrays are "
-                  "indexed from 1) for " + ownerName + "\n");
-         }
-         else
-            lrowObj = (*objectMap)[lrow];
-      }
-      
-      // Build column index
-      if (lcol == ":")
-         colIndex = -1;
-      else
-      {
-         if (objectMap->find(lcol) == objectMap->end())
-         {
-            colIndex = atoi(lcol.c_str());
-            if (colIndex < 0)
-               throw CommandException(
-                  "Attempting to use an invalid (negative) column index for " +
-                  ownerName + "\n");
-            if (colIndex == 0)
-               throw CommandException(
-                  "Attempting to use an invalid column index (0 -- arrays "
-                  "are indexed from 1) for " + ownerName + "\n");
-         }
-         else
-            lcolObj = (*objectMap)[lcol];
-      }
-   }
-
-   // if RHS is not a equation, initialize
-   if (mathTree == NULL)
-      return InitializeRHS(value);
-   else
-      return true;
 }
 
 
@@ -615,311 +262,227 @@ bool Assignment::Initialize()
 bool Assignment::Execute()
 {
    #ifdef DEBUG_ASSIGNMENT_EXEC
-      MessageInterface::ShowMessage("\nAssignment::Execute() entered for " +
-         generatingString + "\n");
+   MessageInterface::ShowMessage
+      ("\nAssignment::Execute() entered for \"%s\"\n", generatingString.c_str());
    #endif
-   bool retval = false;
-
-   if (isLhsArray)
+   
+   Real rval = -99999.999;
+   Integer ival = -99999;
+   bool bval = false;
+   std::string sval;
+   Rmatrix rmat;
+   GmatBase *obj = NULL;
+   
+   Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
+   Gmat::ParameterType rhsDataType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   Gmat::WrapperDataType rhsWrapperType = Gmat::UNKNOWN_WRAPPER_TYPE;
+   
+   #ifdef DEBUG_ASSIGNMENT_EXEC
+   MessageInterface::ShowMessage("   lhsDataType=%d\n", lhsDataType);
+   #endif
+   
+   try
    {
-      #ifdef DEBUG_ASSIGNMENT_EXEC
-      MessageInterface::ShowMessage("   Executing lhs array branch\n");
-      #endif
+      // if rhs is not an equation, assign rhs to lhs
+      if (mathTree == NULL)
+      {
+         rhsDataType = rhsWrapper->GetDataType();
+         rhsWrapperType = rhsWrapper->GetWrapperType();
+         
+         #ifdef DEBUG_ASSIGNMENT_EXEC
+         MessageInterface::ShowMessage("   rhsDataType=%d\n", rhsDataType);
+         #endif
+         
+         // Since it always creates NumberWrapper for numbers,
+         // we can allow INTEGER_TYPE = REAL_TYPE.
+         // Some object stores number as string, so allow that also.
+         if (lhsDataType != rhsDataType &&
+             !(lhsDataType == Gmat::INTEGER_TYPE && rhsDataType == Gmat::REAL_TYPE) &&
+             !(lhsDataType == Gmat::STRING_TYPE && rhsDataType == Gmat::REAL_TYPE) &&
+             !(lhsDataType == Gmat::STRING_TYPE && rhsDataType == Gmat::ON_OFF_TYPE))
+         {
+            CommandException ce;
+            ce.SetDetails("Cannot assign \"%s\" to \"%s\". The types are not same",
+                          rhs.c_str(), lhs.c_str());
+         }
+         
+         switch (rhsDataType)
+         {
+         case Gmat::BOOLEAN_TYPE:
+            bval = rhsWrapper->EvaluateBoolean();
+            break;
+         case Gmat::INTEGER_TYPE:
+            ival = rhsWrapper->EvaluateInteger();
+            break;
+         case Gmat::REAL_TYPE:
+            rval = rhsWrapper->EvaluateReal();
+            break;
+         case Gmat::RMATRIX_TYPE:
+            rmat = rhsWrapper->EvaluateArray();
+            break;
+         case Gmat::STRING_TYPE:
+            sval = rhsWrapper->EvaluateString();
+            break;
+         case Gmat::ON_OFF_TYPE:
+            sval = rhsWrapper->EvaluateOnOff();
+            break;
+         case Gmat::OBJECT_TYPE:
+            obj = rhsWrapper->EvaluateObject();
+            break;
+         default:
+            throw CommandException("Unknown RHS data type");
+         }
+      }
+      else
+      {
+         // Evalute math tree
+         Integer returnType;
+         Integer numRow;
+         Integer numCol;
       
-      if (lrowObj)
-      {
-         if (lrowObj->GetTypeName() == "Variable")
-            rowIndex = (Integer)(((Parameter*)lrowObj)->GetReal());
+         MathNode *topNode = mathTree->GetTopNode();
+      
+         if (topNode)
+         {
+            #if DEBUG_EQUATION
+            MessageInterface::ShowMessage
+               ("Assignment::Execute() topNode=%s, %s\n", topNode->GetTypeName().c_str(),
+                topNode->GetName().c_str());
+            #endif
+            
+            topNode->GetOutputInfo(returnType, numRow, numCol);
+            
+            #if DEBUG_ASSIGNMENT_EXEC
+            MessageInterface::ShowMessage("   returnType=%d\n", returnType);
+            #endif
+            
+            if (lhsDataType != returnType)
+            {
+               CommandException ce;
+               ce.SetDetails("Cannot assign \"%s\" to \"%s\". The types are not same",
+                             rhs.c_str(), lhs.c_str());
+            }
+            
+            switch (returnType)
+            {
+            case Gmat::REAL_TYPE:
+               rhsDataType = Gmat::REAL_TYPE;
+               rval = topNode->Evaluate();
+               break;
+            case Gmat::RMATRIX_TYPE:
+               rhsDataType = Gmat::RMATRIX_TYPE;
+               rmat.SetSize(numRow, numCol);
+               rmat = topNode->MatrixEvaluate();
+               break;
+            default:
+               CommandException ce;
+               ce.SetDetails("Cannot assign \"%s\" to \"%s\". The return type of "
+                             "equation is unknown", rhs.c_str(), lhs.c_str());
+               throw ce;
+            }
+         }
          else
-            throw CommandException
-               ("Non-\"Variable\" Objects (" + lrowObj->GetName() +
-                ") cannot be used to set row indexes yet.");
+         {
+            throw CommandException("RHS is an equation, but top node is NULL\n");
+         }
       }
-      if (lcolObj)
-      {
-         if (lcolObj->GetTypeName() == "Variable")
-            colIndex = (Integer)(((Parameter*)lcolObj)->GetReal());
-         else
-            throw CommandException
-               ("Non-\"Variable\" Objects (" + lcolObj->GetName() +
-                ") cannot be used to set column indexes yet.");
-      }
-      if (rowIndex == -1)
-         throw CommandException
-            ("Multiple array row elements cannot be set yet.");
-      if (colIndex == -1)
-         throw CommandException
-            ("Multiple array column elements cannot be set yet.");
       
       #if DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage
-         ("   rowIndex=%d, colIndex=%d\n", rowIndex, colIndex);
+         ("   ==> Now assign \"%s\" to \"%s\", obj=%p\n",
+          rhs.c_str(), lhs.c_str(), obj);
       #endif
-   }
-   
-   
-   // if there is MathTree, evaluate
-   if (mathTree != NULL)
-   {      
-      Integer returnType;
-      Integer numRow;
-      Integer numCol;
-      Parameter *lhsParm = (Parameter*)parmOwner;
       
-      MathNode *topNode = mathTree->GetTopNode();
-      
-      if (topNode)
+      // Now assign to LHS
+      switch (lhsDataType)
       {
-         #if DEBUG_EQUATION
-         MessageInterface::ShowMessage
-            ("Assignment::Execute() topNode=%s, %s\n", topNode->GetTypeName().c_str(),
-             topNode->GetName().c_str());
-         #endif
-         
-         topNode->GetOutputInfo(returnType, numRow, numCol);
-         
-         if (returnType == Gmat::REAL_TYPE)
+      case Gmat::BOOLEAN_TYPE:
+         lhsWrapper->SetBoolean(bval);
+         break;
+      case Gmat::INTEGER_TYPE:
          {
-            Real rval = topNode->Evaluate();
-            
-            #if DEBUG_EQUATION
-            MessageInterface::ShowMessage("Assignment::Execute() rval=%f\n", rval);
-            #endif
-            
-            // set lhsParm here
-            if (lhsParm->GetTypeName() == "Variable")
+            // Since it always creates NumberWrapper for numbers,
+            // check both Integer and Real types
+            if (rhsDataType == Gmat::INTEGER_TYPE)
             {
-               lhsParm->SetReal(rval);
+               lhsWrapper->SetInteger(ival);
             }
-            else if (lhsParm->GetTypeName() == "Array")
+            else if (rhsDataType == Gmat::REAL_TYPE)
             {
-               parmOwner->SetRealParameter("SingleValue", rval, rowIndex-1,
-                                           colIndex-1);
-            }
-            else
-            {
-               parmID    = parmOwner->GetParameterID(parmName);
-               parmType  = parmOwner->GetParameterType(parmID);
-
-               #if DEBUG_EQUATION
-               MessageInterface::ShowMessage
-                  ("Assignment::Execute() parmName=%s, lhsParm=%s, TypeName=%s, "
-                   "parmID=%d, parmType=%d\n", parmName.c_str(),
-                   lhsParm->GetName().c_str(), lhsParm->GetTypeName().c_str(),
-                   parmID, parmType);
-               #endif
-               
-               if (parmType == Gmat::REAL_TYPE)
-               {
-                  parmOwner->SetRealParameter(parmID, rval);
-               }               
+               Integer itempval;
+               std::string desc = rhsWrapper->GetDescription();
+               if (GmatStringUtil::ToInteger(desc, itempval))
+                  lhsWrapper->SetInteger(itempval);
                else
-               {
-                  throw CommandException
-                     ("Expects LHS type to be a Variable or Array or Real "
-                      "parameter. Object type: " + lhsParm->GetTypeName() +
-                      "Object name: " + lhsParm->GetName() + "\n");
-               }
+                  throw CommandException("Cannot assign Real number to Integer");
             }
+            break;
+         }
+      case Gmat::REAL_TYPE:
+         if (rval != -99999.999)
+            lhsWrapper->SetReal(rval);
+         else
+            throw CommandException("Cannot assign Non-Real number to Real");
+         break;
+      case Gmat::RMATRIX_TYPE:
+         lhsWrapper->SetArray(rmat);
+         break;
+      case Gmat::STRING_TYPE:
+         if (rhsDataType == Gmat::STRING_TYPE ||
+             rhsDataType == Gmat::ON_OFF_TYPE)
+         {
+            lhsWrapper->SetString(sval);
+         }
+         // We don't want to allow VARIALE to STRING assinment
+         else if (rhsDataType == Gmat::REAL_TYPE &&
+                  rhsWrapperType != Gmat::VARIABLE)
+         {
+            lhsWrapper->SetString(rhsWrapper->GetDescription());
+         }
+         else if (obj != NULL) // Object to String
+         {
+            lhsWrapper->SetString(obj->GetName());
          }
          else
          {
-            Rmatrix rmat(numRow, numCol);
-            rmat = topNode->MatrixEvaluate();
-
-            #if DEBUG_EQUATION
-            MessageInterface::ShowMessage
-               ("Assignment::Execute() numRow=%d, numCol=%d, rmat=\n%s\n",
-                numRow, numCol, rmat.ToString().c_str());
-            #endif
-            
-            // set lhsParm here
-            if (lhsParm->GetTypeName() == "Array")
-            {
-               #if DEBUG_EQUATION
-               Array *arr = (Array*)lhsParm;
-               MessageInterface::ShowMessage
-                  ("Assignment::Execute() LHS Array numRow=%d, numCol=%d\n",
-                   arr->GetRowCount(), arr->GetColCount());
-               #endif
-               
-               lhsParm->SetRmatrix(rmat);
-            }
-            else
-               throw CommandException("Expects LHS type to be an Array, but it's " +
-                                      lhsParm->GetTypeName());
+            CommandException ce;
+            ce.SetDetails("Cannot assign \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
+            throw ce;
          }
-         
-         BuildCommandSummary(true);
-         return true;
-      }
-      else
-      {
-         throw CommandException("RHS is a equation, but top node is NULL\n");
-      }
-   }
-
-   
-   // Get the parameter ID and ID type
-   try
-   {
-      #ifdef DEBUG_ASSIGNMENT_EXEC
-         MessageInterface::ShowMessage("   In the try clause\n");
-      #endif
-      if (parmOwner == NULL)
-         //throw CommandException("Parameter Owner Not Initialized\n");
-         throw CommandException("Cannot find LHS Parameter: " + ownerName + "\n");
-      
-      if (isLhsArray)
-      {
-         parmOwner->SetRealParameter("SingleValue", EvaluateRHS(), rowIndex-1,
-            colIndex-1);
-
-         BuildCommandSummary(true);
-         return true;
-      }
-
-      if (objToObj)
-      {
-         #ifdef DEBUG_ASSIGNMENT_EXEC
-            MessageInterface::ShowMessage(
-               "   Executing object to object branch\n");
-         #endif
-
-         if (!rhsObject)
-            throw CommandException("Assignment command cannot find object \"" +
-               value + "\"");
-         if (parmOwner->GetTypeName() != rhsObject->GetTypeName())
+         break;
+      case Gmat::ON_OFF_TYPE:
+         lhsWrapper->SetOnOff(sval);
+         break;
+      case Gmat::OBJECT_TYPE:
+         lhsWrapper->SetObject(obj);
+         break;
+      case Gmat::STRINGARRAY_TYPE:
+         if (obj != NULL) // Object to String
          {
-            std::string errmsg = "Mismatched object types between \"" +
-               parmOwner->GetName();
-            errmsg += "\" of type \"" + parmOwner->GetTypeName();
-            errmsg += "\" and \"" + rhsObject->GetName();
-            errmsg += "\" of type \"" + rhsObject->GetTypeName();
-            errmsg += "\"\n";
-            throw CommandException(errmsg);
+            lhsWrapper->SetString(obj->GetName());
          }
-
-         parmOwner->Copy(rhsObject);
-         
-         BuildCommandSummary(true);
-         return true;
-      }
-      
-      // Once inline equation handling is implemented, variables will do this:
-      // if (parmOwner->GetTypeName() == "Variable")
-      //    return ((Variable*)parmOwner)->EvaluateReal();
-      
-      #ifdef DEBUG_ASSIGNMENT_EXEC
-         MessageInterface::ShowMessage("   Executing parameter setting\n");
-      #endif
-
-      bool isVariable = false;
-      if (parmOwner->GetTypeName() == "Variable")
-      {
-         isVariable = true;
-         parmType = Gmat::REAL_TYPE;
-      }
-      else
-      {
-         parmID    = parmOwner->GetParameterID(parmName);
-         parmType  = parmOwner->GetParameterType(parmID);
-      }
-
-      #ifdef DEBUG_ASSIGNMENT_EXEC
-      if (!isVariable)
-         MessageInterface::ShowMessage("Assignment::Execute Parameter %s has "
-            "type %s\n", parmName.c_str(),
-            parmOwner->GetParameterTypeString(parmID).c_str());
-      #endif
-
-      switch (parmType)
-      {
-         case Gmat::INTEGER_TYPE:
-            parmOwner->SetIntegerParameter(parmID, (Integer)EvaluateRHS());
-            retval = true;
-            break;
-               
-         case Gmat::REAL_TYPE:
-            #ifdef DEBUG_ASSIGNMENT_EXEC
-            if (!isVariable)
-               //MessageInterface::ShowMessage("Setting %s on %s to %lf\n", 
-               MessageInterface::ShowMessage("Setting %s on %s to %.18f\n", 
-                  parmOwner->GetParameterText(parmID).c_str(), 
-                  parmOwner->GetName().c_str(), EvaluateRHS());
-            else
-               MessageInterface::ShowMessage("Setting %s to %lf\n", 
-                  parmOwner->GetName().c_str(), EvaluateRHS());
-            #endif
-            if (isVariable)
-               ((Variable *)parmOwner)->SetReal(EvaluateRHS());
-            else
-               parmOwner->SetRealParameter(parmID, EvaluateRHS());
-            retval = true;
-            break;
-               
-         case Gmat::STRING_TYPE:
-         case Gmat::STRINGARRAY_TYPE:
-            #ifdef DEBUG_ASSIGNMENT_EXEC
-               MessageInterface::ShowMessage("Assignment::Execute setting "
-                  "string to %s\n", value.c_str());
-            #endif
-            parmOwner->SetStringParameter(parmID, value);
-            retval = true;
-            break;
-               
-         case Gmat::ON_OFF_TYPE:
-            #ifdef DEBUG_ASSIGNMENT_EXEC
-               MessageInterface::ShowMessage("Assignment::Execute setting "
-                  "string to %s\n", value.c_str());
-            #endif
-            parmOwner->SetOnOffParameter(parmID, value);
-            retval = true;
-            break;
-            
-         case Gmat::BOOLEAN_TYPE:
-            bool tf;
-            if (value == "true")
-               tf = true;
-            else
-               tf = false;
-            parmOwner->SetBooleanParameter(parmID, tf);
-            retval = true;
-            break;
-   
-         default:
-            break;
-      }
-
-       // "Add" parameters could also mean to set reference objects
-      if (parmName == "Add")
-      {
-         if (objectMap->find(value) != objectMap->end())
+         else
          {
-            GmatBase *obj = (*objectMap)[value];
-            if (obj)
-               parmOwner->SetRefObject(obj, obj->GetType(), value);
+            CommandException ce;
+            ce.SetDetails("Cannot assign \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
+            throw ce;
          }
+         break;
+      default:
+         throw CommandException("Unknown LHS type");
       }
+      
+      BuildCommandSummary(true);
+      return true;
    }
-   catch (BaseException& ex)
+   catch (BaseException &e)
    {
-      if (parmOwner == NULL)
-         throw;
-      // Could be an action rather than a parameter
-      if (!parmOwner->TakeAction(parmName, value))
-         throw;
-       
-      retval = true;
+      CommandException ce;
+      ce.SetMessage("");
+      ce.SetDetails("%s in \n   \"%s\"\n", e.GetFullMessage().c_str(),
+                    generatingString.c_str());
+      throw ce;
    }
-
-   #ifdef DEBUG_ASSIGNMENT_EXEC
-      MessageInterface::ShowMessage("Assignment::Execute finished\n");
-   #endif
-   
-   BuildCommandSummary(true);
-   
-   return retval;
 }
 
 
@@ -934,6 +497,95 @@ bool Assignment::Execute()
 bool Assignment::SkipInterrupt()
 {
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& Vary::GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+/*
+ * Returns wrapper object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Assignment::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+
+   // If rhs is an equation, just add lhs
+   if (mathTree != NULL)
+   {
+      if (lhs != "")
+         wrapperObjectNames.push_back(lhs);
+      return wrapperObjectNames;
+   }
+   
+   // Add lhs and rhs
+   if (lhs != "")
+      wrapperObjectNames.push_back(lhs);
+   if (rhs != "")
+      wrapperObjectNames.push_back(rhs);
+   
+   return wrapperObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+bool Assignment::SetElementWrapper(ElementWrapper *toWrapper, 
+                                   const std::string &withName)
+{
+   if (toWrapper == NULL)
+      return false;
+      
+   bool retval = false;
+   
+   #ifdef DEBUG_ASSIGNMENT_WRAPPER
+   MessageInterface::ShowMessage
+      ("   Setting wrapper \"%s\" on Assignment command\n", withName.c_str());
+   #endif
+   
+   if (withName == lhs)
+   {
+      lhsWrapper = toWrapper;
+      retval = true;
+   }
+   
+   if (withName == rhs)
+   {
+      rhsWrapper = toWrapper;
+      retval = true;
+   }
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearWrappers()
+//------------------------------------------------------------------------------
+void Assignment::ClearWrappers()
+{      
+   ElementWrapper* temp1 = NULL;
+   ElementWrapper* temp2 = NULL;
+   
+   if (lhsWrapper)
+   {
+      temp1 = lhsWrapper;
+      lhsWrapper = NULL;
+   }
+   
+   if (rhsWrapper)
+   {
+      temp2 = rhsWrapper;
+      rhsWrapper = NULL;
+   }
+
+   if (temp1)
+      delete temp1;
+   if (temp2)
+      delete temp2;
+   
 }
 
 
@@ -957,32 +609,32 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
 {
    #if DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Assignment::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
-       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
+      ("Assignment::RenameRefObject() entered <%s>\n", generatingString.c_str());
    MessageInterface::ShowMessage
-      ("   value=%s\n", value.c_str());
+      ("   type=%s, oldName=%s, newName=%s\n",
+       GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (ownerName == oldName)
-      ownerName = newName;
-
-   if (parmName == oldName)
-      parmName = newName;
-
-   if (rhsParmName == oldName)
-      rhsParmName = newName;
-
-   // Since parameter name is composed of spacecraftName.dep.paramType or
-   // burnName.dep.paramType, check the type first
-   if (type == Gmat::SPACECRAFT || type == Gmat::BURN ||
-       type == Gmat::COORDINATE_SYSTEM || type == Gmat::CALCULATED_POINT)
-   {
-      if (value.find(oldName) != value.npos)
-         value = GmatStringUtil::Replace(value, oldName, newName);
-   }
+   if (lhs.find(oldName) != lhs.npos)
+      lhs = GmatStringUtil::Replace(lhs, oldName, newName);
+      
+   if (rhs.find(oldName) != rhs.npos)
+      rhs = GmatStringUtil::Replace(rhs, oldName, newName);
    
-   if (mathTree != NULL)      
+   lhsWrapper->RenameObject(oldName, newName);
+   
+   if (mathTree == NULL)
+      rhsWrapper->RenameObject(oldName, newName);
+   else
       mathTree->RenameRefObject(type, oldName, newName);
+   
+   // Update generatingString
+   GetGeneratingString();
+   
+   #if DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Assignment::RenameRefObject() leaving <%s>\n", generatingString.c_str());
+   #endif
    
    return true;
 }
@@ -1020,298 +672,15 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
 {
-   std::string gen = prefix + "GMAT " + ownerName;
-   if (parmName != "")
-      gen += "." + parmName;
-
-   // Could be setting an array element
-   if ((lrow != "") || (lcol != ""))
-   {
-      // Handle row and column separately, in case we allow ommission of one in
-      // the future.
-      gen += "(";
-      if (lrow != "")
-      {
-         gen += lrow;
-         if (lcol != "")
-            gen += ", ";
-      }
-      if (lcol != "")
-         gen += lcol;
-      gen += ")";
-   }
-   
-   gen += " = " + value + ";";
+   std::string gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
    
    #ifdef DEBUG_ASSIGNMENT_SCRIPTING
-      MessageInterface::ShowMessage("Assignment command generator is \"%s\"\n",
-         gen.c_str());
+   MessageInterface::ShowMessage("Assignment command generator is \"%s\"\n",
+                                 gen.c_str());
    #endif
+   
    generatingString = gen;
-
+   
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
-
-//------------------------------------------------------------------------------
-// bool InitializeRHS(const std::string &rhs)
-//------------------------------------------------------------------------------
-/**
- * Initializes the objects used on the right side of the assignemnt.
- *
- * @param <rhs> The string on the right side of the equals sign.
- *
- * @return true on success, false on failure.
- *
- * @todo Handle RHS Variables and Parameters
- */
-//------------------------------------------------------------------------------
-bool Assignment::InitializeRHS(const std::string &rhs)
-{
-   #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage("Assignment::InitializeRHS(%s) entered\n",
-         rhs.c_str());
-   #endif
-   
-   std::string chunk, kind, subchunk;
-   Integer start = 0, end;
-
-   // Skip leading spaces
-   while (rhs[start] == ' ')
-      ++start;
-   end = start;
-   // Find the next delimiter
-   while ((rhs[end] != ';')  && (rhs[end] != ' ') &&
-          (rhs[end] != '.')  && (rhs[end] != '=') &&
-          (rhs[end] != '(')  && (rhs[end] != ',') &&
-          (rhs[end] != '\t') && (end < (Integer)rhs.length()))
-      ++end;
-
-   #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage("   length = %d, end = %d\n",
-         rhs.length(), end);
-   #endif
-
-   chunk = rhs.substr(start, end - start);
-   if (end < (Integer)rhs.length())
-      subchunk = rhs.substr(end);
-   else
-      subchunk = "";
-
-   if (subchunk[0] == '.')
-      subchunk = subchunk.substr(1);
-
-   #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage(
-         "'%s' was broken into '%s' and '%s'\n", rhs.c_str(), chunk.c_str(),
-         subchunk.c_str());
-   #endif
-   
-   // Code for inline equations.  Right now the parameter database doesn't know
-   // about Parameters on the right side of the =, so this doesn't work yet
-   // if (parmOwner->GetTypeName() == "Variable")
-   // {
-   //    parmOwner->SetStringParameter("Expression", rhs);
-   // }
-   // else
-   
-   // Handle RHS system parameter
-   std::string name = chunk;
-   if (rhs.find('.') != rhs.npos)
-   {
-      //if (!isalpha(name[0]))
-      if (isalpha(name[0]))
-         name = rhs;
-   }
-
-   #ifdef DEBUG_ASSIGNMENT_INIT
-      MessageInterface::ShowMessage("Locating the object %s\n", name.c_str());
-   #endif
-   
-   //if (objectMap->find(chunk) != objectMap->end())
-   if (objectMap->find(name) != objectMap->end())
-   {
-      //rhsObject = (*objectMap)[chunk];
-      rhsObject = (*objectMap)[name];
-      kind = rhsObject->GetTypeName();
-
-      #ifdef DEBUG_ASSIGNMENT_INIT
-         MessageInterface::ShowMessage(
-            "Assignment RHS object is a %s named %s\n", kind.c_str(),
-            rhsObject->GetName().c_str());
-      #endif
-
-      // Determine what type of object handling is needed
-      if (kind == "Array")
-      {
-         rhsType = ARRAY_ELEMENT;
-         std::string rowStr, colStr = "1";
-         
-         unsigned openParen, comma, closeParen, index;
-         openParen  = subchunk.find("(");
-         comma      = subchunk.find(",");
-         closeParen = subchunk.find(")");
-         
-         if ((openParen == std::string::npos) ||
-             (closeParen == std::string::npos))
-            throw CommandException(
-                      "Assignment::InitializeRHS encountered mismatched "
-                      "parenthesis\n   Command text is \"" +
-                      (GetGeneratingString()) + "\"");
-         if (comma != std::string::npos)
-         {
-            colStr = subchunk.substr(comma+1, closeParen - (comma+1));
-            closeParen = comma;
-         }
-         rowStr = subchunk.substr(openParen+1, closeParen - (openParen+1));
-            
-         // Trim whitespace
-         index = 0;
-         while ((rowStr[index] == ' ') && (index < rowStr.length()))
-            ++index;
-         rowStr = rowStr.substr(index);
-         index = rowStr.length() - 1;
-         while ((rowStr[index] == ' ') && (index >= 0))
-            --index;
-         rowStr = rowStr.substr(0, index+1);
-
-         index = 0;
-         while ((colStr[index] == ' ') && (index < colStr.length()))
-            ++index;
-         colStr = colStr.substr(index);
-         index = colStr.length() - 1;
-         while ((colStr[index] == ' ') && (index >= 0))
-            --index;
-         colStr = colStr.substr(0, index+1);
-
-         #ifdef DEBUG_ASSIGNMENT_INIT
-            MessageInterface::ShowMessage(
-               "   Array element given by ('%s', '%s')\n", rowStr.c_str(),
-               colStr.c_str());
-         #endif
-
-         if (objectMap->find(rowStr) == objectMap->end())
-         {
-            row = atoi(rowStr.c_str()) - 1;
-         }
-         else
-            throw CommandException(
-               "Assignment command cannot handle dynamic row indices yet.");
-
-         if (objectMap->find(colStr) == objectMap->end())
-         {
-            col = atoi(colStr.c_str()) - 1;
-         }
-         else
-            throw CommandException(
-               "Assignment command cannot handle dynamic column indices yet.");
-      }
-      else if (kind == "Variable")
-      {
-         rhsType = VARIABLE;
-      }
-      else if (rhsObject->GetType() == Gmat::PARAMETER)
-      {
-         //throw CommandException(
-         //   "Assignment command cannot handle Parameters yet.\n");
-         rhsType = PARAMETER;
-      }
-      else
-      {
-         #ifdef DEBUG_ASSIGNMENT_INIT
-            MessageInterface::ShowMessage("%s is an object parm\n",
-               subchunk.c_str());
-         #endif
-         rhsParmName = subchunk;
-         rhsType = OBJECT_PARM;
-      }
-   }
-   else
-   {
-      Real rval;
-      if (GmatStringUtil::ToReal(rhs, &rval))
-      {
-         #ifdef DEBUG_ASSIGNMENT_INIT
-         MessageInterface::ShowMessage(
-            "Assignment RHS object is the number %le\n", atof(rhs.c_str()));
-         #endif
-         rhsType = NUMBER;
-      }
-      else
-      {
-         if (rhs != "On" && rhs != "Off")
-            throw CommandException
-               ("Assignment command cannot find RHS parameter: " + rhs + "\n");
-      }
-   }
-
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// Real EvaluateRHS()
-//------------------------------------------------------------------------------
-/**
- * Initializes the objects used on the right side of the assignemnt.
- *
- * @return The floating point number corresponding to the right hand side.
- *
- * @todo Handle RHS Variables and Parameters
- *
- * @tod0 Determine how to handle strings in Assignment command.
- */
-//------------------------------------------------------------------------------
-Real Assignment::EvaluateRHS()
-{
-   //MessageInterface::ShowMessage
-   //   ("===> Assignment::EvaluateRHS() rhsType=%d\n", rhsType);
-   
-   // RHS could be a parameter, an array element, a variable, or just a number
-   switch (rhsType)
-   {
-      case VARIABLE:
-      case PARAMETER:
-      {
-         Real value = ((Parameter*)rhsObject)->EvaluateReal();
-
-         #ifdef DEBUG_EVAL_RHS
-            MessageInterface::ShowMessage("Evaluating: the %s named %s = %lf\n", 
-               rhsObject->GetTypeName().c_str(), rhsObject->GetName().c_str(),
-               value);
-         #endif
-
-         return value;
-      }
-
-      case ARRAY_ELEMENT:
-         if (rowObj != NULL)
-            if (rowObj->GetType() == Gmat::PARAMETER)
-               row = (Integer)((Parameter*)rowObj)->EvaluateReal();
-         if (colObj != NULL)
-            if (colObj->GetType() == Gmat::PARAMETER)
-               col = (Integer)((Parameter*)colObj)->EvaluateReal();
-         #ifdef DEBUG_EVAL_RHS
-            MessageInterface::ShowMessage(
-               "   Getting 'SingleValue' for (%d, %d)\n", row, col);
-         #endif
-         return rhsObject->GetRealParameter("SingleValue", row, col);
-
-      case OBJECT_PARM:
-         #ifdef DEBUG_EVAL_RHS
-            MessageInterface::ShowMessage(
-               "   Getting '%s' for %s\n", rhsParmName.c_str(),
-               rhsObject->GetName().c_str());
-         #endif
-            return rhsObject->GetRealParameter(rhsParmName);
-      default:
-         break;
-   }
-   
-   #ifdef DEBUG_EVAL_RHS
-      MessageInterface::ShowMessage("%s is just a number, right?\n", value.c_str());
-   #endif
-   
-   // It's just a number
-   return atof(value.c_str());
-}
