@@ -160,9 +160,13 @@ namespace Gmat
       ARRAY,
       ARRAY_ELEMENT,
       PARAMETER_OBJECT,
-      OBJECT
+      OBJECT,
+      BOOLEAN,
+      INTEGER,
+      ON_OFF,
+      UNKNOWN_WRAPPER_TYPE = -2
    };
-      
+   
    
    enum RunState 
    {
