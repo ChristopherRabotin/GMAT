@@ -1111,8 +1111,8 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
       if (toWrapper->GetWrapperType() != Gmat::VARIABLE)
       {
          std::string errmsg = "The value of \"" + indexName;
-         errmsg            += "\" for field \"Index Name\" on object \"";
-         errmsg            += instanceName + "\" is not an allowed value.\n";
+         errmsg            += "\" for field \"Index Name\" on command \"";
+         errmsg            += GetTypeName() + "\" is not an allowed value.\n";
          errmsg            += "The allowed values are: [ Variable].";
          throw CommandException(errmsg);
       }
