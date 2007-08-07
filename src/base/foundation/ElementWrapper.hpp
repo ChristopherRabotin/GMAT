@@ -53,6 +53,18 @@ public:
                                            const std::string &newName);
    
    
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType  GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the ElementWrapper object.
+ *
+ * @return value type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+   virtual Gmat::ParameterType GetDataType() const = 0;
+   
 //---------------------------------------------------------------------------
 //  Real EvaluateReal() const
 //---------------------------------------------------------------------------
@@ -85,6 +97,14 @@ public:
    virtual bool            SetArray(const Rmatrix &toValue); 
    virtual std::string     EvaluateString() const;
    virtual bool            SetString(const std::string &toValue); 
+   virtual std::string     EvaluateOnOff() const;
+   virtual bool            SetOnOff(const std::string &toValue); 
+   virtual bool            EvaluateBoolean() const;
+   virtual bool            SetBoolean(const bool toValue); 
+   virtual Integer         EvaluateInteger() const;
+   virtual bool            SetInteger(const Integer toValue); 
+   virtual GmatBase*       EvaluateObject() const;
+   virtual bool            SetObject(const GmatBase *obj); 
    
 protected:  
 

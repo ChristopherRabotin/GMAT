@@ -221,25 +221,113 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
    return true;
 }
 
+//---------------------------------------------------------------------------
+// Rmatrix EvaluateArray() const
+//---------------------------------------------------------------------------
 Rmatrix ElementWrapper::EvaluateArray() const
 {
    throw GmatBaseException(
       "EvaluateArray() method not valid for wrapper of non-Array type.\n");
 }
 
+//---------------------------------------------------------------------------
+// bool SetArray(const Rmatrix &toValue)
+//---------------------------------------------------------------------------
 bool ElementWrapper::SetArray(const Rmatrix &toValue)
 {
    throw GmatBaseException(
       "SetArray() method not valid for wrapper of non-Array type.\n");
 }
+
+//---------------------------------------------------------------------------
+// std::string EvaluateString() const
+//---------------------------------------------------------------------------
 std::string ElementWrapper::EvaluateString() const
 {
    throw GmatBaseException(
       "EvaluateString() method not valid for wrapper of non-String type.\n");
 }
 
+//---------------------------------------------------------------------------
+// bool SetString(const std::string &toValue)
+//---------------------------------------------------------------------------
 bool ElementWrapper::SetString(const std::string &toValue)
 {
    throw GmatBaseException(
       "SetString() method not valid for wrapper of non-String type.\n");
 }
+
+//---------------------------------------------------------------------------
+// std::string EvaluateOnOff() const
+//---------------------------------------------------------------------------
+std::string ElementWrapper::EvaluateOnOff() const
+{
+   throw GmatBaseException(
+      "EvaluateOnOff() method not valid for wrapper of non-OnOff type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetOnOff(const std::string &toValue)
+//---------------------------------------------------------------------------
+bool ElementWrapper::SetOnOff(const std::string &toValue)
+{
+   throw GmatBaseException(
+      "SetOnOff() method not valid for wrapper of non-OnOff type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool EvaluateBoolean() const
+//---------------------------------------------------------------------------
+bool ElementWrapper::EvaluateBoolean() const
+{
+   throw GmatBaseException(
+      "EvaluateBoolean() method not valid for wrapper of non-Boolean type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetBoolean(const bool toValue)
+//---------------------------------------------------------------------------
+bool ElementWrapper::SetBoolean(const bool toValue)
+{
+   throw GmatBaseException(
+      "SetBoolean() method not valid for wrapper of non-Boolean type.\n");
+}
+
+//---------------------------------------------------------------------------
+// Integer EvaluateInteger() const
+//---------------------------------------------------------------------------
+Integer ElementWrapper::EvaluateInteger() const
+{
+   throw GmatBaseException(
+      "EvaluateInteger() method not valid for wrapper of non-Integer type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetInteger(const Integer toValue)
+//---------------------------------------------------------------------------
+bool ElementWrapper::SetInteger(const Integer toValue)
+{
+   throw GmatBaseException(
+      "SetInteger() method not valid for wrapper of non-Integer type.\n");
+}
+
+//---------------------------------------------------------------------------
+// GmatBase* EvaluateObject() const
+//---------------------------------------------------------------------------
+GmatBase* ElementWrapper::EvaluateObject() const
+{
+   throw GmatBaseException(
+      "EvaluateInteger() method not valid for wrapper of non-Object type.\n");
+}
+
+
+//---------------------------------------------------------------------------
+// bool SetObject(const GmatBase *obj)
+//---------------------------------------------------------------------------
+bool ElementWrapper::SetObject(const GmatBase *obj)
+{
+   throw GmatBaseException(
+      "SetObject() method not valid for wrapper of non-Object type.\n");
+}
+
+
