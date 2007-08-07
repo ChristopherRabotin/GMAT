@@ -24,15 +24,14 @@
 class ParameterException : public BaseException
 {
    public:
-      ParameterException(const std::string& message) 
-         //: BaseException("ParameterException Thrown: ", message) {};
+      ParameterException(const std::string& message = "") 
          : BaseException(message) {};
 };
 
 class InvalidDependencyException : public BaseException
 {
    public:
-      InvalidDependencyException(const std::string& message) 
+      InvalidDependencyException(const std::string& message = "") 
          : BaseException(message) {};
 };
 
