@@ -259,6 +259,7 @@ OBJECTS = \
     parameter/AttitudeData.o \
     parameter/AttitudeParameters.o \
     parameter/AttitudeReal.o \
+    parameter/BooleanWrapper.o \
     parameter/BplaneData.o \
     parameter/BplaneParameters.o \
     parameter/BplaneReal.o \
@@ -272,7 +273,9 @@ OBJECTS = \
     parameter/ExpressionParser.o \
     parameter/KeplerianParameters.o \
     parameter/NumberWrapper.o \
+    parameter/ObjectWrapper.o \
     parameter/ObjectPropertyWrapper.o \
+    parameter/OnOffWrapper.o \
     parameter/OrbitalParameters.o \
     parameter/OrbitData.o \
     parameter/OrbitReal.o \
@@ -288,6 +291,7 @@ OBJECTS = \
     parameter/RefData.o \
     parameter/Rvec6Var.o \
     parameter/SphericalParameters.o \
+    parameter/StringWrapper.o \
     parameter/StringObjectWrapper.o \
     parameter/StringVar.o \
     parameter/TimeData.o \
