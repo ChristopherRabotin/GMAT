@@ -100,6 +100,21 @@ ParameterWrapper::~ParameterWrapper()
 {
 }
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the ParameterWrapper object.
+ *
+ * @return data type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType ParameterWrapper::GetDataType() const
+{
+   return Gmat::REAL_TYPE;
+}
+
 //---------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj)
 //---------------------------------------------------------------------------

@@ -109,6 +109,21 @@ StringObjectWrapper::~StringObjectWrapper()
 }
 
 //------------------------------------------------------------------------------
+//  Gmat::ParameterType GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the StringObjectWrapper object.
+ *
+ * @return data type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType StringObjectWrapper::GetDataType() const
+{
+   return Gmat::STRING_TYPE;
+}
+
+//------------------------------------------------------------------------------
 //  const StringArray&  GetRefObjectNames() 
 //------------------------------------------------------------------------------
 /**

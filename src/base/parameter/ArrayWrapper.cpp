@@ -109,6 +109,21 @@ ArrayWrapper::~ArrayWrapper()
 }
 
 //------------------------------------------------------------------------------
+//  Gmat::ParameterType GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the ArrayWrapper object.
+ *
+ * @return data type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType ArrayWrapper::GetDataType() const
+{
+   return Gmat::RMATRIX_TYPE;
+}
+
+//------------------------------------------------------------------------------
 //  const StringArray&  GetRefObjectNames() 
 //------------------------------------------------------------------------------
 /**

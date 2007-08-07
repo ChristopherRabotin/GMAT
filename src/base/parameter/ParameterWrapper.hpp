@@ -40,6 +40,8 @@ public:
    // destructor
    virtual ~ParameterWrapper();
    
+   virtual Gmat::ParameterType GetDataType() const;
+   
    virtual bool            SetRefObject(GmatBase *obj);
    virtual bool            RenameObject(const std::string &oldName, 
                                         const std::string &newName);

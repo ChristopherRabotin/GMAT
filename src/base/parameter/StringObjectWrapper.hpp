@@ -40,6 +40,8 @@ public:
    // destructor
    virtual ~StringObjectWrapper();
    
+   virtual Gmat::ParameterType GetDataType() const;
+   
    virtual const StringArray& GetRefObjectNames();
    virtual bool               SetRefObject(GmatBase *obj);
    virtual Real               EvaluateReal() const;

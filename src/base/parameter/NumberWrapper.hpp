@@ -39,6 +39,8 @@ public:
    // destructor
    virtual ~NumberWrapper();
    
+   virtual Gmat::ParameterType GetDataType() const;
+   
    virtual Real            EvaluateReal() const;  
    virtual bool            SetReal(const Real toValue);
    

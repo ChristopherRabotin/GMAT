@@ -99,6 +99,21 @@ NumberWrapper::~NumberWrapper()
 {
 }
 
+//------------------------------------------------------------------------------
+//  Gmat::ParameterType GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the NumberWrapper object.
+ *
+ * @return data type for the object.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType NumberWrapper::GetDataType() const
+{
+   return Gmat::REAL_TYPE;
+}
+
 //---------------------------------------------------------------------------
 //  Real EvaluateReal() const
 //---------------------------------------------------------------------------
@@ -113,7 +128,7 @@ Real NumberWrapper::EvaluateReal() const
 {
    return value;
 }
-   
+
 //---------------------------------------------------------------------------
 //  bool SetReal(const Real toValue)
 //---------------------------------------------------------------------------
