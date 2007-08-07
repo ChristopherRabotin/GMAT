@@ -198,10 +198,13 @@ void AssignmentPanel::SaveData()
       
       try
       {
-         // interpret assignment string
-         
+         // Interpret assignment string         
          theCommand->SetGeneratingString(genStr.c_str());
          theCommand->InterpretAction();
+         
+         // Create element wrappers
+         if (!theGuiInterpreter->ValidateCommand(theCommand))
+            canClose = false;
          
          mIsTextModified = false;
       }
