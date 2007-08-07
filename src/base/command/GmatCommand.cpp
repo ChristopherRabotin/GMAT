@@ -1762,12 +1762,13 @@ StringArray GmatCommand::InterpretPreface()
    StringArray chunks = parser.ChunkLine();
    
    // First comes the command keyword
-   if (chunks[0] != typeName)
+   // @note "GMAT" keyword is automatically removed
+   if (chunks[0] != typeName && typeName != "GMAT")
       throw CommandException(
          "Line \"" + generatingString +
          "\"\n should be a " + typeName + " command, but the \"" + typeName +
          "\" keyword is not the opening token in the line.\n");
-
+   
    return chunks;
 }
 
@@ -1955,7 +1956,7 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
    }
    else
       throw CommandException("GmatCommand::SetWrapperReferences was passed a "
-         "NULL object instead of a wrapper!\n");
+         "NULL object instead of a wrapper in:\n   \"" + generatingString + "\"\n");
    
    return true;
 }
