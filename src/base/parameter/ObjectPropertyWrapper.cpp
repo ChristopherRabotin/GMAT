@@ -98,6 +98,7 @@ const ObjectPropertyWrapper& ObjectPropertyWrapper::operator=(
 
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~ObjectPropertyWrapper()
 //---------------------------------------------------------------------------
@@ -107,6 +108,31 @@ const ObjectPropertyWrapper& ObjectPropertyWrapper::operator=(
 //---------------------------------------------------------------------------
 ObjectPropertyWrapper::~ObjectPropertyWrapper()
 {
+}
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetDataType() const
+//------------------------------------------------------------------------------
+/**
+ * This method returns the data type for the object property.
+ *
+ * @return data type for the object property.
+ *
+ */
+//------------------------------------------------------------------------------
+Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
+{
+   if (object == NULL)
+      throw ParameterException("The object is NULL, so cannot get data type");
+
+   Gmat::ParameterType propType = object->GetParameterType(propID);
+   
+   #ifdef DEBUG_OBJ_PROP
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::GetDataType() returning %d\n", propType);
+   #endif
+   
+   return propType;
 }
 
 //---------------------------------------------------------------------------
@@ -219,7 +245,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
       errmsg += "\" - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
-         
+   
    return itsValue;
 }
    
@@ -253,10 +279,115 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
       errmsg += "\" - exception thrown: " + be.GetFullMessage();
       throw ParameterException(errmsg);
    }
-         
+   
    return true;
 }
 
+//---------------------------------------------------------------------------
+// std::string EvaluateString() const
+//---------------------------------------------------------------------------
+std::string ObjectPropertyWrapper::EvaluateString() const
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::STRING_TYPE || propType == Gmat::ON_OFF_TYPE)
+      return object->GetStringParameter(propID);
+   else
+      throw GmatBaseException
+         ("EvaluateString() method not valid for wrapper of non-String type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetString(const std::string &toValue)
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetString(const std::string &toValue)
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::STRING_TYPE || propType == Gmat::STRINGARRAY_TYPE)
+      return object->SetStringParameter(propID, toValue);
+   else
+      throw GmatBaseException
+         ("SetString() method not valid for wrapper of non-String type.\n");
+}
+
+//---------------------------------------------------------------------------
+// std::string EvaluateOnOff() const
+//---------------------------------------------------------------------------
+std::string ObjectPropertyWrapper::EvaluateOnOff() const
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::ON_OFF_TYPE)
+      return object->GetOnOffParameter(propID);
+   else
+      throw GmatBaseException
+         ("EvaluateOnOff() method not valid for wrapper of non-OnOff type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetOnOff(const std::string &toValue)
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetOnOff(const std::string &toValue)
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::ON_OFF_TYPE)
+      return object->SetOnOffParameter(propID, toValue);
+   else
+      throw GmatBaseException
+         ("SetOnOff() method not valid for wrapper of non-OnOff type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool EvaluateBoolean() const
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::EvaluateBoolean() const
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::BOOLEAN_TYPE)
+      return object->GetBooleanParameter(propID);
+   else
+      throw GmatBaseException
+         ("EvaluateBoolean() method not valid for wrapper of non-Boolean type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetBoolean(const bool toValue)
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetBoolean(const bool toValue)
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::BOOLEAN_TYPE)
+      return object->SetBooleanParameter(propID, toValue);
+   else
+      throw GmatBaseException
+         ("SetBoolean() method not valid for wrapper of non-Boolean type.\n");
+}
+
+//---------------------------------------------------------------------------
+// Integer EvaluateInteger() const
+//---------------------------------------------------------------------------
+Integer ObjectPropertyWrapper::EvaluateInteger() const
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::INTEGER_TYPE)
+      return object->GetIntegerParameter(propID);
+   else
+      throw GmatBaseException
+         ("EvaluateInteger() method not valid for wrapper of non-Integer type.\n");
+}
+
+//---------------------------------------------------------------------------
+// bool SetInteger(const Integer toValue)
+//---------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetInteger(const Integer toValue)
+{
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::INTEGER_TYPE)
+      return object->SetIntegerParameter(propID, toValue);
+   else
+      throw GmatBaseException
+         ("SetInteger() method not valid for wrapper of non-Integer type.\n");
+}
+
+//---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------
 /**
