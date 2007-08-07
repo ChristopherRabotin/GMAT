@@ -41,6 +41,7 @@ public:
 
    // inherited from GmatBase
    virtual GmatBase*   Clone() const;
+   virtual void        Copy(const GmatBase* orig);
    //virtual bool        ExecuteCallback();// *TEMPORARY ******************************//
 
    // Access methods overriden from the base class

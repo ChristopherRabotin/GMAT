@@ -39,14 +39,15 @@ public:
    DifferentialCorrector(std::string name);
    virtual ~DifferentialCorrector();
    DifferentialCorrector(const DifferentialCorrector &dc);
-   DifferentialCorrector&      operator=(const DifferentialCorrector& dc);
-
-   virtual bool                Initialize();
-   virtual SolverState         AdvanceState();
-
+   DifferentialCorrector& operator=(const DifferentialCorrector& dc);
+   
+   virtual bool        Initialize();
+   virtual SolverState AdvanceState();
+   
    // inherited from GmatBase
    virtual GmatBase*   Clone() const;
-
+   virtual void        Copy(const GmatBase* orig);
+   
    // Access methods overriden from the base class
    virtual std::string GetParameterText(const Integer id) const;
    virtual Integer     GetParameterID(const std::string &str) const;

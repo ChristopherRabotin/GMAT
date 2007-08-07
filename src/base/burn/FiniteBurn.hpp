@@ -33,40 +33,41 @@ public:
    FiniteBurn(const std::string &nomme = "");
    virtual ~FiniteBurn();
    FiniteBurn(const FiniteBurn& fb);
-   FiniteBurn&             operator=(const FiniteBurn& fb);
+   FiniteBurn&          operator=(const FiniteBurn& fb);
    
    // Inherited (GmatBase) methods
-   virtual std::string     GetParameterText(const Integer id) const;
-   virtual Integer         GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-   virtual bool            IsParameterReadOnly(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
 
-   virtual bool            SetStringParameter(const Integer id, 
-                                              const std::string &value);
-   virtual bool            SetStringParameter(const Integer id,
-                                              const std::string &value,
-                                              const Integer index);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray&
-                           GetStringArrayParameter(const Integer id) const;
-
-   virtual Real            GetRealParameter(const Integer id) const;
-   virtual Real            SetRealParameter(const Integer id, const Real value);
+                        GetStringArrayParameter(const Integer id) const;
+   
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
 
    virtual const ObjectTypeArray&
-                           GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                           GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
-   virtual bool            Initialize();
-   virtual bool            Fire(Real *burnData, Real epoch);
+   virtual bool         Initialize();
+   virtual bool         Fire(Real *burnData, Real epoch);
    
-   GmatBase*               Clone() const;
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
 protected:
    /// List of thrusters used in the maneuver

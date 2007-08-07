@@ -618,6 +618,21 @@ GmatBase* FiniteBurn::Clone() const
 
 
 //---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void FiniteBurn::Copy(const GmatBase* orig)
+{
+   operator=(*((FiniteBurn *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------

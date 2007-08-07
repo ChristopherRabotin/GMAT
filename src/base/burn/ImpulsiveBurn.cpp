@@ -205,3 +205,18 @@ GmatBase* ImpulsiveBurn::Clone() const
    return (new ImpulsiveBurn(*this));
 }
 
+
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void ImpulsiveBurn::Copy(const GmatBase* orig)
+{
+   operator=(*((ImpulsiveBurn *)(orig)));
+}
+

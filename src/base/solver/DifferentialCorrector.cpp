@@ -185,6 +185,20 @@ GmatBase* DifferentialCorrector::Clone() const
 }
 
 
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void DifferentialCorrector::Copy(const GmatBase* orig)
+{
+   operator=(*((DifferentialCorrector *)(orig)));
+}
+
 // Access methods overriden from the base class
 
 //------------------------------------------------------------------------------

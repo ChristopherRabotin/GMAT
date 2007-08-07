@@ -474,6 +474,21 @@ GmatBase* FminconOptimizer::Clone() const
 }
 
 
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void FminconOptimizer::Copy(const GmatBase* orig)
+{
+   operator=(*((FminconOptimizer *)(orig)));
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
