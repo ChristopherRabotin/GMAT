@@ -887,7 +887,8 @@ const StringArray& Achieve::GetWrapperObjectNameArray()
 }
 
 
-bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, 
+              const std::string &withName)
 {
    bool retval = false;
 
@@ -895,19 +896,36 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper, const std::string &wi
    
    if (toWrapper->GetWrapperType() == Gmat::ARRAY)
    {
-      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+      throw CommandException("A value of type \"Array\" on command \"" + 
+                  typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
    if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
    {
-      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
+      throw CommandException("A value of type \"String Object\" on command \"" 
+                  + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   
+
+   try
+   {
+       if ((toWrapper->GetDataType()) != Gmat::REAL_TYPE)
+       {
+           throw CommandException("A value of type \"non-Real\" on command \"" + 
+                       typeName + 
+                       "\" is not an allowed value.\nThe allowed values are:"
+                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+       }
+   }
+   catch (BaseException &be)
+   {
+       // just ignore it here - will need to check data type on initialization
+   }
    #ifdef DEBUG_WRAPPER_CODE   
-   MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Achieve command\n", 
+   MessageInterface::ShowMessage(
+               "   Setting wrapper \"%s\" on Achieve command\n", 
       withName.c_str());
    #endif
 
@@ -1236,16 +1254,19 @@ bool Achieve::Initialize()
    #endif
    if (SetWrapperReferences(*goal) == false)
       return false;
+   CheckDataType(goal, Gmat::REAL_TYPE, "Achieve");
    #ifdef DEBUG_ACHIEVE_PARAMS
       MessageInterface::ShowMessage("Setting refs for achieve\n");
    #endif
    if (SetWrapperReferences(*achieve) == false)
       return false;
+   CheckDataType(achieve, Gmat::REAL_TYPE, "Achieve");
    #ifdef DEBUG_ACHIEVE_PARAMS
       MessageInterface::ShowMessage("Setting refs for tolerance\n");
    #endif
    if (SetWrapperReferences(*tolerance) == false)
       return false;
+   CheckDataType(tolerance, Gmat::REAL_TYPE, "Achieve");
 
    // find goalName
    //GmatBase *obj = (*objectMap)[goalName];

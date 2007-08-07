@@ -375,6 +375,30 @@ void GmatCommand::ClearWrappers()
    // this default implementation does nothing
 }
 
+void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
+                                Gmat::ParameterType needType,
+                                const std::string &cmdName)
+{
+   if (forWrapper == NULL)
+   {
+      std::string cmdEx = "Reference object not set for command " + 
+                          cmdName;
+      cmdEx += ".\n";
+      throw CommandException(cmdEx);
+   }
+   Gmat::ParameterType pType = forWrapper->GetDataType();
+   if (pType != needType)
+   {
+      // @todo - make this message more meaningful, for non-Real types
+      std::string pText = PARAM_TYPE_STRING[pType];
+      throw CommandException("A value of type \"" + pText + "\" on command \"" + 
+                  cmdName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Object Property (Real), Real Number, Variable,"
+                  " Array Element, or Parameter ]. "); 
+   }
+}
+
 
 //------------------------------------------------------------------------------
 //  bool SetObject(const std::string &name, const Gmat::ObjectType type,

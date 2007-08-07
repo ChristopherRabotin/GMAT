@@ -78,6 +78,9 @@ public:
    virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
                         const std::string &withName);
    virtual void         ClearWrappers();
+   virtual void         CheckDataType(ElementWrapper* forWrapper,
+                                      Gmat::ParameterType needType,
+                                      const std::string &cmdName);
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
