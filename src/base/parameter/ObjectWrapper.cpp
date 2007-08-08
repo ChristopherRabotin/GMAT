@@ -218,35 +218,40 @@ GmatBase* ObjectWrapper::EvaluateObject() const
 bool ObjectWrapper::SetObject(const GmatBase *obj)
 {
    if (obj == NULL)
-      throw ParameterException
-         ("Cannot set a NULL object to an Object in ObjectWrapper::SetObject()");
+   {
+      if (theObject == NULL)
+         throw ParameterException("Cannot set undefined object to undefined object");
+      else
+         throw ParameterException
+            ("Cannot set undefined object to object of type \"" +
+             theObject->GetTypeName() +  "\"");         
+   }
    
    if (theObject != NULL)
    {
       // Let's check the object type
-      if (theObject->GetType() == obj->GetType())
+      if (theObject->GetTypeName() == obj->GetTypeName())
       {
          #ifdef DEBUG_OBJECT_WRAPPER
          MessageInterface::ShowMessage
-            ("ObjectWrapper::SetObject() fromType=%d, toType=%d\n",
-             obj->GetType(), theObject->GetType());
+            ("ObjectWrapper::SetObject() fromType=%s, toType=%s\n",
+             obj->GetTypeName().c_str(), theObject->GetTypeName().c_str());
          #endif
          
-         // We need sub-type check for Parameter, such as Variable, String
          theObject->Copy(obj);
       }
       else
       {
          ParameterException pe;
-         pe.SetDetails("Cannot set %s object to %s object",
+         pe.SetDetails("Cannot set object of type \"%s\" to object of type \"%s\"",
                        obj->GetTypeName().c_str(), theObject->GetTypeName().c_str());
          throw pe;
       }
    }
    else
    {
-      throw ParameterException
-         ("Cannot set object to a NULL pointer object in ObjectWrapper::SetObject()");
+      throw ParameterException("Cannot set object \"" + obj->GetName() +
+                               "\" to an undefined object");
    }
    
    return true;
