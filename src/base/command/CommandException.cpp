@@ -28,7 +28,7 @@
  */
 //------------------------------------------------------------------------------
 CommandException::CommandException(const std::string &details) :
-    BaseException           ("Command Exception Thrown: ", details)
+    BaseException           ("Command Exception: ", details)
 {
 }
 
