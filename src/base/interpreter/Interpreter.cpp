@@ -3996,7 +3996,8 @@ bool Interpreter::CheckBranchCommands(const IntegerArray &lineNumbers,
       if (!controlStack.empty())
       {
          InterpreterException ex
-            ("Matching \"End\" not found for \"" +  controlStack.top() + "\"");
+            ("Matching \"End" + controlStack.top() + "\" not found for \"" +
+             controlStack.top() + "\"");
          HandleError(ex, false);
          retval = false;
       }
