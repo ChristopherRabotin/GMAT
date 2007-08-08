@@ -315,7 +315,7 @@ bool ScriptInterpreter::ReadFirstPass()
    StringArray controlLines;
    IntegerArray lineNumbers;
    Integer charCounter = -1;
-   Integer lineCounter = 0;
+   Integer lineCounter = 1;
    
    while (!reachedEndOfFile)
    {
@@ -333,23 +333,37 @@ bool ScriptInterpreter::ReadFirstPass()
       
       newLine = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true);
       
-      #if DEBUG_READ_FIRST_PASS
-      MessageInterface::ShowMessage("newLine=%s\n", newLine.c_str());
-      #endif
-      
-      type = newLine;
-      UnsignedInt index = newLine.find_first_of(" \t");
-      if (index != newLine.npos)
-      {
-         type = newLine.substr(0, index);
-         if (type[index-1] == ';')
-            type = type.substr(0, index-1);
-      }
-      
-      if (type != "" && IsBranchCommand(type))
-      {
-         lineNumbers.push_back(lineCounter);
-         controlLines.push_back(type);
+      // Skip blank or comment line
+      if (newLine != "" && newLine[0] != '%')
+      {         
+         // Remove ending % or ;
+         UnsignedInt index;
+         index = newLine.find_first_of("%;");
+         if (index != newLine.npos)
+         {
+            newLine = newLine.substr(0, index);
+         }
+         
+         #if DEBUG_READ_FIRST_PASS
+         MessageInterface::ShowMessage("newLine=%s\n", newLine.c_str());
+         #endif
+         
+         type = newLine;
+         // Grap only control command part from the line
+         // ex) While var1 == var2, If var1 > 5
+         index = newLine.find_first_of(" \t");
+         if (index != newLine.npos)
+         {
+            type = newLine.substr(0, index);
+            if (type[index-1] == ';')
+               type = type.substr(0, index-1);         
+         }
+         
+         if (type != "" && IsBranchCommand(type))
+         {
+            lineNumbers.push_back(lineCounter);
+            controlLines.push_back(type);
+         }
       }
       
       if (ch == EOF)
