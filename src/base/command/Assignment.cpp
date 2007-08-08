@@ -34,9 +34,10 @@
 //#define DEBUG_EVAL_RHS
 //#define DEBUG_ASSIGNMENT_IA 1
 //#define DEBUG_ASSIGNMENT_INIT 1
-//define DEBUG_ASSIGNMENT_EXEC 1
+//#define DEBUG_ASSIGNMENT_EXEC 1
 //#define DEBUG_EQUATION 1
 //#define DEBUG_ASSIGNMENT_WRAPPER 1
+
 
 //------------------------------------------------------------------------------
 //  Assignment()
@@ -275,10 +276,13 @@ bool Assignment::Execute()
    
    Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
    Gmat::ParameterType rhsDataType = Gmat::UNKNOWN_PARAMETER_TYPE;
+   std::string lhsTypeStr = GmatBase::PARAM_TYPE_STRING[lhsDataType];
+   std::string rhsTypeStr = "UnknownDataType";
+   Gmat::WrapperDataType lhsWrapperType = lhsWrapper->GetWrapperType();
    Gmat::WrapperDataType rhsWrapperType = Gmat::UNKNOWN_WRAPPER_TYPE;
    
    #ifdef DEBUG_ASSIGNMENT_EXEC
-   MessageInterface::ShowMessage("   lhsDataType=%d\n", lhsDataType);
+   MessageInterface::ShowMessage("   lhsDataType=%s\n", lhsTypeStr.c_str());
    #endif
    
    try
@@ -287,23 +291,21 @@ bool Assignment::Execute()
       if (mathTree == NULL)
       {
          rhsDataType = rhsWrapper->GetDataType();
+         rhsTypeStr = GmatBase::PARAM_TYPE_STRING[rhsDataType];
          rhsWrapperType = rhsWrapper->GetWrapperType();
          
          #ifdef DEBUG_ASSIGNMENT_EXEC
-         MessageInterface::ShowMessage("   rhsDataType=%d\n", rhsDataType);
+         MessageInterface::ShowMessage("   rhsDataType=%s\n", rhsTypeStr.c_str());
          #endif
-         
-         // Since it always creates NumberWrapper for numbers,
-         // we can allow INTEGER_TYPE = REAL_TYPE.
-         // Some object stores number as string, so allow that also.
-         if (lhsDataType != rhsDataType &&
-             !(lhsDataType == Gmat::INTEGER_TYPE && rhsDataType == Gmat::REAL_TYPE) &&
-             !(lhsDataType == Gmat::STRING_TYPE && rhsDataType == Gmat::REAL_TYPE) &&
-             !(lhsDataType == Gmat::STRING_TYPE && rhsDataType == Gmat::ON_OFF_TYPE))
+                  
+         // If lhs is String, it must be String Object, so check it first
+         // ex) UnknownObj1 = str1
+         if (lhsDataType == Gmat::STRING_TYPE && lhsWrapperType == Gmat::STRING)
          {
             CommandException ce;
-            ce.SetDetails("Cannot assign \"%s\" to \"%s\". The types are not same",
+            ce.SetDetails("Cannot set \"%s\" to unknown object \"%s\"",
                           rhs.c_str(), lhs.c_str());
+            throw ce;
          }
          
          switch (rhsDataType)
@@ -339,9 +341,9 @@ bool Assignment::Execute()
          Integer returnType;
          Integer numRow;
          Integer numCol;
-      
+         
          MathNode *topNode = mathTree->GetTopNode();
-      
+         
          if (topNode)
          {
             #if DEBUG_EQUATION
@@ -359,8 +361,10 @@ bool Assignment::Execute()
             if (lhsDataType != returnType)
             {
                CommandException ce;
-               ce.SetDetails("Cannot assign \"%s\" to \"%s\". The types are not same",
-                             rhs.c_str(), lhs.c_str());
+               ce.SetDetails("Cannot set type \"%s\" to type \"%s\"",
+                             GmatBase::PARAM_TYPE_STRING[returnType].c_str(),
+                             lhsTypeStr.c_str());
+               throw ce;
             }
             
             switch (returnType)
@@ -376,7 +380,7 @@ bool Assignment::Execute()
                break;
             default:
                CommandException ce;
-               ce.SetDetails("Cannot assign \"%s\" to \"%s\". The return type of "
+               ce.SetDetails("Cannot set \"%s\" to \"%s\". The return type of "
                              "equation is unknown", rhs.c_str(), lhs.c_str());
                throw ce;
             }
@@ -414,7 +418,7 @@ bool Assignment::Execute()
                if (GmatStringUtil::ToInteger(desc, itempval))
                   lhsWrapper->SetInteger(itempval);
                else
-                  throw CommandException("Cannot assign Real number to Integer");
+                  throw CommandException("Cannot set Real number to Integer");
             }
             break;
          }
@@ -422,16 +426,21 @@ bool Assignment::Execute()
          if (rval != -99999.999)
             lhsWrapper->SetReal(rval);
          else
-            throw CommandException("Cannot assign Non-Real number to Real");
+            throw CommandException("Cannot set Non-Real value to Real");
          break;
       case Gmat::RMATRIX_TYPE:
          lhsWrapper->SetArray(rmat);
          break;
       case Gmat::STRING_TYPE:
-         if (rhsDataType == Gmat::STRING_TYPE ||
-             rhsDataType == Gmat::ON_OFF_TYPE)
+         // Object to String is needed for Remove for Formation
+         if (obj != NULL)
          {
-            lhsWrapper->SetString(sval);
+            lhsWrapper->SetString(obj->GetName());
+         }
+         else if ((rhsDataType == Gmat::STRING_TYPE ||
+              rhsDataType == Gmat::ON_OFF_TYPE))
+         {
+            lhsWrapper->SetString(sval);            
          }
          // We don't want to allow VARIALE to STRING assinment
          else if (rhsDataType == Gmat::REAL_TYPE &&
@@ -439,14 +448,19 @@ bool Assignment::Execute()
          {
             lhsWrapper->SetString(rhsWrapper->GetDescription());
          }
-         else if (obj != NULL) // Object to String
-         {
-            lhsWrapper->SetString(obj->GetName());
-         }
          else
          {
             CommandException ce;
-            ce.SetDetails("Cannot assign \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
+            if (obj != NULL)
+               ce.SetDetails("Cannot set object of type \"%s\" to an undefined "
+                             "object \"%s\"", obj->GetTypeName().c_str(), lhs.c_str());
+            else if (lhsWrapperType == Gmat::STRING_OBJECT &&
+                     rhsWrapperType == Gmat::VARIABLE)
+               ce.SetDetails("Cannot set objet of type \"Variable\" to object of "
+                             "type \"String\"");
+            else
+               ce.SetDetails("Cannot set \"%s\" to an undefined object \"%s\"",
+                             rhs.c_str(), lhs.c_str());
             throw ce;
          }
          break;
@@ -454,18 +468,20 @@ bool Assignment::Execute()
          lhsWrapper->SetOnOff(sval);
          break;
       case Gmat::OBJECT_TYPE:
-         lhsWrapper->SetObject(obj);
+         if (obj == NULL)
+            throw CommandException("Cannot set Non-Object type to object");
+         else
+            lhsWrapper->SetObject(obj);
          break;
       case Gmat::STRINGARRAY_TYPE:
-         if (obj != NULL) // Object to String
-         {
+         // Object to String is needed for Add for Subscribers/Formation
+         if (obj != NULL)
             lhsWrapper->SetString(obj->GetName());
-         }
          else
          {
             CommandException ce;
-            ce.SetDetails("Cannot assign \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
-            throw ce;
+            ce.SetDetails("Cannot set \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
+            throw ce;            
          }
          break;
       default:
@@ -477,10 +493,14 @@ bool Assignment::Execute()
    }
    catch (BaseException &e)
    {
+      // To make error message format consistent, just add "Command Exception:"
+      std::string msg = e.GetFullMessage();
+      if (msg.find("Exception") == msg.npos && msg.find("exception") == msg.npos)
+         msg = "Command Exception: " + msg;
+      
       CommandException ce;
       ce.SetMessage("");
-      ce.SetDetails("%s in \n   \"%s\"\n", e.GetFullMessage().c_str(),
-                    generatingString.c_str());
+      ce.SetDetails("%s in \n   \"%s\"\n", msg.c_str(), generatingString.c_str());
       throw ce;
    }
 }
