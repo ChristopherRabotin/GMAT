@@ -22,6 +22,7 @@
 #include "ConditionalBranch.hpp"
 #include "StringUtil.hpp"  // for ToReal()
 #include "Array.hpp"
+#include "Assignment.hpp"  // for GetLHS(), GetRHS()
 #include "MessageInterface.hpp"
 #include "NumberWrapper.hpp"
 #include "ParameterWrapper.hpp"
@@ -764,17 +765,67 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
       for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
          MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
    #endif
-   for (StringArray::const_iterator i = wrapperNames.begin();
-        i != wrapperNames.end(); ++i)
+   
+   //---------------------------------------------------------------------------
+   // Special case for Assignment command (LHS = RHS).
+   // Since such as Sat.X can be both Parameter or ObjectProperty, we want to
+   // create a Parameter wapper if RHS is a Parameter for Assignment command.
+   // So special code is needed to tell the CreateElementWrapper() to check for
+   // Parameter first.
+   //---------------------------------------------------------------------------
+   if (cmd->GetTypeName() == "GMAT")
    {
-      ElementWrapper *ew = CreateElementWrapper(*i);
-      
-      if (cmd->SetElementWrapper(ew, *i) == false)
+      Assignment *acmd = (Assignment*)cmd;
+      std::string lhs = acmd->GetLHS();
+      ElementWrapper *ew = CreateElementWrapper(lhs);
+      if (cmd->SetElementWrapper(ew, lhs) == false)
       {
          InterpreterException ex
-             ("ElementWrapper for \"" + (*i) + "\" cannot be created.");
+            ("Undefined object \"" + lhs + "\" found in command \"" +
+             cmd->GetTypeName());
          HandleError(ex);
          return false;
+      }
+      
+      //If RHS is not an equation, get RHS
+      if (acmd->GetMathTree() == NULL)
+      {
+         std::string rhs = acmd->GetRHS();
+         if (rhs != "")
+         {
+            if (IsParameterType(rhs))
+               ew = CreateElementWrapper(rhs, true);
+            else
+               ew = CreateElementWrapper(rhs);
+            
+            if (cmd->SetElementWrapper(ew, rhs) == false)
+            {
+               InterpreterException ex
+                  ("Undefined object \"" + rhs + "\" found in command \"" +
+                   cmd->GetTypeName());
+               HandleError(ex);
+               return false;
+            }
+         }
+      }
+   }
+   else
+   {
+      for (StringArray::const_iterator i = wrapperNames.begin();
+           i != wrapperNames.end(); ++i)
+      {
+         ElementWrapper *ew = CreateElementWrapper(*i);
+         
+         if (cmd->SetElementWrapper(ew, *i) == false)
+         {
+            InterpreterException ex
+               ("Undefined object \"" + (*i) + "\" found in command \"" +
+                cmd->GetTypeName());
+            //InterpreterException ex
+            //   ("ElementWrapper for \"" + (*i) + "\" cannot be created.");
+            HandleError(ex);
+            return false;
+         }
       }
    }
    
@@ -948,7 +999,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    if (type[0] == '[')
    {
       cmd = AppendCommand("CallFunction", retFlag, inCmd);
-      desc1 = type +  "=" + desc; //loj: 4/2/07 Added equal sign
+      desc1 = type +  "=" + desc;
       cmd->SetGeneratingString(desc1);
    }
    /// @TODO: This is a work around for a call function
@@ -4374,6 +4425,29 @@ bool Interpreter::IsObjectType(const std::string &type)
 
 
 //------------------------------------------------------------------------------
+// bool IsParameterType(const std::string &desc)
+//------------------------------------------------------------------------------
+/*
+ * Checks if input description is a Parameter.
+ * If desctiption has dots, it will parse the components into Object, Depdency,
+ * and Type. If type is one of the system parameters, it will return true.
+ *
+ * @param  desc  Input string to check for Parameter type
+ * @return  true  if type is a Parameter type
+ */
+//------------------------------------------------------------------------------
+bool Interpreter::IsParameterType(const std::string &desc)
+{
+   std::string type, owner, dep;
+   GmatStringUtil::ParseParameter(desc, type, owner, dep);
+   if (theModerator->IsParameter(type))
+      return true;
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
 // bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value)
 //------------------------------------------------------------------------------
 /**
@@ -4681,20 +4755,20 @@ void Interpreter::WriteParts(const std::string &title, StringArray &parts)
 
 //------------------------------------------------------------------------------
 // ElementWrapper* CreateElementWrapper(const std::string &desc,
-//                                      bool forSubscriber = false)
+//                                      bool parametersFirst = false)
 //------------------------------------------------------------------------------
 /**
  * Creates the appropriate ElementWrapper, based on the description.
  *
  * @param  <desc>  description string for the element required
- * @param  <forSubscriber>  true if creating for subscriber to check
- *                          for the Parameter first then Object Property
+ * @param  <parametersFirst>  true if creating for wrappers for the Parameter
+ *                            first then Object Property
  *
  * @return pointer to the created ElementWrapper
  */
 //------------------------------------------------------------------------------
 ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
-                                                  bool forSubscriber)
+                                                  bool parametersFirst)
 {
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
@@ -4738,8 +4812,8 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
       // check to see if it is an object property or a parameter
       else if (desc.find(".") != std::string::npos)
       {
-         // if creating for subscriber, always create parameter wrapper first
-         if (forSubscriber)
+         // if parametersFirst, always create parameter wrapper first
+         if (parametersFirst)
          {
             Parameter *param = CreateSystemParameter(desc);
             if (param)

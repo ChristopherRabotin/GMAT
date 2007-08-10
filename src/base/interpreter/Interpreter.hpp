@@ -269,6 +269,7 @@ private:
    StringArray   subscriberList;
    
    bool IsObjectType(const std::string &type);
+   bool IsParameterType(const std::string &desc);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
    bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
@@ -278,7 +279,7 @@ private:
    
    // for wrappers
    ElementWrapper* CreateElementWrapper(const std::string &desc,
-                                        bool forSubscriber = false);
+                                        bool parametersFirst = false);
    void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
                                Gmat::WrapperDataType &itsType);
    
