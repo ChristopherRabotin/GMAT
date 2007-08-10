@@ -51,9 +51,9 @@ CompareFilesDialog::CompareFilesDialog(wxWindow *parent)
    mNumDirsToCompare = 1;
    mAbsTol = 1.0e-4;
    mBaseDirectory = "";
-
-   mBaseString = "STK";
-
+   
+   mBaseString = "GMAT";
+   
    // we can have up to 3 directories to compare
    mCompareStrings.Add("GMAT");
    mCompareStrings.Add("GMAT");
