@@ -1056,7 +1056,9 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
 
       if (objTypeName == "MatlabFunction")
       {
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
+         // Until we get permision to use Matlab icon, just use default.
+         //AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
                  new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
          
          #ifndef __USE_MATLAB__
@@ -2069,7 +2071,9 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
       
       if (obj != NULL)
       {
-         AppendItem(item, name, GmatTree::ICON_MATLAB_FUNCTION, -1,
+         // Until we get permision to use Matlab icon, just use default.
+         //AppendItem(item, name, GmatTree::ICON_MATLAB_FUNCTION, -1,
+         AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
                     new GmatTreeItemData(name, GmatTree::MATLAB_FUNCTION));
          Expand(item);
          
