@@ -89,7 +89,7 @@ public:
    //void OnZoomOut(wxCommandEvent& event);
    
    void UpdateMenus(bool openOn);
-   void EnableMenuAndToolBar(bool enable);
+   void EnableMenuAndToolBar(bool enable, bool missionRunning = false);
    
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);
@@ -190,20 +190,19 @@ namespace GmatMenu
    // IDs for the controls and the menu commands
    enum
    {
-      MENU_PROJECT_NEW = 10000,
-      MENU_PROJECT_LOAD_DEFAULT_MISSION,
-      MENU_PROJECT_PRINT,
+      MENU_FILE_NEW_SCRIPT = 10000,
+      MENU_FILE_OPEN_SCRIPT,
+      MENU_FILE_SAVE_SCRIPT,
+      MENU_FILE_SAVE_SCRIPT_AS,
+      MENU_FILE_PRINT,
+      MENU_LOAD_DEFAULT_MISSION,
+      
       MENU_PROJECT_PREFERENCES,
       MENU_PROJECT_PREFERENCES_FONT,
       MENU_PROJECT_EXIT,
       MENU_SET_PATH_AND_LOG,
       MENU_INFORMATION,
-
-      MENU_FILE_OPEN_SCRIPT,
-      MENU_FILE_NEW_SCRIPT,
-      MENU_FILE_SAVE_SCRIPT,
-      MENU_FILE_SAVE_AS_SCRIPT,
-
+      
       MENU_EDIT_UNDO,
       MENU_EDIT_REDO,
       MENU_EDIT_CUT,
@@ -212,7 +211,7 @@ namespace GmatMenu
       MENU_EDIT_COMMENT,
       MENU_EDIT_UNCOMMENT,
       MENU_EDIT_SELECT_ALL,
-
+      
       MENU_EDIT_RESOURCES,
       MENU_EDIT_MISSION,
       
@@ -220,32 +219,11 @@ namespace GmatMenu
       MENU_SCRIPT_BUILD_OBJECT,
       MENU_SCRIPT_RUN,
       MENU_SCRIPT_BUILD_AND_RUN,
-
-      MENU_PARAMETERS_PROP_CONFIG,
-      MENU_PARAMETERS_PROPAGATOR,
-      MENU_PARAMETERS_LAUNCH_MODEL,
-      MENU_PARAMETERS_INJECTION_BURN_MODEL,
-      MENU_PARAMETERS_SOLAR_RAD,
-      MENU_PARAMETERS_ORBIT_INFO,
-      MENU_PARAMETERS_ATTITUDE_MODES,
-      MENU_PARAMETERS_SOLAR_SAILS,
-      MENU_PARAMETERS_SOLAR_ELEC_CONV,
-
-      MENU_ORBIT_FILES_GL_PLOT_TRAJ_FILE,
-      MENU_ORBIT_FILES_XY_PLOT_TRAJ_FILE,
-      MENU_ORBIT_FILES_EPHEM_FILE,
-
-      MENU_VARIABLES_CREATE,
-      MENU_VARIABLES_EVALUATE,
-
-      MENU_TOOLS_SWINGBY,
-      MENU_TOOLS_MATLAB,
-      MENU_TOOLS_MATLAB_OPEN,
-      MENU_TOOLS_MATLAB_CLOSE,
+      
       MENU_TOOLS_FILE_COMPARE_NUMERIC,
       MENU_TOOLS_FILE_COMPARE_TEXT,
       MENU_TOOLS_GEN_TEXT_EPHEM_FILE,
-      
+
       MENU_HELP_TOPICS,
       
       TOOL_RUN,
@@ -253,17 +231,19 @@ namespace GmatMenu
       TOOL_RESUME,
       TOOL_STOP,
       TOOL_BUILD,
-
+      
       TOOL_CLOSE_CHILDREN,
       TOOL_CLOSE_CURRENT,
       TOOL_SCRIPT,
-      
+
+      MENU_MATLAB_OPEN,
+      MENU_MATLAB_CLOSE,
       MENU_START_SERVER,
       MENU_STOP_SERVER,
-
+      
       ID_SASH_WINDOW,
       ID_MSG_SASH_WINDOW,
-
+      
       // it is important for the id corresponding to the "About" command to have
       // this standard value as otherwise it won't be handled properly under Mac
       // (where it is special and put into the "Apple" menu)

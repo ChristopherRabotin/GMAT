@@ -72,6 +72,20 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    
    SetMenuBar(theMenuBar);
    
+   // Disble all top menu items except Help, if output plot was created
+   // This will be enabled when completed mission running
+   if (mItemType == GmatTree::OUTPUT_OPENGL_PLOT ||
+       mItemType == GmatTree::OUTPUT_XY_PLOT)
+   {
+      int helpIndex = theMenuBar->FindMenu("Help");
+      int numMenu = theMenuBar->GetMenuCount();
+      for (int i=0; i<numMenu; i++)
+      {
+         if (i != helpIndex)
+            theMenuBar->EnableTop(i, false);
+      }
+   }
+   
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
    try

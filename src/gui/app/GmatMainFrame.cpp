@@ -139,10 +139,10 @@ using namespace GmatMenu;
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
-   EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
-   EVT_MENU(MENU_PROJECT_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
+   //EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
+   EVT_MENU(MENU_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT, GmatMainFrame::OnSaveScript)
-   EVT_MENU(MENU_FILE_SAVE_AS_SCRIPT, GmatMainFrame::OnSaveScriptAs)
+   EVT_MENU(MENU_FILE_SAVE_SCRIPT_AS, GmatMainFrame::OnSaveScriptAs)
    EVT_MENU(MENU_PROJECT_EXIT, GmatMainFrame::OnProjectExit)
    EVT_MENU(MENU_PROJECT_PREFERENCES_FONT, GmatMainFrame::OnFont)
    EVT_MENU(TOOL_RUN, GmatMainFrame::OnRun)
@@ -164,12 +164,12 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_EDIT_COMMENT, GmatMainFrame::OnComment)
    EVT_MENU(MENU_EDIT_UNCOMMENT, GmatMainFrame::OnUncomment)
    EVT_MENU(MENU_EDIT_SELECT_ALL, GmatMainFrame::OnSelectAll)
-
+   
    EVT_MENU(MENU_START_SERVER, GmatMainFrame::OnStartServer)
    EVT_MENU(MENU_STOP_SERVER, GmatMainFrame::OnStopServer)
-
-   EVT_MENU(MENU_TOOLS_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
-   EVT_MENU(MENU_TOOLS_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
+   
+   EVT_MENU(MENU_MATLAB_OPEN, GmatMainFrame::OnOpenMatlab)
+   EVT_MENU(MENU_MATLAB_CLOSE, GmatMainFrame::OnCloseMatlab)
    EVT_MENU(MENU_TOOLS_FILE_COMPARE_NUMERIC, GmatMainFrame::OnFileCompareNumeric)
    EVT_MENU(MENU_TOOLS_FILE_COMPARE_TEXT, GmatMainFrame::OnFileCompareText)
    EVT_MENU(MENU_TOOLS_GEN_TEXT_EPHEM_FILE, GmatMainFrame::OnGenerateTextEphemFile)
@@ -264,7 +264,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    
    int w, h;
    GetClientSize(&w, &h);
-
+   
    // A window w/sash for messages
    msgWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
                            wxDefaultPosition, wxSize(30, 200),
@@ -315,7 +315,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    mServer = NULL;
    mRunPaused = false;
    mRunCompleted = true;
-
+   
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
    try
@@ -427,7 +427,7 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
           item->GetDesc().c_str(), itemType);
       #endif
    }
-
+   
    return newChild;
 }
 
@@ -1078,25 +1078,17 @@ Integer GmatMainFrame::RunCurrentMission()
       return 0;
    }
    
-   wxToolBar* toolBar = GetToolBar();
-   
-   theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, FALSE);
-   UpdateMenus(FALSE);
-   
-   toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, FALSE);
-   toolBar->EnableTool(TOOL_RUN, FALSE);
-   toolBar->EnableTool(TOOL_PAUSE, TRUE);
-   toolBar->EnableTool(TOOL_STOP, TRUE);
+   EnableMenuAndToolBar(false, true);
    
    wxYield();
    SetFocus();
-
+   
    mRunCompleted = false;
    
    if (mRunPaused)
    {
       mRunPaused = false;
-
+      
       MessageInterface::ShowMessage("Execution resumed.\n");
       theGuiInterpreter->ChangeRunState("Resume");
    }
@@ -1109,12 +1101,7 @@ Integer GmatMainFrame::RunCurrentMission()
          StopServer(); // stop server if running to avoid getting callback staus
                        // when run stopped by user
       
-      theMenuBar->Enable(MENU_FILE_OPEN_SCRIPT, TRUE);
-      UpdateMenus(TRUE);
-      toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, TRUE);
-      toolBar->EnableTool(TOOL_RUN, TRUE);
-      toolBar->EnableTool(TOOL_PAUSE, FALSE);
-      toolBar->EnableTool(TOOL_STOP, FALSE);
+      EnableMenuAndToolBar(true, true);
       
       //put items in output tab
       GmatAppData::GetOutputTree()->UpdateOutput(false);
@@ -1692,7 +1679,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->AddTool(MENU_FILE_SAVE_SCRIPT, _T("Save"), *bitmaps[2], _T("Save to Script"));
    toolBar->AddSeparator();
    
-   toolBar->AddTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[13], 
+   toolBar->AddTool(MENU_LOAD_DEFAULT_MISSION, _T("Default"), *bitmaps[13], 
                     _T("Default Project"));
    toolBar->AddSeparator();
    
@@ -1734,9 +1721,7 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->EnableTool(TOOL_STOP, FALSE);
    
    for (int i = 0; i < 15; i++)
-   {
       delete bitmaps[i];
-   }
    
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() exiting\n");
@@ -2806,40 +2791,73 @@ void GmatMainFrame::UpdateMenus(bool openOn)
 // void EnableMenuAndToolBar(bool enable)
 //------------------------------------------------------------------------------
 /*
+ * Enables menu items and tool bar icons. Usuallay menus and icons will be
+ * disabled when the mission run started and enabled after the run completes.
+ *
  * @param <enable> true to enable the menu and tool icons, false to disable them
+ * @param <missionRunning> true if missin is running, this will toggle pause
+ *                         and stop icons
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::EnableMenuAndToolBar(bool enable)
+void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
 {
    wxToolBar *toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_RUN, enable);
+   toolBar->EnableTool(TOOL_PAUSE, enable);
+   toolBar->EnableTool(TOOL_STOP, enable);
+   
+   if (missionRunning)
+   {
+      toolBar->EnableTool(TOOL_PAUSE, !enable);
+      toolBar->EnableTool(TOOL_STOP, !enable);
+   }
+   else
+   {
+      toolBar->EnableTool(TOOL_PAUSE, false);
+      toolBar->EnableTool(TOOL_STOP, false);
+   }
+   
    toolBar->EnableTool(TOOL_CLOSE_CHILDREN, enable);
    toolBar->EnableTool(TOOL_CLOSE_CURRENT, enable);
    
    toolBar->EnableTool(MENU_FILE_NEW_SCRIPT, enable);
    toolBar->EnableTool(MENU_FILE_OPEN_SCRIPT, enable);
    toolBar->EnableTool(MENU_FILE_SAVE_SCRIPT, enable);
-   toolBar->EnableTool(MENU_PROJECT_LOAD_DEFAULT_MISSION, enable);
-
+   toolBar->EnableTool(MENU_LOAD_DEFAULT_MISSION, enable);
+   
    //-----------------------------------
    // Enable child mdi menu bar first
    //-----------------------------------
    GmatMdiChildFrame *child = (GmatMdiChildFrame*)GetActiveChild();
-   wxMenuBar *childMenuBar = child->GetMenuBar();
-   int childMenuCount = childMenuBar->GetMenuCount();
+   if (child != NULL)
+   {
+      wxMenuBar *childMenuBar = child->GetMenuBar();
+      int helpIndex = childMenuBar->FindMenu("Help");
+      int childMenuCount = childMenuBar->GetMenuCount();
+      
+      for (int i=0; i<childMenuCount; i++)
+      {
+         // Update except Help menu
+         if (i != helpIndex)
+            childMenuBar->EnableTop(i, enable);
+      }
+      
+      childMenuBar->Update();
+   }
    
-   for (int i=0; i<childMenuCount; i++)
-      childMenuBar->EnableTop(i, enable);
-   
-   childMenuBar->Update();
    
    //-----------------------------------
    // Enable parent mdi menu bar second
    //-----------------------------------
    int parentMenuCount = theMenuBar->GetMenuCount();
+      int helpIndex = theMenuBar->FindMenu("Help");
    
    for (int i=0; i<parentMenuCount; i++)
-      theMenuBar->EnableTop(i, enable);
+   {
+      // Update except Help menu
+      if (i != helpIndex)
+         theMenuBar->EnableTop(i, enable);
+   }
    
    theMenuBar->Update();
    
