@@ -1053,13 +1053,11 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
       GmatBase *funct = GetObject(itemNames[i]);
       objName = wxString(itemNames[i].c_str());
       objTypeName = wxString(funct->GetTypeName().c_str());
-
+      
       if (objTypeName == "MatlabFunction")
       {
-         // Until we get permision to use Matlab icon, just use default.
-         //AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
-         AppendItem(itemId, wxT(objName), GmatTree::ICON_DEFAULT, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_MATLAB_FUNCTION, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::MATLAB_FUNCTION));
          
          #ifndef __USE_MATLAB__
          MessageInterface::PopupMessage
@@ -1070,7 +1068,7 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
       else if (objTypeName == "GmatFunction")
       {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_FUNCTION, -1,
-                 new GmatTreeItemData(wxT(objName), GmatTree::GMAT_FUNCTION));
+                    new GmatTreeItemData(wxT(objName), GmatTree::GMAT_FUNCTION));
       }
    }
    
@@ -1597,55 +1595,52 @@ void ResourceTree::OnEndDrag(wxTreeEvent& event)
 void ResourceTree::AddIcons()
 {
    int size = 16;
-  
+   
    wxImageList *images = new wxImageList ( size, size, true );
-  
+   
    wxBusyCursor wait;
    wxIcon icons[29];
-
-   icons[0] = wxIcon ( folder_xpm );
-   icons[1] = wxIcon ( file_xpm );
-   icons[2] = wxIcon ( openfolder_xpm );
-   icons[3] = wxIcon ( spacecraft_xpm );
-   icons[4] = wxIcon ( tank_xpm );
-   icons[5] = wxIcon ( thruster_xpm );
-   icons[6] = wxIcon ( sun_xpm );
-   icons[7] = wxIcon ( mercury_xpm );
-   icons[8] = wxIcon ( venus_xpm );
-   icons[9] = wxIcon ( earth_xpm );
-   icons[10] = wxIcon ( mars_xpm );
-   icons[11] = wxIcon ( jupiter_xpm );
-   icons[12] = wxIcon ( saturn_xpm );
-   icons[13] = wxIcon ( uranus_xpm );
-   icons[14] = wxIcon ( neptune_xpm );
-   icons[15] = wxIcon ( pluto_xpm );
-   icons[16] = wxIcon ( report_xpm );
-   icons[17] = wxIcon ( network_xpm );
-   icons[18] = wxIcon ( burn_xpm );
-   icons[19] = wxIcon ( moon_xpm );
-   icons[20] = wxIcon ( matlabfunction_xpm );
-   icons[21] = wxIcon ( function_xpm );
-   icons[22] = wxIcon ( array_xpm );
-   icons[23] = wxIcon ( coordinatesystem_xpm );
-   icons[24] = wxIcon ( openglplot_xpm );
-   icons[25] = wxIcon ( propagator_xpm );
-   icons[26] = wxIcon ( variable_xpm );
-   icons[27] = wxIcon ( xyplot_xpm );
-   icons[28] = wxIcon ( default_xpm );
-
+   int index = 0;
+   
+   icons[index] = wxIcon ( folder_xpm );
+   icons[++index] = wxIcon ( file_xpm );
+   icons[++index] = wxIcon ( openfolder_xpm );
+   icons[++index] = wxIcon ( spacecraft_xpm );
+   icons[++index] = wxIcon ( tank_xpm );
+   icons[++index] = wxIcon ( thruster_xpm );
+   icons[++index] = wxIcon ( sun_xpm );
+   icons[++index] = wxIcon ( mercury_xpm );
+   icons[++index] = wxIcon ( venus_xpm );
+   icons[++index] = wxIcon ( earth_xpm );
+   icons[++index] = wxIcon ( mars_xpm );
+   icons[++index] = wxIcon ( jupiter_xpm );
+   icons[++index] = wxIcon ( saturn_xpm );
+   icons[++index] = wxIcon ( uranus_xpm );
+   icons[++index] = wxIcon ( neptune_xpm );
+   icons[++index] = wxIcon ( pluto_xpm );
+   icons[++index] = wxIcon ( report_xpm );
+   icons[++index] = wxIcon ( network_xpm );
+   icons[++index] = wxIcon ( burn_xpm );
+   icons[++index] = wxIcon ( moon_xpm );
+   icons[++index] = wxIcon ( matlabfunction_xpm );
+   icons[++index] = wxIcon ( function_xpm );
+   icons[++index] = wxIcon ( array_xpm );
+   icons[++index] = wxIcon ( coordinatesystem_xpm );
+   icons[++index] = wxIcon ( openglplot_xpm );
+   icons[++index] = wxIcon ( propagator_xpm );
+   icons[++index] = wxIcon ( variable_xpm );
+   icons[++index] = wxIcon ( xyplot_xpm );
+   icons[++index] = wxIcon ( default_xpm );
+   
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
       if ( size == sizeOrig )
-      {
          images->Add(icons[i]);
-      }
       else
-      {
          images->Add(wxBitmap(wxBitmap(icons[i]).ConvertToImage().Rescale(size, size)));
-      }
    }
-
+   
    AssignImageList(images);
 
 }
@@ -2071,9 +2066,7 @@ void ResourceTree::OnAddMatlabFunction(wxCommandEvent &event)
       
       if (obj != NULL)
       {
-         // Until we get permision to use Matlab icon, just use default.
-         //AppendItem(item, name, GmatTree::ICON_MATLAB_FUNCTION, -1,
-         AppendItem(item, name, GmatTree::ICON_DEFAULT, -1,
+         AppendItem(item, name, GmatTree::ICON_MATLAB_FUNCTION, -1,
                     new GmatTreeItemData(name, GmatTree::MATLAB_FUNCTION));
          Expand(item);
          
@@ -2829,8 +2822,8 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       
    #ifdef __USE_MATLAB__
    case GmatTree::MATLAB_INTERFACE:
-      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_OPEN, wxT("Open"));
-      menu.Append(GmatMenu::MENU_TOOLS_MATLAB_CLOSE, wxT("Close"));
+      menu.Append(GmatMenu::MENU_MATLAB_OPEN, wxT("Open"));
+      menu.Append(GmatMenu::MENU_MATLAB_CLOSE, wxT("Close"));
       break;
    case GmatTree::MATLAB_SERVER:
       menu.Append(GmatMenu::MENU_START_SERVER, wxT("Start"));
