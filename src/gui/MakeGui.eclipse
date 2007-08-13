@@ -214,12 +214,14 @@ macosx:
 	mkdir -p $(RES_DIR)
 	mkdir -p $(LIBS_DIR)
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" \
-	-e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
+   sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./install_libs_into_bundle
+# old stuff here ....
+#   sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" \
+#   -e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
 
 
 .cpp.o:
