@@ -54,6 +54,7 @@ public:
    virtual bool ReceiveData(const Real * datastream, const Integer len = 0);
    virtual bool FlushData();
    virtual bool SetEndOfRun();
+   virtual void SetRunState(Gmat::RunState rs);
    
    Subscriber*  Next(void);
    bool Add(Subscriber *s);
@@ -120,6 +121,8 @@ protected:
    bool        active;
    bool        isEndOfReceive;
    bool        isEndOfRun;
+   /// The current run state, so actions based on state can be taken
+   Gmat::RunState runstate;
    Integer     currentProvider;
    
    /// The list of names of Wrapper objects
@@ -131,6 +134,7 @@ protected:
    bool SetWrapperReference(GmatBase *obj, const std::string &name);
    virtual bool Distribute(Integer len) = 0;
    virtual bool Distribute(const Real *dat, Integer len);
+   
    
    enum
    {

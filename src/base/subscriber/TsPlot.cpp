@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include "TsPlot.hpp"
-#include "Publisher.hpp"         // for GetRunState()
 #include "PlotInterface.hpp"     // for XY plot
 #include "SubscriberException.hpp"
 #include "MessageInterface.hpp"  // for ShowMessage()
@@ -1055,23 +1054,25 @@ bool TsPlot::Distribute(const Real * dat, Integer len)
    #if DEBUG_TSPLOT_UPDATE > 1
    MessageInterface::ShowMessage
       ("TsPlot::Distribute() entered. isEndOfReceive=%d, active=%d, runState=%d\n",
-       isEndOfReceive, active, Publisher::Instance()->GetRunState());
+       isEndOfReceive, active, runstate);
    #endif
    
    if (isEndOfReceive)
    {
       // if targetting and draw target is None, just return
       if (mSolverIterations == "None" &&
-          (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+          ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
+                (runstate == Gmat::SOLVING)))
          return true;
       
       if (active)
          return PlotInterface::RefreshTsPlot(instanceName);
    }
    
-   // if targetting and draw target is None, just return
+   // if targeting and draw target is None, just return
    if (mSolverIterations == "None" &&
-       (Publisher::Instance()->GetRunState() == Gmat::TARGETING))
+       ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
+             (runstate == Gmat::SOLVING)))
       return true;
    
    if (len > 0)

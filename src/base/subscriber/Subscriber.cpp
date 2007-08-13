@@ -80,6 +80,7 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    active (true),
    isEndOfReceive(false),
    isEndOfRun(false),
+   runstate(Gmat::IDLE),
    currentProvider(0)
 {
    objectTypes.push_back(Gmat::SUBSCRIBER);
@@ -100,6 +101,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    active (copy.active),
    isEndOfReceive(copy.isEndOfReceive),
    isEndOfRun(copy.isEndOfRun),
+   runstate(copy.runstate),
    currentProvider(copy.currentProvider),
    wrapperObjectNames(copy.wrapperObjectNames),
    paramWrappers(copy.paramWrappers)
@@ -127,6 +129,7 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    active = rhs.active;
    isEndOfReceive = rhs.isEndOfReceive;
    isEndOfRun = rhs.isEndOfRun;
+   runstate = rhs.runstate;
    currentProvider = rhs.currentProvider;
    internalCoordSystem = NULL;
    wrapperObjectNames = rhs.wrapperObjectNames;
@@ -138,9 +141,9 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
 
 
 //------------------------------------------------------------------------------
-// ~Subscriber(void)
+// ~Subscriber()
 //------------------------------------------------------------------------------
-Subscriber::~Subscriber(void)
+Subscriber::~Subscriber()
 {
 }
 
@@ -234,6 +237,21 @@ bool Subscriber::SetEndOfRun()
    isEndOfReceive = false;
    isEndOfRun = false;
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetRunState(Gmat::RunState rs)
+//------------------------------------------------------------------------------
+/**
+ * Sets the run state to the input value.
+ * 
+ * @param rs The new run state.
+ */
+//------------------------------------------------------------------------------
+void Subscriber::SetRunState(Gmat::RunState rs)
+{
+   runstate = rs;
 }
 
 

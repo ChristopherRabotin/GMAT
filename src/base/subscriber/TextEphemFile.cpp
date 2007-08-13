@@ -412,7 +412,8 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
    
    // Skip if targeting
    Publisher *thePublisher = Publisher::Instance();
-   if (thePublisher->GetRunState() == Gmat::TARGETING)
+   if ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
+       (runstate == Gmat::SOLVING))
       return true;
    
    if (mNumParams > 0)

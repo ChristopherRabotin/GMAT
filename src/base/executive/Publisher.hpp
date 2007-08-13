@@ -48,6 +48,8 @@ public:
    
    // Interfaces used to update the state of the running system
    void                 SetRunState(const Gmat::RunState state);
+   
+//private:
    inline Gmat::RunState GetRunState();
 
 private:

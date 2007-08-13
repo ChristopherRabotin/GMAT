@@ -315,6 +315,12 @@ const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
 void Publisher::SetRunState(const Gmat::RunState state)
 {
    runState = state;
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->SetRunState(runState);
+      current++;
+   }
 }
 
 

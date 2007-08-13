@@ -2488,10 +2488,11 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    
    // if targeting and draw target is None, just return
    if ((mSolverIterations == "None") &&
-       (thePublisher->GetRunState() == Gmat::TARGETING))
+       ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
+        (runstate == Gmat::SOLVING)))
    {
       #if DEBUG_OPENGL_UPDATE > 1
-      MessageInterface::ShowMessage("   SolverIterations is None and TARGETING\n");
+      MessageInterface::ShowMessage("   SolverIterations is None and SOLVING\n");
       #endif
       
       return true;
@@ -2568,7 +2569,8 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       }
       
       // If targeting, use targeting color
-      if (thePublisher->GetRunState() == Gmat::TARGETING)
+      if ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
+          (runstate == Gmat::SOLVING))
       {
          PlotInterface::
             UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
