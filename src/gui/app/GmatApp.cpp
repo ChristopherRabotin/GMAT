@@ -101,6 +101,11 @@ bool GmatApp::OnInit()
          #ifdef __LINUX__
             size = wxSize(1024, 768);
          #endif
+         // Mac doesn't look right, either
+         #ifdef __WXMAC__
+            size = wxSize(235,900);
+         #endif
+            
             
          //show the splash screen
          try
