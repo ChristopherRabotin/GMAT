@@ -905,25 +905,25 @@ void FileManager::AddAvailablePotentialFiles()
    
    // earth gravity files
    if (mFileMap.find("JGM2_FILE") == mFileMap.end())
-      AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
+      AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.cof");
    
    if (mFileMap.find("JGM3_FILE") == mFileMap.end())
-      AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
+      AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.cof");
    
    if (mFileMap.find("EGM96_FILE") == mFileMap.end())
-      AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.grv");
+      AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.cof");
    
    // luna gravity files
    if (mFileMap.find("LP165P_FILE") == mFileMap.end())
-      AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.grv");
+      AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.cof");
    
    // venus gravity files
    if (mFileMap.find("MGNP180U_FILE") == mFileMap.end())
-      AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.grv");
+      AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.cof");
    
    // mars gravity files
    if (mFileMap.find("MARS50C_FILE") == mFileMap.end())
-      AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.grv");
+      AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.cof");
    
 }
 
@@ -981,21 +981,21 @@ FileManager::FileManager()
    
    // earth gravity files
    AddFileType("EARTH_POT_PATH", "./files/gravity/earth/");
-   AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.grv");
-   AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.grv");
-   AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.grv");
+   AddFileType("JGM2_FILE", "EARTH_POT_PATH/JGM2.cof");
+   AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.cof");
+   AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.cof");
    
    // luna gravity files
    AddFileType("LUNA_POT_PATH", "./files/gravity/luna/");
-   AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.grv");
+   AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.cof");
    
    // venus gravity files
    AddFileType("VENUS_POT_PATH", "./files/gravity/venus/");
-   AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.grv");
+   AddFileType("MGNP180U_FILE", "VENUS_POT_PATH/MGNP180U.cof");
    
    // mars gravity files
    AddFileType("MARS_POT_PATH", "./files/gravity/mars/");
-   AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.grv");
+   AddFileType("MARS50C_FILE", "MARS_POT_PATH/Mars50c.cof");
    
    // planetary coeff. fiels
    AddFileType("PLANETARY_COEFF_PATH", "./files/planetary_coeff/");
