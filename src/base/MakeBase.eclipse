@@ -392,8 +392,9 @@ OBJECTS = \
     util/TimeSystemConverter.o \
     util/TimeTypes.o \
     util/UtcDate.o \
-    $(BRIDGEOBJECTS) \
     $(TCPIP_OBJECTS)
+    
+#    $(BRIDGEOBJECTS)
 
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o
@@ -402,13 +403,20 @@ FORTRAN_OBJECTS = solarsys/msise90_sub.o
     # stopcond/BaseStopCondition.o \
 
 
-$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS)
+$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
 	mkdir -p lib
-	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS)
+	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
 	ranlib $(TARGET)
 
 $(OBJECTS): %.o: %.cpp %.hpp
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+
+ifeq ($(CONSOLE_APP), 0)
+$(BRIDGEOBJECTS): %.o: %.cpp %.hpp
+	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+endif
+
 
 # Specific instructions for the fortran code
 solarsys/msise90_sub.o: solarsys/msise90_sub.for
