@@ -2841,8 +2841,10 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
          if (i != helpIndex)
             childMenuBar->EnableTop(i, enable);
       }
-      
+      // wcs 2007.08.16 crashes the Mac app
+      #ifndef __WXMAC__
       childMenuBar->Update();
+      #endif
    }
    
    
@@ -2859,7 +2861,10 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
          theMenuBar->EnableTop(i, enable);
    }
    
+   // wcs 2007.08.16 crashes the Mac app
+   #ifndef __WXMAC__
    theMenuBar->Update();
+   #endif
    
 }
 
