@@ -479,16 +479,11 @@ protected:
    //Integer                defaultCoefSize;
    //Rmatrix                defaultSij;
    //Rmatrix                defaultCij;
-
-
    
    // initialze the body
    void             InitializeBody(std::string withBodyType = "Planet");
    // methods to read the potential file, if requested
    bool             ReadPotentialFile();
-   bool             ReadCofFile();
-   bool             ReadGrvFile();
-   bool             ReadDatFile();
    
    bool             IsBlank(char* aLine);
    virtual Real     GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const;

@@ -64,15 +64,17 @@
 #include "TimeTypes.hpp"
 #include "CoordinateConverter.hpp"
 #include "StringUtil.hpp"
+#include "GravityFile.hpp"
+#include "FileManager.hpp"
 //#include "SolarSystemException.hpp"
 
 
 //#define DEBUG_GRAVITY_FIELD
-// #define DEBUG_GRAVITY_FIELD_DETAILS
+//#define DEBUG_GRAVITY_FIELD_DETAILS
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GRAV_COORD_SYSTEM
 //#define DEBUG_BODY_STATE
-
+//#define DEBUG_GRAVITY_FILE_READ
 
 using namespace GmatMathUtil;
 
@@ -235,20 +237,20 @@ GravityField::GravityField(const GravityField &gf) :
    
    for (Integer i = 0; i < 361; i++)
    {
-           for (Integer j = 0; j < 361; j++)
-           {
-                   Cbar[i][j] = gf.Cbar[i][j];
-                   Sbar[i][j] = gf.Sbar[i][j];
-           }
+      for (Integer j = 0; j < 361; j++)
+      {
+         Cbar[i][j] = gf.Cbar[i][j];
+         Sbar[i][j] = gf.Sbar[i][j];
+      }
    }
    
    for (Integer i = 0; i < 17; i++)
    {
-           for (Integer j = 0; j < 17; j++)
-           {
-                   dCbar[i][j] = gf.dCbar[i][j];
-                   dSbar[i][j] = gf.dSbar[i][j];
-           }
+      for (Integer j = 0; j < 17; j++)
+      {
+         dCbar[i][j] = gf.dCbar[i][j];
+         dSbar[i][j] = gf.dSbar[i][j];
+      }
    }
   
    parameterCount = GravityFieldParamCount;
@@ -295,20 +297,20 @@ GravityField& GravityField::operator=(const GravityField &gf)
    
    for (Integer i = 0; i < 361; i++)
    {
-           for (Integer j = 0; j < 361; j++)
-           {
-                   Cbar[i][j] = gf.Cbar[i][j];
-                   Sbar[i][j] = gf.Sbar[i][j];
-           }
+      for (Integer j = 0; j < 361; j++)
+      {
+         Cbar[i][j] = gf.Cbar[i][j];
+         Sbar[i][j] = gf.Sbar[i][j];
+      }
    }
    
    for (Integer i = 0; i < 17; i++)
    {
-           for (Integer j = 0; j < 17; j++)
-           {
-                   dCbar[i][j] = gf.dCbar[i][j];
-                   dSbar[i][j] = gf.dSbar[i][j];
-           }
+      for (Integer j = 0; j < 17; j++)
+      {
+         dCbar[i][j] = gf.dCbar[i][j];
+         dSbar[i][j] = gf.dSbar[i][j];
+      }
    }
    
 //   if (Cbar) {
@@ -1289,66 +1291,33 @@ bool GravityField::ReadFile()
    std::string  errMsg;
    bool         isOk = true;
    
-   #ifdef DEBUG_GRAVITY_FIELD
-      char str[1024];
-      strcpy(str, filename.c_str());
-      MessageInterface::ShowMessage("%s \"%s\"\n",
-         "GravityField::ReadFile() called for file", str);
+   #ifdef DEBUG_GRAVITY_FILE_READ
+   MessageInterface::ShowMessage
+      ("%s \"%s\"\n", "GravityField::ReadFile() called for file", filename.c_str());
    #endif
    
-   #ifdef DEBUG_GRAVITY_FILE_READ
-      char str[1024];
-      strcpy(str, filename.c_str());
-      MessageInterface::ShowMessage("%s \"%s\"\n",
-         "GravityField::ReadFile() called for file", str);
-   #endif
-
-   // Determine the type of file  --> add switch later!!!!!!!!!!
-   if ((filename.find(".dat",0) != std::string::npos) ||
-       (filename.find(".DAT",0) != std::string::npos) )
+   // Read gravity file
+   try
    {
-      if (!ReadDatFile(fileDegree, fileOrder))
+      GravityFile gf;
+      if (!gf.ReadFile(filename, fileDegree, fileOrder, mu, a, true,
+                       Cbar, Sbar, dCbar, dSbar, HF_MAX_DEGREE, HF_MAX_ORDER,
+                       GRAV_MAX_DRIFT_DEGREE))
       {
          errMsg = "Error reading coefficients, mu, and equatorial radius from "
-                  + filename;
-         //throw ForceModelException(errMsg);
+            + filename;
          isOk = false;
       }
    }
-   else if ((filename.find(".grv",0) != std::string::npos) ||
-            (filename.find(".GRV",0) != std::string::npos) )
+   catch (BaseException &e)
    {
-      #ifdef DEBUG_GRAVITY_FIELD
-          MessageInterface::ShowMessage("About to read a .grv file\n");
-      #endif
-      if (!ReadGrvFile(fileDegree, fileOrder))
-      {
-         errMsg = "Error reading coefficients, mu, and equatorial radius from "
-                  + filename;
-         //throw ForceModelException(errMsg);
-         isOk = false;
-      }
-   }
-   else if ((filename.find(".cof",0) != std::string::npos) ||
-            (filename.find(".COF",0) != std::string::npos) )
-   {
-      if (!ReadCofFile(fileDegree, fileOrder))
-      {
-         errMsg = "Error reading coefficients, mu, and equatorial radius from "
-                  + filename;
-         //throw ForceModelException(errMsg);
-         isOk = false;
-      }
-   }
-   else
-   {
-      errMsg = "Gravity file \"" + filename + "\" is of unknown format.";
-      //throw ForceModelException(errMsg);
+      errMsg = e.GetFullMessage();
       isOk = false;
    }
+   
    if (!isOk)
    {
-      MessageInterface::ShowMessage(errMsg);
+      MessageInterface::ShowMessage(errMsg + "\n");
       fileRead = true;  // will be reset if/when new filename is set
       return false;
    }
@@ -1391,307 +1360,6 @@ bool GravityField::ReadFile()
       throw ForceModelException("Invalid degree in GravityField: Degree < 0");
 
    fileRead = true;
-   return true;
-}
-
-//------------------------------------------------------------------------------
-//  bool ReadCofFile(Integer& fileDeg, Integer& fileOrd)
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool GravityField::ReadCofFile(Integer& fileDeg, Integer& fileOrd)
-{
-   Integer       n, m;
-   Integer       fileOrder, fileDegree;
-   Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
-   Integer       noIdea;
-   Real          noClue;
-   Real          tmpMu;
-   Real          tmpA;
-
-   #ifdef DEBUG_GRAVITY_FIELD
-      MessageInterface::ShowMessage("Entered GravityField::ReadCofFile\n");
-   #endif
-
-   std::ifstream inFile;
-   inFile.open(filename.c_str());
-   if (!inFile)
-   {
-      //throw ForceModelException("Cannot open file " + filename);
-      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
-      return false;
-   }
-
-   PrepareArrays();
-
-   std::string s;
-   std::string firstStr;
-   while (!inFile.eof())
-   {
-      getline(inFile,s);
-      std::istringstream lineStr;
-      lineStr.str(s);
-      // ignore comment lines
-      if (s[0] != 'C')
-      {
-         lineStr >> firstStr;
-         if (firstStr == "END") break;
-         if (firstStr == "POTFIELD")
-         {
-            lineStr >> fileDegree >> fileOrder >> noIdea >> tmpMu >> tmpA >> noClue;
-            if (tmpMu == 0.0)
-               mu = defaultMu;
-            else
-               mu = tmpMu / 1.0e09;  // -> Km^3/sec^2
-            if (tmpA  == 0.0)
-               a  = defaultA;
-            else
-               a = tmpA / 1000.0;  // -> km
-         }
-         else if (firstStr == "RECOEF")
-         {
-            lineStr >> n >> m >> Cnm >> Snm; 
-               if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-               {
-                  Cbar[n][m] = (Real)Cnm;
-                  Sbar[n][m] = (Real)Snm;
-               }
-         }
-      }
-   }
-
-   fileDeg = fileDegree;
-   fileOrd = fileOrder;
-   // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
-   return true;  
-}
-
-//------------------------------------------------------------------------------
-//  bool ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool GravityField::ReadGrvFile(Integer& fileDeg, Integer& fileOrd)
-{
-   Integer       n, m;
-   Integer       fileOrder, fileDegree;
-   Real          Cnm=0.0, Snm=0.0; // , dCnm=0.0, dSnm=0.0;
-   Real          tmpMu = 0.0;
-   Real          tmpA  = 0.0;
-   std::string   isNormalized;
-
-   #ifdef DEBUG_GRAVITY_FIELD
-      MessageInterface::ShowMessage("Entered GravityField::ReadGrvFile\n");
-   #endif
-
-   std::ifstream inFile;
-   inFile.open(filename.c_str());
-   if (!inFile)
-   {
-      //throw ForceModelException("Cannot open file " + filename);
-      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
-      return false;
-   }
-
-   PrepareArrays();
-
-   std::string s;
-   std::string firstStr;
-   while (!inFile.eof())
-   {
-      getline(inFile,s);
-      std::istringstream lineStr;
-      lineStr.str(s);
-      // ignore comment lines
-      if (s[0] != '#')
-      {
-         lineStr >> firstStr;
-         if (firstStr == "END") break;
-
-         //-----------------------------------------------------------
-         //note: 2007.03.15
-         // Visual C++ doesn't know about strcasecmp()
-         // So change to stricmp()
-         //-----------------------------------------------------------
-         //note: 2007.03.29
-         // Since we're using std:: string, use StringUtil and ==
-         //-----------------------------------------------------------
-         std::string upperString = GmatStringUtil::ToUpper(firstStr);
-         
-         // ignore the stk version and blank lines
-         //if ((stricmp(firstStr.c_str(),"Model") == 0) ||
-         //      (stricmp(firstStr.c_str(),"BEGIN") == 0))
-         if ((upperString == "MODEL") ||
-               (upperString =="BEGIN"))
-         {
-            // do nothing - we don't need to know this
-         }
-         //else if (stricmp(firstStr.c_str(),"Degree") == 0)
-         else if (upperString == "DEGREE")
-         {
-            lineStr >> fileDegree;
-         }
-         //else if (stricmp(firstStr.c_str(),"Order") == 0)
-         else if (upperString == "ORDER")
-         {
-            lineStr >> fileOrder;
-         }
-         //else if (stricmp(firstStr.c_str(),"Gm") == 0)
-         else if (upperString == "GM")
-         {
-            lineStr >> tmpMu;
-            if (tmpMu == 0.0)
-               mu = defaultMu;
-            else
-               mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
-         }
-         //else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
-         else if (upperString == "REFDISTANCE")
-         {
-            lineStr >> tmpA;
-            if (tmpA == 0.0)
-               a = defaultA;
-            else
-               a = tmpA / 1000.0;  // -> Km
-         }
-         //else if (stricmp(firstStr.c_str(),"Normalized") == 0)
-         else if (upperString == "NORMALIZED")
-         {
-            lineStr >> isNormalized;
-            if (isNormalized == "No")
-               throw ForceModelException(
-                     "File " + filename + " is not normalized.");
-            }
-         else
-         {
-            // DJC changes, 11/9/04
-            // Ensure that m and n fall in the allowed ranges
-            n = (Integer) atoi(firstStr.c_str());
-            if ((n > 0) && (n < HF_MAX_DEGREE)) {
-               lineStr >> m;
-               if ((m >= 0) && (m <= n)) {            
-                  lineStr >> Cnm >> Snm;
-//                  if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-//                  {
-                  Cbar[n][m] = (Real)Cnm;
-                  Sbar[n][m] = (Real)Snm;
-//                  }
-               }
-            }
-         }
-      }
-   }
-
-   fileDeg = fileDegree;
-   fileOrd = fileOrder;
-
-   #ifdef DEBUG_GRAVITY_FIELD
-      MessageInterface::ShowMessage("Leaving GravityField::ReadGrvFile\n");
-      MessageInterface::ShowMessage("   dCbar[2][0] = %le   dSbar[2][0] = %le   \n",
-                                    dCbar[2][0], dSbar[2][0]);
-   #endif
-
-   return true;  
-}
-
-//------------------------------------------------------------------------------
-//  bool ReadDatFile(Integer& fileDeg, Integer& fileOrd)
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool GravityField::ReadDatFile(Integer& fileDeg, Integer& fileOrd)
-{
-   Integer      cc, dd, sz=0;
-   Integer      iscomment, rtn;
-   Integer      n=0, m=0;
-   Integer      fileDegree, fileOrder;
-   Real         Cnm=0.0, Snm=0.0, dCnm=0.0, dSnm=0.0;
-   char         buf[CelestialBody::BUFSIZE];
-   FILE        *fp;
-
-   #ifdef DEBUG_GRAVITY_FIELD
-      MessageInterface::ShowMessage("Entered GravityField::ReadDatFile\n");
-   #endif
-
-   for (cc = 2;cc <= HF_MAX_DEGREE; ++cc)
-   {
-      for (dd = 0; dd <= cc; ++dd)
-      {
-         sz++;
-      }
-   }
-   
-   /* read coefficients from file */
-   fp = fopen( filename.c_str(), "r");
-   if (!fp){
-      //MessageInterface::ShowMessage("Cannot open file %s \n", filename);
-//      gfInitialized = false;  // ???????????????????????????????????
-      return false;
-   }
-
-   PrepareArrays();
-
-   iscomment = 1;
-   while ( iscomment )
-   {
-      rtn = fgetc( fp );
-      if ( (char)rtn == '#' )
-      {
-         fgets( buf, CelestialBody::BUFSIZE, fp );
-      }
-      else
-      {
-         ungetc( rtn, fp );
-         iscomment = 0;
-      }
-   }
-
-   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu / 1.0e09;      // -> Km^3/sec^2
-   fscanf(fp, "%lg\n", &a ); a = (Real)a / 1000.0;         // -> Km
-   fgets( buf, CelestialBody::BUFSIZE, fp );
-   while ( ( (char)(rtn=fgetc(fp)) != '#' ) && (rtn != EOF) )
-   {
-      ungetc( rtn, fp );
-      fscanf( fp, "%i %i %le %le\n", &n, &m, &dCnm, &dSnm );
-      if ( n <= GRAV_MAX_DRIFT_DEGREE  && m <= n )
-      {
-         dCbar[n][m] = (Real)dCnm;
-         dSbar[n][m] = (Real)dSnm;
-      }
-   }
-
-   fgets( buf, CelestialBody::BUFSIZE, fp );
-
-   fileDegree = 0;
-   fileOrder  = 0;
-   cc=0;n=0;m=0;
-   do
-   {
-      if ( n <= HF_MAX_DEGREE && m <= HF_MAX_ORDER )
-      {
-         Cbar[n][m] = (Real)Cnm;
-         Sbar[n][m] = (Real)Snm;
-      }
-      if (n > fileDegree) fileDegree = n;
-      if (n > fileOrder)  fileOrder  = n;
-      
-      cc++;
-   } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
-
-   fileDeg = fileDegree;
-   fileOrd = fileOrder;
    return true;
 }
 

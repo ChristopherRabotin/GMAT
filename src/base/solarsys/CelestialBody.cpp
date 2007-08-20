@@ -43,7 +43,7 @@
 #include "TimeTypes.hpp"
 #include "TimeSystemConverter.hpp"
 #include "StringUtil.hpp"           // for ToString()
-
+#include "GravityFile.hpp"          // for GetFileInfo()
 
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
@@ -465,10 +465,9 @@ bool CelestialBody::Initialize()
    isFirstTimeMu = true;
    isFirstTimeRadius = true;
    
-   //loj: 2/28/07 added
    lastEphemTime = 0.0;
    stateTime = 0.0;   
-   newAnalytic = true; 
+   newAnalytic = true;
    
    return true;
 }
@@ -703,9 +702,9 @@ const std::string& CelestialBody::GetCentralBody() const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetGravitationalConstant() 
 {
-//    MessageInterface::ShowMessage
-//       ("==> CelestialBody::GetGravitationalConstant() usePotentialFile=%d\n",
-//        usePotentialFile);
+   //MessageInterface::ShowMessage
+   //   ("==> CelestialBody::GetGravitationalConstant() usePotentialFile=%d for %s\n",
+   //    usePotentialFile, instanceName.c_str());
    
    if (usePotentialFile == true)
    {
@@ -2829,37 +2828,25 @@ bool CelestialBody::ReadPotentialFile()
 {
    if (potentialFileRead) return true;
    if (potentialFileName == "") return false;
-
-   // Determine the type of file  --> add switch later!!!!!!!!!!
-   if ((potentialFileName.find(".dat",0) != std::string::npos) ||
-       (potentialFileName.find(".DAT",0) != std::string::npos) )
+   
+   GravityFile gf;
+   Integer fileDeg, fileOrd;
+   try
    {
-      if (!ReadDatFile())
-         throw SolarSystemException(
-            "Error reading mu and equatorial radius of " + instanceName
-                                    + " from "+ potentialFileName);
+      if (!gf.GetFileInfo(potentialFileName, fileDeg, fileOrd, mu,
+                          equatorialRadius))
+      {
+         throw SolarSystemException
+            ("Error reading mu and equatorial radius of " + instanceName
+             + " from "+ potentialFileName);
+      }
    }
-   else if ((potentialFileName.find(".grv",0) != std::string::npos) ||
-            (potentialFileName.find(".GRV",0) != std::string::npos) )
+   catch (BaseException &e)
    {
-      if (!ReadGrvFile())
-         throw SolarSystemException(
-            "Error reading mu and equatorial radius of " + instanceName
-                                    + " from " + potentialFileName);
+      throw SolarSystemException(e.GetFullMessage());
    }
-   else if ((potentialFileName.find(".cof",0) != std::string::npos) ||
-            (potentialFileName.find(".COF",0) != std::string::npos) )
-   {
-      if (!ReadCofFile())
-         throw SolarSystemException(
-           "Error reading mu and equatorial radius of " + instanceName
-                                    + " from " + potentialFileName);
-   }
-   else
-   {
-      throw SolarSystemException("Gravity file " + potentialFileName +
-                                " is of unknown format.");
-   }
+   
+   
    potentialFileRead = true;
    // recompute polar radius
    polarRadius = (1.0 - flattening) * equatorialRadius;
@@ -2868,211 +2855,6 @@ bool CelestialBody::ReadPotentialFile()
    return true;
 }
 
-//------------------------------------------------------------------------------
-//  bool ReadCofFile()
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool CelestialBody::ReadCofFile()
-{
-   Integer       fileOrder, fileDegree;
-   Integer       noIdea;
-   Real          noClue;
-   Real          tmpMu;
-   Real          tmpA;
-
-   std::ifstream inFile;
-   inFile.open(potentialFileName.c_str());
-   if (!inFile)
-      throw SolarSystemException("Cannot open file " + potentialFileName);
-   std::string s;
-   std::string firstStr;
-   while (!inFile.eof())
-   {
-      getline(inFile,s);
-      std::istringstream lineStr;
-      lineStr.str(s);
-      // ignore comment lines
-      if (s[0] != 'C')
-      {
-         lineStr >> firstStr;
-         if (firstStr == "END") break;
-         if (firstStr == "POTFIELD")
-         {
-            lineStr >> fileDegree >> fileOrder >> noIdea >> tmpMu >> tmpA >> noClue;
-            if (tmpMu == 0.0)
-               mu = defaultMu;
-            else
-               mu = tmpMu / 1.0e09;  // -> Km^3/sec^2
-            if (tmpA  == 0.0)
-               equatorialRadius  = defaultEqRadius;
-            else
-               equatorialRadius = tmpA / 1000.0;  // -> km
-            
-            break;  // stop after reading the mu and a
-         }
-         else
-         {
-            // ignore anything else
-         }
-      }
-   }
-
-   return true; 
-}
-
-//------------------------------------------------------------------------------
-//  bool ReadGrvFile()
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool CelestialBody::ReadGrvFile()
-{
-   Integer       fileOrder, fileDegree;
-   //char          buf[CelestialBody::BUFSIZE];
-   //char          firstToken[CelestialBody::BUFSIZE];
-   Real          tmpMu = 0.0;
-   Real          tmpA  = 0.0;
-   std::string   isNormalized;
-
-   std::ifstream inFile;
-   inFile.open(potentialFileName.c_str());
-   if (!inFile)
-      throw SolarSystemException("Cannot open file " + potentialFileName);
-   std::string s;
-   std::string firstStr;
-   while (!inFile.eof())
-   {
-      getline(inFile,s);
-      std::istringstream lineStr;
-      lineStr.str(s);
-      // ignore comment lines
-      if (s[0] != '#')
-      {
-         lineStr >> firstStr;
-         if (firstStr == "END") break;
-
-         //-----------------------------------------------------------
-         //note: 2007.03.15
-         // Visual C++ doesn't know about strcasecmp()
-         // So change to stricmp()
-         //-----------------------------------------------------------
-          //note: 2007.03.29
-         // using std::string, so use GmatStringUtil and ==
-         //-----------------------------------------------------------
-         std::string upperString = GmatStringUtil::ToUpper(firstStr);
-         // ignore the stk version and blank lines
-         //if ((stricmp(firstStr.c_str(),"Model") == 0) ||
-         //      (stricmp(firstStr.c_str(),"BEGIN") == 0))
-         if ((upperString == "MODEL") ||
-               (upperString =="BEGIN"))
-         {
-            // do nothing - we don't need to know this
-         }
-         //else if (stricmp(firstStr.c_str(),"Degree") == 0)
-         else if (upperString == "DEGREE")
-         {
-            lineStr >> fileDegree;
-         }
-         //else if (stricmp(firstStr.c_str(),"Order") == 0)
-         else if (upperString == "ORDER")
-         {
-            lineStr >> fileOrder;
-         }
-         //else if (stricmp(firstStr.c_str(),"Gm") == 0)
-         else if (upperString == "GM")
-         {
-            lineStr >> tmpMu;
-            if (tmpMu == 0.0)
-               mu = defaultMu;
-            else
-               mu = tmpMu / 1.0e09;     // -> Km^3/sec^2
-            
-            // break as soon as both mu and a are read
-            if ((tmpMu != 0.0) && (tmpA != 0.0)) break;
-         }
-         //else if (stricmp(firstStr.c_str(),"RefDistance") == 0)
-         else if (upperString == "REFDISTANCE")
-         {
-            lineStr >> tmpA;
-            if (tmpA == 0.0)
-               equatorialRadius = defaultEqRadius;
-            else
-               equatorialRadius = tmpA / 1000.0;  // -> Km
-            // break as soon as both mu and a are read
-            if ((tmpMu != 0.0) && (tmpA != 0.0)) break;            
-         }
-         //else if (stricmp(firstStr.c_str(),"Normalized") == 0)
-         else if (upperString == "NORMALIZED")
-         {
-            lineStr >> isNormalized;
-            if (isNormalized == "No")
-               throw SolarSystemException(
-                     "File " + potentialFileName + " is not normalized.");
-            }
-         else
-         {
-            // ignore
-         }
-      }
-   }
-
-   return true;  
-}
-
-//------------------------------------------------------------------------------
-//  bool ReadDatFile()
-//------------------------------------------------------------------------------
-/**
- * This method reads a ???????? file to get the gravity parameters.
- *
- * @return success flag.
- */
-//------------------------------------------------------------------------------
-bool CelestialBody::ReadDatFile()
-{
-   Integer      iscomment, rtn;
-   char         buf[CelestialBody::BUFSIZE];
-   FILE        *fp;
-
-   
-   /* read coefficients from file */
-   fp = fopen( potentialFileName.c_str(), "r");
-   if (!fp)
-   {
-           throw SolarSystemException("Cannot open file " + potentialFileName);
-      return false;
-   }
-
-   iscomment = 1;
-   while ( iscomment )
-   {
-      rtn = fgetc( fp );
-      if ( (char)rtn == '#' )
-      {
-         fgets( buf, CelestialBody::BUFSIZE, fp );
-      }
-      else
-      {
-         ungetc( rtn, fp );
-         iscomment = 0;
-      }
-   }
-
-   fscanf(fp, "%lg\n", &mu ); mu = (Real)mu;
-   fscanf(fp, "%lg\n", &equatorialRadius ); equatorialRadius = (Real)equatorialRadius;
-   equatorialRadius  = equatorialRadius / 1000.0;  // -> Km
-   mu                = mu / 1.0e09;                // -> Km^3/sec^2
-   return true;
-}
 
 //------------------------------------------------------------------------------
 //  bool IsBlank(char* aLine)

@@ -101,7 +101,6 @@ public:
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual bool        IsParameterReadOnly(const Integer id) const;
 
-
    virtual Real        GetRealParameter(const Integer id) const;
    virtual Real        SetRealParameter(const Integer id,
                                         const Real value);
@@ -112,7 +111,7 @@ public:
 
 protected:
 
-      enum   // do we need the Abar, etc. to be in this list?
+   enum   // do we need the Abar, etc. to be in this list?
    {
       MU = HarmonicFieldParamCount,
       A,
@@ -135,16 +134,12 @@ protected:
    Real               defaultA;
    /// normalized harmonic coefficients
    Real               Cbar[361][361];
-//   Real               **Cbar;
    /// normalized harmonic coefficients
    Real               Sbar[361][361];
-//   Real               **Sbar;
    /// coefficient drifts per year
    Real               dCbar[17][17];
-//   Real               **dCbar;
    /// coefficient drifts per year
    Real               dSbar[17][17];
-//   Real               **dSbar;
    ///
    bool               gfInitialized;
    /// Flag used to keep from scrolling the "truncating to order" message
@@ -155,9 +150,6 @@ protected:
    bool          gravity_init(void);
 
    bool          ReadFile();
-   bool          ReadCofFile(Integer& fileDeg, Integer& fileOrd);
-   bool          ReadGrvFile(Integer& fileDeg, Integer& fileOrd);
-   bool          ReadDatFile(Integer& fileDeg, Integer& fileOrd);
    
    void          PrepareArrays();
 
