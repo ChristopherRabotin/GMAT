@@ -372,6 +372,7 @@ OBJECTS = \
     util/Equinoctial.o \
     util/FileUtil.o \
     util/GmatGlobal.o \
+    util/GravityFile.o \
     util/GregorianDate.o \
     util/Keplerian.o \
     util/LeapSecsFileReader.o \
