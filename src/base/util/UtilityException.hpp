@@ -26,7 +26,16 @@ class GMAT_API UtilityException : public BaseException
 {
 public:
    UtilityException(const std::string& details = "") 
-      : BaseException("UtilityException Thrown: ", details) {};
+      : BaseException("Utility Exception: ", details) {};
+};
+
+
+// Gravity File exception
+class GMAT_API GravityFileException : public BaseException
+{
+public:
+   GravityFileException(const std::string& details = "") 
+      : BaseException("Gravity File Exception: ", details) {};
 };
 
 
@@ -35,6 +44,6 @@ class GMAT_API TimeException : public BaseException
 {
 public:
    TimeException(const std::string& details = "") 
-      : BaseException("TimeException Thrown: ", details) {};
+      : BaseException("Time Exception: ", details) {};
 };
 #endif
