@@ -911,11 +911,11 @@ void FileManager::AddAvailablePotentialFiles()
       AddFileType("JGM3_FILE", "EARTH_POT_PATH/JGM3.cof");
    
    if (mFileMap.find("EGM96_FILE") == mFileMap.end())
-      AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96.cof");
+      AddFileType("EGM96_FILE", "EARTH_POT_PATH/EGM96low.cof");
    
    // luna gravity files
    if (mFileMap.find("LP165P_FILE") == mFileMap.end())
-      AddFileType("LP165P_FILE", "LUNA_POT_PATH/lp165p.cof");
+      AddFileType("LP165P_FILE", "LUNA_POT_PATH/LP165P.cof");
    
    // venus gravity files
    if (mFileMap.find("MGNP180U_FILE") == mFileMap.end())
