@@ -279,8 +279,8 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
             if ((GmatStringUtil::ToInteger(nStr, n)) &&
                 (GmatStringUtil::ToInteger(mStr, m)) &&
                 (GmatStringUtil::ToReal(cnmStr, Cnm)) &&
-                ((snmStr == "") ||
-                 (snmStr != "" && GmatStringUtil::ToReal(snmStr, Snm))))
+                ((snmStr[0] != ' ' && snmStr[0] != '-') ||
+                 (GmatStringUtil::ToReal(snmStr, Snm))))
             {
                if ( n <= maxDegree && m <= maxOrder )
                {
