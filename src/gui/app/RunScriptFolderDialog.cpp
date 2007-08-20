@@ -51,7 +51,7 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mAbsTol = absTol;
    mCompareDir = compareDir;
    
-   mReplaceString = "STK";
+   mReplaceString = "GMAT";
    
    Create();
    ShowData();
