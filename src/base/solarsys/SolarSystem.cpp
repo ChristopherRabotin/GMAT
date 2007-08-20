@@ -289,7 +289,6 @@ void SolarSystem::ResetToDefaults()
    ephemUpdateInterval = 0.0;
    
    // Set it for each of the bodies
-   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
@@ -297,7 +296,8 @@ void SolarSystem::ResetToDefaults()
       (*cbi)->SetAnalyticMethod(anMethodForAll);
       (*cbi)->SetOverrideTimeSystem(overrideTimeForAll);
       (*cbi)->SetEphemUpdateInterval(ephemUpdateInterval);
-      
+      (*cbi)->SetEphemUpdateInterval(ephemUpdateInterval);
+      (*cbi)->SetUsePotentialFile(false);
       ++cbi;
    }
 }
