@@ -15,7 +15,6 @@
 // ***  Developed By  :  Thinking Systems, Inc. (www.thinksysinc.com)     ***
 // ***  For:  Flight Dynamics Analysis Branch (Code 595)                  ***
 // ***  Under Contract:  P.O.  GSFC S-67573-G                             ***
-// ***  Copyright Thinking Systems 2003                                   ***
 // ***                                                                    ***
 // ***  Header Version: July 12, 2002                                     ***
 // **************************************************************************
@@ -23,7 +22,7 @@
 // Development Environment   : Visual C++ 7.0
 // Modification History      : 5/20/2003 - D. Conway, Thinking Systems, Inc.
 //                             Original delivery
-//                             Source code not yet transferred to GSFC
+//
 //                           : 10/01/2003 - L. Ruley, Missions Applications Branch
 //                             Updated style using GMAT cpp style guide
 // **************************************************************************
