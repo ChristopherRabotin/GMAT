@@ -16,8 +16,8 @@
  */
 //------------------------------------------------------------------------------
 #include "ViewTextDialog.hpp"
-#include "GmatAppData.hpp"
 #include "FileManager.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
 BEGIN_EVENT_TABLE(ViewTextDialog, wxDialog)
@@ -34,10 +34,9 @@ END_EVENT_TABLE()
  * @param h  Height for the dialog.
  */
 //------------------------------------------------------------------------------
-ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title, 
-                               int w, int h)
+ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title, int w, int h)
    : wxDialog(parent, -1, title, wxDefaultPosition, wxSize(w, h),
-              wxDEFAULT_DIALOG_STYLE, title)
+              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER, title)
 {
    theDialogSizer = new wxBoxSizer(wxVERTICAL);
    theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -48,7 +47,7 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
    theOkButton =
       new wxButton(this, ID_BUTTON, "OK", wxDefaultPosition, wxDefaultSize, 0);
    
-   // adds the buttons to button sizer    
+   // adds the buttons to button sizer
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, 2);   
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, 2);
    
@@ -56,12 +55,12 @@ ViewTextDialog::ViewTextDialog(wxWindow *parent, const wxString& title,
                             wxTE_MULTILINE | wxTE_READONLY);
    
    theText->SetMaxLength(320000);
-   //theText->SetFont(GmatAppData::GetFont());
-   
-   theMiddleSizer->Add(theText, 1, wxGROW|wxALL, 2);
+   //theText->SetFont( GmatAppData::GetFont());
    
    // add items to middle sizer
+   theMiddleSizer->Add(theText, 1, wxGROW|wxALL, 2);
    
+   // add items to dialog sizer
    theDialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
    
