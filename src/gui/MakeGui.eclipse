@@ -95,6 +95,7 @@ cleanmacosx :
 	rm -rf $(TOP_DIR)/bin/GMAT.app
 
 OBJECTS = \
+    app/AboutDialog.o \
     app/GmatApp.o \
     app/GmatAppData.o \
     app/CompareFilesDialog.o \
@@ -193,6 +194,7 @@ OBJECTS = \
     spacecraft/SpaceObjectSelectDialog.o \
     spacecraft/TankPanel.o \
     spacecraft/ThrusterPanel.o \
+    view/ViewTextDialog.o \
     view/ViewTextFrame.o 
 
 $(WXTARGET) : $(OBJECTS) $(LIBS)
