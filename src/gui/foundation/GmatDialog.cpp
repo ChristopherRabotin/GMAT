@@ -14,6 +14,7 @@
 
 #include "GmatDialog.hpp"
 #include "GmatAppData.hpp"
+#include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_GMAT_DIALOG_SAVE 1
@@ -310,7 +311,7 @@ bool GmatDialog::CheckInteger(Integer &ivalue, const std::string &str,
 void GmatDialog::ShowData()
 {
    // add items to middle sizer
-    
+   
    theDialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
    
@@ -319,6 +320,24 @@ void GmatDialog::ShowData()
    SetSizer(theDialogSizer); //use the sizer for layout
    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
+   
+   // Set icon if icon file is in the start up file
+   FileManager *fm = FileManager::Instance();
+   try
+   {
+      wxString iconfile = fm->GetFullPathname("MAIN_ICON_FILE").c_str();
+      #if defined __WXMSW__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_ICO));
+      #elif defined __WXGTK__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_XPM));
+      #elif defined __WXMAC__
+         SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
+      #endif
+   }
+   catch (GmatBaseException &e)
+   {
+      //MessageInterface::ShowMessage(e.GetMessage());
+   }
    
    CenterOnScreen(wxBOTH);
    
