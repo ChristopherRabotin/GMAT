@@ -87,6 +87,7 @@
 #include "CompareFilesDialog.hpp"
 #include "CompareTextDialog.hpp"
 #include "TextEphemFileDialog.hpp"
+#include "AboutDialog.hpp"
 #include "FileManager.hpp"
 #include "FileUtil.hpp"               // for Compare()
 
@@ -1631,12 +1632,8 @@ void GmatMainFrame::OnCloseActive(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
 {
-   wxString msg;
-   msg.Printf(_T("General Mission Analysis Tool.\n")
-               _T("Uses %s\n\nBuild Date: %s %s"), wxVERSION_STRING,
-               __DATE__, __TIME__);      
-
-   wxMessageBox(msg, _T("About GMAT"), wxOK | wxICON_INFORMATION, this);
+   AboutDialog dlg(this, -1, "About GMAT");
+   dlg.ShowModal();
 }
 
 
