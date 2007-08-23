@@ -273,13 +273,14 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
             nStr = line.substr(8, 3);
             mStr = line.substr(11, 3);
             cnmStr = line.substr(17, 21);
-            snmStr = line.substr(38, 21);
+            lineStream.str(line.substr(38, 21));
+            lineStream >> snmStr;
             snmStr = GmatStringUtil::Trim(snmStr);
             
             if ((GmatStringUtil::ToInteger(nStr, n)) &&
                 (GmatStringUtil::ToInteger(mStr, m)) &&
                 (GmatStringUtil::ToReal(cnmStr, Cnm)) &&
-                ((snmStr[0] != ' ' && snmStr[0] != '-') ||
+                ((snmStr == "") ||
                  (GmatStringUtil::ToReal(snmStr, Snm))))
             {
                if ( n <= maxDegree && m <= maxOrder )
