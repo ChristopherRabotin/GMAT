@@ -61,6 +61,7 @@
 //#define DEBUG_FINAL_PASS_CS
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CHECK_BRANCH
+//#define DEBUG_SPECIAL_CASE
 //#define DEBUG_WRAPPERS
 //#define DEBUG_HANDLE_ERROR
 
@@ -1965,9 +1966,20 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       {
          dot = rhs.find('.');
          if (dot == rhs.npos)
+         {
             rhsPropName = rhsParts[1];
+         }
          else
-            rhsPropName = rhs.substr(dot+1);
+         {
+            // check if it is property first
+            ////rhsPropName = rhs.substr(dot+1);
+            std::string afterDot = rhs.substr(dot+1);
+            GmatBase *toObj = NULL;
+            Integer toId = -1;
+            Gmat::ParameterType toType;
+            if (FindPropertyID(rhsObj, afterDot, &toObj, toId, toType))
+               rhsPropName = afterDot;
+         }
       }
    }
    else
