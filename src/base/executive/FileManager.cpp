@@ -9,7 +9,7 @@
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
-// Author: Linda Jun
+// Author: Linda Jun, NASA/GSFC
 // Created: 2004/04/02
 /**
  * Implements FileManager class. This is singleton class which manages
@@ -703,7 +703,7 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
       ("FileManager::GetAbsPathname() typeName=%s\n", typeName.c_str());
    #endif
    
-   // typeName contains _PATH (loj: 1/9/06)
+   // typeName contains _PATH
    if (fileType.find("_PATH") != fileType.npos)
    {
       if (mPathMap.find(fileType) != mPathMap.end())
@@ -736,16 +736,9 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
       }
    }
    
-   //MessageInterface::ShowMessage
-   //   ("FileManager::GetAbsPathname() file type: %s is unknown\n",
-   //    typeName.c_str());
+   throw GmatBaseException
+      (GmatStringUtil::ToUpper(typeName) + " not in the gmat_startup_file\n");
    
-   //return "UNKNOWN_FILE_TYPE";
-
-   throw GmatBaseException(typeName + " not in the gmat_startup_file\n");
-   MessageInterface::ShowMessage
-      ("FileManager::GetAbsPathname() file type:%s is not in the gmat_startup_file\n",
-       typeName.c_str());
 }
 
 
