@@ -28,6 +28,9 @@
 #include <sstream>
 
 //#define DEBUG_GRAVITY_FILE
+//#define DEBUG_GRAVITY_COF_FILE
+//#define DEBUG_GRAVITY_DAT_FILE
+//#define DEBUG_GRAVITY_GRV_FILE
 
 
 //------------------------------------------------------------------------------
@@ -222,7 +225,7 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
    Real          tmpMu;
    Real          tmpA;
    
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_COF_FILE
    MessageInterface::ShowMessage("Entered GravityFile::ReadCofFile\n");
    #endif
    
@@ -276,7 +279,9 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
             lineStream.str(line.substr(38, 21));
             lineStream >> snmStr;
             snmStr = GmatStringUtil::Trim(snmStr);
-            
+            //MessageInterface::ShowMessage
+            //   ("===> nStr=%s, mStr=%s, snmStr=<%s>\n",
+            //    nStr.c_str(), mStr.c_str(), snmStr.c_str());
             if ((GmatStringUtil::ToInteger(nStr, n)) &&
                 (GmatStringUtil::ToInteger(mStr, m)) &&
                 (GmatStringUtil::ToReal(cnmStr, Cnm)) &&
@@ -287,6 +292,9 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
                {
                   cbar[n][m] = Cnm;
                   sbar[n][m] = Snm;
+                  //MessageInterface::ShowMessage
+                  //   ("   cbar[%d][%d]=% .12e\n   sbar[%d][%d]=% .12e\n",
+                  //    n, m, cbar[n][m], n, m, sbar[n][m]);
                }
             }
             else
@@ -294,6 +302,9 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
                throw GravityFileException
                   ("File \"" + filename + "\" has error in \n   \"" + line + "\"");
             }
+            
+            snmStr = "";
+            Snm = 0.0;
          }
       }
    }
@@ -303,7 +314,7 @@ bool GravityFile::ReadCofFile(const std::string &filename, Integer& degree,
    
    // make sure mu and a are in KM and Km^3/sec^2 (they are in meters on the files)
    
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_COF_FILE
    MessageInterface::ShowMessage("   \"%s\" successfully read\n", filename.c_str());
    MessageInterface::ShowMessage
       ("   degree=%d, order=%d, mu=%f, radius=%f\n", degree, order,
@@ -332,12 +343,13 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
                               Real dcbar[][DRF_DIM], Real dsbar[][DRF_DIM],
                               Integer maxDegree, Integer maxOrder, Integer maxDriftDegree)
 {
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_DAT_FILE
    MessageInterface::ShowMessage
       ("GravityFile::ReadDatFile() filename=%s\n   maxDegree=%d, maxOrder=%d, "
-       "maxDriftDegree=%d\n", filename.c_str(), maxDegree, maxOrder, maxDriftDegree);
+       "maxDriftDegree=%d, readCoeff=%d\n", filename.c_str(), maxDegree, maxOrder,
+       maxDriftDegree, readCoeff);
    #endif
-
+   
    if (!readCoeff)
    {
       std::ifstream inStream(filename.c_str());
@@ -354,28 +366,32 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
             break;
       }
       
-      std::istringstream lineStream(line);
-      lineStream >> mu;
+      std::istringstream muStream(line);
+      muStream >> mu;
+      
       getline(inStream, line);
-      lineStream.str(line);
-      lineStream >> radius;
-      radius  = radius / 1000.0;  // -> Km
+      std::istringstream raStream(line);
+      raStream >> radius;
+      
       mu = mu / 1.0e09;           // -> Km^3/sec^2
+      radius  = radius / 1000.0;  // -> Km
       
       while (!inStream.eof())
       {
          getline(inStream, line);
          if (line[0] != '#')
          {
-            lineStream.str(line);
-            lineStream >> degree >> order;
+            std::istringstream coefStream(line);
+            coefStream >> degree >> order;
          }
       }
       
+      #ifdef DEBUG_GRAVITY_DAT_FILE
       MessageInterface::ShowMessage
-         ("GravityFile::ReadDatFile() returning degree=%d, order=%d, mu=%f, "
-          "radius=%f\n", degree, order, mu, radius);
-   
+         ("GravityFile::ReadDatFile() returning degree=%d, order=%d, mu=%le, "
+          "radius=%le\n", degree, order, mu, radius);
+      #endif
+      
       inStream.close();
       return true;
    }
@@ -475,7 +491,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
    // read coefficients and store
    //-------------------------------------------------------
    fgets( buf, maxLen, fp );
-
+   
    fileDegree = 0;
    fileOrder  = 0;
    cc=0; n=0; m=0;
@@ -483,6 +499,7 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
    {
       if ( n <= maxDegree && m <= maxOrder )
       {
+         cbar[n][m] = (Real)Cnm;
          sbar[n][m] = (Real)Snm;
       }
       if (n > fileDegree) fileDegree = n;
@@ -490,14 +507,23 @@ bool GravityFile::ReadDatFile(const std::string &filename, Integer& degree,
       
       cc++;
    } while ( ( cc<=sz ) && ( fscanf( fp, "%i %i %le %le\n", &n, &m, &Cnm, &Snm ) > 0 ));
-
+   
    degree = fileDegree;
    order = fileOrder;
    
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_DAT_FILE
    MessageInterface::ShowMessage("Leaving GravityFile::ReadDatFile\n");
-   MessageInterface::ShowMessage("   dcbar[2][0] = %le   dsbar[2][0] = %le   \n",
-                                 dcbar[2][0], dsbar[2][0]);
+   MessageInterface::ShowMessage
+      ("    degree = %d, order = %d, mu = %.4f, radius = %.4f\n", degree, order,
+       mu, radius);
+   MessageInterface::ShowMessage
+      ("    cbar[2][0] = % .12e    sbar[2][0] = %.12e\n", cbar[2][0], sbar[2][0]);
+   MessageInterface::ShowMessage
+      ("    cbar[2][1] = % .12e    sbar[2][1] = %.12e\n", cbar[2][1], sbar[2][1]);
+   MessageInterface::ShowMessage
+      ("   dcbar[2][0] = % .12e   dsbar[2][0] = %.12e\n", dcbar[2][0], dsbar[2][0]);
+   MessageInterface::ShowMessage
+      ("   dcbar[2][1] = % .12e   dsbar[2][1] = %.12e\n", dcbar[2][1], dsbar[2][1]);
    #endif
    
    fclose(fp);
@@ -527,7 +553,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
    Real          tmpA  = 0.0;
    std::string   isNormalized;
    
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_GRV_FILE
    MessageInterface::ShowMessage("Entered GravityFile::ReadGrvFile\n");
    #endif
    
@@ -615,7 +641,7 @@ bool GravityFile::ReadGrvFile(const std::string &filename, Integer& degree,
 
    inStream.close();
 
-   #ifdef DEBUG_GRAVITY_FILE
+   #ifdef DEBUG_GRAVITY_GRV_FILE
    if (readCoeff)
    {
       MessageInterface::ShowMessage("Leaving GravityFile::ReadGrvFile\n");
