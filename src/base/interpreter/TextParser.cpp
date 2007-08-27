@@ -290,7 +290,12 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             /// @TODO: This is a work around for a call function with
             /// without any return parameters.  It should be updated in
             /// the design to handle this situation.
-            if (str.find("=") == str.npos) // Is this checking enough?
+            UnsignedInt commentPos = str.find("%");
+            std::string noInline = str;
+            if (commentPos != str.npos)
+               noInline = str.substr(0, commentPos);
+            
+            if (noInline.find("=") == str.npos) // Is this checking enough?
             {
                theBlockType = Gmat::COMMAND_BLOCK;
                isFunctionCall = true;
@@ -448,7 +453,7 @@ StringArray TextParser::ChunkLine()
 {
    #if DEBUG_TP_CHUNK_LINE
    MessageInterface::ShowMessage
-      ("TextParser::ChunkLine() theInstruction=%s\n   theBlockType=%d, "
+      ("TextParser::ChunkLine() theInstruction=<%s>\n   theBlockType=%d, "
        "isFunctionCall=%d\n", theInstruction.c_str(), theBlockType, isFunctionCall);
    #endif
    
@@ -591,7 +596,7 @@ StringArray TextParser::ChunkLine()
             if (index2 != 0)
                index3 = str.find_last_not_of(whiteSpace, index2-1);
             
-            //MessageInterface::ShowMessage("index3=%u, index2=%u\n", index3, index2);
+            //MessageInterface::ShowMessage("   index3=%u, index2=%u\n", index3, index2);
             
             if (index3 == str.npos || index2 == 0)
             {
