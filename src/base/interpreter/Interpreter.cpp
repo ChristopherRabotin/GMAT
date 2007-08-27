@@ -147,7 +147,6 @@ void Interpreter::Initialize()
    if (cmds.size() == 0)
    {
       throw InterpreterException("Command list is empty.");
-      //return;
    }
    
    // Build a mapping for all of the defined objects
@@ -1584,6 +1583,27 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
        rhs.c_str());
    #endif
    
+   // First check if it is really assignment by checking blank in the lhs.
+   // (The lhs must be Variable, String, Array, or object property and this is
+   //  validated in the Assignment command)
+   UnsignedInt index = lhs.find_last_of(" ");
+   if (index != lhs.npos)
+   {
+      std::string cmd = lhs.substr(0, index);
+      
+      // See if it is an Array since array index can have blanks
+      index = lhs.find("(");
+      if (index != lhs.npos)
+      {
+         if (!IsArrayElement(lhs))
+         {
+            InterpreterException ex("\"" + cmd + "\" is not a valid Command");
+            HandleError(ex);
+            return NULL;
+         }
+      }
+   }
+   
    std::string desc = lhs + " = " + rhs;
    return CreateCommand("GMAT", desc, retFlag, inCmd);
 }
@@ -2057,7 +2077,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    MessageInterface::ShowMessage
       ("Interpreter::MakeAssignment() returning lhsObj=%p\n", lhsObj);
    #endif
-
+   
    if (retval)
       return lhsObj;
    else
@@ -2112,11 +2132,9 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
    
    if (toObj->GetTypeName() != "Variable" && toObj->GetTypeName() != "String")
    {
-      //InterpreterException ex
-      //   ("Cannot set property to object other than Variable or String.");
       InterpreterException ex
          ("Setting \"" + fromProp + "\" to an object \"" + toObj->GetName() +
-          "\" is not allowed.");
+          "\" is not allowed");
       HandleError(ex);
       return false;
    }
@@ -2167,11 +2185,9 @@ bool Interpreter::SetPropertyToObject(GmatBase *toObj, GmatBase *fromOwner,
    }
    else
    {
-      //InterpreterException ex
-      //   ("Cannot set property to object. Parameter types are not the same.");
       InterpreterException ex
          ("Setting \"" + fromProp + "\" to an object \"" + toObj->GetName() +
-          "\" is not allowed.");
+          "\" is not allowed");
       HandleError(ex);
       return false;
    }
@@ -2193,11 +2209,9 @@ bool Interpreter::SetArrayToObject(GmatBase *toObj, const std::string &fromArray
    
    if (toObj->GetTypeName() != "Variable")
    {
-      //InterpreterException ex
-      //   ("Cannot set Array element to object other than Variable.");
       InterpreterException ex
          ("Setting \"" + fromArray + "\" to an object \"" + toObj->GetName() +
-          "\" is not allowed.");
+          "\" is not allowed");
       HandleError(ex);
       return false;
    }
@@ -2255,11 +2269,9 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
    
    if (objType != "Variable" && objType != "String")
    {
-      //InterpreterException ex
-      //   ("Cannot set value to object other than Variable or String");
       InterpreterException ex
-         ("Setting value of \"" + value + "\" to an object \"" + toObj->GetName() +
-          "\" is not allowed.");
+         ("Setting \"" + value + "\" to an object \"" + toObj->GetName() +
+          "\" is not allowed");
       HandleError(ex);
       return false;
    }
@@ -2289,13 +2301,11 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
          }
          else
          {
-            //InterpreterException ex("Cannot set non-real value to Variable");
             InterpreterException ex
-               ("Setting value of \"" + value + "\" to an object \"" + toObj->GetName() +
-                "\" is not allowed.");
+               ("Setting \"" + value + "\" to an object \"" + toObj->GetName() +
+                "\" is not allowed");
             HandleError(ex);
             return false;
-            //toObj->SetStringParameter(toObj->GetParameterID("Expression"), value);
          }
       }
       catch (BaseException &e)
@@ -2833,11 +2843,9 @@ bool Interpreter::SetPropertyToArray(GmatBase *toArrObj, const std::string &toAr
    
    if (fromOwner->GetParameterType(fromId) != Gmat::REAL_TYPE)
    {
-      //InterpreterException ex
-      //   ("Cannot set property to Array element. Property type is not Real.");
       InterpreterException ex
          ("Setting non-Real type of \"" + fromProp + "\" to an Array element \"" +
-          toArray + "\" is not allowed.");
+          toArray + "\" is not allowed");
       HandleError(ex);
       return false;
    }
@@ -2960,11 +2968,13 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
    }
    else
    {
-      InterpreterException ex("Invalid real number found: " + value);
+      InterpreterException ex
+         ("Setting \"" + value + "\" to an object \"" + toArray +
+          "\" is not allowed");
       HandleError(ex);
       return false;
    }
-
+   
    return true;
 }
 
@@ -3426,8 +3436,12 @@ bool Interpreter::SetComplexProperty(GmatBase *obj, const std::string &prop,
          sc->SetDateFormat(parts[1]);
          sc->SetEpoch(value);
       }
+      else
+      {
+         return false;
+      }
    }
-
+   
    return true;
 }
 
