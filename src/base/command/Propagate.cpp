@@ -40,10 +40,10 @@
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_FIXED_STEP
 //#define DEBUG_EPOCH_SYNC
-
+//#define DEBUG_SECANT_DETAILS
 
 #define TIME_ROUNDOFF 1.0e-6
-#define FIRST_STEP_TOLERANCE 1e-6
+#define DEFAULT_STOP_TOLERANCE 1.0e-7
 
 //--------------------------------- 
 // static data
@@ -119,7 +119,7 @@ Propagate::Propagate() :
    pubdata                     (NULL),
    stopCondMet                 (false),
    stopEpoch                   (0.0),
-   stopAccuracy                (1.0e-7),
+   stopAccuracy                (DEFAULT_STOP_TOLERANCE),
    timeAccuracy                (1.0e-6),
    dim                         (0),
    singleStepMode              (false),
@@ -129,6 +129,9 @@ Propagate::Propagate() :
    stopCondStopVarID           (-1)
 {
    parameterCount = PropagateCommandParamCount;
+   
+   // First step tolerance is one order of magnitude above stop accuracy.
+   firstStepTolerance = stopAccuracy * 10.0;
 
    #ifdef DUMP_PLANET_DATA
       if (!planetData.is_open())
@@ -492,6 +495,16 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
             stopCondDesc << " = " << (*stp)->GetStringParameter("Goal");
    
          gen += stopCondDesc.str();
+      }
+      
+      // Add the stop tolerance is it is not set to the default value
+      if (stopAccuracy != DEFAULT_STOP_TOLERANCE)
+      {
+         gen += ", StopTolerance = ";
+         std::stringstream stopTolDesc;
+         stopTolDesc.precision(13);
+         stopTolDesc << stopAccuracy;
+         gen += stopTolDesc.str();
       }
       gen += "}";
    }
@@ -1153,6 +1166,7 @@ Real Propagate::SetRealParameter(const Integer id, const Real value)
    if (id == STOP_ACCURACY)
    {
       stopAccuracy = value;
+      firstStepTolerance = stopAccuracy * 10.0;
       return stopAccuracy;
    }
    return GmatCommand::SetRealParameter(id, value);
@@ -1736,6 +1750,14 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
       CleanString(lhs, &extras);
       rhs = stopDesc.substr(loc+1);
       CleanString(rhs, &extras);
+      
+      if (lhs == "StopTolerance")
+      {
+         Real rval;
+         if (GmatStringUtil::ToReal(rhs, rval))
+            SetRealParameter(STOP_ACCURACY, rval);
+         return;
+      }
    }
 
    #ifdef DEBUG_PROPAGATE_ASSEMBLE
@@ -2555,11 +2577,8 @@ bool Propagate::Execute()
             // Evaluate Stop conditions to set initial values
             for (UnsignedInt i=0; i<stopWhen.size(); i++)
             {
-               // Fix for bug 910
-//               Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
-//                                stopAccuracy);
                Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
-                                FIRST_STEP_TOLERANCE);
+                                firstStepTolerance);
                stopWhen[i]->Reset();
                stopWhen[i]->Evaluate();
 
@@ -2996,7 +3015,7 @@ void Propagate::CheckStopConditions(Integer epochID)
  * Method used during the first prop step to ensure that a stop encountered on 
  * this step is not repeating the last stop encountered.
  * 
- * @param <i> Index in teh stopping condition list that needs to be checked
+ * @param <i> Index in the stopping condition list that needs to be checked
  * 
  * @return true is the stop is a valid stop -- that is, if it is not a repeat of
  * the last stop -- and false if it is a repeat.
@@ -3034,9 +3053,8 @@ bool Propagate::CheckFirstStepStop(Integer i)
       
       // Only report true if outside of tolerance
       Real accuracy = (stopWhen[i]->IsTimeCondition() ? timeAccuracy : 
-                                                        FIRST_STEP_TOLERANCE);
-// Fix for 910                                                        
-//                                                        stopAccuracy);
+                                                        firstStepTolerance);
+
       if (temp > accuracy)
          if ((goal > min) && (goal < max))
             return true;
@@ -3436,6 +3454,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
 
    if (stopper->IsTimeCondition())
    {
+      // Handle time based stopping condition refinement
       Real prevStep = secsToStep;
       
       while ((attempts < 50) && !closeEnough)
@@ -3497,6 +3516,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    }
    else
    {
+      // Handle non-time based stopping condition refinement
       while (!closeEnough && (attempts < 50))
       {
          target = stopper->GetStopGoal();
@@ -3521,13 +3541,22 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                throw CommandException("Error refining timestep for Propagate "
                   "command: zero slope; Exiting\n");
             }
-            secsToStep = (target - y[0]) / slope;
+            secsToStep = x[1] + (target - y[1]) / slope;
+
+            #ifdef DEBUG_STOPPING_CONDITIONS   
+               MessageInterface::ShowMessage(
+                     "[%2d] Secant target: %16.12le\n"
+                     "   Secant data points:\n"
+                     "      (%16.12le, %16.12le)\n"
+                     "      (%16.12le, %16.12le)\n"
+                     "   Secant timestep: %16.12lf\n",
+                     attempts, target, x[0], y[0], x[1], y[1], secsToStep);
+            #endif
          }
          else
          {
             if (stopper->IsCyclicParameter())
                y[0] = GetRangedAngle(y[0], target);
-            nextTimeThrough = true;
          }
          
          if (!TakeAStep(secsToStep))
@@ -3540,22 +3569,32 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
             fm[i]->UpdateSpaceObject(
                baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
          }
-   
+
+         #ifdef DEBUG_SECANT_DETAILS
+            MessageInterface::ShowMessage(
+                  "%d %16.12lf %16.12lf %16.12lf %16.12lf", attempts, x[0], 
+                  y[0], x[1], y[1]);
+         #endif
+            
+         // Buffer data for next iteration
+         if (nextTimeThrough)
+         {
+            x[0] = x[1];
+            y[0] = y[1];
+         }
+         else
+            nextTimeThrough = true;
+         
+         // And store current results
          x[1] = secsToStep;
          y[1] = stopParam->EvaluateReal();
          if (stopper->IsCyclicParameter())
             y[1] = GetRangedAngle(y[1], target);
-   
-         #ifdef DEBUG_STOPPING_CONDITIONS   
-            MessageInterface::ShowMessage(
-               "[%2d] Secant target: %16.12le\n"
-               "   Secant data points:\n"
-               "      (%16.12le, %16.12le)\n"
-               "      (%16.12le, %16.12le)\n"
-               "   Secant timestep: %16.12lf\n",
-               attempts, target, x[0], y[0], x[1], y[1], secsToStep);
+
+         #ifdef DEBUG_SECANT_DETAILS
+            MessageInterface::ShowMessage(" %16.12lf %16.12lf\n", x[1], y[1]);
          #endif
-    
+         
          // Check to see if accuracy is within tolerance
          if (fabs(stopper->GetStopDifference()) < stopAccuracy)
             closeEnough = true;

@@ -231,6 +231,8 @@ protected:
    Real                    stopAccuracy;
    /// Required accuracy for stopping with stop conditions
    Real                    timeAccuracy;
+   /// Tolerance used when determining if a triggered stop is the previous stop
+   Real                    firstStepTolerance;
    /// Dimension used for (local) state vector
    Integer                 dim;
    /// Identifies when the command is in single step mode
