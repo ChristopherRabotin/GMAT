@@ -153,7 +153,11 @@ bool Assignment::InterpretAction()
    #endif
       
    lhs = chunks[0];
-   rhs = chunks[1];
+   rhs = chunks[1];   
+   
+   // it there is still ; then report error since ; should have been removed
+   if (rhs.find(";") != rhs.npos)
+      throw CommandException("Is there a missing \"\%\" for inline comment?");
    
    // Check if rhs is an equation
    MathParser mp = MathParser();
