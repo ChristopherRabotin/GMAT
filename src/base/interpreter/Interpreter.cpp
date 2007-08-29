@@ -1992,13 +1992,14 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          else
          {
             // check if it is property first
-            ////rhsPropName = rhs.substr(dot+1);
             std::string afterDot = rhs.substr(dot+1);
             GmatBase *toObj = NULL;
             Integer toId = -1;
             Gmat::ParameterType toType;
             if (FindPropertyID(rhsObj, afterDot, &toObj, toId, toType))
                rhsPropName = afterDot;
+            else
+               rhsPropName = rhsParts[1];
          }
       }
    }
