@@ -59,7 +59,7 @@ Propagate::PARAMETER_TEXT[PropagateCommandParamCount - GmatCommandParamCount] =
    "AvailablePropModes",
    "PropagateMode",
    "InterruptFrequency",
-   "StopAccuracy",
+   "StopTolerance",
    "Spacecraft",
    "Propagator",
    "StopCondition",
@@ -1165,8 +1165,21 @@ Real Propagate::SetRealParameter(const Integer id, const Real value)
 {
    if (id == STOP_ACCURACY)
    {
-      stopAccuracy = value;
-      firstStepTolerance = stopAccuracy * 10.0;
+      if (value > 0.0)
+      {
+         stopAccuracy = value;
+         firstStepTolerance = stopAccuracy * 10.0;
+      }
+      else
+      {
+         std::stringstream val;
+         val.precision(13);
+         val << value;
+         CommandException ce;
+         ce.SetDetails(errorMessageFormatUnnamed.c_str(),
+            val.str().c_str(), "StopTolerance", "a Real number > 0.0");
+         throw ce;
+      }
       return stopAccuracy;
    }
    return GmatCommand::SetRealParameter(id, value);
@@ -1756,6 +1769,13 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
          Real rval;
          if (GmatStringUtil::ToReal(rhs, rval))
             SetRealParameter(STOP_ACCURACY, rval);
+         else
+         {
+            CommandException ce;
+            ce.SetDetails(errorMessageFormatUnnamed.c_str(),
+               rhs.c_str(), "StopTolerance", "a Real number > 0.0");
+            throw ce;
+         }
          return;
       }
    }
