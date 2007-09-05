@@ -293,11 +293,12 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
  * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
  * @param  onlyMsg  if true, it only shows error message
+ * @param  positive if true, the value must be positive
  */
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
                           const std::string &field, const std::string &expRange,
-                          bool onlyMsg)
+                          bool onlyMsg, bool positive)
 {
    //MessageInterface::ShowMessage
    //   ("===> CheckReal() str=%s, field=%s, expRange=%s\n", str.c_str(),
@@ -318,17 +319,18 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
    if (GmatStringUtil::ToReal(str, &rval))
    {
       rvalue = rval;
-      return true;
-   }
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
       
-      canClose = false;
-      return false;
+      if (!positive ||
+          (positive && rval > 0))
+         return true;
    }
+   
+   MessageInterface::PopupMessage
+      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+       expRange.c_str());
+      
+   canClose = false;
+   return false;
 }
 
 
@@ -348,11 +350,12 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
  * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
  * @param  onlyMsg  if true, it only shows error message
+ * @param  positive if true, the value must be positive
  */
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
                              const std::string &field, const std::string &expRange,
-                             bool onlyMsg)
+                             bool onlyMsg, bool positive)
 {
    if (onlyMsg)
    {
@@ -369,17 +372,18 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
    if (GmatStringUtil::ToInteger(str, &ival))
    {
       ivalue = ival;
-      return true;
-   }
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
       
-      canClose = false;
-      return false;
+      if (!positive ||
+          (positive && ival > 0))
+         return true;
    }
+   
+   MessageInterface::PopupMessage
+      (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
+       expRange.c_str());
+   
+   canClose = false;
+   return false;
 }
 
 
