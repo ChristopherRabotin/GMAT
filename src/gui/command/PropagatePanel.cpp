@@ -39,6 +39,7 @@ BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
    EVT_GRID_CELL_CHANGE(PropagatePanel::OnCellValueChange)
    EVT_CHECKBOX(ID_CHECKBOX, PropagatePanel::OnCheckBoxChange)
    EVT_COMBOBOX(ID_COMBOBOX, PropagatePanel::OnComboBoxChange)
+   EVT_TEXT(ID_TEXTCTRL, PropagatePanel::OnTextChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -56,18 +57,18 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
    #endif
    
    thePropCmd = (Propagate *)cmd;
-
+   
    // Default values
    mPropModeChanged = false;
-   mPropChanged     = false;
+   mPropDirChanged = false;
+   mPropSatChanged = false;
    mStopCondChanged = false;
-
+   mStopTolChanged = false;
    canClose = true;
-
+   
    mPropModeCount = 1;
    mPropCount     = 0;
    mStopCondCount = 0;
-//   numOfEqualities = 6;
    
    for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
@@ -86,8 +87,6 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
       mTempStopCond[i].typeName = "";
       mTempStopCond[i].relOpStr = "";
       mTempStopCond[i].goalStr = "";
-//      mTempStopCond[i].tol = StopCondition::STOP_COND_TOL;
-//      mTempStopCond[i].repeat = 1;
       mTempStopCond[i].stopCondPtr = NULL;
    }
    
@@ -108,7 +107,6 @@ PropagatePanel::PropagatePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 void PropagatePanel::OnCancel(wxCommandEvent &event)
 {
-//   mRemovedStopCondList.clear();
    GmatAppData::GetMainFrame()->CloseActiveChild();
 }
 
@@ -207,14 +205,11 @@ void PropagatePanel::Create()
    stopCondGrid->SetRowLabelSize(0);
    stopCondGrid->SetScrollbars(5, 8, 15, 15);
 
-
-   //wxSizers
-   propModeSizer = new wxFlexGridSizer( 4, 0, 0 );
-   mMiddleBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mpropSizer = 
+   
+   wxFlexGridSizer *propModeSizer = new wxFlexGridSizer( 4, 0, 0 );
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   GmatStaticBoxSizer *propSizer = 
       new GmatStaticBoxSizer(wxVERTICAL, this, "Propagators and Spacecraft");
-   mStopSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Stopping Conditions");
    
    //Adding objects to sizers
    propModeSizer->Add( synchStaticText, 0, wxALIGN_LEFT|wxALL, bsize );
@@ -222,15 +217,31 @@ void PropagatePanel::Create()
    propModeSizer->Add( 200, 20, wxALIGN_CENTRE|wxALL, bsize );
    propModeSizer->Add( backPropCheckBox, 0, wxALIGN_LEFT|wxALL, bsize );
    
-   mpropSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
-   mpropSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-     
-   mStopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, bsize);
+   propSizer->Add(propModeSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   propSizer->Add(propGrid, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   mMiddleBoxSizer->Add(mpropSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
-   mMiddleBoxSizer->Add(mStopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   // Stop tolerance
+   wxStaticText *stopTolStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Stop Tolerance: "), 
+                       wxDefaultPosition, wxSize(-1, -1), 0);
+   mStopTolTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+                                     wxDefaultPosition, wxSize(150,-1), 0);
+   wxBoxSizer *stopTolSizer = new wxBoxSizer(wxHORIZONTAL);
    
-   theMiddleSizer->Add(mMiddleBoxSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   stopTolSizer->Add(stopTolStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   stopTolSizer->Add(mStopTolTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   // Stopping conditions
+   GmatStaticBoxSizer *stopSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Stopping Conditions");
+   
+   stopSizer->Add(stopTolSizer, 0, wxALIGN_LEFT|wxALL, bsize);
+   stopSizer->Add(stopCondGrid, 0, wxALIGN_CENTER|wxALL, bsize);
+   
+   pageSizer->Add(propSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(stopSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
+   
+   theMiddleSizer->Add(pageSizer, 0, wxGROW|wxALIGN_CENTER|wxALL, bsize);
 }
 
 
@@ -266,7 +277,6 @@ void PropagatePanel::DisplayStopCondition()
    #endif
    
    //----- for stopCondGrid - show all
-//   for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
    for (Integer i=0; i<mStopCondCount; i++)
    {
       stopCondGrid->
@@ -283,8 +293,6 @@ void PropagatePanel::DisplayStopCondition()
       else
       {
          stopCondGrid->SetCellValue( i, STOPCOND_RELOPER_COL, "=" );
-//         stopCondGrid->
-//           SetCellValue( i, STOPCOND_RELOPER_COL, mTempStopCond[i].relOpStr );        
          stopCondGrid->
             SetCellValue( i, STOPCOND_COND_COL, mTempStopCond[i].goalStr );
          stopCondGrid->SetReadOnly( i, STOPCOND_COND_COL, false );
@@ -406,6 +414,16 @@ wxString PropagatePanel::FormatStopCondDesc(const wxString &varName,
 
 
 //------------------------------------------------------------------------------
+// void OnTextChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void PropagatePanel::OnTextChange(wxCommandEvent& event)
+{
+   mStopTolChanged = true;
+   EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
 // void OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 /**
@@ -421,7 +439,7 @@ void PropagatePanel::OnCheckBoxChange(wxCommandEvent& event)
 
    if (event.GetEventObject() == backPropCheckBox)
    {
-      mPropChanged = true;
+      mPropDirChanged = true;
       EnableUpdate(true);
    }
 }
@@ -436,10 +454,7 @@ void PropagatePanel::OnComboBoxChange(wxCommandEvent& event)
    MessageInterface::ShowMessage
       ("PropagatePanel::OnComboBoxChange() entered\n");
    #endif
-
-//   // Assume single selection
-//   wxArrayInt stopRows = stopCondGrid->GetSelectedRows();
-    
+   
    if (event.GetEventObject() == mPropModeComboBox)
    {
       mPropModeChanged = true;
@@ -457,15 +472,15 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
    MessageInterface::ShowMessage
       ("PropagatePanel::OnCellRightClick() entered\n");
    #endif
-
+   
    Integer row = event.GetRow();
    Integer col = event.GetCol();
-
+   
    #if DEBUG_PROPAGATE_PANEL
    MessageInterface::ShowMessage
       ("PropagatePanel::OnCellRightClick() row = %d, col = %d\n", row, col);
    #endif
-
+   
    // Propagate grid
    if (event.GetEventObject() == propGrid)
    {
@@ -489,7 +504,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             #endif
             
             propGrid->SetCellValue(row, col, newPropName);
-           
+            mPropSatChanged = true;
             EnableUpdate(true);
          }
       }
@@ -512,14 +527,14 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
          SpaceObjectSelectDialog soDlg(this, mTempProp[row].soNameList, 
             soExcList);
          soDlg.ShowModal();
-      
+         
          if (soDlg.IsSpaceObjectSelected())
          {
             wxArrayString &names = soDlg.GetSpaceObjectNames();
             mTempProp[row].isChanged = true;
             mTempProp[row].soNames = "";
             soCount = names.GetCount();
-         
+            
             #if DEBUG_PROPAGATE_PANEL
             MessageInterface::ShowMessage
                ("PropagatePanel::OnCellRightClick() soCount=%d\n",
@@ -549,12 +564,12 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             
             propGrid->SetCellValue(row, col, mTempProp[row].soNames);
             
-            mPropChanged = true;
+            mPropSatChanged = true;
             EnableUpdate(true);
          } // soDlg.IsSpaceObjectSelected()
       } // else if (col == 1)
    } // end of if (event.GetEventObject() == propGrid)
-
+   
    // Stopping Condition grid
    else if (event.GetEventObject() == stopCondGrid)
    {
@@ -585,6 +600,8 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
                stopCondGrid->SetCellValue( row, STOPCOND_COND_COL, "0.0" );
                stopCondGrid->SetReadOnly( row, STOPCOND_COND_COL, false );
             }
+            
+            mStopCondChanged = true;
          }
       }
       else if (col == 2)
@@ -608,6 +625,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
          {
             wxString newParamName = paramDlg.GetParamName();
             stopCondGrid->SetCellValue( row, STOPCOND_COND_COL, newParamName );
+            mStopCondChanged = true;
          }
       }
       
@@ -652,6 +670,8 @@ void PropagatePanel::OnCellValueChange(wxGridEvent& event)
             stopCondGrid->SetReadOnly( row, STOPCOND_COND_COL, false );
          }
       }
+      
+      mStopCondChanged = true;
    }
    
    EnableUpdate(true);
@@ -663,7 +683,7 @@ void PropagatePanel::OnCellValueChange(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void PropagatePanel::LoadData()
 {
-   #if DEBUG_PROPAGATE_PANEL
+   #if DEBUG_PROPAGATE_PANEL_LOAD
    MessageInterface::ShowMessage("PropagatePanel::LoadData() entered\n");
    #endif
 
@@ -699,7 +719,7 @@ void PropagatePanel::LoadData()
    
    Integer scId = thePropCmd->GetParameterID( "Spacecraft" );
 
-   #if DEBUG_PROPAGATE_PANEL
+   #if DEBUG_PROPAGATE_PANEL_LOAD
    MessageInterface::ShowMessage
       ("PropagatePanel::LoadData() mPropCount=%d\n", mPropCount);
    #endif
@@ -714,16 +734,16 @@ void PropagatePanel::LoadData()
       soList = thePropCmd->GetStringArrayParameter( scId, i );
       soCount = soList.size();
       
-           #if DEBUG_PROPAGATE_PANEL
-           MessageInterface::ShowMessage
-              ("PropagatePanel::LoadData() propName=%s, soCount=%d\n",
-               propNames[i].c_str(), soCount);
-           #endif
-   
+      #if DEBUG_PROPAGATE_PANEL_LOAD
+      MessageInterface::ShowMessage
+         ("PropagatePanel::LoadData() propName=%s, soCount=%d\n",
+          propNames[i].c_str(), soCount);
+      #endif
+      
       Integer actualSoCount = 0;
       for (Integer j=0; j<soCount; j++)
       {
-         #if DEBUG_PROPAGATE_PANEL
+         #if DEBUG_PROPAGATE_PANEL_LOAD
          MessageInterface::ShowMessage
             ("PropagatePanel::LoadData() soNameList[%d]=<%s>\n",
              j, soList[j].c_str());
@@ -742,7 +762,7 @@ void PropagatePanel::LoadData()
                 "so removed from the display list\n", soList[j].c_str());
          }
       }
-
+      
       soCount = actualSoCount;
       mTempProp[i].soCount = actualSoCount;
       
@@ -753,25 +773,9 @@ void PropagatePanel::LoadData()
             mTempProp[i].soNames += soList[j].c_str();
             mTempProp[i].soNames += ", ";
          }
-
+         
          mTempProp[i].soNames += soList[soCount-1].c_str();
       }
-      
-/////@todo Will be remove when base code is changed -> LTR 1/18/07
-//      // Check if backwards propagation
-//      name = mTempProp[i].propName;
-//      Integer x = name.Find("-");
-//      
-//      if (x == -1)
-//      {
-//         backProp = false;
-//      }
-//      else
-//      {
-//         backProp = true;
-//         name.Replace("-", "", false);
-//         mTempProp[i].propName = name; 
-//      }            
       
    } // for (Integer i=0; i<mPropCount; i++)
    
@@ -780,11 +784,15 @@ void PropagatePanel::LoadData()
    //----------------------------------
    // stopping conditions
    //----------------------------------
+
+   Real stopTol = thePropCmd->GetRealParameter("StopTolerance");
+   mStopTolTextCtrl->SetValue(theGuiManager->ToWxString(stopTol));
+   
    ObjectArray &stopArray =
       thePropCmd->GetRefObjectArray(Gmat::STOP_CONDITION);
    mStopCondCount = stopArray.size();
       
-   #if DEBUG_PROPAGATE_PANEL
+   #if DEBUG_PROPAGATE_PANEL_LOAD
    MessageInterface::ShowMessage
       ("PropagatePanel::LoadData() mStopCondCount=%d\n",
        mStopCondCount);
@@ -795,7 +803,7 @@ void PropagatePanel::LoadData()
    {
       stopCond = (StopCondition *)stopArray[i]; 
       
-      #if DEBUG_PROPAGATE_PANEL
+      #if DEBUG_PROPAGATE_PANEL_LOAD
       MessageInterface::ShowMessage
          ("PropagatePanel::LoadData() stopArray[%d]=%s\n",
           i, stopCond->GetName().c_str());
@@ -812,8 +820,6 @@ void PropagatePanel::LoadData()
          mTempStopCond[i].typeName = wxT(stopCond->GetTypeName().c_str());
          mTempStopCond[i].goalStr = 
             stopCond->GetStringParameter("Goal").c_str();
-//         mTempStopCond[i].tol = stopCond->GetRealParameter("Tol");
-//         mTempStopCond[i].repeat = stopCond->GetIntegerParameter("Repeat");
          wxString str = FormatStopCondDesc(mTempStopCond[i].varName,
                                            mTempStopCond[i].relOpStr,
                                            mTempStopCond[i].goalStr);
@@ -831,13 +837,13 @@ void PropagatePanel::LoadData()
 //------------------------------------------------------------------------------
 void PropagatePanel::SaveData()
 {
-   #if DEBUG_PROPAGATE_PANEL
+   #if DEBUG_PROPAGATE_PANEL_SAVE
    MessageInterface::ShowMessage("PropagatePanel::SaveData() entered\n");
    #endif
 
    Integer blankProps = 0;
    canClose = true;
-
+   
    // count number of propagators
    for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
@@ -856,43 +862,54 @@ void PropagatePanel::SaveData()
    //-----------------------------------------------------------------
    // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
-   for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
+   Real stopTol;
+   if (mStopTolChanged)
    {
-      if ( (stopCondGrid->GetCellValue(i, STOPCOND_PARAM_COL) != "") ||
-           (stopCondGrid->GetCellValue(i, STOPCOND_COND_COL) != "") )
+      CheckReal(stopTol, mStopTolTextCtrl->GetValue().c_str(), "StopTolerance",
+                "Real Number > 0", false, true);
+   }
+   
+   if (mStopCondChanged)
+   {
+      for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
       {
-         CheckVariable( stopCondGrid->GetCellValue
-            (i, STOPCOND_PARAM_COL).c_str(), Gmat::SPACECRAFT, "Parameter",
-            "Variable, Array element, plottable Parameter", true, true);
-         
-         // check condition if parameter is not Periapsis nor Apoapsis
-         wxString paramName = stopCondGrid->GetCellValue( i, STOPCOND_PARAM_COL);
-         if (!paramName.Contains(".Periapsis") && !paramName.Contains(".Apoapsis"))
+         if ( (stopCondGrid->GetCellValue(i, STOPCOND_PARAM_COL) != "") ||
+              (stopCondGrid->GetCellValue(i, STOPCOND_COND_COL) != "") )
          {
             CheckVariable( stopCondGrid->GetCellValue
-               (i, STOPCOND_COND_COL).c_str(), Gmat::SPACECRAFT, "Condition",
-                "Variable, Array element, plottable Parameter", true, true);
+                           (i, STOPCOND_PARAM_COL).c_str(), Gmat::SPACECRAFT, "Parameter",
+                           "Variable, Array element, plottable Parameter", true, true);
+            
+            // check condition if parameter is not Periapsis nor Apoapsis
+            wxString paramName = stopCondGrid->GetCellValue( i, STOPCOND_PARAM_COL);
+            if (!paramName.Contains(".Periapsis") && !paramName.Contains(".Apoapsis"))
+            {
+               CheckVariable( stopCondGrid->GetCellValue
+                              (i, STOPCOND_COND_COL).c_str(), Gmat::SPACECRAFT, "Condition",
+                              "Variable, Array element, plottable Parameter", true, true);
+            }
          }
       }
    }
    
    if (!canClose)
       return;
-
+   
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
    try
    {
       //-------------------------------------------------------
-      // Saving propagation mode
+      // Save propagation mode
       //-------------------------------------------------------
       if (mPropModeChanged)
       {
-         #if DEBUG_PROPAGATE_PANEL
+         #if DEBUG_PROPAGATE_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("PropagatePanel::SaveData() Saving propagation mode \n");
+            ("PropagatePanel::SaveData() Save propagation mode \n");
          #endif
+         
          mPropModeChanged = false;
          wxString str = mPropModeComboBox->GetStringSelection();
          if (str.CmpNoCase("None") == 0)
@@ -900,143 +917,154 @@ void PropagatePanel::SaveData()
          thePropCmd->SetStringParameter
             (thePropCmd->GetParameterID("PropagateMode"), str.c_str());
       }
-           
-      //---------------------------------------
-      // Saving propagator and spacecraft
-      //---------------------------------------
-      #if DEBUG_PROPAGATE_PANEL
-      MessageInterface::ShowMessage
-         ("PropagatePanel::SaveData() Saving propagator and spacecraft \n");
-      #endif
-
-      Integer propId = thePropCmd->GetParameterID("Propagator");
-      Integer scId = thePropCmd->GetParameterID("Spacecraft");
       
-      // Clear propagator and spacecraft list
-      thePropCmd->TakeAction("Clear", "Propagator");
-      
-      Integer soCount = 0;
-      mPropCount = 0;
-           for (Integer i=0; i<MAX_PROP_ROW; i++)
-           {
-         #if DEBUG_PROPAGATE_PANEL
+      //---------------------------------------
+      // Save propagator and spacecraft
+      //---------------------------------------
+      if (mPropSatChanged)
+      {         
+         #if DEBUG_PROPAGATE_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("PropagatePanel::SaveData() propagator name[%d]=%s\n",
-               i,propGrid->GetCellValue(i, PROP_NAME_COL).c_str());
-         MessageInterface::ShowMessage
-            ("PropagatePanel::SaveData() spacecraft name[%d]=%s\n",
-               i,propGrid->GetCellValue(i, PROP_SOS_COL).c_str());
+            ("PropagatePanel::SaveData() Save propagator and spacecraft \n");
          #endif
-
-
-
-              if ( (propGrid->GetCellValue(i, PROP_NAME_COL) != "") || 
-                   (propGrid->GetCellValue(i, PROP_SOS_COL) != "") )
-              {
-            mTempProp[mPropCount].propName = 
-               propGrid->GetCellValue(i, PROP_NAME_COL).c_str(); 
-
-//               // backward propragation
-//               if (backPropCheckBox->IsChecked())
-//               {
-//                  mTempProp[mPropCount].propName.Prepend("-");  
-//               }
-//               else
-//               {
-//                  wxString name = mTempProp[mPropCount].propName;
-//                  name.Replace("-", "", false);
-//                  mTempProp[mPropCount].propName = name; 
-//               }
-                 #if DEBUG_PROPAGATE_PANEL
-                 MessageInterface::ShowMessage
-                    ("PropagatePanel::SaveData() propName[%d]=%s\n",
-                       mPropCount,mTempProp[mPropCount].propName.c_str());
-                 #endif
-                 
-            // saving propagator
-                 thePropCmd->SetStringParameter 
-                    ( propId, mTempProp[mPropCount].propName.c_str() );
-
-            // saving spacecraft
-            std::string spacecraftStr = 
-               propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
-            StringArray parts = 
-               GmatStringUtil::SeparateBy(spacecraftStr, ",");
-
-            soCount = parts.size();                    
-            for (Integer j=0; j<soCount; j++)
+         
+         mPropSatChanged = false;
+         Integer propId = thePropCmd->GetParameterID("Propagator");
+         Integer scId = thePropCmd->GetParameterID("Spacecraft");
+         
+         // Clear propagator and spacecraft list
+         thePropCmd->TakeAction("Clear", "Propagator");
+         
+         Integer soCount = 0;
+         mPropCount = 0;
+         for (Integer i=0; i<MAX_PROP_ROW; i++)
+         {
+            #if DEBUG_PROPAGATE_PANEL_SAVE
+            MessageInterface::ShowMessage
+               ("PropagatePanel::SaveData() propagator name[%d]=%s\n",
+                i,propGrid->GetCellValue(i, PROP_NAME_COL).c_str());
+            MessageInterface::ShowMessage
+               ("PropagatePanel::SaveData() spacecraft name[%d]=%s\n",
+                i,propGrid->GetCellValue(i, PROP_SOS_COL).c_str());
+            #endif
+            
+            
+            if ( (propGrid->GetCellValue(i, PROP_NAME_COL) != "") || 
+                 (propGrid->GetCellValue(i, PROP_SOS_COL) != "") )
             {
-               #if DEBUG_PROPAGATE_PANEL
+               mTempProp[mPropCount].propName = 
+                  propGrid->GetCellValue(i, PROP_NAME_COL).c_str(); 
+            
+               #if DEBUG_PROPAGATE_PANEL_SAVE
                MessageInterface::ShowMessage
-                  ("parts[%d] = %s\n", j, parts[j].c_str());
+                  ("PropagatePanel::SaveData() propName[%d]=%s\n",
+                   mPropCount,mTempProp[mPropCount].propName.c_str());
                #endif
-               thePropCmd->SetStringParameter
-                  (scId, std::string(parts[j].c_str()), mPropCount);
-            }
-                 ++mPropCount;
-              } // if
-           } // for MAX_PROP_ROW
-
-      // Set the prop direction
-      thePropCmd->SetBooleanParameter("PropForward",
-         !(backPropCheckBox->IsChecked()));
-
-
-      #if DEBUG_PROPAGATE_PANEL
+               
+               // saving propagator
+               thePropCmd->SetStringParameter 
+                  ( propId, mTempProp[mPropCount].propName.c_str() );
+               
+               // saving spacecraft
+               std::string spacecraftStr = 
+                  propGrid->GetCellValue(i, PROP_SOS_COL).c_str();
+               StringArray parts = 
+                  GmatStringUtil::SeparateBy(spacecraftStr, ",");
+               
+               soCount = parts.size();                    
+               for (Integer j=0; j<soCount; j++)
+               {
+                  #if DEBUG_PROPAGATE_PANEL_SAVE
+                  MessageInterface::ShowMessage
+                     ("parts[%d] = %s\n", j, parts[j].c_str());
+                  #endif
+                  
+                  thePropCmd->SetStringParameter
+                     (scId, std::string(parts[j].c_str()), mPropCount);
+               }
+               ++mPropCount;
+            } // if
+         } // for MAX_PROP_ROW
+      } // if (mPropSatChanged)
+      
+      
+      //---------------------------------------
+      // Save the prop direction
+      //---------------------------------------
+      if (mPropDirChanged)
+      {
+         mPropDirChanged = false;
+         thePropCmd->SetBooleanParameter("PropForward",
+                                         !(backPropCheckBox->IsChecked()));
+      }
+      
+      //---------------------------------------
+      // Save stop tolerance
+      //---------------------------------------
+      if (mStopTolChanged)
+      {
+         mStopTolChanged = false;
+         thePropCmd->SetRealParameter("StopTolerance", stopTol);
+      }
+      
+      //---------------------------------------
+      // Save stopping condition
+      //---------------------------------------
+      
+      #if DEBUG_PROPAGATE_PANEL_SAVE
       MessageInterface::ShowMessage
          ("PropagatePanel::SaveData() mPropCount=%d\n", mPropCount);
       #endif
-
-      //---------------------------------------
-      // Saving stopping condition
-      //---------------------------------------
-      thePropCmd->TakeAction("Clear", "StopCondition");
-         
-      mStopCondCount = 0;
-      // count number of stopping conditions
-      for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
+      
+      if (mStopCondChanged)
       {
-//         if ( (stopCondGrid->GetCellValue(i, STOPCOND_PARAM_COL) != "") ||
-//              (stopCondGrid->GetCellValue(i, STOPCOND_COND_COL) != "") )
-         if (stopCondGrid->GetCellValue(i, STOPCOND_PARAM_COL) != "")
+         #if DEBUG_PROPAGATE_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("PropagatePanel::SaveData() Save stopping conditions\n");
+         #endif
+         
+         mStopCondChanged = false;
+         thePropCmd->TakeAction("Clear", "StopCondition");
+         
+         mStopCondCount = 0;
+         // count number of stopping conditions
+         for (Integer i=0; i<MAX_STOPCOND_ROW; i++)
          {
-            UpdateStopCondition(i);
+            if (stopCondGrid->GetCellValue(i, STOPCOND_PARAM_COL) != "")
+            {
+               UpdateStopCondition(i);
                
-                 #if DEBUG_PROPAGATE_PANEL
-                 MessageInterface::ShowMessage
-                    ( "PropagatePanel::SaveData() name = %s\n varName = %s\n goal = %s\n tol = %f\n repeat = %d\n",
-                     mTempStopCond[i].name.c_str(),
-                     mTempStopCond[i].varName.c_str(),
-                     mTempStopCond[i].goalStr.c_str(),
-                     mTempStopCond[i].tol,
-                     mTempStopCond[i].repeat );
-                 #endif
-            mTempStopCond[mStopCondCount].stopCondPtr->
-               SetName(std::string(mTempStopCond[i].name.c_str()));
-            
-            mTempStopCond[mStopCondCount].stopCondPtr->
-               SetStringParameter("StopVar", mTempStopCond[i].varName.c_str());
-            
-            mTempStopCond[mStopCondCount].stopCondPtr->
-               SetStringParameter("Goal", mTempStopCond[i].goalStr.c_str());
-            
-//            mTempStopCond[mStopCondCount].stopCondPtr->
-//               SetRealParameter("Tol", mTempStopCond[i].tol);
-//            
-//            mTempStopCond[mStopCondCount].stopCondPtr->
-//               SetIntegerParameter("Repeat", mTempStopCond[i].repeat);
-            
-            thePropCmd->
-               SetRefObject(mTempStopCond[mStopCondCount].stopCondPtr, 
-               Gmat::STOP_CONDITION,"", mStopCondCount);
-            mStopCondCount++;
-                 #if DEBUG_PROPAGATE_PANEL
-                 MessageInterface::ShowMessage
-                    ("PropagatePanel::SaveData() mStopCondCount=%d\n", 
-                    mStopCondCount);
-                 #endif
-         } // STOPCOND_PARAM_COL != ""
-      } // for MAX_STOPCOND_ROW
+               #if DEBUG_PROPAGATE_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("PropagatePanel::SaveData() name = %s\n varName = %s\n goal = %s\n"
+                   " tol = %f\n repeat = %d\n",
+                   mTempStopCond[i].name.c_str(),
+                   mTempStopCond[i].varName.c_str(),
+                   mTempStopCond[i].goalStr.c_str(),
+                   mTempStopCond[i].tol,
+                   mTempStopCond[i].repeat );
+              #endif
+               mTempStopCond[mStopCondCount].stopCondPtr->
+                  SetName(std::string(mTempStopCond[i].name.c_str()));
+               
+               mTempStopCond[mStopCondCount].stopCondPtr->
+                  SetStringParameter("StopVar", mTempStopCond[i].varName.c_str());
+               
+               mTempStopCond[mStopCondCount].stopCondPtr->
+                  SetStringParameter("Goal", mTempStopCond[i].goalStr.c_str());
+               
+               thePropCmd->
+                  SetRefObject(mTempStopCond[mStopCondCount].stopCondPtr, 
+                               Gmat::STOP_CONDITION,"", mStopCondCount);
+               mStopCondCount++;
+               #if DEBUG_PROPAGATE_PANEL_SAVE
+               MessageInterface::ShowMessage
+                  ("PropagatePanel::SaveData() mStopCondCount=%d\n", 
+                   mStopCondCount);
+               #endif
+            } // STOPCOND_PARAM_COL != ""
+         } // for MAX_STOPCOND_ROW
+      } // if (mStopCondChanged)
    } // try
    catch (BaseException &e)
    {

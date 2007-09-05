@@ -63,8 +63,6 @@ private:
       wxString       typeName;
       wxString       relOpStr;
       wxString       goalStr;
-//      Real           tol;
-//      Integer        repeat;
       StopCondition *stopCondPtr;
    };
    
@@ -72,23 +70,19 @@ private:
    wxGrid *stopCondGrid;
 
    wxCheckBox *backPropCheckBox;
-   
+   wxTextCtrl *mStopTolTextCtrl;
    wxComboBox *mPropModeComboBox;
    wxComboBox *equalityComboBox;
    
-   wxBoxSizer *mMiddleBoxSizer;
-   wxFlexGridSizer *propModeSizer;
-   GmatStaticBoxSizer *mpropSizer;
-   GmatStaticBoxSizer *mStopSizer;
-   
-   bool    mPropModeChanged;
-   bool    mPropChanged;
-   bool    mStopCondChanged;
-   bool    mPropGridSelected;
-   bool    mStopCondGridSelected;
+   bool mPropModeChanged;
+   bool mPropDirChanged;
+   bool mPropSatChanged;
+   bool mStopCondChanged;
+   bool mStopTolChanged;
+   bool mPropGridSelected;
+   bool mStopCondGridSelected;
    
    Integer mPropModeCount;
-//   Integer numOfEqualities;
    Integer mPropCount;
    Integer mSpaceObjectCount;
    Integer mStopCondCount;
@@ -117,11 +111,12 @@ private:
                                const wxString &goalStr);
    
    // event handling method
+   void OnTextChange(wxCommandEvent& event);
    void OnCellRightClick(wxGridEvent &event);
    void OnCellValueChange(wxGridEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent &event);
-
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
    
@@ -129,6 +124,7 @@ private:
    enum
    {     
       ID_TEXT = 44000,
+      ID_TEXTCTRL,
       ID_COMBOBOX,
       ID_CHECKBOX,
       ID_GRID,
