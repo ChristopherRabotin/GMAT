@@ -312,8 +312,11 @@ Subscriber* FactoryManager::CreateSubscriber(const std::string &ofType,
                                              const std::string &fileName)
 {
    Factory* f = FindFactory(Gmat::SUBSCRIBER, ofType);
+
    if (f != NULL)
       return f->CreateSubscriber(ofType, withName, fileName);
+
+   MessageInterface::ShowMessage("      Could not find Factory for %s\n", ofType.c_str());
    return NULL;
 }
 

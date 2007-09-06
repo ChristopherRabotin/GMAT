@@ -623,6 +623,8 @@ bool GravityField::GetDerivatives(Real * state, Real dt, Integer dvorder)
    #ifdef DEBUG_FIRST_CALL
       if (firstCallFired == false)
       {
+    	 CelestialBody *targetBody = (CelestialBody*) targetCS->GetOrigin();
+    	 CelestialBody *fixedBody  = (CelestialBody*) fixedCS->GetOrigin();
          MessageInterface::ShowMessage(
             "   Epoch = %.12lf\n   targetBody = %s\n   fixedBody = %s\n", 
             now.Get(), targetBody->GetName().c_str(), 

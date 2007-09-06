@@ -34,6 +34,7 @@ gui: $(WXTARGET)
 
 prep:
 	mkdir -p ../bin
+	rm -f app/AboutDialog.o
 
 HEADERS = -I../base/include \
           -I../base/attitude \

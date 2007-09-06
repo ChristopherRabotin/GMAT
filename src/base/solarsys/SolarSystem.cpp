@@ -26,6 +26,11 @@
 #include "Moon.hpp"
 #include "StringUtil.hpp"     // for ToString()
 
+#include "MessageInterface.hpp"     // for debugging
+
+//#define DEBUG_SS_CLONING
+
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -205,19 +210,20 @@ anMethodForAll  (ss.anMethodForAll),
 pE              (NULL),
 overrideTimeForAll (ss.overrideTimeForAll),
 ephemUpdateInterval (ss.ephemUpdateInterval),
-bodiesInUse     (ss.bodiesInUse), // copy it first
+//bodiesInUse     (ss.bodiesInUse), // copy it first
 bodyStrings     (ss.bodyStrings)
 {
    parameterCount   = SolarSystemParamCount;
    
-   // replace body pointers with clones
-   Integer sz = bodiesInUse.size();
-   Integer i;
-   for (i = 0; i < sz; i++)
+   // clone the SS bodies
+   for (std::vector<CelestialBody*>::const_iterator i = ss.bodiesInUse.begin(); 
+        i != ss.bodiesInUse.end(); ++i)
    {
-      bodiesInUse.push_back(((CelestialBody*)
-                           ((bodiesInUse.front())->Clone())));
-      //loj: bodiesInUse.pop_front();
+      #ifdef DEBUG_SS_CLONING
+         MessageInterface::ShowMessage("Cloning \"%s\"\n", 
+         		(*i)->GetName().c_str());
+      #endif
+   	bodiesInUse.push_back((CelestialBody*)((*i)->Clone()));
    }
 }
 
@@ -316,7 +322,11 @@ SolarSystem::~SolarSystem()
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
-      delete (*cbi);       // delete each body first
+      #ifdef DEBUG_SS_CLONING
+         MessageInterface::ShowMessage("Deleting \"%s\"\n", 
+         		(*cbi)->GetName().c_str());
+      #endif
+		delete (*cbi);       // delete each body first
       ++cbi;
    }
    delete pE;
