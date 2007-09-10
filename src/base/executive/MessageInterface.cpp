@@ -245,12 +245,11 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    }
    
    
-#if !defined __CONSOLE_APP__   
-   if (GmatGlobal::Instance()->IsBatchMode() == true)
-   {
-      ShowMessage(msgBuffer);
-   }
-   else
+#if !defined __CONSOLE_APP__
+   // always show message
+   ShowMessage(msgBuffer);
+   
+   if (GmatGlobal::Instance()->IsBatchMode() != true)
    {
       switch (msgType)
       {
