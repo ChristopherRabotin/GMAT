@@ -242,6 +242,8 @@ protected:
                            *transientForces;
    /// Variable that tracks the current propagation mode
    PropModes               currentMode;
+   /// Bracketing timesteps used in the bisection method
+   Real                    stepBrackets[2];
    
    // Stopping condition parameter IDs
    /// Epoch on the stopping condition
@@ -309,6 +311,7 @@ protected:
    Real                    InterpolateToStop(StopCondition *sc);
    Real                    RefineFinalStep(Real secsToStep, 
                                            StopCondition *stopper);
+   Real                    BisectToStop(StopCondition *stopper);
    
    Real                    GetRangedAngle(const Real angle, const Real midpt);
       
