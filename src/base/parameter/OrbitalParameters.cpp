@@ -367,6 +367,8 @@ bool Apoapsis::Evaluate()
    // compute cos(90 - beta) as the dot product of the R and V vectors
    Real rdotv = R*V;
    mRealValue = rdotv;
+   if (mRealValue == 0.0)
+      mRealValue = -1.0e-40;
    
    //MessageInterface::ShowMessage("Apoapsis::Evaluate() r=%f,%f,%f, v=%f,%f,%f, r.v=%f\n",
    //                              R[0], R[1], R[2], V[0], V[1], V[2], rdotv);
@@ -502,6 +504,8 @@ bool Periapsis::Evaluate()
 //    Real rdotv = R*V;
 //    mRealValue = rdotv;
    mRealValue = R*V;
+   if (mRealValue == 0.0)
+      mRealValue = 1.0e-40;
 
    return true;
 }

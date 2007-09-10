@@ -3709,9 +3709,9 @@ Real Propagate::BisectToStop(StopCondition *stopper)
    Integer attempts = 0;
    bool closeEnough = false;
    Real secsToStep = stepBrackets[1];
-   Real startValue;
-   Real goalValue;
-   Real t_i = stepBrackets[0], dt = stepBrackets[1] - stepBrackets[0];
+//   Real startValue;
+//   Real goalValue;
+//   Real t_i = stepBrackets[0], dt = stepBrackets[1] - stepBrackets[0];
    
    // First do a crude version
    while ((attempts < 250) && !closeEnough)
@@ -3768,6 +3768,8 @@ Real Propagate::BisectToStop(StopCondition *stopper)
 //      
       ++attempts;
    }
+   
+   return secsToStep;
 }
 
 
