@@ -2038,8 +2038,11 @@ bool Propagate::Initialize()
       // Check for finite thrusts and update the force model if there are any
       if (finiteBurnActive == true)
          AddTransientForce(satName[index], fm);
-   
+      
       streamID = publisher->RegisterPublishedData(owners, elements);
+      // Set origin of MJ2000Eq data
+      publisher->SetDataMJ2000EqOrigin(fm->GetBody());
+      
       p->SetPhysicalModel(fm);
       p->SetRealParameter("InitialStepSize", 
          fabs(p->GetRealParameter("InitialStepSize")) * direction);
