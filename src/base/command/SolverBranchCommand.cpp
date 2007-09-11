@@ -35,6 +35,7 @@
 SolverBranchCommand::SolverBranchCommand(const std::string &typeStr) :
    BranchCommand(typeStr)
 {
+   objectTypeNames.push_back("SolverBranchCommand");
 }
 
 //------------------------------------------------------------------------------
@@ -83,6 +84,33 @@ SolverBranchCommand& SolverBranchCommand::operator=(
    }
    
    return *this;
+}
+
+//------------------------------------------------------------------------------
+//  GmatCommand* GetNext()
+//------------------------------------------------------------------------------
+/**
+ * Access the next command in the mission sequence.
+ *
+ * For SolverBranchCommands, this method returns its own pointer while the child
+ * commands are executingm, and it tells the Publisher about a state change after
+ * the Solver has finished its work.
+ *
+ * @return The next command, or NULL if the sequence has finished executing.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* SolverBranchCommand::GetNext()
+{
+   // Return the next pointer in the command sequence if this command -- 
+   // includng its branches -- has finished executing.
+   if ((commandExecuting) && (!commandComplete))
+      return this;
+   
+   // Set state back to RUNNING
+   if (publisher)
+      publisher->SetRunState(Gmat::RUNNING);
+   
+   return next;
 }
 
 

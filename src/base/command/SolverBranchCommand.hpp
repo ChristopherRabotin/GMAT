@@ -27,12 +27,14 @@
 class SolverBranchCommand : public BranchCommand
 {
 public:
-	SolverBranchCommand(const std::string &typeStr);
-	virtual ~SolverBranchCommand();
+        SolverBranchCommand(const std::string &typeStr);
+        virtual ~SolverBranchCommand();
    SolverBranchCommand(const SolverBranchCommand& sbc);
 
    SolverBranchCommand&    operator=(const SolverBranchCommand& sbc);
-
+   
+   virtual GmatCommand*    GetNext();
+   
 protected:
    /// Local store of the objects that we'll need to reset
    ObjectArray         localStore;
