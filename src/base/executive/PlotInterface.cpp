@@ -590,9 +590,9 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
                                  const RealArray &posX, const RealArray &posY,
                                  const RealArray &posZ, const RealArray &velX,
                                  const RealArray &velY, const RealArray &velZ,
-                                 const UnsignedIntArray &scColors,
-                                 bool updateCanvas)
-{   
+                                 const UnsignedIntArray &scColors, bool solving,
+                                 Integer solverOption, bool updateCanvas)
+{
 #if defined __CONSOLE_APP__
    return true;
 #else
@@ -624,7 +624,7 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
             //MessageInterface::ShowMessage
             //   ("PlotInterface::UpdateGlPlot() now updating GL plot...\n");
             frame->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                              scColors, updateCanvas);
+                              scColors, solving, solverOption, updateCanvas);
             
             updated = true;
          }
@@ -635,6 +635,50 @@ bool PlotInterface::UpdateGlPlot(const std::string &plotName,
    
 #endif
 } // end UpdateGlPlot()
+
+
+//------------------------------------------------------------------------------
+// bool TakeGlAction(const std::string &plotName, const std::string &action)
+//------------------------------------------------------------------------------
+bool PlotInterface::TakeGlAction(const std::string &plotName,
+                                 const std::string &action)
+{
+#if defined __CONSOLE_APP__
+   return true;
+#else
+   #if DEBUG_PLOTIF_GL_CLEAR
+   MessageInterface::ShowMessage
+      ("PlotInterface::ClearGlSolverData() entered\n");
+   #endif
+   
+   bool retval = false;
+   wxString owner = wxString(plotName.c_str());
+   
+   MdiChildTrajFrame *frame = NULL;
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      #if DEBUG_PLOTIF_GL_CLEAR
+      MessageInterface::ShowMessage
+         ("PlotInterface::ClearGlSolverData() frame[%d]->GetPlotName()=%s "
+          "owner=%s\n", i, frame->GetPlotName().c_str(), owner.c_str());
+      #endif
+      
+      if (frame)
+      {
+         if (frame->GetPlotName().IsSameAs(owner.c_str()))
+         {
+            frame->TakeAction(action);           
+            retval = true;
+         }
+      }
+   }
+   
+   return retval;
+#endif
+}
 
 
 //------------------------------------------------------------------------------

@@ -781,13 +781,13 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
                                    const RealArray &posX, const RealArray &posY,
                                    const RealArray &posZ, const RealArray &velX,
                                    const RealArray &velY, const RealArray &velZ,
-                                   const UnsignedIntArray &scColors,
-                                   bool updateCanvas)
+                                   const UnsignedIntArray &scColors, bool solving,
+                                   Integer solverOption, bool updateCanvas)
 {
    if (mCanvas)
    {
       mCanvas->UpdatePlot(scNames, time, posX, posY, posZ, velX, velY, velZ,
-                          scColors);
+                          scColors, solving, solverOption);
       
       if (updateCanvas)
       {
@@ -807,6 +807,16 @@ void MdiChildTrajFrame::UpdatePlot(const StringArray &scNames, const Real &time,
          #endif
       }
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void TakeAction(const std::string &action)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::TakeAction(const std::string &action)
+{
+   if (mCanvas)
+      mCanvas->TakeAction(action);
 }
 
 

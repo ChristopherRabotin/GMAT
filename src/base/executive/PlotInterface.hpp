@@ -77,8 +77,11 @@ public:
                             const RealArray &posX, const RealArray &posY,
                             const RealArray &posZ, const RealArray &velX,
                             const RealArray &velY, const RealArray &velZ,
-                            const UnsignedIntArray &scColors,
-                            bool updateCanvas);
+                            const UnsignedIntArray &scColors, bool solving,
+                            Integer solverOption, bool updateCanvas);
+   
+   static bool TakeGlAction(const std::string &plotName,
+                            const std::string &action);
    
    // for XY plot
    static bool CreateTsPlotWindow(const std::string &plotName,

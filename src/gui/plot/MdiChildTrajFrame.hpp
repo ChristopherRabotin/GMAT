@@ -130,8 +130,9 @@ public:
                    const RealArray &posX, const RealArray &posY,
                    const RealArray &posZ, const RealArray &velX,
                    const RealArray &velY, const RealArray &velZ,
-                   const UnsignedIntArray &scColors, bool updateCanvas);
-   
+                   const UnsignedIntArray &scColors, bool solving,
+                   Integer solverOption, bool updateCanvas);
+   void TakeAction(const std::string &action);
    void RefreshPlot();
    void SetEndOfRun();
    void DeletePlot();
