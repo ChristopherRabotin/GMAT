@@ -137,7 +137,10 @@ public:
                    const RealArray &posX, const RealArray &posY,
                    const RealArray &posZ, const RealArray &velX,
                    const RealArray &velY, const RealArray &velZ,
-                   const UnsignedIntArray &scColors);
+                   const UnsignedIntArray &scColors, bool solving,
+                   Integer solverOption);
+   
+   void TakeAction(const std::string &action);
    
    // object
    void AddObjectList(const wxArrayString &objNames,
@@ -219,7 +222,7 @@ private:
    unsigned int mXyPlaneColor;
    unsigned int mEcPlaneColor;
    unsigned int mSunLineColor;
-
+   
    // texture
    std::map<wxString, GLuint> mObjectTextureIdMap;
 
@@ -333,12 +336,20 @@ private:
    bool *mDrawOrbitFlag;           // [mObjectCount][MAX_DATA]
    UnsignedInt *mObjectOrbitColor; // [mObjectCount][MAX_DATA];
    
+   // run data
    Real *mObjectGciPos;            // [mObjectCount][MAX_DATA][3];
    Real *mObjectGciVel;            // [mObjectCount][MAX_DATA][3];   
    Real *mObjectIniPos;            // [mObjectCount][MAX_DATA][3];
    Real *mObjectIniVel;            // [mObjectCount][MAX_DATA][3];
    Real *mObjectTmpPos;            // [mObjectCount][MAX_DATA][3];
    Real *mObjectTmpVel;            // [mObjectCount][MAX_DATA][3];
+   
+   // solver data
+   bool mDrawSolverData;
+   std::vector<RealArray> mSolverAllPosX; // [numPoints][numSC]
+   std::vector<RealArray> mSolverAllPosY; // [numPoints][numSC]
+   std::vector<RealArray> mSolverAllPosZ; // [numPoints][numSC]
+   UnsignedIntArray mSolverIterColorArray;
    
    // coordinate system
    wxString mInternalCoordSysName;
@@ -416,6 +427,7 @@ private:
                    GLenum textureCoords = GL_TRUE);
    void DrawObject(const wxString &objName, int frame);
    void DrawObjectOrbit(int frame);
+   void DrawSolverData();
    void DrawObjectOrbitNormal(int objId, int frame, UnsignedInt color);
    void DrawSpacecraft(UnsignedInt scColor);
    void DrawEquatorialPlane(UnsignedInt color);

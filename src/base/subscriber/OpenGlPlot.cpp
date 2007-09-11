@@ -25,6 +25,7 @@
 #include "MessageInterface.hpp"    // for ShowMessage()
 #include "TextParser.hpp"          // for SeparateBrackets()
 #include "StringUtil.hpp"          // for ToReal()
+#include "CoordinateConverter.hpp" // for Convert()
 #include <algorithm>               // for find(), distance()
 
 #define REMOVE_OBJ_BY_SETTING_FLAG 1
@@ -36,6 +37,7 @@
 //#define DEBUG_OPENGL_UPDATE 2
 //#define DEBUG_REMOVE_ACTION 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_SOLVER_CURRENT_ITER 2
 
 //---------------------------------
 // static data
@@ -45,7 +47,7 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 {
    "Add",
    "OrbitColor",
-   //"TargetColor",
+   "TargetColor",
    "CoordinateSystem",
    "ViewPointRef",
    "ViewPointReference",
@@ -84,7 +86,7 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,       //"Add"
    Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
-   //Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
+   Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
    Gmat::STRING_TYPE,            //"CoordinateSystem"
    Gmat::STRING_TYPE,            //"ViewPointRef",
    Gmat::STRING_TYPE,            //"ViewPointReference",
@@ -141,7 +143,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    // GmatBase data
    parameterCount = OpenGlPlotParamCount;
    objectTypeNames.push_back("OpenGLPlot");
-
+   
    mEclipticPlane = "Off";
    mXYPlane = "On";
    mWireFrame = "Off";
@@ -171,7 +173,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewPointVecVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    
-   mSolarSystem = NULL;
+   theSolarSystem = NULL;
    mViewCoordSystem = NULL;
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
@@ -202,6 +204,7 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mScOrbitColorArray.clear();
    mScTargetColorArray.clear();
    mOrbitColorArray.clear();
+   mTargetColorArray.clear();
    
    mOrbitColorMap.clear();
    mTargetColorMap.clear();
@@ -264,7 +267,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewUpCoordSysName = ogl.mViewUpCoordSysName;
    mViewUpAxisName = ogl.mViewUpAxisName;
    
-   mSolarSystem = ogl.mSolarSystem;
+   theSolarSystem = ogl.theSolarSystem;
    mViewCoordSystem = ogl.mViewCoordSystem;
    mViewUpCoordSystem = ogl.mViewCoordSystem;
    mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
@@ -298,6 +301,7 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mScOrbitColorArray = ogl.mScOrbitColorArray;
    mScTargetColorArray = ogl.mScTargetColorArray;
    mOrbitColorArray = ogl.mOrbitColorArray;
+   mTargetColorArray = ogl.mTargetColorArray;
    
    mOrbitColorMap = ogl.mOrbitColorMap;
    mTargetColorMap = ogl.mTargetColorMap;
@@ -401,6 +405,11 @@ bool OpenGlPlot::SetColor(const std::string &item, const std::string &name,
       if (mTargetColorMap.find(name) != mTargetColorMap.end())
       {
          mTargetColorMap[name] = value;
+         
+         for (int i=0; i<mAllSpCount; i++)
+            if (mAllSpNameArray[i] == name)
+               mTargetColorArray[i] = value;
+         
          return true;
       }
    }
@@ -445,11 +454,11 @@ void OpenGlPlot::SetShowObject(const std::string &name, bool value)
 //------------------------------------------------------------------------------
 Rvector3 OpenGlPlot::GetVector(const std::string &which)
 {
-   if (which == "ViewPointRefVector")
+   if (which == "ViewPointReference")
       return mViewPointRefVector;
-   else if (which == "ViewPointVectorVector")
+   else if (which == "ViewPointVector")
       return mViewPointVecVector;
-   else if (which == "ViewDirectionVector")
+   else if (which == "ViewDirection")
       return mViewDirectionVector;
    else
       throw SubscriberException(which + " is unknown OpenGlPlot parameter\n");
@@ -461,11 +470,17 @@ Rvector3 OpenGlPlot::GetVector(const std::string &which)
 //------------------------------------------------------------------------------
 void OpenGlPlot::SetVector(const std::string &which, const Rvector3 &value)
 {
-   if (which == "ViewPointRefVector")
+   #if DEBUG_OPENGL_SET
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetVector() which=%s, value=%s\n", which.c_str(),
+       value.ToString().c_str());
+   #endif
+   
+   if (which == "ViewPointReference")
       mViewPointRefVector = value;
-   else if (which == "ViewPointVectorVector")
+   else if (which == "ViewPointVector")
       mViewPointVecVector = value;
-   else if (which == "ViewDirectionVector")
+   else if (which == "ViewDirection")
       mViewDirectionVector = value;
    else
       throw SubscriberException(which + " is unknown OpenGlPlot parameter\n");
@@ -531,12 +546,12 @@ bool OpenGlPlot::Initialize()
    {
       #if DEBUG_OPENGL_INIT
       MessageInterface::ShowMessage
-         ("OpenGlPlot::Initialize() CreateGlPlotWindow() mSolarSystem=%d\n",
-          mSolarSystem);
+         ("OpenGlPlot::Initialize() CreateGlPlotWindow() theSolarSystem=%d\n",
+          theSolarSystem);
       #endif
       
       if (PlotInterface::CreateGlPlotWindow
-          (instanceName, mOldName, mViewCoordSysName, mSolarSystem,
+          (instanceName, mOldName, mViewCoordSysName, theSolarSystem,
            (mEclipticPlane == "On"), (mXYPlane == "On"),
            (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
            (mSunLine == "On"), (mOverlapPlot == "On"),
@@ -573,8 +588,9 @@ bool OpenGlPlot::Initialize()
                mDrawOrbitArray.push_back(mDrawOrbitMap[mAllSpNameArray[i]]);
                mShowObjectArray.push_back(mShowObjectMap[mAllSpNameArray[i]]);
                mOrbitColorArray.push_back(mOrbitColorMap[mAllSpNameArray[i]]);
+               mTargetColorArray.push_back(mTargetColorMap[mAllSpNameArray[i]]);
                mObjectArray.push_back(mAllSpArray[i]);
-                  
+               
                if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
                {
                   mScNameArray.push_back(mAllSpNameArray[i]);
@@ -690,7 +706,7 @@ bool OpenGlPlot::Initialize()
          //--------------------------------------------------------
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
-
+         
          retval = true;
       }
       else
@@ -1295,7 +1311,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 {
    #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetStringParameter() id = %d, value = %s \n", id, value.c_str());
+      ("OpenGlPlot::SetStringParameter()<%s> id=%d, value=%s\n",
+       instanceName.c_str(), id, value.c_str());
    #endif
    
    switch (id)
@@ -1365,8 +1382,9 @@ bool OpenGlPlot::SetStringParameter(const std::string &label,
                                     const std::string &value)
 {
    #if DEBUG_OPENGL_PARAM
-   MessageInterface::ShowMessage("OpenGlPlot::SetStringParameter() label = %s, "
-                                 "value = %s \n", label.c_str(), value.c_str());
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetStringParameter()<%s> label=%s, value=%s \n",
+       instanceName.c_str(), label.c_str(), value.c_str());
    #endif
    
    return SetStringParameter(GetParameterID(label), value);
@@ -1382,8 +1400,8 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value,
 {
    #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetStringParameter() id = %d, value = %s, index = %d\n",
-       id, value.c_str(), index);
+      ("OpenGlPlot::SetStringParameter()<%s> id=%d, value=%s, index= d\n",
+       instanceName.c_str(), id, value.c_str(), index);
    #endif
    
    switch (id)
@@ -1443,8 +1461,8 @@ OpenGlPlot::GetUnsignedIntArrayParameter(const Integer id) const
    {
    case ORBIT_COLOR:
       return mOrbitColorArray;
-      //case TARGET_COLOR:
-      //return mTargetColorArray;
+   case TARGET_COLOR:
+      return mTargetColorArray;
    default:
       return Subscriber::GetUnsignedIntArrayParameter(id);
    }
@@ -1460,10 +1478,13 @@ UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
                                                 const UnsignedInt value,
                                                 const Integer index)
 {
-   //MessageInterface::ShowMessage
-   //   ("===> OpenGlPlot::SetUnsignedIntParameter() id=%d, value=%u, index=%d, "
-   //    "mAllSpCount=%d, mOrbitColorArray.size()=%d\n",  id, value, index,
-   //    mAllSpCount, mOrbitColorArray.size());
+   #if DEBUG_OPENGL_PARAM
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::SetUnsignedIntParameter()<%s>\n   id=%d, value=%u, index=%d, "
+       "mAllSpCount=%d, mOrbitColorArray.size()=%d, mTargetColorArray.size()=%d\n",
+       instanceName.c_str(), id, value, index, mAllSpCount, mOrbitColorArray.size(),
+       mTargetColorArray.size());
+   #endif
    
    switch (id)
    {
@@ -1486,8 +1507,25 @@ UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
          }
          return value;
       }
-      //case TARGET_COLOR:
-      //break;
+   case TARGET_COLOR:
+      {
+         Integer size = mAllSpNameArray.size();
+         if (index >= size)
+            throw SubscriberException
+               ("index out of bounds for " + GetParameterText(id));
+         
+         for (int i=0; i<size; i++)
+         {
+            if (index == i)
+               mTargetColorMap[mAllSpNameArray[i]] = value;
+            
+            if (index < size)
+               mTargetColorArray[index] = value;
+            else
+               mTargetColorArray.push_back(value);
+         }
+         return value;
+      }
    default:
       return Subscriber::SetUnsignedIntParameter(id, value, index);
    }
@@ -1527,7 +1565,8 @@ bool OpenGlPlot::SetBooleanParameter(const Integer id, const bool value)
 {
    #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetBooleanParameter() id=%d, value=%d\n", id, value);
+      ("OpenGlPlot::SetBooleanParameter()<%s> id=%d, value=%d\n",
+       instanceName.c_str(), id, value);
    #endif
    
    if (id == SHOW_PLOT)
@@ -1552,8 +1591,6 @@ std::string OpenGlPlot::GetOnOffParameter(const Integer id) const
       return mXYPlane;
    case WIRE_FRAME:
       return mWireFrame;
-//    case TARGET_STATUS:
-//       return mSolverIterations;
    case AXES:
       return mAxes;
    case GRID:
@@ -1601,10 +1638,6 @@ bool OpenGlPlot::SetOnOffParameter(const Integer id, const std::string &value)
    case WIRE_FRAME:
       mWireFrame = value;
       return true;
-      //case TARGET_STATUS:
-      //WriteDeprecatedMessage(id);
-      //mSolverIterations = value;
-      //return true;
    case AXES:
       mAxes = value;
       return true;
@@ -1659,8 +1692,8 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    
    if (type == Gmat::SOLAR_SYSTEM)
    {
-      if (mSolarSystem)
-         return mSolarSystem->GetName();
+      if (theSolarSystem)
+         return theSolarSystem->GetName();
       else
          return "";
    }
@@ -1676,7 +1709,6 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
    #endif
    
    return Subscriber::GetRefObjectName(type);
-   //return "OpenGlPlot::GetRefObjectName() " + msg;
 }
 
 
@@ -1715,8 +1747,8 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    
    if (type == Gmat::SOLAR_SYSTEM)
    {
-      if (mSolarSystem)
-         mAllRefObjectNames.push_back(mSolarSystem->GetName());
+      if (theSolarSystem)
+         mAllRefObjectNames.push_back(theSolarSystem->GetName());
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
@@ -1798,7 +1830,7 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name)
 {
    if (type == Gmat::SOLAR_SYSTEM)
-      return mSolarSystem;
+      return theSolarSystem;
    else if (type == Gmat::COORDINATE_SYSTEM)
    {
       if (name == mViewCoordSysName)
@@ -1847,7 +1879,7 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    // just check for the type
    if (type == Gmat::SOLAR_SYSTEM)
    {
-      mSolarSystem = (SolarSystem*)obj;
+      theSolarSystem = (SolarSystem*)obj;
       return true;
    }
    else if (type == Gmat::COORDINATE_SYSTEM)
@@ -1901,12 +1933,12 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
 {
    #if DEBUG_OPENGL_ADD
    MessageInterface::ShowMessage
-      ("OpenGlPlot::AddSpacePoint() name=%s, index=%d, show=%d, mAllSpCount=%d\n",
-       name.c_str(), index, show, mAllSpCount);
+      ("OpenGlPlot::AddSpacePoint()<%s> name=%s, index=%d, show=%d, mAllSpCount=%d\n",
+       instanceName.c_str(), name.c_str(), index, show, mAllSpCount);
    #endif
    
    bool status = false;
-
+   
    // if name not in the list, add
    if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) ==
        mAllSpNameArray.end())
@@ -1927,21 +1959,23 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
             if (mOrbitColorMap.find(name) == mOrbitColorMap.end())
             {
                mOrbitColorMap[name] = DEFAULT_ORBIT_COLOR[mNonStdBodyCount];
+               mTargetColorMap[name] = GmatColor::TEAL32;
                mOrbitColorArray.push_back(DEFAULT_ORBIT_COLOR[mNonStdBodyCount]);
+               mTargetColorArray.push_back(GmatColor::TEAL32);
                mNonStdBodyCount++;
             }
             else
             {
                mOrbitColorArray.push_back(mOrbitColorMap[name]);
+               mTargetColorArray.push_back(mTargetColorMap[name]);
             }
-            
-            mTargetColorMap[name] = GmatColor::TEAL32;
          }
          else
          {
             mOrbitColorMap[name] = GmatColor::RED32;
-            mOrbitColorArray.push_back(GmatColor::RED32);
             mTargetColorMap[name] = GmatColor::TEAL32;
+            mOrbitColorArray.push_back(GmatColor::RED32);
+            mTargetColorArray.push_back(GmatColor::TEAL32);
          }
          
          status = true;
@@ -1954,11 +1988,12 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("OpenGlPlot::AddSpacePoint() status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d "
+         ("   status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d "
           "orbColor=%u, targColor=%u\n", status, i, objName.c_str(), mDrawOrbitMap[objName],
           mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
       MessageInterface::ShowMessage
-         ("   mOrbitColorArray[%d]=%u\n", i, mOrbitColorArray[i]);
+         ("   mOrbitColorArray[%d]=%u, mTargetColorArray[%d]=%u\n", i, mOrbitColorArray[i],
+          i, mTargetColorArray[i]);
    }
    #endif
    
@@ -1981,6 +2016,7 @@ bool OpenGlPlot::ClearSpacePointList()
    mScNameArray.clear();
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
+   mTargetColorArray.clear();
    
    mScXArray.clear();
    mScYArray.clear();
@@ -2132,6 +2168,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
          
          // reduce the size of array
          mOrbitColorArray.erase(mOrbitColorArray.begin());
+         mTargetColorArray.erase(mTargetColorArray.begin());
          
          mAllSpCount = mAllSpNameArray.size();
          
@@ -2139,6 +2176,7 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
          for (int i=0; i<mAllSpCount; i++)
          {
             mOrbitColorArray[i] = mOrbitColorMap[mAllSpNameArray[i]];
+            mTargetColorArray[i] = mTargetColorMap[mAllSpNameArray[i]];
          }
          
          #if DEBUG_REMOVE_ACTION
@@ -2217,6 +2255,7 @@ void OpenGlPlot::ClearDynamicArrays()
 {
    mObjectNameArray.clear();
    mOrbitColorArray.clear();
+   mTargetColorArray.clear();
    mObjectArray.clear();
    mDrawOrbitArray.clear();
    mShowObjectArray.clear();
@@ -2251,6 +2290,7 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
    {
       mObjectNameArray.push_back(name);
       mOrbitColorArray.push_back(mOrbitColorMap[name]);
+      mTargetColorArray.push_back(mTargetColorMap[name]);
       mObjectArray.push_back(sp);
       mDrawOrbitMap[name] = show;
       mShowObjectMap[name] = show;
@@ -2323,7 +2363,6 @@ void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
          if (index2 != svalue.npos)
          {
             svalue = svalue.substr(index1, index2-index1);
-            MessageInterface::ShowMessage("===> svalue=<%s>\n", svalue.c_str());
          }
          else
          {
@@ -2444,6 +2483,71 @@ void OpenGlPlot::WriteDeprecatedMessage(Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// bool UpdateSolverData()
+//------------------------------------------------------------------------------
+bool OpenGlPlot::UpdateSolverData()
+{
+   int size = mCurrEpochArray.size();
+   int last = size - 1;
+   
+   #if DEBUG_SOLVER_CURRENT_ITER
+   MessageInterface::ShowMessage("===> num buffered data = %d\n", size);
+   MessageInterface::ShowMessage("==========> now update solver plot\n");
+   #endif
+   
+   if (size == 0)
+      return true;
+   
+   UnsignedIntArray colorArray = mScOrbitColorArray;
+   if (runstate == Gmat::SOLVING)
+      colorArray = mScTargetColorArray;
+   else
+      colorArray = mScOrbitColorArray;
+   
+   // Update plot with last iteration data
+   for (int i=0; i<size-1; i++)
+   {
+      #if DEBUG_SOLVER_CURRENT_ITER > 1
+      for (int sc=0; sc<mScCount; sc++)
+         MessageInterface::ShowMessage
+            ("   i=%d, sc=%d, solver epoch = %f, X,Y,Z = %f, %f, %f\n", i, sc,
+             mCurrEpochArray[i], mCurrXArray[i][sc], mCurrYArray[i][sc],
+             mCurrZArray[i][sc]);
+      #endif
+      
+      // Just buffer data up to last point - 1
+      PlotInterface::
+         UpdateGlPlot(instanceName, mOldName, mViewCoordSysName, mCurrScArray[i],
+                      mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
+                      mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
+                      mCurrVzArray[i], colorArray, true, mSolverIterOption, false);
+   }
+   
+   // Buffer last point and Update the plot
+   PlotInterface::
+      UpdateGlPlot(instanceName, mOldName, mViewCoordSysName, mCurrScArray[last],
+                   mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
+                   mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
+                   mCurrVzArray[last], colorArray, true, mSolverIterOption, true);
+   
+   // clear arrays
+   mCurrScArray.clear();
+   mCurrEpochArray.clear();
+   mCurrXArray.clear();
+   mCurrYArray.clear();
+   mCurrZArray.clear();
+   mCurrVxArray.clear();
+   mCurrVyArray.clear();
+   mCurrVzArray.clear();
+   
+   if (runstate == Gmat::SOLVING)
+      PlotInterface::TakeGlAction(instanceName, "ClearSolverData");
+   
+   return true;
+}
+
+
 //--------------------------------------
 // methods inherited from Subscriber
 //--------------------------------------
@@ -2466,9 +2570,9 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    #if DEBUG_OPENGL_UPDATE
    MessageInterface::ShowMessage
       ("OpenGlPlot::Distribute() instanceName=%s, active=%d, isEndOfRun=%d, "
-       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d\n",
+       "isEndOfReceive=%d\n   mAllSpCount=%d, mScCount=%d, len=%d, runstate=%d\n",
        instanceName.c_str(), active, isEndOfRun, isEndOfReceive, mAllSpCount,
-       mScCount, len);
+       mScCount, len, runstate);
    #endif
    
    if (!active || mScCount <= 0)
@@ -2479,20 +2583,34 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       return PlotInterface::SetGlEndOfRun(instanceName);
    
    if (isEndOfReceive)
-      return PlotInterface::RefreshGlPlot(instanceName);
+   {
+      if ((mSolverIterOption == SI_CURRENT) &&
+          (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS))
+      {
+         UpdateSolverData();
+      }
+      else
+      {
+         return PlotInterface::RefreshGlPlot(instanceName);
+      }
+   }
+   
    
    if (len <= 0)
       return true;
    
+   
    Publisher *thePublisher = Publisher::Instance();
    
+   //------------------------------------------------------------
    // if targeting and draw target is None, just return
-   if ((mSolverIterations == "None") &&
-       ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
-        (runstate == Gmat::SOLVING)))
+   //------------------------------------------------------------
+   if ((mSolverIterOption == SI_NONE) && (runstate == Gmat::SOLVING))
    {
       #if DEBUG_OPENGL_UPDATE > 1
-      MessageInterface::ShowMessage("   SolverIterations is None and SOLVING\n");
+      MessageInterface::ShowMessage
+         ("   Just returning: SolverIterations is %d and runstate is %d\n",
+          mSolverIterOption, runstate);
       #endif
       
       return true;
@@ -2501,7 +2619,8 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    //------------------------------------------------------------
    // update plot data
    //------------------------------------------------------------
-   
+
+   CoordinateConverter coordConverter;
    mNumData++;
    
    #if DEBUG_OPENGL_UPDATE > 1
@@ -2522,16 +2641,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       #if DEBUG_OPENGL_UPDATE > 1
       MessageInterface::ShowMessage("   labelArray=\n   ");
       for (int j=0; j<(int)labelArray.size(); j++)
-      {
          MessageInterface::ShowMessage("%s ", labelArray[j].c_str());
-      }
       MessageInterface::ShowMessage("\n");
       #endif
       
       Integer idX, idY, idZ;
       Integer idVx, idVy, idVz;
       Integer scIndex = -1;
-      
+            
       for (int i=0; i<mScCount; i++)
       {
          idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");
@@ -2549,48 +2666,112 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
          #endif
          
          scIndex++;
-         mScXArray[scIndex] = dat[idX];
-         mScYArray[scIndex] = dat[idY];
-         mScZArray[scIndex] = dat[idZ];
          
-         mScVxArray[scIndex] = dat[idVx];
-         mScVyArray[scIndex] = dat[idVy];
-         mScVzArray[scIndex] = dat[idVz];
+//          MessageInterface::ShowMessage
+//             ("===> theDataCoordSystem=<%p>, mViewCoordSystem=<%p>, "
+//              "theInternalCoordSystem=<%p>\n", theDataCoordSystem,
+//              mViewCoordSystem, theInternalCoordSystem);
          
-         #if DEBUG_OPENGL_UPDATE
-         MessageInterface::ShowMessage
-            ("   scNo=%d X=%f Y=%f Z=%f\n",
-             i, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
-         MessageInterface::ShowMessage
-            ("   scNo=%d Vx=%f Vy=%f Vz=%f\n",
-             i, mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
-         #endif
-         
+         // buffer data
+         for (int sc=0; sc<mScCount; sc++)
+         {
+            // If distributed data coordinate system is different from view
+            // coordinate system, convert data here.
+            // if we convert after current epoch, it will not give correct
+            // results, if origin is spacecraft,
+            // ie, sat->GetMJ2000State(epoch) will not give correct results.
+            
+            //if ((theInternalCoordSystem != NULL) &&
+            //    (mViewCoordSystem != theInternalCoordSystem))
+            if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
+                (mViewCoordSystem != theDataCoordSystem))
+            {
+               Rvector6 inState, outState;
+               
+               // convert position and velocity
+               inState.Set(dat[idX], dat[idY], dat[idZ],
+                           dat[idVx], dat[idVy], dat[idVz]);
+               
+               //coordConverter.Convert(dat[0], inState, theInternalCoordSystem,
+               //                       outState, mViewCoordSystem);
+               coordConverter.Convert(dat[0], inState, theDataCoordSystem,
+                                      outState, mViewCoordSystem);
+               
+               mScXArray[scIndex] = outState[0];
+               mScYArray[scIndex] = outState[1];
+               mScZArray[scIndex] = outState[2];
+               mScVxArray[scIndex] = outState[3];
+               mScVyArray[scIndex] = outState[4];
+               mScVzArray[scIndex] = outState[5];
+            }
+            else
+            {
+               mScXArray[scIndex] = dat[idX];
+               mScYArray[scIndex] = dat[idY];
+               mScZArray[scIndex] = dat[idZ];
+               mScVxArray[scIndex] = dat[idVx];
+               mScVyArray[scIndex] = dat[idVy];
+               mScVzArray[scIndex] = dat[idVz];
+            }
+            
+            #if DEBUG_OPENGL_UPDATE
+            if (runstate == Gmat::SOLVING)
+            {
+               MessageInterface::ShowMessage
+                  ("   scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n", i, scIndex, 
+                   mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+               MessageInterface::ShowMessage
+                  ("   Vx,Vy,Vz = %f, %f, %f\n",
+                   mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
+            }
+            #endif
+         }
       }
       
-      // If targeting, use targeting color
-      if ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
-          (runstate == Gmat::SOLVING))
+      // if only showing current iteration, buffer data and return
+      if (mSolverIterOption == SI_CURRENT)
       {
-         PlotInterface::
-            UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                         mScNameArray, dat[0], mScXArray, mScYArray,
-                         mScZArray, mScVxArray, mScVyArray, mScVzArray,
-                         mScTargetColorArray, update);
+         // save data when targeting or last iteration
+         if (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS)
+         {
+            mCurrScArray.push_back(mScNameArray);
+            mCurrEpochArray.push_back(dat[0]);
+            mCurrXArray.push_back(mScXArray);
+            mCurrYArray.push_back(mScYArray);
+            mCurrZArray.push_back(mScZArray);
+            mCurrVxArray.push_back(mScVxArray);
+            mCurrVyArray.push_back(mScVyArray);
+            mCurrVzArray.push_back(mScVzArray);
+         }
+         
+         if (runstate == Gmat::SOLVING)
+         {
+            //MessageInterface::ShowMessage
+            //   ("=====> num buffered = %d\n", mCurrEpochArray.size());
+            return true;
+         }
       }
-      else
+      
+      
+      //MessageInterface::ShowMessage("==========> now update run plot\n");
+      bool solving = false;
+      UnsignedIntArray colorArray = mScOrbitColorArray;
+      if (runstate == Gmat::SOLVING)
       {
-         PlotInterface::
-            UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                         mScNameArray, dat[0], mScXArray, mScYArray,
-                         mScZArray, mScVxArray, mScVyArray, mScVzArray,
-                         mScOrbitColorArray, update);
+         solving = true;
+         colorArray = mScTargetColorArray;
       }
+      
+      PlotInterface::
+         UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
+                      mScNameArray, dat[0], mScXArray, mScYArray,
+                      mScZArray, mScVxArray, mScVyArray, mScVzArray,
+                      colorArray, solving, mSolverIterOption, update);
       
       if (update)
          mNumCollected = 0;
    }
-
+   
    //loj: always return true otherwise next subscriber will not call ReceiveData()
    //     in Publisher::Publish()
    return true;

@@ -21,7 +21,6 @@
 #include "MdiGlPlotData.hpp"
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
-
 #include <string.h>               // for strlen()
 
 #ifdef __WXMAC__
@@ -107,7 +106,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_CONVERT 1
 //#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
-//#define DEBUG_TRAJCANVAS_OBJECT 1
+//#define DEBUG_TRAJCANVAS_OBJECT 2
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
 //#define DEBUG_TRAJCANVAS_PERSPECTIVE 1
 //#define DEBUG_TRAJCANVAS_PROJ 2
@@ -287,6 +286,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mHasUserInterrupted = false;
    mUpdateInterval = 1;
    mFrameInc = 1;
+
+   // solver data
+   mDrawSolverData = false;
    
    // message
    mShowMaxWarning = true;
@@ -546,6 +548,13 @@ void TrajPlotCanvas::SetViewCoordSystem(const wxString &csName)
       mNeedObjectConversion = false;
    }
    
+   #if DEBUG_TRAJCANVAS_INIT
+   MessageInterface::ShowMessage
+      ("   mIsInternalCoordSystem=%d, mNeedInitialConversion=%d, "
+       " mNeedOriginConversion=%d, mNeedObjectConversion=%d\n",
+       mIsInternalCoordSystem, mNeedInitialConversion, mNeedOriginConversion,
+       mNeedObjectConversion);
+   #endif
 }
 
 
@@ -1003,19 +1012,19 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
    
    mObjectArray = objArray;
    wxArrayString tempList;
-   
+
    if (objNames.size() == objOrbitColors.size() &&
        objNames.size() == objArray.size())
-   {
+   {      
       for (UnsignedInt i=0; i<objNames.size(); i++)
       {
          tempList.Add(objNames[i].c_str());
-      
+                  
          #if DEBUG_TRAJCANVAS_OBJECT > 1
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::SetGlObject()  objNames[%d]=%s, objName=%s, "
-             "addr=%d\n", i, objNames[i].c_str(),
-             mObjectArray[i]->GetName().c_str(), mObjectArray[i]);
+            ("TrajPlotCanvas::SetGlObject()  objNames[%d]=%s, objName=%s<%p>\n",
+             i, objNames[i].c_str(), mObjectArray[i]->GetName().c_str(),
+             mObjectArray[i]);
          #endif
       }
       
@@ -1078,14 +1087,14 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    
    UpdateRotateFlags();
    MakeValidCoordSysList();
-
+   
    // add initial view coord. system if not added already
    if (mValidCSNames.Index(mInitialCoordSysName) == wxNOT_FOUND)
       mValidCSNames.Add(mInitialCoordSysName);
-
+   
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("   viewCSName=%s, mViewCoordSystem=%d, originName=%s, "
+      ("   viewCSName=%s, mViewCoordSystem=%p, originName=%s, "
        "mOriginId=%d\n", mViewCoordSysName.c_str(), mViewCoordSystem,
        mOriginName.c_str(),  mOriginId);
    MessageInterface::ShowMessage
@@ -1093,7 +1102,7 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    MessageInterface::ShowMessage
       ("   mViewUpCoordSysName=%s\n", mViewUpCoordSysName.c_str());
    #endif
-
+   
 } // end SetGlCoordSystem()
 
 
@@ -1267,8 +1276,8 @@ void TrajPlotCanvas::SetGlDrawOrbitFlag(const std::vector<bool> &drawArray)
    {
       draw = mDrawOrbitArray[i] ? true : false;      
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetGlDrawObjectFlag() mDrawOrbitArray[%d]=%d\n",
-          i, draw);
+         ("TrajPlotCanvas::SetGlDrawObjectFlag() i=%d, mDrawOrbitArray[%s]=%d\n",
+          i, mObjectNames[i].c_str(), draw);
    }
    #endif
 }
@@ -1300,8 +1309,8 @@ void TrajPlotCanvas::SetGlShowObjectFlag(const std::vector<bool> &showArray)
       
       #if DEBUG_TRAJCANVAS_OBJECT
       MessageInterface::ShowMessage
-         ("TrajPlotCanvas::SetGlShowObjectFlag() mShowObjectMap[%s]=%d\n",
-          mObjectNames[i].c_str(), show);
+         ("TrajPlotCanvas::SetGlShowObjectFlag() i=%d, mShowObjectMap[%s]=%d\n",
+          i, mObjectNames[i].c_str(), show);
       #endif
    }
    
@@ -1378,8 +1387,8 @@ void TrajPlotCanvas::SetUpdateFrequency(Integer updFreq)
 //                 const UnsignedIntArray &scColors)
 //------------------------------------------------------------------------------
 /**
- * Updates spacecraft trajectory. Position and velocity should be in EarthMJ2000Eq
- * coordinate system
+ * Updates spacecraft trajectory. Position and velocity should be in Spacecraft
+ * coordinate system.
  *
  * @param <scNames> spacecraft name array
  * @param <time> time
@@ -1396,22 +1405,79 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                                 const RealArray &posX, const RealArray &posY,
                                 const RealArray &posZ, const RealArray &velX,
                                 const RealArray &velY, const RealArray &velZ,
-                                const UnsignedIntArray &scColors)
-{   
+                                const UnsignedIntArray &scColors, bool solving,
+                                Integer solverOption)
+{
    mScCount = scNames.size();
+   mScNameArray = scNames;
+   mTotalPoints++;
    
    if (mScCount > MAX_SCS)
       mScCount = MAX_SCS;
    
    #if DEBUG_TRAJCANVAS_UPDATE
-   static int sNumDebugOutput = 100;
+   static int sNumDebugOutput = 1000;
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::UpdatePlot() plot=%s, time=%f, mNumData=%d, mScCount=%d\n",
-       GetName().c_str(), time, mNumData, mScCount);
+      ("TrajPlotCanvas::UpdatePlot() plot=%s, time=%f, posX=%f, mNumData=%d, "
+       "mScCount=%d, scColor=%u, solving=%d, solverOption=%d\n", GetName().c_str(),
+       time, posX[0], mNumData, mScCount, scColors[0], solving, solverOption);
    #endif
    
-   mScNameArray = scNames;
-   mTotalPoints++;
+   
+   mDrawSolverData = false;
+   
+   //-----------------------------------------------------------------
+   // If showing current iteration only, handle solver iteration data
+   // separately here since it will be shown temporarily during the run
+   //-----------------------------------------------------------------
+   if (solverOption == 1)
+   {
+      if (solving)
+      {
+         mDrawSolverData = true;
+         RealArray tempSolverX, tempSolverY, tempSolverZ;
+         
+         for (int sc=0; sc<mScCount; sc++)
+         {
+            int satId = GetObjectId(mScNameArray[sc].c_str());
+            if (satId != UNKNOWN_OBJ_ID)
+            {
+               // if we are not drawing this spacecraft, skip
+               if (!mDrawOrbitArray[satId])
+                  continue;
+               
+               tempSolverX.push_back(posX[sc]);
+               tempSolverY.push_back(posY[sc]);
+               tempSolverZ.push_back(posZ[sc]);
+            }
+         }
+         
+         mSolverAllPosX.push_back(tempSolverX);
+         mSolverAllPosY.push_back(tempSolverY);
+         mSolverAllPosZ.push_back(tempSolverZ);
+         mSolverIterColorArray = scColors;
+      }
+      else
+      {
+         mSolverAllPosX.clear();
+         mSolverAllPosY.clear();
+         mSolverAllPosZ.clear();
+      }
+   }
+   
+   // If drawing solver's current iteration and no run data has been
+   // bufferred up, save up to 2 points so that it will still go through
+   // view projection transformation to show other objects.
+   if (solverOption == 1 && solving && mNumData > 1)
+      return;
+   
+   //-----------------------------------------------------------------
+   // Buffer data for plot
+   //-----------------------------------------------------------------
+   
+   #if DEBUG_TRAJCANVAS_UPDATE
+   MessageInterface::ShowMessage("===> add to all buffer\n");
+   #endif
    
    if (mNumData < MAX_DATA)
    {
@@ -1435,30 +1501,42 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
              mInitialLongitude, mInitialMha);
          #endif
       }
-            
+      
       //-------------------------------------------------------
       // update spacecraft position
       //-------------------------------------------------------
       for (int sc=0; sc<mScCount; sc++)
       {
-         int objId = GetObjectId(mScNameArray[sc].c_str());
+         int satId = GetObjectId(mScNameArray[sc].c_str());
          
-         if (objId != UNKNOWN_OBJ_ID)
+         #if DEBUG_TRAJCANVAS_UPDATE
+         MessageInterface::ShowMessage
+            ("TrajPlotCanvas::UpdatePlot() running, satId=%d, scName=%s\n", satId,
+             mObjectNames[satId].c_str());
+         #endif
+         
+         if (satId != UNKNOWN_OBJ_ID)
          {
-            if (!mDrawOrbitArray[objId])
+            if (!mDrawOrbitArray[satId])
             {
-               mDrawOrbitFlag[objId*MAX_DATA+mNumData] = false;
+               mDrawOrbitFlag[satId*MAX_DATA+mNumData] = false;
+               MessageInterface::ShowMessage("===> mDrawOrbitArray[satId] is NULL\n");
                continue;
             }
             
-            mDrawOrbitFlag[objId*MAX_DATA+mNumData] = true;            
-            mObjectOrbitColor[objId*MAX_DATA+mNumData] = scColors[sc];
+            mDrawOrbitFlag[satId*MAX_DATA+mNumData] = true;
             
-            int index = objId*MAX_DATA*3+(mNumData*3);
+            // If drawing solver's current iteration only, we don't want to draw
+            // first 3 points since these points have solver data.
+            if (mDrawSolverData || (solverOption == 1 && mNumData == 2))
+               mDrawOrbitFlag[satId*MAX_DATA+mNumData] = false;
+            
+            mObjectOrbitColor[satId*MAX_DATA+mNumData] = scColors[sc];
+            
+            int index = satId * MAX_DATA * 3 + (mNumData*3);
             mObjectGciPos[index+0] = posX[sc];
             mObjectGciPos[index+1] = posY[sc];
-            mObjectGciPos[index+2] = posZ[sc];
-            
+            mObjectGciPos[index+2] = posZ[sc];            
             mObjectGciVel[index+0] = velX[sc];
             mObjectGciVel[index+1] = velY[sc];
             mObjectGciVel[index+2] = velZ[sc];
@@ -1466,50 +1544,25 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #if DEBUG_TRAJCANVAS_UPDATE
             if (mNumData < sNumDebugOutput)
             {
+               int colorIndex = satId*MAX_DATA+mNumData;
                MessageInterface::ShowMessage
-                  ("   object=%s, objId=%d, color=%d\n", mObjectNames[sc].c_str(),
-                   objId, mObjectOrbitColor[objId*MAX_DATA+mNumData]);
+                  ("   satId=%d, object=%s, index=%u, color=%u\n", satId, mObjectNames[satId].c_str(),
+                   colorIndex, mObjectOrbitColor[colorIndex]);
                MessageInterface::ShowMessage
-                  ("   objId:%d gcipos = %f, %f, %f, color=%d\n", objId,
-                   mObjectGciPos[index+0], mObjectGciPos[index+1],
+                  ("   satId:%d index=%d, gcipos = %f, %f, %f\n", satId,
+                   index, mObjectGciPos[index+0], mObjectGciPos[index+1],
                    mObjectGciPos[index+2]);
             }
             #endif
             
-            if (mNeedInitialConversion)
-            {
-               Rvector6 inState, outState;
-               
-               // convert position and velocity
-               inState.Set(posX[sc], posY[sc], posZ[sc],
-                           velX[sc], velY[sc], velZ[sc]);
-               
-               mCoordConverter.Convert(time, inState, mInternalCoordSystem,
-                                       outState, mViewCoordSystem);
-               
-               mObjectTmpPos[index+0] = outState[0];
-               mObjectTmpPos[index+1] = outState[1];
-               mObjectTmpPos[index+2] = outState[2];
-               
-               mObjectTmpVel[index+0] = outState[3];
-               mObjectTmpVel[index+1] = outState[4];
-               mObjectTmpVel[index+2] = outState[5];
-               
-               // copy to initial view coordinate system array
-               CopyVector3(&mObjectIniPos[index], &mObjectTmpPos[index]);
-               CopyVector3(&mObjectIniVel[index], &mObjectTmpVel[index]);          
-            }
-            else
-            {
-               CopyVector3(&mObjectTmpPos[index], &mObjectGciPos[index]);
-               CopyVector3(&mObjectTmpVel[index], &mObjectGciVel[index]);            
-            }
+            CopyVector3(&mObjectTmpPos[index], &mObjectGciPos[index]);
+            CopyVector3(&mObjectTmpVel[index], &mObjectGciVel[index]);
             
             #if DEBUG_TRAJCANVAS_UPDATE
             if (mNumData < sNumDebugOutput)
             {
                MessageInterface::ShowMessage
-                  ("   objId:%d tmppos = %f, %f, %f\n", objId,
+                  ("   satId:%d index=%d, tmppos = %f, %f, %f\n", satId, index,
                    mObjectTmpPos[index+0], mObjectTmpPos[index+1],
                    mObjectTmpPos[index+2]);
             }
@@ -1519,7 +1572,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             if (mNumData < sNumDebugOutput)
             {
                MessageInterface::ShowMessage
-                  ("   objId:%d tmpvel = %f, %f, %f\n", objId,
+                  ("   satId:%d tmpvel = %f, %f, %f\n", satId,
                    mObjectTmpVel[index+0], mObjectTmpVel[index+1],
                    mObjectTmpVel[index+2]);
             }
@@ -1527,20 +1580,21 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          }
       }
       
+      
       //----------------------------------------------------
       // update object position
       //----------------------------------------------------
       for (int obj=0; obj<mObjectCount; obj++)
       {
-         // if object pointer is not NULL
-         if (mObjectArray[obj])
+         // if object pointer is not NULL and not a spacecraft
+         if (mObjectArray[obj] && mObjectArray[obj]->GetType() != Gmat::SPACECRAFT)
          {
             int objId = GetObjectId(mObjectNames[obj]);
             
             #if DEBUG_TRAJCANVAS_UPDATE_OBJECT
             MessageInterface::ShowMessage
-               ("TrajPlotCanvas::UpdatePlot() object=%s, objId=%d\n",
-                mObjectNames[obj].c_str(), objId);
+               ("TrajPlotCanvas::UpdatePlot() objId=%d, obj=%s\n", objId,
+                mObjectNames[objId].c_str());
             #endif
             
             // if object id found
@@ -1555,11 +1609,12 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                mDrawOrbitFlag[objId*MAX_DATA+mNumData] = true;
                
                Rvector6 objState = mObjectArray[obj]->GetMJ2000State(time);
-               int index = objId*MAX_DATA*3+(mNumData*3);
+               
+               int index = objId * MAX_DATA * 3 + (mNumData*3);
+               
                mObjectGciPos[index+0] = objState[0];
                mObjectGciPos[index+1] = objState[1];
                mObjectGciPos[index+2] = objState[2];
-               
                mObjectGciVel[index+0] = objState[3];
                mObjectGciVel[index+1] = objState[4];
                mObjectGciVel[index+2] = objState[5];
@@ -1569,9 +1624,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                   ("TrajPlotCanvas::UpdatePlot() objState=%s\n",
                    objState.ToString().c_str());
                MessageInterface::ShowMessage
-                  ("    %s gcipos = %f, %f, %f\n", mObjectNames[obj].c_str(),
-                   mObjectGciPos[index+0],
-                   mObjectGciPos[index+1],
+                  ("    %s index=%d, gcipos = %f, %f, %f\n", mObjectNames[obj].c_str(),
+                   index, mObjectGciPos[index+0], mObjectGciPos[index+1],
                    mObjectGciPos[index+2]);
                #endif
                
@@ -1585,8 +1639,7 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                   
                   mObjectTmpPos[index+0] = outState[0];
                   mObjectTmpPos[index+1] = outState[1];
-                  mObjectTmpPos[index+2] = outState[2];
-                  
+                  mObjectTmpPos[index+2] = outState[2];                  
                   mObjectTmpVel[index+0] = outState[3];
                   mObjectTmpVel[index+1] = outState[4];
                   mObjectTmpVel[index+2] = outState[5];
@@ -1603,8 +1656,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
                MessageInterface::ShowMessage
-                  ("    %s tmppos = %f, %f, %f\n", mObjectNames[obj].c_str(),
-                   mObjectTmpPos[index+0], mObjectTmpPos[index+1],
+                  ("    %s index=%d, tmppos = %f, %f, %f\n", mObjectNames[obj].c_str(),
+                   index, mObjectTmpPos[index+0], mObjectTmpPos[index+1],
                    mObjectTmpPos[index+2]);
                #endif
                
@@ -1621,9 +1674,12 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          else
          {
             #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
-            MessageInterface::ShowMessage
-               ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
-                mObjectNames[obj].c_str());
+            if (mObjectArray[obj] == NULL)
+            {
+               MessageInterface::ShowMessage
+                  ("TrajPlotCanvas::UpdatePlot() Cannot add data. %s is NULL\n",
+                   mObjectNames[obj].c_str());
+            }
             #endif
          }
       }
@@ -1649,11 +1705,24 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
          msg.Printf("*** WARNING *** The number of data points exceeded the "
                     "maximum of %d.\nPlease adjust data collect frequency to "
                     "see the whole plot.\n", MAX_DATA);
-         //MessageInterface::PopupMessage(Gmat::INFO_, msg.c_str());
          MessageInterface::ShowMessage(msg.c_str());
       }
    }
-   
+}
+
+
+//---------------------------------------------------------------------------
+// void TakeAction(const std::string &action)
+//---------------------------------------------------------------------------
+void TrajPlotCanvas::TakeAction(const std::string &action)
+{
+   if (action == "ClearSolverData")
+   {
+      //MessageInterface::ShowMessage("===> clearing solver data");
+      mSolverAllPosX.clear();
+      mSolverAllPosY.clear();
+      mSolverAllPosZ.clear();
+   }
 }
 
 
@@ -2885,8 +2954,8 @@ void TrajPlotCanvas::ComputeUpAngleAxis(int frame)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::TransformView(int frame)
 {
-   if (frame < 0)
-      return;
+//    if (frame < 0)
+//       return;
 
    #if DEBUG_TRAJPLOTCANVAS_DRAW
    MessageInterface::ShowMessage
@@ -3100,12 +3169,14 @@ void TrajPlotCanvas::DrawPlot()
    
    // Plot is not refreshed when another panel is opened, so add glFlush()
    // and SwapBuffers() (loj: 4/5/06)
-   if (mNumData < 1) // to avoid 0.0 time
+   //if (mNumData < 1) // to avoid 0.0 time
+   if (mNumData < 1 && !mDrawSolverData) // to avoid 0.0 time
    {
       glFlush();
       SwapBuffers();
       return;
    }
+   
    
    // compute projection if using initial viewpoint and not end of run or
    // if not using initial viewpoint and not first run.
@@ -3118,9 +3189,9 @@ void TrajPlotCanvas::DrawPlot()
    
    // change back to view projection
    SetProjection();
-
+   
    TransformView(mNumData-1);
-
+   
    // tilt Origin rotation axis if needed
    if (mNeedOriginConversion)
    {
@@ -3150,6 +3221,9 @@ void TrajPlotCanvas::DrawPlot()
    
    // draw object orbit
    DrawObjectOrbit(mNumData-1);
+   
+   if (mDrawSolverData)
+      DrawSolverData();
    
    // draw Earth-Sun line
    if (mDrawSunLine)
@@ -3390,7 +3464,6 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
    
    for (int obj=0; obj<mObjectCount; obj++)
    {
-      
       objName = mObjectNames[obj];
       objId = GetObjectId(objName);
       mObjLastFrame[objId] = 0;
@@ -3434,7 +3507,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
       // draw lines
       //---------------------------------------------------------
       for (int i = beginFrame; i <= frame; i++)
-      {
+      {         
          // Draw object orbit line based on points
          if ((mTime[i] > mTime[i-1]) ||
              (i>2 && mTime[i] < mTime[i-1]) && mTime[i-1] < mTime[i-2]) //for backprop
@@ -3471,24 +3544,30 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
             #endif
             
             // If drawing orbit lines
-            if (mDrawOrbitFlag[objId*MAX_DATA+frame])
-            {
+            //if (mDrawOrbitFlag[objId*MAX_DATA+frame])
+            if (mDrawOrbitFlag[objId*MAX_DATA+i])
+            {               
                if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
                   *sIntColor = mObjectOrbitColor[objId*MAX_DATA+i];
                else
                   *sIntColor = mObjectColorMap[objName].GetIntColor();
-            
+               
                glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
-            
+               
                glVertex3f((-mObjectTmpPos[index1+0]),
                           (-mObjectTmpPos[index1+1]),
                           ( mObjectTmpPos[index1+2]));
-            
+               
                glVertex3f((-mObjectTmpPos[index2+0]),
                           (-mObjectTmpPos[index2+1]),
                           ( mObjectTmpPos[index2+2]));
+               
+//                MessageInterface::ShowMessage
+//                   ("===> index2=%d, color=%u, %f, %f, %f\n", index2, *sIntColor,
+//                    mObjectTmpPos[index2+0], mObjectTmpPos[index2+1],
+//                    mObjectTmpPos[index2+2]);
             }
-
+            
             // save last valid frame to show object at final frame
             mObjLastFrame[objId] = i;
             
@@ -3538,7 +3617,7 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
                glTranslatef(-mObjectTmpPos[index3+0],
                             -mObjectTmpPos[index3+1],
                              mObjectTmpPos[index3+2]);
-                              
+               
                if (mObjectArray[obj]->IsOfType(Gmat::SPACECRAFT))
                   color = mObjectOrbitColor[objId*MAX_DATA+i];
                else
@@ -3595,6 +3674,51 @@ void TrajPlotCanvas::DrawObjectOrbit(int frame)
    //MessageInterface::ShowMessage("===> DrawObjectOrbit() exiting\n");
    
 } // end DrawObjectOrbit(int frame)
+
+
+//------------------------------------------------------------------------------
+//  void DrawSolverData()
+//------------------------------------------------------------------------------
+/**
+ * Draws solver iteration data
+ */
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::DrawSolverData()
+{
+
+   int numPoints = mSolverAllPosX.size();
+   //MessageInterface::ShowMessage("==========> solver points = %d\n", numPoints);
+   
+   if (numPoints == 0)
+      return;
+   
+   
+   glPushMatrix();
+   glBegin(GL_LINES);
+   
+   for (int i=1; i<numPoints; i++)
+   {
+      int numSc = mSolverAllPosX[i].size();      
+      //MessageInterface::ShowMessage("==========> sc count = %d\n", numSc);
+      
+      //---------------------------------------------------------
+      // draw lines
+      //---------------------------------------------------------
+      for (int sc=0; sc<numSc; sc++)
+      {
+         
+         *sIntColor = mSolverIterColorArray[sc];         
+         glColor3ub(sGlColor->red, sGlColor->green, sGlColor->blue);
+         
+         glVertex3f(-mSolverAllPosX[i-1][sc], -mSolverAllPosY[i-1][sc], mSolverAllPosZ[i-1][sc]); 
+         glVertex3f(-mSolverAllPosX[i][sc], -mSolverAllPosY[i][sc], mSolverAllPosZ[i][sc]);
+      }
+   }
+   
+   glEnd();
+   glPopMatrix();
+   
+}
 
 
 //------------------------------------------------------------------------------
@@ -3946,7 +4070,7 @@ void TrajPlotCanvas::DrawAxes()
    wxString axisLabel;
    GLfloat viewDist;
 
-   glLineWidth(2.0); //loj: 11/2/05 Fix for L57
+   glLineWidth(2.0);
    
    //-----------------------------------
    // draw axes

@@ -133,7 +133,7 @@ public:
                              const std::string &name = "");
    
 protected:
-   
+
    bool AddSpacePoint(const std::string &name, Integer index, bool show = true);
    bool ClearSpacePointList();
    bool RemoveSpacePoint(const std::string &name);
@@ -146,8 +146,9 @@ protected:
                          const std::string &sval, Integer index = -1);
 
    void WriteDeprecatedMessage(Integer id) const;
+   bool UpdateSolverData();
    
-   SolarSystem *mSolarSystem;
+   //SolarSystem *mSolarSystem;
    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
@@ -204,6 +205,7 @@ protected:
    StringArray mAllSpNameArray;
    StringArray mAllRefObjectNames;
    
+   // arrays for holding distrubuted data
    RealArray mScXArray;
    RealArray mScYArray;
    RealArray mScZArray;
@@ -213,6 +215,17 @@ protected:
    UnsignedIntArray mScOrbitColorArray;
    UnsignedIntArray mScTargetColorArray;
    UnsignedIntArray mOrbitColorArray;
+   UnsignedIntArray mTargetColorArray;
+   
+   // arrays for holding solver current data
+   std::vector<StringArray> mCurrScArray;
+   std::vector<Real> mCurrEpochArray;
+   std::vector<RealArray> mCurrXArray;
+   std::vector<RealArray> mCurrYArray;
+   std::vector<RealArray> mCurrZArray;
+   std::vector<RealArray> mCurrVxArray;
+   std::vector<RealArray> mCurrVyArray;
+   std::vector<RealArray> mCurrVzArray;
    
    std::map<std::string, UnsignedInt> mOrbitColorMap;
    std::map<std::string, UnsignedInt> mTargetColorMap;
@@ -223,7 +236,7 @@ protected:
    {
       ADD = SubscriberParamCount,
       ORBIT_COLOR,
-      //TARGET_COLOR,
+      TARGET_COLOR,
       COORD_SYSTEM,
       VIEWPOINT_REF,
       VIEWPOINT_REFERENCE,
