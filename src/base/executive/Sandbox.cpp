@@ -155,8 +155,8 @@ bool Sandbox::AddObject(GmatBase *obj)
    #endif
 
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
 
    state = IDLE;
 
@@ -225,8 +225,8 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
 {
 
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
 
   state = IDLE;
 
@@ -261,8 +261,8 @@ bool Sandbox::AddCommand(GmatCommand *cmd)
 bool Sandbox::AddSolarSystem(SolarSystem *ss)
 {
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
    state = IDLE;
 
    if (!ss)
@@ -276,7 +276,6 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 #endif
    return true;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -293,8 +292,8 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 bool Sandbox::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
 
    state = IDLE;
 
@@ -324,13 +323,15 @@ bool Sandbox::SetPublisher(Publisher *pub)
 {
 
    if ((state != INITIALIZED) && (state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
    state = IDLE;
 
 
    if (pub) {
       publisher = pub;
+      // Now publisher needs internal coordinate system
+      publisher->SetInternalCoordSystem(internalCoordSys);
       return true;
    }
 
@@ -515,7 +516,7 @@ bool Sandbox::Initialize()
          // Setup spacecraft hardware
          BuildAssociations(obj);
 
-         obj->Initialize();  // loj: 9/7/06 Why was this missing?
+         obj->Initialize();
       }
    }
 
@@ -628,8 +629,11 @@ bool Sandbox::Initialize()
          #endif
             
          BuildReferences(obj);
-         if (obj->IsOfType("OpenGLPlot"))
-            obj->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
+         ((Subscriber*)obj)->SetInternalCoordSystem(internalCoordSys);
+         ((Subscriber*)obj)->SetSolarSystem(solarSys);
+         
+         //if (obj->IsOfType("OpenGLPlot"))
+         //   obj->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
          obj->Initialize();
       }
    }
@@ -762,8 +766,6 @@ void Sandbox::BuildReferences(GmatBase *obj)
             AxisSystem *axes = moderator->CreateAxisSystem("BodyFixed", "");
             fixedCS->SetName(*i);
             fixedCS->SetRefObject(axes, Gmat::AXIS_SYSTEM, "");
-            //fixedCS->SetOriginName("");  // Used to flag as uninitialized
-            //loj: 09/13/06 Set origin name here to avoid "" name in SetRefObject later
             fixedCS->SetOriginName(fm->GetStringParameter("CentralBody"));
             
             fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
@@ -1160,14 +1162,6 @@ bool Sandbox::Execute()
              current->GetGeneratingString().c_str());
          #endif
          
-         if (current->GetTypeName() == "Target")
-         {
-            if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
-               currentState = Gmat::RUNNING;
-            else
-               currentState = Gmat::TARGETING;
-         }
-         
          if (currentState != runState)
          {
             publisher->SetRunState(currentState);
@@ -1175,16 +1169,7 @@ bool Sandbox::Execute()
          }
          
          rv = current->Execute();
-         
-         // Possible fix for displaying the last iteration...
-         if (current->GetTypeName() == "Target")
-         {
-            if (current->GetBooleanParameter(current->GetParameterID("TargeterConverged")))
-               currentState = Gmat::RUNNING;
-            else
-               currentState = Gmat::TARGETING;
-         }
-         
+                  
          if (!rv)
          {
             std::string str = "\"" + current->GetTypeName() +
@@ -1331,8 +1316,8 @@ void Sandbox::Clear()
 
    // Update the sandbox state
    if ((state != STOPPED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
 
    state     = IDLE;
 }
@@ -1353,8 +1338,8 @@ void Sandbox::Clear()
 bool Sandbox::AddSubscriber(Subscriber *subsc)
 {
    if ((state != STOPPED) && (state != INITIALIZED) && (state != IDLE))
-	  MessageInterface::ShowMessage(
-	     "Unexpected state transition in the Sandbox\n");
+          MessageInterface::ShowMessage(
+             "Unexpected state transition in the Sandbox\n");
    state     = IDLE;
 
    Subscriber *sub = (Subscriber *)(subsc->Clone());
