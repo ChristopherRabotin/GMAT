@@ -34,6 +34,9 @@ public:
 protected:
    OpenGlPlot *mOpenGlPlot;
    
+   bool mHasIntegerDataChanged;
+   bool mHasRealDataChanged;
+   bool mHasDrawingOptionChanged;
    bool mHasSpChanged;
    bool mHasOrbitColorChanged;
    bool mHasTargetColorChanged;
@@ -41,6 +44,7 @@ protected:
    bool mHasCoordSysChanged;
    bool mHasViewInfoChanged;
    bool mHasViewUpInfoChanged;
+   
    int  mScCount;
    int  mNonScCount;
    

@@ -89,6 +89,9 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
    // Set the pointer for the "Show Script" button
    mObject = mOpenGlPlot;
    
+   mHasIntegerDataChanged = false;
+   mHasRealDataChanged = false;
+   mHasDrawingOptionChanged = false;
    mHasSpChanged = false;
    mHasOrbitColorChanged = false;
    mHasTargetColorChanged = false;
@@ -595,9 +598,9 @@ void OpenGlPlotSetupPanel::Create()
 void OpenGlPlotSetupPanel::LoadData()
 {
    #if DEBUG_OPENGL_PANEL_LOAD
-      MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entering...\n");
+   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() entered.\n");
    #endif
-
+   
    try
    {
       // load data from the core engine
@@ -626,7 +629,6 @@ void OpenGlPlotSetupPanel::LoadData()
          SetValue(mOpenGlPlot->GetOnOffParameter("SunLine") == "On");
       mUseInitialViewCheckBox->
          SetValue(mOpenGlPlot->GetOnOffParameter("UseInitialView") == "On");
-      
       mSolverIterComboBox->
          SetValue(mOpenGlPlot->GetStringParameter("SolverIterations").c_str());
       
@@ -665,6 +667,7 @@ void OpenGlPlotSetupPanel::LoadData()
       mViewPointVectorComboBox->SetStringSelection(viewObj);
       
       viewObj = mOpenGlPlot->GetStringParameter("ViewDirectionType").c_str();
+      
       if (viewObj != "Vector")
          viewObj = mOpenGlPlot->GetStringParameter("ViewDirection").c_str();
       mViewDirectionComboBox->SetStringSelection(viewObj);
@@ -675,12 +678,11 @@ void OpenGlPlotSetupPanel::LoadData()
       // show vector if viewpoint vector name is Vector
       if (mViewPointRefComboBox->GetStringSelection() == "Vector")
       {
-         Rvector3 vec = mOpenGlPlot->GetVector("ViewPointRefVector");
+         Rvector3 vec = mOpenGlPlot->GetVector("ViewPointReference");
          
          #if DEBUG_OPENGL_PANEL_LOAD
          MessageInterface::ShowMessage
-            ("OpenGlPlotSetupPanel::LoadData() ViewPointRefVector = %s\n",
-             vec.ToString().c_str());
+            ("   ViewPointReference = %s\n", vec.ToString().c_str());
          #endif
          
          mViewPointRef1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
@@ -697,12 +699,11 @@ void OpenGlPlotSetupPanel::LoadData()
       // show vector if viewpoint vector name is Vector
       if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
       {
-         Rvector3 vec = mOpenGlPlot->GetVector("ViewPointVectorVector");
+         Rvector3 vec = mOpenGlPlot->GetVector("ViewPointVector");
          
          #if DEBUG_OPENGL_PANEL_LOAD
          MessageInterface::ShowMessage
-            ("OpenGlPlotSetupPanel::LoadData() ViewPointVectorVector = %s\n",
-             vec.ToString().c_str());
+            ("   ViewPointVector = %s\n", vec.ToString().c_str());
          #endif
          
          mViewPointVec1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
@@ -719,7 +720,13 @@ void OpenGlPlotSetupPanel::LoadData()
       // show vector if view direction name is Vector
       if (mViewDirectionComboBox->GetStringSelection() == "Vector")
       {
-         Rvector3 vec = mOpenGlPlot->GetVector("ViewDirectionVector");
+         Rvector3 vec = mOpenGlPlot->GetVector("ViewDirection");
+         
+         #if DEBUG_OPENGL_PANEL_LOAD
+         MessageInterface::ShowMessage
+            ("   ViewDirector = %s\n", vec.ToString().c_str());
+         #endif
+         
          mViewDir1TextCtrl->SetValue(theGuiManager->ToWxString(vec[0]));
          mViewDir2TextCtrl->SetValue(theGuiManager->ToWxString(vec[1]));
          mViewDir3TextCtrl->SetValue(theGuiManager->ToWxString(vec[2]));
@@ -730,9 +737,6 @@ void OpenGlPlotSetupPanel::LoadData()
       {
          mViewDefSizer->Show(mViewDirVectorSizer, false);
       }
-      
-      // set layout
-      //mBottomViewSizer->Layout();
       
       //--------------------------------------------------------------
       // get SpacePoint list to plot
@@ -875,7 +879,7 @@ void OpenGlPlotSetupPanel::LoadData()
    
    
    #if DEBUG_OPENGL_PANEL_LOAD
-   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting...\n");
+   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::LoadData() exiting.\n");
    #endif
 }
 
@@ -887,93 +891,217 @@ void OpenGlPlotSetupPanel::SaveData()
 {
 
    #if DEBUG_OPENGL_PANEL_SAVE
-   MessageInterface::ShowMessage
-      ("OpenGlPlotSetupPanel::SaveData() entered.\n");
+   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() entered.\n");
    #endif
+
+   canClose = true;
+   std::string str1, str2;
+   Integer collectFreq, updateFreq, pointsToRedraw;
+   Real scaleFactor;
+   Real viewRef[3], viewVec[3], viewDir[3];
+   Rvector3 vec;
+   bool setVector = false;
    
-   canClose = false;
+   //-----------------------------------------------------------------
+   // check values from text field
+   //-----------------------------------------------------------------
+
+   if (mHasIntegerDataChanged)
+   {
+      CheckInteger(collectFreq, mDataCollectFreqTextCtrl->GetValue().c_str(),
+                   "DataCollectFrequency", "Integer Number > 0", false, true);
+      
+      CheckInteger(updateFreq, mUpdatePlotFreqTextCtrl->GetValue().c_str(),
+                   "UpdatePlotFrequency", "Integer Number > 0", false, true);
+      
+      CheckInteger(pointsToRedraw, mNumPointsToRedrawTextCtrl->GetValue().c_str(),
+                   "NumPointsToRedraw", "Integer Number >= 0", false, true, true);
+   }
+   
+   if ((mViewPointRefComboBox->GetStringSelection() == "Vector")||
+       (mViewPointVectorComboBox->GetStringSelection() == "Vector") ||
+       (mViewDirectionComboBox->GetStringSelection() == "Vector"))
+      setVector = true;
+   
+   if (setVector || mHasRealDataChanged)
+   {
+      CheckReal(scaleFactor, mViewScaleFactorTextCtrl->GetValue().c_str(),
+                "ViewScaleFactor", "Real Number > 0", false, true);
+      
+      if (mViewPointRefComboBox->GetStringSelection() == "Vector")
+      {
+         CheckReal(viewRef[0], mViewPointRef1TextCtrl->GetValue().c_str(),
+                   "ViewPointReference[1]", "Real Number");
+         CheckReal(viewRef[1], mViewPointRef2TextCtrl->GetValue().c_str(),
+                   "ViewPointReference[2]", "Real Number");
+         CheckReal(viewRef[2], mViewPointRef3TextCtrl->GetValue().c_str(),
+                   "ViewPointReference[3]", "Real Number");
+      }
+      
+      if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
+      {
+         CheckReal(viewVec[0], mViewPointVec1TextCtrl->GetValue().c_str(),
+                   "ViewPointVector[1]", "Real Number");
+         CheckReal(viewVec[1], mViewPointVec2TextCtrl->GetValue().c_str(),
+                   "ViewPointVector[2]", "Real Number");
+         CheckReal(viewVec[2], mViewPointVec3TextCtrl->GetValue().c_str(),
+                   "ViewPointVector[3]", "Real Number");
+      }
+      
+      if (mViewDirectionComboBox->GetStringSelection() == "Vector")
+      {
+         CheckReal(viewDir[0], mViewDir1TextCtrl->GetValue().c_str(),
+                   "ViewDirection[1]", "Real Number");
+         CheckReal(viewDir[1], mViewDir2TextCtrl->GetValue().c_str(),
+                   "ViewDirection[2]", "Real Number");
+         CheckReal(viewDir[2], mViewDir3TextCtrl->GetValue().c_str(),
+                   "ViewDirection[3]", "Real Number");
+      }
+   }
+   
+   if (!canClose)
+      return;
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do the range checking
+   //-----------------------------------------------------------------
    try
    {
-      // save data to core engine
-      Integer intVal[2];
-      std::string inputString[3];
-      std::string msg = "The value of \"%s\" for field \"%s\" on object \"" +
-                 mOpenGlPlot->GetName() + "\" is not an allowed value.  "
-                 "\nThe allowed values are: [ %s ].";
-      
-      inputString[0] = mDataCollectFreqTextCtrl->GetValue();
-      inputString[1] = mUpdatePlotFreqTextCtrl->GetValue();
-      for (Integer i=0; i < 2; ++i)
+      if (mHasIntegerDataChanged)
       {
-          if (!GmatStringUtil::ToInteger(inputString[i], &intVal[i]) || 
-              intVal[i] < 1)
-          {
-             MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                 inputString[i].c_str(), "DataCollectFrequency","Integer >= 1");
-             return;
-          }
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving Integer data\n");
+         #endif
+         
+         mHasIntegerDataChanged = false;
+         mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", collectFreq);
+         mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", updateFreq);
+         mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", pointsToRedraw);
       }
       
-      mOpenGlPlot->SetIntegerParameter("DataCollectFrequency", intVal[0]);
-      mOpenGlPlot->SetIntegerParameter("UpdatePlotFrequency", intVal[1]);
-
-      inputString[0] = mNumPointsToRedrawTextCtrl->GetValue();
-      if (!GmatStringUtil::ToInteger(inputString[0], &intVal[0]) || 
-          intVal[0] < 0)
+      //--------------------------------------------------------------
+      // save view definitions
+      //--------------------------------------------------------------
+      if (mHasViewInfoChanged)
       {
-         MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                 inputString[0].c_str(), "NumPointsToRedraw","Integer >= 0");
-         return;
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving View definition\n");
+         #endif
+         mHasViewInfoChanged = false;
+         
+         mOpenGlPlot->SetStringParameter
+            ("ViewPointReference",
+             std::string(mViewPointRefComboBox->GetStringSelection().c_str()));
+         mOpenGlPlot->SetStringParameter
+            ("ViewPointVector",
+             std::string(mViewPointVectorComboBox->GetStringSelection().c_str()));
+         mOpenGlPlot->SetStringParameter
+            ("ViewDirection",
+             std::string(mViewDirectionComboBox->GetStringSelection().c_str()));
+      } // end if ( mHasViewInfoChanged)
+      
+      
+      //--------------------------------------------------------------
+      // save scale factor and view definition vectors
+      //--------------------------------------------------------------
+      if (setVector || mHasRealDataChanged)
+      {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving Real data\n");
+         #endif
+         
+         mHasViewInfoChanged = false;
+         mHasRealDataChanged = false;
+         mOpenGlPlot->SetRealParameter("ViewScaleFactor", scaleFactor);
+         
+         if (mViewPointRefComboBox->GetStringSelection() == "Vector")
+         {
+            vec.Set(viewRef[0], viewRef[1], viewRef[2]);
+            mOpenGlPlot->SetStringParameter("ViewPointRefType", "Vector");
+            mOpenGlPlot->SetVector("ViewPointReference", vec);
+         }
+         
+         if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
+         {
+            vec.Set(viewVec[0], viewVec[1], viewVec[2]);
+            mOpenGlPlot->SetStringParameter("ViewPointVectorType", "Vector");
+            mOpenGlPlot->SetVector("ViewPointVector", vec);
+         }
+         
+         if (mViewDirectionComboBox->GetStringSelection() == "Vector")
+         {
+            vec.Set(viewDir[0], viewDir[1], viewDir[2]);
+            mOpenGlPlot->SetStringParameter("ViewDirectionType", "Vector");
+            mOpenGlPlot->SetVector("ViewDirection", vec);
+         }
       }
       
-      mOpenGlPlot->SetIntegerParameter("NumPointsToRedraw", intVal[0]);
       
-      mOpenGlPlot->Activate(mShowPlotCheckBox->IsChecked());
+      //--------------------------------------------------------------
+      // save drawing options
+      //--------------------------------------------------------------
+      if (mHasDrawingOptionChanged)
+      {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving drawing options\n");
+         #endif
+         mHasDrawingOptionChanged = false;
+         
+         mOpenGlPlot->Activate(mShowPlotCheckBox->IsChecked());
+         
+         if (mXYPlaneCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("XYPlane", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("XYPlane", "Off");
+         
+         if (mEclipticPlaneCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("CelestialPlane", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("CelestialPlane", "Off");
+         
+         if (mWireFrameCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("WireFrame", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("WireFrame", "Off");
+         
+         if (mAxesCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("Axes", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("Axes", "Off");
+         
+         if (mGridCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("Grid", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("Grid", "Off");
+         
+         if (mOriginSunLineCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("SunLine", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("SunLine", "Off");
+         
+         //if (mOverlapCheckBox->IsChecked())
+         //   mOpenGlPlot->SetOnOffParameter("Overlap", "On");
+         //else
+         //   mOpenGlPlot->SetOnOffParameter("Overlap", "Off");
+         
+         if (mUseInitialViewCheckBox->IsChecked())
+            mOpenGlPlot->SetOnOffParameter("UseInitialView", "On");
+         else
+            mOpenGlPlot->SetOnOffParameter("UseInitialView", "Off");
+         
+         mOpenGlPlot->SetStringParameter("SolverIterations",
+                                         mSolverIterComboBox->GetValue().c_str());
+      }
       
-      if (mXYPlaneCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("XYPlane", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("XYPlane", "Off");
       
-      if (mEclipticPlaneCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("CelestialPlane", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("CelestialPlane", "Off");
-      
-      if (mWireFrameCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("WireFrame", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("WireFrame", "Off");
-      
-      if (mAxesCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("Axes", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("Axes", "Off");
-      
-      if (mGridCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("Grid", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("Grid", "Off");
-      
-      if (mOriginSunLineCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("SunLine", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("SunLine", "Off");
-      
-      //if (mOverlapCheckBox->IsChecked())
-      //   mOpenGlPlot->SetOnOffParameter("Overlap", "On");
-      //else
-      //   mOpenGlPlot->SetOnOffParameter("Overlap", "Off");
-      
-      if (mUseInitialViewCheckBox->IsChecked())
-         mOpenGlPlot->SetOnOffParameter("UseInitialView", "On");
-      else
-         mOpenGlPlot->SetOnOffParameter("UseInitialView", "Off");
-      
-      mOpenGlPlot->SetStringParameter("SolverIterations",
-                                      mSolverIterComboBox->GetValue().c_str());
-      
+      //--------------------------------------------------------------
+      // save perspective info
+      //--------------------------------------------------------------
       #ifdef __ENABLE_GL_PERSPECTIVE__
+      #if DEBUG_OPENGL_PANEL_SAVE
+      MessageInterface::ShowMessage("   Saving perspective mode data\n");
+      #endif
+      
       if (mPerspectiveModeCheckBox->IsChecked())
          mOpenGlPlot->SetOnOffParameter("PerspectiveMode", "On");
       else
@@ -985,8 +1113,8 @@ void OpenGlPlotSetupPanel::SaveData()
          mOpenGlPlot->SetOnOffParameter("UseFixedFov", "Off");
       
       Real fov;
-      inputString[0] = mFixedFovTextCtrl->GetValue();
-      if (!GmatStringUtil::ToReal(inputString[0], &fov) || fov < 1)
+      std::string fovStr = mFixedFovTextCtrl->GetValue();
+      if (!GmatStringUtil::ToReal(fovStr, &fov) || fov < 1)
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
                  inputString[0].c_str(), "FixedFovAngle", "Real Number >= 1");
@@ -1001,17 +1129,20 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasSpChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving spacecraft and body list\n");
+         #endif
+         
          mHasSpChanged = false;
          mHasOrbitColorChanged = true;
          mHasTargetColorChanged = true;
-      
+         
          mScCount = mSelectedScListBox->GetCount();
          mNonScCount = mSelectedObjListBox->GetCount();
          
          #if DEBUG_OPENGL_PANEL_SAVE
          MessageInterface::ShowMessage
-            ("OpenGlPlotSetupPanel::SaveData() mScCount=%d, mNonScCount=%d\n",
-             mScCount, mNonScCount);
+            ("   mScCount=%d, mNonScCount=%d\n", mScCount, mNonScCount);
          #endif
          
          // clear the list first
@@ -1023,9 +1154,7 @@ void OpenGlPlotSetupPanel::SaveData()
             mSelSpName = std::string(mSelectedScListBox->GetString(i).c_str());
             
             #if DEBUG_OPENGL_PANEL_SAVE
-            MessageInterface::ShowMessage
-               ("OpenGlPlotSetupPanel::SaveData() Sc[%d] = %s\n", i,
-                mSelSpName.c_str());
+            MessageInterface::ShowMessage("   Sc[%d] = %s\n", i, mSelSpName.c_str());
             #endif
             
             mOpenGlPlot->
@@ -1054,6 +1183,10 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasShowObjectChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving show object flags\n");
+         #endif
+         
          mHasShowObjectChanged = false;
          
          // change draw spacecraft
@@ -1080,6 +1213,10 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasOrbitColorChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving orbit colors\n");
+         #endif
+         
          mHasOrbitColorChanged = false;
          
          // change spacecraft orbit color
@@ -1114,6 +1251,10 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasTargetColorChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving target colors\n");
+         #endif
+         
          mHasTargetColorChanged = false;
          
          // change spacecraft target color
@@ -1138,6 +1279,10 @@ void OpenGlPlotSetupPanel::SaveData()
       //--------------------------------------------------------------
       if (mHasCoordSysChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving view coordinate system\n");
+         #endif
+         
          mHasCoordSysChanged = false;
          mOpenGlPlot->SetStringParameter
             ("CoordinateSystem",
@@ -1145,106 +1290,14 @@ void OpenGlPlotSetupPanel::SaveData()
       }
       
       //--------------------------------------------------------------
-      // save ViewPoint info
-      //--------------------------------------------------------------
-      if (mHasViewInfoChanged)
-      {
-         mOpenGlPlot->SetStringParameter
-            ("ViewPointReference",
-             std::string(mViewPointRefComboBox->GetStringSelection().c_str()));
-         mOpenGlPlot->SetStringParameter
-            ("ViewPointVector",
-             std::string(mViewPointVectorComboBox->GetStringSelection().c_str()));
-         mOpenGlPlot->SetStringParameter
-            ("ViewDirection",
-             std::string(mViewDirectionComboBox->GetStringSelection().c_str()));
-         
-         Real realVal[3];
-         inputString[0] = mViewScaleFactorTextCtrl->GetValue();
-         if (!GmatStringUtil::ToReal(inputString[0], &realVal[0]) || 
-             realVal[0] < 0)
-         {
-            MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-              inputString[0].c_str(), "ViewScaleFactor", "Real Number >= 0");
-            return;
-         }
-         mOpenGlPlot->SetRealParameter("ViewScaleFactor", realVal[0]);
-         
-         // save ViewPoint ref. vector
-         if (mViewPointRefComboBox->GetStringSelection() == "Vector")
-         {
-            Rvector3 vec;
-            inputString[0] = mViewPointRef1TextCtrl->GetValue();
-            inputString[1] = mViewPointRef2TextCtrl->GetValue();
-            inputString[2] = mViewPointRef3TextCtrl->GetValue();
-            for (Integer i=0; i < 3; ++i)
-            {
-               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
-               {
-                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                          inputString[i].c_str(), "ViewPointRefVector",
-                          "Real Number");
-                  return;
-               }
-               vec(i) = realVal[i];
-            }
-            mOpenGlPlot->SetStringParameter("ViewPointRefType", "Vector");
-            mOpenGlPlot->SetVector("ViewPointRefVector", vec);
-         }
-         
-         // save ViewPoint vector
-         if (mViewPointVectorComboBox->GetStringSelection() == "Vector")
-         {
-            Rvector3 vec;
-            inputString[0] = mViewPointVec1TextCtrl->GetValue();
-            inputString[1] = mViewPointVec2TextCtrl->GetValue();
-            inputString[2] = mViewPointVec3TextCtrl->GetValue();
-            for (Integer i=0; i < 3; ++i)
-            {
-               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
-               {
-                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                          inputString[i].c_str(), "ViewPointVectorVector",
-                          "Real Number");
-                  return;
-               }
-               vec(i) = realVal[i];
-            }
-            mOpenGlPlot->SetStringParameter("ViewPointVectorType", "Vector");
-            mOpenGlPlot->SetVector("ViewPointVectorVector", vec);
-         }
-         
-         // save View direction
-         if (mViewDirectionComboBox->GetStringSelection() == "Vector")
-         {
-            Rvector3 vec;
-            inputString[0] = mViewDir1TextCtrl->GetValue();
-            inputString[1] = mViewDir2TextCtrl->GetValue();
-            inputString[2] = mViewDir3TextCtrl->GetValue();
-
-            for (Integer i=0; i < 3; ++i)
-            {
-               if (!GmatStringUtil::ToReal(inputString[i], &realVal[i]))
-               {
-                  MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(),
-                          inputString[i].c_str(), "ViewDirectionVector",
-                          "Real Number");
-                  return;
-               }
-               vec(i) = realVal[i];
-            }
-            mOpenGlPlot->SetStringParameter("ViewDirectionType", "Vector");
-            mOpenGlPlot->SetVector("ViewDirectionVector", vec);
-         }
-         
-         mHasViewInfoChanged = false;
-      } // end if ( mHasViewInfoChanged)
-      
-      //--------------------------------------------------------------
       // save view up direction info
       //--------------------------------------------------------------
       if (mHasViewUpInfoChanged)
       {
+         #if DEBUG_OPENGL_PANEL_SAVE
+         MessageInterface::ShowMessage("   Saving view up coordinate system\n");
+         #endif
+         
          mHasViewUpInfoChanged = false;
          mOpenGlPlot->SetStringParameter
             ("ViewUpCoordinateSystem",
@@ -1271,6 +1324,10 @@ void OpenGlPlotSetupPanel::SaveData()
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage().c_str());
    }
+   
+   #if DEBUG_OPENGL_PANEL_SAVE
+   MessageInterface::ShowMessage("OpenGlPlotSetupPanel::SaveData() exiting.\n");
+   #endif
 }
 
 
@@ -1499,6 +1556,10 @@ void OpenGlPlotSetupPanel::OnCheckBoxChange(wxCommandEvent& event)
           mSelSpName.c_str(), mDrawObjectMap[mSelSpName]);
       #endif
    }
+   else
+   {
+      mHasDrawingOptionChanged = true;
+   }
    
    EnableUpdate(true);
 }
@@ -1660,6 +1721,10 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       else
          mViewDefSizer->Show(mViewDirVectorSizer, false);
    }
+   else if (event.GetEventObject() == mSolverIterComboBox)
+   {
+      mHasDrawingOptionChanged = true;
+   }
    
    EnableUpdate(true);
 }
@@ -1670,8 +1735,31 @@ void OpenGlPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlPlotSetupPanel::OnTextChange(wxCommandEvent& event)
 {
-   mHasViewInfoChanged = true;
-   EnableUpdate(true);
+   wxObject *obj = event.GetEventObject();
+   
+   if (((wxTextCtrl*)obj)->IsModified())
+   {
+      if (obj == mDataCollectFreqTextCtrl ||
+          obj == mUpdatePlotFreqTextCtrl ||
+          obj == mNumPointsToRedrawTextCtrl)
+      {
+         mHasIntegerDataChanged = true;
+      }
+      else if (obj == mViewPointRef1TextCtrl ||
+               obj == mViewPointRef2TextCtrl ||
+               obj == mViewPointRef3TextCtrl ||
+               obj == mViewPointVec1TextCtrl ||
+               obj == mViewPointVec2TextCtrl ||
+               obj == mViewPointVec3TextCtrl ||
+               obj == mViewDir1TextCtrl ||
+               obj == mViewDir2TextCtrl ||
+               obj == mViewDir3TextCtrl)
+      {
+         mHasRealDataChanged = true;
+      }
+      
+      EnableUpdate(true);
+   }
 }
 
 
