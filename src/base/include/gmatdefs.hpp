@@ -177,6 +177,7 @@ namespace Gmat
       TARGETING,
       OPTIMIZING,
       SOLVING,
+      SOLVEDPASS,
       WAITING
    };
 
