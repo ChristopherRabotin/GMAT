@@ -1228,7 +1228,7 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    theReadWriter->WriteText(sectionDelimiterString[0]);
    theReadWriter->WriteText(sectionDelimiterString[1] + "Parameters");
    theReadWriter->WriteText(sectionDelimiterString[2]);
-
+   
    //-----------------------------------------------------------------
    // Fill in proper arrays
    //-----------------------------------------------------------------
@@ -1245,7 +1245,7 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
             // if initial value found
             if (genStr.find("=") != genStr.npos)
                arrWithValList.push_back(object);
-
+            
          }
          else if (object->GetTypeName() == "Variable")
          {
@@ -1273,29 +1273,34 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    // Write 10 Variables without initial values per line;
    //-----------------------------------------------------------------
    Integer counter = 0;
+   UnsignedInt size = varList.size();
    
-   for (UnsignedInt i = 0; i<varList.size(); i++)
+   for (UnsignedInt i = 0; i<size; i++)
    {
       counter++;
 
       // Write comment line
-      if (counter == 1)
+      if (i == 0)
          theReadWriter->WriteText(((Parameter*)varList[i])->GetCommentLine(2));
       
-      if (counter == 1 || (counter % 11) == 0)
-         theReadWriter->WriteText("Create Variable ");
+      if (counter == 1)
+         theReadWriter->WriteText("Create Variable");
       
-      theReadWriter->WriteText(varList[i]->GetName() + " ");
+      theReadWriter->WriteText(" " + varList[i]->GetName());
       
-      if ((counter % 10) == 0)
-         theReadWriter->WriteText("\n");
+      if ((counter % 10) == 0 || (i == size-1))
+      {
+         counter = 0;
+         theReadWriter->WriteText(";\n");
+      }
    }
    
    
    //-----------------------------------------------------------------
    // Write Variables with initial values
    //-----------------------------------------------------------------
-   for (UnsignedInt i = 0; i<varWithValList.size(); i++)
+   size = varWithValList.size();
+   for (UnsignedInt i = 0; i<size; i++)
    {
       if (i == 0)
       {
@@ -1311,31 +1316,35 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    // Write 10 Arrays without initial values per line;
    //-----------------------------------------------------------------
    counter = 0;
-   
-   for (UnsignedInt i = 0; i<arrList.size(); i++)
+   size = arrList.size();
+   for (UnsignedInt i = 0; i<size; i++)
    {
       counter++;
       
       // Write comment line
-      if (counter == 1)
+      if (i == 0)
       {
          theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(2));
       }
       
-      if (counter == 1 || (counter % 11) == 0)
-         theReadWriter->WriteText("Create Array ");
+      if (counter == 1)
+         theReadWriter->WriteText("Create Array");
       
-      theReadWriter->WriteText(arrList[i]->GetStringParameter("Description") + " ");
+      theReadWriter->WriteText(" " + arrList[i]->GetStringParameter("Description"));
       
-      if ((counter % 10) == 0)
-         theReadWriter->WriteText("\n");
+      if ((counter % 10) == 0 || (i == size-1))
+      {
+         counter = 0;
+         theReadWriter->WriteText(";\n");
+      }
    }
    
    //-----------------------------------------------------------------
    // Write Arrays with initial values
    //-----------------------------------------------------------------
-   for (UnsignedInt i = 0; i<arrWithValList.size(); i++)
+   size = arrWithValList.size();
+   for (UnsignedInt i = 0; i<size; i++)
    {
       if (i == 0)
       {
@@ -1351,32 +1360,42 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    // Write 10 Strings without initial values per line;
    //-----------------------------------------------------------------
    counter = 0;   
+   size = strList.size();
    for (UnsignedInt i = 0; i<strList.size(); i++)
    {
       counter++;
       
       // Write comment line
-      if (counter == 1)
+      if (i == 0)
       {
          theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(2));
       }
       
-      if (counter == 1 || (counter % 11) == 0)
-         theReadWriter->WriteText("Create String ");
+      if (counter == 1)
+         theReadWriter->WriteText("Create String");
       
-      theReadWriter->WriteText(strList[i]->GetName() + " ");
+      theReadWriter->WriteText(" " + strList[i]->GetName());
       
-      if ((counter % 10) == 0)
-         theReadWriter->WriteText("\n");
+      if ((counter % 10) == 0 || i == size-1)
+      {
+         counter = 0;
+         theReadWriter->WriteText(";\n");
+      }
    }
    
    
    //-----------------------------------------------------------------
    // Write Strings with initial values
    //-----------------------------------------------------------------
-   for (UnsignedInt i = 0; i<strWithValList.size(); i++)
+   size = strWithValList.size();
+   for (UnsignedInt i = 0; i<size; i++)
    {
+      // If no new value has been assigned, skip
+      if (strWithValList[i]->GetName() ==
+          strWithValList[i]->GetStringParameter("Expression"))
+         continue;
+      
       if (i == 0)
       {
          theReadWriter->WriteText("\n");
