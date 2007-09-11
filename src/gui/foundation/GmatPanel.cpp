@@ -280,7 +280,7 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 // bool CheckReal(Real &rvalue, const std::string &str,
 //                const std::string &field, const std::string &expRange,
-//                bool onlyMsg = false)
+//                bool onlyMsg = false, bool positive = false, bool zeroOk = false)
 //------------------------------------------------------------------------------
 /*
  * This method checks if input string is valid real number. It uses
@@ -292,13 +292,14 @@ void GmatPanel::OnSummary(wxCommandEvent &event)
  * @param  str      Input string value
  * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
- * @param  onlyMsg  if true, it only shows error message
- * @param  positive if true, the value must be positive
+ * @param  onlyMsg  if true, it only shows error message (default is false)
+ * @param  positive if true, the value must be positive (default is false)
+ * @param  zeroOk   if true, zero is allowed (default is false)
  */
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
                           const std::string &field, const std::string &expRange,
-                          bool onlyMsg, bool positive)
+                          bool onlyMsg, bool positive, bool zeroOk)
 {
    //MessageInterface::ShowMessage
    //   ("===> CheckReal() str=%s, field=%s, expRange=%s\n", str.c_str(),
@@ -321,7 +322,8 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
       rvalue = rval;
       
       if (!positive ||
-          (positive && rval > 0))
+          (positive && rval > 0) ||
+          (zeroOk && rval >= 0))
          return true;
    }
    
@@ -337,7 +339,7 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
 //------------------------------------------------------------------------------
 // bool CheckInteger(Integer &ivalue, const std::string &str,
 //                   const std::string &field, const std::string &expRange,
-//                   bool onlyMsg = false)
+//                   bool onlyMsg = false, bool positive, bool zeroOk)
 //------------------------------------------------------------------------------
 /*
  * This method checks if input string is valid integer number. It uses
@@ -349,13 +351,14 @@ bool GmatPanel::CheckReal(Real &rvalue, const std::string &str,
  * @param  str      Input string value
  * @param  field    Field name should be used in the error message
  * @param  expRange Expected value range to be used in the error message
- * @param  onlyMsg  if true, it only shows error message
- * @param  positive if true, the value must be positive
+ * @param  onlyMsg  if true, it only shows error message (default is false)
+ * @param  positive if true, the value must be positive (default is false)
+ * @param  zeroOk   if true, zero is allowed (default is false)
  */
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
                              const std::string &field, const std::string &expRange,
-                             bool onlyMsg, bool positive)
+                             bool onlyMsg, bool positive, bool zeroOk)
 {
    if (onlyMsg)
    {
@@ -374,7 +377,8 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
       ivalue = ival;
       
       if (!positive ||
-          (positive && ival > 0))
+          (positive && ival > 0) ||
+          (zeroOk && ival >= 0))
          return true;
    }
    
