@@ -19,10 +19,11 @@
 
 #include "Publisher.hpp"
 #include "PublisherException.hpp"
-#include <string>
 #include "MessageInterface.hpp"
+#include "Moderator.hpp"
+#include <string>
 
-//#define DEBUG_SUBSCRIBER 1
+//#define DEBUG_PUBLISHER 1
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -41,9 +42,12 @@ Publisher* Publisher::Instance()
 // Publisher(void)
 //------------------------------------------------------------------------------
 Publisher::Publisher() :
-   providerCount     (0),
-   currentProvider   (-1),
-   runState          (Gmat::IDLE)
+   providerCount       (0),
+   currentProvider     (-1),
+   runState            (Gmat::IDLE),
+   internalCoordSystem (NULL),
+   dataCoordSystem     (NULL),
+   dataMJ2000EqOrigin  (NULL)
 {
 }
 
@@ -53,6 +57,7 @@ Publisher::Publisher() :
 Publisher::~Publisher()
 {
    subs.clear();
+   coordSysMap.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -60,7 +65,7 @@ Publisher::~Publisher()
 //------------------------------------------------------------------------------
 bool Publisher::Subscribe(Subscriber *s)
 {
-   #if DEBUG_SUBSCRIBER
+   #if DEBUG_PUBLISHER
    MessageInterface::ShowMessage
       ("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
    #endif
@@ -80,7 +85,7 @@ bool Publisher::Unsubscribe(Subscriber *s)
 {
    if (!s)
       return false;
-
+   
    subs.remove(s);
    return true;
 }
@@ -91,6 +96,23 @@ bool Publisher::Unsubscribe(Subscriber *s)
 bool Publisher::UnsubscribeAll()
 {
    subs.clear();
+   
+   // delete locally created coordinate systems
+   std::map<std::string, CoordinateSystem*>::iterator iter;
+   for (iter = coordSysMap.begin(); iter != coordSysMap.end(); ++iter)
+   {
+      if ((iter->first).find("Local-") != std::string::npos)
+      {
+         #ifdef DEBUG_PUBLISHER
+         MessageInterface::ShowMessage
+            ("Publisher::UnsubscribeAll() deleting %s\n", iter->first.c_str());
+         #endif
+         
+         delete iter->second;
+      }
+   }
+   
+   coordSysMap.clear();
    return true;
 }
 
@@ -125,7 +147,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    }
 
 
-   #if DEBUG_SUBSCRIBER
+   #if DEBUG_PUBLISHER
    MessageInterface::ShowMessage
       ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
        subs.size());
@@ -134,7 +156,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
-      #if DEBUG_SUBSCRIBER
+      #if DEBUG_PUBLISHER
       MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
                                     (*current)->GetName().c_str());
       #endif
@@ -306,6 +328,122 @@ const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
       return elementMap[currentProvider];
       
    throw PublisherException("Unknown StringArray type requested.");
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * Sets the internal coordinate system.
+ *
+ * @parameter  cs  Internal coordinate system (usally EarthMJ2000Eq)
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   if (cs != NULL)
+      internalCoordSystem = cs;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetDataCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * Sets the coordinate system of data to subscribers. It also adds the coordinate
+ * system to the map, if it is not found.
+ *
+ * @parameter  cs  Coordinate system which data represents
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetDataCoordSystem(CoordinateSystem *cs)
+{
+   if (cs == NULL)
+      return;
+   
+   dataCoordSystem = cs;
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->SetDataCoordSystem(cs);
+      current++;
+   }
+   
+   // if coordinate system not found in the map, add
+   std::string csName = cs->GetName();
+   if (coordSysMap.find(csName) != coordSysMap.end())
+      coordSysMap[csName] = cs;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetDataMJ2000EqOrigin(CelestialBody *cb)
+//------------------------------------------------------------------------------
+/*
+ * Sets origin of MJ2000Eq coordinate system which data represents. If matching
+ * coordinate system name found from the map, it sets to data coordinate system,
+ * otherwise, it creates new coordinate system.
+ *
+ * @parameter  cb  Origin of MJ2000Eq coordinate system which data represents
+ */
+//------------------------------------------------------------------------------
+void Publisher::SetDataMJ2000EqOrigin(CelestialBody *cb)
+{
+   if (cb == NULL)
+      return;
+
+   #ifdef DEBUG_PUBLISHER
+   MessageInterface::ShowMessage
+      ("Publisher::SetDataMJ2000EqOrigin() cb=%s<%p>\n", cb->GetName().c_str(),
+       cb);
+   #endif
+   
+   dataMJ2000EqOrigin = cb;
+   std::string originName = cb->GetName();
+   std::string csName = originName + "MJ2000Eq";
+      
+   std::map<std::string, CoordinateSystem*>::iterator csIter =
+      coordSysMap.find(csName);
+   
+   if (coordSysMap.find(csName) != coordSysMap.end())
+   {
+      // set coordinate system from the map
+      dataCoordSystem = coordSysMap.find(csName)->second;
+   }
+   else
+   {
+      // check as local name
+      csName = "Local-" + csName;
+      if (coordSysMap.find(csName) != coordSysMap.end())
+         dataCoordSystem = coordSysMap.find(csName)->second;
+      else
+      {
+         // Create coordinate system if not exist
+         CoordinateSystem *newCs = (CoordinateSystem*)internalCoordSystem->Clone();
+         newCs->SetName(csName);
+         newCs->SetStringParameter("Origin", originName);
+         newCs->SetRefObject(cb, Gmat::CELESTIAL_BODY, originName);
+         newCs->Initialize();
+         coordSysMap[csName] = newCs;
+         dataCoordSystem = newCs;
+
+         #ifdef DEBUG_PUBLISHER
+         MessageInterface::ShowMessage
+            ("   ===> %s not found in the map, so created <%p>\n", csName.c_str(),
+             newCs);
+         #endif
+      }
+   }
+   
+   // set to subscribers
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->SetDataMJ2000EqOrigin(cb);
+      (*current)->SetDataCoordSystem(dataCoordSystem);
+      current++;
+   }
 }
 
 

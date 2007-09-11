@@ -36,8 +36,8 @@
 
 #include "GmatBase.hpp"
 #include "CoordinateSystem.hpp"
+#include "SolarSystem.hpp"
 #include "ElementWrapper.hpp"
-
 
 class GMAT_API Subscriber : public GmatBase
 {
@@ -65,6 +65,9 @@ public:
    virtual void SetProviderId(Integer id);
    virtual Integer GetProviderId();
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
+   virtual void SetDataCoordSystem(CoordinateSystem *cs);
+   virtual void SetDataMJ2000EqOrigin(CelestialBody *cb);
+   virtual void SetSolarSystem(SolarSystem *ss);
    
    // methods for setting up the items to subscribe
    virtual const StringArray& GetWrapperObjectNameArray();
@@ -101,7 +104,7 @@ public:
    enum SolverIterOption
    {
       SI_ALL,
-      SI_LAST,
+      SI_CURRENT,
       SI_NONE,
       SolverIterOptionCount
    };
@@ -112,10 +115,14 @@ public:
 protected:
    
    std::string mSolverIterations;
+   SolverIterOption mSolverIterOption;
    
    const char *data;
    Subscriber *next;
-   CoordinateSystem *internalCoordSystem;
+   CoordinateSystem *theInternalCoordSystem;
+   CoordinateSystem *theDataCoordSystem;
+   CelestialBody *theDataMJ2000EqOrigin;
+   SolarSystem *theSolarSystem;
    
    bool        active;
    bool        isEndOfReceive;

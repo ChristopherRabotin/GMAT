@@ -47,7 +47,7 @@
 const std::string
 Subscriber::SOLVER_ITER_OPTION_TEXT[SolverIterOptionCount] =
 {
-   "All", "Last", "None",
+   "All", "Current", "None",
 };
 
 const std::string
@@ -76,6 +76,9 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    GmatBase (Gmat::SUBSCRIBER, typeStr, nomme),
    data (NULL),
    next (NULL),
+   theInternalCoordSystem (NULL),
+   theDataCoordSystem (NULL),
+   theSolarSystem (NULL),
    active (true),
    isEndOfReceive(false),
    isEndOfRun(false),
@@ -86,6 +89,7 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    objectTypeNames.push_back("Subscriber");
    
    mSolverIterations = "None";
+   mSolverIterOption = SI_NONE;
 }
 
 
@@ -96,7 +100,9 @@ Subscriber::Subscriber(const Subscriber &copy) :
    GmatBase (copy),
    data (NULL),
    next (NULL),
-   internalCoordSystem (NULL),
+   theInternalCoordSystem (NULL),
+   theDataCoordSystem (NULL),
+   theSolarSystem (NULL),
    active (copy.active),
    isEndOfReceive(copy.isEndOfReceive),
    isEndOfRun(copy.isEndOfRun),
@@ -106,6 +112,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    paramWrappers(copy.paramWrappers)
 {
    mSolverIterations = copy.mSolverIterations;
+   mSolverIterOption = copy.mSolverIterOption;
 }
 
 
@@ -130,10 +137,12 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
    isEndOfRun = rhs.isEndOfRun;
    runstate = rhs.runstate;
    currentProvider = rhs.currentProvider;
-   internalCoordSystem = NULL;
+   theInternalCoordSystem = NULL;
+   theDataCoordSystem = NULL;
    wrapperObjectNames = rhs.wrapperObjectNames;
    paramWrappers = rhs.paramWrappers;
    mSolverIterations = rhs.mSolverIterations;
+   mSolverIterOption = rhs.mSolverIterOption;
    
    return *this;
 }
@@ -335,7 +344,42 @@ Integer Subscriber::GetProviderId()
 //------------------------------------------------------------------------------
 void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)
 {
-   internalCoordSystem = cs;
+   theInternalCoordSystem = cs;
+   if (theDataCoordSystem == NULL)
+      theDataCoordSystem = cs;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetDataCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void Subscriber::SetDataCoordSystem(CoordinateSystem *cs)
+{
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("Subscriber::SetDataCoordSystem()<%s> set to %s<%p>\n",
+       instanceName.c_str(), cs->GetName().c_str(), cs);
+   #endif
+   
+   theDataCoordSystem = cs;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetDataMJ2000EqOrigin(CelestialBody *cb)
+//------------------------------------------------------------------------------
+void Subscriber::SetDataMJ2000EqOrigin(CelestialBody *cb)
+{
+   theDataMJ2000EqOrigin = cb;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void Subscriber::SetSolarSystem(SolarSystem *ss)
+{
+   theSolarSystem = ss;
 }
 
 
@@ -672,11 +716,13 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
    case SOLVER_ITERATIONS:
       {
          bool itemFound = false;
+         int index = -1;
          for (int i=0; i<SolverIterOptionCount; i++)
          {
             if (value == SOLVER_ITER_OPTION_TEXT[i])
             {
                itemFound = true;
+               index = i;
                break;
             }
          }
@@ -684,6 +730,7 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
          if (itemFound)
          {
             mSolverIterations = value;
+            mSolverIterOption = (SolverIterOption)index;
             return true;
          }
          else
@@ -691,7 +738,7 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
             SubscriberException se;
             se.SetDetails(errorMessageFormat.c_str(), value.c_str(),
                           PARAMETER_TEXT[id - GmatBaseParamCount].c_str(),
-                          "All, Last, None");
+                          "All, Current, None");
             
             if (value == "On" || value == "Off")
             {
@@ -701,6 +748,7 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
                if (value == "On")
                {
                   mSolverIterations = "All";
+                  mSolverIterOption = SI_ALL;
                   MessageInterface::ShowMessage
                      ("The value \"On\" has automatically switched to \"All\" but "
                       "this will cause an error in a future build.\n\n");
@@ -708,6 +756,7 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
                else
                {
                   mSolverIterations = "None";
+                  mSolverIterOption = SI_NONE;
                   MessageInterface::ShowMessage
                      ("The value \"Off\" has automatically switched to \"None\" but "
                       "this will cause an error in a future build.\n\n");
@@ -829,9 +878,15 @@ bool Subscriber::SetOnOffParameter(const Integer id, const std::string &value)
       }
       
       if (value == "On")
+      {
          mSolverIterations = "All";
+         mSolverIterOption = SI_ALL;
+      }
       else
+      {
          mSolverIterations = "None";
+         mSolverIterOption = SI_NONE;
+      }
       
       return true;
       
