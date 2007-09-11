@@ -73,6 +73,7 @@ Optimize::Optimize() :
       MessageInterface::ShowMessage("NOW creating Optimize command ...");
    #endif
    parameterCount = OptimizeParamCount;
+   objectTypeNames.push_back("Optimize");
 }
 
 //------------------------------------------------------------------------------
@@ -448,7 +449,8 @@ bool Optimize::Execute()
    {
 */
       GmatCommand *currentCmd;
-   
+      publisher->SetRunState(Gmat::SOLVING);
+      
       switch (state) 
       {
          case Solver::INITIALIZING:
@@ -522,6 +524,7 @@ bool Optimize::Execute()
             {
                ResetLoopData();
                branchExecuting = true;
+               publisher->SetRunState(Gmat::SOLVEDPASS);
             }
             break;
           /*     

@@ -42,6 +42,7 @@ Target::Target() :
    targeterInDebugMode(false)
 {
    parameterCount += 2;
+   objectTypeNames.push_back("Target");
 }
 
 
@@ -578,6 +579,8 @@ bool Target::Execute()
    {
       GmatCommand *currentCmd;
    
+      publisher->SetRunState(Gmat::SOLVING);
+      
       switch (state) {
          case Solver::INITIALIZING:
             // Finalize initialization of the targeter data
@@ -618,14 +621,14 @@ bool Target::Execute()
                
          case Solver::FINISHED:
             // Final clean-up
-//            commandComplete = true;
             targeterConverged = true;
-
+            
             // Run once more to publish the data from the converged state
             if (!commandComplete)
             {
                ResetLoopData();
                branchExecuting = true;
+               publisher->SetRunState(Gmat::SOLVEDPASS);
             }
             break;
                
@@ -635,7 +638,7 @@ bool Target::Execute()
                "Invalid state in the Targeter state machine");
       }
    }
-
+   
    if (!branchExecuting)
    {
       targeter->AdvanceState();
