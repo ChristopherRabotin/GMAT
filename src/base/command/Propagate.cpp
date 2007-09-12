@@ -41,6 +41,7 @@
 //#define DEBUG_FIXED_STEP
 //#define DEBUG_EPOCH_SYNC
 //#define DEBUG_SECANT_DETAILS
+//#define DEBUG_BISECTION_DETAILS
 
 #define TIME_ROUNDOFF 1.0e-6
 #define DEFAULT_STOP_TOLERANCE 1.0e-7
@@ -2038,7 +2039,7 @@ bool Propagate::Initialize()
       // Check for finite thrusts and update the force model if there are any
       if (finiteBurnActive == true)
          AddTransientForce(satName[index], fm);
-      
+   
       streamID = publisher->RegisterPublishedData(owners, elements);
       // Set origin of MJ2000Eq data
       publisher->SetDataMJ2000EqOrigin(fm->GetBody());
@@ -3474,6 +3475,11 @@ Real Propagate::InterpolateToStop(StopCondition *sc)
 //------------------------------------------------------------------------------
 Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
 {
+   #ifdef DEBUG_SECANT_DETAILS
+      MessageInterface::ShowMessage("\nRefineFinalStep(%16.13lf) entered.\n", 
+            secsToStep);
+   #endif
+
    bool closeEnough = false;
    bool nextTimeThrough = false;
    Integer attempts = 0;
@@ -3554,7 +3560,12 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
       while (!closeEnough && (attempts < 50))
       {
          target = stopper->GetStopGoal();
-         
+         if (stopper->IsCyclicParameter())
+         {
+            y[0] = GetRangedAngle(y[0], target);
+            y[1] = GetRangedAngle(y[1], target);
+         }
+
          if (nextTimeThrough)
          {
             // Restore spacecraft and force models to end state of last step
@@ -3576,8 +3587,8 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                         "   Secant timestep: %16.12lf\n",
                         attempts, target, x[0], y[0], x[1], y[1], secsToStep);
                #endif
-               throw CommandException("Error refining timestep for Propagate "
-                  "command: infinite slope; Exiting\n");
+               throw CommandException("Error refining timestep for Propagate"
+                  " command: infinite slope; Exiting\n");
             }
             slope = (y[1] - y[0]) / (x[1] - x[0]);
             if (slope == 0.0) 
@@ -3612,6 +3623,7 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
             if (stopper->IsCyclicParameter())
                y[0] = GetRangedAngle(y[0], target);
          }
+
          #ifdef DEBUG_STOPPING_CONDITIONS
             MessageInterface::ShowMessage(
                   "Before step, param = %16.12lf, Stepping from %16.12lf by "
@@ -3679,10 +3691,25 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
    }
    
    if (attempts == 50)
-      MessageInterface::ShowMessage(
-         "WARNING: Failed to find a good stopping point for condition \"%s\" in"
-         " 50 attempts!\n", stopper->GetName().c_str());
-      
+   {
+      // Back out last step, then try bisection
+      BufferSatelliteStates(false);
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+      {
+         fm[i]->UpdateFromSpaceObject();
+         fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+      }
+
+      Real bisectSecsToStep = BisectToStop(stopper);
+      if (bisectSecsToStep != 0.0)
+         secsToStep = bisectSecsToStep;
+      else
+         MessageInterface::ShowMessage(
+               "WARNING: Failed to find a good stopping point for condition "
+               "\"%s\" in 50 attempts, and bisection failed as well!\n", 
+               stopper->GetName().c_str());
+   }
+   
    // Restore the spacecraft and force models to the end state of the last step
    BufferSatelliteStates(false);
    for (UnsignedInt i = 0; i < fm.size(); ++i) 
@@ -3695,13 +3722,11 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
 }
 
 //------------------------------------------------------------------------------
-// Real BisectToStop(Real secsToStep, StopCondition *stopper)
+// Real BisectToStop(StopCondition *stopper)
 //------------------------------------------------------------------------------
 /**
  * Bisection method used as a "last resort" to find stopping point.
  * 
- * @param <step1> Timestep that stops on one side of the stopping condition.
- * @param <step2> Timestep that stops on the other side.
  * @param <stopper> Stopping condition we're using.
  * 
  * @note BisectToStop method is not yet implemented
@@ -3709,68 +3734,114 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
 //------------------------------------------------------------------------------
 Real Propagate::BisectToStop(StopCondition *stopper)
 {
-   Integer attempts = 0;
+   Integer attempts = 0, attemptsMax = 52;  // 52 bits in ANSI double
    bool closeEnough = false;
    Real secsToStep = stepBrackets[1];
-//   Real startValue;
-//   Real goalValue;
-//   Real t_i = stepBrackets[0], dt = stepBrackets[1] - stepBrackets[0];
+   Real values[2], currentValue;
+   Real target;
+   Real dt = stepBrackets[1] - stepBrackets[0];
+   Real increasing = 1.0;
    
-   // First do a crude version
-   while ((attempts < 250) && !closeEnough)
+   Parameter *stopParam = stopper->GetStopParameter(),
+             *targParam = stopper->GetGoalParameter();
+   
+   currentValue = values[0] = values[1] = stopParam->EvaluateReal();
+
+   while ((attempts < attemptsMax) && !closeEnough)
    {
-//      BufferSatelliteStates(false);
-//      for (UnsignedInt i = 0; i < fm.size(); ++i) 
-//      {
-//         fm[i]->UpdateFromSpaceObject();
-//         fm[i]->SetTime(fm[i]->GetTime() - prevStep);
-//      }
-//      
-//      if (attempts == 0)
-//         
-//      if (!TakeAStep(secsToStep))
-//         throw CommandException("Unable to take a good step while searching "
-//            "for stopping step in command\n   \"" + GetGeneratingString() + 
-//            "\"\n");
-//   
-//      // Update spacecraft for that step
-//      for (UnsignedInt i = 0; i < fm.size(); ++i) 
-//      {
-//         fm[i]->UpdateSpaceObject(
-//            baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
-//      }
-//
-//      if (targParam != NULL)
-//         target = targParam->EvaluateReal();
-//      else
-//         target = stopper->GetStopGoal();
-//      
-//      x[1] = secsToStep;
-//      y[1] = stopParam->EvaluateReal();
-//
-//      #ifdef DEBUG_STOPPING_CONDITIONS   
-//         MessageInterface::ShowMessage(
-//            "[%d] Time based secant target: %16.12le\n"
-//            "     BaseEpoch: %16.9lf    fmTime: %16.9lf\n"
-//            "     Secant data points:\n"
-//            "        (%16.12le, %16.12le)\n"
-//            "        (%16.12le, %16.12le)\n"
-//            "     Secant timestep: %16.12lf\n",
-//            attempts, target, baseEpoch[0], fm[0]->GetTime(), x[0], y[0], 
-//            x[1], y[1], secsToStep);
-//      #endif
-//      
-//      if (fabs(target - y[1]) < timeAccuracy)
-//         closeEnough = true;
-//      else
-//      {
-//         prevStep = secsToStep;
-//         slope = (y[1] - y[0]) / (x[1] - x[0]);
-//         secsToStep = (target - y[0]) / slope;
-//      }
-//      
+      if (attempts > 0)
+      {
+         BufferSatelliteStates(false);
+         for (UnsignedInt i = 0; i < fm.size(); ++i) 
+         {
+            fm[i]->UpdateFromSpaceObject();
+            fm[i]->SetTime(fm[i]->GetTime() - secsToStep);
+         }
+        
+         dt *= 0.5;
+         
+         if (attempts == 1)
+         {
+            values[1] = currentValue;
+            secsToStep = stepBrackets[0] + dt; 
+            if (stopper->IsCyclicParameter())
+               values[0] = GetRangedAngle(values[0], target);
+
+            if (values[1] < values[0])
+               increasing = -1.0;
+         }
+         else
+         {
+            if (currentValue > target)
+            {
+               secsToStep -= increasing * dt;
+               if (increasing > 0.0)
+                  values[1] = currentValue;
+               else
+                  values[0] = currentValue;
+            }
+            else
+            {
+               secsToStep += increasing * dt;
+               if (increasing > 0.0)
+                  values[0] = currentValue;
+               else
+                  values[1] = currentValue;
+            }
+         }
+      }
+      
+      if (!TakeAStep(secsToStep))
+         throw CommandException("Unable to take a good step while searching "
+            "for stopping step in command\n   \"" + GetGeneratingString() + 
+            "\"\n");
+   
+      // Update spacecraft for that step
+      for (UnsignedInt i = 0; i < fm.size(); ++i) 
+      {
+         fm[i]->UpdateSpaceObject(
+            baseEpoch[i] + fm[i]->GetTime() / GmatTimeUtil::SECS_PER_DAY);
+      }
+
+      if (targParam != NULL)
+         target = targParam->EvaluateReal();
+      else
+         target = stopper->GetStopGoal();
+
+      currentValue = stopParam->EvaluateReal();
+      if (stopper->IsCyclicParameter())
+         currentValue = GetRangedAngle(currentValue, target);
+
+      #ifdef DEBUG_BISECTION_DETAILS
+         if (attempts == 0)
+         {
+            MessageInterface::ShowMessage(
+               "Bisection[%d]: Stop(%16.13lf) = %16.13lf\n\n"
+               "           Stop(%16.13lf) = %16.13lf\n"
+               "           Goal           = %16.13lf\n",
+               attempts, stepBrackets[0], values[0], secsToStep, currentValue, 
+               target);
+         }
+         else
+         {
+            MessageInterface::ShowMessage(
+               "Bisection[%d]: Stop(%16.13lf) = %16.13lf\n"
+               "           Stop(%16.13lf) = %16.13lf\n\n"
+               "           Stop(%16.13lf) = %16.13lf\n"
+               "           Goal           = %16.13lf\n",
+               attempts, stepBrackets[0], values[0], stepBrackets[1], values[1], 
+               secsToStep, currentValue, target);
+         }
+      #endif   
+
       ++attempts;
+      
+      if (fabs(target - currentValue) < stopAccuracy)
+            closeEnough = true;
    }
+   
+   if (attempts == attemptsMax)
+      secsToStep = 0.0;
    
    return secsToStep;
 }

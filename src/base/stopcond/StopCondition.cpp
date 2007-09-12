@@ -1756,7 +1756,7 @@ Real StopCondition::GetStopValue()
 //------------------------------------------------------------------------------
 Real StopCondition::GetStopDifference()
 {
-   Real goalValue;
+   Real goalValue, achievedValue;
    if (mGoalParam)
       goalValue = mGoalParam->EvaluateReal();
    else
@@ -1768,8 +1768,16 @@ Real StopCondition::GetStopDifference()
          (mGoalParam ? mGoalParam->GetName().c_str() : "Fixed goal"), goalValue,
          mStopParam->EvaluateReal());
    #endif
-    
-   return goalValue - mStopParam->EvaluateReal();
+      
+   achievedValue = mStopParam->EvaluateReal();
+   Real min, max, delta;
+   GetRange(min, max);
+   delta = (max - min) * 0.5;
+   if (IsCyclicParameter())
+      achievedValue = PutInRange(achievedValue, goalValue-delta, 
+            goalValue + delta);
+   
+   return goalValue - achievedValue;
 }
 
 
