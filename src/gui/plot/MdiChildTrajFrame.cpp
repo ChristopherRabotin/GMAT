@@ -23,7 +23,7 @@
 #include "ColorTypes.hpp"         // for namespace GmatColor::
 #include "MessageInterface.hpp"
 
-//#define DEBUG_MDI_TRAJ_FRAME 1
+//#define DEBUG_TRAJ_FRAME 1
 //#define DEBUG_MDI_CHILD_FRAME_CLOSE 1
 
 BEGIN_EVENT_TABLE(MdiChildTrajFrame, GmatMdiChildFrame)
@@ -250,7 +250,7 @@ Integer MdiChildTrajFrame::GetAnimationFrameIncrement()
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetPlotName(const wxString &name)
 {
-   #if DEBUG_MDI_TRAJ_FRAME
+   #if DEBUG_TRAJ_FRAME
       MessageInterface::ShowMessage
          ("MdiChildTrajFrame::SetPlotName() name=%s\n", name.c_str());
    #endif
@@ -266,7 +266,7 @@ void MdiChildTrajFrame::SetPlotName(const wxString &name)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::ResetShowViewOption()
 {
-   #if DEBUG_MDI_TRAJ_FRAME
+   #if DEBUG_TRAJ_FRAME
    MessageInterface::ShowMessage
       ("MdiChildTrajFrame::ResetShowViewOption()\n");
    #endif
@@ -327,6 +327,10 @@ void MdiChildTrajFrame::SetAnimationFrameIncrement(int value)
 {
    if (mCanvas)
       mCanvas->SetAnimationFrameIncrement(value);
+   
+   if (mOptionDialog)
+      mOptionDialog->SetAnimationFrameInc(value);
+   
 }
 
 
@@ -468,11 +472,23 @@ void MdiChildTrajFrame::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMa
 
 // actions
 //------------------------------------------------------------------------------
+// void DrawInOtherCoordSystem(const wxString &csName)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
+{
+   if (mCanvas)
+      mCanvas->DrawInOtherCoordSystem(csName);
+   
+   //mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
+}
+
+
+//------------------------------------------------------------------------------
 // void RedrawPlot(bool viewAnimation)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::RedrawPlot(bool viewAnimation)
 {
-   #ifdef DEBUG_MDI_TRAJ_FRAME
+   #ifdef DEBUG_TRAJ_FRAME
    MessageInterface::ShowMessage("MdiChildTrajFrame::RedrawPlot() entered.\n");
    #endif
    
@@ -524,34 +540,29 @@ void MdiChildTrajFrame::OnShowDefaultView(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
 {
-   //MessageInterface::ShowMessage
-   //   ("===> MdiChildTrajFrame::OnShowOptionDialog() entered\n");
+   #if DEBUG_TRAJ_FRAME
+   MessageInterface::ShowMessage
+      ("MdiChildTrajFrame::OnShowOptionDialog() entered\n");
+   #endif
    
-   if (event.IsChecked())
-   {
-      if (mOptionDialog == NULL)
-         mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
-                                                mBodyColors);
-
-      mOptionDialog->UpdateObjectList(mCanvas->GetObjectNames(),
-                                      mCanvas->GetValidCSNames(),
-                                      mCanvas->GetShowObjectMap(),
-                                      mCanvas->GetObjectColorMap());
-      
-      int x, y, newX;
-      GmatAppData::GetMainFrame()->GetPosition(&x, &y);
-      newX = x-20;
-      
-      if (newX < 0)
-         newX = 5;
-     
-      mOptionDialog->Move(newX, y+100);
-      mOptionDialog->Show(true); // modeless dialog
-   }
-   else
-   {
-      mOptionDialog->Hide(); // modeless dialog
-   }
+   if (mOptionDialog == NULL)
+      mOptionDialog = new OpenGlOptionDialog(this, mPlotName, mBodyNames,
+                                             mBodyColors);
+   
+   mOptionDialog->UpdateObjectList(mCanvas->GetObjectNames(),
+                                   mCanvas->GetValidCSNames(),
+                                   mCanvas->GetShowObjectMap(),
+                                   mCanvas->GetObjectColorMap());
+   
+   int x, y, newX;
+   GmatAppData::GetMainFrame()->GetPosition(&x, &y);
+   newX = x-20;
+   
+   if (newX < 0)
+      newX = 5;
+   
+   mOptionDialog->Move(newX, y+100);
+   mOptionDialog->Show(true); // modeless dialog
 }
 
 
@@ -732,7 +743,7 @@ void MdiChildTrajFrame::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecO
 {
    if (mCanvas)
    {
-      #if DEBUG_MDI_TRAJ_FRAME
+      #if DEBUG_TRAJ_FRAME
          MessageInterface::ShowMessage
             ("MdiChildTrajFrame::SetGlViewOption() vsFactor=%f\n", vsFactor);
       #endif

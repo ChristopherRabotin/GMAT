@@ -65,6 +65,8 @@ public:
    // setters
    void SetGLContext(wxGLContext *glContext = NULL)
       { mCanvas->SetGLContext(glContext); }
+   void SetUserInterrupt()
+      { mCanvas->SetUserInterrupt(); }
    
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
@@ -88,6 +90,7 @@ public:
    void SetNumPointsToRedraw(Integer numPoints);
    
    // actions
+   void DrawInOtherCoordSystem(const wxString &csName);
    void RedrawPlot(bool viewAnimation);
    
    // menu actions
