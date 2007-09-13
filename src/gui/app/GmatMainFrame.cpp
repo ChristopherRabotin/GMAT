@@ -99,7 +99,7 @@
 
 #include "bitmaps/new.xpm"
 #include "bitmaps/open.xpm"
-#include "bitmaps/save.xpm"
+#include "bitmaps/tool_save.xpm"
 #include "bitmaps/copy.xpm"
 #include "bitmaps/cut.xpm"
 #include "bitmaps/paste.xpm"
@@ -107,11 +107,17 @@
 #include "bitmaps/help.xpm"
 #include "bitmaps/play.xpm"
 #include "bitmaps/pause.xpm"
-#include "bitmaps/stop.xpm"
+#include "bitmaps/tool_stop.xpm"
 #include "bitmaps/close.xpm"
 #include "bitmaps/tabclose.xpm"
 #include "bitmaps/script.xpm"
 #include "bitmaps/build.xpm"
+
+#include "bitmaps/animation_play.xpm"
+#include "bitmaps/animation_stop.xpm"
+#include "bitmaps/animation_fast.xpm"
+#include "bitmaps/animation_slow.xpm"
+#include "bitmaps/animation_options.xpm"
 
 #define __USE_CHILD_BEST_SIZE__
 
@@ -186,6 +192,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    EVT_MENU(MENU_SCRIPT_BUILD_OBJECT, GmatMainFrame::OnScriptBuildObject)
    EVT_MENU(MENU_SCRIPT_BUILD_AND_RUN, GmatMainFrame::OnScriptBuildAndRun)
    EVT_MENU(MENU_SCRIPT_RUN, GmatMainFrame::OnScriptRun)
+   
+   EVT_MENU_RANGE(TOOL_ANIMATION_PLAY, TOOL_ANIMATION_OPTIONS, GmatMainFrame::OnAnimation)
 
 END_EVENT_TABLE()
 
@@ -220,7 +228,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    
    // set the script name
    mScriptFilename = "$gmattempscript$.script";
-   scriptCounter =0;
+   mScriptCounter = 0;
+   mAnimationFrameInc = 1;
    mInterpretFailed = false;
    mRunStatus = 0;
    
@@ -254,11 +263,12 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
    #endif
-
+   
    // Why not showing separator with wxNO_BORDER | wxTB_HORIZONTAL ?
    //CreateToolBar(wxNO_BORDER | wxTB_HORIZONTAL);
    CreateToolBar();
    InitToolBar(GetToolBar());
+   AddAnimationTools(GetToolBar());
    
    // used to store the list of open children
    theMdiChildren = new wxList();
@@ -267,52 +277,51 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    GetClientSize(&w, &h);
    
    // A window w/sash for messages
-   msgWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
+   theMessageWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
                            wxDefaultPosition, wxSize(30, 200),
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 #ifdef __WXMAC__
-   msgWin->SetDefaultSize(wxSize(w, (int) (0.25 * h)));
+   theMessageWin->SetDefaultSize(wxSize(w, (int) (0.25 * h)));
 #else
-   msgWin->SetDefaultSize(wxSize(w, 100));
+   theMessageWin->SetDefaultSize(wxSize(w, 100));
 #endif
-   msgWin->SetOrientation(wxLAYOUT_HORIZONTAL);
-   msgWin->SetAlignment(wxLAYOUT_BOTTOM);
-   msgWin->SetSashVisible(wxSASH_TOP, TRUE);
+   theMessageWin->SetOrientation(wxLAYOUT_HORIZONTAL);
+   theMessageWin->SetAlignment(wxLAYOUT_BOTTOM);
+   theMessageWin->SetSashVisible(wxSASH_TOP, TRUE);
 
    // create MessageWindow and save in GmatApp for later use
    wxTextCtrl *msgTextCtrl =
-      new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
-                               wxTE_MULTILINE);
+      new wxTextCtrl(theMessageWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
+                     wxTE_MULTILINE);
    msgTextCtrl->SetMaxLength(320000);
    GmatAppData::GetMessageWindow()->Show(false);
    GmatAppData::SetMessageTextCtrl(msgTextCtrl);
    
    // A window w/sash for gmat notebook
-   win = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
+   theMainWin = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
                            wxDefaultPosition, wxSize(200, 30),
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
 
 #ifdef __WXMAC__
-   //win->SetDefaultSize(wxSize(275, h));
-   win->SetDefaultSize(wxSize(w, h));
+   //theMainWinSetDefaultSize(wxSize(275, h));
+   theMainWin->SetDefaultSize(wxSize(w, h));
 #else
-   win->SetDefaultSize(wxSize(200, h));
+   theMainWin->SetDefaultSize(wxSize(200, h));
    // 200 is too narrow for most linux themes
    #ifdef __LINUX__
-      win->SetDefaultSize(wxSize(220, h));
+      theMainWin->SetDefaultSize(wxSize(220, h));
    #endif
 #endif
-   win->SetOrientation(wxLAYOUT_VERTICAL);
-   win->SetAlignment(wxLAYOUT_LEFT);
-   win->SetSashVisible(wxSASH_RIGHT, TRUE);
-
-   /*GmatNotebook *projectTree =*/ new GmatNotebook(win, -1, wxDefaultPosition,
-                                wxDefaultSize, wxCLIP_CHILDREN);          
-   //   new wxNotebookSizer(projectTree);
-  
+   theMainWin->SetOrientation(wxLAYOUT_VERTICAL);
+   theMainWin->SetAlignment(wxLAYOUT_LEFT);
+   theMainWin->SetSashVisible(wxSASH_RIGHT, TRUE);
+   
+   new GmatNotebook(theMainWin, -1, wxDefaultPosition,
+                    wxDefaultSize, wxCLIP_CHILDREN);
+   
    // set the main frame, because there will no longer be right notebook
    GmatAppData::SetMainFrame(this);
-
+   
    mServer = NULL;
    mRunPaused = false;
    mRunCompleted = true;
@@ -1651,11 +1660,13 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() entered\n");
    #endif
-   wxBitmap* bitmaps[15];
+
+   const int NUM_ICONS = 15;
+   wxBitmap* bitmaps[NUM_ICONS];
    
    bitmaps[0] = new wxBitmap(new_xpm);
    bitmaps[1] = new wxBitmap(open_xpm);
-   bitmaps[2] = new wxBitmap(save_xpm);
+   bitmaps[2] = new wxBitmap(tool_save_xpm);
    bitmaps[3] = new wxBitmap(copy_xpm);
    bitmaps[4] = new wxBitmap(cut_xpm);
    bitmaps[5] = new wxBitmap(paste_xpm);
@@ -1663,12 +1674,21 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    bitmaps[7] = new wxBitmap(help_xpm);
    bitmaps[8] = new wxBitmap(play_xpm);
    bitmaps[9] = new wxBitmap(pause_xpm);
-   bitmaps[10] = new wxBitmap(stop_xpm);
+   bitmaps[10] = new wxBitmap(tool_stop_xpm);
    bitmaps[11] = new wxBitmap(close_xpm);
    bitmaps[12] = new wxBitmap(tabclose_xpm);
    bitmaps[13] = new wxBitmap(script_xpm);
    bitmaps[14] = new wxBitmap(build_xpm);
    
+   toolBar->SetToolBitmapSize(wxSize(16,15));
+   
+   // recale to default size of 16x15
+   for (int i=0; i<NUM_ICONS; i++)
+   {
+      wxImage image = bitmaps[i]->ConvertToImage();
+      image = image.Rescale(16, 15);
+      *bitmaps[i] = wxBitmap(image);
+   }
    
    // add project tools
    toolBar->AddTool(MENU_FILE_NEW_SCRIPT, _T("New"), *bitmaps[0], _T("New Script"));
@@ -1717,12 +1737,70 @@ void GmatMainFrame::InitToolBar(wxToolBar* toolBar)
    toolBar->EnableTool(TOOL_PAUSE, FALSE);
    toolBar->EnableTool(TOOL_STOP, FALSE);
    
-   for (int i = 0; i < 15; i++)
+   for (int i = 0; i < NUM_ICONS; i++)
       delete bitmaps[i];
    
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::InitToolBar() exiting\n");
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void AddAnimationTools(wxToolBar* toolBar)
+//------------------------------------------------------------------------------
+/**
+ * Adds animation tool icons to tool bar.
+ *
+ * @param <toolBar> input tool bar.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::AddAnimationTools(wxToolBar* toolBar)
+{
+   #ifdef DEBUG_MAINFRAME
+   MessageInterface::ShowMessage("GmatMainFrame::AddAnimationTools() entered\n");
+   #endif
+      
+   
+   const int NUM_ICONS = 5;
+   wxBitmap* bitmaps[NUM_ICONS];
+   
+   bitmaps[0] = new wxBitmap(animation_play_xpm);
+   bitmaps[1] = new wxBitmap(animation_stop_xpm);
+   bitmaps[2] = new wxBitmap(animation_fast_xpm);
+   bitmaps[3] = new wxBitmap(animation_slow_xpm);
+   bitmaps[4] = new wxBitmap(animation_options_xpm);
+   
+   // recale to default size of 16x15
+   for (int i=0; i<NUM_ICONS; i++)
+   {
+      wxImage image = bitmaps[i]->ConvertToImage();
+      image = image.Rescale(16, 15);
+      *bitmaps[i] = wxBitmap(image);
+   }
+
+   toolBar->AddSeparator();
+   toolBar->AddSeparator();
+   
+   // How do I put spacing between tools
+   //toolBar->SetToolSeparation(50); // Why this doesn't set spacing?
+   //toolBar->SetToolPacking(10);    // What will this do?
+   //toolBar->SetMargins(50, 2);
+   //int currentX = 400;
+   //toolBar->AddTool(TOOL_ANIMATION_PLAY, *bitmaps[0], wxNullBitmap, false, currentX, -1,
+   //                 (wxObject*) NULL, "Start Animation");
+   
+   toolBar->AddTool(TOOL_ANIMATION_PLAY, _T("AnimationPlay"), *bitmaps[0], _T("Start Animation"), wxITEM_CHECK);
+   toolBar->AddTool(TOOL_ANIMATION_STOP, _T("AnimationStop"), *bitmaps[1], _T("Stop Animation"));
+   toolBar->AddTool(TOOL_ANIMATION_FAST, _T("AnimationFast"), *bitmaps[2], _T("Faster Animation"));
+   toolBar->AddTool(TOOL_ANIMATION_SLOW, _T("AnimationSlow"), *bitmaps[3], _T("Slower Animation"));
+   toolBar->AddTool(TOOL_ANIMATION_OPTIONS, _T("AnimationOptions"), *bitmaps[4], _T("Show Animation Options"));
+   
+   // now realize to make tools appear
+   toolBar->Realize();
+   
+   for (int i = 0; i < NUM_ICONS; i++)
+      delete bitmaps[i];
 }
 
 
@@ -2120,7 +2198,7 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
 {
 //   GmatAppData::GetResourceTree()->OnNewScript();
    wxString name;
-   name.Printf("Script%d.script", ++scriptCounter);
+   name.Printf("Script%d.script", ++mScriptCounter);
 
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild =
@@ -2685,7 +2763,7 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
         
-   win->SetDefaultSize(wxSize(event.GetDragRect().width, h));
+   theMainWin->SetDefaultSize(wxSize(event.GetDragRect().width, h));
 
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
@@ -2705,7 +2783,7 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
    
-   msgWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
+   theMessageWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
    
    
    wxLayoutAlgorithm layout;
@@ -2785,7 +2863,7 @@ void GmatMainFrame::UpdateMenus(bool openOn)
 
 
 //------------------------------------------------------------------------------
-// void EnableMenuAndToolBar(bool enable)
+// void EnableMenuAndToolBar(bool enable, bool missionRunning, bool forAnimation)
 //------------------------------------------------------------------------------
 /*
  * Enables menu items and tool bar icons. Usuallay menus and icons will be
@@ -2794,9 +2872,12 @@ void GmatMainFrame::UpdateMenus(bool openOn)
  * @param <enable> true to enable the menu and tool icons, false to disable them
  * @param <missionRunning> true if missin is running, this will toggle pause
  *                         and stop icons
+ * @param <forAnimation> true if icons are for animation, this will toggle animation
+ *                       play icon
  */
 //------------------------------------------------------------------------------
-void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
+void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
+                                         bool forAnimation)
 {
    wxToolBar *toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_RUN, enable);
@@ -2813,6 +2894,9 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
       toolBar->EnableTool(TOOL_PAUSE, false);
       toolBar->EnableTool(TOOL_STOP, false);
    }
+   
+   if (forAnimation)
+      toolBar->ToggleTool(TOOL_ANIMATION_PLAY, !enable);
    
    toolBar->EnableTool(TOOL_CLOSE_CHILDREN, enable);
    toolBar->EnableTool(TOOL_CLOSE_CURRENT, enable);
@@ -2838,10 +2922,10 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
          if (i != helpIndex)
             childMenuBar->EnableTop(i, enable);
       }
-      // wcs 2007.08.16 crashes the Mac app
-      #ifndef __WXMAC__
-      childMenuBar->Update();
-      #endif
+//       // wcs 2007.08.16 crashes the Mac app
+//       #ifndef __WXMAC__
+//       childMenuBar->Update();
+//       #endif
    }
    
    
@@ -2849,7 +2933,7 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
    // Enable parent mdi menu bar second
    //-----------------------------------
    int parentMenuCount = theMenuBar->GetMenuCount();
-      int helpIndex = theMenuBar->FindMenu("Help");
+   int helpIndex = theMenuBar->FindMenu("Help");
    
    for (int i=0; i<parentMenuCount; i++)
    {
@@ -2858,10 +2942,10 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning)
          theMenuBar->EnableTop(i, enable);
    }
    
-   // wcs 2007.08.16 crashes the Mac app
-   #ifndef __WXMAC__
-   theMenuBar->Update();
-   #endif
+//    // wcs 2007.08.16 crashes the Mac app
+//    #ifndef __WXMAC__
+//    theMenuBar->Update();
+//    #endif
    
 }
 
@@ -3088,4 +3172,86 @@ void GmatMainFrame::UpdateTitle(const wxString &filename)
    
    SetTitle(title);
 }
+
+
+//------------------------------------------------------------------------------
+// void OnAnimation(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnAnimation(wxCommandEvent& event)
+{
+   GmatMdiChildFrame* child = (GmatMdiChildFrame *)GetActiveChild();
+   wxToolBar *toolBar = GetToolBar();
+   
+   if (child == NULL)
+   {
+      toolBar->ToggleTool(TOOL_ANIMATION_PLAY, false);
+      return;
+   }
+   
+   // active child is not OpenGL, just return
+   if (child->GetItemType() != GmatTree::OUTPUT_OPENGL_PLOT)
+   {
+      toolBar->ToggleTool(TOOL_ANIMATION_PLAY, false);
+      return;
+   }
+   
+   wxString title = child->GetTitle();
+   MdiChildTrajFrame *frame = NULL;
+   bool frameFound = false;
+   
+   #if DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnAnimation() title=%s\n", title.c_str());
+   #endif
+   
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      if (frame && (frame->GetPlotName().IsSameAs(title)))
+      {
+         frameFound = true;
+         break;
+      }
+   }
+   
+   if (!frameFound)
+      return;
+   
+   #if DEBUG_ANIMATION
+   MessageInterface::ShowMessage
+      ("===> Now start animation of %s\n", frame->GetPlotName().c_str());
+   #endif
+   
+   switch (event.GetId())
+   {
+   case TOOL_ANIMATION_PLAY:
+      frame->SetAnimationUpdateInterval(1);
+      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      frame->RedrawPlot(true);
+      break;
+   case TOOL_ANIMATION_STOP:
+      frame->SetUserInterrupt();
+      break;
+   case TOOL_ANIMATION_FAST:
+      mAnimationFrameInc += 5;
+      if (mAnimationFrameInc > 50)
+         frame->SetAnimationUpdateInterval(0);
+      else
+         frame->SetAnimationUpdateInterval(1);
+      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      break;
+   case TOOL_ANIMATION_SLOW:
+      mAnimationFrameInc -= 5;
+      if (mAnimationFrameInc < 0)
+         mAnimationFrameInc = 1;
+      frame->SetAnimationFrameIncrement(mAnimationFrameInc);
+      break;
+   case TOOL_ANIMATION_OPTIONS:
+      frame->OnShowOptionDialog(event);
+      break;
+   default:
+      break;
+   }
+}
+
 

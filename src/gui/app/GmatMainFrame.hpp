@@ -89,7 +89,8 @@ public:
    //void OnZoomOut(wxCommandEvent& event);
    
    void UpdateMenus(bool openOn);
-   void EnableMenuAndToolBar(bool enable, bool missionRunning = false);
+   void EnableMenuAndToolBar(bool enable, bool missionRunning = false,
+                             bool forAnimation = false);
    
    void OnScriptBuildObject(wxCommandEvent& WXUNUSED(event));
    void OnScriptBuildAndRun(wxCommandEvent& event);
@@ -106,7 +107,8 @@ public:
 protected:
 
 private:
-   int scriptCounter;
+   int  mScriptCounter;
+   int  mAnimationFrameInc;
    bool mRunPaused;
    bool mRunCompleted;
    bool mInterpretFailed;
@@ -116,10 +118,9 @@ private:
    std::string mScriptFilename;
    GuiInterpreter *theGuiInterpreter;
    
-   wxSashLayoutWindow* win;
-   wxSashLayoutWindow* msgWin;
-   wxScrolledWindow *mScrolledWin;
-
+   wxSashLayoutWindow* theMainWin;
+   wxSashLayoutWindow* theMessageWin;
+   
    ViewTextFrame *mTextFrame;
    wxMenu *mServerMenu;
    wxStatusBar *theStatusBar;
@@ -139,6 +140,7 @@ private:
                                       GmatTree::ItemType itemType);
    
    void InitToolBar(wxToolBar* toolBar);
+   void AddAnimationTools(wxToolBar* toolBar);
    bool SaveScriptAs();
    void OpenScript();
    void UpdateTitle(const wxString &filename = "");
@@ -183,6 +185,9 @@ private:
    void OnMainFrameSize(wxSizeEvent &event);
    void OnSetFocus(wxFocusEvent &event);
    void OnKeyDown(wxKeyEvent &event);
+   
+   void OnAnimation(wxCommandEvent& event);
+   
 };
 
 namespace GmatMenu
@@ -236,6 +241,12 @@ namespace GmatMenu
       TOOL_CLOSE_CURRENT,
       TOOL_SCRIPT,
 
+      TOOL_ANIMATION_PLAY,
+      TOOL_ANIMATION_STOP,
+      TOOL_ANIMATION_FAST,
+      TOOL_ANIMATION_SLOW,
+      TOOL_ANIMATION_OPTIONS,
+      
       MENU_MATLAB_OPEN,
       MENU_MATLAB_CLOSE,
       MENU_START_SERVER,
