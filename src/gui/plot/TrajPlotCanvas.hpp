@@ -195,7 +195,7 @@ private:
    
    // Camera translations
    GLfloat mfCamTransX, mfCamTransY, mfCamTransZ;
-
+   
    // DJC added for "Up"   
    GLfloat mfUpAngle, mfUpXAxis, mfUpYAxis, mfUpZAxis;
    
@@ -338,11 +338,9 @@ private:
    
    // run data
    Real *mObjectGciPos;            // [mObjectCount][MAX_DATA][3];
-   Real *mObjectGciVel;            // [mObjectCount][MAX_DATA][3];   
-   Real *mObjectIniPos;            // [mObjectCount][MAX_DATA][3];
-   Real *mObjectIniVel;            // [mObjectCount][MAX_DATA][3];
-   Real *mObjectTmpPos;            // [mObjectCount][MAX_DATA][3];
-   Real *mObjectTmpVel;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectGciVel;            // [mObjectCount][MAX_DATA][3];
+   Real *mObjectViewPos;           // [mObjectCount][MAX_DATA][3];
+   Real *mObjectViewVel;           // [mObjectCount][MAX_DATA][3];
    
    // solver data
    bool mDrawSolverData;
