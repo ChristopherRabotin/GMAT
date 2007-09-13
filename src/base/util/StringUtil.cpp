@@ -1809,6 +1809,55 @@ bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
 
 }
 
+//------------------------------------------------------------------------------
+// bool HasNoBrackets(const std::string &str, 
+//                    bool parensForArraysAllowed = true)
+//------------------------------------------------------------------------------
+/*
+ * return true if string does not contain any brackets, braces, or parentheses, 
+ * or only contains parentheses as part of an arrray element, if
+ * parensForArraysAllowed is true.
+ *
+ * return false if there are brackets, braces, or parentheses, unless 
+ * existing parentheses are allowed for array elements.
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::HasNoBrackets(const std::string &str, 
+                                   bool parensForArraysAllowed)
+{
+   std::string str1 = str;
+   std::string str2 = str;
+   if ((str1.find('(') != str1.npos) || (str1.find(')') != str1.npos))
+   {
+      if (parensForArraysAllowed)
+      {
+         Integer open = 0, close = 0;
+         bool    isOuter, done = false;
+         while (!done)
+         {
+            GmatStringUtil::FindMatchingParen(str1, open, close, isOuter);
+            if (((open == -1) && (close != -1)) ||
+                ((open != -1) && (close == -1)) )
+                return false;
+            else if ((open == -1) && (close == -1))
+               done = true;
+            else
+            {
+               str2 = str1.substr(open, close-open + 1);
+               if (!IsParenPartOfArray(str2))  return false;
+               str1 = str1.substr(close+1);
+            }
+         }
+      }
+      else
+         return false;
+   }  
+   if ((str.find('[') != str.npos) || (str.find(']') != str.npos)) return false;  
+   if ((str.find('{') != str.npos) || (str.find('}') != str.npos)) return false;
+   
+   return true;
+}
+
 
 //------------------------------------------------------------------------------
 // bool IsSingleItem(const std::string &str)
