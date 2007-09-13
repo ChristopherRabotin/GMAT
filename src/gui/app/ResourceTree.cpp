@@ -54,6 +54,7 @@
 #include "CoordSysCreateDialog.hpp"
 #include "GmatMainFrame.hpp"
 #include "RunScriptFolderDialog.hpp"
+#include "ViewTextDialog.hpp"
 #include "FileManager.hpp"            // for GetPathname()
 #include "FileUtil.hpp"               // for Compare()
 #include "GmatGlobal.hpp"             // for SetBatchMode()
@@ -2679,7 +2680,15 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    }
    
    if (msg1 != "" || msg2 != "" || msg3 != "")
-      MessageInterface::PopupMessage(Gmat::ERROR_, msg1 + msg2 + msg3);
+   {
+      //MessageInterface::PopupMessage(Gmat::ERROR_, msg1 + msg2 + msg3);
+      ViewTextDialog *dlg =
+         new ViewTextDialog(this, _T("Information"), 550, 300);
+      wxTextCtrl *text = dlg->GetTextCtrl();
+      wxString msg = msg1 + msg2 + msg3;
+      text->AppendText(msg);
+      dlg->ShowModal();
+   }
    
 }
 
