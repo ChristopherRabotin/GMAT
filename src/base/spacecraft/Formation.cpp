@@ -1014,7 +1014,7 @@ bool Formation::TakeAction(const std::string &action,
 
 void Formation::ClearLastStopTriggered()
 {
-   lastStopTriggered = "";
+   lastStopTriggered.clear();
    // Clear it on all members
    for (std::vector <SpaceObject *>::iterator i = components.begin(); 
         i != components.end(); ++i)

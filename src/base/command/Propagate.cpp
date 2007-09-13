@@ -2042,6 +2042,7 @@ bool Propagate::Initialize()
    
       streamID = publisher->RegisterPublishedData(owners, elements);
       // Set origin of MJ2000Eq data
+      /// @todo Investigate how to publish the origin data
       publisher->SetDataMJ2000EqOrigin(fm->GetBody());
       
       p->SetPhysicalModel(fm);
@@ -3342,13 +3343,13 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
         it != sats.end(); ++it)
       (*it)->ClearLastStopTriggered();      
 
-        if (stopper != NULL)
-        {
+   if (stopper != NULL)
+   {
       // Save the stop condition and reset for next pass
       Integer stopperIndex = 0;
       for (std::vector<StopCondition*>::iterator i = stopWhen.begin(); i != stopWhen.end(); ++i)
       {
-         if (*i == stopper)
+         if ((*i == stopper) || (fabs((*i)->GetStopDifference()) <= accuracy))
          {
             #ifdef DEBUG_FIRST_STEP_STOP
                MessageInterface::ShowMessage(
@@ -3357,12 +3358,12 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
                   stopSats[stopperIndex]->GetName().c_str());
             #endif
             
-            stopSats[stopperIndex]->SetLastStopTriggered(stopper->GetName());
+            stopSats[stopperIndex]->SetLastStopTriggered((*i)->GetName());
          }
          ++stopperIndex;
       }
       triggers.clear();
-        }
+   }
 
    for (std::vector<StopCondition *>::iterator i = stopWhen.begin(); 
         i != stopWhen.end(); ++i)
@@ -3738,7 +3739,7 @@ Real Propagate::BisectToStop(StopCondition *stopper)
    bool closeEnough = false;
    Real secsToStep = stepBrackets[1];
    Real values[2], currentValue;
-   Real target;
+   Real target = 0.0;       // Bogus initialization to clear a warning
    Real dt = stepBrackets[1] - stepBrackets[0];
    Real increasing = 1.0;
    

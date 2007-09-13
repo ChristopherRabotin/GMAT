@@ -78,8 +78,8 @@ protected:
    SpacePoint        *origin;
    /// Flag indicating if the force model parms have changed
    bool              parmsChanged;
-   /// The name of the last stoppiung condition that was triggered
-   std::string       lastStopTriggered;
+   /// The names of the last set of stopping conditions met
+   StringArray       lastStopTriggered;
 
    /// Enumerated parameter IDs   
    enum

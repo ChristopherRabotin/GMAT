@@ -65,8 +65,7 @@ SpaceObject::SpaceObject(Gmat::ObjectType typeId, const std::string &typeStr,
    isManeuvering     (false),
    originName        ("Earth"),
    origin            (NULL),
-   parmsChanged      (true),
-   lastStopTriggered ("")
+   parmsChanged      (true)
 {
    objectTypes.push_back(Gmat::SPACEOBJECT);
    objectTypeNames.push_back("SpaceObject");
@@ -129,7 +128,7 @@ SpaceObject& SpaceObject::operator=(const SpaceObject& so)
    originName    = so.originName;
    origin        = so.origin;
    parmsChanged  = true;       // Always update after using assignment
-
+   lastStopTriggered = so.lastStopTriggered;
    return *this;
 }
 
@@ -547,12 +546,12 @@ Real SpaceObject::SetRealParameter(const std::string &label, const Real value)
 // void ClearLastStopTriggered()
 //------------------------------------------------------------------------------
 /*
- * Clears the name of the last stoppign condition that triggered a stop
+ * Clears the names of the last stopping conditions that triggered a stop.
  */
 //------------------------------------------------------------------------------
 void SpaceObject::ClearLastStopTriggered()
 {
-   lastStopTriggered = "";
+   lastStopTriggered.clear();
 
    #ifdef DEBUG_STOPCONDITION_TRACKING
       MessageInterface::ShowMessage("Cleared stop identifier from \"%s\"\n", 
@@ -565,18 +564,18 @@ void SpaceObject::ClearLastStopTriggered()
 // void SetLastStopTriggered(const std::string &stopCondName)
 //------------------------------------------------------------------------------
 /*
- * Sets the name of the last stopping condition that triggered a stop.
+ * Adds name of a triggered stopping condition to the list of stops triggered.
  *
  * @param  stopCondName  The name of the triggering stopping condition.
  */
 //------------------------------------------------------------------------------
 void SpaceObject::SetLastStopTriggered(const std::string &stopCondName)
 {
-   lastStopTriggered = stopCondName;
+   lastStopTriggered.push_back(stopCondName);
    
    #ifdef DEBUG_STOPCONDITION_TRACKING
       MessageInterface::ShowMessage("Set stop identifier on \"%s\" to \"%s\"\n", 
-         instanceName.c_str(), lastStopTriggered.c_str());
+         instanceName.c_str(), stopCondName.c_str());
    #endif
 }
 
@@ -597,11 +596,13 @@ bool SpaceObject::WasLastStopTriggered(const std::string &stopCondName)
 {
    #ifdef DEBUG_STOPCONDITION_TRACKING
       MessageInterface::ShowMessage(
-         "Checking to see if triggered stop \"%s\" on \"%s\" matches \"%s\"\n", 
-         lastStopTriggered.c_str(), instanceName.c_str(), stopCondName.c_str());
+         "Checking to see if triggered stop \"%s\" on \"%s\" is in the last "
+         "stop triggered list\n", lastStopTriggered.c_str(), 
+         instanceName.c_str());
    #endif
 
-   if (lastStopTriggered == stopCondName)
+   if (find(lastStopTriggered.begin(), lastStopTriggered.end(), stopCondName) != 
+         lastStopTriggered.end())
       return true;
    return false;
 }
