@@ -16,13 +16,16 @@
 #include "OpenGlOptionDialog.hpp"
 #include "MdiChildTrajFrame.hpp"
 #include "CelesBodySelectDialog.hpp"
-
+#include "GmatStaticBoxSizer.hpp"
 #include "ColorTypes.hpp"           // for GmatColor::
 #include "RgbColor.hpp"
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 
 #include "wx/colordlg.h"            // for wxColourDialog
+
+// If we want to see plot in different coordiante system from the list
+//#define __SHOW_COORD_SYSTEM__
 
 //#define DEBUG_GLOPTION_CREATE 1
 //#define DEBUG_GLOPTION_LOAD 1
@@ -80,7 +83,6 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    mHasDrawWireFrameChanged = false;
    mHasDrawXyPlaneChanged = false;
    mHasDrawAxesChanged = false;
-   mHasDrawEcPlaneChanged = false;
    mHasDrawSunLineChanged = false;
    
    mHasXyPlaneColorChanged = false;
@@ -90,7 +92,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
    
    mHasShowObjectChanged = false;
    mHasShowOrbitNormalChanged = false;
-
+   
    mObjectCount = objectNames.GetCount();
    
    mObjectColorMap.clear();
@@ -113,6 +115,7 @@ OpenGlOptionDialog::OpenGlOptionDialog(wxWindow *parent, const wxString &title,
       #endif
    }
    
+   mCoordSysName = "";
    mXyPlaneColor = wxColor("GREY");
    mEcPlaneColor = wxColor("DARK SLATE BLUE");
    mSunLineColor = wxColor("BROWN");
@@ -163,6 +166,33 @@ void OpenGlOptionDialog::SetDrawAxes(bool flag)
 void OpenGlOptionDialog::SetDrawSunLine(bool flag)
 {
    mSunLineCheckBox->SetValue(flag);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetCoordSysName(const wxString &csName)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::SetCoordSysName(const wxString &csName)
+{
+   mCoordSysComboBox->SetStringSelection(csName);
+   mCoordSysName = csName;
+   
+   // We don't want to enable this
+   theApplyButton->Disable();
+}
+
+
+//------------------------------------------------------------------------------
+// void SetAnimationFrameInc(int inc)
+//------------------------------------------------------------------------------
+void OpenGlOptionDialog::SetAnimationFrameInc(int inc)
+{
+   wxString str;
+   str.Printf("%d", inc);
+   mFrameIncTextCtrl->SetValue(str);
+   
+   // We don't want to enable this
+   //theApplyButton->Disable();
 }
 
 
@@ -267,19 +297,45 @@ void OpenGlOptionDialog::Create()
    animationBoxSizer->Add(updateSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
    animationBoxSizer->Add(mViewAnimationButton, 0, wxALIGN_CENTER|wxALL, borderSize);
    
-   wxStaticBox *animationStaticBox =
-      new wxStaticBox(this, -1, wxT("View Animation"));
+   GmatStaticBoxSizer *animationStaticSizer
+      = new GmatStaticBoxSizer(wxVERTICAL, this, "View Animation");
    
-   wxStaticBoxSizer *animationSizer
-      = new wxStaticBoxSizer(animationStaticBox, wxVERTICAL);
-   
-   animationSizer->Add(animationBoxSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
+   animationStaticSizer->Add(animationBoxSizer, 0, wxALIGN_CENTER|wxGROW|wxALL, borderSize);
    
    #if DEBUG_GLOPTION_CREATE
    MessageInterface::ShowMessage
       ("OpenGlOptionDialog::Create() animationSizer created.\n");
    #endif
-      
+
+   
+   #ifdef __SHOW_COORD_SYSTEM__
+   //-----------------------------------------------------------------
+   // view in other coordinate system
+   //-----------------------------------------------------------------
+   mCoordSysComboBox =
+      theGuiManager->GetCoordSysComboBox(this, ID_COMBOBOX, wxSize(120, -1));
+   mCoordSysGoButton =
+      new wxButton(this, ID_BUTTON, "Go", wxDefaultPosition, wxSize(25, -1), 0);
+   
+   //wxFlexGridSizer *coordSysSizer = new wxFlexGridSizer(3, 0, 0);
+   //coordSysSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
+   //coordSysSizer->Add(10, 10);
+   //coordSysSizer->Add(mCoordSysGoButton, 0, wxALIGN_RIGHT|wxALL, borderSize);
+   
+   GmatStaticBoxSizer *coordSysStaticSizer
+      = new GmatStaticBoxSizer(wxHORIZONTAL, this, "Coordinate System");
+   
+   //coordSysStaticSizer->Add(coordSysSizer, 0, wxALIGN_LEFT|wxALL, borderSize);
+   coordSysStaticSizer->Add(mCoordSysComboBox, 0, wxALIGN_LEFT|wxALL, borderSize);
+   coordSysStaticSizer->Add(20, 10);
+   coordSysStaticSizer->Add(mCoordSysGoButton, 0, wxALIGN_LEFT|wxALL, borderSize);
+   
+   #if DEBUG_GLOPTION_CREATE
+   MessageInterface::ShowMessage
+      ("OpenGlOptionDialog::Create() coordSysSizer created.\n");
+   #endif
+   #endif
+   
    //-----------------------------------------------------------------
    // drawing option
    //-----------------------------------------------------------------
@@ -294,7 +350,7 @@ void OpenGlOptionDialog::Create()
    mAxesCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Axes"),
                      wxDefaultPosition, wxSize(150, -1), 0);
-
+   
    mSunLineCheckBox =
       new wxCheckBox(this, ID_CHECKBOX, wxT("Draw Sun Lines"),
                      wxDefaultPosition, wxSize(150, -1), 0);
@@ -310,12 +366,6 @@ void OpenGlOptionDialog::Create()
       new wxButton(this, ID_SUNLINE_COLOR_BUTTON, "", wxDefaultPosition,
                    wxSize(20, 15), 0);
    mSunLineColorButton->SetBackgroundColour(mSunLineColor);
-   
-   wxStaticBox *drawingOptionStaticBox =
-      new wxStaticBox(this, -1, wxT("Drawing Options"));
-   
-   wxStaticBoxSizer *drawingOptionSizer
-      = new wxStaticBoxSizer(drawingOptionStaticBox, wxVERTICAL);
    
    borderSize = 2;
    wxFlexGridSizer *drawGridSizer = new wxFlexGridSizer(2, 0, 0);
@@ -333,7 +383,10 @@ void OpenGlOptionDialog::Create()
       ("OpenGlOptionDialog::Create() drawGridSizer created.\n");
    #endif
    
-   drawingOptionSizer->Add(drawGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
+   GmatStaticBoxSizer *drawingOptionStaticSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Drawing Options");
+   
+   drawingOptionStaticSizer->Add(drawGridSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
    //-----------------------------------------------------------------
    // view bodies options
@@ -341,7 +394,7 @@ void OpenGlOptionDialog::Create()
 
    //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
-
+   
    mObjectListBox =
       new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(75,60), //0,
                     emptyList, wxLB_SINGLE);
@@ -372,25 +425,29 @@ void OpenGlOptionDialog::Create()
    objectSizer->Add(mObjectListBox, 0, wxALIGN_CENTRE|wxALL, borderSize);
    objectSizer->Add(colorSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
-   wxStaticBox *viewObjectStaticBox =
-      new wxStaticBox(this, -1, wxT("View Object"));
-
    //-----------------------------------------------------------------
    // create object sizers
    //-----------------------------------------------------------------
+   wxStaticBox *viewObjectStaticBox =
+      new wxStaticBox(this, -1, wxT("View Object"));
+   
    mViewObjectSizer = new wxStaticBoxSizer(viewObjectStaticBox, wxVERTICAL);
-
    mViewObjectSizer->Add(objectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);   
    
    //-----------------------------------------------------------------
    // create page sizers
    //-----------------------------------------------------------------
    wxBoxSizer *topViewSizer = new wxBoxSizer(wxVERTICAL);
-   topViewSizer->Add(animationSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   topViewSizer->Add(drawingOptionSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
+   topViewSizer->Add(animationStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, borderSize);
+   
+   #ifdef __SHOW_COORD_SYSTEM__
+   topViewSizer->Add(coordSysStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, borderSize);
+   #endif
+   
+   topViewSizer->Add(drawingOptionStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, borderSize);
+   
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(1, 0, 0);
-
+   
    pageSizer->Add(topViewSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    pageSizer->Add(mViewObjectSizer, 0, wxALIGN_CENTRE|wxALL, borderSize);
    
@@ -698,6 +755,15 @@ void OpenGlOptionDialog::OnCheckBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void OpenGlOptionDialog::OnComboBoxChange(wxCommandEvent& event)
 {
+   if (event.GetEventObject() == mCoordSysComboBox)
+   {
+      if (!mCoordSysName.IsSameAs(mCoordSysComboBox->GetStringSelection()))
+      {
+         mHasCoordSysChanged = true;         
+         mCoordSysName = mCoordSysComboBox->GetStringSelection();
+         theApplyButton->Enable();
+      }
+   }
 }
 
 
@@ -798,6 +864,15 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
          mTrajFrame->SetAnimationUpdateInterval(mAnimationUpdInt);
          mTrajFrame->SetAnimationFrameIncrement(mAnimationFrameInc);
          mTrajFrame->RedrawPlot(true);
+      }
+   }
+   else if (event.GetEventObject() == mCoordSysGoButton)
+   {
+      if (mCoordSysName != "")
+      {
+         //MessageInterface::ShowMessage("===> mCoordSysName=%s\n", mCoordSysName.c_str());
+         mHasCoordSysChanged = false;
+         mTrajFrame->DrawInOtherCoordSystem(mCoordSysName);
       }
    }
 }

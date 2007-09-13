@@ -54,6 +54,8 @@ public:
    void SetDrawWireFrame(bool flag);
    void SetDrawAxes(bool flag);
    void SetDrawSunLine(bool flag);
+   void SetCoordSysName(const wxString &csName);
+   void SetAnimationFrameInc(int inc);
    
    void UpdateObjectList(const wxArrayString &objectNames,
                          const wxArrayString &validCSNames,
@@ -76,7 +78,6 @@ protected:
    bool mHasDrawWireFrameChanged;
    bool mHasDrawAxesChanged;
    bool mHasDrawXyPlaneChanged;
-   bool mHasDrawEcPlaneChanged;
    bool mHasDrawSunLineChanged;
    
    bool mHasXyPlaneColorChanged;
@@ -96,6 +97,8 @@ protected:
    int mObjectCount;
    int mValidCSCount;
    
+   wxString mCoordSysName;
+   
    wxStringColorMap mObjectColorMap;
    wxStringBoolMap  mInitialShowObjectMap;
    wxStringBoolMap  mShowObjectMap;
@@ -104,23 +107,23 @@ protected:
    wxTextCtrl *mUpdateIntTextCtrl;
    wxTextCtrl *mFrameIncTextCtrl;
    
+   wxComboBox *mCoordSysComboBox;
+   
    wxListBox *mObjectListBox;
    
-   wxCheckBox *mUseInitialViewDefCheckBox;
-   
+   wxCheckBox *mUseInitialViewDefCheckBox;   
    wxCheckBox *mWireFrameCheckBox;
    wxCheckBox *mXyPlaneCheckBox;
    wxCheckBox *mAxesCheckBox;
-   wxCheckBox *mSunLineCheckBox;
-   
+   wxCheckBox *mSunLineCheckBox;   
    wxCheckBox *mShowObjectCheckBox;
    wxCheckBox *mShowOrbitNormalCheckBox;
 
    wxButton *mViewAnimationButton;
    wxButton *mXyPlaneColorButton;
-   wxButton *mSunLineColorButton;
-   
+   wxButton *mSunLineColorButton;   
    wxButton *mObjectColorButton;
+   wxButton *mCoordSysGoButton;
    wxButton *theApplyButton;
    
    wxColor mXyPlaneColor;
