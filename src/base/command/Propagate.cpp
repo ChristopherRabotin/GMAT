@@ -3588,8 +3588,24 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                         "   Secant timestep: %16.12lf\n",
                         attempts, target, x[0], y[0], x[1], y[1], secsToStep);
                #endif
-               throw CommandException("Error refining timestep for Propagate"
-                  " command: infinite slope; Exiting\n");
+               Real bisectStep = 0.0;
+               try
+               {
+                  bisectStep = BisectToStop(stopper);
+               }
+               catch (BaseException &ex)
+               {
+                  MessageInterface::ShowMessage(
+                        "Error found (%s) while bisecting after a zero slope "
+                        "secant was detected.\n", ex.GetFullMessage().c_str());
+                  throw;
+               }
+               if (bisectStep == 0.0)
+                  throw CommandException("Error refining timestep for Propagate"
+                     " command: infinite slope in secant and bisection failed"
+                     " to stop on \"" + stopper->GetName() + "\"; Exiting\n");
+               secsToStep = bisectStep;
+               break;
             }
             slope = (y[1] - y[0]) / (x[1] - x[0]);
             if (slope == 0.0) 
@@ -3603,9 +3619,27 @@ Real Propagate::RefineFinalStep(Real secsToStep, StopCondition *stopper)
                         "      (%16.12le, %16.12le)\n"
                         "   Secant timestep: %16.12lf\n",
                         attempts, target, x[0], y[0], x[1], y[1], secsToStep);
-               #endif   
-               throw CommandException("Error refining timestep for Propagate "
-                  "command: zero slope; Exiting\n");
+               #endif
+               
+               Real bisectStep = 0.0;
+               try
+               {
+                  bisectStep = BisectToStop(stopper);
+               }
+               catch (BaseException &ex)
+               {
+                  MessageInterface::ShowMessage(
+                        "Error found (%s) while bisecting after a zero slope "
+                        "secant was detected.\n", ex.GetFullMessage().c_str());
+                  throw;
+               }
+               if (bisectStep == 0.0)
+                  throw CommandException("Error refining timestep for Propagate"
+                     " command: zero slope in secant and bisection failed to"
+                     " stop on \"" +
+                     stopper->GetName() + "\"; Exiting\n");
+               secsToStep = bisectStep;
+               break;
             }
             secsToStep = x[1] + (target - y[1]) / slope;
 

@@ -117,7 +117,7 @@ bool PenUp::InterpretAction()
    plotName = generatingString.substr(loc, end-loc);
    
    #ifdef DEBUG_PENUP
-      MessageInterface::ShowMessage("Plot to be cleared: %s\n", plotName.c_str());
+      MessageInterface::ShowMessage("Plot to be PenUped: %s\n", plotName.c_str());
    #endif
 
    return true;
