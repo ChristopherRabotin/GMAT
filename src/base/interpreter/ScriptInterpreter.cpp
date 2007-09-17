@@ -703,11 +703,12 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       
       if (count < 2)
       {
-         if ((logicalBlock.find("End")           != logicalBlock.npos  &&
-              logicalBlock.find("EndFiniteBurn") == logicalBlock.npos) ||
-             (logicalBlock.find("BeginScript")   != logicalBlock.npos) ||
-             (logicalBlock.find("Else")          != logicalBlock.npos) ||
-             (logicalBlock.find("Stop")          != logicalBlock.npos))
+         if ((chunks[0].find("End")           != chunks[0].npos  &&
+              chunks[0].find("EndFiniteBurn") == chunks[0].npos) ||
+             (chunks[0].find("BeginScript")   != chunks[0].npos) ||
+             (chunks[0].find("NoOp")          != chunks[0].npos) ||
+             (chunks[0].find("Else")          != chunks[0].npos) ||
+             (chunks[0].find("Stop")          != chunks[0].npos))
          {
             obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
          }
@@ -735,6 +736,19 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       }
       else
       {
+         // check for extra text at the end of one-word commands
+         if ((chunks[0].find("End")           != chunks[0].npos  &&
+              chunks[0].find("EndFiniteBurn") == chunks[0].npos) ||
+             (chunks[0].find("BeginScript")   != chunks[0].npos) ||
+             (chunks[0].find("NoOp")          != chunks[0].npos) ||
+             (chunks[0].find("Else")          != chunks[0].npos) ||
+             (chunks[0].find("Stop")          != chunks[0].npos))
+         {
+            InterpreterException ex
+               ("Unexpected text after \"" + chunks[0] + "\" command");
+            HandleError(ex);
+            return false;
+         }
          // check for .. in the command block
          if (chunks[1].find("..") != logicalBlock.npos)
          {
