@@ -297,21 +297,25 @@ bool For::Initialize()
    #endif
    if (SetWrapperReferences(*index) == false)
       return false;
+   CheckDataType(index, Gmat::REAL_TYPE, "For");
    #ifdef DEBUG_FOR_PARAMS
       MessageInterface::ShowMessage("Setting refs for start\n");
    #endif
    if (SetWrapperReferences(*start) == false)
       return false;
+   CheckDataType(start, Gmat::REAL_TYPE, "For");
    #ifdef DEBUG_FOR_PARAMS
       MessageInterface::ShowMessage("Setting refs for end\n");
    #endif
    if (SetWrapperReferences(*end) == false)
       return false;
+   CheckDataType(end, Gmat::REAL_TYPE, "For");
    #ifdef DEBUG_FOR_PARAMS
       MessageInterface::ShowMessage("Setting refs for increment\n");
    #endif
    if (SetWrapperReferences(*increment) == false)
       return false;
+   CheckDataType(increment, Gmat::REAL_TYPE, "For");
    
    bool retval = BranchCommand::Initialize();
    
@@ -1099,6 +1103,22 @@ bool For::SetElementWrapper(ElementWrapper *toWrapper,
       throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
+
+   try
+   {
+       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
+            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
+       {
+           throw CommandException("A value of base type \"non-Real\" on command \"" + 
+                       typeName + 
+                       "\" is not an allowed value.\nThe allowed values are:"
+                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+       }
+   }
+   catch (BaseException &be)
+   {
+       // just ignore it here - will need to check data type on initialization
    }
    
    #ifdef DEBUG_WRAPPER_CODE   

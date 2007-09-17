@@ -619,12 +619,14 @@ bool ConditionalBranch::Initialize()
    {
       if (SetWrapperReferences(*(*i)) == false)
          return false;
+      CheckDataType((*i), Gmat::REAL_TYPE, "Conditional Command");
    }
    for (std::vector<ElementWrapper*>::iterator j = rhsWrappers.begin();
         j < rhsWrappers.end(); j++)
    {
       if (SetWrapperReferences(*(*j)) == false)
          return false;
+      CheckDataType((*j), Gmat::REAL_TYPE, "Conditional Command");
    }
     
    return retval;
@@ -1347,7 +1349,23 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   
+
+   try
+   {
+       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
+            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
+       {
+           throw CommandException("A value of base type \"non-Real\" on command \"" + 
+                       typeName + 
+                       "\" is not an allowed value.\nThe allowed values are:"
+                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+       }
+   }
+   catch (BaseException &be)
+   {
+       // just ignore it here - will need to check data type on initialization
+   }
+
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage(
       "   Setting wrapper \"%s\" on Conditional Branch command\n", 
