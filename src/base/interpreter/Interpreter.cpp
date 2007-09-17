@@ -955,22 +955,28 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FindObject(const std::string &name)
+// GmatBase* FindObject(const std::string &name, const std::string &ofType = "")
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to find a configured object.
  *
- * @param  name  Name of the object.
+ * @param  name    Name of the object.
+ * @param  ofType  Type of object required; leave blank for no checking
  *
  * @return Configured object pointer
  */
 //------------------------------------------------------------------------------
-GmatBase* Interpreter::FindObject(const std::string &name)
+GmatBase* Interpreter::FindObject(const std::string &name, 
+                                  const std::string &ofType)
 {
+   GmatBase *obj;
    if (name == "SolarSystem")
-      return theModerator->GetSolarSystemInUse();
+      obj =  theModerator->GetSolarSystemInUse();
    else
-      return theModerator->GetConfiguredObject(name);
+      obj =  theModerator->GetConfiguredObject(name);
+   // check for the requested type
+   if ((obj != NULL) && (ofType != "") && (!obj->IsOfType(ofType))) obj = NULL;
+   return obj;
 }
 
 
@@ -994,7 +1000,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    if (find(commandList.begin(), commandList.end(), type)
        != commandList.end())
       commandFound = true;
-   
+
+
    // Check for CallFunction
    if (type[0] == '[')
    {
@@ -1044,7 +1051,8 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       retFlag = false;
       return NULL;
    }
-   
+
+
    #ifdef DEBUG_CREATE_COMMAND
    if (inCmd == NULL)
       MessageInterface::ShowMessage
@@ -1059,7 +1067,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    // Now assemble command
    try
    {
-      // if command has its own InterpretAction(), jsut return cmd
+      // if command has its own InterpretAction(), just return cmd
       if (cmd->InterpretAction())
       {
          retFlag  = ValidateCommand(cmd);
@@ -1076,7 +1084,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    {
       HandleError(e);
       retFlag = false;
-      // Return cmd since comand already created
+      // Return cmd since command already created
       return cmd;
    }
    
@@ -1233,6 +1241,19 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    std::string type = cmd->GetTypeName();
    std::string opStr = "~<=>&|";
    
+   // conditional commands, for compatability with MATLAB, should not have
+   // parentheses (except to indicate array elements), brackets, or braces
+   if (!GmatStringUtil::HasNoBrackets(desc))
+   {
+      std::string msg = 
+         "A conditional command is not allowed to contain brackets, braces, or "
+         "parentheses (except to indicate an array element)";
+      InterpreterException ex(msg);
+      HandleError(ex);
+      return false;
+   }
+   
+   // This really becomes moot ...  wcs 2007.09.12
    // Remove enclosed parenthesis first
    Integer length = desc.size();
    std::string str1 = desc;
@@ -1244,7 +1265,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    {
       if (!GmatStringUtil::IsParenBalanced(desc))
       {
-         InterpreterException ex("The Command has unbalanced parenthesis");
+         InterpreterException ex("The Command has unbalanced parentheses");
          HandleError(ex);
          return false;
       }
@@ -1364,6 +1385,18 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
       ("Interpreter::AssembleForCommand() desc='%s'\n", desc.c_str());
    #endif
    
+   // For loop commands, for compatability with MATLAB, should not have
+   // parentheses (except to indicate array elements), brackets, or braces
+   if (!GmatStringUtil::HasNoBrackets(desc))
+   {
+      std::string msg = 
+         "A For command is not allowed to contain brackets, braces, or "
+         "parentheses (except to indicate an array element)";
+      InterpreterException ex(msg);
+      HandleError(ex);
+      return false;
+   }
+   
    bool retval = true;
    UnsignedInt equalSign = desc.find("=");
    
@@ -1444,10 +1477,30 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       
       if (type == "Target")
       {
+         // this command, for compatability with MATLAB, should not have
+         // parentheses (except to indicate array elements), brackets, or braces
+         if (!GmatStringUtil::HasNoBrackets(desc, true))
+         {
+            std::string msg = 
+               "This command is not allowed to contain brackets, braces, or "
+               "parentheses";
+            InterpreterException ex(msg);
+            HandleError(ex);
+            return false;
+         }
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
          
+         // Make sure there is only one thing on the line
+         if (parts.size() > 1)
+         {
+            InterpreterException ex
+               ("Unexpected text at end of Target command");
+            HandleError(ex);
+            retval = false;
+         }
+         
          // Check if the Solver exist
-         GmatBase *obj = FindObject(parts[0]);
+         GmatBase *obj = FindObject(parts[0], "Solver");
          if (obj == NULL)
          {
             InterpreterException ex
@@ -1458,13 +1511,53 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       }
       else if (type == "Optimize")
       {
+         // this command, for compatability with MATLAB, should not have
+         // parentheses (except to indicate array elements), brackets, or braces
+         if (!GmatStringUtil::HasNoBrackets(desc, true))
+         {
+            std::string msg = 
+               "This command is not allowed to contain brackets, braces, or "
+               "parentheses";
+            InterpreterException ex(msg);
+            HandleError(ex);
+            return false;
+         }
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
+         // Make sure there is only one thing on the line
+         if (parts.size() > 1)
+         {
+            InterpreterException ex
+               ("Unexpected text at end of Optimize command");
+            HandleError(ex);
+            retval = false;
+         }
          
-         for (int i=1; i<count; i++)
-            cmd->SetRefObjectName(Gmat::PARAMETER, parts[i]);
+         // Check if the Solver exist
+         GmatBase *obj = FindObject(parts[0], "Solver");
+         if (obj == NULL)
+         {
+            InterpreterException ex
+               ("Cannot find the Solver \"" + parts[0] + "\"");
+            HandleError(ex);
+            retval = false;
+         }
+         // 2007.09.14 wcs - should only have a Solver name on the line
+         //for (int i=1; i<count; i++)
+         //   cmd->SetRefObjectName(Gmat::PARAMETER, parts[i]);
       }
       else if (type == "Report")
       {
+         // this command, for compatability with MATLAB, should not have
+         // parentheses (except to indicate array elements), brackets, or braces
+         if (!GmatStringUtil::HasNoBrackets(desc, true))
+         {
+            std::string msg = 
+               "This command is not allowed to contain brackets, braces, or "
+               "parentheses";
+            InterpreterException ex(msg);
+            HandleError(ex);
+            return false;
+         }
          parts = theTextParser.SeparateBrackets(desc, "()", " ,", false);
          
          // first item is ReportFile
@@ -1473,7 +1566,17 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (obj != NULL)
          {
             cmd->SetRefObject(obj, Gmat::SUBSCRIBER, parts[0], 0);
-            
+
+            // Check if the Report exists
+            GmatBase *obj = FindObject(parts[0], "ReportFile");
+            if (obj == NULL)
+            {
+               InterpreterException ex
+                  ("Cannot find the ReportFile \"" + parts[0] + "\"");
+               HandleError(ex);
+               retval = false;
+            }
+
             // checking items to report
             if (count < 2)
             {
@@ -1550,6 +1653,17 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    }
    else if (type == "Save")
    {
+      // these commands, for compatability with MATLAB, should not have
+      // parentheses (except to indicate array elements), brackets, or braces
+      if (!GmatStringUtil::HasNoBrackets(desc))
+      {
+         std::string msg = 
+            "This command is not allowed to contain brackets, braces, or "
+            "parentheses (except to indicate an array element)";
+         InterpreterException ex(msg);
+         HandleError(ex);
+         return false;
+      }
       for (int i=0; i<count; i++)
          cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, parts[i]);
    }

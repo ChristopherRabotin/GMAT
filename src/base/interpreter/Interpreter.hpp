@@ -152,7 +152,8 @@ protected:
    bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
                        Integer &id, Gmat::ParameterType &type);
    
-   GmatBase* FindObject(const std::string &name);
+   GmatBase* FindObject(const std::string &name, 
+                        const std::string &ofType = "");
    
    Parameter* CreateArray( const std::string &arrayStr);   
    Parameter* GetArrayIndex(const std::string &arrayStr,
