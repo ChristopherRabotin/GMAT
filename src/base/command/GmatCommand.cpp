@@ -387,15 +387,17 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       throw CommandException(cmdEx);
    }
    Gmat::ParameterType pType = forWrapper->GetDataType();
-   if (pType != needType)
+   if ((pType != needType) && !((needType == Gmat::REAL_TYPE) &&
+                               (pType == Gmat::INTEGER_TYPE)))
    {
       // @todo - make this message more meaningful, for non-Real types
-      std::string pText = PARAM_TYPE_STRING[pType];
-      throw CommandException("A value of type \"" + pText + "\" on command \"" + 
-                  cmdName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Object Property (Real), Real Number, Variable,"
-                  " Array Element, or Parameter ]. "); 
+      std::string errmsg = "A value of type \"" + PARAM_TYPE_STRING[pType];
+      errmsg += "\" on command \"" + cmdName;
+      errmsg += "\" is not an allowed value.\nThe allowed values are:";
+      errmsg += " [ Object Property (Real), Real Number, Variable,";
+      errmsg += " Array Element, or Parameter ]. \n";
+      errmsg += "Line: " + generatingString + "\n";
+      throw CommandException(errmsg); 
    }
 }
 
