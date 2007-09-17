@@ -689,7 +689,15 @@ bool Vary::InterpretAction()
       MessageInterface::ShowMessage("\n");
    #endif
    
-   // Find and set the solver object name
+      if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
+          (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
+          (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
+      {
+         throw CommandException
+            ("Parentheses, braces, or brackets are unbalanced\n");
+      }
+
+      // Find and set the solver object name
    // This is the only setting in Vary that is not in a wrapper
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
    SetStringParameter(SOLVER_NAME, currentChunks[0]);
@@ -834,7 +842,23 @@ bool Vary::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withN
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   
+
+   try
+   {
+       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
+            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
+       {
+           throw CommandException("A value of base type \"non-Real\" on command \"" + 
+                       typeName + 
+                       "\" is not an allowed value.\nThe allowed values are:"
+                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+       }
+   }
+   catch (BaseException &be)
+   {
+       // just ignore it here - will need to check data type on initialization
+   }
+
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Vary command\n", 
       withName.c_str());
@@ -994,41 +1018,49 @@ bool Vary::Initialize()
    #endif
    if (SetWrapperReferences(*variable) == false)
       return false;
+   CheckDataType(variable, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for initial value\n");
    #endif
    if (SetWrapperReferences(*initialValue) == false)
       return false;
+   CheckDataType(initialValue, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for perturbation\n");
    #endif
    if (SetWrapperReferences(*perturbation) == false)
       return false;
+   CheckDataType(perturbation, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for minimum\n");
    #endif
    if (SetWrapperReferences(*variableMinimum) == false)
       return false;
+   CheckDataType(variableMinimum, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for maximum\n");
    #endif
    if (SetWrapperReferences(*variableMaximum) == false)
       return false;
+   CheckDataType(variableMaximum, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for max step\n");
    #endif
    if (SetWrapperReferences(*variableMaximumStep) == false)
       return false;
+   CheckDataType(variableMaximumStep, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for additive scale factor\n");
    #endif
    if (SetWrapperReferences(*additiveScaleFactor) == false)
       return false;
+   CheckDataType(additiveScaleFactor, Gmat::REAL_TYPE, "Vary");
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Setting refs for mult. scale factor\n");
    #endif
    if (SetWrapperReferences(*multiplicativeScaleFactor) == false)
       return false;
+   CheckDataType(multiplicativeScaleFactor, Gmat::REAL_TYPE, "Vary");
 
    #ifdef DEBUG_VARY_PARAMS
       MessageInterface::ShowMessage("Vary command Initialization complete\n");

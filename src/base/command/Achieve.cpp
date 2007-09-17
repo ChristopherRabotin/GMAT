@@ -672,11 +672,31 @@ bool Achieve::InterpretAction()
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
       MessageInterface::ShowMessage("\n");
    #endif
+      
+   if (chunks.size() <= 1)
+      throw CommandException("Missing information for Achieve command.\n");
+   
+   if (chunks[1].at(0) == '(')
+      throw CommandException("Missing solver name for Achieve command.\n");
+      
+   if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
+       (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
+       (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
+   {
+      throw CommandException
+         ("Parentheses, braces, or brackets are unbalanced\n");
+   }
    
    // Find and set the solver object name
    // This is the only setting in Achieve that is not in a wrapper
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
    SetStringParameter(targeterNameID, currentChunks[0]);
+   #ifdef DEBUG_ACHIEVE_PARSE
+      MessageInterface::ShowMessage("current chunks as\n");
+      for (StringArray::iterator i = currentChunks.begin(); i != currentChunks.end(); ++i)
+         MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
+      MessageInterface::ShowMessage("\n");
+   #endif
    
    // The remaining text in the instruction is the variable definition and 
    // parameters, all contained in currentChunks[1].  Deal with those next.
@@ -685,6 +705,10 @@ bool Achieve::InterpretAction()
    //std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
    //std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
    std::string noSpaces2     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
+   #ifdef DEBUG_ACHIEVE_PARSE
+      MessageInterface::ShowMessage(
+         "Achieve: noSpaces2 = %s\n", noSpaces2.c_str());
+   #endif   
    currentChunks = parser.Decompose(noSpaces2, "()", true, true);
    //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
    
@@ -911,9 +935,10 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
 
    try
    {
-       if ((toWrapper->GetDataType()) != Gmat::REAL_TYPE)
+       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
+            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
        {
-           throw CommandException("A value of type \"non-Real\" on command \"" + 
+           throw CommandException("A value of base type \"non-Real\" on command \"" + 
                        typeName + 
                        "\" is not an allowed value.\nThe allowed values are:"
                        " [ Real Number, Variable, Array Element, or Parameter ]. "); 
