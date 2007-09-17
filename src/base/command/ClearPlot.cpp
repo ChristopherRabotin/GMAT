@@ -111,7 +111,17 @@ bool ClearPlot::InterpretAction()
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
-    
+
+   // this command, for compatability with MATLAB, should not have
+   // parentheses (except to indicate array elements), brackets, or braces
+   if (!GmatStringUtil::HasNoBrackets(str, false))
+   {
+      std::string msg = 
+         "The ClearPlot command is not allowed to contain brackets, braces, or "
+         "parentheses";
+      throw CommandException(msg);
+   }
+
    // Find the Subscriber list
    end = generatingString.find(" ", loc);
    plotName = generatingString.substr(loc, end-loc);

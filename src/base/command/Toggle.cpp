@@ -93,7 +93,17 @@ bool Toggle::InterpretAction()
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
-    
+
+   // this command, for compatability with MATLAB, should not have
+   // parentheses (except to indicate array elements), brackets, or braces
+   if (!GmatStringUtil::HasNoBrackets(str, false))
+   {
+      std::string msg = 
+         "The Toggle command is not allowed to contain brackets, braces, or "
+         "parentheses";
+      throw CommandException(msg);
+   }
+
    Integer cmd = generatingString.find("On", loc);
    while (generatingString.find("On", cmd+1) != std::string::npos)
       cmd = generatingString.find("On", cmd+1);
