@@ -84,6 +84,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
 
    if (firstParam != NULL)
       AddParameter(firstParam->GetName(), mNumParams);
+   objectTypeNames.push_back("ReportFile");
    
    parameterCount = ReportFileParamCount;
    initial = true;
