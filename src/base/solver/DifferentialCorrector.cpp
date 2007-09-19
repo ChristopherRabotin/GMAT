@@ -91,6 +91,7 @@ DifferentialCorrector::DifferentialCorrector(std::string name) :
       ("DifferentialCorrector::DC(constructor) entered\n");
    #endif
    objectTypeNames.push_back("DifferentialCorrector");
+   objectTypeNames.push_back("Targeter");  // should go in a Targeter class ...
    parameterCount = DifferentialCorrectorParamCount;
    // textFileMode = "Verbose";
    //solverTextFile = "targeter_";
