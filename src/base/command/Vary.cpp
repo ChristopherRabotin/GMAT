@@ -245,23 +245,48 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    std::stringstream details;
    
    std::string gen = prefix + "Vary " + solverName + "(";
+   
 
 //   // Iterate through the variables
    details << variable->GetDescription() << " = " << initialValue->GetDescription() <<  ", ";
 //
-   details << "{Perturbation = ";
-   details << perturbation->GetDescription();
- 
-   details << ", MaxStep = ";
-   details << variableMaximumStep->GetDescription();
+   // figure out if this is inside a Target or an Optimize branch command, to
+   // determine which things should be added to the generatingString
+   std::string targOpt  = "";
+   GmatCommand *prevCmd = GetPrevious();
+   while (prevCmd != NULL)
+   {
+      if (prevCmd->IsOfType("Target"))
+      {
+         targOpt = "Target";
+         break;
+      }
+      if (prevCmd->IsOfType("Optimize"))
+      {
+         targOpt = "Optimize";
+         break;
+      }
+      prevCmd = prevCmd->GetPrevious();
+   }
+   // add perturbation and max step for Target
+   //if (solver && (solver->IsOfType("Targeter")))
+   if (targOpt == "Target")
+   {
+      details << "{Perturbation = ";
+      details << perturbation->GetDescription();
+      details << ", MaxStep = ";
+      details << variableMaximumStep->GetDescription();
+   }
+   
    details << ", Lower = ";
    details << variableMinimum->GetDescription();
-
 
    details << ", Upper = ";
    details << variableMaximum->GetDescription();
    
-   if (solver && (solver->IsOfType("Optimizer")))
+   // add the scale factors for Optimize
+   //if (solver && (solver->IsOfType("Optimizer")))
+   if (targOpt == "Optimize")
    {
       details << ", AdditiveScaleFactor = ";
       details << additiveScaleFactor->GetDescription();
