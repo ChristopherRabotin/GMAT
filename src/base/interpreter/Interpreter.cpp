@@ -1313,11 +1313,33 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    #endif
    
    Integer count = parts.size();
+   for (Integer ii = 0; ii < count; ii++)
+   {
+      if (GmatStringUtil::IsBlank(parts.at(ii)))
+      {
+         InterpreterException ex("Missing field or operator in command");
+         HandleError(ex);
+         return false;
+      }
+      std::string strUpper = GmatStringUtil::ToUpper(parts.at(ii));         
+      if (strUpper.find(" OR ") != strUpper.npos)
+      {
+         InterpreterException ex("\"OR\" is not a valid relational operator");
+         HandleError(ex);
+         return false;
+      }
+      if (strUpper.find(" AND ") != strUpper.npos)
+      {
+         InterpreterException ex("\"AND\" is not a valid relational operator");
+         HandleError(ex);
+         return false;
+      }
+   }
    
    // assuming there is no boolean argument
    if (count < 3 || ((count-3)%4) != 0)
    {
-      InterpreterException ex("The Command has invalid number of conditions");
+      InterpreterException ex("The Command has an invalid number of conditions");
       HandleError(ex);
       return false;
    }
@@ -1431,6 +1453,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
       step = parts[1];
       end = parts[2];
    }
+   
    
    #ifdef DEBUG_ASSEMBLE_FOR
    MessageInterface::ShowMessage
