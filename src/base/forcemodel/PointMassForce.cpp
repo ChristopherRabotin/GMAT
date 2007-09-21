@@ -327,7 +327,7 @@ bool PointMassForce::GetDerivatives(Real * state, Real dt, Integer order)
    // Precalculations for the indirect effect term
    rbb3 = rv[0]*rv[0]+rv[1]*rv[1]+rv[2]*rv[2];
    if (rbb3 != 0.0) {
-      rbb3 = sqrt(rbb3 * rbb3 * rbb3);
+      rbb3 *= sqrt(rbb3);
       mu_rbb = mu / rbb3;
       a_indirect[0] = mu_rbb * rv[0];
       a_indirect[1] = mu_rbb * rv[1];

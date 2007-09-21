@@ -169,6 +169,10 @@ protected:
    /// Central body ID for the model
    Integer bodyID;
    
+   Rvector6 sunrv;
+   Rvector6 cbrv;
+
+   
    void FindShadowState(bool &lit, bool &dark, Real *state);
    Real ShadowFunction(Real *state);
    void BuildForceVector(Real *state);

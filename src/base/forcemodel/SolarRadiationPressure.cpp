@@ -659,8 +659,7 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     bool inSunlight = true, inShadow = false;
 
     Real ep = epoch + dt / 86400.0;
-    Rvector6 sunrv = theSun->GetState(ep);
-    Rvector6 cbrv;
+    sunrv = theSun->GetState(ep);
     
     // Rvector6 is initialized to all 0.0's; only change it if the body is not 
     // the Sun
