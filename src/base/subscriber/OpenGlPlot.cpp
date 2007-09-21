@@ -1400,7 +1400,7 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value,
 {
    #if DEBUG_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetStringParameter()<%s> id=%d, value=%s, index= d\n",
+      ("OpenGlPlot::SetStringParameter()<%s> id=%d, value=%s, index= %d\n",
        instanceName.c_str(), id, value.c_str(), index);
    #endif
    
@@ -2319,6 +2319,17 @@ void OpenGlPlot::UpdateObjectList(SpacePoint *sp, bool show)
 // void PutRvector3Value(Rvector3 &rvec3, Integer id,
 //                       const std::string &sval, Integer index = -1);
 //------------------------------------------------------------------------------
+/*
+ * Converts input string to Real and store as Rvector3 element at idnex.
+ *
+ * @param rvec3  input Rvector3 where value to be stored
+ * @param id     input Parameter ID used for formating error message
+ * @param sval   input string value
+ * @param index  input index to be used for storing a Rvector3 element
+ *               if index is -1, whole 3 elements are converted and stored
+ *               from a string format of "[element1 element2 element3]"
+ */
+//------------------------------------------------------------------------------
 void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
                                   const std::string &sval, Integer index)
 {
@@ -2328,89 +2339,88 @@ void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
        id, sval.c_str(), index);
    #endif
    
-   Real rvals[3];
-   bool rvalsOk[3];
    std::string badVal;
+   bool isValid = true;
    std::string field = GetParameterText(id);
    
    // Check index, throw exception if out of bound
-   if (index < -1 && index > 2)
+   if (index < -1 || index > 2)
    {
-      SubscriberException se;
-      se.SetDetails(errorMessageFormat.c_str(), sval.c_str(), field.c_str(),
-                    "SpacecraftName, CelestialBodyName, LibrationPointName, "
-                    "BarycenterName, or 1 3-vector of numerical values");
-      throw se;
+      badVal = sval;
+      isValid = false;
    }
    
-   // Convert string value to Real
-   if (index != -1)
+   if (isValid)
    {
-      rvalsOk[index] = GmatStringUtil::ToReal(sval, rvals[index]);
-      if (rvalsOk[index])
-         rvec3[index] = rvals[index];
-      else
-         badVal = sval;
-   }
-   else if (index == -1)
-   {
-      StringArray valArray;
-      std::string svalue = sval;
-      UnsignedInt index1 = svalue.find_first_of("[");
-      if (index1 != svalue.npos)
+      // Convert string value to Real
+      if (index != -1)
       {
-         UnsignedInt index2 = svalue.find_last_of("]");
-         if (index2 != svalue.npos)
+         Real rval;
+         if (GmatStringUtil::ToReal(sval, rval))
+            rvec3[index] = rval;
+         else
          {
-            svalue = svalue.substr(index1, index2-index1);
+            isValid = false;
+            badVal = sval;
+         }
+      }
+      else if (index == -1)
+      {
+         StringArray valArray;
+         std::string svalue = sval;
+         UnsignedInt index1 = svalue.find_first_of("[");
+         if (index1 != svalue.npos)
+         {
+            UnsignedInt index2 = svalue.find_last_of("]");
+            if (index2 != svalue.npos)
+            {
+               svalue = svalue.substr(index1, index2-index1);
+            }
+            else
+            {
+               isValid = false;
+               badVal = sval;
+            }
+         }
+         
+         valArray = GmatStringUtil::SeparateBy(svalue, " ,");         
+         int arraySize = valArray.size();
+         
+         if (arraySize == 3)
+         {
+            Real rvals[3];
+            bool rvalsOk[3];
+            rvalsOk[0] = GmatStringUtil::ToReal(valArray[0], rvals[0]);
+            rvalsOk[1] = GmatStringUtil::ToReal(valArray[1], rvals[1]);
+            rvalsOk[2] = GmatStringUtil::ToReal(valArray[2], rvals[2]);
+            
+            // Detects first invalid input and throw exception
+            if (!rvalsOk[0])
+               badVal = valArray[0];
+            else if (!rvalsOk[1])
+               badVal = valArray[1];
+            else if (!rvalsOk[2])
+               badVal = valArray[2];
+            
+            if (rvalsOk[0] && rvalsOk[1] && rvalsOk[2])
+               rvec3.Set(rvals[0], rvals[1], rvals[2]);
+            else
+               isValid = false;
          }
          else
          {
-            SubscriberException se;
-            se.SetDetails(errorMessageFormat.c_str(), sval.c_str(), field.c_str(),
-                          "SpacecraftName, CelestialBodyName, LibrationPointName, "
-                          "BarycenterName, or 1 3-vector of numerical values");
-            throw se;
+            isValid = false;
+            badVal = sval;
          }
-      }
-      
-      valArray = GmatStringUtil::SeparateBy(svalue, " ,");
-      
-      int arraySize = valArray.size();
-      
-      if (arraySize == 3)
-      {
-         rvalsOk[0] = GmatStringUtil::ToReal(valArray[0], rvals[0]);
-         rvalsOk[1] = GmatStringUtil::ToReal(valArray[1], rvals[1]);
-         rvalsOk[2] = GmatStringUtil::ToReal(valArray[2], rvals[2]);
-         
-         // Detects first invalid input and throw exception
-         if (!rvalsOk[0])
-            badVal = valArray[0];
-         else if (!rvalsOk[1])
-            badVal = valArray[1];
-         else if (!rvalsOk[2])
-            badVal = valArray[2];
-         
-         if (rvalsOk[0] && rvalsOk[1] && rvalsOk[2])
-            rvec3.Set(rvals[0], rvals[1], rvals[2]);
-      }
-      else
-      {
-         SubscriberException se;
-         se.SetDetails(errorMessageFormat.c_str(), sval.c_str(), field.c_str(),
-                       "SpacecraftName, CelestialBodyName, LibrationPointName, "
-                       "BarycenterName, or 1 3-vector of numerical values");
-         throw se;
       }
    }
    
-   // Check for valid Real number
-   if (!rvalsOk[0] || !rvalsOk[1] || !rvalsOk[2])
+   if (!isValid)
    {
       SubscriberException se;
-      se.SetDetails(errorMessageFormat.c_str(), badVal.c_str(),
-                    field.c_str(), "Real Number");
+      se.SetDetails(errorMessageFormat.c_str(), badVal.c_str(), field.c_str(),
+                    "SpacecraftName, CelestialBodyName, LibrationPointName, "
+                    "BarycenterName, or a 3-vector of numerical values");
       throw se;
    }
 }
@@ -2667,10 +2677,12 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
          
          scIndex++;
          
-//          MessageInterface::ShowMessage
-//             ("===> theDataCoordSystem=<%p>, mViewCoordSystem=<%p>, "
-//              "theInternalCoordSystem=<%p>\n", theDataCoordSystem,
-//              mViewCoordSystem, theInternalCoordSystem);
+         #if DEBUG_OPENGL_UPDATE > 2
+         MessageInterface::ShowMessage
+            ("===> theDataCoordSystem=<%p>, mViewCoordSystem=<%p>, "
+             "theInternalCoordSystem=<%p>\n", theDataCoordSystem,
+             mViewCoordSystem, theInternalCoordSystem);
+         #endif
          
          // buffer data
          for (int sc=0; sc<mScCount; sc++)
