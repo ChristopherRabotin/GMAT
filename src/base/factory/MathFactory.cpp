@@ -19,11 +19,12 @@
 //------------------------------------------------------------------------------
 
 #include "MathFactory.hpp"
-#include "StringUtil.hpp"  // for Capitalize()
+#include "StringUtil.hpp"          // for Capitalize()
 #include "MessageInterface.hpp"
 
 // include list of MathNode classes here
 #include "MathElement.hpp"
+#include "Abs.hpp"
 #include "Acos.hpp"
 #include "Asin.hpp"
 #include "Atan.hpp"
@@ -96,11 +97,13 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Multiply(withName);
    else if (newType == "Divide")      // Divide(x,y) or x/y
       mathNode = new Divide(withName);
-   else if (newType == "Negate")        // Negate(x)
+   else if (newType == "Negate")      // Negate(x)
       mathNode = new Negate(withName);
    else if (newType == "Sqrt")        // Sqrt(x)
       mathNode = new Sqrt(withName);
-
+   else if (newType == "Abs")         // Abs(x)
+      mathNode = new Abs(withName);
+   
    // Power, Log functions
    else if (newType == "Power")       // power(x,y) or x^y
       mathNode = new Power(withName);
@@ -110,7 +113,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Log(withName);
    else if (newType == "Log10")       // log10(x)
       mathNode = new Log10(withName);
-
+   
    // Matrix functions
    else if (newType == "Transpose")   // transpose(m) or m'
       mathNode = new Transpose(withName);
@@ -120,7 +123,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new Inverse(withName);
    else if (newType == "Norm")        // norm(m)
       mathNode = new Norm(withName);
-
+   
    // Trigonometric functions
    else if (newType == "Sin")         // sin(x)
       mathNode = new Sin(withName);
@@ -264,6 +267,7 @@ void MathFactory::BuildCreatables()
    creatables.push_back("Multiply");
    creatables.push_back("Divide");
    creatables.push_back("sqrt");
+   creatables.push_back("abs");
    
    // Power, Log functions
    creatables.push_back("Power");

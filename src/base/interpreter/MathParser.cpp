@@ -53,7 +53,7 @@ const std::string
 MathParser::MATH_FUNC_LIST[MathFuncCount] =
 {
    "asin",  "sin",  "acos",  "cos",  "atan2",  "atan",  "tan",  
-   "log10", "log",  "exp",  "sqrt",
+   "log10", "log",  "exp",  "sqrt",  "abs",
 }; 
 
 

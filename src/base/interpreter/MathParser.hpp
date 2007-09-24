@@ -107,7 +107,7 @@ private:
    {
       SIN = 0,
       COS, TAN, ASIN, ACOS, ATAN2, ATAN,
-      LOG, LOG10, EXP, SQRT,
+      LOG, LOG10, EXP, SQRT, ABS,
       MathFuncCount,
    };
    
