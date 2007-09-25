@@ -239,9 +239,13 @@ bool MathTree::InitializeParameter(MathNode *node)
       }
       else
       {
-         throw InterpreterException
+         #if DEBUG_MATH_TREE
+         MessageInterface::ShowMessage
             ("MathTree::InitializeParameter() Unable to find " + newName +
-             "from theObjectMap\n");
+             " from theObjectMap\n");
+         #endif
+         
+         throw InterpreterException("Undefined variable \"" + newName + "\" is used");
       }
    }
    else
