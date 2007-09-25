@@ -233,16 +233,27 @@ bool Assignment::Initialize()
           topNode->GetTypeName().c_str(), topNode->GetName().c_str());
       #endif
       
-      if (mathTree->Initialize(objectMap))
+      try
       {
-         if (!topNode->ValidateInputs())
-            throw CommandException("Failed to validate equation inputs: " +
-                                   generatingString + "\n");
+         if (mathTree->Initialize(objectMap))
+         {
+            if (!topNode->ValidateInputs())
+               throw CommandException
+                  ("Failed to validate equation inputs in\n   \"" +
+                   generatingString + "\"\n");
+         }
+         else
+         {
+            throw CommandException("Failed to initialize equation in\n   \"" +
+                                   generatingString + "\"\n");
+         }
       }
-      else
+      catch (BaseException &e)
       {
-         throw CommandException("Failed to initialize equation: " +
-                                generatingString + "\n");
+         CommandException ce;
+         ce.SetDetails("%s in \n   \"%s\"\n", e.GetDetails().c_str(),
+                      generatingString.c_str());
+         throw ce;
       }
    }
    
