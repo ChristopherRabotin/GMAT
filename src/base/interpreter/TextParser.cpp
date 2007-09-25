@@ -217,7 +217,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       length = str.size();
       
       // Remove GMAT keyword
-      index1 = str.find("GMAT");
+      index1 = str.find("GMAT ");
       if (index1 == 0)
       {
          index2 = str.find_first_of(whiteSpace, index1);
@@ -596,7 +596,9 @@ StringArray TextParser::ChunkLine()
             if (index2 != 0)
                index3 = str.find_last_not_of(whiteSpace, index2-1);
             
-            //MessageInterface::ShowMessage("   index3=%u, index2=%u\n", index3, index2);
+            #if DEBUG_TP_CHUNK_LINE
+            MessageInterface::ShowMessage("   index3=%u, index2=%u\n", index3, index2);
+            #endif
             
             if (index3 == str.npos || index2 == 0)
             {
