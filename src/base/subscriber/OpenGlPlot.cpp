@@ -1937,8 +1937,6 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
        instanceName.c_str(), name.c_str(), index, show, mAllSpCount);
    #endif
    
-   bool status = false;
-   
    // if name not in the list, add
    if (find(mAllSpNameArray.begin(), mAllSpNameArray.end(), name) ==
        mAllSpNameArray.end())
@@ -1977,8 +1975,6 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
             mOrbitColorArray.push_back(GmatColor::RED32);
             mTargetColorArray.push_back(GmatColor::TEAL32);
          }
-         
-         status = true;
       }
    }
    
@@ -1997,7 +1993,7 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
    }
    #endif
    
-   return status;
+   return true;
 }
 
 
