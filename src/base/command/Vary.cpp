@@ -276,11 +276,16 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << perturbation->GetDescription();
       details << ", MaxStep = ";
       details << variableMaximumStep->GetDescription();
+      details << ", ";
+   }
+   else if (targOpt == "Optimize")
+   {
+      details << "{";
    }
    
-   details << ", Lower = ";
+   details << "Lower = ";
    details << variableMinimum->GetDescription();
-
+   
    details << ", Upper = ";
    details << variableMaximum->GetDescription();
    
@@ -293,7 +298,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << ", MultiplicativeScaleFactor = ";
       details << multiplicativeScaleFactor->GetDescription();
     }
-
+   
    gen += details.str();
    generatingString = gen + "});";
    
