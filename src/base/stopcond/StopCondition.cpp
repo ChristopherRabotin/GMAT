@@ -757,8 +757,13 @@ bool StopCondition::CheckOnPeriapsis()
 //------------------------------------------------------------------------------
 bool StopCondition::CheckOnApoapsis()
 {
+   if (mEccParam == NULL)
+      throw StopConditionException
+         ("StopCondition::CheckOnApoapsis() ECC parameter has NULL pointer.\n");
+   
    // Eccentricity must be large enough to keep asculations from masking the
    // stop point
+   
    Real ecc = mEccParam->EvaluateReal();
    
    //----------------------------------------------------------------------
@@ -852,9 +857,14 @@ bool StopCondition::CheckCyclicCondition(Real &value)
 //------------------------------------------------------------------------------
 bool StopCondition::Initialize()
 {
+   #if DEBUG_BASE_STOPCOND_INIT
+   MessageInterface::ShowMessage("StopCondition::Initialize() entered\n");
+   #endif
+   
    mInitialized = false;
-
-   mStopInterval = 0.0; ///loj
+   isApoapse = false;
+   isPeriapse = false;
+   mStopInterval = 0.0;
    
    // clear local parameters
    if (mEccParam != NULL)
@@ -868,23 +878,17 @@ bool StopCondition::Initialize()
 
    if (Validate())
    {
-      if (mStopParam->GetTypeName() == "Apoapsis" ||
-          mStopParam->GetTypeName() == "Periapsis")
+      if (mStopParamType == "Apoapsis" ||
+          mStopParamType == "Periapsis")
       {
          mGoal = 0.0;
          mAllowGoalParam = false;
-         if (mStopParam->GetTypeName() == "Apoapsis")
+         if (mStopParamType == "Apoapsis")
             isApoapse = true;
-         if (mStopParam->GetTypeName() == "Periapsis")
+         if (mStopParamType == "Periapsis")
             isPeriapse = true;
       }
-      
-//      if (mStopParamType == "TA" || mStopParamType == "MA" ||
-//          mStopParamType == "EA")
-//      {
-//         isAngleParameter = true;
-//      }
-      
+            
       std::string paramTypeName = mStopParam->GetTypeName();
 
       if (paramTypeName == "TA" || paramTypeName == "MA" ||
@@ -907,9 +911,6 @@ bool StopCondition::Initialize()
          
          for (int i=0; i<mBufferSize; i++)
          {
-            // VC++ gives run time error
-            //mEpochBuffer[i] = 0.0;
-            //mValueBuffer[i] = 0.0;
             mEpochBuffer.push_back(0.0);
             mValueBuffer.push_back(0.0);
          }
@@ -925,8 +926,7 @@ bool StopCondition::Initialize()
    
    #if DEBUG_BASE_STOPCOND_INIT
    MessageInterface::ShowMessage
-      ("StopCondition::Initialize() mInitialized=%d\n",
-       mInitialized);
+      ("StopCondition::Initialize() returning mInitialized=%d\n", mInitialized);
    #endif
    
    return mInitialized;
@@ -974,7 +974,7 @@ bool StopCondition::Validate()
          stopParamTimeType = EPOCH_PARAM;
       else
          stopParamTimeType = UNKNOWN_PARAM_TIME_TYPE;
-         
+      
       #if DEBUG_BASE_STOPCOND_INIT   
          MessageInterface::ShowMessage(
             "Stop parameter \"%s\" has time type %d\n", timeTypeName.c_str(), 
@@ -1001,8 +1001,8 @@ bool StopCondition::Validate()
           " has NULL pointer.\n");
    
    // Apoapsis and Periapsis need additional parameters
-   if (mStopParam->GetTypeName() == "Apoapsis" ||
-       mStopParam->GetTypeName() == "Periapsis")
+   if (mStopParamType == "Apoapsis" ||
+       mStopParamType == "Periapsis")
    {
       // check on Ecc parameter
       if (mEccParam  == NULL)
@@ -1032,7 +1032,7 @@ bool StopCondition::Validate()
       }
       
       // check on SphRMag parameter if "Periapsis"
-      if (mStopParam->GetTypeName() == "Periapsis")
+      if (mStopParamType == "Periapsis")
       {
          if (mRmagParam == NULL)
          {
@@ -1081,9 +1081,10 @@ bool StopCondition::Validate()
    
    #if DEBUG_BASE_STOPCOND_INIT
    MessageInterface::ShowMessage
-      ("StopCondition::Validate() mUseInternalEpoch=%d, "
-       "mEpochParam=%d, mStopParam=%d\n   mInterpolator=%d, mRange=%f\n",
-       mUseInternalEpoch, mEpochParam, mStopParam, mInterpolator, mRange);
+      ("StopCondition::Validate() mUseInternalEpoch=%d, mEpochParam=%p, "
+       "mInterpolator=%p\n   mStopParamType=%s, mStopParamName=%s, mStopParam=%s<%p>\n",
+       mUseInternalEpoch, mEpochParam, mInterpolator, mStopParamType.c_str(),
+       mStopParamName.c_str(), mStopParam->GetTypeName().c_str(), mStopParam);
    #endif
    
    return true;
