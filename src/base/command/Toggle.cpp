@@ -23,8 +23,10 @@
 #include "Toggle.hpp" // class's header file
 #include "Publisher.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
 
 //#define DEBUG_RENAME 1
+//#define DEBUG_TOGGLE
 
 // class constructor
 //------------------------------------------------------------------------------
@@ -89,10 +91,21 @@ bool Toggle::InterpretAction()
    /// @todo: Clean up this hack for the Toggle::InterpretAction method
    // Sample string:  "Toggle Report On"
     
-   Integer loc = generatingString.find("Toggle", 0) + 6, end;
+   Integer loc = generatingString.find("Toggle", 0) + 6;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
+   Integer subEnd, commentStart;
+   if ((commentStart = (Integer) generatingString.find_first_of("%", 0)) != 
+       (Integer)generatingString.npos)  
+      subEnd = commentStart;
+   else 
+      subEnd = (Integer) generatingString.size();
+   std::string str1 = generatingString.substr(loc, subEnd-loc);
+   #ifdef DEBUG_TOGGLE
+      MessageInterface::ShowMessage("In InterpretAction, str1 = \n");
+      MessageInterface::ShowMessage("   %s\n", str1.c_str());
+   #endif
 
    // this command, for compatability with MATLAB, should not have
    // parentheses (except to indicate array elements), brackets, or braces
@@ -103,24 +116,51 @@ bool Toggle::InterpretAction()
          "parentheses";
       throw CommandException(msg);
    }
-
+   StringArray parts = GmatStringUtil::SeparateBy(str1," ,", false);
+   Integer partsSz = (Integer) parts.size();
+   #ifdef DEBUG_TOGGLE
+      MessageInterface::ShowMessage("In InterpretAction, parts = \n");
+      for (Integer jj = 0; jj < partsSz; jj++)
+         MessageInterface::ShowMessage("   %s\n", parts.at(jj).c_str());
+   #endif
+   if (partsSz < 2) // 'Toggle' already found
+      throw CommandException("Missing field in Toggle command");
+   if (parts.at(partsSz-1) == "On")       toggleState = true;
+   else if (parts.at(partsSz-1) == "Off") toggleState = false;
+   else
+      throw CommandException("Missing or misplaced 'On' or 'Off' in Toggle command");
+   for (Integer ii = 0; ii < partsSz-1; ii++)
+   {
+      if ((parts.at(ii) == "On") || (parts.at(ii) == "Off"))
+         throw CommandException("Too many 'On's or 'Off's in Toggle command");
+      #ifdef DEBUG_TOGGLE
+         MessageInterface::ShowMessage("Adding subName %s \n", parts.at(ii).c_str());
+      #endif
+               
+      subNames.push_back(parts.at(ii));
+   }
+   
+/*
    Integer cmd = generatingString.find("On", loc);
    while (generatingString.find("On", cmd+1) != std::string::npos)
       cmd = generatingString.find("On", cmd+1);
         
-   if ((cmd == (Integer)std::string::npos) || (cmd <= (Integer)(generatingString.length() - 5))) {
+   if ((cmd == (Integer)std::string::npos) || (cmd <= (Integer)(generatingString.length() - 5))) 
+   {
       cmd = generatingString.find("Off", loc);
       while (generatingString.find("Off", cmd+1) != std::string::npos)
          cmd = generatingString.find("Off", cmd+1);
             
       if (cmd == (Integer)std::string::npos)
          throw CommandException("Must Toggle either 'On' or 'Off'");
-      if (cmd > (Integer)(generatingString.length() - 6)) {
+      if (cmd > (Integer)(generatingString.length() - 6)) 
+      {
          toggleState = false;
       }
    }
    else
-      if (cmd > (Integer)(generatingString.length() - 5)) {
+      if (cmd > (Integer)(generatingString.length() - 5)) 
+      {
          toggleState = true;
       }
             
@@ -128,7 +168,7 @@ bool Toggle::InterpretAction()
    end = generatingString.find(" ", loc);
    std::string sName = generatingString.substr(loc, end-loc);
    subNames.push_back(sName);
-    
+    */ 
    // Register with the publisher
    if (publisher == NULL)
       publisher = Publisher::Instance();
@@ -235,6 +275,25 @@ bool Toggle::TakeAction(const std::string &action, const std::string &actionData
 
    return false;
 }
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Achieve.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& Toggle::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SUBSCRIBER);
+   //refObjectTypes.push_back(Gmat::PARAMETER);
+   return refObjectTypes;
+}
+
 
 
 //------------------------------------------------------------------------------
@@ -368,11 +427,12 @@ std::string Toggle::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Toggle::GetStringParameter(const Integer id) const
 {
-   if (id == subscriberID)
-   {
-      return subNames[0]; //loj: return first subscriber for now
-   }
-   else if (id == toggleStateID)
+//   if (id == subscriberID)
+//   {
+//      return subNames[0]; //loj: return first subscriber for now
+//   }
+   //   else if (id == toggleStateID)
+   if (id == toggleStateID)
    {
       if (toggleState == true)
          return "On";
@@ -425,5 +485,46 @@ bool Toggle::SetStringParameter(const Integer id, const std::string &value)
    }
    
    return GmatCommand::SetStringParameter(id, value);
+}
+
+std::string Toggle::GetStringParameter(const Integer id,
+                                       const Integer index) const
+{
+   if (id == subscriberID)
+   {
+      if (index < 0 || index >= (Integer) subNames.size())
+         throw CommandException(
+                  "Index out-of-range for subscriber names list for Toggle command.\n");
+      return subNames.at(index); 
+   }
+   return GmatCommand::GetStringParameter(id, index);
+}
+
+bool Toggle::SetStringParameter(const Integer id, 
+                                const std::string &value,
+                                const Integer index)
+{
+   if (value == "")
+      return false;
+   
+   if (id == subscriberID)
+   {
+      if (index < 0 || index > (Integer) subNames.size())
+         throw CommandException(
+                  "Index out-of-range for subscriber names list for Toggle command.\n");
+      else
+      {
+         if (index == (Integer) subNames.size())  subNames.push_back(value);
+         else                   subNames.at(index) = value;
+         
+         if (publisher == NULL)
+            publisher = Publisher::Instance();
+         
+         streamID = publisher->RegisterPublishedData(subNames, subNames);
+      }
+      
+      return true;
+   }
+   return GmatCommand::SetStringParameter(id, value, index);
 }
 

@@ -43,6 +43,8 @@ public:
    virtual GmatBase*   Clone(void) const;
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
    const std::string&  GetGeneratingString(Gmat::WriteMode mode,
@@ -63,6 +65,11 @@ public:
    virtual std::string GetStringParameter(const Integer id) const;
    virtual bool        SetStringParameter(const Integer id,
                                           const std::string &value);
+   virtual std::string GetStringParameter(const Integer id,
+                                          const Integer index) const;
+   virtual bool        SetStringParameter(const Integer id, 
+                                          const std::string &value,
+                                          const Integer index);
 
    // Methods used to run the command
    virtual bool        InterpretAction();
