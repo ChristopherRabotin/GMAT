@@ -116,7 +116,7 @@ bool Toggle::InterpretAction()
          "parentheses";
       throw CommandException(msg);
    }
-   StringArray parts = GmatStringUtil::SeparateBy(str1," ,", false);
+   StringArray parts = GmatStringUtil::SeparateBy(str1," ", false);
    Integer partsSz = (Integer) parts.size();
    #ifdef DEBUG_TOGGLE
       MessageInterface::ShowMessage("In InterpretAction, parts = \n");
