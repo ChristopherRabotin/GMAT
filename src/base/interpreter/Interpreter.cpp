@@ -4086,7 +4086,7 @@ void Interpreter::HandleErrorMessage(BaseException &e, const std::string &lineNu
                                      const std::string &line, bool writeLine,
                                      bool warning)
 {
-   std::string currMsg;
+   std::string currMsg = "";
    std::string msgKind = "**** ERROR **** ";
    if (warning)
       msgKind = "*** WARNING *** ";
@@ -4731,6 +4731,7 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          
          #ifdef DEBUG_CHECK_OBJECT
          for (UnsignedInt j=0; j<refNames.size(); j++)
+            MessageInterface::ShowMessage(" and the refNames are:\n");
             MessageInterface::ShowMessage
                ("      %s\n", refNames[j].c_str());
          #endif
