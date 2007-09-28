@@ -221,6 +221,8 @@ protected:
 
    /// The state that is propagated
    Real                    *state;
+   /// The J2000 body state that is propagated
+   Real                    *j2kState;
    /// Data sent to the Publisher
    Real                    *pubdata;
    /// Flag for stopping

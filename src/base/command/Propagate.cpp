@@ -2039,12 +2039,8 @@ bool Propagate::Initialize()
       // Check for finite thrusts and update the force model if there are any
       if (finiteBurnActive == true)
          AddTransientForce(satName[index], fm);
-   
-      streamID = publisher->RegisterPublishedData(owners, elements);
-      // Set origin of MJ2000Eq data
-      /// @todo Investigate how to publish the origin data
-      publisher->SetDataMJ2000EqOrigin(fm->GetBody());
       
+      streamID = publisher->RegisterPublishedData(owners, elements);
       p->SetPhysicalModel(fm);
       p->SetRealParameter("InitialStepSize", 
          fabs(p->GetRealParameter("InitialStepSize")) * direction);
@@ -2289,6 +2285,7 @@ void Propagate::PrepareToPropagate()
          p[n]->Initialize();
          p[n]->Update(direction > 0.0);
          state = fm[n]->GetState();
+         j2kState = fm[n]->GetJ2KState();
       }   
 
       baseEpoch.clear();
@@ -2397,7 +2394,7 @@ void Propagate::PrepareToPropagate()
 
       // Publish the initial data
       pubdata[0] = currEpoch[0];
-      memcpy(&pubdata[1], state, dim*sizeof(Real));
+      memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
 
       inProgress = true;
@@ -2440,6 +2437,7 @@ void Propagate::PrepareToPropagate()
       p[n]->Initialize();
       p[n]->Update(direction > 0.0);
       state = fm[n]->GetState();
+      j2kState = fm[n]->GetJ2KState();
       dim += fm[n]->GetDimension();
    }   
 
@@ -2542,7 +2540,7 @@ void Propagate::PrepareToPropagate()
    
    // Publish the initial data
    pubdata[0] = currEpoch[0];
-   memcpy(&pubdata[1], state, dim*sizeof(Real));
+   memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
    publisher->Publish(streamID, pubdata, dim+1);
 
    hasFired = true;
@@ -2579,7 +2577,8 @@ void Propagate::PrepareToPropagate()
 bool Propagate::Execute()
 {
    #if DEBUG_PROPAGATE_EXE
-      MessageInterface::ShowMessage("Propagate::Execute() entered.\n");
+      MessageInterface::ShowMessage("Propagate::Execute() <%s> entered.\n",
+                                    GetGeneratingString().c_str());
    #endif
 
    if (initialized == false)
@@ -2677,10 +2676,10 @@ bool Propagate::Execute()
          {
             // No longer need to check stopping conditions at the first step
             checkFirstStep = false;
-         
+            
             // Publish the data here
             pubdata[0] = currEpoch[0];
-            memcpy(&pubdata[1], state, dim*sizeof(Real));
+            memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
             publisher->Publish(streamID, pubdata, dim+1);
          }
          else
@@ -3317,7 +3316,7 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
 
       // Publish the final data point here
       pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY;
-      memcpy(&pubdata[1], state, dim*sizeof(Real));
+      memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
       publisher->Publish(streamID, pubdata, dim+1);
       
       #if DEBUG_PROPAGATE_EXE
