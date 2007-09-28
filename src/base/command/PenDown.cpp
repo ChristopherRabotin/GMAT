@@ -18,6 +18,9 @@
 
 #include "PenDown.hpp"
 #include "MessageInterface.hpp"
+#include "StringUtil.hpp"
+
+//#define DEBUG_PENDOWN
 
 
 //------------------------------------------------------------------------------
@@ -28,10 +31,10 @@
  */
 //------------------------------------------------------------------------------
 PenDown::PenDown() :
-   GmatCommand    ("PenDown"),
-   plotName       (""),
-   thePlot        (NULL)
+   GmatCommand    ("PenDown")
 {
+   plotNameList.clear();
+   thePlotList.clear();
 }
 
 
@@ -44,6 +47,8 @@ PenDown::PenDown() :
 //------------------------------------------------------------------------------
 PenDown::~PenDown()
 {
+   plotNameList.clear();
+   thePlotList.clear();
 }
 
 
@@ -58,8 +63,8 @@ PenDown::~PenDown()
 //------------------------------------------------------------------------------
 PenDown::PenDown(const PenDown &c) :
    GmatCommand    (c),
-   plotName       (c.plotName),
-   thePlot        (NULL)
+   plotNameList   (c.plotNameList),
+   thePlotList    (c.thePlotList)
 {
 }
 
@@ -78,8 +83,8 @@ PenDown& PenDown::operator=(const PenDown &c)
 {
    if (&c != this)
    {
-      plotName = c.plotName;
-      thePlot = NULL;
+      plotNameList = c.plotNameList;
+      thePlotList.clear();
    }
    
    return *this;
@@ -100,13 +105,49 @@ GmatBase* PenDown::Clone() const
    return new PenDown(*this);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the Achieve.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& PenDown::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SUBSCRIBER);
+   return refObjectTypes;
+}
+
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * Accesses arrays of names for referenced objects.
+ * 
+ * @param type Type of object requested.
+ * 
+ * @return the StringArray containing the referenced object names.
+ */
+//------------------------------------------------------------------------------
+const StringArray& PenDown::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   // There are only subscribers, so ignore object type
+   return plotNameList;
+}
+
 
 //------------------------------------------------------------------------------
 // bool InterpretAction()
 //------------------------------------------------------------------------------
 bool PenDown::InterpretAction()
 {
-   Integer loc = generatingString.find("PenDown", 0) + 7, end;
+   Integer loc = generatingString.find("PenDown", 0) + 7;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
       ++loc;
@@ -122,12 +163,23 @@ bool PenDown::InterpretAction()
    }
 
    // Find the Subscriber list
-   end = generatingString.find(" ", loc);
-   plotName = generatingString.substr(loc, end-loc);
+   std::string sub = generatingString.substr(loc, generatingString.size()-loc);
+   StringArray parts = GmatStringUtil::SeparateBy(sub," ", false);
+   Integer partsSz = (Integer) parts.size();
+   #ifdef DEBUG_PENDOWN
+      MessageInterface::ShowMessage("In PenDown::InterpretAction, parts = \n");
+      for (Integer jj = 0; jj < partsSz; jj++)
+         MessageInterface::ShowMessage("   %s\n", parts.at(jj).c_str());
+   #endif
+   if (partsSz < 1) // 'PenDown' already found
+      throw CommandException("Missing field in PenDown command");
+   for (Integer ii = 0; ii < partsSz; ii++)
+      plotNameList.push_back(parts.at(ii));
    
    #ifdef DEBUG_PENDOWN
-      MessageInterface::ShowMessage(
-         "Plot to be PenDowned: %s\n", plotName.c_str());
+      MessageInterface::ShowMessage("Plots to be PenDowned:\n");
+      for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
+         MessageInterface::ShowMessage("   %s\n", (plotNameList.at(ii)).c_str());
    #endif
 
    return true;
@@ -153,25 +205,29 @@ bool PenDown::Initialize()
    
    GmatBase *xy;
    
-   if ((*objectMap).find(plotName) != objectMap->end()) 
+   for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
-      xy = (GmatBase *)(*objectMap)[plotName];
-      if (xy->GetTypeName() == "XYPlot") 
-         thePlot = (TsPlot*)xy;
-      else
-         throw CommandException(
-            "Object named \"" + plotName + "\" should be an XYPlot to use the "
-            "PenDown command for this object, but it is a " + 
-            xy->GetTypeName());      
+      //if ((*objectMap).find(plotName) != objectMap->end()) 
+      if ((*objectMap).find(plotNameList.at(ii)) != objectMap->end()) 
+      {
+         xy = (GmatBase *)(*objectMap)[plotNameList.at(ii)];
+         if (xy->GetTypeName() == "XYPlot") 
+            thePlotList.push_back((TsPlot*) xy);
+            //thePlot = (TsPlot*)xy;
+         else
+            throw CommandException(
+               "Object named \"" + plotNameList.at(ii) + "\" should be an XYPlot to use the "
+               "PenDown command for this object, but it is a " + 
+               xy->GetTypeName());      
+      }
+      else 
+      {
+         MessageInterface::ShowMessage
+            ("PenDown command cannot find XY Plot \"%s\"; command has no effect."
+            "\n", (plotNameList.at(ii)).c_str());
+         return false;
+      }
    }
-   else 
-   {
-      MessageInterface::ShowMessage
-         ("PenDown command cannot find XY Plot \"%s\"; command has no effect."
-         "\n", plotName.c_str());
-      return false;
-   }
-
    return true;
 }
 
@@ -191,7 +247,10 @@ bool PenDown::Initialize()
 //---------------------------------------------------------------------------
 bool PenDown::Execute()
 {
-   if (thePlot)
-      thePlot->TakeAction("PenDown");
+   for (unsigned int ii = 0; ii < thePlotList.size(); ii++)
+   {
+      if (thePlotList.at(ii))
+         if (!(thePlotList.at(ii)->TakeAction("PenDown"))) return false;
+   }
    return true;
 }

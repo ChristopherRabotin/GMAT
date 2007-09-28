@@ -37,13 +37,18 @@ public:
    
    virtual GmatBase* Clone() const;
    
+   virtual const ObjectTypeArray&
+                     GetRefObjectTypeArray();
+   virtual const StringArray&
+                     GetRefObjectNameArray(const Gmat::ObjectType type);
+
    bool              InterpretAction();
    bool              Initialize();
    bool              Execute();
 
 protected:
-   std::string plotName;
-   TsPlot      *thePlot;
+   StringArray          plotNameList;   
+   std::vector<TsPlot*> thePlotList;
 };
 
 #endif /* PenDown_hpp */
