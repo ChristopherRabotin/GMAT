@@ -1176,14 +1176,10 @@ void CallFunction::GetOutParams()
             Array *array = (Array *)param;
             int numRows = array->GetIntegerParameter("NumRows");
             int numCols = array->GetIntegerParameter("NumCols");
-            int totalCells = numRows * numCols;
-            
-            //msvc++ change (loj: 2007.06.11)
-            //double outArray[totalCells];
+            int totalCells = numRows * numCols;            
             double *outArray = new double[totalCells];
             
-            //status =
-            MatlabInterface::GetVariable(varName, totalCells, outArray);
+            MatlabInterface::GetRealArray(varName, totalCells, outArray);
             
             // create rmatrix
             Rmatrix rmatrix = Rmatrix (numRows, numCols);
@@ -1222,12 +1218,10 @@ void CallFunction::GetOutParams()
          }
          else if (param->GetTypeName() == "Variable")
          {
-            //msvc++ change (loj: 2007.06.11)
-            //double outArray[1];
             double *outArray = new double[1];
             
-            MatlabInterface::GetVariable(varName, 1, outArray);
-            //MessageInterface::ShowMessage("==> outArray[0]=%f\n", outArray[0]);
+            MatlabInterface::GetRealArray(varName, 1, outArray);
+            
             param->SetReal(outArray[0]);
             std::ostringstream ss;
             ss.precision(18);
@@ -1280,39 +1274,8 @@ void CallFunction::EvalMatlabString(std::string evalString)
 {
 #ifdef __USE_MATLAB__
 
-   // try to call the function
-   evalString = "try,\n  " + evalString + "\ncatch\n  errormsg = lasterr;\nend";
-   MatlabInterface::EvalString(evalString);
-
-   #ifdef DEBUG_UPDATE_VAR
-   MessageInterface::ShowMessage
-      ("CallFunction::EvalMatlabString() evalString =\n%s\n\n", evalString.c_str());
-   #endif
-
-
-   double errormsg[128];
-   // if there was an error throw an exception
-   if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
-   {
-      double buffer[128];
-
-
-      MatlabInterface::OutputBuffer((char *)buffer, 128);
-      MatlabInterface::EvalString("errormsg");
-
-
-      // get rid of "errormsg ="
-      char *ptr = strtok((char *)buffer, "=");
-      ptr = strtok(NULL, "\n");
-
-      std::stringstream errorStr;
-      errorStr << "Error from Matlab\n"<< ptr;
-
-
-      throw CommandException(errorStr.str());
-   }
-
-
+   MatlabInterface::RunMatlabString(evalString);
+   
 #endif
 }
 
