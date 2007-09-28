@@ -446,7 +446,7 @@ bool FminconOptimizer::Optimize()
       double      outArr[1];
       int         OKint = 0;
       std::string resStr    = "exitFlag";
-      OKint                 = MatlabInterface::GetVariable(resStr, 1, outArr);
+      OKint                 = MatlabInterface::GetRealArray(resStr, 1, outArr);
 
       if (!OKint)
          throw SolverException(
@@ -1028,7 +1028,7 @@ bool FminconOptimizer::OpenConnection()
    std::string evalStr   = "fminconexist = exist(\'fmincon\');";
    std::string resStr    = "fminconexist";
    MatlabInterface::RunMatlabString(evalStr);
-   OKint                 = MatlabInterface::GetVariable(resStr, 1, outArr);
+   OKint                 = MatlabInterface::GetRealArray(resStr, 1, outArr);
 
    if (!OKint)
       throw SolverException(
@@ -1042,7 +1042,7 @@ bool FminconOptimizer::OpenConnection()
       evalStr   = "startupexist = exist(\'gmat_startup\');";
       resStr    = "startupexist";
       MatlabInterface::RunMatlabString(evalStr);
-      OKint                 = MatlabInterface::GetVariable(resStr, 1, outArr2); 
+      OKint                 = MatlabInterface::GetRealArray(resStr, 1, outArr2); 
       if (!OKint)
          throw SolverException(
                "Error determining existence of MATLAB gmat_startup");
@@ -1060,19 +1060,19 @@ bool FminconOptimizer::OpenConnection()
          evalStr = "driverexist = exist(\'GmatFminconOptimizationDriver\');"; 
          resStr  = "driverexist";  
          MatlabInterface::RunMatlabString(evalStr);
-         OKint                 = MatlabInterface::GetVariable(resStr, 1, out1); 
+         OKint                 = MatlabInterface::GetRealArray(resStr, 1, out1); 
          evalStr = "objectiveexist = exist(\'EvaluateGMATObjective\');"; 
          resStr  = "objectiveexist";  
          MatlabInterface::RunMatlabString(evalStr);
-         OKint                 = MatlabInterface::GetVariable(resStr, 1, out2); 
+         OKint                 = MatlabInterface::GetRealArray(resStr, 1, out2); 
          evalStr = "constraintexist = exist(\'EvaluateGMATConstraints\');"; 
          resStr  = "constraintexist";  
          MatlabInterface::RunMatlabString(evalStr);
-         OKint                 = MatlabInterface::GetVariable(resStr, 1, out3); 
+         OKint                 = MatlabInterface::GetRealArray(resStr, 1, out3); 
          evalStr = "callbackexist = exist(\'CallGMATfminconSolver\');"; 
          resStr  = "callbackexist";  
          MatlabInterface::RunMatlabString(evalStr);
-         OKint                 = MatlabInterface::GetVariable(resStr, 1, out4); 
+         OKint                 = MatlabInterface::GetRealArray(resStr, 1, out4); 
          #ifdef DEBUG_ML_CONNECTIONS // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
             MessageInterface::ShowMessage(
             "existence codes for support files  = %.4f  %.4f  %.4f  %.4f\n", 
