@@ -215,8 +215,8 @@ int MatlabInterface::Close()
 
 
 //------------------------------------------------------------------------------
-// int PutVariable(const std::string &matlabVarName, int numElements,
-// double inArray[])
+// int PutRealArray(const std::string &matlabVarName, int numElements,
+//                  double inArray[])
 //------------------------------------------------------------------------------
 /**
  * Put arrays to Matlab workspace.
@@ -226,7 +226,7 @@ int MatlabInterface::Close()
  * @return 1 = no error, 0 = error
  */
 //------------------------------------------------------------------------------
-int MatlabInterface::PutVariable(const std::string &matlabVarName,
+int MatlabInterface::PutRealArray(const std::string &matlabVarName,
                                  int numElements, double inArray[])
 {
 #if defined __USE_MATLAB__
@@ -243,11 +243,11 @@ int MatlabInterface::PutVariable(const std::string &matlabVarName,
 
    return 1;
    
-} // end PutVariable()
+} // end PutRealArray()
 
 
 //------------------------------------------------------------------------------
-//  int GetVariable(const std::string &matlabVarName, int numElements,
+// int GetRealArray(const std::string &matlabVarName, int numElements,
 //                  double outArray[])
 //------------------------------------------------------------------------------
 /**
@@ -255,12 +255,13 @@ int MatlabInterface::PutVariable(const std::string &matlabVarName,
  *
  * @param <matlabVarName> variable name in the MATLAB workspace
  * @param <numElements> number of elements to receive from MATLAB
+ * @param <outArray> array to receive double array from MATLAB
  * @Return 1 = no error, 0 = error
  * @exception <InterfaceException> thrown if empty output was received
  */
 //------------------------------------------------------------------------------
-int MatlabInterface::GetVariable(const std::string &matlabVarName,
-                                 int numElements, double outArray[])
+int MatlabInterface::GetRealArray(const std::string &matlabVarName,
+                                  int numElements, double outArray[])
 {
 #if defined __USE_MATLAB__
    // create a matlab variable into which to put the data
@@ -268,7 +269,7 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName,
    
    #ifdef DEBUG_MATLAB_GET
    MessageInterface::ShowMessage
-      ("Entering MatlabInterface::GetVariable() matlabVarName=%s, numElements=%d, "
+      ("Entering MatlabInterface::GetRealArray() matlabVarName=%s, numElements=%d, "
        "mxArrayInputPtrD=%p\n", matlabVarName.c_str(), numElements, mxArrayInputPtrD);
    #endif
    
@@ -282,11 +283,11 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName,
    {
       #ifdef DEBUG_MATLAB_GET
       MessageInterface::ShowMessage
-         ("MatlabInterface::GetArray(): mxArrayOutputPtrD is NULL\n");
+         ("MatlabInterface::GetRealArray(): mxArrayOutputPtrD is NULL\n");
       #endif
       return 0;
    }
-   else
+   else if (mxIsDouble(mxArrayOutputPtrD))
    {
       // If real numeric pointer is NULL, throw an exception
       double *realPtr = mxGetPr(mxArrayOutputPtrD);
@@ -305,10 +306,76 @@ int MatlabInterface::GetVariable(const std::string &matlabVarName,
       mxDestroyArray(mxArrayOutputPtrD);
       return 1;
    }
+   else
+   {
+      #ifdef DEBUG_MATLAB_GET
+      MessageInterface::ShowMessage
+         ("MatlabInterface::GetRealArray() Matlab variable is not a double array\n");
+      #endif
+      
+      return 0;
+   }
 #endif
 
    return 0;
-} // end GetVariable()
+} // end GetRealArray()
+
+
+//------------------------------------------------------------------------------
+// int GetString(const std::string &matlabVarName, std::string &outStr)
+//------------------------------------------------------------------------------
+/**
+ * Get char array from Matlab workspace.
+ *
+ * @param <matlabVarName> variable name in the MATLAB workspace
+ * @param <outStr> string to receive char array from MATLAB
+ * @Return 1 = no error, 0 = error
+ * @exception <InterfaceException> thrown if empty output was received
+ */
+//------------------------------------------------------------------------------
+int MatlabInterface::GetString(const std::string &matlabVarName,
+                               std::string &outStr)
+{
+#if defined __USE_MATLAB__
+   
+   // get the variable from the MATLAB workspace
+   mxArrayOutputPtrD = engGetVariable(enginePtrD, matlabVarName.c_str());
+   
+   if (mxArrayOutputPtrD == NULL)
+   {
+      #ifdef DEBUG_MATLAB_GET
+      MessageInterface::ShowMessage
+         ("MatlabInterface::GetString(): mxArrayOutputPtrD is NULL\n");
+      #endif
+      return 0;
+   }
+   else if (mxIsChar(mxArrayOutputPtrD))
+   {
+      char outArray[512];
+      mxGetString(mxArrayOutputPtrD, outArray, 512);
+      outStr.assign(outArray);
+      
+      #ifdef DEBUG_MATLAB_GET
+      MessageInterface::ShowMessage
+         ("MatlabInterface::GetString() outStr =\n%s\n", outStr.c_str());
+      #endif
+      
+      mxDestroyArray(mxArrayOutputPtrD);
+      return 1;
+   }
+   else
+   {
+      #ifdef DEBUG_MATLAB_GET
+      MessageInterface::ShowMessage
+         ("MatlabInterface::GetString() Matlab variable is not a char array\n");
+      #endif
+      
+      return 0;
+   }
+#endif
+
+   return 0;
+} // end GetString()
 
 
 //------------------------------------------------------------------------------
@@ -383,28 +450,23 @@ void MatlabInterface::RunMatlabString(std::string evalString)
    if (!MatlabInterface::IsOpen())
       throw InterfaceException(
          "ERROR - Matlab Interface not yet open");
-
-   // try to call the function
+   
+   // try to call the function   
    evalString = "try,\n  " + evalString + "\ncatch\n  errormsg = lasterr;\nend";
+   
+   #if DEBUG_MATLAB_EVAL
+   MessageInterface::ShowMessage("===> evalString=\n%s\n", evalString.c_str());
+   MessageInterface::ShowMessage("===> calling EvalString()\n");
+   #endif
+   
    MatlabInterface::EvalString(evalString);
-
-   double errormsg[128];
+   
    // if there was an error throw an exception
-   if (MatlabInterface::GetVariable("errormsg", 1, errormsg))
+   std::string errorStr;
+   if (MatlabInterface::GetString("errormsg", errorStr))
    {
-      double buffer[128];
-
-      MatlabInterface::OutputBuffer((char *)buffer, 128);
-      MatlabInterface::EvalString("errormsg");
-
-      // get rid of "errormsg ="
-      char *ptr = strtok((char *)buffer, "=");
-      ptr = strtok(NULL, "\n");
-
-      std::stringstream errorStr;
-      errorStr << "Error from Matlab\n"<< ptr;
-
-      throw InterfaceException(errorStr.str());
+      //MessageInterface::ShowMessage("===> %s\n", errorStr.c_str());
+      throw InterfaceException(errorStr.c_str());
    }
 #endif
 }

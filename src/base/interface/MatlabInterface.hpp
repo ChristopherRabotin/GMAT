@@ -22,12 +22,13 @@ class MatlabInterface
 
 public:
 
-static int Open();
-static int Close();
-static int PutVariable(const std::string &matlabVarName, int numElements, double inArray[]);
-static int GetVariable(const std::string &matlabVarName, int numElements, double outArray[]);
-static int EvalString(const std::string &evalString);
-static int OutputBuffer(char *buffer, int size);
+static int  Open();
+static int  Close();
+static int  PutRealArray(const std::string &matlabVarName, int numElements, double inArray[]);
+static int  GetRealArray(const std::string &matlabVarName, int numElements, double outArray[]);
+static int  GetString(const std::string &matlabVarName, std::string &outStr);
+static int  EvalString(const std::string &evalString);
+static int  OutputBuffer(char *buffer, int size);
 static bool IsOpen();
 static void RunMatlabString(std::string evalString); 
 
