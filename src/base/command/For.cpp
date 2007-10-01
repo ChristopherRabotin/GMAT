@@ -19,6 +19,7 @@
 //------------------------------------------------------------------------------
 
 #include <ctype.h>               // for isalpha
+#include "gmatdefs.hpp"
 #include "For.hpp"
 #include "BranchCommand.hpp"
 #include "CommandException.hpp"
@@ -1086,39 +1087,40 @@ const StringArray& For::GetWrapperObjectNameArray()
 
 
 bool For::SetElementWrapper(ElementWrapper *toWrapper, 
-                                          const std::string &withName)
+                            const std::string &withName)
 {
    bool retval = false;
 
    if (toWrapper == NULL) return false;
    
-   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
-   {
-      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   }
-   if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
-   {
-      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   }
+   //if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   //{
+   //   throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+   //               "\" is not an allowed value.\nThe allowed values are:"
+   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   //}
 
+   bool typeOK = true;
+   Gmat::ParameterType baseType;
+   std::string         baseStr;
    try
    {
-       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
-            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
-       {
-           throw CommandException("A value of base type \"non-Real\" on command \"" + 
-                       typeName + 
-                       "\" is not an allowed value.\nThe allowed values are:"
-                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-       }
+      baseType = toWrapper->GetDataType();
+      baseStr  = PARAM_TYPE_STRING[baseType];
+      if ( (baseType != Gmat::REAL_TYPE) && (baseType  != Gmat::INTEGER_TYPE) )
+         typeOK = false;
    }
    catch (BaseException &be)
    {
-       // just ignore it here - will need to check data type on initialization
+      // just ignore it here - will need to check data type of object property 
+      // wrappers on initialization
+   }
+   if (!typeOK)
+   {
+      throw CommandException("A value of \"" + withName + "\" of base type \"" +
+                  baseStr + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
    
    #ifdef DEBUG_WRAPPER_CODE   
