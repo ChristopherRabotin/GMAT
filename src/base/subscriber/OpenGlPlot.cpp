@@ -20,7 +20,6 @@
 #include "OpenGlPlot.hpp"
 #include "PlotInterface.hpp"       // for UpdateGlPlot()
 #include "ColorTypes.hpp"          // for namespace GmatColor::
-#include "Publisher.hpp"           // for Instance()
 #include "SubscriberException.hpp" // for SubscriberException()
 #include "MessageInterface.hpp"    // for ShowMessage()
 #include "TextParser.hpp"          // for SeparateBrackets()
@@ -2232,6 +2231,13 @@ bool OpenGlPlot::RemoveSpacePoint(const std::string &name)
 //------------------------------------------------------------------------------
 // Integer FindIndexOfElement(StringArray &labelArray, const std::string &label)
 //------------------------------------------------------------------------------
+/*
+ * Finds the index of the element label from the element label array.
+ *
+ * Typical element label array contains:
+ *    All.epoch, scName.X, scName.Y, scName.Z, scName.Vx, scName.Vy, scName.Vz.
+ */
+//------------------------------------------------------------------------------
 Integer OpenGlPlot::FindIndexOfElement(StringArray &labelArray,
                                        const std::string &label)
 {
@@ -2605,9 +2611,7 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    if (len <= 0)
       return true;
    
-   
-   Publisher *thePublisher = Publisher::Instance();
-   
+      
    //------------------------------------------------------------
    // if targeting and draw target is None, just return
    //------------------------------------------------------------
@@ -2640,30 +2644,26 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       mNumCollected++;
       bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
-      //get data being published
-      StringArray labelArray =
-         thePublisher->GetStringArrayParameter("PublishedDataMap");
-      
       #if DEBUG_OPENGL_UPDATE > 1
-      MessageInterface::ShowMessage("   labelArray=\n   ");
-      for (int j=0; j<(int)labelArray.size(); j++)
-         MessageInterface::ShowMessage("%s ", labelArray[j].c_str());
+      MessageInterface::ShowMessage("   mDataLabels=\n   ");
+      for (int j=0; j<(int)mDataLabels.size(); j++)
+         MessageInterface::ShowMessage("%s ", mDataLabels[j].c_str());
       MessageInterface::ShowMessage("\n");
       #endif
       
       Integer idX, idY, idZ;
       Integer idVx, idVy, idVz;
       Integer scIndex = -1;
-            
+      
       for (int i=0; i<mScCount; i++)
       {
-         idX = FindIndexOfElement(labelArray, mScNameArray[i]+".X");
-         idY = FindIndexOfElement(labelArray, mScNameArray[i]+".Y");
-         idZ = FindIndexOfElement(labelArray, mScNameArray[i]+".Z");
+         idX = FindIndexOfElement(mDataLabels, mScNameArray[i]+".X");
+         idY = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Y");
+         idZ = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Z");
          
-         idVx = FindIndexOfElement(labelArray, mScNameArray[i]+".Vx");
-         idVy = FindIndexOfElement(labelArray, mScNameArray[i]+".Vy");
-         idVz = FindIndexOfElement(labelArray, mScNameArray[i]+".Vz");
+         idVx = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vx");
+         idVy = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vy");
+         idVz = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vz");
          
          #if DEBUG_OPENGL_UPDATE > 1
          MessageInterface::ShowMessage
