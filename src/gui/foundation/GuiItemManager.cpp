@@ -185,38 +185,59 @@ void GuiItemManager::UpdateAll()
    #endif
    
    UpdateCelestialPoint(); // All CelestialBodies and CalculatedPoints
-   //MessageInterface::ShowMessage("===> after UpdateCelestialPoint()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateCelestialPoint()\n");
+   #endif
    
    UpdateFormation();
-   //MessageInterface::ShowMessage("===> after UpdateFormation()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateFormation()\n");
+   #endif
    
    UpdateSpacecraft();
-   //MessageInterface::ShowMessage("===> after UpdateSpacecraft()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateSpacecraft()\n");
+   #endif
    
    UpdateBurn();
-   //MessageInterface::ShowMessage("===> after UpdateBurn()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateBurn()\n");
+   #endif
    
    UpdateParameter();
-   //MessageInterface::ShowMessage("===> after UpdateParameter()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateParameter()\n");
+   #endif
    
    UpdateSolarSystem();
-   //MessageInterface::ShowMessage("===> after UpdateSolarSystem()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateSolarSystem()\n");
+   #endif
    
    UpdateCoordSystem();
-   //MessageInterface::ShowMessage("===> after UpdateCoordSystem()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateCoordSystem()\n");
+   #endif
    
    UpdateHardware();
-   //MessageInterface::ShowMessage("===> after UpdateHardware()\n");
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateHardware()\n");
+   #endif
    
    UpdateFunction();
-   //MessageInterface::ShowMessage("===> after UpdateFunction()\n");
-
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateFunction()\n");
+   #endif
+   
    UpdateSubscriber();
-   //MessageInterface::ShowMessage("===> after UpdateSubscriber()\n");
-
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateSubscriber()\n");
+   #endif
+   
    UpdateSolver();
-   //MessageInterface::ShowMessage("===> after UpdateSolver()\n");
-
+   #if DEBUG_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage("===> after UpdateSolver()\n");
+   #endif
 }
 
 
@@ -653,13 +674,15 @@ void GuiItemManager::UnregisterComboBox(const wxString &type, wxComboBox *cb)
 
 
 //------------------------------------------------------------------------------
-// wxArrayString GetSettablePropertyList(const wxString &objType)
+// wxArrayString GetPropertyList(const wxString &objType,
+//                               int showOption = SHOW_PLOTTABLE))
 //------------------------------------------------------------------------------
-wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
+wxArrayString GuiItemManager::GetPropertyList(const wxString &objType,
+                                              int showOption)
 {
    #if DEBUG_GUI_ITEM_PROPERTY
    MessageInterface::ShowMessage
-      ("GuiItemManager::GetSettablePropertyList() objType=%s\n", objType.c_str());
+      ("GuiItemManager::GetPropertyList() objType=%s\n", objType.c_str());
    #endif
    
    wxArrayString array;
@@ -669,25 +692,59 @@ wxArrayString GuiItemManager::GetSettablePropertyList(const wxString &objType)
       ParameterInfo *theParamInfo = ParameterInfo::Instance();
       for (int i=0; i<theNumScProperty; i++)
       {
-         if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+         if (showOption == SHOW_REPORTABLE)
          {
-            #if DEBUG_GUI_ITEM_PROPERTY > 1
-            MessageInterface::ShowMessage
-               ("GetSettablePropertyList() Adding %s\n",
-                theScPropertyList[i].c_str());
-            #endif
-            
-            array.Add(theScPropertyList[i]);
+            if (theParamInfo->IsReportable(theScPropertyList[i].c_str()))
+            {
+               #if DEBUG_GUI_ITEM_PROPERTY > 1
+               MessageInterface::ShowMessage
+                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
+               #endif
+               
+               array.Add(theScPropertyList[i]);
+            }
+         }
+         else if (showOption == SHOW_PLOTTABLE)
+         {
+            if (theParamInfo->IsPlottable(theScPropertyList[i].c_str()))
+            {
+               #if DEBUG_GUI_ITEM_PROPERTY > 1
+               MessageInterface::ShowMessage
+                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
+               #endif
+               
+               array.Add(theScPropertyList[i]);
+            }
+         }
+         else if (showOption == SHOW_SETTABLE)
+         {
+            if (theParamInfo->IsSettable(theScPropertyList[i].c_str()))
+            {
+               #if DEBUG_GUI_ITEM_PROPERTY > 1
+               MessageInterface::ShowMessage
+                  ("GetPropertyList() Adding %s\n", theScPropertyList[i].c_str());
+               #endif
+               
+               array.Add(theScPropertyList[i]);
+            }
          }
       }
+      
       return array;
    }
    else if (objType == "ImpulsiveBurn")
    {
-      return wxArrayString(theNumImpBurnProperty, GetPropertyList(objType));
+      // for now all impulsive burn parameters are reportable
+      return wxArrayString(theNumImpBurnProperty, theImpBurnPropertyList);
    }
-
-   return array;
+   else
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Property list for %s is not available at this time\n",
+          objType.c_str());
+      
+      return array;
+   }
 }
 
 
@@ -2121,10 +2178,11 @@ CreateParameterSizer(wxWindow *parent,
                      wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                      wxButton **createVarButton, wxWindowID createVarButtonId,
                      wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId, 
-                     wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
+                     wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
+                     wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
                      wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                      wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-                     wxComboBox **originComboBox, wxWindowID originComboBoxId,                     
+                     wxComboBox **originComboBox, wxWindowID originComboBoxId,
                      wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
                      const wxArrayString &objectTypeList, int showOption,
                      bool showVariable, bool showArray, const wxString &objectType)
@@ -2134,7 +2192,7 @@ CreateParameterSizer(wxWindow *parent,
    #endif
    
    int borderSize = 1;
-
+   
    //wxStaticText
    wxStaticText *userVarStaticText = NULL;
    
@@ -2144,7 +2202,7 @@ CreateParameterSizer(wxWindow *parent,
          new wxStaticText(parent, -1, wxT("Variables"),
                           wxDefaultPosition, wxDefaultSize, 0);
    }
-
+   
    wxStaticText *objectTypeStaticText =
       new wxStaticText(parent, -1, wxT("Object Type"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -2168,32 +2226,26 @@ CreateParameterSizer(wxWindow *parent,
          new wxButton(parent, createVarButtonId, wxT("Create"),
                       wxDefaultPosition, wxSize(-1,-1), 0 );
    }
-
-   // Object type ComboBox (loj: 6/22/06)
+   
+   // Object type ComboBox
    *objectTypeComboBox =
       GetObjectTypeComboBox(parent, objectTypeComboBoxId, wxSize(170, 20),
                             objectTypeList);
    (*objectTypeComboBox)->SetValue(objectType);
    
-   // wxComboBox
-   if (objectType == "ImpulsiveBurn")
-   {
-      *objectComboBox =
-         GetImpBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
-   }
-   else if (objectType == "FiniteBurn")
-   {
-      *objectComboBox =
-         GetFiniteBurnComboBox(parent, objectComboBoxId, wxSize(170, 20));
-   }
-   else
-   {
-      *objectComboBox =
-         GetSpacecraftComboBox(parent, objectComboBoxId, wxSize(170, 20));
-   }
+   // Spacecraft ComboBox
+   *spacecraftComboBox =
+      GetSpacecraftComboBox(parent, spacecraftComboBoxId, wxSize(170, 20));
    
+   // ImpulsiveBurn ComboBox
+   *impBurnComboBox =
+      GetImpBurnComboBox(parent, impBurnComboBoxId, wxSize(170, 20));
+   
+   // Coordinate System ComboBox
    *coordSysComboBox =
       GetCoordSysComboBox(parent, coordSysComboBoxId, wxSize(170, 20));
+   
+   // Origin ComboBox
    *originComboBox =
       GetConfigBodyComboBox(parent, originComboBoxId, wxSize(170, 20));
    
@@ -2220,7 +2272,7 @@ CreateParameterSizer(wxWindow *parent,
                                    wxSize(170, 50), "");
       }
    }
-
+   
    //-----------------------------------------------------------------
    // property
    //-----------------------------------------------------------------
@@ -2248,7 +2300,7 @@ CreateParameterSizer(wxWindow *parent,
    *coordSysBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    (*coordSysBoxSizer)->Add(*coordSysLabel, 0, wxALIGN_CENTRE|wxALL, borderSize);
-
+   
    if (showVariable || showArray)
    {
       userParamBoxSizer->Add
@@ -2265,12 +2317,21 @@ CreateParameterSizer(wxWindow *parent,
         (*objectTypeComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
    systemParamBoxSizer->Add
       (objectStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-   systemParamBoxSizer->Add
-        (*objectComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
    
    #ifdef __WXMAC__
    systemParamBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, borderSize);
    #endif
+   
+   systemParamBoxSizer->Add
+      (*spacecraftComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
+   systemParamBoxSizer->Add
+      (*impBurnComboBox, 0, wxGROW|wxALIGN_CENTER|wxBOTTOM|wxALL, borderSize);
+   
+   // Show desired object type   
+   if (objectType == "ImpulsiveBurn")
+      systemParamBoxSizer->Hide(*spacecraftComboBox);
+   else
+      systemParamBoxSizer->Hide(*impBurnComboBox);
    
    systemParamBoxSizer->Add
       (propertyStaticText, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
@@ -2278,7 +2339,6 @@ CreateParameterSizer(wxWindow *parent,
       (*propertyListBox, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
    systemParamBoxSizer->Add
       (*coordSysBoxSizer, 0, wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-
    
    if (showVariable || showArray)
    {
@@ -2292,8 +2352,7 @@ CreateParameterSizer(wxWindow *parent,
    
    paramBoxSizer->Add(systemParamBoxSizer, 0,
                       wxALIGN_CENTRE|wxLEFT|wxRIGHT|wxBOTTOM, borderSize);
-
-
+   
    return paramBoxSizer;
 }
 
@@ -2667,7 +2726,7 @@ void GuiItemManager::UpdateSpacecraftList()
             (*pos)->Append(theSpacecraftList[i]);
       }
       
-      (*pos)->SetSelection((*pos)->GetCount() - 1);
+      //(*pos)->SetSelection((*pos)->GetCount() - 1);
    }
    
    //-------------------------------------------------------
@@ -2679,10 +2738,12 @@ void GuiItemManager::UpdateSpacecraftList()
       if ((*pos) == NULL)
          continue;
       
+      int sel = (*pos)->GetSelection();
+      
       (*pos)->Clear();
       (*pos)->Append(scNames);
       
-      (*pos)->SetSelection(theNumSpacecraft - 1);
+      (*pos)->SetSelection(sel);
    }
    
    //-------------------------------------------------------
@@ -3089,8 +3150,7 @@ void GuiItemManager::UpdateSpacePointList()
 //------------------------------------------------------------------------------
 void GuiItemManager::UpdateBurnList()
 {
-   StringArray items =
-      theGuiInterpreter->GetListOfObjects(Gmat::BURN);
+   StringArray items = theGuiInterpreter->GetListOfObjects(Gmat::BURN);
    int numBurn = items.size();
    
    #if DEBUG_GUI_ITEM_BURN
@@ -3143,7 +3203,7 @@ void GuiItemManager::UpdateBurnList()
    int sel;
    for (std::vector<wxComboBox*>::iterator pos = mImpBurnCBList.begin();
         pos != mImpBurnCBList.end(); ++pos)
-   {      
+   {
       sel = (*pos)->GetSelection();
       
       (*pos)->Clear();

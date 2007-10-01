@@ -131,7 +131,9 @@ public:
    wxString* GetSolverList() { return theSolverList; }   
    wxString* GetOptimizerList() { return theOptimizerList; }
    
-   wxArrayString GetSettablePropertyList(const wxString &objType);
+   //wxArrayString GetSettablePropertyList(const wxString &objType);
+   wxArrayString GetPropertyList(const wxString &objType,
+                                 int showOption = SHOW_PLOTTABLE);
    
    int GetNumProperty(const wxString &objType);
    wxString* GetPropertyList(const wxString &objType);
@@ -271,8 +273,9 @@ public:
    CreateParameterSizer(wxWindow *parent,
                         wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                         wxButton **createVarButton, wxWindowID createVarButtonId,
-                        wxComboBox **objTypeComboBox, wxWindowID objectTypeComboBoxId,
-                        wxComboBox **objectComboBox, wxWindowID objectComboBoxId,
+                        wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
+                        wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
+                        wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
                         wxListBox **propertyListBox, wxWindowID propertyListBoxId,
                         wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
                         wxComboBox **originComboBox, wxWindowID originComboBoxId,
