@@ -1433,13 +1433,34 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    index = GmatStringUtil::Trim(index);
    
    std::string substr = desc.substr(equalSign+1);
+   if (substr.find(':') == substr.npos)
+   {
+      InterpreterException ex("Missing colon (:) for For loop control");
+      HandleError(ex);
+      return false;
+   }
    
    StringArray parts = theTextParser.SeparateBy(substr, ":");
    int count = parts.size();
+   Integer numColons = 0;
+   for (unsigned int ii = 0; ii < substr.size(); ii++)
+      if (substr.at(ii) == ':') numColons++;
+   if (numColons >= (Integer) count)
+   {
+      InterpreterException ex("Too many colons (:) for For loop control");
+      HandleError(ex);
+      return false;
+   }
+   #ifdef DEBUG_ASSEMBLE_FOR
+   MessageInterface::ShowMessage
+      ("Interpreter::AssembleForCommand() After SeparateBy, parts = \n");
+   for (Integer ii=0;ii<count;ii++)
+      MessageInterface::ShowMessage("   %s\n", parts[ii].c_str());
+   #endif
    
    if (count < 2)
    {
-      InterpreterException ex("Cannot find equal sign (=) for For loop control");
+      InterpreterException ex("Missing field, colon (:), or equal sign (=) for For loop control");
       HandleError(ex);
       return false;
    }
