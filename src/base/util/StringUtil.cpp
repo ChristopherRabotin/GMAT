@@ -1698,7 +1698,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
        (openChar == '[' && closeChar == ')'))
    {
       #if DEBUG_STRING_UTIL_ARRAY
-      MessageInterface::ShowMessage("   open and close bracket don't macth.\n");
+      MessageInterface::ShowMessage("   open and close bracket don't match.\n");
       #endif
 
       return false;
