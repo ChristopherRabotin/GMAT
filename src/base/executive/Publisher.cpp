@@ -305,10 +305,31 @@ bool Publisher::NotifyEndOfRun()
 Integer Publisher::RegisterPublishedData(const StringArray& owners, 
                                          const StringArray& elements)
 {
+   #ifdef DEBUG_PUBLISHER
+   MessageInterface::ShowMessage("Publisher::RegisterPublishedData() entered\n");
+   for (unsigned int i=0; i<owners.size(); i++)
+      MessageInterface::ShowMessage("   owner[%d]=%s\n", i, owners[i].c_str());
+   for (unsigned int i=0; i<elements.size(); i++)
+      MessageInterface::ShowMessage("   elements[%d]=%s\n", i, elements[i].c_str());   
+   MessageInterface::ShowMessage("   providerCount=%d\n", providerCount);
+   #endif
+   
    objectMap.push_back(StringArray(owners));
    elementMap.push_back(StringArray(elements));
    
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->SetDataLabels(elements);
+      current++;
+   }
+   
    ++providerCount;
+   
+   #ifdef DEBUG_PUBLISHER
+   MessageInterface::ShowMessage("===> returning %d\n", providerCount-1);
+   #endif
+   
    return providerCount-1;
 }
 
@@ -326,7 +347,7 @@ const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
    
    if (type == "PublishedDataMap")
       return elementMap[currentProvider];
-      
+   
    throw PublisherException("Unknown StringArray type requested.");
 }
 
