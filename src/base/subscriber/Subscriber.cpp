@@ -38,6 +38,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_WRAPPER_CODE 1
+#define DEBUG_SUBSCRIBER
 //#define DEBUG_SUBSCRIBER_PARAM 1
 
 //---------------------------------
@@ -340,11 +341,24 @@ Integer Subscriber::GetProviderId()
 
 
 //------------------------------------------------------------------------------
+// void SetDataLabels(const StringArray& elements)
+//------------------------------------------------------------------------------
+void Subscriber::SetDataLabels(const StringArray& elements)
+{
+   mDataLabels = elements;
+}
+
+
+//------------------------------------------------------------------------------
 // virtual void SetInternalCoordSystem(CoordinateSystem *cs)
 //------------------------------------------------------------------------------
 void Subscriber::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    theInternalCoordSystem = cs;
+
+   // Set data coordinate system to internal coordinate system
+   // Internal coordinate system is MJ2000Eq of j2000body as origin.
+   // Current j2000body of current internal coordinate system is Earth.
    if (theDataCoordSystem == NULL)
       theDataCoordSystem = cs;
 }
