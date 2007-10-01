@@ -65,10 +65,11 @@ protected:
    
    wxComboBox *mSolverIterComboBox;
    wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mObjectComboBox;
+   wxComboBox *mSpacecraftComboBox;
+   wxComboBox *mImpBurnComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
-
+   
    wxListBox *mUserParamListBox;
    wxListBox *mPropertyListBox;
    wxListBox *mVarListBox;
@@ -126,8 +127,9 @@ protected:
    };
 
 private:
+   void ShowCoordSystem();
    wxString GetParamName();
    Parameter* GetParameter(const wxString &name);
-   void ShowCoordSystem();
+   wxComboBox* GetObjectComboBox();
 };
 #endif

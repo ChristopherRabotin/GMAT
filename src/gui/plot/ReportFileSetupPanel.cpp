@@ -105,7 +105,8 @@ ReportFileSetupPanel::ReportFileSetupPanel(wxWindow *parent,
 ReportFileSetupPanel::~ReportFileSetupPanel()
 {
    mObjectTypeList.Clear();
-   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
+   theGuiManager->UnregisterComboBox("Spacecraft", mSpacecraftComboBox);   
+   theGuiManager->UnregisterComboBox("ImpulsiveBurn", mImpBurnComboBox);   
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
 }
 
@@ -160,7 +161,8 @@ void ReportFileSetupPanel::Create()
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
                            &mObjectTypeComboBox, ID_COMBOBOX,
-                           &mObjectComboBox, ID_COMBOBOX,
+                           &mSpacecraftComboBox, ID_COMBOBOX,
+                           &mImpBurnComboBox, ID_COMBOBOX,
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
@@ -172,8 +174,10 @@ void ReportFileSetupPanel::Create()
    {
       mSpacecraftList = theGuiManager->GetSpacecraftList();
       mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
-      mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
-      mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+      mSpacecraftPropertyList =
+         theGuiManager->GetPropertyList("Spacecraft", GuiItemManager::SHOW_PLOTTABLE);
+      mImpBurnPropertyList =
+         theGuiManager->GetPropertyList("ImpulsiveBurn", GuiItemManager::SHOW_PLOTTABLE);
       mNumSc = theGuiManager->GetNumSpacecraft();
       mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
       mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
@@ -192,33 +196,22 @@ void ReportFileSetupPanel::Create()
 
    wxBitmapButton *upVarButton =
       new wxBitmapButton(this, UP_VAR_BUTTON, upBitmap, wxDefaultPosition,
-                         wxSize(20,20));//, wxBU_AUTODRAW);
+                         wxSize(20,20));
    wxBitmapButton *downVarButton =
       new wxBitmapButton(this, DOWN_VAR_BUTTON, downBitmap, wxDefaultPosition,
-                         wxSize(20,20));//, wxBU_AUTODRAW);
-
+                         wxSize(20,20));
    wxBitmapButton *addVarButton =
       new wxBitmapButton(this, ADD_VAR_BUTTON, forwardBitmap, wxDefaultPosition,
-                         wxSize(20,20));//, wxBU_AUTODRAW);
+                         wxSize(20,20));
    wxBitmapButton *removeVarButton =
       new wxBitmapButton(this, REMOVE_VAR_BUTTON, backBitmap, wxDefaultPosition,
-                         wxSize(20,20));//, wxBU_AUTODRAW);
-
+                         wxSize(20,20));
    wxBitmapButton *clearVarButton =
       new wxBitmapButton(this, CLEAR_VAR_BUTTON, backAllBitmap, wxDefaultPosition,
-                         wxSize(20,20));//, wxBU_AUTODRAW);
+                         wxSize(20,20));
    
    clearVarButton->SetToolTip("Remove All");
-   
-//    wxButton *addVarButton = new wxButton(this, ADD_VAR_BUTTON, wxT("-->"),
-//                                 wxDefaultPosition, wxSize(20,20), 0);
-   
-//    wxButton *removeVarButton = new wxButton(this, REMOVE_VAR_BUTTON, wxT("<--"),
-//                                    wxDefaultPosition, wxSize(20,20), 0);
-   
-//    wxButton *clearVarButton = new wxButton(this, CLEAR_VAR_BUTTON, wxT("<="),
-//                                   wxDefaultPosition, wxSize(20,20), 0);
-   
+      
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(upVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    arrowButtonsBoxSizer->Add(downVarButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -443,8 +436,8 @@ void ReportFileSetupPanel::LoadData()
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
-   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-   mObjectComboBox->SetSelection(0);
+   mUserParamListBox->Deselect(mUserParamListBox->GetSelection());   
+   mSpacecraftComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
    
    // show coordinate system or central body
@@ -796,16 +789,17 @@ void ReportFileSetupPanel::OnSelectProperty(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mObjectTypeComboBox)
+   wxObject *obj = event.GetEventObject();
+   
+   if (obj == mObjectTypeComboBox)
    {
       if (mObjectTypeComboBox->GetValue() == "Spacecraft")
       {
-         // Append Spacecraft objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumSc; i++)
-            mObjectComboBox->Append(mSpacecraftList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show Spacecraft objects
+         mParamBoxSizer->Show(mSpacecraftComboBox, true, true);
+         mParamBoxSizer->Hide(mImpBurnComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set Spacecraft property
          mPropertyListBox->Set(mSpacecraftPropertyList);
          mPropertyListBox->SetSelection(0);
@@ -813,23 +807,22 @@ void ReportFileSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       }
       else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
       {
-         // Append ImpulsiveBurn objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumImpBurn; i++)
-            mObjectComboBox->Append(mImpBurnList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show ImpulsiveBurn objects
+         mParamBoxSizer->Show(mImpBurnComboBox, true, true);
+         mParamBoxSizer->Hide(mSpacecraftComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set ImpulsiveBurn property
          mPropertyListBox->Set(mImpBurnPropertyList);
          mPropertyListBox->SetSelection(0);
          ShowCoordSystem();
       }
    }
-   else if (event.GetEventObject() == mObjectComboBox)
+   else if (obj == mSpacecraftComboBox || obj == mImpBurnComboBox)
    {
       mUseUserParam = false;
    }
-   else if(event.GetEventObject() == mCoordSysComboBox)
+   else if(obj == mCoordSysComboBox)
    {
       mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
    }
@@ -913,12 +906,16 @@ wxString ReportFileSetupPanel::GetParamName()
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
-
+      
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return "";
+      
       if (depObj == "")
-         return mObjectComboBox->GetStringSelection() + "." + 
+         return objComboBox->GetStringSelection() + "." + 
             mPropertyListBox->GetStringSelection();
       else
-         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+         return objComboBox->GetStringSelection() + "." + depObj + "." +
             mPropertyListBox->GetStringSelection();
    }
 }
@@ -940,8 +937,12 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
    // create a parameter if it does not exist
    if (param == NULL)
    {
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return NULL;
+      
       std::string paramName(name.c_str());
-      std::string objName(mObjectComboBox->GetStringSelection().c_str());
+      std::string objName(objComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
       bool isScProperty = true;
@@ -972,7 +973,7 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
          }
          else
          {
-            param->SetRefObjectName(Gmat::BURN, objName);
+            param->SetRefObjectName(Gmat::IMPULSIVE_BURN, objName);
          }
       }
       catch (BaseException &e)
@@ -986,3 +987,21 @@ Parameter* ReportFileSetupPanel::GetParameter(const wxString &name)
    return param;
 }
 
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetObjectComboBox()
+//------------------------------------------------------------------------------
+wxComboBox* ReportFileSetupPanel::GetObjectComboBox()
+{
+   if (mSpacecraftComboBox->IsShown())
+      return mSpacecraftComboBox;
+   else if (mImpBurnComboBox->IsShown())
+      return mImpBurnComboBox;
+   else
+   {
+      MessageInterface::ShowMessage
+         ("**** INTERNAL ERROR **** Internal Invalid Object ComboBox in "
+          "ReportFileSetupPanel::GetObjectComboBox()\n");
+      return NULL;
+   }
+}

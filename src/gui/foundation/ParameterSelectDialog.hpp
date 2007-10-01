@@ -84,7 +84,8 @@ protected:
    wxButton *mCreateVarButton;
    
    wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mObjectComboBox;
+   wxComboBox *mSpacecraftComboBox;
+   wxComboBox *mImpBurnComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
    
@@ -127,10 +128,11 @@ protected:
    };
    
 private:
-   wxString FormParamName();
-   Parameter* GetParameter(const wxString &name);
    void ShowCoordSystem();
    void HighlightObject(wxCommandEvent& event, bool highlight);
+   wxString FormParamName();
+   Parameter* GetParameter(const wxString &name);
+   wxComboBox* GetObjectComboBox();
 };
 
 #endif

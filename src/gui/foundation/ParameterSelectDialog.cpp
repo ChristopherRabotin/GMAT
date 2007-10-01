@@ -97,10 +97,11 @@ ParameterSelectDialog::~ParameterSelectDialog()
    #if DEBUG_PARAM_SELECT_DIALOG
    MessageInterface::ShowMessage
       ("ParameterSelectDialog::~ParameterSelectDialog() Unregister "
-       "mObjectComboBox:%d\n", mObjectComboBox);
+       "mSpacecraftComboBox:%d\n", mSpacecraftComboBox);
    #endif
    
-   theGuiManager->UnregisterComboBox(mObjectType, mObjectComboBox);
+   theGuiManager->UnregisterComboBox("Spacecraft", mSpacecraftComboBox);
+   theGuiManager->UnregisterComboBox("ImpulsiveBurn", mImpBurnComboBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
 }
@@ -155,7 +156,8 @@ void ParameterSelectDialog::Create()
                               &mUserParamListBox, USER_PARAM_LISTBOX,
                               &createVarButton, CREATE_VARIABLE,
                               &mObjectTypeComboBox, ID_COMBOBOX,
-                              &mObjectComboBox, ID_COMBOBOX,
+                              &mSpacecraftComboBox, ID_COMBOBOX,
+                              &mImpBurnComboBox, ID_COMBOBOX,
                               &mPropertyListBox, PROPERTY_LISTBOX,
                               &mCoordSysComboBox, ID_COMBOBOX,
                               &mCentralBodyComboBox, ID_COMBOBOX,
@@ -168,8 +170,10 @@ void ParameterSelectDialog::Create()
       {
          mSpacecraftList = theGuiManager->GetSpacecraftList();
          mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
-         mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
-         mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+         mSpacecraftPropertyList =
+            theGuiManager->GetPropertyList("Spacecraft", GuiItemManager::SHOW_PLOTTABLE);
+         mImpBurnPropertyList =
+            theGuiManager->GetPropertyList("ImpulsiveBurn", GuiItemManager::SHOW_PLOTTABLE);
          mNumSc = theGuiManager->GetNumSpacecraft();
          mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
          mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
@@ -264,8 +268,7 @@ void ParameterSelectDialog::LoadData()
 
    if (mShowSysVars)
    {
-      //mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-      mObjectComboBox->SetSelection(0);
+      mSpacecraftComboBox->SetSelection(0);
       mPropertyListBox->SetSelection(0);
 
       if (mObjectType == "ImpulsiveBurn")
@@ -351,7 +354,12 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
           (mPropertyListBox->GetSelection() == -1) &&
           (mUserParamListBox->GetSelection() == -1))
       {
-         wxString newParam = mObjectComboBox->GetStringSelection();
+         
+         wxComboBox *objComboBox = GetObjectComboBox();
+         if (objComboBox == NULL)
+            return;
+         
+         wxString newParam = objComboBox->GetStringSelection();
          int found = mVarSelectedListBox->FindString(newParam);
          
          // if the string wasn't found in the second list, insert it
@@ -373,7 +381,11 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       {
          // Create a system paramete if it does not exist
          if (mShowSysVars && mCreateParam)
-            GetParameter(newParam);
+         {
+            Parameter *param = GetParameter(newParam);
+            if (param == NULL)
+               return;
+         }
          
          int found = mVarSelectedListBox->FindString(newParam);
       
@@ -387,14 +399,9 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          
          //Show next parameter
          if (mUseUserParam)
-         {
             mUserParamListBox->SetSelection(mUserParamListBox->GetSelection() + 1);
-         }
          else
-         {
             mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
-            //OnSelectProperty(event);
-         }
       }
    }
    else if (event.GetEventObject() == mRemoveParamButton)
@@ -542,41 +549,40 @@ void ParameterSelectDialog::OnDoubleClick(wxCommandEvent& event)
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
-{    
-   if (event.GetEventObject() == mObjectTypeComboBox)
+{
+   wxObject *obj = event.GetEventObject();
+   
+   if (obj == mObjectTypeComboBox)
    {
       if (mObjectTypeComboBox->GetValue() == "Spacecraft")
       {
-         // Append Spacecraft objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumSc; i++)
-            mObjectComboBox->Append(mSpacecraftList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show Spacecraft objects
+         mParamBoxSizer->Show(mSpacecraftComboBox, true, true);
+         mParamBoxSizer->Hide(mImpBurnComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set Spacecraft property
          mPropertyListBox->Set(mSpacecraftPropertyList);
-
+         mPropertyListBox->SetSelection(0);         
          ShowCoordSystem();
       }
       else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
       {
-         // Append ImpulsiveBurn objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumImpBurn; i++)
-            mObjectComboBox->Append(mImpBurnList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show ImpulsiveBurn objects
+         mParamBoxSizer->Show(mImpBurnComboBox, true, true);
+         mParamBoxSizer->Hide(mSpacecraftComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set ImpulsiveBurn property
          mPropertyListBox->Set(mImpBurnPropertyList);
       }
    }
-   else if (event.GetEventObject() == mObjectComboBox)
+   else if (obj == mSpacecraftComboBox || obj == mImpBurnComboBox)
    {
-      //mPropertyListBox->Deselect(mPropertyListBox->GetSelection());
       mPropertyListBox->SetSelection(0);
       mUseUserParam = false;
    }
-   else if(event.GetEventObject() == mCoordSysComboBox)
+   else if(obj == mCoordSysComboBox)
    {
       mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
    }
@@ -611,15 +617,18 @@ wxString ParameterSelectDialog::FormParamName()
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
 
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return "";
       
       if (depObj == "")
       {
-         paramName = mObjectComboBox->GetStringSelection() + "." + 
+         paramName = objComboBox->GetStringSelection() + "." + 
             mPropertyListBox->GetStringSelection();
       }
       else
       {
-         paramName = mObjectComboBox->GetStringSelection() + "." + depObj + "." +
+         paramName = objComboBox->GetStringSelection() + "." + depObj + "." +
             mPropertyListBox->GetStringSelection();
       }
    }
@@ -656,8 +665,12 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
           name.c_str());
       #endif
       
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return NULL;
+      
       std::string paramName(name.c_str());
-      std::string objName(mObjectComboBox->GetStringSelection().c_str());
+      std::string objName(objComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
       
@@ -735,21 +748,38 @@ void ParameterSelectDialog::ShowCoordSystem()
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::HighlightObject(wxCommandEvent& event, bool highlight)
 {
+   wxComboBox *objComboBox = GetObjectComboBox();
+   if (objComboBox == NULL)
+      return;
+   
    if (highlight)
    {
-      //loj: 9/1/05
-      // How can I select the item from the code as the user selects it?
-      // So it will show reverse mode?
-      //mObjectComboBox->SetSelection(mObjectComboBox->GetSelection());
-      //OnComboBoxChange(event);
-      
       // Just set background color for now
-      mObjectComboBox->SetBackgroundColour(*wxCYAN);
-      mObjectComboBox->Refresh();
+      objComboBox->SetBackgroundColour(*wxCYAN);
+      objComboBox->Refresh();
    }
    else
    {
-      mObjectComboBox->SetBackgroundColour(*wxWHITE);
-      mObjectComboBox->Refresh();
+      objComboBox->SetBackgroundColour(*wxWHITE);
+      objComboBox->Refresh();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetObjectComboBox()
+//------------------------------------------------------------------------------
+wxComboBox* ParameterSelectDialog::GetObjectComboBox()
+{
+   if (mSpacecraftComboBox->IsShown())
+      return mSpacecraftComboBox;
+   else if (mImpBurnComboBox->IsShown())
+      return mImpBurnComboBox;
+   else
+   {
+      MessageInterface::ShowMessage
+         ("**** INTERNAL ERROR **** Internal Invalid Object ComboBox in "
+          "ParameterSelectDialog::GetObjectComboBox()\n");
+      return NULL;
    }
 }

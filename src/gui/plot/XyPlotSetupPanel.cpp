@@ -123,7 +123,8 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
 XyPlotSetupPanel::~XyPlotSetupPanel()
 {
    mObjectTypeList.Clear();
-   theGuiManager->UnregisterComboBox("Spacecraft", mObjectComboBox);   
+   theGuiManager->UnregisterComboBox("Spacecraft", mSpacecraftComboBox);   
+   theGuiManager->UnregisterComboBox("ImpulsiveBurn", mImpBurnComboBox);   
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
 }
 
@@ -139,12 +140,16 @@ void XyPlotSetupPanel::OnAddX(wxCommandEvent& event)
 {
    wxString oldParam = mXSelectedListBox->GetStringSelection();
    wxString newParam = GetParamName();
+   if (newParam == "")
+      return;
    
    if (!oldParam.IsSameAs(newParam))
    {
       // Get the parameter
       Parameter *param = GetParameter(newParam);
-
+      if (param == NULL)
+         return;
+      
       if (param->IsPlottable())
       {
          // empty listbox first, only one parameter is allowed
@@ -171,6 +176,9 @@ void XyPlotSetupPanel::OnAddY(wxCommandEvent& event)
 {
    // get string in first list and then search for it in the second list
    wxString newParam = GetParamName();
+   if (newParam == "")
+      return;
+   
    int found = mYSelectedListBox->FindString(newParam);
    
    // if the string wasn't found in the second list, insert it
@@ -305,17 +313,18 @@ void XyPlotSetupPanel::OnSelectY(wxCommandEvent& event)
 // void OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
-{    
-   if (event.GetEventObject() == mObjectTypeComboBox)
+{
+   wxObject *obj = event.GetEventObject();
+   
+   if (obj == mObjectTypeComboBox)
    {
       if (mObjectTypeComboBox->GetValue() == "Spacecraft")
       {
-         // Append Spacecraft objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumSc; i++)
-            mObjectComboBox->Append(mSpacecraftList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show Spacecraft objects
+         mParamBoxSizer->Show(mSpacecraftComboBox, true, true);
+         mParamBoxSizer->Hide(mImpBurnComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set Spacecraft property
          mPropertyListBox->Set(mSpacecraftPropertyList);
          mPropertyListBox->SetSelection(0);
@@ -323,23 +332,22 @@ void XyPlotSetupPanel::OnComboBoxChange(wxCommandEvent& event)
       }
       else if (mObjectTypeComboBox->GetValue() == "ImpulsiveBurn")
       {
-         // Append ImpulsiveBurn objects
-         mObjectComboBox->Clear();
-         for (int i=0; i<mNumImpBurn; i++)
-            mObjectComboBox->Append(mImpBurnList[i]);
-         mObjectComboBox->SetSelection(0);
-
+         // Show ImpulsiveBurn objects
+         mParamBoxSizer->Show(mImpBurnComboBox, true, true);
+         mParamBoxSizer->Hide(mSpacecraftComboBox, true);
+         mParamBoxSizer->Layout();
+         
          // Set ImpulsiveBurn property
          mPropertyListBox->Set(mImpBurnPropertyList);
          mPropertyListBox->SetSelection(0);
          ShowCoordSystem();
       }
    }
-   else if (event.GetEventObject() == mObjectComboBox)
+   else if (obj == mSpacecraftComboBox || obj == mImpBurnComboBox)
    {
       mUseUserParam = false;
    }
-   else if(event.GetEventObject() == mCoordSysComboBox)
+   else if(obj == mCoordSysComboBox)
    {
       mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
    }
@@ -444,23 +452,18 @@ void XyPlotSetupPanel::Create()
    //------------------------------------------------------
    // add, remove X buttons (2nd column)
    //------------------------------------------------------
-
+   wxSize buttonSize;
    #if __WXMAC__
-   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
-                              wxDefaultPosition, wxSize(40,20), 0);
-
-   wxButton *removeXButton =
-      new wxButton(this, REMOVE_X, wxT("-->"),
-                   wxDefaultPosition, wxSize(40,20), 0);
+   buttonSize = wxSize(40, 20);
    #else
-   mAddXButton = new wxButton(this, ADD_X, wxT("<--"),
-                              wxDefaultPosition, wxSize(20,20), 0);
-
-   wxButton *removeXButton =
-      new wxButton(this, REMOVE_X, wxT("-->"),
-                   wxDefaultPosition, wxSize(20,20), 0);
+   buttonSize = wxSize(20, 20);
    #endif
-
+   
+   mAddXButton =
+      new wxButton(this, ADD_X, wxT("<--"), wxDefaultPosition, buttonSize, 0);
+   wxButton *removeXButton =
+      new wxButton(this, REMOVE_X, wxT("-->"), wxDefaultPosition, buttonSize, 0);
+   
    wxBoxSizer *xButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    xButtonsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
    xButtonsBoxSizer->Add(mAddXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -475,28 +478,30 @@ void XyPlotSetupPanel::Create()
       CreateParameterSizer(this, &mUserParamListBox, USER_PARAM_LISTBOX,
                            &createVarButton, CREATE_VARIABLE,
                            &mObjectTypeComboBox, ID_COMBOBOX,
-                           &mObjectComboBox, ID_COMBOBOX,
+                           &mSpacecraftComboBox, ID_COMBOBOX,
+                           &mImpBurnComboBox, ID_COMBOBOX,
                            &mPropertyListBox, PROPERTY_LISTBOX,
                            &mCoordSysComboBox, ID_COMBOBOX,
                            &mCentralBodyComboBox, ID_COMBOBOX,
                            &mCoordSysLabel, &mCoordSysSizer,
-                           mObjectTypeList, GuiItemManager::SHOW_PLOTTABLE);
-
+                           mObjectTypeList);
+   
    #if DEBUG_XYPLOT_PANEL
-      MessageInterface::ShowMessage
-         ("XyPlotSetupPanel::Create() got mParamBoxSizer from theGuiManager\n"
-          "createVarButton=%d, mObjectComboBox=%d\nmUserParamListBox=%d, "
-          "mPropertyListBox=%d\n", createVarButton, mObjectComboBox, mUserParamListBox,
-          mPropertyListBox);
+   MessageInterface::ShowMessage
+      ("XyPlotSetupPanel::Create() got mParamBoxSizer from theGuiManager\n"
+       "   createVarButton=%p,  mUserParamListBox=%p, mPropertyListBox=%p\n",
+       createVarButton, mUserParamListBox, mPropertyListBox);
    #endif
-
+   
    // If showing multiple object types
    if (mObjectTypeList.Count() > 1)
    {
       mSpacecraftList = theGuiManager->GetSpacecraftList();
-      mImpBurnList = theGuiManager->GetImpulsiveBurnList();         
-      mSpacecraftPropertyList = theGuiManager->GetSettablePropertyList("Spacecraft");
-      mImpBurnPropertyList = theGuiManager->GetSettablePropertyList("ImpulsiveBurn");
+      mImpBurnList = theGuiManager->GetImpulsiveBurnList();
+      mSpacecraftPropertyList =
+         theGuiManager->GetPropertyList("Spacecraft", GuiItemManager::SHOW_PLOTTABLE);
+      mImpBurnPropertyList =
+         theGuiManager->GetPropertyList("ImpulsiveBurn", GuiItemManager::SHOW_PLOTTABLE);
       mNumSc = theGuiManager->GetNumSpacecraft();
       mNumImpBurn = theGuiManager->GetNumImpulsiveBurn();
       mNumScProperty = theGuiManager->GetNumProperty("Spacecraft");
@@ -504,34 +509,24 @@ void XyPlotSetupPanel::Create()
       
       #if DEBUG_XYPLOT_PANEL
       MessageInterface::ShowMessage
-         ("===> mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
+         ("   mNumSc=%d, mNumImpBurn=%d, mNumScProperty=%d, mNumImpBurnProperty=%d\n",
           mNumSc, mNumImpBurn, mNumScProperty, mNumImpBurnProperty);
+      MessageInterface::ShowMessage
+         ("   mSpacecraftPropertyList.Count()=%d\n", mSpacecraftPropertyList.Count());
       #endif
    }
-
+   
    //------------------------------------------------------
    // add, remove, clear Y buttons (4th column)
    //------------------------------------------------------
-   #if __WXMAC__
-   mAddYButton =
-      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(40,20), 0);
-
-   wxButton *removeYButton =
-      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, wxSize(40,20), 0);
    
-   wxButton *clearYButton =
-      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(40,20), 0);
-   #else
    mAddYButton =
-      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, wxSize(20,20), 0);
-
+      new wxButton(this, ADD_Y, wxT("-->"), wxDefaultPosition, buttonSize, 0);
    wxButton *removeYButton =
-      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, wxSize(20,20), 0);
-   
+      new wxButton(this, REMOVE_Y, wxT("<--"), wxDefaultPosition, buttonSize, 0);
    wxButton *clearYButton =
-      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, wxSize(20,20), 0);
-   #endif
-
+      new wxButton(this, CLEAR_Y, wxT("<="), wxDefaultPosition, buttonSize, 0);
+   
    clearYButton->SetToolTip("Remove All");
    
    wxBoxSizer *yButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -547,7 +542,7 @@ void XyPlotSetupPanel::Create()
    wxStaticText *titleYText =
       new wxStaticText(this, -1, wxT("Selected Y"),
                        wxDefaultPosition, wxSize(-1,-1), 0);
-
+   
    mYSelectedListBox =
       new wxListBox(this, Y_SEL_LISTBOX, wxDefaultPosition, wxSize(170,260), //0,
                     emptyList, wxLB_SINGLE);
@@ -642,7 +637,7 @@ void XyPlotSetupPanel::Create()
 void XyPlotSetupPanel::LoadData()
 {
    // load data from the core engine
-
+   
    try
    {   
       // Set the pointer for the "Show Script" button
@@ -657,7 +652,7 @@ void XyPlotSetupPanel::LoadData()
       // get X parameter
       wxString *xParamNames = new wxString[1];
       xParamNames[0] = mXyPlot->GetStringParameter("IndVar").c_str();
-
+      
       #if DEBUG_XYPLOT_PANEL_LOAD
       MessageInterface::ShowMessage
          ("XyPlotSetupPanel::LoadData() xParamNames[0] = %s\n",
@@ -704,7 +699,7 @@ void XyPlotSetupPanel::LoadData()
          mYSelectedListBox->Set(mNumYParams, yParamNames);
          mYSelectedListBox->SetSelection(0);
          delete [] yParamNames;
-
+         
          // show parameter option
          ShowParameterOption(mYSelectedListBox->GetStringSelection(), true);
       }
@@ -721,7 +716,7 @@ void XyPlotSetupPanel::LoadData()
    }
    
    mUserParamListBox->Deselect(mUserParamListBox->GetSelection());
-   mObjectComboBox->SetSelection(0);
+   mSpacecraftComboBox->SetSelection(0);
    mPropertyListBox->SetSelection(0);
    
    // show coordinate system or central body
@@ -875,9 +870,10 @@ void XyPlotSetupPanel::ShowParameterOption(const wxString &name, bool show)
       }
       
       #if DEBUG_XYPLOT_PANEL
-         MessageInterface::ShowMessage("ShowParameterOption() intColor=%d\n",
-                                       mColorMap[mSelYName].GetIntColor());
+      MessageInterface::ShowMessage
+         ("   intColor=%u\n", mColorMap[mSelYName].GetIntColor());
       #endif
+      
       mLineColor.Set(color.Red(), color.Green(), color.Blue());
       mLineColorButton->SetBackgroundColour(mLineColor);
       
@@ -957,13 +953,17 @@ wxString XyPlotSetupPanel::GetParamName()
          depObj = mCoordSysComboBox->GetStringSelection();
       else if (mCentralBodyComboBox->IsShown())
          depObj = mCentralBodyComboBox->GetStringSelection();
-
+      
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return "";
+      
       if (depObj == "")
-         return mObjectComboBox->GetStringSelection() + "." + 
+         return objComboBox->GetStringSelection() + "." + 
             mPropertyListBox->GetStringSelection();
       else
-         return mObjectComboBox->GetStringSelection() + "." + depObj + "." +
-            mPropertyListBox->GetStringSelection();
+         return objComboBox->GetStringSelection() + "." + depObj + "." +
+            mPropertyListBox->GetStringSelection();         
    }
 }
 
@@ -985,8 +985,12 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
    // create a parameter if it does not exist
    if (param == NULL)
    {
+      wxComboBox *objComboBox = GetObjectComboBox();
+      if (objComboBox == NULL)
+         return NULL;
+      
       std::string paramName(name.c_str());
-      std::string ownerName(mObjectComboBox->GetStringSelection().c_str());
+      std::string ownerName(objComboBox->GetStringSelection().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
       
@@ -996,19 +1000,19 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
          depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
       
       #ifdef DEBUG_XYPLOT_PANEL
-         MessageInterface::ShowMessage
-            ("XyPlotSetupPanel::GetParameter() paramName : %s does not exist. "
-             "So creating.\n", paramName.c_str());
+      MessageInterface::ShowMessage
+         ("XyPlotSetupPanel::GetParameter() paramName : %s does not exist. "
+          "So creating.\n", paramName.c_str());
       #endif
-
+      
       try
       {
          param = theGuiInterpreter->CreateParameter(propName, paramName);
          param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
-      
+         
          if (depObjName != "")
             param->SetStringParameter("DepObject", depObjName);
-      
+         
          if (param->IsCoordSysDependent())
             param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, depObjName);
          else if (param->IsOriginDependent())
@@ -1025,3 +1029,21 @@ Parameter* XyPlotSetupPanel::GetParameter(const wxString &name)
    return param;
 }
 
+
+//------------------------------------------------------------------------------
+// wxComboBox* GetObjectComboBox()
+//------------------------------------------------------------------------------
+wxComboBox* XyPlotSetupPanel::GetObjectComboBox()
+{
+   if (mSpacecraftComboBox->IsShown())
+      return mSpacecraftComboBox;
+   else if (mImpBurnComboBox->IsShown())
+      return mImpBurnComboBox;
+   else
+   {
+      MessageInterface::ShowMessage
+         ("**** INTERNAL ERROR **** Internal Invalid Object ComboBox in "
+          "XyPlotSetupPanel::GetObjectComboBox()\n");
+      return NULL;
+   }
+}
