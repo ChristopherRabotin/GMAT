@@ -287,85 +287,6 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
             " [==, ~=, <, >, <=, >=]."; 
        throw CommandException(errMsg);
    }
-   // old code, not needed now wiht Parameters in Command updates
-    //static Moderator *mod = Moderator::Instance();
-    //Real rval;
-    //// if left is just a number, skip
-    //if (GmatStringUtil::ToReal(lhs, &rval))
-    //{
-    //   ;
-    //}
-    //else
-    //{
-    //  // remove array indexing, if it exists
-    //  std::string lhsNoIndices = lhs;
-    //  Integer openParen = lhs.find_first_of('(');
-    //  if (openParen != (Integer)lhs.npos)  
-    //     lhsNoIndices = lhs.substr(0,openParen);
-    //     
-    //  #ifdef DEBUG_CONDBR_GET_PARAM
-    //     MessageInterface::ShowMessage("In SetCondition, lhs parameter name is: %s\n",
-    //     lhsNoIndices.c_str());
-    //  #endif
-      
-   //   if (mod->GetParameter(lhsNoIndices) == NULL)
-   //   {
-   //       std::string errMsg = "The value of \"" + lhsNoIndices + 
-   //         "\" for the left-hand-side of conditional \"" 
-   //         + typeName +
-   //         "\" is not an allowed value.  The allowed values are: " +
-   //         " [Real number, variable, array element, or object parameter]."; 
-   //       throw CommandException(errMsg);      
-   //    }
-   // }
-            
-   // // if right is just a number, skip
-   // if (GmatStringUtil::ToReal(rhs, &rval))
-   // {
-   //    ;
-   // }
-   // else
-   // {
-   //   // remove array indexing, if it exists
-   //   std::string rhsNoIndices = rhs;
-   //   Integer openParen = rhs.find_first_of('(');
-   //   if (openParen != (Integer)rhs.npos)  
-   //      rhsNoIndices = rhs.substr(0,openParen);
-   //      
-   //   #ifdef DEBUG_CONDBR_GET_PARAM
-   //      MessageInterface::ShowMessage("In SetCondition, rhs parameter name is: %s\n",
-   //      rhsNoIndices.c_str());
-   //   #endif
-      
-   //   if (mod->GetParameter(rhsNoIndices) == NULL)
-   //   {
-   //       std::string errMsg = "The value of \"" + rhsNoIndices + 
-   //         "\" for the right-hand-side of conditional \"" 
-   //         + typeName +
-   //         "\" is not an allowed value.  The allowed values are: " +
-   //         " [Real number, variable, array element, or object parameter]."; 
-   //       throw CommandException(errMsg);      
-   //    }
-   // }
-   
-   //// Handle LHS Array indexing
-   //Integer lhsRow, lhsCol;
-   //std::string newLhs;
-   //GmatStringUtil::GetArrayIndex(lhs, lhsRow, lhsCol, newLhs);
-      
-   //// Handle RHS Array indexing
-   //Integer rhsRow, rhsCol;
-   //std::string newRhs;
-   //GmatStringUtil::GetArrayIndex(rhs, rhsRow, rhsCol, newRhs);
-
-   //#if DEBUG_CONDITIONS
-   //MessageInterface::ShowMessage
-   //   ("ConditionalBranch::SetCondition() newLhs=%s, newRhs=%s\n",
-   //    newLhs.c_str(), newRhs.c_str());
-   //MessageInterface::ShowMessage
-   //   ("ConditionalBranch::SetCondition() lhsRow=%d, lhsCol=%d, "
-   //    "rhsRow=%d, rhsCol=%d\n", lhsRow, lhsCol, rhsRow, rhsCol);
-   //#endif
    
    // put it at the end, if requested (and by default)
    if ((atIndex == -999) || (atIndex == numberOfConditions))
@@ -754,45 +675,6 @@ const StringArray& ConditionalBranch::GetRefObjectNameArray(const Gmat::ObjectTy
 bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name)
 {
-   /*  OLD CODE
-   #ifdef DEBUG_CONDITIONS
-      MessageInterface::ShowMessage(
-         "ConditionalBranch::SetRefObject() entered; Parameters are\n   "
-         "obj with type \"%s\"\n   Gmat::ObjectType = %d\n   name = \"%s\"\n",
-         obj->GetTypeName().c_str(), type, name.c_str());
-   #endif
-   
-   switch (type)
-   {
-      case Gmat::PARAMETER:
-      {
-         std::string newName = name;
-         UnsignedInt openParen = name.find('(');
-   
-         if (openParen != name.npos)
-            newName = name.substr(0, openParen);
-         
-         // if name is not found int the parameter list, add
-         Integer size = params.size();
-         bool paramFound = false;
-         for (int i=0; i<size; i++)
-         {
-            if (params[i]->GetName() == newName)
-            {
-               paramFound = true;
-               break;
-            }
-         }
-
-         if (!paramFound)
-            params.push_back((Parameter *)obj);
-
-         return true;
-      }
-      default:
-         break;
-   }
- */  
    // Not handled here -- invoke the next higher SetRefObject call
    return BranchCommand::SetRefObject(obj, type, name);
 }
@@ -1337,34 +1219,35 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
 
    if (toWrapper == NULL) return false;
    
-   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
-   {
-      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   }
-   if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
-   {
-      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   }
-
+   //if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   //{
+   //   throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+   //               "\" is not an allowed value.\nThe allowed values are:"
+   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   //}
+   bool typeOK = true;
+   Gmat::ParameterType baseType;
+   std::string         baseStr;
    try
    {
-       if ( ((toWrapper->GetDataType()) != Gmat::REAL_TYPE) &&
-            ((toWrapper->GetDataType()  != Gmat::INTEGER_TYPE)) )
-       {
-           throw CommandException("A value of base type \"non-Real\" on command \"" + 
-                       typeName + 
-                       "\" is not an allowed value.\nThe allowed values are:"
-                       " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-       }
+      baseType = toWrapper->GetDataType();
+      baseStr  = PARAM_TYPE_STRING[baseType];
+      if ( (baseType != Gmat::REAL_TYPE) && (baseType  != Gmat::INTEGER_TYPE) )
+         typeOK = false;
    }
    catch (BaseException &be)
    {
-       // just ignore it here - will need to check data type on initialization
+      // just ignore it here - will need to check data type of object property 
+      // wrappers on initialization
    }
+   if (!typeOK)
+   {
+      throw CommandException("A value of \"" + withName + "\" of base type \"" +
+                  baseStr + "\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
+   
 
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage(
