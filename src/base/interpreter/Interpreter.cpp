@@ -1523,7 +1523,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       {
          // this command, for compatability with MATLAB, should not have
          // parentheses (except to indicate array elements), brackets, or braces
-         if (!GmatStringUtil::HasNoBrackets(desc, true))
+         if (!GmatStringUtil::HasNoBrackets(desc, false))
          {
             std::string msg = 
                "This command is not allowed to contain brackets, braces, or "
@@ -1557,7 +1557,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       {
          // this command, for compatability with MATLAB, should not have
          // parentheses (except to indicate array elements), brackets, or braces
-         if (!GmatStringUtil::HasNoBrackets(desc, true))
+         if (!GmatStringUtil::HasNoBrackets(desc, false))
          {
             std::string msg = 
                "This command is not allowed to contain brackets, braces, or "
@@ -1597,7 +1597,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          {
             std::string msg = 
                "This command is not allowed to contain brackets, braces, or "
-               "parentheses";
+               "parentheses (except to indicate array elements)";
             InterpreterException ex(msg);
             HandleError(ex);
             return false;
