@@ -38,14 +38,15 @@ ShowScriptDialog::ShowScriptDialog(wxWindow *parent, wxWindowID id,
                                     const wxString& title, GmatBase *obj, 
                                     bool isSingleton) :
    GmatDialog(parent, id, title, NULL, wxDefaultPosition, wxDefaultSize, 
-      wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
    theObject(obj),
    showAsSingleton(isSingleton)
 {
    Create();
    ShowData();
    theOkButton->Enable(true);
-   theCancelButton->Enable(false);
+   theDialogSizer->Hide(theCancelButton, true);
+   theDialogSizer->Layout();
 }
 
 

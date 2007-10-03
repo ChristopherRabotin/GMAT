@@ -36,13 +36,15 @@
 //------------------------------------------------------------------------------
 ShowSummaryDialog::ShowSummaryDialog(wxWindow *parent, wxWindowID id, 
                                      const wxString& title, GmatCommand *obj) :
-   GmatDialog(parent, id, title),
+   GmatDialog(parent, id, title, NULL, wxDefaultPosition, wxDefaultSize, 
+              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
    theObject(obj)
 {
    Create();
    ShowData();
    theOkButton->Enable(true);
-   theCancelButton->Enable(false);
+   theDialogSizer->Hide(theCancelButton, true);
+   theDialogSizer->Layout();
 }
 
 
@@ -69,7 +71,7 @@ void ShowSummaryDialog::Create()
    theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
    theSummary->SetFont( GmatAppData::GetFont() );
-   theMiddleSizer->Add(theSummary, 0, wxALIGN_CENTRE|wxALL, 3);
+   theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
 }
 
 
