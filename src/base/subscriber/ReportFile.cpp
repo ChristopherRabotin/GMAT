@@ -81,7 +81,7 @@ ReportFile::ReportFile(const std::string &type, const std::string &name,
    usedByReport    (false)
 {
    mNumParams = 0;
-
+   
    if (firstParam != NULL)
       AddParameter(firstParam->GetName(), mNumParams);
    objectTypeNames.push_back("ReportFile");
@@ -912,12 +912,55 @@ bool ReportFile::Distribute(int len)
 //------------------------------------------------------------------------------
 bool ReportFile::Distribute(const Real * dat, Integer len)
 {
+   #ifdef DEBUG_REPORTFILE_DATA
+   MessageInterface::ShowMessage
+      ("ReportFile::Distribute()<%s> called len=%d\n", GetName().c_str(), len);
+   MessageInterface::ShowMessage
+      ("   active=%d, isEndOfReceive=%d, mSolverIterOption=%d, runstate=%d\n",
+       active, isEndOfReceive, mSolverIterOption, runstate);
+   #endif
+   
    if (!active)
       return true;
-
-   if (len == 0)
-      return false;
    
+   //------------------------------------------------------------
+   // if writing current iteration only and solver is not finished,
+   // just return
+   //------------------------------------------------------------
+   if (mSolverIterOption == SI_CURRENT && runstate != Gmat::SOLVEDPASS)
+   {
+      #if DEBUG_REPORTFILE_DATA
+      MessageInterface::ShowMessage
+         ("   ===> Just returning; writing current iteration only and solver "
+          "is not finished\n");
+      #endif
+      return true;
+   }
+   
+   if (len == 0)
+      return true;
+   
+   //------------------------------------------------------------
+   // if not writing solver data and solver is running, just return
+   //------------------------------------------------------------
+   if ((mSolverIterOption == SI_NONE) &&
+       (runstate == Gmat::SOLVING || runstate == Gmat::SOLVEDPASS))
+   {
+      #if DEBUG_REPORTFILE_DATA
+      MessageInterface::ShowMessage
+         ("   ===> Just returning; not writing solver data and solver is running\n");
+      #endif
+      
+      return true;
+   }
+   
+   #if DEBUG_REPORTFILE_DATA
+   MessageInterface::ShowMessage("   Start writing data\n");
+   #endif
+   
+   //------------------------------------------------------------
+   // write data to file
+   //------------------------------------------------------------
    if (mNumParams > 0)
    {
       Real rval = -9999.999;
@@ -1003,7 +1046,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
             dstream.close();
       }
       
-      #if DEBUG_REPORTFILE_DATA
+      #if DEBUG_REPORTFILE_DATA > 1
       MessageInterface::ShowMessage
          ("ReportFile::Distribute() dat=%f %f %f %f %g %g %g\n", dat[0], dat[1],
           dat[2], dat[3], dat[4], dat[5], dat[6]);
