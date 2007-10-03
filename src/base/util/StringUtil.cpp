@@ -29,6 +29,7 @@
 //#define DEBUG_ARRAY_INDEX 2
 //#define DEBUG_STRING_UTIL_ARRAY 1
 //#define DEBUG_STRING_UTIL_SEP 1
+//#define DEBUG_NO_BRACKETS
 
 using namespace std;
 
@@ -1825,8 +1826,14 @@ bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
 bool GmatStringUtil::HasNoBrackets(const std::string &str, 
                                    bool parensForArraysAllowed)
 {
+   #ifdef DEBUG_NO_BRACKETS
+      MessageInterface::ShowMessage("Entering HasNoBrackets with str = %s\n", 
+         str.c_str());
+   #endif
    std::string str1 = str;
    std::string str2 = str;
+   std::string left, right, arrName;
+   bool hasNone = true;
    if ((str1.find('(') != str1.npos) || (str1.find(')') != str1.npos))
    {
       if (parensForArraysAllowed)
@@ -1843,8 +1850,31 @@ bool GmatStringUtil::HasNoBrackets(const std::string &str,
                done = true;
             else
             {
-               str2 = str1.substr(open, close-open + 1);
-               if (!IsParenPartOfArray(str2))  return false;
+               str2 = str1.substr(0, close + 1);
+               //if (!IsParenPartOfArray(str2))  return false;
+               GmatStringUtil::GetArrayIndexVar(str2, left, right, arrName, "()");
+               #ifdef DEBUG_NO_BRACKETS
+                  MessageInterface::ShowMessage("   left = %s, right = %s, arrName = %s\n", 
+                     left.c_str(), right.c_str(), arrName.c_str());
+               #endif
+               if ((arrName == "") || (left == "-1") || (right == "-1"))
+               {
+                  #ifdef DEBUG_NO_BRACKETS
+                     MessageInterface::ShowMessage
+                        ("   NOT a proper array ... returning false\n");
+                  #endif
+                  return false;
+               }
+               hasNone = hasNone + HasNoBrackets(left, parensForArraysAllowed)
+                         + HasNoBrackets(right, parensForArraysAllowed);
+               if (!hasNone) 
+               {
+                  #ifdef DEBUG_NO_BRACKETS
+                     MessageInterface::ShowMessage
+                        ("   left or right contains non-array parens ... returning false\n");
+                  #endif
+                  return false;
+               }
                str1 = str1.substr(close+1);
             }
          }
