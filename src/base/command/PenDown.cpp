@@ -204,6 +204,7 @@ bool PenDown::Initialize()
    GmatCommand::Initialize();
    
    GmatBase *xy;
+   thePlotList.clear();
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
@@ -228,6 +229,12 @@ bool PenDown::Initialize()
          return false;
       }
    }
+   
+   #ifdef DEBUG_PENDOWN
+      MessageInterface::ShowMessage
+         ("   thePlotList.size()=%d\n", thePlotList.size());
+      MessageInterface::ShowMessage("PenDown::Initialize() returning true\n");
+   #endif
    return true;
 }
 
@@ -247,10 +254,19 @@ bool PenDown::Initialize()
 //---------------------------------------------------------------------------
 bool PenDown::Execute()
 {
+   #ifdef DEBUG_PENDOWN
+      MessageInterface::ShowMessage
+         ("PenDown::Execute() thePlotList.size()=%d\n", thePlotList.size());
+   #endif
+      
    for (unsigned int ii = 0; ii < thePlotList.size(); ii++)
    {
       if (thePlotList.at(ii))
          if (!(thePlotList.at(ii)->TakeAction("PenDown"))) return false;
    }
+   
+   #ifdef DEBUG_PENDOWN
+      MessageInterface::ShowMessage("PenDown::Execute() returning true\n");
+   #endif
    return true;
 }

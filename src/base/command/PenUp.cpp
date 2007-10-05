@@ -214,6 +214,7 @@ bool PenUp::Initialize()
    GmatCommand::Initialize();
    
    GmatBase *xy;
+   thePlotList.clear();
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
