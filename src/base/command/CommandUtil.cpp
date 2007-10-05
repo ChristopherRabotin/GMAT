@@ -23,6 +23,7 @@
 //#define DEBUG_MATCHING_END 1
 //#define DEBUG_GET_PARENT 1
 //#define DEBUG_COMMAND_SEQ_STRING 1
+//#define DEBUG_COMMAND_FIND_OBJECT 1
 
 //------------------------------------------------------------------------------
 // GmatCommand* GetLastCommand(GmatCommand *cmd)
@@ -354,6 +355,191 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
 
 
 //------------------------------------------------------------------------------
+// bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if cmd1 is after cmd2 in the sequence.
+ *
+ * @param  cmd1  First command
+ * @param  cmd2  Second command
+ *
+ * @return true if cmd1 is after cmd2 in the sequence, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatCommandUtil::IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
+{
+   if (cmd1 == NULL || cmd2 == NULL)
+      return false;
+   
+   GmatCommand *current = cmd2;
+   
+   while (current != NULL)
+   {
+      if (current == cmd1)
+         return true;
+      
+      current = current->GetNext();
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool FindObject(GmatCommand *cmd, Gmat::ObjectType type,
+//                 const std::string &objName, std::string &cmdName)
+//------------------------------------------------------------------------------
+/*
+ * Finds if object name is referenced in anywhere in the command sequence.
+ *
+ * @param  objType  The type of the named object
+ * @param  objName  The object name to look for
+ * @param  cmdName  The command name contains the object name if found
+ *
+ * @return  true  if object name found, false, otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatCommandUtil::FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
+                                 const std::string &objName, std::string &cmdName)
+{
+   if (cmd == NULL)
+      return false;
+   
+   GmatCommand *current = cmd;
+   std::string cmdstr = cmd->GetTypeName();
+   
+   #if DEBUG_COMMAND_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::FindObject() cmd=(%p)%s\n", cmd, cmdstr.c_str(),
+       objName.c_str());
+   #endif
+   
+   
+   while (current != NULL)
+   {
+      cmdstr = "--- " + current->GetTypeName() + "\n";
+      
+      #if DEBUG_COMMAND_FIND_OBJECT
+      MessageInterface::ShowMessage(cmdstr);
+      #endif
+      
+      try
+      {
+         StringArray names = current->GetRefObjectNameArray(objType);
+         
+         for (UnsignedInt i=0; i<names.size(); i++)
+         {
+            #if DEBUG_COMMAND_FIND_OBJECT
+            MessageInterface::ShowMessage("names[%d]=%s\n", i, names[i].c_str());
+            #endif
+            
+            if (names[i] == objName)
+            {
+               cmdName = current->GetTypeName();
+               return true;
+            }
+         }
+      }
+      catch (BaseException &e)
+      {
+         #ifdef DEBUG_COMMAND_FIND_OBJECT
+         MessageInterface::ShowMessage("*** INTERNAL WARNING *** " + e.GetFullMessage());
+         #endif
+      }
+      
+      // go through sub commands
+      if ((current->GetChildCommand(0)) != NULL)
+      {
+         if (FindObjectFromSubCommands(current, 0, objType, objName, cmdName))
+            return true;
+      }
+      
+      current = current->GetNext();
+   }
+   
+   return false;
+}
+
+
+
+//------------------------------------------------------------------------------
+// bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
+//                                Gmat::ObjectType objType,
+//                                const std::string &objName, std::string &cmdName)
+//------------------------------------------------------------------------------
+/*
+ * Finds if object name is referenced in anywhere in the command sequence.
+ *
+ * @param  objType  The type of the named object
+ * @param  objName  The object name to look for
+ * @param  cmdName  The command name contains the object name if found
+ *
+ * @return  true  if object name found, false, otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
+                                                Gmat::ObjectType objType, 
+                                                const std::string &objName,
+                                                std::string &cmdName)
+{
+   GmatCommand* current = brCmd;
+   Integer childNo = 0;
+   GmatCommand* nextInBranch = NULL;
+   GmatCommand* child;
+   std::string cmdstr;
+   
+   while((child = current->GetChildCommand(childNo)) != NULL)
+   {
+      nextInBranch = child;
+      
+      while ((nextInBranch != NULL) && (nextInBranch != current))
+      {         
+         #if DEBUG_COMMAND_FIND_OBJECT
+         for (int i=0; i<=level; i++)
+            cmdstr = "---" + cmdstr;         
+         cmdstr = "--- " + nextInBranch->GetTypeName() + "\n";        
+         MessageInterface::ShowMessage("%s", cmdstr.c_str());
+         #endif
+         
+         try
+         {
+            StringArray names = nextInBranch->GetRefObjectNameArray(objType);
+            
+            for (UnsignedInt i=0; i<names.size(); i++)
+            {
+               #if DEBUG_COMMAND_FIND_OBJECT
+               MessageInterface::ShowMessage("names[%d]=%s\n", i, names[i].c_str());
+               #endif
+               
+               if (names[i] == objName)
+               {
+                  cmdName = nextInBranch->GetTypeName();
+                  return true;
+               }
+            }
+         }
+         catch (BaseException &e)
+         {
+            #ifdef DEBUG_COMMAND_FIND_OBJECT
+            MessageInterface::ShowMessage("*** INTERNAL WARNING *** " + e.GetFullMessage());
+            #endif
+         }
+         
+         if (nextInBranch->GetChildCommand() != NULL)
+            if (FindObjectFromSubCommands(nextInBranch, level+1, objType, objName, cmdName))
+               return true;
+         
+         nextInBranch = nextInBranch->GetNext();
+      }
+      
+      ++childNo;
+   }
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // void GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
 //                          bool showAddr = true)
 //------------------------------------------------------------------------------
@@ -401,37 +587,6 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
       
       ++childNo;
    }
-}
-
-
-//------------------------------------------------------------------------------
-// bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
-//------------------------------------------------------------------------------
-/*
- * Returns true if cmd1 is after cmd2 in the sequence.
- *
- * @param  cmd1  First command
- * @param  cmd2  Second command
- *
- * @return true if cmd1 is after cmd2 in the sequence, false otherwise
- */
-//------------------------------------------------------------------------------
-bool GmatCommandUtil::IsAfter(GmatCommand *cmd1, GmatCommand *cmd2)
-{
-   if (cmd1 == NULL || cmd2 == NULL)
-      return false;
-   
-   GmatCommand *current = cmd2;
-   
-   while (current != NULL)
-   {
-      if (current == cmd1)
-         return true;
-      
-      current = current->GetNext();
-   }
-   
-   return false;
 }
 
 
