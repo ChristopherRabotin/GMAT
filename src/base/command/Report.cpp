@@ -195,8 +195,14 @@ std::string Report::GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 const StringArray& Report::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   static StringArray refObjectNames;
+   refObjectNames.clear();
+   
    switch (type)
    {
+   case Gmat::SUBSCRIBER:
+      refObjectNames.push_back(rfName);
+      return refObjectNames;
    case Gmat::PARAMETER:
       return parmNames;
    default:
