@@ -648,87 +648,30 @@ bool Moderator::RenameObject(Gmat::ObjectType type, const std::string &oldName,
  */
 //------------------------------------------------------------------------------
 bool Moderator::RemoveObject(Gmat::ObjectType type, const std::string &name,
-                                     bool delOnlyIfNotUsed)
+                             bool delOnlyIfNotUsed)
 {
+   GmatCommand *cmd = GetFirstCommand();
+   
+   #if DEBUG_REMOVE
+   MessageInterface::ShowMessage
+      ("Moderator::RemoveObject() type=%d, name=%s, delOnlyIfNotUsed=%d\n",
+       type, name.c_str(), delOnlyIfNotUsed);
+   MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
+   #endif
+   
    if (!delOnlyIfNotUsed)
    {
       return theConfigManager->RemoveItem(type, name);
    }
    else
    {
-      bool nameUsed = false;
-      
-      //--------------------------------------------------------------
-      // check configure items
-      //--------------------------------------------------------------
-      
-      StringArray itemList = theConfigManager->GetListOfItemsHas(type, name, false);
-      
-      if (itemList.size() > 0)
+      // remove if object is not used in the command sequence
+      std::string cmdName;
+      if (GmatCommandUtil::FindObject(cmd, type, name, cmdName))
       {
          MessageInterface::ShowMessage
-            ("*** WARNING *** Cannot remove %s. The first object it is used: %s\n",
-             name.c_str(), itemList[0].c_str());
-         
-         return false;
-      }
-      
-      //--------------------------------------------------------------
-      // check mission sequence
-      //--------------------------------------------------------------
-      
-      std::string::size_type pos;
-      int sandboxIndex = 0; //handles one sandbox for now
-      GmatCommand *cmd = commands[sandboxIndex]->GetNext();
-      GmatCommand *child;
-      std::string cmdString;
-      std::string typeName;
-      
-      while (cmd != NULL)
-      {
-         typeName = cmd->GetTypeName();
-         #if DEBUG_REMOVE
-         MessageInterface::ShowMessage("--typeName=%s\n", typeName.c_str());
-         #endif
-         
-         cmdString = cmd->GetGeneratingString();
-         pos = cmdString.find(name);
-         if (pos != cmdString.npos)
-         {
-            nameUsed = true;
-            break;
-         }
-         
-         child = cmd->GetChildCommand(0);
-         
-         while ((child != NULL) && (child != cmd))
-         {
-            typeName = child->GetTypeName();
-            #if DEBUG_REMOVE
-            MessageInterface::ShowMessage("----typeName=%s\n", typeName.c_str());
-            #endif
-            if (typeName.find("End") == typeName.npos)
-            {
-               cmdString = child->GetGeneratingString();
-               pos = cmdString.find(name);
-               if (pos != cmdString.npos)
-               {
-                  nameUsed = true;
-                  break;
-               }
-            }
-            
-            child = child->GetNext();
-         }
-         
-         cmd = cmd->GetNext();
-      } // end While
-      
-      if (nameUsed)
-      {
-         MessageInterface::ShowMessage
-            ("*** WARNING *** Cannot remove %s. It is used in the %s\n",
-             name.c_str(), cmd->GetTypeName().c_str());
+            ("*** WARNING *** Cannot remove \"%s.\"  It is used in the %s command.\n",
+             name.c_str(), cmdName.c_str());
          return false;
       }
       else
@@ -3670,6 +3613,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
             ("Moderator::RunMission() after AddCommandToSandbox()\n");
          #endif
          
+         //thePublisher->ClearPublishedData();
          InitializeSandbox(sandboxNum-1);
          
          #if DEBUG_RUN
