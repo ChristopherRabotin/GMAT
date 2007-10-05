@@ -168,12 +168,14 @@ bool Toggle::InterpretAction()
    end = generatingString.find(" ", loc);
    std::string sName = generatingString.substr(loc, end-loc);
    subNames.push_back(sName);
-    */ 
+    */
+
+   // loj: 2007.10.05 - We need to register in Initialize()
    // Register with the publisher
-   if (publisher == NULL)
-      publisher = Publisher::Instance();
-   streamID = publisher->RegisterPublishedData(subNames, subNames);
-        
+   //if (publisher == NULL)
+   //   publisher = Publisher::Instance();
+   //streamID = publisher->RegisterPublishedData(subNames, subNames);
+   
    return true;
 }
 
@@ -205,6 +207,11 @@ bool Toggle::Initialize()
              s->c_str());
       }
    }
+   
+   if (publisher == NULL)
+      publisher = Publisher::Instance();
+   streamID = publisher->RegisterPublishedData(subNames, subNames);
+   
    return true;
 }
 
@@ -468,7 +475,8 @@ bool Toggle::SetStringParameter(const Integer id, const std::string &value)
          if (publisher == NULL)
             publisher = Publisher::Instance();
          
-         streamID = publisher->RegisterPublishedData(subNames, subNames);
+         // loj: 2007.10.05 - We need to register in Initialize()
+         //streamID = publisher->RegisterPublishedData(subNames, subNames);
          //MessageInterface::ShowMessage("===> streamID=%d\n", streamID);
       }
       
