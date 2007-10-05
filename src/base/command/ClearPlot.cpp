@@ -206,6 +206,7 @@ bool ClearPlot::Initialize()
    GmatCommand::Initialize();
    
    GmatBase *xy;
+   thePlotList.clear();
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
@@ -253,7 +254,7 @@ bool ClearPlot::Execute()
    for (unsigned int ii = 0; ii < thePlotList.size(); ii++)
    {
       if (thePlotList.at(ii))
-         if (!(thePlotList.at(ii)->TakeAction("ClearPlot"))) return false;
+         if (!(thePlotList.at(ii)->TakeAction("ClearData"))) return false;
    }
-  return true;
+   return true;
 }
