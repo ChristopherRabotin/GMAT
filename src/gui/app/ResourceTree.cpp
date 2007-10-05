@@ -1340,8 +1340,8 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
 {
    event.Skip();
    
-   wxTreeItemId item = GetSelection();
-   GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
+   wxTreeItemId itemId = GetSelection();
+   GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(itemId);
    GmatTree::ItemType itemType = selItem->GetItemType();
    
    Gmat::ObjectType objType = GetObjectType(itemType);
@@ -1353,11 +1353,13 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
       ("ResourceTree::OnDelete() name=%s\n", selItem->GetDesc().c_str());
    #endif
    
+   wxString itemName = selItem->GetDesc();
    // delete item if object successfully deleted
-   if (theGuiInterpreter->RemoveObjectIfNotUsed(objType, selItem->GetDesc().c_str()))
+   if (theGuiInterpreter->RemoveObjectIfNotUsed(objType, itemName.c_str()))
    {
-      wxTreeItemId parentId = GetItemParent(item);
-      this->Delete(item);
+      // delete item and close all opened windows
+      this->Delete(itemId);
+      GmatAppData::GetMainFrame()->CloseAllChildren(false, true);
       
       theGuiManager->UpdateAll();
    }
