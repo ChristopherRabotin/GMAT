@@ -45,6 +45,7 @@ public:
    // subscribers
    Integer              RegisterPublishedData(const StringArray& owners, 
                                               const StringArray& elements);
+   void                 ClearPublishedData();
    const StringArray&   GetStringArrayParameter(const std::string& type);
    void                 SetInternalCoordSystem(CoordinateSystem *cs);
    void                 SetDataCoordSystem(CoordinateSystem *cs);

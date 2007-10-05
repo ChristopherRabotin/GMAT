@@ -23,7 +23,9 @@
 #include "Moderator.hpp"
 #include <string>
 
-//#define DEBUG_PUBLISHER 1
+//#define DEBUG_PUBLISHER_REGISTER 1
+//#define DEBUG_PUBLISHER_PUBLISH 1
+//#define DEBUG_PUBLISHER_CLEAR 1
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -95,7 +97,15 @@ bool Publisher::Unsubscribe(Subscriber *s)
 //------------------------------------------------------------------------------
 bool Publisher::UnsubscribeAll()
 {
+   #if DEBUG_PUBLISHER_CLEAR
+   MessageInterface::ShowMessage
+      ("Publisher::UnsubscribeAll() entered. Clearing %d subscribers\n",
+       subs.size());
+   #endif
+   
    subs.clear();
+   
+   ClearPublishedData();
    
    // delete locally created coordinate systems
    std::map<std::string, CoordinateSystem*>::iterator iter;
@@ -125,10 +135,15 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    if (subs.empty()) {
       return false;
    }
+
+   #if DEBUG_PUBLISHER_PUBLISH > 1
+   MessageInterface::ShowMessage("Publisher::Publish(Real) id = %d\n", id);
+   #endif
    
    if ((id < 0) || (id >= providerCount))
-      throw PublisherException("Data provider has not registered with the Publisher.");
-
+      throw PublisherException
+         ("Real data provider has not registered with the Publisher.");
+   
    if (id != currentProvider) {
       currentProvider = id;
       UpdateProviderID(id);
@@ -145,18 +160,18 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
       else
          strcat(stream, "\n");
    }
-
-
-   #if DEBUG_PUBLISHER
+   
+   
+   #if DEBUG_PUBLISHER_PUBLISH
    MessageInterface::ShowMessage
       ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
        subs.size());
    #endif
-
+   
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
-      #if DEBUG_PUBLISHER
+      #if DEBUG_PUBLISHER_PUBLISH > 1
       MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
                                     (*current)->GetName().c_str());
       #endif
@@ -181,9 +196,16 @@ bool Publisher::Publish(Integer id, char *data, Integer count)
    if (subs.empty())
       return false;
 
+   #if DEBUG_PUBLISHER_PUBLISH > 1
+   MessageInterface::ShowMessage("Publisher::Publish(char) id = %d\n", id);
+   #endif
+   
    if ((id < 0) || (id >= providerCount))
-      throw PublisherException("Data provider has not registered with the Publisher.");
-
+   {
+      throw PublisherException
+         ("Character data provider has not registered with the Publisher.");
+   }
+   
    if (id != currentProvider) {
       currentProvider = id;
       UpdateProviderID(id);
@@ -224,9 +246,14 @@ bool Publisher::Publish(Integer id, Integer *data, Integer count)
    // No subscribers
    if (subs.empty())
       return false;
-
+   
+   #if DEBUG_PUBLISHER_PUBLISH > 1
+   MessageInterface::ShowMessage("Publisher::Publish(Integer) id = %d\n", id);
+   #endif
+   
    if ((id < 0) || (id >= providerCount))
-      throw PublisherException("Data provider has not registered with the Publisher.");
+      throw PublisherException
+         ("Integer data provider has not registered with the Publisher.");
 
    if (id != currentProvider) {
       currentProvider = id;
@@ -299,13 +326,38 @@ bool Publisher::NotifyEndOfRun()
 
 
 //------------------------------------------------------------------------------
+// void ClearPublishedData()
+//------------------------------------------------------------------------------
+void Publisher::ClearPublishedData()
+{   
+   #if DEBUG_PUBLISHER_CLEAR
+   MessageInterface::ShowMessage
+      ("Publisher::ClearPublishedData() Clearing %d providers\n", objectMap.size());
+   #endif
+   
+   objectMap.clear();
+   elementMap.clear();
+   providerCount = 0;
+   currentProvider = -1;
+   
+   // Clear subscriber's data
+   std::list<Subscriber*>::iterator current = subs.begin();
+   while (current != subs.end())
+   {
+      (*current)->ClearDataLabels();
+      current++;
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // Integer RegisterPublishedData(const StringArray& owners, 
 //                               const StringArray& elements)
 //------------------------------------------------------------------------------
 Integer Publisher::RegisterPublishedData(const StringArray& owners, 
                                          const StringArray& elements)
 {
-   #ifdef DEBUG_PUBLISHER
+   #if DEBUG_PUBLISHER_REGISTER > 1
    MessageInterface::ShowMessage("Publisher::RegisterPublishedData() entered\n");
    for (unsigned int i=0; i<owners.size(); i++)
       MessageInterface::ShowMessage("   owner[%d]=%s\n", i, owners[i].c_str());
@@ -326,8 +378,10 @@ Integer Publisher::RegisterPublishedData(const StringArray& owners,
    
    ++providerCount;
    
-   #ifdef DEBUG_PUBLISHER
-   MessageInterface::ShowMessage("===> returning %d\n", providerCount-1);
+   #ifdef DEBUG_PUBLISHER_REGISTER
+   MessageInterface::ShowMessage("   objectMap.size()=%d\n", objectMap.size());
+   MessageInterface::ShowMessage
+      ("Publisher::RegisterPublishedData() returning %d\n", providerCount-1);
    #endif
    
    return providerCount-1;
