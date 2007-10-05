@@ -758,7 +758,7 @@ void GmatMainFrame::CloseActiveChild()
  *
  * @param <closeScriptWindow> true to close script window
  * @param <closePlots> true to close all plot windows
- * @param <excludeTitle> name of the frame to be excluded from closing
+ * @param <excludeTitle> name of the window to be excluded from closing
  * @return true if all frames is closed false otherwise
  */
 //------------------------------------------------------------------------------ 
@@ -799,32 +799,34 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       MessageInterface::ShowMessage("   title = %s, type = %d\n", title.c_str(), type);
       #endif
       
-      if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
-          (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
+      // if title is not excluded
+      if (child->GetTitle() != excludeTitle)
       {
-         // delete resource and command child
-         if (type == GmatTree::SCRIPT_FILE)
+         if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
+             (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
          {
-            if (closeScriptWindow)
+            // check if script file to be closed or not
+            if (type == GmatTree::SCRIPT_FILE)
+            {
+               if (closeScriptWindow)
+                  canDelete = true;
+            }
+            else
+            {
                canDelete = true;
-            else if (child->GetTitle() != excludeTitle)
-               canDelete = true;
+            }
          }
-         else
+         else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
          {
-            canDelete = true;
+            // delete output child except compare
+            if (closePlots && type != GmatTree::COMPARE_REPORT)
+            {
+               GmatAppData::GetOutputTree()->UpdateOutput(true);
+               canDelete = true;
+            }
          }
       }
-      else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
-      {
-         // delete output child except compare
-         if (closePlots && type != GmatTree::COMPARE_REPORT)
-         {
-            GmatAppData::GetOutputTree()->UpdateOutput(true);
-            canDelete = true;
-         }
-      }
-
+            
       //--------------------------------------------------------------
       // delete chilren by child->OnClose()
       //--------------------------------------------------------------
@@ -858,7 +860,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       // Note: The node is deleted from RemoveChild()
       //-------------------------------------------------
       wxNode *nextNode = theMdiChildren->GetFirst();
-
+      
       // if node is not deleted get next node
       if (!canDelete)
          nextNode = nextNode->GetNext();
@@ -1107,7 +1109,7 @@ Integer GmatMainFrame::RunCurrentMission()
       MinimizeChildren();
       retval = theGuiInterpreter->RunMission();
       
-      if (retval != 1)
+      if (retval != 1 && mServer)
          StopServer(); // stop server if running to avoid getting callback staus
                        // when run stopped by user
       
@@ -1184,18 +1186,18 @@ void GmatMainFrame::StartServer()
       mServer = new GmatServer;
       mServer->Create(service);
       
-      #ifdef DEBUG_SERVER
+      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server started.\n");
-      #endif
+      //#endif
       
       //mServerMenu->Enable(MENU_START_SERVER, false);
       //mServerMenu->Enable(MENU_STOP_SERVER, true);
    }
    else
    {
-      #ifdef DEBUG_SERVER
+      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has already started.\n");
-      #endif
+      //#endif
    }
 }
 
@@ -1209,17 +1211,17 @@ void GmatMainFrame::StopServer()
    {
       delete mServer;
       
-      #ifdef DEBUG_SERVER
+      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server terminated.\n");
-      #endif
+      //#endif
       
       mServer = NULL;
    }
    else
    {
-      #ifdef DEBUG_SERVER
+      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has not started.\n");
-      #endif
+      //#endif
    }
 }
 
