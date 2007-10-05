@@ -927,7 +927,7 @@ bool ReportFile::Distribute(const Real * dat, Integer len)
    // if writing current iteration only and solver is not finished,
    // just return
    //------------------------------------------------------------
-   if (mSolverIterOption == SI_CURRENT && runstate != Gmat::SOLVEDPASS)
+   if (mSolverIterOption == SI_CURRENT && runstate == Gmat::SOLVING)
    {
       #if DEBUG_REPORTFILE_DATA
       MessageInterface::ShowMessage
