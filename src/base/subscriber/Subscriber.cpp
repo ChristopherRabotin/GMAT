@@ -89,8 +89,8 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    objectTypes.push_back(Gmat::SUBSCRIBER);
    objectTypeNames.push_back("Subscriber");
    
-   mSolverIterations = "None";
-   mSolverIterOption = SI_NONE;
+   mSolverIterations = "Current";
+   mSolverIterOption = SI_CURRENT;
 }
 
 
@@ -345,7 +345,16 @@ Integer Subscriber::GetProviderId()
 //------------------------------------------------------------------------------
 void Subscriber::SetDataLabels(const StringArray& elements)
 {
-   mDataLabels = elements;
+   theDataLabels.push_back(elements);
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearDataLabels()
+//------------------------------------------------------------------------------
+void Subscriber::ClearDataLabels()
+{
+   theDataLabels.clear();
 }
 
 

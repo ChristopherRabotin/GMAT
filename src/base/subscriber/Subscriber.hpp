@@ -65,6 +65,7 @@ public:
    virtual void SetProviderId(Integer id);
    virtual Integer GetProviderId();
    virtual void SetDataLabels(const StringArray& elements);
+   virtual void ClearDataLabels();
    virtual void SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void SetDataCoordSystem(CoordinateSystem *cs);
    virtual void SetDataMJ2000EqOrigin(CelestialBody *cb);
@@ -119,7 +120,7 @@ protected:
    SolverIterOption mSolverIterOption;
    
    /// Arrays used to track elements for published data
-   StringArray mDataLabels;
+   std::vector<StringArray> theDataLabels;
    
    const char *data;
    Subscriber *next;
