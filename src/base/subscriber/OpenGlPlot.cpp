@@ -30,6 +30,8 @@
 #define REMOVE_OBJ_BY_SETTING_FLAG 1
 
 //#define DEBUG_OPENGL_INIT 1
+//#define DEBUG_OPENGL_DATA 1
+//#define DEBUG_OPENGL_DATA_LABELS 1
 //#define DEBUG_OPENGL_ADD 1
 //#define DEBUG_OPENGL_OBJ 2
 //#define DEBUG_OPENGL_PARAM 1
@@ -545,7 +547,7 @@ bool OpenGlPlot::Initialize()
    {
       #if DEBUG_OPENGL_INIT
       MessageInterface::ShowMessage
-         ("OpenGlPlot::Initialize() CreateGlPlotWindow() theSolarSystem=%d\n",
+         ("OpenGlPlot::Initialize() CreateGlPlotWindow() theSolarSystem=%p\n",
           theSolarSystem);
       #endif
       
@@ -559,7 +561,7 @@ bool OpenGlPlot::Initialize()
       {
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
-            ("   mViewPointRefObj=%d, mViewScaleFactor=%f\n",
+            ("   mViewPointRefObj=%p, mViewScaleFactor=%f\n",
              mViewPointRefObj, mViewScaleFactor);
          #endif
          
@@ -675,6 +677,15 @@ bool OpenGlPlot::Initialize()
          // set CoordinateSystem
          //--------------------------------------------------------
          #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("   theInternalCoordSystem = <%p>, origin = %s\n"
+             "   theDataCoordSystem     = <%p>, origin = %s\n"
+             "   mViewCoordSystem       = <%p>, origin = %s\n"
+             "   mViewUpCoordSystem     = <%p>, origin = %s\n",
+             theInternalCoordSystem, theInternalCoordSystem->GetOriginName().c_str(),
+             theDataCoordSystem, theDataCoordSystem->GetOriginName().c_str(),
+             mViewCoordSystem, mViewCoordSystem->GetOriginName().c_str(),
+             mViewUpCoordSystem, mViewUpCoordSystem->GetOriginName().c_str());
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlCoordSystem()\n");
          #endif
@@ -2611,7 +2622,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    if (len <= 0)
       return true;
    
-      
+   
+   #if DEBUG_OPENGL_DATA
+   MessageInterface::ShowMessage("%s, len=%d\n", GetName().c_str(), len);
+   for (int i=0; i<len; i++)
+      MessageInterface::ShowMessage("%.11f  ", dat[i]);
+   MessageInterface::ShowMessage("\n");
+   #endif
+   
    //------------------------------------------------------------
    // if targeting and draw target is None, just return
    //------------------------------------------------------------
@@ -2629,13 +2647,14 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
    //------------------------------------------------------------
    // update plot data
    //------------------------------------------------------------
-
+   
    CoordinateConverter coordConverter;
    mNumData++;
    
    #if DEBUG_OPENGL_UPDATE > 1
    MessageInterface::ShowMessage
-      ("   mNumData=%d, mDataCollectFrequency=%d\n", mNumData, mDataCollectFrequency);
+      ("   mNumData=%d, mDataCollectFrequency=%d, currentProvider=%d\n",
+       mNumData, mDataCollectFrequency, currentProvider);
    #endif
    
    if ((mNumData % mDataCollectFrequency) == 0)
@@ -2644,10 +2663,19 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       mNumCollected++;
       bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
-      #if DEBUG_OPENGL_UPDATE > 1
-      MessageInterface::ShowMessage("   mDataLabels=\n   ");
-      for (int j=0; j<(int)mDataLabels.size(); j++)
-         MessageInterface::ShowMessage("%s ", mDataLabels[j].c_str());
+      if (currentProvider >= (Integer)theDataLabels.size())
+      {
+         SubscriberException se;
+         se.SetDetails("The provider id: %d is invalid in OpenGL plot\n", currentProvider);
+         throw se;
+      }
+      
+      StringArray dataLabels = theDataLabels[currentProvider];
+      
+      #if DEBUG_OPENGL_DATA_LABELS
+      MessageInterface::ShowMessage("   Data labels for %s =\n   ", GetName().c_str());
+      for (int j=0; j<(int)dataLabels.size(); j++)
+         MessageInterface::ShowMessage("%s ", dataLabels[j].c_str());
       MessageInterface::ShowMessage("\n");
       #endif
       
@@ -2657,28 +2685,26 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       
       for (int i=0; i<mScCount; i++)
       {
-         idX = FindIndexOfElement(mDataLabels, mScNameArray[i]+".X");
-         idY = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Y");
-         idZ = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Z");
+         idX = FindIndexOfElement(dataLabels, mScNameArray[i]+".X");
+         idY = FindIndexOfElement(dataLabels, mScNameArray[i]+".Y");
+         idZ = FindIndexOfElement(dataLabels, mScNameArray[i]+".Z");
          
-         idVx = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vx");
-         idVy = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vy");
-         idVz = FindIndexOfElement(mDataLabels, mScNameArray[i]+".Vz");
+         idVx = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vx");
+         idVy = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vy");
+         idVz = FindIndexOfElement(dataLabels, mScNameArray[i]+".Vz");
          
-         #if DEBUG_OPENGL_UPDATE > 1
+         #if DEBUG_OPENGL_DATA_LABELS
          MessageInterface::ShowMessage
-            ("   i=%d, idX=%d, idY=%d, idZ=%d, idVx=%d, idVy=%d, idVz=%d\n",
-             i, idX, idY, idZ, idVx, idVy, idVz);
+            ("   mScNameArray[%d]=%s, idX=%d, idY=%d, idZ=%d, idVx=%d, idVy=%d, idVz=%d\n",
+             i, mScNameArray[i].c_str(), idX, idY, idZ, idVx, idVy, idVz);
          #endif
+         
+         // if any of index not found, continue with next spacecraft name
+         if (idX  == -1 || idY  == -1 || idZ  == -1 ||
+             idVx == -1 || idVy == -1 || idVz == -1)
+            continue;
          
          scIndex++;
-         
-         #if DEBUG_OPENGL_UPDATE > 2
-         MessageInterface::ShowMessage
-            ("===> theDataCoordSystem=<%p>, mViewCoordSystem=<%p>, "
-             "theInternalCoordSystem=<%p>\n", theDataCoordSystem,
-             mViewCoordSystem, theInternalCoordSystem);
-         #endif
          
          // buffer data
          for (int sc=0; sc<mScCount; sc++)
@@ -2689,8 +2715,12 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
             // results, if origin is spacecraft,
             // ie, sat->GetMJ2000State(epoch) will not give correct results.
             
-            //if ((theInternalCoordSystem != NULL) &&
-            //    (mViewCoordSystem != theInternalCoordSystem))
+            #if DEBUG_OPENGL_DATA
+            MessageInterface::ShowMessage
+               ("   %s, %.11f, X,Y,Z = %f, %f, %f\n", GetName().c_str(), dat[0],
+                dat[idX], dat[idY], dat[idZ]);
+            #endif
+            
             if ((theDataCoordSystem != NULL && mViewCoordSystem != NULL) &&
                 (mViewCoordSystem != theDataCoordSystem))
             {
@@ -2700,8 +2730,6 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                inState.Set(dat[idX], dat[idY], dat[idZ],
                            dat[idVx], dat[idVy], dat[idVz]);
                
-               //coordConverter.Convert(dat[0], inState, theInternalCoordSystem,
-               //                       outState, mViewCoordSystem);
                coordConverter.Convert(dat[0], inState, theDataCoordSystem,
                                       outState, mViewCoordSystem);
                
@@ -2722,16 +2750,16 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
                mScVzArray[scIndex] = dat[idVz];
             }
             
-            #if DEBUG_OPENGL_UPDATE
-            if (runstate == Gmat::SOLVING)
-            {
-               MessageInterface::ShowMessage
-                  ("   scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n", i, scIndex, 
-                   mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
-               MessageInterface::ShowMessage
-                  ("   Vx,Vy,Vz = %f, %f, %f\n",
-                   mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
-            }
+            #if DEBUG_OPENGL_DATA
+            MessageInterface::ShowMessage
+               ("   after buffering, scNo=%d, scIndex=%d, X,Y,Z = %f, %f, %f\n",
+                i, scIndex, mScXArray[scIndex], mScYArray[scIndex], mScZArray[scIndex]);
+            #endif
+            
+            #if DEBUG_OPENGL_DATA > 1
+            MessageInterface::ShowMessage
+               ("   Vx,Vy,Vz = %f, %f, %f\n",
+                mScVxArray[scIndex], mScVyArray[scIndex], mScVzArray[scIndex]);
             #endif
          }
       }
