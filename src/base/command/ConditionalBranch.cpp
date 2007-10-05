@@ -1218,13 +1218,13 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
    ElementWrapper *ew;
 
    if (toWrapper == NULL) return false;
-   
-   //if (toWrapper->GetWrapperType() == Gmat::ARRAY)
-   //{
-   //   throw CommandException("A value of type \"Array\" on command \"" + typeName + 
-   //               "\" is not an allowed value.\nThe allowed values are:"
-   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   //}
+   // this would be caught by next part, but this message is more meaningful
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   {
+      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
    bool typeOK = true;
    Gmat::ParameterType baseType;
    std::string         baseStr;
@@ -1234,6 +1234,11 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
       baseStr  = PARAM_TYPE_STRING[baseType];
       if ( (baseType != Gmat::REAL_TYPE) && (baseType  != Gmat::INTEGER_TYPE) )
          typeOK = false;
+      #ifdef DEBUG_WRAPPER_CODE   
+      MessageInterface::ShowMessage(
+         "   Setting wrapper \"%s\" of type \"%s\" on Conditional Branch command\n", 
+         withName.c_str(), baseStr.c_str());
+      #endif
    }
    catch (BaseException &be)
    {

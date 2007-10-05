@@ -5004,6 +5004,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             Parameter *param = CreateSystemParameter(desc);
             if (param)
             {
+               #ifdef DEBUG_WRAPPERS
+                  MessageInterface::ShowMessage(
+                     "In Interpreter(1), about to create a ParameterWrapper for \"%s\"\n",
+                     desc.c_str(), "\"\n");
+               #endif
                CreateParameterWrapper(param, &ew, itsType);
             }
             else
@@ -5029,6 +5034,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                
                if (param)
                {
+                  #ifdef DEBUG_WRAPPERS
+                     MessageInterface::ShowMessage(
+                        "In Interpreter(2), about to create a ParameterWrapper for \"%s\"\n",
+                        desc.c_str(), "\"\n");
+                  #endif
                   CreateParameterWrapper(param, &ew, itsType);
                }
                else // there is an error
@@ -5056,6 +5066,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   Parameter *param = CreateSystemParameter(desc);
                   if (param)
                   {
+                     #ifdef DEBUG_WRAPPERS
+                        MessageInterface::ShowMessage(
+                           "In Interpreter(3), about to create a ParameterWrapper for \"%s\"\n",
+                           desc.c_str(), "\"\n");
+                     #endif
                      CreateParameterWrapper(param, &ew, itsType);
                   }
                   else // there is an error
@@ -5080,6 +5095,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                      Parameter *param = CreateSystemParameter(desc);
                      if (param)
                      {
+                        #ifdef DEBUG_WRAPPERS
+                           MessageInterface::ShowMessage(
+                              "In Interpreter(4), about to create a ParameterWrapper for \"%s\"\n",
+                              desc.c_str(), "\"\n");
+                        #endif
                         CreateParameterWrapper(param, &ew, itsType);
                      }
                      else // there is an error
@@ -5139,6 +5159,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
          }
          else if ( (p) && p->IsOfType("Parameter") )
          {
+            #ifdef DEBUG_WRAPPERS
+               MessageInterface::ShowMessage(
+                  "In Interpreter(5), about to create a ParameterWrapper for \"%s\"\n",
+                  desc.c_str(), "\"\n");
+            #endif
             CreateParameterWrapper(p, &ew, itsType);
          }
          else
