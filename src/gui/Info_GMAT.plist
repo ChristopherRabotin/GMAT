@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>GMAT</string>
 	<key>CFBundleGetInfoString</key>
-	<string>GMAT (Mac OS) version Alpha</string>
+	<string>GMAT (Mac OS/ppc) version Alpha</string>
 	<key>CFBundleIconFile</key>
 	<string>gmat.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -15,13 +15,13 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
-	<string>GMAT (Mac OS) version Alpha</string>
+	<string>GMAT (Mac OS/ppc) version Alpha</string>
 	<key>CFBundleName</key>
 	<string>GMAT</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>GMAT (Mac OS) Alpha</string>
+	<string>GMAT (Mac OS/ppc) Alpha</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
