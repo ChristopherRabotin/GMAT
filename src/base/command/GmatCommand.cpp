@@ -377,7 +377,8 @@ void GmatCommand::ClearWrappers()
 
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
-                                const std::string &cmdName)
+                                const std::string &cmdName,
+                                bool ignoreUnsetReference)
 {
    if (forWrapper == NULL)
    {
@@ -386,18 +387,36 @@ void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
       cmdEx += ".\n";
       throw CommandException(cmdEx);
    }
-   Gmat::ParameterType pType = forWrapper->GetDataType();
-   if ((pType != needType) && !((needType == Gmat::REAL_TYPE) &&
-                               (pType == Gmat::INTEGER_TYPE)))
+   bool typeOK = true;
+   Gmat::ParameterType baseType;
+   std::string         baseStr;
+   std::string         desc = forWrapper->GetDescription();
+   try
    {
-      // @todo - make this message more meaningful, for non-Real types
-      std::string errmsg = "A value of type \"" + PARAM_TYPE_STRING[pType];
-      errmsg += "\" on command \"" + cmdName;
-      errmsg += "\" is not an allowed value.\nThe allowed values are:";
-      errmsg += " [ Object Property (Real), Real Number, Variable,";
-      errmsg += " Array Element, or Parameter ]. \n";
-      errmsg += "Line: " + generatingString + "\n";
-      throw CommandException(errmsg); 
+      baseType = forWrapper->GetDataType();
+      baseStr  = PARAM_TYPE_STRING[baseType];
+      if ((baseType != needType) && 
+          !((needType == Gmat::REAL_TYPE) && (baseType == Gmat::INTEGER_TYPE)))
+         typeOK = false;
+   }
+   catch (BaseException &be)
+   {
+      // will need to check data type of object property 
+      // wrappers on initialization
+      if (!ignoreUnsetReference)
+      {
+         std::string errmsg = "Reference not set for \"" + desc;
+         errmsg += "\", cannot check for correct data type.";
+         throw CommandException(errmsg);
+      }
+   }
+   
+   if (!typeOK)
+   {
+      throw CommandException("A value of \"" + desc + "\" of base type \"" +
+                  baseStr + "\" on command \"" + cmdName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Object Property (Real), Real Number, Variable, Array Element, or Parameter ]. "); 
    }
 }
 

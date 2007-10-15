@@ -80,7 +80,8 @@ public:
    virtual void         ClearWrappers();
    virtual void         CheckDataType(ElementWrapper* forWrapper,
                                       Gmat::ParameterType needType,
-                                      const std::string &cmdName);
+                                      const std::string &cmdName,
+                                      bool ignoreUnsetReference = false);
    
    // Methods used to setup objects
    virtual bool         SetObject(const std::string &name,
