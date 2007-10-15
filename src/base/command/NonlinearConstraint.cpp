@@ -558,6 +558,7 @@ bool NonlinearConstraint::SetRefObject(GmatBase *obj, const Gmat::ObjectType typ
 //------------------------------------------------------------------------------
 bool NonlinearConstraint::InterpretAction()
 {
+   bool tooMuch = false;
    // Clean out any old data
    wrapperObjectNames.clear();
    ClearWrappers();
@@ -574,10 +575,27 @@ bool NonlinearConstraint::InterpretAction()
    // Find and set the solver object name
    // This is the only setting in Vary that is not in a wrapper
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   if (!GmatStringUtil::HasNoBrackets(currentChunks.at(0), false))
+      throw CommandException(
+            "Solver name for NonlinearConstraint command may not contain brackets, braces, or parentheses."); 
    SetStringParameter(OPTIMIZER_NAME, currentChunks[0]);
+   if (currentChunks.size() < 2)
+      throw CommandException("Missing field or value for NonlinearConstraint command.");
+   if (currentChunks.size() > 2) tooMuch = true;
+   std::string cc = GmatStringUtil::Strip(currentChunks[1]);
+   Integer ccEnd = cc.size() - 1;
+   if ((tooMuch) || (cc.at(0) != '(') || (cc.at(ccEnd) != ')'))
+      throw CommandException(
+           "Missing parentheses, or unexpected characters found, around logical expression argument to NonlinearConstraint command.");
+   if (!GmatStringUtil::IsBracketBalanced(cc, "()"))
+      throw CommandException("Parentheses unbalanced in Minimize command.");
+   // @todo - if tolerance allowed later, will need to not check for braces here ...
+   if ((cc.find('[') != cc.npos) || (cc.find(']') != cc.npos) ||
+       (cc.find('{') != cc.npos) || (cc.find('}') != cc.npos) )
+      throw CommandException("Minimize command may not contain brackets or braces.");
    
-   std::string noSpaces2     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
-   //currentChunks = parser.Decompose(noSpaces2, "()", true, true);
+   std::string noSpaces2     = GmatStringUtil::RemoveAll(cc,' ');
+   //std::string noSpaces2     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
    currentChunks = parser.SeparateBrackets(noSpaces2, "()", ",", false);
    
    #ifdef DEBUG_NLC_PARSING
@@ -590,13 +608,7 @@ bool NonlinearConstraint::InterpretAction()
                                        currentChunks[jj].c_str());
    #endif
    bool testForMore = false;
-   if ((Integer) currentChunks.size() > 1)
-   {
-      testForMore = true;
-      //std::string errMsg = "The NonlinearConstraint \"" + generatingString 
-      //   + "\" has too many \"chunks\""; 
-      //throw CommandException(errMsg);
-   }
+   if ((Integer) currentChunks.size() > 1) testForMore = true;
    Integer end;
    std::string constraintStr = currentChunks[0];
    Integer opSize = 1;
@@ -619,6 +631,27 @@ bool NonlinearConstraint::InterpretAction()
       #ifdef DEBUG_NONLINEAR_CONSTRAINT_INIT
          MessageInterface::ShowMessage("NLC:InterpretAction: less_than_or_equal\n");
       #endif
+   }
+   else if ((end = constraintStr.find("=>", 0)) != (Integer) constraintStr.npos)
+   {
+      std::string errmsg = "The string \"=>\" is an invalid conditonal operator";
+      errmsg            += " in a NonlinearConstraint command.\n";
+      errmsg            += "The allowed values are [=, <=, >=]\n";
+      throw CommandException(errmsg);
+   }
+   else if ((end = constraintStr.find("=<", 0)) != (Integer) constraintStr.npos)
+   {
+      std::string errmsg = "The string \"=<\" is an invalid conditonal operator";
+      errmsg            += " in a NonlinearConstraint command.\n";
+      errmsg            += "The allowed values are [=, <=, >=]\n";
+      throw CommandException(errmsg);
+   }
+   else if ((end = constraintStr.find("==", 0)) != (Integer) constraintStr.npos)
+   {
+      std::string errmsg = "The string \"==\" is an invalid conditonal operator";
+      errmsg            += " in a NonlinearConstraint command.\n";
+      errmsg            += "The allowed values are [=, <=, >=]\n";
+      throw CommandException(errmsg);
    }
    else if ((end = constraintStr.find("=", 0)) != (Integer) constraintStr.npos)
    {
@@ -644,6 +677,7 @@ bool NonlinearConstraint::InterpretAction()
       MessageInterface::ShowMessage("... operator = %s\n", OP_STRINGS[(Integer)op].c_str());
       MessageInterface::ShowMessage("... arg2Name = %s\n", arg2Name.c_str());
    #endif
+   // Currently, this should not happen ..... 
    if (testForMore)
    {
       std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
@@ -664,15 +698,6 @@ bool NonlinearConstraint::InterpretAction()
            i != currentChunks.end(); ++i)
       {
          SeparateEquals(*i, lhs, rhs);
-         //bool isOK = SeparateEquals(*i, lhs, rhs);
-         //#ifdef DEBUG_NLC_PARSING
-         //   MessageInterface::ShowMessage("Setting NLC properties\n");
-         //   MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
-         //#endif
-         //if (!isOK || lhs.empty() || rhs.empty())
-         //   throw CommandException("The setting \"" + lhs + 
-         //      "\" is missing a value required for a " + typeName + 
-         //      " command.\n");
          
          if (IsSettable(lhs))
             SetStringParameter(GetParameterID(lhs), rhs);
@@ -724,12 +749,13 @@ bool NonlinearConstraint::SetElementWrapper(ElementWrapper *toWrapper,
                   "\" is not currently an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
-   {
-      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
-                  "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   }
+   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   //{
+   //   throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
+   //               "\" is not an allowed value.\nThe allowed values are:"
+   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   //}
+   CheckDataType(toWrapper,Gmat::REAL_TYPE, "NonlinearConstraint", true);
    
    #ifdef DEBUG_NLC_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on NLC command\n", 
@@ -818,11 +844,13 @@ bool NonlinearConstraint::Initialize()
    #endif
    if (SetWrapperReferences(*arg1) == false)
       return false;
+   CheckDataType(arg1, Gmat::REAL_TYPE, "NonlinearConstraint");
    #ifdef DEBUG_NONLINEAR_CONSTRAINT_PARAM
       MessageInterface::ShowMessage("Setting refs for arg2\n");
    #endif
    if (SetWrapperReferences(*arg2) == false)
       return false;
+   CheckDataType(arg2, Gmat::REAL_TYPE, "NonlinearConstraint");
    // The optimizer cannot be finalized until all of the loop is initialized
    optimizerDataFinalized = false;
 

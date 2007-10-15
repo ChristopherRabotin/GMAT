@@ -532,16 +532,28 @@ bool Minimize::InterpretAction()
    // Find and set the solver object name
    // This is the only setting in Vary that is not in a wrapper
    StringArray currentChunks = parser.Decompose(chunks[1], "()", false);
+   if (!GmatStringUtil::HasNoBrackets(currentChunks.at(0), false))
+      throw CommandException(
+            "Solver name for Minimize command may not contain brackets, braces, or parentheses."); 
+      
    SetStringParameter(OPTIMIZER_NAME, currentChunks[0]);
+   if (currentChunks.size() < 2)
+      throw CommandException("Missing field or value for Minimize command.");
  
     // The remaining text in the instruction is the variable definition and 
    // parameters, all contained in currentChunks[1].  Deal with those next.
-   //currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
-   std::string noLeftBrace  = GmatStringUtil::RemoveAll(currentChunks[1],'{');
-   std::string noRightBrace = GmatStringUtil::RemoveAll(noLeftBrace,'}');
-   std::string noSpaces     = GmatStringUtil::RemoveAll(noRightBrace,' ');
+   std::string cc = GmatStringUtil::Strip(currentChunks[1]);
+   Integer ccEnd = cc.size() - 1;
+   if ((cc.at(0) != '(') || (cc.at(ccEnd) != ')'))
+      throw CommandException(
+           "Missing parentheses, or unexpected characters found, around argument to Minimize command.");
+   if (!GmatStringUtil::IsBracketBalanced(cc, "()"))
+      throw CommandException("Parentheses unbalanced in Minimize command.");
+   if ((cc.find('[') != cc.npos) || (cc.find(']') != cc.npos) ||
+       (cc.find('{') != cc.npos) || (cc.find('}') != cc.npos) )
+      throw CommandException("Minimize command may not contain brackets or braces.");
+   std::string noSpaces     = GmatStringUtil::RemoveAll(cc,' ');
    currentChunks = parser.Decompose(noSpaces, "()", true, true);
-   //currentChunks = parser.Decompose(currentChunks[1], "()", true, true);
    
    #ifdef DEBUG_MINIMIZE_PARSING
       MessageInterface::ShowMessage(
@@ -582,19 +594,27 @@ bool Minimize::SetElementWrapper(ElementWrapper *toWrapper, const std::string &w
    {
       throw CommandException("A value of type \"Array\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+                  " [ Variable, Array Element, or Parameter ]. "); 
    }
-   if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   if (toWrapper->GetWrapperType() == Gmat::NUMBER)
    {
-      throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
+      throw CommandException("A value of type \"Number\" on command \"" + typeName + 
                   "\" is not an allowed value.\nThe allowed values are:"
-                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+                  " [ Variable, Array Element, or Parameter ]. "); 
    }
+   //if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
+   //{
+   //   throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
+   //               "\" is not an allowed value.\nThe allowed values are:"
+   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   //}
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Minimize command\n", 
       withName.c_str());
    #endif
+   
+   CheckDataType(toWrapper, Gmat::REAL_TYPE, "Minimize", true);
 
    if (objectiveName == withName)
    {
@@ -735,6 +755,7 @@ bool Minimize::Initialize()
 
    if (SetWrapperReferences(*objective) == false)
       return false;
+   CheckDataType(objective, Gmat::REAL_TYPE, "Minimize");
    
    #if DEBUG_MINIMIZE_INIT // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ debug ~~~~
    MessageInterface::ShowMessage
