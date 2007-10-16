@@ -1526,7 +1526,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (!GmatStringUtil::HasNoBrackets(desc, false))
          {
             std::string msg = 
-               "This command is not allowed to contain brackets, braces, or "
+               "The Target command is not allowed to contain brackets, braces, or "
                "parentheses";
             InterpreterException ex(msg);
             HandleError(ex);
@@ -1560,7 +1560,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (!GmatStringUtil::HasNoBrackets(desc, false))
          {
             std::string msg = 
-               "This command is not allowed to contain brackets, braces, or "
+               "The Optimize command is not allowed to contain brackets, braces, or "
                "parentheses";
             InterpreterException ex(msg);
             HandleError(ex);
@@ -1596,7 +1596,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          if (!GmatStringUtil::HasNoBrackets(desc, true))
          {
             std::string msg = 
-               "This command is not allowed to contain brackets, braces, or "
+               "The Report command is not allowed to contain brackets, braces, or "
                "parentheses (except to indicate array elements)";
             InterpreterException ex(msg);
             HandleError(ex);
@@ -1699,17 +1699,37 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
    {
       // these commands, for compatability with MATLAB, should not have
       // parentheses (except to indicate array elements), brackets, or braces
-      if (!GmatStringUtil::HasNoBrackets(desc))
+      if (!GmatStringUtil::HasNoBrackets(desc, false))
       {
          std::string msg = 
-            "This command is not allowed to contain brackets, braces, or "
-            "parentheses (except to indicate an array element)";
+            "The Save command is not allowed to contain brackets, braces, or "
+            "parentheses";
          InterpreterException ex(msg);
          HandleError(ex);
          return false;
       }
-      for (int i=0; i<count; i++)
-         cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, parts[i]);
+      // we only want to separate by spaces - commas are not allowed, 
+      // not even in arrays (for this command)
+      parts = GmatStringUtil::SeparateBy(desc, " ", true);
+      unsigned int saveCount = parts.size();
+      bool isOk = true;
+      for (unsigned int i=0; i<saveCount; i++)
+      {
+         if (parts[i].find(',') != parts[i].npos)
+         {
+            std::string msg = 
+               "The Save command is not allowed to contain commas - "
+               "separate objects by spaces";
+            InterpreterException ex(msg);
+            HandleError(ex);
+            isOk = false;
+         }
+         else
+            cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, parts[i]);
+      }
+      if (!isOk) return false;
+      //for (int i=0; i<count; i++)
+      //   cmd->SetRefObjectName(Gmat::UNKNOWN_OBJECT, parts[i]);
    }
    else
    {
@@ -4704,6 +4724,9 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
    MessageInterface::ShowMessage
       ("Interpreter::CheckUndefinedReference() type='%s', name='%s', refTypes=\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str());
+   for (UnsignedInt i=0; i<refTypes.size(); i++)
+      MessageInterface::ShowMessage
+         ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
    #endif
    
    // Save command can have any object type, so handle it first
@@ -4712,6 +4735,9 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
       refNames = obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
       for (UnsignedInt j=0; j<refNames.size(); j++)
       {
+         #ifdef DEBUG_CHECK_OBJECT
+            MessageInterface::ShowMessage("For Save, name = %s\n", refNames.at(j).c_str()); 
+         #endif
          GmatBase *refObj = GetConfiguredObject(refNames[j]);
          if (refObj == NULL)
          {
@@ -4720,6 +4746,20 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
                 obj->GetTypeName() + " command\"");
             HandleError(ex, writeLine);
             retval = false;
+         }
+         else if (refObj->GetType() == Gmat::PARAMETER)
+         {
+            // per Steve Hughes 2007.10.16 - arrays are OK - WCS
+            // (but not array elements)
+            if ( (!(refObj->IsOfType("Array"))) ||
+                 (GmatStringUtil::IsParenPartOfArray(refNames[j])) )
+            {
+               InterpreterException ex
+                  ("\"" + refNames[j] + "\" referenced in the " +
+                   obj->GetTypeName() + " command is not a saveable object");
+               HandleError(ex, writeLine);
+               retval = false;
+            }
          }
       }
       return retval;
@@ -4751,8 +4791,8 @@ bool Interpreter::CheckUndefinedReference(GmatBase *obj, bool writeLine)
          refNames = obj->GetRefObjectNameArray(refTypes[i]);
          
          #ifdef DEBUG_CHECK_OBJECT
+         MessageInterface::ShowMessage(" and the refNames are:\n");
          for (UnsignedInt j=0; j<refNames.size(); j++)
-            MessageInterface::ShowMessage(" and the refNames are:\n");
             MessageInterface::ShowMessage
                ("      %s\n", refNames[j].c_str());
          #endif
