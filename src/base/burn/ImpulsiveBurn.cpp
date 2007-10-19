@@ -220,3 +220,25 @@ void ImpulsiveBurn::Copy(const GmatBase* orig)
    operator=(*((ImpulsiveBurn *)(orig)));
 }
 
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames reference object name used in this class.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ * 
+ * @return true if object name changed, false if not.
+ */
+//---------------------------------------------------------------------------
+bool ImpulsiveBurn::RenameRefObject(const Gmat::ObjectType type,
+                                    const std::string &oldName,
+                                    const std::string &newName)
+{
+   return Burn::RenameRefObject(type, oldName, newName);
+}
+

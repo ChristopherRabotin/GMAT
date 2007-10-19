@@ -660,6 +660,34 @@ bool Burn::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames reference object name used in this class.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ * 
+ * @return true if object name changed, false if not.
+ */
+//---------------------------------------------------------------------------
+bool Burn::RenameRefObject(const Gmat::ObjectType type,
+                           const std::string &oldName,
+                           const std::string &newName)
+{
+   if (type == Gmat::SPACECRAFT)
+   {
+      if (satName == oldName)
+         satName = newName;
+   }
+   
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  void SetSpacecraftToManeuver(Spacecraft *sat)
 //------------------------------------------------------------------------------

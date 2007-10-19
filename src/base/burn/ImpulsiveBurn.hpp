@@ -38,6 +38,9 @@ public:
    // inherited from GmatBase
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
 protected:
    void                 TransformDeltaVToJ2kFrame(Real *deltaV, Real epoch);
