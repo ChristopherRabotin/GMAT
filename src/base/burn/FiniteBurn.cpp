@@ -636,6 +636,16 @@ void FiniteBurn::Copy(const GmatBase* orig)
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
+/**
+ * Renames reference object name used in this class.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ * 
+ * @return true if object name changed, false if not.
+ */
+//---------------------------------------------------------------------------
 bool FiniteBurn::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &oldName,
                                  const std::string &newName)
@@ -646,18 +656,18 @@ bool FiniteBurn::RenameRefObject(const Gmat::ObjectType type,
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type != Gmat::HARDWARE)
-      return true;
+   if (type == Gmat::HARDWARE)
+   {
+      for (UnsignedInt i=0; i<thrusters.size(); i++)
+         if (thrusters[i] == oldName)
+            thrusters[i] = newName;
    
-   for (UnsignedInt i=0; i<thrusters.size(); i++)
-      if (thrusters[i] == oldName)
-         thrusters[i] = newName;
+      for (UnsignedInt i=0; i<tanks.size(); i++)
+         if (tanks[i] == oldName)
+            tanks[i] = newName;
+   }
    
-   for (UnsignedInt i=0; i<tanks.size(); i++)
-      if (tanks[i] == oldName)
-         tanks[i] = newName;
-   
-   return true;
+   return Burn::RenameRefObject(type, oldName, newName);
 }
 
 
