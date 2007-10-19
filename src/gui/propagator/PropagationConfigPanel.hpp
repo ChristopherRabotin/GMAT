@@ -146,15 +146,17 @@ private:
       GravityField *gravf;
       DragForce *dragf;
       SolarRadiationPressure *srpf;
-      bool useSrp;
+      bool useSrp; // for future use (SRP on indivitual body is future implementation)
       
       ForceType(const wxString &body, const wxString &grav = "None",
-                const wxString &drag = "None", const wxString &mag = "None")
+                const wxString &drag = "None", const wxString &mag = "None",
+                PointMassForce *pf = NULL, GravityField *gf = NULL,
+                DragForce *df = NULL)
          {
             bodyName = body; gravType = grav; dragType = drag; magfType = mag;
             gravDegree = "4"; gravOrder = "4"; magfDegree = "0"; 
-            magfOrder = "0"; potFilename = ""; pmf = NULL; gravf = NULL; 
-            dragf = NULL; srpf = NULL; useSrp = false;
+            magfOrder = "0"; potFilename = ""; pmf = pf; gravf = gf; 
+            dragf = df; srpf = NULL; useSrp = false;
          }
       
       ForceType& operator= (const ForceType& right)
@@ -215,7 +217,7 @@ private:
    
    wxBoxSizer *leftBoxSizer;
    
-   std::string propSetupName;   
+   std::string propSetupName;
    std::string thePropagatorName;
    
    wxString currentBodyName;
@@ -252,8 +254,9 @@ private:
    Real               dCbar[17][17];
    /// coefficient drifts per year
    Real               dSbar[17][17];
-      
+   
    bool useDragForce;
+   bool usePropOriginForSrp;
    bool isForceModelChanged;
    bool isAtmosChanged;
    bool isDegOrderChanged;
