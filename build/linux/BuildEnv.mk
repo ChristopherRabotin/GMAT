@@ -2,7 +2,7 @@
 # Build environment file for Linux
 
 # Flags used to control the build
-USE_MATLAB = 0
+USE_MATLAB = 1
 USE_DEVIL = 1
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
@@ -10,11 +10,14 @@ PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
 
 # MATLAB specific data
-MATLAB_INCLUDE = -I/opt/matlab73/extern/include
-MATLAB_LIB = -L/opt/matlab73/bin/glnx86 
+# If you build with MATLAB support, you need to set the path infoirmation here.
+# You may also need to edit this list, depending on your MATLAB version number;
+# this set works with R2007b for Linux.
+MATLAB_INCLUDE = -I/opt/matlab/extern/include
+MATLAB_LIB = -L/opt/matlab/bin/glnx86 
 MATLAB_LIBRARIES = -leng -lmx -lut \
-                   -lmat -lpthread -lstdc++ -lm -licudata \
-                   -licuuc -licui18n -licuio -lz
+                   -lmat -lpthread -lstdc++ -lm \
+                   -licudata -licuuc -licui18n -licuio -lz -lhdf5 -lxerces-c
 
 # DevIL data
 IL_HEADERS = -I/usr/local/include/IL
