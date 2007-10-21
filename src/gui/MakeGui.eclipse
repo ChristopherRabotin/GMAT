@@ -33,7 +33,7 @@ all: prep $(TARGETS)
 gui: $(WXTARGET)
 
 prep:
-	mkdir -p ../bin
+	mkdir -p ../../bin
 	rm -f app/AboutDialog.o
 
 HEADERS = -I../base/include \
@@ -200,14 +200,14 @@ OBJECTS = \
 
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
-	cp -f $(WXTARGET) ../bin/.
+	cp -f $(WXTARGET) ../../bin/.
 
 macrez:
 	echo "linking Carbon and wx resource files ......."
 #	$(REZ) -o $(WXTARGET)
 	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
-	cp -f $(WXTARGET) ../bin/.
-	@chmod -R 755 ../bin
+	cp -f $(WXTARGET) ../../bin/.
+	@chmod -R 755 ../../bin
 
 macosx:
 	echo "creating macosx application ......."
