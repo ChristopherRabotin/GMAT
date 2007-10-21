@@ -1,0 +1,54 @@
+# Windows makefile for GMAT, using Eclipse
+# Mac OS X 10.4 version 2006.01.24 W. Shoan/GSFC/MAB
+
+include BuildEnv.mk
+
+
+ifeq ($(CONSOLE_APP),1)
+TARGET = bin/gmatConsole
+TARGETNAME = gmatConsole
+LIBRARY = base/lib/libGmatConsole.a
+else
+ifeq ($(USE_MATLAB),1)
+TARGET = bin/gmat
+TARGETNAME = gmat
+else
+TARGET = bin/gmatNoMatlab
+TARGETNAME = gmatNoMatlab
+endif
+LIBRARY = base/lib/libGmatGui.a
+endif
+
+all: $(TARGET)
+
+clean:
+	cd base; make -f MakeBase.eclipse clean
+	cd gui; make -f MakeGui.eclipse clean
+	cd test/TestScriptInterpreter; make -f MakeConsole.eclipse clean
+	rm -rf $(TARGET) $(LIBRARY) gui/gmat
+	
+clean2:
+	rm $(TARGET)
+	rm gui/$(TARGETNAME)
+	rm -Rf bin/GMAT.app
+	
+base: $(LIBRARY)
+
+bin/gmat: base/lib/libGmatGui.a gui/gmat
+
+bin/gmatNoMatlab: base/lib/libGmatGui.a gui/gmat
+
+gui/gmat:
+	cd base; make -f MakeBase.eclipse all
+	cd gui; make -f MakeGui.eclipse all
+
+base/lib/libGmatGui.a:
+	cd base; make -f MakeBase.eclipse all
+	
+base/lib/libGmatConsole.a:
+	rm -f $(LIBRARY)
+	cd base; make -f Makebase.eclipse console CONSOLE_APP=1
+
+bin/gmatConsole: base/lib/libGmatConsole.a
+	rm -f $(TARGET)
+	cd test/TestScriptInterpreter; make -f MakeConsole.eclipse clean all
