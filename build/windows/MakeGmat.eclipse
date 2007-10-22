@@ -10,7 +10,7 @@ PROGRAM = gmat.exe
 LIBRARY = base/lib/libGmatGui.a
 endif
 
-TARGET = bin/$(PROGRAM)
+TARGET = ../bin/$(PROGRAM)
 
 all: $(TARGET)
 
@@ -41,6 +41,6 @@ $(LIBRARY):
 	cd base; make -f MakeBase.eclipse all
 
 ifeq ($(CONSOLE_APP),1)
-bin/$(PROGRAM): base/lib/libGmatConsole.a
+../bin/$(PROGRAM): base/lib/libGmatConsole.a
 	cd console; make -f MakeConsole.eclipse
 endif

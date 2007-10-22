@@ -16,8 +16,8 @@ MATLAB_LIB = -LC:/Program\ Files/MATLAB/Matlab71SP3/bin/win32
 MATLAB_LIBRARIES = -leng -lmx -lmat
 
 # DevIL data
-IL_HEADERS = -I../DevIL/il -I../DevIL
-IL_LIBRARIES = -L../devIL -lilu -lilut -lDevIL
+IL_HEADERS = -I../../DevIL/il -I../DevIL
+IL_LIBRARIES = -L../../devIL -lilu -lilut -lDevIL
 
 # wxWidgets settings
 ifeq ($(WX_28_SYNTAX), 1)

@@ -63,8 +63,8 @@ LINUX_MAC = 1
 # Build specific flags
 MATLAB_FLAGS = -D__USE_MATLAB__=1
 
-WXCPPFLAGS = `/usr/local/bin/wx-config --cppflags`
-WXLINKFLAGS = `/usr/local/bin/wx-config --libs --gl-libs --static=no`
+WXCPPFLAGS = `wx-config --cppflags`
+WXLINKFLAGS = `wx-config --libs --gl-libs --static=no`
 
 
 ifeq ($(CONSOLE_APP),1)
