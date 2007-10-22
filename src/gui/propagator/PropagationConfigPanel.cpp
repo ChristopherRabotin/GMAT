@@ -225,7 +225,7 @@ void PropagationConfigPanel::LoadData()
             return;
          }
          
-         wxForceType = force->GetTypeName();
+         wxForceType = force->GetTypeName().c_str();
          wxBodyName = force->GetStringParameter("BodyName").c_str();
          
          #ifdef DEBUG_PROP_PANEL_LOAD
