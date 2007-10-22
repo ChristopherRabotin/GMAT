@@ -22,3 +22,7 @@ platform into the bin folder.
 
 Once you have completed these steps, GMAT executables built from source can be 
 run in the bin directory.
+
+Note: If you have write access to the GMAT repository, please be sure the new 
+files are in the subversion ignore file so that you don't inadvertently check 
+them in to the repository.
