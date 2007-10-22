@@ -1,45 +1,82 @@
 VERSION = 2005-07-13
-ROOT_PATH            = ./files
+#-------------------------------------------------------------------------------
+# ! Do not remove or change VERSION date, it won't work otherwise!!
+# Only the new FileManager, version after 2005/07/13, reconizes this new format.
+#-------------------------------------------------------------------------------
+# 
+# Path/File naming convention:
+#   - Path name should end with PATH
+#   - File name should end with FILE
+#   - Path/File names are case sensative
+#
+# You can add potential file and texture file by following the naming
+# convention.
+#   - Potential file should begin with planet name and end with POT_FILE
+#   - Texture file should begin with planet name and end with TEXTURE_FILE
+#
+#-------------------------------------------------------------------------------
+ROOT_PATH            = ./files/
+#-----------------------------------------------------------
 OUTPUT_PATH          = ./output/
-GMAT_FUNCTION_PATH   = ROOT_PATH/GmatFunctions/
-MATLAB_FUNCTION_PATH = ROOT_PATH/../matlab/gmat/
+LOG_FILE             = ./GmatLog.txt
+#REPORT_FILE         = OUTPUT_PATH/GmatReport.txt
+#-----------------------------------------------------------
+GMAT_FUNCTION_PATH   = ./GmatFunctions/
+MATLAB_FUNCTION_PATH = ./matlab/
 FUNCTION_PATH        = ./functions/
-LOG_FILE             = OUTPUT_PATH/GmatLog.txt
-SPLASH_PATH          = ./files/splash/
+#-----------------------------------------------------------
+SPLASH_PATH          = ROOT_PATH/splash/
 SPLASH_FILE          = SPLASH_PATH/GMATSplashScreen.tif
-SLP_PATH             = ./files/planetary_ephem/slp/
-SLP_FILE             = SLP_PATH/DBS_mn2000.pc
+#-----------------------------------------------------------
+ICON_PATH            = ROOT_PATH/icons
+MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
+#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.xpm
+#MAIN_ICON_FILE      = ICON_PATH/GMATMac.icn
+#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
+#-----------------------------------------------------------
+SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
+SLP_FILE             = SLP_PATH/mn2000.pc
 SLP_TIME_COEFF_FILE  = SLP_PATH/timcof.pc
-DE_PATH              = ./files/planetary_ephem/de/
+#-----------------------------------------------------------
+DE_PATH              = ROOT_PATH/planetary_ephem/de/
 DE200_FILE           = DE_PATH/winp1941.200
 DE202_FILE           = DE_PATH/winp1950.202
 DE405_FILE           = DE_PATH/winp1941.405
-EARTH_POT_PATH       = ./files/gravity/earth/
-LUNA_POT_PATH        = ./files/gravity/luna/
-MARS_POT_PATH        = ./files/gravity/mars/
-VENUS_POT_PATH       = ./files/gravity/venus/
+#-----------------------------------------------------------
+EARTH_POT_PATH       = ROOT_PATH/gravity/earth/
 JGM2_FILE            = EARTH_POT_PATH/JGM2.cof
 JGM3_FILE            = EARTH_POT_PATH/JGM3.cof
+EGM96_FILE           = EARTH_POT_PATH/EGM96low.cof
 EARTH_POT_FILE       = EARTH_POT_PATH/JGM2.cof
+#-----------------------------------------------------------
+LUNA_POT_PATH        = ROOT_PATH/gravity/luna/
 LUNA_POT_FILE        = LUNA_POT_PATH/LP165P.cof
-MARS_POT_FILE        = MARS_POT_PATH/Mars50c.cof
+#-----------------------------------------------------------
+VENUS_POT_PATH       = ROOT_PATH/gravity/venus/
 VENUS_POT_FILE       = VENUS_POT_PATH/MGNP180U.cof
-PLANETARY_COEFF_PATH = ./files/planetary_coeff/
+#-----------------------------------------------------------
+MARS_POT_PATH        = ROOT_PATH/gravity/mars/
+MARS_POT_FILE        = MARS_POT_PATH/Mars50c.cof
+#-----------------------------------------------------------
+PLANETARY_COEFF_PATH = ROOT_PATH/planetary_coeff/
 EOP_FILE             = PLANETARY_COEFF_PATH/eopc04.62-now
 PLANETARY_COEFF_FILE = PLANETARY_COEFF_PATH/NUT85.DAT
 NUTATION_COEFF_FILE  = PLANETARY_COEFF_PATH/NUTATION.DAT
-TIME_PATH            = ./files/time/
+#-----------------------------------------------------------
+TIME_PATH            = ROOT_PATH/time/
 LEAP_SECS_FILE       = TIME_PATH/tai-utc.dat
-TEXTURE_PATH         = ./files/plot/texture/
-SUN_TEXTURE_FILE     = TEXTURE_PATH/sun-0512.jpg
-MERCURY_TEXTURE_FILE = TEXTURE_PATH/mercury-0512.jpg
-VENUS_TEXTURE_FILE   = TEXTURE_PATH/venus-0512.jpg
+#-----------------------------------------------------------
+TEXTURE_PATH         = ROOT_PATH/plot/texture/
+SUN_TEXTURE_FILE     = TEXTURE_PATH/Sun.jpg
+MERCURY_TEXTURE_FILE = TEXTURE_PATH/Mercury_JPLCaltech.jpg
+VENUS_TEXTURE_FILE   = TEXTURE_PATH/Venus_BjornJonsson.jpg
 EARTH_TEXTURE_FILE   = TEXTURE_PATH/Earth_NASAWorldWind.jpg
-MARS_TEXTURE_FILE    = TEXTURE_PATH/mars-0512.jpg
-JUPITER_TEXTURE_FILE = TEXTURE_PATH/jupiter-0512.jpg
-SATURN_TEXTURE_FILE  = TEXTURE_PATH/saturn-0512.jpg
-URANUS_TEXTURE_FILE  = TEXTURE_PATH/uranus-0512.jpg
-NEPTUNE_TEXTURE_FILE = TEXTURE_PATH/neptune-0512.jpg
-PLUTO_TEXTURE_FILE   = TEXTURE_PATH/pluto-0512.jpg
-LUNA_TEXTURE_FILE    = TEXTURE_PATH/luna-0512.jpg
-MAIN_ICON_FILE       = ./files/icons/GMATLinux48.xpm
+MARS_TEXTURE_FILE    = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
+JUPITER_TEXTURE_FILE = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
+SATURN_TEXTURE_FILE  = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
+URANUS_TEXTURE_FILE  = TEXTURE_PATH/Uranus_JPLCaltech.jpg
+NEPTUNE_TEXTURE_FILE = TEXTURE_PATH/Neptune_BjornJonsson.jpg
+PLUTO_TEXTURE_FILE   = TEXTURE_PATH/Pluto_JPLCaltech.jpg
+LUNA_TEXTURE_FILE    = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
+#-----------------------------------------------------------
+
