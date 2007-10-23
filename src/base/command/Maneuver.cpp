@@ -21,6 +21,7 @@
 #include "Maneuver.hpp"
 
 //#define DEBUG_MANEUVER 1
+//#define DEBUG_MANEUVER_PARSE
 
 //------------------------------------------------------------------------------
 // Maneuver()
@@ -485,8 +486,21 @@ bool Maneuver::InterpretAction()
    
    SetStringParameter(burnNameID, currentChunks[0]);
    
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("In Maneuver, after Decompose, currentChunks = \n");
+      for (unsigned int ii=0; ii<currentChunks.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
+   #endif
    // ... and the spacecraft that is maneuvered
    currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   #ifdef DEBUG_MANEUVER_PARSE
+      MessageInterface::ShowMessage("In Maneuver, after Separatebrackets, currentChunks = \n");
+      for (unsigned int ii=0; ii<currentChunks.size(); ii++)
+         MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
+   #endif
+   if (currentChunks.size() > 1)
+      throw CommandException("Unexpected text after spacecraft name in Maneuver command\n");
+      
    SetStringParameter(satNameID, currentChunks[0]);
    
    return true;
