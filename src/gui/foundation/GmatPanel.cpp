@@ -1,4 +1,4 @@
-//$Header$
+//$Header: /cygdrive/p/dev/cvs/gui/foundation/GmatPanel.cpp,v 1.29 2007/09/11 15:22:09 lojun Exp $
 //------------------------------------------------------------------------------
 //                              GmatPanel
 //------------------------------------------------------------------------------
@@ -407,10 +407,7 @@ bool GmatPanel::CheckInteger(Integer &ivalue, const std::string &str,
  * @param  allowNumber  true if varName can be a Real number 
  * @param  allowNonPlottable  true if varName can be a non-plottable
  *
- * @return -1 if varName NOT found in the configuration
- *          0 if varName found BUT not one of Variable, Array element, or parameter
- *          1 if varName found AND one of Variable, Array element, or parameter
- *          2 if number is allowed and varName is Real number
+ * @return true if varName is valid
  */
 //------------------------------------------------------------------------------
 bool GmatPanel::CheckVariable(const std::string &varName, Gmat::ObjectType ownerType,
@@ -425,8 +422,34 @@ bool GmatPanel::CheckVariable(const std::string &varName, Gmat::ObjectType owner
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "The variable \"%s\" for field \"%s\" "
-          "does not exist.\nYou can create from the ParameterSelectDialog or\n"
-          "from the Resource Tree.", varName.c_str(), field.c_str());
+          "does not exist.\nPlease create it first from the ParameterSelectDialog or "
+          "from the Resource Tree.\n", varName.c_str(), field.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   else if (retval == 3)
+   {
+      std::string type, ownerName, depObj;
+      GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
+      
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "The Parameter \"%s\" for field \"%s\" "
+          "has undefined object \"%s\".\nPlease create proper object first "
+          "from the Resource Tree.\n", varName.c_str(), field.c_str(), ownerName.c_str());
+      
+      canClose = false;
+      return false;
+   }
+   else if (retval == 4)
+   {
+      std::string type, ownerName, depObj;
+      GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
+      
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "The Parameter \"%s\" for field \"%s\" "
+          "has unknown Parameter type \"%s\".\n", varName.c_str(), field.c_str(),
+          type.c_str());
       
       canClose = false;
       return false;
