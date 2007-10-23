@@ -1,4 +1,4 @@
-//$Header$
+//$Header: /cygdrive/p/dev/cvs/gui/app/ResourceTree.cpp,v 1.144 2007/10/05 17:51:03 lojun Exp $
 //------------------------------------------------------------------------------
 //                              ResourceTree
 //------------------------------------------------------------------------------
@@ -1365,8 +1365,8 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    }
    else
    {
-      wxLogWarning(selItem->GetDesc() +
-                   " cannot be deleted.\n It is currently used in other object(s).");
+      wxLogWarning(selItem->GetDesc() + " cannot be deleted.\n"
+                   "It is currently used in other resource or command sequence");
       wxLog::FlushActive();
    }
 }
