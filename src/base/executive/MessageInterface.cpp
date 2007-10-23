@@ -269,9 +269,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
          break;
       };
    }
+#else   
+   LogMessage(std::string(msgBuffer) + "\n");
 #endif
    
-   LogMessage(std::string(msgBuffer) + "\n");
    free(msgBuffer);
    
 } // end PopupMessage()
