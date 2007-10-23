@@ -19,7 +19,7 @@
 #include "ParameterSelectDialog.hpp"
 #include "SpaceObjectSelectDialog.hpp"
 #include "PropagatorSelectDialog.hpp"
-#include "StringUtil.hpp"    // for SeparateBy()
+#include "StringUtil.hpp"               // for SeparateBy()
 #include "MessageInterface.hpp"
 
 //#define DEBUG_PROPAGATE_PANEL 1
@@ -840,23 +840,57 @@ void PropagatePanel::SaveData()
    #if DEBUG_PROPAGATE_PANEL_SAVE
    MessageInterface::ShowMessage("PropagatePanel::SaveData() entered\n");
    #endif
-
-   Integer blankProps = 0;
-   canClose = true;
    
-   // count number of propagators
+   canClose = true;
+   Integer blankProps = 0;
+   wxArrayString emptyProps, emptySos;
+   wxString propName, soNames;
+   
+   //-----------------------------------------------------------------
+   // check valid propagators and space objects
+   //-----------------------------------------------------------------
    for (Integer i=0; i<MAX_PROP_ROW; i++)
    {
-      if (propGrid->GetCellValue(i, PROP_NAME_COL) == "")
-        ++blankProps;
+      propName = propGrid->GetCellValue(i, PROP_NAME_COL);
+      soNames = propGrid->GetCellValue(i, PROP_SOS_COL);
+      
+      if (propName == "" && soNames == "")
+         ++blankProps;
+      else if (propName != "" && soNames == "")
+         emptySos.Add(propName);
+      else if (propName == "" && soNames != "")
+         emptyProps.Add(soNames);
    }
+   
    // check to see if there is at least one propagator
    if (blankProps == MAX_PROP_ROW)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_, 
-         "Propagate command must have at least one propagator.\n");
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_,
+          "Propagate command must have at least one propagator.\n");
       canClose = false;
-      return;
+   }
+   
+   // check to see if there is any missing propagators for space objects
+   if (emptyProps.GetCount() > 0)
+   {
+      for (UnsignedInt i=0; i<emptyProps.GetCount(); i++)
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Please select a Propagator for "
+             "Spacecraft(s) \"%s\"\n", emptyProps[i].c_str());
+      
+      canClose = false;
+   }
+   
+   // check to see if there is any missing space objects to propagate
+   if (emptySos.GetCount() > 0)
+   {
+      for (UnsignedInt i=0; i<emptySos.GetCount(); i++)
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Please select Spacecraft(s) for "
+             "Propagator \"%s\"\n", emptySos[i].c_str());
+      
+      canClose = false;
    }
    
    //-----------------------------------------------------------------
