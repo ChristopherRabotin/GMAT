@@ -1,4 +1,4 @@
-//$Header$
+//$Header: /cygdrive/p/dev/cvs/gui/foundation/GuiItemManager.cpp,v 1.72 2007/10/01 20:57:27 lojun Exp $
 //------------------------------------------------------------------------------
 //                              GuiItemManager
 //------------------------------------------------------------------------------
@@ -97,9 +97,11 @@ wxString GuiItemManager::ToWxString(Real rval)
  * @param  allowNonPlottable  true if varName can be a non-plottable
  *
  * @return -1 if varName NOT found in the configuration
- *          0 if varName found BUT not one of Variable, Array element, or parameter
- *          1 if varName found AND one of Variable, Array element, or parameter
+ *          0 if varName found BUT is not one of Variable, Array element, or parameter
+ *          1 if varName found AND is one of Variable, Array element, or parameter
  *          2 if number is allowed and varName is Real number
+ *          3 if varName contains undefined object of Parameter type
+ *          4 if varName contains valid Parameter type
  */
 //------------------------------------------------------------------------------
 int GuiItemManager::IsValidVariable(const std::string &varName,
@@ -115,13 +117,33 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
    
    GmatBase *obj = theGuiInterpreter->GetConfiguredObject(varName);
    
+   // If name has a system Parameter type and owner object exist, create
    if (obj == NULL)
    {
-      // If name has a system Parameter type, create
-      if (theGuiInterpreter->IsParameter(varName))
+      std::string type, ownerName, depObj;
+      GmatStringUtil::ParseParameter(varName, type, ownerName, depObj);
+
+      #if DEBUG_GUI_ITEM_VALIDATE
+      MessageInterface::ShowMessage
+         ("GuiItemManager::IsValidVariable() varName=<%s>, type=<%s>, "
+          "ownerName=<%s>, depObj=<%s>\n", varName.c_str(), type.c_str(),
+          ownerName.c_str(), depObj.c_str());
+      #endif
+      
+      if (type != "")
       {
-         theGuiInterpreter->CreateSystemParameter(varName);
-         return 1;
+         if (theGuiInterpreter->IsParameter(type))
+         {
+            if (theGuiInterpreter->GetConfiguredObject(ownerName))
+            {
+               theGuiInterpreter->CreateSystemParameter(varName);
+               return 1;
+            }
+            else
+               return 3;
+         }
+         else
+            return 4;
       }
       else
          return -1;
