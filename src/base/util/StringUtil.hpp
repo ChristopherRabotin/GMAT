@@ -97,6 +97,7 @@ namespace GmatStringUtil
    bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
    bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
    bool IsParenBalanced(const std::string &str);
+   bool AreAllBracketsBalanced(const std::string &str, const std::string &allPairs);
    bool IsOuterParen(const std::string &str);
    bool IsCommaPartOfArray(const std::string &str, Integer start = 0);
    bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,

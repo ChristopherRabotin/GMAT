@@ -30,6 +30,7 @@
 //#define DEBUG_STRING_UTIL_ARRAY 1
 //#define DEBUG_STRING_UTIL_SEP 1
 //#define DEBUG_NO_BRACKETS
+//#define DEBUG_BALANCED_BRACKETS
 
 using namespace std;
 
@@ -1477,6 +1478,72 @@ bool GmatStringUtil::IsBracketBalanced(const std::string &str,
          openCounter++;
       else if (str[i] == close)
          openCounter--;
+   }
+      
+   if (openCounter != 0)
+      retval = false;
+
+   return retval;
+}
+
+bool GmatStringUtil::AreAllBracketsBalanced(const std::string &str, 
+                                            const std::string &allPairs)
+{
+   #ifdef DEBUG_BALANCED_BRACKETS
+      MessageInterface::ShowMessage(
+          "Entering AreAllBracketsBalanced with str = %s and allPairs = %s\n",
+          str.c_str(), allPairs.c_str());
+   #endif
+   Integer count = allPairs.size();
+   if (count%2 == 1)
+      throw UtilityException("Invalid number of Bracket pairs\n");
+   Integer numPairs = count / 2;
+   std::string openBrackets  = allPairs.substr(0, numPairs);
+   std::string closeBrackets = allPairs.substr(numPairs);
+   #ifdef DEBUG_BALANCED_BRACKETS
+      MessageInterface::ShowMessage(
+          "   openBrackets = %s and closeBrackets = %s\n",
+          openBrackets.c_str(), closeBrackets.c_str());
+   #endif
+
+   Integer openCounter = 0;
+   IntegerArray bracketsFound;
+   
+   int length = str.size();
+   bool retval = true;
+   
+   for (int i=0; i<length; i++)
+   {
+      #ifdef DEBUG_BALANCED_BRACKETS
+         //MessageInterface::ShowMessage(
+         //    "   Now checking character %c at position %d\n", str[i], i);
+      #endif
+      for (Integer jj = 0; jj < numPairs; jj++)
+      {
+         if (str[i] == openBrackets[jj])
+         {
+            #ifdef DEBUG_BALANCED_BRACKETS
+               MessageInterface::ShowMessage(
+                   "   found an open bracket and it = %c\n", str[i]);
+            #endif
+            bracketsFound.push_back(jj);
+            openCounter++;
+         }
+         else if (str[i] == closeBrackets[jj])
+         {
+            #ifdef DEBUG_BALANCED_BRACKETS
+               MessageInterface::ShowMessage(
+                   "   found a close bracket and it = %c\n", str[i]);
+            #endif
+            if ((openCounter > 0) && (bracketsFound.at(openCounter-1) == jj))
+            {
+               bracketsFound.pop_back();
+               openCounter--;
+            }
+            else
+               return false;
+         }
+      }
    }
       
    if (openCounter != 0)
