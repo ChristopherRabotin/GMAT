@@ -255,7 +255,8 @@ protected:
    StringArray          InterpretPreface();
    bool                 IsSettable(const std::string &setDesc);
    bool                 SeparateEquals(const std::string &description,
-                                       std::string &lhs, std::string &rhs);
+                                       std::string &lhs, std::string &rhs,
+                                       bool checkOp = false);
    
    // IDs used to buffer the command summary data
    static Integer       satEpochID;

@@ -1850,14 +1850,29 @@ bool GmatCommand::IsSettable(const std::string &setDesc)
  * @param <lhs>         The resulting left hand side.
  * @param <rhs>         The resulting right hand side, or the empty string if 
  *                      there was no right side.
+ * @param <checkOp>     flag indicating whether or not to check to make sure
+ *                      there are no "compound" operators using equals signs
+ *                      (e.g. "<=", "==", ">=")
  * 
  * @return true if the string was separated into two pieces, false if only one
  *         piece.  The method throws if more than 2 pieces were found.
  */
 //------------------------------------------------------------------------------
 bool GmatCommand::SeparateEquals(const std::string &description,
-                                 std::string &lhs, std::string &rhs)
+                                 std::string &lhs, std::string &rhs,
+                                 bool checkOp)
 {
+   if (checkOp)
+      if ( (description.find("==",0) != description.npos) ||
+           (description.find(">=",0) != description.npos) ||
+           (description.find("<=",0) != description.npos) ||
+           (description.find("=>",0) != description.npos) ||
+           (description.find("=<",0) != description.npos) )
+      {
+         std::string msg = "The string \"" + description;
+         msg += "\" contains a disallowed relational operator for this command: expecting \"=\" ";
+         throw CommandException(msg);
+      }
    StringArray sides = parser.SeparateBy(description, "= ");
    #ifdef DEBUG_SEPARATE
       MessageInterface::ShowMessage("In SeparateEquals, description = %s\n",
@@ -1881,8 +1896,7 @@ bool GmatCommand::SeparateEquals(const std::string &description,
       std::string msg = "Error decomposing the string \"";
       msg += description;
       msg += "\"\nTrying to separate into lhs and rhs on \"=\" sign, but found ";
-      msg += GmatStringUtil::ToString((Integer) (sides.size()), 4);
-      msg += " pieces separated by equals or spaces.\n";
+      msg += "too many pieces or missing separator character(s).\n";
       throw CommandException(msg);
    }
 
