@@ -679,12 +679,13 @@ bool Achieve::InterpretAction()
    if (chunks[1].at(0) == '(')
       throw CommandException("Missing solver name for Achieve command.\n");
       
-   if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
-       (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
-       (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
+   //if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
+   //    (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
+   //    (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
+   if (!GmatStringUtil::AreAllBracketsBalanced(chunks[1], "([{)]}"))
    {
       throw CommandException
-         ("Parentheses, braces, or brackets are unbalanced\n");
+         ("Parentheses, braces, or brackets are unbalanced or incorrectly placed\n");
    }
    
    // Find and set the solver object name
@@ -722,12 +723,12 @@ bool Achieve::InterpretAction()
 
    // First chunk is the goal and achieve (target) value
    std::string lhs, rhs;
-   if (!SeparateEquals(currentChunks[0], lhs, rhs))
+   if (!SeparateEquals(currentChunks[0], lhs, rhs, true))
       // Variable takes default initial value
       //rhs = "0.0";
    {
       throw CommandException("The goal \"" + lhs + 
-         "\" is missing a goal value required for an " + typeName + 
+         "\" is missing the \"=\" operator or a goal value required for an " + typeName + 
          " command.\n");
    }
       
@@ -750,7 +751,7 @@ bool Achieve::InterpretAction()
    std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
    // Now deal with the settable parameters
    //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ",", false);
-   currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", false);
+   currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", true);
    
    #ifdef DEBUG_ACHIEVE_PARSE
       MessageInterface::ShowMessage(
@@ -765,7 +766,7 @@ bool Achieve::InterpretAction()
    for (StringArray::iterator i = currentChunks.begin(); 
         i != currentChunks.end(); ++i)
    {
-      bool isOK = SeparateEquals(*i, lhs, rhs);
+      bool isOK = SeparateEquals(*i, lhs, rhs, true);
       #ifdef DEBUG_ACHIEVE_PARSE
          MessageInterface::ShowMessage("Setting Achieve properties\n");
          MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
@@ -773,7 +774,7 @@ bool Achieve::InterpretAction()
       
       if (!isOK || lhs.empty() || rhs.empty())
          throw CommandException("The setting \"" + lhs + 
-            "\" is missing a value required for an " + typeName + 
+            "\" is missing the \"=\" operator or a value required for an " + typeName + 
             " command.\n");
       
       if (IsSettable(lhs))
@@ -925,6 +926,7 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
+   /*
    if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
    {
       throw CommandException("A value of type \"String Object\" on command \"" 
@@ -948,6 +950,9 @@ bool Achieve::SetElementWrapper(ElementWrapper *toWrapper,
    {
        // just ignore it here - will need to check data type on initialization
    }
+   */
+   CheckDataType(toWrapper, Gmat::REAL_TYPE, "Achieve", true);
+
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage(
                "   Setting wrapper \"%s\" on Achieve command\n", 
