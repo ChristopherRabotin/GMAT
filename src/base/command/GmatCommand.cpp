@@ -1867,7 +1867,9 @@ bool GmatCommand::SeparateEquals(const std::string &description,
            (description.find(">=",0) != description.npos) ||
            (description.find("<=",0) != description.npos) ||
            (description.find("=>",0) != description.npos) ||
-           (description.find("=<",0) != description.npos) )
+           (description.find("=<",0) != description.npos) ||
+           (description.find("~=",0) != description.npos) ||
+           (description.find("=~",0) != description.npos) )
       {
          std::string msg = "The string \"" + description;
          msg += "\" contains a disallowed relational operator for this command: expecting \"=\" ";
