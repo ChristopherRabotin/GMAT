@@ -40,7 +40,7 @@
 //#define DEBUG_GUI_ITEM_BURN 2
 //#define DEBUG_GUI_ITEM_SUBS 2
 //#define DEBUG_GUI_ITEM_SOLVER 1
-
+//#define DEBUG_GUI_ITEM_ALL_OBJECT 1
 
 //------------------------------
 // static data
@@ -1447,10 +1447,9 @@ wxCheckListBox*
 GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
                                          const wxSize &size, wxArrayString *excList)
 {
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size, //0,
+      new wxCheckListBox(parent, id, wxDefaultPosition, size,
                          emptyList, wxLB_SINGLE|wxLB_SORT);
    
    //---------------------------------------------
@@ -3345,14 +3344,12 @@ void GuiItemManager::UpdateHardwareList()
 
    theNumFuelTank = 0;
    theNumThruster = 0;
-   //Hardware *hw;
    GmatBase *hw;
    wxArrayString tankNames;
    wxArrayString thrusterNames;
    
    for (int i=0; i<numHardware; i++)
    {
-      //hw = theGuiInterpreter->GetHardware(items[i]);
       hw = theGuiInterpreter->GetConfiguredObject(items[i]);
       
       if (hw->IsOfType(Gmat::FUEL_TANK))
@@ -3374,34 +3371,7 @@ void GuiItemManager::UpdateHardwareList()
    
    //-------------------------------------------------------
    // update registered FuelTank ListBox
-   //-------------------------------------------------------
-
-//    // first merge all FuelTanks in use
-//    wxArrayString excAll;
-
-//    for (std::vector<wxArrayString*>::iterator exPos = mFuelTankExcList.begin();
-//         exPos != mFuelTankExcList.end(); ++exPos)
-//    {
-//       for (unsigned int i=0; i<(*exPos)->size(); i++)
-//       {
-//          excAll.Add((*(*exPos))[i]);
-//       }
-//    }
-   
-//    for (std::vector<wxListBox*>::iterator pos = mFuelTankLBList.begin();
-//         pos != mFuelTankLBList.end(); ++pos)
-//    {
-//       (*pos)->Clear();
-      
-//       for (int i=0; i<theNumFuelTank; i++)
-//       {
-//          if (excAll.Index(theFuelTankList[i].c_str()) == wxNOT_FOUND)
-//             (*pos)->Append(theFuelTankList[i]);
-//       }
-      
-//       (*pos)->SetSelection((*pos)->GetCount() - 1);
-//    }
-
+   //-------------------------------------------------------   
    // It's ok to have the same FuelTank in more than one spacecraft since
    // the Sandbox will clone it.
    std::vector<wxArrayString*>::iterator exPos = mFuelTankExcList.begin();
@@ -3471,6 +3441,8 @@ void GuiItemManager::UpdateHardwareList()
       (*pos)->SetSelection(sel);
    }
    
+   AddToAllObjectList();
+   
 } // end UpdateHardwareList()
 
 
@@ -3527,6 +3499,8 @@ void GuiItemManager::UpdateFunctionList()
       
       (*pos)->SetSelection(sel);
    }
+   
+   AddToAllObjectList();
 }
 
 
@@ -3667,6 +3641,8 @@ void GuiItemManager::UpdateSubscriberList()
             (*pos)->Append(theSubscriberList[i]);
       
    }
+   
+   AddToAllObjectList();
 }
 
 
@@ -3830,6 +3806,8 @@ void GuiItemManager::UpdateSolverList()
       
       (*pos)->SetSelection(sel);
    }
+   
+   AddToAllObjectList();
 }
 
 
@@ -3851,7 +3829,21 @@ void GuiItemManager::AddToAllObjectList()
    // Add Spacecraft object to the list
    for (int i=0; i<theNumSpacecraft; i++)
    {
-      theAllObjectList[i] = theSpacecraftList[i];
+      theAllObjectList[theNumAllObject] = theSpacecraftList[i];
+      theNumAllObject++;
+   }
+   
+   // Add FuelTank object to the list
+   for (int i=0; i<theNumFuelTank; i++)
+   {
+      theAllObjectList[theNumAllObject] = theFuelTankList[i];
+      theNumAllObject++;
+   }
+   
+   // Add Thruster object to the list
+   for (int i=0; i<theNumThruster; i++)
+   {
+      theAllObjectList[theNumAllObject] = theThrusterList[i];
       theNumAllObject++;
    }
    
@@ -3869,9 +3861,36 @@ void GuiItemManager::AddToAllObjectList()
       theNumAllObject++;      
    }
    
-   #if DEBUG_ALL_OBJECT
+   // Add Solver objects to the list
+   for (int i=0; i<theNumSolver; i++)
+   {
+      theAllObjectList[theNumAllObject] = theSolverList[i];
+      theNumAllObject++;      
+   }
+   
+   // Add Subscriber objects to the list
+   for (int i=0; i<theNumSubscriber; i++)
+   {
+      theAllObjectList[theNumAllObject] = theSubscriberList[i];
+      theNumAllObject++;      
+   }   
+   
+   // Add Function objects to the list
+   for (int i=0; i<theNumFunction; i++)
+   {
+      theAllObjectList[theNumAllObject] = theFunctionList[i];
+      theNumAllObject++;      
+   }
+   
+   
+   #if DEBUG_GUI_ITEM_ALL_OBJECT
    MessageInterface::ShowMessage
-      ("GuiItemManager::AddToAllObjectList() theNumAllObject=%d\n",
+      ("GuiItemManager::AddToAllObjectList()\n   "
+       "theNumSpacecraft = %d\n   theNumFuelTank   = %d\n   "
+       "theNumThruster   = %d\n   theNumImpBurn    = %d\n   "
+       "theNumFiniteBurn = %d\n   theNumSolver     = %d\n   "
+       "theNumAllObject  = %d\n", theNumSpacecraft, theNumFuelTank,
+       theNumThruster, theNumImpBurn, theNumFiniteBurn, theNumSolver,
        theNumAllObject);
    #endif
    
