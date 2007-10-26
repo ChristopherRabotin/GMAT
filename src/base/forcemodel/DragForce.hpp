@@ -34,126 +34,133 @@ class DragForce : public PhysicalModel
 public:
    DragForce(const std::string &name = "");
    virtual ~DragForce();
- 
+   
    DragForce(const DragForce& df); 
-   DragForce&          operator=(const DragForce& df); 
- 
-   virtual bool        GetComponentMap(Integer * map, Integer order = 1) const;
-   virtual void        SetSatelliteParameter(const Integer i,
-                                             const std::string parmName, 
-                                             const Real parm);
-   virtual void        SetSatelliteParameter(const Integer i,
-                                             const std::string parmName, 
-                                             const std::string parm);
-   virtual void        ClearSatelliteParameters(
-                                             const std::string parmName = "");
-
-   bool                Initialize();
-   virtual bool        GetDerivatives(Real * state, Real dt = 0.0, 
-                                      Integer order = 1);
-
+   DragForce&           operator=(const DragForce& df); 
+   
+   virtual bool         GetComponentMap(Integer * map, Integer order = 1) const;
+   virtual void         SetSatelliteParameter(const Integer i,
+                                              const std::string parmName, 
+                                              const Real parm);
+   virtual void         SetSatelliteParameter(const Integer i,
+                                              const std::string parmName, 
+                                              const std::string parm);
+   virtual void         ClearSatelliteParameters(const std::string parmName = "");
+   
+   bool                 Initialize();
+   virtual bool         GetDerivatives(Real * state, Real dt = 0.0, 
+                                       Integer order = 1);
+   
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-
+   virtual GmatBase*    Clone(void) const;
+   
    // Parameter accessor methods -- overridden from GmatBase
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                       GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const std::string &label) const;
-    
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id, const Real value);    
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value);
-   virtual bool        SetStringParameter(const std::string &label, 
-                                          const std::string &value);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name = "");
-    
-                                           
-    // Special access methods used by drag forces
-   bool                SetInternalAtmosphereModel(AtmosphereModel* atm);
-   AtmosphereModel*    GetInternalAtmosphereModel();
-
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
+   
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   
+   
+   // Special access methods used by drag forces
+   bool                 SetInternalAtmosphereModel(AtmosphereModel* atm);
+   AtmosphereModel*     GetInternalAtmosphereModel();
+   
 protected:
    /// Sun pointer for bulge calculations
-   CelestialBody       *sun;
+   CelestialBody        *sun;
    /// Position of the Sun
-   Real                sunLoc[3];
+   Real                 sunLoc[3];
    /// Central body pointer for bulge calculations
-   CelestialBody       *centralBody;
+   CelestialBody        *centralBody;
    /// Position of the body with the atmosphere
-   Real                cbLoc[3];
+   Real                 cbLoc[3];
    /// Angular velocity of the central body
-   Real                angVel[3];
+   Real                 angVel[3];
    /// Flag to indicate if the atmosphere model is externally owned or internal
-   bool                useExternalAtmosphere;
+   bool                 useExternalAtmosphere;
    /// Name of the atmosphere model we want to use
-   std::string         atmosphereType;
+   std::string          atmosphereType;
    /// Pointer to the atmosphere model used
-   AtmosphereModel     *atmos;
+   AtmosphereModel      *atmos;
    /// Pointer to Internal atmosphere model
-   AtmosphereModel     *internalAtmos;
+   AtmosphereModel      *internalAtmos;
    /// Array of densities
-   Real                *density;
+   Real                 *density;
    /// Array of products of spacecraft properties
-   Real                *prefactor;
+   Real                 *prefactor;
    /// Flag used to determine if data has changed for the prefactors
-   bool                firedOnce;
+   bool                 firedOnce;
    /// Number of spacecraft in the state vector
-   Integer             satCount;
+   Integer              satCount;
    /// Central bodies used for atmosphere source
-   StringArray         dragBody;
+   StringArray          dragBody;
    /// Spacecraft drag areas
-   std::vector <Real>  area;
+   std::vector <Real>   area;
    /// Spacecraft masses
-   std::vector <Real>  mass;
+   std::vector <Real>   mass;
    /// Spacecraft coefficients of drag
-   std::vector <Real>  dragCoeff;
+   std::vector <Real>   dragCoeff;
    /// State vector translated from force model origin to body with atmosphere
-   Real                *dragState;
-    
+   Real                 *dragState;
+   
    // Optional input parameters used by atmospheric models
    /// Name of the body with the atmosphere
    //std::string         bodyName;
    /// Type of input data -- "File" or "Constant"
-   std::string         dataType;
+   std::string          dataType;
    /// Solar flux file name
-   std::string         fluxFile;
+   std::string          fluxFile;
    /// "Current" value of F10.7
-   Real                fluxF107;
+   Real                 fluxF107;
    /// Running average of the F10.7
-   Real                fluxF107A;
+   Real                 fluxF107A;
    /// Magnetic field index, Ap (a calculated value)
-   Real                ap;
+   Real                 ap;
    /// Magnetic field index, Kp (user specified)
-   Real                kp;
-
-   void                BuildPrefactors();
-   void                TranslateOrigin(const Real *state, const Real now);
-   void                GetDensity(Real *state, Real when = 21545.0);
-    
-   /// ID for the atmosphere model
-   const Integer       atmosphereModelID;
-   /// ID for the central body
-   const Integer       centralBodyID;
-   /// ID for the atmosphere model
-   const Integer       sourceTypeID;
-   /// ID for the central body
-   const Integer       fluxFileID;
-   /// ID for the atmosphere model
-   const Integer       fluxID;
-   /// ID for the atmosphere model
-   const Integer       averageFluxID;
-   /// ID for the atmosphere model
-   const Integer       magneticIndexID;
-    
-   Real                CalculateAp(Real kp);
+   Real                 kp;
+   
+   void                 BuildPrefactors();
+   void                 TranslateOrigin(const Real *state, const Real now);
+   void                 GetDensity(Real *state, Real when = 21545.0);
+      
+   Real                 CalculateAp(Real kp);
+   
+   
+   /// Parameter IDs
+   enum
+   {
+      ATMOSPHERE_MODEL = PhysicalModelParamCount, 
+      ATMOSPHERE_BODY,
+      SOURCE_TYPE,
+      FLUX_FILE,
+      FLUX,
+      AVERAGE_FLUX,
+      MAGNETIC_INDEX,
+      DragForceParamCount
+   };
+   
+   static const std::string 
+      PARAMETER_TEXT[DragForceParamCount - PhysicalModelParamCount];
+   static const Gmat::ParameterType 
+      PARAMETER_TYPE[DragForceParamCount - PhysicalModelParamCount];
 };
 
 #endif // DragForce_hpp
