@@ -718,14 +718,19 @@ bool Vary::InterpretAction()
          MessageInterface::ShowMessage("   \"%s\"\n", i->c_str());
       MessageInterface::ShowMessage("\n");
    #endif
+
+   if (chunks.size() <= 1)
+      throw CommandException("Missing information for Vary command.\n");
    
-      if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
-          (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
-          (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
-      {
-         throw CommandException
-            ("Parentheses, braces, or brackets are unbalanced\n");
-      }
+   if (chunks[1].at(0) == '(')
+      throw CommandException("Missing solver name for Vary command.\n");
+   
+   if ((chunks[1].find("[") != chunks[1].npos) || (chunks[1].find("]") != chunks[1].npos))
+      throw CommandException("Brackets not allowed in Vary command");
+
+   if (!GmatStringUtil::AreAllBracketsBalanced(chunks[1], "({)}"))      
+      throw CommandException
+         ("Parentheses, braces, or brackets are unbalanced");
 
       // Find and set the solver object name
    // This is the only setting in Vary that is not in a wrapper
@@ -754,12 +759,12 @@ bool Vary::InterpretAction()
 
    // First chunk is the variable and initial value
    std::string lhs, rhs;
-   if (!SeparateEquals(currentChunks[0], lhs, rhs))
+   if (!SeparateEquals(currentChunks[0], lhs, rhs, true))
       // Variable takes default initial value
       //rhs = "0.0";
    {
       throw CommandException("The variable \"" + lhs + 
-         "\" is missing an initial value required for a " + typeName + 
+         "\" is missing the \"=\" operator or an initial value required for a " + typeName + 
          " command.\n");
    }
       
@@ -779,7 +784,7 @@ bool Vary::InterpretAction()
    std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
    // Now deal with the settable parameters
    //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ",", false);
-   currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", false);
+   currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", true);
    
    #ifdef DEBUG_VARY_PARSING
       MessageInterface::ShowMessage(
@@ -794,14 +799,14 @@ bool Vary::InterpretAction()
    for (StringArray::iterator i = currentChunks.begin(); 
         i != currentChunks.end(); ++i)
    {
-      bool isOK = SeparateEquals(*i, lhs, rhs);
+      bool isOK = SeparateEquals(*i, lhs, rhs, true);
       #ifdef DEBUG_VARY_PARSING
          MessageInterface::ShowMessage("Setting Vary properties\n");
          MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
       #endif
       if (!isOK || lhs.empty() || rhs.empty())
          throw CommandException("The setting \"" + lhs + 
-            "\" is missing a value required for a " + typeName + 
+            "\" is missing the \"=\" operator or a value required for a " + typeName + 
             " command.\n");
       
       if (IsSettable(lhs))
@@ -866,6 +871,7 @@ bool Vary::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withN
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
+   /*
    if (toWrapper->GetWrapperType() == Gmat::STRING_OBJECT)
    {
       throw CommandException("A value of type \"String Object\" on command \"" + typeName + 
@@ -888,6 +894,9 @@ bool Vary::SetElementWrapper(ElementWrapper *toWrapper, const std::string &withN
    {
        // just ignore it here - will need to check data type on initialization
    }
+   */
+   CheckDataType(toWrapper, Gmat::REAL_TYPE, "Vary", true);
+
 
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   Setting wrapper \"%s\" on Vary command\n", 
