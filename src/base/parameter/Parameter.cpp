@@ -825,17 +825,18 @@ Gmat::ParameterType Parameter::GetParameterType(const Integer id) const
       return GmatBase::GetParameterType(id);
 }
 
+
 //------------------------------------------------------------------------------
 // std::string GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Parameter::GetParameterTypeString(const Integer id) const
 {
    if (id >= GmatBaseParamCount && id < ParameterParamCount)
-      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - GmatBaseParamCount)];
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return GmatBase::GetParameterTypeString(id);
-    
 }
+
 
 //---------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const Integer id) const
