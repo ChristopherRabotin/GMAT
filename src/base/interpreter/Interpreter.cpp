@@ -64,6 +64,7 @@
 //#define DEBUG_SPECIAL_CASE
 //#define DEBUG_WRAPPERS
 //#define DEBUG_HANDLE_ERROR
+//#define DEBUG_PARSE_REPORT
 
 //------------------------------------------------------------------------------
 // Interpreter()
@@ -1602,7 +1603,17 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             HandleError(ex);
             return false;
          }
-         parts = theTextParser.SeparateBrackets(desc, "()", " ,", false);
+         // we only want to separate by spaces - commas are not allowed, 
+         // not even in arrays (for this command)
+         parts = GmatStringUtil::SeparateBy(desc, " ", true);
+         //parts = theTextParser.SeparateBrackets(desc, "()", " ,", false);
+         Integer count = parts.size();
+         
+         #ifdef DEBUG_PARSE_REPORT 
+            MessageInterface::ShowMessage("Parsing Report, parts are:\n");
+            for (Integer ii=0; ii < count; ii++)
+               MessageInterface::ShowMessage("   %d:   %s\n", ii, parts.at(ii).c_str());
+         #endif
          
          // first item is ReportFile
          GmatBase *obj = FindObject(parts[0]);
@@ -1624,7 +1635,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             // checking items to report
             if (count < 2)
             {
-               InterpreterException ex ("There are no itmes to report");
+               InterpreterException ex ("There are no items to report");
                HandleError(ex);
                retval = false;
             }
@@ -1641,8 +1652,8 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
                   else
                   {
                      InterpreterException ex
-                        ("Cannot find Report Variable: " + parts[i] +
-                         ".\nIt will not be added to Report");
+                        ("Nonexistent or disallowed Report Variable: \"" + parts[i] +
+                         "\";\nIt will not be added to Report");
                      HandleError(ex);
                      retval = false;
                   }
@@ -1652,8 +1663,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
          else
          {
             InterpreterException ex
-               ("*** ERROR *** Cannot find ReportFile: " + parts[0] +
-                " in line:\n\"" + currentBlock + "\"\n");
+            ("Cannot find the ReportFile \"" + parts[0] + "\"");
             HandleError(ex);
             retval = false;
          }
