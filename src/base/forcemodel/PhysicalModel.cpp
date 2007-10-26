@@ -879,7 +879,7 @@ void PhysicalModel::SetPropList(std::vector<SpaceObject*> *soList)
 //------------------------------------------------------------------------------
 std::string PhysicalModel::GetParameterText(const Integer id) const
 {
-   if (id >= EPOCH && id < PhysicalModelParamCount)
+   if (id >= GmatBaseParamCount && id < PhysicalModelParamCount)
       return PARAMETER_TEXT[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterText(id);
@@ -894,9 +894,9 @@ std::string PhysicalModel::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer PhysicalModel::GetParameterID(const std::string &str) const
 {
-   for (int i = EPOCH; i < PhysicalModelParamCount; i++)
+   for (int i = GmatBaseParamCount; i < PhysicalModelParamCount; i++)
    {
-      if (str == PhysicalModel::PARAMETER_TEXT[i - GmatBaseParamCount])
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
          return i;
    }
    return GmatBase::GetParameterID(str);
@@ -911,7 +911,7 @@ Integer PhysicalModel::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 {
-   if (id >= EPOCH && id < PhysicalModelParamCount)
+   if (id >= GmatBaseParamCount && id < PhysicalModelParamCount)
       return PARAMETER_TYPE[id - GmatBaseParamCount];
    else
       return GmatBase::GetParameterType(id);
@@ -926,7 +926,7 @@ Gmat::ParameterType PhysicalModel::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PhysicalModel::GetParameterTypeString(const Integer id) const
 {
-   if (id >= EPOCH && id < PhysicalModelParamCount)
+   if (id >= GmatBaseParamCount && id < PhysicalModelParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
    else
       return GmatBase::GetParameterTypeString(id);

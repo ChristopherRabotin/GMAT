@@ -1808,7 +1808,7 @@ bool ForceModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 Integer ForceModel::GetParameterCount() const
 {
-    return parameterCount;
+   return parameterCount;
 }
 
 
@@ -1818,10 +1818,10 @@ Integer ForceModel::GetParameterCount() const
 //------------------------------------------------------------------------------
 std::string ForceModel::GetParameterText(const Integer id) const
 {
-    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
-        return PARAMETER_TEXT[id - PhysicalModelParamCount];
-    else
-        return PhysicalModel::GetParameterText(id);
+   if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+      return PARAMETER_TEXT[id - PhysicalModelParamCount];
+   else
+      return PhysicalModel::GetParameterText(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1829,20 +1829,20 @@ std::string ForceModel::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer ForceModel::GetParameterID(const std::string &str) const
 {
-    std::string alias = str;
+   std::string alias = str;
     
-    // Script document required two different names for the primary body
-    // force descriptor
-    if (alias == "Gravity")
-       alias = "PrimaryBodies";
+   // Script document required two different names for the primary body
+   // force descriptor
+   if (alias == "Gravity")
+      alias = "PrimaryBodies";
     
-    for (int i = PhysicalModelParamCount; i < ForceModelParamCount; i++)
-    {
-        if (alias == PARAMETER_TEXT[i - PhysicalModelParamCount])
-            return i;
-    }
+   for (int i = PhysicalModelParamCount; i < ForceModelParamCount; i++)
+   {
+      if (alias == PARAMETER_TEXT[i - PhysicalModelParamCount])
+         return i;
+   }
 
-    return PhysicalModel::GetParameterID(str);
+   return PhysicalModel::GetParameterID(str);
 }
 
 //------------------------------------------------------------------------------
@@ -1850,10 +1850,10 @@ Integer ForceModel::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType ForceModel::GetParameterType(const Integer id) const
 {
-    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
-        return PARAMETER_TYPE[id - PhysicalModelParamCount];
-    else
-        return PhysicalModel::GetParameterType(id);
+   if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+      return PARAMETER_TYPE[id - PhysicalModelParamCount];
+   else
+      return PhysicalModel::GetParameterType(id);
 }
 
 //------------------------------------------------------------------------------
@@ -1861,13 +1861,15 @@ Gmat::ParameterType ForceModel::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string ForceModel::GetParameterTypeString(const Integer id) const
 {
-
-    if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
-        return GmatBase::PARAM_TYPE_STRING[GetParameterType(id - PhysicalModelParamCount)];
-    else
-        return PhysicalModel::GetParameterTypeString(id);
+   if (id >= PhysicalModelParamCount && id < ForceModelParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return PhysicalModel::GetParameterTypeString(id);
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const Integer id) const
+//------------------------------------------------------------------------------
 bool ForceModel::IsParameterReadOnly(const Integer id) const
 {
    if (id == COORDINATE_SYSTEM_LIST)
@@ -1876,6 +1878,9 @@ bool ForceModel::IsParameterReadOnly(const Integer id) const
    return PhysicalModel::IsParameterReadOnly(id);
 }
 
+//------------------------------------------------------------------------------
+// bool IsParameterReadOnly(const std::string &label) const
+//------------------------------------------------------------------------------
 bool ForceModel::IsParameterReadOnly(const std::string &label) const
 {
    if (label == PARAMETER_TEXT[COORDINATE_SYSTEM_LIST-PhysicalModelParamCount])
