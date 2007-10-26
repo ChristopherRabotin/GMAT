@@ -52,14 +52,13 @@ BEGIN_EVENT_TABLE(PropagationConfigPanel, GmatPanel)
    EVT_TEXT(ID_TEXTCTRL_PROP, PropagationConfigPanel::OnIntegratorTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_GRAV, PropagationConfigPanel::OnGravityTextUpdate)
    EVT_TEXT(ID_TEXTCTRL_MAGF, PropagationConfigPanel::OnMagneticTextUpdate)
-   EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorSelection)
-   EVT_TEXT(ID_CB_BODY, PropagationConfigPanel::OnBodySelection)
-   EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnBodyComboBoxChange)
-   EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBoxChange)
-   EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravitySelection)
-   EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereSelection)
+   EVT_COMBOBOX(ID_CB_INTGR, PropagationConfigPanel::OnIntegratorComboBox)
+   EVT_COMBOBOX(ID_CB_BODY, PropagationConfigPanel::OnPrimaryBodyComboBox)
+   EVT_COMBOBOX(ID_CB_ORIGIN, PropagationConfigPanel::OnOriginComboBox)
+   EVT_COMBOBOX(ID_CB_GRAV, PropagationConfigPanel::OnGravityModelComboBox)
+   EVT_COMBOBOX(ID_CB_ATMOS, PropagationConfigPanel::OnAtmosphereModelComboBox)
    EVT_CHECKBOX(ID_CHECKBOX, PropagationConfigPanel::OnSRPCheckBoxChange)
-   EVT_COMBOBOX(ID_CB_ERROR, PropagationConfigPanel::OnErrorControlSelection)
+   EVT_COMBOBOX(ID_CB_ERROR, PropagationConfigPanel::OnErrorControlComboBox)
 END_EVENT_TABLE()
 
 
@@ -159,7 +158,7 @@ PropagationConfigPanel::~PropagationConfigPanel()
 
    
    // Unregister GUI components
-   theGuiManager->UnregisterComboBox("CoordinateSystem", originComboBox);
+   theGuiManager->UnregisterComboBox("CoordinateSystem", theOriginComboBox);
 }
 
 //------------------------------------------
@@ -291,7 +290,7 @@ void PropagationConfigPanel::LoadData()
                
                primaryBodyList[currentBodyId]->gravType = earthGravModelArray[eGravModelType];
                primaryBodyList[currentBodyId]->potFilename =
-                  theFileMap[earthGravModelArray[eGravModelType]];
+                  theFileMap[earthGravModelArray[eGravModelType]];               
             }
             else if (wxBodyName == "Luna")
             {
@@ -327,7 +326,7 @@ void PropagationConfigPanel::LoadData()
                   mGravModelType = MARS50C;     
                else 
                   mGravModelType = M_OTHER;
-            
+               
                primaryBodyList[currentBodyId]->gravType = marsGravModelArray[mGravModelType];
                primaryBodyList[currentBodyId]->potFilename =
                   theFileMap[marsGravModelArray[mGravModelType]];
@@ -348,12 +347,20 @@ void PropagationConfigPanel::LoadData()
             #endif
             
             primaryBodyList[currentBodyId]->gravf = theGravForce;
-            primaryBodyList[currentBodyId]->potFilename = potFilename;
-         
-            //Warn user about bodies already added as Primary body
+            
+            // Set actual full potenential file path (loj: 2007.10.26)
+            wxString gravTypeName = primaryBodyList[currentBodyId]->gravType;
+            std::string fileType = theFileMap[gravTypeName].c_str();
+            if (gravTypeName != "None" && gravTypeName != "Other")
+            {
+               primaryBodyList[currentBodyId]->potFilename =
+                  theGuiInterpreter->GetFileName(fileType).c_str();
+            }
+            
+            // Warn user about bodies already added as Primary body
             Integer pmSize = (Integer)pointMassBodyList.size();
             Integer last = (Integer)primaryBodyList.size() - 1;
-         
+            
             for (Integer i = 0; i < pmSize; i++)
             {
                if (strcmp(primaryBodyList[last]->bodyName.c_str(), 
@@ -364,28 +371,29 @@ void PropagationConfigPanel::LoadData()
                       pointMassBodyList[last]->bodyName.c_str());
                }
             }
-         
+            
             if (primaryBodyList[currentBodyId]->potFilename == "")
             {
                MessageInterface::PopupMessage
-                  (Gmat::WARNING_, "Cannot Find Gravity Field File."); 
+                  (Gmat::WARNING_, "Cannot find Potential File for %s.\n",
+                   wxBodyName.c_str()); 
             }
-         
+            
             tempStr = "";
             tempStr << theGravForce->GetIntegerParameter("Degree");
             primaryBodyList[currentBodyId]->gravDegree = tempStr;
-         
+            
             tempStr = "";
             tempStr << theGravForce->GetIntegerParameter("Order");
             primaryBodyList[currentBodyId]->gravOrder = tempStr;
-         
+            
             bool found = false;
             for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
             {
                if ( primaryBodiesArray[i].CmpNoCase(wxBodyName) == 0 )
                   found = true;
             }
-         
+            
             if (!found)
                primaryBodiesArray.Add(wxBodyName);     
          }
@@ -486,13 +494,13 @@ void PropagationConfigPanel::LoadData()
    // Display primary bodies
    if ( !primaryBodiesArray.IsEmpty() )
       for (Integer i = 0; i < (Integer)primaryBodiesArray.GetCount(); i++)
-         bodyComboBox->Append(primaryBodiesArray[i]);   
+         thePrimaryBodyComboBox->Append(primaryBodiesArray[i]);   
 
-   integratorComboBox->SetSelection(typeId);
+   theIntegratorComboBox->SetSelection(typeId);
    integratorString = integratorArray[typeId]; 
    
    // Display the force model origin (central body)
-   originComboBox->SetValue(propOriginName);
+   theOriginComboBox->SetValue(propOriginName);
    
    DisplayIntegratorData(false);
    DisplayForceData();
@@ -500,19 +508,9 @@ void PropagationConfigPanel::LoadData()
    Integer count = (Integer)primaryBodyList.size(); 
    
    if (count == 0)
-   {
-      gravComboBox->Enable(false);
-      atmosComboBox->Enable(false);
-      //magfComboBox->Enable(false);
-      //srpCheckBox->Enable(false);
-   }
+      EnablePrimaryBodyItems(false, false);
    else
-   {
-      gravComboBox->Enable(true);
-      atmosComboBox->Enable(true);
-      //magfComboBox->Enable(true);
-      //srpCheckBox->Enable(true);       
-   }
+      EnablePrimaryBodyItems(true);
    
    #ifdef DEBUG_PROP_PANEL_LOAD
    ShowPropData("LoadData() PropData on exit");
@@ -543,28 +541,44 @@ void PropagationConfigPanel::SaveData()
    canClose = true;
    
    //-----------------------------------------------------------------
+   // check for empty primary bodies or point mass
+   //-----------------------------------------------------------------
+   if (primaryBodyList.size() == 0 && pointMassBodyList.size() == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Please select primary bodies or point mass bodies\n");
+      canClose = false;
+      return;
+   }
+   
+   
+   //-----------------------------------------------------------------
    // check for valid gravity model before saving
    //-----------------------------------------------------------------
    for (Integer i=0; i < (Integer)primaryBodyList.size(); i++)
    {
       if (primaryBodyList[i]->gravType == "None")
       {
-         // The new way (2007.10.18)               
          MessageInterface::PopupMessage
             (Gmat::WARNING_, "Please select Gravity Field Model for %s\n",
              primaryBodyList[i]->bodyName.c_str());
          canClose = false;
          return;
-         
-         // The old way
-         //MessageInterface::PopupMessage
-         //   (Gmat::WARNING_, 
-         //    "Did not save %s as Primary Body.\n"
-         //    "Because there is no Gravity Field Type associated with that body.",
-         //    primaryBodyList[i]->bodyName.c_str());
       }
+      //loj: 2007.10.26
+      // Do we need to check empty potential file?
+      // Fow now allow to use default coefficients from the body.      
+      //else if (primaryBodyList[i]->gravType == "Other" &&
+      //         primaryBodyList[i]->potFilename == "")
+      //{
+      //   MessageInterface::PopupMessage
+      //      (Gmat::WARNING_, "Please select potential file for %s\n",
+      //       primaryBodyList[i]->bodyName.c_str());
+      //   canClose = false;
+      //   return;
+      //}
    }
-
+   
    
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
@@ -633,9 +647,17 @@ void PropagationConfigPanel::SaveData()
       {
          for (Integer i=0; i < (Integer)primaryBodyList.size(); i++)
          {
-            // if gravity force pointer is NULL then create.
-            theGravForce = primaryBodyList[i]->gravf;
-            bodyName = primaryBodyList[i]->bodyName.c_str();
+            GravityField *gf = primaryBodyList[i]->gravf;
+
+            Integer deg = -999;
+            Integer ord = -999;
+            
+            // save deg and order for later use
+            if (gf != NULL)
+            {
+               deg = gf->GetIntegerParameter("Degree");
+               ord = gf->GetIntegerParameter("Order");
+            }
             
             // Create new GravityField since ForceModel destructor will delete
             // all PhysicalModel
@@ -644,11 +666,20 @@ void PropagationConfigPanel::SaveData()
                ("SaveData() Creating GravityField for %s\n", bodyName.c_str());
             #endif
             
+            // create new GravityField
+            bodyName = primaryBodyList[i]->bodyName.c_str();
             theGravForce = new GravityField("", bodyName);
             theGravForce->SetSolarSystem(theSolarSystem);
             theGravForce->SetStringParameter("BodyName", bodyName);
             theGravForce->SetStringParameter("PotentialFile",
                                              primaryBodyList[i]->potFilename.c_str());
+            
+            if (deg != -999)
+            {
+               theGravForce->SetIntegerParameter("Degree", deg);
+               theGravForce->SetIntegerParameter("Order", ord);
+            }
+            
             primaryBodyList[i]->gravf = theGravForce;            
             newFm->AddForce(theGravForce);
          }
@@ -673,12 +704,30 @@ void PropagationConfigPanel::SaveData()
       {
          for (Integer i=0; i < (Integer)primaryBodyList.size(); i++)
          {
-            if (primaryBodyList[i]->dragType != dragModelArray[NONE_DM])
+            if (primaryBodyList[i]->dragType == dragModelArray[NONE_DM])
+            {
+               primaryBodyList[i]->dragf = NULL;
+            }
+            else
             {
                #ifdef DEBUG_PROP_PANEL_SAVE
                ShowForceList("SaveData() BEFORE  saving DragForce");
                #endif
                
+               Real fluxF107 = -999.999;
+               Real fluxF107A = -999.999;
+               Real kp = -999.999;
+
+               DragForce *df = primaryBodyList[i]->dragf;
+               // save drag flux info for later use
+               if (df != NULL)
+               {
+                  fluxF107 = df->GetRealParameter("F107");
+                  fluxF107A = df->GetRealParameter("F107A");
+                  kp = df->GetRealParameter("MagneticIndex");
+               }
+               
+               // create new DragForce
                bodyName = primaryBodyList[i]->bodyName.c_str();
                theDragForce = new DragForce(primaryBodyList[i]->dragType.c_str());
                theCelestialBody = theSolarSystem->GetBody(bodyName); 
@@ -708,6 +757,15 @@ void PropagationConfigPanel::SaveData()
                bodyName = primaryBodyList[i]->bodyName.c_str();
                theDragForce->SetStringParameter(paramId, primaryBodyList[i]->dragType.c_str());
                theDragForce->SetStringParameter("BodyName", bodyName);
+               
+               // if drag force was previous defined, set previous flux value
+               if (fluxF107 != -999.999)
+               {
+                  theDragForce->SetRealParameter("F107", fluxF107);
+                  theDragForce->SetRealParameter("F107A", fluxF107A);
+                  theDragForce->SetRealParameter("MagneticIndex", kp);
+               }
+               
                primaryBodyList[i]->dragf = theDragForce;
                newFm->AddForce(theDragForce);
                
@@ -842,7 +900,7 @@ void PropagationConfigPanel::SaveData()
          if (isErrControlChanged)
          {
             theForceModel->SetStringParameter
-               ("ErrorControl", errorComboBox->GetStringSelection().c_str());
+               ("ErrorControl", theErrorComboBox->GetStringSelection().c_str());
             isErrControlChanged = false;
          }
          
@@ -1068,7 +1126,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    for (Integer i=0; i<IntegratorCount; i++)
       intgArray[i] = integratorArray[i];
    
-   integratorComboBox =
+   theIntegratorComboBox =
       new wxComboBox( parent, ID_CB_INTGR, wxT(integratorString),
                       wxDefaultPosition, wxDefaultSize, IntegratorCount,
                       intgArray, wxCB_DROPDOWN|wxCB_READONLY );
@@ -1141,7 +1199,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    
    wxFlexGridSizer *intFlexGridSizer = new wxFlexGridSizer( 3, 0, 0 );
    intFlexGridSizer->Add( integratorStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
-   intFlexGridSizer->Add( integratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
+   intFlexGridSizer->Add( theIntegratorComboBox, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( 20, 20, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( initialStepSizeStaticText, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    intFlexGridSizer->Add( initialStepSizeTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
@@ -1177,53 +1235,51 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Error Control"),
                         wxDefaultPosition, wxSize(70,20), wxST_NO_AUTORESIZE );
    
-   errorComboBox =
+   theErrorComboBox =
       new wxComboBox( parent, ID_CB_ERROR, errorControlArray[0],
                       wxDefaultPosition, wxSize(100,-1),
                       errorControlArray, wxCB_DROPDOWN|wxCB_READONLY );
    
    wxFlexGridSizer *errorFlexGridSizer = new wxFlexGridSizer( 2, 0, 0 );
    errorFlexGridSizer->Add( errorCtrlStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   errorFlexGridSizer->Add( errorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   errorFlexGridSizer->Add( theErrorComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    // Central Body
    wxStaticText *centralBodyStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Central Body"),
                         wxDefaultPosition, wxSize(70,20), wxST_NO_AUTORESIZE);
-   originComboBox  =
+   theOriginComboBox  =
       theGuiManager->GetConfigBodyComboBox(this, ID_CB_ORIGIN, wxSize(100,-1));
    
    wxFlexGridSizer *centralBodySizer = new wxFlexGridSizer( 2, 0, 2 );
    centralBodySizer->Add( centralBodyStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
-   centralBodySizer->Add( originComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
+   centralBodySizer->Add( theOriginComboBox, 0, wxALIGN_LEFT|wxALL, bsize);
    
    // Primary Bodies
-   //VC++ error=>wxString bodyArray[]  = {};
    wxArrayString bodyArray;
-   bodyComboBox =
+   thePrimaryBodyComboBox =
       new wxComboBox( parent, ID_CB_BODY, wxT(primaryBodyString),
                       wxDefaultPosition,  wxSize(80,-1),// 0,
                       bodyArray, wxCB_DROPDOWN|wxCB_READONLY );
    bodyTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL, wxT(""),
                       wxDefaultPosition, wxSize(160,-1), wxTE_READONLY );
-   bodyButton =
+   wxButton *primaryBodySelectButton =
       new wxButton( parent, ID_BUTTON_ADD_BODY, wxT("Select"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
    wxBoxSizer *bodySizer = new wxBoxSizer( wxHORIZONTAL );
-   bodySizer->Add( bodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   bodySizer->Add( thePrimaryBodyComboBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    bodySizer->Add( bodyTextCtrl, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   bodySizer->Add( bodyButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
+   bodySizer->Add( primaryBodySelectButton, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    
    // Gravity
    wxStaticText *type1StaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-   //VC++ error => wxString gravArray[]  = {};
    wxArrayString gravArray;
-   gravComboBox =
+   theGravModelComboBox =
       new wxComboBox( parent, ID_CB_GRAV, wxT(""),
                       wxDefaultPosition, wxSize(150,-1), // 0,
                       gravArray, wxCB_DROPDOWN|wxCB_READONLY );
@@ -1239,18 +1295,18 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    gravityOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_GRAV, wxT(""), wxDefaultPosition,
                       wxSize(30,-1), 0 );
-   searchGravityButton =
+   theGravModelSearchButton =
       new wxButton( parent, ID_BUTTON_GRAV_SEARCH, wxT("Search"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
    wxBoxSizer *degOrdSizer = new wxBoxSizer( wxHORIZONTAL );
    degOrdSizer->Add( type1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( gravComboBox, 0, wxALIGN_CENTRE|wxALL, bsize); 
+   degOrdSizer->Add( theGravModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize); 
    degOrdSizer->Add( degree1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    degOrdSizer->Add( gravityDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    degOrdSizer->Add( order1StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    degOrdSizer->Add( gravityOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   degOrdSizer->Add( searchGravityButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   degOrdSizer->Add( theGravModelSearchButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    potFileStaticText =
       new wxStaticText( parent, ID_TEXT, wxT("Potential File"),
@@ -1273,18 +1329,18 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Atmosphere Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-   atmosComboBox =
+   theAtmosModelComboBox =
       new wxComboBox( parent, ID_CB_ATMOS, dragModelArray[0],
                       wxDefaultPosition, wxDefaultSize,
                       dragModelArray, wxCB_DROPDOWN|wxCB_READONLY );
-   dragSetupButton =
+   theDragSetupButton =
       new wxButton( parent, ID_BUTTON_SETUP, wxT("Setup"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
    wxBoxSizer *atmosSizer = new wxBoxSizer( wxHORIZONTAL );
    atmosSizer->Add( type2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);   
-   atmosSizer->Add( atmosComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   atmosSizer->Add( dragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);       
+   atmosSizer->Add( theAtmosModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   atmosSizer->Add( theDragSetupButton, 0, wxALIGN_CENTRE|wxALL, bsize);       
    
    GmatStaticBoxSizer *atmosStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Drag");
@@ -1295,7 +1351,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
       new wxStaticText( parent, ID_TEXT, wxT("Model"),
                         wxDefaultPosition, wxDefaultSize, 0 );
    
-   magfComboBox =
+   theMagfModelComboBox =
       new wxComboBox( parent, ID_CB_MAG, magfModelArray[0],
                       wxDefaultPosition, wxDefaultSize,
                       magfModelArray, wxCB_DROPDOWN|wxCB_READONLY );
@@ -1312,18 +1368,18 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    magneticOrderTextCtrl =
       new wxTextCtrl( parent, ID_TEXTCTRL_MAGF, wxT(""), wxDefaultPosition,
                       wxSize(30,-1), 0 );
-   searchMagneticButton =
+   theMagModelSearchButton =
       new wxButton( parent, ID_BUTTON_MAG_SEARCH, wxT("Search"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
    wxBoxSizer *magfSizer = new wxBoxSizer( wxHORIZONTAL );
    magfSizer->Add( type3StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   magfSizer->Add( magfComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   magfSizer->Add( theMagfModelComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    magfSizer->Add( degree2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    magfSizer->Add( magneticDegreeTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    magfSizer->Add( order2StaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    magfSizer->Add( magneticOrderTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   magfSizer->Add( searchMagneticButton, 0, wxALIGN_CENTRE|wxALL, bsize);
+   magfSizer->Add( theMagModelSearchButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    GmatStaticBoxSizer *magfStaticSizer =
       new GmatStaticBoxSizer(wxVERTICAL, this, "Magnetic Field");
@@ -1338,7 +1394,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    pmEditTextCtrl =
       new wxTextCtrl( parent, -1, wxT(""), wxDefaultPosition,
                       wxSize(235,-1), wxTE_READONLY );
-   editPmfButton =
+   wxButton *editPmfButton =
       new wxButton( parent, ID_BUTTON_PM_EDIT, wxT("Select"),
                     wxDefaultPosition, wxDefaultSize, 0 );
    
@@ -1350,7 +1406,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    //-----------------------------------------------------------------
    // SRP
    //-----------------------------------------------------------------
-   srpCheckBox =
+   theSrpCheckBox =
       new wxCheckBox( parent, ID_CHECKBOX, wxT("Use Solar Radiation Pressure"),
                       wxDefaultPosition, wxDefaultSize, 0 );
    
@@ -1373,7 +1429,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    fmStaticSizer->Add( centralBodySizer, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    fmStaticSizer->Add( primaryStaticSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    fmStaticSizer->Add( pointMassSizer, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
-   fmStaticSizer->Add( srpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
+   fmStaticSizer->Add( theSrpCheckBox, 0, wxGROW|wxALIGN_CENTER_VERTICAL|wxALL, bsize);
    
    //-----------------------------------------------------------------
    // Add panelSizer
@@ -1398,10 +1454,10 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    //-----------------------------------------------------------------
    // disable components for future implemenation
    //-----------------------------------------------------------------   
-   magfComboBox->Enable(false);
+   theMagfModelComboBox->Enable(false);
    magneticDegreeTextCtrl->Enable(false);
    magneticOrderTextCtrl->Enable(false);
-   searchMagneticButton->Enable(false);
+   theMagModelSearchButton->Enable(false);
    type3StaticText->Enable(false);
    degree2StaticText->Enable(false);
    order2StaticText->Enable(false);
@@ -1409,7 +1465,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
    //-----------------------------------------------------------------
    // initially disable components
    //-----------------------------------------------------------------   
-   dragSetupButton->Enable(false);
+   theDragSetupButton->Enable(false);
    
    #ifdef DEBUG_PROP_PANEL_SETUP
    MessageInterface::ShowMessage("PropagationConfigPanel::Setup() exiting\n");
@@ -1421,7 +1477,7 @@ void PropagationConfigPanel::Setup(wxWindow *parent)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplayIntegratorData(bool integratorChanged)
 {
-   int propIndex = integratorComboBox->GetSelection();
+   int propIndex = theIntegratorComboBox->GetSelection();
    
    #ifdef DEBUG_PROP_INTEGRATOR
    MessageInterface::ShowMessage
@@ -1520,6 +1576,7 @@ void PropagationConfigPanel::DisplayForceData()
    DisplayMagneticFieldData();  
 }
 
+
 //------------------------------------------------------------------------------
 // void DisplayPrimaryBodyData()
 //------------------------------------------------------------------------------
@@ -1533,7 +1590,8 @@ void PropagationConfigPanel::DisplayPrimaryBodyData()
       if ( primaryBodiesArray[i].CmpNoCase(primaryBodyString) == 0 )
          bodyIndex = i;
    }
-   bodyComboBox->SetSelection(bodyIndex);
+   
+   thePrimaryBodyComboBox->SetSelection(bodyIndex);
 }
 
 //------------------------------------------------------------------------------
@@ -1548,7 +1606,7 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
    ShowForceList("DisplayGravityFieldData() entered");
    #endif
    
-   gravComboBox->Clear();
+   theGravModelComboBox->Clear();
    
    wxString gravType = primaryBodyList[currentBodyId]->gravType;
    
@@ -1561,7 +1619,7 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
       #endif
       
       for (Integer i = 0; i < (Integer)EarthGravModelCount; i++)
-         gravComboBox->Append(earthGravModelArray[i]);
+         theGravModelComboBox->Append(earthGravModelArray[i]);
 
    }
    else if (bodyName == "Luna")
@@ -1572,7 +1630,7 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
       #endif
       
       for (Integer i = 0; i < (Integer)LunaGravModelCount; i++)
-         gravComboBox->Append(lunaGravModelArray[i]);
+         theGravModelComboBox->Append(lunaGravModelArray[i]);
    }
    else if (bodyName == "Venus")
    {
@@ -1582,7 +1640,7 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
       #endif
       
       for (Integer i = 0; i < (Integer)VenusGravModelCount; i++)
-         gravComboBox->Append(venusGravModelArray[i]);
+         theGravModelComboBox->Append(venusGravModelArray[i]);
 
    }
    else if (bodyName == "Mars")
@@ -1593,7 +1651,7 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
       #endif
       
       for (Integer i = 0; i < (Integer)MarsGravModelCount; i++)
-         gravComboBox->Append(marsGravModelArray[i]);
+         theGravModelComboBox->Append(marsGravModelArray[i]);
 
    }
    else // other bodies
@@ -1604,12 +1662,12 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
       #endif
       
       for (Integer i = 0; i < (Integer)OthersGravModelCount; i++)
-         gravComboBox->Append(othersGravModelArray[i]);
+         theGravModelComboBox->Append(othersGravModelArray[i]);
 
    }
    
-   searchGravityButton->Enable(false);
-   potFileStaticText->Enable(false);
+   theGravModelSearchButton->Enable(false);
+   ////potFileStaticText->Enable(false);
    potFileTextCtrl->Enable(false);
    gravityDegreeTextCtrl->Enable(true);
    gravityOrderTextCtrl->Enable(true);
@@ -1624,13 +1682,13 @@ void PropagationConfigPanel::DisplayGravityFieldData(const wxString& bodyName)
    {
       if (primaryBodyList[currentBodyId]->gravType == "Other")
       {
-         searchGravityButton->Enable(true);
+         theGravModelSearchButton->Enable(true);
          potFileStaticText->Enable(true);
          potFileTextCtrl->Enable(true);
       }
    }
    
-   gravComboBox->SetValue(gravType);
+   theGravModelComboBox->SetValue(gravType);
    gravityDegreeTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravDegree);
    gravityOrderTextCtrl->SetValue(primaryBodyList[currentBodyId]->gravOrder);
    
@@ -1650,28 +1708,39 @@ void PropagationConfigPanel::DisplayAtmosphereModelData()
        currentBodyName.c_str(), primaryBodyList[currentBodyId]->dragType.c_str());
    #endif
    
+   // Enable atmosphere model only for Earth
+   if (currentBodyName == "Earth")
+   {
+      theAtmosModelComboBox->Enable(true);
+   }
+   else
+   {
+      theAtmosModelComboBox->Enable(false);
+      theDragSetupButton->Enable(false);
+   }
+   
    // Set current drag force pointer
    theDragForce = primaryBodyList[currentBodyId]->dragf;
    
    if (primaryBodyList[currentBodyId]->dragType == dragModelArray[NONE_DM])
    {
-      atmosComboBox->SetSelection(NONE_DM);
-      dragSetupButton->Enable(false);
+      theAtmosModelComboBox->SetSelection(NONE_DM);
+      theDragSetupButton->Enable(false);
    }
    else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[EXPONENTIAL])
    {
-      atmosComboBox->SetSelection(EXPONENTIAL);
-      dragSetupButton->Enable(false);
+      theAtmosModelComboBox->SetSelection(EXPONENTIAL);
+      theDragSetupButton->Enable(false);
    }
    else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[MSISE90])
    {
-      atmosComboBox->SetSelection(MSISE90);
-      dragSetupButton->Enable(true);
+      theAtmosModelComboBox->SetSelection(MSISE90);
+      theDragSetupButton->Enable(true);
    }
    else if (primaryBodyList[currentBodyId]->dragType == dragModelArray[JR])
    {
-      atmosComboBox->SetSelection(JR);
-      dragSetupButton->Enable(true);
+      theAtmosModelComboBox->SetSelection(JR);
+      theDragSetupButton->Enable(true);
    }
 }
 
@@ -1695,7 +1764,7 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 {
    if (primaryBodyList[currentBodyId]->magfType == magfModelArray[NONE_MM])
    {
-      magfComboBox->SetSelection(NONE_MM);
+      theMagfModelComboBox->SetSelection(NONE_MM);
    }
 }
 
@@ -1705,7 +1774,7 @@ void PropagationConfigPanel::DisplayMagneticFieldData()
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::DisplaySRPData()
 {
-   srpCheckBox->SetValue(usePropOriginForSrp);
+   theSrpCheckBox->SetValue(usePropOriginForSrp);
 }
 
 
@@ -1721,15 +1790,114 @@ void PropagationConfigPanel::DisplayErrorControlData()
    wxString wxEcTypeName = errorControlTypeName.c_str();
    
    if (wxEcTypeName == errorControlArray[NONE_EC])
-      errorComboBox->SetSelection(NONE_EC);
+      theErrorComboBox->SetSelection(NONE_EC);
    else if (wxEcTypeName == errorControlArray[RSSSTEP])
-      errorComboBox->SetSelection(RSSSTEP);
+      theErrorComboBox->SetSelection(RSSSTEP);
    else if (wxEcTypeName == errorControlArray[RSSSTATE])
-      errorComboBox->SetSelection(RSSSTATE);
+      theErrorComboBox->SetSelection(RSSSTATE);
    else if (wxEcTypeName == errorControlArray[LARGESTSTEP])
-      errorComboBox->SetSelection(LARGESTSTEP);
+      theErrorComboBox->SetSelection(LARGESTSTEP);
    else if (wxEcTypeName == errorControlArray[LARGESTSTATE])
-      errorComboBox->SetSelection(LARGESTSTATE);
+      theErrorComboBox->SetSelection(LARGESTSTATE);
+}
+
+
+//------------------------------------------------------------------------------
+// void EnablePrimaryBodyItems(bool enable = true, bool clear = false)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::EnablePrimaryBodyItems(bool enable, bool clear)
+{
+   if (enable)
+   {
+      theGravModelComboBox->Enable(true);
+      gravityDegreeTextCtrl->Enable(true);
+      gravityOrderTextCtrl->Enable(true);
+      
+      if (theGravModelComboBox->GetStringSelection() == "Other")
+      {
+         theGravModelSearchButton->Enable(true);
+         potFileTextCtrl->Enable(true);
+      }
+      else
+      {
+         theGravModelSearchButton->Enable(false);
+         potFileTextCtrl->Enable(false);
+      }
+      
+      if (thePrimaryBodyComboBox->GetValue() == "Earth")
+      {
+         theAtmosModelComboBox->Enable(true);
+         if (theAtmosModelComboBox->GetValue() == dragModelArray[NONE_DM] ||
+             theAtmosModelComboBox->GetValue() == dragModelArray[EXPONENTIAL])
+            theDragSetupButton->Enable(false);
+         else
+            theDragSetupButton->Enable(true);         
+      }
+      else
+      {
+         theAtmosModelComboBox->Enable(false);
+         theDragSetupButton->Enable(false);
+      }
+      
+      //theMagfModelComboBox->Enable(true);
+      //theSrpCheckBox->Enable(true);
+   }
+   else
+   {
+      if (clear)
+      {
+         primaryBodyList.clear();
+         primaryBodiesArray.Clear(); 
+         thePrimaryBodyComboBox->Clear();
+         bodyTextCtrl->Clear();
+      }
+      
+      theGravModelComboBox->Enable(false);
+      gravityDegreeTextCtrl->Enable(false);
+      gravityOrderTextCtrl->Enable(false);
+      potFileTextCtrl->Enable(false);
+      theGravModelSearchButton->Enable(false);
+      theAtmosModelComboBox->Enable(false);
+      theDragSetupButton->Enable(false);
+      //theMagfModelComboBox->Enable(false);
+      //theSrpCheckBox->Enable(false);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdatePrimaryBodyItems()
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::UpdatePrimaryBodyItems()
+{
+   if (primaryBodiesArray.IsEmpty())
+      return;
+   
+   wxString selBody = thePrimaryBodyComboBox->GetStringSelection();
+   
+   if (currentBodyName != selBody)
+   {
+      primaryBodyString = thePrimaryBodyComboBox->GetStringSelection();
+      currentBodyName = selBody;
+      currentBodyId = FindPrimaryBody(currentBodyName);
+      
+      DisplayGravityFieldData(currentBodyName);
+      DisplayAtmosphereModelData();
+      DisplayMagneticFieldData();
+      DisplaySRPData();
+   }
+   
+//    // Enable atmosphere model only for Earth
+//    if (strcmp(selBody, "Earth") == 0)
+//    {
+//       theAtmosModelComboBox->Enable(true);
+//       theDragSetupButton->Enable(true);
+//    }
+//    else
+//    {
+//       theAtmosModelComboBox->Enable(false);
+//       theDragSetupButton->Enable(false);
+//    }
 }
 
 
@@ -1874,7 +2042,7 @@ bool PropagationConfigPanel::SaveDegOrder()
       }
       
       // save degree and order
-      wxString bodyName = bodyComboBox->GetValue();
+      wxString bodyName = thePrimaryBodyComboBox->GetValue();
       
       #ifdef DEBUG_PROP_PANEL_SAVE
       MessageInterface::ShowMessage("   bodyName=%s\n", bodyName.c_str());
@@ -1986,8 +2154,8 @@ bool PropagationConfigPanel::SaveAtmosModel()
    Integer paramId;
    bool dragForceFound = false;
    
-   wxString bodyName = bodyComboBox->GetValue();
-   wxString dragType = atmosComboBox->GetValue();
+   wxString bodyName = thePrimaryBodyComboBox->GetValue();
+   wxString dragType = theAtmosModelComboBox->GetValue();
    
    #ifdef DEBUG_PROP_PANEL_SAVE
    MessageInterface::ShowMessage
@@ -2061,98 +2229,57 @@ wxString PropagationConfigPanel::ToString(Real rval)
 
 
 //------------------------------------------------------------------------------
-// void OnIntegratorSelection(wxCommandEvent &event)
+// void OnIntegratorComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnIntegratorSelection(wxCommandEvent &event)
+void PropagationConfigPanel::OnIntegratorComboBox(wxCommandEvent &event)
 {
-   if (!integratorString.IsSameAs(integratorComboBox->GetStringSelection()))
+   if (!integratorString.IsSameAs(theIntegratorComboBox->GetStringSelection()))
    {
       isIntegratorChanged = true;
-      integratorString = integratorComboBox->GetStringSelection();
+      integratorString = theIntegratorComboBox->GetStringSelection();
       DisplayIntegratorData(true);
       isIntegratorDataChanged = false;
       EnableUpdate(true);
    }
 }
 
-//------------------------------------------------------------------------------
-// void OnBodyComboBoxChange(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::OnBodyComboBoxChange(wxCommandEvent &event)
-{
-   OnBodySelection(event);
-   // We don't want to enable Apply when just switching body.
-   //theApplyButton->Enable(false);
-}
 
 //------------------------------------------------------------------------------
-// void OnOriginComboBoxChange(wxCommandEvent &event)
+// void OnPrimaryBodyComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnOriginComboBoxChange(wxCommandEvent &event)
+void PropagationConfigPanel::OnPrimaryBodyComboBox(wxCommandEvent &event)
 {
-   propOriginName = originComboBox->GetValue();
+   UpdatePrimaryBodyItems();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnOriginComboBox(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+void PropagationConfigPanel::OnOriginComboBox(wxCommandEvent &event)
+{
+   propOriginName = theOriginComboBox->GetValue();
    
-   // We don't want to set to true when only origin is changed
-   //isForceModelChanged = true;
    isOriginChanged = true;
    EnableUpdate(true);
 }
 
 
 //------------------------------------------------------------------------------
-// void OnBodySelection(wxCommandEvent &event)
+// void OnGravityModelComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnBodySelection(wxCommandEvent &event)
-{
-   if (primaryBodiesArray.IsEmpty())
-      return;
-   
-   wxString selBody = bodyComboBox->GetStringSelection();
-   
-   if (currentBodyName != selBody)
-   {
-      primaryBodyString = bodyComboBox->GetStringSelection();
-      currentBodyName = selBody;
-      currentBodyId = FindPrimaryBody(currentBodyName);
-      
-      DisplayGravityFieldData(currentBodyName);
-      DisplayAtmosphereModelData();
-      DisplayMagneticFieldData();
-      DisplaySRPData();
-   }
-   
-   // Since SRP can be applied to any force central body, we don't need
-   // to check for Earth
-   if (strcmp(selBody, "Earth") == 0)
-   {
-      atmosComboBox->Enable(true);
-      dragSetupButton->Enable(true);
-      //srpCheckBox->Enable(true);
-   }
-   else
-   {
-      atmosComboBox->Enable(false);
-      dragSetupButton->Enable(false);
-      //srpCheckBox->Enable(false);
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// void OnGravitySelection(wxCommandEvent &event)
-//------------------------------------------------------------------------------
-void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
+void PropagationConfigPanel::OnGravityModelComboBox(wxCommandEvent &event)
 {   
    if (primaryBodiesArray.IsEmpty())
       return;
    
-   gravTypeName = gravComboBox->GetStringSelection();
+   gravTypeName = theGravModelComboBox->GetStringSelection();
    
    if (primaryBodyList[currentBodyId]->gravType != gravTypeName)
    {
       #ifdef DEBUG_PROP_PANEL_GRAV
       MessageInterface::ShowMessage
-         ("OnGravitySelection() grav changed from=%s to=%s for body=%s\n",
+         ("OnGravityModelComboBox() grav changed from=%s to=%s for body=%s\n",
           primaryBodyList[currentBodyId]->gravType.c_str(), gravTypeName.c_str(),
           primaryBodyList[currentBodyId]->bodyName.c_str());
       #endif
@@ -2183,15 +2310,13 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
       
       #ifdef DEBUG_PROP_PANEL_GRAV
       MessageInterface::ShowMessage
-         ("OnGravitySelection() bodyName=%s, potFile=%s\n",
+         ("OnGravityModelComboBox() bodyName=%s, potFile=%s\n",
           primaryBodyList[currentBodyId]->bodyName.c_str(),
           primaryBodyList[currentBodyId]->potFilename.c_str());
       #endif
       
       DisplayGravityFieldData(primaryBodyList[currentBodyId]->bodyName);
       
-      // We don't want to create a new ForceModel if only gravity model is changed
-      //isForceModelChanged = true; 
       isPotFileChanged = true;
       EnableUpdate(true);
    }
@@ -2199,19 +2324,19 @@ void PropagationConfigPanel::OnGravitySelection(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAtmosphereSelection(wxCommandEvent &event)
+// void OnAtmosphereModelComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
+void PropagationConfigPanel::OnAtmosphereModelComboBox(wxCommandEvent &event)
 {
    if (primaryBodiesArray.IsEmpty())
       return;
    
    #ifdef DEBUG_PROP_PANEL_ATMOS
-   MessageInterface::ShowMessage("OnAtmosphereSelection() body=%s\n",
+   MessageInterface::ShowMessage("OnAtmosphereModelComboBox() body=%s\n",
                                  primaryBodyList[currentBodyId]->bodyName.c_str());
    #endif
    
-   dragTypeName = atmosComboBox->GetStringSelection();
+   dragTypeName = theAtmosModelComboBox->GetStringSelection();
    
    // if we are creating new DragForce, set isForceModelChanged
    if (primaryBodyList[currentBodyId]->dragf == NULL)
@@ -2221,7 +2346,7 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
    {    
       #ifdef DEBUG_PROP_PANEL_ATMOS
       MessageInterface::ShowMessage
-         ("OnAtmosphereSelection() grav changed from=%s to=%s for body=%s\n",
+         ("OnAtmosphereModelComboBox() drag changed from=%s to=%s for body=%s\n",
           primaryBodyList[currentBodyId]->dragType.c_str(), dragTypeName.c_str(),
           primaryBodyList[currentBodyId]->bodyName.c_str());
       #endif
@@ -2237,21 +2362,21 @@ void PropagationConfigPanel::OnAtmosphereSelection(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnErrorControlSelection(wxCommandEvent &event)
+// void OnErrorControlComboBox(wxCommandEvent &event)
 //------------------------------------------------------------------------------
-void PropagationConfigPanel::OnErrorControlSelection(wxCommandEvent &event)
+void PropagationConfigPanel::OnErrorControlComboBox(wxCommandEvent &event)
 {     
    #ifdef DEBUG_PROP_PANEL_ERROR
-   MessageInterface::ShowMessage("OnErrorControlSelection()\n");
+   MessageInterface::ShowMessage("OnErrorControlComboBox()\n");
    #endif
    
-   wxString eType = errorComboBox->GetStringSelection();
-
+   wxString eType = theErrorComboBox->GetStringSelection();
+   
    if (errorControlTypeName != eType)
    {    
       #ifdef DEBUG_PROP_PANEL_ERROR
       MessageInterface::ShowMessage
-         ("OnErrorControlSelection() error control changed from=%s to=%s\n",
+         ("OnErrorControlComboBox() error control changed from=%s to=%s\n",
           errorControlTypeName.c_str(), eType.c_str());
       #endif
       
@@ -2280,17 +2405,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
       
       if (names.IsEmpty())
       {
-         primaryBodyList.clear();
-         primaryBodiesArray.Clear(); 
-         bodyComboBox->Clear();
-         bodyTextCtrl->Clear();
-         
-         gravComboBox->Enable(false);
-         atmosComboBox->Enable(false);
-         //magfComboBox->Enable(false);
-         srpCheckBox->Enable(false);
-         gravityDegreeTextCtrl->Enable(false);
-         gravityOrderTextCtrl->Enable(false);
+         EnablePrimaryBodyItems(false, true);
          
          EnableUpdate(true);
          isForceModelChanged = true;
@@ -2298,12 +2413,7 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
       }
       else
       {
-         gravComboBox->Enable(true);
-         atmosComboBox->Enable(true);
-         //magfComboBox->Enable(true);
-         srpCheckBox->Enable(true);
-         gravityDegreeTextCtrl->Enable(true);
-         gravityOrderTextCtrl->Enable(true);
+         EnablePrimaryBodyItems(true);         
       }
       
       std::vector<ForceType*> oldList;
@@ -2341,22 +2451,23 @@ void PropagationConfigPanel::OnAddBodyButton(wxCommandEvent &event)
    //----------------------------------------------
    // Append body names to combobox and text field
    //----------------------------------------------
-   bodyComboBox->Clear();
+   thePrimaryBodyComboBox->Clear();
    bodyTextCtrl->Clear();
    wxString name;
    for (Integer i = 0; i < (Integer)primaryBodyList.size(); i++)
    {
       name = primaryBodyList[i]->bodyName.c_str();
-      bodyComboBox->Append(primaryBodyList[i]->bodyName.c_str());
-      bodyComboBox->SetValue(primaryBodyList[i]->bodyName.c_str());
+      thePrimaryBodyComboBox->Append(primaryBodyList[i]->bodyName.c_str());
+      thePrimaryBodyComboBox->SetValue(primaryBodyList[i]->bodyName.c_str());
    }
    
-   OnBodySelection(event);
+   UpdatePrimaryBodyItems();
    DisplayForceData();
    
    EnableUpdate(true);
    isForceModelChanged = true;
 }
+
 
 //------------------------------------------------------------------------------
 // void OnGravSearchButton(wxCommandEvent &event)
@@ -2371,7 +2482,7 @@ void PropagationConfigPanel::OnGravSearchButton(wxCommandEvent &event)
       
       filename = dialog.GetPath();
       wxString upperCaseFilename = filename;
-
+      
       // Make filename upper case for comparison
       upperCaseFilename.MakeUpper();
       
@@ -2468,7 +2579,7 @@ void PropagationConfigPanel::OnMagSearchButton(wxCommandEvent &event)
       wxString filename;
         
       filename = dialog.GetPath().c_str();
-      magfComboBox->Append(filename); 
+      theMagfModelComboBox->Append(filename); 
    }
    EnableUpdate(true);
 }
@@ -2583,15 +2694,15 @@ void PropagationConfigPanel::OnMagneticTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
 {
-   usePropOriginForSrp = srpCheckBox->GetValue();
+   usePropOriginForSrp = theSrpCheckBox->GetValue();
    isForceModelChanged = true;
    EnableUpdate(true);
    
    // Since SRP can be applied to any force model central body,
-   // we don't need to check for primary bodies (loj:2007.10l19)
+   // we don't need to check for primary bodies (loj:2007.10.19)
    //if (FindPrimaryBody(currentBodyName, false) != -1)
    //{
-   //   primaryBodyList[currentBodyId]->useSrp = srpCheckBox->GetValue();
+   //   primaryBodyList[currentBodyId]->useSrp = theSrpCheckBox->GetValue();
    //   isForceModelChanged = true;
    //   EnableUpdate(true);
    //}
@@ -2600,7 +2711,7 @@ void PropagationConfigPanel::OnSRPCheckBoxChange(wxCommandEvent &event)
    //   MessageInterface::PopupMessage
    //      (Gmat::WARNING_, "Solar radiation pressure force can be only applied to"
    //       " primary bodies.");
-   //   srpCheckBox->SetValue(false);
+   //   theSrpCheckBox->SetValue(false);
    //}
 }
 

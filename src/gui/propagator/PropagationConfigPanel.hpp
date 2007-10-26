@@ -194,21 +194,19 @@ private:
    wxTextCtrl *magneticOrderTextCtrl;
    wxTextCtrl *pmEditTextCtrl;
    
-   wxComboBox *integratorComboBox;
-   wxComboBox *originComboBox;
-   wxComboBox *bodyComboBox;
-   wxComboBox *gravComboBox;
-   wxComboBox *atmosComboBox;
-   wxComboBox *magfComboBox;
-   wxComboBox *errorComboBox;
+   wxComboBox *theIntegratorComboBox;
+   wxComboBox *theOriginComboBox;
+   wxComboBox *thePrimaryBodyComboBox;
+   wxComboBox *theGravModelComboBox;
+   wxComboBox *theAtmosModelComboBox;
+   wxComboBox *theMagfModelComboBox;
+   wxComboBox *theErrorComboBox;
    
-   wxButton *bodyButton;
-   wxButton *searchGravityButton;
-   wxButton *dragSetupButton;
-   wxButton *searchMagneticButton;
-   wxButton *editPmfButton;
+   wxButton *theGravModelSearchButton;
+   wxButton *theDragSetupButton;
+   wxButton *theMagModelSearchButton;
    
-   wxCheckBox *srpCheckBox;
+   wxCheckBox *theSrpCheckBox;
    
    wxString integratorString;
    wxString primaryBodyString;
@@ -305,7 +303,9 @@ private:
    void DisplayMagneticFieldData();
    void DisplaySRPData();
    void DisplayErrorControlData();
-
+   void EnablePrimaryBodyItems(bool enable = true, bool clear = false);
+   void UpdatePrimaryBodyItems();
+   
    // Saving data
    bool SaveIntegratorData();
    bool SaveDegOrder();
@@ -324,13 +324,12 @@ private:
    void OnSRPCheckBoxChange(wxCommandEvent &event);
    
    // Combobox event method
-   void OnIntegratorSelection(wxCommandEvent &event);
-   void OnBodyComboBoxChange(wxCommandEvent &event);
-   void OnOriginComboBoxChange(wxCommandEvent &event);
-   void OnBodySelection(wxCommandEvent &event);
-   void OnGravitySelection(wxCommandEvent &event);
-   void OnAtmosphereSelection(wxCommandEvent &event);
-   void OnErrorControlSelection(wxCommandEvent &event);
+   void OnIntegratorComboBox(wxCommandEvent &event);
+   void OnPrimaryBodyComboBox(wxCommandEvent &event);
+   void OnOriginComboBox(wxCommandEvent &event);
+   void OnGravityModelComboBox(wxCommandEvent &event);
+   void OnAtmosphereModelComboBox(wxCommandEvent &event);
+   void OnErrorControlComboBox(wxCommandEvent &event);
    
    // Button event methods
    void OnAddBodyButton(wxCommandEvent &event);
