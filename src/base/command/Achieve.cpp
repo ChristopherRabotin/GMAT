@@ -679,10 +679,10 @@ bool Achieve::InterpretAction()
    if (chunks[1].at(0) == '(')
       throw CommandException("Missing solver name for Achieve command.\n");
       
-   //if ((!GmatStringUtil::IsBracketBalanced(chunks[1], "()")) ||
-   //    (!GmatStringUtil::IsBracketBalanced(chunks[1], "{}")) ||
-   //    (!GmatStringUtil::IsBracketBalanced(chunks[1], "[]"))  )
-   if (!GmatStringUtil::AreAllBracketsBalanced(chunks[1], "([{)]}"))
+   if ((chunks[1].find("[") != chunks[1].npos) || (chunks[1].find("]") != chunks[1].npos))
+      throw CommandException("Brackets not allowed in Vary command");
+
+   if (!GmatStringUtil::AreAllBracketsBalanced(chunks[1], "({)}"))
    {
       throw CommandException
          ("Parentheses, braces, or brackets are unbalanced or incorrectly placed\n");
