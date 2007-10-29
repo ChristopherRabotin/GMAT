@@ -19,12 +19,10 @@ function WaitForCallback()
 
 global gmatChannel;
 global gmatCallbackStatus;
-
-% if (gmatChannel == 0) 
 if (~isunix && gmatChannel == 0) 
    disp('channel is not valid');
 else
-   var = 'CallbackStatus';
+    var = 'CallbackStatus';
 %   if isunix
 %      pause(5);
 %   else
@@ -35,12 +33,12 @@ else
    
    while(continueWait)
       
-      % gmatCallbackStatus = Request(gmatChannel, var);
       gmatCallbackStatus = Request(gmatChannel, var)
       
       if (isfloat(gmatCallbackStatus))
-         CloseGMAT;
-         OpenGMAT;
+         %% Skip Close/Open to stay with the same channel
+         %%CloseGMAT;
+         %%OpenGMAT;
          continueWait = true;
       elseif(ischar(gmatCallbackStatus))
          if (strcmp(gmatCallbackStatus,'Completed'))

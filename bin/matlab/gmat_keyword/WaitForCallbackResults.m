@@ -38,8 +38,9 @@ else
       callbackResults = Request(gmatChannel, var)
       
       if (isfloat(callbackResults))
-         CloseGMAT;
-         OpenGMAT;
+         %% Skip Close/Open to stay with the same channel
+         %%CloseGMAT;
+         %%OpenGMAT;
          continueWait = true;
       elseif(ischar(callbackResults))
       %   if (strcmp(callbackResults,'Completed'))
