@@ -9,12 +9,14 @@ gmatTopic = 'GMAT-MATLAB';
 
 %-----------------------------------------------------------
 % if computer is 'PCWIN' call dde function to initialize
-% conversion with GMAT
+% conversation with GMAT
 %-----------------------------------------------------------
-if (computer == 'PCWIN')
+if strcmp(computer,'PCWIN')
    gmatChannel = ddeinit(gmatService, gmatTopic);
 else
-   disp('OpenGMAT(): Only PC windows is supported at this time');
+%   disp('OpenGMAT(): Only PC windows is supported at this time');
+   CallGMAT('Open','');   
+   return;
 end
 
 if (gmatChannel == 0)
@@ -22,4 +24,3 @@ if (gmatChannel == 0)
 else
    CallGMAT('Open', '');
 end
-
