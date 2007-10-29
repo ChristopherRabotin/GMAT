@@ -9,12 +9,20 @@ DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
 
+# If the copy of wx-config you neeed is not in your path, enter the path to the
+# file here, including a terminating slash.  (The commented version is an 
+# example, showing what you would use if wx-config were in /usr/local/bin)
+
+WX_CONFIG_PATH = 
+# WX_CONFIG_PATH = /usr/local/bin/
+
+
 # MATLAB specific data
 # If you build with MATLAB support, you need to set the path infoirmation here.
 # You may also need to edit this list, depending on your MATLAB version number;
 # this set works with R2007b for Linux.
-MATLAB_INCLUDE = -I/opt/matlab/extern/include
-MATLAB_LIB = -L/opt/matlab/bin/glnx86 
+MATLAB_INCLUDE = -I/opt/matlab73/extern/include
+MATLAB_LIB = -L/opt/matlab73/bin/glnx86 
 MATLAB_LIBRARIES = -leng -lmx -lut \
                    -lmat -lpthread -lstdc++ -lm \
                    -licudata -licuuc -licui18n -licuio -lz -lhdf5 -lxerces-c
@@ -63,8 +71,8 @@ LINUX_MAC = 1
 # Build specific flags
 MATLAB_FLAGS = -D__USE_MATLAB__=1
 
-WXCPPFLAGS = `wx-config --cppflags`
-WXLINKFLAGS = `wx-config --libs --gl-libs --static=no`
+WXCPPFLAGS = `$(WX_CONFIG_PATH)wx-config --cppflags`
+WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no`
 
 
 ifeq ($(CONSOLE_APP),1)
