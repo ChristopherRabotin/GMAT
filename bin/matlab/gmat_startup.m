@@ -7,9 +7,9 @@
 %-------------------------------------------------------------------------------
 format long g
 
-GMAT_KEYWORD_DIR = '../gmat_keyword'
-GMAT_COMMAND_DIR = '../gmat_command'
-GMAT_SCRIPT_DIR  = '../gmat_sample_script'
+GMAT_KEYWORD_DIR = './gmat_keyword'
+GMAT_COMMAND_DIR = './gmat_command'
+GMAT_OPT_DIR  = './gmat_fmincon'
 addpath (GMAT_KEYWORD_DIR)
 addpath (GMAT_COMMAND_DIR)
-addpath (GMAT_SCRIPT_DIR)
+addpath (GMAT_OPT_DIR)
