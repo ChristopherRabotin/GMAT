@@ -1,4 +1,4 @@
-%$Header: /GMAT/dev/cvs/supportfiles/matlab/gmat_keyword/WaitForGMAT.m,v 1.1 2007/08/22 19:15:16 shughes Exp $
+%$Header: /cygdrive/p/dev/cvs/matlab/gmat_keyword/WaitForGMAT.m,v 1.3 2006/08/28 17:38:29 wshoan Exp $
 %------------------------------------------------------------------------------
 %                               WaitForGMAT.m
 %------------------------------------------------------------------------------
@@ -20,20 +20,32 @@ function WaitForGMAT()
 global gmatChannel;
 global gmatRunState;
 
-if (gmatChannel == 0) 
+% if (gmatChannel == 0) 
+if (~isunix && gmatChannel == 0) 
    disp('channel is not valid');
 else
    var = 'RunState';
-   pause(.1);
+   if isunix
+      pause(5);
+   else
+      pause(1);
+   end
+   
    continueWait = true;
    
    while(continueWait)
       
-      gmatRunState = Request(gmatChannel, var);
+      gmatRunState = Request(gmatChannel, var)
       
+      %% On computer PICWIN:
+      %% Close/Open to get new channel if String value was not received from Request().
+      %% It could mean the Server is not responding to new Request so it has timed out.
+      %% This happens when building and running a long script.
       if (isfloat(gmatRunState))
-         CloseGMAT;
-         OpenGMAT;
+         if (~isunix)
+            CloseGMAT;
+            OpenGMAT;
+         end
          continueWait = true;
       elseif(ischar(gmatRunState))
          if (strcmp(gmatRunState,'Idle'))
@@ -43,7 +55,11 @@ else
          end
       end
       
-      pause(.1);
-      
+      if isunix
+         pause(5);
+      else
+         pause(1);
+      end 
+
    end
 end
