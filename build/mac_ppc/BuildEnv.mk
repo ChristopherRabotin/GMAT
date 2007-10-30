@@ -18,13 +18,13 @@ WX_28_SYNTAX = 1
 USE_SHARED = 1
 
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here ....
-TOP_DIR = /Users/wcshoan/gmatdev/NewGMAT
+TOP_DIR = /Users/wcshoan/gmatdev/gmat
 # *** EDIT THIS *** - this is where you installed the version of wxMac that you're using ...
-WX_HOME = /Applications/wxmac-2.8.4/osx-build
+WX_HOME = /Applications/wxmac-2.8.6/osx-build
 # *** EDIT THIS *** - 'sudo make install' of wxMac will put things here ......
 WX_INSTALLED = /usr/local/bin
 # *** EDIT THIS *** - this is where you installed MATLAB ......
-MATLAB = /Applications/MATLAB71
+MATLAB = /Applications/MATLAB_R2007b
 
 BUILD = release
 
@@ -92,8 +92,8 @@ MAC_SPECIFIC = 1
 ifeq ($(MAC_SPECIFIC),1)
 EXECUTABLE 	= $(TOP_DIR)/bin/GMAT
 # *** EDIT THIS *** - put the version number of the wxMac that you're using here ...
-WX_VERSION   = 2.8.4
-GMAT_INFO    = $(TOP_DIR)/gui/Info_GMAT.plist
+WX_VERSION   = 2.8.6
+GMAT_INFO    = $(TOP_DIR)/src/gui/Info_GMAT.plist
 CONTENTS_DIR = $(EXECUTABLE).app/Contents
 MACOS_DIR    = $(CONTENTS_DIR)/MacOS
 RES_DIR      = $(CONTENTS_DIR)/Resources
@@ -137,8 +137,8 @@ CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(MATLAB_FLAGS) \
 F77_FLAGS = $(SOME_OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(MATLAB_FLAGS) \
            $(WXCPPFLAGS) \
            $(MATLAB_INCLUDE) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES)
-TCPIP_OBJECTS =	$(TOP_DIR)/matlab/gmat_mex/src/MatlabClient.o \
-				$(TOP_DIR)/matlab/gmat_mex/src/MatlabConnection.o
+TCPIP_OBJECTS =	$(TOP_DIR)/src/matlab/gmat_mex/src/MatlabClient.o \
+				$(TOP_DIR)/src/matlab/gmat_mex/src/MatlabConnection.o
 else
 CPPFLAGS = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall \
            $(WXCPPFLAGS) $(IL_HEADERS) -D__WXMAC__ $(WX_28_DEFINES)
