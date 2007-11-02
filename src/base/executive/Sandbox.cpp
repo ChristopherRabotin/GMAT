@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Sandbox
 //------------------------------------------------------------------------------
@@ -665,11 +665,17 @@ bool Sandbox::Initialize()
       {
          // Check to see if it is a GmatFunction
          std::string funName = current->GetStringParameter("FunctionName");
+         
+         if (funName == "")
+            throw SandboxException
+               ("CallFunction command has empty Function name in line:\n \"" +
+                current->GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         
          if (objectMap.find(funName) == objectMap.end())
-            throw SandboxException("The script line \n  '" +
-               current->GetGeneratingString(Gmat::SCRIPTING) +
-               "'\nreferences the function '" + funName +
-               "', which cannot be found.");
+            throw SandboxException
+               ("CallFunction command references undefined Function \"" + funName +
+                "\" in line:\n \"" + current->GetGeneratingString(Gmat::SCRIPTING) + "\"");
+         
          GmatFunction *fun = (GmatFunction*)objectMap[funName];
          if (fun->GetTypeName() == "GmatFunction")
          {
