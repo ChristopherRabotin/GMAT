@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ParameterSelectDialog
 //------------------------------------------------------------------------------
@@ -359,7 +359,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          if (objComboBox == NULL)
             return;
          
-         wxString newParam = objComboBox->GetStringSelection();
+         wxString newParam = objComboBox->GetValue();
          int found = mVarSelectedListBox->FindString(newParam);
          
          // if the string wasn't found in the second list, insert it
@@ -375,7 +375,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       
       // get string in first list
       wxString newParam = FormParamName();
-
+      
       // if newParam is properly created
       if (newParam != "")
       {
@@ -388,7 +388,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          }
          
          int found = mVarSelectedListBox->FindString(newParam);
-      
+         
          // if the string wasn't found in the second list, insert it
          if (found == wxNOT_FOUND)
          {
@@ -401,7 +401,10 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          if (mUseUserParam)
             mUserParamListBox->SetSelection(mUserParamListBox->GetSelection() + 1);
          else
+         {
             mPropertyListBox->SetSelection(mPropertyListBox->GetSelection() + 1);
+            OnSelectProperty(event);
+         }
       }
    }
    else if (event.GetEventObject() == mRemoveParamButton)
@@ -483,6 +486,10 @@ void ParameterSelectDialog::OnSelectUserParam(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ParameterSelectDialog::OnSelectProperty(wxCommandEvent& event)
 {
+   #if DEBUG_PARAM_SELECT_DIALOG > 1
+   MessageInterface::ShowMessage("OnSelectProperty() entered\n");
+   #endif
+   
    // if click on selected item, deselect
    if (mPropertyListBox->GetSelection() == mLastPropertySelection)
    {
@@ -584,7 +591,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
    }
    else if(obj == mCoordSysComboBox)
    {
-      mLastCoordSysName = mCoordSysComboBox->GetStringSelection();
+      mLastCoordSysName = mCoordSysComboBox->GetValue();
    }
 }
 
@@ -613,22 +620,22 @@ wxString ParameterSelectDialog::FormParamName()
       }
       
       if (mCoordSysComboBox->IsShown())
-         depObj = mCoordSysComboBox->GetStringSelection();
+         depObj = mCoordSysComboBox->GetValue();
       else if (mCentralBodyComboBox->IsShown())
-         depObj = mCentralBodyComboBox->GetStringSelection();
-
+         depObj = mCentralBodyComboBox->GetValue();
+      
       wxComboBox *objComboBox = GetObjectComboBox();
       if (objComboBox == NULL)
          return "";
       
       if (depObj == "")
       {
-         paramName = objComboBox->GetStringSelection() + "." + 
+         paramName = objComboBox->GetValue() + "." + 
             mPropertyListBox->GetStringSelection();
       }
       else
       {
-         paramName = objComboBox->GetStringSelection() + "." + depObj + "." +
+         paramName = objComboBox->GetValue() + "." + depObj + "." +
             mPropertyListBox->GetStringSelection();
       }
    }
@@ -670,14 +677,14 @@ Parameter* ParameterSelectDialog::GetParameter(const wxString &name)
          return NULL;
       
       std::string paramName(name.c_str());
-      std::string objName(objComboBox->GetStringSelection().c_str());
+      std::string objName(objComboBox->GetValue().c_str());
       std::string propName(mPropertyListBox->GetStringSelection().c_str());
       std::string depObjName = "";
       
       if (mCoordSysComboBox->IsShown())
-         depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+         depObjName = std::string(mCoordSysComboBox->GetValue().c_str());
       else if (mCentralBodyComboBox->IsShown())
-         depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
+         depObjName = std::string(mCentralBodyComboBox->GetValue().c_str());
       
       param = theGuiInterpreter->CreateParameter(propName, paramName);
       param->SetRefObjectName(Gmat::SPACECRAFT, objName);
@@ -700,9 +707,11 @@ void ParameterSelectDialog::ShowCoordSystem()
 {
    std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
    GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
-
-   //MessageInterface::ShowMessage
-   //   ("===> ShowCoordSystem() property=%s, depObj=%d\n", property.c_str(), depObj);
+   
+   #if DEBUG_PARAM_SELECT_DIALOG
+   MessageInterface::ShowMessage
+      ("ShowCoordSystem() property=%s, depObj=%d\n", property.c_str(), depObj);
+   #endif
    
    if (depObj == GmatParam::COORD_SYS)
    {
