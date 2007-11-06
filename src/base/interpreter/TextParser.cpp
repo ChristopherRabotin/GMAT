@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //-------------------------------------------------------------------------------
 //                              TextParser
 //-------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    
    #if DEBUG_TP_EVAL_BLOCK > 1
    MessageInterface::ShowMessage
-      ("TextParser::EvaluateBlock() logicalBlock=\n   %s\n", logicalBlock.c_str());
+      ("TextParser::EvaluateBlock() logicalBlock=\n<<<%s>>>\n", logicalBlock.c_str());
    #endif
    
    // first break into string array
@@ -208,13 +208,8 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
       str = lines[i];
       length = str.size();
       
-      // Remove leading and trailing blank spaces and ending semi-colon
-      str = GmatStringUtil::Trim(str, GmatStringUtil::BOTH, true);
-
-      // Remove trailing space after removing semi-colon
-      str = GmatStringUtil::Trim(str, GmatStringUtil::TRAILING);
-      
-      length = str.size();
+      // Remove leading blank spaces
+      str = GmatStringUtil::Trim(str, GmatStringUtil::LEADING);
       
       // Remove GMAT keyword
       index1 = str.find("GMAT ");
@@ -250,6 +245,9 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          {
             keyword = str.substr(index1);
          }
+         
+         // remove any eol or semicoln from keyword
+         keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true, true);
          
          // check for "Create" or Commands
          if (keyword == "Create")
@@ -318,7 +316,11 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             {
                // find last non-blank
                index4 = str.find_last_not_of(whiteSpace, index3-1);
+               
+               // remove eol char from inlineComment
                inlineComment = str.substr(index4+1);
+               inlineComment = inlineComment.substr(0, inlineComment.size()-1);
+               
                theInstruction = str.substr(index1, index4-index1+1);
             }
             else
@@ -328,19 +330,15 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          }
       }
    }
-
+   
    //MessageInterface::ShowMessage("===> theInstruction=%s\n", theInstruction.c_str());
    
    if (commentCounter == count)
       theBlockType = Gmat::COMMENT_BLOCK;
    
    // remove ending ; from the instruction
-   length = theInstruction.size();
-
-   // Added if (length > 0) for VC++
-   if (length > 0)
-      if (theInstruction[length-1] == ';')
-         theInstruction = theInstruction.substr(0, length-1);
+   theInstruction =
+      GmatStringUtil::Trim(theInstruction, GmatStringUtil::TRAILING, true, true);
    
    theChunks.clear();
    theChunks.push_back(prefaceComment);
