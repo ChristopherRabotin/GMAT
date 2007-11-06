@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               ScriptInterpreter
 //------------------------------------------------------------------------------
@@ -68,9 +68,10 @@ private:
    
    void SetComments(GmatBase *obj, const std::string &preStr,
                     const std::string &inStr);
-   
+
+   void WriteSectionDelimiter(const std::string &firstObj, const std::string &objDesc);
    void WriteObjects(StringArray &objs, const std::string &objDesc,
-                    Gmat::WriteMode mode);
+                     Gmat::WriteMode mode);
    void WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode);
    void WriteHardwares(StringArray &objs, Gmat::WriteMode mode);
    void WriteVariablesAndArrays(StringArray &objs, Gmat::WriteMode mode);
