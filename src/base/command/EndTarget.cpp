@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                EndTarget
 //------------------------------------------------------------------------------
@@ -223,6 +223,7 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
+   // Build the local string
    generatingString = prefix + "EndTarget;";
    if ((next) && (next->GetTypeName() == "Target"))
    {
@@ -233,5 +234,8 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
          generatingString += next->GetRefObjectName(Gmat::SOLVER);
       }
    }
-   return GmatCommand::GetGeneratingString(mode, prefix, useName);
+   
+   // Then call the base class method for preface and inline comments
+   // We want preface comment to be indented
+   return GmatCommand::GetGeneratingString(mode, prefix + "   ", useName);
 }
