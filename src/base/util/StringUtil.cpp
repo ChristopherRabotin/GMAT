@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 StringUtil
 //------------------------------------------------------------------------------
@@ -142,12 +142,22 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
 
 //------------------------------------------------------------------------------
 // std::string Trim(const std::string &str, StripType stype = BOTH,
-//                  bool removeSemicolon = false)
+//                  bool removeSemicolon = false, bool removeEol = false)
+//------------------------------------------------------------------------------
+/*
+ * Removs leading or/and trailing blanks.  On option it removes end-of-line first
+ * before removing semicoln.
+ *
+ * @param  str  input string to be trimmed
+ * @param  stype  option of trimming front, end, or both (default is BOTH)
+ * @param  removeSemicolon  option of removing trailing semicoln
+ * @param  removeEol  option of removing end-of-line character first before
+ *                    removing semicoln
+ */ 
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
-                                 bool removeSemicolon)
+                                 bool removeSemicolon, bool removeEol)
 {
-   //Add for VC++ compiler
    if (str == "")
       return str;
    
@@ -172,13 +182,28 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
       ("==> index1=%d, index2=%d str=<%s>, str2=<%s>\n", index1, index2,
        str.c_str(), str2.c_str());
    #endif
-   
+
+   //loj: 2007.10.30
+   // remove trailing end-of-lines (\r or \n) or blanks before removing semicolns
    if (removeSemicolon)
    {
-      //Add for VC++ compiler
       if (str2.size() > 0)
-         if (str2[str2.size()-1] == ';')
+      {
+         // if option is to remove eol
+         if (removeEol)
+         {
+            while (str2[str2.size()-1] == '\n' || str2[str2.size()-1] == '\r')
+               str2.erase(str2.size()-1, 1);         
+            
+            // remove trailing blanks
+            while (str2[str2.size()-1] == ' ')
+               str2.erase(str2.size()-1, 1);
+         }
+         
+         // remove trailing semicolns
+         while (str2[str2.size()-1] == ';')
             str2.erase(str2.size()-1, 1);
+      }
    }
    
    #if DEBUG_STRING_UTIL
@@ -576,7 +601,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    if (index1 != str2.npos)
       if (str2.find_first_of("Ee", index1 + 1) != str2.npos)
          return false;
-
+   
    // Check for multiple + or -
    index1 = str2.find_first_of("+-");
    if (index1 != str2.npos)
@@ -2183,11 +2208,26 @@ bool GmatStringUtil::IsValidName(const std::string &str, bool isObject)
 
 
 //------------------------------------------------------------------------------
-// bool IsBlank(const std::string &text)
+// bool IsBlank(const std::string &text, bool ignoreEol = false)
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsBlank(const std::string &text)
+/*
+ * Checks if text has only blank spaces.
+ *
+ * @param  text  input text
+ * @param  ignoreEol  Set this to true if end-of-line char to be ignored
+ *
+ * @return true if text has only blank spaces
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
 {
    std::string str = Trim(text, GmatStringUtil::BOTH);
+   
+   if (ignoreEol)
+   {
+      str = RemoveAll(str, '\n');
+      str = RemoveAll(str, '\r');
+   }
    
    if (str == "")
       return true;

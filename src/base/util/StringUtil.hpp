@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 StringUtil
 //------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ namespace GmatStringUtil
    std::string RemoveSpaceInBrackets(const std::string &str,
                                      const std::string &bracketPair);
    std::string Trim(const std::string &str, StripType stype = BOTH,
-                    bool removeSemicolon = false);
+                    bool removeSemicolon = false, bool removeEol = false);
    std::string Strip(const std::string &str, StripType stype = BOTH);
    std::string ToUpper(const std::string &str);
    std::string ToLower(const std::string &str);
@@ -108,7 +108,7 @@ namespace GmatStringUtil
    bool StartsWith(const std::string &str, const std::string &value);
    bool EndsWith(const std::string &str, const std::string &value);
    bool IsValidName(const std::string &str, bool isObject = false);
-   bool IsBlank(const std::string &str);
+   bool IsBlank(const std::string &str, bool ignoreEol = false);
 }
 
 #endif // StringUtil_hpp
