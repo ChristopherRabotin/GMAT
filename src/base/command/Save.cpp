@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Save
 //------------------------------------------------------------------------------
@@ -14,7 +14,6 @@
  * Class implementation for the save command
  */
 //------------------------------------------------------------------------------
-
 
 #include "Save.hpp"
 #include "FileManager.hpp"      // for GetPathname()
@@ -187,11 +186,12 @@ bool Save::Initialize()
    FileManager *fm = FileManager::Instance();
    std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
    
-   #ifdef DEBUG_SAVE_OUTPUT
-   MessageInterface::ShowMessage("Save::Initialize() outPath=%s\n", outPath.c_str());
-   #endif
-   
    Integer objCount = objNameArray.size();
+   
+   #ifdef DEBUG_SAVE_OUTPUT
+   MessageInterface::ShowMessage
+      ("Save::Initialize() objCount=%d, outPath=%s\n", objCount, outPath.c_str());
+   #endif
    
    #ifndef __USE_SINGLE_FILE__
       for (Integer i=0; i<objCount; i++)
@@ -211,11 +211,13 @@ bool Save::Initialize()
          // Maybe it's a solar system object
          if (solarSys)
          {
-            GmatBase *bod = solarSys->GetBody(*i);
-            if (bod != NULL)
+            GmatBase *body = solarSys->GetBody(*i);
+            if (body != NULL)
             {
-               objArray.push_back(bod);
-               return retval;
+               objArray.push_back(body);
+               UpdateOutputFileNames(index, *i);
+               index++;
+               continue;
             }
          }
          
@@ -224,25 +226,12 @@ bool Save::Initialize()
          errorString += "\"";
          throw CommandException(errorString);
       }
+      else
+      {
+         objArray.push_back((*objectMap)[*i]);
+      }
       
-      objArray.push_back((*objectMap)[*i]);
-      
-      // If saving multiple objects for single file,
-      // we want to append object names.
-      #ifdef __USE_SINGLE_FILE__
-         if (index > 0)
-            fileNameArray[0] = fileNameArray[0] + "_" + *i;
-         
-      #else
-         fileNameArray[index] += ("." + objArray[index]->GetTypeName() + ".data");
-         
-         #ifdef DEBUG_SAVE_OUTPUT
-         MessageInterface::ShowMessage
-            ("Save::Initialize() fileNameArray[%d]=%s\n", index,
-             fileNameArray[index].c_str());
-         #endif
-      #endif
-         
+      UpdateOutputFileNames(index, *i);
       index++;
    }
    
@@ -358,58 +347,6 @@ void Save::RunComplete()
 
 
 //------------------------------------------------------------------------------
-// void Save::WriteObject()
-//------------------------------------------------------------------------------
-/**
- * Writes out the script snippet that is needed to recreate an object.
- */
-//------------------------------------------------------------------------------
-void Save::WriteObject(UnsignedInt i, GmatBase *o)
-{
-   #ifdef DEBUG_SAVE_OUTPUT
-      MessageInterface::ShowMessage("Save: %s has %d parameters\n", 
-         o->GetName().c_str(), o->GetParameterCount());
-   #endif
-   
-   std::string objectname = o->GetName();
-   std::string prefix = "";
-
-   /**
-    * @note:
-    * Since we are using GetGeneratingString() we don't need to write "Create"
-    * except Variables and Strings.  Variables and Strings are special case that
-    * they are written in group in the ScriptInterpreter.  For example,
-    * "Create Variable var1 var2 var3;" are written when save script.
-    * For Arrays, it needs to know the dimension of array so it is handled in the
-    * Array::GetGeneratingString().
-    */
-   
-   // "Create Propagator" creates a PropSetup.  This code handles
-   // that special case.
-   //std::string tname = o->GetTypeName();
-   //if (tname == "PropSetup")
-   //   tname = "Propagator";   
-   //file << "Create " << tname << " " << o->GetName() << "\n";
-   
-   if (o->GetTypeName() == "Variable" || o->GetTypeName() == "String")
-      prefix = "Create " + o->GetTypeName() + " " + o->GetName() + "\n";
-   
-   #ifdef __USE_SINGLE_FILE__
-      fileArray[0] << prefix << o->GetGeneratingString();
-      fileArray[0] << std::endl;
-   #else
-      fileArray[i] << prefix << o->GetGeneratingString();
-      fileArray[i] << std::endl;
-   #endif
-      
-   #ifdef DEBUG_SAVE_OUTPUT
-      MessageInterface::ShowMessage("Save:WriteObject() leaving\n");
-   #endif
-      
-}
-
-
-//------------------------------------------------------------------------------
 //  GmatBase* Clone() const
 //------------------------------------------------------------------------------
 /**
@@ -518,3 +455,88 @@ bool Save::RenameRefObject(const Gmat::ObjectType type,
    
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+// void UpdateOutputFileNames(Integer index, const std::string objName)
+//------------------------------------------------------------------------------
+void Save::UpdateOutputFileNames(Integer index, const std::string objName)
+{
+   // If saving multiple objects for single file,
+   // we want to append object names.
+   #ifdef __USE_SINGLE_FILE__
+      if (index > 0)
+         fileNameArray[0] = fileNameArray[0] + "_" + objName;
+      
+   #else
+      fileNameArray[index] += ("." + objArray[index]->GetTypeName() + ".data");
+      
+      #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage
+         ("Save::UpdateOutputFileNames() fileNameArray[%d]=%s\n", index,
+          fileNameArray[index].c_str());
+      #endif
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void Save::WriteObject()
+//------------------------------------------------------------------------------
+/**
+ * Writes out the script snippet that is needed to recreate an object.
+ */
+//------------------------------------------------------------------------------
+void Save::WriteObject(UnsignedInt i, GmatBase *o)
+{
+   #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage("Save: %s has %d parameters\n", 
+         o->GetName().c_str(), o->GetParameterCount());
+   #endif
+   
+   std::string objectname = o->GetName();
+   std::string prefix = "";
+
+   /**
+    * @note:
+    * Since we are using GetGeneratingString() we don't need to write "Create"
+    * except Variables and Strings.  Variables and Strings are special case that
+    * they are written in group in the ScriptInterpreter.  For example,
+    * "Create Variable var1 var2 var3;" are written when save script.
+    * For Arrays, it needs to know the dimension of array so it is handled in the
+    * Array::GetGeneratingString().
+    */
+   
+   // "Create Propagator" creates a PropSetup.  This code handles
+   // that special case.
+   //std::string tname = o->GetTypeName();
+   //if (tname == "PropSetup")
+   //   tname = "Propagator";   
+   //file << "Create " << tname << " " << o->GetName() << "\n";
+   
+   if (o->GetTypeName() == "Variable" || o->GetTypeName() == "String")
+      prefix = "Create " + o->GetTypeName() + " " + o->GetName() + "\n";
+
+   // Do not write comments
+   o->SetShowPrefaceComment(false);
+   o->SetShowInlineComment(false);
+   
+   #ifdef __USE_SINGLE_FILE__
+   fileArray[0] << prefix << o->GetGeneratingString(Gmat::SCRIPTING, "", "");
+      fileArray[0] << std::endl;
+   #else
+      fileArray[i] << prefix << o->GetGeneratingString(Gmat::SCRIPTING, "", "");
+      fileArray[i] << std::endl;
+   #endif
+   
+   // Set back to write comments
+   o->SetShowPrefaceComment(true);
+   o->SetShowInlineComment(true);
+      
+   #ifdef DEBUG_SAVE_OUTPUT
+      MessageInterface::ShowMessage("Save:WriteObject() leaving\n");
+   #endif
+      
+}
+
+

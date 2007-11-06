@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Save
 //------------------------------------------------------------------------------
@@ -31,50 +31,51 @@ public:
    Save();
    virtual ~Save();
    Save(const Save& sv);
-   Save&                  operator=(const Save&);
+   Save&                operator=(const Save&);
    
-   virtual bool TakeAction(const std::string &action,  
-                           const std::string &actionData = "");
-   virtual std::string     GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual const StringArray&
-                           GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool            SetRefObjectName(const Gmat::ObjectType type,
-                                            const std::string &name);
-   virtual bool            Initialize();
-   bool                    Execute();
-   virtual void            RunComplete();
+   // inherited from GmatCommand
+   virtual bool         Execute();
+   virtual void         RunComplete();
    
    // inherited from GmatBase
-   virtual GmatBase*      Clone() const;
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                            const std::string &name);
+   virtual bool         Initialize();
+   
+   virtual GmatBase*    Clone() const;
    virtual const std::string&
-                          GetGeneratingString(Gmat::WriteMode mode,
-                                              const std::string &prefix,
-                                              const std::string &useName);
-
-
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
+   
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
 protected:
    /// Name of the save file -- for now, it is objectName.objectType
-   //std::string            fileNameArray;
-   StringArray            fileNameArray;
+   StringArray          fileNameArray;
    /// Toggle to allow multiple writes
-   bool                   appendData;
+   bool                 appendData;
    /// Toggle to tell if file was written this run
-   bool                   wasWritten;
+   bool                 wasWritten;
    /// Name of the objects that are written
-   StringArray            objNameArray;
+   StringArray          objNameArray;
    /// Pointer to the objects
-   ObjectArray            objArray;
+   ObjectArray          objArray;
    /// Toggle to show or hide emply fields
-   bool                   writeVerbose;
-   /// File stream used for the output
-   //std::ofstream          file;
-   std::ofstream          *fileArray;
+   bool                 writeVerbose;
+   /// File streams used for the output
+   std::ofstream        *fileArray;
    
-   void                   WriteObject(UnsignedInt i, GmatBase *o);
+   void  UpdateOutputFileNames(Integer index, const std::string objName);
+   void  WriteObject(UnsignedInt i, GmatBase *o);
 };
 
 #endif // Save_hpp
