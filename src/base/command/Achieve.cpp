@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Achieve
 //------------------------------------------------------------------------------
@@ -1502,18 +1502,19 @@ const std::string& Achieve::GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &useName)
 {
    // Build the local string
-   //std::stringstream tol;
-   //if (tolerance) tol << tolerance->EvaluateReal();
-   //std::string gen = prefix + "Achieve " + targeterName + "(" + goalName +
-   //                  " = " + achieveName + ", {Tolerance = " + tol.str();
    std::string gen = prefix + "Achieve " + targeterName + "(" + goalName +
                      " = " + achieveName + ", {Tolerance = " + toleranceName;
-
+   
    generatingString = gen + "});";
-   // Then call the base class method
-   return GmatCommand::GetGeneratingString();
+   
+   // Then call the base class method for preface and inline comments
+   return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
+
+//------------------------------------------------------------------------------
+// void RunComplete()
+//------------------------------------------------------------------------------
 void Achieve::RunComplete()
 {
    #ifdef DEBUG_ACHIEVE_EXEC
@@ -1524,6 +1525,7 @@ void Achieve::RunComplete()
    targeterDataFinalized = false;
    GmatCommand::RunComplete();
 }
+
 
 //------------------------------------------------------------------------------
 // void SetTolerance(Real value)
