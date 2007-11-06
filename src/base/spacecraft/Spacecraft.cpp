@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Spacecraft 
 //------------------------------------------------------------------------------
@@ -2390,7 +2390,10 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    generatingString = data.str();
 
    //MessageInterface::ShowMessage("===> generatingString=\n%s\n", generatingString.c_str());
-   return generatingString;
+   //return generatingString;
+   
+   // Then call the parent class method for preface and inline comments
+   return SpaceObject::GetGeneratingString(mode, prefix, useName);
 }
 
 
