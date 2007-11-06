@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GmatBase
 //------------------------------------------------------------------------------
@@ -43,6 +43,7 @@
 //#define DEBUG_OBJECT_TYPE_CHECKING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_COMMENTS
+//#define DEBUG_GENERATING_STRING
 //#define DEBUG_WRITE_PARAM
 
 /// Set the static "undefined" parameters
@@ -54,24 +55,6 @@ const Rvector     GmatBase::RVECTOR_PARAMETER_UNDEFINED = Rvector(1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
 const Rmatrix     GmatBase::RMATRIX_PARAMETER_UNDEFINED = Rmatrix(1,1,
                   GmatBase::REAL_PARAMETER_UNDEFINED);
-
-// DATA_PRECISION and TIME_PRECISION are now in GmatGlobal
-// // Set the precision used for data output
-// Integer           GmatBase::DATA_PRECISION = 16;
-// Integer           GmatBase::TIME_PRECISION = 16;
-
-// Static accessors for the precision settings
-Integer GmatBase::GetDataPrecision()
-{
-   return GmatGlobal::Instance()->GetDataPrecision();
-   //return DATA_PRECISION;
-}
-
-Integer GmatBase::GetTimePrecision()
-{
-   return GmatGlobal::Instance()->GetTimePrecision();
-   //return TIME_PRECISION;
-}
 
 
 /**
@@ -114,44 +97,6 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
 Integer GmatBase::instanceCount = 0; 
 
 //-------------------------------------
-// public static methods
-//-------------------------------------
-
-//---------------------------------------------------------------------------
-// std::string GetObjectTypeString(Gmat::ObjectType type)
-//---------------------------------------------------------------------------
-/**
- * @param <type> object type
- *
- * @return object type string for given type
- *
- */
-//---------------------------------------------------------------------------
-std::string GmatBase::GetObjectTypeString(Gmat::ObjectType type)
-{
-   return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
-}
-
-//---------------------------------------------------------------------------
-// Gmat::ObjectType GetObjectType(const std::string &typeString)
-//---------------------------------------------------------------------------
-/**
- * @param <typeString> object type string
- *
- * @return object type for given type string
- *
- */
-//---------------------------------------------------------------------------
-Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
-{
-   for (int i=0; i<Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT; i++)
-      if (OBJECT_TYPE_STRING[i] == typeString)
-         return (Gmat::ObjectType)(i + Gmat::SPACECRAFT);
-
-   return Gmat::UNKNOWN_OBJECT;
-}
-
-//-------------------------------------
 // public methods
 //-------------------------------------
 
@@ -170,15 +115,16 @@ Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
  */
 GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr, 
                    const std::string &nomme) :
-   parameterCount  (GmatBaseParamCount),
-   typeName        (typeStr),
-   instanceName    (nomme),
-   type            (typeId),
-   ownedObjectCount(0),
-   callbackExecuting(false),
-   commentLine     (""),
-   inlineComment   ("")
-   
+   parameterCount    (GmatBaseParamCount),
+   typeName          (typeStr),
+   instanceName      (nomme),
+   type              (typeId),
+   ownedObjectCount  (0),
+   callbackExecuting (false),
+   commentLine       (""),
+   inlineComment     (""),
+   showPrefaceComment(true),
+   showInlineComment (true)
 {
    attributeCommentLines.clear();
    attributeInlineComments.clear();
@@ -246,7 +192,9 @@ GmatBase::GmatBase(const GmatBase &a) :
     commentLine     (a.commentLine),
     inlineComment   (a.inlineComment),
     attributeCommentLines    (a.attributeCommentLines),
-    attributeInlineComments  (a.attributeInlineComments)
+    attributeInlineComments  (a.attributeInlineComments),
+    showPrefaceComment       (a.showPrefaceComment),
+    showInlineComment        (a.showInlineComment)
 {
    // one more instance - add to the instanceCount
    ++instanceCount;
@@ -282,6 +230,8 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    inlineComment    = a.inlineComment;
    attributeCommentLines    = a.attributeCommentLines;
    attributeInlineComments  = a.attributeInlineComments;
+   showPrefaceComment       = a.showPrefaceComment;
+   showInlineComment        = a.showInlineComment;
    
    return *this;
 }
@@ -300,36 +250,6 @@ Gmat::ObjectType GmatBase::GetType() const
    return type;
 }
 
-
-//---------------------------------------------------------------------------
-//  std::string GetTypeName() const
-//---------------------------------------------------------------------------
-/**
- * Retrieve the script string used for this class.
- *
- * @return The string used in the scripting for this type of object.
- */
-/*std::string GmatBase::GetTypeName() const
-{
-   return typeName;
-}
-
-*/
-//---------------------------------------------------------------------------
-//  std::string GetName() const
-//---------------------------------------------------------------------------
-/**
-* Retrieve the name of the instance.
- *
- * @return This object's name, or the empty string ("").
- *
- * @note Some classes are unnamed.
- */
-/*std::string GmatBase::GetName() const
-{
-   return instanceName;
-}
-*/
 
 //---------------------------------------------------------------------------
 //  bool SetName(std::string &who, const std;:string &oldName = "")
@@ -453,6 +373,55 @@ bool GmatBase::IsOfType(std::string typeDescription)
    
    return false;
 }
+
+//---------------------------------------------------------------------------
+// void GmatBase::SetShowPrefaceComment(bool show = true)
+//---------------------------------------------------------------------------
+/*
+ * Sets show preface comment flag.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetShowPrefaceComment(bool show)
+{
+   showPrefaceComment = show;
+}
+
+//---------------------------------------------------------------------------
+// void SetShowInlineComment(bool show = true)
+//---------------------------------------------------------------------------
+/*
+ * Sets show inline comment flag.
+ */
+//---------------------------------------------------------------------------
+void GmatBase::SetShowInlineComment(bool show)
+{
+   showInlineComment = show;
+}
+
+//---------------------------------------------------------------------------
+// bool GetShowPrefaceComment()
+//---------------------------------------------------------------------------
+/*
+ * @return Show preface comment flag
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::GetShowPrefaceComment()
+{
+   return showPrefaceComment;
+}
+
+//---------------------------------------------------------------------------
+// bool GetShowInlineComment()
+//---------------------------------------------------------------------------
+/*
+ * @return Show inline comment flag
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::GetShowInlineComment()
+{
+   return showInlineComment;
+}
+
 
 //---------------------------------------------------------------------------
 //  std::string GetRefObjectName(const Gmat::ObjectType type) const
@@ -778,27 +747,20 @@ bool GmatBase::IsCallbackExecuting()
    return callbackExecuting;
 }
 
+//---------------------------------------------------------------------------
+// bool PutCallbackData(std::string &data)
+//---------------------------------------------------------------------------
 bool GmatBase::PutCallbackData(std::string &data)
 {
    return false;
 }
 
+//---------------------------------------------------------------------------
+// std::string GetCallbackResults()
+//---------------------------------------------------------------------------
 std::string GmatBase::GetCallbackResults()
 {
    return "no data";
-}
-
-//---------------------------------------------------------------------------
-//  static Integer GetInstanceCount()
-//---------------------------------------------------------------------------
-/**
- * Find out how many GmatBase objects have been instantiated.
- *
- * @return The number of instantiated objects.
- */
-Integer GmatBase::GetInstanceCount()
-{
-   return GmatBase::instanceCount;
 }
 
 
@@ -898,7 +860,6 @@ std::string GmatBase::GetParameterTypeString(const Integer id) const
       retval = PARAM_TYPE_STRING[t];
    return retval;
 }
-
 
 
 //---------------------------------------------------------------------------
@@ -1169,6 +1130,7 @@ Integer GmatBase::SetIntegerParameter(const Integer id, const Integer value)
                            idString.str() +
                            " on " + typeName + " named " + instanceName);
 }
+
 
 //---------------------------------------------------------------------------
 //  Integer GetIntegerParameter(const Integer id, const Integer index) const
@@ -2245,7 +2207,6 @@ bool GmatBase::SetStringParameter(const std::string &label,
 }
 
 
-
 //---------------------------------------------------------------------------
 //  std::string GetStringParameter(const std::string &label,
 //                                 const Integer index) const
@@ -2459,6 +2420,268 @@ bool GmatBase::TakeAction(const std::string &action,
 }
 
 
+//------------------------------------------------------------------------------
+// const std::string& GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+//       const std::string &prefix = "", const std::string &useName = "")
+//------------------------------------------------------------------------------
+/**
+ * Produces a string, possibly multi-line, containing the text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string containing the text.
+ */
+//------------------------------------------------------------------------------
+const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
+                                                 const std::string &prefix,
+                                                 const std::string &useName)
+{
+   #ifdef DEBUG_GENERATING_STRING
+   MessageInterface::ShowMessage
+      ("GmatBase::GetGeneratingString() entered for %s<%s>, mode=%d, prefix=%s, "
+       "useName=%s, \n", GetTypeName().c_str(), GetName().c_str(), mode,
+       prefix.c_str(), useName.c_str());
+   MessageInterface::ShowMessage
+      ("   showPrefaceComment=%d, commentLine=<%s>\n   showInlineComment=%d "
+       "inlineComment=<%s>\n",  showPrefaceComment, commentLine.c_str(),
+       showInlineComment, inlineComment.c_str());
+   #endif
+   
+   std::stringstream data;
+   
+   data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
+   std::string preface = "", nomme;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+       (mode == Gmat::SHOW_SCRIPT))
+      inMatlabMode = false;
+   if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
+      inMatlabMode = true;
+   
+   if (useName != "")
+      nomme = useName;
+   else
+      nomme = instanceName;
+   
+   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
+       (mode == Gmat::EPHEM_HEADER))
+   {
+      std::string tname = typeName;
+      if (tname == "PropSetup")
+         tname = "Propagator";
+      
+      if (mode == Gmat::EPHEM_HEADER)
+      {
+         data << tname << " = " << "'" << nomme << "';\n";
+         preface = "";
+      }
+      else
+      {
+         if (showPrefaceComment)
+         {
+            if ((commentLine != "") &&
+                ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+                 (mode == Gmat::SHOW_SCRIPT)))
+               data << commentLine;
+         }
+         
+         data << "Create " << tname << " " << nomme << ";";
+         
+         if (showInlineComment)
+         {
+            if ((inlineComment != "") &&
+                ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
+                 (mode == Gmat::SHOW_SCRIPT)))
+               data << inlineComment << "\n";
+            else
+               data << "\n";
+         }
+         else
+         {
+            data << "\n";
+         }
+         
+         preface = "GMAT ";
+      }
+   }
+   
+   nomme += ".";
+   
+   if (mode == Gmat::OWNED_OBJECT) {
+      preface = prefix;
+      nomme = "";
+   }
+   
+   preface += nomme;
+   WriteParameters(mode, preface, data);
+   
+   generatingString = data.str();
+   return generatingString;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGeneratingStringArray(Gmat::WriteMode mode = Gmat::SCRIPTING,
+//             const std::string &prefix = "", const std::string &useName = "")
+//------------------------------------------------------------------------------
+/**
+ * Produces a string array containing the line-by-line text that produces an
+ * object.
+ * 
+ * @param mode Specifies the type of serialization requested.
+ * @param prefix Optional prefix appended to the object's name
+ * @param useName Name that replaces the object's name.
+ * 
+ * @return A string array containing the text.
+ * 
+ * @note The current implementation just calls GetGeneratingString, and returns
+ *       a multiline string in the first element of the string array.  A later
+ *       update is needed to break that string into multiple entries in the
+ *       string array.
+ */
+//------------------------------------------------------------------------------
+StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
+                                               const std::string &prefix,
+                                               const std::string &useName)
+{
+   StringArray sar;
+   std::string genstr = GetGeneratingString(mode, prefix, useName);
+   std::string text;
+   Integer start = 0, end = 0, len = genstr.length();
+   
+   while (end < len) {
+      if (genstr[end] == '\n') {
+         text = genstr.substr(start, end - start);
+         sar.push_back(text);
+         start = end+1;
+      }
+      ++end;
+   }
+   
+   return sar;
+}
+
+
+//------------------------------------------------------------------------------
+//  void FinalizeCreation()
+//------------------------------------------------------------------------------
+/**
+ * Completes any post-construction steps needed before the object can be used.
+ * 
+ * This method performs initialization of GmatBase properties that depend on the
+ * features of the derived classes.  Derived classes touch some of the base 
+ * class properties -- the parameterCount, for example.  This method is called
+ * after the object creation process is complete, so that any of the object's 
+ * base-class properties can be updated to reflect the object's actual 
+ * properties.
+ */
+void GmatBase::FinalizeCreation()
+{
+   PrepCommentTables();
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetErrorMessageFormat()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the error message format string.
+ * 
+ * @return The format string.
+ */
+std::string GmatBase::GetErrorMessageFormat()
+{
+   return errorMessageFormat;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetErrorMessageFormat(const std::string &fmt)
+//------------------------------------------------------------------------------
+/**
+ * Sets the error message format string.
+ * 
+ * @param fmt The format string.
+ */
+void GmatBase::SetErrorMessageFormat(const std::string &fmt)
+{
+   errorMessageFormat = fmt;
+}
+
+//-------------------------------------
+// public static functions
+//-------------------------------------
+
+//---------------------------------------------------------------------------
+//  static Integer GetInstanceCount()
+//---------------------------------------------------------------------------
+/**
+ * Find out how many GmatBase objects have been instantiated.
+ *
+ * @return The number of instantiated objects.
+ */
+Integer GmatBase::GetInstanceCount()
+{
+   return GmatBase::instanceCount;
+}
+
+//---------------------------------------------------------------------------
+// static Gmat::ObjectType GetObjectType(const std::string &typeString)
+//---------------------------------------------------------------------------
+/**
+ * @param <typeString> object type string
+ *
+ * @return object type for given type string
+ *
+ */
+//---------------------------------------------------------------------------
+Gmat::ObjectType GmatBase::GetObjectType(const std::string &typeString)
+{
+   for (int i=0; i<Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT; i++)
+      if (OBJECT_TYPE_STRING[i] == typeString)
+         return (Gmat::ObjectType)(i + Gmat::SPACECRAFT);
+
+   return Gmat::UNKNOWN_OBJECT;
+}
+
+//---------------------------------------------------------------------------
+// static std::string GetObjectTypeString(Gmat::ObjectType type)
+//---------------------------------------------------------------------------
+/**
+ * @param <type> object type
+ *
+ * @return object type string for given type
+ *
+ */
+//---------------------------------------------------------------------------
+std::string GmatBase::GetObjectTypeString(Gmat::ObjectType type)
+{
+   return OBJECT_TYPE_STRING[type - Gmat::SPACECRAFT];
+}
+
+//------------------------------------------------------------------------------
+// static Integer GmatBase::GetDataPrecision()
+//------------------------------------------------------------------------------
+Integer GmatBase::GetDataPrecision()
+{
+   return GmatGlobal::Instance()->GetDataPrecision();
+}
+
+//------------------------------------------------------------------------------
+// static Integer GmatBase::GetTimePrecision()
+//------------------------------------------------------------------------------
+Integer GmatBase::GetTimePrecision()
+{
+   return GmatGlobal::Instance()->GetTimePrecision();
+}
+
+//-------------------------------------
+// protected methods
+//-------------------------------------
+
 //---------------------------------------------------------------------------
 //  void CopyParameters(const GmatBase &a)
 //---------------------------------------------------------------------------
@@ -2505,129 +2728,6 @@ void GmatBase::CopyParameters(const GmatBase &a)
 }
 
 //------------------------------------------------------------------------------
-// const std::string&  GetGeneratingString(Gmat::WriteMode mode,
-//                        const std::string &prefix, const std::string &useName)
-//------------------------------------------------------------------------------
-/**
- * Produces a string, possibly multi-line, containing the text that produces an
- * object.
- * 
- * @param mode Specifies the type of serialization requested.
- * @param prefix Optional prefix appended to the object's name
- * @param useName Name that replaces the object's name.
- * 
- * @return A string containing the text.
- */
-//------------------------------------------------------------------------------
-const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
-                                                 const std::string &prefix,
-                                                 const std::string &useName)
-{
-   std::stringstream data;
-
-   //data.precision(DATA_PRECISION);   // Crank up data precision so we don't lose anything
-   data.precision(GetDataPrecision()); // Crank up data precision so we don't lose anything
-   std::string preface = "", nomme;
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
-       (mode == Gmat::SHOW_SCRIPT))
-      inMatlabMode = false;
-   if (mode == Gmat::MATLAB_STRUCT || mode == Gmat::EPHEM_HEADER)
-      inMatlabMode = true;
-   
-   if (useName != "")
-      nomme = useName;
-   else
-      nomme = instanceName;
-   
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
-       (mode == Gmat::EPHEM_HEADER))
-   {
-      std::string tname = typeName;
-      if (tname == "PropSetup")
-         tname = "Propagator";
-      
-      if (mode == Gmat::EPHEM_HEADER)
-      {
-         data << tname << " = " << "'" << nomme << "';\n";
-         preface = "";
-      }
-      else
-      {
-         if ((commentLine != "") && ((mode == Gmat::SCRIPTING) || 
-             (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
-            data << commentLine;
-         
-         data << "Create " << tname << " " << nomme << ";";
-         
-         if ((inlineComment != "") && ((mode == Gmat::SCRIPTING) || 
-             (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
-            data << inlineComment << "\n";
-         else
-            data << "\n";
-         
-         preface = "GMAT ";
-      }
-   }
-   
-   nomme += ".";
-   
-   if (mode == Gmat::OWNED_OBJECT) {
-      preface = prefix;
-      nomme = "";
-   }
-   
-   preface += nomme;
-   WriteParameters(mode, preface, data);
-   
-   generatingString = data.str();
-   return generatingString;
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray GetGeneratingStringArray(Gmat::WriteMode mode,
-//                       const std::string &prefix, const std::string &useName)
-//------------------------------------------------------------------------------
-/**
- * Produces a string array containing the line-by-line text that produces an
- * object.
- * 
- * @param mode Specifies the type of serialization requested.
- * @param prefix Optional prefix appended to the object's name
- * @param useName Name that replaces the object's name.
- * 
- * @return A string array containing the text.
- * 
- * @note The current implementation just calls GetGeneratingString, and returns
- *       a multiline string in the first element of the string array.  A later
- *       update is needed to break that string into multiple entries in the
- *       string array.
- */
-//------------------------------------------------------------------------------
-StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
-                                               const std::string &prefix,
-                                               const std::string &useName)
-{
-   StringArray sar;
-   std::string genstr = GetGeneratingString(mode, prefix, useName);
-   std::string text;
-   Integer start = 0, end = 0, len = genstr.length();
-
-   while (end < len) {
-      if (genstr[end] == '\n') {
-         text = genstr.substr(start, end - start);
-         sar.push_back(text);
-         start = end+1;
-      }
-      ++end;
-   }
-   
-   return sar;
-}
-
-
-//------------------------------------------------------------------------------
 // void WriteParameters(Gmat::WriteMode mode, std::string &prefix,
 //                      std::stringstream &stream)
 //------------------------------------------------------------------------------
@@ -2642,13 +2742,25 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
 void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix, 
                                std::stringstream &stream)
 {
+   #ifdef DEBUG_WRITE_PARAM
+   MessageInterface::ShowMessage
+      ("GmatBase::WriteParameters() mode=%d, prefix='%s'\n", mode, prefix.c_str());
+   #endif
+   
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
    value.precision(GetDataPrecision());
-
+   
    for (i = 0; i < parameterCount; ++i)
    {
+      #ifdef DEBUG_WRITE_PARAM
+      MessageInterface::ShowMessage
+         ("   %2d, checking %s, type=%s, %s\n", i, GetParameterText(i).c_str(),
+          PARAM_TYPE_STRING[GetParameterType(i)].c_str(),
+          (IsParameterReadOnly(i) ? "ReadOnly" : "Writable"));
+      #endif
+      
       if (IsParameterReadOnly(i) == false)
       {
          parmType = GetParameterType(i);
@@ -2779,10 +2891,10 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
 {
    Gmat::ParameterType tid = GetParameterType(id);
    Integer precision = GmatGlobal::Instance()->GetDataPrecision();
-
+   
    #ifdef DEBUG_WRITE_PARAM
    MessageInterface::ShowMessage
-      ("===> %d, %s, type=%s\n", id, GetParameterText(id).c_str(),
+      ("   %2d, writing  %s, type=%s\n", id, GetParameterText(id).c_str(),
        PARAM_TYPE_STRING[tid].c_str());
    #endif
    
@@ -2824,6 +2936,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
       break;
       
    case Gmat::REAL_TYPE:
+   case Gmat::TIME_TYPE: // Treat TIME_TYPE as Real (loj: 2007.11.02);
       stream << GetRealParameter(id);
       break;
       
@@ -2833,11 +2946,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          Integer col = GetIntegerParameter("NumCols");
          for (Integer i = 0; i < row; ++i)
          {
-//             for (Integer j = 0; j < col; ++j)
-//                stream << "GMAT " << instanceName << "(" << i+1 << ", " << j+1 <<
-//                   ") = " << GetRealParameter(id, i, j) << ";\n";
-
-            //loj: Do not write if value is zero since default is zero(03/27/07)
+            // Do not write if value is zero since default is zero(03/27/07)
             for (Integer j = 0; j < col; ++j)
             {
                if (GetRealParameter(id, i, j) != 0.0)
@@ -2887,50 +2996,9 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    }
 }
 
-//------------------------------------------------------------------------------
-//  void FinalizeCreation()
-//------------------------------------------------------------------------------
-/**
- * Completes any post-construction steps needed before the object can be used.
- * 
- * This method performs initialization of GmatBase properties that depend on the
- * features of the derived classes.  Derived classes touch some of the base 
- * class properties -- the parameterCount, for example.  This method is called
- * after the object creation process is complete, so that any of the object's 
- * base-class properties can be updated to reflect the object's actual 
- * properties.
- */
-void GmatBase::FinalizeCreation()
-{
-   PrepCommentTables();
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetErrorMessageFormat()
-//------------------------------------------------------------------------------
-/**
- * Retrieves the error message format string.
- * 
- * @return The format string.
- */
-std::string GmatBase::GetErrorMessageFormat()
-{
-   return errorMessageFormat;
-}
-
-//------------------------------------------------------------------------------
-// void SetErrorMessageFormat(const std::string &fmt)
-//------------------------------------------------------------------------------
-/**
- * Sets the error message format string.
- * 
- * @param fmt The format string.
- */
-void GmatBase::SetErrorMessageFormat(const std::string &fmt)
-{
-   errorMessageFormat = fmt;
-}
+//-------------------------------------
+// private methods
+//-------------------------------------
 
 //------------------------------------------------------------------------------
 //  void PrepCommentTables()

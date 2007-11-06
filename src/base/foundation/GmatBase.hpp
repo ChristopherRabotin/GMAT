@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GmatBase
 //------------------------------------------------------------------------------
@@ -65,230 +65,260 @@ public:
             const std::string &nomme = "");
    virtual ~GmatBase() = 0;
    GmatBase(const GmatBase &a);
-   GmatBase&           operator=(const GmatBase &a);
+   GmatBase&            operator=(const GmatBase &a);
    
    // Access methods called on the base class
    virtual Gmat::ObjectType
-                       GetType() const;
-   inline std::string  GetTypeName() const;
-   inline std::string  GetName() const;
-   virtual bool        SetName(const std::string &who,
-                               const std::string &oldName = "");
-   virtual Integer     GetParameterCount() const;
+                        GetType() const;
+   inline std::string   GetTypeName() const;
+   inline std::string   GetName() const;
+   virtual bool         SetName(const std::string &who,
+                                const std::string &oldName = "");
+   virtual Integer      GetParameterCount() const;
    
-   bool                IsOfType(Gmat::ObjectType ofType);
-   bool                IsOfType(std::string typeDescription);
-
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   bool                 IsOfType(Gmat::ObjectType ofType);
+   bool                 IsOfType(std::string typeDescription);
+   
+   void                 SetShowPrefaceComment(bool show = true);
+   void                 SetShowInlineComment(bool show = true);
+   bool                 GetShowPrefaceComment();
+   bool                 GetShowInlineComment();
+   
+   // Access methods derived classes can override on comments
+   virtual const std::string
+                        GetCommentLine() const;
+   virtual void         SetCommentLine(const std::string &comment);
+   
+   virtual const std::string
+                        GetInlineComment() const;
+   virtual void         SetInlineComment(const std::string &comment);
+   
+   virtual const std::string
+                        GetAttributeCommentLine(Integer index);
+   virtual void         SetAttributeCommentLine(Integer index, 
+                                                const std::string &comment);
+   
+   virtual const std::string
+                        GetInlineAttributeComment(Integer index);
+   virtual void         SetInlineAttributeComment(Integer index, 
+                                                  const std::string &comment);
+   
+   // Access methods derived classes can override on reference objects
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
    virtual const ObjectTypeArray&
-                       GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                        const std::string &name);
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name = "");
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const std::string &name);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
    
-   virtual Integer     GetOwnedObjectCount();
-   virtual GmatBase*   GetOwnedObject(Integer whichOne);
-   virtual bool        ExecuteCallback();
-   virtual bool        IsCallbackExecuting();
-   virtual bool        PutCallbackData(std::string &data);
-   virtual std::string GetCallbackResults();
+   virtual Integer      GetOwnedObjectCount();
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   virtual bool         ExecuteCallback();
+   virtual bool         IsCallbackExecuting();
+   virtual bool         PutCallbackData(std::string &data);
+   virtual std::string  GetCallbackResults();
    
-   // Method to return the current number of instantiated objects
-   static Integer      GetInstanceCount();
-
    // required method for all subclasses
-   virtual GmatBase*   Clone() const = 0;
+   virtual GmatBase*    Clone() const = 0;
    
    // required method for all subclasses that can be copied in a script
-   virtual void        Copy(const GmatBase*);
+   virtual void         Copy(const GmatBase*);
    
-   virtual bool        Initialize();
-   virtual void        SetSolarSystem(SolarSystem *ss);
-
-
-   virtual bool        RequiresJ2000Body();
+   virtual bool         Initialize();
+   virtual void         SetSolarSystem(SolarSystem *ss);
+   
+   virtual bool         RequiresJ2000Body();
 
    // Access methods derived classes can override
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                       GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual bool        IsParameterReadOnly(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
 
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value);
-   virtual Real        GetRealParameter(const Integer id,
-                                        const Integer index) const;
-   virtual Real        GetRealParameter(const Integer id, const Integer row,
-                                        const Integer col) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value,
-                                        const Integer index);
-   virtual Real        SetRealParameter(const Integer id, const Real value,
-                                        const Integer row, const Integer col);
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         GetRealParameter(const Integer id, const Integer row,
+                                         const Integer col) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         SetRealParameter(const Integer id, const Real value,
+                                         const Integer row, const Integer col);
 
-   virtual Integer     GetIntegerParameter(const Integer id) const;
-   virtual Integer     SetIntegerParameter(const Integer id,
-                                           const Integer value);
-   virtual Integer     GetIntegerParameter(const Integer id,
-                                           const Integer index) const;
-   virtual Integer     SetIntegerParameter(const Integer id,
-                                           const Integer value,
-                                           const Integer index);
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const Integer id,
+                                            const Integer index) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value,
+                                            const Integer index);
                                            
-   virtual UnsignedInt GetUnsignedIntParameter(const Integer id) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value);
-   virtual UnsignedInt GetUnsignedIntParameter(const Integer id,
-                                               const Integer index) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value,
-                                               const Integer index);
+   virtual UnsignedInt  GetUnsignedIntParameter(const Integer id) const;
+   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value);
+   virtual UnsignedInt  GetUnsignedIntParameter(const Integer id,
+                                                const Integer index) const;
+   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value,
+                                                const Integer index);
    virtual const UnsignedIntArray& 
-                       GetUnsignedIntArrayParameter(const Integer id) const; 
-                                               
-   virtual const Rvector&    GetRvectorParameter(const Integer id) const;
-   virtual const Rvector&    SetRvectorParameter(const Integer id,
-                                                 const Rvector &value);
-                                    
-   virtual const Rmatrix&    GetRmatrixParameter(const Integer id) const;
-   virtual const Rmatrix&    SetRmatrixParameter(const Integer id,
-                                                 const Rmatrix &value);
-                                                 
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value);
-   virtual std::string GetStringParameter(const Integer id,
-                                          const Integer index) const;
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value,
-                                          const Integer index);
-   virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id) const; 
-   virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id, 
-                                               const Integer index) const;
+                        GetUnsignedIntArrayParameter(const Integer id) const;
    
-   virtual std::string GetOnOffParameter(const Integer id) const;
-   virtual bool        SetOnOffParameter(const Integer id, 
+   virtual const Rvector&
+                        GetRvectorParameter(const Integer id) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const Integer id,
+                                            const Rvector &value);
+   
+   virtual const Rmatrix&
+                        GetRmatrixParameter(const Integer id) const;
+   virtual const Rmatrix&
+                        SetRmatrixParameter(const Integer id,
+                                            const Rmatrix &value);
+   
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id) const; 
+   virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id, 
+                                                const Integer index) const;
+   
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id, 
                                          const std::string &value);
+   
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const Integer id,
+                                            const Integer index) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value,
+                                            const Integer index);
+   
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value,
+                                         const Integer index);
+   virtual Real         GetRealParameter(const std::string &label, 
+                                         const Integer row, 
+                                         const Integer col) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value, const Integer row,
+                                         const Integer col);
 
-   virtual const std::string  GetCommentLine() const;
-   virtual void               SetCommentLine(const std::string &comment);
-   
-   virtual const std::string  GetInlineComment() const;
-   virtual void               SetInlineComment(const std::string &comment);
-   
-   virtual const std::string  GetAttributeCommentLine(Integer index);
-   virtual void               SetAttributeCommentLine(Integer index, 
-                                const std::string &comment);
-
-   virtual const std::string  GetInlineAttributeComment(Integer index);
-   virtual void               SetInlineAttributeComment(Integer index, 
-                                const std::string &comment);
-   
-   virtual bool        GetBooleanParameter(const Integer id) const;
-   virtual bool        SetBooleanParameter(const Integer id,
-                                           const bool value);
-   virtual bool        GetBooleanParameter(const Integer id,
-                                           const Integer index) const;
-   virtual bool        SetBooleanParameter(const Integer id,
-                                           const bool value,
-                                           const Integer index);
-   
-   virtual Real        GetRealParameter(const std::string &label) const;
-   virtual Real        SetRealParameter(const std::string &label,
-                                        const Real value);
-   virtual Real        GetRealParameter(const std::string &label,
-                                        const Integer index) const;
-   virtual Real        SetRealParameter(const std::string &label,
-                                        const Real value,
-                                        const Integer index);
-   virtual Real        GetRealParameter(const std::string &label, 
-                                        const Integer row, 
-                                        const Integer col) const;
-   virtual Real        SetRealParameter(const std::string &label,
-                                        const Real value, const Integer row,
-                                        const Integer col);
-
-   virtual Integer     GetIntegerParameter(const std::string &label) const;
-   virtual Integer     SetIntegerParameter(const std::string &label,
-                                           const Integer value);
-   virtual Integer     GetIntegerParameter(const std::string &label,
-                                           const Integer index) const;
-   virtual Integer     SetIntegerParameter(const std::string &label,
-                                           const Integer value,
-                                           const Integer index);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label,
+                                            const Integer index) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value,
+                                            const Integer index);
                                     
-   virtual UnsignedInt GetUnsignedIntParameter(const std::string &label) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                               const UnsignedInt value);
-   virtual UnsignedInt GetUnsignedIntParameter(const std::string &label,
-                                               const Integer index) const;
-   virtual UnsignedInt SetUnsignedIntParameter(const std::string &label,
-                                               const UnsignedInt value,
-                                               const Integer index);
+   virtual UnsignedInt  GetUnsignedIntParameter(const std::string &label) const;
+   virtual UnsignedInt  SetUnsignedIntParameter(const std::string &label,
+                                                const UnsignedInt value);
+   virtual UnsignedInt  GetUnsignedIntParameter(const std::string &label,
+                                                const Integer index) const;
+   virtual UnsignedInt  SetUnsignedIntParameter(const std::string &label,
+                                                const UnsignedInt value,
+                                                const Integer index);
    virtual const UnsignedIntArray& 
-                       GetUnsignedIntArrayParameter(const std::string &label) const;
+                        GetUnsignedIntArrayParameter(const std::string &label) const;
    
-   virtual const Rvector&  GetRvectorParameter(const std::string &label) const;
-   virtual const Rvector&  SetRvectorParameter(const std::string &label,
-                                               const Rvector &value);
-                                               
-   virtual const Rmatrix&  GetRmatrixParameter(const std::string &label) const;
-   virtual const Rmatrix&  SetRmatrixParameter(const std::string &label,
-                                               const Rmatrix &value);
-                                               
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool        SetStringParameter(const std::string &label, 
-                                          const std::string &value);
-   virtual std::string GetStringParameter(const std::string &label,
-                                          const Integer index) const;
-   virtual bool        SetStringParameter(const std::string &label, 
-                                          const std::string &value,
-                                          const Integer index);
+   virtual const Rvector&
+                        GetRvectorParameter(const std::string &label) const;
+   virtual const Rvector&
+                        SetRvectorParameter(const std::string &label,
+                                            const Rvector &value);
+   
+   virtual const Rmatrix&
+                        GetRmatrixParameter(const std::string &label) const;
+   virtual const Rmatrix&
+                        SetRmatrixParameter(const std::string &label,
+                                            const Rmatrix &value);
+   
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index);
                                           
    virtual const StringArray& 
-                       GetStringArrayParameter(const std::string &label) const;
+                        GetStringArrayParameter(const std::string &label) const;
    virtual const StringArray& 
-                       GetStringArrayParameter(const std::string &label, 
-                                               const Integer index) const; 
+                        GetStringArrayParameter(const std::string &label, 
+                                                const Integer index) const; 
    
-   virtual bool        GetBooleanParameter(const std::string &label) const;
-   virtual bool        SetBooleanParameter(const std::string &label,
-                                           const bool value);
-   virtual bool        GetBooleanParameter(const std::string &label,
-                                           const Integer index) const;
-   virtual bool        SetBooleanParameter(const std::string &label,
-                                           const bool value,
-                                           const Integer index);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label,
+                                            const Integer index) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value,
+                                            const Integer index);
    
-   virtual std::string GetOnOffParameter(const std::string &label) const;
-   virtual bool        SetOnOffParameter(const std::string &label, 
-                                         const std::string &value);
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label, 
+                                          const std::string &value);
    
-   virtual bool        TakeAction(const std::string &action,  
-                                  const std::string &actionData = "");
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+   
+   virtual const std::string&  
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
+   virtual StringArray  GetGeneratingStringArray(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
+   
+   virtual void         FinalizeCreation();
+   
+   virtual std::string  GetErrorMessageFormat();
+   virtual void         SetErrorMessageFormat(const std::string &fmt);
    
    /// Return value used if the parameter is not accessible as a Real
    static const Real         REAL_PARAMETER_UNDEFINED;
@@ -306,34 +336,25 @@ public:
    static const std::string  PARAM_TYPE_STRING[Gmat::TypeCount];
    /// String mappings for the GMAT object types
    static const std::string  OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1];
-   /// Method for getting GMAT object type string
-   static std::string GetObjectTypeString(Gmat::ObjectType type);
+   
+   /// Method to return the current number of instantiated objects
+   static Integer          GetInstanceCount();
    /// Method for getting GMAT object type
    static Gmat::ObjectType GetObjectType(const std::string &typeString);
-   
-   virtual const std::string&  
-                           GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                               const std::string &prefix = "",
-                                               const std::string &useName = "");
-   virtual StringArray     GetGeneratingStringArray(
-                                         Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                         const std::string &prefix = "",
-                                         const std::string &useName = "");
-   virtual void FinalizeCreation();
-   
-   virtual std::string GetErrorMessageFormat();
-   virtual void SetErrorMessageFormat(const std::string &fmt);
-   
+   /// Method for getting GMAT object type string
+   static std::string      GetObjectTypeString(Gmat::ObjectType type);
+   /// Method for getting data precision
    static Integer          GetDataPrecision();
+   /// Method for getting time precision
    static Integer          GetTimePrecision();
-
+   
 protected:
    /// Parameter IDs
    enum
    {
       GmatBaseParamCount = 0,
    };
-
+   
    /// count of the number of GmatBase objects currently instantiated
    static Integer      instanceCount;
    
@@ -353,7 +374,7 @@ protected:
    ObjectTypeArray     objectTypes;
    /// The list types that this class extends, by name
    StringArray         objectTypeNames;
-
+   
    /// The list of object types referenced by this class
    ObjectTypeArray     refObjectTypes;
    /// The list of object names referenced by this class
@@ -362,22 +383,13 @@ protected:
    /// flag indicating whether or not a Callback method is currently executing
    bool                callbackExecuting;
    
+   /// error message formats
    std::string         errorMessageFormat;
    std::string         errorMessageFormatUnnamed;
    
-   // DATA_PRECISION and TIME_PRECISION are now in GmatGlobal
-   //static Integer      DATA_PRECISION;
-   //static Integer      TIME_PRECISION;
-   
-   // Scripting interfaces
    /// flag used to deterine if the current write is in Matlab mode
-   bool                inMatlabMode;   
-   void                CopyParameters(const GmatBase &a);
-   virtual void        WriteParameters(Gmat::WriteMode mode,
-                                       std::string &prefix, 
-                                       std::stringstream &stream);
-   void                WriteParameterValue(Integer id, 
-                                           std::stringstream &stream);   
+   bool                inMatlabMode;
+   
    /// String used to hold the comment line
    std::string         commentLine;
    /// String used to hold inline comment
@@ -386,12 +398,23 @@ protected:
    StringArray         attributeCommentLines;
    /// String array used to hold the attribute inline comments
    StringArray         attributeInlineComments;
+   /// Flag to indicating whether to show preface comment
+   bool                showPrefaceComment;
+   /// Flag to indicating whether to show inline comment
+   bool                showInlineComment;
+   
+   // Scripting interfaces
+   void                CopyParameters(const GmatBase &a);
+   virtual void        WriteParameters(Gmat::WriteMode mode,
+                                       std::string &prefix, 
+                                       std::stringstream &stream);
+   void                WriteParameterValue(Integer id, 
+                                           std::stringstream &stream);
    
 private:
    
    virtual void PrepCommentTables();
 };
-
 
 
 //------------------------------------------------------------------------------
