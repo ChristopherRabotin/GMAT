@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           ScriptReadWriter
 //------------------------------------------------------------------------------
@@ -23,7 +23,6 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include <iostream>
-// #include <fstream>
 
 class GMAT_API ScriptReadWriter 
 {
@@ -40,9 +39,10 @@ public:
    Integer GetLineNumber();
    std::string GetCurrentLine() { return currentLine; }
    
+   void ReadFirstBlock(std::string &header, std::string &firstBlock);
    std::string ReadLogicalBlock();
    bool WriteText(const std::string &textToWrite);
-      
+   
 protected:
 
 private:
@@ -66,7 +66,6 @@ private:
    bool HasEllipse(const std::string &text);
    std::string HandleEllipsis(const std::string &text);
    std::string HandleComments(const std::string &text);
-   std::string HandleFirstBlock(const std::string &text); 
    
    static ScriptReadWriter *instance;   
    static const std::string sectionDelimiter;

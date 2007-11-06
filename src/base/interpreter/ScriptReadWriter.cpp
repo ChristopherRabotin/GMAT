@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           ScriptReadWriter
 //------------------------------------------------------------------------------
@@ -27,6 +27,9 @@
 ScriptReadWriter* ScriptReadWriter::instance = NULL;
 const std::string ScriptReadWriter::sectionDelimiter = "%--------";
 const std::string ScriptReadWriter::ellipsis = "...";
+
+//#define DEBUG_SCRIPT_READ 1
+//#define DEBUG_FIRST_BLOCK 1
 
 //---------------------------------
 // public
@@ -99,12 +102,128 @@ Integer ScriptReadWriter::GetLineNumber()
 
 
 //------------------------------------------------------------------------------
+// void ReadFirstBlock(std::string &header, std::string &firstBlock)
+//------------------------------------------------------------------------------
+/*
+ * Reads header and first preface comment and script from the script file.
+ * The header block ends when first blank line is read.
+ * The first block ends when first non-blank and non-comment line is read.
+ *
+ * @param  header  header comment lines read
+ * @param  firstBlock  first preface comment and script read
+ */
+//------------------------------------------------------------------------------
+void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlock)
+{
+   std::string newLine = "";
+   header = "";
+   firstBlock = "";
+   bool doneWithHeader = false;
+   
+   if (reachedEndOfFile)
+      return;
+   
+   // get 1 line of text
+   newLine = CrossPlatformGetLine();
+   
+   #if DEBUG_FIRST_BLOCK
+   MessageInterface::ShowMessage
+      ("ReadFirstBlock() firstLine=<<<%s>>>\n", newLine.c_str());
+   #endif
+   
+   if (reachedEndOfFile && IsBlank(newLine))
+      return;
+   
+   // if line is not blank and is not comment line, return this line
+   if (!IsBlank(newLine) && (!IsComment(newLine)))
+   {
+      firstBlock = newLine;
+      return;
+   }
+   
+   header = newLine + "\n";
+   
+   if (IsBlank(newLine))
+      doneWithHeader = true;
+   
+   //-----------------------------------------------------------------
+   // Read header comments
+   // keep looping and append till we find blank line or end of file
+   //-----------------------------------------------------------------
+   if (!doneWithHeader)
+   {
+      while (!reachedEndOfFile)
+      {
+         newLine = CrossPlatformGetLine();
+         
+         #if DEBUG_FIRST_BLOCK
+         MessageInterface::ShowMessage
+            ("   header newLine=<<<%s>>>\n", newLine.c_str());
+         #endif
+         
+         // If non-blank and non-comment line found, return
+         if (!IsBlank(newLine) && (!IsComment(newLine)))
+         {
+            firstBlock = newLine + "\n";
+            return;
+         }
+         
+         // If blank line found, break
+         if (IsBlank(newLine))
+         {
+            header = header + newLine + "\n";
+            doneWithHeader = true;
+            break;
+         }
+         
+         header = header + newLine + "\n";
+      }
+   }
+   
+   
+   //-----------------------------------------------------------------
+   // Read first script
+   // Keep looping and append till we find non-blank/non-comment line
+   // or end of file
+   //-----------------------------------------------------------------
+   while (!reachedEndOfFile)
+   {
+      newLine = CrossPlatformGetLine();
+      
+      #if DEBUG_FIRST_BLOCK
+      MessageInterface::ShowMessage("   1stblk newLine=<<<%s>>>\n", newLine.c_str());
+      #endif
+      
+      // If non-blank and non-comment line found, break
+      if (!IsBlank(newLine) && (!IsComment(newLine)))
+      {
+         firstBlock = firstBlock + newLine + "\n";
+         break;
+      }
+      
+      firstBlock = firstBlock + newLine + "\n";
+   }
+   
+   #if DEBUG_FIRST_BLOCK
+   MessageInterface::ShowMessage
+      ("ReadFirstBlock() header=<<<%s>>>\nfirstBlock=<<<%s>>>", header.c_str(),
+       firstBlock.c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // std::string ReadLogicalBlock()
+//------------------------------------------------------------------------------
+/*
+ * Reads lines until non-blank and non-comment line from the input stream
+ */
 //------------------------------------------------------------------------------
 std::string ScriptReadWriter::ReadLogicalBlock()
 {
    std::string result = "";
    std::string oneLine = ""; 
+   std::string block = "";
    
    if (reachedEndOfFile)
       return "\0";
@@ -115,30 +234,36 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    if (reachedEndOfFile && IsBlank(oneLine))
       return "\0";
    
-   // keep looping till we find text or end of file
-   // oneLine should be overwritten each time
-   while ((!reachedEndOfFile) && (IsBlank(oneLine)))
-      oneLine = CrossPlatformGetLine();
+   #if DEBUG_SCRIPT_READ
+   MessageInterface::ShowMessage
+      ("ReadLogicalBlock() oneLine=\n<<<%s>>>\n", oneLine.c_str());
+   #endif
    
-   // if the last lines of the file were blank
-   // return eof string
-   if (reachedEndOfFile && IsBlank(oneLine))
-      return "\0";
-   
-   // we know we don't have any blank lines
-   // now, so lets set result to the line read in.
-   // After, we will check for comments/delimiters and ellipses
-   result = oneLine;
-   
-   if (IsComment(oneLine))
+   // keep looping till we find non-blank or non-comment line
+   while ((!reachedEndOfFile) && (IsBlank(oneLine) || IsComment(oneLine)))
    {
-      // overwrite result with multiple lines of comments
-      result = HandleComments(oneLine);
+      block = block + oneLine + "\n";
+      oneLine = CrossPlatformGetLine();
+      
+      #if DEBUG_SCRIPT_READ
+      MessageInterface::ShowMessage
+         ("ReadLogicalBlock() oneLine=\n<<<%s>>>\n", oneLine.c_str());
+      #endif
    }
-   else if (HasEllipse(oneLine))
+   
+   block = block + oneLine + "\n";
+   
+   #if DEBUG_SCRIPT_READ
+   MessageInterface::ShowMessage
+      ("ReadLogicalBlock() block=\n<<<%s>>>\n", block.c_str());
+   #endif
+   
+   result = block;
+   
+   if (HasEllipse(oneLine))
    {
       // overwrite result with mulitple lines separated  by ellipsis
-      result = HandleEllipsis(oneLine);
+      result = block + HandleEllipsis(oneLine);
    }
    
    readFirstBlock = true;
@@ -252,12 +377,12 @@ std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
    {
       std::stringstream buffer;
       buffer << currentLineNumber;
-      throw InterpreterException("Script Line " +buffer.str() 
-                                 +"-->Ellipses must be at the end of the line\n" );
+      throw InterpreterException("Script Line " + buffer.str() +
+                                 "-->Ellipses must be at the end of the line\n" );
    }
    
    std::string result = "";
-     
+   
    while (pos >= 0)
    {
       if (pos == 0)     // ellipsis were on a line by themselves
@@ -271,33 +396,33 @@ std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
       // reset str string and position
       str = "";
       pos = -1;
-
+      
       // read a line
       str = CrossPlatformGetLine();
       
       while (IsBlank(str) && !reachedEndOfFile)
          str = CrossPlatformGetLine();
-         
+      
       if (IsBlank(str) && reachedEndOfFile)
       {
          std::stringstream buffer;
-             buffer << currentLineNumber;
+         buffer << currentLineNumber;
          throw InterpreterException("Script Line " + buffer.str() +
-           "-->Prematurely reached the end of file.\n");
+             "-->Prematurely reached the end of file.\n");
       }
-        
+      
       if (IsComment(str))
       {
-             std::stringstream buffer;
-             buffer << currentLineNumber;
+         std::stringstream buffer;
+         buffer << currentLineNumber;
          throw InterpreterException("Script Line " + buffer.str() +
-           "-->Comments are not allowed in the middle of a block\n");
+            "-->Comments are not allowed in the middle of a block\n");
       }
       
       str = GmatStringUtil::Trim(str, GmatStringUtil::TRAILING);      
       pos = str.find(ellipsis, 0);
    }
-      
+   
    // add the last line on to result
    if (IsComment(str))
    {
@@ -317,80 +442,22 @@ std::string ScriptReadWriter::HandleEllipsis(const std::string &text)
 //------------------------------------------------------------------------------
 std::string ScriptReadWriter::HandleComments(const std::string &text)
 {
-   if (!readFirstBlock)
-      return HandleFirstBlock(text);    
-        
-   std::string result = text +"\n";
-   
-   if (GmatStringUtil::StartsWith(GmatStringUtil::Trim(text, GmatStringUtil::BOTH),
-       sectionDelimiter))
-      result = "";   // overwrite result
-   
-   std::string newLine = CrossPlatformGetLine();
-   
-   while (((IsComment(newLine)) || (IsBlank(newLine))) &&
-          (!reachedEndOfFile))
-   {
-      // only add comment line in, if it doesn't start with section delimiter
-      if ((!GmatStringUtil::StartsWith(GmatStringUtil::Trim(newLine, GmatStringUtil::BOTH), 
-                                       sectionDelimiter)) && (!IsBlank(newLine)))
-         result += (newLine + "\n");
-      
-      newLine = CrossPlatformGetLine();
-   }
-   
-   if (HasEllipse(newLine))
-      newLine = HandleEllipsis(newLine);
-      
-   if (!IsBlank(newLine))
-      result += newLine;
-         
-   return result;
-}
-
-
-//------------------------------------------------------------------------------
-// std::string HandleFirstBlock()
-//------------------------------------------------------------------------------
-std::string ScriptReadWriter::HandleFirstBlock(const std::string &text)
-{
-   std::string result = text +"\n";
-    
-   // first block is a section delimiter, so must end with script line
-   if (GmatStringUtil::StartsWith(GmatStringUtil::Trim(text, GmatStringUtil::BOTH), 
-       sectionDelimiter))
-      result = "";   // overwrite result
+   std::string result = text + "\n";
    
    std::string newLine = CrossPlatformGetLine();
 
-   while (!IsBlank(newLine))
+   // keep adding to comment if line is blank or comment
+   while (((IsComment(newLine)) || (IsBlank(newLine))) && (!reachedEndOfFile))
    {
-      if (!IsComment(newLine))   // not a comment header
-      {
-         if (HasEllipse(newLine))
-            newLine = HandleEllipsis(newLine);
-                 
-         return result += newLine;
-      }
-      
-      // only add comment line in, if it doesn't start with section delimiter
-      if (!GmatStringUtil::StartsWith(GmatStringUtil::Trim(newLine, GmatStringUtil::BOTH),
-                                      sectionDelimiter))
-         result += (newLine + "\n");
-      
-      //newLine = CrossPlatformGetLine(fileStream);
+      result += (newLine + "\n");
       newLine = CrossPlatformGetLine();
    }
    
    if (HasEllipse(newLine))
       newLine = HandleEllipsis(newLine);
    
-   if (!IsBlank(newLine))
-      result += newLine;
+   result += newLine;
    
-   if (result == "")   // might be blank if section delimiter has a space after
-      return ReadLogicalBlock();
-     
    return result;
 }
 
