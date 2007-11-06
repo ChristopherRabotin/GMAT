@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               BranchCommand
 //------------------------------------------------------------------------------
@@ -874,10 +874,12 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       
       fullString = gen.str() + fullString;
    }
-   
-   // Add end-of-line before beginnig new outer branch command
-   if (this->IsOfType("BranchCommand") && prefix == "")
-      fullString = "\n" + fullString;
+
+   // To preserve blank lines from original script, do not
+   // write extra blank line (loj: 2007.10.31)
+//    // Add end-of-line before beginnig new outer branch command
+//    if (this->IsOfType("BranchCommand") && prefix == "")
+//       fullString = "\n" + fullString;
    
    // Handle inline comment
    if (inlineComment != "")
@@ -923,9 +925,11 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       }
    }
    
-   // Add end-of-line after outer branch command
-   if (prefix == "")
-      fullString = fullString + "\n";
+   // To preserve blank lines from original script, do not
+   // write extra blank line (loj: 2007.10.31)
+//    // Add end-of-line after outer branch command
+//    if (prefix == "")
+//       fullString = fullString + "\n";
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    MessageInterface::ShowMessage
