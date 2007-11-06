@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ForceModel
 //------------------------------------------------------------------------------
@@ -54,8 +54,8 @@
 #include <string.h> 
 
 
-//#define DEBUG_FORCEMODEL_INIT 1
-//#define DEBUG_FORCEMODEL_EXE 1
+//#define DEBUG_FORCEMODEL_INIT
+//#define DEBUG_FORCEMODEL_EXE
 //#define FORCE_REFERENCE_OBJECTS
 //#define DEBUG_FORCEMODEL_EPOCHS
 //#define DEBUG_SATELLITE_PARAMETERS
@@ -2346,10 +2346,11 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    std::stringstream data;
-
-   data.precision(18);   // Crank up data precision so we don't lose anything
+   
+   // Crank up data precision so we don't lose anything
+   data.precision(GmatGlobal::Instance()->GetDataPrecision());
    std::string preface = "", nomme;
-
+   
    if ((mode == Gmat::SCRIPTING) || (mode == Gmat::OWNED_OBJECT) ||
        (mode == Gmat::SHOW_SCRIPT))
       inMatlabMode = false;
@@ -2378,9 +2379,6 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
          data << "Create " << tname << " " << nomme << ";\n";
          preface = "GMAT ";
       }
-      
-      //data << "Create " << tname << " " << nomme << ";\n";
-      //preface = "GMAT ";
    }
 
    nomme += ".";
@@ -2389,12 +2387,14 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
       preface = prefix;
       nomme = "";
    }
-
+   
    preface += nomme;
    WriteFMParameters(mode, preface, data);
-
+   
    generatingString = data.str();
-   return generatingString;
+   
+   // Call the base class method for preface and inline comments
+   return GmatBase::GetGeneratingString(mode, prefix, useName);
 }
 
 
@@ -2417,8 +2417,8 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
    Integer i;
    Gmat::ParameterType parmType;
    std::stringstream value;
-   value.precision(18);
-
+   value.precision(GmatGlobal::Instance()->GetDataPrecision());
+      
    for (i = 0; i < parameterCount; ++i)
    {
       if (IsParameterReadOnly(i) == false)
