@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              PropagatePanel
 //------------------------------------------------------------------------------
@@ -35,6 +35,11 @@ public:
    PropagatePanel(wxWindow *parent, GmatCommand *cmd);
    ~PropagatePanel();  
    
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
+   
 private:
    
    static const Integer MAX_PROP_ROW     = 5;
@@ -60,7 +65,7 @@ private:
       wxString       name;
       wxString       desc;
       wxString       varName;
-      wxString       typeName;
+      //wxString       typeName;
       wxString       relOpStr;
       wxString       goalStr;
       StopCondition *stopCondPtr;
@@ -96,12 +101,12 @@ private:
    std::vector<StopCondition*> mRemovedStopCondList;
    
    // methods inherited from GmatPanel
-   virtual void OnCancel(wxCommandEvent &event);
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    
    // Layout & data handling methods
+   void InitializeData();
    void DisplayPropagator();
    void DisplayStopCondition();
    void UpdateStopCondition(Integer stopRow);
