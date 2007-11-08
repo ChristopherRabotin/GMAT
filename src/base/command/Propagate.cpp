@@ -35,7 +35,7 @@
 //#define DEBUG_PROPAGATE_STEPSIZE 1
 //#define DEBUG_PROPAGATE_EXE 1
 //#define DEBUG_STOPPING_CONDITIONS 1
-//#define DEBUG_RENAME 1
+//#define DEBUG_RENAME
 //#define DEBUG_PROP_PERFORMANCE
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_FIXED_STEP
@@ -1274,7 +1274,7 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Propagate::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
@@ -1282,9 +1282,9 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
    
    // Propagate needs to know about spacecraft or formation only
    if (type != Gmat::SPACECRAFT && type != Gmat::FORMATION &&
-       type != Gmat::PROP_SETUP)
+       type != Gmat::PROP_SETUP && type != Gmat::PARAMETER)
       return true;
-
+   
    StringArray::iterator pos;
    
    if (type == Gmat::PROP_SETUP)
@@ -1307,9 +1307,9 @@ bool Propagate::RenameRefObject(const Gmat::ObjectType type,
          if (stopSatNames[i] == oldName)
             stopSatNames[i] = newName;
       
-      #if DEBUG_RENAME
+      #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
-         ("Propagate::RenameConfiguredItem() Rename StopCondtion Ref. Object\n");
+         ("Propagate::RenameRefObject() Rename StopCondtion Object\n");
       #endif
       
       // rename stop condition parameter
