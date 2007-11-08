@@ -1,4 +1,4 @@
-//$Header: /cygdrive/p/dev/cvs/gui/app/ResourceTree.cpp,v 1.144 2007/10/05 17:51:03 lojun Exp $
+//$Id$
 //------------------------------------------------------------------------------
 //                              ResourceTree
 //------------------------------------------------------------------------------
@@ -1259,7 +1259,7 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRename(wxCommandEvent &event)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage("ResourceTree::OnRename() entered\n");
    #endif
    
@@ -1276,13 +1276,32 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    {
       Gmat::ObjectType objType = GetObjectType(itemType);
       
-      #if DEBUG_RENAME
+      #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage
          ("ResourceTree::OnRename() objType = %d\n", objType);
       #endif
       
       if (objType == Gmat::UNKNOWN_OBJECT)
          return;
+      
+      // If user wants to save data from the currently opened panels
+      if (wxMessageBox(_T("GMAT will save data from the currently opened "
+                          "panels first.\nDo you want to continue?"), 
+                       _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+      {
+         // save any GUI data before renaming object from base code
+         if (!theGuiManager->PrepareObjectNameChange())
+         {
+            wxMessageBox(wxT("GMAT cannot continue with Rename.\nPlease fix problem "
+                             "with the current panel before renaming."),
+                         wxT("GMAT Warning"));
+            return;
+         }         
+      }
+      else
+      {
+         return;
+      }
       
       // update item only if successful
       if (theGuiInterpreter->
@@ -1292,7 +1311,10 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          GmatAppData::GetMainFrame()->RenameChild(selItem, newName);
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
-         theGuiManager->UpdateAll();
+         
+         // notify object name changed to panels which listens to resource update
+         UpdateGuiItem(itemType);
+         theGuiManager->NotifyObjectNameChange(objType, oldName, newName);
          
          // update formation which may use new spacecraft name
          if (objType == Gmat::SPACECRAFT)
@@ -1320,7 +1342,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
       }
    }
    
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage("ResourceTree::OnRename() rename completed\n");
    #endif
 }
