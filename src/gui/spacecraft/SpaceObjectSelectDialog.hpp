@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SpaceObjectSelectDialog
 //------------------------------------------------------------------------------
@@ -29,13 +29,13 @@ public:
    ~SpaceObjectSelectDialog();
    
    wxArrayString& GetSpaceObjectNames();
-   bool IsSpaceObjectSelected();
+   bool IsSelectionChanged();
    
 private:
    wxArrayString mSoNameList;
    wxArrayString mSoExcList;
    wxArrayString mSoSelList;
-   bool mIsSpaceObjectSelected;
+   bool mIsSelectionChanged;
    
    wxButton *addSpaceObjectButton;
    wxButton *removeSpaceObjectButton;
