@@ -444,6 +444,57 @@ GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
 
 
 //------------------------------------------------------------------------------
+// Integer GetNumberOfChildOpen(bool incPlots = false, bool incScripts = false)
+//------------------------------------------------------------------------------
+Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
+{
+   #ifdef DEBUG_MAINFRAME_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetNumberOfChildOpen() incPlots=%d, incScripts=%d\n",
+       incPlots, incScripts);
+   #endif
+   
+   Integer openCount = 0;
+   wxNode *node = theMdiChildren->GetFirst();
+   while (node)
+   {
+      GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
+      GmatTree::ItemType itemType = theChild->GetItemType();
+      
+      #ifdef DEBUG_MAINFRAME_CHILD
+      MessageInterface::ShowMessage
+         ("   itemType=%d, title=%s\n", itemType, theChild->GetTitle().c_str());
+      #endif
+      
+      if (itemType == GmatTree::SCRIPT_FILE)
+      {
+         if (incScripts)
+            openCount++;
+      }
+      else if (itemType >= GmatTree::BEGIN_OF_OUTPUT && itemType <= GmatTree::END_OF_OUTPUT)
+      {
+         if (incPlots)
+            openCount++;
+      }
+      else
+      {
+         openCount++;
+      }
+      
+      node = node->GetNext();
+      
+   }
+   
+   #ifdef DEBUG_MAINFRAME_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GetNumberOfChildOpen() returning %d\n", openCount);
+   #endif
+   
+   return openCount;
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsChildOpen(GmatTreeItemData *item)
 //------------------------------------------------------------------------------
 /**
@@ -738,15 +789,6 @@ void GmatMainFrame::CloseActiveChild()
    
    GmatMdiChildFrame *child = (GmatMdiChildFrame *)GetActiveChild();
    CloseChild(child);
-   
-//    if (child != NULL)
-//    {
-//       // Note: child->Close() will not process OnClose() correctly
-//       // so use OnClose(event) instead
-//       wxCloseEvent event;
-//       child->OnClose(event);
-//       wxSafeYield();
-//    }
 }
 
 
@@ -775,7 +817,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    #endif
    
    wxString title;
-   int type;
+   GmatTree::ItemType type;
    bool canDelete;
    
    wxNode *node = theMdiChildren->GetFirst();
