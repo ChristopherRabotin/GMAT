@@ -1285,22 +1285,25 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          return;
       
       // If user wants to save data from the currently opened panels
-      if (wxMessageBox(_T("GMAT will save data from the currently opened "
-                          "panels first.\nDo you want to continue?"), 
-                       _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
+      if (GmatAppData::GetMainFrame()->GetNumberOfChildOpen() > 0)
       {
-         // save any GUI data before renaming object from base code
-         if (!theGuiManager->PrepareObjectNameChange())
+         if (wxMessageBox(_T("GMAT will save data from the currently opened "
+                             "panels first.\nDo you want to continue?"), 
+                          _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxYES)
          {
-            wxMessageBox(wxT("GMAT cannot continue with Rename.\nPlease fix problem "
-                             "with the current panel before renaming."),
-                         wxT("GMAT Warning"));
+            // save any GUI data before renaming object from base code
+            if (!theGuiManager->PrepareObjectNameChange())
+            {
+               wxMessageBox(wxT("GMAT cannot continue with Rename.\nPlease fix problem "
+                                "with the current panel before renaming."),
+                            wxT("GMAT Warning"));
+               return;
+            }         
+         }
+         else
+         {
             return;
-         }         
-      }
-      else
-      {
-         return;
+         }
       }
       
       // update item only if successful
