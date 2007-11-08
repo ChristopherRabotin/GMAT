@@ -1,4 +1,4 @@
-//$Header: /cygdrive/p/dev/cvs/gui/foundation/GuiItemManager.cpp,v 1.72 2007/10/01 20:57:27 lojun Exp $
+//$Id$
 //------------------------------------------------------------------------------
 //                              GuiItemManager
 //------------------------------------------------------------------------------
@@ -23,9 +23,11 @@
 #include "Array.hpp"
 #include "ParameterInfo.hpp"
 #include "Hardware.hpp"
+#include "GmatGlobal.hpp"         // for GetDataPrecision()
 #include "MessageInterface.hpp"
 #include <algorithm>              // for sort(), set_difference()
 #include <sstream>
+#include "GmatPanel.hpp"
 
 //#define DEBUG_GUI_ITEM 1
 //#define DEBUG_GUI_ITEM_UPDATE 1
@@ -453,6 +455,60 @@ void GuiItemManager::UpdateSolver()
    
    UpdateSolverList();
 }
+
+
+//------------------------------------------------------------------------------
+// void AddToResourceUpdateListeners(GmatPanel *panel)
+//------------------------------------------------------------------------------
+void GuiItemManager::AddToResourceUpdateListeners(GmatPanel *panel)
+{
+   mResourceUpdateListeners.push_back(panel);
+}
+
+
+//------------------------------------------------------------------------------
+// void RemoveFromResourceUpdateListeners(GmatPanel *panel)
+//------------------------------------------------------------------------------
+void GuiItemManager::RemoveFromResourceUpdateListeners(GmatPanel *panel)
+{
+   std::vector<GmatPanel*>::iterator pos1 =
+      find(mResourceUpdateListeners.begin(), mResourceUpdateListeners.end(), panel);
+   
+   if (pos1 != mResourceUpdateListeners.end())
+      mResourceUpdateListeners.erase(pos1);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool PrepareObjectNameChange()
+//------------------------------------------------------------------------------
+bool GuiItemManager::PrepareObjectNameChange()
+{
+   for (UnsignedInt i=0; i<mResourceUpdateListeners.size(); i++)
+   {
+      if (!mResourceUpdateListeners[i]->PrepareObjectNameChange())
+         return false;
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void NotifyObjectNameChange(Gmat::ObjectType type,
+//                                     const wxString &oldName,
+//                                     const wxString &newName)
+//------------------------------------------------------------------------------
+void GuiItemManager::NotifyObjectNameChange(Gmat::ObjectType type,
+                                            const wxString &oldName,
+                                            const wxString &newName)
+{
+   for (UnsignedInt i=0; i<mResourceUpdateListeners.size(); i++)
+   {
+      mResourceUpdateListeners[i]->ObjectNameChanged(type, oldName, newName);
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // void UnregisterListBox(const wxString &type, wxListBox *lb)
@@ -3943,7 +3999,7 @@ GuiItemManager::GuiItemManager()
    MessageInterface::ShowMessage("GuiItemManager::GuiItemManager() entered\n");
    #endif
    
-   theDataPrecision = GmatBase::GetDataPrecision();
+   theDataPrecision = GmatGlobal::Instance()->GetDataPrecision();
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();

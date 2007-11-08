@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GuiItemManager
 //------------------------------------------------------------------------------
@@ -29,6 +29,8 @@
 #include <wx/grid.h>
 #include <wx/radiobut.h>
 #include <wx/string.h>
+
+class GmatPanel; // forward declaration
 
 class GuiItemManager
 {
@@ -94,41 +96,49 @@ public:
    void UpdateSubscriber();
    void UpdateSolver();
    
+   // For handling of resource update 
+   void AddToResourceUpdateListeners(GmatPanel *panel);
+   void RemoveFromResourceUpdateListeners(GmatPanel *panel);
+   bool PrepareObjectNameChange();
+   void NotifyObjectNameChange(Gmat::ObjectType type,
+                               const wxString &oldName,
+                               const wxString &newName);
    void UnregisterListBox(const wxString &type, wxListBox *lb,
                           wxArrayString *excList = NULL);
    void UnregisterCheckListBox(const wxString &type, wxCheckListBox *clb,
                                wxArrayString *excList = NULL);
    void UnregisterComboBox(const wxString &type, wxComboBox *cb);
    
-   int GetNumSpacecraft() { return theNumSpacecraft; }   
-   int GetNumImpulsiveBurn() { return theNumImpBurn; }   
-   int GetNumFiniteBurn() { return theNumFiniteBurn; }   
-   int GetNumFuelTank() { return theNumFuelTank; }  
-   int GetNumThruster() { return theNumThruster; }   
-   int GetNumConfigBody() { return theNumCelesBody; }   
-   int GetNumCoordSystem() { return theNumCoordSys; }   
-   int GetNumFunction() { return theNumFunction; }   
-   int GetNumPlottableParameter() { return theNumPlottableParam; }   
-   int GetNumSystemParameter() { return theNumSystemParam; }   
-   int GetNumUserVariable() { return theNumUserVariable; }   
-   int GetNumUserString() { return theNumUserString; }   
-   int GetNumUserArray() { return theNumUserArray; }   
-   int GetNumUserParameter() { return theNumUserParam; }      
+   // For resource counters
+   int GetNumSpacecraft() { return theNumSpacecraft; }
+   int GetNumImpulsiveBurn() { return theNumImpBurn; }
+   int GetNumFiniteBurn() { return theNumFiniteBurn; }
+   int GetNumFuelTank() { return theNumFuelTank; }
+   int GetNumThruster() { return theNumThruster; }
+   int GetNumConfigBody() { return theNumCelesBody; }
+   int GetNumCoordSystem() { return theNumCoordSys; }
+   int GetNumFunction() { return theNumFunction; }
+   int GetNumPlottableParameter() { return theNumPlottableParam; }
+   int GetNumSystemParameter() { return theNumSystemParam; }
+   int GetNumUserVariable() { return theNumUserVariable; }
+   int GetNumUserString() { return theNumUserString; }
+   int GetNumUserArray() { return theNumUserArray; }
+   int GetNumUserParameter() { return theNumUserParam; }
    int GetNumSolver() { return theNumSolver; }
-   int GetNumBoundarySolver() { return theNumBoundarySolver; }   
+   int GetNumBoundarySolver() { return theNumBoundarySolver; }
    int GetNumOptimizer() { return theNumOptimizer; }
    
-   wxString* GetPlottableParameterList() { return thePlottableParamList; }   
-   wxString* GetSystemParameterList() { return theSystemParamList; }   
-   wxString* GetUserVariableList() { return theUserVariableList; }   
-   wxString* GetUserStringList() { return theUserStringList; }   
-   wxString* GetUserParameterList() { return theUserParamList; }   
-   wxString* GetCoordSysList() { return theCoordSysList; }   
-   wxString* GetConfigBodyList() { return theCelesBodyList; }   
-   wxString* GetSpacecraftList() { return theSpacecraftList; }   
-   wxString* GetImpulsiveBurnList() { return theImpBurnList; }   
-   wxString* GetFiniteBurnList() { return theFiniteBurnList; }   
-   wxString* GetSolverList() { return theSolverList; }   
+   wxString* GetPlottableParameterList() { return thePlottableParamList; }
+   wxString* GetSystemParameterList() { return theSystemParamList; }
+   wxString* GetUserVariableList() { return theUserVariableList; }
+   wxString* GetUserStringList() { return theUserStringList; }
+   wxString* GetUserParameterList() { return theUserParamList; }
+   wxString* GetCoordSysList() { return theCoordSysList; }
+   wxString* GetConfigBodyList() { return theCelesBodyList; }
+   wxString* GetSpacecraftList() { return theSpacecraftList; }
+   wxString* GetImpulsiveBurnList() { return theImpBurnList; }
+   wxString* GetFiniteBurnList() { return theFiniteBurnList; }
+   wxString* GetSolverList() { return theSolverList; }
    wxString* GetOptimizerList() { return theOptimizerList; }
    
    //wxArrayString GetSettablePropertyList(const wxString &objType);
@@ -318,8 +328,11 @@ private:
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
    SolarSystem *theSolarSystem;
-
+   
    Integer theDataPrecision;
+   
+   // Register for resource change
+   std::vector<GmatPanel*> mResourceUpdateListeners;
    
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
