@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  StopCondition
 //------------------------------------------------------------------------------
@@ -31,7 +31,7 @@
 //#define DEBUG_BASE_STOPCOND_INIT 1
 //#define DEBUG_BASE_STOPCOND_GET 1
 //#define DEBUG_BASE_STOPCOND_SET 1
-//#define DEBUG_RENAME 1
+//#define DEBUG_RENAME
 //#define DEBUG_STOPCOND 2
 //#define DEBUG_STOPCOND_PERIAPSIS 1
 //#define DEBUG_BUFFER_FILLING
@@ -1369,34 +1369,39 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("StopCondition::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (type == Gmat::SPACECRAFT)
+   if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
+      return true;
+   
+   //set new StopCondition name
+   std::string name = GetName();
+   std::string::size_type pos = name.find(oldName);
+   
+   if (pos != name.npos)
    {
-      // set new StopCondition name
-      std::string name = GetName();
-      std::string::size_type pos = name.find(oldName);
-      
-      if (pos != name.npos)
-      {
-         name.replace(pos, oldName.size(), newName);
-         SetName(name);
-      }
-      
-      // epoch parameter name
-      pos = mEpochParamName.find(oldName);
-      if (pos != mEpochParamName.npos)
-         mEpochParamName.replace(pos, oldName.size(), newName);
-      
-      // stop parameter name
-      pos = mStopParamName.find(oldName);
-      if (pos != mStopParamName.npos)
-         mStopParamName.replace(pos, oldName.size(), newName);
+      name.replace(pos, oldName.size(), newName);
+      SetName(name);
    }
+   
+   //set new epoch parameter name
+   pos = mEpochParamName.find(oldName);
+   if (pos != mEpochParamName.npos)
+      mEpochParamName.replace(pos, oldName.size(), newName);
+   
+   //set new stop parameter name
+   pos = mStopParamName.find(oldName);
+   if (pos != mStopParamName.npos)
+      mStopParamName.replace(pos, oldName.size(), newName);
+   
+   //set new stop goal string
+   pos = mGoalStr.find(oldName);
+   if (pos != mStopParamName.npos)
+      mGoalStr.replace(pos, oldName.size(), newName);
    
    return true;
 }
