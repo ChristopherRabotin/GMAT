@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatMainFrame
 //------------------------------------------------------------------------------
@@ -112,6 +112,7 @@ private:
    bool mRunPaused;
    bool mRunCompleted;
    bool mInterpretFailed;
+   bool mExitWithoutConfirm;
    Integer mRunStatus;
    
    GmatServer *mServer;
@@ -141,6 +142,7 @@ private:
    
    void InitToolBar(wxToolBar* toolBar);
    void AddAnimationTools(wxToolBar* toolBar);
+   void ShowSaveMessage();
    bool SaveScriptAs();
    void OpenScript();
    void UpdateTitle(const wxString &filename = "");
