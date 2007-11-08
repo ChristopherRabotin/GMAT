@@ -31,12 +31,6 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(PropagatePanel, GmatPanel)
-   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-   
-   EVT_BUTTON(ID_BUTTON_CANCEL, PropagatePanel::OnCancel)
    EVT_GRID_CELL_RIGHT_CLICK(PropagatePanel::OnCellRightClick)
    EVT_GRID_CELL_CHANGE(PropagatePanel::OnCellValueChange)
    EVT_CHECKBOX(ID_CHECKBOX, PropagatePanel::OnCheckBoxChange)
@@ -287,7 +281,6 @@ void PropagatePanel::InitializeData()
       mTempStopCond[i].name = "";
       mTempStopCond[i].desc = "";
       mTempStopCond[i].varName = "";
-      //mTempStopCond[i].typeName = "";
       mTempStopCond[i].relOpStr = "";
       mTempStopCond[i].goalStr = "";
       mTempStopCond[i].stopCondPtr = NULL;
@@ -879,7 +872,6 @@ void PropagatePanel::LoadData()
          mTempStopCond[i].name = wxT(stopCond->GetName().c_str());
          mTempStopCond[i].varName = 
             wxT(stopCond->GetStringParameter("StopVar").c_str());
-         //mTempStopCond[i].typeName = wxT(stopCond->GetTypeName().c_str());
          mTempStopCond[i].goalStr = 
             stopCond->GetStringParameter("Goal").c_str();
          wxString str = FormatStopCondDesc(mTempStopCond[i].varName,
