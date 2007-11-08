@@ -1,4 +1,4 @@
-//$Header: /cygdrive/p/dev/cvs/gui/foundation/GmatPanel.cpp,v 1.29 2007/09/11 15:22:09 lojun Exp $
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatPanel
 //------------------------------------------------------------------------------
@@ -53,9 +53,8 @@ GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    canClose = true;
-   //enableApply = true;
    mDataChanged = false;
-
+   
    mShowScriptButton = showScriptButton;
 
    theParent = parent;
@@ -144,7 +143,27 @@ void GmatPanel::EnableUpdate(bool enable)
 
 
 //------------------------------------------------------------------------------
-// void OnApply()
+// virtual bool PrepareObjectNameChange()
+//------------------------------------------------------------------------------
+bool GmatPanel::PrepareObjectNameChange()
+{
+   return canClose;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+//                                const wxString &newName)
+//------------------------------------------------------------------------------
+void GmatPanel::ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+                                  const wxString &newName)
+{
+   // Do we need anything here?
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void OnApply()
 //------------------------------------------------------------------------------
 /**
  * Saves the data and remain unclosed.
@@ -172,7 +191,7 @@ void GmatPanel::OnApply(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnOk()
+// virtual void OnOk()
 //------------------------------------------------------------------------------
 /**
  * Saves the data and closes the page
@@ -206,7 +225,7 @@ void GmatPanel::OnOK(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnCancel()
+// virtual void OnCancel()
 //------------------------------------------------------------------------------
 /**
  * Close page.
@@ -225,7 +244,7 @@ void GmatPanel::OnCancel(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnHelp()
+// virtual void OnHelp()
 //------------------------------------------------------------------------------
 /**
  * Shows Helps
@@ -238,7 +257,7 @@ void GmatPanel::OnHelp(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnScript()
+// virtual void OnScript()
 //------------------------------------------------------------------------------
 /**
  * Shows Scripts
@@ -258,7 +277,7 @@ void GmatPanel::OnScript(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnSummary()
+// virtual void OnSummary()
 //------------------------------------------------------------------------------
 /**
  * Shows command summary

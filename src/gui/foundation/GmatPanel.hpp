@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatPanel
 //------------------------------------------------------------------------------
@@ -37,8 +37,11 @@ public:
    // constructors
    GmatPanel( wxWindow *parent, bool showScriptButton = true);
 
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
    virtual void EnableUpdate(bool enable = true);
-   
    virtual void OnApply(wxCommandEvent &event);
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
@@ -60,7 +63,6 @@ public:
                       const std::string &field, const std::string &expRange,
                       bool allowNumber = true, bool allowNonPlottable = false);
    
-   
 protected:
    
    // member functions
@@ -78,12 +80,12 @@ protected:
    std::string mMsgFormat;
    
    wxWindow *theParent;
-    
+   
    wxBoxSizer *thePanelSizer;
    //wxStaticBoxSizer *theTopSizer;
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
-    
+   
    wxButton *theOkButton;
    wxButton *theApplyButton;
    wxButton *theCancelButton;
@@ -92,10 +94,10 @@ protected:
    wxButton *theSummaryButton;
    
    GmatBase *mObject;
-    
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
