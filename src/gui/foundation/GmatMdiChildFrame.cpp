@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             GmatMdiChildFrame
 //------------------------------------------------------------------------------
@@ -128,8 +128,15 @@ void GmatMdiChildFrame::OnClose(wxCloseEvent &event)
    // check if window is dirty?
    if (mDirty)
    {
-      if ( wxMessageBox(_T("Changes will be lost. \nDo you really want to close?"),
-                        _T("Please confirm"), wxICON_QUESTION | wxYES_NO) != wxYES )
+      #ifdef DEBUG_MDI_CHILD_FRAME
+      MessageInterface::ShowMessage
+         ("GmatMdiChildFrame::OnClose() show exit confirm message\n");
+      #endif
+      
+      if ( wxMessageBox(_T("There were changes made to \"" + GetTitle() + "\" panel"
+                           " which will be lost on Close. \nDo you want to close anyway?"),
+                        _T("Please Confirm Close"),
+                        wxICON_QUESTION | wxYES_NO) != wxYES )
       {
          event.Veto();
          mCanClose = false;
