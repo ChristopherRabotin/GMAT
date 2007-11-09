@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ReportFile
 //------------------------------------------------------------------------------
@@ -32,8 +32,7 @@
 #include <iostream>
 #include <iomanip>
 
-class ReportFile :
-    public Subscriber
+class ReportFile : public Subscriber
 {
 public:
    ReportFile(const std::string &typeName, const std::string &name,
@@ -45,66 +44,72 @@ public:
    ReportFile(const ReportFile &);
    ReportFile& operator=(const ReportFile&);
    
-   std::string GetFileName();
+   // methods for this class
+   std::string          GetFileName();
+   Integer              GetNumParameters();
+   bool                 AddParameter(const std::string &paramName, Integer index);
+   bool                 AddParameterForTitleOnly(const std::string &paramName);
    
    // methods inherited from Subscriber
-   virtual bool Initialize();
-                      
-   // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-
-   virtual bool TakeAction(const std::string &action,
-                           const std::string &actionData = "");
+   virtual bool         Initialize();
    
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   // methods inherited from GmatBase
+   virtual GmatBase*    Clone(void) const;
    
-   virtual std::string GetParameterText(const Integer id) const;
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   
+   virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
-   virtual bool IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    
    virtual Integer      GetIntegerParameter(const Integer id) const;
    virtual Integer      SetIntegerParameter(const Integer id,
-                                          const Integer value);
-
+                                            const Integer value);
+   
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const Integer id, const std::string &value);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value);
-
-   virtual bool SetStringParameter(const Integer id, const std::string &value,
-                                   const Integer index);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value,
-                                   const Integer index);
-   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
    
-   virtual std::string GetOnOffParameter(const Integer id) const;
-   virtual bool        SetOnOffParameter(const Integer id, 
-                                         const std::string &value);
-   virtual std::string GetOnOffParameter(const std::string &label) const;
-   virtual bool        SetOnOffParameter(const std::string &label, 
-                                         const std::string &value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
-   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
-                                  const std::string &name);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                             const std::string &name = "");
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id, 
+                                          const std::string &value);
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label, 
+                                          const std::string &value);
    
-   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
-   Integer GetNumParameters();
-   bool AddParameter(const std::string &paramName, Integer index);
-   bool AddParameterForTitleOnly(const std::string &paramName);
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
    // methods for setting up the items to subscribe
-   virtual const StringArray& GetWrapperObjectNameArray();
+   virtual const StringArray&
+                        GetWrapperObjectNameArray();
    
 protected:
    /// Name of the output path
@@ -123,23 +128,24 @@ protected:
    bool           zeroFill;
    
    /// output data stream
-   std::ofstream       dstream;
+   std::ofstream           dstream;
    std::vector<Parameter*> mParams;
    
-   Integer mNumParams;
-   StringArray mParamNames;
-   StringArray mAllRefObjectNames;
-   Integer lastUsedProvider;
-   bool usedByReport;
-   bool calledByReport;
-   bool initial;
+   Integer        mNumParams;
+   StringArray    mParamNames;
+   StringArray    mAllRefObjectNames;
+   Integer        lastUsedProvider;
+   bool           usedByReport;
+   bool           calledByReport;
+   bool           initial;
    
-   void ClearParameters();
-   void WriteHeaders();
+   virtual bool         OpenReportFile(void);
+   void                 ClearParameters();
+   void                 WriteHeaders();
    
-   virtual bool Distribute(Integer len);
-   virtual bool Distribute(const Real * dat, Integer len);
-   virtual bool OpenReportFile(void);
+   // methods inherited from Subscriber
+   virtual bool         Distribute(Integer len);
+   virtual bool         Distribute(const Real * dat, Integer len);
    
    enum
    {
@@ -155,8 +161,10 @@ protected:
 
 private:
 
-   static const std::string PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
+   static const std::string
+      PARAMETER_TEXT[ReportFileParamCount - SubscriberParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[ReportFileParamCount - SubscriberParamCount];
 
 };
 
