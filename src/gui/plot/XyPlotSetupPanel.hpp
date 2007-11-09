@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              XyPlotSetupPanel
 //------------------------------------------------------------------------------
@@ -31,6 +31,10 @@ public:
    XyPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    ~XyPlotSetupPanel();
    
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
 protected:
    TsPlot *mXyPlot;
    wxString mLastCoordSysName;

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              XyPlotSetupPanel
 //------------------------------------------------------------------------------
@@ -109,6 +109,9 @@ XyPlotSetupPanel::XyPlotSetupPanel(wxWindow *parent,
       showPlotCheckBox->SetValue(true);
    }
    
+   // Listen for Spacecraft and Parameter name change
+   theGuiManager->AddToResourceUpdateListeners(this);
+   
    #if DEBUG_XYPLOT_PANEL
    MessageInterface::ShowMessage
       ("   mNumXParams=%d, mNumYParams=%d, mXParamChanged=%d, mYParamChanged=%d\n",
@@ -126,6 +129,71 @@ XyPlotSetupPanel::~XyPlotSetupPanel()
    theGuiManager->UnregisterComboBox("Spacecraft", mSpacecraftComboBox);   
    theGuiManager->UnregisterComboBox("ImpulsiveBurn", mImpBurnComboBox);   
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);   
+   
+   theGuiManager->RemoveFromResourceUpdateListeners(this);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool PrepareObjectNameChange()
+//------------------------------------------------------------------------------
+bool XyPlotSetupPanel::PrepareObjectNameChange()
+{
+   // Save GUI data
+   wxCommandEvent event;
+   OnApply(event);
+   
+   return GmatPanel::PrepareObjectNameChange();
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+//                                const wxString &newName)
+//------------------------------------------------------------------------------
+/*
+ * Reflects resource name change to this panel.
+ * By the time this method is called, the base code already changed reference
+ * object name, so all we need to do is re-load the data.
+ */
+//------------------------------------------------------------------------------
+void XyPlotSetupPanel::ObjectNameChanged(Gmat::ObjectType type,
+                                         const wxString &oldName,
+                                         const wxString &newName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("XyPlotPanel::ObjectNameChanged() type=%d, oldName=<%s>, "
+       "newName=<%s>, mDataChanged=%d\n", type, oldName.c_str(), newName.c_str(),
+       mDataChanged);
+   #endif
+   
+   if (type != Gmat::SPACECRAFT && type != Gmat::PARAMETER)
+      return;
+   
+   mXParamChanged = false;
+   mYParamChanged = false;
+   mIsColorChanged = false;
+   mUseUserParam = false;
+   mNumXParams = 0;
+   mNumYParams = 0;
+   
+   mColorMap.clear();
+   
+   LoadData();
+   
+   // force saving data
+   if (mNumXParams == 0 || mNumYParams <= 0)
+   {
+      EnableUpdate(true);
+      mXParamChanged = true;
+      mYParamChanged = true;
+      showPlotCheckBox->SetValue(true);
+   }
+   
+   // We don't need to save data if object name changed from the resouce tree
+   // while this panel is opened, since base code already has new name
+   EnableUpdate(false);
 }
 
 

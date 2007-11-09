@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ReportFileSetupPanel
 //------------------------------------------------------------------------------
@@ -29,6 +29,11 @@ class ReportFileSetupPanel: public GmatPanel
 public:
    ReportFileSetupPanel(wxWindow *parent, const wxString &subscriberName);
    ~ReportFileSetupPanel();
+   
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
    
 protected:
    ReportFile *reportFile;

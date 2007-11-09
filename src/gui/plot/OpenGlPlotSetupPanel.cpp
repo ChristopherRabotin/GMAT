@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              OpenGlPlotSetupPanel
 //------------------------------------------------------------------------------
@@ -76,36 +76,42 @@ OpenGlPlotSetupPanel::OpenGlPlotSetupPanel(wxWindow *parent,
                                            const wxString &subscriberName)
    : GmatPanel(parent)
 {
-#if DEBUG_OPENGL_PANEL
+   #if DEBUG_OPENGL_PANEL
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel() entering...\n");
    MessageInterface::ShowMessage("OpenGlPlotSetupPanel() subscriberName = " +
                                  std::string(subscriberName.c_str()) + "\n");
-#endif
+   #endif
+   
    Subscriber *subscriber = (Subscriber*)
       theGuiInterpreter->GetConfiguredObject(subscriberName.c_str());
    
    mOpenGlPlot = (OpenGlPlot*)subscriber;
-
+   
    // Set the pointer for the "Show Script" button
    mObject = mOpenGlPlot;
+
+   InitializeData();
    
-   mHasIntegerDataChanged = false;
-   mHasRealDataChanged = false;
-   mHasDrawingOptionChanged = false;
-   mHasSpChanged = false;
-   mHasOrbitColorChanged = false;
-   mHasTargetColorChanged = false;
-   mHasShowObjectChanged = false;
-   mHasCoordSysChanged = false;
-   mHasViewInfoChanged = false;
-   mScCount = 0;
-   mNonScCount = 0;
+//    mHasIntegerDataChanged = false;
+//    mHasRealDataChanged = false;
+//    mHasDrawingOptionChanged = false;
+//    mHasSpChanged = false;
+//    mHasOrbitColorChanged = false;
+//    mHasTargetColorChanged = false;
+//    mHasShowObjectChanged = false;
+//    mHasCoordSysChanged = false;
+//    mHasViewInfoChanged = false;
+//    mScCount = 0;
+//    mNonScCount = 0;
    
-   mOrbitColorMap.clear();
-   mTargetColorMap.clear();
+//    mOrbitColorMap.clear();
+//    mTargetColorMap.clear();
    
    Create();
    Show();
+   
+   // Listen for Spacecraft name change
+   theGuiManager->AddToResourceUpdateListeners(this);
 }
 
 
@@ -127,12 +133,83 @@ OpenGlPlotSetupPanel::~OpenGlPlotSetupPanel()
    theGuiManager->UnregisterComboBox("SpacePoint", mViewPointRefComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", mViewPointVectorComboBox);
    theGuiManager->UnregisterComboBox("SpacePoint", mViewDirectionComboBox);
+   
+   theGuiManager->RemoveFromResourceUpdateListeners(this);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool PrepareObjectNameChange()
+//------------------------------------------------------------------------------
+bool OpenGlPlotSetupPanel::PrepareObjectNameChange()
+{
+   // Save GUI data
+   wxCommandEvent event;
+   OnApply(event);
+   
+   return GmatPanel::PrepareObjectNameChange();
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+//                                const wxString &newName)
+//------------------------------------------------------------------------------
+/*
+ * Reflects resource name change to this panel.
+ * By the time this method is called, the base code already changed reference
+ * object name, so all we need to do is re-load the data.
+ */
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::ObjectNameChanged(Gmat::ObjectType type,
+                                             const wxString &oldName,
+                                             const wxString &newName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("OpenGlPlotPanel::ObjectNameChanged() type=%d, oldName=<%s>, "
+       "newName=<%s>, mDataChanged=%d\n", type, oldName.c_str(), newName.c_str(),
+       mDataChanged);
+   #endif
+   
+   if (type != Gmat::SPACECRAFT)
+      return;
+   
+   // Initialize GUI data and re-load from base
+   InitializeData();
+   LoadData();
+   
+   // We don't need to save data if object name changed from the resouce tree
+   // while this panel is opened, since base code already has new name
+   EnableUpdate(false);
 }
 
 
 //---------------------------------
 // protected methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+// void InitializeData()
+//------------------------------------------------------------------------------
+void OpenGlPlotSetupPanel::InitializeData()
+{
+   mHasIntegerDataChanged = false;
+   mHasRealDataChanged = false;
+   mHasDrawingOptionChanged = false;
+   mHasSpChanged = false;
+   mHasOrbitColorChanged = false;
+   mHasTargetColorChanged = false;
+   mHasShowObjectChanged = false;
+   mHasCoordSysChanged = false;
+   mHasViewInfoChanged = false;
+   mScCount = 0;
+   mNonScCount = 0;
+   
+   mOrbitColorMap.clear();
+   mTargetColorMap.clear();
+}
+
 
 //------------------------------------------------------------------------------
 // void Create()

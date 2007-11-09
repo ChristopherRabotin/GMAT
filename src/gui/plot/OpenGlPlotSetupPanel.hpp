@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              OpenGlPlotSetupPanel
 //------------------------------------------------------------------------------
@@ -31,6 +31,10 @@ public:
    OpenGlPlotSetupPanel(wxWindow *parent, const wxString &subscriberName);
    ~OpenGlPlotSetupPanel();
    
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
 protected:
    OpenGlPlot *mOpenGlPlot;
    
@@ -117,11 +121,14 @@ protected:
    wxBoxSizer *mViewPointVectorSizer;
    wxBoxSizer *mViewDirVectorSizer;
    
+   // for initializing data
+   void InitializeData();
+   
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
+   
    // event handler
    void OnAddSpacePoint(wxCommandEvent& event);
    void OnRemoveSpacePoint(wxCommandEvent& event);
