@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Subscriber
 //------------------------------------------------------------------------------
@@ -35,11 +35,13 @@
 #include "Subscriber.hpp"
 #include "SubscriberException.hpp"
 #include "Parameter.hpp"
+#include "StringUtil.hpp"          // for Replace()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_WRAPPER_CODE 1
-#define DEBUG_SUBSCRIBER
-//#define DEBUG_SUBSCRIBER_PARAM 1
+//#define DEBUG_WRAPPER_CODE
+//#define DEBUG_SUBSCRIBER
+//#define DEBUG_SUBSCRIBER_PARAM
+//#define DEBUG_RENAME
 
 //---------------------------------
 // static data
@@ -441,9 +443,7 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
          MessageInterface::ShowMessage
             ("   Found wrapper name \"%s\", wrapper=%p\n", name.c_str(), paramWrappers.at(i));
          #endif
-         
-         //paramWrappers.push_back(toWrapper);
-         
+                  
          if (paramWrappers.at(i) != NULL)
          {
             ew = paramWrappers.at(i);
@@ -454,6 +454,11 @@ bool Subscriber::SetElementWrapper(ElementWrapper* toWrapper,
          {
             paramWrappers.at(i) = toWrapper;
          }
+         
+         #ifdef DEBUG_WRAPPER_CODE   
+         MessageInterface::ShowMessage
+            ("   Set wrapper name \"%s\" to wrapper=%p\n", name.c_str(), paramWrappers.at(i));
+         #endif
          
          return true;
       }
@@ -622,6 +627,86 @@ void Subscriber::ClearWrappers()
 
 
 //---------------------------------------------------------------------------
+// virtual bool RenameRefObject(const Gmat::ObjectType type,
+//                              const std::string &oldName,
+//                              const std::string &newName)
+//---------------------------------------------------------------------------
+bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
+                                 const std::string &oldName,
+                                 const std::string &newName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("Subscriber::RenameRefObject() type=%d, oldName=<%s>, newName=<%s>\n",
+       type, oldName.c_str(), newName.c_str());
+   #endif
+   
+   // go through wrapper object names
+   Integer sz = wrapperObjectNames.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      std::string name = wrapperObjectNames[i];
+      
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage("   old name=<%s>\n", name.c_str());
+      #endif
+      
+      if (name == oldName)
+      {
+         wrapperObjectNames[i] = newName;
+      }
+      else if (name.find(oldName) != name.npos)
+      {
+         name = GmatStringUtil::Replace(name, oldName, newName);
+         wrapperObjectNames[i] = name;
+      }
+   }
+   
+   #ifdef DEBUG_RENAME
+   for (Integer i = 0; i < sz; i++)
+      MessageInterface::ShowMessage
+         ("   new name=<%s>\n", wrapperObjectNames[i].c_str());
+   #endif
+   
+   // now go through wrappers
+   sz = paramWrappers.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (paramWrappers[i] == NULL)
+         throw SubscriberException
+            ("Subscriber::SetWrapperReference() failed to set reference for "
+             "object named \"" + oldName + ".\"\nThe wrapper is NULL.\n");
+      
+      std::string desc = paramWrappers[i]->GetDescription();
+      
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage("   old desc=<%s>\n", desc.c_str());
+      #endif
+      
+      if (desc == oldName)
+      {
+         paramWrappers[i]->SetDescription(newName);
+      }
+      else if (desc.find(oldName) != desc.npos)
+      {
+         desc = GmatStringUtil::Replace(desc, oldName, newName);
+         paramWrappers[i]->SetDescription(desc);         
+      }
+   }
+   
+   #ifdef DEBUG_RENAME
+   for (Integer i = 0; i < sz; i++)
+      MessageInterface::ShowMessage
+         ("   new desc=<%s>\n", paramWrappers[i]->GetDescription().c_str());
+   MessageInterface::ShowMessage
+      ("Subscriber::RenameRefObject() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
+//---------------------------------------------------------------------------
 //  bool IsParameterReadOnly(const Integer id) const
 //---------------------------------------------------------------------------
 /**
@@ -714,7 +799,7 @@ std::string Subscriber::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Subscriber::GetStringParameter(const std::string &label) const
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::GetStringParameter() label = %s\n", label.c_str());
    #endif
@@ -728,7 +813,7 @@ std::string Subscriber::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::SetStringParameter() id = %d, value = %s \n", id,
        value.c_str());
@@ -805,7 +890,7 @@ bool Subscriber::SetStringParameter(const Integer id, const std::string &value)
 bool Subscriber::SetStringParameter(const std::string &label,
                                     const std::string &value)
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::SetStringParameter() label = %s, value = %s \n",
        label.c_str(), value.c_str());
@@ -822,7 +907,7 @@ bool Subscriber::SetStringParameter(const std::string &label,
 bool Subscriber::SetStringParameter(const Integer id, const std::string &value,
                                     const Integer index)
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::SetStringParameter() id = %d, value = %s, index = %d\n",
        id, value.c_str(), index);
@@ -841,7 +926,7 @@ bool Subscriber::SetStringParameter(const std::string &label,
                                     const std::string &value,
                                     const Integer index)
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::SetStringParameter() label = %s, value = %s, index = %d\n",
        label.c_str(), value.c_str(), index);
@@ -879,7 +964,7 @@ std::string Subscriber::GetOnOffParameter(const std::string &label) const
 //---------------------------------------------------------------------------
 bool Subscriber::SetOnOffParameter(const Integer id, const std::string &value)
 {
-   #if DEBUG_SUBSCRIBER_PARAM
+   #ifdef DEBUG_SUBSCRIBER_PARAM
    MessageInterface::ShowMessage
       ("Subscriber::SetOnOffParameter() id = %d, value = %s \n", id,
        value.c_str());
