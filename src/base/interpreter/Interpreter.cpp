@@ -1505,8 +1505,10 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
 {
    bool retval = true;
    std::string type = cmd->GetTypeName();      
-   StringArray parts = theTextParser.Decompose(desc, "()");
-   Integer count = parts.size();
+   StringArray parts;
+   Integer count;
+   //StringArray parts = theTextParser.Decompose(desc, "()");
+   //Integer count = parts.size();
    
    #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
@@ -1533,6 +1535,8 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             HandleError(ex);
             return false;
          }
+         parts = theTextParser.Decompose(desc, "()");
+         count = parts.size();
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
          
          // Make sure there is only one thing on the line
@@ -1567,6 +1571,8 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             HandleError(ex);
             return false;
          }
+         parts = theTextParser.Decompose(desc, "()");
+         count = parts.size();
          cmd->SetRefObjectName(Gmat::SOLVER, parts[0]);
          // Make sure there is only one thing on the line
          if (parts.size() > 1)
@@ -1670,9 +1676,28 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       }
       else
       {
+         #ifdef DEBUG_ASSEMBLE_COMMAND
+         MessageInterface::ShowMessage("Begin/EndFiniteBurn being processed ...");
+         #endif
          // Note:
          // Begin/EndFiniteBurn has the syntax: BeginFiniteBurn burn1(sat1 sat2)
-         
+         // First, check for errors in brackets
+         if ((desc.find("[") != desc.npos) || (desc.find("]") != desc.npos))
+         {
+            InterpreterException ex
+            ("Brackets not allowed in " + cmd->GetTypeName()+ " command");
+            HandleError(ex);
+            retval = false;
+         }
+
+         if (!GmatStringUtil::AreAllBracketsBalanced(desc, "({)}"))
+         {
+            InterpreterException ex
+            ("Parentheses, braces, or brackets are unbalanced or incorrectly placed");
+            HandleError(ex);
+            retval = false;
+         }
+
          // Get FiniteBurn name
          parts = theTextParser.Decompose(desc, "()", false);
          
@@ -1693,15 +1718,40 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
             cmd->SetRefObjectName(Gmat::FINITE_BURN, parts[0]);
             
             // Get Spacecraft names
-            StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
+            //StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", " ,");
+            StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", ",");
             
             #ifdef DEBUG_ASSEMBLE_COMMAND
             WriteParts(type, subParts);
             #endif
             
             count = subParts.size();
+            if (count == 0)
+            {
+               InterpreterException ex
+                  (cmd->GetTypeName() + " command must contain at least one spacecraft name");
+               HandleError(ex);
+               retval = false;
+            }
+            Integer numCommas = GmatStringUtil::NumberOfOccurrences(parts[1],',');
+            if (count != (numCommas + 1))
+            {
+               InterpreterException ex
+                  ("Missing spacecraft name in " + cmd->GetTypeName() + " command");
+               HandleError(ex);
+               retval = false;
+            }
             for (int i=0; i<count; i++)
+            {
+               if (GmatStringUtil::IsBlank(subParts[i]))
+               {
+                  InterpreterException ex
+                  ("Missing spacecraft name in " + cmd->GetTypeName() + " command");
+                  HandleError(ex);
+                  retval = false;
+               }
                cmd->SetRefObjectName(Gmat::SPACECRAFT, subParts[i]);
+            }
          }
       }
    }
