@@ -109,6 +109,8 @@ namespace GmatStringUtil
    bool EndsWith(const std::string &str, const std::string &value);
    bool IsValidName(const std::string &str, bool isObject = false);
    bool IsBlank(const std::string &str, bool ignoreEol = false);
+   
+   Integer NumberOfOccurrences(const std::string str, const char c);
 }
 
 #endif // StringUtil_hpp

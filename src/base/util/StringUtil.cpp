@@ -2235,3 +2235,25 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
       return false;
 }
 
+//------------------------------------------------------------------------------
+// Integer GmatStringUtil::NumberOfOccurrences(const std::string str, const char c)
+//------------------------------------------------------------------------------
+/*
+ * Counts the number of occurrences of the character c in the string str.
+ *
+ * @param  str  input string
+ * @param  c    character
+ *
+ * @return number of occurrences of c in str
+ */
+//------------------------------------------------------------------------------
+Integer GmatStringUtil::NumberOfOccurrences(const std::string str, const char c)
+{
+   Integer count = 0;
+   Integer strSz = (Integer) str.size();
+   for (Integer ii = 0; ii < strSz; ii++)
+      if (str[ii] == c)  count++;
+   
+   return count;
+}
+
