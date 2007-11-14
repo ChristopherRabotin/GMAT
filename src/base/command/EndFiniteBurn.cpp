@@ -176,6 +176,25 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
    return GmatCommand::GetRefObjectName(type);
 }
 
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by the BeginFiniteBurn.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& EndFiniteBurn::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::FINITE_BURN);
+   refObjectTypes.push_back(Gmat::SPACECRAFT);
+   return refObjectTypes;
+}
+
+
 
 //------------------------------------------------------------------------------
 // const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
@@ -191,7 +210,22 @@ std::string EndFiniteBurn::GetRefObjectName(const Gmat::ObjectType type) const
 const StringArray& EndFiniteBurn::GetRefObjectNameArray(
                              const Gmat::ObjectType type)
 {
-   switch (type)
+   refObjectNames.clear();
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::SPACECRAFT)
+   {
+      refObjectNames.insert(refObjectNames.end(), satNames.begin(), satNames.end());
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT ||
+       type == Gmat::FINITE_BURN)
+   {
+      refObjectNames.push_back(burnName);
+   }
+
+   return refObjectNames;
+/*   switch (type)
    {
       case Gmat::SPACECRAFT:
          #ifdef DEBUG_END_MANEUVER
@@ -205,6 +239,7 @@ const StringArray& EndFiniteBurn::GetRefObjectNameArray(
    }
    
    return GmatCommand::GetRefObjectNameArray(type);
+   */
 }
 
 

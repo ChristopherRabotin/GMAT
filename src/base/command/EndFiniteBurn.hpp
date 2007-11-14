@@ -42,6 +42,8 @@ public:
    virtual bool TakeAction(const std::string &action,  
                            const std::string &actionData = "");
    virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray&
+                       GetRefObjectTypeArray();
    virtual const StringArray&
                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool        SetRefObjectName(const Gmat::ObjectType type,
