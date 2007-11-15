@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SavePanel
 //------------------------------------------------------------------------------
@@ -13,7 +13,9 @@
 //------------------------------------------------------------------------------
 
 #include "SavePanel.hpp"
-//#include "MessageInterface.hpp"
+#include "MessageInterface.hpp"
+
+//#define DEBUG_SAVE_PANEL 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -45,7 +47,7 @@ SavePanel::SavePanel(wxWindow *parent, GmatCommand *cmd)
 
 {
    theCommand = cmd;
-
+   
    if (theCommand != NULL)
    {
       Create();
@@ -87,7 +89,7 @@ void SavePanel::Create()
    wxStaticText *objectLabel =
       new wxStaticText(this, ID_TEXT, wxT("Select Objects to Save"),
                        wxDefaultPosition, wxDefaultSize, 0);
-      
+   
    // list of object
    mObjectCheckListBox = theGuiManager->
       GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,150));
@@ -103,6 +105,7 @@ void SavePanel::Create()
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
 
 }
+
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()
@@ -121,7 +124,7 @@ void SavePanel::LoadData()
    
    for (UnsignedInt i=0; i<objNames.size(); i++)
    {
-      #if DEBUG_SAVE_PANEL
+      #ifdef DEBUG_SAVE_PANEL
       MessageInterface::ShowMessage("   objName=<%s>\n", objNames[i].c_str());
       #endif
       
