@@ -651,6 +651,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
    
    wxNode *node = theMdiChildren->GetFirst();
    bool childRemoved = false;
+   wxString childTitle;
    
    while (node)
    {
@@ -668,10 +669,12 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
          // The count is decremented and object is deleted in the
          // destructors
          //------------------------------------------------------
+
+         childTitle = child->GetTitle();
          
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage
-            ("   removing title:%s\n   item: %s\n", child->GetTitle().c_str(),
+            ("   removing title:%s\n   item: %s\n", childTitle.c_str(),
              item.c_str());
          #endif
          
@@ -703,6 +706,9 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
          
          GmatAppData::GetOutputTree()->RemoveItem(itemType, item);
       }
+      
+      // Change MissionTree node label (loj: 2007.11.15)
+      GmatAppData::GetMissionTree()->ChangeNodeLabel(childTitle);
    }
    
    #ifdef DEBUG_REMOVE_CHILD
