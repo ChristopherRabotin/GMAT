@@ -2466,8 +2466,8 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
    else
       nomme = instanceName;
    
-   if ((mode == Gmat::SCRIPTING) || (mode == Gmat::SHOW_SCRIPT) ||
-       (mode == Gmat::EPHEM_HEADER))
+   if (mode == Gmat::SCRIPTING    || mode == Gmat::SHOW_SCRIPT ||
+       mode == Gmat::EPHEM_HEADER || mode == Gmat::NO_COMMENTS)
    {
       std::string tname = typeName;
       if (tname == "PropSetup")
@@ -2477,6 +2477,11 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       {
          data << tname << " = " << "'" << nomme << "';\n";
          preface = "";
+      }
+      else if (mode == Gmat::NO_COMMENTS)
+      {
+         data << "Create " << tname << " " << nomme << ";\n";
+         preface = "GMAT ";
       }
       else
       {
