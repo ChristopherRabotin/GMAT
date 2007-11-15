@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 // *** File Name : gmatdefs.h
 // *** Created   : May 20, 2003
 // **************************************************************************
@@ -188,6 +188,7 @@ namespace Gmat
       OWNED_OBJECT,
       MATLAB_STRUCT,
       EPHEM_HEADER,
+      NO_COMMENTS,
    };
 
 }
