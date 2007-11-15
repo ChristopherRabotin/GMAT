@@ -31,12 +31,12 @@
 class MissionTree : public DecoratedTree
 {
 public:
-   MissionTree(wxWindow *parent, const wxWindowID id,
-               const wxPoint& pos, const wxSize& size,
-               long style);
+   MissionTree(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
+               const wxSize& size, long style);
    
    void ClearMission();
    void UpdateMission(bool resetCounter);
+   void ChangeNodeLabel(const wxString &oldLabel);
    
 protected:
    
@@ -53,11 +53,11 @@ private:
    wxArrayString mCommandList;
    wxWindow *parent;
    
-   wxTreeItemId mMissionSeqTopItem;
-   wxTreeItemId mMissionSeqSubItem;
+   wxTreeItemId mMissionSeqTopId;
+   wxTreeItemId mMissionSeqSubId;
    wxTreeItemId mFiniteBurnTreeId;
    wxTreeItemId mNewTreeId;
-   
+
    int mTempCounter;
    int mNumMissionSeq;
    int mNumPropagate;
@@ -84,6 +84,7 @@ private:
    
    bool inScriptEvent;
    bool inFiniteBurn;
+   bool mShowDetailedItem;
    int  mScriptEventCount;
    
    void InitializeCounter();
@@ -116,18 +117,21 @@ private:
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
    void OnItemActivated(wxTreeEvent &event);
+   
    void OnDoubleClick(wxMouseEvent &event);
+   
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
    bool CheckClickIn(wxPoint position);
    
    void OnAddMissionSeq(wxCommandEvent &event);
-
+   
    void OnAppend(wxCommandEvent &event);
    void OnInsertBefore(wxCommandEvent &event);
    void OnInsertAfter(wxCommandEvent &event);
       
    void OnDelete(wxCommandEvent &event);
    void OnRun(wxCommandEvent &event);
+   void OnShowDetail(wxCommandEvent &event);
    void OnShowScript(wxCommandEvent &event);
    
    void OnCollapse(wxCommandEvent &event);
@@ -143,6 +147,7 @@ private:
    wxMenu* AppendOptimizePopupMenu(wxMenu *menu, ActionType action);
    wxMenu* CreateControlLogicPopupMenu(int type, ActionType action);
    
+   wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
    int GetMenuId(const wxString &cmd, ActionType action);
    GmatTree::MissionIconType GetIconId(const wxString &cmd);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
@@ -296,6 +301,7 @@ private:
       POPUP_VIEW_GOALS, 
       
       POPUP_RUN,
+      POPUP_SHOW_DETAIL,
       POPUP_SHOW_SCRIPT,
       
       //----- for auto testing actions

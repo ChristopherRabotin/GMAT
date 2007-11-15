@@ -34,6 +34,7 @@
 #include "bitmaps/endfb.xpm"
 #include "bitmaps/report.xpm"
 #include "bitmaps/stop.xpm"
+#include <wx/tipwin.h>
 
 #include "MissionTree.hpp"
 #include "MissionTreeItemData.hpp"
@@ -69,6 +70,7 @@
 //#define DEBUG_MISSION_TREE_FIND 2
 //#define DEBUG_FIND_ITEM_PARENT 2
 //#define DEBUG_MISSION_TREE_MENU 1
+//#define DEBUG_MISSION_TREE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -90,11 +92,15 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    // checked to open up a panel from the variables/goals boxes
    //loj: 11/4/04 Uncommented so that double click on Target/If/For/While folder
    // will not collapse
+   
+   // wxMouseEvent event
    EVT_LEFT_DCLICK(MissionTree::OnDoubleClick)
    
+   // wxTreeEvent
    EVT_TREE_ITEM_RIGHT_CLICK(-1, MissionTree::OnItemRightClick)
    EVT_TREE_ITEM_ACTIVATED(-1, MissionTree::OnItemActivated)
    
+   // wxCommandEvent
    EVT_MENU(POPUP_OPEN, MissionTree::OnOpen)
    EVT_MENU(POPUP_CLOSE, MissionTree::OnClose)
    
@@ -112,6 +118,7 @@ BEGIN_EVENT_TABLE(MissionTree, wxTreeCtrl)
    
    EVT_MENU(POPUP_RUN, MissionTree::OnRun)
    EVT_MENU(POPUP_DELETE, MissionTree::OnDelete)
+   EVT_MENU(POPUP_SHOW_DETAIL, MissionTree::OnShowDetail)
    EVT_MENU(POPUP_SHOW_SCRIPT, MissionTree::OnShowScript)
 
    #ifdef __TEST_MISSION_TREE_ACTIONS__
@@ -146,7 +153,8 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
                          const wxPoint &pos, const wxSize &size, long style)
    : DecoratedTree(parent, id, pos, size, style),
      inScriptEvent(false),
-     inFiniteBurn(false)
+     inFiniteBurn(false),
+     mShowDetailedItem(false)
 {
    parent = parent;
    
@@ -207,10 +215,10 @@ void MissionTree::ClearMission()
    
    // Collapse, so folder icon is closed
    #ifdef __WXMSW__
-      Collapse(mMissionSeqSubItem);
+      Collapse(mMissionSeqSubId);
    #endif
    
-   DeleteChildren(mMissionSeqSubItem);
+   DeleteChildren(mMissionSeqSubId);
    
    #ifdef __TEST_MISSION_TREE_ACTIONS__
    if (mActionsOutStream.is_open())
@@ -242,6 +250,47 @@ void MissionTree::UpdateMission(bool resetCounter)
    ClearMission();   
    UpdateCommand();
 }
+
+
+//------------------------------------------------------------------------------
+// void ChangeNodeLabel(const wxString &oldLabel)
+//------------------------------------------------------------------------------
+/*
+ * Sets tree node label to new label if it is different from oldLabel.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::ChangeNodeLabel(const wxString &oldLabel)
+{
+   #ifdef DEBUG_CHANGE_NODE_LABEL
+   MessageInterface::ShowMessage
+      ("MissionTree::ChangeNodeLabel() oldLabel=<%s>\n", oldLabel.c_str());
+   #endif
+   
+   wxTreeItemId itemId = FindChild(mMissionSeqSubId, oldLabel);
+   if (itemId.IsOk())
+   {
+      MissionTreeItemData *item = (MissionTreeItemData *)GetItemData(itemId);
+      GmatCommand *cmd = item->GetCommand();
+      wxString newLabel = GetCommandString(cmd, oldLabel);
+      
+      #ifdef DEBUG_CHANGE_NODE_LABEL
+      MessageInterface::ShowMessage("   newLabel=<%s>\n", newLabel.c_str());
+      #endif
+      
+      if (newLabel != oldLabel)
+      {
+         item->SetDesc(newLabel);
+         SetItemText(itemId, newLabel);
+      }
+   }
+   else
+   {
+      #ifdef DEBUG_CHANGE_NODE_LABEL
+      MessageInterface::ShowMessage("===> <%s> not found\n", oldLabel.c_str());
+      #endif
+   }
+}
+
 
 //-------------------------------
 // private methods
@@ -304,7 +353,7 @@ void MissionTree::UpdateCommand()
    GmatCommand *cmd = theGuiInterpreter->GetFirstCommand();
    GmatCommand *child;
    MissionTreeItemData *seqItemData =
-      (MissionTreeItemData *)GetItemData(mMissionSeqSubItem);
+      (MissionTreeItemData *)GetItemData(mMissionSeqSubId);
    wxTreeItemId node;
    
    if (cmd->GetTypeName() == "NoOp")
@@ -312,7 +361,7 @@ void MissionTree::UpdateCommand()
    
    while (cmd != NULL)
    {
-      node = UpdateCommandTree(mMissionSeqSubItem, cmd);
+      node = UpdateCommandTree(mMissionSeqSubId, cmd);
       
       if (cmd->GetTypeName() == "BeginScript")
          mScriptEventCount++;
@@ -333,8 +382,8 @@ void MissionTree::UpdateCommand()
       
    }
    
-   Expand(mMissionSeqSubItem);   
-   ScrollTo(mMissionSeqSubItem);
+   Expand(mMissionSeqSubId);   
+   ScrollTo(mMissionSeqSubId);
 
 }
 
@@ -498,6 +547,9 @@ MissionTree::AppendCommand(wxTreeItemId parent, GmatTree::MissionIconType icon,
    // Show "Equation" instead of "GMAT" to be more clear for user
    if (nodeName.Contains("GMAT"))
       nodeName.Replace("GMAT", "Equation");
+   
+   // Show command string as node label(loj: 2007.11.13)
+   nodeName = GetCommandString(cmd, nodeName);
    
    #if DEBUG_MISSION_TREE_APPEND
    MessageInterface::ShowMessage
@@ -666,6 +718,9 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    if (nodeName.Trim() == "" || nodeName == cmdTypeName)
       nodeName.Printf("%s%d", cmdTypeName.c_str(), ++(*cmdCount));
    
+   // Show command string as node label(loj: 2007.11.13)
+   nodeName = GetCommandString(cmd, nodeName);
+   
    #if DEBUG_MISSION_TREE_INSERT
    MessageInterface::ShowMessage
       ("   cmd=%s, nodeName=%s, cmdCount=%d\n", cmdTypeName.c_str(),
@@ -709,7 +764,7 @@ MissionTree::InsertCommand(wxTreeItemId parentId, wxTreeItemId currId,
    #if DEBUG_MISSION_TREE_INSERT
    WriteCommand("   ==>", " Resetting previous of ", cmd, "to ", prevCmd);
    #endif
-      
+   
    cmd->ForceSetPrevious(prevCmd);
    
    #if DEBUG_MISSION_TREE_INSERT
@@ -985,7 +1040,7 @@ void MissionTree::Append(const wxString &cmdName)
          #endif
       }
    }
-   else if (currId == mMissionSeqSubItem)
+   else if (currId == mMissionSeqSubId)
    {
       #if DEBUG_MISSION_TREE_APPEND
       MessageInterface::ShowMessage("   current item is MissionSequence\n");
@@ -1485,26 +1540,26 @@ void MissionTree::AddDefaultMission()
    //-----------------------------------------------------------------
    #ifdef __ENABLE_MULTIPLE_SEQUENCE__
    //-----------------------------------------------------------------
-   mMissionSeqTopItem =
+   mMissionSeqTopId =
       AppendItem(mission, wxT("Mission Sequence"), GmatTree::MISSION_ICON_FOLDER,
                  -1, new MissionTreeItemData(wxT("Mission Sequence"),
                                              GmatTree::MISSION_SEQ_TOP_FOLDER));
    
-   SetItemImage(mMissionSeqTopItem, GmatTree::MISSION_ICON_OPENFOLDER,
+   SetItemImage(mMissionSeqTopId, GmatTree::MISSION_ICON_OPENFOLDER,
                wxTreeItemIcon_Expanded);
    
-   AddDefaultMissionSeq(mMissionSeqTopItem);
+   AddDefaultMissionSeq(mMissionSeqTopId);
    
    //-----------------------------------------------------------------
    #else
    //-----------------------------------------------------------------
    
-   mMissionSeqSubItem =
+   mMissionSeqSubId =
       AppendItem(mission, wxT("Mission Sequence"), GmatTree::MISSION_ICON_FOLDER,
                  -1, new MissionTreeItemData(wxT("Mission Sequence"),
                                              GmatTree::MISSION_SEQ_SUB_FOLDER));
    
-   SetItemImage(mMissionSeqSubItem, GmatTree::MISSION_ICON_OPENFOLDER,
+   SetItemImage(mMissionSeqSubId, GmatTree::MISSION_ICON_OPENFOLDER,
                wxTreeItemIcon_Expanded);
    
    //-----------------------------------------------------------------
@@ -1541,11 +1596,11 @@ void MissionTree::AddDefaultMissionSeq(wxTreeItemId item)
    wxString name;   
    name.Printf("Sequence%d", ++mNumMissionSeq);
    
-   mMissionSeqSubItem =
+   mMissionSeqSubId =
       AppendItem(item, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
    
-   SetItemImage(mMissionSeqSubItem, GmatTree::MISSION_ICON_OPENFOLDER,
+   SetItemImage(mMissionSeqSubId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
    
    Expand(item);
@@ -1649,7 +1704,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
    MessageInterface::ShowMessage("MissionTree::OnItemActivated() item=%s parent=%s\n",
                                  item->GetDesc().c_str(), parent->GetDesc().c_str());
    #endif
-
+   
    // Since VaryPanel is used for both Target and Optimize,
    // set proper id indicating Optimize Vary
    if ((item->GetItemType() == GmatTree::VARY) &&
@@ -1657,6 +1712,9 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
       item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    GmatAppData::GetMainFrame()->CreateChild(item);
+   
+   //loj: 2007.11.14 When do I update node label
+   item->SetDesc(item->GetCommand()->GetGeneratingString(Gmat::NO_COMMENTS));
 }
 
 
@@ -1746,6 +1804,8 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
       menu.AppendSeparator();
       menu.Append(POPUP_RUN, wxT("Run"));
       menu.AppendSeparator();
+      menu.AppendCheckItem(POPUP_SHOW_DETAIL, wxT("Show Detail"));
+      menu.Check(POPUP_SHOW_DETAIL, mShowDetailedItem);
       menu.Append(POPUP_SHOW_SCRIPT, wxT("Show Script"));
       
       //----- for auto testing actions
@@ -1874,19 +1934,19 @@ void MissionTree::ShowMenu(wxTreeItemId id, const wxPoint& pt)
 //------------------------------------------------------------------------------
 void MissionTree::OnAddMissionSeq(wxCommandEvent &event)
 {
-   wxTreeItemId item = GetSelection();
+   wxTreeItemId itemId = GetSelection();
    wxString name;
    
    name.Printf("Sequence%d", ++mNumMissionSeq);
    
-   mMissionSeqSubItem =
-      AppendItem(item, name, GmatTree::MISSION_ICON_FOLDER, -1,
+   mMissionSeqSubId =
+      AppendItem(itemId, name, GmatTree::MISSION_ICON_FOLDER, -1,
                  new MissionTreeItemData(name, GmatTree::MISSION_SEQ_SUB_FOLDER));
     
-   SetItemImage(mMissionSeqSubItem, GmatTree::MISSION_ICON_OPENFOLDER,
+   SetItemImage(mMissionSeqSubId, GmatTree::MISSION_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 
-   Expand(item);
+   Expand(itemId);
 }
 
 
@@ -2382,6 +2442,16 @@ void MissionTree::OnRun(wxCommandEvent &event)
 
 
 //---------------------------------------------------------------------------
+// void MissionTree::OnShowDetail()
+//--------------------------------------------------------------------------
+void MissionTree::OnShowDetail(wxCommandEvent &event)
+{
+   mShowDetailedItem = event.IsChecked();
+   UpdateMission(true);
+}
+
+
+//---------------------------------------------------------------------------
 // void MissionTree::OnShowScript()
 //--------------------------------------------------------------------------
 void MissionTree::OnShowScript(wxCommandEvent &event)
@@ -2799,6 +2869,31 @@ GmatTree::MissionIconType MissionTree::GetIconId(const wxString &cmd)
 
 
 //------------------------------------------------------------------------------
+// wxString GetCommandString(GmatCommand *cmd, const wxString &currStr)
+//------------------------------------------------------------------------------
+/*
+ * Returns command string if command is not a BranchCommand or Begin/EndScript.
+ */
+//------------------------------------------------------------------------------
+wxString MissionTree::GetCommandString(GmatCommand *cmd, const wxString &currStr)
+{
+   if (!mShowDetailedItem)
+      return currStr;
+   
+   if (cmd->GetTypeName() == "BeginScript" || cmd->GetTypeName() == "EndScript")
+      return currStr;
+   
+   wxString cmdString;
+   cmdString = cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str();
+   
+   if (cmdString == ";")
+      return currStr;
+   else
+      return cmdString;
+}
+
+
+//------------------------------------------------------------------------------
 // GmatTree::ItemType GetCommandId(const wxString &cmd)
 //------------------------------------------------------------------------------
 GmatTree::ItemType MissionTree::GetCommandId(const wxString &cmd)
@@ -2943,7 +3038,7 @@ wxTreeItemId MissionTree::FindChild(wxTreeItemId parentId, const wxString &cmd)
       ("\nMissionTree::FindChild() parentId=<%s>, cmd=<%s>\n",
        GetItemText(parentId).c_str(), cmd.c_str());
    #endif
-
+   
    MissionTreeItemData *parentItem = (MissionTreeItemData *)GetItemData(parentId);
    GmatTree::ItemType parentType = parentItem->GetItemType();
    unsigned int itemCount = 0;
