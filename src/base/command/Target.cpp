@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Target
 //------------------------------------------------------------------------------
@@ -207,6 +207,12 @@ const std::string& Target::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName)
 {
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = "Target " + targeterName + ";";
+      return generatingString;
+   }
+   
    generatingString = prefix + "Target " + targeterName + ";";
    return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }

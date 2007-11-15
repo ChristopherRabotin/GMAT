@@ -223,6 +223,12 @@ const std::string& EndTarget::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = "EndTarget;";
+      return generatingString;
+   }
+   
    // Build the local string
    generatingString = prefix + "EndTarget;";
    if ((next) && (next->GetTypeName() == "Target"))
