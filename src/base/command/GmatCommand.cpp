@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GmatCommand
 //------------------------------------------------------------------------------
@@ -18,15 +18,15 @@
 //------------------------------------------------------------------------------
 
 
-#include "GmatCommand.hpp"          // class's header file
-#include "MessageInterface.hpp" // MessageInterface
+#include "GmatCommand.hpp"       // class's header file
+#include "MessageInterface.hpp"  // MessageInterface
 #include "Spacecraft.hpp"
-#include "StringUtil.hpp"       // for ToString
+#include "StringUtil.hpp"        // for ToString
 
-#include <sstream>              // for command summary generation
-#include <cmath>                // for Cartesian to Keplerian conversion; 
-                                // remove it when the real conversions are
-                                // used.
+#include <sstream>               // for command summary generation
+#include <cmath>                 // for Cartesian to Keplerian conversion; 
+                                 // remove it when the real conversions are
+                                 // used.
 
 
 //#define DEBUG_COMMAND_DEALLOCATION
@@ -39,7 +39,7 @@
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
 //#define DEBUG_SEPARATE
-
+//#define DEBUG_GEN_STRING 1
 
 //---------------------------------
 //  static members
@@ -309,6 +309,10 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       empty = "% Generating string not set for " + typeName + " command.";
       return empty;
    }
+
+   if (mode == Gmat::NO_COMMENTS)
+      return generatingString;
+
    
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
@@ -322,59 +326,71 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       ("===> generatingString=\n%s\n", generatingString.c_str());
    #endif
    
-   // This code keep appending the commentLine and inineComment
-   // when ScriptEventPanel is opened
-   //if (commentLine != "")
-   //   generatingString = commentLine + generatingString;
-   //if (inlineComment != "")
-   //   generatingString = generatingString + inlineComment;
-   
    // Handle multiple line comments
-   if (commentLine != "")
+   if (showPrefaceComment)
    {
-      std::stringstream gen;
-      TextParser tp;
-      StringArray textArray = tp.DecomposeBlock(commentLine);
-      
-      // handle multiple comment lines
-      for (UnsignedInt i=0; i<textArray.size(); i++)
+      if (commentLine != "")
       {
-         gen << prefix << textArray[i];
-         if (textArray[i].find("\n") == commentLine.npos &&
-             textArray[i].find("\r") == commentLine.npos)
-            gen << "\n";
-      }
+         std::stringstream gen;
+         TextParser tp;
+         StringArray textArray = tp.DecomposeBlock(commentLine);
       
-      generatingString = gen.str() + generatingString;
+         // handle multiple comment lines
+         for (UnsignedInt i=0; i<textArray.size(); i++)
+         {
+            gen << prefix << textArray[i];
+            if (textArray[i].find("\n") == commentLine.npos &&
+                textArray[i].find("\r") == commentLine.npos)
+               gen << "\n";
+         }
+      
+         generatingString = gen.str() + generatingString;
+      }
    }
    
-   if (inlineComment != "")
-      generatingString = generatingString + inlineComment;
+   
+   if (showInlineComment)
+      if (inlineComment != "")
+         generatingString = generatingString + inlineComment;
    
    #if DEBUG_GEN_STRING
    MessageInterface::ShowMessage
-      ("===> return\n%s\n", generatingString.c_str());
+      ("===> return\n<%s>\n", generatingString.c_str());
    #endif
    
    return generatingString;
 }
 
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
 const StringArray& GmatCommand::GetWrapperObjectNameArray()
 {
    return wrapperObjectNames;
 }
 
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper* toWrapper,
+//                        const std::string &withName)
+//------------------------------------------------------------------------------
 bool GmatCommand::SetElementWrapper(ElementWrapper* toWrapper,
                                     const std::string &withName)
 {
    return false;
 }
 
+//------------------------------------------------------------------------------
+// void ClearWrappers()
+//------------------------------------------------------------------------------
 void GmatCommand::ClearWrappers()
 {
    // this default implementation does nothing
 }
 
+//------------------------------------------------------------------------------
+// void CheckDataType(ElementWrapper* forWrapper, Gmat::ParameterType needType,
+//                    const std::string &cmdName, bool ignoreUnsetReference)
+//------------------------------------------------------------------------------
 void GmatCommand::CheckDataType(ElementWrapper* forWrapper,
                                 Gmat::ParameterType needType,
                                 const std::string &cmdName,

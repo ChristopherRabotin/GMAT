@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Assignment
 //------------------------------------------------------------------------------
@@ -707,6 +707,13 @@ const std::string& Assignment::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
 {
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = lhs + " = " + rhs + ";";
+      return generatingString;
+   }
+   
+   
    std::string gen = prefix + "GMAT " + lhs + " = " + rhs + ";";
    
    #ifdef DEBUG_ASSIGNMENT_SCRIPTING

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                While
 //------------------------------------------------------------------------------
@@ -442,6 +442,12 @@ const std::string& While::GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix,
                                            const std::string &useName)
 {
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = "While " + GetConditionalString();
+      return generatingString;
+   }
+   
    // Build the local string
    generatingString = prefix + "While " + GetConditionalString();
    return ConditionalBranch::GetGeneratingString(mode, prefix, useName);

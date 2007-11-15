@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                If
 //------------------------------------------------------------------------------
@@ -455,6 +455,12 @@ const std::string& If::GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix,
                                            const std::string &useName)
 {
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = "If " + GetConditionalString();
+      return generatingString;
+   }
+   
    // Build the local string
    generatingString = prefix + "If " + GetConditionalString();
    return ConditionalBranch::GetGeneratingString(mode, prefix, useName);

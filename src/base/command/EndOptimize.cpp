@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                EndOptimize 
 //------------------------------------------------------------------------------
@@ -141,13 +141,19 @@ const std::string& EndOptimize::GetGeneratingString(Gmat::WriteMode mode,
                                                     const std::string &useName)
 {
    generatingString = prefix + "EndOptimize;";
+   if (mode == Gmat::NO_COMMENTS)
+      return generatingString;
+   
    if ((next) && (next->GetTypeName() == "Optimize"))
    {
-      // To avoid keep appending, check for empty inline comment
-      if (GetInlineComment() == "")
+      if (showInlineComment)
       {
-         generatingString += "  % For optimizer ";
-         generatingString += next->GetRefObjectName(Gmat::SOLVER);
+         // To avoid keep appending, check for empty inline comment
+         if (GetInlineComment() == "")
+         {
+            generatingString += "  % For optimizer ";
+            generatingString += next->GetRefObjectName(Gmat::SOLVER);
+         }
       }
    }
    return GmatCommand::GetGeneratingString(mode, prefix, useName);

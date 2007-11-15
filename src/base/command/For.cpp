@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                For
 //------------------------------------------------------------------------------
@@ -461,35 +461,18 @@ const std::string& For::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    std::stringstream gen;
    gen.precision(4);
-
-   //if (indexName != "")
-      gen << indexName;
-   //else
-   //   gen << forName;
-   gen << " = ";
    
-   //if (startName != "")
-      gen << startName;
-   //else
-   //   gen << startValue;
-   gen << ":";
-
-   //if (incrName != "")
-   //{
-      gen << incrName;
-      gen << ":";
-   //}
-   //else if (stepSize != 1.0)
-   //{
-   //   gen << stepSize;
-   //   gen << ":";
-   //}
-
-   //if (endName != "")
-      gen << endName;
-   //else
-   //   gen << endValue;
-
+   gen << indexName << " = ";
+   gen << startName << ":";
+   gen << incrName  << ":";
+   gen << endName;
+   
+   if (mode == Gmat::NO_COMMENTS)
+   {
+      generatingString = "For " + gen.str() + ";";
+      return generatingString;
+   }
+   
    generatingString = prefix + "For " + gen.str() + ";";
 
    // Then call the base class method
