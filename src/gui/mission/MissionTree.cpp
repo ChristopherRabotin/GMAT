@@ -1701,8 +1701,9 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
    MissionTreeItemData *parent = (MissionTreeItemData *)GetItemData(GetItemParent(itemId));
    
    #if DEBUG_MISSION_TREE
-   MessageInterface::ShowMessage("MissionTree::OnItemActivated() item=%s parent=%s\n",
-                                 item->GetDesc().c_str(), parent->GetDesc().c_str());
+   MessageInterface::ShowMessage
+      ("MissionTree::OnItemActivated() item=%s parent=%s\n",
+       item->GetDesc().c_str(), parent->GetDesc().c_str());
    #endif
    
    // Since VaryPanel is used for both Target and Optimize,
@@ -1712,9 +1713,6 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
       item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    GmatAppData::GetMainFrame()->CreateChild(item);
-   
-   //loj: 2007.11.14 When do I update node label
-   item->SetDesc(item->GetCommand()->GetGeneratingString(Gmat::NO_COMMENTS));
 }
 
 
