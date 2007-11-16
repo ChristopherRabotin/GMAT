@@ -25,10 +25,11 @@
 #include <sstream>
 
 #if defined __USE_MATLAB__
-#include "MatlabInterface.hpp"   // for Matlab Engine functions
+#include "MatlabInterface.hpp"     // for Matlab Engine functions
 #endif
 
 //#define DEBUG_CALL_FUNCTION
+//#define DEBUG_SEND_PARAM
 //#define DEBUG_UPDATE_VAR
 //#define DEBUG_UPDATE_OBJECT
 //#define DEBUG_USE_ARRAY
@@ -948,10 +949,10 @@ bool CallFunction::ExecuteMatlabFunction()
 //------------------------------------------------------------------------------
 void CallFunction::SendInParam(Parameter *param)
 {
-   #ifdef DEBUG_CALL_FUNCTION
-      MessageInterface::ShowMessage("CallFunction::SendInParam()");
+   #ifdef DEBUG_SEND_PARAM
+   MessageInterface::ShowMessage("CallFunction::SendInParam()");
    #endif
-
+   
    #ifdef __USE_MATLAB__
       if (param == NULL)
       {
@@ -959,12 +960,12 @@ void CallFunction::SendInParam(Parameter *param)
          return;
       }
       
-      #ifdef DEBUG_CALL_FUNCTION
-         MessageInterface::ShowMessage("Parameter name=%s, type=%s\n",
-               param->GetName().c_str(),
-               param->GetTypeName().c_str());
+      #ifdef DEBUG_SEND_PARAM
+      MessageInterface::ShowMessage
+         ("Parameter name=%s, type=%s\n", param->GetName().c_str(),
+          param->GetTypeName().c_str());
       #endif
-         
+      
       if (param->GetTypeName() == "Array")
       {
          Array *array = (Array *)param;
@@ -987,34 +988,7 @@ void CallFunction::SendInParam(Parameter *param)
          std::string inParamString = array->GetName() + " = [" +os.str() + "];";
          EvalMatlabString(inParamString);
       }
-      else if (param->GetTypeName() == "String")
-      {
-         StringVar *stringVar = (StringVar *)param;
-         std::string inParamString = param->GetName() +" = '" +
-                                   stringVar->GetString() +"';";
-         EvalMatlabString(inParamString);
-      }
-      // needs to be updated when burn, etc are added to dialog
-      else if (param->GetTypeName() == "Spacecraft")
-      {
-          #ifdef DEBUG_CALL_FUNCTION
-              MessageInterface::ShowMessage(
-                     "Parameter type is : %s\n",
-                     param->GetTypeName().c_str());
-          #endif
-              
-          param->TakeAction("UpdateEpoch");
-          std::string inParamString =
-                     param->GetGeneratingString(Gmat::MATLAB_STRUCT);
-          
-          #ifdef DEBUG_CALL_FUNCTION
-             MessageInterface::ShowMessage("Generated param string : %s\n",
-                     inParamString.c_str());
-          #endif
-
-          EvalMatlabString(inParamString);
-      }
-      else //if (param->GetTypeName() == "Variable")
+      else if (param->GetTypeName() == "Variable")
       {
           std::ostringstream os;
           os.precision(18);
@@ -1022,12 +996,35 @@ void CallFunction::SendInParam(Parameter *param)
           
           std::string inParamString = param->GetName() +" = " + os.str() +";";
           
-          #ifdef DEBUG_UPDATE_VAR
-             MessageInterface::ShowMessage("Sent string %s to matlab\n",
-                              inParamString.c_str());
+          #ifdef DEBUG_SEND_PARAM
+          MessageInterface::ShowMessage
+             ("Sent string %s to matlab\n", inParamString.c_str());
           #endif
-             
+          
           EvalMatlabString(inParamString);
+      }
+      else if (param->GetTypeName() == "String")
+      {
+         StringVar *stringVar = (StringVar *)param;
+         std::string inParamString = param->GetName() +" = '" +
+            stringVar->GetString() +"';";
+         
+         EvalMatlabString(inParamString);
+      }
+      else // it is any object
+      {
+         if (param->GetTypeName() == "Spacecraft")
+            param->TakeAction("UpdateEpoch");
+         
+         std::string inParamString =
+            param->GetGeneratingString(Gmat::MATLAB_STRUCT);
+         
+         #ifdef DEBUG_SEND_PARAM
+         MessageInterface::ShowMessage
+            ("Generated param string :\n%s\n", inParamString.c_str());
+         #endif
+         
+         EvalMatlabString(inParamString);
       }
    #endif  //__USE_MATLAB__
 }
@@ -1084,19 +1081,6 @@ void CallFunction::GetOutParams()
             delete [] outArray;
             
          }
-         else if (param->GetTypeName() == "String")
-         {
-            // need to output string value to buffer         
-            char buffer[512];
-            MatlabInterface::OutputBuffer(buffer, 512);
-            EvalMatlabString(varName);
-            
-            // get rid of "var ="
-            char *ptr = strtok((char *)buffer, "=");
-            ptr = strtok(NULL, "\n");
-            
-            param->SetStringParameter("Expression", ptr);
-         }
          else if (param->GetTypeName() == "Variable")
          {
             double *outArray = new double[1];
@@ -1117,6 +1101,19 @@ void CallFunction::GetOutParams()
             #endif
             
             delete [] outArray;
+         }
+         else if (param->GetTypeName() == "String")
+         {
+            // need to output string value to buffer         
+            char buffer[512];
+            MatlabInterface::OutputBuffer(buffer, 512);
+            EvalMatlabString(varName);
+            
+            // get rid of "var ="
+            char *ptr = strtok((char *)buffer, "=");
+            ptr = strtok(NULL, "\n");
+            
+            param->SetStringParameter("Expression", ptr);
          }
          else // objects
          {
