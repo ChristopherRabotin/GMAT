@@ -32,30 +32,29 @@ public:
 private:
    CallFunction *theCommand;
    
-   wxGrid *inputGrid;
-   wxGrid *outputGrid;
-   
-   wxArrayString inputStrings;
-   wxArrayString outputStrings;
-   
-   wxStaticText *nameStaticText;
-   wxComboBox *functionComboBox;
-   
-   wxTextCtrl *inputTextCtrl;
-   wxTextCtrl *outputTextCtrl;
-   
-   wxButton *theInputViewButton;
-   wxButton *theOutputViewButton;
-   
+   wxArrayString mInputWxStrings;
+   wxArrayString mOutputWxStrings;
    wxArrayString mObjectTypeList;
    int  mNumInput;
    int  mNumOutput;
+   
+   wxGrid *theInputGrid;
+   wxGrid *theOutputGrid;
+   
+   wxComboBox *theFunctionComboBox;
+   
+   wxTextCtrl *theInputTextCtrl;
+   wxTextCtrl *theOutputTextCtrl;
+   
+   wxButton *theInputViewButton;
+   wxButton *theOutputViewButton;
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    
+   // event handling
    void OnComboChange(wxCommandEvent &event);
    void OnCellRightClick(wxGridEvent &event);
    void OnButtonClick(wxCommandEvent& event);
