@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   Burn
 //------------------------------------------------------------------------------
@@ -324,9 +324,10 @@ std::string Burn::GetParameterTypeString(const Integer id) const
 bool Burn::IsParameterReadOnly(const Integer id) const
 {
    if ((id == DELTAV1LABEL) || (id == DELTAV2LABEL) ||
-       (id == DELTAV3LABEL) || (id == SATNAME))
+       (id == DELTAV3LABEL) || (id == SATNAME) ||
+       (id == COORDINATESYSTEM)) //loj:2007.11.15 until COORDINATESYSTEM works
       return true;
-
+   
    return GmatBase::IsParameterReadOnly(id);
 }
 
