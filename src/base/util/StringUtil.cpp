@@ -827,9 +827,10 @@ void GmatStringUtil::GetArrayCommaIndex(const std::string &str, Integer &comma,
    // if there is no opening bracket
    if (openBracket == str.npos)
    {
-      firstComma = str.find(',');
-      if (firstComma != str.npos)
-         comma = firstComma;
+      comma = -1;  // wcs - 2007.11.16 - I think we just want to return -1 here ... 
+      //firstComma = str.find(',');
+      //if (firstComma != str.npos)
+      //   comma = firstComma;
       
       #if DEBUG_ARRAY_INDEX
       MessageInterface::ShowMessage
@@ -2236,7 +2237,7 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
 }
 
 //------------------------------------------------------------------------------
-// Integer GmatStringUtil::NumberOfOccurrences(const std::string str, const char c)
+// Integer NumberOfOccurrences(const std::string str, const char c)
 //------------------------------------------------------------------------------
 /*
  * Counts the number of occurrences of the character c in the string str.
