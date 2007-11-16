@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Interpreter
 //------------------------------------------------------------------------------
@@ -1162,12 +1162,12 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
                                               const std::string &desc)
 {
    bool retval = true;
-
+   
    // Output
    UnsignedInt index1 = desc.find("=");
    std::string lhs = desc.substr(0, index1);
    StringArray outArray;
-
+   
    // get out parameters if there was an equal sign
    if (index1 != lhs.npos)
    {   
@@ -1192,7 +1192,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    }
    
    funcName = GmatStringUtil::Trim(funcName);
-
+   
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting funcName=%s\n", funcName.c_str());
    #endif
@@ -1216,8 +1216,40 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    #endif
    
    // Set input to CallFunction
+   bool validParam = false;
    for (UnsignedInt i=0; i<inArray.size(); i++)
+   {
       retval = cmd->SetStringParameter("AddInput", inArray[i]);
+      
+      // if input parameter is a system parameter then create (loj: 2007.11.16)
+      validParam = false;      
+      if (inArray[i].find('.') != std::string::npos)
+      {
+         if (IsParameterType(inArray[i]))
+         {
+            Parameter *param = CreateSystemParameter(inArray[i]);            
+            if (param != NULL)
+               validParam = true;
+         }         
+      }
+      else // whole object
+      {
+         GmatBase *obj = FindObject(inArray[i]);
+         if (obj != NULL)
+            validParam = true;
+      }
+      
+      if (!validParam)
+      {
+         InterpreterException ex
+            ("Nonexistent or disallowed CallFunction Input Parameter: \"" +
+             inArray[i] +  "\"");
+         HandleError(ex);
+      }
+   }
+   
+   if (!retval || !validParam)
+      return false;
    
    // Set output to CallFunction
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
@@ -1637,7 +1669,7 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
                HandleError(ex);
                retval = false;
             }
-
+            
             // checking items to report
             if (count < 2)
             {
