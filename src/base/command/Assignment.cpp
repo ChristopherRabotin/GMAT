@@ -153,9 +153,22 @@ bool Assignment::InterpretAction()
    #endif
       
    lhs = chunks[0];
-   rhs = chunks[1];   
+   rhs = chunks[1]; 
    
-   // it there is still ; then report error since ; should have been removed
+   if (!GmatStringUtil::HasNoBrackets(lhs,true))
+      throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
+         "parentheses (except to indicate an array element)");      
+
+   // check for unexpected commas on the left-hand-side
+   Integer commaPos = -1;
+   if (lhs.find(',') != lhs.npos)
+   {
+      GmatStringUtil::GetArrayCommaIndex(lhs, commaPos);
+      if (commaPos == -1)
+         throw CommandException("Command contains an unexpected comma on left-hand-side");
+   }
+   
+// it there is still ; then report error since ; should have been removed
    if (rhs.find(";") != rhs.npos)
       throw CommandException("Is there a missing \"\%\" for inline comment?");
    
@@ -179,6 +192,19 @@ bool Assignment::InterpretAction()
       
       mathTree = new MathTree("MathTree", rhs);
       mathTree->SetTopNode(topNode);
+   }
+   else // if not an equation, check for unexpected commas on the right-hand-side
+   {
+      if (!GmatStringUtil::HasNoBrackets(rhs,true))
+         throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
+            "parentheses (except to indicate an array element)");      
+
+      if (rhs.find(',') != rhs.npos)
+      {
+         GmatStringUtil::GetArrayCommaIndex(rhs, commaPos);
+         if (commaPos == -1)
+            throw CommandException("Command contains an unexpected comma on right-hand-side");
+      }
    }
    
    #ifdef DEBUG_ASSIGNMENT_IA
