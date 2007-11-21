@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  OpenGlPlot
 //------------------------------------------------------------------------------
@@ -174,7 +174,6 @@ OpenGlPlot::OpenGlPlot(const std::string &name)
    mViewPointVecVector.Set(0.0, 0.0, 30000.0);
    mViewDirectionVector.Set(0.0, 0.0, -1.0);
    
-   theSolarSystem = NULL;
    mViewCoordSystem = NULL;
    mViewUpCoordSystem = NULL;
    mViewCoordSysOrigin = NULL;
@@ -268,7 +267,6 @@ OpenGlPlot::OpenGlPlot(const OpenGlPlot &ogl)
    mViewUpCoordSysName = ogl.mViewUpCoordSysName;
    mViewUpAxisName = ogl.mViewUpAxisName;
    
-   theSolarSystem = ogl.theSolarSystem;
    mViewCoordSystem = ogl.mViewCoordSystem;
    mViewUpCoordSystem = ogl.mViewCoordSystem;
    mViewCoordSysOrigin = ogl.mViewCoordSysOrigin;
@@ -538,7 +536,7 @@ bool OpenGlPlot::Initialize()
           "added to OpenGL plot\n");
       return false;
    }
-
+   
    
    //--------------------------------------------------------
    // start initializing for OpenGL plot
@@ -552,12 +550,10 @@ bool OpenGlPlot::Initialize()
       #endif
       
       if (PlotInterface::CreateGlPlotWindow
-          (instanceName, mOldName, mViewCoordSysName, theSolarSystem,
-           (mEclipticPlane == "On"), (mXYPlane == "On"),
+          (instanceName, mOldName, (mEclipticPlane == "On"), (mXYPlane == "On"),
            (mWireFrame == "On"), (mAxes == "On"), (mGrid == "On"),
-           (mSunLine == "On"), (mOverlapPlot == "On"),
-           (mUseInitialView == "On"), (mPerspectiveMode == "On"),
-           mNumPointsToRedraw))
+           (mSunLine == "On"), (mOverlapPlot == "On"), (mUseInitialView == "On"),
+           (mPerspectiveMode == "On"), mNumPointsToRedraw))
       {
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
@@ -662,14 +658,21 @@ bool OpenGlPlot::Initialize()
                 i, mObjectNameArray[i].c_str(), draw, show, mOrbitColorArray[i]);
          }
          #endif
+                  
+         #if DEBUG_OPENGL_INIT
+         MessageInterface::ShowMessage
+            ("   calling PlotInterface::SetGlSolarSystem(%p)\n", theSolarSystem);
+         #endif
          
-         // set all object array and pointers
+         // set SolarSystem
+         PlotInterface::SetGlSolarSystem(instanceName, theSolarSystem);
          
          #if DEBUG_OPENGL_INIT
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlObject()\n");
          #endif
          
+         // set all object array and pointers
          PlotInterface::SetGlObject(instanceName, mObjectNameArray,
                                     mOrbitColorArray, mObjectArray);
          
@@ -1700,14 +1703,7 @@ std::string OpenGlPlot::GetRefObjectName(const Gmat::ObjectType type) const
        GmatBase::GetObjectTypeString(type).c_str());
    #endif
    
-   if (type == Gmat::SOLAR_SYSTEM)
-   {
-      if (theSolarSystem)
-         return theSolarSystem->GetName();
-      else
-         return "";
-   }
-   else if (type == Gmat::COORDINATE_SYSTEM)
+   if (type == Gmat::COORDINATE_SYSTEM)
    {
       return mViewCoordSysName; //just return this
    }
@@ -1755,12 +1751,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
       AddSpacePoint("Sun", mAllSpCount, false);
    }
    
-   if (type == Gmat::SOLAR_SYSTEM)
-   {
-      if (theSolarSystem)
-         mAllRefObjectNames.push_back(theSolarSystem->GetName());
-   }
-   else if (type == Gmat::COORDINATE_SYSTEM)
+   if (type == Gmat::COORDINATE_SYSTEM)
    {
       mAllRefObjectNames.push_back(mViewCoordSysName);
       mAllRefObjectNames.push_back(mViewUpCoordSysName);
@@ -1839,9 +1830,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
 GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
                                    const std::string &name)
 {
-   if (type == Gmat::SOLAR_SYSTEM)
-      return theSolarSystem;
-   else if (type == Gmat::COORDINATE_SYSTEM)
+   if (type == Gmat::COORDINATE_SYSTEM)
    {
       if (name == mViewCoordSysName)
          return mViewCoordSystem;
@@ -1857,7 +1846,7 @@ GmatBase* OpenGlPlot::GetRefObject(const Gmat::ObjectType type,
       else if (name == mViewDirectionName)
          return mViewDirectionObj;
    }
-
+   
    return Subscriber::GetRefObject(type, name);
    
 //    throw SubscriberException("OpenGlPlot::GetRefObject() the object name: " + name +
@@ -1886,13 +1875,7 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
        type, obj->GetTypeName().c_str(), obj->GetName().c_str(), obj);
    #endif
    
-   // just check for the type
-   if (type == Gmat::SOLAR_SYSTEM)
-   {
-      theSolarSystem = (SolarSystem*)obj;
-      return true;
-   }
-   else if (type == Gmat::COORDINATE_SYSTEM)
+   if (type == Gmat::COORDINATE_SYSTEM)
    {
       if (name == mViewCoordSysName)
          mViewCoordSystem = (CoordinateSystem*)obj;
@@ -2541,7 +2524,7 @@ bool OpenGlPlot::UpdateSolverData()
       
       // Just buffer data up to last point - 1
       PlotInterface::
-         UpdateGlPlot(instanceName, mOldName, mViewCoordSysName, mCurrScArray[i],
+         UpdateGlPlot(instanceName, mOldName, mCurrScArray[i],
                       mCurrEpochArray[i], mCurrXArray[i], mCurrYArray[i],
                       mCurrZArray[i], mCurrVxArray[i], mCurrVyArray[i],
                       mCurrVzArray[i], colorArray, true, mSolverIterOption, false);
@@ -2549,7 +2532,7 @@ bool OpenGlPlot::UpdateSolverData()
    
    // Buffer last point and Update the plot
    PlotInterface::
-      UpdateGlPlot(instanceName, mOldName, mViewCoordSysName, mCurrScArray[last],
+      UpdateGlPlot(instanceName, mOldName, mCurrScArray[last],
                    mCurrEpochArray[last], mCurrXArray[last], mCurrYArray[last],
                    mCurrZArray[last], mCurrVxArray[last], mCurrVyArray[last],
                    mCurrVzArray[last], colorArray, true, mSolverIterOption, true);
@@ -2799,9 +2782,9 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       }
       
       PlotInterface::
-         UpdateGlPlot(instanceName, mOldName, mViewCoordSysName,
-                      mScNameArray, dat[0], mScXArray, mScYArray,
-                      mScZArray, mScVxArray, mScVyArray, mScVzArray,
+         UpdateGlPlot(instanceName, mOldName, mScNameArray,
+                      dat[0], mScXArray, mScYArray, mScZArray,
+                      mScVxArray, mScVyArray, mScVzArray,
                       colorArray, solving, mSolverIterOption, update);
       
       if (update)

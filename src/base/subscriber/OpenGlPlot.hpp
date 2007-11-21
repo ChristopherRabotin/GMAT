@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  OpenGlPlot
 //------------------------------------------------------------------------------
@@ -21,7 +21,6 @@
 
 #include "Subscriber.hpp"
 #include "SpacePoint.hpp"
-#include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
 #include <map>
 
@@ -148,7 +147,6 @@ protected:
    void WriteDeprecatedMessage(Integer id) const;
    bool UpdateSolverData();
    
-   //SolarSystem *mSolarSystem;
    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;
    SpacePoint *mViewCoordSysOrigin;
