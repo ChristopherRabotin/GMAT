@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             PlotInterface
 //------------------------------------------------------------------------------
@@ -65,20 +65,13 @@ PlotInterface::~PlotInterface()
 
 
 //------------------------------------------------------------------------------
-//  bool CreateGlPlotWindow(const std::string &plotName, const std::string &oldName,
-//                          const std::string &csName, SolarSystem *ssPtr,
-//                          bool drawEcPlane, bool drawXyPlane, bool drawWireFrame,
-//                          bool drawAxes, bool drawGrid, bool drawEarthSunLine,
-//                          bool overlapPlot, bool usevpInfo, bool usepm,
-//                          bool Integer numPtsToRedraw)
+//  bool CreateGlPlotWindow(const std::string &plotName, ...)
 //------------------------------------------------------------------------------
 /*
  * Creates OpenGlPlot window
  *
  * @param <plotName> plot name
  * @param <oldName>  old plot name, this is needed for renaming plot
- * @param <csName>  coordinate system name
- * @param <ssPtr>  solar system pionter
  * @param <drawEcPlane>  true if draw ecliptic plane
  * @param <drawXyPlane>  true if draw XY plane
  * @param <drawWirePlane>  true if draw wire frame
@@ -93,8 +86,6 @@ PlotInterface::~PlotInterface()
 //------------------------------------------------------------------------------
 bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                        const std::string &oldName,
-                                       const std::string &csName,
-                                       SolarSystem *ssPtr,
                                        bool drawEcPlane, bool drawXyPlane,
                                        bool drawWireFrame, bool drawAxes,
                                        bool drawGrid, bool drawSunLine,
@@ -115,8 +106,8 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    #if DEBUG_PLOTIF_GL_CREATE
    MessageInterface::ShowMessage
       ("PlotInterface::CreateGlPlotWindow() MdiGlPlot::numChildren=%d, "
-       "plotName=%s\n   oldName=%s, csName=%s\n", MdiGlPlot::numChildren,
-       plotName.c_str(), oldName.c_str(), csName.c_str());
+       "plotName=%s\n   oldName=%s\n", MdiGlPlot::numChildren,
+       plotName.c_str(), oldName.c_str());
    #endif
    
    for (int i=0; i<MdiGlPlot::numChildren; i++)
@@ -164,8 +155,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
-                               wxDEFAULT_FRAME_STYLE, wxString(csName.c_str()),
-                               ssPtr);
+                               wxDEFAULT_FRAME_STYLE);
       
       if (frame)
          frame->Show();
@@ -211,7 +201,6 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    frame->SetOverlapPlot(overlapPlot);
    frame->SetUseInitialViewDef(usevpInfo);
    frame->SetUsePerspectiveMode(usepm);
-   frame->SetViewCoordSystem(wxString(csName.c_str()));
    frame->SetNumPointsToRedraw(numPtsToRedraw);
    
    #if DEBUG_PLOTIF_GL_CREATE
@@ -222,6 +211,37 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
    return true;
 #endif
 } //CreateGlPlotWindow()
+
+
+//------------------------------------------------------------------------------
+// void SetGlSolarSystem(const std::string &plotName, SolarSystem *ss)
+//------------------------------------------------------------------------------
+void PlotInterface::SetGlSolarSystem(const std::string &plotName, SolarSystem *ss)
+{
+#if defined __CONSOLE_APP__
+   return;
+#else
+   
+   #if DEBUG_PLOTIF_GL
+   MessageInterface::ShowMessage
+      ("PlotInterface::SetGlSolarSystem() SolarSystem=%p\n", ss);
+   #endif
+   
+   wxString owner = wxString(plotName.c_str());
+   
+   MdiChildTrajFrame *frame = NULL;
+   for (int i=0; i<MdiGlPlot::numChildren; i++)
+   {
+      frame = (MdiChildTrajFrame*)(MdiGlPlot::mdiChildren.Item(i)->GetData());
+      
+      if (frame->GetPlotName().IsSameAs(owner.c_str()))
+      {            
+         frame->SetSolarSystem(ss);
+      }
+   }
+   
+#endif
+}
 
 
 //------------------------------------------------------------------------------
@@ -585,7 +605,6 @@ bool PlotInterface::SetGlEndOfRun(const std::string &plotName)
 //------------------------------------------------------------------------------
 bool PlotInterface::UpdateGlPlot(const std::string &plotName,
                                  const std::string &oldName,
-                                 const std::string &csName,
                                  const StringArray &scNames, const Real &time,
                                  const RealArray &posX, const RealArray &posY,
                                  const RealArray &posZ, const RealArray &velX,
@@ -863,8 +882,7 @@ bool PlotInterface::AddTsPlotCurve(const std::string &plotName, int curveIndex,
    for (int i = 0; i < MdiTsPlot::numChildren; i++)
    {
       frame = (MdiChildTsFrame*)(MdiTsPlot::mdiChildren.Item(i)->GetData());
-        
-      //if (frame->GetPlotName() == wxString(plotName.c_str()))
+      
       if (frame->GetPlotName().IsSameAs(plotName.c_str()))
       {
          frame->AddPlotCurve(curveIndex, yOffset, yMin, yMax,

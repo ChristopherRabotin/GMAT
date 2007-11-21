@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             PlotInterface
 //------------------------------------------------------------------------------
@@ -31,13 +31,13 @@ public:
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
-                                  const std::string &csName,
-                                  SolarSystem *ssPtr,
                                   bool drawEcPlane, bool drawEqPlane,
                                   bool drawWireFrame, bool drawAxes, bool drawGrid,
                                   bool drawESLines, bool overlapPlot,
                                   bool usevpInfo, bool usepm,
                                   Integer numPtsToRedraw);
+   
+   static void SetGlSolarSystem(const std::string &plotName, SolarSystem *ss);
    
    static void SetGlObject(const std::string &plotName,
                            const StringArray &objNames,
@@ -72,7 +72,6 @@ public:
    
    static bool UpdateGlPlot(const std::string &plotName,
                             const std::string &oldName,
-                            const std::string &csName,
                             const StringArray &scNames, const Real &time,
                             const RealArray &posX, const RealArray &posY,
                             const RealArray &posZ, const RealArray &velX,
