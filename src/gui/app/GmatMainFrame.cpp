@@ -117,7 +117,13 @@
 #include "bitmaps/animation_stop.xpm"
 #include "bitmaps/animation_fast.xpm"
 #include "bitmaps/animation_slow.xpm"
+
+// If we want to show GL option dialog from tool bar
+//#define __SHOW_GL_OPTION_DIALOG__
+
+#ifdef __SHOW_GL_OPTION_DIALOG__
 #include "bitmaps/animation_options.xpm"
+#endif
 
 #define __USE_CHILD_BEST_SIZE__
 
@@ -356,6 +362,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
+   //MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() entered\n");
+   
    // Close MATLAB connection
    MatlabInterface::Close();
    
@@ -367,6 +375,8 @@ GmatMainFrame::~GmatMainFrame()
    
    if (theGuiInterpreter)
       theGuiInterpreter->Finalize();
+   
+   //MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() exiting\n");
 }
 
 
@@ -1443,16 +1453,23 @@ void GmatMainFrame::AddAnimationTools(wxToolBar* toolBar)
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage("GmatMainFrame::AddAnimationTools() entered\n");
    #endif
-      
    
+   #ifdef __SHOW_GL_OPTION_DIALOG__
    const int NUM_ICONS = 5;
+   #else
+   const int NUM_ICONS = 4;
+   #endif
+   
    wxBitmap* bitmaps[NUM_ICONS];
    
    bitmaps[0] = new wxBitmap(animation_play_xpm);
    bitmaps[1] = new wxBitmap(animation_stop_xpm);
    bitmaps[2] = new wxBitmap(animation_fast_xpm);
    bitmaps[3] = new wxBitmap(animation_slow_xpm);
+   
+   #ifdef __SHOW_GL_OPTION_DIALOG__
    bitmaps[4] = new wxBitmap(animation_options_xpm);
+   #endif
    
    // recale to default size of 16x15
    for (int i=0; i<NUM_ICONS; i++)
@@ -1461,7 +1478,7 @@ void GmatMainFrame::AddAnimationTools(wxToolBar* toolBar)
       image = image.Rescale(16, 15);
       *bitmaps[i] = wxBitmap(image);
    }
-
+   
    toolBar->AddSeparator();
    toolBar->AddSeparator();
    
@@ -1481,8 +1498,11 @@ void GmatMainFrame::AddAnimationTools(wxToolBar* toolBar)
                     _T("Faster Animation"));
    toolBar->AddTool(TOOL_ANIMATION_SLOW, _T("AnimationSlow"), *bitmaps[3],
                     _T("Slower Animation"));
+   
+   #ifdef __SHOW_GL_OPTION_DIALOG__
    toolBar->AddTool(TOOL_ANIMATION_OPTIONS, _T("AnimationOptions"), *bitmaps[4],
                     _T("Show Animation Options"));
+   #endif
    
    // now realize to make tools appear
    toolBar->Realize();
