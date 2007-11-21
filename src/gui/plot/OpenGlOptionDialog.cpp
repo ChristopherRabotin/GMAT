@@ -25,7 +25,7 @@
 #include "wx/colordlg.h"            // for wxColourDialog
 
 // If we want to see plot in different coordiante system from the list
-//#define __SHOW_COORD_SYSTEM__
+#define __SHOW_COORD_SYSTEM__
 
 //#define DEBUG_GLOPTION_CREATE 1
 //#define DEBUG_GLOPTION_LOAD 1
@@ -866,6 +866,7 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
          mTrajFrame->RedrawPlot(true);
       }
    }
+   #ifdef __SHOW_COORD_SYSTEM__
    else if (event.GetEventObject() == mCoordSysGoButton)
    {
       if (mCoordSysName != "")
@@ -875,6 +876,7 @@ void OpenGlOptionDialog::OnButtonClick(wxCommandEvent& event)
          mTrajFrame->DrawInOtherCoordSystem(mCoordSysName);
       }
    }
+   #endif
 }
 
 
