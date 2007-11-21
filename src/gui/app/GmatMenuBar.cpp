@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             GmatMenuBar
 //------------------------------------------------------------------------------
@@ -35,7 +35,6 @@ using namespace GmatMenu;
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMenuBar, wxMenuBar)
-   EVT_MENU(GmatPlot::MDI_GL_SHOW_DEFAULT_VIEW, MdiChildTrajFrame::OnShowDefaultView)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -156,19 +155,6 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
                          _T("&Build and Run"));
       scriptMenu->Append(MENU_SCRIPT_RUN, _T("&Run"));
       this->Append(scriptMenu, wxT("Script"));
-   }
-   
-   //-----------------------------------------------------------------
-   // View menu
-   //-----------------------------------------------------------------
-   if (itemType == GmatTree::OUTPUT_OPENGL_PLOT)
-   {
-      wxMenu *viewMenu = new wxMenu;
-      viewMenu->Append(GmatPlot::MDI_GL_SHOW_OPTION_PANEL,
-                       _T("Show OpenGL Option Dialog"),
-                       _T("Show OpenGL Option Dialog"), wxITEM_CHECK);
-      
-      this->Append(viewMenu, wxT("View"));
    }
    
    //-----------------------------------------------------------------
