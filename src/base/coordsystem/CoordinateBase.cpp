@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CoordinateBase
 //------------------------------------------------------------------------------
@@ -93,11 +93,11 @@ solar          (NULL)
 //---------------------------------------------------------------------------
 CoordinateBase::CoordinateBase(const CoordinateBase &coordBase) :
 GmatBase(coordBase),
-origin        (coordBase.origin),
+origin        (NULL),
 originName    (coordBase.originName),
-j2000Body     (coordBase.j2000Body),
+j2000Body     (NULL),
 j2000BodyName (coordBase.j2000BodyName),
-solar         (coordBase.solar)
+solar         (NULL)
 {
 }
 
@@ -117,14 +117,15 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    if (&coordBase == this)
       return *this;
    GmatBase::operator=(coordBase);
-   origin        = coordBase.origin;
+   origin        = NULL;
    originName    = coordBase.originName;
-   j2000Body     = coordBase.j2000Body;
+   j2000Body     = NULL;
    j2000BodyName = coordBase.j2000BodyName;
-   solar         = coordBase.solar;
+   solar         = NULL;
    
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~CoordinateBase()
 //---------------------------------------------------------------------------
