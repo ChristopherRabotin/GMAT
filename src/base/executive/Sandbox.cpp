@@ -32,7 +32,7 @@
 
 #include <algorithm>       // for find
 
-#define DISABLE_SOLAR_SYSTEM_CLONING
+//#define DISABLE_SOLAR_SYSTEM_CLONING
 
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 1
@@ -1309,11 +1309,13 @@ void Sandbox::Clear()
    publisher = NULL;
 
 #ifndef DISABLE_SOLAR_SYSTEM_CLONING
-   MessageInterface::ShowMessage(
-      "Deleting the solar system clone in the Sandbox\n");
    if (solarSys != NULL)
+   {
+      MessageInterface::ShowMessage
+         ("Deleting the solar system clone in the Sandbox\n");
       delete solarSys;
-
+   }
+   
    solarSys = NULL;
 #endif
 
