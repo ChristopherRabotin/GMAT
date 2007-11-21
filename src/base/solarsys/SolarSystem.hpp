@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  SolarSystem
 //------------------------------------------------------------------------------
@@ -54,22 +54,22 @@ public:
    SolarSystem& operator=(const SolarSystem &ss);
    // class destructor
    ~SolarSystem();
-
+   
    virtual bool Initialize();
    void ResetToDefaults();
    
    // method to add a body to the solar system
-   bool           AddBody(CelestialBody* cb);
+   bool                 AddBody(CelestialBody* cb);
    // method to return a body of the solar system, given its name
-   CelestialBody* GetBody(std::string withName);
-
+   CelestialBody*       GetBody(std::string withName);
+   
    // method to return an array of the names of the bodies included in
    // this solar system
    const StringArray&   GetBodiesInUse() const;
    // method to return a flag indicating whether or not the specified
    // body is in use for this solar system
-   bool           IsBodyInUse(std::string theBody);
-
+   bool                 IsBodyInUse(std::string theBody);
+   
    // methods to gt the source and analytic model flags
    Gmat::PosVelSource   GetPosVelSource() const;
    Gmat::AnalyticMethod GetAnalyticMethod() const;
@@ -78,7 +78,7 @@ public:
    Real                 GetEphemUpdateInterval() const;
    StringArray          GetValidModelList(Gmat::ModelType m, 
                                           const std::string &forBody);
-
+   
    // methods to set the source, source file, and analytic method for each
    // of the bodies in use
    bool SetSource(Gmat::PosVelSource pvSrc);
@@ -94,47 +94,39 @@ public:
    bool RemoveValidModelName(Gmat::ModelType m, const std::string &forBody,
                              const std::string &theModel);
    
-   // Parameter access methods - overridden from GmatBase do I need these???
-   virtual std::string    GetParameterText(const Integer id) const;     // const?
-   virtual Integer        GetParameterID(const std::string &str) const; // const?
+   // Parameter access methods
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                          GetParameterType(const Integer id) const;
-   virtual std::string    GetParameterTypeString(const Integer id) const;
-
-   virtual Integer        GetIntegerParameter(const Integer id) const; // const?
-   //virtual Integer        SetIntegerParameter(const Integer id,
-   //                                           const Integer value);
-   virtual Integer        GetIntegerParameter(const std::string &label) const;
-   //virtual Integer        SetIntegerParameter(const std::string &label,
-   //                                           const Integer value);
-   //virtual Real           GetRealParameter(const Integer id) const;
-   //virtual Real           SetRealParameter(const Integer id,
-   //                                        const Real value);
-   //virtual std::string    GetStringParameter(const Integer id) const; // const?
-   //virtual bool           SetStringParameter(const Integer id,
-   //                                          const std::string &value); // const?
-   virtual Real           GetRealParameter(const Integer id) const;
-   virtual Real           GetRealParameter(const std::string &label) const;
-   virtual Real           SetRealParameter(const Integer id,
-                                           const Real value);
-   virtual Real           SetRealParameter(const std::string &label,
-                                           const Real value);
-   virtual bool           GetBooleanParameter(const Integer id) const; 
-   virtual bool           GetBooleanParameter(const std::string &label) const; 
-   virtual bool           SetBooleanParameter(const Integer id,
-                                              const bool value); 
-   virtual bool           SetBooleanParameter(const std::string &label,
-                                              const bool value);
-   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   virtual bool         GetBooleanParameter(const Integer id) const; 
+   virtual bool         GetBooleanParameter(const std::string &label) const; 
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
 
    
-   virtual Integer    GetOwnedObjectCount();
-   virtual GmatBase*  GetOwnedObject(Integer whichOne);
+   virtual Integer      GetOwnedObjectCount();
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
    
    // all classes derived from GmatBase must supply this Clone method
    virtual SolarSystem* Clone(void) const;
-
+   
    /// default names for each of the possible celestial bodies in the solar system
    static const std::string SUN_NAME;
    
@@ -221,29 +213,31 @@ protected:
    };
    
    
-   static const std::string PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount];
+   static const std::string
+      PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount];
    
-   static const Gmat::ParameterType PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount];
    
-    
+   
    Gmat::PosVelSource    pvSrcForAll;
    Gmat::AnalyticMethod  anMethodForAll;
-   PlanetaryEphem*       pE;
+   PlanetaryEphem*       thePlanetaryEphem;
    bool                  overrideTimeForAll;
    Real                  ephemUpdateInterval;
 
 private:
    
-   // method to find a body in the solar system, given its name
-   CelestialBody* FindBody(std::string withName);
-   
    /// list of the celestial bodies that are included in this solar system
-   //loj:std::list<CelestialBody*> bodiesInUse;
    std::vector<CelestialBody*> bodiesInUse;
    
    /// the names of the bodies in use
    StringArray bodyStrings;  // is this needed, or just a convenience?
    
+   // method to find a body in the solar system, given its name
+   CelestialBody* FindBody(std::string withName);
+   void CloneBodiesInUse(const SolarSystem &ss);
+   void DeleteBodiesInUse();
 };
 
 #endif // SolarSystem_hpp

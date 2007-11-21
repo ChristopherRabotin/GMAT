@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  SolarSystem
 //------------------------------------------------------------------------------
@@ -146,10 +146,10 @@ SolarSystem::SolarSystem(std::string withName)
 {
    objectTypes.push_back(Gmat::SOLAR_SYSTEM);
    objectTypeNames.push_back("SolarSystem");
-   parameterCount   = SolarSystemParamCount;
-   pvSrcForAll      = Gmat::DE_405;
-   anMethodForAll   = Gmat::LOW_FIDELITY;
-   pE               = NULL;
+   parameterCount      = SolarSystemParamCount;
+   pvSrcForAll         = Gmat::DE_405;
+   anMethodForAll      = Gmat::LOW_FIDELITY;
+   thePlanetaryEphem   = NULL;
    overrideTimeForAll  = false;
    ephemUpdateInterval = 0.0;
    
@@ -204,27 +204,16 @@ SolarSystem::SolarSystem(std::string withName)
  */
 //------------------------------------------------------------------------------
 SolarSystem::SolarSystem(const SolarSystem &ss) :
-GmatBase        (ss),
-pvSrcForAll     (ss.pvSrcForAll),
-anMethodForAll  (ss.anMethodForAll),
-pE              (NULL),
-overrideTimeForAll (ss.overrideTimeForAll),
+GmatBase            (ss),
+pvSrcForAll         (ss.pvSrcForAll),
+anMethodForAll      (ss.anMethodForAll),
+thePlanetaryEphem   (NULL),
+overrideTimeForAll  (ss.overrideTimeForAll),
 ephemUpdateInterval (ss.ephemUpdateInterval),
-//bodiesInUse     (ss.bodiesInUse), // copy it first
-bodyStrings     (ss.bodyStrings)
+bodyStrings         (ss.bodyStrings)
 {
    parameterCount   = SolarSystemParamCount;
-   
-   // clone the SS bodies
-   for (std::vector<CelestialBody*>::const_iterator i = ss.bodiesInUse.begin(); 
-        i != ss.bodiesInUse.end(); ++i)
-   {
-      #ifdef DEBUG_SS_CLONING
-         MessageInterface::ShowMessage("Cloning \"%s\"\n", 
-         		(*i)->GetName().c_str());
-      #endif
-   	bodiesInUse.push_back((CelestialBody*)((*i)->Clone()));
-   }
+   CloneBodiesInUse(ss);
 }
 
 //------------------------------------------------------------------------------
@@ -242,26 +231,30 @@ bodyStrings     (ss.bodyStrings)
 SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 {
    GmatBase::operator=(ss);
-   pvSrcForAll    = ss.pvSrcForAll;
-   anMethodForAll = ss.anMethodForAll;
-   pE             = NULL;
-   overrideTimeForAll      = ss.overrideTimeForAll;
-   ephemUpdateInterval     = ss.ephemUpdateInterval;
-   bodiesInUse.clear();
-   bodyStrings.clear();
-   bodiesInUse    = ss.bodiesInUse;
-   bodyStrings    = ss.bodyStrings;
+   pvSrcForAll         = ss.pvSrcForAll;
+   anMethodForAll      = ss.anMethodForAll;
+   thePlanetaryEphem   = NULL;
+   overrideTimeForAll  = ss.overrideTimeForAll;
+   ephemUpdateInterval = ss.ephemUpdateInterval;
+   bodyStrings         = ss.bodyStrings;
+   parameterCount      = SolarSystemParamCount;
    
-   // replace body pointers with clones
-   Integer sz = bodiesInUse.size();
-   Integer i;
-   for (i = 0; i < sz; i++)
-   {
-      bodiesInUse.push_back(((CelestialBody*)
-                           ((bodiesInUse.front())->Clone())));
-      //loj: bodiesInUse.pop_front();
-   }
+   CloneBodiesInUse(ss);
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+//  ~SolarSystem()
+//------------------------------------------------------------------------------
+/**
+ * Destructor for the SolarSystem class.
+ */
+//------------------------------------------------------------------------------
+SolarSystem::~SolarSystem()
+{
+   DeleteBodiesInUse();
+   thePlanetaryEphem = NULL;
 }
 
 
@@ -271,14 +264,13 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
 bool SolarSystem::Initialize()
 {
    // Initialize bodies in use
-   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
       (*cbi)->Initialize();      
       ++cbi;
    }
-
+   
    return true;
 }
 
@@ -288,9 +280,9 @@ bool SolarSystem::Initialize()
 //------------------------------------------------------------------------------
 void SolarSystem::ResetToDefaults()
 {
-   pvSrcForAll      = Gmat::DE_405;
-   anMethodForAll   = Gmat::LOW_FIDELITY;
-   pE               = NULL;
+   pvSrcForAll         = Gmat::DE_405;
+   anMethodForAll      = Gmat::LOW_FIDELITY;
+   thePlanetaryEphem   = NULL;
    overrideTimeForAll  = false;
    ephemUpdateInterval = 0.0;
    
@@ -306,30 +298,6 @@ void SolarSystem::ResetToDefaults()
       (*cbi)->SetUsePotentialFile(false);
       ++cbi;
    }
-}
-
-
-//------------------------------------------------------------------------------
-//  ~SolarSystem()
-//------------------------------------------------------------------------------
-/**
- * Destructor for the SolarSystem class.
- */
-//------------------------------------------------------------------------------
-SolarSystem::~SolarSystem()
-{
-   //loj: std::list<CelestialBody*>::iterator cbi = bodiesInUse.begin();
-   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
-   while (cbi != bodiesInUse.end())
-   {
-      #ifdef DEBUG_SS_CLONING
-         MessageInterface::ShowMessage("Deleting \"%s\"\n", 
-         		(*cbi)->GetName().c_str());
-      #endif
-		delete (*cbi);       // delete each body first
-      ++cbi;
-   }
-   delete pE;
 }
 
 
@@ -359,8 +327,8 @@ bool SolarSystem::AddBody(CelestialBody* cb)
    // new body
    if (!cb->SetSource(pvSrcForAll))  return false; 
    if (!cb->SetAnalyticMethod(anMethodForAll))  return false; 
-   if (pE)
-      if (!cb->SetSourceFile(pE))  return false; 
+   if (thePlanetaryEphem)
+      if (!cb->SetSourceFile(thePlanetaryEphem))  return false; 
    if (!cb->SetOverrideTimeSystem(overrideTimeForAll))  return false; 
    
    return true;
@@ -457,25 +425,35 @@ Gmat::AnalyticMethod SolarSystem::GetAnalyticMethod() const
 //------------------------------------------------------------------------------
 std::string SolarSystem::GetSourceFileName() const
 {
-   if (pE == NULL) return "";
-   return pE->GetName();
+   if (thePlanetaryEphem == NULL) return "";
+   return thePlanetaryEphem->GetName();
 }
 
+
+//------------------------------------------------------------------------------
+// bool GetOverrideTimeSystem() const
+//------------------------------------------------------------------------------
 bool SolarSystem::GetOverrideTimeSystem() const
 {
    return overrideTimeForAll;
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetEphemUpdateInterval() const
+//------------------------------------------------------------------------------
 Real SolarSystem::GetEphemUpdateInterval() const
 {
    return ephemUpdateInterval;
 }
  
 
+//------------------------------------------------------------------------------
+// StringArray GetValidModelList(Gmat::ModelType m, const std::string &forBody)
+//------------------------------------------------------------------------------
 StringArray SolarSystem::GetValidModelList(Gmat::ModelType m, 
                          const std::string &forBody)
 {
-   //loj: for (std::list<CelestialBody*>::iterator i = bodiesInUse.begin();
    for (std::vector<CelestialBody*>::iterator i = bodiesInUse.begin();
         i != bodiesInUse.end(); ++i)
    {
@@ -485,7 +463,6 @@ StringArray SolarSystem::GetValidModelList(Gmat::ModelType m,
    throw SolarSystemException("Model list requested for unknown body " 
                                + forBody);
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -533,12 +510,12 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
    Gmat::PosVelSource theSrc = Gmat::PosVelSourceCount;
    for (Integer i = 0; i < Gmat::PosVelSourceCount; i++)
    {
-      //if (pvSrc == CelestialBody::POS_VEL_STRINGS[i]) 
       if (pvSrc == Gmat::POS_VEL_SOURCE_STRINGS[i]) 
          theSrc = (Gmat::PosVelSource) i; 
    }
    if (theSrc == Gmat::PosVelSourceCount)
       throw SolarSystemException("Unknown ephemeris source " + pvSrc);
+   
    // Search through bodiesInUse and set the source for all
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
@@ -564,15 +541,21 @@ bool SolarSystem::SetSource(const std::string &pvSrc)
  */
 //------------------------------------------------------------------------------
 bool SolarSystem::SetSourceFile(PlanetaryEphem *src)
-{
+{   
+   // check for null src
+   if (src == NULL)
+      return false;
+   
+   thePlanetaryEphem = src;
+   
    // Search through bodiesInUse for the body with the name withName
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
    {
-      if ((*cbi)->SetSourceFile(src) == false)  return false;
+      if ((*cbi)->SetSourceFile(thePlanetaryEphem) == false) return false;
       ++cbi;
    }
-   pE = src;
+   
    return true;
 }
 
@@ -620,12 +603,12 @@ bool SolarSystem::SetAnalyticMethod(const std::string &aM)
    Gmat::AnalyticMethod theMethod = Gmat::AnalyticMethodCount;
    for (Integer i = 0; i < Gmat::AnalyticMethodCount; i++)
    {
-      //if (aM == CelestialBody::ANALYTIC_METHOD_STRINGS[i]) 
       if (aM == Gmat::ANALYTIC_METHOD_STRINGS[i]) 
          theMethod = (Gmat::AnalyticMethod) i; 
    }
    if (theMethod == Gmat::AnalyticMethodCount)
       throw SolarSystemException("Unknown analytic method " + aM);
+   
    // Search through bodiesInUse and set it for all
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
@@ -662,17 +645,21 @@ bool SolarSystem::SetOverrideTimeSystem(bool overrideIt)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetEphemUpdateInterval(Real intvl)
+//------------------------------------------------------------------------------
 bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 {
    if (intvl < 0.0)
-        {
-           SolarSystemException sse;
-           sse.SetDetails(errorMessageFormat.c_str(),
-              GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
-              "Ephemeris Update Interval", "Real Number >= 0.0");
-           throw sse;
-        }
-//   throw SolarSystemException("SolarSystem - ephem update interval must be > 0.0");
+   {
+      SolarSystemException sse;
+      sse.SetDetails(errorMessageFormat.c_str(),
+                     GmatStringUtil::ToString(intvl, GetDataPrecision()).c_str(),
+                     "Ephemeris Update Interval", "Real Number >= 0.0");
+      throw sse;
+   }
+   
    // Set it for each of the bodies
    std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
    while (cbi != bodiesInUse.end())
@@ -685,6 +672,10 @@ bool SolarSystem::SetEphemUpdateInterval(Real intvl)
 }
 
 
+//------------------------------------------------------------------------------
+// bool AddValidModelName(Gmat::ModelType m, const std::string &forBody,
+//                        const std::string &theModel)
+//------------------------------------------------------------------------------
 bool SolarSystem::AddValidModelName(Gmat::ModelType m, 
                   const std::string &forBody,
                   const std::string &theModel)
@@ -699,6 +690,12 @@ bool SolarSystem::AddValidModelName(Gmat::ModelType m,
                               + forBody);
 }
 
+
+//------------------------------------------------------------------------------
+// bool SolarSystem::RemoveValidModelName(Gmat::ModelType m, 
+//                  const std::string & forBody,
+//                  const std::string &theModel)
+//------------------------------------------------------------------------------
 bool SolarSystem::RemoveValidModelName(Gmat::ModelType m, 
                   const std::string & forBody,
                   const std::string &theModel)
@@ -844,6 +841,7 @@ Integer SolarSystem::GetIntegerParameter(const Integer id) const
    return GmatBase::GetIntegerParameter(id); 
 }
 
+
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const std::string &label) const
 //------------------------------------------------------------------------------
@@ -862,6 +860,10 @@ Integer SolarSystem::GetIntegerParameter(const std::string &label) const
    return GetIntegerParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
 Real SolarSystem::GetRealParameter(const Integer id) const
 {
    if (id == EPHEM_UPDATE_INTERVAL) return ephemUpdateInterval;
@@ -869,13 +871,18 @@ Real SolarSystem::GetRealParameter(const Integer id) const
 }
 
 
+//------------------------------------------------------------------------------
+// Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 Real SolarSystem::GetRealParameter(const std::string &label) const
 {
    return GetRealParameter(GetParameterID(label));
 }
 
-Real SolarSystem::SetRealParameter(const Integer id,
-                                   const Real value)
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+Real SolarSystem::SetRealParameter(const Integer id, const Real value)
 {
    if (id == EPHEM_UPDATE_INTERVAL)
    {
@@ -884,27 +891,40 @@ Real SolarSystem::SetRealParameter(const Integer id,
    }
    return GmatBase::SetRealParameter(id, value);
 }
-                                   
-Real SolarSystem::SetRealParameter(const std::string &label,
-                                  const Real value)
+
+
+//------------------------------------------------------------------------------
+// Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+Real SolarSystem::SetRealParameter(const std::string &label, const Real value)
 {
    return SetRealParameter(GetParameterID(label),value);
 }
 
 
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
 bool SolarSystem::GetBooleanParameter(const Integer id) const
 {
    if (id == OVERRIDE_TIME_SYSTEM) return overrideTimeForAll;
    return GmatBase::GetBooleanParameter(id); 
 }
 
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 bool SolarSystem::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
 }
 
-bool SolarSystem::SetBooleanParameter(const Integer id,
-                                      const bool value)
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
+bool SolarSystem::SetBooleanParameter(const Integer id, const bool value)
 {
    if (id == OVERRIDE_TIME_SYSTEM)
    {
@@ -914,8 +934,11 @@ bool SolarSystem::SetBooleanParameter(const Integer id,
    return GmatBase::SetBooleanParameter(id, value);
 }
 
-bool SolarSystem::SetBooleanParameter(const std::string &label,
-                                      const bool value)
+
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
+bool SolarSystem::SetBooleanParameter(const std::string &label, const bool value)
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
@@ -984,10 +1007,6 @@ GmatBase* SolarSystem::GetOwnedObject(Integer whichOne)
 
 
 //------------------------------------------------------------------------------
-// protected methods
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
 // private methods
 //------------------------------------------------------------------------------
 
@@ -1014,7 +1033,59 @@ CelestialBody* SolarSystem::FindBody(std::string withName)
       }
       ++cbi;
    }
+   
    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// void CloneBodiesInUse(const SolarSystem &ss)
+//------------------------------------------------------------------------------
+void SolarSystem::CloneBodiesInUse(const SolarSystem &ss)
+{
+   #ifdef DEBUG_SS_CLONING
+   MessageInterface::ShowMessage("===> Cloning %d bodies\n", ss.bodiesInUse.size());
+   #endif
+   
+   bodiesInUse.clear();
+   
+   // clone the SS bodies
+   for (std::vector<CelestialBody*>::const_iterator i = ss.bodiesInUse.begin(); 
+        i != ss.bodiesInUse.end(); ++i)
+   {
+      CelestialBody *cb = (CelestialBody*)((*i)->Clone());
+      bodiesInUse.push_back(cb);
+      
+      #ifdef DEBUG_SS_CLONING
+      MessageInterface::ShowMessage("   Cloned <%p>\"%s\"\n", cb, cb->GetName().c_str());
+      #endif
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void DeleteBodiesInUse()
+//------------------------------------------------------------------------------
+void SolarSystem::DeleteBodiesInUse()
+{
+   #ifdef DEBUG_SS_CLONING
+   MessageInterface::ShowMessage("===> Deleting %d bodies\n", bodiesInUse.size());
+   #endif
+   
+   std::vector<CelestialBody*>::iterator cbi = bodiesInUse.begin();
+   while (cbi != bodiesInUse.end())
+   {
+      #ifdef DEBUG_SS_CLONING
+      MessageInterface::ShowMessage
+         ("   Deleting <%p>\"%s\"\n", (*cbi), (*cbi)->GetName().c_str());
+      #endif
+      
+      delete (*cbi);       // delete each body first
+      (*cbi) = NULL;
+      ++cbi;
+   }
+   
+   bodiesInUse.clear();
 }
 
 
