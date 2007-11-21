@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              TrajPlotCanvas
 //------------------------------------------------------------------------------
@@ -13,15 +13,16 @@
  */
 //------------------------------------------------------------------------------
 #include "TrajPlotCanvas.hpp"
-#include "GmatAppData.hpp"        // for GetGuiInterpreter()
-#include "FileManager.hpp"        // for texture files
-#include "ColorTypes.hpp"         // for namespace GmatColor::
-#include "Rvector3.hpp"           // for Rvector3::GetMagnitude()
-#include "AngleUtil.hpp"          // for ComputeAngleInDeg()
+#include "GmatAppData.hpp"         // for GetGuiInterpreter()
+#include "FileManager.hpp"         // for texture files
+#include "ColorTypes.hpp"          // for namespace GmatColor::
+#include "Rvector3.hpp"            // for Rvector3::GetMagnitude()
+#include "AngleUtil.hpp"           // for ComputeAngleInDeg()
 #include "MdiGlPlotData.hpp"
 #include "MessageInterface.hpp"
 #include "SubscriberException.hpp"
-#include <string.h>               // for strlen()
+#include "TimeSystemConverter.hpp" // for ConvertMjdToGregorian()
+#include <string.h>                // for strlen()
 
 #ifdef __WXMAC__
 #  ifdef __DARWIN__
@@ -106,10 +107,11 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_CONVERT 1
 //#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
-//#define DEBUG_TRAJCANVAS_OBJECT 2
+//#define DEBUG_TRAJCANVAS_OBJECT 1
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
 //#define DEBUG_TRAJCANVAS_PERSPECTIVE 1
-//#define DEBUG_TRAJCANVAS_PROJ 2
+//#define DEBUG_TRAJCANVAS_PROJ 1
+//#define DEBUG_TRAJCANVAS_CS 1
 //#define DEBUG_TRAJCANVAS_ANIMATION 1
 //#define DEBUG_TRAJCANVAS_LONGITUDE 1
 //#define DEBUG_SHOW_SKIP 1
@@ -149,20 +151,15 @@ static int *sIntColor = new int;
 static GlColorType *sGlColor = (GlColorType*)sIntColor;
 
 //------------------------------------------------------------------------------
-// TrajPlotCanvas(wxWindow *parent, wxWindowID id, 
-//                const wxPoint& pos, const wxSize& size, const wxString &csName,
-//                SolarSystem *solarSys, const wxString& name, long style)
+// TrajPlotCanvas(wxWindow *parent, wxWindowID id, ...)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
  * @param <parent>   parent window pointer
  * @param <id>       window id
- * @param <pos>      position (top, left) where the window to be placed within the
- *                   parent window
+ * @param <pos>      position (top, left) where the window to be placed 
  * @param <size>     size of the window
- * @param <csName>   coordinate system name for data to be plotted in
- * @param <solarSys> solar system pointer to retrieve body information
  * @param <name>     title of window
  * @param <style>    style of window
  *
@@ -170,7 +167,6 @@ static GlColorType *sGlColor = (GlColorType*)sIntColor;
 //------------------------------------------------------------------------------
 TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
                                const wxPoint& pos, const wxSize& size,
-                               const wxString &csName, SolarSystem *solarSys,
                                const wxString& name, long style)
    #ifdef __USE_WX280_GL__
    : wxGLCanvas(parent, id, 0, pos, size, style, name)
@@ -184,8 +180,8 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas() csName=%s, name=%s, size.X=%d, size.Y=%d\n",
-       csName.c_str(), name.c_str(), size.GetWidth(), size.GetHeight());
+      ("TrajPlotCanvas() name=%s, size.X=%d, size.Y=%d\n",
+       name.c_str(), size.GetWidth(), size.GetHeight());
    #endif
    
    #ifdef __USE_WX280_GL__
@@ -205,24 +201,26 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    
    // projection
    mUsePerspectiveMode = false;
+   mUseInitialViewPoint = true;
    
    // viewpoint
-   mViewPointRefObjName = "UNKNOWN";
-   mViewPointRefObj = NULL;
-   mViewPointVectorObj = NULL;
-   mViewDirectionObj = NULL;
-   mViewPointRefVector.Set(0.0, 0.0, 0.0);
-   mViewPointVector.Set(0.0, 0.0, 30000.0);
-   mViewDirectionVector.Set(0.0, 0.0, -1.0);
-   mVpLocVec.Set(0.0, 0.0, 30000.0);
-   mViewScaleFactor = 1.0;
-   mUseInitialViewPoint = false;
-   mUseViewPointRefVector = true;
-   mUseViewPointVector = true;
-   mUseViewDirectionVector = true;
-   mVpRefObjId = UNKNOWN_OBJ_ID;
-   mVpVecObjId = UNKNOWN_OBJ_ID;
-   mVdirObjId = UNKNOWN_OBJ_ID;
+   InitializeViewPoint();
+   
+//    mViewPointRefObjName = "UNKNOWN";
+//    pViewPointRefObj = NULL;
+//    pViewPointVectorObj = NULL;
+//    pViewDirectionObj = NULL;
+//    mViewPointRefVector.Set(0.0, 0.0, 0.0);
+//    mViewPointVector.Set(0.0, 0.0, 30000.0);
+//    mViewDirectionVector.Set(0.0, 0.0, -1.0);
+//    mVpLocVec.Set(0.0, 0.0, 30000.0);
+//    mViewScaleFactor = 1.0;
+//    mUseViewPointRefVector = true;
+//    mUseViewPointVector = true;
+//    mUseViewDirectionVector = true;
+//    mVpRefObjId = UNKNOWN_OBJ_ID;
+//    mVpVecObjId = UNKNOWN_OBJ_ID;
+//    mVdirObjId = UNKNOWN_OBJ_ID;
    
    // devault view
    mCanvasSize = size;
@@ -242,7 +240,8 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mRedrawLastPointsOnly = false;
    mUpdateFrequency = 50;
    
-   mAxisLength = mCurrViewDist;
+   //mAxisLength = mCurrViewDist;
+   mAxisLength = DEFAULT_DIST;
    
    mOriginName = "";
    mOriginId = 0;
@@ -257,7 +256,6 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    //mRotateAboutZaxis = true;    // 1-2-3
    
    mRotateXy = true;
-   
    mZoomAmount = 300.0;
    
    // projection
@@ -295,9 +293,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mOverCounter = 0;
    
    // solar system
-   mSolarSystem = solarSys;
+   pSolarSystem = NULL;
    //MessageInterface::ShowMessage
-   //   ("==> TrajPlotCanvas::TrajPlotCanvas() mSolarSystem=%p\n", mSolarSystem);
+   //   ("==> TrajPlotCanvas::TrajPlotCanvas() pSolarSystem=%p\n", pSolarSystem);
    
    // objects
    mObjectDefaultRadius = 200; //km: make big enough to see
@@ -318,34 +316,25 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mScCount = 0;
    
    // Coordinate System
-   mInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
-   mInternalCoordSysName = wxString(mInternalCoordSystem->GetName().c_str());
+   pInternalCoordSystem = theGuiInterpreter->GetInternalCoordinateSystem();
+   mInternalCoordSysName = wxString(pInternalCoordSystem->GetName().c_str());
    
-   mViewCoordSysName = csName;
-   mViewCoordSystem = (CoordinateSystem*)theGuiInterpreter->
-      GetConfiguredObject(std::string(csName.c_str()));
+   mViewCoordSysName = "";
+   pViewCoordSystem = NULL;
    
    // CoordinateSystem conversion
-   mIsInternalCoordSystem = true;
-   mNeedSpacecraftConversion = false;
-   mNeedOriginConversion = false;
-   mNeedObjectConversion = false;
-   
-   if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
-      mNeedInitialConversion = true;
-   else
-      mNeedInitialConversion = false;
+   mViewCsIsInternalCs = true;
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
-      ("   mInternalCoordSystem=%p, mViewCoordSystem=%p\n", mInternalCoordSystem,
-       mViewCoordSystem);
-   if (mInternalCoordSystem)
+      ("   pInternalCoordSystem=%p, pViewCoordSystem=%p\n", pInternalCoordSystem,
+       pViewCoordSystem);
+   if (pInternalCoordSystem)
       MessageInterface::ShowMessage
-         ("   mInternalCoordSystem=%s\n", mInternalCoordSystem->GetName().c_str());
-   if (mViewCoordSystem)
+         ("   pInternalCoordSystem=%s\n", pInternalCoordSystem->GetName().c_str());
+   if (pViewCoordSystem)
       MessageInterface::ShowMessage
-         ("   mViewCoordSystem=%s\n", mViewCoordSystem->GetName().c_str());
+         ("   pViewCoordSystem=%s\n", pViewCoordSystem->GetName().c_str());
    MessageInterface::ShowMessage("TrajPlotCanvas() constructor exiting\n");
    #endif
    
@@ -363,7 +352,7 @@ TrajPlotCanvas::~TrajPlotCanvas()
 {
    if (mTextTrajFile)
       delete mTextTrajFile;
-
+   
    // Note:
    // deleting m_glContext is handled in wxGLCanvas
    
@@ -511,48 +500,6 @@ void TrajPlotCanvas::SetEndOfRun(bool flag)
       #endif
 
    }
-}
-
-
-//------------------------------------------------------------------------------
-// void SetViewCoordSystem(const wxString &csName)
-//------------------------------------------------------------------------------
-void TrajPlotCanvas::SetViewCoordSystem(const wxString &csName)
-{
-   #if DEBUG_TRAJCANVAS_INIT
-   MessageInterface::ShowMessage
-      ("TrajPlotCanvas()::SetViewCoordSysName() internalCS=%s, viewCS=%s\n",
-       mInternalCoordSystem->GetName().c_str(), csName.c_str());
-   #endif
-   
-   mViewCoordSysName = csName;
-   
-   mViewCoordSystem =
-      //theGuiInterpreter->GetCoordinateSystem(std::string(csName.c_str()));
-      (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(std::string(csName.c_str()));
-   
-   if (!mViewCoordSysName.IsSameAs(mInternalCoordSysName))
-   {
-      mIsInternalCoordSystem = false;
-      mNeedInitialConversion = true;
-      mNeedOriginConversion = true;
-      mNeedObjectConversion = true;
-   }
-   else
-   {
-      mIsInternalCoordSystem = true;
-      mNeedInitialConversion = false;
-      mNeedOriginConversion = false;
-      mNeedObjectConversion = false;
-   }
-   
-   #if DEBUG_TRAJCANVAS_INIT
-   MessageInterface::ShowMessage
-      ("   mIsInternalCoordSystem=%d, mNeedInitialConversion=%d, "
-       " mNeedOriginConversion=%d, mNeedObjectConversion=%d\n",
-       mIsInternalCoordSystem, mNeedInitialConversion, mNeedOriginConversion,
-       mNeedObjectConversion);
-   #endif
 }
 
 
@@ -872,28 +819,24 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
 
    if (csName == "")
       return;
-
+   
    
    // if current view CS name is different from the new CS name
    if (!mViewCoordSysName.IsSameAs(csName))
    {
       mViewCoordSysName = csName;
       
-      mViewCoordSystem =
+      pViewCoordSystem =
          (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(csName.c_str());
       
-      if (mViewCoordSystem->GetName() == mInternalCoordSystem->GetName())
-         mIsInternalCoordSystem = true;
+      if (pViewCoordSystem->GetName() == pInternalCoordSystem->GetName())
+         mViewCsIsInternalCs = true;
       else
-         mIsInternalCoordSystem = false;
+         mViewCsIsInternalCs = false;
       
       wxString oldOriginName = mOriginName;
-      mOriginName = mViewCoordSystem->GetOriginName().c_str();
+      mOriginName = pViewCoordSystem->GetOriginName().c_str();
       mOriginId = GetObjectId(mOriginName);
-      
-      mNeedSpacecraftConversion = true;
-      mNeedOriginConversion = true;
-      mNeedObjectConversion = true;
       
       UpdateRotateFlags();
       
@@ -902,12 +845,6 @@ void TrajPlotCanvas::DrawInOtherCoordSystem(const wxString &csName)
       
       ConvertObjectData();
       Refresh(false);
-   }
-   else
-   {
-      mNeedSpacecraftConversion = false;
-      mNeedOriginConversion = false;
-      mNeedObjectConversion = false;
    }
 }
 
@@ -984,15 +921,10 @@ void TrajPlotCanvas::ViewAnimation(int interval, int frameInc)
    
    GmatAppData::GetMainFrame()->EnableMenuAndToolBar(false, false, true);
    
-   if (((MdiChildTrajFrame*)mParent)->GetOptionDialog())
-      ((MdiChildTrajFrame*)mParent)->GetOptionDialog()->EnableAnimation(false);
-   
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    DrawFrame();
    
    GmatAppData::GetMainFrame()->EnableMenuAndToolBar(true, false, true);   
-   if (((MdiChildTrajFrame*)mParent)->GetOptionDialog())
-      ((MdiChildTrajFrame*)mParent)->GetOptionDialog()->EnableAnimation(true);
    
    mIsAnimationRunning = false;
    
@@ -1010,25 +942,27 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetGlObject() objCount=%d, colorCount=%d.\n",
-       objNames.size(), objOrbitColors.size());
+      ("TrajPlotCanvas::SetGlObject() for %s, objCount=%d, colorCount=%d.\n",
+       mPlotName.c_str(), objNames.size(), objOrbitColors.size());
    #endif
+   
+   // Initialize objects used in view
+   InitializeViewPoint();
    
    mObjectArray = objArray;
    wxArrayString tempList;
-
+   
    if (objNames.size() == objOrbitColors.size() &&
        objNames.size() == objArray.size())
    {      
       for (UnsignedInt i=0; i<objNames.size(); i++)
       {
          tempList.Add(objNames[i].c_str());
-                  
+         
          #if DEBUG_TRAJCANVAS_OBJECT > 1
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::SetGlObject()  objNames[%d]=%s, objName=%s<%p>\n",
-             i, objNames[i].c_str(), mObjectArray[i]->GetName().c_str(),
-             mObjectArray[i]);
+            ("   objNames[%d]=%s, objPtr=<%p>%s\n", i, objNames[i].c_str(),
+             mObjectArray[i], mObjectArray[i]->GetName().c_str());
          #endif
       }
       
@@ -1043,22 +977,46 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
 
 
 //------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::SetSolarSystem(SolarSystem *ss)
+{
+   pSolarSystem = ss;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetGlCoordSystem(CoordinateSystem *viewCs, CoordinateSystem *viewUpCs)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
                                       CoordinateSystem *viewUpCs)
 {
-   mInitialCoordSystem = viewCs;
-   mInitialCoordSysName = wxString(viewCs->GetName().c_str());
+   #if DEBUG_TRAJCANVAS_CS
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::SetGlCoordSystem() for %s, viewCs=%p, viweUpCs=%p\n",
+       mPlotName.c_str(), viewCs, viewUpCs);
+   #endif
    
-   mViewCoordSystem = mInitialCoordSystem;
-   mViewCoordSysName = mInitialCoordSysName;
+   if (viewCs == NULL || viewUpCs == NULL)
+   {
+      throw SubscriberException
+         ("View CoordinateSystem or View Up CoordinateSystem is NULL\n"); 
+   }
    
-   mViewUpCoordSystem = viewUpCs;
-   mViewUpCoordSysName = wxString(viewUpCs->GetName().c_str());
+   pViewCoordSystem = viewCs;
+   mViewCoordSysName = viewCs->GetName().c_str();
+   
+   pViewUpCoordSystem = viewUpCs;
+   mViewUpCoordSysName = viewUpCs->GetName().c_str();
+   
+   // see if we need data conversion
+   if (mViewCoordSysName.IsSameAs(mInternalCoordSysName))
+      mViewCsIsInternalCs = true;
+   else
+      mViewCsIsInternalCs = false;
    
    // set view center object
-   mOriginName = wxString(viewCs->GetOriginName().c_str());   
+   mOriginName = viewCs->GetOriginName().c_str();
    mOriginId = GetObjectId(mOriginName);
    
    mViewObjName = mOriginName;
@@ -1072,16 +1030,6 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    else if (viewCs->GetOrigin()->IsOfType(Gmat::CELESTIAL_BODY))
       mScRadius = mObjectRadius[mOriginId] * 0.03;
    
-   // set center view object as origin of the CoordinateSystem if view direction
-   // is not an object
-   if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
-   {
-      mViewObjName = wxString(mViewDirectionObj->GetName().c_str());
-      //mViewObjId = GetObjectId(mViewObjName);
-      //loj: 11/2/05 commented out because when solar system is deleted in the
-      //Sandbox it crashes when rerunning the default mission
-   }
-   
    mMaxZoomIn = mObjMaxZoomIn[mOriginId];
    
    if (mUseInitialViewPoint)
@@ -1090,21 +1038,15 @@ void TrajPlotCanvas::SetGlCoordSystem(CoordinateSystem *viewCs,
    }
    
    UpdateRotateFlags();
-   MakeValidCoordSysList();
    
-   // add initial view coord. system if not added already
-   if (mValidCSNames.Index(mInitialCoordSysName) == wxNOT_FOUND)
-      mValidCSNames.Add(mInitialCoordSysName);
-   
-   #if DEBUG_TRAJCANVAS_OBJECT
+   #if DEBUG_TRAJCANVAS_CS
    MessageInterface::ShowMessage
-      ("   viewCSName=%s, mViewCoordSystem=%p, originName=%s, "
-       "mOriginId=%d\n", mViewCoordSysName.c_str(), mViewCoordSystem,
+      ("   mViewCoordSysName=%s, pViewCoordSystem=%p, mOriginName=%s, "
+       "mOriginId=%d\n", mViewCoordSysName.c_str(), pViewCoordSystem,
        mOriginName.c_str(),  mOriginId);
    MessageInterface::ShowMessage
-      ("   mViewObjName=%s, mViewObjId=%d\n", mViewObjName.c_str(), mViewObjId);
-   MessageInterface::ShowMessage
-      ("   mViewUpCoordSysName=%s\n", mViewUpCoordSysName.c_str());
+      ("   mViewUpCoordSysName=%s, mViewObjName=%s, mViewObjId=%d\n",
+       mViewUpCoordSysName.c_str(), mViewObjName.c_str(), mViewObjId);
    #endif
    
 } // end SetGlCoordSystem()
@@ -1140,9 +1082,10 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
                                      bool usevpRefVec, bool usevpVec, bool usevdVec,
                                      bool useFixedFov, Real fov)
 {
-   mViewPointRefObj = vpRefObj;
-   mViewPointVectorObj = vpVecObj;
-   mViewDirectionObj = vdObj;
+   pViewPointRefObj = vpRefObj;
+   pViewPointVectorObj = vpVecObj;
+   pViewDirectionObj = vdObj;
+      
    mViewScaleFactor = vsFactor;
    mViewPointRefVector = vpRefVec;
    mViewPointVector = vpVec;
@@ -1157,33 +1100,34 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    Rvector3 lvpRefVec(vpRefVec);
    Rvector3 lvpVec(vpVec);
    Rvector3 lvdVec(vdVec);
-   
+      
    #if DEBUG_TRAJCANVAS_PROJ
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetGlViewOption() mViewPointRefObj=%d, "
-       "mViewPointVectorObj=%d\n   mViewDirectionObj=%d, mViewScaleFactor=%f   "
+      ("TrajPlotCanvas::SetGlViewOption() pViewPointRefObj=%p, "
+       "pViewPointVectorObj=%p\n   pViewDirectionObj=%p, mViewScaleFactor=%f   "
        "mViewPointRefVector=%s\n   mViewPointVector=%s, mViewDirectionVector=%s, "
        "mViewUpAxisName=%s\n   mUseViewPointRefVector=%d, mUseViewDirectionVector=%d, "
-       "mUseFixedFov=%d, mFixedFovAngle=%f\n",  mViewPointRefObj, mViewPointVectorObj,
-       mViewDirectionObj, mViewScaleFactor, lvpRefVec.ToString().c_str(),
-       lvpVec.ToString().c_str(), lvdVec.ToString().c_str(), mViewUpAxisName.c_str(),
+       "mUseFixedFov=%d, mFixedFovAngle=%f\n",  pViewPointRefObj, pViewPointVectorObj,
+       pViewDirectionObj, mViewScaleFactor, lvpRefVec.ToString(10).c_str(),
+       lvpVec.ToString(10).c_str(), lvdVec.ToString(10).c_str(), mViewUpAxisName.c_str(),
        mUseViewPointRefVector, mUseViewDirectionVector, mUseFixedFov, mFixedFovAngle);
    #endif
    
    // Set viewpoint ref. object id
-   if (!mUseViewPointRefVector && mViewPointRefObj)
+   if (!mUseViewPointRefVector && pViewPointRefObj)
    {
-      mViewPointRefObjName = mViewPointRefObj->GetName();
+      mViewObjName = pViewDirectionObj->GetName().c_str();
+      mViewPointRefObjName = pViewPointRefObj->GetName();
       
-      mVpRefObjId = GetObjectId(mViewPointRefObj->GetName().c_str());
+      mVpRefObjId = GetObjectId(pViewPointRefObj->GetName().c_str());
       
       if (mVpRefObjId == GmatPlot::UNKNOWN_BODY)
       {
          mUseViewPointRefVector = true;
          MessageInterface::ShowMessage
             ("*** Warning *** TrajPlotCanvas::SetGlViewOption() Cannot find "
-             "mViewPointRefObj name=%s, so using vector=%s\n",
-             mViewPointRefObj->GetName().c_str(),
+             "pViewPointRefObj name=%s, so using vector=%s\n",
+             pViewPointRefObj->GetName().c_str(),
              mViewPointRefVector.ToString().c_str());
       }
    }
@@ -1199,17 +1143,17 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    }
    
    // Set viewpoint vector object id
-   if (!mUseViewPointVector && mViewPointVectorObj)
+   if (!mUseViewPointVector && pViewPointVectorObj)
    {
-      mVpVecObjId = GetObjectId(mViewPointVectorObj->GetName().c_str());
+      mVpVecObjId = GetObjectId(pViewPointVectorObj->GetName().c_str());
       
       if (mVpVecObjId == GmatPlot::UNKNOWN_BODY)
       {
          mUseViewPointVector = true;
          MessageInterface::ShowMessage
             ("*** Warning *** TrajPlotCanvas::SetGlViewOption() Cannot find "
-             "mViewPointVectorObj name=%s, so using vector=%s\n",
-             mViewPointVectorObj->GetName().c_str(),
+             "pViewPointVectorObj name=%s, so using vector=%s\n",
+             pViewPointVectorObj->GetName().c_str(),
              mViewPointVector.ToString().c_str());
       }
    }
@@ -1223,17 +1167,17 @@ void TrajPlotCanvas::SetGlViewOption(SpacePoint *vpRefObj, SpacePoint *vpVecObj,
    }
    
    // Set view direction object id
-   if (!mUseViewDirectionVector && mViewDirectionObj)
+   if (!mUseViewDirectionVector && pViewDirectionObj)
    {
-      mVdirObjId = GetObjectId(mViewDirectionObj->GetName().c_str());
+      mVdirObjId = GetObjectId(pViewDirectionObj->GetName().c_str());
       
       if (mVdirObjId == GmatPlot::UNKNOWN_BODY)
       {
          mUseViewDirectionVector = true;
          MessageInterface::ShowMessage
             ("*** Warning *** TrajPlotCanvas::SetGlViewOption() Cannot find "
-             "mViewDirectionObj name=%s, so using vector=%s\n",
-             mViewDirectionObj->GetName().c_str(),
+             "pViewDirectionObj name=%s, so using vector=%s\n",
+             pViewDirectionObj->GetName().c_str(),
              mViewDirectionVector.ToString().c_str());
       }
    }
@@ -1550,8 +1494,8 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             {
                int colorIndex = satId*MAX_DATA+mNumData;
                MessageInterface::ShowMessage
-                  ("   satId=%d, object=%s, index=%u, color=%u\n", satId, mObjectNames[satId].c_str(),
-                   colorIndex, mObjectOrbitColor[colorIndex]);
+                  ("   satId=%d, object=%s, index=%u, color=%u\n", satId,
+                   mObjectNames[satId].c_str(), colorIndex, mObjectOrbitColor[colorIndex]);
                MessageInterface::ShowMessage
                   ("   satId:%d index=%d, gcipos = %f, %f, %f\n", satId,
                    index, mObjectViewPos[index+0], mObjectViewPos[index+1],
@@ -1560,13 +1504,18 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
             #endif
             
             // if need to convert to internal coordiante system (EarthMJ2000Eq)
-            if (mNeedInitialConversion)
+            if (mViewCsIsInternalCs)
+            {
+               CopyVector3(&mObjectGciPos[index], &mObjectViewPos[index]);
+               CopyVector3(&mObjectGciVel[index], &mObjectViewVel[index]);
+            }
+            else
             {
                Rvector6 satState(posX[sc], posY[sc], posZ[sc], velX[sc], velY[sc], velZ[sc]);
                Rvector6 outState;
                
-               mCoordConverter.Convert(time, satState, mViewCoordSystem,
-                                       outState, mInternalCoordSystem);
+               mCoordConverter.Convert(time, satState, pViewCoordSystem,
+                                       outState, pInternalCoordSystem);
                
                mObjectGciPos[index+0] = outState[0];
                mObjectGciPos[index+1] = outState[1];
@@ -1574,11 +1523,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                mObjectGciVel[index+0] = outState[3];
                mObjectGciVel[index+1] = outState[4];
                mObjectGciVel[index+2] = outState[5];
-            }
-            else
-            {
-               CopyVector3(&mObjectGciPos[index], &mObjectViewPos[index]);
-               CopyVector3(&mObjectGciVel[index], &mObjectViewVel[index]);
             }
             
             #if DEBUG_TRAJCANVAS_UPDATE
@@ -1647,12 +1591,17 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                #endif
                
                // convert objects to view CoordinateSystem
-               if (mNeedInitialConversion)
+               if (mViewCsIsInternalCs)
+               {
+                  CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
+                  CopyVector3(&mObjectViewVel[index], &mObjectGciVel[index]);
+               }
+               else
                {
                   Rvector6 outState;
                   
-                  mCoordConverter.Convert(time, objState, mInternalCoordSystem,
-                                          outState, mViewCoordSystem);
+                  mCoordConverter.Convert(time, objState, pInternalCoordSystem,
+                                          outState, pViewCoordSystem);
                   
                   mObjectViewPos[index+0] = outState[0];
                   mObjectViewPos[index+1] = outState[1];
@@ -1660,11 +1609,6 @@ void TrajPlotCanvas::UpdatePlot(const StringArray &scNames, const Real &time,
                   mObjectViewVel[index+0] = outState[3];
                   mObjectViewVel[index+1] = outState[4];
                   mObjectViewVel[index+2] = outState[5];
-               }
-               else
-               {
-                  CopyVector3(&mObjectViewPos[index], &mObjectGciPos[index]);
-                  CopyVector3(&mObjectViewVel[index], &mObjectGciVel[index]);
                }
                
                #if DEBUG_TRAJCANVAS_UPDATE_OBJECT > 1
@@ -1776,7 +1720,7 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
       {
          #if DEBUG_TRAJCANVAS_OBJECT
          MessageInterface::ShowMessage
-            ("TrajPlotCanvas::AddObjectList()  Bind new texture object=%s\n",
+            ("TrajPlotCanvas::AddObjectList() Bind new texture object=%s\n",
              objNames[i].c_str());
          #endif
          
@@ -2324,6 +2268,31 @@ void TrajPlotCanvas::SetDefaultGLFont()
 
 
 //------------------------------------------------------------------------------
+// void InitializeViewPoint()
+//------------------------------------------------------------------------------
+void TrajPlotCanvas::InitializeViewPoint()
+{
+   mViewPointRefObjName = "UNKNOWN";
+   
+   pViewPointRefObj = NULL;
+   pViewPointVectorObj = NULL;
+   pViewDirectionObj = NULL;
+   
+   mViewPointRefVector.Set(0.0, 0.0, 0.0);
+   mViewPointVector.Set(0.0, 0.0, 30000.0);
+   mViewDirectionVector.Set(0.0, 0.0, -1.0);
+   mVpLocVec.Set(0.0, 0.0, 30000.0);
+   mViewScaleFactor = 1.0;
+   mUseViewPointRefVector = true;
+   mUseViewPointVector = true;
+   mUseViewDirectionVector = true;
+   mVpRefObjId = UNKNOWN_OBJ_ID;
+   mVpVecObjId = UNKNOWN_OBJ_ID;
+   mVdirObjId = UNKNOWN_OBJ_ID;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool LoadGLTextures()
 //------------------------------------------------------------------------------
 /**
@@ -2503,18 +2472,11 @@ void TrajPlotCanvas::SetupWorld()
       
       // Setup how we view the world
       GLfloat aspect = (GLfloat)mCanvasSize.x / (GLfloat)mCanvasSize.y;
-
-      //loj: 12/7/05 commented out, need only x and y size.
-      //Real size = GmatMathUtil::Sqrt(mfRightPos * mfRightPos +
-      //                               mfTopPos   * mfTopPos +
-      //                               mfViewFar  * mfViewFar);
       
       Real size = GmatMathUtil::Sqrt(mfRightPos * mfRightPos +
                                      mfTopPos   * mfTopPos);
       
-      Real dist = mVpLocVec.GetMagnitude();
-      
-      //loj: 12/7/05 mViewObjRadius = mObjectDefaultRadius*50;
+      Real dist = mVpLocVec.GetMagnitude();      
       mViewObjRadius = mObjectDefaultRadius;
       
       if (mUseFixedFov && mUseSingleRotAngle)
@@ -2523,24 +2485,17 @@ void TrajPlotCanvas::SetupWorld()
       }
       else
       {
-         if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
+         if (!mUseViewDirectionVector && pViewDirectionObj != NULL)
          {
-            // if showing view object (loj: 12/7/05 added)
+            // if showing view object
             if (mShowObjectMap[mViewObjName])
-            {
-               //loj: 12/7/05 use mViewObjId
-               //int objId = GetObjectId(mViewDirectionObj->GetName().c_str());
-               //mViewObjRadius = mObjectRadius[objId];
                mViewObjRadius = mObjectRadius[mViewObjId];
-            }
          }
          
          // compute fov angle
-         //loj: 12/7/05 add mViewObjRadius to dist
-         //mFovDeg = 2.0 * ATan(size/2.0, dist - mViewObjRadius) * DEG_PER_RAD;
          mFovDeg = 2.0 * ATan(size/2.0, dist + mViewObjRadius) * DEG_PER_RAD;
       }
-
+      
       Real ratio = dist / mAxisLength;
       
       #if DEBUG_TRAJCANVAS_PERSPECTIVE
@@ -2552,10 +2507,10 @@ void TrajPlotCanvas::SetupWorld()
              mFovDeg, ratio);
       }
       #endif
-
-      //loj: 12/7/05 Added ratio to prevent near side clipping
+      
+      //Add ratio to prevent near side clipping
       gluPerspective(mFovDeg, aspect, mAxisLength/(mFovDeg*15), mAxisLength * mFovDeg * ratio);
-
+      
       //glFrustum(mfLeftPos, mfRightPos, mfViewBottom, mfTopPos, mAxisLength, mfViewFar*mAxisLength);
    }
    else
@@ -2719,8 +2674,8 @@ void TrajPlotCanvas::ChangeProjection(int width, int height, float axisLength)
 void TrajPlotCanvas::ComputeViewVectors(int frame)
 {
    #if DEBUG_TRAJCANVAS_PROJ
-   MessageInterface::ShowMessage("ComputeViewVectors() frame=%d, time=%f\n",
-                                 frame, mTime[frame]);
+   MessageInterface::ShowMessage
+      ("ComputeViewVectors() frame=%d, time=%f\n", frame, mTime[frame]);
    #endif
 
    mIsFirstRun = false;
@@ -2731,14 +2686,14 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
    //-----------------------------------------------------------------
    mVpRefVec.Set(0.0, 0.0, 0.0);
    
-   if (!mUseViewPointRefVector && mViewPointRefObj != NULL)
+   if (!mUseViewPointRefVector && pViewPointRefObj != NULL)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeViewVectors() mViewPointRefObj=%d, name=%s\n",
-          mViewPointRefObj, mViewPointRefObj->GetName().c_str());
+         ("ComputeViewVectors() pViewPointRefObj=%p, name=%s\n",
+          pViewPointRefObj, pViewPointRefObj->GetName().c_str());
       #endif
-
+      
       // if valid body id
       if (mVpRefObjId != UNKNOWN_OBJ_ID)
       {
@@ -2761,12 +2716,12 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
    //-----------------------------------------------------------------
    mVpVec = mViewPointVector;
    
-   if (!mUseViewPointVector && mViewPointVectorObj != NULL)
+   if (!mUseViewPointVector && pViewPointVectorObj != NULL)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeViewVectors() mViewPointVectorObj=%d, name=%s, mVpVecObjId=%d\n",
-          mViewPointVectorObj, mViewPointVectorObj->GetName().c_str(),
+         ("ComputeViewVectors() pViewPointVectorObj=%p, name=%s, mVpVecObjId=%d\n",
+          pViewPointVectorObj, pViewPointVectorObj->GetName().c_str(),
           mVpVecObjId);
       #endif
       
@@ -2813,17 +2768,17 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
    //-----------------------------------------------------------------
    mVdVec = mViewDirectionVector;
    
-   if (!mUseViewDirectionVector && mViewDirectionObj != NULL)
+   if (!mUseViewDirectionVector && pViewDirectionObj != NULL)
    {
       #if DEBUG_TRAJCANVAS_PROJ
       MessageInterface::ShowMessage
-         ("ComputeViewVectors() mViewDirectionObj=%d, name=%s\n",
-          mViewDirectionObj, mViewDirectionObj->GetName().c_str());
+         ("ComputeViewVectors() pViewDirectionObj=%p, name=%s\n",
+          pViewDirectionObj, pViewDirectionObj->GetName().c_str());
       #endif
       
       // if viewpoint ref object is same as view direction object
       // just look opposite side
-      if (mViewDirectionObj->GetName() == mViewPointRefObjName)
+      if (pViewDirectionObj->GetName() == mViewPointRefObjName)
       {
          mVdVec = -mVpLocVec;
       }
@@ -2847,7 +2802,7 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
              "mVdirObjId=%d\n", mVdirObjId);
       }
    }
-
+   
    // set view center vector for gluLookAt()
    mVcVec = mVdVec;
    
@@ -2863,7 +2818,7 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
    //-----------------------------------------------------------------
    // set view center object
    //-----------------------------------------------------------------
-      
+   
    // compute axis length (this tells how far zoom out is)
 
    // Initially use mVpLocVec and later use changed value by mouse zoom-in/out.
@@ -2886,7 +2841,7 @@ void TrajPlotCanvas::ComputeViewVectors(int frame)
    mfCamRotYAxis = -mVdVec[0];
    mfCamRotZAxis = 0.0;
    mUseSingleRotAngle = true;
-
+   
    ComputeUpAngleAxis(frame);
    
    #if DEBUG_TRAJCANVAS_PROJ
@@ -2910,14 +2865,14 @@ void TrajPlotCanvas::ComputeUpAngleAxis(int frame)
    
    upOutState = mUpState;
    
-   if (mViewUpCoordSystem->GetName() != mViewCoordSystem->GetName())
+   if (pViewUpCoordSystem->GetName() != pViewCoordSystem->GetName())
    {
-      mCoordConverter.Convert(mTime[frame], mUpState, mViewUpCoordSystem,
-                              upOutState, mViewCoordSystem);
+      mCoordConverter.Convert(mTime[frame], mUpState, pViewUpCoordSystem,
+                              upOutState, pViewCoordSystem);
    }
    
    mUpVec.Set(upOutState(0), upOutState(1), upOutState(2));
-
+   
    // If view up and view direction is the same axis, change view direction,
    // so it can show up direction correctly even for gluLookAt.
    
@@ -3078,7 +3033,7 @@ void TrajPlotCanvas::DrawFrame()
       UpdateRotateFlags();
       
       // set view center object
-      mOriginName = wxString(mViewCoordSystem->GetOriginName().c_str());
+      mOriginName = wxString(pViewCoordSystem->GetOriginName().c_str());
       mOriginId = GetObjectId(mOriginName);
       
       mViewObjName = mOriginName;
@@ -3140,10 +3095,9 @@ void TrajPlotCanvas::DrawPlot()
 {
    #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::DrawPlot() mNumData=%d, mNeedOriginConversion=%d, "
-       "mIsInternalCoordSystem=%d\n   mUseInitialViewPoint=%d, mAxisLength=%f\n",
-       mNumData, mNeedOriginConversion, mIsInternalCoordSystem, mUseInitialViewPoint,
-       mAxisLength);
+      ("TrajPlotCanvas::DrawPlot() mNumData=%d, mViewCsIsInternalCs=%d\n   "
+       "mUseInitialViewPoint=%d, mAxisLength=%f\n", mNumData, mViewCsIsInternalCs,
+       mUseInitialViewPoint, mAxisLength);
    #endif
    
    if (mRedrawLastPointsOnly || mNumPointsToRedraw == 0)
@@ -3187,12 +3141,12 @@ void TrajPlotCanvas::DrawPlot()
    
    TransformView(mNumData-1);
    
-   // tilt Origin rotation axis if needed
-   if (mNeedOriginConversion)
-   {
-      glPushMatrix();
-      TiltOriginZAxis();
-   }
+//    // tilt Origin rotation axis if needed
+//    if (mNeedOriginConversion)
+//    {
+//       glPushMatrix();
+//       TiltOriginZAxis();
+//    }
    
    // draw equatorial plane
    if (mDrawXyPlane)
@@ -3211,8 +3165,8 @@ void TrajPlotCanvas::DrawPlot()
    if (mDrawEcPlane)
       DrawEclipticPlane(mEcPlaneColor);
    
-   if (mNeedOriginConversion)
-      glPopMatrix();
+//    if (mNeedOriginConversion)
+//       glPopMatrix();
    
    // draw object orbit
    DrawObjectOrbit(mNumData-1);
@@ -3323,14 +3277,14 @@ void TrajPlotCanvas::DrawObject(const wxString &objName, int frame)
       //========== #ifdef
       #ifdef USE_MHA_TO_ROTATE_EARTH
       
-      if (mSolarSystem)
+      if (pSolarSystem)
       {         
          Real mha = 0.0;
          
          if (initialLong < 180.0)
             initialLong = -initialLong - offset;
 
-         CelestialBody *earth = mSolarSystem->GetBody("Earth");
+         CelestialBody *earth = pSolarSystem->GetBody("Earth");
          if (earth)
             mha = earth->GetHourAngle(mTime[frame]);
          
@@ -4115,7 +4069,7 @@ void TrajPlotCanvas::DrawAxes()
 //                 const wxString &label3 = "")
 //---------------------------------------------------------------------------
 /*
- * Writes status
+ * Writes status at the bottom of the frame
  */
 //---------------------------------------------------------------------------
 void TrajPlotCanvas::DrawStatus(const wxString &label1, int frame,
@@ -4137,6 +4091,8 @@ void TrajPlotCanvas::DrawStatus(const wxString &label1, int frame,
    str.Printf("%d", frame);
    text = label1 + str;
    str.Printf("%f", time);
+   //str = TimeConverterUtil::ConvertMjdToGregorian(time).c_str();
+   
    text = text + label2 + str;
    
    glColor3f(1, 1, 0); //yellow
@@ -4340,11 +4296,11 @@ bool TrajPlotCanvas::TiltOriginZAxis()
    if (mNumData == 0)
       return false;
    
-   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
+   if (pInternalCoordSystem == NULL || pViewCoordSystem == NULL)
       return false;
 
    std::string axisTypeName =
-      mViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetTypeName();
+      pViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "")->GetTypeName();
    
    #if DEBUG_TRAJCANVAS_DRAW
    MessageInterface::ShowMessage
@@ -4352,14 +4308,14 @@ bool TrajPlotCanvas::TiltOriginZAxis()
    #endif
    
    // rotate earth Z axis if view CS is EarthMJ2000Ec
-   if (mViewCoordSystem->GetName() == "EarthMJ2000Ec")
+   if (pViewCoordSystem->GetName() == "EarthMJ2000Ec")
    {
       Rvector6 inState, outState;
       
       inState.Set(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
       
-      mCoordConverter.Convert(mTime[0], inState, mInternalCoordSystem,
-                              outState, mViewCoordSystem);
+      mCoordConverter.Convert(mTime[0], inState, pInternalCoordSystem,
+                              outState, pViewCoordSystem);
       
       #if DEBUG_TRAJCANVAS_DRAW > 2
          MessageInterface::ShowMessage
@@ -4386,11 +4342,45 @@ bool TrajPlotCanvas::TiltOriginZAxis()
 
 
 //---------------------------------------------------------------------------
+// void UpdateRotateFlags()
+//---------------------------------------------------------------------------
+void TrajPlotCanvas::UpdateRotateFlags()
+{
+   AxisSystem *axis =
+      (AxisSystem*)pViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "");
+
+   if (axis->IsOfType("BodyFixedAxes") &&
+       (mOriginName.IsSameAs(axis->GetStringParameter("Origin").c_str())))
+   {
+      mCanRotateBody = false;
+      mCanRotateAxes = false;
+   }
+   else if (axis->IsOfType("InertialAxes"))
+   {
+      mCanRotateBody = true;
+      mCanRotateAxes = false;
+   }
+   else
+   {
+      mCanRotateBody = false;
+      mCanRotateAxes = false;
+   }
+   
+   
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage
+      ("TrajPlotCanvas::UpdateRotateFlags() mCanRotateBody=%d, "
+       "mCanRotateAxes=%d\n", mCanRotateBody, mCanRotateAxes);
+   #endif
+}
+
+
+//---------------------------------------------------------------------------
 // bool ConvertObjectData()
 //---------------------------------------------------------------------------
 bool TrajPlotCanvas::ConvertObjectData()
 {
-   if (mInternalCoordSystem == NULL || mViewCoordSystem == NULL)
+   if (pInternalCoordSystem == NULL || pViewCoordSystem == NULL)
       return false;
    
    Rvector6 inState, outState;
@@ -4398,12 +4388,12 @@ bool TrajPlotCanvas::ConvertObjectData()
    #if DEBUG_TRAJCANVAS_CONVERT
    MessageInterface::ShowMessage
       ("TrajPlotCanvas::ConvertObjectData() internalCS=%s, viewCSName=%s, viewCS=%d\n",
-       mInternalCoordSystem->GetName().c_str(), mViewCoordSystem->GetName().c_str(),
-       mViewCoordSystem);
+       pInternalCoordSystem->GetName().c_str(), pViewCoordSystem->GetName().c_str(),
+       pViewCoordSystem);
    #endif
    
    // do not convert if view CS is internal CS
-   if (mIsInternalCoordSystem)
+   if (mViewCsIsInternalCs)
    {
       #if DEBUG_TRAJCANVAS_CONVERT
       MessageInterface::ShowMessage
@@ -4453,8 +4443,8 @@ void TrajPlotCanvas::ConvertObject(int objId, int index)
                mObjectGciPos[start+2], mObjectGciVel[start+0],
                mObjectGciVel[start+1], mObjectGciVel[start+2]);
    
-   mCoordConverter.Convert(mTime[index], inState, mInternalCoordSystem,
-                           outState, mViewCoordSystem);
+   mCoordConverter.Convert(mTime[index], inState, pInternalCoordSystem,
+                           outState, pViewCoordSystem);
    
    mObjectViewPos[index+0] = outState[0];
    mObjectViewPos[index+1] = outState[1];
@@ -4476,137 +4466,6 @@ void TrajPlotCanvas::ConvertObject(int objId, int index)
 
 
 //---------------------------------------------------------------------------
-// void UpdateRotateFlags()
-//---------------------------------------------------------------------------
-void TrajPlotCanvas::UpdateRotateFlags()
-{
-   AxisSystem *axis =
-      (AxisSystem*)mViewCoordSystem->GetRefObject(Gmat::AXIS_SYSTEM, "");
-
-   if (axis->IsOfType("BodyFixedAxes") &&
-       (mOriginName.IsSameAs(axis->GetStringParameter("Origin").c_str())))
-   {
-      mCanRotateBody = false;
-      mCanRotateAxes = false;
-   }
-   else if (axis->IsOfType("InertialAxes"))
-   {
-      mCanRotateBody = true;
-      mCanRotateAxes = false;
-   }
-   else
-   {
-      mCanRotateBody = false;
-      mCanRotateAxes = false;
-   }
-   
-   
-   #if DEBUG_TRAJCANVAS_OBJECT
-   MessageInterface::ShowMessage
-      ("TrajPlotCanvas::UpdateRotateFlags() mCanRotateBody=%d, "
-       "mCanRotateAxes=%d\n", mCanRotateBody, mCanRotateAxes);
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void MakeValidCoordSysList()
-//------------------------------------------------------------------------------
-/*
- * Make a list of coordinate system that can be converted from and to.
- */
-//------------------------------------------------------------------------------
-void TrajPlotCanvas::MakeValidCoordSysList()
-{
-   StringArray csList =
-      theGuiInterpreter->GetListOfObjects(Gmat::COORDINATE_SYSTEM);
-   CoordinateSystem *cs;
-   SpacePoint *sp;
-   wxString csName;
-   wxString origin;
-   wxString primary;
-   wxString secondary;
-   
-   mValidCSNames.Empty();
-   
-   for (unsigned int i=0; i<csList.size(); i++)
-   {
-      origin = "None";
-      primary = "None";
-      secondary = "None";
-      
-      //cs = theGuiInterpreter->GetCoordinateSystem(csList[i]);
-      cs = (CoordinateSystem*)theGuiInterpreter->GetConfiguredObject(csList[i]);
-      csName = cs->GetName().c_str();
-      
-      //MessageInterface::ShowMessage("==> csName=%s\n", csName.c_str());
-      
-      sp = cs->GetOrigin();
-      // cannot convert to CS with spacecraft as origin
-      if (sp->IsOfType("Spacecraft"))
-         continue;
-      else
-         origin = cs->GetOriginName().c_str();
-      
-      sp = cs->GetPrimaryObject();
-      if (sp != NULL)
-      {
-         // cannot convert to CS with spacecraft as primary
-         if (sp->IsOfType("Spacecraft"))
-            continue;
-         
-         primary = sp->GetName().c_str();
-      }
-      
-      sp = cs->GetSecondaryObject();
-      if (sp != NULL)
-      {
-         // cannot convert to CS with spacecraft as secondary
-         if (sp->IsOfType("Spacecraft"))
-            continue;
-         
-         secondary = sp->GetName().c_str();
-      }
-      
-      //MessageInterface::ShowMessage
-      //   ("==> origin=%s, primary=%s, secondary=%s\n",
-      //    origin.c_str(), primary.c_str(), secondary.c_str());
-      
-      if (origin == "None")
-         continue;
-      
-      if (GetObjectId(origin) != UNKNOWN_OBJ_ID)
-      {
-         if (primary == "None" && secondary == "None")
-         {
-            mValidCSNames.Add(csName);
-            continue;
-         }
-         
-         if (primary != "None" && GetObjectId(primary) != UNKNOWN_OBJ_ID)
-         {
-            if (secondary == "None")
-            {
-               mValidCSNames.Add(csName);
-               continue;
-            }
-            else if (GetObjectId(secondary) != UNKNOWN_OBJ_ID)
-            {
-               mValidCSNames.Add(csName);
-               continue;               
-            }
-         }
-      }
-   }
-   
-   //for (unsigned int i=0; i<mValidCSNames.GetCount(); i++)
-   //{
-   //   MessageInterface::ShowMessage("==> validCSName=%s\n", mValidCSNames[i].c_str());
-   //}
-}
-
-
-//---------------------------------------------------------------------------
 // Rvector3 ComputeEulerAngles()
 //---------------------------------------------------------------------------
 Rvector3 TrajPlotCanvas::ComputeEulerAngles()
@@ -4624,7 +4483,6 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
    Rmatrix33 finalMat;
    
    #ifdef USE_MODELVIEW_MAT
-   //if (mUseGluLookAt)
    {   
       // model view matrix
       static GLfloat sViewMat[16];
@@ -4657,18 +4515,16 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
       #endif
    }
    #else
-   //else
-   {
-   
+   {   
       Rvector3 upAxis((Real)mfUpXAxis, (Real)mfUpYAxis, (Real)mfUpZAxis);
       Rvector3 rotAxis = Rvector3((Real)mfCamRotXAxis, (Real)mfCamRotYAxis,
                                   (Real)mfCamRotZAxis);
-
+      
       #ifdef DEBUG_TRAJCANVAS_EULER
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::ComputeEulerAngles() mfUpAngle=%f, upAxis=%s\n",
           mfUpAngle, upAxis.ToString().c_str());
-   
+      
       MessageInterface::ShowMessage
          ("TrajPlotCanvas::ComputeEulerAngles() mfCamSingleRotAngle=%f, rotAxis=%s\n",
           mfCamSingleRotAngle, rotAxis.ToString().c_str());
@@ -4708,7 +4564,7 @@ Rvector3 TrajPlotCanvas::ComputeEulerAngles()
    
    if (error)
       return modAngle;
-
+   
    
    try
    {
@@ -4833,11 +4689,11 @@ void TrajPlotCanvas::ComputeLongitudeLst(Real time, Real x, Real y,
       return;
    
    // compute longitude of the first spacecraft
-   if (mSolarSystem)
+   if (pSolarSystem)
    {
       Real raRad = ATan(y, x);
       Real raDeg = RadToDeg(raRad, true);
-      CelestialBody *earth = mSolarSystem->GetBody("Earth");
+      CelestialBody *earth = pSolarSystem->GetBody("Earth");
       if (earth)
          mha = earth->GetHourAngle(time);
       

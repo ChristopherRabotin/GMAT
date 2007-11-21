@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              MdiChildTrajFrame
 //------------------------------------------------------------------------------
@@ -46,8 +46,7 @@ END_EVENT_TABLE()
 MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
                                      const wxString& plotName, const wxString& title,
                                      const wxPoint& pos, const wxSize& size,
-                                     const long style, const wxString &csName,
-                                     SolarSystem *solarSys)
+                                     const long style)
    : GmatMdiChildFrame(parent, plotName, title, GmatTree::OUTPUT_OPENGL_PLOT, -1,
                        pos, size, style | wxNO_FULL_REPAINT_ON_RESIZE)
 {
@@ -78,8 +77,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
    int width, height;
    GetClientSize(&width, &height);
    TrajPlotCanvas *canvas =
-      new TrajPlotCanvas(this, -1, wxPoint(0, 0),
-                         wxSize(width, height), csName, solarSys, plotName);
+      new TrajPlotCanvas(this, -1, wxPoint(0, 0), wxSize(width, height), plotName);
    
    mCanvas = canvas;
    
@@ -242,6 +240,36 @@ Integer MdiChildTrajFrame::GetAnimationFrameIncrement()
       return mCanvas->GetAnimationFrameIncrement();
 
    return 0;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetSolarSystem(SolarSystem *ss)
+{
+   if (mCanvas)
+      mCanvas->SetSolarSystem(ss);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGLContext(wxGLContext *glContext = NULL)
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetGLContext(wxGLContext *glContext)
+{
+   if (mCanvas)
+      mCanvas->SetGLContext(glContext);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetUserInterrupt()
+//------------------------------------------------------------------------------
+void MdiChildTrajFrame::SetUserInterrupt()
+{
+   if (mCanvas)
+      mCanvas->SetUserInterrupt();
 }
 
 
@@ -411,16 +439,6 @@ void MdiChildTrajFrame::SetXyPlaneColor(UnsignedInt color)
 
 
 //------------------------------------------------------------------------------
-// void SetViewCoordSystem(const wxString &csName)
-//------------------------------------------------------------------------------
-void MdiChildTrajFrame::SetViewCoordSystem(const wxString &csName)
-{
-   if (mCanvas)
-      mCanvas->SetViewCoordSystem(csName);
-}
-
-
-//------------------------------------------------------------------------------
 // void SetSunLineColor(UnsignedInt color)
 //------------------------------------------------------------------------------
 void MdiChildTrajFrame::SetSunLineColor(UnsignedInt color)
@@ -470,7 +488,6 @@ void MdiChildTrajFrame::SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMa
 }
 
 
-// actions
 //------------------------------------------------------------------------------
 // void DrawInOtherCoordSystem(const wxString &csName)
 //------------------------------------------------------------------------------
@@ -478,8 +495,6 @@ void MdiChildTrajFrame::DrawInOtherCoordSystem(const wxString &csName)
 {
    if (mCanvas)
       mCanvas->DrawInOtherCoordSystem(csName);
-   
-   //mOptionDialog->SetGotoObjectName(mCanvas->GetGotoObjectName());
 }
 
 

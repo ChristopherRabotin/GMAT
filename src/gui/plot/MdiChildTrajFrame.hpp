@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              MdiChildTrajFrame
 //------------------------------------------------------------------------------
@@ -37,11 +37,9 @@
 class MdiChildTrajFrame: public GmatMdiChildFrame
 {
 public:
-   MdiChildTrajFrame(wxMDIParentFrame *parent,
-                     const wxString& plotName, const wxString& title,
-                     const wxPoint& pos, const wxSize& size,
-                     const long style, const wxString &csName = "",
-                     SolarSystem *solarSys = NULL);
+   MdiChildTrajFrame(wxMDIParentFrame *parent, const wxString& plotName,
+                     const wxString& title, const wxPoint& pos,
+                     const wxSize& size, const long style);
    virtual ~MdiChildTrajFrame();
    
    // getters
@@ -63,10 +61,9 @@ public:
    Integer GetAnimationFrameIncrement();
    
    // setters
-   void SetGLContext(wxGLContext *glContext = NULL)
-      { mCanvas->SetGLContext(glContext); }
-   void SetUserInterrupt()
-      { mCanvas->SetUserInterrupt(); }
+   void SetSolarSystem(SolarSystem *ss);
+   void SetGLContext(wxGLContext *glContext = NULL);
+   void SetUserInterrupt();
    
    void SetPlotName(const wxString &name);
    void ResetShowViewOption();
@@ -83,7 +80,6 @@ public:
    void SetDrawGrid(bool flag);
    void SetXyPlaneColor(UnsignedInt color);
    void SetSunLineColor(UnsignedInt color);
-   void SetViewCoordSystem(const wxString &csName);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
    void SetShowOrbitNormals(const wxStringBoolMap &showOrbNormMap);
@@ -97,7 +93,8 @@ public:
    void OnClearPlot(wxCommandEvent& event);
    void OnChangeTitle(wxCommandEvent& event);
    void OnShowDefaultView(wxCommandEvent& event);
-   
+
+   // from GL option dialog
    void OnShowOptionDialog(wxCommandEvent& event);
    void OnDrawWireFrame(wxCommandEvent& event);
    void OnDrawXyPlane(wxCommandEvent& event);
@@ -144,17 +141,17 @@ public:
    void EnableAnimation(bool enable);
    
 protected:
-
+   
    TrajPlotCanvas *mCanvas;
    OpenGlOptionDialog *mOptionDialog;
    
    wxString mPlotName;
    wxString mPlotTitle;
    bool mOverlapPlot;
-
+   
    wxArrayString mBodyNames;
    UnsignedIntArray mBodyColors;
-
+   
    void CheckFrame();
    
    DECLARE_EVENT_TABLE();

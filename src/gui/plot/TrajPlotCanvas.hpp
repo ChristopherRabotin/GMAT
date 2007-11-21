@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              TrajPlotCanvas
 //------------------------------------------------------------------------------
@@ -33,8 +33,8 @@ public:
    TrajPlotCanvas(wxWindow *parent, const wxWindowID id = -1,
                   const wxPoint& pos = wxDefaultPosition,
                   const wxSize& size = wxDefaultSize, 
-                  const wxString &csName = "", SolarSystem *solarSys = NULL,
-                  const wxString& name = wxT("TrajPlotCanvas"), long style = 0);
+                  const wxString& name = wxT("TrajPlotCanvas"),
+                  long style = 0);
    ~TrajPlotCanvas();
    
    // initialization
@@ -58,7 +58,7 @@ public:
    int GetAnimationUpdateInterval() { return mUpdateInterval; }
    int GetAnimationFrameIncrement() { return mFrameInc; }
    wxString GetViewCoordSysName() { return mViewCoordSysName; }
-   CoordinateSystem* GetViewCoordSystem() { return mViewCoordSystem; }
+   CoordinateSystem* GetViewCoordSystem() { return pViewCoordSystem; }
    const wxArrayString& GetObjectNames() { return mObjectNames; }
    const wxArrayString& GetValidCSNames() { return mValidCSNames; }
    const wxStringBoolMap& GetShowObjectMap() { return mShowObjectMap; }
@@ -83,7 +83,6 @@ public:
    void SetXyPlaneColor(unsigned int color) { mXyPlaneColor = color; }
    void SetEcPlaneColor(unsigned int color) { mEcPlaneColor = color; }
    void SetSunLineColor(unsigned int color) { mSunLineColor = color; }
-   void SetViewCoordSystem(const wxString &csName);
    void SetUsePerspectiveMode(bool perspMode);
    void SetObjectColors(const wxStringColorMap &objectColorMap);
    void SetShowObjects(const wxStringBoolMap &showObjMap);
@@ -111,6 +110,9 @@ public:
    void SetGlObject(const StringArray &objNames,
                     const UnsignedIntArray &objOrbitColors,
                     const std::vector<SpacePoint*> &objectArray);
+   
+   // SolarSystem
+   void SetSolarSystem(SolarSystem *ss);
    
    // CoordinateSystem
    void SetGlCoordSystem(CoordinateSystem *viewCs,
@@ -253,9 +255,12 @@ private:
    StringArray mScNameArray;
    std::string mViewPointRefObjName;
    std::string mViewUpAxisName;
-   SpacePoint *mViewPointRefObj;
-   SpacePoint *mViewPointVectorObj;
-   SpacePoint *mViewDirectionObj;
+   
+   // passed view definition object pointers
+   SpacePoint *pViewPointRefObj;
+   SpacePoint *pViewPointVectorObj;
+   SpacePoint *pViewDirectionObj;
+   
    Rvector3 mViewPointRefVector;
    Rvector3 mViewPointVector;
    Rvector3 mViewDirectionVector;
@@ -311,11 +316,11 @@ private:
    GLuint mGlList;
    
    // solar system
-   SolarSystem *mSolarSystem;
+   SolarSystem *pSolarSystem;
    
    // earth
    float mEarthRadius;
-
+   
    // objects
    wxArrayString mObjectNames;
    wxArrayString mShowObjectNames;
@@ -351,26 +356,20 @@ private:
    
    // coordinate system
    wxString mInternalCoordSysName;
-   wxString mInitialCoordSysName;
    wxString mViewCoordSysName;
    wxString mViewUpCoordSysName;
    wxString mOriginName;
-   CoordinateSystem *mInternalCoordSystem;
-   CoordinateSystem *mInitialCoordSystem;
-   CoordinateSystem *mViewCoordSystem;
-   CoordinateSystem *mViewUpCoordSystem;
+   CoordinateSystem *pInternalCoordSystem;
+   CoordinateSystem *pViewCoordSystem;
+   CoordinateSystem *pViewUpCoordSystem;
    int mOriginId;
    
    // coordinate sytem conversion
-   bool mIsInternalCoordSystem;
-   bool mNeedSpacecraftConversion;
-   bool mNeedOriginConversion;
-   bool mNeedObjectConversion;
-   bool mNeedInitialConversion;
+   bool mViewCsIsInternalCs;
    CoordinateConverter mCoordConverter;
    
    // view
-   wxSize mCanvasSize;
+   wxSize  mCanvasSize;
    GLfloat mfViewLeft;
    GLfloat mfViewRight;
    GLfloat mfViewTop;
@@ -390,16 +389,19 @@ private:
    // animation
    bool mIsAnimationRunning;
    bool mHasUserInterrupted;
-   int mUpdateInterval;
-   int mFrameInc;
+   int  mUpdateInterval;
+   int  mFrameInc;
    
    // message
    bool mShowMaxWarning;
    int  mOverCounter;
-
+   
    // windows specific functions
    bool SetPixelFormatDescriptor();
    void SetDefaultGLFont();
+   
+   // initialize
+   void InitializeViewPoint();
    
    // texture
    bool LoadGLTextures();
@@ -440,20 +442,19 @@ private:
    void ApplyEulerAngles();
    
    // drawing primative objects
-   //void DrawStringAt(char* inMsg, GLfloat x, GLfloat y, GLfloat z);
    void DrawStringAt(const wxString &str, GLfloat x, GLfloat y, GLfloat z);
    void DrawCircle(GLUquadricObj *qobj, Real radius);
    
    // for object
-   int GetObjectId(const wxString &name);
+   int  GetObjectId(const wxString &name);
    void ClearObjectArrays();
    bool CreateObjectArrays();
    
    // for coordinate system
    bool TiltOriginZAxis();
+   void UpdateRotateFlags();
    bool ConvertObjectData();
    void ConvertObject(int objId, int index);
-   void UpdateRotateFlags();
    void MakeValidCoordSysList();
    
    // for utility
@@ -463,7 +464,7 @@ private:
    
    // for copy
    void CopyVector3(Real to[3], Real from[3]);
-   
+   // for loading image
    bool LoadImage(char *fileName);
    
 };
