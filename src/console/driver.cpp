@@ -418,7 +418,7 @@ void TestSyncModeAccess(std::string filwwename)
 int main(int argc, char *argv[])
 {
    try {
-      std::string msg = "Goddard Mission Analysis Tool\nConsole Based Version\n";
+      std::string msg = "General Mission Analysis Tool\nConsole Based Version\n";
 
       msg += "Build Date: ";
       msg += __DATE__;
