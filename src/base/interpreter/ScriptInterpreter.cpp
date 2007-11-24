@@ -341,7 +341,7 @@ bool ScriptInterpreter::ReadFirstPass()
       if (newLine != "" && newLine[0] != '%')
       {         
          // Remove ending % or ;
-         UnsignedInt index;
+         std::string::size_type index;
          index = newLine.find_first_of("%;");
          if (index != newLine.npos)
          {

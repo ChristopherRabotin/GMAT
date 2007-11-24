@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 # Build environment file for Linux
 
 # Flags used to control the build
@@ -8,6 +8,9 @@ CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
+
+# For AMD64 native code, this variable should be set equal to 1
+USE_64_BIT_LONGS = 0
 
 # If the copy of wx-config you neeed is not in your path, enter the path to the
 # file here, including a terminating slash.  (The commented version is an 
@@ -22,7 +25,7 @@ WX_CONFIG_PATH =
 # You may also need to edit this list, depending on your MATLAB version number;
 # this set works with R2007b for Linux.
 MATLAB_INCLUDE = -I/opt/matlab73/extern/include
-MATLAB_LIB = -L/opt/matlab73/bin/glnx86 
+MATLAB_LIB = -L/opt/matlab73/bin/glnx86
 MATLAB_LIBRARIES = -leng -lmx -lut \
                    -lmat -lpthread -lstdc++ -lm \
                    -licudata -licuuc -licui18n -licuio -lz -lhdf5 -lxerces-c
@@ -32,10 +35,12 @@ IL_HEADERS = -I/usr/local/include/IL
 IL_LIBRARIES = -lIL -lILU -lILUT
 
 # wxWidgets settings
+ifeq ($(CONSOLE_APP), 0)
 ifeq ($(WX_28_SYNTAX), 1)
 WX_28_DEFINES = -D__USE_WX280__ -D__USE_WX280_GL__ -DwxUSE_GLCANVAS
 else
 WX_28_DEFINES = 
+endif
 endif
 
 # The Console app does not support MATLAB linkage for now
@@ -71,8 +76,10 @@ LINUX_MAC = 1
 # Build specific flags
 MATLAB_FLAGS = -D__USE_MATLAB__=1
 
+ifeq ($(CONSOLE_APP), 0)
 WXCPPFLAGS = `$(WX_CONFIG_PATH)wx-config --cppflags`
 WXLINKFLAGS = `$(WX_CONFIG_PATH)wx-config --libs --gl-libs --static=no`
+endif
 
 
 ifeq ($(CONSOLE_APP),1)
@@ -88,14 +95,18 @@ else
 DEBUG_FLAGS = 
 endif
 
+ifeq ($(USE_64_BIT_LONGS), 1)
+PROCFLAGS = -DUSE_64_BIT_LONGS
+endif
+
 # Build the complete list of flags for the compilers
 ifeq ($(USE_MATLAB),1)
 CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall $(MATLAB_FLAGS) \
            $(WXCPPFLAGS) \
-           $(MATLAB_INCLUDE) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
+           $(MATLAB_INCLUDE) $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(PROCFLAGS)
 else
 CPP_BASE = $(OPTIMIZATIONS) $(CONSOLE_FLAGS) -Wall \
-           $(WXCPPFLAGS) $(PROFILE_FLAGS) $(DEBUG_FLAGS)
+           $(WXCPPFLAGS) $(PROFILE_FLAGS) $(DEBUG_FLAGS) $(PROCFLAGS)
 endif
 
 ifeq ($(USE_DEVIL), 0)

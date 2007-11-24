@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Propagate
 //------------------------------------------------------------------------------
@@ -1628,7 +1628,7 @@ void Propagate::FindSetupsAndStops(Integer &loc,
    currentLoc = loc;
    
    parmstart = generatingString.find("{", currentLoc);
-   if ((UnsignedInt)parmstart == std::string::npos)
+   if ((std::string::size_type)parmstart == std::string::npos)
       scanning = false;
    
    while (scanning) 
@@ -1695,7 +1695,7 @@ void Propagate::ConfigurePropSetup(std::string &setupDesc)
 
    // First separate the PropSetup from the SpaceObjects
    std::string prop, sats, sat;
-   UnsignedInt loc = setupDesc.find("(");
+   std::string::size_type loc = setupDesc.find("(");
    if (loc == std::string::npos)
       throw CommandException("The propsetup string '" + setupDesc +
          "' does not identify any spacecraft for propagation on "
@@ -1750,7 +1750,7 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
    #endif
 
    std::string lhs, rhs = "";
-   UnsignedInt loc;
+   std::string::size_type loc;
    StringArray extras;
    extras.push_back("{");
    extras.push_back("}");

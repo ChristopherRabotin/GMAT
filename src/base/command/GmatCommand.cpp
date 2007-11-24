@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //                                  GmatCommand
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: Goddard MiHeaderssion Analysis Tool.
 //
 // **Legal**
 //
@@ -1987,7 +1987,7 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    std::string newName = name;
    
    // Ignore array indexing of Array
-   UnsignedInt index = name.find('(');
+   std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
    

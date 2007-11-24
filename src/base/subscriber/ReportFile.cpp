@@ -567,7 +567,7 @@ std::string ReportFile::GetStringParameter(const Integer id) const
 {
    if (id == FILENAME)
    {
-      UnsignedInt index = filename.find_last_of("/\\");
+      std::string::size_type index = filename.find_last_of("/\\");
       if (index != filename.npos)
          return filename;
       else

@@ -1,4 +1,4 @@
-//$Header$ 
+//$Id$ 
 //------------------------------------------------------------------------------
 //                              TimeSystemConverter
 //------------------------------------------------------------------------------
@@ -429,7 +429,7 @@ void TimeConverterUtil::GetTimeSystemAndFormat(const std::string &type,
    //-------------------------------------------------------
    // Get from time system and format
    //-------------------------------------------------------
-   UnsignedInt loc = type.find("ModJulian", 0);
+   std::string::size_type loc = type.find("ModJulian", 0);
    if (loc == type.npos)
       loc = type.find("Gregorian", 0);
    

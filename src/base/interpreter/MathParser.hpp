@@ -74,10 +74,10 @@ private:
    bool IsParenPartOfFunction(const std::string &str);
    std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
                                std::string &leftStr);
-   std::string FindOperatorFrom(const std::string &str, UnsignedInt start,
+   std::string FindOperatorFrom(const std::string &str, std::string::size_type start,
                                 std::string &left, std::string &right,
-                                UnsignedInt &opIndex);
-   UnsignedInt FindSubtract(const std::string &str, UnsignedInt start);
+                                std::string::size_type &opIndex);
+   std::string::size_type FindSubtract(const std::string &str, std::string::size_type start);
    std::string GetOperator(const std::map<std::string, Integer>::iterator &pos1,
                            const std::map<std::string, Integer>::iterator &pos2,
                            const std::map<std::string, Integer> &opIndexMap,
@@ -87,7 +87,7 @@ private:
    std::string GetOperatorName(const std::string &op, bool &opFound);
    void BuildFunction(const std::string &str, const std::string list[],
                       UnsignedInt count, std::string &fnName, std::string &leftStr);
-   UnsignedInt FindMatchingParen(const std::string &str, UnsignedInt start);
+   std::string::size_type FindMatchingParen(const std::string &str, std::string::size_type start);
    void FillItems(StringArray &items, const std::string &op,
                   const std::string &left, const std::string &right);
    

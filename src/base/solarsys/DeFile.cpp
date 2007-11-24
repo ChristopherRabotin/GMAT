@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  DeFile
 //------------------------------------------------------------------------------
@@ -35,12 +35,15 @@
 #include "TimeSystemConverter.hpp"
 #include "MessageInterface.hpp"
 
+//#define __UNIT_TEST__
+
 #if defined (__UNIT_TEST__)
 #include <fstream> //for debug output
 #endif
 
 //#define DEBUG_DEFILE
 //#define DEBUG_DEFILE_READ
+//#define DEBUG_DEFILE_INIT
 
 // DE file code from JPL/JSC (Hoffman) includes
 #include <stdio.h>
@@ -208,7 +211,7 @@ void DeFile::Initialize()
    #ifdef DEBUG_DEFILE_INIT
    MessageInterface::ShowMessage("DeFile::Initialize() entered\n");
    #endif
-   
+  
    try
    {
       InitializeDeFile(theFileName, theFileFormat);

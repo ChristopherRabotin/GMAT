@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  DeFile
 //------------------------------------------------------------------------------
@@ -146,7 +146,11 @@ protected:
          numConst        = 0;
          AU              = 0.0;
          EMRAT           = 0.0;
-         DENUM           = (long int) 0;
+         #if (USE_64_BIT_LONGS == 1)
+            DENUM           = (int) 0;
+         #else
+            DENUM           = (long int) 0;
+         #endif
    }
       recOneData(const recOneData& r)  // copy constructor
    {
@@ -185,13 +189,24 @@ protected:
       char label[3][84];
       char constName[400][6];
       double timeData[3];
-      long int numConst;
+      #if (USE_64_BIT_LONGS == 1)
+         int numConst;
+      #else
+         long int numConst;
+      #endif
       double AU;
       double EMRAT;
-      long int coeffPtr[12][3];
-      long int DENUM;
-      long int libratPtr[3];
-       long int RSize; //loj: 4/14/04 added
+      #if (USE_64_BIT_LONGS == 1)
+         int coeffPtr[12][3];
+         int DENUM;
+         int libratPtr[3];
+         int RSize; //loj: 4/14/04 added
+      #else
+         long int coeffPtr[12][3];
+         long int DENUM;
+         long int libratPtr[3];
+         long int RSize; //loj: 4/14/04 added
+      #endif
    };
 
    struct recTwoData {
@@ -263,6 +278,11 @@ private:
    double       Coeff_Array[MAX_ARRAY_SIZE];   // MAX
    double       T_beg , T_end , T_span;
    double       mFileBeg;
+      #if (USE_64_BIT_LONGS == 1)
+         int numConst;
+      #else
+         long int numConst;
+      #endif
    
    Integer EPHEMERIS; // caps because of reuse from JPL/JSC code (Hoffman)
 

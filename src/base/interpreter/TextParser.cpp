@@ -193,7 +193,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
    Integer commentCounter = 0;
    Integer noCommentLine = -1;
    std::string str, keyword, substr;
-   UnsignedInt index1, index2, index3, index4;
+   std::string::size_type index1, index2, index3, index4;
    
    Reset();
    
@@ -274,10 +274,10 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             // ex) opengl.OrbitColor = [100 200 300 ];
             //     opengl.ViewPointVectorVector = [0, 0, 50000];
             
-            UnsignedInt index1 = str.find("[");
+            std::string::size_type index1 = str.find("[");
             if (index1 != str.npos)
             {
-               UnsignedInt index2 = str.find("=");
+               std::string::size_type index2 = str.find("=");
                if (index2 == str.npos || index2 > index1)
                {
                   theBlockType = Gmat::COMMAND_BLOCK;
@@ -288,7 +288,7 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             /// @TODO: This is a work around for a call function with
             /// without any return parameters.  It should be updated in
             /// the design to handle this situation.
-            UnsignedInt commentPos = str.find("%");
+            std::string::size_type commentPos = str.find("%");
             std::string noInline = str;
             if (commentPos != str.npos)
                noInline = str.substr(0, commentPos);
@@ -457,7 +457,7 @@ StringArray TextParser::ChunkLine()
    
    std::string str = theInstruction;
    std::string space;
-   UnsignedInt index1, index2, index3 = 123456;
+   std::string::size_type index1, index2, index3 = 123456;
    
    Integer length = str.size();
    StringArray chunks;
@@ -701,7 +701,7 @@ StringArray TextParser::Decompose(const std::string &chunk,
       str1 = RemoveSpaceInBrackets(chunk, bracketPair);
    
    int length = str1.size();
-   UnsignedInt index1;
+   std::string::size_type index1;
    Integer open, close;
    bool isOuterBracket = false;
    
@@ -729,8 +729,8 @@ StringArray TextParser::Decompose(const std::string &chunk,
    }
    
    StringArray parts;
-   UnsignedInt openBrace = str1.find_first_of("{");
-   UnsignedInt closeBrace = str1.find_last_of("}");
+   std::string::size_type openBrace = str1.find_first_of("{");
+   std::string::size_type closeBrace = str1.find_last_of("}");
    
    //-----------------------------------------------------------------
    // check for brace first to simplify decompose

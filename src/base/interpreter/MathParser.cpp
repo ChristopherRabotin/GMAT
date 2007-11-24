@@ -152,7 +152,7 @@ bool MathParser::IsEquation(const std::string &str)
    bool isEq = false;
    std::string left, right;
    Real rval;
-   UnsignedInt opIndex;
+   std::string::size_type opIndex;
    
    // If it is just a number, return false
    if (GmatStringUtil::ToReal(str, &rval))
@@ -364,7 +364,7 @@ MathNode* MathParser::Parse(const std::string &theEquation)
    
    // first remove all blank spaces and semicoln
    std::string newEq = GmatStringUtil::RemoveAll(theEquation, ' ');
-   UnsignedInt index = newEq.find_first_of(';');
+   std::string::size_type index = newEq.find_first_of(';');
    if (index != newEq.npos)
       newEq.erase(index);
    
@@ -617,12 +617,12 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
    std::string op = "";
    std::string left = "";
    std::string right = "";
-   UnsignedInt opIndex;
+   std::string::size_type opIndex;
    
    //-----------------------------------------------------------------
    // if no opening parenthesis '(' found, just return
    //-----------------------------------------------------------------
-   UnsignedInt index1 = str.find('(');
+   std::string::size_type index1 = str.find('(');
    
    if (index1 == str.npos)
    {
@@ -721,7 +721,7 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
       // handle special atan2(y,x) function
       if (op == "atan2")
       {
-         UnsignedInt comma = str.find(',', index1);
+         std::string::size_type comma = str.find(',', index1);
          if (comma == str.npos)
             throw MathException("Missing 2nd argument for atan2(y,x)\n");
 
@@ -832,13 +832,13 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// std::string FindOperatorFrom(const std::string &str, UnsignedInt start,
+// std::string FindOperatorFrom(const std::string &str, std::string::size_type start,
 //                              std::string &left, std::string &right,
-//                              UnsignedInt &opIndex)
+//                              std::string::size_type &opIndex)
 //------------------------------------------------------------------------------
-std::string MathParser::FindOperatorFrom(const std::string &str, UnsignedInt start,
+std::string MathParser::FindOperatorFrom(const std::string &str, std::string::size_type start,
                                          std::string &left, std::string &right,
-                                         UnsignedInt &opIndex)
+                                         std::string::size_type &opIndex)
 {
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
@@ -847,9 +847,9 @@ std::string MathParser::FindOperatorFrom(const std::string &str, UnsignedInt sta
    
    StringArray items;
    std::string op;
-   UnsignedInt index;
-   UnsignedInt index1 = str.find("+", start);
-   UnsignedInt index2 = str.find("-", start);
+   std::string::size_type index;
+   std::string::size_type index1 = str.find("+", start);
+   std::string::size_type index2 = str.find("-", start);
    
    if (index1 == str.npos && index2 == str.npos)
    {
@@ -957,9 +957,9 @@ std::string MathParser::FindOperator(const std::string &str, Integer &opIndex)
    
    StringArray items;
    std::string op;
-   UnsignedInt index;
-   UnsignedInt index1 = str.find_last_of("+");
-   UnsignedInt index2 = str.find_last_of("-");
+   std::string::size_type index;
+   std::string::size_type index1 = str.find_last_of("+");
+   std::string::size_type index2 = str.find_last_of("-");
    
    #if DEBUG_FIND_OPERATOR
    MessageInterface::ShowMessage
@@ -1109,17 +1109,17 @@ std::string MathParser::GetOperator(const std::map<std::string, Integer>::iterat
 
 
 //------------------------------------------------------------------------------
-// UnsignedInt FindSubtract(const std::string &str, UnsignedInt start)
+// UnsignedInt FindSubtract(const std::string &str, std::string::size_type start)
 //------------------------------------------------------------------------------
-UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
+std::string::size_type MathParser::FindSubtract(const std::string &str, std::string::size_type start)
 {
    #if DEBUG_INVERSE_OP
    MessageInterface::ShowMessage
       ("MathParser::FindSubtract() str=%s, start=%u\n", str.c_str(), start);
    #endif
    
-   UnsignedInt index2 = str.find('-', start);
-   UnsignedInt index3 = str.find("^(-1)", start);
+   std::string::size_type index2 = str.find('-', start);
+   std::string::size_type index3 = str.find("^(-1)", start);
    
    #if DEBUG_INVERSE_OP
    MessageInterface::ShowMessage
@@ -1177,7 +1177,7 @@ UnsignedInt MathParser::FindSubtract(const std::string &str, UnsignedInt start)
       }
       else
       {
-         UnsignedInt index = FindSubtract(str, index3+5);
+         std::string::size_type index = FindSubtract(str, index3+5);
          
          #if DEBUG_INVERSE_OP
          MessageInterface::ShowMessage
@@ -1223,8 +1223,8 @@ StringArray MathParser::ParseAddSubtract(const std::string &str)
    std::string right;
 
    // find last - or +
-   UnsignedInt index1 = str.find_last_of('+');
-   UnsignedInt index2 = str.find_last_of('-');
+   std::string::size_type index1 = str.find_last_of('+');
+   std::string::size_type index2 = str.find_last_of('-');
    
    #if DEBUG_ADD_SUBTRACT
    MessageInterface::ShowMessage
@@ -1356,8 +1356,8 @@ StringArray MathParser::ParseMultDivide(const std::string &str)
    // a * b / c * d
    //-----------------------------------------------------------------
    
-   UnsignedInt index1 = str.find_last_of('*');
-   UnsignedInt index2 = str.find_last_of('/');
+   std::string::size_type index1 = str.find_last_of('*');
+   std::string::size_type index2 = str.find_last_of('/');
    
    if (index1 == str.npos && index2 == str.npos)
    {
@@ -1441,7 +1441,7 @@ StringArray MathParser::ParsePower(const std::string &str)
    std::string op = "";
    
    // find first ^
-   UnsignedInt index1 = str.find('^');
+   std::string::size_type index1 = str.find('^');
    
    if (index1 == str.npos)
    {
@@ -1479,7 +1479,7 @@ StringArray MathParser::ParsePower(const std::string &str)
    }
 
    
-   UnsignedInt index = str.npos;
+   std::string::size_type index = str.npos;
    if (index1 != str.npos)
    {
       op = "Power";
@@ -1531,8 +1531,8 @@ StringArray MathParser::ParseUnary(const std::string &str)
    }
       
    // find  - or -
-   UnsignedInt index1 = str.find('-');
-   UnsignedInt index2 = str.find('+');
+   std::string::size_type index1 = str.find('-');
+   std::string::size_type index2 = str.find('+');
    
    if (index1 == str.npos && index2 == str.npos)
    {
@@ -1627,7 +1627,7 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
    if (fnName == "")
    {
       // try matrix op ' for transpose
-      UnsignedInt index1 = str.find("'");
+      std::string::size_type index1 = str.find("'");
 
       #if DEBUG_MATRIX_OPS
       MessageInterface::ShowMessage
@@ -1801,7 +1801,7 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
    MessageInterface::ShowMessage("MathParser::BuildFunction() str=%s\n", str.c_str());
    #endif
    
-   UnsignedInt functionIndex = str.npos;
+   std::string::size_type functionIndex = str.npos;
    
    for (UnsignedInt i=0; i<count; i++)
    {
@@ -1841,7 +1841,7 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
 //------------------------------------------------------------------------------
 // UnsignedInt FindMatchingParen(const std::string &str, UnsignedInt start)
 //------------------------------------------------------------------------------
-UnsignedInt MathParser::FindMatchingParen(const std::string &str, UnsignedInt start)
+std::string::size_type MathParser::FindMatchingParen(const std::string &str, std::string::size_type start)
 {
    #if DEBUG_MATH_PARSER > 1
    MessageInterface::ShowMessage

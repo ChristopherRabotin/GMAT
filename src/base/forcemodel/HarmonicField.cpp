@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              HarmonicField
 //------------------------------------------------------------------------------
@@ -736,7 +736,7 @@ std::string HarmonicField::GetStringParameter(const Integer id) const
    if (id == FILENAME)
    {
       //return filename;
-      UnsignedInt index = filename.find_last_of("/\\");
+      std::string::size_type index = filename.find_last_of("/\\");
       
       // if path not found, just write filename
       if (index == filename.npos)

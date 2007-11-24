@@ -20,9 +20,19 @@ BRIDGEOBJECTS = executive/MessageInterfaceConsole.o \
 else
 TARGET = $(WXTARGET)
 # GUI versions of these objects
+# Note: ExternalOptimizer also uses some wx code, so it is included here
+
+ifeq ($(USE_MATLAB),1)
+BRIDGEOBJECTS = executive/MessageInterface.o \
+                executive/PlotInterface.o \
+                interpreter/GuiInterpreter.o \
+                solver/ExternalOptimizer.o \
+                solver/FminconOptimizer.o       
+else
 BRIDGEOBJECTS = executive/MessageInterface.o \
                 executive/PlotInterface.o \
                 interpreter/GuiInterpreter.o
+endif
 endif
 
 all: $(TARGET)
@@ -333,8 +343,6 @@ OBJECTS = \
     solarsys/SolarSystem.o \
     solarsys/Star.o \
     solver/DifferentialCorrector.o \
-    solver/ExternalOptimizer.o \
-    solver/FminconOptimizer.o \
     solver/Optimizer.o \
     solver/Solver.o \
     spacecraft/Converter.o \

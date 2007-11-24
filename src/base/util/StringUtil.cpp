@@ -107,9 +107,9 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
 {
    // Removed extra space in the array indexing, between bracketPair (), [], {}
    std::string str1;
-   UnsignedInt index1 = 0;
-   UnsignedInt closeParen;
-   UnsignedInt length = str.size();
+   std::string::size_type index1 = 0;
+   std::string::size_type closeParen;
+   std::string::size_type length = str.size();
    std::string closeStr = bracketPair.substr(1,1);
    
    while (index1 < length)
@@ -119,7 +119,7 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
          str1.push_back(str[index1]);
          closeParen = str.find(bracketPair[1], index1);
          
-         if (closeParen == str.npos)
+
             throw UtilityException
                ("Closing bracket \"" + closeStr + "\" not found");
          
@@ -164,8 +164,8 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    std::string str2;
    std::string whiteSpace = " \t";
    
-   UnsignedInt index1 = str.find_first_not_of(whiteSpace);
-   UnsignedInt index2 = str.find_last_not_of(whiteSpace);
+   std::string::size_type index1 = str.find_first_not_of(whiteSpace);
+   std::string::size_type index2 = str.find_last_not_of(whiteSpace);
    
    if (index1 == str.npos)
       index1 = 0;
@@ -445,9 +445,9 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
    //-----------------------------------------------------------------
    StringArray parts;   
    std::string openBrackets = "([{";
-   UnsignedInt index1;
+   std::string::size_type index1;
    int count = tempParts.size();
-   
+    
    #if DEBUG_STRING_UTIL_SEP
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage
@@ -587,7 +587,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
    
    std::string str2 = Trim(str, BOTH);
    Integer numDot = 0;
-   UnsignedInt index1;
+   std::string::size_type index1;
    
    if (str2.length() == 0)
       return false;
@@ -609,7 +609,7 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
       index1 = str2.find_first_of("+-", index1 + 1);
       if (index1 != str2.npos)
       {
-         UnsignedInt firstE = str2.find_first_of("Ee");
+         std::string::size_type firstE = str2.find_first_of("Ee");
          if (firstE != str2.npos && index1 < firstE)
             return false;
       }
@@ -808,8 +808,8 @@ void GmatStringUtil::GetArrayCommaIndex(const std::string &str, Integer &comma,
    
    comma = -1;
    std::string openStr = bracketPair.substr(0,1);
-   UnsignedInt openBracket = str.find(openStr);
-   UnsignedInt firstComma;
+   std::string::size_type openBracket = str.find(openStr);
+   std::string::size_type firstComma;
    
    Integer length = str.size();
    std::string str1 = str.substr(openBracket+1, length-openBracket-2);
@@ -864,7 +864,7 @@ void GmatStringUtil::GetArrayCommaIndex(const std::string &str, Integer &comma,
    // if closing paren found
    if (close != -1)
    {
-      UnsignedInt commaAfterClose = str1.find(',', close);
+      std::string::size_type commaAfterClose = str1.find(',', close);
       
       // if row is missing
       if (commaAfterClose == str1.npos && firstComma > UnsignedInt(open))
@@ -955,7 +955,7 @@ void GmatStringUtil::GetArrayIndexVar(const std::string &str, std::string &rowSt
    colStr = "-1";
    name = str1;
    
-   UnsignedInt openBracket = str1.find(openStr);
+   std::string::size_type openBracket = str1.find(openStr);
 
    // if there is no opening bracket
    if (openBracket == str1.npos)
@@ -1615,8 +1615,8 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
    if (openParen == 0 && closeParen == length-1)
    {
       // make sure ending ) is not part of ^(-1)
-      UnsignedInt lastOpenParen = str.find_last_of('(');
-      UnsignedInt lastCloseParen = str.find_last_of(')', closeParen-1);
+      std::string::size_type lastOpenParen = str.find_last_of('(');
+      std::string::size_type lastCloseParen = str.find_last_of(')', closeParen-1);
 
       #if DEBUG_STRING_UTIL > 1
       MessageInterface::ShowMessage
@@ -1674,8 +1674,8 @@ bool GmatStringUtil::IsOuterParen(const std::string &str)
 bool GmatStringUtil::IsCommaPartOfArray(const std::string &str, Integer start)
 {   
    // First remove parenthesis around array
-   UnsignedInt open = str.find_first_of("(");
-   UnsignedInt close = str.find_last_of(")");
+   std::string::size_type open = str.find_first_of("(");
+   std::string::size_type close = str.find_last_of(")");
    std::string str1 = str.substr(open+1, close-open-1);
    
    close = str1.find(")");
@@ -1735,7 +1735,7 @@ bool GmatStringUtil::IsBracketPartOfArray(const std::string &str,
 
    std::string str1 = RemoveAll(str, ' ');
    bool ret = true;
-   UnsignedInt index1, index2, comma;
+   std::string::size_type index1, index2, comma;
    std::string substr;
    Integer count = bracketPairs.size();
    char openChar = 'x';

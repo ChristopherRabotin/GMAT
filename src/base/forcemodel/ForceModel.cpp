@@ -1189,7 +1189,7 @@ Integer ForceModel::SetupSpacecraftData(GmatBase *sat, PhysicalModel *pm,
          if (!cs)
          {
             char sataddr[20];
-            std::sprintf(sataddr, "%x", (unsigned)sat);
+            std::sprintf(sataddr, "%lx", (unsigned long)sat);
             throw ForceModelException(
                "CoordinateSystem is NULL on Spacecraft " + sat->GetName() +
                " at address " + sataddr);

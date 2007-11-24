@@ -1164,7 +1164,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    bool retval = true;
    
    // Output
-   UnsignedInt index1 = desc.find("=");
+   std::string::size_type index1 = desc.find("=");
    std::string lhs = desc.substr(0, index1);
    StringArray outArray;
    
@@ -1177,7 +1177,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Function Name, Input
    StringArray inArray;
    std::string funcName;
-   UnsignedInt index2 = desc.find("(", index1);
+   std::string::size_type index2 = desc.find("(", index1);
    if (index2 == desc.npos)
    {
       funcName = desc.substr(index1+1);
@@ -1304,9 +1304,9 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
       }
    }
    
-   UnsignedInt start = 0;
-   UnsignedInt right = 0;
-   UnsignedInt op = 0;
+   std::string::size_type start = 0;
+   std::string::size_type right = 0;
+   std::string::size_type op = 0;
    bool done = false;
    StringArray parts;
    std::string str2;
@@ -1453,7 +1453,7 @@ bool Interpreter::AssembleForCommand(GmatCommand *cmd, const std::string &desc)
    }
    
    bool retval = true;
-   UnsignedInt equalSign = desc.find("=");
+   std::string::size_type equalSign = desc.find("=");
    
    if (equalSign == desc.npos)
    {
@@ -1856,7 +1856,7 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
    // First check if it is really assignment by checking blank in the lhs.
    // (The lhs must be Variable, String, Array, or object property and this is
    //  validated in the Assignment command)
-   UnsignedInt index = lhs.find_last_of(" ");
+   std::string::size_type index = lhs.find_last_of(" ");
    if (index != lhs.npos)
    {
       std::string cmd = lhs.substr(0, index);
@@ -2156,7 +2156,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    Integer lhsPartCount = lhsParts.size();
    StringArray rhsParts = theTextParser.SeparateDots(rhs);
    Integer rhsPartCount = rhsParts.size();
-   UnsignedInt dot;
+   std::string::size_type dot;
    std::string lhsObjName, rhsObjName;
    std::string lhsPropName, rhsPropName;
    GmatBase *lhsObj = NULL;

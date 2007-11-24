@@ -2364,10 +2364,10 @@ void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
       {
          StringArray valArray;
          std::string svalue = sval;
-         UnsignedInt index1 = svalue.find_first_of("[");
+         std::string::size_type index1 = svalue.find_first_of("[");
          if (index1 != svalue.npos)
          {
-            UnsignedInt index2 = svalue.find_last_of("]");
+            std::string::size_type index2 = svalue.find_last_of("]");
             if (index2 != svalue.npos)
             {
                svalue = svalue.substr(index1, index2-index1);
