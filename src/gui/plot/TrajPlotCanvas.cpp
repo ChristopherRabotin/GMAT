@@ -43,12 +43,17 @@
 #ifndef SKIP_DEVIL
 // Include without IL/ so different versions of IL can be used without modifying
 // the directory
-// #  include <IL/il.h>
-// #  include <IL/ilu.h>
-// #  include <IL/ilut.h>
+// On Linux, just use the installed versions of DevIL
+#ifdef __WXGTK__
+#  include <IL/il.h>
+#  include <IL/ilu.h>
+#  include <IL/ilut.h>
+#else
 #  include <il.h>
 #  include <ilu.h>
 #  include <ilut.h>
+#endif
+
 #endif
 
 
