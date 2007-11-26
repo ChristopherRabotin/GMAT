@@ -119,7 +119,7 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
          str1.push_back(str[index1]);
          closeParen = str.find(bracketPair[1], index1);
          
-
+         if (closeParen == str.npos)
             throw UtilityException
                ("Closing bracket \"" + closeStr + "\" not found");
          
