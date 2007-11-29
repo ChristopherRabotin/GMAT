@@ -67,6 +67,7 @@
 #include <wx/filedlg.h>
 #include <wx/dirdlg.h>
 
+// If we are ready to handle Constellations, enable this
 //define __ENABLE_CONSTELLATIONS__
 
 //#define DEBUG_RESOURCE_TREE 1
@@ -1272,6 +1273,13 @@ void ResourceTree::OnRename(wxCommandEvent &event)
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
    
+   if (!GmatStringUtil::IsValidName(newName.c_str()))
+   {
+      wxMessageBox(wxT("\"" + newName + "\" is invalid name. Please enter different name."),
+                   wxT("GMAT Warning"));
+      return;
+   }
+   
    if ( !newName.IsEmpty() && !(newName.IsSameAs(oldName)))
    {
       Gmat::ObjectType objType = GetObjectType(itemType);
@@ -1336,6 +1344,8 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          DeleteChildren(mVariableItem);
          AddDefaultVariables(mVariableItem);
          
+         // update MissionTree for resource rename
+         GmatAppData::GetMissionTree()->UpdateMissionForRename();
       }
       else
       {
