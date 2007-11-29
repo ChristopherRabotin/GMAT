@@ -24,6 +24,7 @@
 #include "AngleUtil.hpp"               // for PutAngleInDegRange()
 #include "KeplerianParameters.hpp"     // for KepEcc()
 #include "SphericalParameters.hpp"     // for SphRMag()
+#include "StringUtil.hpp"              // for ReplaceName()
 #include "MessageInterface.hpp"
 
 
@@ -1366,8 +1367,8 @@ bool StopCondition::SetSpacecraft(SpaceObject *sc)
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
 bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
-                                        const std::string &oldName,
-                                        const std::string &newName)
+                                    const std::string &oldName,
+                                    const std::string &newName)
 {
    #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
@@ -1381,27 +1382,26 @@ bool StopCondition::RenameRefObject(const Gmat::ObjectType type,
    //set new StopCondition name
    std::string name = GetName();
    std::string::size_type pos = name.find(oldName);
-   
    if (pos != name.npos)
    {
-      name.replace(pos, oldName.size(), newName);
+      name = GmatStringUtil::ReplaceName(name, oldName, newName);
       SetName(name);
    }
    
    //set new epoch parameter name
    pos = mEpochParamName.find(oldName);
    if (pos != mEpochParamName.npos)
-      mEpochParamName.replace(pos, oldName.size(), newName);
+      mEpochParamName = GmatStringUtil::ReplaceName(mEpochParamName, oldName, newName);
    
    //set new stop parameter name
    pos = mStopParamName.find(oldName);
    if (pos != mStopParamName.npos)
-      mStopParamName.replace(pos, oldName.size(), newName);
+      mStopParamName = GmatStringUtil::ReplaceName(mStopParamName, oldName, newName);
    
    //set new stop goal string
    pos = mGoalStr.find(oldName);
    if (pos != mStopParamName.npos)
-      mGoalStr.replace(pos, oldName.size(), newName);
+      mGoalStr = GmatStringUtil::ReplaceName(mGoalStr, oldName, newName);
    
    return true;
 }
