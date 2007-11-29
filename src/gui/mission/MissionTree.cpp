@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              MissionTree
 //------------------------------------------------------------------------------
@@ -249,6 +249,28 @@ void MissionTree::UpdateMission(bool resetCounter)
    
    ClearMission();   
    UpdateCommand();
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateMissionForRename()
+//------------------------------------------------------------------------------
+/**
+ * Updates MissionTree nodes if show detail is turned on since it needs to show
+ * new resource name on the nodes.
+ */
+//------------------------------------------------------------------------------
+void MissionTree::UpdateMissionForRename()
+{
+   #if DEBUG_MISSION_TREE
+   MessageInterface::ShowMessage("MissionTree::UpdateMissionForRename() entered\n");
+   #endif
+   
+   if (mShowDetailedItem)
+   {
+      ClearMission();
+      UpdateCommand();
+   }
 }
 
 
@@ -3306,9 +3328,9 @@ void MissionTree::OnPlaybackActions(wxCommandEvent &event)
    
    // clear command sequence and mission tree first
    #ifdef DEBUG_MISSION_TREE_ACTIONS
-   MessageInterface::ShowMessage
-      ("   clearing command sequence and mission tree\n");
+   MessageInterface::ShowMessage("   clearing command sequence and mission tree\n");
    #endif
+   
    ClearMission();
    theGuiInterpreter->ClearCommandSeq();
    InitializeCounter();

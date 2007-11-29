@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              MissionTree
 //------------------------------------------------------------------------------
@@ -36,6 +36,7 @@ public:
    
    void ClearMission();
    void UpdateMission(bool resetCounter);
+   void UpdateMissionForRename();
    void ChangeNodeLabel(const wxString &oldLabel);
    
 protected:
