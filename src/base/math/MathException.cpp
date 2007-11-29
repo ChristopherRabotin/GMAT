@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               MathException
 //------------------------------------------------------------------------------
@@ -15,9 +15,7 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "MathException.hpp"
-
 
 //------------------------------------------------------------------------------
 //  MathException(std::string details)
@@ -28,8 +26,8 @@
  * @param details A message providing the details of the exception. 
  */
 //------------------------------------------------------------------------------
-MathException::MathException(std::string details) :
-    BaseException           ("Math Exception Thrown: ", details)
+MathException::MathException(std::string details)
+   : BaseException ("Math Exception: ", details)
 {
 }
 
@@ -53,7 +51,7 @@ MathException::~MathException()
  * Constructs MathException instance (copy constructor).
  */
 //------------------------------------------------------------------------------
-MathException::MathException(const MathException &be) :
-    BaseException       (be)
+MathException::MathException(const MathException &be)
+   : BaseException(be)
 {
 }

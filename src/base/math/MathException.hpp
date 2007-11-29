@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               MathException
 //------------------------------------------------------------------------------
@@ -14,18 +14,17 @@
  * Exception class used by the Math hierarchy.
  */
 //------------------------------------------------------------------------------
-
-
 #ifndef MATHEXCEPTION_H
 #define MATHEXCEPTION_H
 
 #include "BaseException.hpp"
 
-class MathException : public BaseException{
+class MathException : public BaseException
+{
 public:
-
-	MathException(std::string details);
-	virtual ~MathException();
+   
+   MathException(std::string details = "");
+   virtual ~MathException();
    MathException(const MathException &be);
 };
 
