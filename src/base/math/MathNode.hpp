@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   MathNode
 //------------------------------------------------------------------------------
@@ -16,11 +16,8 @@
  * Defines the MathNode base class for Math in scripts.
  */
 //------------------------------------------------------------------------------
-
-
 #ifndef MathNode_hpp
 #define MathNode_hpp
-
 
 #include "GmatBase.hpp"
 #include "MathException.hpp"
@@ -31,38 +28,40 @@
 class GMAT_API MathNode : public GmatBase
 {
 public:
+   
    MathNode(const std::string &typeStr, const std::string &nomme);
    virtual ~MathNode();
    MathNode(const MathNode &mn);
    MathNode& operator=(const MathNode &mn);
-
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
    
-   bool IsFunction() { return isFunction; }
-   bool IsNumber() { return isNumber; }
-   void SetNumberFlag(bool flag) { isNumber = flag; }
+   bool                 IsFunction() { return isFunction; }
+   bool                 IsNumber() { return isNumber; }
+   void                 SetNumberFlag(bool flag) { isNumber = flag; }
    
-   Integer GetElementType() { return elementType; }
+   Integer              GetElementType() { return elementType; }
    
-   Real GetRealValue() { return realValue; }
-   const Rmatrix& GetMatrixValue() { return matrix; }
+   Real                 GetRealValue() { return realValue; }
+   const Rmatrix&       GetMatrixValue() { return matrix; }
    
-   void SetRealValue(Real val);
-   virtual void SetMatrixValue(const Rmatrix &mat);
+   void                 SetRealValue(Real val);
+   virtual void         SetMatrixValue(const Rmatrix &mat);
    
-   virtual bool ValidateInputs() = 0;
-   virtual void GetOutputInfo(Integer &type, Integer &rowCount,
-                              Integer &colCount) = 0;
-   virtual Real Evaluate() = 0;
-   virtual Rmatrix MatrixEvaluate() = 0;
-   virtual bool SetChildren(MathNode *leftChild, MathNode *rightChild) = 0;
-   virtual MathNode* GetLeft() = 0;
-   virtual MathNode* GetRight() = 0;
+   // abstract methods
+   virtual bool         ValidateInputs() = 0;
+   virtual void         GetOutputInfo(Integer &type, Integer &rowCount,
+                                      Integer &colCount) = 0;
+   virtual Real         Evaluate() = 0;
+   virtual Rmatrix      MatrixEvaluate() = 0;
+   virtual bool         SetChildren(MathNode *leftChild, MathNode *rightChild) = 0;
+   virtual MathNode*    GetLeft() = 0;
+   virtual MathNode*    GetRight() = 0;
    
+   // Inherited (GmatBase) methods
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
 protected:
-
+   
    bool isFunction;
    bool isNumber;
    
@@ -71,6 +70,7 @@ protected:
    
    Real realValue;
    Rmatrix matrix;
+   
 };
 
 

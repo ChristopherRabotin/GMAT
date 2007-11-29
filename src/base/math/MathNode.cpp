@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   MathNode
 //------------------------------------------------------------------------------
@@ -103,29 +103,6 @@ MathNode& MathNode::operator=(const MathNode &mn)
 }
 
 
-//---------------------------------------------------------------------------
-//  bool RenameRefObject(const Gmat::ObjectType type,
-//                       const std::string &oldName, const std::string &newName)
-//---------------------------------------------------------------------------
-/*
- * Renames referenced objects
- *
- * @param <type> type of the reference object.
- * @param <oldName> old name of the reference object.
- * @param <newName> new name of the reference object.
- *
- * @return always true to indicate RenameRefObject() was implemented.
- */
-//---------------------------------------------------------------------------
-bool MathNode::RenameRefObject(const Gmat::ObjectType type,
-                               const std::string &oldName,
-                               const std::string &newName)
-{
-   // There are no renamable objects
-   return true;
-}
-
-
 //------------------------------------------------------------------------------
 // void SetRealValue(Real val)
 //------------------------------------------------------------------------------
@@ -157,5 +134,28 @@ void MathNode::SetMatrixValue(const Rmatrix &mat)
        "theColCount=%d, matarix=\n%s\n", theReturnType, theRowCount, theColCount,
        ss.str().c_str());
    #endif
+}
+
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/*
+ * Renames referenced objects
+ *
+ * @param <type> type of the reference object.
+ * @param <oldName> old name of the reference object.
+ * @param <newName> new name of the reference object.
+ *
+ * @return always true to indicate RenameRefObject() was implemented.
+ */
+//---------------------------------------------------------------------------
+bool MathNode::RenameRefObject(const Gmat::ObjectType type,
+                               const std::string &oldName,
+                               const std::string &newName)
+{
+   // There are no renamable objects
+   return true;
 }
 
