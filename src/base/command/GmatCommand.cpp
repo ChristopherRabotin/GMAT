@@ -1998,6 +1998,9 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
 }
 
 
+//------------------------------------------------------------------------------
+// bool SetWrapperReferences(ElementWrapper &wrapper)
+//------------------------------------------------------------------------------
 bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
 {
    if (&wrapper != NULL)
@@ -2007,16 +2010,15 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
             wrapper.GetDescription().c_str());
       #endif
       StringArray onames = wrapper.GetRefObjectNames();
-   
+      
       for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
       {
          std::string name = *j;
          if (objectMap->find(name) == objectMap->end())
-         {
-            
+         {            
             throw CommandException(
                "GmatCommand::SetWrapperReferences failed to find object named \"" + 
-               name + "\"\n");
+               name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
          }
          if (wrapper.SetRefObject((*objectMap)[name]) == false)
          {
