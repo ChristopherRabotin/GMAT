@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ElementWrapper
 //------------------------------------------------------------------------------
@@ -22,6 +22,7 @@
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
 #include "ElementWrapper.hpp"
+#include "StringUtil.hpp"     // for ReplaceName()
 
 //#define DEBUG_RENAME
 
@@ -206,16 +207,20 @@ bool ElementWrapper::RenameObject(const std::string &oldName,
    Integer sz = refObjectNames.size();
    for (Integer j=0; j < sz; j++)
    {
-      if (refObjectNames[j] == oldName)  refObjectNames[j] = newName;
-      #ifdef DEBUG_RENAME
-         MessageInterface::ShowMessage(
-         "--- And now changing the name in the refObjectNames array");
-      #endif
-      std::string::size_type pos = refObjectNames[j].find(oldName);
-      
-      if (pos != refObjectNames[j].npos)
+      if (refObjectNames[j].find(oldName) != oldName.npos)
       {
-         refObjectNames[j].replace(pos, oldName.size(), newName);
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   old refObjectNames[%d]=<%s>\n", j, refObjectNames[j].c_str());
+         #endif
+         
+         refObjectNames[j] =
+            GmatStringUtil::ReplaceName(refObjectNames[j], oldName, newName);
+         
+         #ifdef DEBUG_RENAME
+         MessageInterface::ShowMessage
+            ("   new refObjectNames[%d]=<%s>\n", j, refObjectNames[j].c_str());
+         #endif
       }
    }
    return true;
