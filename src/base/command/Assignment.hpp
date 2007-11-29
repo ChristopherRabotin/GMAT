@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Assignment
 //------------------------------------------------------------------------------
@@ -36,15 +36,16 @@ public:
    virtual ~Assignment();
    Assignment(const Assignment& a);
    Assignment&          operator=(const Assignment& a);
-
+   
    MathTree*            GetMathTree() { return mathTree; }
-
+   void                 SetMathWrappers();
+   
    std::string          GetLHS() { return lhs; }
    std::string          GetRHS() { return rhs; }
    
    // inherited from GmatCommand
-   virtual bool         Initialize();
    virtual bool         InterpretAction();
+   virtual bool         Initialize();
    virtual bool         Execute();
    virtual bool         SkipInterrupt();
    
@@ -79,6 +80,8 @@ protected:
    ElementWrapper*      rhsWrapper;
    /// MathNode pointer for RHS equation
    MathTree             *mathTree;
+   /// Wrapper name and ElementWrapper pointer Map for RHS math element
+   std::map<std::string, ElementWrapper*> mathWrapperMap;
    
 };
 

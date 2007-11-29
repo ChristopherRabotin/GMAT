@@ -30,7 +30,7 @@
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_RENAME 1
+//#define DEBUG_RENAME
 //#define DEBUG_EVAL_RHS
 //#define DEBUG_ASSIGNMENT_IA 1
 //#define DEBUG_ASSIGNMENT_INIT 1
@@ -68,8 +68,10 @@ Assignment::~Assignment()
 {
    if (mathTree)
       delete mathTree;
-
+   
    mathTree = NULL;
+   
+   ClearWrappers();
 }
 
 
@@ -106,13 +108,24 @@ Assignment& Assignment::operator=(const Assignment& a)
 {
    if (this == &a)
       return *this;
-        
-   mathTree    = a.mathTree;
+   
+   mathTree   = a.mathTree;
    
    lhsWrapper = NULL;
    rhsWrapper = NULL;
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetMathWrappers()
+//------------------------------------------------------------------------------
+void Assignment::SetMathWrappers()
+{
+   // Set math Wrapper map
+   if (mathTree)
+      mathTree->SetMathWrappers(&mathWrapperMap);
 }
 
 
@@ -158,7 +171,7 @@ bool Assignment::InterpretAction()
    if (!GmatStringUtil::HasNoBrackets(lhs,true))
       throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
          "parentheses (except to indicate an array element)");      
-
+   
    // check for unexpected commas on the left-hand-side
    Integer commaPos = -1;
    if (lhs.find(',') != lhs.npos)
@@ -168,7 +181,7 @@ bool Assignment::InterpretAction()
          throw CommandException("Command contains an unexpected comma on left-hand-side");
    }
    
-// it there is still ; then report error since ; should have been removed
+   // it there is still ; then report error since ; should have been removed
    if (rhs.find(";") != rhs.npos)
       throw CommandException("Is there a missing \"\%\" for inline comment?");
    
@@ -198,7 +211,7 @@ bool Assignment::InterpretAction()
       if (!GmatStringUtil::HasNoBrackets(rhs,true))
          throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
             "parentheses (except to indicate an array element)");      
-
+      
       if (rhs.find(',') != rhs.npos)
       {
          GmatStringUtil::GetArrayCommaIndex(rhs, commaPos);
@@ -246,14 +259,32 @@ bool Assignment::Initialize()
    }
    else
    {
-      // Set references for the wrappers   
+      // Set references for the lhs wrapper
       if (SetWrapperReferences(*lhsWrapper) == false)
          return false;
+      
+      std::map<std::string, ElementWrapper *>::iterator ewi;
+      
+      #ifdef DEBUG_ASSIGNMENT_INIT
+      for (ewi = mathWrapperMap.begin(); ewi != mathWrapperMap.end(); ++ewi)
+         MessageInterface::ShowMessage
+            ("   name=<%s>, wrapper=%p\n", (ewi->first).c_str(), ewi->second);
+      #endif
+      
+      // Set references for the rhs math element wrappers
+      for (ewi = mathWrapperMap.begin(); ewi != mathWrapperMap.end(); ++ewi)
+      {
+         if (SetWrapperReferences(*(ewi->second)) == false)
+            return false;
+      }
       
       // Initialize mathTree
       MathNode *topNode = mathTree->GetTopNode();
       
-      #if DEBUG_EQUATION
+//       // Set math Wrapper map
+//       mathTree->SetMathWrappers(&mathWrapperMap);
+      
+      #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage
          ("Assignment::Initialize() Initializing topNode=%s, %s\n",
           topNode->GetTypeName().c_str(), topNode->GetName().c_str());
@@ -570,23 +601,41 @@ bool Assignment::SkipInterrupt()
 //------------------------------------------------------------------------------
 const StringArray& Assignment::GetWrapperObjectNameArray()
 {
+   #ifdef DEBUG_ASSIGNMENT_WRAPPER
+   MessageInterface::ShowMessage
+      ("Assignment::GetWrapperObjectNameArray() lhs=<%s>, rhs=<%s>\n",
+       lhs.c_str(), rhs.c_str());
+   #endif
+   
    wrapperObjectNames.clear();
-
-   // If rhs is an equation, just add lhs
-   if (mathTree != NULL)
+   
+   // If rhs is not an equation, just add rhs
+   if (mathTree == NULL)
    {
-      if (lhs != "")
-         wrapperObjectNames.push_back(lhs);
-      return wrapperObjectNames;
+      if (rhs != "")
+         wrapperObjectNames.push_back(rhs);
+   }
+   else
+   {      
+      // Add math node elements to wrapper object names
+      StringArray tmpArray = mathTree->GetRefObjectNameArray(Gmat::PARAMETER);
+      if (tmpArray.size() > 0)
+         wrapperObjectNames.insert(wrapperObjectNames.end(),
+                                   tmpArray.begin(), tmpArray.end());
+      
+      for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
+      {
+         mathWrapperMap[wrapperObjectNames[i]] = NULL;
+         
+         #ifdef DEBUG_ASSIGNMENT_WRAPPER
+         MessageInterface::ShowMessage
+            ("   Math element %d, %s\n", i, wrapperObjectNames[i].c_str());
+         #endif
+      }
    }
    
-   // Add lhs and rhs
-   if (lhs != "")
-      wrapperObjectNames.push_back(lhs);
-   if (rhs != "")
-      wrapperObjectNames.push_back(rhs);
-   
    return wrapperObjectNames;
+   
 }
 
 
@@ -596,26 +645,57 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
 bool Assignment::SetElementWrapper(ElementWrapper *toWrapper, 
                                    const std::string &withName)
 {
+   #ifdef DEBUG_ASSIGNMENT_WRAPPER
+   MessageInterface::ShowMessage
+      ("Assignment::SetElementWrapper() toWrapper=%p, name=%s\n", toWrapper,
+       withName.c_str());
+   #endif
+   
    if (toWrapper == NULL)
       return false;
-      
+   
    bool retval = false;
    
    #ifdef DEBUG_ASSIGNMENT_WRAPPER
    MessageInterface::ShowMessage
-      ("   Setting wrapper \"%s\" on Assignment command\n", withName.c_str());
+      ("   Setting wrapper \"%s\" on Assignment \"%s\"\n",
+       withName.c_str(), GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
    if (withName == lhs)
    {
-      lhsWrapper = toWrapper;
-      retval = true;
+      // lhs should always be object property wrapper, so check first
+      if (withName.find(".") == withName.npos ||
+          (withName.find(".") != withName.npos &&
+           toWrapper->GetWrapperType() == Gmat::OBJECT_PROPERTY))
+      {
+         lhsWrapper = toWrapper;
+         retval = true;
+      }
    }
    
-   if (withName == rhs)
+   if (mathTree == NULL)
    {
-      rhsWrapper = toWrapper;
-      retval = true;
+      if (withName == rhs)
+      {
+         rhsWrapper = toWrapper;
+         retval = true;
+      }
+   }
+   else
+   {
+      // if name found in the math wrapper map
+      if (mathWrapperMap.find(withName) != mathWrapperMap.end())
+      {
+         // rhs should always be parameter wrapper, so check first
+         if (withName.find(".") == withName.npos ||
+             (withName.find(".") != withName.npos &&
+              toWrapper->GetWrapperType() == Gmat::PARAMETER_OBJECT))
+         {
+            mathWrapperMap[withName] = toWrapper;
+            retval = true;
+         }
+      }
    }
    
    return retval;
@@ -626,27 +706,42 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
 // void ClearWrappers()
 //------------------------------------------------------------------------------
 void Assignment::ClearWrappers()
-{      
-   ElementWrapper* temp1 = NULL;
-   ElementWrapper* temp2 = NULL;
+{
+   ElementWrapper* lhsEw = NULL;
+   ElementWrapper* rhsEw = NULL;
    
    if (lhsWrapper)
    {
-      temp1 = lhsWrapper;
+      lhsEw = lhsWrapper;
       lhsWrapper = NULL;
    }
    
    if (rhsWrapper)
    {
-      temp2 = rhsWrapper;
+      rhsEw = rhsWrapper;
       rhsWrapper = NULL;
    }
-
-   if (temp1)
-      delete temp1;
-   if (temp2)
-      delete temp2;
    
+   if (rhsEw)
+      delete rhsEw;
+   
+   // clear rhs math wrapper map
+   std::map<std::string, ElementWrapper *>::iterator ewi;
+   for (ewi = mathWrapperMap.begin(); ewi != mathWrapperMap.end(); ++ewi)
+   {
+      if (ewi->second != NULL)
+      {
+         // if it is not the same as lhs wrapper, delete
+         if (ewi->second != lhsEw)
+            delete ewi->second;
+         ewi->second = NULL;
+      }
+   }
+   
+   if (lhsEw)
+      delete lhsEw;
+   
+   mathWrapperMap.clear();
 }
 
 
@@ -668,33 +763,48 @@ bool Assignment::RenameRefObject(const Gmat::ObjectType type,
                                  const std::string &oldName,
                                  const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Assignment::RenameRefObject() entered <%s>\n", generatingString.c_str());
+      ("Assignment::RenameRefObject() entered <%s>\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    MessageInterface::ShowMessage
       ("   type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
    #endif
    
-   if (lhs.find(oldName) != lhs.npos)
-      lhs = GmatStringUtil::Replace(lhs, oldName, newName);
+   if (type != Gmat::PARAMETER && type != Gmat::SPACECRAFT &&
+       type != Gmat::IMPULSIVE_BURN && type != Gmat::COORDINATE_SYSTEM &&
+       type != Gmat::CALCULATED_POINT)
+   {
+      #ifdef DEBUG_RENAME
+      MessageInterface::ShowMessage("===> no replacement needed, just return true\n");
+      #endif
       
+      return true;
+   }
+
+   if (lhs.find(oldName) != lhs.npos)
+      lhs = GmatStringUtil::ReplaceName(lhs, oldName, newName);
+   
    if (rhs.find(oldName) != rhs.npos)
-      rhs = GmatStringUtil::Replace(rhs, oldName, newName);
+      rhs = GmatStringUtil::ReplaceName(rhs, oldName, newName);
    
-   lhsWrapper->RenameObject(oldName, newName);
+   if (lhsWrapper)
+      lhsWrapper->RenameObject(oldName, newName);
    
-   if (mathTree == NULL)
+   if (rhsWrapper)
       rhsWrapper->RenameObject(oldName, newName);
-   else
+   
+   if (mathTree)
       mathTree->RenameRefObject(type, oldName, newName);
    
    // Update generatingString
    GetGeneratingString();
    
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
-      ("Assignment::RenameRefObject() leaving <%s>\n", generatingString.c_str());
+      ("Assignment::RenameRefObject() leaving <%s>\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
    return true;
