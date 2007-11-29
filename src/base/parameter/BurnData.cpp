@@ -26,6 +26,7 @@
 //#define DEBUG_BURNDATA_INIT 1
 //#define DEBUG_BURNDATA_CONVERT 1
 //#define DEBUG_BURNDATA_RUN 1
+//#define DEBUG_BURNDATA_SET 1
 
 using namespace GmatMathUtil;
 
@@ -160,7 +161,7 @@ Real BurnData::GetBurnReal(Integer item)
    case ELEMENT3:
       return mImpBurn->GetRealParameter(mImpBurn->GetParameterID("Element3"));
    default:
-      throw ParameterException("BurnData::GetBurnReal() Unknown parameter id: " +
+      throw ParameterException("BurnData::GetBurnReal() Unknown ELEMENT id: " +
                                GmatRealUtil::ToString(item));
    }
 }
@@ -212,12 +213,15 @@ void BurnData::SetBurnReal(Integer item, Real rval)
    {
    case ELEMENT1:
       mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element1"), rval);
+      break;
    case ELEMENT2:
       mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element2"), rval);
+      break;
    case ELEMENT3:
       mImpBurn->SetRealParameter(mImpBurn->GetParameterID("Element3"), rval);
+      break;
    default:
-      throw ParameterException("BurnData::GetBurnReal() Unknown parameter id: " +
+      throw ParameterException("BurnData::SetBurnReal() Unknown ELEMENT id: " +
                                GmatRealUtil::ToString(item));
    }
 }
