@@ -247,27 +247,41 @@ Integer Burn::GetParameterID(const std::string &str) const
 {
    #if DEBUG_BURN_PARAM
    MessageInterface::ShowMessage
-      ("Burn::GetParameterID() str=%s, dvLabels=%s, %s, %s\n", str.c_str(),
-       dvLabels[0].c_str(), dvLabels[0].c_str(), dvLabels[0].c_str());
+      ("Burn::GetParameterID() str=%s, dvLabels=%s, %s, %s, ", str.c_str(),
+       dvLabels[0].c_str(), dvLabels[1].c_str(), dvLabels[2].c_str());
    #endif
+   
+   Integer id = -1;
    
    // Let users ask for components (e.g. "V", "N", or "B" in VNB coordinates)
    // directly
    if (str == dvLabels[0])
-      return DELTAV1;
-        
-   if (str == dvLabels[1])
-      return DELTAV2;
-        
-   if (str == dvLabels[2])
-      return DELTAV3;
-   
-   for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
+      id = DELTAV1;   
+   else if (str == dvLabels[1])
+      id = DELTAV2;        
+   else if (str == dvLabels[2])
+      id = DELTAV3;
+   else
    {
-      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
-         return i;
+      for (Integer i = GmatBaseParamCount; i < BurnParamCount; i++)
+      {
+         if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         {
+            id = i;
+            break;
+         }
+      }
    }
-
+   
+   if (id != -1)
+   {
+      #if DEBUG_BURN_PARAM
+      MessageInterface::ShowMessage("returning %d\n", id);
+      #endif
+      
+      return id;
+   }
+   
    return GmatBase::GetParameterID(str);
 }
 
