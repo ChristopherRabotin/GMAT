@@ -293,18 +293,133 @@ std::string GmatStringUtil::Capitalize(const std::string &str)
 std::string GmatStringUtil::Replace(const std::string &str, const std::string &from,
                                     const std::string &to)
 {
+   #ifdef DEBUG_REPLACE
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::Replace()> str=\"%s\", from=\"%s\", to=\"%s\"\n", str.c_str(),
+       from.c_str(), to.c_str());
+   #endif
+   
    std::string str1 = str;
    std::string::size_type pos = str1.find(from);
+   
+   // if string not found, just return same string
+   if (pos == str1.npos)
+      return str1;
+   
+   // if input string is the same as string to replace, just return <to> string
+   if (str == from)
+      return to;
+   
    bool done = false;
+   std::string::size_type start = 0;
    
    while (!done)
    {
-      pos = str1.find(from);
+      pos = str1.find(from, start);
+      
+      #ifdef DEBUG_REPLACE
+      MessageInterface::ShowMessage("===> start=%u, pos=%u\n", start, pos);
+      #endif
+      
       if (pos != str1.npos)
+      {
          str1.replace(pos, from.size(), to);
+         start = pos + to.size();
+         
+         #ifdef DEBUG_REPLACE
+         MessageInterface::ShowMessage("===> start=%u, str1=<%s>\n", start, str1.c_str());
+         #endif
+      }
       else
+      {
          break;
+      }
    }
+   
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ReplaceName(const std::string &str, const std::string &from,
+//                         const std::string &to)
+//------------------------------------------------------------------------------
+/*
+ * Replaces all occurenece of <from> string to <to> string if <from> is not
+ * part of word. It replaces the string if character before and after <from> are
+ * not alphanumeric except underscores "_".
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::ReplaceName(const std::string &str, const std::string &from,
+                                        const std::string &to)
+{
+   #ifdef DEBUG_REPLACE_NAME
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::ReplaceName()> str=\"%s\", from=\"%s\", to=\"%s\"\n", str.c_str(),
+       from.c_str(), to.c_str());
+   #endif
+   
+   std::string str1 = str;
+   std::string::size_type pos = str1.find(from);
+   
+   // if string not found, just return same string
+   if (pos == str1.npos)
+      return str1;
+   
+   // if input string is the same as string to replace, just return <to> string
+   if (str == from)
+      return to;
+   
+   bool done = false;
+   std::string::size_type start = 0;
+   std::string::size_type strSize = str1.size();
+   std::string::size_type fromSize = from.size();
+   bool replace = false;
+   
+   while (!done)
+   {
+      pos = str1.find(from, start);
+      if (pos != str1.npos)
+      {
+         #ifdef DEBUG_REPLACE_NAME
+         MessageInterface::ShowMessage("===> start=%u, pos=%u\n", start, pos);
+         #endif
+         
+         if (pos == 0 && fromSize < strSize)
+         {
+            if (!isalnum(str1[fromSize]) && str1[fromSize] != '_')
+               replace = true;
+         }
+         else if (pos > 0 && (pos + fromSize) < strSize)
+         {
+            if (!isalnum(str1[pos + fromSize]) && str1[pos + fromSize] != '_')
+               replace = true;
+         }
+         else if (pos == strSize-fromSize) // replace last name
+         {
+            replace = true;
+         }
+         
+         if (!replace)
+            break;
+         
+         str1.replace(pos, fromSize, to);
+         start = pos + to.size();
+         
+         #ifdef DEBUG_REPLACE_NAME
+         MessageInterface::ShowMessage("===> start=%d, str1=<%s>\n", start, str1.c_str());
+         #endif
+      }
+      else
+      {
+         break;
+      }
+   }
+   
+   #ifdef DEBUG_REPLACE_NAME
+   MessageInterface::ShowMessage("===> returning <%s>\n", str1.c_str());
+   #endif
    
    return str1;
 }

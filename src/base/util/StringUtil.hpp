@@ -44,6 +44,8 @@ namespace GmatStringUtil
    std::string Capitalize(const std::string &str);
    std::string Replace(const std::string &str, const std::string &from,
                        const std::string &to);
+   std::string ReplaceName(const std::string &str, const std::string &from,
+                           const std::string &to);
    
    std::string ToString(const Real &val, Integer precision);
    std::string ToString(const Integer &val, Integer width);
