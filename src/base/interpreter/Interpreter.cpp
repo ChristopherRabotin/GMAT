@@ -777,6 +777,8 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
    if (cmd->GetTypeName() == "GMAT")
    {
       Assignment *acmd = (Assignment*)cmd;
+      
+      // Handle LHS
       std::string lhs = acmd->GetLHS();
       ElementWrapper *ew = CreateElementWrapper(lhs);
       if (cmd->SetElementWrapper(ew, lhs) == false)
@@ -788,27 +790,31 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
          return false;
       }
       
-      //If RHS is not an equation, get RHS
-      if (acmd->GetMathTree() == NULL)
+      // Handle RHS
+      // Note: Assignment::GetWrapperObjectNameArray() returns only for RHS elements
+      for (StringArray::const_iterator i = wrapperNames.begin();
+           i != wrapperNames.end(); ++i)
       {
-         std::string rhs = acmd->GetRHS();
-         if (rhs != "")
+         std::string name = (*i);
+         if (name != "")
          {
-            if (IsParameterType(rhs))
-               ew = CreateElementWrapper(rhs, true);
+            if (IsParameterType(name))
+               ew = CreateElementWrapper(name, true);
             else
-               ew = CreateElementWrapper(rhs);
+               ew = CreateElementWrapper(name);
             
-            if (cmd->SetElementWrapper(ew, rhs) == false)
+            if (cmd->SetElementWrapper(ew, name) == false)
             {
                InterpreterException ex
-                  ("Undefined object \"" + rhs + "\" found in command \"" +
-                   cmd->GetTypeName());
+                  ("Undefined object \"" + name + "\" found in Math Assignment");
                HandleError(ex);
                return false;
             }
          }
       }
+      
+      // Set math wrappers to math tree
+      acmd->SetMathWrappers();
    }
    else
    {
@@ -822,8 +828,6 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
             InterpreterException ex
                ("Undefined object \"" + (*i) + "\" found in command \"" +
                 cmd->GetTypeName());
-            //InterpreterException ex
-            //   ("ElementWrapper for \"" + (*i) + "\" cannot be created.");
             HandleError(ex);
             return false;
          }
