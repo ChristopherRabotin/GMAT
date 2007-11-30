@@ -669,20 +669,20 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
 
 
 //------------------------------------------------------------------------------
-// bool ToReal(const std::string &str, Real *value)
+// bool ToReal(const std::string &str, Real *value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
  * @see ToReal(const std::string &str, Real &value)
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToReal(const std::string &str, Real *value)
+bool GmatStringUtil::ToReal(const std::string &str, Real *value, bool trimParens)
 {
-   return ToReal(str, *value);
+   return ToReal(str, *value, trimParens);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ToReal(const std::string &str, Real &value)
+// bool ToReal(const std::string &str, Real &value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
  * This method converts string to Real using atof() after validation.
@@ -695,12 +695,17 @@ bool GmatStringUtil::ToReal(const std::string &str, Real *value)
  * @note  atof() returns 100.00 for 100.00ABC, but we want it be an error.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToReal(const std::string &str, Real &value)
+bool GmatStringUtil::ToReal(const std::string &str, Real &value, bool trimParens)
 {
    if (str == "")
       return false;
    
    std::string str2 = Trim(str, BOTH);
+   if (trimParens)
+   {
+      str2 = RemoveExtraParen(str2);
+      str2 = Trim(str2, BOTH);
+   }
    Integer numDot = 0;
    std::string::size_type index1;
    
@@ -766,20 +771,20 @@ bool GmatStringUtil::ToReal(const std::string &str, Real &value)
 
 
 //------------------------------------------------------------------------------
-// bool ToInteger(const std::string &str, Integer *value)
+// bool ToInteger(const std::string &str, Integer *value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
  * @see ToInteger(const std::string &str, Integer &value)
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
+bool GmatStringUtil::ToInteger(const std::string &str, Integer *value, bool trimParens)
 {
-   return ToInteger(str, *value);
+   return ToInteger(str, *value, trimParens);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ToInteger(const std::string &str, Integer &value)
+// bool ToInteger(const std::string &str, Integer &value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
  * This method converts string to Integer (signed integer) using atoi() after
@@ -797,9 +802,14 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer *value)
  *        The value out of this range will return complementary number
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
+bool GmatStringUtil::ToInteger(const std::string &str, Integer &value, bool trimParens)
 {
    std::string str2 = Trim(str, BOTH);
+   if (trimParens)
+   {
+      str2 = RemoveExtraParen(str2);
+      str2 = Trim(str2, BOTH);
+   }
    
    if (str2.length() == 0)
       return false;
@@ -822,24 +832,29 @@ bool GmatStringUtil::ToInteger(const std::string &str, Integer &value)
 
 
 //------------------------------------------------------------------------------
-// bool ToBoolean(const std::string &str, bool *value)
+// bool ToBoolean(const std::string &str, bool *value, bool trimParens = false)
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToBoolean(const std::string &str, bool *value)
+bool GmatStringUtil::ToBoolean(const std::string &str, bool *value, bool trimParens)
 {
-   return ToBoolean(str, *value);
+   return ToBoolean(str, *value, trimParens);
 }
 
 
 //------------------------------------------------------------------------------
-// bool ToBoolean(const std::string &str, bool &value)
+// bool ToBoolean(const std::string &str, bool &value, bool trimParens = false)
 //------------------------------------------------------------------------------
 /*
  * @return true if string value is boolean (TRUE, FALSE, true, false, True, False).
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::ToBoolean(const std::string &str, bool &value)
+bool GmatStringUtil::ToBoolean(const std::string &str, bool &value, bool trimParens)
 {
    std::string str2 = Trim(str, BOTH);
+   if (trimParens)
+   {
+      str2 = RemoveExtraParen(str2);
+      str2 = Trim(str2, BOTH);
+   }
    
    if (str2.length() == 0)
       return false;
