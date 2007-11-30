@@ -170,7 +170,7 @@ bool Assignment::InterpretAction()
    
    if (!GmatStringUtil::HasNoBrackets(lhs,true))
       throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
-         "parentheses (except to indicate an array element)");      
+         "parentheses (except to indicate an array element) on the left-hand-side");      
    
    // check for unexpected commas on the left-hand-side
    Integer commaPos = -1;
@@ -208,9 +208,13 @@ bool Assignment::InterpretAction()
    }
    else // if not an equation, check for unexpected commas on the right-hand-side
    {
-      if (!GmatStringUtil::HasNoBrackets(rhs,true))
-         throw CommandException("An assignment command is not allowed to contain brackets, braces, or "
-            "parentheses (except to indicate an array element)");      
+      // Braces are allowed for lists of names, but brackets shouldn't be allowed
+      if ((rhs.find('[') != rhs.npos) || (rhs.find(']') != rhs.npos))
+         throw CommandException(
+            "An assignment command is not allowed to contain brackets on the right-hand side"); 
+      if (!GmatStringUtil::AreAllBracketsBalanced(rhs, "({)}"))
+         throw CommandException(
+            "Parentheses or braces are unbalanced on the right-hand-side of an assignment command"); 
       
       if (rhs.find(',') != rhs.npos)
       {
