@@ -2566,7 +2566,7 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
 
       try
       {
-         if (GmatStringUtil::ToReal(value, rval))
+         if (GmatStringUtil::ToReal(value, rval, true))
          {      
             #ifdef DEBUG_SET
             MessageInterface::ShowMessage("   SetValueToObject() rval=%f\n", rval);
@@ -3223,7 +3223,7 @@ bool Interpreter::SetValueToArray(GmatBase *array, const std::string &toArray,
    if (param == NULL)
       return false;
    
-   if (GmatStringUtil::ToReal(value, rval))
+   if (GmatStringUtil::ToReal(value, rval, true))
    {
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage
@@ -3344,8 +3344,8 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
             // check if value is not a number
             Real rval;
             Integer ival;
-            if (GmatStringUtil::ToReal(value, rval) ||
-                GmatStringUtil::ToInteger(value, ival))
+            if (GmatStringUtil::ToReal(value, rval, true) ||
+                GmatStringUtil::ToInteger(value, ival, true))
             {
                errorMsg1 = errorMsg1 + "The value of \"" + value + "\" for ";
                errorMsg2 = "  The allowed value is Object Name";
@@ -3447,7 +3447,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    case Gmat::RVECTOR_TYPE:
       {
          Real rval;
-         if (GmatStringUtil::ToReal(valueToUse, rval))
+         if (GmatStringUtil::ToReal(valueToUse, rval, true))
          {
             #ifdef DEBUG_SET
             std::string rvalStr =
@@ -5052,7 +5052,7 @@ bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param
       }
       
       if ((!isNumberAllowed) ||
-          (isNumberAllowed && !GmatStringUtil::ToReal(param, rval)))
+          (isNumberAllowed && !GmatStringUtil::ToReal(param, rval, true)))
       {
          InterpreterException ex(msg + " \"" + param + "\" is undefined");
          HandleError(ex);
@@ -5095,15 +5095,28 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
    Real           rval;
+   // remove extra parens and blank spaces at either end of string
+   std::string    descTrimmed = GmatStringUtil::Trim(desc);
+   descTrimmed = GmatStringUtil::RemoveExtraParen(descTrimmed);
+   descTrimmed = GmatStringUtil::Trim(descTrimmed);  
+
+   #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage(
+         "In Interpreter::CreateElementWrapper, original string is \"%s\"\n",
+         desc.c_str(), "\"\n");
+      MessageInterface::ShowMessage(
+         "                                  and trimmed string is \"%s\"\n",
+         descTrimmed.c_str(), "\"\n");
+   #endif
    
    // first, check to see if it is a number
-   if (GmatStringUtil::ToReal(desc,rval))
+   if (GmatStringUtil::ToReal(descTrimmed,rval))
    {
       ew = new NumberWrapper();
       #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage(
             "In Interpreter, created a NumberWrapper for \"%s\"\n",
-            desc.c_str(), "\"\n");
+            descTrimmed.c_str(), "\"\n");
       #endif
    }
    else 
@@ -5112,44 +5125,55 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
       // check to see if it is an array
       bool isOuterParen;
       Integer openParen, closeParen;
-      GmatStringUtil::FindParenMatch(desc, openParen, closeParen, isOuterParen);
+      GmatStringUtil::FindParenMatch(descTrimmed, openParen, closeParen, isOuterParen);
+      #ifdef DEBUG_WRAPPERS
+         MessageInterface::ShowMessage(
+            "In Interpreter, descTrimmed = \"%s\"\n", descTrimmed.c_str());
+      #endif
       if ((openParen  != -1) && (closeParen != -1) && (closeParen > openParen))
       {
-         std::string arrayName = GmatStringUtil::Trim(desc.substr(0,openParen));
-         if ( ((p = theModerator->GetParameter(arrayName)) == NULL) ||
-              !p->IsOfType("Array") )
-         {
-            InterpreterException ex("\"" + arrayName + "\"" + " is not an array");
-            HandleError(ex);
-            return false;
-         }
-         ew             = new ArrayElementWrapper();
-         itsType        = Gmat::ARRAY_ELEMENT;
+         std::string arrayName = GmatStringUtil::Trim(descTrimmed.substr(0,openParen));
          #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage(
-               "In Interpreter, created a ArrayElementWrapper for \"%s\"\n",
-                desc.c_str(), "\"\n");
+               "In Interpreter, arrayName = \"%s\"\n", arrayName.c_str());
          #endif
+         if (!GmatStringUtil::IsBlank(arrayName))
+         {
+            if (((p = theModerator->GetParameter(arrayName)) == NULL)  ||
+               !(p->IsOfType("Array")) )
+            {
+               InterpreterException ex("\"" + arrayName + "\"" + " is not an array");
+               HandleError(ex);
+               return false;
+            }
+            ew             = new ArrayElementWrapper();
+            itsType        = Gmat::ARRAY_ELEMENT;
+            #ifdef DEBUG_WRAPPERS
+               MessageInterface::ShowMessage(
+                  "In Interpreter, created a ArrayElementWrapper for \"%s\"\n",
+                  descTrimmed.c_str(), "\"\n");
+            #endif
+         }
       }
       // check to see if it is an object property or a parameter
-      else if (desc.find(".") != std::string::npos)
+      else if (descTrimmed.find(".") != std::string::npos)
       {
          // if parametersFirst, always create parameter wrapper first
          if (parametersFirst)
          {
-            Parameter *param = CreateSystemParameter(desc);
+            Parameter *param = CreateSystemParameter(descTrimmed);
             if (param)
             {
                #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage(
                      "In Interpreter(1), about to create a ParameterWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
+                     descTrimmed.c_str(), "\"\n");
                #endif
                CreateParameterWrapper(param, &ew, itsType);
             }
             else
             {
-               InterpreterException ex("\"" + desc + "\"" + 
+               InterpreterException ex("\"" + descTrimmed + "\"" + 
                    " is not a valid parameter");
                HandleError(ex);
                return NULL;
@@ -5161,19 +5185,19 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
             // check for object parameter first
             std::string type, owner, dep;
-            GmatStringUtil::ParseParameter(desc, type, owner, dep);
+            GmatStringUtil::ParseParameter(descTrimmed, type, owner, dep);
             // if it's not a valid object, then see if it's a parameter
             GmatBase *theObj = theModerator->GetConfiguredObject(owner);
             if (theObj == NULL)
             {
-               Parameter *param = CreateSystemParameter(desc);
+               Parameter *param = CreateSystemParameter(descTrimmed);
                
                if (param)
                {
                   #ifdef DEBUG_WRAPPERS
                      MessageInterface::ShowMessage(
                         "In Interpreter(2), about to create a ParameterWrapper for \"%s\"\n",
-                        desc.c_str(), "\"\n");
+                        descTrimmed.c_str(), "\"\n");
                   #endif
                   CreateParameterWrapper(param, &ew, itsType);
                }
@@ -5185,10 +5209,10 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage
                      ("In Interpreter, created a StringWrapper for \"%s\"\n",
-                      desc.c_str(), "\"\n");
+                              descTrimmed.c_str(), "\"\n");
                   #endif
                   
-                  //InterpreterException ex("\"" + desc + "\"" + 
+                  //InterpreterException ex("\"" + descTrimmed + "\"" + 
                   //   " is not a valid object property or parameter");
                   //HandleError(ex);
                   //return NULL;
@@ -5197,21 +5221,21 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             else
             {
                // if there are two dots, then treat it as a parameter
-               if (desc.find_first_of(".") != desc.find_last_of("."))
+               if (descTrimmed.find_first_of(".") != descTrimmed.find_last_of("."))
                {
-                  Parameter *param = CreateSystemParameter(desc);
+                  Parameter *param = CreateSystemParameter(descTrimmed);
                   if (param)
                   {
                      #ifdef DEBUG_WRAPPERS
                         MessageInterface::ShowMessage(
                            "In Interpreter(3), about to create a ParameterWrapper for \"%s\"\n",
-                           desc.c_str(), "\"\n");
+                           descTrimmed.c_str(), "\"\n");
                      #endif
                      CreateParameterWrapper(param, &ew, itsType);
                   }
                   else // there is an error
                   {
-                     InterpreterException ex("\"" + desc + "\"" + 
+                     InterpreterException ex("\"" + descTrimmed + "\"" + 
                         " is not a valid object property or parameter");
                      HandleError(ex);
                      return NULL;
@@ -5228,19 +5252,19 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   catch (BaseException &be)
                   {
                      isValidProperty = false;
-                     Parameter *param = CreateSystemParameter(desc);
+                     Parameter *param = CreateSystemParameter(descTrimmed);
                      if (param)
                      {
                         #ifdef DEBUG_WRAPPERS
                            MessageInterface::ShowMessage(
                               "In Interpreter(4), about to create a ParameterWrapper for \"%s\"\n",
-                              desc.c_str(), "\"\n");
+                              descTrimmed.c_str(), "\"\n");
                         #endif
                         CreateParameterWrapper(param, &ew, itsType);
                      }
                      else // there is an error
                      {
-                        InterpreterException ex("\"" + desc + "\"" + 
+                        InterpreterException ex("\"" + descTrimmed + "\"" + 
                            " is not a valid object property or parameter");
                         HandleError(ex);
                         return NULL;
@@ -5253,7 +5277,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                      #ifdef DEBUG_WRAPPERS
                      MessageInterface::ShowMessage(
                         "In Interpreter, created a ObjectPropertyWrapper for \"%s\"\n",
-                        desc.c_str(), "\"\n");
+                        descTrimmed.c_str(), "\"\n");
                      #endif
                   }
                }
@@ -5262,7 +5286,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
       }
       else // check to see if it is a Variable or some other parameter
       {
-         p = theModerator->GetParameter(desc);
+         p = theModerator->GetParameter(descTrimmed);
          if ( (p) && (p->IsOfType("Variable")) )
          {
             ew = new VariableWrapper();
@@ -5270,7 +5294,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
                      "In Interpreter, created a VariableWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
+                     descTrimmed.c_str(), "\"\n");
             #endif
          }
          else if ( (p) && p->IsOfType("Array") )
@@ -5280,7 +5304,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
                      "In Interpreter, created an ArrayWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
+                     descTrimmed.c_str(), "\"\n");
             #endif
          }
          else if ( (p) && p->IsOfType("String") )
@@ -5290,7 +5314,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
                      "In Interpreter, created a StringObjectWrapper for \"%s\"\n",
-                     desc.c_str(), "\"\n");
+                     descTrimmed.c_str(), "\"\n");
             #endif
          }
          else if ( (p) && p->IsOfType("Parameter") )
@@ -5298,14 +5322,14 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
             #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
                   "In Interpreter(5), about to create a ParameterWrapper for \"%s\"\n",
-                  desc.c_str(), "\"\n");
+                  descTrimmed.c_str(), "\"\n");
             #endif
             CreateParameterWrapper(p, &ew, itsType);
          }
          else
          {
             // Check see if it is clonable object
-            GmatBase *obj = FindObject(desc);
+            GmatBase *obj = FindObject(descTrimmed);
 
             if (obj != NULL)
             {
@@ -5315,13 +5339,13 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage
                   ("In Interpreter, created an ObjectWrapper for \"%s\"\n",
-                   desc.c_str(), "\"\n");
+                           descTrimmed.c_str(), "\"\n");
                #endif
             }
             else
             {
                bool bVal;
-               if (GmatStringUtil::ToBoolean(desc, bVal))
+               if (GmatStringUtil::ToBoolean(descTrimmed, bVal))
                {
                   ew = new BooleanWrapper();
                   itsType = Gmat::BOOLEAN;
@@ -5329,11 +5353,11 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage
                      ("In Interpreter, created a BooleanWrapper for \"%s\"\n",
-                      desc.c_str(), "\"\n");
+                              descTrimmed.c_str(), "\"\n");
                   #endif
                }
-               else if (desc == "On" || desc == "Off" ||
-                        desc == "on" || desc == "off")
+               else if (descTrimmed == "On" || descTrimmed == "Off" ||
+                        descTrimmed == "on" || descTrimmed == "off")
                {
                   ew = new OnOffWrapper();
                   itsType = Gmat::ON_OFF;
@@ -5341,7 +5365,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage
                      ("In Interpreter, created a OnOffWrapper for \"%s\"\n",
-                      desc.c_str(), "\"\n");
+                              descTrimmed.c_str(), "\"\n");
                   #endif
                }
                else
@@ -5352,7 +5376,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
                   #ifdef DEBUG_WRAPPERS
                   MessageInterface::ShowMessage
                      ("In Interpreter, created a StringWrapper for \"%s\"\n",
-                      desc.c_str(), "\"\n");
+                              descTrimmed.c_str(), "\"\n");
                   #endif
                }
             }
@@ -5364,6 +5388,7 @@ ElementWrapper* Interpreter::CreateElementWrapper(const std::string &desc,
    {
       // set the description string; this will also setup the wrapper
       ew->SetDescription(desc);
+      //ew->SetDescription(descTrimmed); // or do I want this?
       // if it's an ArrayElement, set up the row and column wrappers
       if (itsType == Gmat::ARRAY_ELEMENT)
       {
