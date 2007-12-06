@@ -295,7 +295,9 @@ public:
    //                                             Integer coeffSize, Rmatrix& bodySij,
    //                                             Rmatrix& bodyCij);
    
-
+   
+   // required method for all subclasses that can be copied in a script
+   virtual void         Copy(const GmatBase* orig);
    
    //------------------------------------------------------------------------------
    // virtual CelestialBody* Clone(void) const
@@ -393,11 +395,11 @@ protected:
    Rvector6               state ;
    // time of the state
    A1Mjd                  stateTime;
-
+   
    /// name of central body around which this body revolves
-   std::string            centralBody;
+   std::string            theCentralBodyName;
    /// central body around which this body revolves
-   CelestialBody          *cb;
+   CelestialBody          *theCentralBody;
    /// body number for the SLP file
    Integer                bodyNumber;
    /// body number of origin of coordinate system for file
@@ -406,7 +408,7 @@ protected:
    std::string            sourceFilename;
    // the source file
    PlanetaryEphem*        theSourceFile;
-
+   
    /// flag indicating whether or not to get data from potential file
    bool                   usePotentialFile;
    /// file name of the potential file to use

@@ -48,7 +48,7 @@
 //#define DEBUG_CELESTIAL_BODY 1
 //#define DEBUG_GET_STATE
 //#define DEBUG_CB_ANALYTIC
-
+//#define DEBUG_EPHEM_SOURCE
 
 using namespace GmatMathUtil;
 using namespace std; 
@@ -160,8 +160,8 @@ CelestialBody::CelestialBody(std::string itsBodyType, std::string name) :
    posVelSrc          (Gmat::DE_405),
    analyticMethod     (Gmat::LOW_FIDELITY),
    stateTime          (21545.0),
-   centralBody        (""),
-   cb                 (NULL),
+   theCentralBodyName (""),
+   theCentralBody     (NULL),
    bodyNumber         (0),
    referenceBodyNumber(0),
    sourceFilename     (""),
@@ -219,8 +219,8 @@ CelestialBody::CelestialBody(Gmat::BodyType itsBodyType, std::string name) :
    posVelSrc          (Gmat::DE_405),
    analyticMethod     (Gmat::LOW_FIDELITY),
    stateTime          (21545.0),
-   centralBody        (""),
-   cb                 (NULL),
+   theCentralBodyName (""),
+   theCentralBody     (NULL),
    bodyNumber         (0),
    referenceBodyNumber(0),
    sourceFilename     (""),
@@ -275,8 +275,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    mu                  (cBody.mu),
    posVelSrc           (cBody.posVelSrc),
    analyticMethod      (cBody.analyticMethod),
-   centralBody         (cBody.centralBody),
-   cb                  (cBody.cb),
+   theCentralBodyName  (cBody.theCentralBodyName),
+   theCentralBody      (cBody.theCentralBody),
    bodyNumber          (cBody.bodyNumber),
    referenceBodyNumber (cBody.referenceBodyNumber),
    sourceFilename      (cBody.sourceFilename),
@@ -354,8 +354,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    analyticMethod      = cBody.analyticMethod;
    state               = cBody.state;
    stateTime           = cBody.stateTime;
-   centralBody         = cBody.centralBody;
-   cb                  = cBody.cb;
+   theCentralBodyName  = cBody.theCentralBodyName;
+   theCentralBody      = cBody.theCentralBody;
    bodyNumber          = cBody.bodyNumber;
    referenceBodyNumber = cBody.referenceBodyNumber;
    sourceFilename      = cBody.sourceFilename;
@@ -367,18 +367,16 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    
    if (atmModel)
       delete atmModel;
-
+   
    if (cBody.atmModel)
-   {
       atmModel = (AtmosphereModel*)(cBody.atmModel)->Clone();
-   }
    else
       atmModel = NULL;
    
    potentialFileRead   = false;
    defaultMu           = cBody.defaultMu;
    defaultEqRadius     = cBody.defaultEqRadius;
-      
+   
    for (Integer i = 0; i < Gmat::ModelTypeCount; i++)
       models[i] = cBody.models[i];
    
@@ -420,8 +418,8 @@ bool CelestialBody::Initialize()
 {
    #ifdef DEBUG_CB_INIT
    MessageInterface::ShowMessage
-      ("CelestialBody::Initialize() posVelSrc=%d, this=%s, ephemUpdateInterval=%f\n",
-       posVelSrc, GetName().c_str(), ephemUpdateInterval);
+      ("CelestialBody::Initialize() <%p> %s, posVelSrc=%d, ephemUpdateInterval=%f\n",
+       this, GetName().c_str(), posVelSrc, ephemUpdateInterval);
    #endif
    
    isFirstTimeMu = true;
@@ -456,6 +454,8 @@ const Rvector6&  CelestialBody::GetState(A1Mjd atTime)
 {
    #ifdef DEBUG_GET_STATE
       MessageInterface::ShowMessage("Entering Rvector6& GetState with time %.17f\n",
+      MessageInterface::ShowMessage
+         ("   posVelSrc=%d for <%p> %s\n", posVelSrc, this, GetName().c_str());
       atTime.Get());
       MessageInterface::ShowMessage("   lastEphemTime = %.17f\n",lastEphemTime.Get());
    #endif
@@ -642,7 +642,7 @@ Gmat::BodyType CelestialBody::GetBodyType() const
 //------------------------------------------------------------------------------
 const std::string& CelestialBody::GetCentralBody() const
 {
-   return centralBody;
+   return theCentralBodyName;
 }
 
 
@@ -658,9 +658,11 @@ const std::string& CelestialBody::GetCentralBody() const
 //------------------------------------------------------------------------------
 Real CelestialBody::GetGravitationalConstant() 
 {
-   //MessageInterface::ShowMessage
-   //   ("==> CelestialBody::GetGravitationalConstant() usePotentialFile=%d for %s\n",
-   //    usePotentialFile, instanceName.c_str());
+   #ifdef DEBUG_GRAV_CONST
+   MessageInterface::ShowMessage
+      ("CelestialBody::GetGravitationalConstant() usePotentialFile=%d for %s\n",
+       usePotentialFile, instanceName.c_str());
+   #endif
    
    if (usePotentialFile == true)
    {
@@ -1178,7 +1180,7 @@ bool CelestialBody::SetBodyType(Gmat::BodyType bType)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetCentralBody(const std::string &cBody)
 {
-   centralBody = cBody;
+   theCentralBodyName = cBody;
    return true;
 }
 
@@ -1293,6 +1295,12 @@ bool CelestialBody::SetFlattening(Real flat)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 {
+   #ifdef DEBUG_EPHEM_SOURCE
+   MessageInterface::ShowMessage
+      ("CelestialBody::SetSource() <%p> %s, Setting source to %d\n", this,
+       GetName().c_str(), pvSrc);
+   #endif
+   
    posVelSrc = pvSrc;
    return true;
 }
@@ -1311,6 +1319,12 @@ bool CelestialBody::SetSource(Gmat::PosVelSource pvSrc)
 //------------------------------------------------------------------------------
 bool CelestialBody::SetSourceFile(PlanetaryEphem *src)
 {
+   #ifdef DEBUG_EPHEM_SOURCE
+   MessageInterface::ShowMessage
+      ("CelestialBody::SetSourceFile() <%p> %s, Setting source file to %p\n",
+       this, GetName().c_str(), src);
+   #endif
+   
    // should I delete the old one here???
    theSourceFile = src;
    sourceFilename = theSourceFile->GetName();
@@ -1635,6 +1649,10 @@ bool CelestialBody::SetAnalyticElements(const Rvector6 &kepl)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetRotationDataSource(Gmat::RotationDataSource src)
+//------------------------------------------------------------------------------
 bool CelestialBody::SetRotationDataSource(Gmat::RotationDataSource src)
 {
    rotationSrc = src;
@@ -1649,11 +1667,11 @@ const Rvector6 CelestialBody::GetMJ2000State(const A1Mjd &atTime)
 {
    if (j2000Body == NULL)
       throw SolarSystemException("j2000Body is NULL for " + instanceName);
-      
+   
    // If j2000Body is this body, return the zero state vector
    if(j2000Body->GetName() == instanceName) 
       return Rvector6(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
+   
    Rvector6         stateEphem    = GetState(atTime);
    Rvector6         j2kEphemState;
    Gmat::ObjectType ot            = j2000Body->GetType();
@@ -2106,7 +2124,7 @@ std::string CelestialBody::GetStringParameter(const Integer id) const
       if (atmModel == NULL) return "";
       return atmModel->GetTypeName();
    }
-   if (id == CENTRAL_BODY)          return centralBody;
+   if (id == CENTRAL_BODY)          return theCentralBodyName;
    if (id == ANALYTIC_DATE_FORMAT)  return analyticFormat;
    if (id == ANALYTIC_STATE_TYPE)   return analyticStateType;
    if (id == ROTATION_DATA_SRC)     return Gmat::ROTATION_DATA_SOURCE_STRINGS[rotationSrc];
@@ -2181,7 +2199,7 @@ bool CelestialBody::SetStringParameter(const Integer id,
    }
    if (id == CENTRAL_BODY)
    {
-      centralBody = value;
+      theCentralBodyName = value;
       return true;
    }
    if (id == ANALYTIC_DATE_FORMAT)
@@ -2544,12 +2562,12 @@ GmatBase* CelestialBody::GetRefObject(const Gmat::ObjectType type,
    {
       case Gmat::SPACE_POINT:
       case Gmat::CELESTIAL_BODY:
-         if ((cb) && (name == centralBody))     return cb;
+         if ((theCentralBody) && (name == theCentralBodyName)) return theCentralBody;
          break;
       default:
          break;
    }
-
+   
    // Not handled here -- invoke the next higher GetRefObject call
    return SpacePoint::GetRefObject(type, name);
 }
@@ -2576,7 +2594,7 @@ const StringArray& CelestialBody::GetRefObjectNameArray(
    {
       static StringArray refs = SpacePoint::GetRefObjectNameArray(type);
 
-      refs.push_back(centralBody);
+      refs.push_back(theCentralBodyName);
 
       #ifdef DEBUG_REFERENCE_SETTING
          MessageInterface::ShowMessage("+++ReferenceObjects:\n");
@@ -2611,29 +2629,42 @@ bool CelestialBody::SetRefObject(GmatBase *obj,
                                  const Gmat::ObjectType type,
                                  const std::string &name)
 {
+   #ifdef DEBUG_REFERENCE_SETTING
+   MessageInterface::ShowMessage
+      ("CelestialBody::SetRefObject() this=<%p> %s, obj=%p, name=%s\n",
+       this, GetName().c_str(), obj, name.c_str());
+   #endif
+   
+   if (this == obj)
+      return true;
+   
    bool foundHere = false;
    bool trySP     = false;
    if (obj->IsOfType("CelestialBody"))
    {
-      if (name == centralBody)
+      if (name == theCentralBodyName)
       {
          #ifdef DEBUG_REFERENCE_SETTING
-            MessageInterface::ShowMessage("Setting %s as primary for %s\n",
+            MessageInterface::ShowMessage("   Setting %s as primary for %s\n",
                                           name.c_str(), instanceName.c_str());
          #endif
-         cb = (CelestialBody*) obj;
+         theCentralBody = (CelestialBody*) obj;
          foundHere = true;
       }
    }
-
+   
    // may also be the right object for a higher level parameter ...
    try
    {
       trySP = SpacePoint::SetRefObject(obj, type, name);
    }
-   catch (GmatBaseException &gbe)
+   catch (GmatBaseException &e)
    {
-      if (!foundHere) throw;
+      //loj: We don't want to throw an exception here. (2007.12.05)
+      //if (!foundHere) throw;
+      #ifdef DEBUG_REFERENCE_SETTING
+      MessageInterface::ShowMessage(e.GetFullMessage() + "\n");
+      #endif
    }
    if (foundHere || trySP) return true;
    return false;
@@ -2671,6 +2702,21 @@ bool CelestialBody::IsParameterReadOnly(const Integer id) const
 bool CelestialBody::IsParameterReadOnly(const std::string &label) const
 {
    return IsParameterReadOnly(GetParameterID(label));
+}
+
+
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Set this instance to match the one passed in.
+ * 
+ * @param <orig> The object that is being copied.
+ */
+//---------------------------------------------------------------------------
+void CelestialBody::Copy(const GmatBase* orig)
+{
+   operator=(*((CelestialBody *)(orig)));
 }
 
 
@@ -2817,11 +2863,18 @@ Real CelestialBody::GetJulianDaysFromTCBEpoch(const A1Mjd &forTime) const
 //------------------------------------------------------------------------------
 Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
 {
+   #ifdef DEBUG_LOW_FIDELITY
+   MessageInterface::ShowMessage
+      ("CelestialBody::ComputeLowFidelity() this=<%p> %s, "
+       "theCentralBody=<%p> %s\n", this, GetName().c_str(), theCentralBody,
+       theCentralBodyName.c_str());
+   #endif
+   
    // Since we want the state in MJ2000Eq Earth-centered
    if (instanceName == SolarSystem::EARTH_NAME) 
       return Rvector6(0.0,0.0,0.0,0.0,0.0,0.0);
-
-   Rvector6 cbState = cb->GetState(forTime);
+   
+   Rvector6 cbState = theCentralBody->GetState(forTime);
    Rvector6 posvel = KeplersProblem(forTime);
    
    return (KeplersProblem(forTime) + cbState);    
@@ -2843,8 +2896,8 @@ Rvector6 CelestialBody::ComputeLowFidelity(const A1Mjd &forTime)
  */
 //------------------------------------------------------------------------------
 Rvector6 CelestialBody::KeplersProblem(const A1Mjd &forTime)
-{   
-   Real     cbMu  = cb->GetGravitationalConstant() + mu;
+{
+   Real     cbMu  = theCentralBody->GetGravitationalConstant() + mu;
    Rvector6 cart;  // or MA???
    Real     dTime;
    if (newAnalytic)
