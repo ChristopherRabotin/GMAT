@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              InteractiveMatlabDialog
 //------------------------------------------------------------------------------
@@ -142,8 +142,7 @@ void InteractiveMatlabDialog::Create()
                      new wxStaticText( this, ID_TEXT, wxT("  Function  "),
                      wxDefaultPosition, wxDefaultSize, 0 );
 
-   StringArray &list =
-         theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
+   StringArray list = theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
    int size = list.size();
    wxString *choices = new wxString[size];
 
