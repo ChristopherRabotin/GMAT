@@ -138,7 +138,7 @@ GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// StringArray GetListOfFactoryItems(Gmat::ObjectType type)
+// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all creatable items of object type.
@@ -148,7 +148,7 @@ GmatBase* GuiInterpreter::GetRunningObject(const std::string &name)
  * @return array of item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
+const StringArray& GuiInterpreter::GetListOfFactoryItems(Gmat::ObjectType type)
 {
    return theModerator->GetListOfFactoryItems(type);
 }
@@ -427,26 +427,26 @@ bool GuiInterpreter::IsDefaultCoordinateSystem(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetarySourceTypes()
+// const StringArray& GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 /**
- * @return a planetary source types
+ * @return a planetary source types for the solar system in use.
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetarySourceTypes()
+const StringArray& GuiInterpreter::GetPlanetarySourceTypes()
 {
    return theModerator->GetPlanetarySourceTypes();
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetarySourceNames()
+// const StringArray& GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 /**
- * @return a planetary source file names
+ * @return a planetary source file names of the solar system in use.
  */
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetarySourceNames()
+const StringArray& GuiInterpreter::GetPlanetarySourceNames()
 {
    return theModerator->GetPlanetarySourceNames();
 }
@@ -455,16 +455,24 @@ StringArray& GuiInterpreter::GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 // StringArray& GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
+/*
+ * @return planetary source type in use of the solar system in use.
+ */
+//------------------------------------------------------------------------------
+const StringArray& GuiInterpreter::GetPlanetarySourceTypesInUse()
 {
    return theModerator->GetPlanetarySourceTypesInUse();
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetAnalyticModelNames()
+// const StringArray& GetAnalyticModelNames()
 //------------------------------------------------------------------------------
-StringArray& GuiInterpreter::GetAnalyticModelNames()
+/*
+ * @return analytic model name used of the solar system in use.
+ */
+//------------------------------------------------------------------------------
+const StringArray& GuiInterpreter::GetAnalyticModelNames()
 {
    return theModerator->GetAnalyticModelNames();
 }

@@ -39,7 +39,7 @@ public:
    GmatBase* GetRunningObject(const std::string &name);
    
    //----- factory
-   StringArray GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    
    //----- configuration
    std::string GetNewName(const std::string &name, Integer startCount);
@@ -75,10 +75,10 @@ public:
    GmatBase* CreateDefaultPropSetup(const std::string &name);
    
    // Planetary source
-   StringArray& GetPlanetarySourceTypes();
-   StringArray& GetPlanetarySourceNames();
-   StringArray& GetPlanetarySourceTypesInUse();
-   StringArray& GetAnalyticModelNames();
+   const StringArray& GetPlanetarySourceTypes();
+   const StringArray& GetPlanetarySourceNames();
+   const StringArray& GetPlanetarySourceTypesInUse();
+   const StringArray& GetAnalyticModelNames();
    bool SetAnalyticModelToUse(const std::string &modelName);
    bool SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &filename);

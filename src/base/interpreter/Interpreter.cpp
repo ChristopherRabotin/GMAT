@@ -538,7 +538,7 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfObjects(Gmat::ObjectType type)
+// const StringArray& GetListOfObjects(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -548,7 +548,7 @@ GmatCommand* Interpreter::InterpretGMATFunction(const std::string &pathAndName)
  * @return array of configured item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
+const StringArray& Interpreter::GetListOfObjects(Gmat::ObjectType type)
 {
    return theModerator->GetListOfObjects(type);
 }

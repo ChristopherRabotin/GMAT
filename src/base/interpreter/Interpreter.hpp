@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Interpreter
 //------------------------------------------------------------------------------
@@ -100,12 +100,12 @@ public:
    
    GmatCommand* InterpretGMATFunction(const std::string &pathAndName);
    
-   StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
    GmatBase* CreateObject(const std::string &type, const std::string &name);
    SolarSystem* GetSolarSystemInUse();
    
-   StringArray& GetErrorList() { return errorList; }
+   const StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
    void SetFooterComment(const std::string &comment){footerComment = comment;}
    
