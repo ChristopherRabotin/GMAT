@@ -147,7 +147,38 @@ CoordinateBase::~CoordinateBase()
 //------------------------------------------------------------------------------
 void CoordinateBase::SetSolarSystem(SolarSystem *ss)
 {
-   solar = ss;
+   if (ss == NULL)
+      return;
+   
+   #ifdef DEBUG_SET_SS
+   MessageInterface::ShowMessage
+      ("CoordinateBase::SetSolarSystem() this=%s, solar=%p, ss=%p\n",
+       GetName().c_str(), solar, ss);
+   #endif
+   
+   if (solar != ss)
+   {
+      solar = ss;
+      
+      // set new origin 
+      SpacePoint *sp = solar->GetBody(originName);
+      if (sp != NULL)
+         origin = sp;
+      
+      // set new j2000body
+      sp = solar->GetBody(j2000BodyName);
+      if (sp != NULL)
+         j2000Body = sp;
+      
+      // set J2000Body of origin
+      if (origin != NULL)
+         origin->SetJ2000Body(solar->GetBody(origin->GetJ2000BodyName()));
+      
+      #ifdef DEBUG_SET_SS
+      MessageInterface::ShowMessage
+         ("   got new SolarSystem, origin=%p, j2000Body=%p\n", origin, j2000Body);
+      #endif
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -566,7 +597,7 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
    {
       static StringArray refs;
       refs.clear();
-   
+      
       refs.push_back(originName);
       if (j2000BodyName != originName)
          refs.push_back(j2000BodyName);
@@ -576,7 +607,7 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
       
       return refs;
    }
-
+   
    // Not handled here -- invoke the next higher GetRefObject call
    return GmatBase::GetRefObjectNameArray(type);
 }
@@ -600,18 +631,32 @@ const StringArray& CoordinateBase::GetRefObjectNameArray(const Gmat::ObjectType 
 bool CoordinateBase::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   if (obj == NULL)
+      return false;
+
+   #ifdef DEBUG_SET_REF
+   MessageInterface::ShowMessage
+      ("CoordinateBase::SetRefObject() <%s>, obj=%p, name=%s\n", GetName().c_str(),
+       obj, name.c_str());
+   #endif
    
    if (obj->IsOfType(Gmat::SPACE_POINT))
    {
+      SpacePoint *sp = (SpacePoint*) obj;
+      
       if (name == originName)
-         origin = (SpacePoint*) obj;
-
+         origin = sp;
+      
       if (name == j2000BodyName)
-         j2000Body = (SpacePoint*) obj;
-
+         j2000Body = sp;      
+      
+      if (origin != NULL)
+         if (name == origin->GetJ2000BodyName())
+            origin->SetJ2000Body(sp);
+      
       return true;
    }
-
+   
    // Not handled here -- invoke the next higher SetRefObject call
    return GmatBase::SetRefObject(obj, type, name);
 }
