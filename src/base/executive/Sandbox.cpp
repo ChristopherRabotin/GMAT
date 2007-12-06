@@ -271,7 +271,7 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 #ifdef DISABLE_SOLAR_SYSTEM_CLONING
    solarSys = ss;
 #else
-   MessageInterface::ShowMessage("Cloning the solar system\n");
+   MessageInterface::ShowMessage("Cloning the solar system in the Sandbox\n");
    solarSys = (SolarSystem*)(ss->Clone());
 #endif
    return true;
