@@ -272,6 +272,9 @@ Spacecraft::~Spacecraft()
  * Copy Constructor for base Spacecraft structures.
  *
  * @param <a> The original that is being copied.
+ *
+ * @notes We need to copy internal and display coordinate systems to work
+ * properly in the mission sequence for object copy.
  */
 Spacecraft::Spacecraft(const Spacecraft &a) :
    SpaceObject          (a),
@@ -287,8 +290,8 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    stateType            (a.stateType),
    displayStateType     (a.displayStateType),
    anomalyType          (a.anomalyType),
-   internalCoordSystem  (a.internalCoordSystem),
-   coordinateSystem     (a.coordinateSystem),      // Check this one...
+   internalCoordSystem  (a.internalCoordSystem),   // need to copy
+   coordinateSystem     (a.coordinateSystem),      // need to copy
    coordSysName         (a.coordSysName),
    stateConverter       (a.stateConverter),
    coordConverter       (a.coordConverter),
@@ -299,7 +302,7 @@ Spacecraft::Spacecraft(const Spacecraft &a) :
    objectTypes.push_back(Gmat::SPACECRAFT);
    objectTypeNames.push_back("Spacecraft");
    parameterCount = a.parameterCount;
-
+   
    state.SetEpoch(a.state.GetEpoch());
    // clone the attitude
    if (a.attitude) attitude = (Attitude*) a.attitude->Clone();
@@ -358,6 +361,8 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
    displayStateType     = a.displayStateType;
    anomalyType          = a.anomalyType;
    coordSysName         = a.coordSysName;
+   internalCoordSystem  = a.internalCoordSystem; // need to copoy
+   coordinateSystem     = NULL;
    //attitude             = a.attitude,        // correct?
    //attitude             = (Attitude*) a.attitude->Clone(),        // correct?
    stateConverter       = a.stateConverter;
@@ -371,8 +376,11 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
 
 //   MessageInterface::ShowMessage("Anomaly has type %s, copied from %s\n", 
 //      trueAnomaly.GetTypeString().c_str(), a.trueAnomaly.GetTypeString().c_str());
-
+   
    state.SetEpoch(a.state.GetEpoch());
+   // clone the attitude
+   if (a.attitude) attitude = (Attitude*) a.attitude->Clone();
+   else            attitude = NULL;
    
    state[0] = a.state[0];
    state[1] = a.state[1];
@@ -387,8 +395,6 @@ Spacecraft& Spacecraft::operator=(const Spacecraft &a)
       csSet = true;
    }
    
-   internalCoordSystem = a.internalCoordSystem;
-
    stateElementLabel = a.stateElementLabel;
    stateElementUnits = a.stateElementUnits;
    representations   = a.representations;
@@ -420,8 +426,8 @@ void Spacecraft::SetInternalCoordSystem(CoordinateSystem *cs)
 {
    #if DEBUG_SPACECRAFT_CS
       MessageInterface::ShowMessage
-         ("Spacecraft::SetInternalCoordSystem() cs=%d on %s\n", cs, 
-         instanceName.c_str());
+         ("Spacecraft::SetInternalCoordSystem() cs=%s<%p> on %s\n",
+          cs->GetName().c_str(),cs, instanceName.c_str());
    #endif
    
    if (internalCoordSystem != cs)
@@ -855,6 +861,9 @@ const StringArray&
 
 
 // DJC: Not sure if we need this yet...
+//------------------------------------------------------------------------------
+// bool SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
+//------------------------------------------------------------------------------
 bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
 {
    if (type == Gmat::COORDINATE_SYSTEM)
@@ -881,13 +890,13 @@ bool Spacecraft::SetRefObjectName(const Gmat::ObjectType type, const std::string
 GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type, 
                                    const std::string &name)
 {
-//MessageInterface::ShowMessage("Accessing ref object on %s of type ", instanceName.c_str());
+   //MessageInterface::ShowMessage("Accessing ref object on %s of type ", instanceName.c_str());
    // This switch statement intentionally drops through without breaks, so that
    // the search in the tank and thruster name lists only need to be coded once. 
    switch (type)
    {
       case Gmat::COORDINATE_SYSTEM:
-//MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
+         //MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return coordinateSystem;
          
       case Gmat::ATTITUDE:
@@ -895,20 +904,20 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          MessageInterface::ShowMessage(
          "In SC::GetRefObject - returning Attitude poinetr\n");
          #endif
-//MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
+         //MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return attitude;
          
       case Gmat::HARDWARE:
       case Gmat::FUEL_TANK:
-//MessageInterface::ShowMessage("FuelTank named %s\n", name.c_str());
+         //MessageInterface::ShowMessage("FuelTank named %s\n", name.c_str());
          for (ObjectArray::iterator i = tanks.begin(); 
               i < tanks.end(); ++i) {
             if ((*i)->GetName() == name)
                return *i;
          }
-      
+         
       case Gmat::THRUSTER:
-//MessageInterface::ShowMessage("Thruster named %s\n", name.c_str());
+         //MessageInterface::ShowMessage("Thruster named %s\n", name.c_str());
          for (ObjectArray::iterator i = thrusters.begin(); 
               i < thrusters.end(); ++i) {
             if ((*i)->GetName() == name)
@@ -916,14 +925,14 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
          }
          
          // Other Hardware cases go here...
-
+         
          return NULL;      // Hardware requested, but not in the hardware lists
          
       default:
          break;
    }
-
-//MessageInterface::ShowMessage("Unknown named %s\n", name.c_str());
+   
+   //MessageInterface::ShowMessage("Unknown named %s\n", name.c_str());
    return SpaceObject::GetRefObject(type, name);
 }
 
@@ -981,20 +990,23 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       CoordinateSystem *cs = (CoordinateSystem*)obj;
       
       #if DEBUG_SPACECRAFT_CS
-         MessageInterface::ShowMessage
-            ("Spacecraft::SetRefObject() coordinateSystem=%d, cs=%d on %s\n",
-             coordinateSystem, cs, instanceName.c_str());
+      MessageInterface::ShowMessage
+         ("Spacecraft::SetRefObject() coordinateSystem=%s<%p>, cs=%s<%p> on %s\n",
+          GetName().c_str(), coordinateSystem->GetName().c_str(), coordinateSystem,
+          cs->GetName().c_str(), cs, instanceName.c_str());
       #endif
       
       if (coordinateSystem != cs)
-         coordinateSystem = cs;
+      {
+         coordinateSystem = cs;         
+         TakeAction("ApplyCoordinateSystem");
          
-      TakeAction("ApplyCoordinateSystem");
-      #if DEBUG_SPACECRAFT_CS
+         #if DEBUG_SPACECRAFT_CS
          MessageInterface::ShowMessage
             ("Spacecraft::SetRefObject() coordinateSystem applied ----------\n");
-      #endif
-
+         #endif
+      }
+      
       return true;
    }
    else if (type == Gmat::ATTITUDE)
@@ -1989,7 +2001,7 @@ bool Spacecraft::TakeAction(const std::string &action,
 
       return true;
    }
-
+   
    if (action == "ApplyCoordinateSystem")
    {
       if (!stateConverter.SetMu(coordinateSystem))
@@ -2004,6 +2016,8 @@ bool Spacecraft::TakeAction(const std::string &action,
          
          csSet = true;
       }
+      
+      return true;
    }
    
    // 6/12/06 - arg: reset scEpochStr to epoch from prop state
@@ -2040,13 +2054,17 @@ bool Spacecraft::TakeAction(const std::string &action,
       MessageInterface::ShowMessage("In TakeAction, scEpochStr being set to %s\n",
       scEpochStr.c_str());
       #endif
-
+      
       return true;
    }
-      
+   
    return SpaceObject::TakeAction(action, actionData);
 }
 
+
+//---------------------------------------------------------------------------
+// GmatBase* GetOwnedObject(Integer whichOne)
+//---------------------------------------------------------------------------
 GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
 {
    // only one owned object at the moment 
@@ -2055,7 +2073,6 @@ GmatBase* Spacecraft::GetOwnedObject(Integer whichOne)
    
    return NULL;
 }
-
 
 
 //---------------------------------------------------------------------------
@@ -2071,7 +2088,7 @@ bool Spacecraft::Initialize()
 {
    #if DEBUG_SPACECRAFT_CS
       MessageInterface::ShowMessage("Spacecraft::Initialize() "
-         "internalCoordSystem=%d, coordinateSystem=%d\n", internalCoordSystem, 
+         "internalCoordSystem=%p, coordinateSystem=%p\n", internalCoordSystem, 
          coordinateSystem);
    
       if (internalCoordSystem)
@@ -2388,10 +2405,7 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    WriteParameters(mode, preface, data);
    
    generatingString = data.str();
-
-   //MessageInterface::ShowMessage("===> generatingString=\n%s\n", generatingString.c_str());
-   //return generatingString;
-   
+      
    // Then call the parent class method for preface and inline comments
    return SpaceObject::GetGeneratingString(mode, prefix, useName);
 }
@@ -2423,21 +2437,15 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
    value.precision(GetDataPrecision()); 
    
    bool showAnomaly = false;
-   //loj: 1/8/07 set the flag
    if (stateType == "Keplerian" || stateType == "ModKeplerian")
       showAnomaly = true;
    
-   // Set the parameter order for output
-   //VC++ error C2057: expected constant expression
-   //     error C2466: cannot allocate an array of constant size 0
-   //Integer parmOrder[parameterCount], parmIndex = 0;
    Integer *parmOrder = new Integer[parameterCount];   
    Integer parmIndex = 0;
    
    parmOrder[parmIndex++] = DATE_FORMAT_ID;
    parmOrder[parmIndex++] = SC_EPOCH_ID;
    parmOrder[parmIndex++] = COORD_SYS_ID;
-   //parmOrder[parmIndex++] = STATE_TYPE_ID;
    parmOrder[parmIndex++] = DISPLAY_STATE_TYPE_ID;
    parmOrder[parmIndex++] = ANOMALY_ID;
    parmOrder[parmIndex++] = ELEMENT1_ID;
@@ -2476,21 +2484,23 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          parmOrder[parmIndex++] = i;
    }
    
-//    Rvector6 genState; 
-//    coordConverter.Convert(A1Mjd(GetEpoch()), Rvector6(GetState().GetState()), 
-//                           internalCoordSystem, 
-//                           genState, coordinateSystem);
-   
+   //Rvector6 genState; 
+   //coordConverter.Convert(A1Mjd(GetEpoch()), Rvector6(GetState().GetState()), 
+   //                       internalCoordSystem, 
+   //                       genState, coordinateSystem);
    //Rvector6 repState = GetStateInRepresentation(stateType);
+   
    Rvector6 repState = GetStateInRepresentation(displayStateType);
    
-//    MessageInterface::ShowMessage("===> trueAnomaly=%s\n", trueAnomaly.ToString().c_str());
    #if DEBUG_SPACECRAFT_GEN_STRING
-   //MessageInterface::ShowMessage("===> stateType=%s, repState=%s\n", stateType.c_str(),
-   //                              repState.ToString().c_str());
-   MessageInterface::ShowMessage("===> displayStateType=%s, repState=%s\n", 
-                                 displayStateType.c_str(),
-                                 repState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   trueAnomaly=%s\n", trueAnomaly.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   stateType=%s, repState=%s\n", stateType.c_str(),
+       repState.ToString().c_str());
+   MessageInterface::ShowMessage
+      ("   displayStateType=%s, repState=%s\n", displayStateType.c_str(),
+       repState.ToString().c_str());
    #endif
    
    for (i = 0; i < parameterCount; ++i)
@@ -2529,14 +2539,11 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   value << repState[parmOrder[i] - ELEMENT1_ID];
                   value.precision(GetDataPrecision()); 
                }
-               //else if (parmOrder[i] == STATE_TYPE_ID)
                else if (parmOrder[i] == DISPLAY_STATE_TYPE_ID)
                {
                   if (mode != Gmat::MATLAB_STRUCT)
-                     //value << stateType;
                      value << displayStateType;
                   else
-                     //value << "'" << stateType << "'"; 
                      value << "'" << displayStateType << "'"; 
                }
                else if (parmOrder[i] == ANOMALY_ID)
@@ -2562,10 +2569,6 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   #endif
                   WriteParameterValue(parmOrder[i], value);
                }
-               
-               //loj: 1/8/07 moved up as else if (parmOrder[i] == ANOMALY_ID)
-               //if ((showAnomaly == false) && (parmOrder[i] == ANOMALY_ID))
-               //   value.str("");
                
                if (value.str() != "")
                {
