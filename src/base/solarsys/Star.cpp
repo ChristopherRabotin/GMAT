@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Star
 //------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ void Star::InitializeStar()
    polarRadius         = (1.0 - flattening) * equatorialRadius;
    posVelSrc           = Star::POS_VEL_SOURCE;
    analyticMethod      = Star::ANALYTIC_METHOD;
-   centralBody         = "";
+   theCentralBodyName  = "";
    bodyNumber          = Star::BODY_NUMBER;
    referenceBodyNumber = Star::REF_BODY_NUMBER;
 

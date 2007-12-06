@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Moon
 //------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
    Real d = GetJulianDaysFromTCBEpoch(forTime); // interval in Julian days
    Real T = d / 36525;                          // interval in Julian centuries
    // Compute for Eath's Moon
-   if (centralBody == SolarSystem::EARTH_NAME) 
+   if (theCentralBodyName == SolarSystem::EARTH_NAME) 
    {
       p1  = Rad(125.045 -  0.0529921 * d);
       p2  = Rad(250.089 -  0.1059842 * d);
@@ -251,7 +251,7 @@ Rvector Moon::GetBodyCartographicCoordinates(const A1Mjd &forTime) const
              +  0.00001 * Cos(p11) +  0.00031 * Cos(p12) - 0.057 * Cos(p13);
    }
    // Compute for Mars' moons
-   else if (centralBody == SolarSystem::MARS_NAME)
+   else if (theCentralBodyName == SolarSystem::MARS_NAME)
    {
       p1  = Rad(169.51  -    0.4357640 * d);
       p2  = Rad(192.93  + 1128.4096700 * d +  8.864 * T * T);
@@ -354,7 +354,7 @@ void Moon::InitializeMoon(const std::string &cBody)
    bodyType            = Moon::BODY_TYPE;
    posVelSrc           = Moon::POS_VEL_SOURCE;
    analyticMethod      = Moon::ANALYTIC_METHOD;
-   centralBody         = cBody;
+   theCentralBodyName  = cBody;
 
    order               = Moon::ORDER;
    degree              = Moon::DEGREE;

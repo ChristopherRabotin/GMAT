@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Planet
 //------------------------------------------------------------------------------
@@ -614,7 +614,7 @@ bool Planet::SetAnalyticEpoch(const A1Mjd &toTime)
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
    {
-      if (!cb) 
+      if (!theCentralBody) 
          throw SolarSystemException("Central body must be set for " 
                                     + instanceName);
       #ifdef DEBUG_PLANET_ANALYTIC
@@ -622,7 +622,7 @@ bool Planet::SetAnalyticEpoch(const A1Mjd &toTime)
          "-------- and setting central body's epoch time to %.12f\n", 
          toTime.Get());
       #endif
-      OK = cb->SetAnalyticEpoch(toTime);
+      OK = theCentralBody->SetAnalyticEpoch(toTime);
    }
    return OK;
 }
@@ -651,11 +651,11 @@ bool Planet::SetAnalyticElements(const Rvector6 &kepl)
    // For the Earth, send the information to the Sun
    if (instanceName == SolarSystem::EARTH_NAME)
    {
-      if (!cb) 
+      if (!theCentralBody) 
          throw SolarSystemException("Central body must be set for " 
                                     + instanceName);
       Real     ma;
-      Real     totalMu = mu + cb->GetGravitationalConstant();
+      Real     totalMu = mu + theCentralBody->GetGravitationalConstant();
       Rvector6 cart    = - (CoordUtil::KeplerianToCartesian(kepl,
                             totalMu, CoordUtil::TA)); 
       Rvector6 sunKepl = CoordUtil::CartesianToKeplerian(cart, totalMu, &ma);
@@ -666,7 +666,7 @@ bool Planet::SetAnalyticElements(const Rvector6 &kepl)
          sunKepl[0], sunKepl[1], sunKepl[2], 
          sunKepl[3], sunKepl[4], sunKepl[5]);
       #endif
-      OK = cb->SetAnalyticElements(sunKepl);
+      OK = theCentralBody->SetAnalyticElements(sunKepl);
    }
    return OK;
 }
@@ -844,7 +844,7 @@ Real Planet::SetRealParameter(const Integer id, const Real value)
 //   }
    if (id == NUTATION_UPDATE_INTERVAL)
    {
-   	SetNutationUpdateInterval(value);
+        SetNutationUpdateInterval(value);
       return true;
    }
    return CelestialBody::SetRealParameter(id,value);
@@ -907,7 +907,7 @@ void Planet::InitializePlanet(const std::string &cBody)
    
    // fill in with default values, use Earth values for Earth and unheard-of
    // planets
-   centralBody         = cBody;
+   theCentralBodyName  = cBody;
    bodyType            = Planet::DEFAULT_BODY_TYPE;
    posVelSrc           = Planet::DEFAULT_POS_VEL_SOURCE;
    analyticMethod      = Planet::DEFAULT_ANALYTIC_METHOD;
