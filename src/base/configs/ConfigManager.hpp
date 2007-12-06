@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ConfigManager
 //------------------------------------------------------------------------------
@@ -73,9 +73,9 @@ public:
    void                SetSolarSystemInUse(SolarSystem *ss);
    bool                SetSolarSystemInUse(const std::string &name);
    
-   StringArray&        GetListOfAllItems();
-   StringArray&        GetListOfItems(Gmat::ObjectType itemType);
-   StringArray&        GetListOfItemsHas(Gmat::ObjectType type,
+   const StringArray&  GetListOfAllItems();
+   const StringArray&  GetListOfItems(Gmat::ObjectType itemType);
+   const StringArray&  GetListOfItemsHas(Gmat::ObjectType type,
                                          const std::string &name,
                                          bool includeSysParam = true);
    
@@ -99,6 +99,7 @@ public:
    Subscriber*         GetSubscriber(const std::string &name);
    SolarSystem*        GetDefaultSolarSystem();
    SolarSystem*        GetSolarSystemInUse();
+   SolarSystem*        GetSolarSystemInUse(const std::string &name);
    StopCondition*      GetStopCondition(const std::string &name);
    Parameter*          GetParameter(const std::string &name);
    Burn*               GetBurn(const std::string &name);
@@ -107,13 +108,7 @@ public:
    Function*           GetFunction(const std::string &name);
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
-   
-   // Methods we don't currently need -- uncomment and implement when needed
-//   void                AddCelestialBody(CelestialBody* body);
-//   void                AddCommand(GmatCommand *cmd);
-//   CelestialBody*      GetCelestialBody(const std::string &name);
-//   GmatCommand*        GetCommand(const std::string name);
-   
+      
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);
    

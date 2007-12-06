@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ConfigManager
 //------------------------------------------------------------------------------
@@ -589,13 +589,12 @@ void ConfigManager::SetSolarSystemInUse(SolarSystem *ss)
 bool ConfigManager::SetSolarSystemInUse(const std::string &name)
 {
    throw ConfigManagerException
-      ("ConfigManager::SetSolarSystemInUse(string) has not been implemented.\n");
-   //return false;
+      ("ConfigManager::SetSolarSystemInUse(name) has not been implemented.\n");
 }
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfAllItems()
+// const StringArray& GetListOfAllItems()
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of all configured objects.
@@ -603,7 +602,7 @@ bool ConfigManager::SetSolarSystemInUse(const std::string &name)
  * @return The list of objects.
  */
 //------------------------------------------------------------------------------
-StringArray& ConfigManager::GetListOfAllItems()
+const StringArray& ConfigManager::GetListOfAllItems()
 {
    listOfItems.erase(listOfItems.begin(), listOfItems.end());
     
@@ -620,8 +619,8 @@ StringArray& ConfigManager::GetListOfAllItems()
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
-//                                bool includeSysParam)
+// const StringArray& GetListOfItemsHas(Gmat::ObjectType type, const std::string &name,
+//                                      bool includeSysParam)
 //------------------------------------------------------------------------------
 /**
  * Checks a specific item used in anywhere.
@@ -633,9 +632,9 @@ StringArray& ConfigManager::GetListOfAllItems()
  * @return array of item names where the name is used.
  */
 //------------------------------------------------------------------------------
-StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
-                                              const std::string &name,
-                                              bool includeSysParam)
+const StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
+                                                    const std::string &name,
+                                                    bool includeSysParam)
 {
    StringArray items = GetListOfAllItems();
    std::string::size_type pos;
@@ -700,7 +699,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
 
 
 //------------------------------------------------------------------------------
-// StringArray& GetListOfItems(Gmat::ObjectType itemType)
+// const StringArray& GetListOfItems(Gmat::ObjectType itemType)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a list of all configured objects of a given type.
@@ -710,7 +709,7 @@ StringArray& ConfigManager::GetListOfItemsHas(Gmat::ObjectType type,
  * @return The list of objects.
  */
 //------------------------------------------------------------------------------
-StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
+const StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
 {
    listOfItems.erase(listOfItems.begin(), listOfItems.end());
     
@@ -940,21 +939,21 @@ bool ConfigManager::RemoveAllItems()
 {
    // delete objects
    #ifdef DEBUG_CONFIG_MEMORY
-      MessageInterface::ShowMessage("Deleting %d objects\n", objects.size());
+   MessageInterface::ShowMessage("Deleting %d objects\n", objects.size());
    #endif
    
    for (unsigned int i=0; i<objects.size(); i++)
    {
       std::string objName = objects[i]->GetName();
-
+      
       #ifdef DEBUG_CONFIG_MEMORY
          MessageInterface::ShowMessage("  Deleting %s\n", objects[i]->GetName().c_str());
       #endif
 
-//      delete objects[i];
+      delete objects[i];
       objects[i] = NULL;
    }
-
+   
    objects.clear();
    mapping.clear();
    
@@ -1241,8 +1240,6 @@ Subscriber* ConfigManager::GetSubscriber(const std::string &name)
 SolarSystem* ConfigManager::GetDefaultSolarSystem()
 {
    return defaultSolarSystem;
-   //throw ConfigManagerException
-   //   ("ConfigManager::GetDefaultSolarSystem() has not been implemented.\n");
 }
 
 
@@ -1253,21 +1250,34 @@ SolarSystem* ConfigManager::GetDefaultSolarSystem()
  * Retrieves the current SolarSystem object.
  *
  * @return A pointer to the object.
- *
- * @note This method is not yet used in GMAT.
  */
 //------------------------------------------------------------------------------
 SolarSystem* ConfigManager::GetSolarSystemInUse()
 {
+   return solarSystemInUse;
+}
+
+
+//------------------------------------------------------------------------------
+// SolarSystem* GetSolarSystemInUse(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the current SolarSystem object by name
+ *
+ * @return A pointer to the object.
+ *
+ * @note This method is not yet used in GMAT.
+ */
+//------------------------------------------------------------------------------
+SolarSystem* ConfigManager::GetSolarSystemInUse(const std::string &name)
+{
    #if DEBUG_CONFIG_SS
    MessageInterface::ShowMessage
-      ("ConfigManager::GetSolarSystemInUse() name=%s\n",
-       solarSystemInUse->GetName().c_str());
+      ("ConfigManager::GetSolarSystemInUse() name=%s\n", name.c_str());
    #endif
    
-   return solarSystemInUse;
-   //throw ConfigManagerException
-   //   ("ConfigManager::GetSolarSystemInUse() has not been implemented.\n");
+   throw ConfigManagerException
+      ("ConfigManager::GetSolarSystemInUse(name) has not been implemented.\n");
 }
 
 
@@ -1465,81 +1475,19 @@ CalculatedPoint* ConfigManager::GetCalculatedPoint(const std::string &name)
    return cs;
 }
 
-//=================================
-// Methods we do not currently need
-//=================================
 
-////------------------------------------------------------------------------------
-//// void AddCelestialBody(CelestialBody* body)
-////------------------------------------------------------------------------------
-///**
-// * Adds a CelestialBody to the configuration.
-// *
-// * @param body Pointer to the CelestialBody instance.
-// */
-////------------------------------------------------------------------------------
-//void ConfigManager::AddCelestialBody(CelestialBody* body)
-//{
-//   throw ConfigManagerException
-//      ("ConfigManager::AddCelestialBody() has not been implemented.\n");
-//}
-//
-////------------------------------------------------------------------------------
-//// void AddCommand(GmatCommand *cmd)
-////------------------------------------------------------------------------------
-///**
-// * Adds a GmatCommand to the configuration.
-// *
-// * @param cmd Pointer to the PhysicalModel instance.
-// */
-////------------------------------------------------------------------------------
-//void ConfigManager::AddCommand(GmatCommand *cmd)
-//{
-//   throw ConfigManagerException
-//      ("ConfigManager::AddCommand() has not been implemented.\n");
-//}
-//
-////------------------------------------------------------------------------------
-//// CelestialBody* GetCelestialBody(const std::string &name)
-////------------------------------------------------------------------------------
-///**
-// * Retrieves a CelestialBody object.
-// *
-// * @param name The name of the object.
-// *
-// * @return A pointer to the object.
-// */
-////------------------------------------------------------------------------------
-//CelestialBody* ConfigManager::GetCelestialBody(const std::string &name)
-//{
-//   throw ConfigManagerException
-//      ("ConfigManager::GetCelestialBody() has not been implemented.\n");
-//}
-//
-////------------------------------------------------------------------------------
-//// GmatCommand* GetCommand(const std::string name)
-////------------------------------------------------------------------------------
-///**
-// * Retrieves a GmatCommand object.
-// *
-// * @param name The name of the object.
-// *
-// * @return A pointer to the object.
-// */
-////------------------------------------------------------------------------------
-//GmatCommand* ConfigManager::GetCommand(const std::string name)
-//{
-//   throw ConfigManagerException
-//      ("ConfigManager::GetCommand() has not been implemented.\n");
-//}
-
-
+//------------------------------------------------------------------------------
+// bool HasConfigurationChanged()
+//------------------------------------------------------------------------------
 bool ConfigManager::HasConfigurationChanged()
 {
    return objectChanged;
 }
 
 
+//------------------------------------------------------------------------------
+// void ConfigurationChanged(bool tf)
+//------------------------------------------------------------------------------
 void ConfigManager::ConfigurationChanged(bool tf)
 {
    objectChanged = tf;
