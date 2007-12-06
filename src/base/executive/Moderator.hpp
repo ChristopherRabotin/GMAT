@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Moderator
 //------------------------------------------------------------------------------
@@ -54,8 +54,6 @@
 #include "CalculatedPoint.hpp"
 #include "MathNode.hpp"
 // files
-#include "SlpFile.hpp"
-#include "DeFile.hpp"
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 #include "LeapSecsFileReader.hpp"
@@ -85,10 +83,10 @@ public:
    static void SetScriptInterpreter(ScriptInterpreter *scriptInterp);
    
    //----- factory
-   StringArray GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    
    //----- configuration
-   StringArray& GetListOfObjects(Gmat::ObjectType type);
+   const StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
    std::string GetNewName(const std::string &name, Integer startCount);
    std::string AddClone(const std::string &name);
@@ -108,7 +106,6 @@ public:
    SolarSystem* GetSolarSystemInUse();
    bool SetSolarSystemInUse(const std::string &name);
    void SetSolarSystemInUse(SolarSystem *ss);
-   void CreateSolarSystemInUse();
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
@@ -131,17 +128,17 @@ public:
    Hardware* CreateHardware(const std::string &type,
                             const std::string &name);
    Hardware* GetHardware(const std::string &name);
-
+   
    // Propagator
    Propagator* CreatePropagator(const std::string &type,
                                 const std::string &name);
    Propagator* GetPropagator(const std::string &name);
-
+   
    // PhysicalModel
    PhysicalModel* CreatePhysicalModel(const std::string &type,
                                       const std::string &name);
    PhysicalModel* GetPhysicalModel(const std::string &name);
-
+   
    // AtmosphereModel
    AtmosphereModel* CreateAtmosphereModel(const std::string &type,
                                           const std::string &name,
@@ -152,7 +149,7 @@ public:
    Burn* CreateBurn(const std::string &type,
                     const std::string &name);
    Burn* GetBurn(const std::string &name);
-
+   
    // Parameter
    bool IsParameter(const std::string &type);
    Parameter* CreateParameter(const std::string &type,
@@ -160,7 +157,7 @@ public:
                               const std::string &ownerName = "",
                               const std::string &depName = "");
    Parameter* GetParameter(const std::string &name);
-
+   
    // ForceModel
    ForceModel* CreateForceModel(const std::string &name);
    ForceModel* GetForceModel(const std::string &name);
@@ -172,7 +169,7 @@ public:
    Solver* CreateSolver(const std::string &type,
                         const std::string &name);
    Solver* GetSolver(const std::string &name);
-
+   
    // PropSetup
    PropSetup* CreateDefaultPropSetup(const std::string &name);
    PropSetup* CreatePropSetup(const std::string &name,
@@ -187,7 +184,8 @@ public:
    
    // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name,
-                                            bool createDefault = false);
+                                            bool createDefault = false,
+                                            bool internal = false);
    CoordinateSystem* GetCoordinateSystem(const std::string &name);
    
    // Subscriber
@@ -201,7 +199,7 @@ public:
    Function* CreateFunction(const std::string &type,
                             const std::string &name);
    Function* GetFunction(const std::string &name);
-
+   
    //----- Non-Configurable Items
    // StopCondition
    StopCondition* CreateStopCondition(const std::string &type,
@@ -240,10 +238,10 @@ public:
    CoordinateSystem* GetInternalCoordinateSystem();
    
    // Planetary files
-   StringArray& GetPlanetarySourceTypes();
-   StringArray& GetPlanetarySourceNames();
-   StringArray& GetPlanetarySourceTypesInUse();
-   StringArray& GetAnalyticModelNames();
+   const StringArray& GetPlanetarySourceTypes();
+   const StringArray& GetPlanetarySourceNames();
+   const StringArray& GetPlanetarySourceTypesInUse();
+   const StringArray& GetAnalyticModelNames();
    bool SetAnalyticModelToUse(const std::string &modelName);
    bool SetPlanetarySourceName(const std::string &sourceType,
                                const std::string &fileName);
@@ -264,7 +262,7 @@ public:
    
    // Resource
    bool ClearResource();
-    
+   
    // Mission sequence
    bool ClearCommandSeq(Integer sandboxNum = 1);
    
@@ -288,18 +286,14 @@ public:
 private:
 
    // initialization
-   void InitializePlanetarySource();
-   void InitializePlanetaryCoeffFile();
-   void InitializeTimeFile();
+   void CreatePlanetaryCoeffFile();
+   void CreateTimeFile();
    
-   void SetDefaultPlanetarySource();
-//    void CreateSolarSystemInUse();
+   void CreateSolarSystemInUse();
+   void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
-   bool CreateSlpFile(const std::string &fileName);
-   bool CreateDeFile(const Integer id, const std::string &fileName,
-                     Gmat::DeFileFormat format = Gmat::DE_BINARY);
-
+   
    // default objects
    Spacecraft* GetDefaultSpacecraft();
    PropSetup* GetDefaultPropSetup();
@@ -329,7 +323,7 @@ private:
    void AddCommandToSandbox(Integer index);
    void InitializeSandbox(Integer index);
    void ExecuteSandbox(Integer index);
-
+   
    // for Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
@@ -357,40 +351,10 @@ private:
    SolarSystem *theDefaultSolarSystem;
    SolarSystem *theSolarSystemInUse;
    CoordinateSystem *theInternalCoordSystem;
-   SlpFile *theDefaultSlpFile;
-   DeFile *theDefaultDeFile;
-   StringArray thePlanetarySourceTypes;
-   StringArray thePlanetarySourceNames;
-   StringArray thePlanetarySourceTypesInUse;
-   StringArray theAnalyticModelNames;
-   StringArray theTempFileList;
    StringArray theSpacePointList;
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
    LeapSecsFileReader *theLeapSecsFile;
-   Gmat::AnalyticMethod theAnalyticMethod;
-   
-   enum
-   {
-      ANALYTIC = 0,
-      SLP,
-      DE200,
-      DE405,
-      PlanetarySourceCount,
-   };
-   
-   enum
-   {
-      LOW_FIDELITY = 0,
-      AnalyticModelCount,
-   };
-
-   std::string theCurrentPlanetarySource;
-   Integer thePlanetarySourcePriority[PlanetarySourceCount];
-   bool isPlanetarySourceInUse[PlanetarySourceCount];
-   static const std::string PLANETARY_SOURCE_STRING[PlanetarySourceCount];
-   static const std::string ANALYTIC_MODEL_STRING[AnalyticModelCount];
-   static const Integer HIGHEST_PRIORITY = 10;
    Gmat::RunState runState;
 };
 

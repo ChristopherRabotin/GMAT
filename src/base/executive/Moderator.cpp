@@ -55,13 +55,13 @@
 //#define DEBUG_INIT 1
 //#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
+//#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
 //#define DEBUG_COMMAND_DELETE 1
 //#define DEBUG_RENAME 1
 //#define DEBUG_DEFAULT_MISSION 1
-//#define DEBUG_PLANETARY_FILE 1
 //#define DEBUG_MULTI_STOP 2
 //#define DEBUG_USER_INTERRUPT 1
 //#define DEBUG_LOOKUP_RESOURCE 1
@@ -72,6 +72,7 @@
 
 //#define __CREATE_DEFAULT_BC__
 //#define __SHOW_FINAL_STATE__
+//#define __DISABLE_SOLAR_SYSTEM_CLONING__
 
 //---------------------------------
 // static data
@@ -80,20 +81,6 @@ Moderator* Moderator::instance = NULL;
 GuiInterpreter* Moderator::theGuiInterpreter = NULL;
 ScriptInterpreter* Moderator::theScriptInterpreter = NULL;
 
-const std::string
-Moderator::PLANETARY_SOURCE_STRING[PlanetarySourceCount] =
-{
-   "Analytic",
-   "SLP",
-   "DE200",
-   "DE405",
-};
-
-const std::string
-Moderator::ANALYTIC_MODEL_STRING[AnalyticModelCount] =
-{
-   "Low Fidelity",
-};
 
 //---------------------------------
 // public
@@ -125,10 +112,19 @@ bool Moderator::Initialize(bool fromGui)
       theFileManager->ReadStartupFile();
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage("===> Moderator is creating FactoryManager...\n");
+      #endif
+      
       // Create Managers
       theFactoryManager = FactoryManager::Instance();
+      
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage("===> Moderator is creating ConfigManager...\n");
+      #endif
+      
       theConfigManager = ConfigManager::Instance();
-            
+      
       // Register factories
       theFactoryManager->RegisterFactory(new AtmosphereFactory());
       theFactoryManager->RegisterFactory(new AttitudeFactory());
@@ -149,73 +145,92 @@ bool Moderator::Initialize(bool fromGui)
       theFactoryManager->RegisterFactory(new SpacecraftFactory());
       theFactoryManager->RegisterFactory(new StopConditionFactory());
       theFactoryManager->RegisterFactory(new SubscriberFactory());
-            
-      // Create default SolarSystem
-      /// @note: If the solar system can be configured by name, add it to the
-      ///        ConfigManager by calling CreateSolarSystem().
-      ///        Until then, just use solar system name as "SolarSystem"
-      theDefaultSolarSystem = new SolarSystem("SolarSystem");
-      theConfigManager->SetDefaultSolarSystem(theDefaultSolarSystem);
-      theSolarSystemInUse = new SolarSystem("SolarSystem");
-      StringArray bodies = theSolarSystemInUse->GetBodiesInUse();
-      SpacePoint *sp;
-      SpacePoint *earth = theSolarSystemInUse->GetBody("Earth");
+      
+      // Create publisher
+      
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage("===> Moderator is creating Publisher...\n");
+      #endif
+      
+      thePublisher = Publisher::Instance();
       
       // Create interpreters
+      
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage("===> Moderator is creating Gui/Script interpreters...\n");
+      #endif
+      
       theGuiInterpreter = GuiInterpreter::Instance();
       theScriptInterpreter = ScriptInterpreter::Instance();      
       
-      // Create publisher
-      thePublisher = Publisher::Instance();
+      // Create default SolarSystem
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage("===> Moderator is creating default SolarSystem...\n");
+      #endif
       
-      // Set J2000Body to SolarSystem bodies
-      for (UnsignedInt i=0; i<bodies.size(); i++)
-      {
-         sp = theSolarSystemInUse->GetBody(bodies[i]);
-         sp->SetJ2000Body(earth);
-      }
-
-      //MessageInterface::ShowMessage
-      //   ("Moderator::Initialize() theDefaultSolarSystem created\n");
+      theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
+      theConfigManager->SetDefaultSolarSystem(theDefaultSolarSystem);
       
-      // Create internal CoordinateSystem with noname, so that it will not
-      // be configured
-      theInternalCoordSystem = CreateCoordinateSystem("", true);
-      theInternalCoordSystem->SetName("EarthMJ2000Eq");
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage
+         ("===> Moderator created default solar system: %p\n", theDefaultSolarSystem);
+      #endif
       
-      // Set object pointers so that it can be used in CS conversion in the GUI
-      SpacePoint *origin =
-         (SpacePoint*)GetConfiguredObject(theInternalCoordSystem->GetOriginName());
-      origin->SetJ2000Body(earth);
-      SpacePoint *j2000body =
-         (SpacePoint*)GetConfiguredObject(theInternalCoordSystem->GetJ2000BodyName());
-      j2000body->SetJ2000Body(earth);
-      theInternalCoordSystem->SetOrigin(origin);
-      theInternalCoordSystem->SetJ2000Body(j2000body);
-      theInternalCoordSystem->SetSolarSystem(theSolarSystemInUse);
-      theInternalCoordSystem->Initialize();
+      // Create solar system in use
+      /// @note: If the solar system can be configured by name, add it to the
+      ///        ConfigManager by calling CreateSolarSystem().
+      ///        Until then, just use solar system name as "SolarSystem"
       
-      InitializePlanetarySource();
-      InitializePlanetaryCoeffFile();
-      InitializeTimeFile();
+      // Create SolarSystem in use 
+      #ifndef __DISABLE_SOLAR_SYSTEM_CLONING__
+         #if DEBUG_INIT
+         MessageInterface::ShowMessage
+            ("===> Moderator creating SolarSystem in use by cloning the default...\n");
+         #endif
+         
+         theSolarSystemInUse = theDefaultSolarSystem->Clone();
+         theSolarSystemInUse->SetName("SolarSystem");
+      #else
+         #if DEBUG_INIT
+         MessageInterface::ShowMessage
+            ("===> Moderator creating new SolarSystem in use...\n");
+         #endif
+         
+         theSolarSystemInUse = CreateSolarSystem("SolarSystem");
+      #endif
+         
+      SetSolarSystemInUse(theSolarSystemInUse);
+      
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage
+         ("===> Moderator created solar system in use: %p\n",
+          theSolarSystemInUse);
+      #endif
+      
+      // Create internal coordinate system
+      CreateInternalCoordSystem();
+      
+      // Create other files in use
+      CreatePlanetaryCoeffFile();
+      CreateTimeFile();
       
       if (fromGui)
          CreateDefaultMission();
    }
    catch (BaseException &e)
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-                                     "Error occured during initialization: " +
-                                     e.GetFullMessage());
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Error occured during initialization: " +
+          e.GetFullMessage());
       return false;
    }
    catch (...)
    {
-      MessageInterface::PopupMessage(Gmat::WARNING_,
-                                     "Unknown Error occured during initialization");
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "Unknown Error occured during initialization");
       return false;
    }
-
+   
    // Let's put current time out
    time_t rawtime;
    struct tm * timeinfo;
@@ -251,8 +266,6 @@ void Moderator::Finalize()
    #endif
    
    delete theFileManager;
-   delete theDefaultSlpFile;
-   delete theDefaultDeFile;
    delete theEopFile;
    delete theItrfFile;
    delete theLeapSecsFile;
@@ -271,16 +284,24 @@ void Moderator::Finalize()
       delete cmd;
       cmd = NULL;
       
-//      delete theFactoryManager;
+      //delete theFactoryManager;
       delete theGuiInterpreter;
       
       //delete theConfigManager; (private)
       //delete theScriptInterpreter; (private)
       //delete thePublisher; (private)
-   
+      
       //MessageInterface::ShowMessage("deleting internal objects\n");
-      //delete theDefaultSolarSystem;
-      //delete theInternalCoordSystem;
+      
+      // delete solar systems
+      delete theDefaultSolarSystem;
+      
+      if (theSolarSystemInUse != NULL)
+         delete theSolarSystemInUse;
+      
+      // delete internal coordinate system
+      if (theInternalCoordSystem != NULL)
+         delete theInternalCoordSystem;
    }
    catch (BaseException &e)
    {
@@ -382,7 +403,7 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
 
 //----- factory
 //------------------------------------------------------------------------------
-// StringArray GetListOfFactoryItems(Gmat::ObjectType type)
+// const StringArray& GetListOfFactoryItems(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configurable items of object type.
@@ -392,14 +413,14 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
  * @return array of configurable item names; return empty array if none
  */
 //------------------------------------------------------------------------------
-StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
+const StringArray& Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
 {
    return theFactoryManager->GetListOfItems(type);
 }
 
 //----- configuration
 //------------------------------------------------------------------------------
-// StringArray& GetListOfObjects(Gmat::ObjectType type)
+// const StringArray& GetListOfObjects(Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 /**
  * Returns names of all configured items of object type.
@@ -410,14 +431,17 @@ StringArray Moderator::GetListOfFactoryItems(Gmat::ObjectType type)
  *  return all configured item if type is UNKNOWN_OBJECT
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type)
+const StringArray& Moderator::GetListOfObjects(Gmat::ObjectType type)
 {
    if (type == Gmat::UNKNOWN_OBJECT)
       return theConfigManager->GetListOfAllItems();
-
+   
    if (type == Gmat::CELESTIAL_BODY || type == Gmat::SPACE_POINT)
    {
       theSpacePointList.clear();
+      
+      if (theSolarSystemInUse == NULL)
+         return theSpacePointList;
       
       if (type == Gmat::CELESTIAL_BODY)
       {
@@ -474,12 +498,11 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    }
    
    GmatBase *obj = theConfigManager->GetItem(newName);
-
+   
    if (obj == NULL)
    {
       // try SolarSystem
-      //return theSolarSystemInUse->GetBody(newName);
-      obj = theSolarSystemInUse->GetBody(newName);
+      obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
    }
    
    #if DEBUG_CONFIG
@@ -496,6 +519,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
           newName.c_str());
    }
    #endif
+   
    return obj;
 }
 
@@ -754,7 +778,6 @@ void Moderator::ResetConfigurationChanged(bool resetResource, bool resetCommands
 SolarSystem* Moderator::GetDefaultSolarSystem()
 {
    return theConfigManager->GetDefaultSolarSystem();
-   //loj: 2/8/06 return theDefaultSolarSystem;
 }
 
 
@@ -763,12 +786,23 @@ SolarSystem* Moderator::GetDefaultSolarSystem()
 //------------------------------------------------------------------------------
 SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 {
-   // comment this out until solar system can be managed by name
-   //SolarSystem *solarSys = theFactoryManager->CreateSolarSystem(name);
-   //theConfigManager->AddSolarSystem(solarSys);
-   //return solarSys;
-   throw GmatBaseException
-      ("Moderator::CreateSolarSystem() has not been implemented\n");
+   #if DEBUG_SOLAR_SYSTEM
+   MessageInterface::ShowMessage
+      ("Moderator::CreateSolarSystem() creating %s\n", name.c_str());
+   #endif
+   
+   // There is no factory to create SolarSystem so just create by new
+   SolarSystem *ss = new SolarSystem(name);
+   
+   // Creates available planetary ephem sorce list.
+   // Also set to DE405 as a default planetary ephem source
+   //ss->CreatePlanetarySource();
+   
+   #if DEBUG_SOLAR_SYSTEM
+   MessageInterface::ShowMessage("Moderator::CreateSolarSystem() returning %p\n", ss);
+   #endif
+   
+   return ss;
 }
 
 
@@ -778,7 +812,6 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 SolarSystem* Moderator::GetSolarSystemInUse()
 {
    return theConfigManager->GetSolarSystemInUse();
-   //loj: 2/8/06 return theDefaultSolarSystem;
 }
 
 
@@ -1045,7 +1078,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
    if (GetSpacecraft(name) == NULL)
    {
       Spacecraft *sc = (Spacecraft*)(theFactoryManager->CreateSpacecraft(type, name));
-
+      
       if (sc == NULL)
          throw GmatBaseException("Error Creating Spacecraft: " + type + "\n");
       
@@ -1115,8 +1148,8 @@ SpaceObject* Moderator::GetSpacecraft(const std::string &name)
 //------------------------------------------------------------------------------
 std::string Moderator::GetSpacecraftNotInFormation()
 {
-   StringArray scList = theGuiInterpreter->GetListOfObjects(Gmat::SPACECRAFT);
-   StringArray fmList = theGuiInterpreter->GetListOfObjects(Gmat::FORMATION);
+   StringArray scList = GetListOfObjects(Gmat::SPACECRAFT);
+   StringArray fmList = GetListOfObjects(Gmat::FORMATION);
    int numSc = scList.size(), numFm = fmList.size();
    
    if (numSc == 0 && numFm == 0)
@@ -1133,7 +1166,6 @@ std::string Moderator::GetSpacecraftNotInFormation()
    //------------------------------------------
    for (int i=0; i<numFm; i++)
    {
-      //GmatBase *fm = theGuiInterpreter->GetConfiguredObject(fmList[i]);
       GmatBase *fm = GetConfiguredObject(fmList[i]);
       StringArray fmscList = fm->GetStringArrayParameter(fm->GetParameterID("Add"));
       fmscListAll.insert(fmscListAll.begin(), fmscList.begin(), fmscList.end());
@@ -1734,11 +1766,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
             CoordinateSystem *cs = CreateCoordinateSystem(axisName);
             
             // create BodyFixedAxis with origin
-            AxisSystem *axis = CreateAxisSystem("BodyFixed", "");
+            AxisSystem *axis = CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
             cs->SetStringParameter("Origin", origin);
             cs->SetRefObject(GetConfiguredObject(origin), Gmat::SPACE_POINT, origin);
             cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-            //cs->SetStringParameter("J2000Body", "Earth"); // Default is Earth
+            cs->SetStringParameter("J2000Body", "Earth");
             cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
             cs->SetSolarSystem(theSolarSystemInUse);
             cs->Initialize();
@@ -2086,56 +2118,89 @@ Interpolator* Moderator::GetInterpolator(const std::string &name)
 // CoordinateSystem
 //------------------------------------------------------------------------------
 // CoordinateSystem* CreateCoordinateSystem(const std::string &name,
-//                                          bool createDefault = false)
+//                   bool createDefault = false, bool internal = false)
 //------------------------------------------------------------------------------
 CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
-                                                    bool createDefault)
+                                                    bool createDefault,
+                                                    bool internal)
 {
-   CoordinateSystem *cs = theFactoryManager->CreateCoordinateSystem(name);
-
+   #if DEBUG_CREATE_COORDSYS
+   MessageInterface::ShowMessage
+      ("Moderator::CreateCoordinateSystem() name=%s, createDefault=%d, "
+       "internal=%d, theSolarSystemInUse=%p\n", name.c_str(), createDefault,
+       internal, theSolarSystemInUse);
+   #endif
+   
+   CoordinateSystem *cs = GetCoordinateSystem(name);
+   
    if (cs == NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a CoordinateSystem.\n"
-          "Make sure CoordinateSystem is correct type and registered to "
-          "CoordinateSystemFactory.\n");
+      cs = theFactoryManager->CreateCoordinateSystem(name);
       
-      return NULL;
-      //throw GmatBaseException("Error Creating CoordinateSystem");
-   }
-   
-   // Manage it if it is a named CoordinateSystem
-   try
-   {
-      if (cs->GetName() != "")
-         theConfigManager->AddCoordinateSystem(cs);
-
-      // Set J2000Body and SolarSystem
-      cs->SetStringParameter("J2000Body", "Earth");
-      cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
-      cs->SetSolarSystem(theSolarSystemInUse);
-      
-      if (createDefault)
+      if (cs == NULL)
       {
-         // create MJ2000Eq AxisSystem with Earth as origin
-         AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "");
-         //cs->SetStringParameter("J2000Body", "Earth");
-         cs->SetStringParameter("Origin", "Earth");
-         //cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
-         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-         //cs->SetSolarSystem(theSolarSystemInUse);
+         MessageInterface::PopupMessage
+            (Gmat::ERROR_, "Cannot create a CoordinateSystem.\n"
+             "Make sure CoordinateSystem is correct type and registered to "
+             "CoordinateSystemFactory.\n");
+         
+         return NULL;
+         //throw GmatBaseException("Error Creating CoordinateSystem:" + type);
+      }
+      
+      // Manage it if it is a named CoordinateSystem
+      try
+      {
+         if (cs->GetName() != "" && !internal)
+            theConfigManager->AddCoordinateSystem(cs);
+         
+         CelestialBody *earth = theSolarSystemInUse->GetBody("Earth");
+         
+         // Set J2000Body and SolarSystem
+         cs->SetStringParameter("J2000Body", "Earth");
+         cs->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+         cs->SetSolarSystem(theSolarSystemInUse);
          cs->Initialize();
-      }      
-   }
-   catch (BaseException &e)
-   {
-      #if DEBUG_CREATE_RESOURCE
-      MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
-                                    e.GetFullMessage().c_str());
+         
+         if (createDefault)
+         {
+            // create MJ2000Eq AxisSystem with Earth as origin
+            AxisSystem *axis = CreateAxisSystem("MJ2000Eq", "MJ2000Eq_Earth");
+            cs->SetStringParameter("J2000Body", "Earth");
+            cs->SetStringParameter("Origin", "Earth");
+            cs->SetRefObject(earth, Gmat::SPACE_POINT, "Earth");
+            cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+            cs->SetSolarSystem(theSolarSystemInUse);
+            cs->Initialize();
+         }
+      }
+      catch (BaseException &e)
+      {
+         #if DEBUG_CREATE_COORDSYS
+         MessageInterface::ShowMessage("Moderator::CreateCoordinateSystem() %s\n",
+                                       e.GetFullMessage().c_str());
+         #endif
+      }
+      
+      #if DEBUG_CREATE_COORDSYS
+      MessageInterface::ShowMessage
+         ("Moderator::CreateCoordinateSystem() returning new %p\n", cs);
       #endif
+      
+      return cs;
    }
-   
-   return cs;
+   else
+   {
+      #if DEBUG_CREATE_COORDSYS
+      MessageInterface::ShowMessage
+         ("Moderator::CreateCoordinateSystem() Unable to create CoordinateSystem "
+          "name: %s already exist\n", name.c_str());      
+      MessageInterface::ShowMessage
+         ("Moderator::CreateCoordinateSystem() returning existing %p\n", cs);
+      #endif
+      
+      return cs;
+   }
 }
 
 
@@ -2238,7 +2303,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreateSubscriber()\n" +
                                        e.GetFullMessage());
       }
-   
+      
       return sub;
    }
    else
@@ -2378,16 +2443,6 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
    return stopCond;
 }
 
-// //------------------------------------------------------------------------------
-// // StopCondition* GetStopCondition(const std::string &name)
-// //------------------------------------------------------------------------------
-// StopCondition* Moderator::GetStopCondition(const std::string &name)
-// {
-//    if (name == "")
-//       return NULL;
-//    else
-//       return theConfigManager->GetStopCondition(name);
-// }
 
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxisSystem(const std::string &type,
@@ -2422,7 +2477,7 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
       return NULL;
       //throw GmatBaseException("Error Creating AxisSystem: " + type);
    }
-
+   
    // set origin and j2000body
    axisSystem->SetOrigin((SpacePoint*)GetConfiguredObject(axisSystem->GetOriginName()));
    axisSystem->SetJ2000Body((SpacePoint*)GetConfiguredObject(axisSystem->GetJ2000BodyName()));
@@ -2433,7 +2488,7 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
    // DJC added 5/11/05.  The ScriptInterpreter does not have the parms needed
    // to set these references, so defaults are set here.  This might need to be
    // fixed later.
-
+   
    /// @todo Evaluate how the AxixSystem file usage really should be set
    
    // Set required internal references if they are used
@@ -2441,7 +2496,7 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
       axisSystem->SetEopFile(theEopFile);
    if (axisSystem->UsesItrfFile() == GmatCoordinate::REQUIRED)
       axisSystem->SetCoefficientsFile(theItrfFile);
-
+   
    return axisSystem;
 }
 
@@ -2631,7 +2686,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          cmd->SetObject(GetDefaultPropSetup()->GetName(), Gmat::PROP_SETUP);
          
-         StringArray &formList = GetListOfObjects(Gmat::FORMATION);
+         StringArray formList = GetListOfObjects(Gmat::FORMATION);
          
          if (formList.size() == 0)
          {
@@ -2869,6 +2924,7 @@ bool Moderator::InsertCommand(GmatCommand *cmd, GmatCommand *prevCmd,
  * it will remove and delete all commands including EndScrpt between BeginScrint
  * and EndScript.
  */
+//------------------------------------------------------------------------------
 GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
 {
    #if DEBUG_COMMAND_DELETE
@@ -3048,43 +3104,41 @@ CoordinateSystem* Moderator::GetInternalCoordinateSystem()
 
 //Planetary files
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetarySourceTypes()
+// const StringArray& GetPlanetarySourceTypes()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source types
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetarySourceTypes()
+const StringArray& Moderator::GetPlanetarySourceTypes()
 {
-   return thePlanetarySourceTypes;
+   return theSolarSystemInUse->GetPlanetarySourceTypes();
 }
 
+
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetarySourceNames()
+// const StringArray& GetPlanetarySourceNames()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source file names
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetarySourceNames()
+const StringArray& Moderator::GetPlanetarySourceNames()
 {
-   return thePlanetarySourceNames;
+   return theSolarSystemInUse->GetPlanetarySourceNames();
 }
 
+
 //------------------------------------------------------------------------------
-// StringArray& GetPlanetarySourceTypesInUse()
+// const StringArray& GetPlanetarySourceTypesInUse()
 //------------------------------------------------------------------------------
 /**
  * @return a planetary source types in use
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetPlanetarySourceTypesInUse()
+const StringArray& Moderator::GetPlanetarySourceTypesInUse()
 {
-   theTempFileList.clear();
-   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
-      theTempFileList.push_back(thePlanetarySourceTypesInUse[i]);
-
-   return theTempFileList;
+   return theSolarSystemInUse->GetPlanetarySourceTypesInUse();
 }
 
 
@@ -3095,9 +3149,9 @@ StringArray& Moderator::GetPlanetarySourceTypesInUse()
  * @return available planetary analytic model names.
  */
 //------------------------------------------------------------------------------
-StringArray& Moderator::GetAnalyticModelNames()
+const StringArray& Moderator::GetAnalyticModelNames()
 {
-   return theAnalyticModelNames;
+   return theSolarSystemInUse->GetAnalyticModelNames();
 }
 
 
@@ -3106,26 +3160,7 @@ StringArray& Moderator::GetAnalyticModelNames()
 //------------------------------------------------------------------------------
 bool Moderator::SetAnalyticModelToUse(const std::string &modelName)
 {
-   int modelId = 0;
-   for (int i=0; i<AnalyticModelCount; i++)
-   {
-      if (ANALYTIC_MODEL_STRING[i] == modelName)
-      {
-         modelId = i;
-         break;
-      }
-   }
-   
-   // because NO_ANALYTIC_METHOD = 0 in CelestialBody.hpp
-   theAnalyticMethod = Gmat::AnalyticMethod(modelId + 1);
-   
-   #if DEBUG_PLANETARY_FILE
-   MessageInterface::ShowMessage
-      ("Moderator::SetAnalyticModelToUse() theAnalyticMethod=%d\n",
-       theAnalyticMethod);
-   #endif
-   
-   return theSolarSystemInUse->SetAnalyticMethod(theAnalyticMethod);
+   return theSolarSystemInUse->SetAnalyticModelToUse(modelName);
 }
 
 
@@ -3134,31 +3169,18 @@ bool Moderator::SetAnalyticModelToUse(const std::string &modelName)
 //                           const std::string &fileName)
 //------------------------------------------------------------------------------
 bool Moderator::SetPlanetarySourceName(const std::string &sourceType,
-                                     const std::string &fileName)
+                                       const std::string &fileName)
 {
-   bool status = false;
-   Integer id = GetPlanetarySourceId(sourceType);
-
-   if (id >= 0)
-   {
-      thePlanetarySourceNames[id] = fileName;
-      status = true;
-   }
-    
-   return status;
+   return theSolarSystemInUse->SetPlanetarySourceName(sourceType, fileName);
 }
+
 
 //------------------------------------------------------------------------------
 // std::string GetPlanetarySourceName(const std::string &sourceType)
 //------------------------------------------------------------------------------
 std::string Moderator::GetPlanetarySourceName(const std::string &sourceType)
 {
-   Integer id = GetPlanetarySourceId(sourceType);
-
-   if (id >= 0)
-      return thePlanetarySourceNames[id];
-   else
-      return "Unknown Source Type";
+   return theSolarSystemInUse->GetPlanetarySourceName(sourceType);
 }
 
 
@@ -3176,212 +3198,16 @@ std::string Moderator::GetPlanetarySourceName(const std::string &sourceType)
 //------------------------------------------------------------------------------
 Integer Moderator::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 {
-   #if DEBUG_PLANETARY_FILE
-   MessageInterface::
-      ShowMessage("Moderator::SetPlanetarySourceTypesInUse() num source types=%d\n",
-                  sourceTypes.size());
-   #endif
-   
-   bool status = false;
-   Integer sourceTypeInUse = -1;
-   Integer retCode = 0;
-   
-   // update planetary file types
-   if (&thePlanetarySourceTypesInUse != &sourceTypes)
-   {
-      #if DEBUG_PLANETARY_FILE
-      MessageInterface::ShowMessage
-         ("Moderator::SetPlanetarySourceTypesInUse() updating planetary source\n");
-      #endif
-      
-      thePlanetarySourceTypesInUse.clear();
-    
-      for (unsigned int i=0; i<sourceTypes.size(); i++)
-      {
-         thePlanetarySourceTypesInUse.push_back(sourceTypes[i]);
-      }
-   }
-
-   theTempFileList.clear();
-   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
-      theTempFileList.push_back(thePlanetarySourceTypesInUse[i]);
-   
-   // create planetary ephem file if non-analytic
-   for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
-   {
-      if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[ANALYTIC])
-      {
-         thePlanetarySourcePriority[ANALYTIC] = 0;
-         status = theSolarSystemInUse->SetAnalyticMethod(theAnalyticMethod);
-         if (status)
-         {
-            thePlanetarySourcePriority[ANALYTIC] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[ANALYTIC] = true;
-            sourceTypeInUse = ANALYTIC;
-            break;
-         }
-         else
-         {
-            MessageInterface::ShowMessage
-               ("*** Error *** Failed to Set AnalyticMethod: %d\n",
-                theAnalyticMethod);
-         }
-      }
-      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[SLP])
-      {
-         thePlanetarySourcePriority[SLP] = 0;
-         status = CreateSlpFile(thePlanetarySourceNames[SLP]);
-         if (status)
-         {
-            thePlanetarySourcePriority[SLP] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[SLP] = true;
-            sourceTypeInUse = SLP;
-            break;
-         }
-      }
-      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[DE200])
-      {
-         #if DEBUG_PLANETARY_FILE
-         MessageInterface::
-            ShowMessage("Moderator::SetPlanetarySourceTypesInUse() create DE200\n");
-         #endif
-         
-         thePlanetarySourcePriority[DE200] = 0;
-         status = CreateDeFile(DE200, thePlanetarySourceNames[DE200]);
-         if (status)
-         {
-            thePlanetarySourcePriority[DE200] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[DE200] = true;
-            sourceTypeInUse = DE200;
-            break;
-         }
-      }
-      else if (thePlanetarySourceTypesInUse[i] == PLANETARY_SOURCE_STRING[DE405])
-      {
-         #if DEBUG_PLANETARY_FILE
-         MessageInterface::
-            ShowMessage("Moderator::SetPlanetarySourceTypesInUse() create DE405\n");
-         #endif
-         
-         thePlanetarySourcePriority[DE405] = 0;
-         status = CreateDeFile(DE405, thePlanetarySourceNames[DE405]);
-         if (status)
-         {
-            thePlanetarySourcePriority[DE405] = HIGHEST_PRIORITY - i;
-            isPlanetarySourceInUse[DE405] = true;
-            sourceTypeInUse = DE405;
-            break;
-         }
-      }
-   }
-
-   // set SolarSystem to use the file
-   if (sourceTypeInUse == -1)
-   {
-      MessageInterface::ShowMessage("Moderator::SetPlanetarySourceTypesInUse() NO "
-                                    "Planetary file is set to use \n");
-      retCode = 0;
-   }
-   else
-   {
-      #if DEBUG_PLANETARY_FILE
-      MessageInterface::
-         ShowMessage("Moderator::SetPlanetarySourceTypesInUse() "
-                     "Set Planetary Source to use:%d\n", sourceTypeInUse);
-      #endif
-      switch (sourceTypeInUse)
-      {
-      case ANALYTIC:
-         if (theSolarSystemInUse->SetSource(Gmat::ANALYTIC))
-            if (theSolarSystemInUse->SetAnalyticMethod(theAnalyticMethod))
-               retCode = 1;
-         break;
-      case SLP:
-         if (theSolarSystemInUse->SetSource(Gmat::SLP))
-            if (theSolarSystemInUse->SetSourceFile(theDefaultSlpFile))
-               retCode = 1;
-         break;
-      case DE200:
-         if (theSolarSystemInUse->SetSource(Gmat::DE_200))
-            if (theSolarSystemInUse->SetSourceFile(theDefaultDeFile))
-               retCode = 1;
-         break;
-      case DE405:
-         if (theSolarSystemInUse->SetSource(Gmat::DE_405))
-            if (theSolarSystemInUse->SetSourceFile(theDefaultDeFile))
-               retCode = 1;
-         break;
-      default:
-         break;
-      }
-   }
-
-   // if planetary file is set to first type in the list
-   if (retCode == 1 && PLANETARY_SOURCE_STRING[sourceTypeInUse] == sourceTypes[0])
-      retCode = 2;
-
-
-   // if error setting given planetary file, re-arrange planetary file list
-   if (retCode == 1)
-   {      
-      thePlanetarySourceTypesInUse.clear();
-
-      for (unsigned int i=0; i<theTempFileList.size(); i++)
-      {            
-         if (theTempFileList[i] == PLANETARY_SOURCE_STRING[ANALYTIC])
-         {
-            if (thePlanetarySourcePriority[ANALYTIC] > 0)
-               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]);
-         }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[SLP])
-         {
-            if (thePlanetarySourcePriority[SLP] > 0)
-               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
-         }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE200])
-         {
-            if (thePlanetarySourcePriority[DE200] > 0)
-               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE200]);
-         }
-         else if (theTempFileList[i] == PLANETARY_SOURCE_STRING[DE405])
-         {
-            if (thePlanetarySourcePriority[DE405] > 0)
-               thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
-         }
-      }
-      
-      #if DEBUG_PLANETARY_FILE
-      for (unsigned int i=0; i<thePlanetarySourceTypesInUse.size(); i++)
-      {
-         MessageInterface::ShowMessage
-            ("thePlanetarySourceTypesInUse[%d]=%s\n", i,
-             thePlanetarySourceTypesInUse[i].c_str());
-      }
-      #endif
-   }
-   
-   if (retCode > 0)
-      MessageInterface::ShowMessage
-         ("Successfully set Planetary Source to use: %s\n",
-          PLANETARY_SOURCE_STRING[sourceTypeInUse].c_str());
-
-   theCurrentPlanetarySource = PLANETARY_SOURCE_STRING[sourceTypeInUse];
-   
-   return retCode;
+   return theSolarSystemInUse->SetPlanetarySourceTypesInUse(sourceTypes);
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetPlanetarySourceId(const std::string &sourceType)
 //------------------------------------------------------------------------------
 Integer Moderator::GetPlanetarySourceId(const std::string &sourceType)
 {
-   for (int i=0; i<PlanetarySourceCount; i++)
-   {
-      if (sourceType == PLANETARY_SOURCE_STRING[i])
-         return i;
-   }
-   
-   return -1;
+   return theSolarSystemInUse->GetPlanetarySourceId(sourceType);
 }
 
 
@@ -3390,7 +3216,7 @@ Integer Moderator::GetPlanetarySourceId(const std::string &sourceType)
 //------------------------------------------------------------------------------
 std::string Moderator::GetCurrentPlanetarySource()
 {
-   return theCurrentPlanetarySource;
+   return theSolarSystemInUse->GetCurrentPlanetarySource();
 }
 
 
@@ -3434,9 +3260,9 @@ bool Moderator::LoadDefaultMission()
 {
    theScriptInterpreter->SetHeaderComment("");
    theScriptInterpreter->SetFooterComment("");
-
+   
    CreateDefaultMission();
-    
+   
    return true;
 }
 
@@ -3452,6 +3278,23 @@ bool Moderator::ClearResource()
    
    theConfigManager->RemoveAllItems();
    ClearAllSandboxes();
+   
+   // Delete solar system in use. We want to begin with default solar system
+   // before creating default mission or new script is read.
+   #ifndef __DISABLE_SOLAR_SYSTEM_CLONING__
+      if (theSolarSystemInUse != NULL)
+      {
+         #if DEBUG_RUN
+         MessageInterface::ShowMessage
+            ("Moderator deleting solar system in use: %p\n", theSolarSystemInUse);
+         #endif
+         
+         delete theSolarSystemInUse;
+         theSolarSystemInUse = NULL;
+      }
+   #endif
+   
+   // @notes: default coordinate systems will remain through out the running of GMAT.
    
    #if DEBUG_RUN
    MessageInterface::ShowMessage("Moderator::ClearResource() leaving\n");
@@ -3584,7 +3427,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
                                         "Invalid Sandbox number" + sandboxNum);
          return status;
       }
-
+      
       try
       {
          // add objects to sandbox and initialize
@@ -3599,7 +3442,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          AddPropSetupToSandbox(sandboxNum-1);
          AddBurnToSandbox(sandboxNum-1);        
          AddSolverToSandbox(sandboxNum-1);
-
+         
          // Note:
          // Add Subscriber after Publisher.
          // AddPublisherToSandbox() clears subscribers
@@ -3632,7 +3475,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
          MessageInterface::ShowMessage
             ("Moderator::RunMission() after ExecuteSandbox()\n");
          #endif
-      
+         
       }
       catch (BaseException &e)
       {
@@ -4090,56 +3933,9 @@ Integer Moderator::RunScript(Integer sandboxNum)
 
 // initialization
 //------------------------------------------------------------------------------
-// void InitializePlanetarySource()
+// void CreatePlanetaryCoeffFile()
 //------------------------------------------------------------------------------
-void Moderator::InitializePlanetarySource()
-{
-   #if DEBUG_INIT
-   //MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("Moderator initializing planetary source...\n");
-   #endif
-   
-   // initialize planetary source
-   for (int i=0; i<PlanetarySourceCount; i++)
-   {
-      thePlanetarySourcePriority[i] = 0;
-      isPlanetarySourceInUse[i] = false;
-      
-      thePlanetarySourceTypes.push_back(PLANETARY_SOURCE_STRING[i]);
-   }
-   
-   for (int i=0; i<AnalyticModelCount; i++)
-   {
-      theAnalyticModelNames.push_back(ANALYTIC_MODEL_STRING[i]);
-   }
-
-   theAnalyticMethod = Gmat::LOW_FIDELITY;
-   
-   //initialize file names
-   thePlanetarySourceNames.push_back("NA");
-   thePlanetarySourceNames.push_back(theFileManager->
-                                     GetFullPathname("SLP_FILE"));
-   thePlanetarySourceNames.push_back(theFileManager->
-                                     GetFullPathname("DE200_FILE"));
-   thePlanetarySourceNames.push_back(theFileManager->
-                                     GetFullPathname("DE405_FILE"));
-   
-   // initialize planetary file types/names in use
-   // Set DE405 as default
-   SetDefaultPlanetarySource();
-   
-//    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
-//    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
-//    thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
-   
-//    SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
-}
-
-
-//------------------------------------------------------------------------------
-// void InitializePlanetaryCoeffFile()
-//------------------------------------------------------------------------------
-void Moderator::InitializePlanetaryCoeffFile()
+void Moderator::CreatePlanetaryCoeffFile()
 {
    #if DEBUG_INIT
    //MessageInterface::ShowMessage("========================================\n");
@@ -4161,9 +3957,9 @@ void Moderator::InitializePlanetaryCoeffFile()
 
 
 //------------------------------------------------------------------------------
-// void InitializeTimeFile()
+// void CreateTimeFile()
 //------------------------------------------------------------------------------
-void Moderator::InitializeTimeFile()
+void Moderator::CreateTimeFile()
 {
    #if DEBUG_INIT
    //MessageInterface::ShowMessage("========================================\n");
@@ -4186,42 +3982,63 @@ void Moderator::InitializeTimeFile()
 
 
 //------------------------------------------------------------------------------
-// void SetDefaultPlanetarySource()
-//------------------------------------------------------------------------------
-void Moderator::SetDefaultPlanetarySource()
-{
-   #if DEBUG_INIT
-   MessageInterface::ShowMessage("Moderator setting default planetary source...\n");
-   #endif
-         
-   // initialize planetary file types/names in use
-   // Set DE405 as default
-   thePlanetarySourceTypesInUse.clear();
-   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[DE405]);
-   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[ANALYTIC]); 
-   thePlanetarySourceTypesInUse.push_back(PLANETARY_SOURCE_STRING[SLP]);
-   
-   SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
-}
-
-
-//------------------------------------------------------------------------------
 // void CreateSolarSystemInUse()
 //------------------------------------------------------------------------------
 void Moderator::CreateSolarSystemInUse()
 {
-   // Create SolarSystem in use (loj: 2/8/06)
-   // Note: GMAT crashes when I delete solarSystemInUse in ConfigManager
-   // So just set to default values for now.
+   #ifndef __DISABLE_SOLAR_SYSTEM_CLONING__
 
-   // We can Clone theDefaultSolarSystem when we can delete solarSystemInUse 
-   //delete theSolarSystemInUse;
-   //theSolarSystemInUse = theDefaultSolarSystem->Clone();
+      // delete old SolarSystem in use and create new from default
+      if (theSolarSystemInUse != NULL)
+         delete theSolarSystemInUse;
+      
+      theSolarSystemInUse = theDefaultSolarSystem->Clone();
+      theSolarSystemInUse->SetName("SolarSystem");
+      //theSolarSystemInUse->CreatePlanetarySource();
+      
+      #if DEBUG_INIT
+      MessageInterface::ShowMessage
+         ("Moderator created solar system in use: %p\n", theSolarSystemInUse);
+      #endif
+      
+      // delete old theInternalCoordSystem and create new
+      delete theInternalCoordSystem;
+      CreateInternalCoordSystem();
+      
+      // set solar system in use
+      SetSolarSystemInUse(theSolarSystemInUse);
+   #else
+      //theSolarSystemInUse->ResetToDefaults(theDefaultSolarSystem);
+      theSolarSystemInUse->Copy(theDefaultSolarSystem);
+      MessageInterface::ShowMessage
+         ("===> theSolarSystemInUse=%p, theDefaultSolarSystem=%p\n",
+         theSolarSystemInUse,  theDefaultSolarSystem);
+   #endif
+}
 
-   // Until then we just set defaults
-   theSolarSystemInUse->ResetToDefaults();
-   theConfigManager->SetSolarSystemInUse(theSolarSystemInUse);
-   SetDefaultPlanetarySource();
+
+//------------------------------------------------------------------------------
+// void CreateInternalCoordSystem()
+//------------------------------------------------------------------------------
+/*
+ * Creates the internal coordinate system. This coordinate system is used for
+ * publishing data for OpenGL plot.
+ * Currently it is EarthMJ2000Eq system.
+ */
+//------------------------------------------------------------------------------
+void Moderator::CreateInternalCoordSystem()
+{
+   #if DEBUG_INIT
+   //MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("Moderator creating internal coordinate system...\n");
+   #endif
+   
+   // Create internal CoordinateSystem with no name, since we don't want
+   // it to be configured.
+   theInternalCoordSystem =
+      CreateCoordinateSystem("InternalEarthMJ2000Eq", true, true);
+   
+   //theInternalCoordSystem->SetName("InternalEarthMJ2000Eq");
 }
 
 
@@ -4237,20 +4054,26 @@ void Moderator::CreateDefaultCoordSystems()
    
    try
    {
-      StringArray csNames =
-            theConfigManager->GetListOfItems(Gmat::COORDINATE_SYSTEM);
-      
       SpacePoint *earth = (SpacePoint*)GetConfiguredObject("Earth");
       
       // EarthMJ2000Eq
-      if (find(csNames.begin(), csNames.end(), "EarthMJ2000Eq") == csNames.end())
+      CoordinateSystem *eqcs = GetCoordinateSystem("EarthMJ2000Eq");
+      if (eqcs == NULL)
+      {
          CreateCoordinateSystem("EarthMJ2000Eq", true);
+      }
+      else
+      {
+         eqcs->SetSolarSystem(theSolarSystemInUse);
+         eqcs->Initialize();
+      }
       
       // EarthMJ2000Ec
-      if (find(csNames.begin(), csNames.end(), "EarthMJ2000Ec") == csNames.end())
+      CoordinateSystem *eccs = GetCoordinateSystem("EarthMJ2000Ec");
+      if (eccs == NULL)
       {
-         CoordinateSystem *eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
-         AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "EarthMJ2000Ec");
+         eccs = CreateCoordinateSystem("EarthMJ2000Ec", false);
+         AxisSystem *ecAxis = CreateAxisSystem("MJ2000Ec", "MJ2000Ec_Earth");
          eccs->SetStringParameter("Origin", "Earth");
          eccs->SetStringParameter("J2000Body", "Earth");
          eccs->SetRefObject(ecAxis, Gmat::AXIS_SYSTEM, ecAxis->GetName());
@@ -4259,13 +4082,19 @@ void Moderator::CreateDefaultCoordSystems()
          eccs->SetSolarSystem(theSolarSystemInUse);
          eccs->Initialize();
       }
+      else
+      {
+         eccs->SetSolarSystem(theSolarSystemInUse);
+         eccs->Initialize();
+      }
       
       // EarthFixed
-      if (find(csNames.begin(), csNames.end(), "EarthFixed") == csNames.end())
+      CoordinateSystem *bfcs = GetCoordinateSystem("EarthFixed");
+      if (bfcs == NULL)
       {
-         CoordinateSystem *bfcs = CreateCoordinateSystem("EarthFixed", false);
+         bfcs = CreateCoordinateSystem("EarthFixed", false);
          BodyFixedAxes *bfecAxis =
-            (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "EarthFixed");
+            (BodyFixedAxes*)CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
          bfecAxis->SetEopFile(theEopFile);
          bfecAxis->SetCoefficientsFile(theItrfFile);
          bfcs->SetStringParameter("Origin", "Earth");
@@ -4274,6 +4103,11 @@ void Moderator::CreateDefaultCoordSystems()
          bfcs->SetOrigin(earth);
          bfcs->SetJ2000Body(earth);
          bfcs->SetSolarSystem(theSolarSystemInUse);
+         bfcs->Initialize();
+      }
+      else
+      {
+         eccs->SetSolarSystem(theSolarSystemInUse);
          bfcs->Initialize();
       }
    }
@@ -4302,7 +4136,7 @@ void Moderator::CreateDefaultMission()
       //----------------------------------------------------
       // Create default resource
       //----------------------------------------------------
-
+      
       // Create solar system in use
       CreateSolarSystemInUse();
       
@@ -4329,28 +4163,33 @@ void Moderator::CreateDefaultMission()
       //--------------------------------------------------------------
       // test Burn Parameter
       //--------------------------------------------------------------
+
+      #ifdef __CREATE_HARDWARE__
       // Hardware 
-      //CreateHardware("FuelTank", "DefaultFuelTank");
-      //CreateHardware("Thruster", "DefaultThruster");
+      CreateHardware("FuelTank", "DefaultFuelTank");
+      CreateHardware("Thruster", "DefaultThruster");
+      #endif
       
-      // Burn
+      #ifdef __CREATE_VNB_COORD__
+      // Create VNB CoordinateSystem
+      CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
+      ObjectReferencedAxes *orAxis =
+         (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
+                                                 "ObjectReferenced");
+      orAxis->SetEopFile(theEopFile);
+      orAxis->SetCoefficientsFile(theItrfFile);
+      orAxis->SetStringParameter("XAxis", "V");
+      orAxis->SetStringParameter("YAxis", "N");
+      orAxis->SetStringParameter("Primary", "Earth");
+      orAxis->SetStringParameter("Secondary", "DefaultSC");
+      vnb->SetStringParameter("Origin", "Earth");
+      vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
+      #endif
+      
+      // ImpulsiveBurn
       GetDefaultBurn("ImpulsiveBurn");
       
-      // Create VNB CoordinateSystem
-//       CoordinateSystem *vnb = CreateCoordinateSystem("VNB", false);
-//       ObjectReferencedAxes *orAxis =
-//          (ObjectReferencedAxes*)CreateAxisSystem("ObjectReferenced",
-//                                                  "ObjectReferenced");
-//       orAxis->SetEopFile(theEopFile);
-//       orAxis->SetCoefficientsFile(theItrfFile);
-//       orAxis->SetStringParameter("XAxis", "V");
-//       orAxis->SetStringParameter("YAxis", "N");
-//       orAxis->SetStringParameter("Primary", "Earth");
-//       orAxis->SetStringParameter("Secondary", "DefaultSC");
-//       vnb->SetStringParameter("Origin", "Earth");
-//       vnb->SetRefObject(orAxis, Gmat::AXIS_SYSTEM, orAxis->GetName());
-      
-      // Burn parameters
+      // ImpulsiveBurn parameters
       CreateParameter("Element1", "DefaultIB.Element1");
       CreateParameter("Element2", "DefaultIB.Element2");
       CreateParameter("Element3", "DefaultIB.Element3");
@@ -4478,9 +4317,9 @@ void Moderator::CreateDefaultMission()
       #endif
       
       // Set parameter description and object name
-      StringArray &params = GetListOfObjects(Gmat::PARAMETER);
+      StringArray params = GetListOfObjects(Gmat::PARAMETER);
       Parameter *param;
-    
+      
       for (unsigned int i=0; i<params.size(); i++)
       {
          param = GetParameter(params[i]);
@@ -4587,108 +4426,6 @@ void Moderator::CreateDefaultMission()
 }
 
 
-//------------------------------------------------------------------------------
-// bool CreateSlpFile(const std::string &fileName)
-//------------------------------------------------------------------------------
-bool Moderator::CreateSlpFile(const std::string &fileName)
-{
-   //MessageInterface::ShowMessage("Moderator::CreateSlpFile() fileName=%s\n",
-   //                              fileName.c_str());
-    
-   bool status = false;
-    
-   if (isPlanetarySourceInUse[SLP])
-   {
-      MessageInterface::ShowMessage
-         ("Moderator::CreateSlpFile() SlpFile already created\n");
-      status = true;
-   }
-   else
-   {
-      theDefaultSlpFile = new SlpFile(fileName);
-      //MessageInterface::ShowMessage("Moderator::CreateSlpFile() SlpFile created\n");
-        
-      if (theDefaultSlpFile != NULL)
-         status = true;
-   }
-
-   return status;
-}
-
-
-//------------------------------------------------------------------------------
-// bool CreateDeFile(const Integer id, const std::string &fileName,
-//                   Gmat::DeFileFormat format = Gmat::DE_BINARY)
-//------------------------------------------------------------------------------
-bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
-                             Gmat::DeFileFormat format)
-{
-   bool status = false;
-   Gmat::DeFileType deFileType;
-    
-   if (isPlanetarySourceInUse[id])
-   {
-      MessageInterface::ShowMessage
-         ("Moderator::CreateDeFile() DeFile already created\n");
-      status = true;
-   }
-   else
-   {
-      switch (id)
-      {
-      case DE200:
-         deFileType = Gmat::DE200;
-         break;
-      case DE405:
-         deFileType = Gmat::DE405;
-         break;
-      default:
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "Moderator::CreateDeFile() unsupported DE file type");
-         return false;
-      }
-      
-      #if DEBUG_PLANETARY_FILE
-      MessageInterface::ShowMessage
-         ("Moderator::CreateDeFile() creating DeFile. type=%d, "
-          "fileName=%s, format=%d\n", deFileType, fileName.c_str(),
-          format);
-      #endif
-
-      FILE *defile = fopen(fileName.c_str(), "rb");
-      if (defile == NULL)
-      {
-         MessageInterface::PopupMessage
-            (Gmat::WARNING_,
-             "Error opening DE file:%s. \n"
-             "Please check file path. "
-             "The next filetype in the list will be used.\n", fileName.c_str());
-      }
-      else
-      {
-         fclose(defile);
-         
-         try
-         {
-            theDefaultDeFile = new DeFile(deFileType, fileName, format);
-        
-            if (theDefaultDeFile != NULL)
-               status = true;
-         }
-         catch (...)
-         {
-            MessageInterface::PopupMessage
-               (Gmat::WARNING_,
-                "Moderator::CreateDeFile() Error creating %s. "
-                "The next filetype in the list will "
-                "be created.\n", fileName.c_str());
-         }
-      }
-   }
-   return status;
-}
-
 // default objects
 //------------------------------------------------------------------------------
 // Spacecraft* GetDefaultSpacecraft()
@@ -4699,7 +4436,7 @@ bool Moderator::CreateDeFile(Integer id, const std::string &fileName,
 //------------------------------------------------------------------------------
 Spacecraft* Moderator::GetDefaultSpacecraft()
 {
-   StringArray &soConfigList = GetListOfObjects(Gmat::SPACECRAFT);
+   StringArray soConfigList = GetListOfObjects(Gmat::SPACECRAFT);
    
    if (soConfigList.size() > 0)
    {
@@ -4720,7 +4457,7 @@ Spacecraft* Moderator::GetDefaultSpacecraft()
 //------------------------------------------------------------------------------
 PropSetup* Moderator::GetDefaultPropSetup()
 {
-   StringArray &configList = GetListOfObjects(Gmat::PROP_SETUP);
+   StringArray configList = GetListOfObjects(Gmat::PROP_SETUP);
    
    if (configList.size() > 0)
    {
@@ -4740,7 +4477,7 @@ PropSetup* Moderator::GetDefaultPropSetup()
 //------------------------------------------------------------------------------
 Burn* Moderator::GetDefaultBurn(const std::string &type)
 {
-   StringArray &configList = GetListOfObjects(Gmat::BURN);
+   StringArray configList = GetListOfObjects(Gmat::BURN);
 
    if (configList.size() > 0)
    {
@@ -4765,7 +4502,7 @@ Burn* Moderator::GetDefaultBurn(const std::string &type)
 //------------------------------------------------------------------------------
 Hardware* Moderator::GetDefaultHardware(const std::string &type)
 {
-   StringArray &configList = GetListOfObjects(Gmat::HARDWARE);
+   StringArray configList = GetListOfObjects(Gmat::HARDWARE);
 
    if (configList.size() > 0)
    {
@@ -4790,7 +4527,7 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 //------------------------------------------------------------------------------
 Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
 {
-   StringArray &configList = GetListOfObjects(Gmat::SUBSCRIBER);
+   StringArray configList = GetListOfObjects(Gmat::SUBSCRIBER);
    int subSize = configList.size();
    Subscriber *sub = NULL;
    
@@ -4854,7 +4591,7 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
 //------------------------------------------------------------------------------
 Solver* Moderator::GetDefaultSolver()
 {
-   StringArray &configList = GetListOfObjects(Gmat::SOLVER);
+   StringArray configList = GetListOfObjects(Gmat::SOLVER);
    
    if (configList.size() > 0)
    {
@@ -4958,10 +4695,11 @@ void Moderator::AddSolarSystemToSandbox(Integer index)
       ("Moderator::AddSolarSystemToSandbox() entered\n");
    #endif
    
-   //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse();
+   //If we are ready to configure SolarSystem by name
+   //SolarSystem *solarSys = theConfigManager->GetSolarSystemInUse(name);
    //sandboxes[index]->AddSolarSystem(solarSys);
    sandboxes[index]->AddSolarSystem(theSolarSystemInUse);
-
+   
    // Add LibrationPoint and Barycenter objects
    StringArray cpNames = theConfigManager->GetListOfItems(Gmat::CALCULATED_POINT);
 
@@ -5382,8 +5120,6 @@ Moderator::Moderator()
    theDefaultSolarSystem = NULL;
    theSolarSystemInUse = NULL;
    theInternalCoordSystem = NULL;
-   theDefaultSlpFile = NULL;
-   theDefaultDeFile = NULL;
    runState = Gmat::IDLE;
    
    sandboxes.reserve(Gmat::MAX_SANDBOX);
