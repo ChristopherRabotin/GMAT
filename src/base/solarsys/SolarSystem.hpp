@@ -34,6 +34,9 @@
 #include "GmatBase.hpp"
 #include "CelestialBody.hpp"
 #include "PlanetaryEphem.hpp"
+#include "SlpFile.hpp"
+#include "DeFile.hpp"
+
 /**
  * SolarSystem class, containing pointers to all of the objects currently in
  * use.
@@ -56,6 +59,22 @@ public:
    ~SolarSystem();
    
    virtual bool Initialize();
+   
+   // method for planetary ephemris files
+   void CreatePlanetarySource();
+   
+   const StringArray& GetPlanetarySourceTypes();
+   const StringArray& GetPlanetarySourceNames();
+   const StringArray& GetPlanetarySourceTypesInUse();
+   const StringArray& GetAnalyticModelNames();
+   bool SetAnalyticModelToUse(const std::string &modelName);
+   bool SetPlanetarySourceName(const std::string &sourceType,
+                               const std::string &fileName);
+   Integer SetPlanetarySourceTypesInUse(const StringArray &sourceTypes); 
+   Integer GetPlanetarySourceId(const std::string &sourceType);
+   std::string GetPlanetarySourceName(const std::string &sourceType);
+   std::string GetCurrentPlanetarySource();
+   
    void ResetToDefaults();
    
    // method to add a body to the solar system
@@ -126,6 +145,9 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method
    virtual SolarSystem* Clone(void) const;
+   
+   // required method for all subclasses that can be copied in a script
+   virtual void         Copy(const GmatBase* orig);
    
    /// default names for each of the possible celestial bodies in the solar system
    static const std::string SUN_NAME;
@@ -228,6 +250,39 @@ protected:
 
 private:
    
+   enum
+   {
+      ANALYTIC = 0,
+      SLP,
+      DE200,
+      DE405,
+      PlanetarySourceCount,
+   };
+   
+   enum
+   {
+      LOW_FIDELITY = 0,
+      AnalyticModelCount,
+   };
+   
+   std::string theCurrentPlanetarySource;
+   Integer thePlanetarySourcePriority[PlanetarySourceCount];
+   bool isPlanetarySourceInUse[PlanetarySourceCount];
+   static const std::string PLANETARY_SOURCE_STRING[PlanetarySourceCount];
+   static const std::string ANALYTIC_MODEL_STRING[AnalyticModelCount];
+   static const Integer HIGHEST_PRIORITY = 10;
+   
+   // list for planetary source
+   StringArray thePlanetarySourceTypes;
+   StringArray thePlanetarySourceNames;
+   StringArray thePlanetarySourceTypesInUse;
+   StringArray theAnalyticModelNames;
+   StringArray theTempFileList;
+   Gmat::AnalyticMethod theAnalyticMethod;
+   
+   SlpFile *theDefaultSlpFile;
+   DeFile *theDefaultDeFile;
+   
    /// list of the celestial bodies that are included in this solar system
    std::vector<CelestialBody*> bodiesInUse;
    
@@ -236,8 +291,16 @@ private:
    
    // method to find a body in the solar system, given its name
    CelestialBody* FindBody(std::string withName);
+   void SetJ2000Body();
    void CloneBodiesInUse(const SolarSystem &ss);
    void DeleteBodiesInUse();
+   
+   // methods to create planetary source file
+   void SetDefaultPlanetarySource();
+   bool CreateSlpFile(const std::string &fileName);
+   bool CreateDeFile(const Integer id, const std::string &fileName,
+                     Gmat::DeFileFormat format = Gmat::DE_BINARY);
+   
 };
 
 #endif // SolarSystem_hpp
