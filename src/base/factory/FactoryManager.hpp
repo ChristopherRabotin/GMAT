@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             FactoryManager
 //------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public:
 
    // Generic method to create an object
    GmatBase*              CreateObject(const Gmat::ObjectType generalType,
-		                               const std::string &ofType,
+                                       const std::string &ofType,
                                        const std::string &withName = "");
    
    // methods to create and return objects of the various types
@@ -115,34 +115,11 @@ public:
    
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
-   StringArray            GetListOfItems(Gmat::ObjectType byType);
-
-   // individual methods to return a list of strings representing the types of
-   // objects that may be created in the system, by Gmat::ObjectType
-   StringArray            GetListOfSpacecraft();
-   StringArray            GetListOfPropagator();
-   StringArray            GetListOfForceModel();
-   StringArray            GetListOfPhysicalModel();
-   StringArray            GetListOfPropSetup();
-   StringArray            GetListOfStopCondition();
-   StringArray            GetListOfCalculatedPoint();
-   StringArray            GetListOfCelestialBody();
-   StringArray            GetListOfSolarSystem();
-   StringArray            GetListOfSolver();
-   StringArray            GetListOfSubscriber();
-   StringArray            GetListOfCommand();
-   StringArray            GetListOfBurn();
-   StringArray            GetListOfAtmosphereModel();
-   StringArray            GetListOfFunction();
-   StringArray            GetListOfHardware();
-   StringArray            GetListOfAxisSystem();
-   StringArray            GetListOfCoordinateSystem();
-   StringArray            GetListOfMathNode();
-   StringArray            GetListOfAttitude();
-
+   const StringArray&     GetListOfItems(Gmat::ObjectType byType);
+   
 protected:
    StringArray            entireList;
-
+   
 private:
 
    // private class data
@@ -154,8 +131,8 @@ private:
    
    // private methods 
    Factory*               FindFactory(Gmat::ObjectType ofType, const std::string &forType);
-   StringArray            GetList(Gmat::ObjectType ofType);
-
+   const StringArray&     GetList(Gmat::ObjectType ofType);
+   
    // Hide the default constructor and destructor to preserve singleton status
    // default constructor
    FactoryManager();

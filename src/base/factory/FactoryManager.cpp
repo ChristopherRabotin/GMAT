@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               Factory Manager
 //------------------------------------------------------------------------------
@@ -99,7 +99,7 @@ bool FactoryManager::RegisterFactory(Factory* fact)
  */
 //------------------------------------------------------------------------------
 GmatBase* FactoryManager::CreateObject(const Gmat::ObjectType generalType,
-		                               const std::string &ofType,
+                                               const std::string &ofType,
                                        const std::string &withName)
 {
    Factory* f = FindFactory(generalType, ofType);
@@ -589,7 +589,7 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
 
 
 //------------------------------------------------------------------------------
-// StringArray  GetListOfItems(Gmat::ObjectType byType)
+// const StringArray& GetListOfItems(Gmat::ObjectType byType)
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type byType that can be created.
@@ -599,291 +599,9 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
  * @return list of creatable items of type byType.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfItems(Gmat::ObjectType byType)
+const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType)
 {
    return GetList(byType);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfSpacecraft()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Spacecraft that can be created.
- *
- * @return list of creatable items of type Spacecraft.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSpacecraft()
-{
-   return GetList(Gmat::SPACECRAFT);
-}
-
-//------------------------------------------------------------------------------
-// StringArray GetListOfGroundStation()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type GroundStation that can be created.
- *
- * @return list of creatable items of type GroundStation.
- */
-//------------------------------------------------------------------------------
-//StringArray FactoryManager::GetListOfGroundStation() const
-//{
-//   return GetList(Gmat::GROUND_STATION);
-//}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfPropagator()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Propagator that can be created.
- *
- * @return list of creatable items of type Propagator.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPropagator()
-{
-   return GetList(Gmat::PROPAGATOR);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfForceModel()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type ForceModel that can be created.
- *
- * @return list of creatable items of type ForceModel.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfForceModel()
-{
-   return GetList(Gmat::FORCE_MODEL);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfPhysicalModel()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type PhysicalModel that can be created.
- *
- * @return list of creatable items of type Force.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPhysicalModel()
-{
-   return GetList(Gmat::PHYSICAL_MODEL);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfPropSetup()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type PropSetup that can be created.
- *
- * @return list of creatable items of type PropSetup.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfPropSetup()
-{
-   return GetList(Gmat::PROP_SETUP);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfStopCondition()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type StopCondition that can be created.
- *
- * @return list of creatable items of type StopCondition.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfStopCondition()
-{
-   return GetList(Gmat::STOP_CONDITION);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfCelestialBody()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type CelestialBody that can be created.
- *
- * @return list of creatable items of type CelestialBody.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfCelestialBody()
-{
-   return GetList(Gmat::CELESTIAL_BODY);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfSolarSystem()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type SolarSystem that can be created.
- *
- * @return list of creatable items of type SolarSystem.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSolarSystem()
-{
-   return GetList(Gmat::SOLAR_SYSTEM);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfSolver()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Solver that can be created.
- *
- * @return list of creatable items of type Solver.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSolver()
-{
-   return GetList(Gmat::SOLVER);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfSubscriber()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Subscriber that can be created.
- *
- * @return list of creatable items of type Subscriber.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfSubscriber()
-{
-   return GetList(Gmat::SUBSCRIBER);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfCommand()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type GmatCommand that can be created.
- *
- * @return list of creatable items of type GmatCommand.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfCommand()
-{
-   return GetList(Gmat::COMMAND);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfBurn()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Burn that can be created.
- *
- * @return list of creatable items of type Burn.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfBurn()
-{
-   return GetList(Gmat::BURN);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfAtmosphereModel()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type AtmosphereModel that can be created.
- *
- * @return list of creatable items of type AtmosphereModel.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfAtmosphereModel()
-{
-   return GetList(Gmat::ATMOSPHERE);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfFunction()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Function that can be created.
- *
- * @return list of creatable items of type Function.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfFunction()
-{
-   return GetList(Gmat::FUNCTION);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfHardware()
-//------------------------------------------------------------------------------
-/**
-* Return a list of items of type Hardware that can be created.
- *
- * @return list of creatable items of type Hardware.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfHardware()
-{
-   return GetList(Gmat::HARDWARE);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfAxisSystem()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type AxisSystem that can be created.
- *
- * @return list of creatable items of type AxisSystem.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfAxisSystem()
-{
-   return GetList(Gmat::AXIS_SYSTEM);
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfCoordinateSystem()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type CoordinateSystem that can be created.
- *
- * @return list of creatable items of type CoordinateSystem.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfCoordinateSystem()
-{
-   return GetList(Gmat::COORDINATE_SYSTEM);
-}
-
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfMathNode()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type MathNode that can be created.
- *
- * @return list of creatable items of type MathNode.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfMathNode()
-{
-   return GetList(Gmat::MATH_NODE);
-}
-
-//------------------------------------------------------------------------------
-// StringArray  GetListOfAttitude()
-//------------------------------------------------------------------------------
-/**
- * Return a list of items of type Attitude that can be created.
- *
- * @return list of creatable items of type Attitude.
- */
-//------------------------------------------------------------------------------
-StringArray  FactoryManager::GetListOfAttitude()
-{
-   return GetList(Gmat::ATTITUDE);
 }
 
 
@@ -900,7 +618,6 @@ FactoryManager::~FactoryManager()
    //MessageInterface::ShowMessage("~FactoryManager() size=%d\n", factoryList.size());
    
    std::list<Factory*>::iterator f = factoryList.begin();
-   // Factory f = factoryList.begin();
    while (f != factoryList.end())
    {
       //MessageInterface::ShowMessage("Deleting FactoryType=%d\n", (*f)->GetFactoryType());
@@ -908,8 +625,6 @@ FactoryManager::~FactoryManager()
       ++f;
    }
    
-   //delete factoryList;
-   //factoryList.~list<Factory*>(); //loj: 4/7/06 commented
 };
 
 //---------------------------------
@@ -954,10 +669,10 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
    "Entering FactoryManager::FindFactory with type = %d and forType = %s\n",
    (Integer) ofType, forType.c_str());
    #endif
+   
    // Search through factoryList for the factory that creates objects of type
    // ofType, specifically of type forType
    std::list<Factory*>::iterator f = factoryList.begin();
-   //Factory f = factoryList.begin();     // returns a bidirectional iterator
    while (f != factoryList.end())
    {
       if ((*f)->GetFactoryType() == ofType)
@@ -965,16 +680,18 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
          // Search through the list of creatable objects to see if one matches
          StringArray listObj = (*f)->GetListOfCreatableObjects();
          bool isCaseSensitive = (*f)->IsTypeCaseSensitive();
+         
          #ifdef DEBUG_FACTORY_CREATE
          MessageInterface::ShowMessage(
          "    isCaseSensitive = %s\n",
          (isCaseSensitive?  "TRUE" : "False"));
          #endif
+         
          if (!listObj.empty())
          {
             StringArray::iterator s = listObj.begin();
             std::string objType = forType;
-            if (isCaseSensitive) //loj: 4/7/06 added
+            if (isCaseSensitive)
                objType = GmatStringUtil::Capitalize(objType);
             
             while (s != listObj.end())
@@ -984,7 +701,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
                "    -> now comparing \"%s\" with \"%s\"\n",
                (*s).c_str(), objType.c_str());
                #endif
-               //if ((*s).compare(forType) == 0)
+               
                if ((*s).compare(objType) == 0)
                {
                   //MessageInterface::ShowMessage
@@ -1006,7 +723,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 }
 
 //------------------------------------------------------------------------------
-// StringArray  GetList(Gmat::ObjectType ofType) const
+// const StringArray& GetList(Gmat::ObjectType ofType) const
 //------------------------------------------------------------------------------
 /**
  * Return a list of items of type ofType that can be created.
@@ -1016,33 +733,21 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
  * @return list of creatable items of type ofType.
  */
 //------------------------------------------------------------------------------
-StringArray  FactoryManager::GetList(Gmat::ObjectType ofType)
+const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
 {
-    entireList.clear();
-
-   // Search through factoryList for the factory that creates objects of type
-   // ofType
-//   std::list<Factory*>::iterator f = ((std::list<Factory*>)factoryList).begin();
-
+   entireList.clear();
+   
    std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())
    {
       if ((*f)->GetFactoryType() == ofType)
       {
          // Add the name(s) to the list 
-         StringArray s = (*f)->GetListOfCreatableObjects();
-         if (!entireList.empty())
-         {
-            StringArray::iterator si = s.begin();
-            while (si != s.end())
-            {
-               entireList.push_back(*si);
-               ++si;
-            }
-         }
-//            entireList.splice(entireList.end(),s);
-         else
-            entireList = s;
+         StringArray objs = (*f)->GetListOfCreatableObjects();
+         if (!objs.empty())
+            entireList.insert(entireList.end(), objs.begin(), objs.end());
+         
+         break;
       }
       ++f;
    }
