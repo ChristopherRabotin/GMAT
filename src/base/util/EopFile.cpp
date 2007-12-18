@@ -31,6 +31,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OFFSET
+//#define DEBUG_EOP_READ
 
 //------------------------------------------------------------------------------
 // static data
@@ -154,7 +155,7 @@ void EopFile::Initialize()
    eopFile.setf(std::ios::skipws);
    if (eopFType == GmatEop::EOP_C04)
    {
-      // read past the 'YEAR' line
+      // read up to the first data line
       bool startNow = false;
       std::string   firstWord;
       while ((!startNow) && (!eopFile.eof()))
@@ -163,7 +164,7 @@ void EopFile::Initialize()
          std::istringstream lineStr;
          lineStr.str(line);
          lineStr >> firstWord;
-         if (firstWord == "YEAR")   startNow = true;
+         if (firstWord == "1962") startNow = true;
       }
       if (startNow == false)
          throw UtilityException("Unable to read EopFile.");
@@ -171,14 +172,22 @@ void EopFile::Initialize()
       Integer     year, day, mjd;
       std::string month;
       Real        x, y, ut1_utc, lod; // ignore lod, dPsi, dEpsilon
-      while (!eopFile.eof())
+      bool done = false;
+      while (!done)
       {
-         getline(eopFile, line);
          if (!IsBlank(line.c_str()))
          {
             std::istringstream lineS;
             lineS.str(line);
             lineS >> year >> month >> day >> mjd >> x >> y >> ut1_utc >> lod;
+            #ifdef DEBUG_EOP_READ
+               //MessageInterface::ShowMessage(
+                  //"%d   %s   %d   %d   %.12f   %.12f   %.12f   %.12f\n",
+                  //year, month.c_str(), day, mjd, x, y, ut1_utc, lod);
+               MessageInterface::ShowMessage(
+                  "%d   %.12f   %.12f   %.12f   %.12f\n",
+                  mjd, x, y, ut1_utc, lod);
+            #endif
             ut1UtcOffsets->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
             ut1UtcOffsets->SetElement(tableSz,1,ut1_utc);
             polarMotion->SetElement(tableSz,0,mjd + GmatTimeUtil::JD_NOV_17_1858);
@@ -187,6 +196,8 @@ void EopFile::Initialize()
             polarMotion->SetElement(tableSz,3,lod);
             tableSz++;
          }
+         if (eopFile.eof())   done = true;
+         else                 getline(eopFile, line);
       }
    }
    else if (eopFType == GmatEop::FINALS)
