@@ -1221,6 +1221,9 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    
    // Set input to CallFunction
    bool validParam = false;
+   if (inArray.size() == 0) //if no inputs, set validParam to true (loj: 2007.12.14)
+      validParam = true;
+   
    for (UnsignedInt i=0; i<inArray.size(); i++)
    {
       retval = cmd->SetStringParameter("AddInput", inArray[i]);
