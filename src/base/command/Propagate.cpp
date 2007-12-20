@@ -2416,9 +2416,25 @@ void Propagate::PrepareToPropagate()
          if (s == sar->begin())
             baseEp = sat1->GetRealParameter(epochID);
          else if (baseEp != sat1->GetRealParameter(epochID))
+         {
+            #ifdef DEBUG_EPOCH_SYNC
+               MessageInterface::ShowMessage(
+                     "Epoch mismatch:   Base = %18.12lf\n   %s = %18.12lf\n"
+                     "   delta = %18.12le\n\n", baseEp, sat1->GetName().c_str(), 
+                     sat1->GetRealParameter(epochID),
+                     (sat1->GetRealParameter(epochID) - baseEp));
+               for (StringArray::iterator sd = sar->begin(); sd != sar->end(); ++sd)
+               {
+                  GmatBase *theSat = (*objectMap)[*sd];
+                  MessageInterface::ShowMessage("   %s epoch = %18.12lf\n", 
+                        theSat->GetName().c_str(), 
+                        theSat->GetRealParameter(epochID));
+               }
+            #endif
             throw CommandException(
                "Epochs are out of sync on Propagation line:\n\"" + 
                generatingString + "\"\n");
+         }
       }
    }
    
