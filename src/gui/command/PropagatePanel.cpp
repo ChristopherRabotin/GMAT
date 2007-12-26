@@ -565,7 +565,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
          SpaceObjectSelectDialog soDlg(this, mTempProp[row].soNameList, soExcList);
          soDlg.ShowModal();
          
-         if (soDlg.IsSelectionChanged())
+         if (soDlg.HasSelectionChanged())
          {
             wxArrayString &names = soDlg.GetSpaceObjectNames();
             mTempProp[row].isChanged = true;
@@ -606,7 +606,7 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             
             mPropSatChanged = true;
             EnableUpdate(true);
-         } // soDlg.IsSelectionChanged()
+         } // soDlg.HasSelectionChanged()
       } // else if (col == 1)
    } // end of if (event.GetEventObject() == propGrid)
    
@@ -618,10 +618,11 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
       if (col == 0)
       {
          // show dialog to select parameter
+         // we cannot allow Variables
          ParameterSelectDialog paramDlg(this, mObjectTypeList);
          paramDlg.ShowModal();
          
-         if (paramDlg.IsParamSelected())
+         if (paramDlg.HasSelectionChanged())
          {
             wxString newParamName = paramDlg.GetParamName();
             stopCondGrid->SetCellValue(row,STOPCOND_PARAM_COL,newParamName);
@@ -642,6 +643,8 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             }
             
             mStopCondChanged = true;
+            UpdateStopCondition(row);
+            EnableUpdate(true);
          }
       }
       else if (col == 2)
@@ -658,19 +661,20 @@ void PropagatePanel::OnCellRightClick(wxGridEvent& event)
             return;
          
          // show dialog to select parameter
+         // we can allow Variables
          ParameterSelectDialog paramDlg(this, mObjectTypeList);
          paramDlg.ShowModal();
          
-         if (paramDlg.IsParamSelected())
+         if (paramDlg.HasSelectionChanged())
          {
             wxString newParamName = paramDlg.GetParamName();
             stopCondGrid->SetCellValue(row, STOPCOND_COND_COL, newParamName);
             mStopCondChanged = true;
+            UpdateStopCondition(row);
+            EnableUpdate(true);
          }
       }
       
-      UpdateStopCondition(row);
-      EnableUpdate(true);
    } // event.GetEventObject() == stopCondGrid
 }
 

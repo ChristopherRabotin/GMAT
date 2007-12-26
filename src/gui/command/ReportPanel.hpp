@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ReportPanel
 //------------------------------------------------------------------------------
@@ -32,80 +32,37 @@ public:
 protected:
    GmatCommand *theCommand;
    
-   int  mNumSc;
-   int  mNumImpBurn;
-   int  mNumScProperty;
-   int  mNumImpBurnProperty;
-   int  mNumVarParams;
-   bool mUseUserParam;
-   bool mIsReportFileChanged;
-   bool mIsParameterChanged;
+   int  mNumParameters;
+   bool mHasReportFileChanged;
+   bool mHasParameterChanged;
    
-   wxString *mSpacecraftList;
-   wxString *mImpBurnList;
-   wxArrayString mSpacecraftPropertyList;
-   wxArrayString mImpBurnPropertyList;
-   
-   wxString mLastCoordSysName;
    wxArrayString mObjectTypeList;
+   wxArrayString mReportWxStrings;
    
-   wxStaticText *mCoordSysLabel;
+   wxComboBox *mReportFileComboBox;   
+   wxListBox  *mSelectedListBox;
+   wxButton   *mViewButton;   
    
-   wxComboBox *mReportFileComboBox;
-   wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mSpacecraftComboBox;
-   wxComboBox *mImpBurnComboBox;
-   wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox;
-   
-   wxListBox *mUserParamListBox;
-   wxListBox *mPropertyListBox;
-   wxListBox *mVarListBox;
-   wxListBox *mVarSelectedListBox;
-   
-   wxBoxSizer *mCoordSysSizer;
-   wxBoxSizer *mParamBoxSizer;
-   
-   void OnMoveUpVariable(wxCommandEvent& event);
-   void OnMoveDownVariable(wxCommandEvent& event);
-   
-   void OnAddVariable(wxCommandEvent& event);
-   void OnRemoveVariable(wxCommandEvent& event);
-   void OnClearVariable(wxCommandEvent& event);
-   
-   void OnSelectUserParam(wxCommandEvent& event);
-   void OnSelectProperty(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
-   void OnCreateVariable(wxCommandEvent& event);
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
-      RF_TEXT = 93000,      
-      UP_VAR_BUTTON,
-      DOWN_VAR_BUTTON,
-      
-      ADD_VAR_BUTTON,
-      REMOVE_VAR_BUTTON,
-      CLEAR_VAR_BUTTON,
-      VAR_SEL_LISTBOX,
-      CREATE_VARIABLE,
+      ID_TEXT = 93000,
+      ID_BUTTON,
+      ID_LISTBOX,
       ID_COMBOBOX,
-      USER_PARAM_LISTBOX,
-      PROPERTY_LISTBOX,
    };
 
 private:
-   void ShowCoordSystem();
-   wxString GetParamName();
-   Parameter* GetParameter(const wxString &name);
-   wxComboBox* GetObjectComboBox();
+   
 };
 #endif
