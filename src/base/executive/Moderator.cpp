@@ -1674,7 +1674,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    if (GetParameter(name) == NULL)
    {
       Parameter *param = theFactoryManager->CreateParameter(type, name);
-         
+      
       #if DEBUG_CREATE_RESOURCE
       if (param == NULL)
          MessageInterface::ShowMessage("   param = (NULL)\n");
@@ -1731,7 +1731,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // Set dependent object name
       if (depName != "")
          param->SetStringParameter("DepObject", depName);
-
+      
       // Set SolarSystem
       param->SetSolarSystem(theSolarSystemInUse);
       param->SetInternalCoordSystem(theInternalCoordSystem);
@@ -1787,8 +1787,15 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       // Manage it if it is a named parameter
       try
       {
+         bool oldFlag = theConfigManager->HasConfigurationChanged();
+         
          if (param->GetName() != "")
             theConfigManager->AddParameter(param);
+         
+         // if system paramter, set configuration changed to old flag. (loj: 2007.12.26)
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+            theConfigManager->ConfigurationChanged(oldFlag);
+         
       }
       catch (BaseException &e)
       {
@@ -4273,7 +4280,8 @@ void Moderator::CreateDefaultMission()
       CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
       CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
       CreateParameter("LST", "DefaultSC.Earth.LST");
-      CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
+      //CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
+      CreateParameter("BetaAngle", "DefaultSC.Earth.BetaAngle"); //loj: 2007.12.26 Added Earth
       
       // B-Plane parameters
       CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
