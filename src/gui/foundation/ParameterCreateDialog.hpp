@@ -26,14 +26,14 @@ class ParameterCreateDialog : public GmatDialog
 {
 public:
    
-   ParameterCreateDialog(wxWindow *parent);
+   ParameterCreateDialog(wxWindow *parent, int paramType);
    ~ParameterCreateDialog();
    
    wxArrayString& GetParamNames()
       { return mParamNames; }
    bool IsParamCreated()
       { return mIsParamCreated; }
-    
+   
 protected:
 
    Parameter *mCurrParam;
@@ -41,6 +41,7 @@ protected:
    wxArrayString mParamNames;
    wxArrayString mExcludedScList;
    
+   int mParamType;
    bool mIsParamCreated;
    bool mCreateVariable;
    bool mCreateString;

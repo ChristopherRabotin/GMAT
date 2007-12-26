@@ -41,11 +41,16 @@ END_EVENT_TABLE()
 
    
 //------------------------------------------------------------------------------
-// ParameterCreateDialog(wxWindow *parent)
+// ParameterCreateDialog(wxWindow *parent, int paramType)
 //------------------------------------------------------------------------------
-ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent)
+/*
+ * @param paramType 1 = Variable, 2 = Array, 3 = String
+ */
+//------------------------------------------------------------------------------
+ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, int paramType)
    : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
 {
+   mParamType = paramType;
    mCurrParam = NULL;
    mParamNames.Clear();
    mIsParamCreated = false;
@@ -289,12 +294,29 @@ void ParameterCreateDialog::Create()
    arr1FlexGridSizer->Add(arrTimesStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
    arr1FlexGridSizer->Add(mUserArrayListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-
+   
    arrayStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    
    pageBoxSizer->Add(variableStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(stringStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    pageBoxSizer->Add(arrayStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageBoxSizer->Add(stringStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   if (mParamType == 1)
+   {
+      pageBoxSizer->Show(arrayStaticBoxSizer, false);
+      pageBoxSizer->Show(stringStaticBoxSizer, false);
+   }
+   else if (mParamType == 2)
+   {
+      pageBoxSizer->Show(variableStaticBoxSizer, false);
+      pageBoxSizer->Show(stringStaticBoxSizer, false);
+   }
+   else if (mParamType == 3)
+   {
+      pageBoxSizer->Show(variableStaticBoxSizer, false);
+      pageBoxSizer->Show(arrayStaticBoxSizer, false);
+   }
+   
    
    //-------------------------------------------------------
    // add to parent sizer
