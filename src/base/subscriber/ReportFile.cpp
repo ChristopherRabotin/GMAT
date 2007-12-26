@@ -30,6 +30,7 @@
 
 //#define DEBUG_REPORTFILE_OPEN
 //#define DEBUG_REPORTFILE_SET
+//#define DEBUG_REPORTFILE_GET
 //#define DEBUG_REPORTFILE_INIT
 //#define DEBUG_RENAME
 //#define DEBUG_WRAPPER_CODE
@@ -233,9 +234,9 @@ Integer ReportFile::GetNumParameters()
 bool ReportFile::AddParameter(const std::string &paramName, Integer index)
 {
    #ifdef DEBUG_REPORTFILE_SET
-      MessageInterface::ShowMessage(
-         "ReportFile::AddParameter() Adding parameter '%s' to "
-         "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
+   MessageInterface::ShowMessage
+      ("ReportFile::AddParameter() Adding parameter '%s' to "
+       "ReportFile '%s'\n", paramName.c_str(), instanceName.c_str());
    #endif
    
    if (paramName != "" && index == mNumParams)
@@ -247,10 +248,13 @@ bool ReportFile::AddParameter(const std::string &paramName, Integer index)
          mParamNames.push_back(paramName);
          mNumParams = mParamNames.size();
          mParams.push_back(NULL);
-         paramWrappers.push_back(NULL); //loj: 4/4/07 added
+         paramWrappers.push_back(NULL);
+         
          #ifdef DEBUG_REPORTFILE_SET
-         MessageInterface::ShowMessage("   '%s' added\n", paramName.c_str());
+         MessageInterface::ShowMessage
+            ("   '%s' added, size=%d\n", paramName.c_str(), mNumParams);
          #endif
+         
          return true;
       }
    }
@@ -371,18 +375,24 @@ GmatBase* ReportFile::Clone(void) const
 bool ReportFile::TakeAction(const std::string &action,
                             const std::string &actionData)
 {
+   #ifdef DEBUG_REPORTFILE_ACTION
+   MessageInterface::ShowMessage
+      ("ReportFile::TakeAction() action=%s, actionData=%s\n", action.c_str(),
+       actionData.c_str());
+   #endif
+   
    if (action == "Clear")
    {
       ClearParameters();
       return true;
    }
-
+   
    if (action == "PassedToReport")
    {
       usedByReport = true;
       return true;
    }
-
+   
    if (action == "ActivateForReport")
    {
       calledByReport = ((actionData == "On") ? true : false);
@@ -678,8 +688,8 @@ const StringArray& ReportFile::GetStringArrayParameter(const Integer id) const
 {
    #ifdef DEBUG_REPORTFILE_GET
    MessageInterface::ShowMessage
-      ("ReportFile::GetStringArrayParameter(%d) mParamNames.size()=%d\n",
-       id, mParamNames.size());
+      ("ReportFile::GetStringArrayParameter() id=%d, mParamNames.size()=%d, "
+       "mNumParams=%d\n", id, mParamNames.size(), mNumParams);
    #endif
    
    switch (id)
@@ -919,7 +929,9 @@ bool ReportFile::OpenReportFile(void)
 //------------------------------------------------------------------------------
 void ReportFile::ClearParameters()
 {
-   //MessageInterface::ShowMessage("==> ReportFile::ClearParameters() entered\n");
+   #ifdef DEBUG_REPORTFILE_SET
+   MessageInterface::ShowMessage("ReportFile::ClearParameters() entered\n");
+   #endif
    
    mParams.clear();
    mParamNames.clear();
