@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ResourceTree
 //------------------------------------------------------------------------------
@@ -127,6 +127,8 @@ private:
    void OnAddDiffCorr(wxCommandEvent &event);
    void OnAddSqp(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
+   void OnAddArray(wxCommandEvent &event);
+   void OnAddString(wxCommandEvent &event);
    void OnAddMatlabFunction(wxCommandEvent &event);
    void OnAddGmatFunction(wxCommandEvent &event);
    void OnAddCoordSys(wxCommandEvent &event);
@@ -194,6 +196,8 @@ private:
       POPUP_ADD_XY_PLOT,
       POPUP_ADD_OPENGL_PLOT,
       POPUP_ADD_VARIABLE,
+      POPUP_ADD_ARRAY,
+      POPUP_ADD_STRING,
       
       POPUP_ADD_COORD_SYS,
       

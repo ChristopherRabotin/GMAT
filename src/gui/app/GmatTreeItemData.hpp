@@ -49,11 +49,12 @@ namespace GmatTree
       
       ICON_MATLAB_FUNCTION,
       ICON_FUNCTION,
-      ICON_ARRAY,
       ICON_COORDINATE_SYSTEM,
       ICON_OPEN_GL_PLOT,
       ICON_PROPAGATOR,
       ICON_VARIABLE,
+      ICON_ARRAY,
+      ICON_STRING,
       ICON_XY_PLOT,
       
       ICON_DEFAULT,
@@ -156,6 +157,8 @@ namespace GmatTree
       OPENGL_PLOT,
       
       VARIABLE,
+      ARRAY,
+      STRING,
       MATLAB_FUNCTION,
       GMAT_FUNCTION,
       COORD_SYSTEM,

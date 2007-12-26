@@ -36,11 +36,12 @@
 #include "bitmaps/moon.xpm"
 #include "bitmaps/function.xpm"
 #include "bitmaps/matlabfunction.xpm"
-#include "bitmaps/array.xpm"
 #include "bitmaps/coordinatesystem.xpm"
 #include "bitmaps/openglplot.xpm"
 #include "bitmaps/propagator.xpm"
 #include "bitmaps/variable.xpm"
+#include "bitmaps/array.xpm"
+#include "bitmaps/string.xpm"
 #include "bitmaps/xyplot.xpm"
 #include "bitmaps/default.xpm"
 #include "bitmaps/tank.xpm"
@@ -105,6 +106,8 @@ BEGIN_EVENT_TABLE(ResourceTree, wxTreeCtrl)
    EVT_MENU(POPUP_ADD_XY_PLOT, ResourceTree::OnAddXyPlot)
    EVT_MENU(POPUP_ADD_OPENGL_PLOT, ResourceTree::OnAddOpenGlPlot)
    EVT_MENU(POPUP_ADD_VARIABLE, ResourceTree::OnAddVariable)
+   EVT_MENU(POPUP_ADD_ARRAY, ResourceTree::OnAddArray)
+   EVT_MENU(POPUP_ADD_STRING, ResourceTree::OnAddString)
    EVT_MENU(POPUP_ADD_MATLAB_FUNCT, ResourceTree::OnAddMatlabFunction)
    EVT_MENU(POPUP_ADD_GMAT_FUNCT, ResourceTree::OnAddGmatFunction)
    EVT_MENU(POPUP_ADD_COORD_SYS, ResourceTree::OnAddCoordSys)
@@ -571,8 +574,8 @@ void ResourceTree::AddDefaultResources()
    
    //----- Vairables
    mVariableItem = 
-      AppendItem(resource, wxT("Variables/Arrays"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("Variables/Arrays"),
+      AppendItem(resource, wxT("Variables/Arrays/Strings"), GmatTree::ICON_FOLDER, -1,
+                 new GmatTreeItemData(wxT("Variables/Arrays/Strings"),
                                       GmatTree::VARIABLE_FOLDER));
    // ag:  Should the GmatTree type of variableItem change?
    
@@ -1021,12 +1024,22 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
       
       // append only user parameters
       // all system parameters works as Object.Property
-      if (param->GetKey() == GmatParam::USER_PARAM)
+      //if (param->GetKey() == GmatParam::USER_PARAM)
+      if (param->GetTypeName() == "Variable")
       {
          AppendItem(itemId, wxT(objName), GmatTree::ICON_VARIABLE, -1,
-                    new GmatTreeItemData(wxT(objName),
-                                         GmatTree::VARIABLE));
+                    new GmatTreeItemData(wxT(objName), GmatTree::VARIABLE));
       }
+      else if (param->GetTypeName() == "Array")
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_ARRAY, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::ARRAY));
+      }
+      else if (param->GetTypeName() == "String")
+      {
+         AppendItem(itemId, wxT(objName), GmatTree::ICON_STRING, -1,
+                    new GmatTreeItemData(wxT(objName), GmatTree::STRING));
+      }      
    };
    
    if (size > 0)
@@ -1637,10 +1650,10 @@ void ResourceTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
    
    wxBusyCursor wait;
-   wxIcon icons[29];
+   wxIcon icons[30];
    int index = 0;
    
-   icons[index] = wxIcon ( folder_xpm );
+   icons[index]   = wxIcon ( folder_xpm );
    icons[++index] = wxIcon ( file_xpm );
    icons[++index] = wxIcon ( openfolder_xpm );
    icons[++index] = wxIcon ( spacecraft_xpm );
@@ -1662,11 +1675,12 @@ void ResourceTree::AddIcons()
    icons[++index] = wxIcon ( moon_xpm );
    icons[++index] = wxIcon ( matlabfunction_xpm );
    icons[++index] = wxIcon ( function_xpm );
-   icons[++index] = wxIcon ( array_xpm );
    icons[++index] = wxIcon ( coordinatesystem_xpm );
    icons[++index] = wxIcon ( openglplot_xpm );
    icons[++index] = wxIcon ( propagator_xpm );
    icons[++index] = wxIcon ( variable_xpm );
+   icons[++index] = wxIcon ( array_xpm );
+   icons[++index] = wxIcon ( string_xpm );
    icons[++index] = wxIcon ( xyplot_xpm );
    icons[++index] = wxIcon ( default_xpm );
    
@@ -2075,7 +2089,45 @@ void ResourceTree::OnAddVariable(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
    
    // show dialog to create user parameter
-   ParameterCreateDialog paramDlg(this);
+   ParameterCreateDialog paramDlg(this, 1);
+   paramDlg.ShowModal();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnAddArray(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add an array to variable folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddArray(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   
+   // show dialog to create user parameter
+   ParameterCreateDialog paramDlg(this, 2);
+   paramDlg.ShowModal();
+}
+
+
+//------------------------------------------------------------------------------
+// void OnAddString(wxCommandEvent &event)
+//------------------------------------------------------------------------------
+/**
+ * Add a string to variable folder
+ *
+ * @param <event> command event
+ */
+//------------------------------------------------------------------------------
+void ResourceTree::OnAddString(wxCommandEvent &event)
+{
+   wxTreeItemId item = GetSelection();
+   
+   // show dialog to create user parameter
+   ParameterCreateDialog paramDlg(this, 3);
    paramDlg.ShowModal();
 }
 
@@ -2884,7 +2936,7 @@ void ResourceTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
       menu.Append(POPUP_ADD_SUBSCRIBER, wxT("Add"), CreatePopupMenu(itemType));
       break;
    case GmatTree::VARIABLE_FOLDER:
-      menu.Append(POPUP_ADD_VARIABLE, wxT("Add Variable"));
+      menu.Append(POPUP_ADD_VARIABLE, wxT("Add"), CreatePopupMenu(itemType));
       break;
    case GmatTree::FUNCTION_FOLDER:
       menu.Append(POPUP_ADD_FUNCTION, wxT("Add"), CreatePopupMenu(itemType));
@@ -2996,6 +3048,11 @@ wxMenu* ResourceTree::CreatePopupMenu(GmatTree::ItemType itemType)
       menu->Append(POPUP_ADD_REPORT_FILE, wxT("ReportFile"));
       menu->Append(POPUP_ADD_XY_PLOT, wxT("XYPlot"));
       menu->Append(POPUP_ADD_OPENGL_PLOT, wxT("OpenGLPlot"));
+      break;
+   case GmatTree::VARIABLE_FOLDER:
+      menu->Append(POPUP_ADD_VARIABLE, wxT("Variable"));
+      menu->Append(POPUP_ADD_ARRAY, wxT("Array"));
+      menu->Append(POPUP_ADD_STRING, wxT("String"));
       break;
    case GmatTree::FUNCTION_FOLDER:
       #ifdef __USE_MATLAB__
@@ -3153,6 +3210,10 @@ GmatTree::IconType ResourceTree::GetTreeItemIcon(GmatTree::ItemType itemType)
       return GmatTree::ICON_OPEN_GL_PLOT;
    case GmatTree::VARIABLE:
       return GmatTree::ICON_VARIABLE;
+   case GmatTree::ARRAY:
+      return GmatTree::ICON_ARRAY;
+   case GmatTree::STRING:
+      return GmatTree::ICON_STRING;
    case GmatTree::MATLAB_FUNCTION:
       return GmatTree::ICON_MATLAB_FUNCTION;
    case GmatTree::GMAT_FUNCTION:
