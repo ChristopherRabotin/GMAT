@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             MessageInterface
 //------------------------------------------------------------------------------
@@ -234,7 +234,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    short    size;
    va_list  marker;
    char     *msgBuffer;
-   
+
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
    if( (msgBuffer = (char *)malloc(size)) != NULL )
@@ -242,6 +242,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
       va_end(marker);
+      
+      // if no EOL then append it
+      if (msgBuffer[strlen(msgBuffer)-1] != '\n')
+         msgBuffer[strlen(msgBuffer)] = '\n';
    }
    
    
