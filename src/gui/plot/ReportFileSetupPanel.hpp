@@ -37,104 +37,48 @@ public:
    
 protected:
    ReportFile *reportFile;
-
-   int  mNumSc;
-   int  mNumImpBurn;
-   int  mNumScProperty;
-   int  mNumImpBurnProperty;
-   int  mNumVarParams;
-   bool mUseUserParam;
-   bool mParamChanged;
    
-   wxString *mSpacecraftList;
-   wxString *mImpBurnList;
-   wxArrayString mSpacecraftPropertyList;
-   wxArrayString mImpBurnPropertyList;
-      
-   wxString mLastCoordSysName;
+   int  mNumParameters;
+   bool mHasParameterChanged;
+   
    wxArrayString mObjectTypeList;
-   
-   wxStaticText *mCoordSysLabel;
-   wxStaticText *fileStaticText;
+   wxArrayString mReportWxStrings;
    
    wxTextCtrl *colWidthTextCtrl;
    wxTextCtrl *precisionTextCtrl;
-   wxTextCtrl *fileTextCtrl;
-   
-   wxButton *browseButton; 
-   
+   wxTextCtrl *mFileTextCtrl;   
    wxCheckBox *writeCheckBox;
    wxCheckBox *showHeaderCheckBox;
    wxCheckBox *leftJustifyCheckBox;
-   wxCheckBox *zeroFillCheckBox;
+   wxCheckBox *zeroFillCheckBox;   
+   wxComboBox *mSolverIterComboBox;   
+   wxListBox  *mSelectedListBox;
+   wxButton   *mBrowseButton; 
+   wxButton   *mViewButton;   
    
-   wxComboBox *mSolverIterComboBox;
-   wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mSpacecraftComboBox;
-   wxComboBox *mImpBurnComboBox;
-   wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox;
-   
-   wxListBox *mUserParamListBox;
-   wxListBox *mPropertyListBox;
-   wxListBox *mVarListBox;
-   wxListBox *mVarSelectedListBox;
-   
-   wxBoxSizer *mCoordSysSizer;
-   wxBoxSizer *mParamBoxSizer;
-   
-   void OnWriteCheckBoxChange(wxCommandEvent& event);
-   void OnBrowseButton(wxCommandEvent& event);
-   void OnTextChange(wxCommandEvent &event);
-   
-   void OnMoveUpVariable(wxCommandEvent& event);
-   void OnMoveDownVariable(wxCommandEvent& event);
-   
-   void OnAddVariable(wxCommandEvent& event);
-   void OnRemoveVariable(wxCommandEvent& event);
-   void OnClearVariable(wxCommandEvent& event);
-
-   void OnSelectUserParam(wxCommandEvent& event);
-   void OnSelectProperty(wxCommandEvent& event);
+   void OnCheckBoxChange(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
+   void OnTextChange(wxCommandEvent &event);   
    void OnComboBoxChange(wxCommandEvent& event);
-   void OnCreateVariable(wxCommandEvent& event);
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
-      RF_TEXT = 93000,
-      RF_WRITE_CHECKBOX,
-        
-      ID_TEXT,
+      ID_TEXT = 93000,
+      ID_CHECKBOX,
       ID_TEXT_CTRL,
-      ID_BROWSE_BUTTON,
-        
-      UP_VAR_BUTTON,
-      DOWN_VAR_BUTTON,
-      
-      ADD_VAR_BUTTON,
-      REMOVE_VAR_BUTTON,
-      CLEAR_VAR_BUTTON,
-      VAR_SEL_LISTBOX,
-      CREATE_VARIABLE,
+      ID_BUTTON,
       ID_COMBOBOX,
-      USER_PARAM_LISTBOX,
-      PROPERTY_LISTBOX,
-
-      CHECKBOX,
+      ID_LISTBOX,
    };
 
 private:
-   void ShowCoordSystem();
-   wxString GetParamName();
-   Parameter* GetParameter(const wxString &name);
-   wxComboBox* GetObjectComboBox();
 };
 #endif

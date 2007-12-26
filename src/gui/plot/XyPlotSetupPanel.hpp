@@ -37,12 +37,7 @@ public:
                                   const wxString &newName);
 protected:
    TsPlot *mXyPlot;
-   wxString mLastCoordSysName;
    
-   int  mNumSc;
-   int  mNumImpBurn;
-   int  mNumScProperty;
-   int  mNumImpBurnProperty;
    int  mNumXParams;
    int  mNumYParams;
    bool mXParamChanged;
@@ -50,55 +45,26 @@ protected:
    bool mIsColorChanged;
    bool mUseUserParam;
    
-   wxString *mSpacecraftList;
-   wxString *mImpBurnList;
-   wxArrayString mSpacecraftPropertyList;
-   wxArrayString mImpBurnPropertyList;
-
    std::string mSelYName;
    wxArrayString mObjectTypeList;
+   wxArrayString mXvarWxStrings;
+   wxArrayString mYvarWxStrings;
    std::map<std::string, RgbColor> mColorMap;
    
    wxStaticText *mCoordSysLabel;
-   
-   wxColour mLineColor;
-   
-   wxComboBox *mSolverIterComboBox;
-   wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mSpacecraftComboBox;
-   wxComboBox *mImpBurnComboBox;
-   wxComboBox *mCoordSysComboBox;
-   wxComboBox *mCentralBodyComboBox;
-   
-   wxListBox *mUserParamListBox;
-   wxListBox *mPropertyListBox;
+   wxColour mLineColor;   
+   wxComboBox *mSolverIterComboBox;   
    wxListBox *mXSelectedListBox;
-   wxListBox *mYSelectedListBox;
-   
-   wxButton *mAddXButton;
-   wxButton *mAddYButton;
-   wxButton *mLineColorButton;
-   
+   wxListBox *mYSelectedListBox;   
+   wxButton *mViewXButton;
+   wxButton *mViewYButton;
+   wxButton *mLineColorButton;   
    wxCheckBox *showPlotCheckBox;
    wxCheckBox *showGridCheckBox;
    
-   wxFlexGridSizer *mFlexGridSizer;
-   wxBoxSizer *mParamOptionBoxSizer;
-   wxBoxSizer *mCoordSysSizer;
-   wxBoxSizer *mParamBoxSizer;
-   
-   void OnAddX(wxCommandEvent& event);
-   void OnAddY(wxCommandEvent& event);
-   void OnRemoveX(wxCommandEvent& event);
-   void OnRemoveY(wxCommandEvent& event);
-   void OnClearY(wxCommandEvent& event);
-   void OnSelectUserParam(wxCommandEvent& event);
-   void OnSelectProperty(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
-   void OnSelectY(wxCommandEvent& event);
-   void OnCreateVariable(wxCommandEvent& event);
    void OnCheckBoxChange(wxCommandEvent& event);
-   void OnLineColorClick(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -110,28 +76,15 @@ protected:
    // IDs for the controls and the menu commands
    enum
    {     
-      TEXTCTRL = 92000,
-      ID_TEXT,
+      ID_TEXT = 92000,
+      ID_TEXTCTRL,
       ID_COMBOBOX,
-      USER_PARAM_LISTBOX,
-      PROPERTY_LISTBOX,
-      X_SEL_LISTBOX,
-      Y_SEL_LISTBOX,
-      ADD_X,
-      ADD_Y,
-      REMOVE_X,
-      REMOVE_Y,
-      CLEAR_Y,
-      CREATE_VARIABLE,
-      CHECKBOX,
-      LINE_COLOR_BUTTON,
+      ID_CHECKBOX,
+      ID_LISTBOX,
+      ID_BUTTON,
    };
    
 private:
    void ShowParameterOption(const wxString &scName, bool show = true);
-   void ShowCoordSystem();
-   wxString GetParamName();
-   Parameter* GetParameter(const wxString &name);
-   wxComboBox* GetObjectComboBox();
 };
 #endif
