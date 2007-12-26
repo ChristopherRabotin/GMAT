@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              WhilePanel
 //------------------------------------------------------------------------------
@@ -307,10 +307,10 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
 {
    int row = event.GetRow();
    int col = event.GetCol();
-      
+   
    if ( (row == COMMAND_COL) && (col == COMMAND_COL) )
       return;
-     
+   
    if (col == COMMAND_COL)
    {
       wxString oldStr = conditionGrid->GetCellValue(row, col);
@@ -327,28 +327,6 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
             conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
             EnableUpdate(true);
          }
-         
-//          wxString logicalString = dialog.GetStringSelection();
-         
-//          if (logicalString != conditionGrid->GetCellValue(row, col))
-//          {        
-//             if (mLogicalOpStrings.empty())
-//             {
-//                 mLogicalOpStrings.push_back(logicalString.c_str());                
-//             }
-//             else
-//             {
-//                 Integer size = mLogicalOpStrings.size();
-                
-//                 if (row < size)
-//                    mLogicalOpStrings[row] = logicalString.c_str();
-//                 else
-//                    mLogicalOpStrings.push_back(logicalString.c_str());        
-//             }                         
-//             conditionGrid->SetCellValue(row, col, logicalString);
-//             mNumberOfLogicalOps++;
-//             EnableUpdate(true);
-//          }
       }   
    }   
    else if (col == LHS_COL)
@@ -364,34 +342,6 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
             conditionGrid->SetCellValue(row, col, paramDlg.GetParamName());
             EnableUpdate(true);
          }
-         
-//          wxString newParamName = paramDlg.GetParamName();
-         
-//          if (newParamName != conditionGrid->GetCellValue(row, col))
-//          { 
-//             if (mLhsList.empty())
-//             {
-//                mLhsList.push_back(newParamName.c_str());
-//                mLhsIsParam.push_back(true);
-//             }    
-//             else
-//             {
-//               Integer size = mLhsList.size();
-              
-//               if (row < size)
-//               {
-//                  mLhsList[row] = newParamName.c_str();  
-//                  mLhsIsParam[row] = true;
-//               }    
-//               else
-//               {
-//                  mLhsList.push_back(newParamName.c_str());   
-//                  mLhsIsParam.push_back(true);
-//               }    
-//             }  
-//             conditionGrid->SetCellValue(row, col, newParamName);
-//             EnableUpdate(true);
-//          }    
       }
    }
    else if (col == COND_COL)
@@ -411,28 +361,6 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
             conditionGrid->SetCellValue(row, col, dialog.GetStringSelection());
             EnableUpdate(true);
          }
-         
-//          wxString equalityString = dialog.GetStringSelection();
-          
-//          if (equalityString != conditionGrid->GetCellValue(row, col))
-//          {
-//             if (mEqualityOpStrings.empty())
-//             { 
-//                mEqualityOpStrings.push_back(equalityString.c_str());
-//             }    
-//             else
-//             { 
-//                 Integer size = mEqualityOpStrings.size();
-                
-//                 if (row < size)
-//                    mEqualityOpStrings[row] = equalityString.c_str();
-//                 else
-//                    mEqualityOpStrings.push_back(equalityString.c_str());        
-//             }                         
-//             conditionGrid->SetCellValue(row, col, equalityString);
-//             mNumberOfConditions++;
-//             EnableUpdate(true); 
-//          }
       }  
    }
    else if (col == RHS_COL)
@@ -440,7 +368,7 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
       wxString oldStr = conditionGrid->GetCellValue(row, col);
       ParameterSelectDialog paramDlg(this, mObjectTypeList);
       paramDlg.ShowModal();
-
+      
       if (paramDlg.IsParamSelected())
       {
          if (oldStr != paramDlg.GetParamName())
@@ -448,113 +376,15 @@ void WhilePanel::OnCellRightClick(wxGridEvent& event)
             conditionGrid->SetCellValue(row, col, paramDlg.GetParamName());
             EnableUpdate(true);
          }
-         
-//          wxString newParamName = paramDlg.GetParamName();
-         
-//          if (newParamName != conditionGrid->GetCellValue(row, col))
-//          { 
-//             if (mRhsList.empty())
-//             {
-//                mRhsList.push_back(newParamName.c_str());
-//                mRhsIsParam.push_back(true);
-//             }    
-//             else
-//             {
-//                Integer size = mRhsList.size();
-              
-//                if (row < size)
-//                {
-//                   mRhsList[row] = newParamName.c_str(); 
-//                   mRhsIsParam[row] = true;
-//                }     
-//                else
-//                {
-//                   mRhsList.push_back(newParamName.c_str());
-//                   mRhsIsParam.push_back(true);
-//                }    
-//             } 
-//             conditionGrid->SetCellValue(row, col, newParamName);
-//             EnableUpdate(true);
-//          }    
       }
    }      
 }      
+
 
 //------------------------------------------------------------------------------
 // void OnCellValueChange(wxGridEvent& event)
 //------------------------------------------------------------------------------
 void WhilePanel::OnCellValueChange(wxGridEvent& event)
 {
-//    int row = event.GetRow();
-//    int col = event.GetCol();  
-   
-//    wxString temp = conditionGrid->GetCellValue(row, col);
-
-//    if (temp.IsEmpty())
-//       return;
-      
-//    if (col == COMMAND_COL)
-//    {
-//        Integer size = mLogicalOpStrings.size();
-//        Integer index = row - 1;         
-//        if (index < size)
-//           conditionGrid->SetCellValue(row, col, mLogicalOpStrings[index].c_str());
-//        else
-//           conditionGrid->SetCellValue(row, col, "");       
-//    }    
-//    else if (col == LHS_COL)
-//    {   
-//       if (mLhsList.empty())
-//       {
-//          mLhsList.push_back(temp.c_str());
-//          mLhsIsParam.push_back(false);
-//       }    
-//       else
-//       {
-//          Integer size = mLhsList.size();   
-//          if (row < size)
-//          {
-//             mLhsList[row] = temp.c_str();
-//             mLhsIsParam[row] = false; 
-//          }    
-//          else
-//          {
-//             mLhsList.push_back(temp.c_str());
-//             mLhsIsParam.push_back(false);
-//          }      
-//       }  
-//    }    
-//    else if (col == COND_COL)
-//    {
-//        Integer size = mEqualityOpStrings.size();
-                
-//        if (row < size)
-//           conditionGrid->SetCellValue(row, col, mEqualityOpStrings[row].c_str());
-//        else
-//           conditionGrid->SetCellValue(row, col, ""); 
-//    }    
-//    else if (col == RHS_COL)
-//    {
-//       if (mRhsList.empty())
-//       {
-//          mRhsList.push_back(temp.c_str());
-//          mRhsIsParam.push_back(false);
-//       }    
-//       else
-//       {
-//          Integer size = mRhsList.size();
-         
-//          if (row < size)
-//          {  
-//             mRhsList[row] = temp.c_str(); 
-//             mRhsIsParam[row] = false; 
-//          }    
-//          else
-//          {  
-//             mRhsList.push_back(temp.c_str()); 
-//             mRhsIsParam.push_back(false);
-//          }   
-//       } 
-//    }    
    EnableUpdate(true);
 } 
