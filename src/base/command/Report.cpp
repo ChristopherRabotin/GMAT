@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            Report
 //------------------------------------------------------------------------------
@@ -142,13 +142,15 @@ bool Report::TakeAction(const std::string &action, const std::string &actionData
       parmRows.clear();
       parmCols.clear();
       
-      if (reporter)
-      {
-         reporter->TakeAction("Clear");
-         return true;
-      }
+      // Why we need to clear? (loj: 2007.12.19 commented out)
+      // We want to preserve parameters to report for ReportFile
+      //if (reporter)
+      //{
+      //   reporter->TakeAction("Clear");
+      //   return true;
+      //}
    }
-
+   
    return false;
 }
 
@@ -253,7 +255,10 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       // Tell the ReportFile object that a command has requested its services
       obj->TakeAction("PassedToReport");
       reporter = (ReportFile*)obj;
-      reporter->TakeAction("Clear");
+      
+      // Why we need to clear? (loj: 2007.12.19 commented out)
+      // We want to preserve parameters to report for ReportFile
+      //reporter->TakeAction("Clear");
    }
    else if (type == Gmat::PARAMETER)
    {
