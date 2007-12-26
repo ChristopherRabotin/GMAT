@@ -455,61 +455,80 @@ void CallFunctionPanel::OnCellRightClick(wxGridEvent& event)
    unsigned int col = event.GetCol();
    
    #ifdef DEBUG_CALLFUNCTION_PANEL
-   MessageInterface::ShowMessage
-      ("CallFunctionPanel::OnCellRightClick row = %d, col = %d\n", row, col);
+   MessageInterface::ShowMessage("   row = %d, col = %d\n", row, col);
    #endif
    
    if (event.GetEventObject() == theInputGrid)
    {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+      ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true, true, true); 
+                                     true, true, true);
       theOutputGrid->DeselectRow(0);
       paramDlg.SetParamNameArray(mInputWxStrings);
       paramDlg.ShowModal();
       
-      mInputWxStrings = paramDlg.GetParamNameArray();
-      wxString cellValue = "";
-      wxString delimiter = ", ";
+      #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage
+         ("   Has new input selection made? %d\n", paramDlg.HasSelectionChanged());
+      #endif
       
-      if (mInputWxStrings.Count() > 0)
+      if (paramDlg.HasSelectionChanged())
       {
-         cellValue = cellValue + mInputWxStrings[0];
-         
-         for (unsigned int i=1; i<mInputWxStrings.Count(); i++)
-            cellValue = cellValue + delimiter + mInputWxStrings[i];
-         
-         theInputGrid->SetCellValue(row, col, cellValue);
          EnableUpdate(true);
+         mInputWxStrings = paramDlg.GetParamNameArray();
+         wxString cellValue = "";
+         wxString delimiter = ", ";
+         
+         if (mInputWxStrings.Count() > 0)
+         {
+            cellValue = cellValue + mInputWxStrings[0];
+         
+            for (unsigned int i=1; i<mInputWxStrings.Count(); i++)
+               cellValue = cellValue + delimiter + mInputWxStrings[i];
+         
+            theInputGrid->SetCellValue(row, col, cellValue);
+         }
+         else     // no selections
+         {
+            theInputGrid->SetCellValue(row, col, "");
+         }         
       }
-      else     // no selections
-         theInputGrid->SetCellValue(row, col, "");
    }
    else if (event.GetEventObject() == theOutputGrid)
    {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+      ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, false, true);
+                                     true, true, true);
       theInputGrid->DeselectRow(0);
       paramDlg.SetParamNameArray(mOutputWxStrings);
       paramDlg.ShowModal();
       
-      mOutputWxStrings = paramDlg.GetParamNameArray();
-      wxString cellValue = "";
-      wxString delimiter = ", ";
+      #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage
+         ("   Has new output selection made? %d\n", paramDlg.HasSelectionChanged());
+      #endif
       
-      if (mOutputWxStrings.Count() > 0)
+      if (paramDlg.HasSelectionChanged())
       {
-         cellValue = cellValue + mOutputWxStrings[0];
-
-         for (unsigned int i=1; i<mOutputWxStrings.Count(); i++)
-            cellValue = cellValue + delimiter + mOutputWxStrings[i];
-         
-         theOutputGrid->SetCellValue(row, col, cellValue);
          EnableUpdate(true);
+         mOutputWxStrings = paramDlg.GetParamNameArray();
+         wxString cellValue = "";
+         wxString delimiter = ", ";
+         
+         if (mOutputWxStrings.Count() > 0)
+         {
+            cellValue = cellValue + mOutputWxStrings[0];
+            
+            for (unsigned int i=1; i<mOutputWxStrings.Count(); i++)
+               cellValue = cellValue + delimiter + mOutputWxStrings[i];
+            
+            theOutputGrid->SetCellValue(row, col, cellValue);
+         }
+         else     // no selections
+         {
+            theOutputGrid->SetCellValue(row, col, "");
+         }         
       }
-      else     // no selections
-         theOutputGrid->SetCellValue(row, col, "");
    }
 }
 
@@ -532,61 +551,80 @@ void CallFunctionPanel::OnComboChange(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void CallFunctionPanel::OnButtonClick(wxCommandEvent& event)
 {
+   #ifdef DEBUG_CALLFUNCTION_PANEL
+   MessageInterface::ShowMessage
+      ("CallFunctionPanel::OnButtonClick() entered\n");
+   #endif
+   
    wxString value = "";
    wxString delimiter = ", ";
    
    if (event.GetEventObject() == theInputViewButton)
    {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+      ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true, true, true);
+                                     true, true, true);
       
       paramDlg.SetParamNameArray(mInputWxStrings);
       paramDlg.ShowModal();
       
-      mInputWxStrings = paramDlg.GetParamNameArray();
+      #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage
+         ("   Has new input selection made? %d\n", paramDlg.HasSelectionChanged());
+      #endif
       
-      if (mInputWxStrings.Count() > 0)
+      if (paramDlg.HasSelectionChanged())
       {
-         value = value + mInputWxStrings[0];
-         
-         for (unsigned int i=1; i<mInputWxStrings.Count(); i++)
-            value = value + delimiter + mInputWxStrings[i];
-         
-         theInputTextCtrl->SetValue(value);
          EnableUpdate(true);
-      }
-      else     // no selections
-      {
-         theInputTextCtrl->SetValue(value);
-         EnableUpdate(true);
+         mInputWxStrings = paramDlg.GetParamNameArray();
+         
+         if (mInputWxStrings.Count() > 0)
+         {
+            value = value + mInputWxStrings[0];
+         
+            for (unsigned int i=1; i<mInputWxStrings.Count(); i++)
+               value = value + delimiter + mInputWxStrings[i];
+         
+            theInputTextCtrl->SetValue(value);
+         }
+         else     // no selections
+         {
+            theInputTextCtrl->SetValue(value);
+         }
       }
    }
    else if (event.GetEventObject() == theOutputViewButton)
    {
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, "Spacecraft",
+      ParameterSelectDialog paramDlg(this, mObjectTypeList,
                                      GuiItemManager::SHOW_REPORTABLE,
-                                     true, true, true, true, true);
+                                     true, true, true);
       
       paramDlg.SetParamNameArray(mOutputWxStrings);
       paramDlg.ShowModal();
       
-      mOutputWxStrings = paramDlg.GetParamNameArray();
+      #ifdef DEBUG_CALLFUNCTION_PANEL
+      MessageInterface::ShowMessage
+         ("   Has new output selection made? %d\n", paramDlg.HasSelectionChanged());
+      #endif
       
-      if (mOutputWxStrings.Count() > 0)
+      if (paramDlg.HasSelectionChanged())
       {
-         value = value + mOutputWxStrings[0];
-         
-         for (unsigned int i=1; i<mOutputWxStrings.Count(); i++)
-            value = value + delimiter + mOutputWxStrings[i];
-         
-         theOutputTextCtrl->SetValue(value);
          EnableUpdate(true);
-      }
-      else     // no selections
-      {
-         theOutputTextCtrl->SetValue(value);
-         EnableUpdate(true);
+         mOutputWxStrings = paramDlg.GetParamNameArray();
+         
+         if (mOutputWxStrings.Count() > 0)
+         {
+            value = value + mOutputWxStrings[0];
+            
+            for (unsigned int i=1; i<mOutputWxStrings.Count(); i++)
+               value = value + delimiter + mOutputWxStrings[i];
+            
+            theOutputTextCtrl->SetValue(value);
+         }
+         else     // no selections
+         {
+            theOutputTextCtrl->SetValue(value);
+         }
       }
    }
 }
