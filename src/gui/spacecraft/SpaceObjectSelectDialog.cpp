@@ -39,7 +39,7 @@ SpaceObjectSelectDialog::SpaceObjectSelectDialog(wxWindow *parent,
    : GmatDialog(parent, -1, wxString(_T("SpaceObjectSelectDialog")))
 {
    mSoNameList.Clear();
-   mIsSelectionChanged = false;
+   mHasSelectionChanged = false;
    mSoSelList = soSelList;
    mSoExcList = soExcList;
    
@@ -75,11 +75,11 @@ wxArrayString& SpaceObjectSelectDialog::GetSpaceObjectNames()
 
 
 //------------------------------------------------------------------------------
-// bool IsSelectionChanged()
+// bool HasSelectionChanged()
 //------------------------------------------------------------------------------
-bool SpaceObjectSelectDialog::IsSelectionChanged()
+bool SpaceObjectSelectDialog::HasSelectionChanged()
 {
-   return mIsSelectionChanged;
+   return mHasSelectionChanged;
 }
 
 
@@ -297,7 +297,7 @@ void SpaceObjectSelectDialog::SaveData()
       #endif
    }
    
-   mIsSelectionChanged = true;
+   mHasSelectionChanged = true;
 }
 
 
@@ -306,6 +306,6 @@ void SpaceObjectSelectDialog::SaveData()
 //------------------------------------------------------------------------------
 void SpaceObjectSelectDialog::ResetData()
 {
-   mIsSelectionChanged = false;
+   mHasSelectionChanged = false;
 }
 

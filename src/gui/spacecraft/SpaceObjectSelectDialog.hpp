@@ -29,13 +29,13 @@ public:
    ~SpaceObjectSelectDialog();
    
    wxArrayString& GetSpaceObjectNames();
-   bool IsSelectionChanged();
+   bool HasSelectionChanged();
    
 private:
    wxArrayString mSoNameList;
    wxArrayString mSoExcList;
    wxArrayString mSoSelList;
-   bool mIsSelectionChanged;
+   bool mHasSelectionChanged;
    
    wxButton *addSpaceObjectButton;
    wxButton *removeSpaceObjectButton;
