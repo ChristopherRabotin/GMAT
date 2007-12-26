@@ -2762,8 +2762,8 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
                     emptyList, wxLB_SINGLE);
    
    //----- selectedSizer
-   wxStaticBoxSizer *selectedSizer =
-      new wxStaticBoxSizer(wxVERTICAL, parent, "");
+   GmatStaticBoxSizer *selectedSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, parent, "");
    
    selectedSizer->Add(selectedLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
    selectedSizer->Add(*selectedListBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
