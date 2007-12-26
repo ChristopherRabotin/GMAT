@@ -17,6 +17,7 @@
 //------------------------------------------------------------------------------
 
 #include "XyPlotSetupPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "PlotTypes.hpp"                // for MAX_XY_CURVE
@@ -344,7 +345,8 @@ void XyPlotSetupPanel::Create()
    option2Sizer->Add(titleColor, 0, wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(mLineColorButton, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   wxStaticBoxSizer *optionSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Options");
+   GmatStaticBoxSizer *optionSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
    optionSizer->Add(option2Sizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    
@@ -359,8 +361,8 @@ void XyPlotSetupPanel::Create()
    mViewXButton = new wxButton(this, ID_BUTTON, "View X",
                                wxDefaultPosition, wxDefaultSize, 0);
    
-   wxStaticBoxSizer *xSelectedBoxSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Selected X");
+   GmatStaticBoxSizer *xSelectedBoxSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Selected X");
    
    xSelectedBoxSizer->Add(mXSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    xSelectedBoxSizer->Add(mViewXButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -375,8 +377,8 @@ void XyPlotSetupPanel::Create()
    mViewYButton = new wxButton(this, ID_BUTTON, "View Y",
                                wxDefaultPosition, wxDefaultSize, 0);
    
-   wxStaticBoxSizer *ySelectedBoxSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Selected Y");
+   GmatStaticBoxSizer *ySelectedBoxSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Selected Y");
    
    ySelectedBoxSizer->Add(mYSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    ySelectedBoxSizer->Add(mViewYButton, 0, wxALIGN_CENTRE|wxALL, bsize);

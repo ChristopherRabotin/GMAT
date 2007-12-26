@@ -26,9 +26,9 @@
 #include <fstream>
 
 
-#define DEBUG_REPORTFILE_PANEL 1
-#define DEBUG_REPORTFILE_PANEL_LOAD 1
-#define DEBUG_REPORTFILE_PANEL_SAVE 1
+//#define DEBUG_REPORTFILE_PANEL 1
+//#define DEBUG_REPORTFILE_PANEL_LOAD 1
+//#define DEBUG_REPORTFILE_PANEL_SAVE 1
 
 //------------------------------
 // event tables for wxWindows
@@ -249,7 +249,8 @@ void ReportFileSetupPanel::Create()
    option2Sizer->Add(precisionText, 0, wxALIGN_LEFT|wxALL, bsize);
    option2Sizer->Add(precisionTextCtrl, 0, wxGROW|wxALIGN_LEFT|wxALL, bsize);
    
-   wxStaticBoxSizer *optionSizer = new wxStaticBoxSizer(wxVERTICAL, this, "Options");
+   GmatStaticBoxSizer *optionSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
    optionSizer->Add(option2Sizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //-------------------------------------------------------
