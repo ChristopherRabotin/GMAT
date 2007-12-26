@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ParameterSelectDialog
 //------------------------------------------------------------------------------
@@ -26,22 +26,22 @@ public:
    
    ParameterSelectDialog(wxWindow *parent,
                          const wxArrayString &objectTypeList,
+                         int  showOption = GuiItemManager::SHOW_PLOTTABLE,
+                         bool allowMultiSelect = false,
+                         bool allowString = false,
+                         bool allowWholeObject = false,
+                         bool allowSysParam = true,
+                         bool allowVariable = true,
+                         bool allowArray = true,
                          const wxString &objectType = "Spacecraft",
-                         int showOption = GuiItemManager::SHOW_PLOTTABLE,
-                         bool showVariable = true,
-                         bool showArray = false,
-                         bool showSysParams = true,
-                         bool canSelectMultiVars = false,
-                         bool canSelectWholeObject = false,
                          bool createParam = true);
    ~ParameterSelectDialog();
-   
-   bool IsParamSelected()
-      { return mIsParamSelected; }
-   wxString GetParamName()
-      { return mParamName; }
-   wxArrayString& GetParamNameArray()
-      { return mParamNameArray; }
+
+   bool HasSelectionChanged();
+   bool IsParamSelected();
+   wxString GetParamName();
+   void SetObjectType(const wxString &objType);
+   wxArrayString& GetParamNameArray();
    void SetParamNameArray(const wxArrayString &paramNames);
    
 protected:
@@ -51,88 +51,104 @@ protected:
    wxString mObjectType;
    wxString mLastCoordSysName;
    wxArrayString mParamNameArray;
-
+   
+   bool mHasSelectionChanged;
    bool mIsParamSelected;
+   bool mIsAddingMode;
    bool mCanClose;
    bool mUseUserParam;
-   bool mShowVariable;
-   bool mShowArray;
-   bool mShowSysVars;
-   bool mCanSelectMultiVars;
-   bool mCanSelectWholeObject;
+   bool mAllowSysParam;
+   bool mAllowVariable;
+   bool mAllowArray;
+   bool mAllowString;
+   bool mAllowMultiSelect;
+   bool mAllowWholeObject;
    bool mCreateParam;
-   bool mShowMultObjTypes;
    
-   int  mNumSc;
-   int  mNumImpBurn;
-   int  mNumScProperty;
-   int  mNumImpBurnProperty;
    int  mShowOption;
-   int  mLastUserParamSelection;
-   int  mLastPropertySelection;
-
-   wxString *mSpacecraftList;
-   wxString *mImpBurnList;
-   wxArrayString mSpacecraftPropertyList;
-   wxArrayString mImpBurnPropertyList;
+   int  mNumRow;
+   int  mNumCol;
+   
+   wxArrayInt mLastObjectSelections;
+   wxArrayInt mLastPropertySelections;
+   
+   wxStaticText *mRowStaticText;
+   wxStaticText *mColStaticText;
+   
+   wxTextCtrl *mRowTextCtrl;
+   wxTextCtrl *mColTextCtrl;
    
    wxStaticText *mCoordSysLabel;
    
-   wxButton *mAddParamButton;
-   wxButton *mRemoveParamButton;
-   wxButton *mRemoveAllParamButton;
-   wxButton *mCreateVarButton;
+   wxButton *mUpButton;
+   wxButton *mDownButton;
+   wxButton *mAddButton;
+   wxButton *mRemoveButton;
+   wxButton *mAddAllButton;
+   wxButton *mRemoveAllButton;
    
    wxComboBox *mObjectTypeComboBox;
-   wxComboBox *mSpacecraftComboBox;
-   wxComboBox *mImpBurnComboBox;
    wxComboBox *mCoordSysComboBox;
    wxComboBox *mCentralBodyComboBox;
    
    wxListBox *mUserParamListBox;
+   wxListBox *mObjectListBox;
    wxListBox *mPropertyListBox;
-   wxListBox *mVarSelectedListBox;
+   wxListBox *mSelectedListBox;
+   
+   wxCheckBox *mEntireObjectCheckBox;
    
    wxBoxSizer *mVarBoxSizer;
    wxBoxSizer *mCoordSysSizer;
-   wxBoxSizer *mParamBoxSizer;
-
+   wxSizer *mParameterSizer;
+   
    // abstract methods from GmatDialog
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    virtual void ResetData();
-
+   
+   // virtual methods from GmatDialog
+   virtual void OnCancel(wxCommandEvent &event);
+   
    // event handling
-   void OnButtonClick(wxCommandEvent& event);   
-   void OnCreateVariable(wxCommandEvent& event);
-   void OnSelectUserParam(wxCommandEvent& event);
-   void OnSelectProperty(wxCommandEvent& event);
-   void OnDoubleClick(wxCommandEvent& event);
+   void OnButtonClick(wxCommandEvent& event);
+   void OnListBoxSelect(wxCommandEvent& event);
+   void OnListBoxDoubleClick(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
+   void OnCheckBoxChange(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
-        
+   
    // IDs for the controls and the menu commands
    enum
-   {     
-      ID_TEXT = 9300,
-      ID_COMBOBOX,
-      ID_BUTTON,
-      ADD_VAR_BUTTON,
-      CREATE_VARIABLE,
-      VAR_SEL_LISTBOX,
-      USER_PARAM_LISTBOX,
-      PROPERTY_LISTBOX,
-
+   {
+      TEXT_ID = 9300,
+      TEXTCTRL_ID,
+      COMBOBOX_ID,
+      BUTTON_ID,
+      LISTBOX_ID,
+      CHECKBOX_ID,
    };
    
 private:
+   
+   bool AddWholeObject();
+   bool AddParameter();
+   void AddParameter(const wxString &param);
+   bool AddMultipleSelections();
+   void AddAll();
+   void RemoveParameter();
+   void ShowArrayInfo(bool show);
    void ShowCoordSystem();
-   void HighlightObject(wxCommandEvent& event, bool highlight);
-   wxString FormParamName();
+   void ClearProperties();
+   void DeselectObjects(wxArrayInt &newSelects, wxArrayInt &oldSelects);
+   int  GetLastPropertySelection();
+   
+   wxString GetObjectSelection();
+   wxString GetPropertySelection();
+   wxString FormParameterName();
    Parameter* GetParameter(const wxString &name);
-   wxComboBox* GetObjectComboBox();
 };
 
 #endif
