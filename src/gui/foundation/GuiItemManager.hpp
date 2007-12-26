@@ -121,8 +121,8 @@ public:
    int GetNumPlottableParameter() { return theNumPlottableParam; }
    int GetNumSystemParameter() { return theNumSystemParam; }
    int GetNumUserVariable() { return theNumUserVariable; }
-   int GetNumUserString() { return theNumUserString; }
    int GetNumUserArray() { return theNumUserArray; }
+   int GetNumUserString() { return theNumUserString; }
    int GetNumUserParameter() { return theNumUserParam; }
    int GetNumSolver() { return theNumSolver; }
    int GetNumBoundarySolver() { return theNumBoundarySolver; }
@@ -131,6 +131,7 @@ public:
    wxString* GetPlottableParameterList() { return thePlottableParamList; }
    wxString* GetSystemParameterList() { return theSystemParamList; }
    wxString* GetUserVariableList() { return theUserVariableList; }
+   wxString* GetUserArrayList() { return theUserArrayList; }
    wxString* GetUserStringList() { return theUserStringList; }
    wxString* GetUserParameterList() { return theUserParamList; }
    wxString* GetCoordSysList() { return theCoordSysList; }
@@ -141,13 +142,12 @@ public:
    wxString* GetSolverList() { return theSolverList; }
    wxString* GetOptimizerList() { return theOptimizerList; }
    
-   //wxArrayString GetSettablePropertyList(const wxString &objType);
    wxArrayString GetPropertyList(const wxString &objType,
                                  int showOption = SHOW_PLOTTABLE);
    
    int GetNumProperty(const wxString &objType);
    wxString* GetPropertyList(const wxString &objType);
-
+   
    //-----------------------------------------------------------------
    //Note: To enables automatic updates when new object is added to
    //      resrouce, the following function automatically registers
@@ -235,20 +235,27 @@ public:
                                     bool includeFormation = true);
    
    wxListBox* GetSpacecraftListBox(wxWindow *parent, wxWindowID id,
-                                   const wxSize &size,
-                                   wxArrayString *excList = NULL);
+                                   const wxSize &size, 
+                                   wxArrayString *excList = NULL,
+                                   bool multiSelect = false);
    
    wxListBox* GetFormationListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
                                   wxArrayString &sosToExclude);
    
+   wxListBox* GetImpBurnListBox(wxWindow *parent, wxWindowID id,
+                                const wxSize &size,
+                                wxArrayString *excList = NULL,
+                                bool multiSelect = false);
+   
    wxListBox* GetPropertyListBox(wxWindow *parent, wxWindowID id,
                                  const wxSize &size,
                                  const wxString &objType,
-                                 int showOption = SHOW_PLOTTABLE);
+                                 int showOption = SHOW_PLOTTABLE,
+                                 bool multiSelect = false);
    
    wxListBox* GetPlottableParameterListBox(wxWindow *parent, wxWindowID id,
-                                           const wxSize &size,
+                                           const wxSize &size, 
                                            const wxString &nameToExclude = "");
    
    wxListBox* GetAllUserParameterListBox(wxWindow *parent, wxWindowID id,
@@ -256,15 +263,18 @@ public:
    
    wxListBox* GetUserVariableListBox(wxWindow *parent, wxWindowID id,
                                      const wxSize &size,
-                                     const wxString &nameToExclude = "");
+                                     const wxString &nameToExclude = "",
+                                      bool multiSelect = false);
    
    wxListBox* GetUserStringListBox(wxWindow *parent, wxWindowID id,
                                    const wxSize &size,
-                                   const wxString &nameToExclude = "");
+                                   const wxString &nameToExclude = "",
+                                   bool multiSelect = false);
    
    wxListBox* GetUserArrayListBox(wxWindow *parent, wxWindowID id,
                                   const wxSize &size,
-                                  const wxString &nameToExclude = "");
+                                  const wxString &nameToExclude = "",
+                                  bool multiSelect = false);
    
    wxListBox* GetUserParameterListBox(wxWindow *parent, wxWindowID id,
                                       const wxSize &size);
@@ -279,22 +289,48 @@ public:
                                  const wxSize &size,
                                  wxArrayString *excList);
    
-   wxBoxSizer*
-   CreateParameterSizer(wxWindow *parent,
-                        wxListBox **userParamListBox, wxWindowID userParamListBoxId,
-                        wxButton **createVarButton, wxWindowID createVarButtonId,
-                        wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
-                        wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
-                        wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
-                        wxListBox **propertyListBox, wxWindowID propertyListBoxId,
-                        wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
-                        wxComboBox **originComboBox, wxWindowID originComboBoxId,
-                        wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
-                        const wxArrayString &objectTypeList,
-                        int showOption = SHOW_PLOTTABLE, bool showVariable = true,
-                        bool showArray = false, const wxString &onwer = "Spacecraft");
+   wxBoxSizer* CreateParameterSizer
+         (wxWindow *parent,
+          wxListBox **userParamListBox, wxWindowID userParamListBoxId,
+          wxButton **createVarButton, wxWindowID createVarButtonId,
+          wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
+          wxComboBox **spacecraftComboBox, wxWindowID spacecraftComboBoxId,
+          wxComboBox **impBurnComboBox, wxWindowID impBurnComboBoxId,
+          wxListBox **propertyListBox, wxWindowID propertyListBoxId,
+          wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
+          wxComboBox **originComboBox, wxWindowID originComboBoxId,
+          wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
+          const wxArrayString &objectTypeList,
+          int showOption = SHOW_PLOTTABLE, bool showVariable = true,
+          bool showArray = false, const wxString &onwer = "Spacecraft");
    
-   wxBoxSizer*
+   wxSizer* Create3ColParameterSizer
+         (wxWindow *parent,
+          wxCheckBox **entireObjCheckBox, wxWindowID entireObjCheckBoxId,
+          wxComboBox **objectTypeComboBox, wxWindowID objectTypeComboBoxId,
+          wxListBox **objectListBox, wxWindowID objectListBoxId,
+          wxStaticText **rowStaticText, wxWindowID rowStaticTextId,
+          wxStaticText **colStaticText, wxWindowID colStaticTextId,
+          wxTextCtrl **rowTextCtrl, wxWindowID rowTextCtrlId,
+          wxTextCtrl **colTextCtrl, wxWindowID colTextCtrlId,
+          wxListBox **propertyListBox, wxWindowID propertyListBoxId,
+          wxComboBox **coordSysComboBox, wxWindowID coordSysComboBoxId,
+          wxComboBox **originComboBox, wxWindowID originComboBoxId,
+          wxStaticText **coordSysLabel, wxBoxSizer **coordSysBoxSizer,
+          wxButton **upButton, wxWindowID upButtonId,
+          wxButton **downButton, wxWindowID downButtonId,
+          wxButton **addButton, wxWindowID addButtonId,
+          wxButton **removeButton, wxWindowID removeButtonId,
+          wxButton **addAllButton, wxWindowID addAllButtonId,
+          wxButton **removeAllButton, wxWindowID removeAllButtonId,
+          wxListBox **selectedListBox, wxWindowID selectedListBoxId,
+          const wxArrayString &objectTypeList, int showOption = SHOW_PLOTTABLE,
+          bool allowMultiSelect = false, bool showString = false,
+          bool allowWholeObject = false, bool showSysParam = true,
+          bool showVariable = false, bool showArray = false,
+          const wxString &onwer = "Spacecraft");
+   
+   wxSizer*
    CreateUserVarSizer(wxWindow *parent,
                       wxListBox **userParamListBox, wxWindowID userParamListBoxId,
                       wxButton **createVarButton, wxWindowID createVarButtonId,
@@ -336,6 +372,7 @@ private:
    
    std::vector<wxListBox*> mSpaceObjectLBList;
    std::vector<wxListBox*> mSpacecraftLBList;
+   std::vector<wxListBox*> mImpBurnLBList;
    std::vector<wxCheckListBox*> mSubscriberCLBList;
    std::vector<wxCheckListBox*> mSpacecraftCLBList;
    std::vector<wxCheckListBox*> mAllObjectCLBList;
@@ -358,6 +395,7 @@ private:
    
    std::vector<wxArrayString*> mSpaceObjectExcList;
    std::vector<wxArrayString*> mSpacecraftExcList;
+   std::vector<wxArrayString*> mImpBurnExcList;
    std::vector<wxArrayString*> mAllObjectExcList;
    std::vector<wxArrayString*> mFuelTankExcList;
    std::vector<wxArrayString*> mThrusterExcList;
