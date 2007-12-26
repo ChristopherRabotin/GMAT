@@ -16,6 +16,7 @@
  */
 //------------------------------------------------------------------------------
 #include "ReportPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "GuiInterpreter.hpp"
 #include "GmatAppData.hpp"
 #include "ParameterSelectDialog.hpp"
@@ -134,8 +135,8 @@ void ReportPanel::Create()
    mViewButton = new wxButton( this, ID_BUTTON, wxT("View"), 
                                 wxDefaultPosition, wxDefaultSize, 0 );
    
-   wxStaticBoxSizer *selectedSizer =
-      new wxStaticBoxSizer(wxVERTICAL, this, "Parameter List");
+   GmatStaticBoxSizer *selectedSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, "Parameter List");
    
    selectedSizer->Add(mSelectedListBox, 0, wxGROW|wxALIGN_CENTRE|wxALL, bsize);
    selectedSizer->Add(mViewButton, 0, wxALIGN_CENTRE|wxALL, bsize);
