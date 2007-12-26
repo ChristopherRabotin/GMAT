@@ -507,9 +507,10 @@ void VaryPanel::OnButton(wxCommandEvent& event)
       if (theGuiManager->GetNumImpulsiveBurn() == 0)
           objType = "Spacecraft";
       
-      ParameterSelectDialog paramDlg(this, mObjectTypeList, objType,
-                                     GuiItemManager::SHOW_SETTABLE,
-                                     false, false, true, false, false, false);
+      ParameterSelectDialog paramDlg(this, mObjectTypeList,
+                                     GuiItemManager::SHOW_SETTABLE);
+      
+      paramDlg.SetObjectType(objType);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
