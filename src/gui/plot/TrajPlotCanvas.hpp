@@ -467,6 +467,10 @@ private:
    // for loading image
    bool LoadImage(char *fileName);
    
+   // Linux specific fix
+   #ifdef __WXGTK__
+      bool hasBeenPainted;
+   #endif
 };
 
 #endif

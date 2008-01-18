@@ -182,6 +182,11 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    mGlInitialized = false;
    mPlotName = name;
    mParent = parent;
+
+   // Linux specific
+   #ifdef __WXGTK__
+      hasBeenPainted = false;
+   #endif
    
    #if DEBUG_TRAJCANVAS_INIT
    MessageInterface::ShowMessage
@@ -1844,7 +1849,6 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
    }
    
    return numDataPoints;
-    
 } //end ReadTextTrajectory()
 
 
@@ -1891,6 +1895,11 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
       glPolygonMode(GL_BACK, GL_FILL);
    }
    
+   // Linux specific
+   #ifdef __WXGTK__
+      hasBeenPainted = true;
+   #endif
+
    DrawPlot();
 }
 
@@ -1904,6 +1913,12 @@ void TrajPlotCanvas::OnPaint(wxPaintEvent& event)
 //------------------------------------------------------------------------------
 void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
 {
+   // Linux specific handler for sizing
+   #ifdef __WXGTK__
+      if (hasBeenPainted == false)
+         return;
+   #endif
+   
    // this is also necessary to update the context on some platforms
    wxGLCanvas::OnSize(event);
    
@@ -1926,7 +1941,6 @@ void TrajPlotCanvas::OnTrajSize(wxSizeEvent& event)
       #endif
       
       glViewport(0, 0, (GLint) nWidth, (GLint) nHeight);
-      
    }
 }
 
