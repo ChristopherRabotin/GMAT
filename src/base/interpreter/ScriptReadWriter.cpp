@@ -28,8 +28,8 @@ ScriptReadWriter* ScriptReadWriter::instance = NULL;
 const std::string ScriptReadWriter::sectionDelimiter = "%--------";
 const std::string ScriptReadWriter::ellipsis = "...";
 
-//#define DEBUG_SCRIPT_READ 1
-//#define DEBUG_FIRST_BLOCK 1
+//#define DEBUG_SCRIPT_READ
+//#define DEBUG_FIRST_BLOCK
 
 //---------------------------------
 // public
@@ -102,18 +102,23 @@ Integer ScriptReadWriter::GetLineNumber()
 
 
 //------------------------------------------------------------------------------
-// void ReadFirstBlock(std::string &header, std::string &firstBlock)
+// void ReadFirstBlock(std::string &header, std::string &firstBlock,
+//                     bool skipHeader = false)
 //------------------------------------------------------------------------------
 /*
  * Reads header and first preface comment and script from the script file.
  * The header block ends when first blank line is read.
  * The first block ends when first non-blank and non-comment line is read.
+ * When skipHeader is true, it will read as first block. Usually skipping header
+ * will be needed when interpreting ScriptEvent from the GUI.
  *
- * @param  header  header comment lines read
- * @param  firstBlock  first preface comment and script read
+ * @param  header  Header comment lines read
+ * @param  firstBlock  First preface comment and script read
+ * @param  skipHeader Flag indicating first comment block is not a header(false)
  */
 //------------------------------------------------------------------------------
-void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlock)
+void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlock,
+                                      bool skipHeader)
 {
    std::string newLine = "";
    header = "";
@@ -126,7 +131,7 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    // get 1 line of text
    newLine = CrossPlatformGetLine();
    
-   #if DEBUG_FIRST_BLOCK
+   #ifdef DEBUG_FIRST_BLOCK
    MessageInterface::ShowMessage
       ("ReadFirstBlock() firstLine=<<<%s>>>\n", newLine.c_str());
    #endif
@@ -134,7 +139,7 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    if (reachedEndOfFile && IsBlank(newLine))
       return;
    
-   // if line is not blank and is not comment line, return this line
+   //if line is not blank and is not comment line, return this line
    if (!IsBlank(newLine) && (!IsComment(newLine)))
    {
       firstBlock = newLine;
@@ -156,7 +161,7 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
       {
          newLine = CrossPlatformGetLine();
          
-         #if DEBUG_FIRST_BLOCK
+         #ifdef DEBUG_FIRST_BLOCK
          MessageInterface::ShowMessage
             ("   header newLine=<<<%s>>>\n", newLine.c_str());
          #endif
@@ -165,6 +170,20 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
          if (!IsBlank(newLine) && (!IsComment(newLine)))
          {
             firstBlock = newLine + "\n";
+            
+            if (skipHeader)
+            {
+               firstBlock = header + firstBlock;
+               header = "";
+            }
+            
+            #ifdef DEBUG_FIRST_BLOCK
+            MessageInterface::ShowMessage
+               ("ReadFirstBlock() non-blank and non-comment found\n"
+                "header=<<<%s>>>\nfirstBlock=<<<%s>>>\n", header.c_str(),
+                firstBlock.c_str());
+            #endif
+            
             return;
          }
          
@@ -190,7 +209,7 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
    {
       newLine = CrossPlatformGetLine();
       
-      #if DEBUG_FIRST_BLOCK
+      #ifdef DEBUG_FIRST_BLOCK
       MessageInterface::ShowMessage("   1stblk newLine=<<<%s>>>\n", newLine.c_str());
       #endif
       
@@ -204,9 +223,15 @@ void ScriptReadWriter::ReadFirstBlock(std::string &header, std::string &firstBlo
       firstBlock = firstBlock + newLine + "\n";
    }
    
-   #if DEBUG_FIRST_BLOCK
+   if (skipHeader)
+   {
+      firstBlock = header + firstBlock;
+      header = "";
+   }
+   
+   #ifdef DEBUG_FIRST_BLOCK
    MessageInterface::ShowMessage
-      ("ReadFirstBlock() header=<<<%s>>>\nfirstBlock=<<<%s>>>", header.c_str(),
+      ("ReadFirstBlock() header=<<<%s>>>\nfirstBlock=<<<%s>>>\n", header.c_str(),
        firstBlock.c_str());
    #endif
 }
@@ -234,7 +259,7 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    if (reachedEndOfFile && IsBlank(oneLine))
       return "\0";
    
-   #if DEBUG_SCRIPT_READ
+   #ifdef DEBUG_SCRIPT_READ
    MessageInterface::ShowMessage
       ("ReadLogicalBlock() oneLine=\n<<<%s>>>\n", oneLine.c_str());
    #endif
@@ -245,7 +270,7 @@ std::string ScriptReadWriter::ReadLogicalBlock()
       block = block + oneLine + "\n";
       oneLine = CrossPlatformGetLine();
       
-      #if DEBUG_SCRIPT_READ
+      #ifdef DEBUG_SCRIPT_READ
       MessageInterface::ShowMessage
          ("ReadLogicalBlock() oneLine=\n<<<%s>>>\n", oneLine.c_str());
       #endif
@@ -253,7 +278,7 @@ std::string ScriptReadWriter::ReadLogicalBlock()
    
    block = block + oneLine + "\n";
    
-   #if DEBUG_SCRIPT_READ
+   #ifdef DEBUG_SCRIPT_READ
    MessageInterface::ShowMessage
       ("ReadLogicalBlock() block=\n<<<%s>>>\n", block.c_str());
    #endif

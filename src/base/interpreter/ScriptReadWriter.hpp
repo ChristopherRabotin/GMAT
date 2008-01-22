@@ -39,7 +39,8 @@ public:
    Integer GetLineNumber();
    std::string GetCurrentLine() { return currentLine; }
    
-   void ReadFirstBlock(std::string &header, std::string &firstBlock);
+   void ReadFirstBlock(std::string &header, std::string &firstBlock,
+                       bool skipHeader = false);
    std::string ReadLogicalBlock();
    bool WriteText(const std::string &textToWrite);
    
