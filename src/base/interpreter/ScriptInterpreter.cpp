@@ -29,6 +29,7 @@
 //#define DEBUG_SCRIPT_WRITING 1
 //#define DEBUG_DELAYED_BLOCK 1
 //#define DEBUG_PARSE 1
+//#define DEBUG_PARSE_FOOTER 1
 //#define DEBUG_SET_COMMENTS 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
@@ -48,6 +49,7 @@ ScriptInterpreter* ScriptInterpreter::Instance()
       instance = new ScriptInterpreter();
    return instance;
 }
+
 
 //------------------------------------------------------------------------------
 // ScriptInterpreter()
@@ -76,6 +78,7 @@ ScriptInterpreter::ScriptInterpreter() : Interpreter()
    
    Initialize();
 }
+
 
 //------------------------------------------------------------------------------
 // ~ScriptInterpreter()
@@ -132,16 +135,17 @@ bool ScriptInterpreter::Interpret()
 
 
 //------------------------------------------------------------------------------
-// bool Interpret(GmatCommand *inCmd)
+// bool Interpret(GmatCommand *inCmd, bool skipHeader = false)
 //------------------------------------------------------------------------------
 /**
  * Parses and creates commands from input stream and append to input command.
  *
  * @param  inCmd  Command which appended to
+ * @param  skipHeader Flag indicating first comment block is not a header(false)
  * @return true if the stream parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Interpret(GmatCommand *inCmd)
+bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader)
 {
    Initialize();
    
@@ -163,7 +167,7 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd)
    
    if (retval0)
    {
-      retval1 = ReadScript(inCmd);   
+      retval1 = ReadScript(inCmd, skipHeader);
       retval2 = FinalPass();
    }
    
@@ -407,15 +411,17 @@ bool ScriptInterpreter::ReadFirstPass()
 
 
 //------------------------------------------------------------------------------
-// bool ReadScript(GmatCommand *inCmd)
+// bool ReadScript(GmatCommand *inCmd, bool skipHeader = false)
 //------------------------------------------------------------------------------
 /**
  * Reads a script from the input stream line by line and parses it.
- * 
+ *
+ * @param *inCmd The input command to append new commands to
+ * @param  skipHeader Flag indicating first comment block is not a header(false)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
+bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
 {
    bool retval1 = true;
    
@@ -434,12 +440,20 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd)
    initialized = false;
    Initialize();
    
-   // Read header comment and first logical block
-   theReadWriter->ReadFirstBlock(headerComment, currentBlock);
+   
+   // Read header comment and first logical block, command is NULL
+   // since this method is also called from GUI to interpret BeginScript block
+   // we want to ignore header comment.
+   std::string tempHeader;
+   theReadWriter->ReadFirstBlock(tempHeader, currentBlock, skipHeader);
+   if (inCmd == NULL)
+      headerComment = tempHeader;
    
    #if DEBUG_SCRIPT_READING
    MessageInterface::ShowMessage
       ("===> currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+   MessageInterface::ShowMessage
+      ("===> headerComment:\n<<<%s>>>\n", headerComment.c_str());
    #endif
    
    while (currentBlock != "")
@@ -611,7 +625,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    {
       footerComment = currentBlock;
       
-      #ifdef DEBUG_PARSE
+      #ifdef DEBUG_PARSE_FOOTER
       MessageInterface::ShowMessage("footerComment=<<<%s>>>\n", footerComment.c_str());
       #endif
       
@@ -1037,7 +1051,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    
    if (foundVarsAndArrays)
       WriteVariablesAndArrays(objs, mode);
-      
+   
    //-----------------------------------
    // Coordinate System
    //-----------------------------------
@@ -1047,7 +1061,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #endif
    if (objs.size() > 0)
       WriteObjects(objs, "Coordinate Systems", mode);
-      
+   
    //-----------------------------------
    // Solver
    //-----------------------------------
@@ -1086,10 +1100,14 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    //-----------------------------------
    // Footer Comment
    //-----------------------------------
+   #ifdef DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage("   footerComment=\n<%s>\n", footerComment.c_str());
+   #endif
+   
    if (footerComment != "")
       theReadWriter->WriteText(footerComment);
-   else
-      theReadWriter->WriteText("\n");
+   //else
+   //   theReadWriter->WriteText("\n");
    
    #ifdef DEBUG_SCRIPT_WRITING
    MessageInterface::ShowMessage
@@ -1113,7 +1131,7 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
        obj->GetTypeName().c_str(), obj->GetName().c_str(), preStr.c_str(),
        inStr.c_str());
    #endif
-
+   
    // Preseve blank lines if command
    if (obj->GetType() == Gmat::COMMAND)
    {
@@ -1124,9 +1142,16 @@ void ScriptInterpreter::SetComments(GmatBase *obj, const std::string &preStr,
    {
       // If comment has only blank space or lines, ignore
       if (!GmatStringUtil::IsBlank(preStr, true))
-      obj->SetCommentLine(preStr);
+      {
+         // Handle preface comment for Parameters separately since there are
+         // comments from Create line and Initialization line
+         if (obj->GetType() == Gmat::PARAMETER)
+            ((Parameter*)obj)->SetCommentLine(preStr);
+         else
+            obj->SetCommentLine(preStr);
+      }
    }
-      
+   
    if (inStr != "")
       obj->SetInlineComment(inStr);
 }
@@ -1386,10 +1411,10 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       // Write comment line
       if (i == 0)
       {
-         if (((Parameter*)varList[i])->GetCommentLine(2) == "")
+         if (((Parameter*)varList[i])->GetCommentLine(1) == "")
             theReadWriter->WriteText("\n");
          else
-            theReadWriter->WriteText(((Parameter*)varList[i])->GetCommentLine(2));
+            theReadWriter->WriteText(((Parameter*)varList[i])->GetCommentLine(1));
       }
       
       if (counter == 1)
@@ -1419,8 +1444,8 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    {
       if (i == 0)
       {
-         theReadWriter->WriteText("\n");
-         theReadWriter->WriteText(((Parameter*)varWithValList[i])->GetCommentLine(1));
+         ////theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)varWithValList[i])->GetCommentLine(2));
       }
       
       theReadWriter->WriteText(varWithValList[i]->GetGeneratingString(mode));
@@ -1445,8 +1470,8 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       // Write comment line
       if (i == 0)
       {
-         theReadWriter->WriteText("\n");
-         theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(2));
+         ////theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(1));
       }
       
       if (counter == 1)
@@ -1475,8 +1500,8 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    {
       if (i == 0)
       {
-         theReadWriter->WriteText("\n");
-         theReadWriter->WriteText(arrWithValList[0]->GetCommentLine());
+         ////theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)arrWithValList[0])->GetCommentLine(2));
       }
       
       theReadWriter->WriteText(arrWithValList[i]->GetStringParameter("InitialValue"));
@@ -1501,8 +1526,8 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       // Write comment line
       if (i == 0)
       {
-         theReadWriter->WriteText("\n");
-         theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(2));
+         ////theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(1));
       }
       
       if (counter == 1)
@@ -1537,14 +1562,12 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       if (i == 0)
       {
-         theReadWriter->WriteText("\n");
-         theReadWriter->WriteText(((Parameter*)strWithValList[i])->GetCommentLine(1));
+         ////theReadWriter->WriteText("\n");
+         theReadWriter->WriteText(((Parameter*)strWithValList[i])->GetCommentLine(2));
       }
       
       theReadWriter->WriteText(strWithValList[i]->GetGeneratingString(mode));
    }
-   
-   theReadWriter->WriteText("\n");
 }
 
 
