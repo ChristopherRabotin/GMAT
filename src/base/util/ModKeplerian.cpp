@@ -219,7 +219,7 @@ Rvector6 ModKeplerianToKeplerian(const Rvector6& modKeplerian)
    Real radApo = modKeplerian[1];     // Radius of Apoapsis 
 
    // Check validity
-   if (radApo < radPer & radApo > 0)
+   if (radApo < radPer && radApo > 0)
       throw UtilityException("ModKeplerian::ModKeplerianToKeplerian: " 
                              "If RadApo < RadPer then RadApo must be negative");
 
