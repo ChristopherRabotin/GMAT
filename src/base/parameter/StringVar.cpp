@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  StringVar
 //------------------------------------------------------------------------------
@@ -345,7 +345,7 @@ const std::string& StringVar::GetGeneratingString(Gmat::WriteMode mode,
    if (sval != "")
    {
       generatingString = "GMAT " + GetName() + " = " + sval;
-      generatingString = generatingString + inlineComment + "\n";
+      generatingString = generatingString + ";" + inlineComment + "\n";
    }
    
    return generatingString;

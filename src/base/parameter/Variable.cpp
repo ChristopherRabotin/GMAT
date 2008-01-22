@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Variable
 //------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
       Integer prec = GetDataPrecision();
       generatingString = "GMAT " + GetName() + " = " +
          GmatRealUtil::ToString(rval, false, false, false, prec, 1);
-      generatingString = generatingString + inlineComment + "\n";
+      generatingString = generatingString + ";" + inlineComment + "\n";
    }
    
    return generatingString;
