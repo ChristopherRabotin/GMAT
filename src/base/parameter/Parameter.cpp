@@ -22,8 +22,9 @@
 #include "ParameterInfo.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_PARAMETER 1
-//#define DEBUG_RENAME 1
+//#define DEBUG_PARAMETER
+//#define DEBUG_RENAME
+//#define DEBUG_COMMENT
 
 //---------------------------------
 // static data
@@ -97,7 +98,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
 {  
    objectTypes.push_back(Gmat::PARAMETER);
    objectTypeNames.push_back("Parameter");
-
+   
    mKey = key;
    
    //if ((name != "" && name != " "))
@@ -110,7 +111,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
       for (unsigned int i=0; i<tempName.size(); i++)
          if (tempName[i] == ' ')
             tempName.replace(i, 1, replaceStr);
-
+      
       instanceName = tempName;
       
       //if (name.find(' ') < name.npos)
@@ -122,11 +123,12 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
       mDesc = instanceName;
    else
       mDesc = desc;
-
+   
    mExpr = "";
    mUnit = unit;
    mDepObjectName = "";
    mCommentLine2 = "";
+   mIsCommentFromCreate = true;
    mOwnerType = ownerType;
    mDepObj = depObj;
    mColor = 0; // black
@@ -148,7 +150,7 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    // register parameter names with info
    ParameterInfo::Instance()->Add(typeName, mOwnerType, instanceName, mDepObj,
                                   isPlottable, isReportable, isSettable);
-
+   
    // set parameter count
    parameterCount = ParameterParamCount;
 
@@ -173,6 +175,7 @@ Parameter::Parameter(const Parameter &copy)
    mUnit = copy.mUnit;
    mDepObjectName = copy.mDepObjectName;
    mCommentLine2 = copy.mCommentLine2;
+   mIsCommentFromCreate = copy.mIsCommentFromCreate;
    mOwnerType = copy.mOwnerType;
    mReturnType = copy.mReturnType;
    mDepObj = copy.mDepObj;
@@ -212,6 +215,7 @@ Parameter& Parameter::operator= (const Parameter& right)
    mUnit = right.mUnit;
    mDepObjectName = right.mDepObjectName;
    mCommentLine2 = right.mCommentLine2;
+   mIsCommentFromCreate = right.mIsCommentFromCreate;
    mOwnerType = right.mOwnerType;
    mReturnType = right.mReturnType;
    mDepObj = right.mDepObj;
@@ -757,7 +761,7 @@ bool Parameter::RenameRefObject(const Gmat::ObjectType type,
                                 const std::string &oldName,
                                 const std::string &newName)
 {
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("Parameter::RenameRefObject() type=%s, oldName=%s, newName=%s\n",
        GetObjectTypeString(type).c_str(), oldName.c_str(), newName.c_str());
@@ -778,7 +782,7 @@ bool Parameter::RenameRefObject(const Gmat::ObjectType type,
       mExpr.replace(pos, oldName.size(), newName);
    }
    
-   #if DEBUG_RENAME
+   #ifdef DEBUG_RENAME
    MessageInterface::ShowMessage
       ("oldExpr=%s, mExpr=%s\n", oldExpr.c_str(), mExpr.c_str());
    #endif
@@ -1023,6 +1027,13 @@ bool Parameter::SetStringParameter(const std::string &label,
 //---------------------------------------------------------------------------
 const std::string Parameter::GetCommentLine(Integer which)
 {
+   #ifdef DEBUG_COMMENT
+   MessageInterface::ShowMessage
+      ("Parameter::GetCommentLine() <%s> which=%d\ncommentLine=<%s>\n"
+       "mCommentLine2=<%s>\n", GetName().c_str(), which, commentLine.c_str(),
+       mCommentLine2.c_str());
+   #endif
+   
    if (which == 2)
       return mCommentLine2;
    else
@@ -1031,20 +1042,55 @@ const std::string Parameter::GetCommentLine(Integer which)
 
 
 //---------------------------------------------------------------------------
-//  void SetCommentLine(const std::string &comment)
+//  void SetCommentLine(const std::string &comment, Integer which = 0)
 //---------------------------------------------------------------------------
 /*
- * This method sets preface comments for Variable and Array.
- * Since preface comments from initialization overrides comments from
+ * This method sets preface comments for Variable, Array, and String.
+ * Since preface comments from initialization line overrides comments from
  * Create line, there are two comments used in the Parameter class.
+ *
+ * @param which Indicates which comment should be saved
+ *              0 = When this method is called first time,
+ *                     it assumes comment is set for Create line.
+ *              1 = Preface comment from Create line
+ *              2 = Preface comment from Initialization line
  *
  */
 //---------------------------------------------------------------------------
-void Parameter::SetCommentLine(const std::string &comment)
+void Parameter::SetCommentLine(const std::string &comment, Integer which)
 {
-   if (mCommentLine2 == "")
-      mCommentLine2 = comment;
-   else
+   if (which == 0)
+   {
+      // When this method is called first time, it assumes comment from Create line.
+      if (mIsCommentFromCreate)
+      {
+         #ifdef DEBUG_COMMENT
+         MessageInterface::ShowMessage
+            ("Parameter::SetCommentLine() <%s> commentLine is set to <%s>\n",
+             GetName().c_str(), comment.c_str());
+         #endif
+         
+         commentLine = comment;
+         mIsCommentFromCreate = false;
+      }
+      else
+      {
+         mCommentLine2 = comment;
+         
+         #ifdef DEBUG_COMMENT
+         MessageInterface::ShowMessage
+            ("Parameter::SetCommentLine() <%s> commentLine2 is set to <%s>\n",
+             GetName().c_str(), comment.c_str());
+         #endif
+      }
+   }
+   else if (which == 1)
+   {
       commentLine = comment;
+   }
+   else if (which == 2)
+   {
+      mCommentLine2 = comment;
+   }
 }
 

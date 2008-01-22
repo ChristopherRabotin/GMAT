@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Parameter
 //------------------------------------------------------------------------------
@@ -127,12 +127,13 @@ public:
                                    const std::string &value);
    
    virtual const std::string  GetCommentLine(Integer which = 1);
-   virtual void               SetCommentLine(const std::string &comment);
+   virtual void               SetCommentLine(const std::string &comment,
+                                             Integer which = 0);
    
 protected:
-
+   
    static const std::string PARAMETER_KEY_STRING[GmatParam::KeyCount];
-
+   
    GmatParam::ParameterKey  mKey;
    std::string   mDesc;
    std::string   mUnit;
@@ -152,6 +153,7 @@ protected:
    bool mIsCoordSysDependent;
    bool mIsOriginDependent;
    bool mNeedCoordSystem;
+   bool mIsCommentFromCreate;
    
    enum
    {
@@ -163,7 +165,7 @@ protected:
       COLOR,
       ParameterParamCount
    };
-
+   
    static const Gmat::ParameterType
       PARAMETER_TYPE[ParameterParamCount - GmatBaseParamCount];
    static const std::string
