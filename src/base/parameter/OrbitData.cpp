@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  OrbitData
 //------------------------------------------------------------------------------
@@ -34,10 +34,10 @@
 #include "MessageInterface.hpp"
 
 
-//#define DEBUG_ORBITDATA_INIT 1
-//#define DEBUG_ORBITDATA_CONVERT 1
-//#define DEBUG_ORBITDATA_RUN 1
-//#define DEBUG_CLONE 1
+//#define DEBUG_ORBITDATA_INIT
+//#define DEBUG_ORBITDATA_CONVERT
+//#define DEBUG_ORBITDATA_RUN
+//#define DEBUG_CLONE
 //#define DEBUG_MA
 //#define DEBUG_HA
 
@@ -87,9 +87,6 @@ OrbitData::OrbitData()
    mOrigin = NULL;
    mInternalCoordSystem = NULL;
    mOutCoordSystem = NULL;
-
-//    if (mCoordConverter == NULL)
-//       mCoordConverter = new CoordinateConverter;
 }
 
 
@@ -106,7 +103,7 @@ OrbitData::OrbitData(const OrbitData &data)
    : RefData(data),
    stateTypeId (data.stateTypeId)
 {
-   #if DEBUG_CLONE
+   #ifdef DEBUG_CLONE
    MessageInterface::ShowMessage
       ("OrbitData::OrbitData copy constructor called\n");
    #endif
@@ -174,7 +171,9 @@ OrbitData& OrbitData::operator= (const OrbitData &right)
 //------------------------------------------------------------------------------
 OrbitData::~OrbitData()
 {
-   //MessageInterface::ShowMessage("==> OrbitData::~OrbitData()\n");
+   #ifdef DEBUG_ORBITDATA_DESTRUCTOR
+   MessageInterface::ShowMessage("OrbitData::~OrbitData()\n");
+   #endif
 }
 
 
@@ -186,10 +185,10 @@ Rvector6 OrbitData::GetCartState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
    
-   mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
+   mCartEpoch = mSpacecraft->GetEpoch();
    mCartState.Set(mSpacecraft->GetState().GetState());
    
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetCartState() mCartState=\n   %s\n", mCartState.ToString().c_str());
    #endif
@@ -213,7 +212,7 @@ Rvector6 OrbitData::GetCartState()
    //-----------------------------------------------------------------
    if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
    {
-      #if DEBUG_ORBITDATA_CONVERT
+      #ifdef DEBUG_ORBITDATA_CONVERT
          MessageInterface::ShowMessage
             ("OrbitData::GetCartState() mOutCoordSystem:%s, Axis addr=%d\n",
              mOutCoordSystem->GetName().c_str(),
@@ -227,7 +226,7 @@ Rvector6 OrbitData::GetCartState()
       {
          mCoordConverter.Convert(A1Mjd(mCartEpoch), mCartState, mInternalCoordSystem,
                                  mCartState, mOutCoordSystem, true);
-         #if DEBUG_ORBITDATA_CONVERT
+         #ifdef DEBUG_ORBITDATA_CONVERT
             MessageInterface::ShowMessage
                ("OrbitData::GetCartState() --> After  convert: mCartEpoch=%f\n"
                 "state = %s\n", mCartEpoch, mCartState.ToString().c_str());
@@ -256,15 +255,19 @@ Rvector6 OrbitData::GetKepState()
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
 
-   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() from SC mKepState=%s\n",
-   //                               mKepState.ToString().c_str());
+   #ifdef DEBUG_ORBITDATA_STATE
+   MessageInterface::ShowMessage("rbitData::GetKepState() from SC mKepState=%s\n",
+                                  mKepState.ToString().c_str());
+   #endif
    
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
    mKepState = Keplerian::CartesianToKeplerian(mGravConst, state);
-   
-   //MessageInterface::ShowMessage("==>OrbitData::GetKepState() mKepState=%s\n",
-   //                              mKepState.ToString().c_str());
+
+   #ifdef DEBUG_ORBITDATA_KEP_STATE
+   MessageInterface::ShowMessage("OrbitData::GetKepState() mKepState=%s\n",
+                                 mKepState.ToString().c_str());
+   #endif
    
    return mKepState;
 }
@@ -299,11 +302,13 @@ Rvector6 OrbitData::GetSphRaDecState()
    // Call GetCartState() to convert to parameter coord system first
    Rvector6 state = GetCartState();
    mSphRaDecState = CartesianToSphericalRADEC(state);
-   
-   //MessageInterface::ShowMessage
-   //   ("==>OrbitData::GetKepState() GetCartState() mSphRaDecState=\n   %s\n",
-   //    mSphRaDecState.ToString().c_str());
 
+   #ifdef DEBUG_ORBITDATA_STATE
+   MessageInterface::ShowMessage
+      ("OrbitData::GetSphRaDecState() mSphRaDecState=\n   %s\n",
+       mSphRaDecState.ToString().c_str());
+   #endif
+   
    return mSphRaDecState;
 }
 
@@ -349,7 +354,7 @@ Rvector6 OrbitData::GetEquinState()
 //------------------------------------------------------------------------------
 Real OrbitData::GetCartReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetCartReal() item=%d\n", item);
    #endif
    
@@ -371,7 +376,7 @@ Real OrbitData::GetCartReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetKepReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetKepReal() item=%d\n", item);
    #endif
    
@@ -444,7 +449,7 @@ Real OrbitData::GetKepReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherKepReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetOtherKepReal() item=%d\n", item);
    #endif
    
@@ -512,13 +517,13 @@ Real OrbitData::GetOtherKepReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetSphRaDecReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetSphRaDecReal() item=%d\n", item);
    #endif
    
    Rvector6 state = GetSphRaDecState();
 
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetSphRaDecReal() item=%d state=%s\n",
        item, state.ToString().c_str());
@@ -557,13 +562,13 @@ Real OrbitData::GetSphRaDecReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetSphAzFpaReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetSphAzFpaReal() item=%d\n", item);
    #endif
    
    Rvector6 state = GetSphAzFpaState();
 
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetSphAzFpaReal() item=%s state=%s\n",
        item, state.ToString().c_str());
@@ -588,13 +593,13 @@ Real OrbitData::GetSphAzFpaReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetAngularReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetAngularReal() item=%d\n", item);
    #endif
    
    Rvector6 state = GetCartState();
 
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage
       ("OrbitData::GetAngularReal() item=%d state=%s\n",
        item, state.ToString().c_str());
@@ -665,7 +670,7 @@ Real OrbitData::GetAngularReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetOtherAngleReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetOtherAngleReal() item=%d\n", item);
    #endif
    
@@ -713,7 +718,7 @@ Real OrbitData::GetOtherAngleReal(Integer item)
 //------------------------------------------------------------------------------
 Real OrbitData::GetEquinReal(Integer item)
 {
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
    MessageInterface::ShowMessage("OrbitData::GetEquinReal() item=%d\n", item);
    #endif
    
@@ -860,7 +865,7 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
    // get origin state
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
 
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
           origin->GetName().c_str(), originState.ToString().c_str());
@@ -895,7 +900,7 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
    // get relative position magnitude
    Rvector3 relPos = scPos - originPos;
    
-   #if DEBUG_ORBITDATA_RUN
+   #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitData::GetPositionMagnitude() scPos=%s, originPos=%s, relPos=%s\n",
           scPos.ToString().c_str(), originPos.ToString().c_str(),
@@ -912,7 +917,7 @@ Real OrbitData::GetPositionMagnitude(SpacePoint *origin)
 //------------------------------------------------------------------------------
 void OrbitData::InitializeRefObjects()
 {
-   #if DEBUG_ORBITDATA_INIT
+   #ifdef DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage("OrbitData::InitializeRefObjects() entered.\n");
    #endif
    
@@ -921,7 +926,7 @@ void OrbitData::InitializeRefObjects()
    
    if (mSpacecraft == NULL)
    {
-      #if DEBUG_ORBITDATA_INIT
+      #ifdef DEBUG_ORBITDATA_INIT
       MessageInterface::ShowMessage
          ("OrbitData::InitializeRefObjects() Cannot find spacecraft: " +
           GetRefObjectName(Gmat::SPACECRAFT) + ".\n" +
@@ -959,7 +964,7 @@ void OrbitData::InitializeRefObjects()
    
    if (originName != "")
    {
-      #if DEBUG_ORBITDATA_INIT
+      #ifdef DEBUG_ORBITDATA_INIT
       MessageInterface::ShowMessage
          ("OrbitData::InitializeRefObjects() getting originName:%s pointer.\n",
           originName.c_str());
@@ -989,7 +994,7 @@ void OrbitData::InitializeRefObjects()
    
       if (mOutCoordSystem == NULL)
       {
-         #if DEBUG_ORBITDATA_INIT
+         #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
             ("OrbitData::InitializeRefObjects() Cannot find output "
              "CoordinateSystem object\n");
@@ -1006,7 +1011,7 @@ void OrbitData::InitializeRefObjects()
       
       if (!mOrigin)
       {
-         #if DEBUG_ORBITDATA_INIT
+         #ifdef DEBUG_ORBITDATA_INIT
          MessageInterface::ShowMessage
             ("OrbitData::InitializeRefObjects() origin not found: " +
              mOutCoordSystem->GetOriginName() + "\n");
@@ -1022,7 +1027,7 @@ void OrbitData::InitializeRefObjects()
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    }
    
-   #if DEBUG_ORBITDATA_INIT
+   #ifdef DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage
       ("OrbitData::InitializeRefObjects() mOrigin.Name=%s, mGravConst=%f, "
        "mOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mOriginDep);

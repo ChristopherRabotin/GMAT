@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  TimeData
 //------------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 #include "Linear.hpp"               // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_TIMEDATA 1
+//#define DEBUG_TIMEDATA
 
 //---------------------------------
 // static data
@@ -58,7 +58,6 @@ TimeData::TimeData()
    mInitialEpoch = 0.0;
    mIsInitialEpochSet = false;
    mSpacecraft = NULL;
-   mEpochId = -1;
 }
 
 
@@ -139,7 +138,7 @@ bool TimeData::IsInitialEpochSet()
 //------------------------------------------------------------------------------
 Real TimeData::GetInitialEpoch() const
 {
-   #if DEBUG_TIMEDATA
+   #ifdef DEBUG_TIMEDATA
    MessageInterface::ShowMessage
       ("TimeData::GetInitialEpoch() returning %f\n", mInitialEpoch);
    #endif
@@ -160,7 +159,7 @@ void TimeData::SetInitialEpoch(const Real &initialEpoch)
    mInitialEpoch = initialEpoch;
    mIsInitialEpochSet = true;
    
-   #if DEBUG_TIMEDATA
+   #ifdef DEBUG_TIMEDATA
    MessageInterface::ShowMessage
       ("TimeData::SetInitialEpoch() mInitialEpoch = %f\n",
        mInitialEpoch);
@@ -181,7 +180,7 @@ Real TimeData::GetCurrentTimeReal(Integer id)
    if (mSpacecraft == NULL)
       InitializeRefObjects();
 
-   Real a1mjd = mSpacecraft->GetRealParameter(mEpochId);
+   Real a1mjd = mSpacecraft->GetEpoch();
 
    Real time = -9999.999;
    
@@ -223,7 +222,7 @@ Real TimeData::GetCurrentTimeReal(Integer id)
                                GmatRealUtil::ToString(id));
    }
 
-   #if DEBUG_TIMEDATA
+   #ifdef DEBUG_TIMEDATA
    MessageInterface::ShowMessage
       ("TimeData::GetCurrentTimeReal() id=%d, a1mjd=%.10f, return time=%.10f\n",
        id, a1mjd, time);
@@ -252,7 +251,7 @@ std::string TimeData::GetCurrentTimeString(Integer id)
    case TDB_MJD:
    case TCB_MJD:
    case UTC_MJD:
-      #if DEBUG_TIMEDATA
+      #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
          ("TimeData::GetCurrentTimeString() id=%d, timeStr = %s\n", id,
           TimeConverterUtil::ConvertMjdToGregorian(time).c_str());
@@ -350,7 +349,7 @@ void TimeData::InitializeRefObjects()
    mSpacecraft = (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
    if (mSpacecraft == NULL)
    {
-      #if DEBUG_TIMEDATA
+      #ifdef DEBUG_TIMEDATA
       MessageInterface::ShowMessage
          ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
       #endif
@@ -361,12 +360,13 @@ void TimeData::InitializeRefObjects()
    {
       if (!mIsInitialEpochSet)
       {
-         mEpochId = mSpacecraft->GetParameterID("A1Epoch");
-         //mInitialEpoch = mSpacecraft->GetRealParameter("A1Epoch");
-         mInitialEpoch = mSpacecraft->GetRealParameter(mEpochId);
+         mInitialEpoch = mSpacecraft->GetEpoch();
          mIsInitialEpochSet = true;
-         //MessageInterface::ShowMessage
-         //   ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
+         
+         #ifdef DEBUG_TIMEDATA
+         MessageInterface::ShowMessage
+            ("TimeData::InitializeRefObjects() set mInitialEpoch to %f\n", mInitialEpoch);
+         #endif
       }
    }
 }

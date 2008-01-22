@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  AttitudeData
 //------------------------------------------------------------------------------
@@ -88,8 +88,8 @@ Real AttitudeData::GetAttitudeReal(Integer item)
 {
    if (mSpacecraft == NULL)
       InitializeRefObjects();
-
-   Real epoch = mSpacecraft->GetRealParameter(mEpochId);
+   
+   Real epoch = mSpacecraft->GetEpoch();
    
    // get the basics - cosine matrix, angular velocity, euler angle sequence
    Rmatrix33        cosMat        = mSpacecraft->GetAttitude(epoch);
@@ -97,19 +97,19 @@ Real AttitudeData::GetAttitudeReal(Integer item)
                                     * GmatMathUtil::DEG_PER_RAD;
    UnsignedIntArray seq           = mSpacecraft->GetEulerAngleSequence();
    Rvector3         euler;
-
-   if (item == DCM1_1)   return cosMat(0,0);                  
-   if (item == DCM1_2)   return cosMat(0,1);                  
-   if (item == DCM1_3)   return cosMat(0,2);                  
-   if (item == DCM2_1)   return cosMat(1,0);                  
-   if (item == DCM2_2)   return cosMat(1,1);                  
-   if (item == DCM2_3)   return cosMat(1,2);                  
-   if (item == DCM3_1)   return cosMat(2,0);                  
-   if (item == DCM3_2)   return cosMat(2,1);                  
+   
+   if (item == DCM1_1)   return cosMat(0,0);
+   if (item == DCM1_2)   return cosMat(0,1);
+   if (item == DCM1_3)   return cosMat(0,2);
+   if (item == DCM2_1)   return cosMat(1,0);
+   if (item == DCM2_2)   return cosMat(1,1);
+   if (item == DCM2_3)   return cosMat(1,2);
+   if (item == DCM3_1)   return cosMat(2,0);
+   if (item == DCM3_2)   return cosMat(2,1);
    if (item == DCM3_3)   return cosMat(2,2);
-   if (item == ANGVELX) return angVel[0];                
-   if (item == ANGVELY) return angVel[1];                
-   if (item == ANGVELZ) return angVel[2]; 
+   if (item == ANGVELX) return angVel[0];
+   if (item == ANGVELY) return angVel[1];
+   if (item == ANGVELZ) return angVel[2];
    
    // do conversions if necessary
    if ((item >= QUAT1) && (item <= QUAT4))

@@ -24,14 +24,6 @@
 #include "RefData.hpp"
 #include "Spacecraft.hpp"
 
-// namespace GmatParam
-// {
-//    enum TimeDataID
-//    {
-//       A1MJD, JD,
-//       YEARS, MONTHS, DAYS, HOURS, MINS, SECS
-//    };
-// };
 
 class GMAT_API TimeData : public RefData
 {
@@ -51,7 +43,6 @@ public:
    
    Real GetElapsedTimeReal(Integer id);
    
-   
    // The inherited methods from RefData
    virtual bool ValidateRefObjects(GmatBase *param);
    virtual const std::string* GetValidObjectList() const;
@@ -65,9 +56,7 @@ protected:
    Real mInitialEpoch;
    bool mIsInitialEpochSet;
    Spacecraft *mSpacecraft;
-   Integer mEpochId;
    
-//    const static Real MJD_OFFSET;// = 2430000.0; //loj: check the value
    const static Real TIME_REAL_UNDEFINED;
    const static std::string TIME_STRING_UNDEFINED;
    

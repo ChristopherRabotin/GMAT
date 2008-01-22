@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  PlanetData
 //------------------------------------------------------------------------------
@@ -29,8 +29,8 @@
 
 //#define __COMPUTE_LONGITUDE_OLDWAY__
 
-//#define DEBUG_PLANETDATA_INIT 1
-//#define DEBUG_PLANETDATA_RUN 1
+//#define DEBUG_PLANETDATA_INIT
+//#define DEBUG_PLANETDATA_RUN
 
 using namespace GmatMathUtil;
 
@@ -158,17 +158,17 @@ Real PlanetData::GetPlanetReal(Integer item)
    
    if (mSpacecraft == NULL || mSolarSystem == NULL)
       InitializeRefObjects();
-
+   
    switch (item)
    {
    case MHA_ID:
       {
          // Get current time
-         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
-      
+         Real a1mjd = mSpacecraft->GetEpoch();
+         
          // Call GetHourAngle() on origin
          Real mha = mOrigin->GetHourAngle(a1mjd);
-      
+         
          #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
             ("PlanetData::GetPlanetReal() a1mdj=%f, origin=%s, mha=%f\n", a1mjd,
@@ -181,35 +181,33 @@ Real PlanetData::GetPlanetReal(Integer item)
       {
          #ifdef __COMPUTE_LONGITUDE_OLDWAY__
          //==============================================================
-      
+         
          // Get spacecraft RightAscension
-         //Rvector6 state = mSpacecraft->GetState(0);
          Rvector6 state = mSpacecraft->GetState().GetState();
-         Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
-      
+         Real a1mjd = mSpacecraft->GetEpoch();
+         
          if (mOrigin->GetName() != "Earth")
          {
-            // Get current time
-            //Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
+            // Get current state
             state = state - mOrigin->GetMJ2000State(a1mjd);
          }
-      
+         
          Real raDeg = GmatMathUtil::ATan(state[1], state[0]) * DEG_PER_RAD;
          Real mha = mOrigin->GetHourAngle(a1mjd);
-      
+         
          // Compute east longitude
          // Longitude is measured positive to east from prime meridian.
          // (Greenwich for Earth)
          // Reference: Valado 3.2.1 Location Parameters
          Real longitude = raDeg - mha;
          longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
-
+         
          #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
             ("PlanetData::GetPlanetReal(%d) raDeg=%f, mha=%f, longitude=%f\n",
              item, raDeg, mha, longitude);
          #endif
-      
+         
          #else
          //==============================================================
          // 1)  Get state in the body fixed system of the central body
@@ -219,18 +217,21 @@ Real PlanetData::GetPlanetReal(Integer item)
          //     This gives us X_f, Y_f, and Z_f,  the cartesian coordinates
          //     in the fixed system.
          // 2)  Longitude = atan2( Y_f, X_f )
-      
-         Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
+         
+         Real epoch = mSpacecraft->GetEpoch();
          Rvector6 state = mSpacecraft->GetState().GetState();
          Rvector6 outState;
          mCoordConverter.Convert(A1Mjd(epoch), state, mInternalCoordSystem,
                                  outState, mOutCoordSystem);
-      
+         
          Real longitude = ATan(outState[1], outState[0]) * DEG_PER_RAD;
          longitude = AngleUtil::PutAngleInDegRange(longitude, -180.0, 180.0);
-      
-         //MessageInterface::ShowMessage("===> longitude=%f\n\n", longitude);
-      
+
+         #ifdef DEBUG_LONGITUDE
+         MessageInterface::ShowMessage
+            ("PlanetData::GetPlanetReal(%d) longitude=%f\n\n", item, longitude);
+         #endif
+         
          #endif
          //==============================================================
       
@@ -239,41 +240,36 @@ Real PlanetData::GetPlanetReal(Integer item)
    case LATITUDE:
    case ALTITUDE:
       {
-         //Rvector6 state = mSpacecraft->GetState(0);
          Rvector6 intState = mSpacecraft->GetState().GetState();
-         //MessageInterface::ShowMessage("==>PlanetData::GetPlanetReal(%d) state=%s\n",
-         //                              item, state.ToString().c_str());
+         
+         #ifdef DEBUG_ALTITUDE
+         MessageInterface::ShowMessage
+            ("PlanetData::GetPlanetReal(%d) state=%s\n", item, state.ToString().c_str());
+         #endif
          
          Real epoch = mSpacecraft->GetRealParameter("A1Epoch");
          Rvector6 instate = mSpacecraft->GetState().GetState();
          Rvector6 state;
          mCoordConverter.Convert(A1Mjd(epoch), instate, mInternalCoordSystem,
                                  state, mOutCoordSystem);
-      
-         //if (mOrigin->GetName() != "Earth")
-         //{
-         //   // Get current time
-         //   Real a1mjd = mSpacecraft->GetRealParameter("A1Epoch");
-         //   state = state - mOrigin->GetMJ2000State(a1mjd);
-         //}
-      
+         
          // get flattening for the body
          Real flatteningFactor =
             mOrigin->GetRealParameter(mOrigin->GetParameterID("Flattening"));
-      
+         
          // Reworked to match Vallado algorithm 12 (Vallado, 2nd ed, p. 177)
-
+         
          // Note -- using cmath here because I know it better -- may want to change
          // to GmatMath
          Real equatorialRadius =
             mOrigin->GetRealParameter(mOrigin->GetParameterID("EquatorialRadius"));
-
+         
          Real rxy = sqrt(state[0]*state[0] + state[1]*state[1]);
          Real geolat = atan2(state[2], rxy);
          Real delta = 1.0;
          Real geodeticTolerance = 1.0e-7;    // Better than 0.0001 degrees
          Real ecc2 = 2.0 * flatteningFactor - flatteningFactor*flatteningFactor;
-
+         
          Real cFactor, oldlat, sinlat;
          while (delta > geodeticTolerance)
          {
@@ -283,13 +279,13 @@ Real PlanetData::GetPlanetReal(Integer item)
             geolat = atan2(state[2] + cFactor*ecc2*sinlat, rxy);
             delta = fabs(geolat - oldlat);
          }
-
+         
          #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage
             ("PlanetData::GetPlanetReal() geolat=%lf rad = %lf deg\n", geolat,
              geolat * 180.0 / PI);
          #endif
-
+         
          if (item == LATITUDE)
          {
             //return geolat * 180.0 / PI;
@@ -313,13 +309,10 @@ Real PlanetData::GetPlanetReal(Integer item)
          Real lst = gmst + GetPlanetReal(LONGITUDE);
          lst = AngleUtil::PutAngleInDegRange(lst, 0.0, 360.0);
          
-         // convert it to hours (1h = 15 deg according to Vallado 3.5)
-         //lst = lst / 15.0;
-      
          #ifdef DEBUG_PLANETDATA_RUN
          MessageInterface::ShowMessage("PlanetData::GetPlanetReal() lst=%f\n", lst);
          #endif
-      
+         
          return lst;
       }
    default:
@@ -445,10 +438,10 @@ void PlanetData::InitializeRefObjects()
    
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
-
+   
    if (originName != "")
    {
-      #if DEBUG_PLANETDATA_INIT
+      #ifdef DEBUG_PLANETDATA_INIT
          MessageInterface::ShowMessage
             ("PlanetData::InitializeRefObjects() getting originName:%s pointer.\n",
              originName.c_str());
