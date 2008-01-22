@@ -326,7 +326,7 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
       ("===> generatingString=\n%s\n", generatingString.c_str());
    #endif
    
-   // Handle multiple line comments
+   // write preface comment
    if (showPrefaceComment)
    {
       if (commentLine != "")
@@ -334,16 +334,19 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
          std::stringstream gen;
          TextParser tp;
          StringArray textArray = tp.DecomposeBlock(commentLine);
-      
-         // handle multiple comment lines
-         for (UnsignedInt i=0; i<textArray.size(); i++)
+         
+         if (textArray.size() > 0 && textArray[0] != "")
          {
-            gen << prefix << textArray[i];
-            if (textArray[i].find("\n") == commentLine.npos &&
-                textArray[i].find("\r") == commentLine.npos)
-               gen << "\n";
+            // handle multiple comment lines
+            for (UnsignedInt i=0; i<textArray.size(); i++)
+            {
+               gen << prefix << textArray[i];
+               if (textArray[i].find("\n") == commentLine.npos &&
+                   textArray[i].find("\r") == commentLine.npos)
+                  gen << "\n";
+            }
          }
-      
+         
          generatingString = gen.str() + generatingString;
       }
    }
