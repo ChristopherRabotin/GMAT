@@ -31,11 +31,13 @@
 
 #include <iostream>                // for cout, endl
 #include <fstream>
+#include <sstream>
 #include <queue>                   // for queue
 #include "MessageInterface.hpp"    // for MessageInterface functions
 #include "BaseException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "GmatGlobal.hpp"          // for RunBachMode()
+//#include "StringUtil.hpp"          // for GmatStringUtil::Replace()
 
 //---------------------------------
 //  static data
@@ -166,23 +168,26 @@ void MessageInterface::ShowMessage(const char *msg, ...)
    va_list  marker;
    char     *msgBuffer;
    
+   // msg is vsprintf format
+   // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
+   //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
    
    if( (msgBuffer = (char *)malloc(size)) != NULL )
    {
       va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);      
+      ret = vsprintf(msgBuffer, msg, marker);
       va_end(marker);
-   }
-   
+      //LogMessage("ret from vsprintf()=%d\n", ret);
+      
 #if !defined __CONSOLE_APP__
-   if (GmatAppData::GetMessageTextCtrl() != NULL)
-      GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
+      if (GmatAppData::GetMessageTextCtrl() != NULL)
+         GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
 #endif
-   
-   LogMessage(std::string(msgBuffer));
-   free(msgBuffer);
-   
+      
+      LogMessage(std::string(msgBuffer));
+      free(msgBuffer);
+   }
 } // end ShowMessage()
 
 
@@ -234,7 +239,9 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    short    size;
    va_list  marker;
    char     *msgBuffer;
-
+   
+   // msg is vsprintf format
+   // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
    if( (msgBuffer = (char *)malloc(size)) != NULL )
@@ -326,7 +333,7 @@ std::string MessageInterface::GetLogFileName()
 void MessageInterface::LogMessage(const std::string &msg)
 {
    std::cout << msg;
-
+   
    if (logEnabled)
    {
       if (logFile == NULL)
@@ -341,11 +348,44 @@ void MessageInterface::LogMessage(const std::string &msg)
    
    if (logFile)
    {
+      //std::string tempStr = GmatStringUtil::Replace(msg, "%", "%%");
+      //fprintf(logFile, "%s", tempStr.c_str());
       fprintf(logFile, "%s", msg.c_str());
       fflush(logFile);
    }
    
 }
+
+
+//------------------------------------------------------------------------------
+//  void LogMessage(const char *msg, ...)
+//------------------------------------------------------------------------------
+/**
+ * Logs the message to a file.
+ */
+//------------------------------------------------------------------------------
+void MessageInterface::LogMessage(const char *msg, ...)
+{
+   short    ret;
+   short    size;
+   va_list  marker;
+   char     *msgBuffer;
+   
+   // msg is vsprintf format
+   // actual max message length is MAX_MESSAGE_LENGTH
+   size = strlen(msg) + MAX_MESSAGE_LENGTH;
+   
+   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   {
+      va_start(marker, msg);      
+      ret = vsprintf(msgBuffer, msg, marker);      
+      va_end(marker);
+   }
+   
+   LogMessage(std::string(msgBuffer));
+   free(msgBuffer);
+   
+} // end LogMessage()
 
 
 //------------------------------------------------------------------------------

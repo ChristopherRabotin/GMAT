@@ -53,6 +53,7 @@ public:
                                   const std::string &msg);
    
    static void LogMessage(const std::string &msg);
+   static void LogMessage(const char *msg, ...);
    
    static std::string GetLogFileName();
 
@@ -65,7 +66,7 @@ public:
    
 private:
    
-   static const int MAX_MESSAGE_LENGTH = 3000;
+   static const int MAX_MESSAGE_LENGTH = 10000;
    
    static std::queue<std::string> messageQueue;
    static std::string popupMessage;
