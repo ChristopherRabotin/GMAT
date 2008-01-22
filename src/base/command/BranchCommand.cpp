@@ -336,7 +336,9 @@ void BranchCommand::AddBranch(GmatCommand *cmd, Integer which)
       #endif
       
       (branch.at(which))->Append(cmd);
-      SetPreviousCommand(cmd, branch.at(which), true);
+      
+      // We don't want to override previous command (loj: 2008.01.18)
+      ////SetPreviousCommand(cmd, branch.at(which), true);
       
    }
 } // AddBranch()
@@ -833,8 +835,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
    UnsignedInt prefixSize = prefix.size();   
    if (this->IsOfType("BranchCommand") && prefix != "")
       fullString = fullString.substr(prefixSize);
-//    else if (this->IsOfType("BranchCommand") && prefix == "")
-//       fullString = "\n" + fullString;
    
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    ShowCommand("BranchCommand::", "GetGeneratingString() this = ", this);
@@ -874,12 +874,6 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       
       fullString = gen.str() + fullString;
    }
-
-   // To preserve blank lines from original script, do not
-   // write extra blank line (loj: 2007.10.31)
-//    // Add end-of-line before beginnig new outer branch command
-//    if (this->IsOfType("BranchCommand") && prefix == "")
-//       fullString = "\n" + fullString;
    
    // Handle inline comment
    if (inlineComment != "")
@@ -925,15 +919,9 @@ const std::string& BranchCommand::GetGeneratingString(Gmat::WriteMode mode,
       }
    }
    
-   // To preserve blank lines from original script, do not
-   // write extra blank line (loj: 2007.10.31)
-//    // Add end-of-line after outer branch command
-//    if (prefix == "")
-//       fullString = fullString + "\n";
-   
    #ifdef DEBUG_BRANCHCOMMAND_GEN_STRING
    MessageInterface::ShowMessage
-      ("%s::GetGeneratingString() return fullString = \n%s\n",
+      ("%s::GetGeneratingString() return fullString = \n<%s>\n",
        this->GetTypeName().c_str(), fullString.c_str());
    #endif
    
