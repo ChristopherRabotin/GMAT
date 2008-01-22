@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ParameterInfo
 //------------------------------------------------------------------------------
@@ -187,11 +187,11 @@ bool ParameterInfo::IsSettable(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// void Add(const std::string type, Gmat::ObjectType objectType,
+// void Add(const std::string &type, Gmat::ObjectType objectType,
 //          const std::string &name, GmatParam::DepObject depType,
 //          bool isPlottable, bool isReportable, bool isSettable)
 //------------------------------------------------------------------------------
-void ParameterInfo::Add(const std::string type, Gmat::ObjectType objectType,
+void ParameterInfo::Add(const std::string &type, Gmat::ObjectType objectType,
                         const std::string &name, GmatParam::DepObject depType,
                         bool isPlottable, bool isReportable, bool isSettable)
 {

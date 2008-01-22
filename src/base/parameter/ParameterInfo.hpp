@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ParameterInfo
 //------------------------------------------------------------------------------
@@ -39,14 +39,14 @@ public:
    bool IsReportable(const std::string &type);
    bool IsSettable(const std::string &type);
    
-   void Add(const std::string type, Gmat::ObjectType objectType,
+   void Add(const std::string &type, Gmat::ObjectType objectType,
             const std::string &name, GmatParam::DepObject depType,
             bool isPlottable, bool isReportable, bool isSettable);
    void Remove(const std::string &name);
    
 protected:
 private:
-
+   
    static ParameterInfo *theInstance;
    
    std::map<std::string, GmatParam::DepObject> mParamDepObjMap;
