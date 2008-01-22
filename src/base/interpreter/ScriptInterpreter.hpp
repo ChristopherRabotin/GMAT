@@ -29,7 +29,7 @@ public:
    static ScriptInterpreter*   Instance();
 
    virtual bool Interpret();
-   virtual bool Interpret(GmatCommand *cmd);
+   virtual bool Interpret(GmatCommand *cmd, bool skipHeader = false);
    virtual bool Interpret(const std::string &scriptfile); 
    virtual bool Build(Gmat::WriteMode mode);
    
@@ -50,7 +50,7 @@ protected:
    std::ostream *outStream;
    
    //std::string ReadLogicalBlock();
-   bool ReadScript(GmatCommand *cmd = NULL);
+   bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false);
    bool Parse(const std::string &logicBlock, GmatCommand *inCmd = NULL);
    bool WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
