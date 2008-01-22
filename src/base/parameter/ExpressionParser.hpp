@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ExpressionParser
 //------------------------------------------------------------------------------
@@ -47,8 +47,7 @@ public:
    void SetParameterDatabase(ParameterDatabase *pdb);
    
 private:
-   static ExpressionParser* theExpressionParser;
-
+   
    static const int NUM_VARS = 26;
    
    enum TokenType

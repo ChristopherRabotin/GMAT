@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ExpressionParser
 //------------------------------------------------------------------------------
@@ -38,11 +38,6 @@
 using namespace std;
 
 //#define DEBUG_EXP_PARSER 1
-
-//---------------------------------
-// static varible
-//---------------------------------
-ExpressionParser* ExpressionParser::theExpressionParser = NULL;
 
 //---------------------------------
 // public methods

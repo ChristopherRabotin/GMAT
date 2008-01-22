@@ -26,9 +26,9 @@
 #include "Linear.hpp"           // for GmatRealUtil::ToString()
 #include "MessageInterface.hpp"
 
-//#define DEBUG_BPLANE_DATA_INIT 1
-//#define DEBUG_BPLANE_DATA_CONVERT 1
-//#define DEBUG_BPLANE_DATA_RUN 1
+//#define DBGLVL_BPLANEDATA_INIT 1
+//#define DBGLVL_BPLANEDATA_CONVERT 1
+//#define DBGLVL_BPLANEDATA_RUN 1
 
 using namespace GmatMathUtil;
 
@@ -84,19 +84,11 @@ BplaneData::BplaneData(const BplaneData &copy)
    : RefData(copy)
 {
    mCartState = copy.mCartState;
-   
    mSpacecraft = copy.mSpacecraft;
    mSolarSystem = copy.mSolarSystem;
    mOrigin = copy.mOrigin;
    mInternalCoordSystem = copy.mInternalCoordSystem;
-   mOutCoordSystem = copy.mOutCoordSystem;
-   
-//    mSpacecraft = NULL;
-//    mSolarSystem = NULL;
-//    mOrigin = NULL;
-//    mInternalCoordSystem = NULL;
-//    mOutCoordSystem = NULL;
-   
+   mOutCoordSystem = copy.mOutCoordSystem;   
    mCartEpoch = copy.mCartEpoch;
    mGravConst = copy.mGravConst;
 }
@@ -121,19 +113,11 @@ BplaneData& BplaneData::operator= (const BplaneData &right)
    RefData::operator=(right);
    
    mCartState = right.mCartState;
-   
    mSpacecraft = right.mSpacecraft;
    mSolarSystem = right.mSolarSystem;
    mOrigin = right.mOrigin;
    mInternalCoordSystem = right.mInternalCoordSystem;
    mOutCoordSystem = right.mOutCoordSystem;
-   
-//    mSpacecraft = NULL;
-//    mSolarSystem = NULL;
-//    mOrigin = NULL;
-//    mInternalCoordSystem = NULL;
-//    mOutCoordSystem = NULL;
-   
    mCartEpoch = right.mCartEpoch;
    mGravConst = right.mGravConst;
    
@@ -187,7 +171,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    
    Rvector6 state = GetCartState();
    
-   #if DEBUG_BPLANE_DATA_RUN > 1
+   #if DBGLVL_BPLANEDATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal() item = %d, mGravConst = %f\n     state = %s\n",
        item, mGravConst, state.ToString().c_str());
@@ -220,7 +204,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    hVec.Normalize();
    Rvector3 nVec = Cross(hVec, eVec);
    
-   #if DEBUG_BPLANE_DATA_RUN > 1
+   #if DBGLVL_BPLANEDATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal()\n     eVec = %s\n     hVec = %s\n     nVec = %s\n",
        eVec.ToString().c_str(), hVec.ToString().c_str(), nVec.ToString().c_str());
@@ -237,7 +221,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    // Compute the B-vector
    Rvector3 bVec = b * (temp * eVec - oneOverEmag*nVec);
    
-   #if DEBUG_BPLANE_DATA_RUN > 1
+   #if DBGLVL_BPLANEDATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal() b = %f\n     sVec = %s\n     bVec = %s\n",
        b, sVec.ToString().c_str(), bVec.ToString().c_str());
@@ -247,8 +231,8 @@ Real BplaneData::GetBplaneReal(Integer item)
    Rvector3 sVec1(sVec[1], -sVec[0], 0.0);
    Rvector3 tVec = sVec1 / Sqrt(sVec[0]*sVec[0] + sVec[1]*sVec[1]);
    Rvector3 rVec = Cross(sVec, tVec);
-
-   #if DEBUG_BPLANE_DATA_RUN > 1
+   
+   #if DBGLVL_BPLANEDATA_RUN > 1
    MessageInterface::ShowMessage
       ("BplaneData::GetBplaneReal()\n     sVec1 = %s\n     tVec = %s\n     rVec = %s\n",
        sVec1.ToString().c_str(), tVec.ToString().c_str(), rVec.ToString().c_str());
@@ -257,7 +241,7 @@ Real BplaneData::GetBplaneReal(Integer item)
    Real bDotT = bVec * tVec;
    Real bDotR = bVec * rVec;
    
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DBGLVL_BPLANEDATA_RUN
    MessageInterface::ShowMessage
       ("==>BplaneData::GetBplaneReal() B_DOT_T=%f, B_DOT_R=%f\n   B_VECTOR_MAG=%f, "
        "B_VECTOR_ANGLE=%f\n", bDotT, bDotR, Sqrt(bDotT*bDotT + bDotR*bDotR),
@@ -326,14 +310,14 @@ bool BplaneData::ValidateRefObjects(GmatBase *param)
 //------------------------------------------------------------------------------
 void BplaneData::InitializeRefObjects()
 {
-   #if DEBUG_BPLANE_DATA_INIT
+   #if DBGLVL_BPLANEDATA_INIT
    MessageInterface::ShowMessage
       ("BplaneData::InitializeRefObjects() entered.\n");
    #endif
    
    mSpacecraft =
       (Spacecraft*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACECRAFT]);
-
+   
    if (mSpacecraft == NULL)
       throw ParameterException
          ("BplaneData::InitializeRefObjects() Cannot find Spacecraft object.\n"
@@ -380,7 +364,7 @@ void BplaneData::InitializeRefObjects()
    if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
       mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
    
-   #if DEBUG_BPLANE_DATA_INIT
+   #if DBGLVL_BPLANEDATA_INIT
    MessageInterface::ShowMessage
       ("BplaneData::InitializeRefObjects() mOriginName=%s\n",
        mOrigin->GetName().c_str());
@@ -410,7 +394,7 @@ bool BplaneData::IsValidObjectType(Gmat::ObjectType type)
        type);
    
    return false;
-
+   
 }
 
 
@@ -449,14 +433,11 @@ void BplaneData::SetInternalCoordSys(CoordinateSystem *cs)
 // Rvector6 GetCartState()
 //------------------------------------------------------------------------------
 Rvector6 BplaneData::GetCartState()
-{
-//    if (mSpacecraft == NULL || mSolarSystem == NULL)
-//       InitializeRefObjects();
-   
-   mCartEpoch = mSpacecraft->GetRealParameter("A1Epoch");
+{   
+   mCartEpoch = mSpacecraft->GetEpoch();
    mCartState.Set(mSpacecraft->GetState().GetState());
    
-   #if DEBUG_BPLANE_DATA_RUN
+   #if DBGLVL_BPLANEDATA_RUN
    MessageInterface::ShowMessage
       ("BplaneData::GetCartState() stateType=%s, internalCoordName=%s\n"
        "     outCoordName=%s\n", elemType.c_str(),
@@ -479,7 +460,7 @@ Rvector6 BplaneData::GetCartState()
    // convert to output CoordinateSystem
    if (mInternalCoordSystem->GetName() != mOutCoordSystem->GetName())
    {
-      #if DEBUG_BPLANE_DATA_CONVERT
+      #if DBGLVL_BPLANEDATA_CONVERT
       MessageInterface::ShowMessage
          ("BplaneData::GetCartState() ===> mOutCoordSystem:%s Axis=%s\n",
           mOutCoordSystem->GetName().c_str(),
@@ -495,7 +476,7 @@ Rvector6 BplaneData::GetCartState()
                                  mInternalCoordSystem,
                                  mCartState, mOutCoordSystem);
          
-         #if DEBUG_BPLANE_DATA_CONVERT
+         #if DBGLVL_BPLANEDATA_CONVERT
          MessageInterface::ShowMessage
             ("BplaneData::GetCartState() --After convert: mCartEpoch=%f\n"
              "     state = %s\n", mCartEpoch, mCartState.ToString().c_str());
