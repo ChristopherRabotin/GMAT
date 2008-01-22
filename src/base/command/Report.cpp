@@ -383,17 +383,23 @@ GmatBase* Report::Clone() const
 const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName)
-{
-//    std::string gen = prefix;
-//    gen = gen + GmatStringUtil::Trim(generatingString, GmatStringUtil::BOTH);
-//    generatingString = gen;
-   
+{   
    std::string gen = prefix + "Report " + rfName + " ";
-
-   for (UnsignedInt i=0; i<actualParmNames.size(); i++)
-      gen += actualParmNames[i] + " ";
+   UnsignedInt numElem = actualParmNames.size();
    
-   generatingString = gen;
+   if (numElem > 1)
+   {
+      for (UnsignedInt i=0; i<numElem-1; i++)
+         gen += actualParmNames[i] + " ";
+      
+      gen += actualParmNames[numElem-1];
+   }
+   else
+   {
+      gen += actualParmNames[0];
+   }
+   
+   generatingString = gen + ";";
    
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
