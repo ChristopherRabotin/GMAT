@@ -51,71 +51,15 @@ GuiInterpreter::~GuiInterpreter()
 }
 
 
-// //------------------------------------------------------------------------------
-// // bool Interpret(GmatBase *obj, const std::string generator)
-// //------------------------------------------------------------------------------
-// /**
-//  * Reads the generatingString for an object and builds the corresponding data.
-//  *
-//  * This method is used to rebuild pieces of a mission sequence when a user makes
-//  * changes on a ScriptEvent panel, and to build the commands that are encoded
-//  * in a BeginScript/EndScript block.
-//  *
-//  * @param <obj>         The object that is being reinterpreted.
-//  * @param <generator>   The string that gets interpreted.
-//  *
-//  * @return true on success, false on failure.
-//  *
-//  * @note Interpret only works for GmatCommands at this time.
-//  */
-// //------------------------------------------------------------------------------
-// bool GuiInterpreter::Interpret(GmatBase *obj, const std::string generator)
-// {
-//    if (obj->GetType() != Gmat::COMMAND)
-//       throw InterpreterException(
-//          "Interpret(GmatBase*) currently only supports GmatCommands.");
-
-//    #ifdef DEBUG_INTERPRET
-//       MessageInterface::ShowMessage(
-//          "%s\n%s\n\"%s\"\n",
-//          "\nInterpret(GmatBase*)is under construction.  Please be patient!",
-//          "String that is interpreted:", obj->GetGeneratingString().c_str());
-//    #endif
-   
-//    if (obj->GetTypeName() == "BeginScript")
-//    {
-//       #ifdef DEBUG_INTERPRET
-//       MessageInterface::ShowMessage
-//          ("Parsing in-line text:\n%s\n", generator.c_str());
-//       #endif
-      
-//       //return InterpretTextBlock((GmatCommand*)obj, generator);
-//       //loj: need work
-//       return false;
-//    }
-//    else
-//    {
-//       #ifdef DEBUG_INTERPRET
-//       MessageInterface::ShowMessage
-//          ("Resetting command using\n%s\n", generator.c_str());
-//       #endif
-      
-//       //AssembleCommand(generator, (GmatCommand*)obj);
-//       //loj: need work
-//       return false;
-//    }
-   
-//    return true;
-// }
-
-
 //------------------------------------------------------------------------------
 // bool Interpret(GmatCommand *inCmd, std::istringstream *ss)
 //------------------------------------------------------------------------------
 bool GuiInterpreter::Interpret(GmatCommand *inCmd, std::istringstream *ss)
 {   
    SetInStream(ss);
-   return ScriptInterpreter::Interpret(inCmd);
+
+   // We don't want parse first comment as header, so set skipHeader to true.
+   return ScriptInterpreter::Interpret(inCmd, true);
 }
 
 
