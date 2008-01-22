@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              BeginScript
 //------------------------------------------------------------------------------
@@ -33,23 +33,32 @@ public:
    BeginScript();
    virtual ~BeginScript();
    BeginScript(const BeginScript& noop);
-   BeginScript&                  operator=(const BeginScript&);
-
-   bool                          Execute();
-
-   // inherited from GmatBase
-   virtual GmatBase*             Clone() const;
-   virtual const std::string&    GetGeneratingString(
-                                       Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                       const std::string &prefix = "",
-                                       const std::string &useName = "");
-
-   const std::string GetChildString(const std::string &prefix,
-                                    GmatCommand *child, GmatCommand *parent);
+   BeginScript&         operator=(const BeginScript&);
    
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   bool                 Execute();
+   
+   // inherited from GmatBase
+   virtual GmatBase*    Clone() const;
+   virtual const std::string&
+                        GetGeneratingString(
+                           Gmat::WriteMode mode = Gmat::SCRIPTING,
+                           const std::string &prefix = "",
+                           const std::string &useName = "");
+   
+   const std::string    GetChildString(const std::string &prefix,
+                                       GmatCommand *child, GmatCommand *parent);
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+protected:
+   
+   void IndentChildString(std::stringstream &gen, GmatCommand* cmd, 
+                          std::string &indent, Gmat::WriteMode mode,
+                          const std::string &prefix, const std::string &useName,
+                          bool indentCommentOnly);
+   void IndentComment(std::stringstream &gen, std::string &comment,
+                      const std::string &prefix);
 };
 
 #endif // BeginScript_hpp

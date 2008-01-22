@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              BeginScript
 //------------------------------------------------------------------------------
@@ -24,8 +24,8 @@
 
 #include "MessageInterface.hpp"
 
-//#define DEBUG_BEGIN_SCRIPT
-//#define DEBUG_BEGIN_SCRIPT_GEN_STRING
+//#define DEBUG_BEGINSCRIPT
+//#define DBGLVL_GEN_STRING 1
 
 //------------------------------------------------------------------------------
 //  BeginScript()
@@ -152,23 +152,12 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    // So all nested ScriptEvent generating string should be handled here
    
    std::stringstream gen;
-   std::string indent = "   ", cmdstr;
+   std::string indent;
    std::string commentLine = GetCommentLine();
    std::string inlineComment = GetInlineComment();
-   std::string newPrefix = prefix + indent;
+   std::string beginPrefix = prefix;
    
-   TextParser tp;
-   StringArray textArray = tp.DecomposeBlock(commentLine);
-   
-   // handle multiple comment lines
-   for (UnsignedInt i=0; i<textArray.size(); i++)
-   {
-      gen << prefix << textArray[i];
-      if (textArray[i].find("\n") == commentLine.npos &&
-          textArray[i].find("\r") == commentLine.npos)
-         gen << "\n";
-   }
-      
+   IndentComment(gen, commentLine, prefix);
    gen << prefix << "BeginScript";
    
    if (inlineComment != "")
@@ -176,18 +165,18 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
    else
       gen << "\n";
    
-   #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+   #if DBGLVL_GEN_STRING
    MessageInterface::ShowMessage
       ("BeginScript::GetGeneratingString() this=(%p)%s, mode=%d, prefix='%s', "
        "useName='%s'\n", this, this->GetTypeName().c_str(), mode, prefix.c_str(),
        useName.c_str());
    #endif
    
+   indent = "   ";
    GmatCommand *current = next;
-   
    while (current != NULL)
-   {
-      #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+   {      
+      #if DBGLVL_GEN_STRING > 1
       MessageInterface::ShowMessage
          ("BeginScript::GetGeneratingString() current=(%p)%s\n", current,
           current->GetTypeName().c_str());
@@ -195,43 +184,29 @@ const std::string& BeginScript::GetGeneratingString(Gmat::WriteMode mode,
       
       if (current->GetTypeName() != "EndScript")
       {
-         // Indent whole block within Begin/EndScript (loj: 12/15/06)
-         cmdstr = current->GetGeneratingString(mode, prefix, useName);
-                  
-         #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
-         MessageInterface::ShowMessage
-            ("BeginScript::GetGeneratingString() cmdstr=\n   \"%s\"\n", cmdstr.c_str());
-         #endif
-         
-         textArray = tp.DecomposeBlock(cmdstr);
-         
-         for (UnsignedInt i=0; i<textArray.size(); i++)
-         {
-            gen << indent << textArray[i];
-            if (textArray[i].find("\n") == cmdstr.npos &&
-                textArray[i].find("\r") == cmdstr.npos)
-               gen << "\n";
-         }
+         // Indent whole block within Begin/EndScript
+         IndentChildString(gen, current, indent, mode, prefix, useName, false);
          
          // Get command after EndScript
          current = GmatCommandUtil::GetNextCommand(current);
          
          if (current == NULL)
-            gen << prefix << "EndScript;\n";
+            IndentChildString(gen, current, indent, mode, beginPrefix, useName, true);
       }
       else
       {
-         gen << prefix << "EndScript;\n";         
+         // Indent whole block within Begin/EndScript
+         IndentChildString(gen, current, indent, mode, beginPrefix, useName, true);
          current = NULL;
       }
    }
    
    generatingString = gen.str();
    
-   #ifdef DEBUG_BEGIN_SCRIPT_GEN_STRING
+   #if DBGLVL_GEN_STRING
    MessageInterface::ShowMessage
-      ("BeginScript::GetGeneratingString() return generatingString=\n%s\n\n",
-       generatingString.c_str());
+      ("BeginScript::GetGeneratingString() returnning generatingString\n");
+   MessageInterface::ShowMessage("<<<\n%s>>>\n\n", generatingString.c_str());
    #endif
    
    return generatingString;
@@ -259,7 +234,7 @@ const std::string BeginScript::GetChildString(const std::string &prefix,
                                               GmatCommand *cmd,
                                               GmatCommand *parent)
 {
-   #ifdef DEBUG_BEGIN_SCRIPT
+   #ifdef DEBUG_BEGINSCRIPT
       MessageInterface::ShowMessage("BeginScript::GetChildString entered\n");
    #endif
    
@@ -332,3 +307,90 @@ bool BeginScript::RenameRefObject(const Gmat::ObjectType type,
    
    return true;
 }
+
+
+//------------------------------------------------------------------------------
+//void IndentChildString(std::stringstream &gen, GmatCommand* cmd, 
+//                       std::string &indent, Gmat::WriteMode mode,
+//                       const std::string &prefix, const std::string &useName,
+//                       bool indentCommentOnly)
+//------------------------------------------------------------------------------
+void BeginScript::IndentChildString(std::stringstream &gen, GmatCommand* cmd, 
+                                    std::string &indent, Gmat::WriteMode mode,
+                                    const std::string &prefix,
+                                    const std::string &useName,
+                                    bool indentCommentOnly)
+{
+   TextParser tp;
+   
+   #if DBGLVL_GEN_STRING
+   ShowCommand("", "BeginScript::IndentChildString() cmd = ", cmd);
+   MessageInterface::ShowMessage
+      ("BeginScript::IndentChildString() indent='%s', mode=%d, prefix='%s', "
+       "useName='%s'\n", indent.c_str(), mode, prefix.c_str(), useName.c_str());
+   #endif
+   
+   std::string cmdstr;
+   if (indentCommentOnly)
+      cmdstr = cmd->GetCommentLine();
+   else
+      cmdstr = cmd->GetGeneratingString(mode, prefix, useName);
+   
+   StringArray textArray = tp.DecomposeBlock(cmdstr);
+   UnsignedInt size = textArray.size();
+   
+   if (size > 0 && textArray[0] != "")
+   {
+      for (UnsignedInt i=0; i<size; i++)
+      {
+         if (indentCommentOnly)
+            gen << indent << prefix << textArray[i];
+         else
+            gen << indent << textArray[i];
+         
+         if (textArray[i].find("\n") == cmdstr.npos &&
+             textArray[i].find("\r") == cmdstr.npos)
+         {
+            gen << "\n";
+         }
+      }
+   }
+   
+   if (indentCommentOnly)
+      gen << prefix << cmd->GetTypeName() << ";";
+}
+
+
+//------------------------------------------------------------------------------
+//void IndentComment(std::stringstream &gen, std::string &comment,
+//                   const std::string &prefix)
+//------------------------------------------------------------------------------
+void BeginScript::IndentComment(std::stringstream &gen, std::string &comment,
+                                const std::string &prefix)
+{
+   TextParser tp;
+   
+   #if DBGLVL_GEN_STRING
+   MessageInterface::ShowMessage
+      ("BeginScript::IndentComment() comment='%s', prefix='%s'\n",
+       comment.c_str(), prefix.c_str());
+   #endif
+   
+   StringArray textArray = tp.DecomposeBlock(comment);
+   UnsignedInt size = textArray.size();
+   
+   if (size > 0 && textArray[0] != "")
+   {
+      for (UnsignedInt i=0; i<size; i++)
+      {
+         gen << prefix << textArray[i];
+         
+         if (textArray[i].find("\n") == comment.npos &&
+             textArray[i].find("\r") == comment.npos)
+         {
+            gen << "\n";
+         }
+      }
+   }
+}
+
