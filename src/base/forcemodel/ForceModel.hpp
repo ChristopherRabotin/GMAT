@@ -155,11 +155,15 @@ public:
    
    virtual Integer     GetOwnedObjectCount();
    virtual GmatBase*   GetOwnedObject(Integer whichOne);
+   virtual std::string BuildPropertyName(GmatBase *ownedObj);
    
+   #ifdef __WITH_FM_GEN_STRING__
    virtual const std::string&
    GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
                        const std::string &prefix = "",
                        const std::string &useName = "");
+   #endif
+   
    void                UpdateInitialData();
    void                ReportEpochData();
 
@@ -205,16 +209,19 @@ protected:
    
    /// Mapping between script descriptions and force names.
    static std::map<std::string, std::string> scriptAliases;
-    
+   
    const StringArray&  BuildBodyList(std::string type) const;
    const StringArray&  BuildCoordinateList() const;
    virtual Integer     SetupSpacecraftData(GmatBase *sat, 
                                            PhysicalModel *pm, Integer i);
    void                UpdateTransientForces();
-
+   
+   #ifdef __WITH_FM_GEN_STRING__
    void                WriteFMParameters(Gmat::WriteMode mode,
                                          std::string &prefix,
                                          std::stringstream &stream);
+   #endif
+   
    std::string         BuildForceNameString(PhysicalModel *force);
    void                ClearInternalCoordinateSystems();
    void                SetInternalCoordinateSystem(const std::string csId,

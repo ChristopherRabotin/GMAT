@@ -60,6 +60,7 @@
 //#define DEBUG_FORCEMODEL_EPOCHS
 //#define DEBUG_SATELLITE_PARAMETERS
 //#define DEBUG_FIRST_CALL
+//#define DEBUG_GEN_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
 
 //---------------------------------
@@ -989,18 +990,49 @@ void ForceModel::SetInternalCoordinateSystem(const std::string csId, PhysicalMod
 }
 
 
+//------------------------------------------------------------------------------
+// Integer ForceModel::GetOwnedObjectCount()
+//------------------------------------------------------------------------------
 Integer ForceModel::GetOwnedObjectCount()
 {
    return numForces;
 }
 
 
+//------------------------------------------------------------------------------
+// GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
+//------------------------------------------------------------------------------
 GmatBase* ForceModel::GetOwnedObject(Integer whichOne)
 {
    if (whichOne < numForces) 
       return GetForce(whichOne);
    
    return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual std::string BuildPropertyName(GmatBase *ownedObj)
+//------------------------------------------------------------------------------
+/*
+ * Builds property name of owned object.
+ * This method is called when special handling of object property name is
+ * required when writing object. For example, ForceModel requires additional
+ * name Earth for GravityField as in FM.GravityField.Earth.Degree.
+ *
+ * @param ownedObj The object of property handling
+ * @return The property name
+ */
+//------------------------------------------------------------------------------
+std::string ForceModel::BuildPropertyName(GmatBase *ownedObj)
+{
+   #ifdef DEBUG_OWNED_OBJECT_STRINGS
+   MessageInterface::ShowMessage
+      ("ForceModel::BuildPropertyName() called with ownedObj type=%s\n",
+       ownedObj->GetTypeName().c_str());
+   #endif
+   
+   return BuildForceNameString((PhysicalModel*)ownedObj);
 }
 
 
@@ -2316,7 +2348,8 @@ ObjectArray& ForceModel::GetRefObjectArray(const std::string& typeString)
 }
 
 
-
+//We can remove GetGeneratingString() and WriteFMParameters() now (loj: 2008.01.25)
+#ifdef __WITH_FM_GEN_STRING__
 //------------------------------------------------------------------------------
 // StringArray GetGeneratingString(Gmat::WriteMode mode,
 //                const std::string &prefix, const std::string &useName)
@@ -2339,7 +2372,7 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
                                                    const std::string &prefix,
                                                    const std::string &useName)
 {
-   #if DEBUG_FORCEMODEL_GEN_STRING
+   #ifdef DEBUG_GEN_STRING
    MessageInterface::ShowMessage
       ("ForceModel::GetGeneratingString() this=%p, mode=%d, prefix=%s, "
        "useName=%s\n", this, mode, prefix.c_str(), useName.c_str());
@@ -2393,8 +2426,10 @@ const std::string& ForceModel::GetGeneratingString(Gmat::WriteMode mode,
    
    generatingString = data.str();
    
+   return generatingString;
+   
    // Call the base class method for preface and inline comments
-   return GmatBase::GetGeneratingString(mode, prefix, useName);
+   //return GmatBase::GetGeneratingString(mode, prefix, useName);
 }
 
 
@@ -2489,17 +2524,25 @@ void ForceModel::WriteFMParameters(Gmat::WriteMode mode, std::string &prefix,
                 i, ownedObject->GetTypeName().c_str(),
                 nomme.c_str(), ownedObject);
          #endif
-
+         
          if (nomme != "")
             newprefix += nomme + ".";
          else if (GetType() == Gmat::FORCE_MODEL)
-            newprefix += ownedObject->GetTypeName();
+            newprefix += ownedObject->GetTypeName() + ".";
+         
+         #ifdef DEBUG_OWNED_OBJECT_STRINGS
+         MessageInterface::ShowMessage
+            ("   Calling ownedObject->GetGeneratingString() with "
+             "newprefix='%s'\n", newprefix.c_str());
+         #endif
+         
          stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
       }
       else
          MessageInterface::ShowMessage("Cannot access force %d\n", i);
    }
 }
+#endif
 
 
 //------------------------------------------------------------------------------
@@ -2512,14 +2555,15 @@ std::string ForceModel::BuildForceNameString(PhysicalModel *force)
    if (forceType == "DragForce")
       retval = "Drag";
    if (forceType == "GravityField")
-      retval = "Gravity." + force->GetStringParameter("BodyName");
+      // Changed "Gravity" to "GravityField" to be consistent with type name (loj: 2007.01.25)
+      retval = "GravityField." + force->GetStringParameter("BodyName");
    if (forceType == "PointMassForce")
       retval = force->GetStringParameter("BodyName");
    if (forceType == "SolarRadiationPressure")
       retval = "SRP";
-
+   
    // Add others here
-      
+   
    return retval;
 }
 
