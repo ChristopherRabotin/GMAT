@@ -314,7 +314,7 @@ public:
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
                            const std::string &prefix = "",
                            const std::string &useName = "");
-   
+   virtual std::string  BuildPropertyName(GmatBase *ownedObj);
    virtual void         FinalizeCreation();
    
    virtual std::string  GetErrorMessageFormat();

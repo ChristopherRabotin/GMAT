@@ -41,9 +41,10 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_OBJECT_TYPE_CHECKING
-//#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_COMMENTS
+//#define DEBUG_COMMENTS_ATTRIBUTE
 //#define DEBUG_GENERATING_STRING
+//#define DEBUG_OWNED_OBJECT_STRINGS
 //#define DEBUG_WRITE_PARAM
 
 /// Set the static "undefined" parameters
@@ -1581,7 +1582,7 @@ void GmatBase::SetCommentLine(const std::string &comment)
 {
    commentLine = comment;
 }
-   
+
 //---------------------------------------------------------------------------
 //  const std::string GetInlineComment() const
 //---------------------------------------------------------------------------
@@ -1605,7 +1606,7 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
-      #ifdef DEBUG_COMMENTS
+      #ifdef DEBUG_COMMENTS_ATTRIBUTE
       MessageInterface::ShowMessage
          ("Attribute comment name:%s index:%d has not been retrieved.\n",
           instanceName.c_str(), index);
@@ -1613,7 +1614,7 @@ const std::string GmatBase::GetAttributeCommentLine(Integer index)
       return "";
    }
    
-   #ifdef DEBUG_COMMENTS
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
    MessageInterface::ShowMessage
       ("Getting Attribute comment name:%s index:%d - %s.\n",
        instanceName.c_str(), index, attributeCommentLines[index].c_str());
@@ -1629,14 +1630,14 @@ void GmatBase::SetAttributeCommentLine(Integer index,
 {
    if (index >= (Integer)attributeCommentLines.size())
    {
-          #ifdef DEBUG_COMMENTS
+      #ifdef DEBUG_COMMENTS_ATTRIBUTE
       MessageInterface::ShowMessage("Attribute comment index:%d - %s - has not been set. Size=%d\n",
          index, comment.c_str(), (Integer)attributeCommentLines.size());
       #endif
       return;
    }
    
-   #ifdef DEBUG_COMMENTS
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
    MessageInterface::ShowMessage
       ("Setting Attribute comment index:%d - %s.\n", index, comment.c_str());
    #endif
@@ -1652,7 +1653,7 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-      #ifdef DEBUG_COMMENTS
+      #ifdef DEBUG_COMMENTS_ATTRIBUTE
       MessageInterface::ShowMessage
          ("Inline attribute comment name:%s index:%d has not been retrieved.\n",
           instanceName.c_str(), index);
@@ -1660,7 +1661,7 @@ const std::string GmatBase::GetInlineAttributeComment(Integer index)
       return "";
    }
    
-   #ifdef DEBUG_COMMENTS
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
    MessageInterface::ShowMessage
       ("Getting Inline attribute comment name:%s index:%d - %s.\n",
        instanceName.c_str(), index, attributeInlineComments[index].c_str());
@@ -1677,7 +1678,7 @@ void GmatBase::SetInlineAttributeComment(Integer index,
 {
    if (index >= (Integer)attributeInlineComments.size())
    {
-      #ifdef DEBUG_COMMENTS
+      #ifdef DEBUG_COMMENTS_ATTRIBUTE
       MessageInterface::ShowMessage
          ("Inline attribute comment - %s - has not been set. Size=%d\n",
           comment.c_str(), (Integer)attributeInlineComments.size());
@@ -1685,7 +1686,7 @@ void GmatBase::SetInlineAttributeComment(Integer index,
       return;
    }
 
-   #ifdef DEBUG_COMMENTS
+   #ifdef DEBUG_COMMENTS_ATTRIBUTE
    MessageInterface::ShowMessage
       ("Setting Inline attribute comment - %s.\n", comment.c_str());
    #endif 
@@ -2480,6 +2481,7 @@ const std::string& GmatBase::GetGeneratingString(Gmat::WriteMode mode,
       }
       else if (mode == Gmat::NO_COMMENTS)
       {
+         MessageInterface::ShowMessage("==> Do not show comments\n");
          data << "Create " << tname << " " << nomme << ";\n";
          preface = "GMAT ";
       }
@@ -2586,6 +2588,25 @@ StringArray GmatBase::GetGeneratingStringArray(Gmat::WriteMode mode,
 void GmatBase::FinalizeCreation()
 {
    PrepCommentTables();
+}
+
+
+//------------------------------------------------------------------------------
+// virtual std::string BuildPropertyName(GmatBase *ownedObj)
+//------------------------------------------------------------------------------
+/*
+ * Builds property name of given owned object.
+ * This method is called when special naming of owned object property is
+ * required when writing object. For example, ForceModel requires additional
+ * name Earth for GravityField as in FM.GravityField.Earth.Degree.
+ *
+ * @param obj The owned object that needs special property naming
+ * @return The property name
+ */
+//------------------------------------------------------------------------------
+std::string GmatBase::BuildPropertyName(GmatBase *ownedObj)
+{
+   return "";
 }
 
 
@@ -2783,7 +2804,7 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                if (value.str() != "")
                {
                   std::string attCmtLn = GetAttributeCommentLine(i);
-
+                  
                   if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
                      (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
                      stream << attCmtLn;
@@ -2846,10 +2867,10 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          }
       }
    }
-
+   
    GmatBase *ownedObject;
    std::string nomme, newprefix;
-
+   
    #ifdef DEBUG_OWNED_OBJECT_STRINGS
       MessageInterface::ShowMessage("\"%s\" has %d owned objects\n",
          instanceName.c_str(), GetOwnedObjectCount());
@@ -2867,15 +2888,38 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
              i, ownedObject->GetTypeName().c_str(),
              ownedObject->GetName().c_str());
       #endif
-
+          
       // if owned object is a propagator, don't append the propagator name
       if (ownedObject->GetType() != Gmat::PROPAGATOR)
       {
-         if (nomme != "")
+         // old code commented out (loj: 2008.01.25)
+         //if (nomme != "")
+         //   newprefix += nomme + ".";
+         //else if (GetType() == Gmat::FORCE_MODEL)
+         //   newprefix += ownedObject->GetTypeName();
+         
+         // Call new method BuildPropertyName() first to handle additional property
+         // name for owned object in general way. For example, additional "Earth" in
+         // "FM.GravityField.Earth.Degree", (loj: 2008.01.25)
+         std::string ownedPropName = BuildPropertyName(ownedObject);
+         
+         #ifdef DEBUG_OWNED_OBJECT_STRINGS
+         MessageInterface::ShowMessage
+            ("   ownedPropName=<%s>, name=<%s>\n", ownedPropName.c_str(), nomme.c_str());
+         #endif
+         
+         if (ownedPropName != "")
+            newprefix += ownedPropName + ".";
+         else if (nomme != "")
             newprefix += nomme + ".";
-         else if (GetType() == Gmat::FORCE_MODEL)
-            newprefix += ownedObject->GetTypeName();      
+         
       }
+      
+      #ifdef DEBUG_OWNED_OBJECT_STRINGS
+      MessageInterface::ShowMessage
+         ("   Calling ownedObject->GetGeneratingString() with newprefix='%s'\n",
+          newprefix.c_str());
+      #endif
       
       stream << ownedObject->GetGeneratingString(Gmat::OWNED_OBJECT, newprefix);
    }
@@ -2929,7 +2973,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    case Gmat::UNSIGNED_INT_TYPE:
       stream << GetUnsignedIntParameter(id);
       break;
-            
+      
    case Gmat::UNSIGNED_INTARRAY_TYPE:
       {
          UnsignedIntArray arr = GetUnsignedIntArrayParameter(id);
