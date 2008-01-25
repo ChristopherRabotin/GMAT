@@ -947,7 +947,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    
    if (outStream == NULL)
       return false;
-
+   
    //-----------------------------------
    // Header Comment
    //-----------------------------------
@@ -1583,15 +1583,20 @@ void ScriptInterpreter::WriteCommandSequence(Gmat::WriteMode mode)
    if (cmd == NULL)
       return;
    
-   #if DEBUG_SCRIPT_WRITING
-   MessageInterface::ShowMessage
-      ("WriteCommandSequence() Writing Command Sequence\nPrefaceComment of %s=%s\n",
-       cmd->GetNext()->GetTypeName().c_str(), cmd->GetNext()->GetCommentLine().c_str());
-   #endif
-   
    // Write out the section delimiter comment if preface comment is blank
    // The first command is always NoOp, so get next command
    cmd = cmd->GetNext();
+   
+   // If there is no command after NoOp, return
+   if (cmd == NULL)
+      return;
+   
+   #if DEBUG_SCRIPT_WRITING
+   MessageInterface::ShowMessage
+      ("WriteCommandSequence() Writing Command Sequence\nPrefaceComment of %s=%s\n",
+       cmd->GetTypeName().c_str(), cmd->GetCommentLine().c_str());
+   #endif
+   
    if (GmatStringUtil::IsBlank(cmd->GetCommentLine(), true))
    {
       theReadWriter->WriteText(sectionDelimiterString[0]);
