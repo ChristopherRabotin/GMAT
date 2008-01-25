@@ -585,7 +585,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    #endif
    
    GmatBase *obj = NULL;
-
+   
    if (!GmatStringUtil::IsValidName(name, true))
    {
       InterpreterException ex
@@ -614,16 +614,17 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
    }
    #endif
    
-   // This error message may be confusing to users
-   // check for name first
+   // Give warning if name already exist
    if ((name != "EarthMJ2000Eq") && 
        (name != "EarthMJ2000Ec") && 
        (name != "EarthFixed"))
    {
       obj = FindObject(name);
-      // Since Parameters are created automatically as they are referenced,
-      // add check for PARAMETER type
-      if (obj != NULL && obj->GetType() != Gmat::PARAMETER)
+      // Since System Parameters are created automatically as they are referenced,
+      // do not give warning if creating a system parameter
+      if (obj != NULL && ((obj->GetType() != Gmat::PARAMETER) ||
+                          (obj->GetType() == Gmat::PARAMETER &&
+                           (!obj->IsOfType("SystemParameter")))))
       {
          InterpreterException ex
             (type + " object named \"" + name + "\" already exist");
@@ -3739,14 +3740,17 @@ bool Interpreter::SetForceModelProperty(GmatBase *obj, const std::string &prop,
    Gmat::ParameterType type;
    
    // Current ForceModel scripting, SRP is on for central body.
-   //GMAT FM.CentralBody          = Earth;
-   //GMAT FM.PrimaryBodies        = {Earth};
-   //GMAT FM.PointMasses          = {Sun, Luna, Jupiter}; 
-   //GMAT FM.Drag                 = None;
-   //GMAT FM.Gravity.Earth.Model  = JGM2;
-   //GMAT FM.Gravity.Earth.Degree = 20;
-   //GMAT FM.Gravity.Earth.Order  = 20;
-   //GMAT FM.SRP                  = On;
+   //GMAT FM.CentralBody = Earth;
+   //GMAT FM.PrimaryBodies = {Earth, Luna};
+   //GMAT FM.PointMasses = {Sun, Jupiter}; 
+   //GMAT FM.Drag = None;
+   //GMAT FM.SRP = On;
+   //GMAT FM.GravityField.Earth.Degree = 20;
+   //GMAT FM.GravityField.Earth.Order = 20;
+   //GMAT FM.GravityField.Earth.Model = JGM2.cof;
+   //GMAT FM.GravityField.Luna.Degree = 4;
+   //GMAT FM.GravityField.Luna.Order = 4;
+   //GMAT FM.GravityField.Luna.PotentialFile = LP165P.cof;
    
    // For future scripting we want to specify body for Drag and SRP
    // e.g. FM.Drag.Earth = JacchiaRoberts;
