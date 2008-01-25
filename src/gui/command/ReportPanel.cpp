@@ -24,8 +24,9 @@
 #include "ReportFile.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_REPORT_PANEL 1
-//#define DEBUG_REPORT_PANEL_SAVE 1
+//#define DEBUG_REPORTPANEL
+//#define DEBUG_REPORTPANEL_LOAD
+//#define DEBUG_REPORTPANEL_SAVE
 
 //------------------------------
 // event tables for wxWindows
@@ -58,7 +59,7 @@ END_EVENT_TABLE()
 ReportPanel::ReportPanel(wxWindow *parent, GmatCommand *cmd)
    : GmatPanel(parent)
 {
-   #if DEBUG_REPORT_PANEL
+   #ifdef DEBUG_REPORTPANEL
    MessageInterface::ShowMessage("ReportPanel() entering...\n");
    MessageInterface::ShowMessage("ReportPanel() cmd = " +
                                  cmd->GetTypeName() + "\n");
@@ -104,7 +105,7 @@ ReportPanel::~ReportPanel()
 //------------------------------------------------------------------------------
 void ReportPanel::Create()
 {
-   #if DEBUG_REPORT_PANEL
+   #ifdef DEBUG_REPORTPANEL
    MessageInterface::ShowMessage("ReportPanel::Create() entering...\n");
    #endif
    
@@ -154,7 +155,7 @@ void ReportPanel::Create()
    //-------------------------------------------------------
    theMiddleSizer->Add(panelSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   #if DEBUG_REPORT_PANEL
+   #ifdef DEBUG_REPORTPANEL
    MessageInterface::ShowMessage("ReportPanel::Create() exiting...\n");
    #endif
 }
@@ -165,7 +166,7 @@ void ReportPanel::Create()
 //------------------------------------------------------------------------------
 void ReportPanel::LoadData()
 {
-   #if DEBUG_REPORT_PANEL
+   #ifdef DEBUG_REPORTPANEL_LOAD
    MessageInterface::ShowMessage("ReportPanel::LoadData() entering...\n");
    #endif
 
@@ -175,7 +176,12 @@ void ReportPanel::LoadData()
       mObject = theCommand;
       
       // Get ReportFile name
-      std::string reportFileName = theCommand->GetRefObjectName(Gmat::SUBSCRIBER);
+      std::string rfName = theCommand->GetRefObjectName(Gmat::SUBSCRIBER);
+      mReportFileComboBox->SetValue(rfName.c_str());
+      
+      #ifdef DEBUG_REPORTPANEL_LOAD
+      MessageInterface::ShowMessage("   ReportFile name='%s'\n", rfName.c_str());
+      #endif
       
       // Get parameters to report
       StringArray parameterList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
@@ -200,7 +206,7 @@ void ReportPanel::LoadData()
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
    
-   #if DEBUG_REPORT_PANEL
+   #ifdef DEBUG_REPORTPANEL_LOAD
    MessageInterface::ShowMessage("ReportPanel::LoadData() exiting...\n");
    #endif
    
@@ -212,7 +218,7 @@ void ReportPanel::LoadData()
 //------------------------------------------------------------------------------
 void ReportPanel::SaveData()
 {
-   #if DEBUG_REPORT_PANEL_SAVE
+   #ifdef DEBUG_REPORTPANEL_SAVE
    MessageInterface::ShowMessage("ReportPanel::SaveData() entering...\n");
    #endif
    
@@ -223,12 +229,20 @@ void ReportPanel::SaveData()
    ReportFile *reportFile =
       (ReportFile*)theGuiInterpreter->GetConfiguredObject(rfName);
    
+   #ifdef DEBUG_REPORTPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("   ReportFile name='%s', addr=%p\n", rfName.c_str(), reportFile);
+   #endif
+   
+   if (reportFile == NULL)
+      return;
+   
    try
    {
       // save ReportFile
       if (mHasReportFileChanged)
       {
-         #if DEBUG_REPORT_PANEL_SAVE
+         #ifdef DEBUG_REPORTPANEL_SAVE
          MessageInterface::ShowMessage
             ("    rfName=%s, reportFile=%p\n", rfName.c_str(), reportFile);
          #endif
@@ -260,7 +274,7 @@ void ReportPanel::SaveData()
       canClose = false;
    }
    
-   #if DEBUG_REPORT_PANEL_SAVE
+   #ifdef DEBUG_REPORTPANEL_SAVE
    MessageInterface::ShowMessage("ReportPanel::SaveData() exiting...\n");
    #endif
    
@@ -274,8 +288,11 @@ void ReportPanel::OnButtonClick(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mViewButton)
    {
+      // Note:: 2008.01.23
+      // The Report command cannot take Arrays yet, so set allowArray to false
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE, true);
+                                     GuiItemManager::SHOW_REPORTABLE, true, true,
+                                     false, true, true, false);
       
       paramDlg.SetParamNameArray(mReportWxStrings);
       paramDlg.ShowModal();
