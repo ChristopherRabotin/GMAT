@@ -217,6 +217,7 @@ private:
    
    std::string propSetupName;
    std::string thePropagatorName;
+   std::string mFmPrefaceComment;
    
    wxString currentBodyName;
    wxString gravTypeName;

@@ -196,10 +196,8 @@ void PropagationConfigPanel::LoadData()
    
    try
    {
-      // Getting the force model central body
+      mFmPrefaceComment = theForceModel->GetCommentLine();
       propOriginName = theForceModel->GetStringParameter("CentralBody").c_str();
-      
-      // Getting the force model error control
       errorControlTypeName = theForceModel->GetStringParameter("ErrorControl").c_str();
       
       PhysicalModel *force;     
@@ -626,6 +624,7 @@ void PropagationConfigPanel::SaveData()
       
       isForceModelChanged = false;
       ForceModel *newFm = new ForceModel();
+      newFm->SetCommentLine(mFmPrefaceComment);
       std::string bodyName;
       
       //----------------------------------------------------
