@@ -29,6 +29,7 @@ class OpenGlPlot : public Subscriber
 public:
    OpenGlPlot(const std::string &name);
    OpenGlPlot(const OpenGlPlot &ogl);
+   OpenGlPlot& operator=(const OpenGlPlot&);
    virtual ~OpenGlPlot(void);
    
    const StringArray& GetSpacePointList();
