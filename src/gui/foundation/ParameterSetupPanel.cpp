@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ParameterSetupPanel
 //------------------------------------------------------------------------------
@@ -131,14 +131,17 @@ void ParameterSetupPanel::Create()
    mVarStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    mVarStaticBoxSizer->Add(detailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   // add note
-   wxStaticText *noteStaticText =
-      new wxStaticText(this, ID_TEXT,
-                       wxT("Only number is editable for expression for now."),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   noteStaticText->SetForegroundColour(*wxRED);
+   // add note if Variable
+   if (!mIsStringVar)
+   {
+      wxStaticText *noteStaticText =
+         new wxStaticText(this, ID_TEXT,
+                          wxT("Only number is editable for expression for now."),
+                          wxDefaultPosition, wxDefaultSize, 0);
+      noteStaticText->SetForegroundColour(*wxRED);
+      mPageBoxSizer->Add(noteStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   }
    
-   mPageBoxSizer->Add(noteStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
    mPageBoxSizer->Add(mVarStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------
