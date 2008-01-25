@@ -99,6 +99,9 @@ Parameter::Parameter(const std::string &name, const std::string &typeStr,
    objectTypes.push_back(Gmat::PARAMETER);
    objectTypeNames.push_back("Parameter");
    
+   if (key == GmatParam::SYSTEM_PARAM)
+      objectTypeNames.push_back("SystemParameter");
+   
    mKey = key;
    
    //if ((name != "" && name != " "))
