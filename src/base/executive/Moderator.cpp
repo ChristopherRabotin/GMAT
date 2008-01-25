@@ -486,7 +486,7 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    std::string newName = name;
    
    // Ignore array indexing of Array
-   std::string::size_type index = name.find('(');
+   std::string::size_type index = name.find_first_of("([");
    if (index != name.npos)
    {
       newName = name.substr(0, index);
@@ -2684,7 +2684,7 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       }
       else if (type == "Report")
       {
-         Subscriber *sub = GetDefaultSubscriber("ReportFile");
+         Subscriber *sub = GetDefaultSubscriber("ReportFile", false);
          Parameter *param = GetDefaultX();
          cmd->SetRefObject(sub, Gmat::SUBSCRIBER, sub->GetName(), 0);
          cmd->SetRefObject(param, Gmat::PARAMETER, param->GetName(), 0);
@@ -4531,9 +4531,9 @@ Hardware* Moderator::GetDefaultHardware(const std::string &type)
 
 
 //------------------------------------------------------------------------------
-// Subscriber* GetDefaultSubscriber(const std::string &type)
+// Subscriber* GetDefaultSubscriber(const std::string &type, bool addObjects = true)
 //------------------------------------------------------------------------------
-Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
+Subscriber* Moderator::GetDefaultSubscriber(const std::string &type, bool addObjects)
 {
    StringArray configList = GetListOfObjects(Gmat::SUBSCRIBER);
    int subSize = configList.size();
@@ -4558,7 +4558,7 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
    else if (type == "XYPlot")
    {
       // create default XYPlot
-      sub = CreateSubscriber("XYPlot", "DefaultXYPlot"); 
+      sub = CreateSubscriber("XYPlot", "DefaultXYPlot");
       sub->SetStringParameter("IndVar", "DefaultSC.A1ModJulian");
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.X", 0);      
       sub->SetStringParameter("Add", "DefaultSC.EarthMJ2000Eq.Y", 1);
@@ -4572,13 +4572,17 @@ Subscriber* Moderator::GetDefaultSubscriber(const std::string &type)
       std::string scName = GetDefaultSpacecraft()->GetName();
       sub->SetStringParameter(sub->GetParameterID("Filename"),
                               "DefaultReportFile.txt");
-      sub->SetStringParameter("Add", scName + ".A1ModJulian");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.X");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Y");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Z");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VX");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VY");
-      sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VZ");
+      
+      if (addObjects)
+      {
+         sub->SetStringParameter("Add", scName + ".A1ModJulian");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.X");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Y");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.Z");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VX");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VY");
+         sub->SetStringParameter("Add", scName + ".EarthMJ2000Eq.VZ");
+      }
       sub->Activate(true);
       
       // To validate and create element wrappers

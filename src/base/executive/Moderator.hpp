@@ -296,14 +296,15 @@ private:
    
    // default objects
    Spacecraft* GetDefaultSpacecraft();
-   PropSetup* GetDefaultPropSetup();
-   Burn* GetDefaultBurn(const std::string &type);
-   Hardware* GetDefaultHardware(const std::string &type);
-   Solver* GetDefaultSolver();
-   Subscriber* GetDefaultSubscriber(const std::string &type);
+   PropSetup*  GetDefaultPropSetup();
+   Burn*       GetDefaultBurn(const std::string &type);
+   Hardware*   GetDefaultHardware(const std::string &type);
+   Solver*     GetDefaultSolver();
+   Subscriber* GetDefaultSubscriber(const std::string &type,
+                                    bool addObjects = true);
+   Parameter*  GetDefaultX();
+   Parameter*  GetDefaultY();
    StopCondition* CreateDefaultStopCondition();
-   Parameter* GetDefaultX();
-   Parameter* GetDefaultY();
    
    // sandbox
    void AddSolarSystemToSandbox(Integer index);
