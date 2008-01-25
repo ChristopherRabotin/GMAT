@@ -559,7 +559,7 @@ void ReportFileSetupPanel::OnButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mViewButton)
    {
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_REPORTABLE, true);
+                                     GuiItemManager::SHOW_REPORTABLE, true, true);
       
       paramDlg.SetParamNameArray(mReportWxStrings);
       paramDlg.ShowModal();
