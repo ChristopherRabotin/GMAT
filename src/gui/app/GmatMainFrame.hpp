@@ -143,7 +143,7 @@ private:
    
    void InitToolBar(wxToolBar* toolBar);
    void AddAnimationTools(wxToolBar* toolBar);
-   void ShowSaveMessage();
+   bool ShowSaveMessage();
    bool SaveScriptAs();
    void OpenScript();
    void UpdateTitle(const wxString &filename = "");

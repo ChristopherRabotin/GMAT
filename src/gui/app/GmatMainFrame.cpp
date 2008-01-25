@@ -1307,13 +1307,16 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    // close all child windows first
    if (CloseAllChildren(true, true))
    {
-      ShowSaveMessage();
-      event.Skip();
+      // if user canceled, veto the event
+      if (ShowSaveMessage())
+         event.Veto();
+      else
+         event.Skip();
    }
    else
    {
       event.Veto();
-   }   
+   }
 }
 
 
@@ -1513,9 +1516,15 @@ void GmatMainFrame::AddAnimationTools(wxToolBar* toolBar)
 
 
 //------------------------------------------------------------------------------
-// void ShowSaveMessage()
+// bool ShowSaveMessage()
 //------------------------------------------------------------------------------
-void GmatMainFrame::ShowSaveMessage()
+/*
+ * Shows save changes to script file message.
+ *
+ * @return true if user canceled from the message dialog
+ */
+//------------------------------------------------------------------------------
+bool GmatMainFrame::ShowSaveMessage()
 {
    // prompt save, if changes were made
    if (theGuiInterpreter->HasConfigurationChanged())
@@ -1531,17 +1540,20 @@ void GmatMainFrame::ShowSaveMessage()
       
       if (result == wxID_CANCEL)
       {
-         return;
+         return true;
       }
       else if (result == wxID_NO)
       {
          // If we decided to ignore any changes made to panel later,
          // just uncomment this
          //mExitWithoutConfirm = true;
+         return false;
       }
       else if (result == wxID_YES)
       {
          bool scriptSaved = false;
+         wxString wxCurrFilename = mScriptFilename.c_str();
+         wxString wxBackupFilename = wxCurrFilename + ".bak";
          
          if (strcmp(mScriptFilename.c_str(), "$gmattempscript$.script") == 0)
          {
@@ -1549,6 +1561,9 @@ void GmatMainFrame::ShowSaveMessage()
          }
          else
          {
+            // Create backup file
+            ::wxCopyFile(wxCurrFilename, wxBackupFilename);
+            
             theGuiInterpreter->SaveScript(mScriptFilename);
             scriptSaved = true;
          }
@@ -1556,7 +1571,8 @@ void GmatMainFrame::ShowSaveMessage()
          if (scriptSaved)
          {
             MessageInterface::PopupMessage
-               (Gmat::INFO_, "Script saved to \"%s\"\n", mScriptFilename.c_str());
+               (Gmat::INFO_, "Script saved to \"%s\"\nSaved backup to \"%s\"\n",
+                mScriptFilename.c_str(), wxBackupFilename.c_str());
          }
       }
    }
@@ -1570,9 +1586,11 @@ void GmatMainFrame::ShowSaveMessage()
       int result = msgDlg->ShowModal();
       
       if (result == wxID_NO)
-         return;
+         return false;
       #endif
    }
+   
+   return false;
 }
 
 
@@ -2000,15 +2018,11 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
       sizer->Add(new OpenGlPlotSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::VARIABLE:
-      if (theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "Variable" ||
-          theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "String")
-      {
-         sizer->Add(new ParameterSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
-      }
-      else if (theGuiInterpreter->GetConfiguredObject(name.c_str())->GetTypeName() == "Array")
-      {
-         sizer->Add(new ArraySetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
-      }
+   case GmatTree::STRING:
+      sizer->Add(new ParameterSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
+   case GmatTree::ARRAY:
+      sizer->Add(new ArraySetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
    case GmatTree::GMAT_FUNCTION:
       {
