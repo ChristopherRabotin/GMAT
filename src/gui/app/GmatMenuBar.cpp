@@ -109,7 +109,10 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    fileMenu->Append(MENU_FILE_PRINT, wxT("Print"), wxT(""));
    fileMenu->AppendSeparator();
    fileMenu->Append(MENU_PROJECT_EXIT, wxT("Exit"), wxT(""));
-   
+   #ifdef __WXMAC__
+       wxApp::s_macExitMenuItemId = MENU_PROJECT_EXIT;
+   #endif
+  
    fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_FILE_PRINT, FALSE);
