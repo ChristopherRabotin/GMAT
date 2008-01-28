@@ -91,15 +91,16 @@ int MatlabInterface::Open()
    int OK = gethostname(hName, 128);
    if (OK != 0) MessageInterface::ShowMessage("Error getting host name\n");
    std::string hNameStr(hName);
+   // -desktop now causes MATLAB desktop to come up (as of 2008.01.11) but it 
+   // hangs both MATLAB and GMAT
    //std::string runString = "matlab -display " + hNameStr + ":0.0 -desktop";
-   std::string runString = "matlab -display " + hNameStr + ":0.0";
-   //MessageInterface::ShowMessage("MATLAB being opened with the command: " 
-   //                  + runString + "\n");
-   //if ((enginePtrD = engOpen("\0")))
-   if ((enginePtrD = engOpen(NULL))) // ***** temporary or dos it matter? ******
-   //if ((enginePtrD = engOpen(runString.c_str())))
+   //std::string runString = "matlab -display " + hNameStr + ":0.0";
+   std::string runString = "matlab ";
+   if ((enginePtrD = engOpen(runString.c_str())))
    {
-      MessageInterface::ShowMessage("Successfully opened MATLAB engine ...\n");
+      MessageInterface::ShowMessage(
+               "Successfully opened MATLAB engine using startcmd \"%s\"\n",
+               runString.c_str());
       accessCount++;
       #ifdef DEBUG_MATLAB_OPEN_CLOSE
          MessageInterface::ShowMessage(
@@ -110,7 +111,9 @@ int MatlabInterface::Open()
    }
    else
    {
-      MessageInterface::ShowMessage("Failed to open MATLAB engine ...\n");
+      MessageInterface::ShowMessage(
+               "Failed to open MATLAB engine using startcmd \"%s\"\n",
+               runString.c_str());
       return 0;
    }
    
