@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   VaryPanel
 //------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ void VaryPanel::LoadData()
    MessageInterface::ShowMessage("VaryPanel::LoadData() entered\n");
    MessageInterface::ShowMessage("Command=%s\n", mVaryCommand->GetTypeName().c_str());
    #endif
-
+   
    mVarNameTextCtrl->Disable(); // we don't want user to edit this box
    mViewVarButton->Enable();
    
@@ -217,75 +217,52 @@ void VaryPanel::LoadData()
    {
       // Set the pointer for the "Show Script" button
       mObject = mVaryCommand;
-
+      
       std::string solverName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("SolverName"));
-
+      
       #if DEBUG_VARY_PANEL
       MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
       #endif
       
       std::string varName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Variable"));
-
+      
       #if DEBUG_VARY_PANEL
       MessageInterface::ShowMessage("varName=%s\n", varName.c_str());
       #endif
-   
-      //Real value;
-
+            
       mSolverData.solverName = wxT(solverName.c_str());
       mSolverData.varName = wxT(varName.c_str());
       
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("InitialValue"));
-      //mSolverData.initialValue = value;
       std::string initVal = 
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("InitialValue"));
       mSolverData.initialValue = wxT(initVal.c_str());
-
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("Perturbation"));
-      //mSolverData.pert = value;
+      
       std::string pertVal = 
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Perturbation"));
       mSolverData.pert = wxT(pertVal.c_str());
-
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("Lower"));
-      //mSolverData.minValue = value;
+      
       std::string lowerVal = 
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Lower"));
       mSolverData.minValue = wxT(lowerVal.c_str());
-         
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("Upper"));
-      //mSolverData.maxValue = value;
+      
       std::string upperVal = 
       mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Upper"));
       mSolverData.maxValue = wxT(upperVal.c_str());
-         
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("MaxStep"));
-      //mSolverData.maxStep = value;
+      
       std::string maxVal = 
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MaxStep"));
       mSolverData.maxStep = wxT(maxVal.c_str());
-
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("AdditiveScaleFactor"));
-      //mSolverData.additiveScaleFactor = value;
+      
       std::string addVal = 
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("AdditiveScaleFactor"));
       mSolverData.additiveScaleFactor = wxT(addVal.c_str());
-
-      //value = mVaryCommand->
-      //   GetRealParameter(mVaryCommand->GetParameterID("MultiplicativeScaleFactor"));
-      //mSolverData.multiplicativeScaleFactor = value;
+      
       std::string multVal =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MultiplicativeScaleFactor"));
       mSolverData.multiplicativeScaleFactor = wxT(multVal.c_str());
-            
+      
       if (inOptimizeCmd)
       {   
          pertStaticText->Enable(false);
@@ -371,37 +348,30 @@ void VaryPanel::SaveData()
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Variable"), variableName);
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("InitialValue"),
           mSolverData.initialValue.c_str());
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Perturbation"),
           mSolverData.pert.c_str());
    
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Lower"),
           mSolverData.minValue.c_str());
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("Upper"),
           mSolverData.maxValue.c_str());
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("MaxStep"),
           mSolverData.maxStep.c_str());
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("AdditiveScaleFactor"),
           mSolverData.additiveScaleFactor.c_str());
       
-      //mVaryCommand->SetRealParameter
       mVaryCommand->SetStringParameter
          (mVaryCommand->GetParameterID("MultiplicativeScaleFactor"),
           mSolverData.multiplicativeScaleFactor.c_str());
@@ -415,8 +385,6 @@ void VaryPanel::SaveData()
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
    }
-   
-   //EnableUpdate(false);
 }
 
 //------------------------------------------------------------------------------
@@ -427,14 +395,6 @@ void VaryPanel::ShowVariableSetup()
    mSolverComboBox->SetStringSelection(mSolverData.solverName);
    mVarNameTextCtrl->SetValue(mSolverData.varName);
    
-   //mInitialTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.initialValue));
-   //mPertTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.pert.c_str()));
-   //mMinValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.minValue));
-   //mMaxValueTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxValue));
-   //mMaxStepTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.maxStep));
-   //mAdditiveTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.additiveScaleFactor));
-   //mMultiplicativeTextCtrl->SetValue(theGuiManager->ToWxString(mSolverData.multiplicativeScaleFactor));
-
    mInitialTextCtrl->SetValue(mSolverData.initialValue);
    mPertTextCtrl->SetValue(mSolverData.pert);
    mMinValueTextCtrl->SetValue(mSolverData.minValue);
@@ -456,32 +416,25 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
    if (mInitialTextCtrl->IsModified())
       mSolverData.initialValue =
          mInitialTextCtrl->GetValue();
-         //atof(mInitialTextCtrl->GetValue().c_str());
-      
+   
    if (mPertTextCtrl->IsModified())
       mSolverData.pert = mPertTextCtrl->GetValue();
-      //mSolverData.pert = atof(mPertTextCtrl->GetValue().c_str());
-      
+   
    if (mMinValueTextCtrl->IsModified())
       mSolverData.minValue = mMinValueTextCtrl->GetValue();
-      //mSolverData.minValue = atof(mMinValueTextCtrl->GetValue().c_str());
-
+   
    if (mMaxValueTextCtrl->IsModified())
       mSolverData.maxValue = mMaxValueTextCtrl->GetValue();
-      //mSolverData.maxValue = atof(mMaxValueTextCtrl->GetValue().c_str());
-
+   
    if (mMaxStepTextCtrl->IsModified())
       mSolverData.maxStep = mMaxStepTextCtrl->GetValue();
-      //mSolverData.maxStep = atof(mMaxStepTextCtrl->GetValue().c_str());
-
+   
    if (mAdditiveTextCtrl->IsModified())
       mSolverData.additiveScaleFactor = mAdditiveTextCtrl->GetValue();
-      //mSolverData.additiveScaleFactor = atof(mAdditiveTextCtrl->GetValue().c_str());
-
+   
    if (mMultiplicativeTextCtrl->IsModified())
       mSolverData.multiplicativeScaleFactor = mMultiplicativeTextCtrl->GetValue();
-      //mSolverData.multiplicativeScaleFactor = atof(mMultiplicativeTextCtrl->GetValue().c_str());
-
+   
    EnableUpdate(true);
 }
 
@@ -508,9 +461,9 @@ void VaryPanel::OnButton(wxCommandEvent& event)
           objType = "Spacecraft";
       
       ParameterSelectDialog paramDlg(this, mObjectTypeList,
-                                     GuiItemManager::SHOW_SETTABLE);
+                                     GuiItemManager::SHOW_SETTABLE, false,
+                                     false, false, true, true, true, objType);
       
-      paramDlg.SetObjectType(objType);
       paramDlg.ShowModal();
       
       if (paramDlg.IsParamSelected())
