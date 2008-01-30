@@ -35,6 +35,7 @@
 //#define DBGLVL_GUI_ITEM_UNREG 1
 //#define DBGLVL_GUI_ITEM_PARAM 2
 //#define DBGLVL_GUI_ITEM_PROPERTY 2
+//#define DBGLVL_GUI_ITEM_FN 2
 //#define DBGLVL_GUI_ITEM_SP 1
 //#define DBGLVL_GUI_ITEM_SO 1
 //#define DBGLVL_GUI_ITEM_SC 1
@@ -1124,7 +1125,6 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
       theNumSpacePoint);
    #endif
    
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
    wxComboBox *spacePointComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, //0,
@@ -1135,12 +1135,7 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
    
    for (int i=0; i<theNumSpacePoint; i++)
       spacePointComboBox->Append(theSpacePointList[i]);
-   
-   // select first item
-   //loj: 6/21/05 commented out.
-   // We don't want to show object selected for CoordinateSystem.
-   //spacePointComboBox->SetSelection(0);
-   
+      
    //---------------------------------------------
    // register to update list
    //---------------------------------------------
@@ -1168,7 +1163,6 @@ GuiItemManager::GetCelestialPointComboBox(wxWindow *parent, wxWindowID id,
       theNumCelesPoint);
    #endif
       
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
    wxComboBox * celestialPointComboBox =
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, // 0,
@@ -2558,7 +2552,12 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
     const wxString &objectType)
 {
    #if DEBUG_PARAM_SIZER
-   MessageInterface::ShowMessage("GuiItemManager::Create3ColParameterSizer() entered\n");
+   MessageInterface::ShowMessage
+      ("GuiItemManager::Create3ColParameterSizer() entered\n"
+       "   allowMultiSelect=%d, showString=%d, allowWholeObject=%d, "
+       "showSysParam=%d\n   showVariable=%d, showArray=%d, objectType=%s\n",
+       allowMultiSelect, showString, allowWholeObject, showSysParam,
+       showVariable, showArray, objectType.c_str());
    #endif
    
    int bsize = 1;
@@ -3880,10 +3879,10 @@ void GuiItemManager::UpdateFunctionList()
    {
       theFunctionList[i] = items[i].c_str();
       functionNames.Add(items[i].c_str());
-
+      
       #if DBGLVL_GUI_ITEM_FN > 1
-      MessageInterface::ShowMessage("GuiItemManager::UpdateFunctionList() " +
-                                    std::string(theFunctionList[i].c_str()) + "\n");
+      MessageInterface::ShowMessage
+         ("   " + std::string(theFunctionList[i].c_str()) + "\n");
       #endif
    }
    
@@ -3893,9 +3892,14 @@ void GuiItemManager::UpdateFunctionList()
    int sel;
    for (std::vector<wxComboBox*>::iterator pos = mFunctionCBList.begin();
         pos != mFunctionCBList.end(); ++pos)
-   {      
-       sel = (*pos)->GetSelection();
-
+   {
+      sel = (*pos)->GetSelection();
+      
+      #if DBGLVL_GUI_ITEM_FN > 1
+      MessageInterface::ShowMessage
+         ("   appending %s to FunctionComboBox\n", functionNames[0].c_str());
+      #endif
+      
       (*pos)->Clear();
       (*pos)->Append(functionNames);
       
