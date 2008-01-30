@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>GMAT</string>
+	<string>RunGMAT</string>
 	<key>CFBundleGetInfoString</key>
 	<string>GMAT (Mac OS/ppc) version Alpha</string>
 	<key>CFBundleIconFile</key>

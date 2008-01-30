@@ -220,6 +220,7 @@ macosx:
    sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./install_libs_into_bundle
 # old stuff here ....
