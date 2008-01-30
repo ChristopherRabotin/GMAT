@@ -20,7 +20,11 @@ WXTARGET = gmatNoMatlab$(EXTENSION)
 endif
 
 ifdef MAC_SPECIFIC
+ifeq ($(USE_MATLAB),1)
+TARGETS = $(WXTARGET) macrez macosx macmatlab
+else
 TARGETS = $(WXTARGET) macrez macosx
+endif
 CLEANTARGET = archclean cleanmacosx
 else
 TARGETS = $(WXTARGET)
@@ -209,24 +213,22 @@ macrez:
 	cp -f $(WXTARGET) ../../bin/.
 	@chmod -R 755 ../../bin
 
-macosx:
-	echo "creating macosx application ......."
+macosx: 
+	echo "building Mac application bundle ......."
 	/Developer/Tools/SetFile -a C $(TOP_DIR)/bin/$(WXTARGET)
 	mkdir -p $(CONTENTS_DIR)
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
 	mkdir -p $(LIBS_DIR)
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-   sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./install_libs_into_bundle
-# old stuff here ....
-#   sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" \
-#   -e "s/VERSION/$(WX_VERSION)/" $(WX_MAC_PKG) >$(MAC_PKG)
 
+macmatlab:
+	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
