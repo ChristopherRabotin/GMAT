@@ -435,6 +435,10 @@ void ResourceTree::UpdateGuiItem(GmatTree::ItemType itemType)
    case GmatTree::VARIABLE:
       theGuiManager->UpdateParameter();
       break;
+   case GmatTree::MATLAB_FUNCTION:
+   case GmatTree::GMAT_FUNCTION:
+      theGuiManager->UpdateFunction();
+      break;
    default:
       break;
    }
