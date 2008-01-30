@@ -29,6 +29,11 @@ public:
    CallFunctionPanel( wxWindow *parent, GmatCommand *cmd);
    ~CallFunctionPanel();
    
+   virtual bool PrepareObjectNameChange();
+   virtual void ObjectNameChanged(Gmat::ObjectType type,
+                                  const wxString &oldName,
+                                  const wxString &newName);
+   
 private:
    CallFunction *theCommand;
    

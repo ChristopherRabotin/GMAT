@@ -65,6 +65,9 @@ CallFunctionPanel::CallFunctionPanel( wxWindow *parent, GmatCommand *cmd)
       if (theFunctionComboBox->GetValue() == "")
          EnableUpdate(true);
    }
+   
+   // Listen for Spacecraft and Parameter name change
+   theGuiManager->AddToResourceUpdateListeners(this);
 }
 
 
@@ -75,7 +78,54 @@ CallFunctionPanel::~CallFunctionPanel()
 {
    mObjectTypeList.Clear();
    theGuiManager->UnregisterComboBox("Function", theFunctionComboBox);   
+   theGuiManager->RemoveFromResourceUpdateListeners(this);
 }
+
+
+//------------------------------------------------------------------------------
+// virtual bool PrepareObjectNameChange()
+//------------------------------------------------------------------------------
+bool CallFunctionPanel::PrepareObjectNameChange()
+{
+   // Save GUI data
+   wxCommandEvent event;
+   OnApply(event);
+   
+   return GmatPanel::PrepareObjectNameChange();
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void ObjectNameChanged(Gmat::ObjectType type, const wxString &oldName,
+//                                const wxString &newName)
+//------------------------------------------------------------------------------
+/*
+ * Reflects resource name change to this panel.
+ * By the time this method is called, the base code already changed reference
+ * object name, so all we need to do is re-load the data.
+ */
+//------------------------------------------------------------------------------
+void CallFunctionPanel::ObjectNameChanged(Gmat::ObjectType type,
+                                          const wxString &oldName,
+                                          const wxString &newName)
+{
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("ReportFilePanel::ObjectNameChanged() type=%d, oldName=<%s>, "
+       "newName=<%s>, mDataChanged=%d\n", type, oldName.c_str(), newName.c_str(),
+       mDataChanged);
+   #endif
+   
+   if (type != Gmat::FUNCTION)
+      return;
+   
+   LoadData();
+   
+   // We don't need to save data if object name changed from the resouce tree
+   // while this panel is opened, since base code already has new name
+   EnableUpdate(false);
+}
+
 
 //---------------------------------
 // private methods
