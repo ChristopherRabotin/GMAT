@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               FuelTank
 //------------------------------------------------------------------------------
@@ -476,6 +476,21 @@ bool FuelTank::SetBooleanParameter(const Integer id, const bool value)
 GmatBase* FuelTank::Clone() const
 {
    return new FuelTank(*this);
+}
+
+
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void FuelTank::Copy(const GmatBase* orig)
+{
+   operator=(*((FuelTank *)(orig)));
 }
 
 

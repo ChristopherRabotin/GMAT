@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               FuelTank
 //------------------------------------------------------------------------------
@@ -33,57 +33,58 @@ public:
    FuelTank(std::string nomme);
    virtual ~FuelTank();
    FuelTank(const FuelTank& ft);
-   FuelTank&                  operator=(const FuelTank& ft);
+   FuelTank&            operator=(const FuelTank& ft);
    
    // Parameter access methods - overridden from GmatBase
-   virtual std::string        GetParameterText(const Integer id) const;
-   virtual Integer            GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                              GetParameterType(const Integer id) const;
-   virtual std::string        GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual bool               IsParameterReadOnly(const Integer id) const;
-
-   virtual Real               GetRealParameter(const Integer id) const;
-   virtual Real               SetRealParameter(const Integer id,
-                                               const Real value);
-   virtual bool               GetBooleanParameter(const Integer id) const;
-   virtual bool               SetBooleanParameter(const Integer id,
-                                                  const bool value);
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    
-  
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   
+   
    // required method for all subclasses
-   virtual GmatBase*          Clone() const;
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual bool               Initialize();
+   virtual bool         Initialize();
    
 protected:
    /// Mass of the fuel in the tank
-   Real                       fuelMass;
+   Real                 fuelMass;
    /// Tank pressure
-   Real                       pressure;
+   Real                 pressure;
    /// Fuel temperature
-   Real                       temperature;
+   Real                 temperature;
    /// Reference temperature
-   Real                       refTemperature;
+   Real                 refTemperature;
    /// Tank volume
-   Real                       volume;
+   Real                 volume;
    /// Fuel density
-   Real                       density;
+   Real                 density;
    /// Flag indicating is the tank is pressure regulated or blow-down
-   bool                       pressureRegulated;
+   bool                 pressureRegulated;
    
    // Parameters used for internal calculations
-
+   
    /// Pressurant volume, a calculated parameter
-   Real                       gasVolume;
+   Real                 gasVolume;
    /// Baseline product of the pressure and temperature
-   Real                       pvBase;
+   Real                 pvBase;
    /// Flag used to force an update to the pressure and temperature calculations
-   bool                       initialized;
-
-   virtual void               UpdateTank();
-   virtual void               DepleteFuel(Real dm);
+   bool                 initialized;
+   
+   virtual void         UpdateTank();
+   virtual void         DepleteFuel(Real dm);
    
    /// Published parameters for generic fuel tanks
    enum
@@ -100,10 +101,10 @@ protected:
    
    /// Parameter labels
    static const std::string 
-                        PARAMETER_TEXT[FuelTankParamCount - HardwareParamCount];
+                  PARAMETER_TEXT[FuelTankParamCount - HardwareParamCount];
    /// Parameter types
    static const Gmat::ParameterType 
-                        PARAMETER_TYPE[FuelTankParamCount - HardwareParamCount];
+                  PARAMETER_TYPE[FuelTankParamCount - HardwareParamCount];
 };
 
 #endif // FUELTANK_HPP
