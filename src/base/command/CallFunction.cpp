@@ -481,6 +481,12 @@ bool CallFunction::RenameRefObject(const Gmat::ObjectType type,
                                    const std::string &oldName,
                                    const std::string &newName)
 {
+   #ifdef DEBUG_RENAME
+   MessageInterface::ShowMessage
+      ("CallFunction::RenameRefObject() type=%d, oldName='%s', newName='%s'\n",
+       type, oldName.c_str(), newName.c_str());
+   #endif
+   
    if (type == Gmat::FUNCTION)
    {
       if (mFunctionName == oldName)
