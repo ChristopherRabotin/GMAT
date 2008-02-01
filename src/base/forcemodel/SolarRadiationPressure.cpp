@@ -48,7 +48,7 @@
 
 //#define DEBUG_SRP_ORIGIN
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
-
+//#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
 
 //---------------------------------
 // static data
@@ -740,15 +740,19 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
         }
    }
-   #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
-      MessageInterface::ShowMessage(
-         "SRP Parameters:\n   SunVec = [%16le %16le %16le]\n   posVec = "
-         "[%16le %16le %16le]\n", cbSunVector[0], cbSunVector[1], 
-         cbSunVector[2], state[0], state[1], state[2]);
-      MessageInterface::ShowMessage(
-         "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   percent\n",
-         ep, nominalSun, sunDistance);
-   #endif
+#ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
+   MessageInterface::ShowMessage(
+      "SRP Parameters:\n   SunVec = [%16le %16le %16le]\n   posVec = "
+      "[%16le %16le %16le]\n", cbSunVector[0], cbSunVector[1], 
+      cbSunVector[2], state[0], state[1], state[2]);
+   MessageInterface::ShowMessage(
+      "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   %16le percent\n",
+      ep, nominalSun, sunDistance, percentSun);
+#endif
+
+#ifdef DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW    
+   MessageInterface::ShowMessage("   %16.12le      %16.12le\n", ep, percentSun);
+#endif
 
    #ifdef DEBUG_SRP_ORIGIN
       if (showData) 
@@ -942,7 +946,7 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
 
     Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
 
-    return 1.0 - area / (M_PI * a2);
+    return area / (M_PI * a2);
 }
 
 //------------------------------------------------------------------------------
