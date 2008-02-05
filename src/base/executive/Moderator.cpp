@@ -729,7 +729,6 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   //loj: 1/17/06 debug
    #if DEBUG_CONFIG
    MessageInterface::ShowMessage("Moderator::ConfigurationChanged() called\n");
    #endif
@@ -1463,8 +1462,6 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
    if (GetAtmosphereModel(name) == NULL)
    {
       AtmosphereModel *atmosphereModel =
-         //loj: 9/25 Wrong calling sequence
-         //theFactoryManager->CreateAtmosphereModel(type, body, name);
          theFactoryManager->CreateAtmosphereModel(type, name, body);
       
       if (atmosphereModel ==  NULL)
@@ -1792,7 +1789,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          if (param->GetName() != "")
             theConfigManager->AddParameter(param);
          
-         // if system paramter, set configuration changed to old flag. (loj: 2007.12.26)
+         // if system paramter, set configuration changed to old flag.
          if (param->GetKey() == GmatParam::SYSTEM_PARAM)
             theConfigManager->ConfigurationChanged(oldFlag);
          
@@ -2853,7 +2850,7 @@ bool Moderator::AppendCommand(GmatCommand *cmd, Integer sandboxNum)
        cmd, cmd->GetTypeName().c_str());
    #endif
    
-   // Get last command and append (loj: 12/11/06)
+   // Get last command and append
    GmatCommand *lastCmd = GmatCommandUtil::GetLastCommand(commands[sandboxNum-1]);
    
    #if DEBUG_COMMAND_APPEND
@@ -2880,12 +2877,7 @@ GmatCommand* Moderator::AppendCommand(const std::string &type,
    
    if (cmd != NULL)
    {
-      // Commands are not configured
-      //if (name != "")
-      //   theConfigManager->AddCommand(cmd);
-      
-      retFlag = AppendCommand(cmd, sandboxNum); //loj: 12/11/06
-      //retFlag = commands[sandboxNum-1]->Append(cmd);
+      retFlag = AppendCommand(cmd, sandboxNum);
    }
    else
    {
@@ -3489,7 +3481,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
          std::string msg = e.GetFullMessage();
          
          // assign status
-         if (msg.find("Execution interrupted") != msg.npos)
+         // Look for "interrupted" (loj: 2008.02.05)
+         //if (msg.find("Execution interrupted") != msg.npos)
+         if (msg.find("interrupted") != msg.npos)
          {
             status = -2;
          }
@@ -3520,6 +3514,10 @@ Integer Moderator::RunMission(Integer sandboxNum)
    thePublisher->NotifyEndOfRun();
    theGuiInterpreter->NotifyRunCompleted();
    
+   #if DEBUG_RUN > 1
+   MessageInterface::ShowMessage("===> status=%d\n", status);
+   #endif
+   
    if (status == 1)
       MessageInterface::ShowMessage("Mission run completed.\n");
    else if (status == -2)
@@ -3530,7 +3528,7 @@ Integer Moderator::RunMission(Integer sandboxNum)
    clock_t t2 = clock();
    MessageInterface::ShowMessage
       ("===> Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
-
+   
    // show final state
    #ifdef __SHOW_FINAL_STATE__
    showFinalState = true;
@@ -4280,8 +4278,7 @@ void Moderator::CreateDefaultMission()
       CreateParameter("Longitude", "DefaultSC.Earth.Longitude");
       CreateParameter("Latitude", "DefaultSC.Earth.Latitude");
       CreateParameter("LST", "DefaultSC.Earth.LST");
-      //CreateParameter("BetaAngle", "DefaultSC.BetaAngle");
-      CreateParameter("BetaAngle", "DefaultSC.Earth.BetaAngle"); //loj: 2007.12.26 Added Earth
+      CreateParameter("BetaAngle", "DefaultSC.Earth.BetaAngle");
       
       // B-Plane parameters
       CreateParameter("BdotT", "DefaultSC.Earth.BdotT");
