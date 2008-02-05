@@ -7,7 +7,7 @@
 
 # Flags used to control the build
 # Make this 1 if you want MATLAB 
-USE_MATLAB = 0
+USE_MATLAB = 1
 USE_DEVIL = 0
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
@@ -20,7 +20,7 @@ USE_SHARED = 1
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here ....
 TOP_DIR = /Users/wcshoan/gmatdev/gmat
 # *** EDIT THIS *** - this is where you installed the version of wxMac that you're using ...
-WX_HOME = /Applications/wxmac-2.8.6/osx-build
+WX_HOME = /Applications/wxmac-2.8.7/osx-build
 # *** EDIT THIS *** - 'sudo make install' of wxMac will put things here ......
 WX_INSTALLED = /usr/local/bin
 # *** EDIT THIS *** - this is where you installed MATLAB ......
@@ -41,13 +41,14 @@ endif
 
 # MATLAB specific data
 MATLAB_INCLUDE = -I${MATLAB}/extern/include \
-				-I$(TOP_DIR)/matlab/gmat_mex/src
+				-I$(TOP_DIR)/src/matlab/gmat_mex/src
 MATLAB_LIB = -L${MATLAB}/bin/mac \
 			-L$(MATLAB)/bin \
-             -L${MATLAB}/sys/os/mac
-MATLAB_LIBRARIES = -leng -lmx -lut -lmat \
-                   -licudata -licuuc -licui18n -licuio -lMTwister \
-                   -lz -lstdc++ -lc 
+             -L${MATLAB}/sys/os/mac -L$(TOP_DIR)/src/matlab/gmat_mex/mex-file
+MATLAB_LIBRARIES = -leng -lmx -lut -lmat -lm -lpthread \
+                   -licudata -licuuc -licui18n -licuio \
+                   -lz -lstdc++ -lc -lhdf5 -lxerces-c
+                   #-lMTwister \
 
 # DevIL data
 ifeq ($(USE_DEVIL), 1)
@@ -92,13 +93,14 @@ MAC_SPECIFIC = 1
 ifeq ($(MAC_SPECIFIC),1)
 EXECUTABLE 	= $(TOP_DIR)/bin/GMAT
 # *** EDIT THIS *** - put the version number of the wxMac that you're using here ...
-WX_VERSION   = 2.8.6
+WX_VERSION   = 2.8.7
 GMAT_INFO    = $(TOP_DIR)/src/gui/Info_GMAT.plist
 CONTENTS_DIR = $(EXECUTABLE).app/Contents
 MACOS_DIR    = $(CONTENTS_DIR)/MacOS
 RES_DIR      = $(CONTENTS_DIR)/Resources
 LIBS_DIR     = $(CONTENTS_DIR)/Frameworks
 MAC_APP      = $(MACOS_DIR)/GMAT
+MAC_SCRIPT   = $(MACOS_DIR)/RunGMAT
 MAC_PKG      = $(CONTENTS_DIR)/Info.plist
 MAC_PKGINFO  = $(CONTENTS_DIR)/PkgInfo
 GMAT_ICONS   = $(TOP_DIR)/bin/files/icons/GMATIcon.icns
@@ -167,5 +169,5 @@ endif
 #            			$(FORTRAN_LIB) \
 #                     -lg2c $(DEBUG_FLAGS) 
 # else
-CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -lg2c $(DEBUG_FLAGS) 
+CONSOLE_LINK_FLAGS = -L../base/lib $(FORTRAN_LIB) -lm -lg2c $(DEBUG_FLAGS) 
 # endif
