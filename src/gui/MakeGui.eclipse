@@ -23,7 +23,7 @@ ifdef MAC_SPECIFIC
 ifeq ($(USE_MATLAB),1)
 TARGETS = $(WXTARGET) macrez macosx macmatlab
 else
-TARGETS = $(WXTARGET) macrez macosx
+TARGETS = $(WXTARGET) macrez macosx macnomatlab
 endif
 CLEANTARGET = archclean cleanmacosx
 else
@@ -220,15 +220,27 @@ macosx:
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
 	mkdir -p $(LIBS_DIR)
+#	echo -n "APPL????" > $(MAC_PKGINFO)
+#	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
+#	./install_libs_into_bundle
+
+macmatlab:
+	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
+	echo -n "APPL????" > $(MAC_PKGINFO)
+	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
+	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
+	./install_libs_into_bundle
+
+macnomatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
 	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./install_libs_into_bundle
-
-macmatlab:
-	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
