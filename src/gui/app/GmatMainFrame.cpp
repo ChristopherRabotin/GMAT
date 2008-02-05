@@ -95,6 +95,7 @@
 #include <wx/filename.h>
 #include <wx/gdicmn.h>
 #include <wx/toolbar.h>
+#include <wx/progdlg.h>
 #include "ddesetup.hpp"   // for IPC_SERVICE, IPC_TOPIC
 
 #include "bitmaps/new.xpm"
@@ -126,6 +127,15 @@
 #endif
 
 #define __USE_CHILD_BEST_SIZE__
+
+
+// If Sleep in not defined (on unix boxes)
+#ifndef Sleep 
+#ifndef __WXMSW__
+#include <unistd.h>
+#define Sleep(t) usleep((t))
+#endif
+#endif
 
 
 //#define DEBUG_MAINFRAME
@@ -1135,7 +1145,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
 //------------------------------------------------------------------------------ 
 Integer GmatMainFrame::RunCurrentMission()
 {
-   #ifdef DEBUG_MAINFRAME
+   #ifdef DEBUG_RUN
    MessageInterface::ShowMessage
       ("GmatMainFrame::RunCurrentMission() mRunPaused=%d\n", mRunPaused);
    #endif
@@ -1170,6 +1180,10 @@ Integer GmatMainFrame::RunCurrentMission()
    {
       MinimizeChildren();
       retval = theGuiInterpreter->RunMission();
+
+      #ifdef DEBUG_RUN
+      MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
+      #endif
       
       if (retval != 1 && mServer)
          StopServer(); // stop server if running to avoid getting callback staus
@@ -1278,6 +1292,17 @@ void GmatMainFrame::StopServer()
       //#endif
       
       mServer = NULL;
+      
+      // Show progress bar while GMAT closes the server
+      wxProgressDialog dlg(wxT("GMAT closing the server"),
+                           wxT("Please wait while GMAT closes the server"), 100, this,
+                           wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_SMOOTH);
+      
+      for (int i=0; i<10; i++)
+      {
+         dlg.Update((i+1)*10);
+         Sleep(200);
+      }
    }
    else
    {
