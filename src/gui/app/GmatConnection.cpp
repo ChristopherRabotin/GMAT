@@ -21,7 +21,11 @@
 #include "GmatInterface.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_CONNECTION 1
+//#define DEBUG_CONNECTION
+//#define DEBUG_CONNECTION_EXECUTE
+//#define DEBUG_CONNECTION_POKE
+//#define DEBUG_CONNECTION_REQUEST
+//#define DEBUG_CONNECTION_ADVISE
 
 //---------------------------------
 // global variables
@@ -35,6 +39,10 @@ GmatConnection *theGmatConnection = NULL;
 GmatConnection::GmatConnection()
    : wxConnection()
 {
+   #ifdef DEBUG_CONNECTION
+   MessageInterface::ShowMessage("GmatConnection() constructor entered\n");
+   #endif
+   
    theGmatConnection = this;
 }
 
@@ -44,6 +52,10 @@ GmatConnection::GmatConnection()
 //------------------------------------------------------------------------------
 GmatConnection::~GmatConnection()
 {
+   #ifdef DEBUG_CONNECTION
+   MessageInterface::ShowMessage("~GmatConnection() destructor entered\n");
+   #endif
+   
    if (theGmatConnection)
    {
       theGmatConnection = NULL;
@@ -59,7 +71,7 @@ bool GmatConnection::OnExecute(const wxString& WXUNUSED(topic),
                                int WXUNUSED(size),
                                wxIPCFormat WXUNUSED(format))
 {
-   #if DEBUG_CONNECTION
+   #ifdef DEBUG_CONNECTION_EXECUTE
    MessageInterface::ShowMessage
       ("GmatConnection::OnExecute() command: %s\n", data);
    #endif
@@ -77,7 +89,7 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
                             int WXUNUSED(size),
                             wxIPCFormat WXUNUSED(format))
 {
-   #if DEBUG_CONNECTION
+   #ifdef DEBUG_CONNECTION_POKE
    MessageInterface::ShowMessage
       ("GmatConnection::OnPoke() %s = %s\n", item.c_str(), data);
    #endif
@@ -119,7 +131,7 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
    {
       std::string theString(data);
       std::string callbackData = theString.substr(13,1024);
-      #if DEBUG_CONNECTION
+      #ifdef DEBUG_CONNECTION_POKE
          MessageInterface::ShowMessage
             ("GmatConnection::callbackData = %s\n", callbackData.c_str());
       #endif
@@ -154,7 +166,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
                                   int * WXUNUSED(size),
                                   wxIPCFormat WXUNUSED(format))
 {
-   #if DEBUG_CONNECTION
+   #ifdef DEBUG_CONNECTION_REQUEST
    MessageInterface::ShowMessage
       ("GmatConnection::OnRequest() %s\n", item.c_str());
    #endif
@@ -172,29 +184,29 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
       tempItem.RemoveLast();
       data = GmatInterface::Instance()->GetInternalObject(tempItem.c_str());
    }
-   else if (item == "RunState") //loj: 8/2/05 Added
+   else if (item == "RunState")
    {
       data = GmatInterface::Instance()->GetRunState();
          
-      #if DEBUG_CONNECTION
+      #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
       #endif
    }
-   else if (item == "CallbackStatus") //wcs: 2006.08.24 Added
+   else if (item == "CallbackStatus")
    {
       data = GmatInterface::Instance()->GetCallbackStatus();
          
-      #if DEBUG_CONNECTION
+      #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
       #endif
    }
-   else if (item == "CallbackResults") //wcs: 2006.09.21 Added
+   else if (item == "CallbackResults")
    {
       data = GmatInterface::Instance()->GetCallbackResults();
          
-      #if DEBUG_CONNECTION
+      #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
       #endif
@@ -214,17 +226,16 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
 bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
                                    const wxString& item)
 {
-   #if DEBUG_CONNECTION
+   #ifdef DEBUG_CONNECTION_ADVISE
    MessageInterface::ShowMessage
       ("GmatConnection::OnRequest() %s\n", item.c_str());
    #endif
    
+   //#ifdef DEBUG_CONNECTION
    //char* data = GmatInterface::Instance()->GetRunState();
-   
-   #if DEBUG_CONNECTION
    //MessageInterface::ShowMessage
    //   ("GmatConnection::OnStartAdvise() data=%s\n", data);
-   #endif
+   //#endif
    
    return TRUE;
 }
