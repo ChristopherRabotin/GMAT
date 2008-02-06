@@ -128,7 +128,6 @@
 
 #define __USE_CHILD_BEST_SIZE__
 
-
 // If Sleep in not defined (on unix boxes)
 #ifndef Sleep 
 #ifndef __WXMSW__
@@ -145,6 +144,7 @@
 //#define DEBUG_SERVER
 //#define DEBUG_CREATE_CHILD
 //#define DEBUG_REMOVE_CHILD
+//#define DEBUG_RUN
 
 using namespace GmatMenu;
 
@@ -1180,12 +1180,14 @@ Integer GmatMainFrame::RunCurrentMission()
    {
       MinimizeChildren();
       retval = theGuiInterpreter->RunMission();
-
+      
       #ifdef DEBUG_RUN
       MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
       #endif
       
-      if (retval != 1 && mServer)
+      // always stop server after run (loj: 2008.02.06)
+      //if (retval != 1 && mServer)
+      if (mServer)
          StopServer(); // stop server if running to avoid getting callback staus
                        // when run stopped by user
       
@@ -1253,6 +1255,10 @@ void GmatMainFrame::ProcessPendingEvent()
 //------------------------------------------------------------------------------
 void GmatMainFrame::StartServer()
 {
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage("GmatMainFrame::StartServer() entered.\n");
+   #endif
+   
    if (!mServer)
    {
       // service name (DDE classes) or port number (TCP/IP based classes)
@@ -1262,18 +1268,19 @@ void GmatMainFrame::StartServer()
       mServer = new GmatServer;
       mServer->Create(service);
       
-      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server started.\n");
-      //#endif
+      
+      #ifdef DEBUG_SERVER
+      MessageInterface::ShowMessage
+         ("   service='%s', mServer=%p\n", service.c_str(), mServer);
+      #endif
       
       //mServerMenu->Enable(MENU_START_SERVER, false);
       //mServerMenu->Enable(MENU_STOP_SERVER, true);
    }
    else
    {
-      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has already started.\n");
-      //#endif
    }
 }
 
@@ -1283,32 +1290,38 @@ void GmatMainFrame::StartServer()
 //------------------------------------------------------------------------------
 void GmatMainFrame::StopServer()
 {
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage("GmatMainFrame::StopServer() entered.\n");
+   #endif
+   
    if (mServer)
    {
+      mServer->Disconnect();
       delete mServer;
       
-      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server terminated.\n");
-      //#endif
       
       mServer = NULL;
       
+      //==============================================================
+      #ifdef __WAIT_BEFORE_RERUN__
       // Show progress bar while GMAT closes the server
       wxProgressDialog dlg(wxT("GMAT closing the server"),
                            wxT("Please wait while GMAT closes the server"), 100, this,
                            wxPD_AUTO_HIDE | wxPD_APP_MODAL | wxPD_SMOOTH);
       
+      // wait for 2 secconds
       for (int i=0; i<10; i++)
       {
          dlg.Update((i+1)*10);
          Sleep(200);
       }
+      #endif
+      //==============================================================
    }
    else
    {
-      //#ifdef DEBUG_SERVER
       MessageInterface::ShowMessage("Server has not started.\n");
-      //#endif
    }
 }
 
@@ -1342,6 +1355,10 @@ void GmatMainFrame::OnClose(wxCloseEvent& event)
    {
       event.Veto();
    }
+   
+   // stop server if running (loj: 2008.02.06)
+   if (mServer)
+      StopServer();
 }
 
 
