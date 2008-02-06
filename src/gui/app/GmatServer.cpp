@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               GmatServer
 //------------------------------------------------------------------------------
@@ -22,24 +22,61 @@
 #include "ddesetup.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_SERVER 1
+//#define DEBUG_SERVER
 
 //------------------------------------------------------------------------------
 // wxConnectionBase* OnAcceptConnection(const wxString& topic)
 //------------------------------------------------------------------------------
 wxConnectionBase* GmatServer::OnAcceptConnection(const wxString& topic)
 {
-#if DEBUG_SERVER
+   #ifdef DEBUG_SERVER
    MessageInterface::ShowMessage
       ("GmatServer::OnAcceptConnection() topic=%s\n", topic.c_str());
-#endif
+   #endif
    
    if ( topic == IPC_TOPIC )
-      return new GmatConnection();
-
+   {
+      mConnection = new GmatConnection();
+      
+      #ifdef DEBUG_SERVER
+      MessageInterface::ShowMessage
+         ("GmatServer::OnAcceptConnection() mConnection=%p\n", mConnection);
+      #endif
+      
+      return mConnection;
+   }
+   
    wxMessageBox(_T("OnAcceptConnection(): Unknown topic() entered"),
                 _T("GmatServer"));
    
    // unknown topic
+   mConnection = NULL;
    return NULL;
 }
+
+
+//------------------------------------------------------------------------------
+// wxConnectionBase* GetConnection()
+//------------------------------------------------------------------------------
+wxConnectionBase* GmatServer::GetConnection()
+{
+   return mConnection;
+}
+
+
+//------------------------------------------------------------------------------
+// bool Disconnect()
+//------------------------------------------------------------------------------
+bool GmatServer::Disconnect()
+{
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage
+      ("GmatServer::Disconnect() mConnection=%p\n", mConnection);
+   #endif
+   
+   if (mConnection)
+      return mConnection->Disconnect();
+   else
+      return false;
+}
+

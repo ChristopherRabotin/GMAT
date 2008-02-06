@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               GmatServer
 //------------------------------------------------------------------------------
@@ -20,12 +20,18 @@
 #define GmatServer_hpp
 
 #include "gmatwxdefs.hpp"
+#include "GmatConnection.hpp"
 #include "wx/ipc.h"
 
 class GmatServer: public wxServer
 {
 public:
    wxConnectionBase *OnAcceptConnection(const wxString& topic);
+   wxConnectionBase *GetConnection();
+   bool Disconnect();
+   
+protected:
+   GmatConnection *mConnection;
 };
 
 #endif // GmatServer_hpp
