@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               GmatConnection
 //------------------------------------------------------------------------------
@@ -27,23 +27,17 @@
 //#define DEBUG_CONNECTION_REQUEST
 //#define DEBUG_CONNECTION_ADVISE
 
-//---------------------------------
-// global variables
-//---------------------------------
-
-GmatConnection *theGmatConnection = NULL;
 
 //------------------------------------------------------------------------------
 // GmatConnection()
 //------------------------------------------------------------------------------
 GmatConnection::GmatConnection()
    : wxConnection()
-{
+{   
    #ifdef DEBUG_CONNECTION
-   MessageInterface::ShowMessage("GmatConnection() constructor entered\n");
+   MessageInterface::ShowMessage
+      ("GmatConnection() constructor entered, this=%p\n", this);
    #endif
-   
-   theGmatConnection = this;
 }
 
 
@@ -53,13 +47,83 @@ GmatConnection::GmatConnection()
 GmatConnection::~GmatConnection()
 {
    #ifdef DEBUG_CONNECTION
-   MessageInterface::ShowMessage("~GmatConnection() destructor entered\n");
+   MessageInterface::ShowMessage
+      ("~GmatConnection() destructor entered, this=%p\n", this);
+   #endif   
+}
+
+
+//------------------------------------------------------------------------------
+// wxChar* OnRequest(const wxString& WXUNUSED(topic), const wxString& item,
+//                   int * WXUNUSED(size), wxIPCFormat WXUNUSED(format))
+//------------------------------------------------------------------------------
+/*
+ * This method responds to the client application to request data from the server.
+ *
+ * @param <topic>  Unused
+ * @param <item>   Object or parameter name to retrive value from
+ * @param <size>   Unused
+ * @param <format> Unused
+ *
+ * @return Object or parameter value string.
+ */
+//------------------------------------------------------------------------------
+wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
+                                  const wxString& item,
+                                  int * WXUNUSED(size),
+                                  wxIPCFormat WXUNUSED(format))
+{
+   #ifdef DEBUG_CONNECTION_REQUEST
+   MessageInterface::ShowMessage
+      ("GmatConnection::OnRequest() %s\n", item.c_str());
    #endif
    
-   if (theGmatConnection)
+   // Check for user interrupt first (loj: 2007.05.11 Added)
+   GmatInterface::Instance()->CheckUserInterrupt();
+   
+   // How can I tell whether item is an object or a parameter?
+   // For now GetGMATObject.m appends '.' for object name.
+   
+   char *data;
+   if (item.Last() == '.')
    {
-      theGmatConnection = NULL;
+      wxString tempItem = item;
+      tempItem.RemoveLast();
+      data = GmatInterface::Instance()->GetInternalObject(tempItem.c_str());
    }
+   else if (item == "RunState")
+   {
+      data = GmatInterface::Instance()->GetRunState();
+         
+      #ifdef DEBUG_CONNECTION_REQUEST
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
+   else if (item == "CallbackStatus")
+   {
+      data = GmatInterface::Instance()->GetCallbackStatus();
+         
+      #ifdef DEBUG_CONNECTION_REQUEST
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
+   else if (item == "CallbackResults")
+   {
+      data = GmatInterface::Instance()->GetCallbackResults();
+         
+      #ifdef DEBUG_CONNECTION_REQUEST
+      MessageInterface::ShowMessage
+         ("GmatConnection::OnRequest() data=%s\n", data);
+      #endif
+   }
+   else
+   {
+      data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
+   }
+   
+   return _T(data);
 }
 
 
@@ -147,80 +211,6 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
 
 
 //------------------------------------------------------------------------------
-// wxChar* OnRequest(const wxString& WXUNUSED(topic), const wxString& item,
-//                   int * WXUNUSED(size), wxIPCFormat WXUNUSED(format))
-//------------------------------------------------------------------------------
-/*
- * This method responds to the client application to request data from the server.
- *
- * @param <topic>  Unused
- * @param <item>   Object or parameter name to retrive value from
- * @param <size>   Unused
- * @param <format> Unused
- *
- * @return Object or parameter value string.
- */
-//------------------------------------------------------------------------------
-wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
-                                  const wxString& item,
-                                  int * WXUNUSED(size),
-                                  wxIPCFormat WXUNUSED(format))
-{
-   #ifdef DEBUG_CONNECTION_REQUEST
-   MessageInterface::ShowMessage
-      ("GmatConnection::OnRequest() %s\n", item.c_str());
-   #endif
-   
-   // Check for user interrupt first (loj: 2007.05.11 Added)
-   GmatInterface::Instance()->CheckUserInterrupt();
-   
-   // How can I tell whether item is an object or a parameter?
-   // For now GetGMATObject.m appends '.' for object name.
-   
-   char *data;
-   if (item.Last() == '.')
-   {
-      wxString tempItem = item;
-      tempItem.RemoveLast();
-      data = GmatInterface::Instance()->GetInternalObject(tempItem.c_str());
-   }
-   else if (item == "RunState")
-   {
-      data = GmatInterface::Instance()->GetRunState();
-         
-      #ifdef DEBUG_CONNECTION_REQUEST
-      MessageInterface::ShowMessage
-         ("GmatConnection::OnRequest() data=%s\n", data);
-      #endif
-   }
-   else if (item == "CallbackStatus")
-   {
-      data = GmatInterface::Instance()->GetCallbackStatus();
-         
-      #ifdef DEBUG_CONNECTION_REQUEST
-      MessageInterface::ShowMessage
-         ("GmatConnection::OnRequest() data=%s\n", data);
-      #endif
-   }
-   else if (item == "CallbackResults")
-   {
-      data = GmatInterface::Instance()->GetCallbackResults();
-         
-      #ifdef DEBUG_CONNECTION_REQUEST
-      MessageInterface::ShowMessage
-         ("GmatConnection::OnRequest() data=%s\n", data);
-      #endif
-   }
-   else
-   {
-      data = GmatInterface::Instance()->GetParameter(std::string(item.c_str()));
-   }
-   
-   return _T(data);
-}
-
-
-//------------------------------------------------------------------------------
 // bool OnStartAdvise(const wxString& WXUNUSED(topic),
 //------------------------------------------------------------------------------
 bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
@@ -238,5 +228,18 @@ bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
    //#endif
    
    return TRUE;
+}
+
+
+//------------------------------------------------------------------------------
+// bool OnDisconnect()
+//------------------------------------------------------------------------------
+bool GmatConnection::OnDisconnect()
+{
+   #ifdef DEBUG_CONNECTION
+   MessageInterface::ShowMessage
+      ("GmatConnection::OnDisconnect() entered, this=%p\n", this);
+   #endif
+   return true;
 }
 

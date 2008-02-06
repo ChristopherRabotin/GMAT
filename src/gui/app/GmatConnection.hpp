@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               GmatConnection
 //------------------------------------------------------------------------------
@@ -16,6 +16,8 @@
  * Implements GmatConnection which provides service to client.
  */
 //------------------------------------------------------------------------------
+#ifndef GmatConnection_hpp
+#define GmatConnection_hpp
 
 #include "wx/wxprec.h"
 
@@ -30,13 +32,16 @@ class GmatConnection : public wxConnection
 public:
    GmatConnection();
    ~GmatConnection();
-
-   bool OnExecute(const wxString& topic, wxChar *data, int size,
-                  wxIPCFormat format);
-   wxChar *OnRequest(const wxString& topic, const wxString& item, int *size,
-                     wxIPCFormat format);
-   bool OnPoke(const wxString& topic, const wxString& item, wxChar *data,
-               int size, wxIPCFormat format);
-   bool OnStartAdvise(const wxString& topic, const wxString& item);
-
+   
+   virtual wxChar* OnRequest(const wxString& topic, const wxString& item,
+                             int *size, wxIPCFormat format);
+   virtual bool    OnExecute(const wxString& topic, wxChar *data, int size,
+                             wxIPCFormat format);
+   virtual bool    OnPoke(const wxString& topic, const wxString& item, wxChar *data,
+                          int size, wxIPCFormat format);
+   virtual bool    OnStartAdvise(const wxString& topic, const wxString& item);
+   virtual bool    OnDisconnect();
+   
 };
+
+#endif // GmatConnection_hpp
