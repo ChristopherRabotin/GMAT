@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatInterface
 //------------------------------------------------------------------------------
@@ -25,7 +25,7 @@
 GmatInterface* GmatInterface::instance = NULL;
 bool GmatInterface::mPassedInterpreter = false;
 
-//#define DEBUG_GMAT_INTERFACE 1
+//#define DEBUG_GMAT_INTERFACE
 //#define DEBUG_TEST_CALLBACK
 
 //---------------------------------
@@ -76,7 +76,7 @@ void GmatInterface::ClearScript()
 void GmatInterface::PutScript(char *str)
 {
    mStringStream << std::string(str) << std::endl;
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage("GmatInterface::PutScript() str=%s\n", str);
    #endif
 }
@@ -99,7 +99,7 @@ void GmatInterface::BuildObject()
    // redirect mInStringStream into mStringStream
    RedirectBuffer(mInStringStream, streamBuf);
    
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    //loj: 8/31/04 Why this causes problem for long scripts? buffer overflow?
    //MessageInterface::ShowMessage
    //   ("GmatInterface::BuildObject() mStringStream.str=\n%s", mStringStream.str().c_str());
@@ -136,7 +136,7 @@ void GmatInterface::UpdateObject()
    // redirect mInStringStream into mStringStream
    RedirectBuffer(mInStringStream, streamBuf);
    
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    //loj: 8/31/04 Why this causes problem for long scripts? buffer overflow?
    //MessageInterface::ShowMessage
    //   ("GmatInterface::UpdateObject() mStringStream.str=\n%s", mStringStream.str().c_str());
@@ -163,7 +163,7 @@ void GmatInterface::UpdateObject()
 //------------------------------------------------------------------------------
 void GmatInterface::RunScript()
 {
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::RunScript() entered. mPassedInterpreter=%d\n",
        mPassedInterpreter);
@@ -173,6 +173,10 @@ void GmatInterface::RunScript()
       Moderator::Instance()->RunScript();
 }
 
+
+//------------------------------------------------------------------------------
+// bool ExecuteCallback()
+//------------------------------------------------------------------------------
 bool GmatInterface::ExecuteCallback()
 {
    #ifdef DEBUG_TEST_CALLBACK
@@ -184,12 +188,18 @@ bool GmatInterface::ExecuteCallback()
       return true;
    }
    else
-   //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
-   
-   //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
+   {
+      //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
+      MessageInterface::ShowMessage("call back object is NULL, so returning false\n");
+      //*************** TEMPORARY tuff to test MATLAB->GMAT part ******************
       return false;
+   }
 }
 
+
+//------------------------------------------------------------------------------
+// bool RegisterCallbackServer(GmatBase *callbackObject)
+//------------------------------------------------------------------------------
 bool GmatInterface::RegisterCallbackServer(GmatBase *callbackObject)
 {
    #ifdef DEBUG_TEST_CALLBACK
@@ -280,7 +290,7 @@ char* GmatInterface::GetCallbackResults()
       std::string results = callbackObj->GetCallbackResults();
       sprintf(dataString, "%s", results.c_str());
    }
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_TEST_CALLBACK
    MessageInterface::ShowMessage
       ("GmatInterface::GetCallbackData() dataString=<%s>\n", dataString);
    #endif
@@ -313,7 +323,7 @@ char* GmatInterface::GetRunState()
    else
       sprintf(dataString, "Unknown");
    
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::GetRunState() state=%d, dataString=<%s>\n", state,
        dataString);
@@ -332,7 +342,7 @@ char* GmatInterface::GetRunState()
 //------------------------------------------------------------------------------
 char* GmatInterface::GetParameter(const std::string &name)
 {
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::GetParameter() name=%s\n", name.c_str());
    #endif
@@ -345,7 +355,7 @@ char* GmatInterface::GetParameter(const std::string &name)
    param = Moderator::Instance()->GetParameter(name);
    if (param != NULL)
    {
-      #if DEBUG_GMAT_INTERFACE
+      #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
          ("GmatInterface::GetParameter() evaluate the parameter:%s, type=%s\n",
           param->GetName().c_str(), param->GetTypeName().c_str());
@@ -357,7 +367,7 @@ char* GmatInterface::GetParameter(const std::string &name)
       std::string str = param->ToString(); // returns last value
       str = "[" + str + "]";
       
-      #if DEBUG_GMAT_INTERFACE
+      #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
          ("GmatInterface::GetParameter() str=%s\n", str.c_str());
       #endif
@@ -378,7 +388,7 @@ char* GmatInterface::GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
 char* GmatInterface::GetInternalObject(const std::string &name)
 {
-   #if DEBUG_GMAT_INTERFACE
+   #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
       ("GmatInterface::GetInternalObject() name=%s\n", name.c_str());
    #endif
@@ -392,7 +402,7 @@ char* GmatInterface::GetInternalObject(const std::string &name)
    
    if (obj != NULL)
    {
-      #if DEBUG_GMAT_INTERFACE
+      #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
          ("GmatInterface::GetInternalObject() get serialized string of object name:"
           "%s, type=%s\n", obj->GetName().c_str(), obj->GetTypeName().c_str());
@@ -400,7 +410,7 @@ char* GmatInterface::GetInternalObject(const std::string &name)
       
       std::string str = obj->GetGeneratingString(Gmat::MATLAB_STRUCT);
       
-      #if DEBUG_GMAT_INTERFACE
+      #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage("str=%s\n", str.c_str());
       #endif
       
