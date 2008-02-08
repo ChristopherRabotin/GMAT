@@ -39,6 +39,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMdiChildFrame, wxMDIChildFrame)
    EVT_CLOSE(GmatMdiChildFrame::OnClose) 
+   EVT_ACTIVATE(GmatMdiChildFrame::OnActivate)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -70,7 +71,13 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
    theMenuBar = new GmatMenuBar(mItemType, NULL);
    #endif
    
-   SetMenuBar(theMenuBar);
+   #ifdef DEBUG_MENUBAR
+   MessageInterface::ShowMessage
+      ("GmatMdiChildFrame::GmatMdiChildFrame() theMenuBarCreated %p\n", theMenuBar);
+   #endif
+   
+   // Commented out so that Window menu works for MdiChildFrame (loj: 2008.02.08)
+   //SetMenuBar(theMenuBar);
    
    // Disble all top menu items except Help, if output plot was created
    // This will be enabled when completed mission running
@@ -111,6 +118,7 @@ GmatMdiChildFrame::GmatMdiChildFrame(wxMDIParentFrame *parent,
 //------------------------------------------------------------------------------
 GmatMdiChildFrame::~GmatMdiChildFrame()
 {
+   delete theMenuBar;
 }
 
 
