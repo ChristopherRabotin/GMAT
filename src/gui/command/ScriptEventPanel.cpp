@@ -89,13 +89,14 @@ void ScriptEventPanel::Create()
 {
    int bsize = 3; // border size
    
-    // create sizers
+   // create sizers
    mBottomSizer = new wxGridSizer( 1, 0, 0 );
    mPageSizer = new wxBoxSizer(wxVERTICAL);
    
-   mFileContentsTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
-                            wxDefaultPosition, wxDefaultSize,
-                            wxTE_MULTILINE | wxGROW);
+   // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
+   mFileContentsTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
    
    mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
    
