@@ -34,29 +34,30 @@ public:
    PropSetup(const PropSetup &propagatorSetup);
    PropSetup& operator= (const PropSetup &right); 
    virtual ~PropSetup();
-
+   
    bool IsInitialized();
    Propagator* GetPropagator();
    ForceModel* GetForceModel();
    void SetPropagator(Propagator *propagator);
    void SetForceModel(ForceModel *forceModel);
    void SetUseDrag(bool flag);
-
+   
    void AddForce(PhysicalModel *force);
-   //loj: 3/16/04 void RemoveForce(const std::string &name); // future implementation
    PhysicalModel* GetForce(Integer index);
    Integer GetNumForces();
    
+   // inherited from GmatBase
+   virtual bool RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName);
+   
+   virtual GmatBase* Clone(void) const;
+   
    virtual GmatBase* GetOwnedObject(Integer whichOne);
 
-   virtual const std::string* GetParameterList() const;
-
-   // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-
-   // The inherited methods from GmatBase
-   virtual Integer GetParameterCount(void) const;
-
+   virtual const std::string* GetParameterList() const;   
+   virtual Integer GetParameterCount() const;
+   
    virtual Gmat::ParameterType GetParameterType(const Integer id) const;
    virtual std::string GetParameterTypeString(const Integer id) const;
    virtual std::string GetParameterText(const Integer id) const;
@@ -65,33 +66,25 @@ public:
    virtual std::string GetStringParameter(const std::string &label) const;
    virtual bool SetStringParameter(const Integer id, const std::string &value);
    virtual bool SetStringParameter(const std::string &label, const std::string &value);
-
+   
    bool Initialize();
    
    virtual const std::string&
                 GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
                                     const std::string &prefix = "",
                                     const std::string &useName = "");
-
-
+   
+   
 private:
 
    bool mInitialized;
    Propagator *mPropagator;
    ForceModel *mForceModel;
    
-// DJC 8/13/04: These are now part of the ForceModel
-//   bool           usedrag;
-//   std::string    dragType;
-//   bool           useSRP;
-
    enum
    {
       FORCE_MODEL_NAME = GmatBaseParamCount,
       PROPAGATOR_NAME,
-// DJC 8/13/04: These are now part of the ForceModel
-//      USE_DRAG,
-//      USE_SRP,
       PropSetupParamCount
    };
 

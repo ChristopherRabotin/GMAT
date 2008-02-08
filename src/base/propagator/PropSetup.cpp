@@ -343,6 +343,30 @@ Integer PropSetup::GetParameterCount(void) const
 //------------------------------------
 // Inherited methods from GmatBase
 //------------------------------------
+
+//---------------------------------------------------------------------------
+//  bool RenameRefObject(const Gmat::ObjectType type,
+//                       const std::string &oldName, const std::string &newName)
+//---------------------------------------------------------------------------
+/**
+ * Renames reference objects used in this class.
+ *
+ * @param <type> reference object type.
+ * @param <oldName> object name to be renamed.
+ * @param <newName> new object name.
+ * 
+ * @return true if object name changed, false if not.
+ */
+//---------------------------------------------------------------------------
+bool PropSetup::RenameRefObject(const Gmat::ObjectType type,
+                                const std::string &oldName,
+                                const std::string &newName)
+{
+   // There is nothing to check for now
+   return true;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -378,7 +402,7 @@ GmatBase* PropSetup::GetOwnedObject(Integer whichOne)
    return GmatBase::GetOwnedObject(whichOne);
 }
 
-   
+
 //------------------------------------------------------------------------------
 // Gmat::ParameterType GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
