@@ -20,7 +20,7 @@
 #include "MessageInterface.hpp"
 
 
-#define __ADD_CLOSE_TO_WINDOW__
+#define __ADD_CLOSE_TO_WINDOW_MENU__
 
 //#define DEBUG_MENUBAR 1
 
@@ -62,7 +62,7 @@ GmatMenuBar::GmatMenuBar(GmatTree::ItemType itemType, wxMenu *windowMenu,
 //------------------------------------------------------------------------------
 void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
 {
-   #if DEBUG_MENUBAR
+   #ifdef DEBUG_MENUBAR
    MessageInterface::ShowMessage
       ("GmatMenuBar::CreateMenu() itemType=%d, windowMenu=%p\n",
        itemType, windowMenu);
@@ -182,14 +182,13 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    
    helpMenu->Enable(MENU_HELP_TOPICS, FALSE);
    this->Append(helpMenu, wxT("Help"));
-
    
    //-----------------------------------------------------------------
-   // Windows menu
+   // Window menu
    //-----------------------------------------------------------------
-   // @note: It needs to figure out why it does not work for
-   //        MdiChildFrame windows
-   #ifdef __ADD_CLOSE_TO_WINDOW__
+   // @note: In order for system Window menu to work, do not call
+   // SetMenuBar() from GmatMdiChildFrame after theMenuBar is created.
+   #ifdef __ADD_CLOSE_TO_WINDOW_MENU__
    //-------------------------------------------------------
    // If on Windows, use Window menu from MdiParenentFrame
    // otherwise, create Window menu
@@ -209,6 +208,12 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    }
    #endif
    
+   #ifdef DEBUG_MENUBAR
+   MessageInterface::ShowMessage
+      ("==> GmatMenuBar::CreateMenu() this=%p, winMenu=%p, createWindowMenu=%d, "
+       "prependClose=%d\n", this, winMenu, createWindowMenu, prependClose);
+   #endif
+   
    if (createWindowMenu)
    {
       //MessageInterface::ShowMessage("===> creating Window menu\n");
@@ -226,28 +231,6 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
       winMenu->PrependSeparator();
       winMenu->Prepend(TOOL_CLOSE_CURRENT, wxT("Close"), wxT(""));      
       winMenu->Prepend(TOOL_CLOSE_CHILDREN, wxT("Close All"), wxT(""));
-   }
-   else
-   {
-      int winMenuIndex = this->FindMenu("Windows");
-      #if DEBUG_MENUBAR
-      MessageInterface::ShowMessage("===> winMenuIndex=%d\n", winMenuIndex);
-      #endif
-      
-      // Why I need to have this part to work for MdiChildFrame Window menu?
-      // This is just workaround. The trick is to append blank menu to the
-      // end of menu bar
-      
-      if (winMenuIndex == wxNOT_FOUND)
-      {
-         //MessageInterface::ShowMessage("===> creating Window menu\n");
-         winMenu = new wxMenu;
-         winMenu->Append(TOOL_CLOSE_CHILDREN, wxT("Close All"), wxT(""));
-         winMenu->Append(TOOL_CLOSE_CURRENT, wxT("Close"), wxT(""));
-         
-         // Append to very last so it won't show blank menu
-         this->Append(winMenu, wxT(""));
-      }
    }
    #endif
    
