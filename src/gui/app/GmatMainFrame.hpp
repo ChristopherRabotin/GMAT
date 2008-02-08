@@ -65,7 +65,7 @@ public:
    void CloseChild(GmatMdiChildFrame *child);
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-                         wxString excludeTitle = "");
+                         bool closeReports = true, wxString excludeTitle = "");
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
    void CloseCurrentProject();

@@ -145,6 +145,7 @@
 //#define DEBUG_CREATE_CHILD
 //#define DEBUG_REMOVE_CHILD
 //#define DEBUG_RUN
+//#define DBGLVL_MENUBAR 1
 
 using namespace GmatMenu;
 
@@ -162,7 +163,6 @@ using namespace GmatMenu;
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
-   //EVT_MENU(MENU_PROJECT_NEW, GmatMainFrame::OnProjectNew)
    EVT_MENU(MENU_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT, GmatMainFrame::OnSaveScript)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT_AS, GmatMainFrame::OnSaveScriptAs)
@@ -264,7 +264,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #else
    theMenuBar = new GmatMenuBar(GmatTree::UNKNOWN_ITEM, NULL);
    #endif
-   
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GmatMainFrame() theMenuBar created: %p\n", theMenuBar);
    SetMenuBar(theMenuBar);
 #endif // wxUSE_MENUS
 
@@ -820,24 +821,26 @@ void GmatMainFrame::CloseActiveChild()
 
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-//                       wxString excludeTitle = "")
+//                       bool closeReports = true, wxString excludeTitle = "")
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
  *
- * @param <closeScriptWindow> true to close script window
- * @param <closePlots> true to close all plot windows
- * @param <excludeTitle> name of the window to be excluded from closing
+ * @param <closeScriptWindow> true to close script window (true)
+ * @param <closePlots> true to close all plot windows (true)
+ * @param <closeReports> true to close all reports from Output tab (true)
+ * @param <excludeTitle> name of the window to be excluded from closing ("")
  * @return true if all frames is closed false otherwise
  */
 //------------------------------------------------------------------------------ 
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
-                                     wxString excludeTitle)
-{   
+                                     bool closeReports, wxString excludeTitle)
+{
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CloseAllChildren() closeScriptWindow = %d, closePlots = %d"
-       "\n   excludeTitle = %s\n", closeScriptWindow, closePlots, excludeTitle.c_str());
+      ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d, "
+       "closeReports=%d\n   excludeTitle = %s\n", closeScriptWindow, closePlots,
+       closeReports, excludeTitle.c_str());
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
@@ -890,7 +893,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             // delete output child except compare
             if (closePlots && type != GmatTree::COMPARE_REPORT)
             {
-               GmatAppData::GetOutputTree()->UpdateOutput(true);
+               GmatAppData::GetOutputTree()->UpdateOutput(true, closeReports);
                canDelete = true;
             }
          }
@@ -1036,7 +1039,7 @@ void GmatMainFrame::CloseCurrentProject()
    
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
-   GmatAppData::GetOutputTree()->UpdateOutput(true);
+   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
 }
 
 
@@ -1076,7 +1079,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    CloseAllChildren(false, true, filename);
    GmatAppData::GetResourceTree()->ClearResource(false);
    GmatAppData::GetMissionTree()->ClearMission();
-   GmatAppData::GetOutputTree()->UpdateOutput(true);
+   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -1194,7 +1197,7 @@ Integer GmatMainFrame::RunCurrentMission()
       EnableMenuAndToolBar(true, true);
       
       //put items in output tab
-      GmatAppData::GetOutputTree()->UpdateOutput(false);
+      GmatAppData::GetOutputTree()->UpdateOutput(false, true);
    }
    
    return retval;
@@ -1780,7 +1783,7 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    // Update trees
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
-   GmatAppData::GetOutputTree()->UpdateOutput(true);
+   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
 }
 
 
@@ -1957,7 +1960,7 @@ void GmatMainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnCloseAll(wxCommandEvent& WXUNUSED(event))
 {
-   CloseAllChildren();
+   CloseAllChildren(true, true, false);
    wxSafeYield();
 }
 
@@ -3056,7 +3059,7 @@ void GmatMainFrame::UpdateMenus(bool openOn)
  * disabled when the mission run started and enabled after the run completes.
  *
  * @param <enable> true to enable the menu and tool icons, false to disable them
- * @param <missionRunning> true if missin is running, this will toggle pause
+ * @param <missionRunning> true if mission is running, this will toggle pause
  *                         and stop icons
  * @param <forAnimation> true if icons are for animation, this will toggle animation
  *                       play icon
@@ -3065,6 +3068,12 @@ void GmatMainFrame::UpdateMenus(bool openOn)
 void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
                                          bool forAnimation)
 {
+   #if DBGLVL_MENUBAR
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::EnableMenuAndToolBar() enable=%d, missionRunning=%d, "
+       "forAnimation=%d\n", enable, missionRunning, forAnimation);
+   #endif
+   
    wxToolBar *toolBar = GetToolBar();
    toolBar->EnableTool(TOOL_RUN, enable);
    toolBar->EnableTool(TOOL_PAUSE, enable);
@@ -3099,6 +3108,11 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
    if (child != NULL)
    {
       wxMenuBar *childMenuBar = child->GetMenuBar();
+
+      #if DBGLVL_MENUBAR > 1
+      MessageInterface::ShowMessage("   ==childMenuBar=%p\n", childMenuBar);
+      #endif
+      
       int helpIndex = childMenuBar->FindMenu("Help");
       int childMenuCount = childMenuBar->GetMenuCount();
       
@@ -3108,13 +3122,8 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
          if (i != helpIndex)
             childMenuBar->EnableTop(i, enable);
       }
-//       // wcs 2007.08.16 crashes the Mac app
-//       #ifndef __WXMAC__
-//       childMenuBar->Update();
-//       #endif
    }
-   
-   
+      
    //-----------------------------------
    // Enable parent mdi menu bar second
    //-----------------------------------
@@ -3127,12 +3136,6 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
       if (i != helpIndex)
          theMenuBar->EnableTop(i, enable);
    }
-   
-//    // wcs 2007.08.16 crashes the Mac app
-//    #ifndef __WXMAC__
-//    theMenuBar->Update();
-//    #endif
-   
 }
 
 
