@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              SolarRadiationPressure
 //------------------------------------------------------------------------------
@@ -369,22 +369,6 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
       sunRadius = value;
       return sunRadius;
    }
-//   if (id == CR)
-//   {
-//      cr.push_back(value);
-//      return cr[cr.size()-1];
-//   }
-//   if (id == AREA)
-//   {
-//      area.push_back(value);
-//      return area[area.size()-1];
-//   }
-//   /// @todo Revise this when mass is depleted
-//   if (id == MASS)
-//   {
-//      mass.push_back(value);
-//      return mass[mass.size()-1];
-//   }
    if (id == FLUX)
    {
       flux = value;
@@ -610,7 +594,13 @@ bool SolarRadiationPressure::SetCentralBody()
 // bool SolarRadiationPressure::GetDerivatives(Real *state,Real dt,Integer order)
 //------------------------------------------------------------------------------
 /**
- * Calculates the SRP accelerations 
+ * Calculates the SRP accelerations
+ * 
+ * @param <state> The state vector for the spacecraft
+ * @param <dt>    Epoch offset of the state
+ * @param <order> The order of derivative needed
+ * 
+ * @return true on success, false if an error was encountered
  */
 //------------------------------------------------------------------------------
 bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
@@ -690,17 +680,19 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
     {
         i6 = i*6;
 
-        sunSat[0] = cbSunVector[0] - state[i6];
-        sunSat[1] = cbSunVector[1] - state[i6+1];
-        sunSat[2] = cbSunVector[2] - state[i6+2];
+        // Build vector from the Sun to the current spacecraft
+        sunSat[0] = state[i6] - cbSunVector[0];
+        sunSat[1] = state[i6+1] - cbSunVector[1];
+        sunSat[2] = state[i6+2] - cbSunVector[2];
         sunDistance = sqrt(sunSat[0]*sunSat[0] + sunSat[1]*sunSat[1] + 
                            sunSat[2]*sunSat[2]);
         if (sunDistance == 0.0)
            sunDistance = 1.0;
+        // Make a unit vector for the force direction
         forceVector[0] = sunSat[0] / sunDistance;
         forceVector[1] = sunSat[1] / sunDistance;
         forceVector[2] = sunSat[2] / sunDistance;
-
+        
         distancefactor = nominalSun / sunDistance;
         // Factor of 0.001 converts m/s^2 to km/s^2
         distancefactor *= distancefactor * 0.001;
@@ -712,12 +704,16 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
         
         // Test shadow condition for current spacecraft (only if body isn't Sol)
         if (!bodyIsTheSun)
+        {
+           psunrad = asin(sunRadius / sunDistance);
            FindShadowState(inSunlight, inShadow, &state[i6]);
+        }
         
         if (!inShadow) 
         {
-            mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
-                                 mass[i];
+           // Montenbruck and Gill, eq. 3.75
+           mag = percentSun * cr[i] * fluxPressure * area[i] * distancefactor / 
+                                mass[i];
 
             if (order == 1) 
             {
@@ -740,19 +736,20 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
             deriv[i6 + 3] = deriv[i6 + 4] = deriv[i6 + 5] = 0.0;
         }
    }
-#ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
-   MessageInterface::ShowMessage(
-      "SRP Parameters:\n   SunVec = [%16le %16le %16le]\n   posVec = "
-      "[%16le %16le %16le]\n", cbSunVector[0], cbSunVector[1], 
-      cbSunVector[2], state[0], state[1], state[2]);
-   MessageInterface::ShowMessage(
-      "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   %16le percent\n",
-      ep, nominalSun, sunDistance, percentSun);
-#endif
-
-#ifdef DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW    
-   MessageInterface::ShowMessage("   %16.12le      %16.12le\n", ep, percentSun);
-#endif
+    
+   #ifdef DEBUG_SOLAR_RADIATION_PRESSURE    
+      MessageInterface::ShowMessage(
+         "SRP Parameters:\n   SunVec = [%16le %16le %16le]\n   posVec = "
+         "[%16le %16le %16le]\n", cbSunVector[0], cbSunVector[1], 
+         cbSunVector[2], state[0], state[1], state[2]);
+      MessageInterface::ShowMessage(
+         "   epoch = %16le\n   nomSun = %16le\n   sunDist = %16le\n   %16le percent\n",
+         ep, nominalSun, sunDistance, percentSun);
+   #endif
+   
+   #ifdef DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW    
+      MessageInterface::ShowMessage("   %16.12le      %16.12le\n", ep, percentSun);
+   #endif
 
    #ifdef DEBUG_SRP_ORIGIN
       if (showData) 
@@ -780,6 +777,11 @@ bool SolarRadiationPressure::GetDerivatives(Real *state, Real dt, Integer order)
 //------------------------------------------------------------------------------
 /**
  * Determines lighting conditions at the input location
+ * 
+ * @param <lit>   Indicates if the spoacecraft is in full sunlight
+ * @param <dark>  Indicates if the spacecarft is in umbra
+ * @param <state> Current spacecraft state
+ * 
  * \todo: Currently implemented for one spacecraft, state vector arranges as (x, y, z)
  */
 //------------------------------------------------------------------------------
@@ -802,7 +804,6 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
     {    
         lit = true;
         dark = false;
-        BuildForceVector(state);
         percentSun = 1.0;
         return;
     }
@@ -825,7 +826,6 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
         }
         else 
         {
-            BuildForceVector(state);
             percentSun = 1.0;
             lit = true;
             dark = false;
@@ -835,10 +835,14 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
     {
         Real s0, s2, lsc, l1, l2, c1, c2, sinf1, sinf2, tanf1, tanf2;
 
+        // Montenbruck and Gill, eq. 3.79
         s0 = -state[0]*unitsun[0] - state[1]*unitsun[1] - state[2]*unitsun[2];
         s2 = state[0]*state[0] + state[1]*state[1] + state[2]*state[2];
+
+        // Montenbruck and Gill, eq. 3.80
         lsc = sqrt(s2 - s0*s0);
 
+        // Montenbruck and Gill, eq. 3.81
         sinf1 = (sunRadius + bodyRadius) / mag;
         sinf2 = (sunRadius - bodyRadius) / mag;
 
@@ -848,9 +852,11 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
         tanf1 = sqrt(l1 / (1.0 - l1));
         tanf2 = sqrt(l2 / (1.0 - l2));
         
+        // Montenbruck and Gill, eq. 3.82
         c1 = s0 + bodyRadius / sinf1;
         c2 = bodyRadius / sinf2 - s0;       // Different sign from M&G
 
+        // Montenbruck and Gill, eq. 3.83
         l1 = c1 * tanf1;
         l2 = c2 * tanf2;
 
@@ -860,7 +866,6 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
             lit = true;
             dark = false;
             percentSun = 1.0;
-            BuildForceVector(state);
             return;
         }
         else 
@@ -878,7 +883,6 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
                 else 
                 {
                     // annular eclipse
-                    BuildForceVector(state);
                     pcbrad = asin(bodyRadius / sqrt(s2));
                     percentSun = (psunrad*psunrad - pcbrad*pcbrad) / 
                                  (psunrad*psunrad);
@@ -887,7 +891,7 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
                 
                 return;
             }
-            BuildForceVector(state);
+            // In penumbra
             pcbrad = asin(bodyRadius / sqrt(s2));
             percentSun = ShadowFunction(state);
             lit = false;
@@ -896,37 +900,16 @@ void SolarRadiationPressure::FindShadowState(bool &lit, bool &dark, Real *state)
     }
 }
 
-//------------------------------------------------------------------------------
-// void SolarRadiationPressure::BuildForceVector(Real * state)
-//------------------------------------------------------------------------------
-/**
- * 
- */
-//------------------------------------------------------------------------------
-void SolarRadiationPressure::BuildForceVector(Real * state)
-{
-    // Vector from the spacecraft to the Sun
-    forceVector[0] = cbSunVector[0] - state[0]; 
-    forceVector[1] = cbSunVector[1] - state[1]; 
-    forceVector[2] = cbSunVector[2] - state[2]; 
-
-    Real mag = - sqrt(forceVector[0]*forceVector[0] + 
-                        forceVector[1]*forceVector[1] + 
-                        forceVector[2]*forceVector[2]);
-
-    // Point the force directly away from the Sun.  This gets modified to sail.
-    forceVector[0] /= mag;
-    forceVector[1] /= mag;
-    forceVector[2] /= mag;
-
-    psunrad = asin(sunRadius / mag);
-}
 
 //------------------------------------------------------------------------------
 // Real SolarRadiationPressure::ShadowFunction(Real * state)
 //------------------------------------------------------------------------------
 /**
- * Returns the multiplier used when the satellite is partially lit
+ * Calculates %lit when in penumbra.
+ * 
+ * @param <state> The current spacecraft state
+ * 
+ * @return the multiplier used when the satellite is partially lit
  */
 //------------------------------------------------------------------------------
 Real SolarRadiationPressure::ShadowFunction(Real * state)
@@ -934,6 +917,8 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
     Real mag = sqrt(state[0]*state[0] + 
                       state[1]*state[1] + 
                       state[2]*state[2]);
+    
+    // Montenbruck and Gill, eq. 3.87
     Real c = acos((state[0]*forceVector[0] + 
                      state[1]*forceVector[1] + 
                      state[2]*forceVector[2]) / mag);
@@ -941,12 +926,15 @@ Real SolarRadiationPressure::ShadowFunction(Real * state)
     Real a2 = psunrad*psunrad;
     Real b2 = pcbrad*pcbrad;
 
+    // Montenbruck and Gill, eq. 3.93
     Real x = (c*c + a2 - b2) / (2.0 * c);
     Real y = sqrt(a2 - x*x);
 
+    // Montenbruck and Gill, eq. 3.92
     Real area = a2*acos(x/psunrad) + b2*acos((c-x)/pcbrad) - c*y;
 
-    return area / (M_PI * a2);
+    // Montenbruck and Gill, eq. 3.94
+    return 1.0 - area / (M_PI * a2);
 }
 
 //------------------------------------------------------------------------------
