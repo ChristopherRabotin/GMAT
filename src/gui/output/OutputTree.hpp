@@ -33,7 +33,7 @@ public:
               const wxSize& size, long style);
    
    void RemoveItem(GmatTree::ItemType type, const wxString &name);
-   void UpdateOutput(bool resetTree);
+   void UpdateOutput(bool resetTree, bool removeReports);
    
 private:
    GuiInterpreter *theGuiInterpreter;

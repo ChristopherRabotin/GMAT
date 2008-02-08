@@ -174,27 +174,30 @@ wxTreeItemId OutputTree::FindItem(wxTreeItemId parentId, const wxString &name)
 
 
 //------------------------------------------------------------------------------
-// void UpdateOutput(bool resetTree)
+// void UpdateOutput(bool resetTree, bool removeReports)
 //------------------------------------------------------------------------------
 /**
  * Updates output tree.
  *
  * @param  resetTree  true if just clearing tree
+ * @param  removeReports  true if reports are also removed from the tree
  */
 //------------------------------------------------------------------------------
-void OutputTree::UpdateOutput(bool resetTree)
+void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
 {
    #if DEBUG_OUTPUT_TREE
    MessageInterface::ShowMessage
       ("OutputTree::UpdateOutput() resetTree=%d\n", resetTree);
    #endif
    
-   Collapse(mReportItem);
+   if (removeReports)
+      Collapse(mReportItem);
    Collapse(mOpenGlItem);
    Collapse(mXyPlotItem);
    
    // delete all old children
-   DeleteChildren(mReportItem);
+   if (removeReports)
+      DeleteChildren(mReportItem);
    DeleteChildren(mOpenGlItem);
    DeleteChildren(mXyPlotItem);
    
