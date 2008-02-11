@@ -145,6 +145,7 @@
 //#define DEBUG_CREATE_CHILD
 //#define DEBUG_REMOVE_CHILD
 //#define DEBUG_RUN
+//#define DEBUG_SIZE
 //#define DBGLVL_MENUBAR 1
 
 using namespace GmatMenu;
@@ -242,6 +243,9 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    MessageInterface::ShowMessage("GmatMainFrame::GmatMainFrame() entered\n");
    #endif
    
+   theMessageWin = NULL;
+   theMainWin = NULL;
+   
    // set the script name
    mScriptFilename = "$gmattempscript$.script";
    mScriptCounter = 0;
@@ -253,7 +257,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    // child frames
    trajSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
-
+   
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    
 #if wxUSE_MENUS
@@ -264,11 +268,15 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #else
    theMenuBar = new GmatMenuBar(GmatTree::UNKNOWN_ITEM, NULL);
    #endif
+   
+   #if DBGLVL_MENUBAR
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() theMenuBar created: %p\n", theMenuBar);
+   #endif
+   
    SetMenuBar(theMenuBar);
 #endif // wxUSE_MENUS
-
+   
 #if wxUSE_STATUSBAR
    // create a status bar
    int widths[] = {150, 600, 300};
@@ -276,7 +284,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    SetStatusWidths(3, widths);
    SetStatusText(_T("Welcome to GMAT!"));
 #endif // wxUSE_STATUSBAR
-
+   
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::GmatMainFrame() creating ToolBar...\n");
@@ -294,6 +302,14 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    int w, h;
    GetClientSize(&w, &h);
    
+   #ifdef DEBUG_SIZE
+   MessageInterface::ShowMessage
+      ("Before creating wxSashLayoutWindow\n   client size w=%d, h=%d\n", w, h);
+   int winW, winH;
+   GetSize(&winW, &winH);
+   MessageInterface::ShowMessage("   window size w=%d, h=%d\n", winW, winH);
+   #endif
+   
    // A window w/sash for messages
    theMessageWin = new wxSashLayoutWindow(this, ID_MSG_SASH_WINDOW,
                            wxDefaultPosition, wxSize(30, 200),
@@ -303,10 +319,12 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 #else
    theMessageWin->SetDefaultSize(wxSize(w, 100));
 #endif
+   theMessageWin->SetMinimumSizeY(20);
+   theMessageWin->SetMaximumSizeY(h-20);
    theMessageWin->SetOrientation(wxLAYOUT_HORIZONTAL);
    theMessageWin->SetAlignment(wxLAYOUT_BOTTOM);
    theMessageWin->SetSashVisible(wxSASH_TOP, TRUE);
-
+   
    // create MessageWindow and save in GmatApp for later use
    wxTextCtrl *msgTextCtrl =
       new wxTextCtrl(theMessageWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
@@ -319,7 +337,7 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMainWin = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
                            wxDefaultPosition, wxSize(200, 30),
                            wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-
+   
 #ifdef __WXMAC__
    //theMainWinSetDefaultSize(wxSize(275, h));
    theMainWin->SetDefaultSize(wxSize(w, h));
@@ -330,6 +348,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
       theMainWin->SetDefaultSize(wxSize(220, h));
    #endif
 #endif
+   theMainWin->SetMinimumSizeX(20);
+   theMainWin->SetMaximumSizeX(w-20);
    theMainWin->SetOrientation(wxLAYOUT_VERTICAL);
    theMainWin->SetAlignment(wxLAYOUT_LEFT);
    theMainWin->SetSashVisible(wxSASH_RIGHT, TRUE);
@@ -2948,18 +2968,28 @@ void GmatMainFrame::OnSashDrag(wxSashEvent& event)
 {
    int w, h;
    GetClientSize(&w, &h);
-
+   
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
-        
+   
+   #ifdef DEBUG_SASH_DRAG
+   int newW = event.GetDragRect().width;
+   int minW = theMainWin->GetMinimumSizeX();
+   int maxW = theMainWin->GetMaximumSizeX();
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnSashDrag() minW=%d, maxW=%d, setting new width to %d\n",
+       minW, maxW, newW);
+   #endif
+   
    theMainWin->SetDefaultSize(wxSize(event.GetDragRect().width, h));
-
+   
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
-
+   
    // Leaves bits of itself behind sometimes
    GetClientWindow()->Refresh();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnMsgSashDrag(wxSashEvent& event)
@@ -2972,8 +3002,16 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
    if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
       return;
    
-   theMessageWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
+   #ifdef DEBUG_SASH_DRAG
+   int newH = event.GetDragRect().height;
+   int minH = theMessageWin->GetMinimumSizeY();
+   int maxH = theMessageWin->GetMaximumSizeY();   
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnMsgSashDrag() minH=%d, maxH=%d, setting new height to %d\n",
+       minH, maxH, newH);
+   #endif
    
+   theMessageWin->SetDefaultSize(wxSize(w, event.GetDragRect().height));
    
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
@@ -2994,7 +3032,20 @@ void GmatMainFrame::OnMsgSashDrag(wxSashEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnMainFrameSize(wxSizeEvent& event)
 {
-   //MessageInterface::ShowMessage("===> GmatMainFrame::OnMainFrameSize() called\n");
+   int w, h;
+   GetClientSize(&w, &h);
+   
+   #ifdef DEBUG_SIZE
+   MessageInterface::ShowMessage("GmatMainFrame::OnMainFrameSize() entered\n");
+   MessageInterface::ShowMessage("   client size w=%d, h=%d\n", w, h);
+   #endif
+   
+   // adjust new maximum SashWindow size
+   if (theMessageWin != NULL && theMainWin != NULL)
+   {
+      theMessageWin->SetMaximumSizeY(h-20);
+      theMainWin->SetMaximumSizeX(w-20);
+   }
    
    wxLayoutAlgorithm layout;
    layout.LayoutMDIFrame(this);
