@@ -1066,7 +1066,7 @@ void GmatMainFrame::CloseCurrentProject()
 //------------------------------------------------------------------------------
 // bool InterpretScript(const wxString &filename, bool readBack = false,
 //                      const wxString &savePath = "", bool openScript = true,
-//                      bool multScripts = false)
+//                      bool multiScripts = false)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
@@ -1075,20 +1075,20 @@ void GmatMainFrame::CloseCurrentProject()
  * @param <readBack> true will read scripts, save, and read back in
  * @param <newPath> new path to be used for saving scripts
  * @param <openScript> true if script file to be opened on error
- * @param <multScripts> true if running scripts from the folder
+ * @param <multiScripts> true if running scripts from the folder
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
                                     const wxString &savePath, bool openScript,
-                                    bool multScripts)
+                                    bool multiScripts)
 {
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript()\n   filename=%s, readBack=%d\n   "
-       "savePath=%s openScript=%d, multScripts=%d\n", filename.c_str(), readBack,
-       savePath.c_str(), openScript, multScripts);
+       "savePath=%s openScript=%d, multiScripts=%d\n", filename.c_str(), readBack,
+       savePath.c_str(), openScript, multiScripts);
    #endif
    
    UpdateTitle(filename);
@@ -1096,7 +1096,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    bool success = false;
    
    // Always refresh the gui before new scritpes are read
-   CloseAllChildren(false, true, filename);
+   // Pass true to close Script file when reading new scripts (loj: 02.14.2008)
+   //CloseAllChildren(false, true, filename);
+   CloseAllChildren(true, true, filename);
    GmatAppData::GetResourceTree()->ClearResource(false);
    GmatAppData::GetMissionTree()->ClearMission();
    GmatAppData::GetOutputTree()->UpdateOutput(true, true);
@@ -1128,7 +1130,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
          GmatAppData::GetMissionTree()->UpdateMission(true);
          
          // if not running script folder, clear status
-         if (!multScripts)
+         if (!multiScripts)
             SetStatusText("", 1);
       }
       else
