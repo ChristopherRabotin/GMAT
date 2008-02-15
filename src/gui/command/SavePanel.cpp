@@ -15,7 +15,8 @@
 #include "SavePanel.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_SAVE_PANEL 1
+//#define DEBUG_SAVEPANEL_LOAD
+//#define DEBUG_SAVEPANEL_SAVE
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -84,22 +85,22 @@ void SavePanel::Create()
 {
    StringArray items;
    int bsize = 3;
-    
+   
    // create object label
    wxStaticText *objectLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Select Objects to Save"),
+      new wxStaticText(this, ID_TEXT, wxT("Please Select Objects to Save"),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    // list of object
    mObjectCheckListBox = theGuiManager->
-      GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(200,150));
+      GetAllObjectCheckListBox(this, ID_CHECKLISTBOX, wxSize(300,200));
    
    // create sizers
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    
    // add object label and combobox to sizer
-   pageBoxSizer->Add(objectLabel, 0, wxALIGN_CENTER | wxALL, bsize);
-   pageBoxSizer->Add(mObjectCheckListBox, 0, wxALIGN_CENTER | wxALL, bsize);
+   pageBoxSizer->Add(objectLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageBoxSizer->Add(mObjectCheckListBox, 0, wxALIGN_CENTER|wxGROW|wxALL, bsize);
    
    // add to middle sizer
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
@@ -117,21 +118,23 @@ void SavePanel::LoadData()
    
    // Set objects
    
-   // Get object list from the command. Actually it can be any object type,
-   // but pass SPACECRAFT since the method needs input type.
-   StringArray objNames = theCommand->GetRefObjectNameArray(Gmat::SPACECRAFT);
-   int item;
+   // Get object list from the command. It can be any object type.
+   StringArray objNames = theCommand->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
    
    for (UnsignedInt i=0; i<objNames.size(); i++)
    {
-      #ifdef DEBUG_SAVE_PANEL
+      #ifdef DEBUG_SAVEPANEL_LOAD
       MessageInterface::ShowMessage("   objName=<%s>\n", objNames[i].c_str());
       #endif
       
-      item = mObjectCheckListBox->FindString(objNames[i].c_str());
-      mObjectCheckListBox->Check(item);
+      wxString objName = objNames[i].c_str();
+      for (UnsignedInt j=0; j<mObjectCheckListBox->GetCount(); j++)
+      {
+         wxString objStr = mObjectCheckListBox->GetString(j);
+         if (objStr.BeforeFirst(' ') == objName)
+            mObjectCheckListBox->Check(j);
+      }
    }
-
 }
 
 
@@ -140,9 +143,36 @@ void SavePanel::LoadData()
 //------------------------------------------------------------------------------
 void SavePanel::SaveData()
 {
-   // save objects
    int count = mObjectCheckListBox->GetCount();
-   wxString objName;
+   
+   int checkedCount = 0;
+   canClose = true;
+   
+   //-----------------------------------------------------------------
+   // check for number of objects checked
+   //-----------------------------------------------------------------
+   for (int i=0; i<count; i++)
+      if (mObjectCheckListBox->IsChecked(i))
+         checkedCount++;
+   
+   if (checkedCount == 0)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Please select one or more objects to save.");
+      canClose = false;
+      return;
+   }
+   
+   #ifdef DEBUG_SAVEPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("SavePanel::SaveData() number of checked object=%d\n", checkedCount);
+   #endif
+   
+   //-----------------------------------------------------------------
+   // save values to base, base code should do any range checking
+   //-----------------------------------------------------------------
+   
+   wxString objStr, objName;
    
    theCommand->TakeAction("Clear");
    
@@ -150,8 +180,15 @@ void SavePanel::SaveData()
    {
       if (mObjectCheckListBox->IsChecked(i))
       {
-         objName = mObjectCheckListBox->GetString(i);
-         theCommand->SetRefObjectName(Gmat::SPACECRAFT, objName.c_str());
+         objStr = mObjectCheckListBox->GetString(i);
+         objName = objStr.BeforeFirst(' ');
+         
+         #ifdef DEBUG_SAVEPANEL_SAVE
+         MessageInterface::ShowMessage
+            ("objStr=<%s>, objName=<%s>\n", objStr.c_str(), objName.c_str());
+         #endif
+         
+         theCommand->SetRefObjectName(Gmat::UNKNOWN_OBJECT, objName.c_str());         
       }
    }
 }
