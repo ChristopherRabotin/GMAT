@@ -24,6 +24,8 @@
 // it will create files per Save objects
 #define __USE_SINGLE_FILE__
 
+//#define DEBUG_SAVE_INIT
+//#define DEBUG_SAVE_EXEC
 //#define DEBUG_SAVE_OUTPUT
 
 //------------------------------------------------------------------------------
@@ -182,16 +184,20 @@ bool Save::Initialize()
    
    wasWritten = false;
    appendData = false;
-
+   
    FileManager *fm = FileManager::Instance();
    std::string outPath = fm->GetAbsPathname(FileManager::OUTPUT_PATH);
    
    Integer objCount = objNameArray.size();
    
-   #ifdef DEBUG_SAVE_OUTPUT
+   #ifdef DEBUG_SAVE_INIT
    MessageInterface::ShowMessage
       ("Save::Initialize() objCount=%d, outPath=%s\n", objCount, outPath.c_str());
    #endif
+   
+   // throw an exception if no objects to save
+   if (objCount == 0)   
+      throw CommandException("Save command has no objects to save");
    
    #ifndef __USE_SINGLE_FILE__
       for (Integer i=0; i<objCount; i++)
@@ -205,19 +211,34 @@ bool Save::Initialize()
    Integer index = 0;
    
    for (StringArray::iterator i = objNameArray.begin(); i != objNameArray.end(); ++i)
-   {         
+   {
+      #ifdef DEBUG_SAVE_INIT
+      MessageInterface::ShowMessage("   objName=%s\n", (*i).c_str());
+      #endif
+      
       if (objectMap->find(*i) == objectMap->end())
       {
-         // Maybe it's a solar system object
          if (solarSys)
          {
-            GmatBase *body = solarSys->GetBody(*i);
-            if (body != NULL)
+            // Maybe it's a solar system object     
+            if ((*i) == "SolarSystem")
             {
-               objArray.push_back(body);
+               objArray.push_back(solarSys);
                UpdateOutputFileNames(index, *i);
                index++;
                continue;
+            }
+            else if (solarSys)
+            {
+               // Maybe it's a solar system body object
+               GmatBase *body = solarSys->GetBody(*i);
+               if (body != NULL)
+               {
+                  objArray.push_back(body);
+                  UpdateOutputFileNames(index, *i);
+                  index++;
+                  continue;
+               }
             }
          }
          
@@ -241,14 +262,14 @@ bool Save::Initialize()
       else if (index == objCount)
          fileNameArray[0] += ("." + objArray[0]->GetTypeName() + ".data");
       
-      #ifdef DEBUG_SAVE_OUTPUT
+      #ifdef DEBUG_SAVE_INIT
       MessageInterface::ShowMessage
          ("Save::Initialize() fileNameArray[%d]=%s\n", 0,
           fileNameArray[0].c_str());
       #endif
    #endif
    
-   #ifdef DEBUG_SAVE_OUTPUT
+   #ifdef DEBUG_SAVE_INIT
    MessageInterface::ShowMessage
       ("Save::Initialize() Saving %d object(s)\n", objArray.size());
    #endif
@@ -269,11 +290,14 @@ bool Save::Initialize()
 //------------------------------------------------------------------------------
 bool Save::Execute()
 {
-   #ifdef DEBUG_SAVE_OUTPUT
+   #ifdef DEBUG_SAVE_EXEC
    MessageInterface::ShowMessage("Save::Execute() entered\n");
    #endif
    
    Integer prec = GmatGlobal::Instance()->GetDataPrecision();
+   
+   if (objArray.empty())
+      throw CommandException("Save command has no objects to save");
    
    if (!objArray[0])
       throw CommandException("Object not set for Save command");
@@ -297,7 +321,7 @@ bool Save::Execute()
       //if (appendData && wasWritten)
       if (appendData || wasWritten)
       {
-         #ifdef DEBUG_SAVE_OUTPUT
+         #ifdef DEBUG_SAVE_EXEC
          MessageInterface::ShowMessage("   open %s as append\n", fileNameArray[0].c_str());
          #endif
          
@@ -305,7 +329,7 @@ bool Save::Execute()
       }
       else
       {
-         #ifdef DEBUG_SAVE_OUTPUT
+         #ifdef DEBUG_SAVE_EXEC
          MessageInterface::ShowMessage("   open %s as new\n", fileNameArray[0].c_str());
          #endif
          
