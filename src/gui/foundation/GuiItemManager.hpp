@@ -42,40 +42,6 @@ public:
       SHOW_PLOTTABLE,  // Real
       SHOW_SETTABLE,   // for Vary command
    };
-
-   //@Note Should we use dynamic array instead of fixed since wxWidgets 2.6.1 or
-   // later supports wxArrayString as choices in the wxComboBox or wxListBox?
-   
-   // for SpacePoint
-   static const int MAX_SPACE_POINT = 60;  // CELES_POINT + SPACE_OBJECT
-   static const int MAX_CELES_POINT = 20;  // CELES_BODY + CAL_POINT
-   static const int MAX_CELES_BODY = 20;
-   static const int MAX_CAL_POINT = 20;
-   static const int MAX_SPACE_OBJECT = 40; // FORMATION + SPACECRAFT
-   static const int MAX_FORMATION = 10;
-   static const int MAX_SPACECRAFT = 30;
-   static const int MAX_BURN = 40;
-   static const int MAX_ALL_OBJECT = 70;   // MAX_SPACE_OBJECT + MAX_BURN
-   
-   // for Parameter
-   static const int MAX_SC_PROPERTY = 100; // Max Spacecraft
-   static const int MAX_IB_PROPERTY = 20;  // Max ImpulsiveBurn
-   static const int MAX_PROPERTY = 110;
-   static const int MAX_USER_VAR = 100;
-   static const int MAX_USER_STRING = 50;
-   static const int MAX_USER_ARRAY = 100;
-   static const int MAX_USER_PARAM = 250;  // MAX_USER_VAR + MAX_USER_STRING + MAX_USER_ARRAY
-   static const int MAX_PLOT_PARAM = 250;
-
-   // Other
-   static const int MAX_COORD_SYS = 60;
-   static const int MAX_HARDWARE = 60;
-   static const int MAX_FUNCTION = 20;
-   static const int MAX_SOLVER = 40;      // MAX_BOUNDARY_SOLVER + MAX_OPTIMIZER
-   static const int MAX_BOUNDARY_SOLVER = 20;
-   static const int MAX_OPTIMIZER = 20;
-   static const int MAX_REPORT_FILE = 20;
-   static const int MAX_SUBSCRIBER = 40;   // MAX_REPORT_FILE + 20
    
    static GuiItemManager* GetInstance();
    
@@ -84,17 +50,19 @@ public:
                        bool allowNumber = false, bool allowNonPlottable = false);
    
    void UpdateAll();
-   void UpdateCelestialPoint();
-   void UpdateFormation();
-   void UpdateSpacecraft();
    void UpdateBurn();
-   void UpdateParameter();
-   void UpdateSolarSystem();
+   void UpdateCelestialPoint();
    void UpdateCoordSystem();
-   void UpdateHardware();
+   void UpdateForceModel();
+   void UpdateFormation();
    void UpdateFunction();
-   void UpdateSubscriber();
+   void UpdateHardware();
+   void UpdateParameter();
+   void UpdatePropagator();
+   void UpdateSolarSystem();
+   void UpdateSpacecraft();
    void UpdateSolver();
+   void UpdateSubscriber();
    
    // For handling of resource update 
    void AddToResourceUpdateListeners(GmatPanel *panel);
@@ -128,25 +96,24 @@ public:
    int GetNumBoundarySolver() { return theNumBoundarySolver; }
    int GetNumOptimizer() { return theNumOptimizer; }
    
-   wxString* GetPlottableParameterList() { return thePlottableParamList; }
-   wxString* GetSystemParameterList() { return theSystemParamList; }
-   wxString* GetUserVariableList() { return theUserVariableList; }
-   wxString* GetUserArrayList() { return theUserArrayList; }
-   wxString* GetUserStringList() { return theUserStringList; }
-   wxString* GetUserParameterList() { return theUserParamList; }
-   wxString* GetCoordSysList() { return theCoordSysList; }
-   wxString* GetConfigBodyList() { return theCelesBodyList; }
-   wxString* GetSpacecraftList() { return theSpacecraftList; }
-   wxString* GetImpulsiveBurnList() { return theImpBurnList; }
-   wxString* GetFiniteBurnList() { return theFiniteBurnList; }
-   wxString* GetSolverList() { return theSolverList; }
-   wxString* GetOptimizerList() { return theOptimizerList; }
+   wxArrayString GetPlottableParameterList() { return thePlottableParamList; }
+   wxArrayString GetSystemParameterList() { return theSystemParamList; }
+   wxArrayString GetUserVariableList() { return theUserVariableList; }
+   wxArrayString GetUserArrayList() { return theUserArrayList; }
+   wxArrayString GetUserStringList() { return theUserStringList; }
+   wxArrayString GetUserParameterList() { return theUserParamList; }
+   wxArrayString GetCoordSysList() { return theCoordSysList; }
+   wxArrayString GetConfigBodyList() { return theCelesBodyList; }
+   wxArrayString GetSpacecraftList() { return theSpacecraftList; }
+   wxArrayString GetImpulsiveBurnList() { return theImpBurnList; }
+   wxArrayString GetFiniteBurnList() { return theFiniteBurnList; }
+   wxArrayString GetSolverList() { return theSolverList; }
+   wxArrayString GetOptimizerList() { return theOptimizerList; }
    
    wxArrayString GetPropertyList(const wxString &objType,
                                  int showOption = SHOW_PLOTTABLE);
    
    int GetNumProperty(const wxString &objType);
-   wxString* GetPropertyList(const wxString &objType);
    
    //-----------------------------------------------------------------
    //Note: To enables automatic updates when new object is added to
@@ -345,7 +312,7 @@ private:
    
    void UpdatePropertyList();
    void UpdateParameterList();
-
+   
    void UpdateSpacecraftList();
    void UpdateFormationList();
    void UpdateSpaceObjectList();
@@ -358,8 +325,11 @@ private:
    void UpdateFunctionList();
    void UpdateSubscriberList();
    void UpdateSolverList();
-
-   void AddToAllObjectList();
+   void UpdatePropagatorList();
+   void UpdateForceModelList();
+   
+   //void AddToAllObjectList();
+   void AddToAllObjectArray();
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
@@ -407,60 +377,85 @@ private:
    int theNumFiniteBurnProperty;
    int theNumSpaceObject;
    int theNumFormation;
+   int theNumForceModel;
    int theNumSpacecraft;
+   int theNumCalPoint;
+   int theNumCelesBody;
+   int theNumCelesPoint;
+   int theNumSpacePoint;
    int theNumImpBurn;
    int theNumFiniteBurn;
    int theNumCoordSys;
    int theNumFunction;
    int theNumFuelTank;
    int theNumThruster;
+   int theNumSubscriber;
+   int theNumReportFile;
+   int theNumSolver;
+   int theNumBoundarySolver;
+   int theNumOptimizer;
+   int theNumPropagator;
    int theNumPlottableParam;
    int theNumSystemParam;
    int theNumUserVariable;
    int theNumUserString;
    int theNumUserArray;
    int theNumUserParam;
-   int theNumCelesBody;
-   int theNumCelesPoint;
-   int theNumCalPoint;
-   int theNumSpacePoint;
-   int theNumSubscriber;
-   int theNumReportFile;
-   int theNumSolver;
-   int theNumBoundarySolver;
-   int theNumOptimizer;
    int theNumAllObject;
    
-   wxString theSpacePointList[MAX_SPACE_POINT];
-   wxString theCelesPointList[MAX_CELES_POINT];
-   wxString theCelesBodyList[MAX_CELES_BODY];
-   wxString theCalPointList[MAX_CAL_POINT];
+   // Spacecraft Properties
+   wxArrayString theScPropertyList;
    
-   wxString theSpaceObjectList[MAX_SPACE_OBJECT];
-   wxString theFormationList[MAX_FORMATION];
-   wxString theSpacecraftList[MAX_SPACECRAFT];
-   wxString theImpBurnList[MAX_BURN];
-   wxString theFiniteBurnList[MAX_BURN];
-   wxString theCoordSysList[MAX_COORD_SYS];
-   wxString theFunctionList[MAX_FUNCTION];
-   wxString theFuelTankList[MAX_HARDWARE];
-   wxString theThrusterList[MAX_HARDWARE];
-   wxString theReportFileList[MAX_REPORT_FILE];
-   wxString theSubscriberList[MAX_SUBSCRIBER];
-   wxString theSolverList[MAX_SOLVER];
-   wxString theBoundarySolverList[MAX_BOUNDARY_SOLVER];
-   wxString theOptimizerList[MAX_OPTIMIZER];
-   wxString theAllObjectList[MAX_ALL_OBJECT];
+   // Burn Properties
+   wxArrayString theImpBurnPropertyList;
+   wxArrayString theFiniteBurnPropertyList;
    
-   wxString theScPropertyList[MAX_SC_PROPERTY];
-   wxString theImpBurnPropertyList[MAX_IB_PROPERTY];
-   wxString theFiniteBurnPropertyList[MAX_IB_PROPERTY];
-   wxString thePlottableParamList[MAX_PLOT_PARAM];
-   wxString theSystemParamList[MAX_PROPERTY];
-   wxString theUserVariableList[MAX_USER_VAR];
-   wxString theUserStringList[MAX_USER_STRING];
-   wxString theUserArrayList[MAX_USER_ARRAY];
-   wxString theUserParamList[MAX_USER_PARAM];
+   // All Objects
+   wxArrayString theAllObjectList;
+   
+   // Propagator, ForceModel
+   wxArrayString thePropagatorList;
+   wxArrayString theForceModelList;
+   
+   // CoordinateSystem
+   wxArrayString theCoordSysList;
+   
+   // Burn
+   wxArrayString theImpBurnList;
+   wxArrayString theFiniteBurnList;
+
+   // Function
+   wxArrayString theFunctionList;
+   
+   // Solver
+   wxArrayString theSolverList;
+   wxArrayString theBoundarySolverList;
+   wxArrayString theOptimizerList;
+   
+   // SpacePoint
+   wxArrayString theCelesBodyList;
+   wxArrayString theCelesPointList;
+   wxArrayString theCalPointList;
+   wxArrayString theSpacePointList;
+   wxArrayString theSpacecraftList;
+   wxArrayString theSpaceObjectList;
+   wxArrayString theFormationList;
+   
+   // Subscriber
+   wxArrayString theSubscriberList;
+   wxArrayString theReportFileList;
+   
+   // Hardware
+   wxArrayString theFuelTankList;
+   wxArrayString theThrusterList;
+   
+   // Parameter
+   wxArrayString thePlottableParamList;
+   wxArrayString theSystemParamList;
+   wxArrayString theUserVariableList;
+   wxArrayString theUserStringList;
+   wxArrayString theUserArrayList;
+   wxArrayString theUserParamList;
    
 };
 
