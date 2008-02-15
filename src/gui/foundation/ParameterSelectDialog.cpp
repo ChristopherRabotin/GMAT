@@ -592,8 +592,8 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       if (objType == "Spacecraft")
       {
          // Show Spacecraft objects
-         mObjectListBox->InsertItems(theGuiManager->GetNumSpacecraft(),
-                                     theGuiManager->GetSpacecraftList(), 0);
+         mObjectListBox->InsertItems(theGuiManager->GetSpacecraftList(), 0);
+         
          // Set Spacecraft property
          mPropertyListBox->
             Set(theGuiManager->GetPropertyList("Spacecraft",
@@ -607,8 +607,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       else if (objType == "ImpulsiveBurn")
       {
          // Show ImpulsiveBurn objects
-         mObjectListBox->InsertItems(theGuiManager->GetNumImpulsiveBurn(),
-                                     theGuiManager->GetImpulsiveBurnList(), 0);
+         mObjectListBox->InsertItems(theGuiManager->GetImpulsiveBurnList(), 0);
          
          // Set ImpulsiveBurn property
          mPropertyListBox->
@@ -623,8 +622,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          // Show Variables
          if (theGuiManager->GetNumUserVariable() > 0)
          {
-            mObjectListBox->InsertItems(theGuiManager->GetNumUserVariable(),
-                                        theGuiManager->GetUserVariableList(), 0);
+            mObjectListBox->InsertItems(theGuiManager->GetUserVariableList(), 0);
          }
          
          // There is no properties
@@ -635,8 +633,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          // Show Arrays
          if (theGuiManager->GetNumUserArray() > 0)
          {
-            mObjectListBox->InsertItems(theGuiManager->GetNumUserArray(),
-                                        theGuiManager->GetUserArrayList(), 0);
+            mObjectListBox->InsertItems(theGuiManager->GetUserArrayList(), 0);
          }
          
          // There is no properties
@@ -653,8 +650,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
          // Show Strings
          if (theGuiManager->GetNumUserString() > 0)
          {
-            mObjectListBox->InsertItems(theGuiManager->GetNumUserString(),
-                                        theGuiManager->GetUserStringList(), 0);
+            mObjectListBox->InsertItems(theGuiManager->GetUserStringList(), 0);
          }
          
          // There is no properties
