@@ -141,7 +141,7 @@ private:
    void OnRemoveScript(wxCommandEvent &event);
    void OnScriptBuildObject(wxCommandEvent& event);
    void OnScriptBuildAndRun(wxCommandEvent& event);
-
+   
    // script folder
    void OnAddScriptFolder(wxCommandEvent &event);
    void OnRunScriptsFromFolder(wxCommandEvent& event);
@@ -149,7 +149,8 @@ private:
    void OnRemoveScriptFolder(wxCommandEvent& event);
    
    bool BuildScript(const wxString &filename, bool readBack = false,
-                    const wxString &savePath = "");
+                    const wxString &savePath = "", bool openScript = true,
+                    bool multiScripts = false);
    
    // menu
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);

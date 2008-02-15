@@ -1219,9 +1219,12 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
-
-   //    mainNotebook->CreatePage(item);
+   
+   #ifdef __USE_NOTEBOOK__
+   mainNotebook->CreatePage(item);
+   #else
    GmatAppData::GetMainFrame()->CreateChild(item);
+   #endif
 }
 
 
@@ -1238,8 +1241,12 @@ void ResourceTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   //    mainNotebook->CreatePage(item);
+   
+   #ifdef __USE_NOTEBOOK__
+   mainNotebook->CreatePage(item);
+   #else
    GmatAppData::GetMainFrame()->CreateChild(item);
+   #endif
 }
 
 
@@ -1882,6 +1889,8 @@ void ResourceTree::OnAddPropagator(wxCommandEvent &event)
       AppendItem(item, name, GmatTree::ICON_PROPAGATOR, -1,
                  new GmatTreeItemData(name, GmatTree::PROPAGATOR));
       Expand(item);
+      
+      theGuiManager->UpdatePropagator();
    }
    else
    {
@@ -2674,7 +2683,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          {
             // Create objects from script only first time, to test re-run
             if (i == 0)
-               builtOk = BuildScript(filename, runFromSavedScripts, savePath);
+               builtOk = BuildScript(filename, runFromSavedScripts, savePath, false, true);
             
             if (builtOk)
             {
@@ -2828,25 +2837,30 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 
 //------------------------------------------------------------------------------
 // bool BuildScript(const wxString &filename, bool readBack = false,
-//                  const wxString &savePath = "")
+//                  const wxString &savePath = "", bool openScript = true,
+//                  bool multScript = false)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
  * @param <filename> input script file name
- * @param <readBack> true will read scripts, save, and read back in
- * @param <newPath> new path to be used for saving scripts
+ * @param <readBack> true will read scripts, save, and read back in (false)
+ * @param <newPath> new path to be used for saving scripts ("")
+ * @param <openScript> true if script file to be opened on error (true)
+ * @param <multiScripts> true if running scripts from the folder (false)
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
 bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
-                               const wxString &savePath)
+                               const wxString &savePath, bool openScript,
+                               bool multiScripts)
 {
    #if DEBUG_RESOURCE_TREE
    MessageInterface::ShowMessage
-      ("===> ResourceTree::BuildScript() filename=%s, readBack=%d\n   savePath=%s\n",
-       filename.c_str(), readBack, savePath.c_str());
+      ("ResourceTree::BuildScript() filename=%s, readBack=%d, openScript=%d, "
+       "multiScripts=%d\n   savePath=%s\n", filename.c_str(), readBack, openScript,
+       multiScripts, savePath.c_str());
    #endif
    
    // Set the filename to mainframe, so save will not bring up the file dialog
@@ -2856,8 +2870,8 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
    {
       // Interpret script
       bool status = GmatAppData::GetMainFrame()->
-         InterpretScript(filename, readBack, savePath, false, true);
-   
+         InterpretScript(filename, readBack, savePath, openScript, multiScripts);
+      
       if (!status)
       {
          mBuildErrorCount++;
