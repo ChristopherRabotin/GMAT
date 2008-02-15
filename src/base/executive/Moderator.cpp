@@ -2674,6 +2674,11 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
          cmd->SetStringParameter("StartName", "1");
          cmd->SetStringParameter("EndName", "10");
       }
+      else if (type == "Save")
+      {
+         cmd->SetRefObjectName(Gmat::SPACECRAFT,
+                               GetDefaultSpacecraft()->GetName());
+      }
       else if (type == "Toggle")
       {
          cmd->SetStringParameter(cmd->GetParameterID("Subscriber"),
