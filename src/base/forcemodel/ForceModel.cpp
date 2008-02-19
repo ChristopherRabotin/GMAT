@@ -1577,6 +1577,21 @@ GmatBase* ForceModel::Clone() const
 }
 
 
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void ForceModel::Copy(const GmatBase* orig)
+{
+   operator=(*((ForceModel *)(orig)));
+}
+
+
 //------------------------------------------------------------------------------
 // const ObjectTypeArray& GetRefObjectTypeArray()
 //------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ForceModel
 //------------------------------------------------------------------------------
@@ -101,61 +101,62 @@ public:
    
    
    // inherited from GmatBase
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
-   virtual GmatBase* Clone() const;
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual void  SetSolarSystem(SolarSystem *ss);
-   virtual const ObjectTypeArray& GetRefObjectTypeArray();
+   virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
-   GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool  SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                              const std::string &name = "");
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
    
    // Access methods derived classes can override
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                       GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual bool        IsParameterReadOnly(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
    
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &value) const;
-   virtual bool        SetStringParameter(const Integer id,
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &value) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id, 
                                           const std::string &value);
-   virtual bool        SetStringParameter(const std::string &label,
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label, 
                                           const std::string &value);
-   
-   virtual std::string GetOnOffParameter(const Integer id) const;
-   virtual bool        SetOnOffParameter(const Integer id, 
-                                         const std::string &value);
-   virtual std::string GetOnOffParameter(const std::string &label) const;
-   virtual bool        SetOnOffParameter(const std::string &label, 
-                                         const std::string &value);
    virtual const StringArray&
-                       GetStringArrayParameter(const Integer id) const;
+                        GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
-                       GetStringArrayParameter(const std::string &label) const;
+                        GetStringArrayParameter(const std::string &label) const;
    
-   static void         SetScriptAlias(const std::string& alias, 
-                                      const std::string& typeName);
-   static std::string& GetScriptAlias(const std::string& alias);
+   static void          SetScriptAlias(const std::string& alias, 
+                                       const std::string& typeName);
+   static std::string&  GetScriptAlias(const std::string& alias);
    
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name);
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
    
-   virtual Integer     GetOwnedObjectCount();
-   virtual GmatBase*   GetOwnedObject(Integer whichOne);
-   virtual std::string BuildPropertyName(GmatBase *ownedObj);
+   virtual Integer      GetOwnedObjectCount();
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   virtual std::string  BuildPropertyName(GmatBase *ownedObj);
    
    #ifdef __WITH_FM_GEN_STRING__
    virtual const std::string&
@@ -164,8 +165,8 @@ public:
                        const std::string &useName = "");
    #endif
    
-   void                UpdateInitialData();
-   void                ReportEpochData();
+   void                 UpdateInitialData();
+   void                 ReportEpochData();
 
 protected:
    /// Count of the number of forces in the model
