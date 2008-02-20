@@ -4241,7 +4241,7 @@ void GuiItemManager::AddToAllObjectArray()
    
    // Add SolarSystem objects to the list
    SolarSystem *ss = theGuiInterpreter->GetSolarSystemInUse();
-   wxString ssName = ss->GetName();
+   wxString ssName = ss->GetName().c_str();
    ssName = ssName + " <SolarSystem>";
    theAllObjectList.Add(ssName);
    
