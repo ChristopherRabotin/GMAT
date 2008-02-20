@@ -220,7 +220,8 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    
    parameterCount   = a.parameterCount;
    typeName         = a.typeName;
-   instanceName     = a.instanceName;
+   // We don't want to copy instanceName (loj: 2008.02.15)
+   //instanceName     = a.instanceName;
    type             = a.type;
    ownedObjectCount = a.ownedObjectCount;
    generatingString = a.generatingString;

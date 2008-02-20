@@ -117,11 +117,17 @@ const CoordinateBase& CoordinateBase::operator=(const CoordinateBase &coordBase)
    if (&coordBase == this)
       return *this;
    GmatBase::operator=(coordBase);
-   origin        = NULL;
+   
+   // Copied original pointer (loj: 2008.02.20)
+   //origin        = NULL;
+   //j2000Body     = NULL;
+   //solar         = NULL;
+   
+   origin        = coordBase.origin;
    originName    = coordBase.originName;
-   j2000Body     = NULL;
+   j2000Body     = coordBase.j2000Body;
    j2000BodyName = coordBase.j2000BodyName;
-   solar         = NULL;
+   solar         = coordBase.solar;
    
    return *this;
 }

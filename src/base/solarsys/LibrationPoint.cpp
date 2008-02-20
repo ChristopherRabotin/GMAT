@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  LibrationPoint
 //------------------------------------------------------------------------------
@@ -651,6 +651,24 @@ const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType 
 GmatBase* LibrationPoint::Clone() const
 {
    return (new LibrationPoint(*this));
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void LibrationPoint::Copy(const GmatBase* orig)
+{
+   // We don't want to copy instanceName
+   std::string name = instanceName;
+   operator=(*((LibrationPoint *)(orig)));
+   instanceName = name;
 }
 
 

@@ -35,44 +35,49 @@ public:
    PropSetup& operator= (const PropSetup &right); 
    virtual ~PropSetup();
    
-   bool IsInitialized();
-   Propagator* GetPropagator();
-   ForceModel* GetForceModel();
-   void SetPropagator(Propagator *propagator);
-   void SetForceModel(ForceModel *forceModel);
-   void SetUseDrag(bool flag);
+   bool                 IsInitialized();
+   Propagator*          GetPropagator();
+   ForceModel*          GetForceModel();
+   void                 SetPropagator(Propagator *propagator);
+   void                 SetForceModel(ForceModel *forceModel);
+   void                 SetUseDrag(bool flag);
    
-   void AddForce(PhysicalModel *force);
-   PhysicalModel* GetForce(Integer index);
-   Integer GetNumForces();
+   void                 AddForce(PhysicalModel *force);
+   PhysicalModel*       GetForce(Integer index);
+   Integer              GetNumForces();
    
    // inherited from GmatBase
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*    Clone(void) const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual GmatBase* GetOwnedObject(Integer whichOne);
-
-   virtual const std::string* GetParameterList() const;   
-   virtual Integer GetParameterCount() const;
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
    
-   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer GetParameterID(const std::string &str) const;
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const Integer id, const std::string &value);
-   virtual bool SetStringParameter(const std::string &label, const std::string &value);
+   virtual const std::string*
+                        GetParameterList() const;   
+   virtual Integer      GetParameterCount() const;
    
-   bool Initialize();
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   
+   bool                 Initialize();
    
    virtual const std::string&
-                GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                    const std::string &prefix = "",
-                                    const std::string &useName = "");
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
    
    
 private:

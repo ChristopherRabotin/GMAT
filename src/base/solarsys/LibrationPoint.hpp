@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  LibrationPoint
 //------------------------------------------------------------------------------
@@ -50,9 +50,9 @@ public:
    
    // methods inherited from SpacePoint, that must be implemented here
    // in the derived class
-   virtual const Rvector6           GetMJ2000State(const A1Mjd &atTime);
-   virtual const Rvector3           GetMJ2000Position(const A1Mjd &atTime);
-   virtual const Rvector3           GetMJ2000Velocity(const A1Mjd &atTime);   
+   virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
+   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);   
    
    // Parameter access methods - overridden from GmatBase
    virtual std::string  GetParameterText(const Integer id) const;
@@ -75,11 +75,12 @@ public:
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value,
                                            const Integer index);
-
+   
    virtual const StringArray& 
-      GetRefObjectNameArray(const Gmat::ObjectType type);
-
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
    
 protected:

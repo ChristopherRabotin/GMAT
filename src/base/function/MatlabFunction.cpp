@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  MatlabFunction
 //------------------------------------------------------------------------------
@@ -94,5 +94,20 @@ MatlabFunction& MatlabFunction::operator=(const MatlabFunction& right)
 GmatBase* MatlabFunction::Clone() const
 {
    return (new MatlabFunction(*this));
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void MatlabFunction::Copy(const GmatBase* orig)
+{
+   operator=(*((MatlabFunction *)(orig)));
 }
 

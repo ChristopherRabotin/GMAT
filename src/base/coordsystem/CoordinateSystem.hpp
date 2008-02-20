@@ -100,42 +100,43 @@ public:
    
    // all classes derived from GmatBase must supply this Clone method;
    // this must be implemented in the 'leaf' classes
-   virtual GmatBase*       Clone() const;
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    // Parameter access methods - overridden from GmatBase 
-   virtual std::string     GetParameterText(const Integer id) const;     
-   virtual Integer         GetParameterID(const std::string &str) const; 
+   virtual std::string  GetParameterText(const Integer id) const;     
+   virtual Integer      GetParameterID(const std::string &str) const; 
    virtual Gmat::ParameterType
-                           GetParameterType(const Integer id) const;
-   virtual std::string     GetParameterTypeString(const Integer id) const;
-   virtual Real            GetRealParameter(const Integer id) const;
-   virtual Real            SetRealParameter(const Integer id,
-                                            const Real value);
-   virtual Real            GetRealParameter(const std::string &label) const;
-   virtual Real            SetRealParameter(const std::string &label,
-                                            const Real value);
-   std::string             GetStringParameter(const Integer id) const;
-   std::string             GetStringParameter(const std::string &label) const;
-   virtual bool            GetBooleanParameter(const Integer id) const; 
-   virtual bool            GetBooleanParameter(const std::string &label) const; 
-   virtual bool            SetBooleanParameter(const Integer id,
-                                               const bool value); 
-   virtual bool            SetBooleanParameter(const std::string &label,
-                                               const bool value);
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   std::string          GetStringParameter(const Integer id) const;
+   std::string          GetStringParameter(const std::string &label) const;
+   virtual bool         GetBooleanParameter(const Integer id) const; 
+   virtual bool         GetBooleanParameter(const std::string &label) const; 
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value); 
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
    
-   virtual GmatBase*       GetRefObject(const Gmat::ObjectType type,
-                                        const std::string &name);
-   virtual GmatBase*       GetOwnedObject(Integer whichOne);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual const ObjectTypeArray&
-                           GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                           GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool            SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                        const std::string &name = "");
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
 protected:
 

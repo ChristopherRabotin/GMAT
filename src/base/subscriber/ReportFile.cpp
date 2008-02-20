@@ -309,8 +309,8 @@ bool ReportFile::Initialize()
       if ((mNumParams == 0) && !usedByReport)
       {
          MessageInterface::ShowMessage
-            ("ReportFile::Initialize() ReportFile:%s will not be written.\n"
-             "   No parameters selected for ReportFile.\n", GetName().c_str());
+            ("*** WARNING *** The ReportFile named \"%s\" will not be created.\n"
+             "No parameters were added to ReportFile.\n", GetName().c_str());
          
          active = false;
          return false;
@@ -320,9 +320,9 @@ bool ReportFile::Initialize()
          if (mParams[0] == NULL)
          {
             MessageInterface::ShowMessage
-               ("ReportFile::Initialize() ReportFile will not be created.\n"
-                "The first parameter:%s selected for the report file is NULL\n",
-                mParamNames[0].c_str());
+               ("*** WARNING *** The ReportFile named \"%s\" will not be created.\n"
+                "The first parameter:%s added for the report file is NULL\n",
+                GetName().c_str(), mParamNames[0].c_str());
             
             active = false;
             return false;
@@ -330,7 +330,7 @@ bool ReportFile::Initialize()
    }
    
    Subscriber::Initialize();
-
+   
    if (active)
    { 
       if (!OpenReportFile())
@@ -356,6 +356,21 @@ bool ReportFile::Initialize()
 GmatBase* ReportFile::Clone(void) const
 {
    return (new ReportFile(*this));
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void ReportFile::Copy(const GmatBase* orig)
+{
+   operator=(*((ReportFile *)(orig)));
 }
 
 

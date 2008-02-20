@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              Formation
 //------------------------------------------------------------------------------
@@ -265,6 +265,21 @@ bool Formation::RenameRefObject(const Gmat::ObjectType type,
 GmatBase* Formation::Clone() const
 {
    return new Formation(*this);
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void Formation::Copy(const GmatBase* orig)
+{
+   operator=(*((Formation *)(orig)));
 }
 
 

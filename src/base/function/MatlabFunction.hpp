@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  MatlabFunction
 //------------------------------------------------------------------------------
@@ -27,14 +27,13 @@ class GMAT_API MatlabFunction : public Function
 {
 public:
    MatlabFunction(const std::string &nomme);
-
    virtual ~MatlabFunction();
-
    MatlabFunction(const MatlabFunction &copy);
    MatlabFunction& operator=(const MatlabFunction &right);
-                 
+   
    // inherited from GmatBase
-   virtual GmatBase* Clone() const;
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
 
 };
 

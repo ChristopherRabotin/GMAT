@@ -632,8 +632,8 @@ bool OpenGlPlot::Initialize()
    {
       active = false;
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "OpenGL plot will be turned off. No spacecraft is "
-          "added to OpenGL plot\n");
+         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off.\n"
+          "No spacecraft was added to plot.\n", GetName().c_str());
       return false;
    }
    
@@ -861,6 +861,21 @@ bool OpenGlPlot::Initialize()
 GmatBase* OpenGlPlot::Clone() const
 {
    return (new OpenGlPlot(*this));
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void OpenGlPlot::Copy(const GmatBase* orig)
+{
+   operator=(*((OpenGlPlot *)(orig)));
 }
 
 

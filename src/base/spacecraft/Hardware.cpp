@@ -130,7 +130,9 @@ Hardware& Hardware::operator=(const Hardware& hw)
 {
    if (&hw == this)
       return *this;
-      
+   
+   GmatBase::operator=(hw);
+   
    direction[0] = hw.direction[0];
    direction[1] = hw.direction[1];
    direction[2] = hw.direction[2];
@@ -138,7 +140,7 @@ Hardware& Hardware::operator=(const Hardware& hw)
    secondDirection[0] = hw.secondDirection[0];
    secondDirection[1] = hw.secondDirection[1];
    secondDirection[2] = hw.secondDirection[2];
-
+   
    location[0] = hw.location[0];
    location[1] = hw.location[1];
    location[2] = hw.location[2];

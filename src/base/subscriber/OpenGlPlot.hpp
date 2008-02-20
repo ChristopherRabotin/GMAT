@@ -32,57 +32,60 @@ public:
    OpenGlPlot& operator=(const OpenGlPlot&);
    virtual ~OpenGlPlot(void);
    
-   const StringArray& GetSpacePointList();
-   const StringArray& GetSpacecraftList();
-   const StringArray& GetNonSpacecraftList();
+   const StringArray&   GetSpacePointList();
+   const StringArray&   GetSpacecraftList();
+   const StringArray&   GetNonSpacecraftList();
    
-   UnsignedInt GetColor(const std::string &item, const std::string &scName);
-   bool SetColor(const std::string &item, const std::string &name,
-                 UnsignedInt value);
-   bool GetShowObject(const std::string &name);
-   void SetShowObject(const std::string &name, bool value);
+   UnsignedInt          GetColor(const std::string &item, const std::string &scName);
+   bool                 SetColor(const std::string &item, const std::string &name,
+                                 UnsignedInt value);
+   bool                 GetShowObject(const std::string &name);
+   void                 SetShowObject(const std::string &name, bool value);
    
-   Rvector3 GetVector(const std::string &which);
-   void SetVector(const std::string &which, const Rvector3 &value);
+   Rvector3             GetVector(const std::string &which);
+   void                 SetVector(const std::string &which, const Rvector3 &value);
    
    // methods inherited from Subscriber
-   virtual bool Initialize();
+   virtual bool         Initialize();
    
    // methods inherited from GmatBase
-   virtual GmatBase* Clone() const;
-   virtual bool SetName(const std::string &who,
-                        const std::string &oldName = "");
+   virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    
-   virtual bool TakeAction(const std::string &action,  
-                           const std::string &actionData = "");
+   virtual bool         SetName(const std::string &who,
+                                const std::string &oldName = "");
    
-   virtual bool RenameRefObject(const Gmat::ObjectType type,
-                                const std::string &oldName,
-                                const std::string &newName);
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    // methods for parameters
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
-   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-   virtual bool        IsParameterReadOnly(const Integer id) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    
-   virtual Integer GetIntegerParameter(const Integer id) const;
-   virtual Integer SetIntegerParameter(const Integer id, const Integer value);
-   virtual Integer GetIntegerParameter(const std::string &label) const;
-   virtual Integer SetIntegerParameter(const std::string &label,
-                                       const Integer value);
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
    
-   virtual Real GetRealParameter(const Integer id) const;
-   virtual Real SetRealParameter(const Integer id, const Real value);
-   virtual Real GetRealParameter(const std::string &label) const;
-   virtual Real SetRealParameter(const std::string &label, const Real value);
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
    
-   virtual Real GetRealParameter(const Integer id,
-                                 const Integer index) const;
-   virtual Real SetRealParameter(const Integer id,
-                                 const Real value,
-                                 const Integer index);
+   virtual Real         GetRealParameter(const Integer id,
+                                         const Integer index) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value,
+                                         const Integer index);
    
    virtual const Rvector& GetRvectorParameter(const Integer id) const;
    virtual const Rvector& SetRvectorParameter(const Integer id,
@@ -91,62 +94,65 @@ public:
    virtual const Rvector& SetRvectorParameter(const std::string &label,
                                               const Rvector &value);
    
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool SetStringParameter(const Integer id, const std::string &value);
-   virtual std::string GetStringParameter(const std::string &label) const;
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id, const std::string &value);
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
    
-   virtual bool SetStringParameter(const Integer id, const std::string &value,
-                                   const Integer index);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value,
-                                   const Integer index);
+   virtual bool         SetStringParameter(const Integer id, const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
    
-   virtual UnsignedInt SetUnsignedIntParameter(const Integer id,
-                                               const UnsignedInt value,
-                                               const Integer index);
+   virtual UnsignedInt  SetUnsignedIntParameter(const Integer id,
+                                                const UnsignedInt value,
+                                                const Integer index);
    
    virtual const UnsignedIntArray&
-                 GetUnsignedIntArrayParameter(const Integer id) const;   
+                        GetUnsignedIntArrayParameter(const Integer id) const;   
    virtual const StringArray&
-                 GetStringArrayParameter(const Integer id) const;
+                        GetStringArrayParameter(const Integer id) const;
    
-   virtual bool  GetBooleanParameter(const Integer id) const;
-   virtual bool  SetBooleanParameter(const Integer id,
-                                     const bool value);
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
    
-   virtual std::string GetOnOffParameter(const Integer id) const;
-   virtual bool        SetOnOffParameter(const Integer id, 
-                                         const std::string &value);
-   virtual std::string GetOnOffParameter(const std::string &label) const;
-   virtual bool        SetOnOffParameter(const std::string &label, 
-                                         const std::string &value);
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id, 
+                                          const std::string &value);
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label, 
+                                          const std::string &value);
    
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual const ObjectTypeArray& GetRefObjectTypeArray();
-   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
-   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                             const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
 protected:
 
-   bool AddSpacePoint(const std::string &name, Integer index, bool show = true);
-   bool ClearSpacePointList();
-   bool RemoveSpacePoint(const std::string &name);
-   Integer FindIndexOfElement(StringArray &labelArray,
-                              const std::string &label);
+   bool     AddSpacePoint(const std::string &name, Integer index,
+                          bool show = true);
+   bool     ClearSpacePointList();
+   bool     RemoveSpacePoint(const std::string &name);
+   Integer  FindIndexOfElement(StringArray &labelArray,
+                               const std::string &label);
    
-   void ClearDynamicArrays();
-   void UpdateObjectList(SpacePoint *sp, bool show = false);
-   void PutRvector3Value(Rvector3 &rvec3, Integer id,
-                         const std::string &sval, Integer index = -1);
-
-   void WriteDeprecatedMessage(Integer id) const;
-   bool UpdateSolverData();
+   void     ClearDynamicArrays();
+   void     UpdateObjectList(SpacePoint *sp, bool show = false);
+   void     PutRvector3Value(Rvector3 &rvec3, Integer id,
+                             const std::string &sval, Integer index = -1);
+   
+   void     WriteDeprecatedMessage(Integer id) const;
+   bool     UpdateSolverData();
    
    CoordinateSystem *mViewCoordSystem;
    CoordinateSystem *mViewUpCoordSystem;

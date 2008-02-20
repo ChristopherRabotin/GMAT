@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Barycenter
 //------------------------------------------------------------------------------
@@ -280,6 +280,25 @@ GmatBase* Barycenter::Clone() const
 {
    return (new Barycenter(*this));
 }
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void Barycenter::Copy(const GmatBase* orig)
+{
+   // We don't want to copy instanceName
+   std::string name = instanceName;
+   operator=(*((Barycenter *)(orig)));
+   instanceName = name;
+}
+
 
 //------------------------------------------------------------------------------
 // private methods

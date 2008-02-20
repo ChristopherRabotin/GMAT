@@ -383,6 +383,24 @@ GmatBase* PropSetup::Clone(void) const
 }
 
 
+//---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void PropSetup::Copy(const GmatBase* orig)
+{
+   // We don't want to copy instanceName
+   std::string name = instanceName;
+   operator=(*((PropSetup *)(orig)));
+   instanceName = name;
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------

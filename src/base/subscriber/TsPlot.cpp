@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  XyPlot
 //------------------------------------------------------------------------------
@@ -102,34 +102,76 @@ TsPlot::TsPlot(const std::string &name, Parameter *xParam,
 
 
 //------------------------------------------------------------------------------
-// TsPlot(const TsPlot &copy)
+// TsPlot(const TsPlot &orig)
 //------------------------------------------------------------------------------
-TsPlot::TsPlot(const TsPlot &copy) :
-   Subscriber(copy)
+TsPlot::TsPlot(const TsPlot &orig) :
+   Subscriber(orig)
 {
-   mXParam = copy.mXParam;
-   mYParams = copy.mYParams;
+   mXParam = orig.mXParam;
+   mYParams = orig.mYParams;
    
-   mNumXParams = copy.mNumXParams;
-   mNumYParams = copy.mNumYParams;
+   mNumXParams = orig.mNumXParams;
+   mNumYParams = orig.mNumYParams;
    
-   mXParamName = copy.mXParamName;
-   mYParamNames = copy.mYParamNames;
+   mXParamName = orig.mXParamName;
+   mYParamNames = orig.mYParamNames;
    
-   mAllParamNames = copy.mAllParamNames;
+   mAllParamNames = orig.mAllParamNames;
    
-   mOldName = copy.mOldName;
-   mPlotTitle = copy.mPlotTitle;
-   mXAxisTitle = copy.mXAxisTitle;
-   mYAxisTitle = copy.mYAxisTitle;
-   mDrawGrid = copy.mDrawGrid;
-   mIsTsPlotWindowSet = copy.mIsTsPlotWindowSet;
+   mOldName = orig.mOldName;
+   mPlotTitle = orig.mPlotTitle;
+   mXAxisTitle = orig.mXAxisTitle;
+   mYAxisTitle = orig.mYAxisTitle;
+   mDrawGrid = orig.mDrawGrid;
+   mIsTsPlotWindowSet = orig.mIsTsPlotWindowSet;
    
-   mDataCollectFrequency = copy.mDataCollectFrequency;
-   mUpdatePlotFrequency = copy.mUpdatePlotFrequency;
+   mDataCollectFrequency = orig.mDataCollectFrequency;
+   mUpdatePlotFrequency = orig.mUpdatePlotFrequency;
    
-   mNumDataPoints = copy.mNumDataPoints;
-   mNumCollected = copy.mNumCollected;
+   mNumDataPoints = orig.mNumDataPoints;
+   mNumCollected = orig.mNumCollected;
+}
+
+
+//------------------------------------------------------------------------------
+// TsPlot& operator=(const TsPlot& orig)
+//------------------------------------------------------------------------------
+/**
+ * The assignment operator
+ */
+//------------------------------------------------------------------------------
+TsPlot& TsPlot::operator=(const TsPlot& orig)
+{
+   if (this == &orig)
+      return *this;
+   
+   Subscriber::operator=(orig);
+   
+   mXParam = orig.mXParam;
+   mYParams = orig.mYParams;
+   
+   mNumXParams = orig.mNumXParams;
+   mNumYParams = orig.mNumYParams;
+   
+   mXParamName = orig.mXParamName;
+   mYParamNames = orig.mYParamNames;
+   
+   mAllParamNames = orig.mAllParamNames;
+   
+   mOldName = orig.mOldName;
+   mPlotTitle = orig.mPlotTitle;
+   mXAxisTitle = orig.mXAxisTitle;
+   mYAxisTitle = orig.mYAxisTitle;
+   mDrawGrid = orig.mDrawGrid;
+   mIsTsPlotWindowSet = orig.mIsTsPlotWindowSet;
+   
+   mDataCollectFrequency = orig.mDataCollectFrequency;
+   mUpdatePlotFrequency = orig.mUpdatePlotFrequency;
+   
+   mNumDataPoints = orig.mNumDataPoints;
+   mNumCollected = orig.mNumCollected;
+   
+   return *this;
 }
 
 
@@ -199,9 +241,9 @@ bool TsPlot::Initialize()
          active = false;
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "TsPlot::Initialize() TsPlot will not be shown.\n"
-             "No parameters selected for X Axis:%d or Y Axis:%d\n", mNumXParams,
-             mNumYParams);
+             "*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
+             "No parameters were selected for X Axis or Y Axis.\n",
+             GetName().c_str());
          return false;
       }
       
@@ -210,8 +252,9 @@ bool TsPlot::Initialize()
          active = false;
          MessageInterface::PopupMessage
             (Gmat::WARNING_,
-             "TsPlot::Initialize() TsPlot will not be shown.\n"
-             "The first parameter selected for X Axis or Y Axis is NULL\n");
+             "*** WARNING *** The XYPlot named \"%s\" will not be shown.\n"
+             "The first parameter selected for X Axis or Y Axis is NULL\n",
+             GetName().c_str());
          return false;
       }
    }
@@ -311,6 +354,21 @@ bool TsPlot::Initialize()
 GmatBase* TsPlot::Clone(void) const
 {
    return (new TsPlot(*this));
+}
+
+
+//---------------------------------------------------------------------------
+// void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void TsPlot::Copy(const GmatBase* orig)
+{
+   operator=(*((TsPlot *)(orig)));
 }
 
 

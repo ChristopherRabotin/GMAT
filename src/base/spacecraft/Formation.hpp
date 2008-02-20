@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              Formation
 //------------------------------------------------------------------------------
@@ -40,6 +40,7 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual GmatBase*    Clone() const;
+   virtual void         Copy(const GmatBase* orig);
    virtual void         ParametersHaveChanged(bool flag);
    
    // Access methods derived classes can override
@@ -49,12 +50,12 @@ public:
                         GetParameterType(const Integer id) const;
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual bool         IsParameterReadOnly(const Integer id) const;
-
-   virtual bool GetBooleanParameter(const Integer id) const;
-   virtual bool GetBooleanParameter(const std::string &label) const;
-   virtual bool SetBooleanParameter(const Integer id, const bool value);
-   virtual bool SetBooleanParameter(const std::string &label,
-                                    const bool value);
+   
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const Integer id, const bool value);
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
    
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
@@ -88,7 +89,7 @@ public:
    virtual void         UpdateState();
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
-   virtual void ClearLastStopTriggered();
+   virtual void         ClearLastStopTriggered();
    // virtual void SetLastStopTriggered(const std::string &stopCondName);
    // virtual bool WasLastStopTriggered(const std::string &stopCondName);
 
@@ -116,7 +117,7 @@ protected:
    /// Array of parameter types
    static const Gmat::ParameterType PARAMETER_TYPE[FormationParamCount - 
                                                    SpaceObjectParamCount];
-                                                   
+   
    bool                 ClearSpacecraftList();
    bool                 RemoveSpacecraft(const std::string &name);
 };

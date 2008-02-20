@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CoordinateSystem
 //------------------------------------------------------------------------------
@@ -130,7 +130,7 @@ const CoordinateSystem& CoordinateSystem::operator=(
       return *this;
    CoordinateBase::operator=(coordSys);
    //axes           = coordSys.axes;
-
+   
    if (coordSys.axes)
       axes = (AxisSystem*)coordSys.axes->Clone();
    else
@@ -631,6 +631,21 @@ GmatBase* CoordinateSystem::Clone() const
 
 
 //---------------------------------------------------------------------------
+//  void Copy(const GmatBase* orig)
+//---------------------------------------------------------------------------
+/**
+ * Sets this object to match another one.
+ * 
+ * @param orig The original that is being copied.
+ */
+//---------------------------------------------------------------------------
+void CoordinateSystem::Copy(const GmatBase* orig)
+{
+   operator=(*((CoordinateSystem *)(orig)));
+}
+
+
+//---------------------------------------------------------------------------
 //  bool RenameRefObject(const Gmat::ObjectType type,
 //                       const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
@@ -990,7 +1005,7 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
       refs.clear();
       
       refs = CoordinateBase::GetRefObjectNameArray(type);
-
+      
       #if DEBUG_CS_REF_OBJECT
       for (unsigned int i=0; i<refs.size(); i++)
          MessageInterface::ShowMessage("   cs obj=%s\n", refs[i].c_str());
