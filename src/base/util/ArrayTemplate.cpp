@@ -127,7 +127,7 @@ ArrayTemplate<T>::ArrayTemplate(const ArrayTemplate<T> &array)
 template <class T>
 ArrayTemplate<T>::~ArrayTemplate()
 {
-   delete[] elementD;
+   delete [] elementD;
 }
 
 //------------------------------------------------------------------------------
@@ -290,7 +290,7 @@ ArrayTemplate<T>::SetSize(int size)
    {
        //throw ArrayTemplateExceptions::ArrayAlreadySized();
       // wcs - 2005.02.01 - need to be able to resize
-      delete elementD;
+      delete [] elementD;
    }
 
    if (size < 0)
