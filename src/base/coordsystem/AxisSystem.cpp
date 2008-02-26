@@ -113,6 +113,11 @@ nutationSrc      (GmatItrf::NUTATION_1980),
 planetarySrc     (GmatItrf::PLANETARY_1980),
 aVals            (NULL), 
 apVals           (NULL),
+precData         (NULL),
+nutData          (NULL),
+stData           (NULL),
+stDerivData      (NULL),
+pmData           (NULL),
 AVals            (NULL),
 BVals            (NULL),
 CVals            (NULL),
@@ -162,6 +167,11 @@ nutationSrc       (GmatItrf::NUTATION_1980),
 planetarySrc      (GmatItrf::PLANETARY_1980),
 aVals            (NULL), 
 apVals           (NULL),
+precData         (NULL),
+nutData          (NULL),
+stData           (NULL),
+stDerivData      (NULL),
+pmData           (NULL),
 AVals            (NULL),
 BVals            (NULL),
 CVals            (NULL),
@@ -241,7 +251,22 @@ AxisSystem::~AxisSystem()
       delete [] aVals;
    if (apVals != NULL)
       delete [] apVals;
-   
+   if (AVals != NULL) delete [] AVals;
+   if (BVals != NULL) delete [] BVals;
+   if (CVals != NULL) delete [] CVals;
+   if (DVals != NULL) delete [] DVals;
+   if (EVals != NULL) delete [] EVals;
+   if (FVals != NULL) delete [] FVals;
+   if (ApVals != NULL) delete [] ApVals;
+   if (BpVals != NULL) delete [] BpVals;
+   if (CpVals != NULL) delete [] CpVals;
+   if (DpVals != NULL) delete [] DpVals;
+   if (precData != NULL)    delete [] precData;
+   if (nutData != NULL)     delete [] nutData;
+   if (stData != NULL)      delete [] stData;
+   if (stDerivData != NULL) delete [] stDerivData;
+   if (pmData != NULL)      delete [] pmData;
+  
 //   aVals = NULL;
 //   apVals = NULL;
    #ifdef DEBUG_DESTRUCTION
