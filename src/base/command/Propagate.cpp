@@ -161,7 +161,7 @@ Propagate::~Propagate()
 
    if (pubdata)
       delete [] pubdata;
-      
+   
    for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
         ++ps)
    {
@@ -280,7 +280,16 @@ Propagate& Propagate::operator=(const Propagate &prp)
    initialized             = false;
        
    baseEpoch.clear();
+
+   for (std::vector<PropSetup*>::iterator ps = prop.begin(); ps != prop.end(); 
+        ++ps)
+   {
+      PropSetup *oldPs = *ps;
+      *ps = NULL;
+      delete oldPs;
+   }
    prop.clear();
+
    sats.clear();
    stopWhen.clear();
    stopSats.clear();
@@ -1227,7 +1236,16 @@ bool Propagate::TakeAction(const std::string &action,
          satName.clear();
 
          propName.clear();
+
+         for (std::vector<PropSetup*>::iterator ps = prop.begin(); 
+              ps != prop.end(); ++ps)
+         {
+            PropSetup *oldPs = *ps;
+            *ps = NULL;
+            delete oldPs;
+         }
          prop.clear();
+
          sats.clear();
       }
       else if (actionData == "StopCondition")
@@ -1940,7 +1958,7 @@ bool Propagate::Initialize()
    
    inProgress = false;
    UnsignedInt index = 0;
-   prop.clear();
+//   prop.clear();
    sats.clear();
    SpaceObject *so;
    std::string pName;
