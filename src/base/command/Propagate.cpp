@@ -1245,6 +1245,8 @@ bool Propagate::TakeAction(const std::string &action,
             delete oldPs;
          }
          prop.clear();
+         p.clear();
+         fm.clear();
 
          sats.clear();
       }
@@ -1975,6 +1977,8 @@ bool Propagate::Initialize()
       delete oldPs;
    }
    prop.clear();
+   p.clear();
+   fm.clear();
       
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {
@@ -3098,7 +3102,7 @@ bool Propagate::CheckFirstStepStop(Integer i)
           "false" : "true"));
    #endif
    
-   if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()));
+   if (stopSats[i]->WasLastStopTriggered(stopWhen[i]->GetName()))//;
    {
       // Only report as triggered if outside of the stop accuracy
       Real min, max, goal, temp;
