@@ -33,7 +33,7 @@
 // If we want to create default input file names turn this on
 //#define FM_CREATE_DEFAULT_INPUT
 
-//#define DEBUG_FILE_MANAGER 1
+//#define DEBUG_FILE_MANAGER
 
 //---------------------------------
 // static data
@@ -105,7 +105,7 @@ FileManager::~FileManager()
    {
       if (pos->second)
       {
-         #if DEBUG_FILE_MANAGER
+         #ifdef DEBUG_FILE_MANAGER
          MessageInterface::ShowMessage
             ("FileManager::~FileManager deleting %s\n", pos->first.c_str());
          #endif
@@ -242,7 +242,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    if (fileName != "")
       mStartupFileName = fileName;
    
-   #if DEBUG_FILE_MANAGER
+   #ifdef DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage("FileManager::ReadStartupFile() reading:%s\n",
                                  mStartupFileName.c_str());
    #endif
@@ -258,8 +258,8 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       // Use global function getline()
       getline(mInStream, line);
       
-      #if DEBUG_FILE_MANAGER
-      MessageInterface::ShowMessage("line=%s\n", line);
+      #ifdef DEBUG_FILE_MANAGER
+      MessageInterface::ShowMessage("line=%s\n", line.c_str());
       #endif
       
       // Skip empty line or comment line
@@ -282,7 +282,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       
       ss >> name;
       
-      #if DEBUG_FILE_MANAGER
+      #ifdef DEBUG_FILE_MANAGER
       MessageInterface::ShowMessage("type=%s, name=%s\n", type.c_str(), name.c_str());
       #endif
       
@@ -336,7 +336,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    if (fileName != "")
       outFileName = fileName;
    
-   #if DEBUG_FILE_MANAGER
+   #ifdef DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage
       ("FileManager::WriteStartupFile() outFileName = %s\n", outFileName.c_str());
    #endif
@@ -697,8 +697,8 @@ std::string FileManager::GetAbsPathname(const FileType type)
 std::string FileManager::GetAbsPathname(const std::string &typeName)
 {
    std::string fileType = GmatStringUtil::ToUpper(typeName);
-
-   #if DEBUG_FILE_MANAGER
+   
+   #ifdef DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage
       ("FileManager::GetAbsPathname() typeName=%s\n", typeName.c_str());
    #endif
@@ -790,15 +790,26 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
       if (type.find("_PATH") != type.npos)
       {
          std::string str2 = newpath;
-
+         
          // append '/' if not there
-         if (str2.find_last_of('/') != str2.length()-1)
+         std::string::size_type index = str2.find_last_of("/\\");
+         if (index != str2.length() - 1)
+         {
             str2 = str2 + "/";
+         }
+         else
+         {
+            index = str2.find_last_not_of("/\\");            
+            str2 = str2.substr(0, index+1) + "/";
+         }
          
          mPathMap[type] = str2;
-         //MessageInterface::ShowMessage
-         //   ("==>FileManager::SetAbsPathname() %s set to %s\n", type.c_str(),
-         //    str2.c_str());
+         
+         #ifdef DEBUG_SET_PATH
+         MessageInterface::ShowMessage
+            ("FileManager::SetAbsPathname() %s set to %s\n", type.c_str(),
+             str2.c_str());
+         #endif
       }
       else
       {
@@ -829,7 +840,7 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
 //------------------------------------------------------------------------------
 void FileManager::AddFileType(const std::string &type, const std::string &name)
 {  
-   #if DEBUG_FILE_MANAGER
+   #ifdef DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage
       ("FileManager::AddFileType() type=%s, name=%s\n", type.c_str(), name.c_str());
    #endif
@@ -932,7 +943,7 @@ FileManager::FileManager()
 {  
    MessageInterface::SetLogEnable(false); // so that debug can be written from here
    
-   #if DEBUG_FILE_MANAGER
+   #ifdef DEBUG_FILE_MANAGER
    MessageInterface::ShowMessage("FileManager::FileManager() entered\n");
    #endif
    
