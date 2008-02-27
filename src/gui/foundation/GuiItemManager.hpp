@@ -50,19 +50,19 @@ public:
                        bool allowNumber = false, bool allowNonPlottable = false);
    
    void UpdateAll();
-   void UpdateBurn();
-   void UpdateCelestialPoint();
-   void UpdateCoordSystem();
-   void UpdateForceModel();
-   void UpdateFormation();
-   void UpdateFunction();
-   void UpdateHardware();
-   void UpdateParameter();
-   void UpdatePropagator();
-   void UpdateSolarSystem();
-   void UpdateSpacecraft();
-   void UpdateSolver();
-   void UpdateSubscriber();
+   void UpdateBurn(bool updateObjectArray = true);
+   void UpdateCelestialPoint(bool updateObjectArray = true);
+   void UpdateCoordSystem(bool updateObjectArray = true);
+   void UpdateForceModel(bool updateObjectArray = true);
+   void UpdateFormation(bool updateObjectArray = true);
+   void UpdateFunction(bool updateObjectArray = true);
+   void UpdateHardware(bool updateObjectArray = true);
+   void UpdateParameter(bool updateObjectArray = true);
+   void UpdatePropagator(bool updateObjectArray = true);
+   void UpdateSolarSystem(bool updateObjectArray = true);
+   void UpdateSpacecraft(bool updateObjectArray = true);
+   void UpdateSolver(bool updateObjectArray = true);
+   void UpdateSubscriber(bool updateObjectArray = true);
    
    // For handling of resource update 
    void AddToResourceUpdateListeners(GmatPanel *panel);

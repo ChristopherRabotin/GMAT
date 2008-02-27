@@ -213,81 +213,83 @@ void GuiItemManager::UpdateAll()
    MessageInterface::ShowMessage("==================> GuiItemManager::UpdateAll()\n");
    #endif
    
-   UpdateCelestialPoint(); // All CelestialBodies and CalculatedPoints
+   UpdateCelestialPoint(false); // All CelestialBodies and CalculatedPoints
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateCelestialPoint()\n");
    #endif
    
-   UpdateFormation();
+   UpdateFormation(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateFormation()\n");
    #endif
    
-   UpdateSpacecraft();
+   UpdateSpacecraft(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateSpacecraft()\n");
    #endif
    
-   UpdateBurn();
+   UpdateBurn(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateBurn()\n");
    #endif
    
-   UpdateParameter();
+   UpdateParameter(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateParameter()\n");
    #endif
    
-   UpdateSolarSystem();
+   UpdateSolarSystem(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateSolarSystem()\n");
    #endif
    
-   UpdateCoordSystem();
+   UpdateCoordSystem(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateCoordSystem()\n");
    #endif
    
-   UpdatePropagator();
+   UpdatePropagator(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdatePropagator()\n");
    #endif
    
-   UpdateForceModel();
+   UpdateForceModel(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateForceModel()\n");
    #endif
    
-   UpdateHardware();
+   UpdateHardware(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateHardware()\n");
    #endif
    
-   UpdateFunction();
+   UpdateFunction(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateFunction()\n");
    #endif
    
-   UpdateSubscriber();
+   UpdateSubscriber(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateSubscriber()\n");
    #endif
    
-   UpdateSolver();
+   UpdateSolver(false);
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> after UpdateSolver()\n");
    #endif
+   
+   AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateCelestialPoint()
+//  void UpdateCelestialPoint(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates CelestialBody and CalculatedPoint objects.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateCelestialPoint()
+void GuiItemManager::UpdateCelestialPoint(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateCelestialPoint\n");
@@ -295,18 +297,19 @@ void GuiItemManager::UpdateCelestialPoint()
    
    UpdateCelestialPointList();
    UpdateSpacePointList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateFormation()
+//  void UpdateFormation(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates Formation related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateFormation()
+void GuiItemManager::UpdateFormation(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateFormation\n");
@@ -315,36 +318,38 @@ void GuiItemManager::UpdateFormation()
    UpdateFormationList();
    UpdateSpaceObjectList();
    UpdateSpacePointList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateForceModel()
+//  void UpdateForceModel(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates parameter related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateForceModel()
+void GuiItemManager::UpdateForceModel(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateForceModel\n");
    #endif
    
    UpdateForceModelList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateSpacecraft()
+//  void UpdateSpacecraft(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates spacecraft related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSpacecraft()
+void GuiItemManager::UpdateSpacecraft(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateSpacecraft\n");
@@ -353,126 +358,133 @@ void GuiItemManager::UpdateSpacecraft()
    UpdateSpacecraftList();
    UpdateSpaceObjectList();
    UpdateSpacePointList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateBurn()
+//  void UpdateBurn(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates burn related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateBurn()
+void GuiItemManager::UpdateBurn(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateBurn\n");
    #endif
    
    UpdateBurnList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateCoordSystem()
+//  void UpdateCoordSystem(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates CoordinateSystem related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateCoordSystem()
+void GuiItemManager::UpdateCoordSystem(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateCoordSystem\n");
    #endif
    
    UpdateCoordSystemList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateFunction()
+//  void UpdateFunction(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates Function related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateFunction()
+void GuiItemManager::UpdateFunction(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateFunction\n");
    #endif
    
    UpdateFunctionList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateHardware()
+//  void UpdateHardware(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates hardware related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateHardware()
+void GuiItemManager::UpdateHardware(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateHardware\n");
    #endif
    
    UpdateHardwareList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateParameter()
+//  void UpdateParameter(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates parameter related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateParameter()
+void GuiItemManager::UpdateParameter(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateParameter\n");
    #endif
    
    UpdateParameterList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdatePropagator()
+//  void UpdatePropagator(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates parameter related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdatePropagator()
+void GuiItemManager::UpdatePropagator(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdatePropagator\n");
    #endif
    
    UpdatePropagatorList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateSolarSystem()
+//  void UpdateSolarSystem(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates SolarSystem related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSolarSystem()
+void GuiItemManager::UpdateSolarSystem(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateSolarSystem\n");
@@ -480,43 +492,46 @@ void GuiItemManager::UpdateSolarSystem()
    
    UpdateCelestialBodyList();
    UpdateCelestialPointList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateSolver()
+//  void UpdateSolver(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates Solver related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSolver()
+void GuiItemManager::UpdateSolver(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateSolver\n");
    #endif
    
    UpdateSolverList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
 //------------------------------------------------------------------------------
-//  void UpdateSubscriber()
+//  void UpdateSubscriber(bool updateObjectArray = true)
 //------------------------------------------------------------------------------
 /**
  * Updates Subscriber related gui components.
  */
 //------------------------------------------------------------------------------
-void GuiItemManager::UpdateSubscriber()
+void GuiItemManager::UpdateSubscriber(bool updateObjectArray)
 {
    #if DBGLVL_GUI_ITEM_UPDATE
    MessageInterface::ShowMessage("===> UpdateSubscriber\n");
    #endif
    
    UpdateSubscriberList();
-   AddToAllObjectArray();
+   if (updateObjectArray)
+      AddToAllObjectArray();
 }
 
 
@@ -964,22 +979,22 @@ wxComboBox* GuiItemManager::GetObjectTypeComboBox(wxWindow *parent, wxWindowID i
 {
    wxArrayString emptyList;
    wxComboBox *cb =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-                     emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, emptyList,
+                     wxCB_READONLY);
    
    for (unsigned int i=0; i<objectTypeList.size(); i++)
    {
-      if (objectTypeList[i] == "Spacecraft")// && theNumSpacecraft > 0)
+      if (objectTypeList[i] == "Spacecraft")
          cb->Append(objectTypeList[i]);
-      else if (objectTypeList[i] == "ImpulsiveBurn")// && theNumImpBurn > 0)
+      else if (objectTypeList[i] == "ImpulsiveBurn")
          cb->Append(objectTypeList[i]);
-      else if (objectTypeList[i] == "FiniteBurn")// && theNumFiniteBurn > 0)
+      else if (objectTypeList[i] == "FiniteBurn")
          cb->Append(objectTypeList[i]);
-      else if (objectTypeList[i] == "Array")// && theNumUserArray > 0)
+      else if (objectTypeList[i] == "Array")
          cb->Append(objectTypeList[i]);
-      else if (objectTypeList[i] == "Variable")// && theNumUserVariable > 0)
+      else if (objectTypeList[i] == "Variable")
          cb->Append(objectTypeList[i]);
-      else if (objectTypeList[i] == "String")// && theNumUserString > 0)
+      else if (objectTypeList[i] == "String")
          cb->Append(objectTypeList[i]);
    }
    
@@ -1000,8 +1015,6 @@ wxComboBox* GuiItemManager::GetSpacecraftComboBox(wxWindow *parent, wxWindowID i
                                                   const wxSize &size)
 {
    wxComboBox *spacecraftComboBox =
-      //new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
-      //               theNumSpacecraft, theSpacecraftList, wxCB_READONLY);
       new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size,
                      theSpacecraftList, wxCB_READONLY);
    
@@ -1193,8 +1206,8 @@ GuiItemManager::GetSpacePointComboBox(wxWindow *parent, wxWindowID id,
    
    wxArrayString emptyList;
    wxComboBox *spacePointComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, //0,
-                     emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, emptyList,
+                     wxCB_READONLY);
    
    if (addVector)
       spacePointComboBox->Append("Vector");
@@ -1231,8 +1244,8 @@ GuiItemManager::GetCelestialPointComboBox(wxWindow *parent, wxWindowID id,
       
    wxArrayString emptyList;
    wxComboBox * celestialPointComboBox =
-      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, // 0,
-                     emptyList, wxCB_READONLY);
+      new wxComboBox(parent, id, wxT(""), wxDefaultPosition, size, emptyList,
+                     wxCB_READONLY);
    
    if (addVector)
       celestialPointComboBox->Append("Vector");
@@ -1500,8 +1513,8 @@ wxCheckListBox* GuiItemManager::GetSubscriberCheckListBox(wxWindow *parent, wxWi
 {
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size,
-                         emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -1542,8 +1555,8 @@ wxCheckListBox* GuiItemManager::GetSpacecraftCheckListBox(wxWindow *parent, wxWi
 {
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size,
-                         emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT);
    
    if (excList != NULL && excList->GetCount() > 0)
    {
@@ -1583,8 +1596,8 @@ GuiItemManager::GetAllObjectCheckListBox(wxWindow *parent, wxWindowID id,
 {
    wxArrayString emptyList;
    wxCheckListBox *checkListBox =
-      new wxCheckListBox(parent, id, wxDefaultPosition, size,
-                         emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxCheckListBox(parent, id, wxDefaultPosition, size, emptyList,
+                         wxLB_SINGLE|wxLB_SORT);
    
    //---------------------------------------------
    // Get all object list
@@ -1639,8 +1652,8 @@ wxListBox* GuiItemManager::GetSpacePointListBox(wxWindow *parent, wxWindowID id,
 
    wxArrayString emptyList;
    wxListBox *spacePointListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, //0,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
    
    if (addVector)
       spacePointListBox->Append("Vector");
@@ -1676,8 +1689,8 @@ wxListBox* GuiItemManager::GetCelestialPointListBox(wxWindow *parent, wxWindowID
    
    wxArrayString emptyList;
    wxListBox *celesPointListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
    
    if (excList.GetCount() > 0)
    {
@@ -1724,8 +1737,8 @@ wxListBox* GuiItemManager::GetSpaceObjectListBox(wxWindow *parent, wxWindowID id
    
    wxArrayString emptyList;
    wxListBox *spaceObjectListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, //0,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
 
    // get Formation list
    StringArray fmList =
@@ -1996,9 +2009,9 @@ wxListBox* GuiItemManager::GetPlottableParameterListBox(wxWindow *parent,
    wxArrayString emptyList;
    
    wxListBox *plottableParamListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
-
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
+   
    if (nameToExclude != "")
    {
       for (int i=0; i<theNumPlottableParam; i++)
@@ -2065,8 +2078,8 @@ wxListBox* GuiItemManager::GetAllUserParameterListBox(wxWindow *parent, wxWindow
       wxArrayString emptyList;
       
       allUserParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size,
-                       emptyList, wxLB_SINGLE|wxLB_SORT);
+         new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                       wxLB_SINGLE|wxLB_SORT);
    }
    
    return allUserParamListBox;
@@ -2231,14 +2244,14 @@ wxListBox* GuiItemManager::GetUserParameterListBox(wxWindow *parent, wxWindowID 
    if (theNumUserParam > 0)
    {       
       userParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size,
-                       theUserParamList, wxLB_SINGLE|wxLB_SORT);
+         new wxListBox(parent, id, wxDefaultPosition, size, theUserParamList,
+                       wxLB_SINGLE|wxLB_SORT);
    }
    else
    {       
       userParamListBox =
-         new wxListBox(parent, id, wxDefaultPosition, size,
-                       emptyList, wxLB_SINGLE|wxLB_SORT);
+         new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                       wxLB_SINGLE|wxLB_SORT);
    }
    
    return userParamListBox;
@@ -2258,12 +2271,10 @@ wxListBox* GuiItemManager::GetConfigBodyListBox(wxWindow *parent, wxWindowID id,
                                                 const wxSize &size,
                                                 wxArrayString &excList)
 {    
-   //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
    wxListBox *celesBodyListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, //0,
-                    emptyList, wxLB_SINGLE);
-
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList, wxLB_SINGLE);
+   
    if (excList.GetCount() > 0)
    {
       for (int i=0; i<theNumCelesBody; i++)
@@ -2298,8 +2309,8 @@ wxListBox* GuiItemManager::GetFuelTankListBox(wxWindow *parent, wxWindowID id,
    
    wxArrayString emptyList;
    wxListBox *fuelTankListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
 
    //----------------------------------------------------------------------
    #ifdef __EXCLUDE_FUELTANKS_IN_USE__
@@ -2369,9 +2380,9 @@ wxListBox* GuiItemManager::GetThrusterListBox(wxWindow *parent, wxWindowID id,
 {
    wxArrayString emptyList;
    wxListBox *thrusterListBox =
-      new wxListBox(parent, id, wxDefaultPosition, size, //0,
-                    emptyList, wxLB_SINGLE|wxLB_SORT);
-      
+      new wxListBox(parent, id, wxDefaultPosition, size, emptyList,
+                    wxLB_SINGLE|wxLB_SORT);
+   
    // It's ok to have the same Thruster in more than one spacecraft isince
    // the Sandbox will clone it
    if (excList != NULL && excList->GetCount() > 0)
@@ -2824,8 +2835,8 @@ wxSizer* GuiItemManager::Create3ColParameterSizer
    
    // make single selection so we can do move up and down
    *selectedListBox =
-      new wxListBox(parent, -1, wxDefaultPosition, wxSize(200, 270),
-                    emptyList, wxLB_SINGLE);
+      new wxListBox(parent, -1, wxDefaultPosition, wxSize(200, 270), emptyList,
+                    wxLB_SINGLE);
    
    //----- selectedSizer
    GmatStaticBoxSizer *selectedSizer =
@@ -3439,7 +3450,7 @@ void GuiItemManager::UpdateCelestialPointList()
        "theNumCalPoint=%d, theNumCelesPoint=%d\n", theNumCelesBody, theNumCalPoint,
        theNumCelesPoint);
    #endif
-
+   
    theCelesBodyList.Clear();
    theCalPointList.Clear();
    theCelesPointList.Clear();
@@ -3854,7 +3865,7 @@ void GuiItemManager::UpdateSubscriberList()
       
       #if DBGLVL_GUI_ITEM_SUBS > 1
       MessageInterface::ShowMessage
-         ("   %s added to theSubscriberList ", theSubscriberList[i].c_str());
+         ("   %s added to theSubscriberList\n", theSubscriberList[i].c_str());
       #endif
    }
    
@@ -4147,33 +4158,38 @@ void GuiItemManager::AddToAllObjectArray()
 {
    #if DBGLVL_GUI_ITEM_ALL_OBJECT
    MessageInterface::ShowMessage
-      ("GuiItemManager::AddToAllObjectArray()\n   "
-       "theNumSpacecraft = %d\n   theNumFormation  = %d\n   "
-       "theNumFuelTank   = %d\n   theNumThruster   = %d\n   "
-       "theNumImpBurn    = %d\n   theNumFiniteBurn = %d\n   "
-       "theNumSolver     = %d\n   theNumCalPoint   = %d\n   "
-       "theNumPropagator = %d\n   theNumForceModel = %d\n",
-       theNumSpacecraft, theNumFormation, theNumFuelTank, theNumThruster,
-       theNumImpBurn, theNumFiniteBurn, theNumSolver, theNumCalPoint,
-       theNumPropagator, theNumForceModel);
+      ("GuiItemManager::AddToAllObjectArray() entered\n");
    #endif
    
    theNumAllObject = 0;
    theAllObjectList.Clear();
    
    // Add CoordinateSystem objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d CoordinateSystem\n", theNumCoordSys);
+   #endif
+   
    for (int i=0; i<theNumCoordSys; i++)
       theAllObjectList.Add(theCoordSysList[i] + " <CoordinateSystem>");
    
    // Add Spacecraft objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Spacecraft\n", theNumSpacecraft);
+   #endif
    for (int i=0; i<theNumSpacecraft; i++)
       theAllObjectList.Add(theSpacecraftList[i] + " <Spacecraft>");
    
    // Add Formation objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Formation\n", theNumFormation);
+   #endif
    for (int i=0; i<theNumFormation; i++)
       theAllObjectList.Add(theFormationList[i] + " <Formation>");
    
    // Add CalculatedPoint objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d CalculatedPoint\n", theNumCalPoint);
+   #endif
    for (int i=0; i<theNumCalPoint; i++)
    {
       GmatBase *obj = theGuiInterpreter->GetConfiguredObject(theCalPointList[i].c_str());
@@ -4184,50 +4200,86 @@ void GuiItemManager::AddToAllObjectArray()
    }
    
    // Add Function objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Function\n", theNumFunction);
+   #endif
    for (int i=0; i<theNumFunction; i++)
       theAllObjectList.Add(theFunctionList[i] + " <Function>");
    
    // Add FuelTank objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d FuelTank\n", theNumFuelTank);
+   #endif
    for (int i=0; i<theNumFuelTank; i++)
       theAllObjectList.Add(theFuelTankList[i] + " <FuelTank>");
    
    // Add Thruster objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Thruster\n", theNumThruster);
+   #endif
    for (int i=0; i<theNumThruster; i++)
       theAllObjectList.Add(theThrusterList[i] + " <Thruster>");
    
    // Add ImpulsiveBurn objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d ImpulsiveBurn\n", theNumImpBurn);
+   #endif
    for (int i=0; i<theNumImpBurn; i++)
       theAllObjectList.Add(theImpBurnList[i] + " <ImpulsiveBurn>");
    
    // Add FiniteBurn objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d FiniteBurn\n", theNumFiniteBurn);
+   #endif
    for (int i=0; i<theNumFiniteBurn; i++)
       theAllObjectList.Add(theFiniteBurnList[i] + " <FiniteBurn>");
    
    // Add Propagator objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Propagator\n", theNumPropagator);
+   #endif
    for (int i=0; i<theNumPropagator; i++)
       theAllObjectList.Add(thePropagatorList[i] + " <Propagator>");
    
    // Add ForceModel objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d ForceModel\n", theNumForceModel);
+   #endif
    for (int i=0; i<theNumForceModel; i++)
       theAllObjectList.Add(theForceModelList[i] + " <ForceModel>");
    
    // Add Solver objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Solver\n", theNumSolver);
+   #endif
    for (int i=0; i<theNumSolver; i++)
       theAllObjectList.Add(theSolverList[i] + " <Solver>");
    
    // Add Variable objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Variable\n", theNumUserVariable);
+   #endif
    for (int i=0; i<theNumUserVariable; i++)
       theAllObjectList.Add(theUserVariableList[i] + " <Variable>");
    
    // Add Array objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Array\n", theNumUserArray);
+   #endif
    for (int i=0; i<theNumUserArray; i++)
       theAllObjectList.Add(theUserArrayList[i] + " <Array>");
    
    // Add String objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d String\n", theNumUserString);
+   #endif
    for (int i=0; i<theNumUserString; i++)
       theAllObjectList.Add(theUserStringList[i] + " <String>");
    
    // Add Subscriber objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding %d Subscriber\n", theNumSubscriber);
+   #endif
    for (int i=0; i<theNumSubscriber; i++)
    {
       GmatBase *obj = theGuiInterpreter->GetConfiguredObject(theSubscriberList[i].c_str());
@@ -4240,6 +4292,9 @@ void GuiItemManager::AddToAllObjectArray()
    }
    
    // Add SolarSystem objects to the list
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Adding SolarSystem\n");
+   #endif
    SolarSystem *ss = theGuiInterpreter->GetSolarSystemInUse();
    wxString ssName = ss->GetName().c_str();
    ssName = ssName + " <SolarSystem>";
@@ -4250,6 +4305,9 @@ void GuiItemManager::AddToAllObjectArray()
    //-------------------------------------------------------
    // update registered All Object CheckListBox
    //-------------------------------------------------------
+   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+   MessageInterface::ShowMessage("   Updating registerd All Object CheckListBox\n");
+   #endif
    for (std::vector<wxCheckListBox*>::iterator pos = mAllObjectCLBList.begin();
         pos != mAllObjectCLBList.end(); ++pos)
    {
@@ -4287,7 +4345,7 @@ void GuiItemManager::AddToAllObjectArray()
    
    #if DBGLVL_GUI_ITEM_ALL_OBJECT
    MessageInterface::ShowMessage
-      ("GuiItemManager::AddToAllObjectArray() theNumAllObject = %d\n",
+      ("GuiItemManager::AddToAllObjectArray() exiting, theNumAllObject = %d\n",
        theNumAllObject);
    #endif
 }
