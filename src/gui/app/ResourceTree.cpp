@@ -243,17 +243,15 @@ void ResourceTree::ClearResource(bool leaveScripts)
 //------------------------------------------------------------------------------
 void ResourceTree::UpdateResource(bool restartCounter)
 {
-   #if DEBUG_RESOURCE_TREE
+   #if DEBUG_RESOURCE_TREE_UPDATE
    MessageInterface::ShowMessage("ResourceTree::UpdateResource() entered\n");
    #endif
    
    if (restartCounter)
-   {
       theGuiInterpreter->ResetConfigurationChanged();
-   }
    
    ClearResource(true);
-
+   
    AddDefaultBodies(mUniverseItem);
    AddDefaultSpecialPoints(mSpecialPointsItem);
    AddDefaultSpacecraft(mSpacecraftItem, restartCounter);
@@ -266,9 +264,13 @@ void ResourceTree::UpdateResource(bool restartCounter)
    AddDefaultVariables(mVariableItem);
    AddDefaultFunctions(mFunctionItem);
    AddDefaultCoordSys(mCoordSysItem);
-
+   
    theGuiManager->UpdateAll();
    ScrollTo(mSpacecraftItem);
+   
+   #if DEBUG_RESOURCE_TREE_UPDATE
+   MessageInterface::ShowMessage("ResourceTree::UpdateResource() exiting\n");
+   #endif
 }
 
 
@@ -2561,11 +2563,11 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    // if running from saved scripts folder, set path to save path
    if (runFromSavedScripts)
-   {
       currPath = savePath;
-      if (!::wxDirExists(currPath))
-         ::wxMkdir(currPath);
-   }
+   
+   // Create path if not exist
+   if (!::wxDirExists(currPath))
+      ::wxMkdir(currPath);
    
    int count = 0;
    mHasUserInterrupted = false;
@@ -2628,7 +2630,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       
       if (count > runCount)
          break;
-
+      
       // Set main frame title to script file name
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
       wxString titleText;
@@ -2653,6 +2655,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
             outPath << "Run_" << i+1;
             if (!::wxDirExists(outPath))
                ::wxMkdir(outPath);
+            
             outPath = outPath + "/";
          }
          
@@ -2706,10 +2709,16 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          catch(BaseException &e)
          {
             MessageInterface::ShowMessage
-               ("*** Error running: %s\n   %s\n", e.GetFullMessage().c_str());
+               ("*** Error running: %s\n   %s\n", filename.c_str(),
+                e.GetFullMessage().c_str());
             
             if (compare)
                textCtrl->AppendText(e.GetFullMessage().c_str());
+         }
+         catch (...)
+         {
+            MessageInterface::ShowMessage
+               ("*** Unknown Error running: %s\n", filename.c_str());
          }
       }
       
@@ -2794,7 +2803,6 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       text->AppendText(msg);
       dlg->ShowModal();
    }
-   
 }
 
 
