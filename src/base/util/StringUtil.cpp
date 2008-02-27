@@ -158,6 +158,12 @@ std::string GmatStringUtil::RemoveSpaceInBrackets(const std::string &str,
 std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
                                  bool removeSemicolon, bool removeEol)
 {
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::Trim() str=<%s>, stripType=%d, removeSemicolon=%d, "
+       "removeEol=%d\n", str.c_str(), stype, removeSemicolon, removeEol);
+   #endif
+   
    if (str == "")
       return str;
    
@@ -179,12 +185,12 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("==> index1=%d, index2=%d str=<%s>, str2=<%s>\n", index1, index2,
+      ("   index1=%d, index2=%d str=<%s>, str2=<%s>\n", index1, index2,
        str.c_str(), str2.c_str());
    #endif
-
-   //loj: 2007.10.30
-   // remove trailing end-of-lines (\r or \n) or blanks before removing semicolns
+   
+   // remove trailing end-of-lines (\r or \n) or blanks or tabs (\t)
+   // before removing semicolns
    if (removeSemicolon)
    {
       if (str2.size() > 0)
@@ -192,8 +198,12 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
          // if option is to remove eol
          if (removeEol)
          {
+            // replace all occurance of tab with a space
+            str2 = Replace(str2, "\t", " ");
+            
+            // remove trailing \r and \n
             while (str2[str2.size()-1] == '\n' || str2[str2.size()-1] == '\r')
-               str2.erase(str2.size()-1, 1);         
+               str2.erase(str2.size()-1, 1);
             
             // remove trailing blanks
             while (str2[str2.size()-1] == ' ')
@@ -208,7 +218,7 @@ std::string GmatStringUtil::Trim(const std::string &str, StripType stype,
    
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
-      ("==> GmatStringUtil::Trim() returning:\n   %s\n", str2.c_str());
+      ("GmatStringUtil::Trim() returning <%s>\n", str2.c_str());
    #endif
    
    return str2;
