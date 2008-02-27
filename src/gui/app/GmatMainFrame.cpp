@@ -940,14 +940,18 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
          
          child->OnClose(event);
          
-         if (!child->CanClose())
+         // if type is not output, check if child can be closed (loj: 2008.02.22)
+         if (type < GmatTree::BEGIN_OF_OUTPUT && type > GmatTree::END_OF_OUTPUT)
          {
-            #ifdef DEBUG_MAINFRAME_CLOSE
-            MessageInterface::ShowMessage("   ==> cannot close this child\n");
-            #endif
-            
-            canDelete = false;
-            return false;
+            if (!child->CanClose())
+            {
+               #ifdef DEBUG_MAINFRAME_CLOSE
+               MessageInterface::ShowMessage("   ==> cannot close this child\n");
+               #endif
+               
+               canDelete = false;
+               return false;
+            }
          }
       }
       
@@ -1040,7 +1044,7 @@ void GmatMainFrame::SetActiveChildDirty(bool dirty)
 void GmatMainFrame::CloseCurrentProject()
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
-   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject()\n");
+   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() entered\n");
    #endif
    
    // close all windows
@@ -1053,6 +1057,10 @@ void GmatMainFrame::CloseCurrentProject()
    UpdateTitle();
    
    // clear trees, message window
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("   clearing trees and message window\n");
+   #endif
+   
    theGuiInterpreter->ClearResource();
    theGuiInterpreter->ClearCommandSeq();
    MessageInterface::ClearMessage();
@@ -1060,6 +1068,10 @@ void GmatMainFrame::CloseCurrentProject()
    GmatAppData::GetResourceTree()->UpdateResource(true);
    GmatAppData::GetMissionTree()->UpdateMission(true);
    GmatAppData::GetOutputTree()->UpdateOutput(true, true);
+   
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n");
+   #endif
 }
 
 
