@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            AttitudePanel
 //------------------------------------------------------------------------------
@@ -334,14 +334,14 @@ void AttitudePanel::Create()
       MessageInterface::ShowMessage
          ("AttitudePanel::Create() Creating wxString objects\n");
    #endif
-
-                      
+      
+      
    #ifdef DEBUG_ATTITUDE_PANEL
       MessageInterface::ShowMessage(
          "AttitudePanel::Create() Creating wxBoxSizer objects.\n");
    #endif
    
-   Integer bsize = 6; // border size
+   Integer bsize = 2; // border size
    // wx*Sizers   
    GmatStaticBoxSizer *boxSizer1 = new GmatStaticBoxSizer( wxHORIZONTAL, this, "" );
    GmatStaticBoxSizer *boxSizer2 = new GmatStaticBoxSizer( wxVERTICAL, this, "" );
