@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CelesBodySelectDialog
 //------------------------------------------------------------------------------
@@ -28,24 +28,23 @@ public:
     
    CelesBodySelectDialog(wxWindow *parent, wxArrayString &bodiesToExclude,
                          wxArrayString &bodiesToHide, bool showCalPoints = false);
-
+   
    wxArrayString& GetBodyNames()
       { return mBodyNames; }
    UnsignedIntArray& GetBodyColors()
       { return mBodyColors; }
    bool IsBodySelected()
       { return mIsBodySelected; }
-
+   
    void SetBodyColors(const wxArrayString &bodyNames,
                       const UnsignedIntArray &bodyColors);
    
 private:
-   static const int MAX_LIST_SIZE = 30;
    wxArrayString mBodyNames;
    wxArrayString mBodiesToExclude;
    wxArrayString mBodiesToHide;
-
-   UnsignedIntArray mBodyColors; //loj: 12/15/04 Added
+   
+   UnsignedIntArray mBodyColors;
    
    bool mIsBodySelected;
    bool mShowCalPoints;
@@ -55,13 +54,13 @@ private:
    
    wxColour mSelBodyColor;
    
-   wxButton *addBodyButton;
-   wxButton *removeBodyButton;
-   wxButton *clearBodyButton;
+   wxButton *mAddBodyButton;
+   wxButton *mRemoveBodyButton;
+   wxButton *mClearBodyButton;
    wxButton *mBodyColorButton;
    
-   wxListBox *bodyListBox;
-   wxListBox *bodySelectedListBox;
+   wxListBox *mBodyListBox;
+   wxListBox *mBodySelectedListBox;
    
    // methods inherited from GmatDialog
    virtual void Create();
