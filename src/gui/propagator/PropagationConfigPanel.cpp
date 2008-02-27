@@ -2595,6 +2595,9 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
    {
       wxArrayString &names = bodyDlg.GetBodyNames();
       
+      for (Integer i=0; i<(Integer)pointMassBodyList.size(); i++)
+         delete pointMassBodyList[i];
+      
       if (names.IsEmpty())
       {
          pointMassBodyList.clear();
@@ -2606,7 +2609,7 @@ void PropagationConfigPanel::OnPMEditButton(wxCommandEvent &event)
       }
       
       wxString bodyName;
-
+      
       pointMassBodyList.clear();
       secondaryBodiesArray.Clear(); 
       pmEditTextCtrl->Clear();
