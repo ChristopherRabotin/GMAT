@@ -179,15 +179,19 @@ void MessageInterface::ShowMessage(const char *msg, ...)
       ret = vsprintf(msgBuffer, msg, marker);
       va_end(marker);
       //LogMessage("ret from vsprintf()=%d\n", ret);
-      
-#if !defined __CONSOLE_APP__
-      if (GmatAppData::GetMessageTextCtrl() != NULL)
-         GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
-#endif
-      
-      LogMessage(std::string(msgBuffer));
-      free(msgBuffer);
    }
+   else
+   {
+      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+   }
+   
+#if !defined __CONSOLE_APP__
+   if (GmatAppData::GetMessageTextCtrl() != NULL)
+      GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
+#endif
+   
+   LogMessage(std::string(msgBuffer));
+   free(msgBuffer);
 } // end ShowMessage()
 
 
@@ -244,7 +248,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   if ( (msgBuffer = (char *)malloc(size)) != NULL )
    {
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
@@ -254,7 +258,10 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
       if (msgBuffer[strlen(msgBuffer)-1] != '\n')
          msgBuffer[strlen(msgBuffer)] = '\n';
    }
-   
+   else
+   {
+      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+   }
    
 #if !defined __CONSOLE_APP__
    // always show message
@@ -375,11 +382,15 @@ void MessageInterface::LogMessage(const char *msg, ...)
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if( (msgBuffer = (char *)malloc(size)) != NULL )
+   if ( (msgBuffer = (char *)malloc(size)) != NULL )
    {
       va_start(marker, msg);      
       ret = vsprintf(msgBuffer, msg, marker);      
       va_end(marker);
+   }
+   else
+   {
+      msgBuffer = "*** WARNING *** Cannot allocate enough memory to log the message.\n";
    }
    
    LogMessage(std::string(msgBuffer));
@@ -404,7 +415,7 @@ void MessageInterface::SetLogEnable(bool flag)
  * Sets log file path with keeping log file name as is.
  *
  * @param  pathname  log file path name, such as "/newpath/test1/"
- * @param  append  true if appending log message
+ * @param  append  true if appending log message (false)
  */
 //------------------------------------------------------------------------------
 void MessageInterface::SetLogPath(const std::string &pathname, bool append)
@@ -465,6 +476,12 @@ void MessageInterface::OpenLogFile(const std::string &filename, bool append)
       fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
       fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
               logFileName.c_str());
+      
+      if (append)
+         fprintf(logFile, "The log file mode is append\n");
+      else
+         fprintf(logFile, "The log file mode is create\n");
+      
       logFileSet = true;
    }
 }
