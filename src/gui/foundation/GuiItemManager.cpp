@@ -210,7 +210,8 @@ int GuiItemManager::IsValidVariable(const std::string &varName,
 void GuiItemManager::UpdateAll()
 {
    #if DBGLVL_GUI_ITEM_UPDATE
-   MessageInterface::ShowMessage("==================> GuiItemManager::UpdateAll()\n");
+   MessageInterface::ShowMessage
+      ("==================> GuiItemManager::UpdateAll() entered\n");
    #endif
    
    UpdateCelestialPoint(false); // All CelestialBodies and CalculatedPoints
@@ -279,6 +280,11 @@ void GuiItemManager::UpdateAll()
    #endif
    
    AddToAllObjectArray();
+   
+   #if DBGLVL_GUI_ITEM_UPDATE
+   MessageInterface::ShowMessage
+      ("==================> GuiItemManager::UpdateAll() exiting\n");
+   #endif
 }
 
 
@@ -3037,7 +3043,7 @@ void GuiItemManager::UpdateParameterList()
       
       #if DBGLVL_GUI_ITEM_PARAM > 1
       MessageInterface::ShowMessage
-         ("GuiItemManager::UpdateParameterList() items[%d]=%s, type=%s\n",
+         ("GuiItemManager::UpdateParameterList() items[%d]=%s, type=%s\n", i, 
           items[i].c_str(), param->GetTypeName().c_str());
       #endif
       
@@ -4291,22 +4297,31 @@ void GuiItemManager::AddToAllObjectArray()
       theAllObjectList.Add(theSubscriberList[i] + " <" + typeName + ">");
    }
    
-   // Add SolarSystem objects to the list
-   #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
-   MessageInterface::ShowMessage("   Adding SolarSystem\n");
-   #endif
-   SolarSystem *ss = theGuiInterpreter->GetSolarSystemInUse();
-   wxString ssName = ss->GetName().c_str();
-   ssName = ssName + " <SolarSystem>";
-   theAllObjectList.Add(ssName);
-   
    theNumAllObject = theAllObjectList.GetCount();
+   
+   // Add SolarSystem objects to the list
+   if (theNumAllObject > 0)
+   {
+      #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
+      MessageInterface::ShowMessage("   Adding 1 SolarSystem\n");
+      #endif
+      SolarSystem *ss = theGuiInterpreter->GetSolarSystemInUse();
+      if (ss)
+      {
+         wxString ssName = ss->GetName().c_str();
+         ssName = ssName + " <SolarSystem>";
+         theAllObjectList.Add(ssName);
+         theNumAllObject = theAllObjectList.GetCount();
+      }
+   }
+   
    
    //-------------------------------------------------------
    // update registered All Object CheckListBox
    //-------------------------------------------------------
    #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
-   MessageInterface::ShowMessage("   Updating registerd All Object CheckListBox\n");
+   MessageInterface::ShowMessage
+      ("   Updating registerd All Object CheckListBox, count=%d\n", mAllObjectCLBList.size());
    #endif
    for (std::vector<wxCheckListBox*>::iterator pos = mAllObjectCLBList.begin();
         pos != mAllObjectCLBList.end(); ++pos)
