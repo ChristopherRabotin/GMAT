@@ -26,6 +26,7 @@
 class GmatServer: public wxServer
 {
 public:
+   GmatServer();
    wxConnectionBase *OnAcceptConnection(const wxString& topic);
    wxConnectionBase *GetConnection();
    bool Disconnect();

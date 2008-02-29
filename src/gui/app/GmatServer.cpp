@@ -25,6 +25,15 @@
 //#define DEBUG_SERVER
 
 //------------------------------------------------------------------------------
+// GmatServer()
+//------------------------------------------------------------------------------
+GmatServer::GmatServer() : wxServer()
+{
+   mConnection = NULL;
+}
+
+
+//------------------------------------------------------------------------------
 // wxConnectionBase* OnAcceptConnection(const wxString& topic)
 //------------------------------------------------------------------------------
 wxConnectionBase* GmatServer::OnAcceptConnection(const wxString& topic)
