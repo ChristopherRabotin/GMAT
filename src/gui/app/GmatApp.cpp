@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatApp
 //------------------------------------------------------------------------------
@@ -87,13 +87,12 @@ bool GmatApp::OnInit()
          // get GuiInterpreter
          GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
          
-         // Make default size larger for Linux
-         //VC++ error C2059 syntax error : '=' 
-         //wxSize size = ((wxUSE_UNIX != 1) ? wxSize(800, 600) : wxSize(380, 900));
-         #ifdef wxUSE_UNIX
-         wxSize size = wxSize(380, 900);
-         #else
+         // set default size
          wxSize size = wxSize(800, 600);
+         
+         // for Windows
+         #ifdef __WXMSW__
+         size = wxSize(800, 600);
          #endif
          
          // The code above broke the Linux scaling.  This is a temporary hack to 
@@ -106,18 +105,13 @@ bool GmatApp::OnInit()
             size = wxSize(235,900);
          #endif
             
-            
          //show the splash screen
          try
          {
             wxImage::AddHandler(new wxTIFFHandler);
             
-            //loj: 7/7/05 Get splash file from FileManager through the Moderator
             wxString splashFile = theModerator->GetFileName("SPLASH_FILE").c_str();
             wxBitmap *bitmap = new wxBitmap(splashFile, wxBITMAP_TYPE_TIF);
-            
-            //wxBitmap *bitmap = new wxBitmap("files/splash/GMATSplashScreen.tif",
-            //                   wxBITMAP_TYPE_TIF);
             
             new wxSplashScreen(*bitmap,
                                wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
@@ -136,7 +130,12 @@ bool GmatApp::OnInit()
                               _T("GMAT - General Mission Analysis Tool"),
                               wxDefaultPosition, size,
                               wxDEFAULT_FRAME_STYLE | wxHSCROLL | wxVSCROLL);
-
+         
+         #ifdef DEBUG_GMATAPP
+         MessageInterface::ShowMessage
+            ("GmatApp::OnInit() size=%dx%d\n", size.GetWidth(), size.GetHeight());
+         #endif
+         
          // Mac user rather smaller frame and top left corner and show it.
          // (the frames, unlike simple controls, are not shown when created
          // initially)
@@ -160,7 +159,6 @@ bool GmatApp::OnInit()
             wxYield();
          }
          
-         //loj: How do I change the title?
          wxLogError(wxT("The error occurred during the initialization.  GMAT will exit"));
          wxLog::FlushActive();
          status = false;
@@ -207,10 +205,7 @@ bool GmatApp::OnInit()
 //------------------------------------------------------------------------------
 int GmatApp::OnExit()
 {
-   //loj: 7/8/05 Why I cannot Finalize here?
-   //I had to do in GmatMainFrame destructor
-   //if (theModerator)
-   //   theModerator->Finalize();
-   
+   // Moderator destructor is private, so just call Finalize()
+   theModerator->Finalize();
    return 0;
 }
