@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               MatlabInterface
 //------------------------------------------------------------------------------
@@ -132,11 +132,15 @@ int MatlabInterface::Open()
    if ((enginePtrD = engOpen(NULL)))
    {
       accessCount++;
+      
       #ifdef DEBUG_MATLAB_OPEN_CLOSE
-         MessageInterface::ShowMessage
-            ("Attempting to open MATLAB connection ... accessCount = %d, "
-             "enginePtrD=%p\n", accessCount, enginePtrD);
+      MessageInterface::ShowMessage
+         ("Attempting to open MATLAB connection ... accessCount = %d, "
+          "enginePtrD=%p\n", accessCount, enginePtrD);
       #endif
+      
+      // set precision to long
+      EvalString("format long");
       return 1;
    }
    else
@@ -444,6 +448,7 @@ bool MatlabInterface::IsOpen()
    return false;
 }
 
+
 //------------------------------------------------------------------------------
 // void RunMatlabString(std::string evalString)
 //------------------------------------------------------------------------------
@@ -451,8 +456,12 @@ void MatlabInterface::RunMatlabString(std::string evalString)
 {
 #if defined __USE_MATLAB__
    if (!MatlabInterface::IsOpen())
-      throw InterfaceException(
-         "ERROR - Matlab Interface not yet open");
+   {
+      // Let's try to open it first (loj: 2008.03.06)
+      if (MatlabInterface::Open() == 0)
+         throw InterfaceException("**** ERROR **** Failed to open MATLAB engine\n");
+      //throw InterfaceException("ERROR - Matlab Interface not yet open");
+   }
    
    // try to call the function   
    evalString = "try,\n  " + evalString + "\ncatch\n  errormsg = lasterr;\nend";
