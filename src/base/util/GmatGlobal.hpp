@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 GmatGlobal
 //------------------------------------------------------------------------------
@@ -69,22 +69,23 @@ public:
    void SetBinaryOut(bool flag) { actualFormat.mBinaryOut = flag; }
    void SetSpacing(Integer sp) { actualFormat.mSpacing = sp; }
    void SetPrefix(const std::string &prefix) { actualFormat.mPrefix = prefix; }
+   void SetAppendEol(bool flag) { actualFormat.mAppendEol = flag; }
    
    void SetDefaultFormat();
    void SetCurrentFormat(bool scientific = false, bool showPoint = false,
                          Integer width = GmatGlobal::DATA_WIDTH,
                          Integer precision = GmatGlobal::DATA_PRECISION,
                          bool horizontal = true, Integer spacing = 1,
-                         const std::string &prefix = "",
+                         const std::string &prefix = "", bool appendEol = true,
                          bool binaryIn = false, bool binaryOut = false);
    
    void GetActualFormat(bool &scientific, bool &showPoint, Integer &precision,
                         Integer &width, bool &horizontal, Integer &spacing,
-                        std::string &prefix); 
+                        std::string &prefix, bool &appendEol); 
    
    void SetActualFormat(bool scientific, bool showPoint, Integer precision,
                         Integer width, bool horizontal = true, Integer spacing = 1,
-                        const std::string &prefix = "");
+                        const std::string &prefix = "", bool appendEol = true);
    
    void SetToDefaultFormat() { actualFormat = defaultFormat; }
    void SetToCurrentFormat() { actualFormat = currentFormat; }
@@ -122,7 +123,7 @@ private:
                Integer precision = GmatGlobal::DATA_PRECISION,
                Integer width = GmatGlobal::DATA_WIDTH,
                bool horizontal = true, Integer spacing = 1,
-               const std::string &prefix = "",
+               const std::string &prefix = "", bool appendEol = true,
                bool binaryIn = false, bool binaryOut = false)
       {
          mScientific = scientific;
@@ -132,6 +133,7 @@ private:
          mHorizontal = horizontal;
          mSpacing = spacing;
          mPrefix = prefix;
+         mAppendEol = appendEol;
          mBinaryIn = binaryIn;
          mBinaryOut = binaryOut;
       };
@@ -145,6 +147,7 @@ private:
       bool mBinaryIn;      /// read in binary if true. Default is false
       bool mBinaryOut;     /// print in binary if true. Default is false
       std::string mPrefix; /// prefix to be used for vertical formatting
+      bool mAppendEol ;    /// appends eol if true. Default is true
    };
    
    Setting defaultSetting;

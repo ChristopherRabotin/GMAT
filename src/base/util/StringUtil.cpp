@@ -469,40 +469,38 @@ std::string GmatStringUtil::ToString(const Integer &val, Integer width)
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Real &val, bool useCurrentFormat = true,
-//                      bool scientific = false,
-//                      Integer precision = GmatGlobal::DATA_PRECISION,
-//                      Integer width = GmatGlobal::INTEGER_WIDTH)
+// std::string ToString(const Real &val, bool useCurrentFormat, bool scientific,
+//                      bool showPoint, Integer precision, Integer width)
 //------------------------------------------------------------------------------
 /*
  * Formats Real value to String.
  *
  * @param  val  Real value
- * @param  useCurrentFormat  Uses precision and width from GmatGlobal
- * @param  scientific  Formats using scientific notation if true
- * @param  precision  Precision to be used in formatting
- * @param  width  Width to be used in formatting
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal (true)
+ * @param  scientific  Formats using scientific notation if true (true)
+ * @param  showPoint if true, shows decimal point and trailing zeros (false)
+ * @param  precision  Precision to be used in formatting (GmatGlobal::DATA_PRECISION)
+ * @param  width  Width to be used in formatting (GmatGlobal::INTEGER_WIDTH)
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::ToString(const Real &val, bool useCurrentFormat,
-                                     bool scientific, Integer precision,
-                                     Integer width)
+                                     bool scientific, bool showPoint,
+                                     Integer precision, Integer width)
 {
-   return GmatRealUtil::ToString(val, useCurrentFormat, scientific, true,
+   return GmatRealUtil::ToString(val, useCurrentFormat, scientific, showPoint,
                                  precision, width);
 }
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(const Integer &val, bool useCurrentFormat = true,
-//                      Integer width = GmatGlobal::INTEGER_WIDTH)
+// std::string ToString(const Integer &val, bool useCurrentFormat, Integer width)
 //------------------------------------------------------------------------------
 /*
  * Formats Integer value to String.
  *
  * @param  val  Integer value
- * @param  useCurrentFormat  Uses width from GmatGlobal if true
- * @param  width  Width to be used in formatting
+ * @param  useCurrentFormat  Uses width from GmatGlobal if true (true)
+ * @param  width  Width to be used in formatting (GmatGlobal::INTEGER_WIDTH)
  */
 //------------------------------------------------------------------------------
 std::string GmatStringUtil::ToString(const Integer &val, bool useCurrentFormat,
@@ -545,7 +543,7 @@ char GmatStringUtil::GetClosingBracket(const char &openBracket)
  *
  * @param  str  input string
  * @param  delim  input delimiter
- * @param  putBracketsTogether  true if put brackets together
+ * @param  putBracketsTogether  true if put brackets together (false)
  *
  */
 //------------------------------------------------------------------------------

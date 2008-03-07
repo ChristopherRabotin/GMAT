@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rvector
 //------------------------------------------------------------------------------
@@ -618,14 +618,15 @@ Real Rvector::Norm()
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(Integer precision, bool horizontal = true) const
+// std::string ToString(Integer precision, bool horizontal,
+//                      const std::string &prefix) const
 //------------------------------------------------------------------------------
 /*
  * Formats Rvector value to String.
  *
  * @param  precision  Precision to be used in formatting
- * @param  horizontal  Format horizontally if true
- * @param  prefix  Prefix to be used in vertical formatting
+ * @param  horizontal  Format horizontally if true (true)
+ * @param  prefix  Prefix to be used in vertical formatting ("")
  *
  * @return Formatted Rvector value string
  */
@@ -643,22 +644,23 @@ std::string Rvector::ToString(Integer precision, bool horizontal,
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
-//                      Integer precision = GmatGlobal::DATA_PRECISION,
-//                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1,
-//                      const std::string &indent = "") const
+// std::string ToString(bool useCurrentFormat, bool scientific, bool showPoint,
+//                      Integer precision, Integer width, bool horizontal,
+//                      Integer spacing, const std::string &prefix,
+//                      bool appendEol) const
 //------------------------------------------------------------------------------
 /*
  * Formats Rvector value to String.
  *
- * @param  useCurrentFormat  Uses precision and width from GmatGlobal
- * @param  scientific  Formats using scientific notation if true
- * @param  precision  Precision to be used in formatting
- * @param  width  Width to be used in formatting
- * @param  horizontal  Format horizontally if true
- * @param  spacing  Spacing to be used in horozontal formatting
- * @param  prefix  Prefix to be used in vertical formatting
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal (true)
+ * @param  scientific  Formats using scientific notation if true (false)
+ * @param  showPoint  Shows decimal point (false)
+ * @param  precision  Precision to be used in formatting (global default)
+ * @param  width  Width to be used in formatting (global default)
+ * @param  horizontal  Format horizontally if true (true)
+ * @param  spacing  Spacing to be used in horozontal formatting (1)
+ * @param  prefix  Prefix to be used in vertical formatting ("")
+ * @param  appendEol  Appends eol if true (true)
  *
  * @return Formatted Rvector value
  */
@@ -666,13 +668,13 @@ std::string Rvector::ToString(Integer precision, bool horizontal,
 std::string Rvector::ToString(bool useCurrentFormat, bool scientific,
                               bool showPoint, Integer precision, Integer width,
                               bool horizontal, Integer spacing,
-                              const std::string &prefix) const
+                              const std::string &prefix, bool appendEol) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
    
    if (!useCurrentFormat)
       global->SetActualFormat(scientific, showPoint, precision, width, horizontal,
-                              spacing, prefix);
+                              spacing, prefix, appendEol);
    
    std::stringstream ss("");
    ss << *this;

@@ -51,7 +51,7 @@ namespace GmatStringUtil
    std::string ToString(const Integer &val, Integer width);
    
    std::string ToString(const Real &val, bool useCurrentFormat = true,
-                        bool scientific = false,
+                        bool scientific = false, bool showPoint = true, 
                         Integer precision = GmatGlobal::DATA_PRECISION,
                         Integer width = GmatGlobal::DATA_WIDTH);
    std::string ToString(const Integer &val, bool useCurrentFormat = true,

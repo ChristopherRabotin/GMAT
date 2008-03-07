@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 GmatGlobal
 //------------------------------------------------------------------------------
@@ -65,23 +65,35 @@ void GmatGlobal::SetDefaultFormat()
    defaultFormat.mHorizontal = true;
    defaultFormat.mSpacing = 1;
    defaultFormat.mPrefix = "";
+   defaultFormat.mAppendEol = true;
    defaultFormat.mBinaryIn = false;
    defaultFormat.mBinaryOut = false;
 }
 
 
 //------------------------------------------------------------------------------
-// void SetCurrentFormat(bool scientific = false, bool showPoint = false,
-//                       Integer width = GmatGlobal::DATA_WIDTH,
-//                       Integer precision = GmatGlobal::DATA_PRECISION,
-//                       bool horizontal = false, Integer spacing = 1,
-//                       const std::string &prefix = "", 
-//                       bool binaryIn = false, bool binaryOut = false)
+// void SetCurrentFormat(bool scientific, bool showPoint, Integer width,
+//                       Integer precision, bool horizontal, Integer spacing,
+//                       const std::string &prefix, bool appendEol,
+//                       bool binaryIn, bool binaryOut)
 //------------------------------------------------------------------------------
-void GmatGlobal::SetCurrentFormat(bool scientific, bool showPoint,
-                                  Integer width, Integer precision,
-                                  bool horizontal, Integer spacing,
-                                  const std::string &prefix,
+/*
+ * Sets current Real data input/output formatting.
+ *
+ * @param  scientific  Formats using scientific notation if true (false)
+ * @param  showPoint  Formats using ios::showpoint if true (false)
+ * @param  width  Width to be used in formatting (GmatGlobal::DATA_WIDTH)
+ * @param  precision  Precision to be used in formatting (GmatGlobal::DATA_PRECISION)
+ * @param  horizontal  Format horizontally if true (false)
+ * @param  spacing  Spacing to be used in formatting (1)
+ * @param  appendEol  Appends eol if true (true)
+ * @param  binaryIn  Reads binary data if true (false)
+ * @param  binaryOut  Writes binary data if true (false) 
+ */
+//------------------------------------------------------------------------------
+void GmatGlobal::SetCurrentFormat(bool scientific, bool showPoint, Integer width,
+                                  Integer precision, bool horizontal, Integer spacing,
+                                  const std::string &prefix, bool appendEol,
                                   bool binaryIn, bool binaryOut)
 {
    currentFormat.mScientific = scientific;
@@ -91,6 +103,7 @@ void GmatGlobal::SetCurrentFormat(bool scientific, bool showPoint,
    currentFormat.mHorizontal = horizontal;
    currentFormat.mSpacing = spacing;
    currentFormat.mPrefix = prefix;   
+   currentFormat.mAppendEol = appendEol;   
    currentFormat.mBinaryIn = binaryIn;
    currentFormat.mBinaryOut = binaryOut;
 }
@@ -99,12 +112,12 @@ void GmatGlobal::SetCurrentFormat(bool scientific, bool showPoint,
 //------------------------------------------------------------------------------
 // void GetActualFormat(bool &scientific, bool &showPoint, Integer &precision,
 //                      Integer &width, bool &horizontal, Integer &spacing,
-//                      std::string &prefix)
+//                      std::string &prefix, bool &appendEol)
 //------------------------------------------------------------------------------
 void GmatGlobal::GetActualFormat(bool &scientific, bool &showPoint,
                                  Integer &precision, Integer &width,
                                  bool &horizontal, Integer &spacing,
-                                 std::string &prefix)
+                                 std::string &prefix, bool &appendEol)
 {
    scientific = actualFormat.mScientific;
    showPoint = actualFormat.mShowPoint;
@@ -113,18 +126,18 @@ void GmatGlobal::GetActualFormat(bool &scientific, bool &showPoint,
    horizontal = actualFormat.mHorizontal;
    spacing = actualFormat.mSpacing;
    prefix = actualFormat.mPrefix;
+   appendEol = actualFormat.mAppendEol;
 }
 
 
 //------------------------------------------------------------------------------
-// void SetActualFormat(bool scientific, bool showPoint,
-//                      Integer precision, Integer width,
-//                      bool horizontal = false, Integer spacing = 1,
-//                      const std::string &prefix = "")
+// void SetActualFormat(bool scientific, bool showPoint, Integer precision,
+//                      Integer width, bool horizontal = false, Integer spacing = 1,
+//                      const std::string &prefix = "", bool appendEol = true)
 //------------------------------------------------------------------------------
 void GmatGlobal::SetActualFormat(bool scientific, bool showPoint, Integer precision,
                                  Integer width, bool horizontal, Integer spacing,
-                                 const std::string &prefix)
+                                 const std::string &prefix, bool appendEol)
 {
    actualFormat.mScientific = scientific;
    actualFormat.mShowPoint = showPoint;
@@ -133,6 +146,7 @@ void GmatGlobal::SetActualFormat(bool scientific, bool showPoint, Integer precis
    actualFormat.mHorizontal = horizontal;
    actualFormat.mSpacing = spacing;
    actualFormat.mPrefix = prefix;
+   actualFormat.mAppendEol = appendEol;
 }
 
 

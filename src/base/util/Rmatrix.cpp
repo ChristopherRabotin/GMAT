@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Rmatrix
 //------------------------------------------------------------------------------
@@ -1061,14 +1061,15 @@ const StringArray& Rmatrix::GetStringVals(Integer p, Integer w)
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(Integer precision, bool horizontal = false,
+// std::string ToString(Integer precision, bool horizontal,
 //                      const std::string &prefix = "") const
 //------------------------------------------------------------------------------
 /*
  * Formats Rmatrix value to String.
  *
  * @param  precision  Precision to be used in formatting
- * @param  horizontal  Format horizontally if true
+ * @param  horizontal  Format horizontally if true (false)
+ * @param  prefix  Prefix to be used in vertical formatting ("")
  *
  * @return Formatted Rmatrix value string
  */
@@ -1086,22 +1087,22 @@ std::string Rmatrix::ToString(Integer precision, bool horizontal,
 
 
 //------------------------------------------------------------------------------
-// std::string ToString(bool useCurrentFormat = true, bool scientific = false,
-//                      Integer precision = GmatGlobal::DATA_PRECISION,
-//                      Integer width = GmatGlobal::DATA_WIDTH,
-//                      bool horizontal = false, Integer spacing = 1,
-//                      const std::string &prefix = "") const
+// std::string ToString(bool useCurrentFormat, bool scientific,
+//                      bool showPoint, Integer precision, Integer width,
+//                      bool horizontal, Integer spacing,
+//                      const std::string &prefix, bool appendEol) const
 //------------------------------------------------------------------------------
 /*
  * Formats Rmatrix value to String.
  *
- * @param  useCurrentFormat  Uses precision and width from GmatGlobal
- * @param  scientific  Formats using scientific notation if true
- * @param  showPoint  Formats using ios::showpoint if true
- * @param  precision  Precision to be used in formatting
- * @param  width  Width to be used in formatting
- * @param  horizontal  Format horizontally if true
- * @param  spacing  Spacing to be used in formatting
+ * @param  useCurrentFormat  Uses precision and width from GmatGlobal (true)
+ * @param  scientific  Formats using scientific notation if true (false)
+ * @param  showPoint  Formats using ios::showpoint if true (false)
+ * @param  precision  Precision to be used in formatting (GmatGlobal::DATA_PRECISION)
+ * @param  width  Width to be used in formatting (GmatGlobal::DATA_WIDTH)
+ * @param  horizontal  Format horizontally if true (false)
+ * @param  spacing  Spacing to be used in formatting (1)
+ * @param  appendEol  Appends eol if true (true)
  *
  * @return Formatted Rmatrix value string
  */
@@ -1109,13 +1110,13 @@ std::string Rmatrix::ToString(Integer precision, bool horizontal,
 std::string Rmatrix::ToString(bool useCurrentFormat, bool scientific,
                               bool showPoint, Integer precision, Integer width,
                               bool horizontal, Integer spacing,
-                              const std::string &prefix) const
+                              const std::string &prefix, bool appendEol) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
    
    if (!useCurrentFormat)
       global->SetActualFormat(scientific, showPoint, precision, width, horizontal,
-                              spacing, prefix);
+                              spacing, prefix, appendEol);
    
    std::stringstream ss("");
    ss << *this;

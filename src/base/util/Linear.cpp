@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Linear
 //------------------------------------------------------------------------------
@@ -254,9 +254,10 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
    GmatGlobal *global = GmatGlobal::Instance();
    Integer size = a.GetSize();
    Integer p, w, spacing;
-   bool scientific, showPoint, horizontal;
+   bool scientific, showPoint, horizontal, appendEol;
    std::string prefix;
-   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix);
+   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix,
+                           appendEol);
    
    if (showPoint)
       output.setf(std::ios::showpoint);
@@ -282,6 +283,9 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rvector &a)
             if (i < size-1)
                output << spaces;
          }
+         
+         if (appendEol)
+            output << std::endl;
       } 
       else 
       {
@@ -353,9 +357,10 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
    int row = a.GetNumRows();
    int column = a.GetNumColumns();
    Integer p, w, spacing;
-   bool scientific, showPoint, horizontal;
+   bool scientific, showPoint, horizontal, appendEol;
    std::string prefix;
-   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix);
+   global->GetActualFormat(scientific, showPoint, p, w, horizontal, spacing, prefix,
+                           appendEol);
    
    if (showPoint)
       output.setf(std::ios::showpoint);
@@ -381,7 +386,9 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
          for (int i=0; i<row; i++) 
             for (int j=0; j<column; j++) 
                output << setw(w) << setprecision(p) << a.GetElement(i,j) << spaces;
-         output << std::endl;
+         
+         if (appendEol)
+            output << std::endl;
       }
       else 
       {
@@ -418,7 +425,7 @@ std::ostream& GmatRealUtil::operator<< (std::ostream &output, const Rmatrix &a)
  * @param  rval  Real value
  * @param  useCurrentFormat  Uses precision and width from GmatGlobal
  * @param  scientific  if true, formats using scientific notation
- * @param  showPoint if true, shows decimal point
+ * @param  showPoint if true, shows decimal point and trailing zeros
  * @param  precision  Precision to be used in formatting
  * @param  width  Width to be used in formatting
  */
