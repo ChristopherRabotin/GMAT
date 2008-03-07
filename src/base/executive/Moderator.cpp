@@ -52,7 +52,8 @@
 #include <algorithm>               // for sort(), set_difference()
 #include <ctime>                   // for clock()
 
-//#define DEBUG_INIT 1
+//#define DEBUG_INITIALIZE 1
+//#define DEBUG_FINALIZE 1
 //#define DEBUG_INTERPRET 1
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
@@ -67,7 +68,6 @@
 //#define DEBUG_LOOKUP_RESOURCE 1
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
-//#define DEBUG_FINALIZE 1
 //#define DEBUG_CREATE_VAR 1
 
 //#define __CREATE_DEFAULT_BC__
@@ -110,20 +110,28 @@ bool Moderator::Initialize(bool fromGui)
       // Read startup file, Set Log file
       theFileManager = FileManager::Instance();
       theFileManager->ReadStartupFile();
+      
       MessageInterface::ShowMessage("Moderator is creating core engine...\n");
       
-      #if DEBUG_INIT
-      MessageInterface::ShowMessage("===> Moderator is creating FactoryManager...\n");
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)theFileManager\n", theFileManager);
       #endif
       
       // Create Managers
       theFactoryManager = FactoryManager::Instance();
       
-      #if DEBUG_INIT
-      MessageInterface::ShowMessage("===> Moderator is creating ConfigManager...\n");
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)theFactoryManager\n", theFactoryManager);
       #endif
       
       theConfigManager = ConfigManager::Instance();
+      
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)theConfigManager\n", theConfigManager);
+      #endif
       
       // Register factories
       theFactoryManager->RegisterFactory(new AtmosphereFactory());
@@ -148,33 +156,38 @@ bool Moderator::Initialize(bool fromGui)
       
       // Create publisher
       
-      #if DEBUG_INIT
-      MessageInterface::ShowMessage("===> Moderator is creating Publisher...\n");
-      #endif
-      
       thePublisher = Publisher::Instance();
+      
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)thePublisher...\n", thePublisher);
+      #endif
       
       // Create interpreters
       
-      #if DEBUG_INIT
-      MessageInterface::ShowMessage("===> Moderator is creating Gui/Script interpreters...\n");
+      theGuiInterpreter = GuiInterpreter::Instance();
+      
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)theGuiInterpreter\n", theGuiInterpreter);
       #endif
       
-      theGuiInterpreter = GuiInterpreter::Instance();
       theScriptInterpreter = ScriptInterpreter::Instance();      
       
-      // Create default SolarSystem
-      #if DEBUG_INIT
-      MessageInterface::ShowMessage("===> Moderator is creating default SolarSystem...\n");
-      #endif
-      
-      theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
-      theConfigManager->SetDefaultSolarSystem(theDefaultSolarSystem);
-      
-      #if DEBUG_INIT
+      #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
-         ("===> Moderator created default solar system: %p\n", theDefaultSolarSystem);
+         (".....created  (%p)theScriptInterpreter\n", theScriptInterpreter);
       #endif
+      
+      // Create default SolarSystem
+      theDefaultSolarSystem = CreateSolarSystem("DefaultSolarSystem");
+      
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)theDefaultSolarSystem\n", theDefaultSolarSystem);
+      #endif
+      
+      theConfigManager->SetDefaultSolarSystem(theDefaultSolarSystem);
       
       // Create solar system in use
       /// @note: If the solar system can be configured by name, add it to the
@@ -183,29 +196,29 @@ bool Moderator::Initialize(bool fromGui)
       
       // Create SolarSystem in use 
       #ifndef __DISABLE_SOLAR_SYSTEM_CLONING__
-         #if DEBUG_INIT
+         #if DEBUG_SOLAR_SYSTEM
          MessageInterface::ShowMessage
-            ("===> Moderator creating SolarSystem in use by cloning the default...\n");
+            ("Moderator creating SolarSystem in use by cloning the default...\n");
          #endif
          
          theSolarSystemInUse = theDefaultSolarSystem->Clone();
          theSolarSystemInUse->SetName("SolarSystem");
+         
       #else
-         #if DEBUG_INIT
+         #if DEBUG_SOLAR_SYSTEM
          MessageInterface::ShowMessage
-            ("===> Moderator creating new SolarSystem in use...\n");
+            ("Moderator creating new SolarSystem in use...\n");
          #endif
          
          theSolarSystemInUse = CreateSolarSystem("SolarSystem");
       #endif
          
-      SetSolarSystemInUse(theSolarSystemInUse);
-      
-      #if DEBUG_INIT
+      #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
-         ("===> Moderator created solar system in use: %p\n",
-          theSolarSystemInUse);
+         (".....created  (%p)theSolarSystemInUse\n", theSolarSystemInUse);
       #endif
+      
+      SetSolarSystemInUse(theSolarSystemInUse);
       
       // Create internal coordinate system
       CreateInternalCoordSystem();
@@ -213,6 +226,16 @@ bool Moderator::Initialize(bool fromGui)
       // Create other files in use
       CreatePlanetaryCoeffFile();
       CreateTimeFile();
+      
+      // create at least 1 Sandbox and Command
+      sandboxes.push_back(new Sandbox());
+      commands.push_back(new NoOp());
+      #if DEBUG_INITIALIZE
+      MessageInterface::ShowMessage
+         (".....created  (%p)Sandbox 1\n", sandboxes[0]);
+      MessageInterface::ShowMessage
+         (".....created  (%p)%s\n", commands[0], commands[0]->GetTypeName().c_str());
+      #endif
       
       if (fromGui)
          CreateDefaultMission();
@@ -244,7 +267,7 @@ bool Moderator::Initialize(bool fromGui)
       ("%s GMAT Moderator successfully created core engine\n", timestr);
    
    return true;;
-}
+} // Initialize()
 
 
 //------------------------------------------------------------------------------
@@ -259,10 +282,20 @@ void Moderator::Finalize()
    MessageInterface::ShowMessage("Moderator is deleting core engine...\n");
    
    #if DEBUG_FINALIZE
+   MessageInterface::ShowMessage("Moderator::Finalize() entered\n");
+   #endif
+   
+   #if DEBUG_FINALIZE > 1
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
    MessageInterface::ShowMessage(GetScript().c_str());
-   MessageInterface::ShowMessage("...deleting files\n");
+   #endif
+   
+   #if DEBUG_FINALIZE
+   MessageInterface::ShowMessage(".....deleting (%p)theFileManager\n", theFileManager);
+   MessageInterface::ShowMessage(".....deleting (%p)theEopFile\n", theEopFile);
+   MessageInterface::ShowMessage(".....deleting (%p)theItrfFile\n", theItrfFile);
+   MessageInterface::ShowMessage(".....deleting (%p)theLeapSecsFile\n", theLeapSecsFile);
    #endif
    
    delete theFileManager;
@@ -270,38 +303,88 @@ void Moderator::Finalize()
    delete theItrfFile;
    delete theLeapSecsFile;
    
+   theFileManager = NULL;
+   theEopFile = NULL;
+   theItrfFile = NULL;
+   theLeapSecsFile = NULL;
+   
    //clear resource and command sequence
    try
    {
+      #if DEBUG_FINALIZE
+      MessageInterface::ShowMessage(".....clearing resource\n");
+      MessageInterface::ShowMessage(".....clearing command sequence\n");
+      #endif
+      
       ClearResource();
       ClearCommandSeq();
       
-      // only 1 sandbox for now
-      GmatCommand *cmd = commands[0];
-      #if DEBUG_FINALIZE
-      MessageInterface::ShowMessage("...deleting (%p)%s\n", cmd, cmd->GetTypeName().c_str());
-      #endif
-      delete cmd;
-      cmd = NULL;
+      if (!commands.empty())
+      {
+         // only 1 sandbox for now
+         GmatCommand *cmd = commands[0];
+         #if DEBUG_FINALIZE
+         MessageInterface::ShowMessage
+            (".....deleting (%p)%s\n", cmd, cmd->GetTypeName().c_str());
+         #endif
+         delete cmd;
+         cmd = NULL;
+         commands[0] = NULL;
+      }
       
-      //delete theFactoryManager;
-      delete theGuiInterpreter;
+//       #if DEBUG_FINALIZE
+//       MessageInterface::ShowMessage
+//          (".....deleting (%p)theGuiInterpreter\n", theGuiInterpreter);
+//       #endif
+//       delete theGuiInterpreter;
+//       theGuiInterpreter = NULL;
       
-      //delete theConfigManager; (private)
-      //delete theScriptInterpreter; (private)
-      //delete thePublisher; (private)
-      
-      //MessageInterface::ShowMessage("deleting internal objects\n");
+      //delete theFactoryManager; (private destructor)
+      //delete theConfigManager; (private destructor)
+      //delete theScriptInterpreter; (private destructor)
+      //delete theGuiInterpreter; (private destructor)
+      //delete thePublisher; (private destructor)
       
       // delete solar systems
+      #if DEBUG_FINALIZE
+      MessageInterface::ShowMessage
+         (".....deleting (%p)theDefaultSolarSystem\n", theDefaultSolarSystem);
+      #endif      
       delete theDefaultSolarSystem;
+      theDefaultSolarSystem = NULL;
       
       if (theSolarSystemInUse != NULL)
+      {
+         #if DEBUG_FINALIZE
+         MessageInterface::ShowMessage
+            (".....deleting (%p)theSolarSystemInUse\n", theSolarSystemInUse);
+         #endif
          delete theSolarSystemInUse;
+         theSolarSystemInUse = NULL;
+      }
       
       // delete internal coordinate system
       if (theInternalCoordSystem != NULL)
+      {
+         #if DEBUG_FINALIZE
+         MessageInterface::ShowMessage
+            (".....deleting (%p)theInternalCoordSystem\n", theInternalCoordSystem);
+         #endif
          delete theInternalCoordSystem;
+         theInternalCoordSystem = NULL;
+      }
+      
+      // delete Sanbox (only 1 Sandbox for now)
+      #if DEBUG_FINALIZE
+      MessageInterface::ShowMessage
+         (".....deleting (%p)sandbox 1\n", sandboxes[0]);
+      #endif
+      delete sandboxes[0];
+      commands[0] = NULL;
+      sandboxes[0] = NULL;
+      commands.clear();
+      sandboxes.clear();
+      
    }
    catch (BaseException &e)
    {
@@ -311,7 +394,7 @@ void Moderator::Finalize()
    #if DEBUG_FINALIZE
    MessageInterface::ShowMessage("Moderator::Finalize() exiting\n");
    #endif
-}
+} // Finalize()
 
 
 //------------------------------------------------------------------------------
@@ -502,7 +585,8 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    if (obj == NULL)
    {
       // try SolarSystem
-      obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
+      if (theSolarSystemInUse)
+         obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
    }
    
    #if DEBUG_CONFIG
@@ -3288,20 +3372,18 @@ bool Moderator::ClearResource()
    #ifndef __DISABLE_SOLAR_SYSTEM_CLONING__
       if (theSolarSystemInUse != NULL)
       {
-         #if DEBUG_RUN
+         #if DEBUG_FINALIZE
          MessageInterface::ShowMessage
-            ("Moderator deleting solar system in use: %p\n", theSolarSystemInUse);
+            (".....deleting (%p)theSolarSystemInUse\n", theSolarSystemInUse);
          #endif
          
          delete theSolarSystemInUse;
          theSolarSystemInUse = NULL;
       }
    #endif
-   
-   // @notes: default coordinate systems will remain through out the running of GMAT.
-   
+      
    #if DEBUG_RUN
-   MessageInterface::ShowMessage("Moderator::ClearResource() leaving\n");
+   MessageInterface::ShowMessage("Moderator::ClearResource() exiting\n");
    #endif
    
    return true;
@@ -3316,11 +3398,29 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
    #if DEBUG_SEQUENCE_CLEARING
    MessageInterface::ShowMessage("Moderator::ClearCommandSeq() entered\n");
    #endif
+
+   if (commands.empty())
+   {
+      #if DEBUG_SEQUENCE_CLEARING
+      MessageInterface::ShowMessage
+         ("Moderator::ClearCommandSeq() exiting, command array is empty\n");
+      #endif
+      return true;
+   }
    
    //djc: Maybe set to NULL if you plan to do something completely different from
    // the way GMAT acts from a script?  I think you want to do this, though:
    // commands[sandboxNum-1] = NULL;
    GmatCommand *cmd = commands[sandboxNum-1], *oldcmd;
+   
+   if (cmd == NULL)
+   {
+      #if DEBUG_SEQUENCE_CLEARING
+      MessageInterface::ShowMessage
+         ("Moderator::ClearCommandSeq() exiting, first command is NULL\n");
+      #endif
+      return true;
+   }
    
    // Be sure we're in an idle state first
    #if DEBUG_SEQUENCE_CLEARING
@@ -3348,7 +3448,7 @@ bool Moderator::ClearCommandSeq(Integer sandboxNum)
       
       delete oldcmd;
    }
-
+   
    // Leave current NoOp in the sequence
    // The NoOp will be deleted in the Finalize()
    //cmd = new NoOp; 
@@ -3947,9 +4047,9 @@ Integer Moderator::RunScript(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::CreatePlanetaryCoeffFile()
 {
-   #if DEBUG_INIT
+   #if DEBUG_INITIALIZE
    //MessageInterface::ShowMessage("========================================\n");
-   MessageInterface::ShowMessage("Moderator initializing planetary coeff. file...\n");
+   MessageInterface::ShowMessage("Moderator initializing planetary coefficient file...\n");
    #endif
    
    std::string nutFileName =
@@ -3971,7 +4071,7 @@ void Moderator::CreatePlanetaryCoeffFile()
 //------------------------------------------------------------------------------
 void Moderator::CreateTimeFile()
 {
-   #if DEBUG_INIT
+   #if DEBUG_INITIALIZE
    //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator initializing time file...\n");
    #endif
@@ -4006,23 +4106,30 @@ void Moderator::CreateSolarSystemInUse()
       theSolarSystemInUse->SetName("SolarSystem");
       //theSolarSystemInUse->CreatePlanetarySource();
       
-      #if DEBUG_INIT
+      #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
          ("Moderator created solar system in use: %p\n", theSolarSystemInUse);
       #endif
       
-      // delete old theInternalCoordSystem and create new
+      // delete old theInternalCoordSystem and create new one
+      
+      #if DEBUG_FINALIZE
+      MessageInterface::ShowMessage
+         (".....deleting (%p)theInternalCoordSystem\n", theInternalCoordSystem);
+      #endif
       delete theInternalCoordSystem;
+      
       CreateInternalCoordSystem();
       
       // set solar system in use
       SetSolarSystemInUse(theSolarSystemInUse);
    #else
-      //theSolarSystemInUse->ResetToDefaults(theDefaultSolarSystem);
       theSolarSystemInUse->Copy(theDefaultSolarSystem);
+      #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
-         ("===> theSolarSystemInUse=%p, theDefaultSolarSystem=%p\n",
-         theSolarSystemInUse,  theDefaultSolarSystem);
+         ("Moderator::CreateSolarSystemInUse() theSolarSystemInUse=%p, "
+          "theDefaultSolarSystem=%p\n", theSolarSystemInUse,  theDefaultSolarSystem);
+      #endif
    #endif
 }
 
@@ -4038,7 +4145,7 @@ void Moderator::CreateSolarSystemInUse()
 //------------------------------------------------------------------------------
 void Moderator::CreateInternalCoordSystem()
 {
-   #if DEBUG_INIT
+   #if DEBUG_INTERNAL_CS
    //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator creating internal coordinate system...\n");
    #endif
@@ -4047,6 +4154,11 @@ void Moderator::CreateInternalCoordSystem()
    // it to be configured.
    theInternalCoordSystem =
       CreateCoordinateSystem("InternalEarthMJ2000Eq", true, true);
+   
+   #if DEBUG_INITIALIZE
+   MessageInterface::ShowMessage
+      (".....created  (%p)theInternalCoordSystem\n",theInternalCoordSystem);
+   #endif
    
    //theInternalCoordSystem->SetName("InternalEarthMJ2000Eq");
 }
@@ -4057,7 +4169,7 @@ void Moderator::CreateInternalCoordSystem()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultCoordSystems()
 {
-   #if DEBUG_INIT
+   #if DEBUG_INITIALIZE
    //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator creating default coordinate systems...\n");
    #endif
@@ -4136,7 +4248,7 @@ void Moderator::CreateDefaultCoordSystems()
 //------------------------------------------------------------------------------
 void Moderator::CreateDefaultMission()
 {
-   #if DEBUG_INIT
+   #if DEBUG_INITIALIZE
    //MessageInterface::ShowMessage("========================================\n");
    MessageInterface::ShowMessage("Moderator creating default mission...\n");
    #endif
@@ -5138,11 +5250,13 @@ Moderator::Moderator()
    
    sandboxes.reserve(Gmat::MAX_SANDBOX);
    commands.reserve(Gmat::MAX_SANDBOX);
-
-   // create at least 1 Sandbox and Command
-   sandboxes.push_back(new Sandbox());
-   commands.push_back(new NoOp());
+   
+   //loj: moved to Initialize()
+//    // create at least 1 Sandbox and Command
+//    sandboxes.push_back(new Sandbox());
+//    commands.push_back(new NoOp());
 }
+
 
 //------------------------------------------------------------------------------
 // ~Moderator()
