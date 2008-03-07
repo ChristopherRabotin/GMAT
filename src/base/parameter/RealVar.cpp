@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  RealVar
 //------------------------------------------------------------------------------
@@ -20,8 +20,9 @@
 #include "RealVar.hpp"
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"          // for GmatStringUtil::ToReal()
+#include "GmatGlobal.hpp"          // for Global settings
 #include "MessageInterface.hpp"
-#include <sstream>
+//#include <sstream>
 
 //#define DEBUG_REAL_VAR 1
 
@@ -187,7 +188,7 @@ bool RealVar::operator!=(const RealVar &right) const
 //------------------------------------------------------------------------------
 bool RealVar::Initialize()
 {
-//    mRealValue = REAL_PARAMETER_UNDEFINED;
+   //mRealValue = REAL_PARAMETER_UNDEFINED;
    return true;
 }
 
@@ -203,11 +204,16 @@ bool RealVar::Initialize()
 //------------------------------------------------------------------------------
 std::string RealVar::ToString()
 {
-   std::stringstream ss("");
-   ss.precision(10);
-   ss << mRealValue;
-   return std::string(ss.str());
+   // use default global precision to convert to string (loj: 2008.03.05)
+   return GmatStringUtil::ToString(mRealValue, false, false, false, 
+                                   GmatGlobal::DATA_PRECISION, 1);
+   
+   //std::stringstream ss("");
+   //ss.precision(10);
+   //ss << mRealValue;
+   //return std::string(ss.str());
 }
+
 
 //------------------------------------------------------------------------------
 // Real GetReal() const
@@ -228,6 +234,7 @@ Real RealVar::GetReal() const
    return mRealValue;
 }
 
+
 //------------------------------------------------------------------------------
 // virtual void SetReal(Real val)
 //------------------------------------------------------------------------------
@@ -243,10 +250,15 @@ void RealVar::SetReal(Real val)
    #endif
    
    mRealValue = val;
-   std::stringstream ss("");
-   ss.precision(10);
-   ss << mRealValue;
-   mExpr = ss.str();
+   
+   // use default global precision to convert to string (loj: 2008.03.05)
+   mExpr = GmatStringUtil::ToString(mRealValue, false, false, false,
+                                    GmatGlobal::DATA_PRECISION, 1);
+   
+   //std::stringstream ss("");
+   //ss.precision(10);
+   //ss << mRealValue;
+   //mExpr = ss.str();
    
    #if DEBUG_REAL_VAR
    MessageInterface::ShowMessage
@@ -353,7 +365,7 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
          {
             mRealValue = temp;
             mIsNumberEquation = false;
-
+            
             #if DEBUG_REAL_VAR
             MessageInterface::ShowMessage("mRealValue set to %f\n", mRealValue);
             #endif
