@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  MatlabWs
 //------------------------------------------------------------------------------
@@ -27,78 +27,86 @@ class MatlabWs : public Subscriber
 {
 public:
    MatlabWs(const std::string &name, Parameter *firstParam = NULL);
-   
    virtual ~MatlabWs(void);
-   
    MatlabWs(const MatlabWs &copy);
    MatlabWs& operator=(const MatlabWs &right);
    
+   Integer              GetNumParameters();
+   bool                 AddParameter(const std::string &paramName, Integer index);
+   
    // methods inherited from Subscriber
-   virtual bool Initialize();
+   virtual bool         Initialize();
    
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*    Clone(void) const;
    
-   virtual bool TakeAction(const std::string &action,
-                           const std::string &actionData = "");
+   virtual bool         TakeAction(const std::string &action,
+                                   const std::string &actionData = "");
    
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                     GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual bool SetStringParameter(const Integer id,
-                                   const std::string &value);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value);
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id, const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
    
-   virtual bool SetStringParameter(const Integer id, const std::string &value,
-                                   const Integer index);
-   virtual bool SetStringParameter(const std::string &label,
-                                   const std::string &value,
-                                   const Integer index);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
    
-   virtual const StringArray& GetStringArrayParameter(const Integer id) const;
-   virtual const StringArray& GetStringArrayParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
    
-   //loj: 1/10/04 Added
-   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
-                                  const std::string &name);
-   virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                             const std::string &name = "");
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
-   virtual const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
-   Integer GetNumParameters();
-   bool AddParameter(const std::string &paramName, Integer index);
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
 protected:
-   /// Precision for output of real data
-   Integer mEvaluateFrequency;
+   Integer mUpdateFrequency;
    Integer mNumParams;
+   Integer mDataCount;
+   Integer mSendCount;
    
    std::vector<Parameter*> mParams;
    StringArray mParamNames;
    StringArray mAllRefObjectNames;
    
-   virtual bool        Distribute(Integer len);
-   virtual bool        Distribute(const Real * dat, Integer len);
+   virtual bool         Distribute(Integer len);
+   virtual bool         Distribute(const Real * dat, Integer len);
    
 private:
-    void ClearParameters();
-    
-    enum
-    {
-       ADD = SubscriberParamCount,
-       MatlabWsParamCount  /// Count of the parameters for this class
-    };
-
+   void ClearParameters();
+   
+   enum
+   {
+      ADD = SubscriberParamCount,
+      UPDATE_FREQUENCY,
+      MatlabWsParamCount  /// Count of the parameters for this class
+   };
+   
    static const std::string
       PARAMETER_TEXT[MatlabWsParamCount - SubscriberParamCount];
    static const Gmat::ParameterType
       PARAMETER_TYPE[MatlabWsParamCount - SubscriberParamCount];
-
+   
 };
 
 
