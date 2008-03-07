@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GuiInterpreter
 //------------------------------------------------------------------------------
@@ -28,7 +28,6 @@ class GMAT_API GuiInterpreter : public ScriptInterpreter
 public:
 
    static GuiInterpreter* Instance();
-   ~GuiInterpreter();
 
    // Interpreter abstract methods
    virtual bool Interpret(GmatCommand *inCmd, std::istringstream *ss);
@@ -133,11 +132,13 @@ public:
    void NotifyRunCompleted();
    void UpdateResourceTree();
    void UpdateMissionTree();
+   void UpdateOutputTree();
    void CloseCurrentProject();
    
 private:
 
    GuiInterpreter();
+   virtual ~GuiInterpreter();
    GuiInterpreter(const GuiInterpreter&);
    GuiInterpreter& operator=(const GuiInterpreter &guiInterpreter);
 

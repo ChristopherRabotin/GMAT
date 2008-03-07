@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GuiInterpreter
 //------------------------------------------------------------------------------
@@ -760,6 +760,17 @@ void GuiInterpreter::UpdateMissionTree()
 {
 #if !defined __CONSOLE_APP__
    GmatAppData::GetMissionTree()->UpdateMission(true);
+#endif
+}
+
+
+//------------------------------------------------------------------------------
+// void UpdateOutputTree()
+//------------------------------------------------------------------------------
+void GuiInterpreter::UpdateOutputTree()
+{
+#if !defined __CONSOLE_APP__
+   GmatAppData::GetOutputTree()->UpdateOutput(false, true);
 #endif
 }
 
