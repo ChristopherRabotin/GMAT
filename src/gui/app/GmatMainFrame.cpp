@@ -260,6 +260,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    
    theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    
+   #ifdef DEBUG_MAINFRAME
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::GmatMainFrame() theGuiInterpreter=%p\n", theGuiInterpreter);
+   #endif
+   
 #if wxUSE_MENUS
    // create a menu bar
    // pass Window menu if Windows
@@ -393,7 +398,11 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 //------------------------------------------------------------------------------
 GmatMainFrame::~GmatMainFrame()
 {
-   //MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() entered\n");
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::~GmatMainFrame() entered. mServer=%p, theGuiInterpreter=%p\n",
+       mServer, theGuiInterpreter);
+   #endif
    
    // Close MATLAB connection
    MatlabInterface::Close();
@@ -404,10 +413,20 @@ GmatMainFrame::~GmatMainFrame()
    if (GmatAppData::GetMessageWindow() != NULL)
       GmatAppData::GetMessageWindow()->Close();
    
-   if (theGuiInterpreter)
-      theGuiInterpreter->Finalize();
+   // Commented out since Moderator::Finalize() is called from GmatApp (loj: 2008.03.06)
+   //if (theGuiInterpreter)
+   //   theGuiInterpreter->Finalize();
    
-   //MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() exiting\n");
+   GmatAppData::SetMainFrame(NULL);
+   GmatAppData::SetMessageWindow(NULL);   
+   GmatAppData::SetMessageTextCtrl(NULL);
+   GmatAppData::SetResourceTree(NULL);
+   GmatAppData::SetMissionTree(NULL);
+   GmatAppData::SetOutputTree(NULL);
+   
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() exiting.\n");
+   #endif
 }
 
 
@@ -1222,9 +1241,10 @@ Integer GmatMainFrame::RunCurrentMission()
       MessageInterface::ShowMessage("   return code from RunMission()=%d\n", retval);
       #endif
       
-      // always stop server after run (loj: 2008.02.06)
-      //if (retval != 1 && mServer)
-      if (mServer)
+      // always stop server after run (loj: 2008.02.06) - to investigate Bug 1133 
+      // stop server after user interrupt (loj: 2008.03.05)
+      //if (mServer)
+      if (retval != 1 && mServer)
          StopServer(); // stop server if running to avoid getting callback staus
                        // when run stopped by user
       
@@ -1328,7 +1348,8 @@ void GmatMainFrame::StartServer()
 void GmatMainFrame::StopServer()
 {
    #ifdef DEBUG_SERVER
-   MessageInterface::ShowMessage("GmatMainFrame::StopServer() entered.\n");
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::StopServer() entered. mServer=%p\n", mServer);
    #endif
    
    if (mServer)
@@ -1368,7 +1389,10 @@ void GmatMainFrame::StopServer()
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnClose(wxCloseEvent& event)
 {
-   //MessageInterface::ShowMessage("===> GmatMainFrame::OnClose()\n");
+   #ifdef DEBUG_MAINFRAME_CLOSE
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::OnClose() entered. mServer=%p\n", mServer);
+   #endif
    
    if (!mRunCompleted)
    {
