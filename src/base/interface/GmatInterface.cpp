@@ -143,7 +143,7 @@ void GmatInterface::UpdateObject()
    //MessageInterface::ShowMessage
    //   ("GmatInterface::UpdateObject() mInStringStream.str=\n%s\n", mInStringStream->str().c_str());
    #endif
-
+   
    // flag not to clear objects and mission sequence
    moderator->InterpretScript(mInStringStream, false);
    Moderator::GetGuiInterpreter()->UpdateResourceTree();
@@ -171,6 +171,8 @@ void GmatInterface::RunScript()
 
    if (mPassedInterpreter)
       Moderator::Instance()->RunScript();
+   
+   Moderator::GetGuiInterpreter()->UpdateOutputTree();
 }
 
 
@@ -337,7 +339,10 @@ char* GmatInterface::GetRunState()
 // char* GetParameter(const std::string &name)
 //------------------------------------------------------------------------------
 /*
- * @return string value of the parameter.
+ * It retrieves a Parameter pointer from the Sandbox, if it is not found in the
+ * Sandbox, it retrieves it from the Configuration.
+ *
+ * @return string value of the parameter in the Sandbox or in the Configuration.
  */
 //------------------------------------------------------------------------------
 char* GmatInterface::GetParameter(const std::string &name)
@@ -350,9 +355,30 @@ char* GmatInterface::GetParameter(const std::string &name)
    static char dataString[MAX_PARAM_VAL_STRING];
    static char *undefindString = "-123456789.123456789\0";
    strcpy(dataString, undefindString);
-   Parameter *param;
+   Parameter *param = NULL;
+   GmatBase *obj = NULL;
    
-   param = Moderator::Instance()->GetParameter(name);
+   try
+   {
+      obj = Moderator::Instance()->GetInternalObject(name);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Could not find \"%s\" in the Sandbox. "
+          "Trying Configuration...\n", name.c_str());
+   }
+   
+   // if internal object not found, get configured object (loj: 2008.03.04)
+   if (obj == NULL)
+      param = Moderator::Instance()->GetParameter(name);
+   else
+      param = (Parameter*)obj;
+   
+   #ifdef DEBUG_GMAT_INTERFACE
+   MessageInterface::ShowMessage("   internal obj=%p, param=%p\n", obj, param);
+   #endif
+   
    if (param != NULL)
    {
       #ifdef DEBUG_GMAT_INTERFACE
@@ -373,38 +399,59 @@ char* GmatInterface::GetParameter(const std::string &name)
       #endif
       
       sprintf(dataString, "%s", str.c_str());
-   }      
+   }
+   else
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Could not find \"%s\" in the Configuration\n", name.c_str());
+   }
    
    return dataString;
 }
 
 
 //------------------------------------------------------------------------------
-// char* GetInternalObject(const std::string &name)
+// char* GetObject(const std::string &name)
 //------------------------------------------------------------------------------
 /*
- * @return serialized string value of the object.
+ * It retrieves an object pointer from the Sandbox, if it is not found in the
+ * Sandbox, it retrieves it from the Configuration.
+ *
+ * @return serialized string value of the internal object in the Sandbox or
+ *         object in the Configuration
  */
 //------------------------------------------------------------------------------
-char* GmatInterface::GetInternalObject(const std::string &name)
+char* GmatInterface::GetObject(const std::string &name)
 {
    #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
-      ("GmatInterface::GetInternalObject() name=%s\n", name.c_str());
+      ("GmatInterface::GetObject() name=%s\n", name.c_str());
    #endif
-
+   
    static char dataString[MAX_OBJECT_VAL_STRING];
    static char *undefindString = "-123456789.123456789\0";
    strcpy(dataString, undefindString);
-   GmatBase *obj;
+   GmatBase *obj = NULL;
    
-   obj = Moderator::Instance()->GetInternalObject(name);
+   try
+   {
+      obj = Moderator::Instance()->GetInternalObject(name);
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Could not find \"%s\" in the Sandbox. "
+          "Trying Configuration...\n", name.c_str());
+      
+      // if internal object not found, get configured object (loj: 2008.03.04)
+      obj = Moderator::Instance()->GetConfiguredObject(name);
+   }
    
    if (obj != NULL)
    {
       #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
-         ("GmatInterface::GetInternalObject() get serialized string of object name:"
+         ("GmatInterface::GetObject() get serialized string of object name:"
           "%s, type=%s\n", obj->GetName().c_str(), obj->GetTypeName().c_str());
       #endif
       
@@ -419,8 +466,7 @@ char* GmatInterface::GetInternalObject(const std::string &name)
    else
    {
       MessageInterface::ShowMessage
-         ("GmatInterface::GetInternalObject() the pointer of object name:%s is null\n",
-          name.c_str());
+         ("*** WARNING *** Could not find \"%s\" in the Configuration\n", name.c_str());
    }
    
    return dataString;

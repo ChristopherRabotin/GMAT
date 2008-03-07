@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatInterface
 //------------------------------------------------------------------------------
@@ -28,7 +28,8 @@ class GMAT_API GmatInterface
 {
 public:
    static GmatInterface* Instance();
-
+   ~GmatInterface();
+   
    void OpenScript();
    void ClearScript();
    void PutScript(char *str);
@@ -37,14 +38,14 @@ public:
    void RunScript();
    
    // methods to manage execution of GMAT callback
-   bool ExecuteCallback();
-   bool RegisterCallbackServer(GmatBase *callbackObject);
+   bool  ExecuteCallback();
+   bool  RegisterCallbackServer(GmatBase *callbackObject);
    char* GetCallbackStatus();
    void  PutCallbackData(std::string &data);
    char* GetCallbackResults();
    
    char* GetRunState();
-   char* GetInternalObject(const std::string &name);
+   char* GetObject(const std::string &name);
    char* GetParameter(const std::string &name);
    
    void CheckUserInterrupt();
@@ -58,7 +59,6 @@ private:
       { stream->rdbuf(newBuff); }
    
    GmatInterface();
-   ~GmatInterface();
    
    std::stringstream mStringStream;
    std::istringstream *mInStringStream;
