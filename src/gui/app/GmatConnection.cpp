@@ -89,12 +89,12 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    {
       wxString tempItem = item;
       tempItem.RemoveLast();
-      data = GmatInterface::Instance()->GetInternalObject(tempItem.c_str());
+      data = GmatInterface::Instance()->GetObject(tempItem.c_str());
    }
    else if (item == "RunState")
    {
       data = GmatInterface::Instance()->GetRunState();
-         
+      
       #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
@@ -103,7 +103,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "CallbackStatus")
    {
       data = GmatInterface::Instance()->GetCallbackStatus();
-         
+      
       #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
@@ -112,7 +112,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    else if (item == "CallbackResults")
    {
       data = GmatInterface::Instance()->GetCallbackResults();
-         
+      
       #ifdef DEBUG_CONNECTION_REQUEST
       MessageInterface::ShowMessage
          ("GmatConnection::OnRequest() data=%s\n", data);
@@ -157,7 +157,7 @@ bool GmatConnection::OnPoke(const wxString& WXUNUSED(topic),
    MessageInterface::ShowMessage
       ("GmatConnection::OnPoke() %s = %s\n", item.c_str(), data);
    #endif
-
+   
    //------------------------------
    // save data to string stream
    //------------------------------
@@ -218,10 +218,10 @@ bool GmatConnection::OnStartAdvise(const wxString& WXUNUSED(topic),
 {
    #ifdef DEBUG_CONNECTION_ADVISE
    MessageInterface::ShowMessage
-      ("GmatConnection::OnRequest() %s\n", item.c_str());
+      ("GmatConnection::OnStartAdvise() %s\n", item.c_str());
    #endif
    
-   //#ifdef DEBUG_CONNECTION
+   //#ifdef DEBUG_CONNECTION_ADVISE
    //char* data = GmatInterface::Instance()->GetRunState();
    //MessageInterface::ShowMessage
    //   ("GmatConnection::OnStartAdvise() data=%s\n", data);
