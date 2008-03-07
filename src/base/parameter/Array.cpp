@@ -231,10 +231,14 @@ void Array::SetRmatrix(const Rmatrix &mat)
 //------------------------------------------------------------------------------
 std::string Array::ToString()
 {
-   std::stringstream ss("");
-   ss.precision(10);
-   ss << mRmatValue;
-   return std::string(ss.str());
+   // use default global precision to convert to string (loj: 2008.03.05)
+   return mRmatValue.ToString(false, false, false, GmatGlobal::DATA_PRECISION, 1,
+                              true, 1, "", false);
+   
+   //std::stringstream ss("");
+   //ss.precision(10);
+   //ss << mRmatValue;
+   //return std::string(ss.str());
 }
 
 
