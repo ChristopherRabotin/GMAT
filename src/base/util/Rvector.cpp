@@ -635,7 +635,7 @@ std::string Rvector::ToString(Integer precision, bool horizontal,
                               const std::string &prefix) const
 {
    GmatGlobal *global = GmatGlobal::Instance();
-   global->SetActualFormat(false, false, precision, 0, horizontal, 1, prefix);
+   global->SetActualFormat(false, false, precision, 0, horizontal, 1, prefix, false);
    
    std::stringstream ss("");
    ss << *this;
