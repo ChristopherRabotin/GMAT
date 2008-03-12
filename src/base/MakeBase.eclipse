@@ -345,6 +345,7 @@ OBJECTS = \
     solver/DifferentialCorrector.o \
     solver/Optimizer.o \
     solver/Solver.o \
+    solver/SteepestDescent.o \
     spacecraft/Converter.o \
     spacecraft/Formation.o \
     spacecraft/FuelTank.o \
