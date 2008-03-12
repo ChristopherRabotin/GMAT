@@ -210,13 +210,10 @@ bool ClearPlot::Initialize()
    
    for (unsigned int ii = 0; ii < plotNameList.size(); ii++)
    {
-      //if ((*objectMap).find(plotName) != objectMap->end()) 
-      if ((*objectMap).find(plotNameList.at(ii)) != objectMap->end()) 
+      if ((xy = FindObject(plotNameList.at(ii))) != NULL) 
       {
-         xy = (GmatBase *)(*objectMap)[plotNameList.at(ii)];
          if (xy->GetTypeName() == "XYPlot") 
             thePlotList.push_back((TsPlot*) xy);
-            //thePlot = (TsPlot*)xy;
          else
             throw CommandException(
                "Object named \"" + plotNameList.at(ii) + "\" should be an XYPlot to use the "

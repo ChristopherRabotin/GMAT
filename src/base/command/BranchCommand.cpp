@@ -729,10 +729,10 @@ void BranchCommand::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-//  void SetAssetMap(std::map<std::string, Asset *> *map)
+//  void SetObjectMap(std::map<std::string, Asset *> *map)
 //------------------------------------------------------------------------------
 /**
- * Called by the Sandbox to set the local asset store used by the Command.  This
+ * Called by the Sandbox or Function to set the local asset store used by the Command.  This
  * implementation chains through the branches and sets the asset map for each of
  * the branch nodes.
  * 
@@ -752,6 +752,35 @@ void BranchCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
       while ((current != NULL) && (current != this))
       {
          current->SetObjectMap(map);
+         current = current->GetNext();
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(std::map<std::string, Asset *> *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox or Function to set the global asset store used by the Command.  This
+ * implementation chains through the branches and sets the asset map for each of
+ * the branch nodes.
+ * 
+ * @param <map> Pointer to the local asset map
+ */
+//------------------------------------------------------------------------------
+void BranchCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   GmatCommand::SetGlobalObjectMap(map);
+   GmatCommand *current = NULL;
+   
+   // Set it for all of the branch nodes
+   // If we have branches, try to insert there first
+   for (Integer which = 0; which < (Integer)branch.size(); ++which)
+   {
+      current = branch[which];
+      while ((current != NULL) && (current != this))
+      {
+         current->SetGlobalObjectMap(map);
          current = current->GetNext();
       }
    }

@@ -69,6 +69,8 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
    
    parameterCount = PropSetupParamCount;
    ownedObjectCount += 1;
+   // Propagators (PropSetups) are Global by default
+   isGlobal = true;
    
    // PropSetup data
    if (propagator != NULL)

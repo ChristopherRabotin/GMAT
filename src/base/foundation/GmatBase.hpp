@@ -129,6 +129,8 @@ public:
    
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   virtual bool         SetIsGlobal(bool globalFlag);
+   virtual bool         GetIsGlobal() const;
    virtual bool         ExecuteCallback();
    virtual bool         IsCallbackExecuting();
    virtual bool         PutCallbackData(std::string &data);
@@ -379,6 +381,8 @@ protected:
    ObjectTypeArray     refObjectTypes;
    /// The list of object names referenced by this class
    StringArray         refObjectNames;
+   /// flag indicating whether or not the object is Global
+   bool                isGlobal;
    
    /// flag indicating whether or not a Callback method is currently executing
    bool                callbackExecuting;

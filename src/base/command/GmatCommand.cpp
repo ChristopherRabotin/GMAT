@@ -89,6 +89,7 @@ GmatCommand::GmatCommand(const std::string &typeStr) :
    previous             (NULL),
    level                (-1),   // Not set
    objectMap            (NULL),
+   globalObjectMap      (NULL),
    solarSys             (NULL),
    publisher            (NULL),
    streamID             (-1),
@@ -182,6 +183,7 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    next                 (NULL),
    level                (-1),   // Not set
    objectMap            (c.objectMap),
+   globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
    publisher            (c.publisher),
    streamID             (c.streamID),
@@ -232,6 +234,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    association = c.association;
    
    objectMap = c.objectMap;
+   globalObjectMap = c.globalObjectMap;
    solarSys = c.solarSys;
    publisher = c.publisher;
    generatingString = c.generatingString;
@@ -558,7 +561,7 @@ void GmatCommand::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-//  void SetAssetMap(std::map<std::string, GmatBase *> *map)
+//  void SetObjectMap(std::map<std::string, GmatBase *> *map)
 //------------------------------------------------------------------------------
 /**
  * Called by the Sandbox to set the local asset store used by the GmatCommand
@@ -569,6 +572,20 @@ void GmatCommand::SetSolarSystem(SolarSystem *ss)
 void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
    objectMap = map;
+}
+
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the global asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   globalObjectMap = map;
 }
 
 
@@ -1046,6 +1063,13 @@ bool GmatCommand::Initialize()
       throw CommandException(errorstr);
    }
    
+   if (globalObjectMap == NULL)
+   {
+      std::string errorstr("Global object map has not been initialized for ");
+      errorstr += GetTypeName();
+      throw CommandException(errorstr);
+   }
+   
    if (solarSys == NULL) {
       std::string errorstr("Solar system has not been initialized for ");
       errorstr += GetTypeName();
@@ -1075,7 +1099,7 @@ bool GmatCommand::Initialize()
    }
    
    satVector.clear();
-   satsInSandbox = 0;
+   satsInMaps = 0;
    
    #if DEBUG_COMMAND_INIT
    MessageInterface::ShowMessage
@@ -1526,14 +1550,14 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() %s, commandCompleted=%d, "
-       "objectMap=%p\n    epochData=%p, stateData=%p, parmData=%p, "
+       "objectMap=%p, globalObjectMap=%p\n    epochData=%p, stateData=%p, parmData=%p, "
        "satVector.size()=%d\n", GetTypeName().c_str(), commandCompleted, objectMap,
-       epochData, stateData, parmData, satVector.size());
+       globalObjectMap, epochData, stateData, parmData, satVector.size());
    #endif
    
    if (epochData == NULL)
    {
-      satsInSandbox = 0;
+      satsInMaps = 0;
       if (objectMap != NULL)
       {
          // Build summary data for each spacecraft in the object list
@@ -1565,24 +1589,68 @@ void GmatCommand::BuildCommandSummary(bool commandCompleted)
                   satTotalMassID = obj->GetParameterID("TotalMass");
                }
 
-               ++satsInSandbox;
+               ++satsInMaps;
             }
          }
-         epochData = new Real[satsInSandbox];
-         stateData = new Real[6*satsInSandbox];
-         parmData = new Real[6*satsInSandbox];
+         //epochData = new Real[satsInMaps];
+         //stateData = new Real[6*satsInMaps];
+         //parmData = new Real[6*satsInMaps];
+      }
+      if (globalObjectMap != NULL)
+      {
+         // Add summary data for each spacecraft in the global object list
+         GmatBase *obj;
+         for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
+              i != globalObjectMap->end(); ++i)
+         {
+            #ifdef DEBUG_COMMAND_SUMMARY_LIST
+               MessageInterface::ShowMessage("Examining %s\n", i->first.c_str());
+            #endif
+            obj = i->second;
+
+            if (obj == NULL)
+               continue;
+            
+            if (obj->GetTypeName() == "Spacecraft")
+            {
+               satVector.push_back((SpaceObject*)obj);
+               if (satEpochID == -1)
+               {
+                  satEpochID = obj->GetParameterID("A1Epoch");
+                  satCdID = obj->GetParameterID("Cd");
+                  satDragAreaID = obj->GetParameterID("DragArea");
+                  satCrID = obj->GetParameterID("Cr");
+                  satSRPAreaID = obj->GetParameterID("SRPArea");
+                  satTankID = obj->GetParameterID("Tanks");
+                  satThrusterID = obj->GetParameterID("Thrusters");
+                  satDryMassID = obj->GetParameterID("DryMass");
+                  satTotalMassID = obj->GetParameterID("TotalMass");
+               }
+
+               ++satsInMaps;
+            }
+         }
+         //epochData = new Real[satsInMaps];
+         //stateData = new Real[6*satsInMaps];
+         //parmData = new Real[6*satsInMaps];
+      }
+      if (satsInMaps > 0)
+      {
+         epochData = new Real[satsInMaps];
+         stateData = new Real[6*satsInMaps];
+         parmData = new Real[6*satsInMaps];
       }
    }
 
    #if DEBUG_BUILD_CMD_SUMMARY
    MessageInterface::ShowMessage
       ("GmatCommand::BuildCommandSummary() Now fill in data...\n   "
-       "satsInSandbox=%d, satVector.size()=%d\n", satsInSandbox,
+       "satsInMaps=%d, satVector.size()=%d\n", satsInMaps,
        satVector.size());
    #endif
    
    Integer i6;
-   for (Integer i = 0; i < satsInSandbox; ++i)
+   for (Integer i = 0; i < satsInMaps; ++i)
    {
       i6 = i * 6;
       epochData[i] = satVector[i]->GetRealParameter(satEpochID);
@@ -1613,7 +1681,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    std::stringstream data;
    StateConverter    stateConverter;
 
-   if ((objectMap == NULL) || (satVector.size() == 0))
+   if (((objectMap == NULL) && (globalObjectMap == NULL))|| (satVector.size() == 0))
    {
       data << "Command Summary: " << typeName << " Command\n"
            << "Execute the script to generate command summary data\n";
@@ -1630,7 +1698,7 @@ void GmatCommand::BuildCommandSummaryString(bool commandCompleted)
    
          GmatBase *obj;
          // Build summary data for each spacecraft in the object list
-         for (Integer i = 0; i < satsInSandbox; ++i)
+         for (Integer i = 0; i < satsInMaps; ++i)
          {
             obj = satVector[i];
 
@@ -1993,9 +2061,14 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
-   
+   // Check for the object in the Local Object Store (LOS) first
    if (objectMap->find(newName) == objectMap->end())
-      return NULL;
+   {
+	  // If not found in the LOS, check the Global Object Store (GOS)
+      if (globalObjectMap->find(newName) == globalObjectMap->end())
+         return NULL;
+      else return (*globalObjectMap)[newName];
+   }
    else
       return (*objectMap)[newName];
 }
@@ -2017,13 +2090,22 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
       for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
       {
          std::string name = *j;
-         if (objectMap->find(name) == objectMap->end())
-         {            
+         //if (objectMap->find(name) == objectMap->end())
+         //{            
+         //   throw CommandException(
+         //      "GmatCommand::SetWrapperReferences failed to find object named \"" + 
+         //      name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
+         //}
+         GmatBase *obj = FindObject(name);
+         if (obj == NULL)
+         {
             throw CommandException(
-               "GmatCommand::SetWrapperReferences failed to find object named \"" + 
-               name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
+                  "GmatCommand::SetWrapperReferences failed to find object named \"" + 
+                  name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
          }
-         if (wrapper.SetRefObject((*objectMap)[name]) == false)
+
+         //if (wrapper.SetRefObject((*objectMap)[name]) == false)
+         if (wrapper.SetRefObject(obj) == false)
          {
             MessageInterface::ShowMessage(
                "GmatCommand::SetWrapperReferences failed to set object named \"%s\"\n", 

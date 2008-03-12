@@ -121,6 +121,7 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    instanceName      (nomme),
    type              (typeId),
    ownedObjectCount  (0),
+   isGlobal          (false),
    callbackExecuting (false),
    commentLine       (""),
    inlineComment     (""),
@@ -189,7 +190,8 @@ GmatBase::GmatBase(const GmatBase &a) :
     generatingString(a.generatingString),
     objectTypes     (a.objectTypes),
     objectTypeNames (a.objectTypeNames),
-    callbackExecuting    (false),
+    isGlobal        (a.isGlobal),
+    callbackExecuting (false),
     commentLine     (a.commentLine),
     inlineComment   (a.inlineComment),
     attributeCommentLines    (a.attributeCommentLines),
@@ -227,6 +229,7 @@ GmatBase& GmatBase::operator=(const GmatBase &a)
    generatingString = a.generatingString;
    objectTypes      = a.objectTypes;
    objectTypeNames  = a.objectTypeNames;
+   // don't want to modify isGlobal here 
    callbackExecuting = false;
    commentLine      = a.commentLine;
    inlineComment    = a.inlineComment;
@@ -691,7 +694,6 @@ Integer GmatBase::GetOwnedObjectCount()
    return ownedObjectCount;
 }
 
-
 //---------------------------------------------------------------------------
 //  GmatBase* GetOwnedObject(Integer whichOne)
 //---------------------------------------------------------------------------
@@ -719,6 +721,36 @@ GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
    throw GmatBaseException("No owned objects for this instance\n");
 }
 
+//------------------------------------------------------------------------------
+//  bool SetIsGlobal(bool globalFlag)
+//------------------------------------------------------------------------------
+/**
+ * Method to set the isGlobal flag for an object.
+ *
+ * @param globalFlag  flag indicating whether or not this object is global
+ * 
+ * @return value of isGlobal flag.
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::SetIsGlobal(bool globalFlag)
+{
+	isGlobal = globalFlag;
+	return isGlobal;
+}
+
+//------------------------------------------------------------------------------
+//  bool GetIsGlobal()
+//------------------------------------------------------------------------------
+/**
+ * Method to return the isGlobal flag for an object.
+ *
+ * @return value of isGlobal flag (i.e. whether or not this object is Global)
+ */
+//------------------------------------------------------------------------------
+bool GmatBase::GetIsGlobal() const
+{
+	return isGlobal;
+}
 
 //------------------------------------------------------------------------------
 //  bool ExecuteCallback()

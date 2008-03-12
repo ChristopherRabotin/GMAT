@@ -82,6 +82,8 @@ private:
     
    /// Object store for this run
    std::map<std::string, GmatBase *> objectMap;
+   /// GLobal object store for this run
+   std::map<std::string, GmatBase *> globalObjectMap;
    /// Solar System model for this Sandbox
    SolarSystem                       *solarSys;
    /// CoordinateSystem used internally

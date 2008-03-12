@@ -1964,6 +1964,7 @@ bool Propagate::Initialize()
    sats.clear();
    SpaceObject *so;
    std::string pName;
+   GmatBase *mapObj = NULL;
 
    // Ensure that we are using fresh objects when buffering stops
    EmptyBuffer();
@@ -1990,7 +1991,7 @@ bool Propagate::Initialize()
       else 
         pName = *i;
 
-      if (objectMap->find(pName) == objectMap->end())
+      if ((mapObj = FindObject(pName)) == NULL)
          throw CommandException(
             "Propagate command cannot find Propagator Setup \"" + (pName) +
             "\"\n");
@@ -2005,8 +2006,7 @@ bool Propagate::Initialize()
       else
          singleStepMode = false;
 
-      prop.push_back((PropSetup *)(((*objectMap)[pName])->Clone()));
-      // prop.push_back((PropSetup *)((*objectMap)[pName]));
+      prop.push_back((PropSetup *)(mapObj->Clone()));
       if (!prop[index])
          return false;
       
@@ -2035,14 +2035,14 @@ bool Propagate::Initialize()
             MessageInterface::ShowMessage("   Adding '%s' to propsetup '%s'\n",
                scName->c_str(), i->c_str());
          #endif
-         if (objectMap->find(*scName) == objectMap->end()) 
+         if ((mapObj = FindObject(*scName)) == NULL) 
          {
             std::string errmsg = "Unknown SpaceObject \"";
             errmsg += *scName;
             errmsg += "\"";
             throw CommandException(errmsg);
          }
-         so = (SpaceObject*)(*objectMap)[*scName];
+         so = (SpaceObject*)mapObj;
          if (epochID == -1)
             epochID = so->GetParameterID("A1Epoch");
          if (so->IsManeuvering())
@@ -2076,13 +2076,15 @@ bool Propagate::Initialize()
    // Setup spacecraft array used for stopping conditions
    for (StringArray::iterator sc = stopSatNames.begin(); 
         sc != stopSatNames.end(); ++sc) {
-      if (objectMap->find(*sc) == objectMap->end()) {
+
+      if ((mapObj = FindObject(*sc)) == NULL)
+      {
          std::string errmsg = "Unknown SpaceObject \"";
          errmsg += *sc;
          errmsg += "\" used in stopping conditions";
          throw CommandException(errmsg);
       }
-      so = (SpaceObject*)(*objectMap)[*sc];
+      so = (SpaceObject*)mapObj;
       stopSats.push_back(so);
    }
 
@@ -2113,7 +2115,8 @@ bool Propagate::Initialize()
                MessageInterface::ShowMessage("===> refNames=<%s>\n", 
                   refNames[j].c_str());
             #endif
-            stopWhen[i]->SetRefObject((*objectMap)[refNames[j]],
+            mapObj = FindObject(refNames[j]);
+            stopWhen[i]->SetRefObject(mapObj,
                                       Gmat::PARAMETER, refNames[j]);
          }
          
@@ -2199,6 +2202,7 @@ bool Propagate::Initialize()
 void Propagate::FillFormation(SpaceObject *so, StringArray& owners, 
                               StringArray& elements)
 {
+   GmatBase *mapObj = NULL;
    static Integer soEpochId = -1;
    if ((so == NULL) || (so->GetType() != Gmat::FORMATION))
       throw CommandException("Invalid SpaceObject passed to FillFormation");
@@ -2210,12 +2214,13 @@ void Propagate::FillFormation(SpaceObject *so, StringArray& owners,
    SpaceObject *el;
    Real ep;
    
-   for (StringArray::iterator i = comps.begin(); i != comps.end(); ++i) {
-      if ((*objectMap).find(*i) == objectMap->end())
+   for (StringArray::iterator i = comps.begin(); i != comps.end(); ++i) 
+   {
+      if ((mapObj = FindObject(*i)) == NULL)
          throw CommandException("Formation " + so->GetName() +
             " uses unknown object named '" + (*i) + "'");
             
-      el = (SpaceObject*)(*objectMap)[*i];
+      el = (SpaceObject*)mapObj;
       if (i == comps.begin())
       {
          ep = el->GetRealParameter(soEpochId);
@@ -2330,7 +2335,8 @@ void Propagate::PrepareToPropagate()
          if (satName[n]->empty())
             throw CommandException(
                "Propagator has no associated space objects.");
-         GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
+
+         GmatBase* sat1 = FindObject(*satName[n]->begin());
          baseEpoch.push_back(sat1->GetRealParameter(epochID));
          elapsedTime[n] = fm[n]->GetTime();
          currEpoch[n] = baseEpoch[n] + elapsedTime[n] /
@@ -2434,7 +2440,7 @@ void Propagate::PrepareToPropagate()
       Real baseEp = 0.0;
       for (StringArray::iterator s = sar->begin(); s != sar->end(); ++s)
       {
-         sat1 = (*objectMap)[*s];
+         sat1 = FindObject(*s);
          if (s == sar->begin())
             baseEp = sat1->GetRealParameter(epochID);
          else if (baseEp != sat1->GetRealParameter(epochID))
@@ -2447,7 +2453,7 @@ void Propagate::PrepareToPropagate()
                      (sat1->GetRealParameter(epochID) - baseEp));
                for (StringArray::iterator sd = sar->begin(); sd != sar->end(); ++sd)
                {
-                  GmatBase *theSat = (*objectMap)[*sd];
+                  GmatBase *theSat = FindObject(*sd);
                   MessageInterface::ShowMessage("   %s epoch = %18.12lf\n", 
                         theSat->GetName().c_str(), 
                         theSat->GetRealParameter(epochID));
@@ -2500,7 +2506,7 @@ void Propagate::PrepareToPropagate()
       if (satName[n]->empty())
          throw CommandException(
             "Propagator has no associated space objects.");
-      GmatBase* sat1 = (*objectMap)[*(satName[n]->begin())];
+      GmatBase* sat1 = FindObject(*(satName[n]->begin()));
 
       baseEpoch.push_back(sat1->GetRealParameter(epochID));
       elapsedTime[n] = fm[n]->GetTime();
@@ -4137,7 +4143,7 @@ void Propagate::AddToBuffer(SpaceObject *so)
       StringArray formSats = form->GetStringArrayParameter("Add");
       
       for (StringArray::iterator i = formSats.begin(); i != formSats.end(); ++i)
-         AddToBuffer((SpaceObject *)(*objectMap)[*i]);
+         AddToBuffer((SpaceObject *)(FindObject(*i)));
    }
    else
       throw CommandException("Object " + so->GetName() + " is not either a "
@@ -4192,13 +4198,13 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
       soName = (*i)->GetName();
       if (fillingBuffer)
       {
-         fromSat = (Spacecraft *)((*objectMap)[soName]);
+         fromSat = (Spacecraft *)FindObject(soName);
          toSat = *i;
       }
       else
       {
          fromSat = *i;
-         toSat = (Spacecraft *)((*objectMap)[soName]);
+         toSat = (Spacecraft *)FindObject(soName);
       }
 
       #ifdef DEBUG_STOPPING_CONDITIONS
@@ -4238,13 +4244,13 @@ void Propagate::BufferSatelliteStates(bool fillingBuffer)
       #endif
       if (fillingBuffer)
       {
-         fromForm = (Formation *)((*objectMap)[soName]);
+         fromForm = (Formation *)FindObject(soName);
          toForm = *i;
       }
       else
       {
          fromForm = *i;
-         toForm = (Formation *)((*objectMap)[soName]);
+         toForm = (Formation *)FindObject(soName);
       }
 
       #ifdef DEBUG_STOPPING_CONDITIONS

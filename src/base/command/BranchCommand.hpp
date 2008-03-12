@@ -48,6 +48,7 @@ public:
    
    virtual void            SetSolarSystem(SolarSystem *ss);
    virtual void            SetObjectMap(std::map<std::string, GmatBase*> *map);
+   virtual void            SetGlobalObjectMap(std::map<std::string, GmatBase*> *map);
    
    virtual const std::string&
                            GetGeneratingString(Gmat::WriteMode mode =

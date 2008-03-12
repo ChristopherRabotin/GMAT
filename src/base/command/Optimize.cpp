@@ -319,7 +319,8 @@ bool Optimize::Initialize()
    ShowCommand("", "Initialize() this = ", this);
    #endif
    
-   if (objectMap->find(optimizerName) == objectMap->end()) 
+   GmatBase *mapObj = NULL;
+   if ((mapObj = FindObject(optimizerName)) == NULL) 
    {
       std::string errorString = "Optimize command cannot find optimizer \"";
       errorString += optimizerName;
@@ -328,9 +329,9 @@ bool Optimize::Initialize()
    }
 
    // Clone the optimizer for local use
-   optimizer = (Solver *)((*objectMap)[optimizerName])->Clone();
+   optimizer = (Solver *)(mapObj->Clone());
    optimizer->TakeAction("IncrementInstanceCount");
-   ((*objectMap)[optimizerName])->TakeAction("IncrementInstanceCount");
+   mapObj->TakeAction("IncrementInstanceCount");
    
    if (optimizer->GetStringParameter("ReportStyle") == "Debug")
       optimizerInDebugMode = true;      
@@ -366,7 +367,7 @@ bool Optimize::Initialize()
    if (retval == true) 
    {
       // Optimizer specific initialization goes here: // wcs - why is this done twice?
-      if (objectMap->find(optimizerName) == objectMap->end()) 
+      if ((mapObj = FindObject(optimizerName)) == NULL) 
       {
          std::string errorString = "Optimize command cannot find optimizer \"";
          errorString += optimizerName;

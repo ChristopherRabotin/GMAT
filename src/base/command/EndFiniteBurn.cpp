@@ -406,26 +406,27 @@ bool EndFiniteBurn::Initialize()
 {
    bool retval = GmatCommand::Initialize();
    
+   GmatBase *mapObj;
    if (retval)
    {
       // Look up the maneuver object
-      if (objectMap->find(burnName) == objectMap->end()) 
+      if ((mapObj = FindObject(burnName)) == NULL) 
          throw CommandException("Unknown finite burn \"" + burnName + "\"");
-      if ((*objectMap)[burnName]->GetTypeName() != "FiniteBurn")
+      if (mapObj->GetTypeName() != "FiniteBurn")
          throw CommandException((burnName) + " is not a FiniteBurn");
-      maneuver = (FiniteBurn*)((*objectMap)[burnName]);
+      maneuver = (FiniteBurn*)mapObj;
       
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
       for (scName = satNames.begin(); scName != satNames.end(); ++scName)
       {
-         if (objectMap->find(*scName) == objectMap->end()) 
+         if ((mapObj = FindObject(*scName)) == NULL) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
          
-         if ((*objectMap)[*scName]->GetType() != Gmat::SPACECRAFT)
+         if (mapObj->GetType() != Gmat::SPACECRAFT)
             throw CommandException((*scName) + " is not a Spacecraft");
-         sc = (Spacecraft*)(*objectMap)[*scName];
+         sc = (Spacecraft*)mapObj;
          sats.push_back(sc);
       }
       
@@ -507,21 +508,6 @@ bool EndFiniteBurn::Execute()
       #endif      
    }
    
-   // Remove the thrust force from all force models
-   ForceModel* fm;
-   for (std::map<std::string, GmatBase *>::iterator n = objectMap->begin(); 
-        n != objectMap->end(); ++n)
-   {
-      if (n->second->GetType() == Gmat::FORCE_MODEL)
-      {
-         fm = (ForceModel*)(n->second);
-         #ifdef DEBUG_END_MANEUVER_EXE
-            MessageInterface::ShowMessage
-               ("Attempting to remove %s from %s\n", thrustName.c_str(), 
-                fm->GetName().c_str());
-         #endif
-      }
-   }
    
    // Tell active spacecraft that they are no longer firing
    for (std::vector<Spacecraft*>::iterator s=sats.begin(); s!=sats.end(); ++s)

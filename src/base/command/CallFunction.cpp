@@ -675,12 +675,20 @@ bool CallFunction::Initialize()
          ("===> obj=%s type=%s, name=%s\n", (pos->first).c_str(),
           obj->GetTypeName().c_str(), obj->GetName().c_str());
    }
+   for (pos = globalObjectMap->begin(); pos != globalObjectMap->end(); ++pos)
+   {
+      obj = pos->second;
+      MessageInterface::ShowMessage
+         ("===> obj=%s type=%s, name=%s\n", (pos->first).c_str(),
+          obj->GetTypeName().c_str(), obj->GetName().c_str());
+   }
    #endif
    
-   if (objectMap->find(mFunctionName)  == objectMap->end())
+   GmatBase *mapObj;
+   if ((mapObj = FindObject(mFunctionName))  == NULL)
       throw CommandException("CallFunction command cannot find Function " +
                mFunctionName + "\n");
-   mFunction = (Function *)((*objectMap)[mFunctionName]);
+   mFunction = (Function *)mapObj;
 
    
    // need to initialize input parameters
@@ -688,7 +696,7 @@ bool CallFunction::Initialize()
    
    for (StringArray::iterator i = mInputListNames.begin(); i != mInputListNames.end(); ++i)
    {
-      if (objectMap->find(*i)  == objectMap->end())
+      if ((mapObj = FindObject(*i))  == NULL)
         throw CommandException("CallFunction command cannot find Parameter " +
            *i + " in script line\n   \"" +
            GetGeneratingString(Gmat::SCRIPTING) + "\"");
@@ -697,7 +705,7 @@ bool CallFunction::Initialize()
          MessageInterface::ShowMessage("Adding input parameter %s\n", i->c_str());
       #endif
          
-      mInputList.push_back((Parameter *)((*objectMap)[*i]));
+          mInputList.push_back((Parameter *)mapObj);
    }
 
    
@@ -707,14 +715,14 @@ bool CallFunction::Initialize()
    for (StringArray::iterator i = mOutputListNames.begin();
    i != mOutputListNames.end();++i)
    {
-      if (objectMap->find(*i)  == objectMap->end())
+      if ((mapObj = FindObject(*i))  == NULL)
         throw CommandException("CallFunction command cannot find Parameter " + (*i));
 
       #ifdef DEBUG_CALL_FUNCTION
          MessageInterface::ShowMessage("Adding output parameter %s\n", i->c_str());
       #endif
          
-      mOutputList.push_back((Parameter *)((*objectMap)[*i]));
+          mOutputList.push_back((Parameter *)mapObj);
    }
    
    
@@ -758,6 +766,7 @@ bool CallFunction::Initialize()
       callcmds->TakeAction("ClearLocalData");
       callcmds->SetPublisher(publisher);
       callcmds->SetObjectMap(objectMap);
+      callcmds->SetGlobalObjectMap(globalObjectMap);
       callcmds->SetSolarSystem(solarSys);
       
       if (callcmds->GetTypeName() == "BeginFunction")

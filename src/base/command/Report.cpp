@@ -420,14 +420,14 @@ bool Report::Initialize()
       return false;
    
    parms.clear();
-   GmatBase *object;
+   GmatBase *object, *mapObj;
    
-   if (objectMap->find(rfName) == objectMap->end())
+   if ((mapObj = FindObject(rfName)) == NULL)
       throw CommandException(
          "Report command cannot find ReportFile named \"" + (rfName) +
          "\"\n");
    
-   reporter = ((ReportFile *)((*objectMap)[rfName]));
+   reporter = (ReportFile *)mapObj;
    if (reporter->GetTypeName() != "ReportFile")
       throw CommandException(
          "Object named \"" + rfName +
@@ -438,7 +438,7 @@ bool Report::Initialize()
    
    for (StringArray::iterator i = parmNames.begin(); i != parmNames.end(); ++i)
    {
-      object = ((*objectMap)[*i]);
+      object = FindObject(*i);
       if (object == NULL)
          throw CommandException("Object named " + (*i) + 
             " cannot be found for the Report command '" +

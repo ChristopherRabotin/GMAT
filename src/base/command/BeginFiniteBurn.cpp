@@ -432,15 +432,16 @@ bool BeginFiniteBurn::Initialize()
          ("BeginFiniteBurn::Initialize() entered. burnName=%s\n", burnName.c_str());
    #endif
    
+   GmatBase *mapObj = NULL;
    if (retval)
    {
       // Look up the maneuver object
-      if (objectMap->find(burnName) == objectMap->end()) 
+      if ((mapObj = FindObject(burnName)) == NULL) 
          throw CommandException("Unknown finite burn \"" + burnName + "\"\n");
-      if ((*objectMap)[burnName]->GetTypeName() != "FiniteBurn")
+      if (mapObj->GetTypeName() != "FiniteBurn")
          throw CommandException((burnName) + " is not a FiniteBurn\n");
 
-      maneuver = (FiniteBurn*)((*objectMap)[burnName]);
+      maneuver = (FiniteBurn*)mapObj;
 
       #ifdef DEBUG_BEGIN_MANEUVER
          MessageInterface::ShowMessage(
@@ -454,12 +455,12 @@ bool BeginFiniteBurn::Initialize()
       sats.clear();
       for (scName = satNames.begin(); scName != satNames.end(); ++scName)
       {
-         if (objectMap->find(*scName) == objectMap->end()) 
+         if ((mapObj = FindObject(*scName)) == NULL) 
             throw CommandException("Unknown SpaceObject \"" + (*scName) + "\"");
 
-         if ((*objectMap)[*scName]->GetType() != Gmat::SPACECRAFT)
+         if (mapObj->GetType() != Gmat::SPACECRAFT)
             throw CommandException((*scName) + " is not a Spacecraft");
-         sc = (Spacecraft*)(*objectMap)[*scName];
+         sc = (Spacecraft*)mapObj;
 
          #ifdef DEBUG_BEGIN_MANEUVER
             MessageInterface::ShowMessage(

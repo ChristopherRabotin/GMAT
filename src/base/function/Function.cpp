@@ -60,6 +60,8 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
+   // Functions are Global by default
+   isGlobal = true;
 
    // function path
    FileManager *fm = FileManager::Instance();

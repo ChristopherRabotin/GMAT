@@ -455,8 +455,9 @@ bool Target::SetRefObjectName(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 bool Target::Initialize()
 {
-   
-   if (objectMap->find(targeterName) == objectMap->end()) {
+   GmatBase *mapObj = NULL;
+   if ((mapObj = FindObject(targeterName)) == NULL) 
+   {
       std::string errorString = "Target command cannot find targeter \"";
       errorString += targeterName;
       errorString += "\"";
@@ -464,9 +465,9 @@ bool Target::Initialize()
    }
 
    // Clone the targeter for local use
-   targeter = (Solver *)((*objectMap)[targeterName])->Clone();
+   targeter = (Solver *)(mapObj->Clone());
    targeter->TakeAction("IncrementInstanceCount");
-   ((*objectMap)[targeterName])->TakeAction("IncrementInstanceCount");
+   mapObj->TakeAction("IncrementInstanceCount");
    
    if (targeter->GetStringParameter("ReportStyle") == "Debug")
       targeterInDebugMode = true;      
@@ -500,7 +501,8 @@ bool Target::Initialize()
 
    if (retval == true) {
       // Targeter specific initialization goes here:
-      if (objectMap->find(targeterName) == objectMap->end()) {
+      if (FindObject(targeterName) == NULL) 
+      {
          std::string errorString = "Target command cannot find targeter \"";
          errorString += targeterName;
          errorString += "\"";

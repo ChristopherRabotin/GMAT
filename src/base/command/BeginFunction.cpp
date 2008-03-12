@@ -681,22 +681,25 @@ bool BeginFunction::Initialize()
    #endif
    
    // Find the GmatFunction
-   if (objectMap->find(functionName) == objectMap->end())
+   GmatBase *mapObj;
+   if ((mapObj = FindObject(functionName)) == NULL)
    {
-      std::string names;
-      for (std::map<std::string, GmatBase*>::iterator i = objectMap->begin();
-           i != objectMap->end(); ++i)
-      {
-         names += "\n   '";
-         names += i->first;
-         names += "'";
-      }
+      //std::string names; // do we need to do al this?  WCS 2008.03.12
+      //for (std::map<std::string, GmatBase*>::iterator i = objectMap->begin();
+      //     i != objectMap->end(); ++i)
+      //{
+      //   names += "\n   '";
+      //   names += i->first;
+      //   names += "'";
+      //}
+      //throw CommandException("Error setting up GMAT function '" + functionName +
+      //   "'; there is no GmatFunction object with that name.\nHere's the list:" +
+      //   names);
       throw CommandException("Error setting up GMAT function '" + functionName +
-         "'; there is no GmatFunction object with that name.\nHere's the list:" +
-         names);
+         "'; there is no GmatFunction object with that name.\n");
    }
    
-   gfun = (GmatFunction *)((*objectMap)[functionName]);
+   gfun = (GmatFunction *) mapObj;
 
    if (gfun->GetTypeName() != "GmatFunction")
       throw CommandException("Object type Error: The object named '" +
@@ -734,13 +737,14 @@ bool BeginFunction::Initialize()
       MessageInterface::ShowMessage("Copying object %s to %s\n",
                inputObjects[i].c_str(), inputs[i].c_str());
 
-      if (objectMap->find(inputObjects[i]) == objectMap->end())
+      GmatBase *mapObj;
+      if ((mapObj = FindObject(inputObjects[i])) == NULL)
       {
          std::string errmsg = "Error initializing GmatFunction '";
          throw CommandException(errmsg + functionName + "': could not find " +
             "an object named '" + (inputObjects[i]) + "'");
       }
-      GmatBase *inobj = (*objectMap)[inputObjects[i]]->Clone();
+      GmatBase *inobj = mapObj;
                
       // Give the clone the local variable name
       inobj->SetName(inputs[i]);
@@ -802,6 +806,23 @@ bool BeginFunction::Initialize()
             SetRefObject(obj, obj->GetType(), obj->GetName());
       }
    }
+   for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
+   {
+      obj = omi->second;
+      // Set J2000 Body for all SpacePoint derivatives before anything else
+      if (obj->IsOfType(Gmat::PARAMETER))
+      {
+         SetRefObject(obj, obj->GetType(), obj->GetName());
+      }
+      if (obj->IsOfType(Gmat::COORDINATE_SYSTEM))
+      {
+         std::string csName = obj->GetName();
+         if ((csName == "EarthMJ2000Eq") ||
+             (csName == "EarthMJ2000Ec") ||
+             (csName == "EarthFixed"))
+            SetRefObject(obj, obj->GetType(), obj->GetName());
+      }
+   }
 
    ObjectArray newObj;
    ObjectArray newParam;
@@ -816,13 +837,13 @@ bool BeginFunction::Initialize()
 //      obj->GetName().c_str(), obj->GetTypeName().c_str());
 
 
-      if ((objectMap->find(obj->GetName()) == objectMap->end()) &&
+      if (((FindObject(obj->GetName())) == NULL) &&
          (obj->GetType() != Gmat::PARAMETER))
       {
 //        MessageInterface::ShowMessage("adding obj to obj array\n");
         newObj.push_back(obj);
       }
-      else if ((objectMap->find(obj->GetName()) == objectMap->end()) &&
+      else if (((FindObject(obj->GetName())) == NULL) &&
          (obj->GetType() == Gmat::PARAMETER))
       {
 //        MessageInterface::ShowMessage("adding obj to param array\n");
@@ -941,11 +962,12 @@ bool BeginFunction::Initialize()
       {
          // Check to see if it is a GmatFunction
          std::string funName = cmd->GetStringParameter("FunctionName");
-         if (objectMap->find(funName) == objectMap->end())
+         GmatBase *mapObj;
+         if ((mapObj = FindObject(funName)) == NULL)
             throw CommandException("The GmatFunction '" + functionName +
                "' references the function '" + funName +
                "', which cannot be found.");
-         GmatFunction *fun = (GmatFunction*)(*objectMap)[funName];
+         GmatFunction *fun = (GmatFunction*) mapObj;
          if (fun->GetTypeName() == "GmatFunction")
          {
 //            /// @todo Make the GmatFunction file name handling more robust
@@ -1031,7 +1053,7 @@ bool BeginFunction::Execute()
       #endif
       GmatBase *inObj, *localObj;
       
-      inObj = (*objectMap)[inputObjects[i]];
+      inObj = FindObject(inputObjects[i]);
       localObj = localMap[inputs[i]];
 
       // For now just copy select objects
@@ -1071,10 +1093,11 @@ SpacePoint* BeginFunction::FindSpacePoint(const std::string &spName)
 
    if (sp == NULL)
    {
-      if (objectMap->find(spName) != objectMap->end())
+      GmatBase *mapObj;
+      if ((mapObj = FindObject(spName)) != NULL)
       {
-         if ((*objectMap)[spName]->IsOfType(Gmat::SPACE_POINT))
-            sp = (SpacePoint*)((*objectMap)[spName]);
+         if (mapObj->IsOfType(Gmat::SPACE_POINT))
+            sp = (SpacePoint*)mapObj;
       }
    }
 
@@ -1314,10 +1337,10 @@ void BeginFunction::InitializeInternalObjects()
 //------------------------------------------------------------------------------
 void BeginFunction::SetRefFromName(GmatBase *obj, const std::string &oName)
 {
-   if (objectMap->find(oName) != objectMap->end())
+   GmatBase *mapObj;
+   if ((mapObj = FindObject(oName)) != NULL)
    {
-      GmatBase *refObj = (*objectMap)[oName];
-      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
+      obj->SetRefObject(mapObj, mapObj->GetType(), mapObj->GetName());
    }
    else
    {

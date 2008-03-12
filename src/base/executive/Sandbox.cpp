@@ -657,6 +657,7 @@ bool Sandbox::Initialize()
       #endif
          
       current->SetObjectMap(&objectMap);
+      current->SetGlobalObjectMap(&globalObjectMap);
       current->SetSolarSystem(solarSys);
       current->SetTransientForces(&transientForces);
 

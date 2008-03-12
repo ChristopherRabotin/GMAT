@@ -520,15 +520,16 @@ bool Maneuver::Initialize(void)
 {
    GmatCommand::Initialize();
 
-   if (objectMap->find(burnName) == objectMap->end())
+   GmatBase *mapObj = NULL;
+   if ((mapObj = FindObject(burnName)) == NULL)
       throw CommandException("Maneuver command cannot find Burn");
-   burn = (Burn *)((*objectMap)[burnName]);
+   burn = (Burn *)mapObj;
    if (!burn)
       return false;
     
-   if (objectMap->find(satName) == objectMap->end())
+   if ((mapObj = FindObject(satName)) == NULL)
       throw CommandException("Maneuver command cannot find Spacecraft");
-   sat = (Spacecraft *)((*objectMap)[satName]);
+   sat = (Spacecraft *)mapObj;
    if (!sat)
       return false;
     

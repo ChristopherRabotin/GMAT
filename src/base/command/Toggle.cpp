@@ -194,9 +194,13 @@ bool Toggle::Initialize()
    Subscriber *sub;
    subs.clear();
    
-   for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) {
-      if ((*objectMap).find(*s) != objectMap->end()) {
-         sub = (Subscriber *)(*objectMap)[*s];
+   GmatBase *mapObj = NULL;
+   
+   for (StringArray::iterator s = subNames.begin(); s != subNames.end(); ++s) 
+   {
+      if ((mapObj = FindObject(*s)) != NULL) 
+      {
+         sub = (Subscriber *)mapObj;
          if (sub) {
             subs.push_back(sub);
          }

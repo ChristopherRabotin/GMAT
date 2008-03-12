@@ -216,7 +216,7 @@ bool Save::Initialize()
       MessageInterface::ShowMessage("   objName=%s\n", (*i).c_str());
       #endif
       
-      if (objectMap->find(*i) == objectMap->end())
+      if (FindObject(*i) == NULL)
       {
          if (solarSys)
          {
@@ -249,7 +249,7 @@ bool Save::Initialize()
       }
       else
       {
-         objArray.push_back((*objectMap)[*i]);
+         objArray.push_back(FindObject(*i));
       }
       
       UpdateOutputFileNames(index, *i);
