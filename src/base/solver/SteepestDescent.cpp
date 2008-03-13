@@ -49,6 +49,9 @@ SteepestDescent::PARAMETER_TYPE[SteepestDescentParamCount - SolverParamCount] =
 SteepestDescent::SteepestDescent(const std::string &name) :
    Optimizer      ("SteepestDescent", name)
 {
+   objectiveFnName = "SDObjective";
+   tolerance       = 1.0e-5;
+   maxIterations   = 200;
 }
 
 

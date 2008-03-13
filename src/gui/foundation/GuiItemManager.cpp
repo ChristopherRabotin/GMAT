@@ -4024,7 +4024,7 @@ void GuiItemManager::UpdateSolverList()
    {
       // check for Optimizer
       obj = theGuiInterpreter->GetConfiguredObject(items[i]);
-      if (obj->GetTypeName() == "FminconOptimizer")
+      if (obj->IsOfType("Optimizer"))
       {
          theOptimizerList.Add(items[i].c_str());
          

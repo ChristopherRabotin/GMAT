@@ -781,42 +781,44 @@ bool Vary::InterpretAction()
          "Vary:  setting initialValueName to %s\n", initialValueName.c_str());
    #endif
    
-   std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
-   // Now deal with the settable parameters
-   //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ",", false);
-   currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", true);
-   
-   #ifdef DEBUG_VARY_PARSING
-      MessageInterface::ShowMessage(
-         "Vary: After SeparateBrackets, current chunks = \n");
-      for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
-         MessageInterface::ShowMessage("   %s\n",
-                                       currentChunks[jj].c_str());
-   #endif
-   
-   // currentChunks now holds all of the pieces - no need for more separation  
-   
-   for (StringArray::iterator i = currentChunks.begin(); 
-        i != currentChunks.end(); ++i)
+   if (currentChunks.size() > 1)
    {
-      bool isOK = SeparateEquals(*i, lhs, rhs, true);
-      #ifdef DEBUG_VARY_PARSING
-         MessageInterface::ShowMessage("Setting Vary properties\n");
-         MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
-      #endif
-      if (!isOK || lhs.empty() || rhs.empty())
-         throw CommandException("The setting \"" + lhs + 
-            "\" is missing the \"=\" operator or a value required for a " + typeName + 
-            " command.\n");
+      std::string noSpaces     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
+      // Now deal with the settable parameters
+      //currentChunks = parser.SeparateBrackets(currentChunks[1], "{}", ",", false);
+      currentChunks = parser.SeparateBrackets(noSpaces, "{}", ",", true);
       
-      if (IsSettable(lhs))
-         SetStringParameter(GetParameterID(lhs), rhs);
-      else
-         throw CommandException("The setting \"" + lhs + 
-            "\" is not a valid setting for a " + typeName + 
-            " command.\n");
+      #ifdef DEBUG_VARY_PARSING
+         MessageInterface::ShowMessage(
+            "Vary: After SeparateBrackets, current chunks = \n");
+         for (Integer jj = 0; jj < (Integer) currentChunks.size(); jj++)
+            MessageInterface::ShowMessage("   %s\n",
+                                          currentChunks[jj].c_str());
+      #endif
+      
+      // currentChunks now holds all of the pieces - no need for more separation  
+      
+      for (StringArray::iterator i = currentChunks.begin(); 
+           i != currentChunks.end(); ++i)
+      {
+         bool isOK = SeparateEquals(*i, lhs, rhs, true);
+         #ifdef DEBUG_VARY_PARSING
+            MessageInterface::ShowMessage("Setting Vary properties\n");
+            MessageInterface::ShowMessage("   \"%s\" = \"%s\"\n", lhs.c_str(), rhs.c_str());
+         #endif
+         if (!isOK || lhs.empty() || rhs.empty())
+            throw CommandException("The setting \"" + lhs + 
+               "\" is missing the \"=\" operator or a value required for a " + typeName + 
+               " command.\n");
+         
+         if (IsSettable(lhs))
+            SetStringParameter(GetParameterID(lhs), rhs);
+         else
+            throw CommandException("The setting \"" + lhs + 
+               "\" is not a valid setting for a " + typeName + 
+               " command.\n");
+      }
    }
-   
    return true;
 }
 
