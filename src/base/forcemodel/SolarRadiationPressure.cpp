@@ -50,6 +50,8 @@
 //#define DEBUG_SOLAR_RADIATION_PRESSURE
 //#define DEBUG_SOLAR_RADIATION_PRESSURE_TIMESHADOW
 
+#define SPEED_OF_LIGHT 299792458.0
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -116,8 +118,8 @@ SolarRadiationPressure::SolarRadiationPressure(const std::string &name) :
    forceVector         (NULL),
    sunRadius           (6.96e5),
    hasMoons            (false),
-   flux                (1367.0),               // W/m^2, IERS 1996
-   fluxPressure        (flux / 299792458.0),   // converted to N/m^2
+   flux                (1367.0),                  // W/m^2, IERS 1996
+   fluxPressure        (flux / SPEED_OF_LIGHT),   // converted to N/m^2
    sunDistance         (149597870.691),
    nominalSun          (149597870.691),
    bodyIsTheSun        (false)
@@ -372,11 +374,13 @@ Real SolarRadiationPressure::SetRealParameter(const Integer id, const Real value
    if (id == FLUX)
    {
       flux = value;
+      fluxPressure = flux / SPEED_OF_LIGHT;
       return flux;
    }
    if (id == FLUX_PRESSURE)
    {
       fluxPressure = value;
+      flux = fluxPressure * SPEED_OF_LIGHT;
       return fluxPressure;
    }
    if (id == SUN_DISTANCE)
