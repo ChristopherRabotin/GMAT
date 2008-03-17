@@ -113,6 +113,7 @@ OBJECTS = \
     command/CommandUtil.o \
     command/ClearPlot.o \
     command/ConditionalBranch.o \
+    command/Create.o \
     command/Else.o \
     command/EndFiniteBurn.o \
     command/EndFor.o \
@@ -123,7 +124,9 @@ OBJECTS = \
     command/EndTarget.o \
     command/EndWhile.o \
     command/For.o \
+    command/Global.o \
     command/If.o \
+    command/ManageObject.o \
     command/Maneuver.o \
     command/Minimize.o \
     command/NonlinearConstraint.o \

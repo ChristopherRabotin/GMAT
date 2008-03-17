@@ -55,6 +55,7 @@
 #include "ClearPlot.hpp"      // for ClearPlot command
 #include "PenUp.hpp"          // for PenUp command
 #include "PenDown.hpp"        // for PenDown command
+#include "Global.hpp"
 
 
 //---------------------------------
@@ -146,6 +147,8 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new PenUp;
     else if (ofType == "PenDown")
         return new PenDown;
+    else if (ofType == "Global")
+        return new Global;
    // add more here .......
    else 
    {
@@ -203,6 +206,7 @@ CommandFactory::CommandFactory() :
       creatables.push_back("ClearPlot");
       creatables.push_back("PenUp");
       creatables.push_back("PenDown");
+      creatables.push_back("Global");
    }
 }
 
@@ -270,6 +274,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("ClearPlot");
       creatables.push_back("PenUp");
       creatables.push_back("PenDown");
+      creatables.push_back("Global");
    }
 }
 
