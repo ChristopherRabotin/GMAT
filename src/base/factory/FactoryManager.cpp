@@ -620,11 +620,10 @@ Gmat::ObjectType FactoryManager::GetBaseTypeOf(const std::string &typeName)
    // Special case for the "Create Propagator" line - do we want this?
    //if (typeName == "Propagator") return Gmat::PROP_SETUP;
    StringArray listByType;
-   unsigned int sz = -1;
    for (int ii = Gmat::SPACECRAFT; ii < Gmat::UNKNOWN_OBJECT; ii++)
    {
       listByType = GetListOfItems((Gmat::ObjectType)ii);
-      sz = listByType.size();
+      unsigned int sz = listByType.size();
       for (unsigned int jj = 0; jj < sz; jj++)
          if (listByType.at(jj) == typeName)  return (Gmat::ObjectType)ii;
    }
