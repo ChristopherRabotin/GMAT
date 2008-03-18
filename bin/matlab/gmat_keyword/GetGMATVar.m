@@ -11,5 +11,10 @@ if (gmatChannel == 0)
    disp('channel is not valid');
 else
    tempdata = Request(gmatChannel, var);
-   data = eval(tempdata);
+   try % Extract numeric data
+       data = eval(tempdata); 
+   catch % Extract string data
+       tempdata2 = tempdata(2:size(tempdata,2)-1); % Strip brackets from tempdata
+       data = tempdata2;
+   end
 end
