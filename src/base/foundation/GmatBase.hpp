@@ -338,6 +338,7 @@ public:
    static const std::string  PARAM_TYPE_STRING[Gmat::TypeCount];
    /// String mappings for the GMAT object types
    static const std::string  OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1];
+   static const bool         AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1];
    
    /// Method to return the current number of instantiated objects
    static Integer          GetInstanceCount();

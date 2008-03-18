@@ -92,6 +92,19 @@ GmatBase::OBJECT_TYPE_STRING[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] =
    "Hardware",        "CoordinateSystem", "AxisSystem",    "Attitude",
    "UnknownObject"
 };
+const bool         
+GmatBase::AUTOMATIC_GLOBAL_FLAGS[Gmat::UNKNOWN_OBJECT - Gmat::SPACECRAFT+1] = 
+{
+   false,             false,              false,           false,
+   false,             false,              false,           false,
+   false,             false,              false,           false,
+   false,             false,              false,           false,
+   false,             false,              false,           false,
+   false,             false,              false,           false,
+   true,              true,               false,           false,
+   false,             true,               false,           false,
+   false
+};
 
 
 /// initialize the count of instances
@@ -121,7 +134,6 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
    instanceName      (nomme),
    type              (typeId),
    ownedObjectCount  (0),
-   isGlobal          (false),
    callbackExecuting (false),
    commentLine       (""),
    inlineComment     (""),
@@ -153,6 +165,9 @@ GmatBase::GmatBase(const Gmat::ObjectType typeId, const std::string &typeStr,
          + typeName +  "\" is not an allowed value. "
          "The allowed values are: [%s]";
    }
+   
+   // Set the isGlobal flag appropriately
+   isGlobal = AUTOMATIC_GLOBAL_FLAGS[type - Gmat::SPACECRAFT];
    
    // one more instance - add to the instanceCount
    ++instanceCount;
