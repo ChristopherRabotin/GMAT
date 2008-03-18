@@ -33,6 +33,12 @@ public:
    Create(const Create &cr);
    Create&        operator=(const Create &cr);
    
+   // Parameter access methods - overridden from GmatBase
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
    virtual bool         SetStringParameter(const Integer id, 

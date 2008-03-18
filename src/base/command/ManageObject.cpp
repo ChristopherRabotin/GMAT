@@ -100,6 +100,39 @@ ManageObject& ManageObject::operator=(const ManageObject &mo)
    return *this;
 }
 
+// Parameter access methods - overridden from GmatBase
+std::string ManageObject::GetParameterText(const Integer id) const
+{
+   if (id >= GmatCommandParamCount && id < ManageObjectParamCount)
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
+   return GmatCommand::GetParameterText(id);
+}
+
+Integer ManageObject::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatCommandParamCount; i < ManageObjectParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
+   
+   return GmatCommand::GetParameterID(str);
+}
+
+Gmat::ParameterType ManageObject::GetParameterType(const Integer id) const
+{
+   if (id >= GmatCommandParamCount && id < ManageObjectParamCount)
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
+      
+   return GmatCommand::GetParameterType(id);
+}
+
+std::string ManageObject::GetParameterTypeString(const Integer id) const
+{
+   return GmatCommand::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
 std::string ManageObject::GetStringParameter(const Integer id) const
 {
    return GmatCommand::GetStringParameter(id);

@@ -106,6 +106,39 @@ Create& Create::operator=(const Create &cr)
    return *this;
 }
 
+// Parameter access methods - overridden from GmatBase
+std::string Create::GetParameterText(const Integer id) const
+{
+   if (id >= ManageObjectParamCount && id < CreateParamCount)
+      return PARAMETER_TEXT[id - ManageObjectParamCount];
+   return ManageObject::GetParameterText(id);
+}
+
+Integer Create::GetParameterID(const std::string &str) const
+{
+   for (Integer i = ManageObjectParamCount; i < CreateParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - ManageObjectParamCount])
+         return i;
+   }
+   
+   return ManageObject::GetParameterID(str);
+}
+
+Gmat::ParameterType Create::GetParameterType(const Integer id) const
+{
+   if (id >= ManageObjectParamCount && id < CreateParamCount)
+      return PARAMETER_TYPE[id - ManageObjectParamCount];
+      
+   return ManageObject::GetParameterType(id);
+}
+
+std::string Create::GetParameterTypeString(const Integer id) const
+{
+   return ManageObject::PARAM_TYPE_STRING[GetParameterType(id)];
+}
+
+
 std::string Create::GetStringParameter(const Integer id) const
 {
    if (id == OBJECT_TYPE)
@@ -210,6 +243,11 @@ bool Create::Initialize()
       std::string ex = "Too many reference objects of type """ + objType;
       ex += """ set for Create command.\n";
       throw CommandException(ex);
+   }
+   // remove the array indices from the names if necessary
+   if (objType == "Array")
+   {
+      // ******* todo **********
    }
    Integer numNames = (Integer) objectNames.size();
    creations.at(0)->SetName(objectNames.at(0));
