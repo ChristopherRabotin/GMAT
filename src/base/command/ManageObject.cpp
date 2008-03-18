@@ -100,6 +100,59 @@ ManageObject& ManageObject::operator=(const ManageObject &mo)
    return *this;
 }
 
+std::string ManageObject::GetStringParameter(const Integer id) const
+{
+   return GmatCommand::GetStringParameter(id);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID and the index into the array.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <index> index into the StringArray parameter.
+ *
+ * @exception <CommandException> thrown if value is out of range
+ *
+ * @return  string value at index 'index'.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ManageObject::GetStringParameter(const Integer id,
+                                             const Integer index) const
+{
+   if (id == OBJECT_NAMES)
+   {
+      if ((index < 0) || (index >= ((Integer) objectNames.size())))
+         throw CommandException(
+               "Index out of bounds when attempting to return object name\n");
+      return objectNames.at(index);
+    }
+   return GmatCommand::GetStringParameter(id, index);
+}
+
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const std::string &label, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * string label and the index into the array.
+ *
+ * @param <label> label for the requested parameter.
+ * @param <index> index into the StringArray parameter.
+ *
+ * @return  string value at index 'index'.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string ManageObject::GetStringParameter(const std::string &label,
+                                             const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
 
 //------------------------------------------------------------------------------
 //  bool  SetStringParameter(const Integer id, const std::string value)
@@ -131,37 +184,61 @@ bool ManageObject::SetStringParameter(const Integer id,
             throw CommandException(ex);
          }
       objectNames.push_back(value);
+      return true;
     }
    return GmatCommand::SetStringParameter(id, value);
 }
 
 //------------------------------------------------------------------------------
-//  std::string  GetStringParameter(const Integer id, const Integer index)
+//  bool  SetStringParameter(const std::string &label, const std::string value)
 //------------------------------------------------------------------------------
 /**
- * This method returns the string parameter value, given the input
- * parameter ID and the index into the array.
+ * This method sets the string parameter value, given the input
+ * parameter label.
  *
- * @param <id> ID for the requested parameter.
- * @param <index> index into the StringArray parameter.
+ * @param <label> label for the requested parameter.
+ * @param <value> string value for the requested parameter.
  *
- * @exception <CommandException> thrown if value is out of range
+ * @exception <CommandException> thrown if value is already in the list.
  *
- * @return  string value at index 'index'.
+ * @return  success flag.
  *
  */
 //------------------------------------------------------------------------------
-std::string ManageObject::GetStringParameter(const Integer id,
-                           const Integer index) const
+bool ManageObject::SetStringParameter(const std::string &label, 
+                                      const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+bool ManageObject::SetStringParameter(const Integer id, 
+                                      const std::string &value,
+                                      const Integer index)
 {
    if (id == OBJECT_NAMES)
    {
-      if ((index < 0) || (index >= ((Integer) objectNames.size())))
+      Integer sz = objectNames.size();
+      if (index < 0)
          throw CommandException(
-               "Index out of bounds when attempting to return object name\n");
-      return objectNames.at(index);
-    }
-   return GmatCommand::GetStringParameter(id, index);
+               "Index of object name array out of bounds for ManageObject command.\n");
+      if (index > sz)
+         throw CommandException(
+               "Missing elements in Object Name list for ManageObject command.\n");
+      // push it onto the end of the list
+      if (index == sz) objectNames.push_back(value);
+      // or replace one of the already-existing names
+      else
+         objectNames.at(index) = value;
+      return true;
+   }
+   return GmatCommand::SetStringParameter(id, value, index);
+}
+
+bool ManageObject::SetStringParameter(const std::string &label, 
+                                      const std::string &value,
+                                      const Integer index)
+{
+   return SetStringParameter(GetParameterID(label),value,index);
 }
 
 //------------------------------------------------------------------------------
@@ -185,6 +262,31 @@ ManageObject::GetStringArrayParameter(const Integer id) const
       return objectNames;
    }
    return GmatCommand::GetStringArrayParameter(id);
+}
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
+/**
+ * Method that initializes the internal data structures.
+ * 
+ * @return true if initialization succeeds.
+ */
+//------------------------------------------------------------------------------
+bool ManageObject::Initialize()
+{
+   #ifdef DEBUG_MANAGE_OBJECT
+      MessageInterface::ShowMessage("ManageObject::Initialize() entered\n");
+   #endif
+      
+   GmatCommand::Initialize();
+   Integer numNames = (Integer) objectNames.size();
+   if (numNames <= 0)
+   {
+      std::string ex = "No objects listed for ManageObject command.\n";
+      throw CommandException(ex);
+   }
+   return true;
 }
 
 //---------------------------------------------------------------------------
@@ -219,6 +321,7 @@ bool ManageObject::MakeGlobal(const std::string &objName)
       mapObj = (*objectMap)[objName];
       objectMap->erase(objName);
       globalObjectMap->insert(std::make_pair(objName,mapObj));
+      mapObj->SetIsGlobal(true);
    }
    else
    {

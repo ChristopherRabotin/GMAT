@@ -33,6 +33,12 @@ public:
    Create(const Create &cr);
    Create&        operator=(const Create &cr);
    
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
@@ -46,14 +52,13 @@ protected:
    enum
    {
       OBJECT_TYPE = ManageObjectParamCount, 
-      CREATIONS,
       CreateParamCount
    };
    static const std::string PARAMETER_TEXT[CreateParamCount - ManageObjectParamCount];
 
    static const Gmat::ParameterType PARAMETER_TYPE[CreateParamCount - ManageObjectParamCount];
 
-   std::string objectType;
+   std::string objType;
    ObjectArray creations; 
 };
 

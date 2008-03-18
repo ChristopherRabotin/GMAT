@@ -34,12 +34,25 @@ public:
    ManageObject(const ManageObject &mo);
    ManageObject&        operator=(const ManageObject &mo);
    
-   virtual bool         SetStringParameter(const Integer id, 
-                                           const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
+
+   bool                 Initialize();
 
 protected:
    enum

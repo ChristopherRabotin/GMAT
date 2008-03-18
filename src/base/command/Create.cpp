@@ -30,14 +30,12 @@ const std::string
 Create::PARAMETER_TEXT[CreateParamCount - ManageObjectParamCount] =
 {
       "ObjectType",
-      "Creations",
 };
 
 const Gmat::ParameterType
 Create::PARAMETER_TYPE[CreateParamCount - ManageObjectParamCount] =
 {
       Gmat::STRING_TYPE,
-      Gmat::OBJECTARRAY_TYPE,
 };
 
 //------------------------------------------------------------------------------
@@ -62,6 +60,9 @@ Create::Create() :
 //------------------------------------------------------------------------------
 Create::~Create()
 {
+   creations.clear();
+   // assuming objects in this list will be deleted in the Sandbox as members 
+   // of the LOS or GOS
 }
 
 
@@ -76,8 +77,8 @@ Create::~Create()
 //------------------------------------------------------------------------------
 Create::Create(const Create &cr) :
    ManageObject(cr),
-   objectType  (cr.objectType),
-   creations   (cr.creations)
+   objType  (cr.objType),
+   creations(cr.creations)
 {
 }
 
@@ -98,22 +99,53 @@ Create& Create::operator=(const Create &cr)
    if (&cr != this)
    {
       ManageObject::operator=(cr);
-      objectType = cr.objectType;
+      objType    = cr.objType;
       creations  = cr.creations;
    }
    
    return *this;
 }
 
+std::string Create::GetStringParameter(const Integer id) const
+{
+   if (id == OBJECT_TYPE)
+   {
+      return objType;
+   }
+   return ManageObject::GetStringParameter(id);
+}
+
+std::string Create::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+bool Create::SetStringParameter(const Integer id, 
+                                const std::string &value)
+{
+   if (id == OBJECT_TYPE)
+   {
+      objType = value;
+      return true;
+   }
+   return ManageObject::SetStringParameter(id, value);
+}
+
+bool Create::SetStringParameter(const std::string &label, 
+                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label),value);
+}
+
+
 GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
                                const std::string &name)
 {
-   // Need to check type here in case requested type is not
-   // of the correct type
    Integer sz = (Integer) creations.size();
    for (Integer ii=0; ii < sz; ii++)
-      if ((creations.at(ii))->GetName() == name)
-         return creations.at(ii);
+      if (((creations.at(ii))->GetType() == type) &&
+          ((creations.at(ii))->GetName() == name))
+            return creations.at(ii);
    return NULL;
 }
 
@@ -122,9 +154,11 @@ bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    if (creations.size() > 0)
       throw CommandException(
-            "Reference object for Create command already set,\n"); 
-//   if ((!GmatStringUtil::IsBlank(objectType)) &&
-//       ... need to check type match here ...
+            "Reference object for Create command already set.\n"); 
+   if ((!GmatStringUtil::IsBlank(objType)) &&
+       !(obj->IsOfType(objType)))
+      throw CommandException(
+            "Reference object for Create command is not of expected type.\n");
    creations.push_back(obj);
    return true;
 }
@@ -163,22 +197,23 @@ bool Create::Initialize()
    ManageObject::Initialize();
    // Clone the reference object to create as many of that requested
    // type of object as needed
+   if (GmatStringUtil::IsBlank(objType))
+      throw CommandException("Object type not set for Create command.\n");
    if (creations.size() <= 0)
    {
-      std::string ex = "No reference object of type """ + objectType;
-      ex += """ set for Create command.\n ";
+      std::string ex = "No reference object of type """ + objType;
+      ex += """ set for Create command.\n";
       throw CommandException(ex);
    }
    if (creations.size() > 1)
    {
-      std::string ex = "Too many reference objects of type """ + objectType;
-      ex += """ set for Create command.\n ";
+      std::string ex = "Too many reference objects of type """ + objType;
+      ex += """ set for Create command.\n";
       throw CommandException(ex);
    }
-   // set the name for the first, reference, object
+   Integer numNames = (Integer) objectNames.size();
    creations.at(0)->SetName(objectNames.at(0));
    // clone the other needed objects from the reference one
-   Integer numNames = (Integer) objectNames.size();
    for (Integer jj = 1; jj < numNames; jj++)
    {
       creations.push_back((creations.at(0))->Clone());
@@ -202,6 +237,29 @@ bool Create::Initialize()
 bool Create::Execute()
 {
    bool isOK = true;
-   // ............ todo
+
+   //put the objects onto the LOS if not already there
+   GmatBase *mapObj = NULL;
+   for (Integer ii = 0; ii < (Integer) creations.size(); ii++)
+   {
+      // if it is already in the LOS, make sure the types match
+      if (objectMap->find(objectNames.at(ii)) != objectMap->end())
+      {
+         mapObj = (*objectMap)[objectNames.at(ii)];
+         if (!mapObj->IsOfType(objType))
+         {
+            std::string ex = "Object of name """ + objectNames.at(ii);
+            ex += """, but of a different type, already exists in Local Object Store\n";
+            throw CommandException(ex);
+         }
+      }
+      // put it into the LOS
+      objectMap->insert(std::make_pair(objectNames.at(ii),creations.at(ii)));
+      // if the type of object created by this Create command is an automatic
+      // global, move it to the GOS (an automatic global would have been 
+      // created with its isGlobal flag set to true
+      if ((creations.at(ii))->GetIsGlobal()) 
+         isOK += MakeGlobal(objectNames.at(ii));
+   }
    return isOK;
 }
