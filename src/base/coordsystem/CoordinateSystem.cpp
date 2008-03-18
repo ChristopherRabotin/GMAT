@@ -86,8 +86,6 @@ axes               (NULL)
    objectTypes.push_back(Gmat::COORDINATE_SYSTEM);
    objectTypeNames.push_back("CoordinateSystem");
    parameterCount = CoordinateSystemParamCount;
-   // Coordinate systems are Global by default
-   isGlobal = true;
    #ifdef DEBUG_CONSTRUCTION
       MessageInterface::ShowMessage("Now constructing CS %s of type %s\n",
          itsName.c_str(), itsType.c_str());
