@@ -604,6 +604,32 @@ const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType)
    return GetList(byType);
 }
 
+//------------------------------------------------------------------------------
+// Gmat::ObjectType GetBaseTypeOf(const std::string &typeName)
+//------------------------------------------------------------------------------
+/**
+ * Return the base type for the input string.
+ *
+ * @param <typeName> string type name.
+ *
+ * @return the base Gmat::ObjectType for this string type name.
+ */
+//------------------------------------------------------------------------------
+Gmat::ObjectType FactoryManager::GetBaseTypeOf(const std::string &typeName)
+{
+   // Special case for the "Create Propagator" line - do we want this?
+   //if (typeName == "Propagator") return Gmat::PROP_SETUP;
+   StringArray listByType;
+   unsigned int sz = -1;
+   for (int ii = Gmat::SPACECRAFT; ii < Gmat::UNKNOWN_OBJECT; ii++)
+   {
+      listByType = GetListOfItems((Gmat::ObjectType)ii);
+      sz = listByType.size();
+      for (unsigned int jj = 0; jj < sz; jj++)
+         if (listByType.at(jj) == typeName)  return (Gmat::ObjectType)ii;
+   }
+   return Gmat::UNKNOWN_OBJECT;
+}
 
 //------------------------------------------------------------------------------
 //  ~FactoryManager()
