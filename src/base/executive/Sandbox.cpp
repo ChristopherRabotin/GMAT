@@ -38,7 +38,7 @@
 //#define DEBUG_SANDBOX_INIT 1
 //#define DEBUG_SANDBOX_INIT_CS 1
 //#define DEBUG_SANDBOX_INIT_PARAM 1
-//#define DEBUG_SANDBOX_RUN 1
+//#define DEBUG_SANDBOX_RUN 2
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 //#define DEBUG_MODERATOR_CALLBACK
 //#define DEBUG_FM_INITIALIZATION
@@ -273,6 +273,10 @@ bool Sandbox::AddSolarSystem(SolarSystem *ss)
 #else
    MessageInterface::ShowMessage("Cloning the solar system in the Sandbox\n");
    solarSys = (SolarSystem*)(ss->Clone());
+
+   #ifdef DEBUG_SS_CLONNING
+   MessageInterface::ShowMessage("Sandbox cloned the solar system: %p\n", solarSys);
+   #endif
 #endif
    return true;
 }
@@ -359,8 +363,13 @@ bool Sandbox::SetPublisher(Publisher *pub)
 //------------------------------------------------------------------------------
 GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
 {
+   #ifdef DEBUG_INTERNAL_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::GetInternalObject() name=%s, type=%d\n", name.c_str(), type);
+   #endif
+   
    GmatBase* obj = NULL;
-
+   
    if (objectMap.find(name) != objectMap.end()) {
       obj = objectMap[name];
       if (type != Gmat::UNKNOWN_OBJECT)
@@ -374,17 +383,17 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
    }
    else {
       std::string errorStr = "Sandbox::GetInternalObject(" + name +
-                             "...) Could not find ";
+                             "...) Could not find \"";
       errorStr += name;
-      errorStr += " in the Sandbox.";
-
+      errorStr += "\" in the Sandbox.";
+      
       #ifdef DEBUG_SANDBOX_OBJECT_MAPS
          MessageInterface::ShowMessage("Here is the current object map:\n");
          for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
               i != objectMap.end(); ++i)
             MessageInterface::ShowMessage("   %s\n", i->first.c_str());
       #endif
-
+      
       throw SandboxException(errorStr);
    }
 
@@ -607,13 +616,13 @@ bool Sandbox::Initialize()
                "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
          #endif
-
+         
          BuildReferences(obj);
          param->Initialize();
       }
    }
-
-
+   
+   
    //MessageInterface::ShowMessage("=====> Initialize subscribers\n");
    // Now that the references are all set, handle the Subscribers
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
@@ -627,24 +636,21 @@ bool Sandbox::Initialize()
                "Sandbox::Initialize objTypeName = %s, objName = %s\n",
                obj->GetTypeName().c_str(), obj->GetName().c_str());
          #endif
-            
+         
          BuildReferences(obj);
          ((Subscriber*)obj)->SetInternalCoordSystem(internalCoordSys);
          ((Subscriber*)obj)->SetSolarSystem(solarSys);
-         
-         //if (obj->IsOfType("OpenGLPlot"))
-         //   obj->SetRefObject(solarSys, Gmat::SOLAR_SYSTEM, "");
          obj->Initialize();
       }
    }
-
-
+   
+   
    #if DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage(
          "Sandbox::Initialize() Initializing Commands...\n");
    #endif
-
-
+   
+   
    //MessageInterface::ShowMessage("=====> Initialize commands\n");
    // Initialize commands
    while (current)
@@ -720,7 +726,6 @@ bool Sandbox::Initialize()
    //MessageInterface::ShowMessage("=====> Initialize successful\n");
    return rv;
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -885,8 +890,8 @@ void Sandbox::BuildReferences(GmatBase *obj)
             ex.GetFullMessage() + "\n");
       #endif
    }
-
-
+   
+   
    // Next handle the array version
    try
    {
@@ -949,21 +954,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
             ex.GetFullMessage() + "\n");
       #endif
    }
-
-
-   // Temporary calls that will be removed once GetRefObjectName methods are
-   // completed.
-//   if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
-//      InitializeCoordinateSystem((CoordinateSystem *)obj);
-
-
-//   // Not sure if needed...
-//   if (obj->GetType() == Gmat::SPACECRAFT)
-//      ((Spacecraft *)obj)->SaveDisplay();
-
-
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -1126,7 +1117,8 @@ bool Sandbox::Execute()
 
    state = RUNNING;
    Gmat::RunState runState = Gmat::IDLE, currentState = Gmat::RUNNING;
-
+   GmatCommand *prev = NULL;
+   
    current = sequence;
    if (!current)
       return false;
@@ -1164,9 +1156,16 @@ bool Sandbox::Execute()
          }
          
          #if DEBUG_SANDBOX_RUN
-         MessageInterface::ShowMessage
-            ("Sandbox::Execution running %s\n   %s\n", current->GetTypeName().c_str(),
-             current->GetGeneratingString().c_str());
+         if (current != prev)
+         {
+            MessageInterface::ShowMessage
+               ("Sandbox::Execution running %s\n", current->GetTypeName().c_str());
+            
+            #if DEBUG_SANDBOX_RUN > 1
+            MessageInterface::ShowMessage
+               ("command = \n<%s>\n", current->GetGeneratingString().c_str());
+            #endif
+         }
          #endif
          
          if (currentState != runState)
@@ -1176,7 +1175,7 @@ bool Sandbox::Execute()
          }
          
          rv = current->Execute();
-                  
+         
          if (!rv)
          {
             std::string str = "\"" + current->GetTypeName() +
@@ -1184,6 +1183,8 @@ bool Sandbox::Execute()
                current->GetGeneratingString() + "\"\n";
             throw SandboxException(str);
          }
+
+         prev = current;
          current = current->GetNext();
       }
    }
@@ -1313,7 +1314,7 @@ void Sandbox::Clear()
    if (solarSys != NULL)
    {
       MessageInterface::ShowMessage
-         ("Deleting the solar system clone in the Sandbox\n");
+         ("Sandbox deleting the solar system clone: %p\n", solarSys);
       delete solarSys;
    }
    
