@@ -275,7 +275,8 @@ bool GuiInterpreter::IsParameter(const std::string &str)
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name,
-//                            const std::string &ownerName, const std::string &depName)
+//                            const std::string &ownerName, const std::string &depName
+//                            bool manage = true)
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to create a Parameter. We need this to create an array
@@ -283,8 +284,9 @@ bool GuiInterpreter::IsParameter(const std::string &str)
  * 
  * @param  type       Type of parameter requested
  * @param  name       Name for the parameter.
- * @param  ownerName  object name of parameter requested
- * @param  depName    Dependent object name of parameter requested
+ * @param  ownerName  object name of parameter requested ("")
+ * @param  depName    Dependent object name of parameter requested ("")
+ * @param  manage     true if created object to be added to configuration (true)
  * 
  * @return Pointer to the constructed Parameter.
  *
@@ -295,9 +297,10 @@ bool GuiInterpreter::IsParameter(const std::string &str)
 Parameter* GuiInterpreter::CreateParameter(const std::string &type, 
                                            const std::string &name,
                                            const std::string &ownerName,
-                                           const std::string &depName)
+                                           const std::string &depName,
+                                           bool manage)
 {
-   return theModerator->CreateParameter(type, name, ownerName, depName);
+   return theModerator->CreateParameter(type, name, ownerName, depName, manage);
 }
 
 

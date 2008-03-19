@@ -63,7 +63,8 @@ public:
    virtual Parameter* CreateParameter(const std::string &type,
                                       const std::string &name,
                                       const std::string &ownerName = "",
-                                      const std::string &depName = "");
+                                      const std::string &depName = "",
+                                      bool manage = true);
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
