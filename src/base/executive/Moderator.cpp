@@ -1725,17 +1725,18 @@ bool Moderator::IsParameter(const std::string &str)
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &type, const std::string &name)
+// Parameter* CreateParameter(const std::string &type, const std::string &name
 //                            const std::string &ownerName = "",
-//                            const std::string &depName = "");
+//                            const std::string &depName = "", bool manage = true)
 //------------------------------------------------------------------------------
 /**
  * Creates a parameter object by given type and name and add to configuration.
  *
  * @param <type> parameter type
  * @param <name> parameter name
- * @param <ownerName> parameter owner name
- * @param <depName> dependent object name
+ * @param <ownerName> parameter owner name ("")
+ * @param <depName> dependent object name ("")
+ * @param  manage  true if created object to be added to configuration (true)
  *
  * @return a parameter object pointer
  */
@@ -1743,7 +1744,8 @@ bool Moderator::IsParameter(const std::string &str)
 Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &name,
                                       const std::string &ownerName,
-                                      const std::string &depName)
+                                      const std::string &depName,
+                                      bool manage)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
@@ -1865,18 +1867,21 @@ Parameter* Moderator::CreateParameter(const std::string &type,
          }
       }
       
-      // Manage it if it is a named parameter
+      // Manage it if manage flag is true and it is a named parameter
       try
       {
-         bool oldFlag = theConfigManager->HasConfigurationChanged();
-         
-         if (param->GetName() != "")
-            theConfigManager->AddParameter(param);
-         
-         // if system paramter, set configuration changed to old flag.
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
-            theConfigManager->ConfigurationChanged(oldFlag);
-         
+         // check if object is to be managed (loj: 2008.03.18)
+         if (manage)
+         {
+            bool oldFlag = theConfigManager->HasConfigurationChanged();
+            
+            if (param->GetName() != "")
+               theConfigManager->AddParameter(param);
+            
+            // if system paramter, set configuration changed to old flag.
+            if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+               theConfigManager->ConfigurationChanged(oldFlag);
+         }
       }
       catch (BaseException &e)
       {
@@ -2656,22 +2661,39 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
 
 //GmatCommand
 //------------------------------------------------------------------------------
-// GmatCommand* InterpretGmatFunction(const std::string functionFilename)
+// GmatCommand* InterpretGmatFunction(const std::string fileName)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a function object pointer by given name.
  *
- * @param <functionFilename>  Full path and name of the GmatFunction file.
+ * @param <fileName>  Full path and name of the GmatFunction file.
  *
  * @return A command list that is executed to run the function.
  */
 //------------------------------------------------------------------------------
-GmatCommand* Moderator::InterpretGmatFunction(const std::string &functionFilename)
+GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 {
-   if (functionFilename == "")
+   if (fileName == "")
       return NULL;
    else
-      return theScriptInterpreter->InterpretGMATFunction(functionFilename);
+      return theScriptInterpreter->InterpretGmatFunction(fileName);
+}
+
+
+//------------------------------------------------------------------------------
+// GmatCommand* InterpretGmatFunction(Function *funct)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a function object pointer by given name.
+ *
+ * @param <funct>  The GmatFunction pointer
+ *
+ * @return A command list that is executed to run the function.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* Moderator::InterpretGmatFunction(Function *funct)
+{
+   return theScriptInterpreter->InterpretGmatFunction(funct);
 }
 
 

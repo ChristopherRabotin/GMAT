@@ -155,7 +155,8 @@ public:
    Parameter* CreateParameter(const std::string &type,
                               const std::string &name,
                               const std::string &ownerName = "",
-                              const std::string &depName = "");
+                              const std::string &depName = "",
+                              bool manage = true);
    Parameter* GetParameter(const std::string &name);
    
    // ForceModel
@@ -204,7 +205,7 @@ public:
    // StopCondition
    StopCondition* CreateStopCondition(const std::string &type,
                                       const std::string &name);
-
+   
    // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
                                 const std::string &name);
@@ -212,13 +213,14 @@ public:
    // MathNode
    MathNode* CreateMathNode(const std::string &type,
                             const std::string &name = "");
-
+   
    // AxisSystem
    Attitude* CreateAttitude(const std::string &type,
                             const std::string &name);
    
    // GmatCommand
-   GmatCommand* InterpretGmatFunction(const std::string &functionFilename);
+   GmatCommand* InterpretGmatFunction(const std::string &fileName);
+   GmatCommand* InterpretGmatFunction(Function *funct);
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name, bool &retFlag);
    GmatCommand* CreateDefaultCommand(const std::string &type,
