@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  TextEphemFile
 //------------------------------------------------------------------------------
@@ -62,9 +62,10 @@ TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
 {
    // create Interpolator
    mInterpolator = new CubicSplineInterpolator("InternalInterpolator", 6);
-
+   
    // rename data file name
-   filename = fileName + ".tempdata$$$";
+   //filename = fileName + ".tempdata$$$";
+   filename = fileName + ".data";
    mHeaderFileName = fileName;
    mEpochFormat = "";
    mCoordSysName = "";
@@ -79,8 +80,10 @@ TextEphemFile::TextEphemFile(const std::string &type, const std::string &name,
    mEpochSysId = 0;
    mIsGregorian = false;
    
-   //MessageInterface::ShowMessage
-   //   ("TextEphemFile() Constructor: mBufferSize=%d\n", mBufferSize);
+   #if DEBUG_EPHEM_FILE
+   MessageInterface::ShowMessage
+      ("TextEphemFile() Constructor: mBufferSize=%d\n", mBufferSize);
+   #endif
 }
 
 
@@ -121,13 +124,13 @@ TextEphemFile::TextEphemFile(const TextEphemFile &copy) :
    Integer i;
    for (i = 0; i < 7; i++)
       mColWidth[i] = copy.mColWidth[i];
-      
+   
    for (i = 0; i < 6; i++)
       mOutputVals[i] = copy.mOutputVals[i];
-      
+   
    for (i = 0; i < BUFFER_SIZE; i++)
    {
-           mTimeBuffer[i] = copy.mTimeBuffer[i];
+      mTimeBuffer[i] = copy.mTimeBuffer[i];
       mXposBuffer[i] = copy.mXposBuffer[i];
       mYposBuffer[i] = copy.mYposBuffer[i];
       mZposBuffer[i] = copy.mZposBuffer[i];
@@ -135,9 +138,11 @@ TextEphemFile::TextEphemFile(const TextEphemFile &copy) :
       mYvelBuffer[i] = copy.mYvelBuffer[i];
       mZvelBuffer[i] = copy.mZvelBuffer[i];
    }
-
-   //MessageInterface::ShowMessage
-   //   ("TextEphemFile() Copy Constructor: mBufferSize=%d\n", mBufferSize);   
+   
+   #if DEBUG_EPHEM_FILE
+   MessageInterface::ShowMessage
+      ("TextEphemFile() Copy Constructor: mBufferSize=%d\n", mBufferSize);
+   #endif
 }
 
 
@@ -190,8 +195,10 @@ TextEphemFile& TextEphemFile::operator=(const TextEphemFile& right)
       mZvelBuffer[i] = right.mZvelBuffer[i];
    }
 
-   //MessageInterface::ShowMessage
-   //   ("TextEphemFile() = operator: mBufferSize=%d\n", mBufferSize);
+   #if DEBUG_EPHEM_FILE
+   MessageInterface::ShowMessage
+      ("TextEphemFile() = operator: mBufferSize=%d\n", mBufferSize);
+   #endif
    
    return *this;
 }
@@ -411,7 +418,6 @@ bool TextEphemFile::Distribute(const Real * dat, Integer len)
    }
    
    // Skip if targeting
-   //Publisher *thePublisher = Publisher::Instance();
    if ((runstate == Gmat::TARGETING) || (runstate == Gmat::OPTIMIZING) ||
        (runstate == Gmat::SOLVING))
       return true;
@@ -548,7 +554,7 @@ void TextEphemFile::WriteToBuffer()
    }
    
    Real rval = -9999.999;
-
+   
    mTimeBuffer[BUFFER_SIZE - 1] = mCurrA1Mjd;
    
    #if DEBUG_EPHEMFILE_DATA
@@ -559,40 +565,40 @@ void TextEphemFile::WriteToBuffer()
    for (int i=1; i < mNumParams; i++)
    {
       // assuming all real parameters
-
+      
       rval = mParams[i]->EvaluateReal();
-
+      
       #if DEBUG_EPHEMFILE_DATA
       MessageInterface::ShowMessage
          ("TextEphemFile::WriteToBuffer() i=%d, rval=%f\n", i, rval);
       #endif
       
-      if (i == 1) //(mParams[i]->GetName() == "X")
+      if (i == 1)
       {
          mXposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[0] = rval;
       }
-      else if (i == 2) //(mParams[i]->GetName() == "Y")
+      else if (i == 2)
       {
          mYposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[1] = rval;
       }
-      else if (i == 3) //(mParams[i]->GetName() == "Z")
+      else if (i == 3)
       {
          mZposBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[2] = rval;
       }
-      else if (i == 4) //(mParams[i]->GetName() == "VX")
+      else if (i == 4)
       {
          mXvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[3] = rval;
       }
-      else if (i == 5) //(mParams[i]->GetName() == "VY")
+      else if (i == 5)
       {
          mYvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[4] = rval;
       }
-      else if (i == 6) //(mParams[i]->GetName() == "VZ")
+      else if (i == 6)
       {
          mZvelBuffer[BUFFER_SIZE - 1] = rval;
          mOutputVals[5] = rval;
@@ -646,9 +652,9 @@ bool TextEphemFile::IsTimeToWrite()
              "midpoint for time: %f\n   mTimeBuffer[0]=%f, mTimeBuffer[9]=%f\n",
              mOutputA1Mjd, mTimeBuffer[0], mTimeBuffer[9]);
          #endif
-
+         
          return false;
-       }
+      }
       
       if (midIndex <= startIndex)
          midIndex = startIndex+2;
@@ -860,7 +866,7 @@ void TextEphemFile::WriteEphemHeader()
       headerStream.close();
       return;
    }
-
+   
    char buffer[MAX_LINE_CHAR];
    
    // Append the data
