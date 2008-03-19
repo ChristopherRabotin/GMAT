@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 FileUtil
 //------------------------------------------------------------------------------
@@ -23,11 +23,196 @@
 #include "MessageInterface.hpp"
 #include "RealUtilities.hpp"       // for Abs()
 #include "StringUtil.hpp"          // for ToString()
+#include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
+
+#ifndef _MSC_VER  // if not Microsoft Visual C++
+#include <dirent.h>
+#endif
 
 using namespace std;
 using namespace GmatStringUtil;
 
 //#define DEBUG_COMPARE_REPORT 1
+
+//------------------------------------------------------------------------------
+// std::string GetPathSeparator()
+//------------------------------------------------------------------------------
+/**
+ * @return path separator; "/" or "\\" dependends on the platform
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetPathSeparator()
+{
+   std::string sep = "/";
+   
+   char *buffer;
+   buffer = getenv("OS");
+   if (buffer != NULL)
+   {
+      #ifdef DEBUG_FILE_UTIL
+      MessageInterface::ShowMessage
+         ("GmatFileUtil::GetPathSeparator() Current OS is %s\n", buffer);
+      #endif
+      
+      std::string osStr(buffer);
+      
+      if (osStr.find("Windows") != osStr.npos)
+         sep = "\\";
+   }
+   
+   return sep;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetCurrentPath()
+//------------------------------------------------------------------------------
+/*
+ * Note: This function calls getcwd() which is defined in <dirent>. There is a
+ *       problem compling with VC++ compiler, so until it is resolved, it will
+ *       always return blank if it is compiled with VC++ compiler.
+ *
+ * @return  The current working directory, generally the application path.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::GetCurrentPath()
+{
+   std::string currPath;
+   
+#ifndef _MSC_VER  // if not Microsoft Visual C++
+   char buffer[GmatFile::MAX_PATH_LEN];
+   getcwd(buffer, GmatFile::MAX_PATH_LEN);
+   currPath = buffer;
+#else
+   MessageInterface::ShowMessage
+      ("*** WARNING *** GmatFileUtil::GetCurrentPath() \n"
+       "Cannot compile getcwd() with MSVC, so jsut returning empty path\n");
+#endif
+   
+   return currPath;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ParsePathName(const std::string &fullPath)
+//------------------------------------------------------------------------------
+/*
+ * This function parses file name from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @return  The file name from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
+{
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParsePathName() fullPath=<%s>\n", fullPath.c_str());
+   
+   std::string filePath;
+   std::string::size_type lastSlash = fullPath.find_last_of("/\\");
+   
+   if (lastSlash != filePath.npos)
+      filePath = fullPath.substr(0, lastSlash+1);
+   
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParsePathName() returning <%s>\n", filePath.c_str());
+   
+   return filePath;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ParseFileName(const std::string &fullPath)
+//------------------------------------------------------------------------------
+/*
+ * This function parses file name from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @return  The file name from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
+{
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFileName() fullPath=<%s>\n", fullPath.c_str());
+   #endif
+   
+   std::string fileName = fullPath;
+   
+   std::string::size_type lastSlash = fileName.find_last_of("/\\");
+   if (lastSlash != fileName.npos)
+      fileName = fileName.substr(lastSlash+1);
+   
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFileName() returning <%s>\n", fileName.c_str());
+   #endif
+   
+   return fileName;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesDirectoryExist(const std::string &dirPath)
+//------------------------------------------------------------------------------
+/*
+ * Note: This function calls opendir() which is defined in <dirent>. There is a
+ *       problem compling with VC++ compiler, so until it is resolved, it will
+ *       always return false if it is compiled with VC++ compiler.
+ *
+ * @return  true  If directory exist, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
+{
+   if (dirPath == "")
+      return false;
+   
+   bool dirExist = false;
+   
+#ifndef _MSC_VER  // if not Microsoft Visual C++
+   DIR *dir = NULL;
+   dir = opendir(dirPath.c_str());
+   
+   if (dir != NULL)
+   {
+      dirExist = true; 
+      closedir(dir);
+   }
+#else
+   MessageInterface::ShowMessage
+      ("*** WARNING *** GmatFileUtil::DoesDirectoryExist() \n"
+       "Cannot compile opendir() with MSVC, so jsut returning false\n");
+#endif
+   
+   return dirExist;
+}
+
+
+//------------------------------------------------------------------------------
+// bool DoesFileExist(const std::string &filename)
+//------------------------------------------------------------------------------
+bool GmatFileUtil::DoesFileExist(const std::string &filename)
+{
+   FILE * pFile;
+   pFile = fopen (filename.c_str(), "rt+");
+   
+   if (pFile!=NULL)
+   {
+      fclose (pFile);
+      return true;
+   }
+   else
+   {
+      return false;
+   }
+}
+
 
 //------------------------------------------------------------------------------
 // StringArray& Compare(const std::string &filename1, const std::string &filename2,

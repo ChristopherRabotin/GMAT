@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 FileUtil
 //------------------------------------------------------------------------------
@@ -13,8 +13,8 @@
 // Created: 2005/12/12
 //
 /**
- * This file provides methods to compare two output files. The compare summary
- * is written to the log file.
+ * This file provides methods to query file information and methods to compare
+ * two output files. The compare summary is written to the log file.
  */
 //------------------------------------------------------------------------------
 #ifndef FileUtil_hpp
@@ -27,6 +27,13 @@ namespace GmatFileUtil
 {
    const Integer BUFFER_SIZE = 4096;
    static Real CompareAbsTol = 1.0e-4;
+   
+   std::string GetPathSeparator();
+   std::string GetCurrentPath();
+   std::string ParsePathName(const std::string &fullPath);
+   std::string ParseFileName(const std::string &fullPath);
+   bool DoesDirectoryExist(const std::string &dirPath);
+   bool DoesFileExist(const std::string &filename);
    
    StringArray& Compare(const std::string &filename1,
                         const std::string &filename2,
