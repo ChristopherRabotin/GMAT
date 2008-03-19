@@ -20,9 +20,6 @@
 #ifndef Interpreter_hpp
 #define Interpreter_hpp
 
-#include <map>
-#include <list>
-#include <iostream>
 #include "gmatdefs.hpp"
 #include "InterpreterException.hpp"
 #include "GmatBase.hpp"
@@ -44,11 +41,9 @@ class Parameter;
 class GmatCommand;
 class CoordinateSystem;
 class AxisSystem;
-//class Publisher;
 class Subscriber;
 class Burn;
-
-
+class Function;
 class Moderator;
 
 
@@ -92,17 +87,18 @@ public:
    //------------------------------------------------------------------------------
    virtual bool Build(Gmat::WriteMode mode) = 0;
    
-   virtual Parameter* CreateSystemParameter(const std::string &str);
+   virtual Parameter* CreateSystemParameter(const std::string &str,
+                                            bool manage = true);
    virtual Parameter* CreateParameter(const std::string &type,
                                       const std::string &name,
                                       const std::string &ownerName = "",
-                                      const std::string &depName = "");
-   
-   GmatCommand* InterpretGMATFunction(const std::string &pathAndName);
+                                      const std::string &depName = "",
+                                      bool manage = true);
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
-   GmatBase* CreateObject(const std::string &type, const std::string &name);
+   GmatBase* CreateObject(const std::string &type, const std::string &name,
+                          bool manage = true);
    SolarSystem* GetSolarSystemInUse();
    
    const StringArray& GetErrorList() { return errorList; }
@@ -116,8 +112,6 @@ public:
    
 protected:
    
-   // subclasses accessable member data
-
    /// A pointer to the ScriptReadWriter used when reading or writing script.
    ScriptReadWriter* theReadWriter;
    Moderator    *theModerator;
@@ -127,6 +121,11 @@ protected:
    bool         initialized;
    bool         parsingDelayedBlock;
    bool         ignoreError;
+   
+   /// For handling GmatFunction
+   bool         inFunctionMode;
+   bool         hasFunctionDefinition;
+   Function     *currentFunction;
    
    /// For handling delayed blocks
    StringArray  delayedBlocks;
@@ -155,7 +154,7 @@ protected:
    GmatBase* FindObject(const std::string &name, 
                         const std::string &ofType = "");
    
-   Parameter* CreateArray( const std::string &arrayStr);   
+   Parameter* CreateArray( const std::string &arrayStr, bool manage = true);   
    Parameter* GetArrayIndex(const std::string &arrayStr,
                             Integer &row, Integer &col);
    
@@ -175,6 +174,7 @@ protected:
    bool AssembleConditionalCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleForCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc);
+   bool SetCommandRefObjects(GmatCommand *cmd, const std::string &desc);
    
    // for assignment
    GmatBase* MakeAssignment(const std::string &lhs, const std::string &rhs);
@@ -229,7 +229,6 @@ protected:
    
    // for setting/getting array value
    Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col);
-   
    bool IsArrayElement(const std::string &str);
    
    // for error handling
@@ -246,14 +245,16 @@ protected:
    // Final setting of reference object pointers needed by the GUI
    bool FinalPass();
    
-   // for handling wrappers 
-      
+   // for debug
+   void WriteParts(const std::string &title, StringArray &parts);
+   
+   // for GamtFunction handling
+   bool CheckFunctionDefinition(const std::string &funcPathAndName,
+                                GmatBase *function);
+   bool BuildFunctionDefinition(const std::string &str);
+   
 private:
-   
-   // Mapping between the object base class strings and the objecttypes enum
-   // It is not used
-   //std::map<std::string, Integer>  typeMap;
-   
+      
    StringArray   commandList;
    StringArray   atmosphereList;
    StringArray   attitudeList;
@@ -276,8 +277,6 @@ private:
    bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
                             const std::string &msg, bool isNumberAllowed,
                             bool isArrayAllowed);
-   void WriteParts(const std::string &title, StringArray &parts);
-   
    // for wrappers
    ElementWrapper* CreateElementWrapper(const std::string &desc,
                                         bool parametersFirst = false);
