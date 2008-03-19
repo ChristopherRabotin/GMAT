@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   Function
 //------------------------------------------------------------------------------
@@ -20,12 +20,13 @@
 
 #include "Function.hpp"
 #include "FileManager.hpp"       // for GetPathname()
+#include "FileUtil.hpp"          // for ParseFileName()
 #include "StringUtil.hpp"        // for Trim()
+#include "FunctionException.hpp" // for exception
+#include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION
-#ifdef DEBUG_FUNCTION
-#include "MessageInterface.hpp"
-#endif
+//#define DEBUG_FUNCTION_SET
 
 //---------------------------------
 // static data
@@ -34,11 +35,17 @@ const std::string
 Function::PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount] =
 {
    "FunctionPath",
+   "FunctionName",
+   "Input",
+   "Output"
 };
 
 const Gmat::ParameterType
 Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 {
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
    Gmat::STRING_TYPE,
 };
 
@@ -54,13 +61,19 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &nomme) :
-    GmatBase        (Gmat::FUNCTION, typeStr, nomme),
-    functionPath      ("")
+   GmatBase        (Gmat::FUNCTION, typeStr, nomme),
+   functionPath    ("")
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Function::Function() entered, typeStr=%s, nomme=%s\n",
+       typeStr.c_str(), nomme.c_str());
+   #endif
+   
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
-
+   
    // function path
    FileManager *fm = FileManager::Instance();
    std::string pathname;
@@ -77,6 +90,19 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
             pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH") +nomme +".gmf";
          
          functionPath = pathname;
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         
+         // Remove path and .gmf (loj: 2008.03.12)
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         std::string::size_type dotIndex = functionName.find(".gmf");
+         functionName = functionName.substr(0, dotIndex);
+         
+         #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage
+            ("   functionPath=<%s>\n", functionPath.c_str());
+         MessageInterface::ShowMessage
+            ("   functionName=<%s>\n", functionName.c_str());
+         #endif
       }
    }
    catch (GmatBaseException &e)
@@ -98,6 +124,10 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
          #endif
       }
    }
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("Function::Function() exiting\n");
+   #endif
 }
 
 
@@ -123,10 +153,10 @@ Function::~Function()
  */
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
-    GmatBase        (f),
-    functionPath    (f.functionPath)
+   GmatBase        (f),
+   functionPath    (f.functionPath)
 {
-    parameterCount = FunctionParamCount;
+   parameterCount = FunctionParamCount;
 }
 
 
@@ -143,14 +173,51 @@ Function::Function(const Function &f) :
 //------------------------------------------------------------------------------
 Function& Function::operator=(const Function &f)
 {
-    if (this == &f)
-        return *this;
-        
-    GmatBase::operator=(f);
+   if (this == &f)
+      return *this;
+   
+   GmatBase::operator=(f);
+   
+   functionPath  = f.functionPath;
+   
+   return *this;
+}
 
-    functionPath  = f.functionPath;
 
-    return *this;
+//------------------------------------------------------------------------------
+// virtual bool TakeAction(const std::string &action,
+//                         const std::string &actionData = "")
+//------------------------------------------------------------------------------
+/**
+ * This method performs action.
+ *
+ * @param <action> action to perform
+ * @param <actionData> action data associated with action ("")
+ * @return true if action successfully performed
+ *
+ */
+//------------------------------------------------------------------------------
+bool Function::TakeAction(const std::string &action,
+                          const std::string &actionData)
+{
+   #ifdef DEBUG_FUNCTION_ACTION
+   MessageInterface::ShowMessage
+      ("Function::TakeAction() action=%s, actionData=%s\n", action.c_str(),
+       actionData.c_str());
+   #endif
+   
+   if (action == "Clear")
+   {
+      #ifdef DEBUG_FUNCTION_ACTION
+      MessageInterface::ShowMessage("   Clearing input and output argument list\n");
+      #endif
+      
+      inputArgMap.clear();
+      outputArgMap.clear();
+      return true;
+   }
+   
+   return false;
 }
 
 
@@ -167,10 +234,10 @@ Function& Function::operator=(const Function &f)
 //------------------------------------------------------------------------------
 std::string Function::GetParameterText(const Integer id) const
 {
-    if (id >= FUNCTION_PATH && id < FunctionParamCount)
-        return PARAMETER_TEXT[id - GmatBaseParamCount];
-    else
-        return GmatBase::GetParameterText(id);
+   if (id >= FUNCTION_PATH && id < FunctionParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   else
+      return GmatBase::GetParameterText(id);
 }
 
 
@@ -187,13 +254,13 @@ std::string Function::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Function::GetParameterID(const std::string &str) const
 {
-    for (Integer i = FUNCTION_PATH; i < FunctionParamCount; i++)
-    {
-        if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
-            return i;
-    }
-
-    return GmatBase::GetParameterID(str);
+   for (Integer i = FUNCTION_PATH; i < FunctionParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
+         return i;
+   }
+   
+   return GmatBase::GetParameterID(str);
 }
 
 
@@ -252,7 +319,19 @@ std::string Function::GetStringParameter(const Integer id) const
 {
    if (id == FUNCTION_PATH)
       return functionPath;
+   else if (id == FUNCTION_NAME)
+      return functionName;
+   
    return GmatBase::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Function::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
 }
 
 
@@ -270,37 +349,101 @@ std::string Function::GetStringParameter(const Integer id) const
 //------------------------------------------------------------------------------
 bool Function::SetStringParameter(const Integer id, const std::string &value)
 {
-   if (id == FUNCTION_PATH)
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("Function::SetStringParameter() entered, id=%d, value=%s\n", id, value.c_str());
+   #endif
+   
+   switch (id)
    {
-      // Compose full path if it has relative path.
-      // Assuming if first char has '.', it has relative path.
-      std::string temp = GmatStringUtil::Trim(value);
-      if (temp[0] == '.')
+   case FUNCTION_PATH:
       {
-         FileManager *fm = FileManager::Instance();
-         std::string currPath = fm->GetCurrentPath();
+         // Compose full path if it has relative path.
+         // Assuming if first char has '.', it has relative path.
+         std::string temp = GmatStringUtil::Trim(value);
+         if (temp[0] == '.')
+         {
+            FileManager *fm = FileManager::Instance();
+            std::string currPath = fm->GetCurrentPath();
          
-         #ifdef DEBUG_FUNCTION
+            #ifdef DEBUG_FUNCTION_SET
+            MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+            #endif
+            
+            functionPath = currPath + temp.substr(1);
+         }
+         else
+         {
+            functionPath = value;
+         }
+         
+         // Remove path
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         
+         // Remove .gmf if GmatFunction
+         if (GetTypeName() == "GmatFunction")
+         {
+            std::string::size_type dotIndex = functionName.find(".gmf");
+            functionName = functionName.substr(0, dotIndex);
+         }
+         
+         #ifdef DEBUG_FUNCTION_SET
          MessageInterface::ShowMessage
-            ("Function::SetStringParameter() currPath=%s\n",
-             currPath.c_str());
+            ("   functionPath=<%s>\n", functionPath.c_str());
+         MessageInterface::ShowMessage
+            ("   functionName=<%s>\n", functionName.c_str());
          #endif
          
-         functionPath = currPath + temp.substr(1);
+         return true;
       }
-      else
+   case FUNCTION_NAME:
       {
-         functionPath = value;
+         // Remove path if it has one
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         
+         // Remove .gmf if GmatFunction
+         if (GetTypeName() == "GmatFunction")
+         {
+            std::string::size_type dotIndex = functionName.find(".gmf");
+            functionName = functionName.substr(0, dotIndex);
+         }
+         
+         return true;
       }
-
-      #ifdef DEBUG_FUNCTION
-      MessageInterface::ShowMessage
-         ("   functionPath = %s\n", functionPath.c_str());
-      #endif
-      
-      return true;
+   case FUNCTION_INPUT:
+      {
+         if (inputArgMap.find(value) == inputArgMap.end())
+            inputArgMap[value] = NULL;
+         else
+            throw FunctionException
+               ("In function file \"" + functionPath + "\": "
+                "The input argument \"" + value + "\" already exists");
+         
+         return true;
+      }
+   case FUNCTION_OUTPUT:
+      {
+         if (outputArgMap.find(value) == outputArgMap.end())
+            outputArgMap[value] = NULL;
+         else
+            throw FunctionException
+               ("In function file \"" + functionPath + "\": "
+                "The output argument \"" + value + "\" already exists");
+         
+         return true;
+      }
+   default:
+      return GmatBase::SetStringParameter(id, value);
    }
+}
 
-   return GmatBase::SetStringParameter(id, value);
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool Function::SetStringParameter(const std::string &label,
+                                  const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
 }
 
