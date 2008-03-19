@@ -28,6 +28,22 @@
 //#define DEBUG_SAVE_EXEC
 //#define DEBUG_SAVE_OUTPUT
 
+//---------------------------------
+//  static data
+//---------------------------------
+const std::string
+Save::PARAMETER_TEXT[SaveParamCount - GmatCommandParamCount] = 
+{
+   "ObjectNames",
+};
+
+const Gmat::ParameterType
+Save::PARAMETER_TYPE[SaveParamCount - GmatCommandParamCount] =
+{
+   Gmat::STRINGARRAY_TYPE,   // "ObjectNames",
+};
+
+
 //------------------------------------------------------------------------------
 // Save()
 //------------------------------------------------------------------------------
@@ -104,6 +120,187 @@ Save& Save::operator=(const Save& sv)
    objArray.clear();
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Save::GetParameterText(const Integer id) const
+{
+   if (id >= GmatCommandParamCount && id < SaveParamCount)
+      return PARAMETER_TEXT[id - GmatCommandParamCount];
+   else
+      return GmatCommand::GetParameterText(id);
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer Save::GetParameterID(const std::string &str) const
+{
+   for (int i=GmatCommandParamCount; i<SaveParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
+   
+   return GmatCommand::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// Gmat::ParameterType GetParameterType(const Integer id) const
+//------------------------------------------------------------------------------
+Gmat::ParameterType Save::GetParameterType(const Integer id) const
+{
+   if (id >= GmatCommandParamCount && id < SaveParamCount)
+      return PARAMETER_TYPE[id - GmatCommandParamCount];
+   else
+      return GmatCommand::GetParameterType(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetParameterTypeString(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Save::GetParameterTypeString(const Integer id) const
+{
+   if (id >= GmatCommandParamCount && id < SaveParamCount)
+      return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
+   else
+      return GmatCommand::GetParameterTypeString(id);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool  SetStringParameter(const Integer id, const std::string value)
+//------------------------------------------------------------------------------
+/**
+ * This method sets the string parameter value, given the input
+ * parameter ID.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <value> string value for the requested parameter.
+ *
+ * @exception <CommandException> thrown if value is already in the list.
+ *
+ * @return  success flag.
+ *
+ */
+//------------------------------------------------------------------------------
+bool Save::SetStringParameter(const Integer id, const std::string &value)
+{
+   if (id == OBJECT_NAMES)
+   {
+      Integer sz = objNameArray.size();
+      for (Integer ii = 0; ii < sz; ii++)
+      {
+         if (objNameArray[ii] == value)
+         {
+            std::string ex = "Attempting to add """;
+            ex += value + """ more than once to list of objects.\n";
+            throw CommandException(ex);
+         }
+      }
+      
+      objNameArray.push_back(value);
+      return true;
+   }
+   
+   return GmatCommand::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> New value for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+bool Save::SetStringParameter(const std::string &label, const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string  GetStringParameter(const Integer id, const Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string parameter value, given the input
+ * parameter ID and the index into the array.
+ *
+ * @param <id> ID for the requested parameter.
+ * @param <index> index into the StringArray parameter.
+ *
+ * @exception <CommandException> thrown if value is out of range
+ *
+ * @return  string value at index 'index'.
+ *
+ */
+//------------------------------------------------------------------------------
+std::string Save::GetStringParameter(const Integer id,
+                                     const Integer index) const
+{
+   if (id == OBJECT_NAMES)
+   {
+      if ((index < 0) || (index >= ((Integer) objNameArray.size())))
+         throw CommandException
+            ("Index out of bounds when attempting to return object name\n");
+      return objNameArray.at(index);
+   }
+   
+   return GmatCommand::GetStringParameter(id, index);
+}
+
+
+//------------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label,
+//                                 const Integer index) const
+//------------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <index> array index for the parameter.
+ *
+ * @return The string stored for this parameter.
+ */
+//------------------------------------------------------------------------------
+std::string Save::GetStringParameter(const std::string &label,
+                                     const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray&  GetStringArrayParameter(const Integer id)
+//------------------------------------------------------------------------------
+/**
+ * This method returns the string array value, given the input
+ * parameter ID .
+ *
+ * @param <id> ID for the requested parameter.
+ *
+  * @return  string array.
+ *
+ */
+//------------------------------------------------------------------------------
+const StringArray& Save::GetStringArrayParameter(const Integer id) const
+{
+   if (id == OBJECT_NAMES)
+      return objNameArray;
+   
+   return GmatCommand::GetStringArrayParameter(id);
 }
 
 

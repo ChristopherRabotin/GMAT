@@ -44,21 +44,45 @@ public:
    virtual const StringArray&
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         SetRefObjectName(const Gmat::ObjectType type,
-                                            const std::string &name);
+                                         const std::string &name);
    virtual bool         Initialize();
    
    virtual GmatBase*    Clone() const;
+   
+   // Parameter accessors
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
+   virtual const StringArray& 
+                        GetStringArrayParameter(const Integer id) const;
    virtual const std::string&
                         GetGeneratingString(Gmat::WriteMode mode,
                                             const std::string &prefix,
                                             const std::string &useName);
-   
-   
+      
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
    
 protected:
+   // Parameter IDs
+   enum  
+   {
+      OBJECT_NAMES = GmatCommandParamCount,
+      SaveParamCount
+   };
+   
    /// Name of the save file -- for now, it is objectName.objectType
    StringArray          fileNameArray;
    /// Toggle to allow multiple writes
@@ -76,6 +100,11 @@ protected:
    
    void  UpdateOutputFileNames(Integer index, const std::string objName);
    void  WriteObject(UnsignedInt i, GmatBase *o);
+   
+   static const std::string
+      PARAMETER_TEXT[SaveParamCount - GmatCommandParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[SaveParamCount - GmatCommandParamCount];
 };
 
 #endif // Save_hpp
