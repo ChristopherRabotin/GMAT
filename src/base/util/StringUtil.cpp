@@ -570,7 +570,7 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
    std::string openBrackets = "([{";
    std::string::size_type index1;
    int count = tempParts.size();
-    
+   
    #if DEBUG_STRING_UTIL_SEP
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage
@@ -584,18 +584,23 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
    for (int i=0; i<count; i++)
    {         
       index1 = tempParts[i].find_first_of(openBrackets);
-         
+      
       if (index1 != str.npos)
       {
          if (append)
          {
-            parts[size] = parts[size] + "," + tempParts[i];
+            // preserve comma, semicoln, coln, and blank space (loj: 2008.03.11)
+            //parts[size] = parts[size] + "," + tempParts[i];
+            if (parts[size].find_last_of(",;:") == str.npos)
+               parts[size] = parts[size] + " " + tempParts[i];
+            else
+               parts[size] = parts[size] + tempParts[i];
          }
          else
          {
             #if DEBUG_STRING_UTIL_SEP > 1
             MessageInterface::ShowMessage
-               ("===> adding %s\n", tempParts[i].c_str());
+               ("===> adding1 %s\n", tempParts[i].c_str());
             #endif
             
             parts.push_back(tempParts[i]);
@@ -612,7 +617,7 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
          
          #if DEBUG_STRING_UTIL_SEP > 1
          MessageInterface::ShowMessage
-            ("===> parts[%d]=%s\n", size, parts[size].c_str());
+            ("===> parts1[%d]=%s\n", size, parts[size].c_str());
          MessageInterface::ShowMessage("===> append=%d\n", append);
          #endif
       }
@@ -624,16 +629,21 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
             MessageInterface::ShowMessage
                ("===> appending %s\n", tempParts[i].c_str());
             #endif
-               
-            parts[size] = parts[size] + "," + tempParts[i];
+            
+            // preserve comma, semicoln, coln, and blank space (loj: 2008.03.11)
+            ///parts[size] = parts[size] + "," + tempParts[i];            
+            if (parts[size].find_last_of(",;:") == str.npos)
+               parts[size] = parts[size] + " " + tempParts[i];
+            else
+               parts[size] = parts[size] + tempParts[i];
          }
          else
          {
             #if DEBUG_STRING_UTIL_SEP > 1
             MessageInterface::ShowMessage
-               ("===> adding %s\n", tempParts[i].c_str());
+               ("===> adding2 %s\n", tempParts[i].c_str());
             #endif
-               
+            
             parts.push_back(tempParts[i]);
             size++;
          }
@@ -648,12 +658,12 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
          
          #if DEBUG_STRING_UTIL_SEP > 1
          MessageInterface::ShowMessage
-            ("===> parts[%d]=%s\n", size, parts[size].c_str());
+            ("===> parts2[%d]=%s\n", size, parts[size].c_str());
          MessageInterface::ShowMessage("===> append=%d\n", append);
          #endif
       }
    }
-
+   
    StringArray parts1;
    
    // add non-blank items
@@ -1170,7 +1180,7 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
                                    Integer &col, std::string &name,
                                    const std::string &bracketPair)
 {
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_ARRAY_INDEX
    MessageInterface::ShowMessage
       ("StringUtil::GetArrayIndex() str=%s\n", str.c_str());
    #endif
@@ -1197,7 +1207,7 @@ void GmatStringUtil::GetArrayIndex(const std::string &str, Integer &row,
          else
             col = intVal;
    
-   #if DEBUG_STRING_UTIL
+   #if DEBUG_ARRAY_INDEX
    MessageInterface::ShowMessage
       ("StringUtil::GetArrayIndex() row=%d, col=%d, name=%s\n", row, col, name.c_str());
    #endif
@@ -2312,7 +2322,7 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-// bool IsValidName(const std::string &str, bool isObject)
+// bool IsValidName(const std::string &str, bool isObject, bool ignoreParen)
 //------------------------------------------------------------------------------
 /*
  * If validating for object, it returns true if it is not the same as some keywords.
@@ -2322,7 +2332,8 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
  * Underscore is allowed.
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsValidName(const std::string &str, bool isObject)
+bool GmatStringUtil::IsValidName(const std::string &str, bool isObject,
+                                 bool ignoreParen)
 {
    // check for valid object name
    if (isObject)
@@ -2337,9 +2348,22 @@ bool GmatStringUtil::IsValidName(const std::string &str, bool isObject)
    // check for valid variable name
    if (!isalpha(str[0]))
       return false;
+
+   std::string str1 = str;
+
+   // if ignoring open parenthesis, remove it first
+   if (ignoreParen)
+   {
+      std::string::size_type openParen = str1.find("(");
+      if (openParen != str1.npos)
+      {
+         str1 = str1.substr(0, openParen);
+         str1 = Trim(str1);
+      }
+   }
    
-   for (UnsignedInt i=1; i<str.size(); i++)
-      if (!isalnum(str[i]) && str[i] != '_')
+   for (UnsignedInt i=1; i<str1.size(); i++)
+      if (!isalnum(str1[i]) && str1[i] != '_')
          return false;
    
    return true;

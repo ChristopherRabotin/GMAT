@@ -109,7 +109,8 @@ namespace GmatStringUtil
    bool IsSingleItem(const std::string &str);
    bool StartsWith(const std::string &str, const std::string &value);
    bool EndsWith(const std::string &str, const std::string &value);
-   bool IsValidName(const std::string &str, bool isObject = false);
+   bool IsValidName(const std::string &str, bool isObject = false,
+                    bool ignoreParen = false);
    bool IsBlank(const std::string &str, bool ignoreEol = false);
    
    Integer NumberOfOccurrences(const std::string str, const char c);
