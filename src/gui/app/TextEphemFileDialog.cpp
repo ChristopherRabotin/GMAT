@@ -222,7 +222,7 @@ void TextEphemFileDialog::LoadData()
       wxString scName = mSpacecraftListBox->GetStringSelection();
       mSelectedScListBox->Append(scName);
       mSelectedScListBox->SetStringSelection(scName);
-
+      
       // set default ephemeris  file using spacecraft name
       wxString fname = scName + "_Ephem.txt";
       mEphemFileTextCtrl->SetValue(mEphemDirectory.c_str() + fname);
@@ -248,7 +248,7 @@ void TextEphemFileDialog::LoadData()
       mEpochFormatComboBox->Append(reps[i].c_str());
    
    mEpochFormatComboBox->SetSelection(0);
-
+   
    // Change label
    theOkButton->SetLabel("Run and Create Ephemeris File");
 }
@@ -346,7 +346,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    
    TextEphemFile *ephemFile = (TextEphemFile*)(theGuiInterpreter->
       CreateSubscriber("TextEphemFile", "TextEphemFile", ephemFileName, false));
-
+   
    // get first spacecraft from the list
    std::string scName = mSelectedScListBox->GetString(0).c_str();
    std::string epochFormat = mEpochFormatComboBox->GetValue().c_str();
@@ -368,7 +368,7 @@ bool TextEphemFileDialog::CreateTextEphem()
    std::string xvel = scName + "." + coordSys + ".VX";
    std::string yvel = scName + "." + coordSys + ".VY";
    std::string zvel = scName + "." + coordSys + ".VZ";
-
+   
    // Create parameters
    try
    {
@@ -412,14 +412,16 @@ bool TextEphemFileDialog::CreateTextEphem()
       for (UnsignedInt i=0; i<params.size(); i++)
          MessageInterface::ShowMessage("%s\n", params[i].c_str());
       #endif
-
+      
+      // Now create element wrappers through ValidateSubscriber() (loj: 2008.03.19)
+      theGuiInterpreter->ValidateSubscriber(ephemFile);
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
-         ("TextEphemFileDialog:CreateTextEphem() error occurred!\n%s\n",
-          e.GetFullMessage().c_str());
-
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Cannot generate text ephemeris file. "
+          "Error occurred!\n%s\n", e.GetFullMessage().c_str());
+      
       return false;
    }
    
