@@ -20,6 +20,7 @@
 #include "MessageInterface.hpp"
 #include "CommandException.hpp"
 #include "StringUtil.hpp"
+#include "Array.hpp"
 
 //#define DEBUG_CREATE
 
@@ -245,19 +246,31 @@ bool Create::Initialize()
       throw CommandException(ex);
    }
    // remove the array indices from the names if necessary
+   Integer numNames = (Integer) objectNames.size();
    if (objType == "Array")
    {
-      // ******* todo **********
+      SetArrayInfo();
+      numNames = (Integer) arrayNames.size();
+      creations.at(0)->SetName(arrayNames.at(0));
+      ((Array*) (creations.at(0)))->SetSize(rows.at(0), columns.at(0));
+      // clone the other needed objects from the reference one
+      for (Integer jj = 1; jj < numNames; jj++)
+      {
+         creations.push_back((creations.at(0))->Clone());
+         creations.at(jj)->SetName(arrayNames.at(jj));
+         ((Array*) (creations.at(jj)))->SetSize(rows.at(jj), columns.at(jj));
+      }
    }
-   Integer numNames = (Integer) objectNames.size();
-   creations.at(0)->SetName(objectNames.at(0));
-   // clone the other needed objects from the reference one
-   for (Integer jj = 1; jj < numNames; jj++)
+   else
    {
-      creations.push_back((creations.at(0))->Clone());
-      creations.at(jj)->SetName(objectNames.at(jj));
+      creations.at(0)->SetName(objectNames.at(0));
+      // clone the other needed objects from the reference one
+      for (Integer jj = 1; jj < numNames; jj++)
+      {
+         creations.push_back((creations.at(0))->Clone());
+         creations.at(jj)->SetName(objectNames.at(jj));
+      }
    }
-   
    return true;
 }
 
@@ -275,29 +288,65 @@ bool Create::Initialize()
 bool Create::Execute()
 {
    bool isOK = true;
+   StringArray useThese = objectNames;
+   if (objType == "Array")  useThese = arrayNames;
+   
+   // If the type is Array, use the names without the indices
 
    //put the objects onto the LOS if not already there
    GmatBase *mapObj = NULL;
    for (Integer ii = 0; ii < (Integer) creations.size(); ii++)
    {
       // if it is already in the LOS, make sure the types match
-      if (objectMap->find(objectNames.at(ii)) != objectMap->end())
+      if (objectMap->find(useThese.at(ii)) != objectMap->end())
       {
-         mapObj = (*objectMap)[objectNames.at(ii)];
+         mapObj = (*objectMap)[useThese.at(ii)];
          if (!mapObj->IsOfType(objType))
          {
-            std::string ex = "Object of name """ + objectNames.at(ii);
+            std::string ex = "Object of name """ + useThese.at(ii);
             ex += """, but of a different type, already exists in Local Object Store\n";
             throw CommandException(ex);
          }
+         if (objType == "Array")
+         {
+            Integer r1, r2, c1, c2;
+            ((Array*) mapObj)->GetSize(r1, c1);
+            ((Array*) (creations.at(ii)))->GetSize(r2, c2);
+            if ((r1 != r2) || (c1 != c2))
+            {
+               std::string ex = "Array of name """ + useThese.at(ii);
+               ex += """, but with different dimensions already exists in Local Object Store\n";
+               throw CommandException(ex);
+            }
+         }
       }
       // put it into the LOS
-      objectMap->insert(std::make_pair(objectNames.at(ii),creations.at(ii)));
+      objectMap->insert(std::make_pair(useThese.at(ii),creations.at(ii)));
       // if the type of object created by this Create command is an automatic
       // global, move it to the GOS (an automatic global would have been 
-      // created with its isGlobal flag set to true
+      // created with its isGlobal flag set to true)
       if ((creations.at(ii))->GetIsGlobal()) 
-         isOK += MakeGlobal(objectNames.at(ii));
+         isOK += MakeGlobal(useThese.at(ii));
    }
    return isOK;
+}
+
+void Create::SetArrayInfo()
+{
+   // Extract the array names, number of rows, and number of columns from the
+   // objectNames array
+   arrayNames.clear();
+   rows.clear();
+   columns.clear();
+   std::string itsName;
+   Integer r = -99;
+   Integer c = -99;
+   unsigned int sz = objectNames.size();
+   for (unsigned int ii = 0; ii < sz; ii++)
+   {
+      GmatStringUtil::GetArrayIndex(objectNames.at(ii), r, c, itsName, "[]");
+      arrayNames.push_back(itsName);
+      rows.push_back(r);
+      columns.push_back(c);
+   }
 }

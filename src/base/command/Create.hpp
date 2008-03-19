@@ -64,8 +64,14 @@ protected:
 
    static const Gmat::ParameterType PARAMETER_TYPE[CreateParamCount - ManageObjectParamCount];
 
-   std::string objType;
-   ObjectArray creations; 
+   std::string  objType;
+   ObjectArray  creations; 
+   /// object names and sizes  when the object type is an Array
+   StringArray  arrayNames;
+   IntegerArray rows;
+   IntegerArray columns;
+   
+   void SetArrayInfo();
 };
 
 #endif /* Create_hpp */
