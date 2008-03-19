@@ -19,6 +19,7 @@
 
 #include "Interpreter.hpp"
 #include "InterpreterException.hpp"
+#include "Function.hpp"
 
 /**
  * The ScriptInterpreter class manages the script reading and writing process.
@@ -30,7 +31,11 @@ public:
 
    virtual bool Interpret();
    virtual bool Interpret(GmatCommand *cmd, bool skipHeader = false);
-   virtual bool Interpret(const std::string &scriptfile); 
+   virtual bool Interpret(const std::string &scriptfile);
+   
+   GmatCommand* InterpretGmatFunction(const std::string &fileName);
+   GmatCommand* InterpretGmatFunction(Function *funct);
+   
    virtual bool Build(Gmat::WriteMode mode);
    
    bool ReadFirstPass();

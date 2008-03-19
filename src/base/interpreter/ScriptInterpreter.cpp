@@ -18,9 +18,10 @@
 #include "MessageInterface.hpp"
 #include "Moderator.hpp"
 #include "MathParser.hpp"
+#include "NoOp.hpp"
 #include "StringUtil.hpp"      // for GmatStringUtil::
 
-// to allow object creation inside ScriptEvent
+// to allow object creation in command mode, such as inside ScriptEvent
 //#define __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
 
 
@@ -31,6 +32,7 @@
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_FOOTER 1
 //#define DEBUG_SET_COMMENTS 1
+//#define DEBUG_GMAT_FUNCTION 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -61,7 +63,7 @@ ScriptInterpreter* ScriptInterpreter::Instance()
 ScriptInterpreter::ScriptInterpreter() : Interpreter()
 {
    logicalBlockCount = 0;
-    
+   
    scriptFilename = "";
    currentBlock   = "";
    headerComment  = "";
@@ -168,7 +170,12 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader)
    if (retval0)
    {
       retval1 = ReadScript(inCmd, skipHeader);
-      retval2 = FinalPass();
+
+      // call FinalPass if not in function mode (loj: 2008.03.12)
+      if (inFunctionMode)
+         retval2 = true;
+      else
+         retval2 = FinalPass();
    }
    
    // Write any error messages collected
@@ -215,6 +222,116 @@ bool ScriptInterpreter::Interpret(const std::string &scriptfile)
 
 
 //------------------------------------------------------------------------------
+// GmatCommand* InterpretGmatFunction(const std::string fileName)
+//------------------------------------------------------------------------------
+/**
+ * Retrieves a function object pointer by given name.
+ *
+ * @param <fileName>  Full path and name of the GmatFunction file.
+ *
+ * @return A command list that is executed to run the function.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileName)
+{
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction()\n   filename = %s\n",
+       fileName.c_str());
+   #endif
+   
+   std::string msg;
+   if (fileName == "")
+      msg = "The GMATFunction file name is empty.\n";
+   
+   if (currentFunction == NULL)
+      msg = "The GMATFunction pointer is NULL.\n";
+   
+   // We don't want to continue if error found in the function file,
+   // so set continueOnError to false
+   continueOnError = false;
+   if (!CheckFunctionDefinition(fileName, currentFunction))
+      return NULL;
+   
+   // Now function file is ready to parse
+   continueOnError = true;
+   bool retval = false;
+   std::ifstream funcFile(fileName.c_str());
+   SetInStream(&funcFile);
+   GmatCommand *noOp = new NoOp;
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction() Create <%p>NoOp\n", noOp);
+   #endif
+   
+   // Set function mode and build function definition flag
+   inFunctionMode = true;
+   buildFunctionDefinition = false;
+   
+   // We don't want parse first comment as header, so set skipHeader to true.
+   retval = Interpret(noOp, true);
+   
+   funcFile.close();
+   
+   // Reset function mode and current function
+   inFunctionMode = false;
+   hasFunctionDefinition = false;
+   buildFunctionDefinition = false;
+   currentFunction = NULL;
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction() retval=%d\n", retval);
+   #endif
+   
+   //@todo remove noOp before return
+   // Just return noOP for now (loj: 2008.03.12)
+   if (retval)
+      return noOp;
+   else
+      return NULL;
+}
+
+
+//------------------------------------------------------------------------------
+// GmatCommand* InterpretGmatFunction(Function *funct)
+//------------------------------------------------------------------------------
+/**
+ * Reads a GMATFunction file and builds the corresponding command stream.
+ * 
+ * @param <funct> The GmatFunction pointer
+ *
+ * @return The head of the generated command list.
+ */
+//------------------------------------------------------------------------------
+GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
+{
+   if (funct == NULL)
+      return NULL;
+   
+   std::string fileName = funct->GetStringParameter("FunctionPath");
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::InterpretGmatFunction() function=%p\n   "
+       "filename = %s\n", funct, fileName.c_str());
+   #endif
+   
+   // Set urrent function
+   currentFunction = funct;
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("   currentFunction set to <%p>\n", currentFunction);
+   #endif
+   
+   return InterpretGmatFunction(fileName);
+   
+}
+
+
+//------------------------------------------------------------------------------
 // bool Build()
 //------------------------------------------------------------------------------
 /**
@@ -246,19 +363,19 @@ bool ScriptInterpreter::Build(Gmat::WriteMode mode)
 bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mode)
 {
    bool retval = false;
-    
+   
    if (scriptfile != "")
       scriptFilename = scriptfile;
-
+   
    std::ofstream outFile(scriptFilename.c_str());
    outStream = &outFile;
-
+   
    theReadWriter->SetOutStream(outStream);
    retval = Build(mode);
-    
+   
    outFile.close();
    outStream = NULL;
-    
+   
    return retval;
 }
 
@@ -425,8 +542,13 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
 {
    bool retval1 = true;
    
-   if (inStream->fail() || inStream->eof()) 
+   if (inStream->fail() || inStream->eof())
+   {
+      MessageInterface::ShowMessage
+         ("==> ScriptInterpreter::ReadScript() inStream failed or eof reached, "
+          "so returning false\n");
       return false;
+   }
    
    // Empty header & footer comment data members
    headerComment = "";
@@ -441,9 +563,9 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    Initialize();
    
    
-   // Read header comment and first logical block, command is NULL
-   // since this method is also called from GUI to interpret BeginScript block
-   // we want to ignore header comment.
+   // Read header comment and first logical block.
+   // If input command is NULL, this method is called from GUI to interpret
+   // BeginScript block. We want to ignore header comment if parsing script event.
    std::string tempHeader;
    theReadWriter->ReadFirstBlock(tempHeader, currentBlock, skipHeader);
    if (inCmd == NULL)
@@ -466,8 +588,10 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          
          currentBlockType = theTextParser.EvaluateBlock(currentBlock);
          
-         //MessageInterface::ShowMessage
-         //   ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         #if DEBUG_SCRIPT_READING > 1
+         MessageInterface::ShowMessage
+            ("===> after EvaluateBlock() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         #endif
          
          #if DEBUG_SCRIPT_READING
          MessageInterface::ShowMessage
@@ -477,11 +601,12 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          // Keep previous retval1 value
          retval1 = Parse(currentBlock, inCmd) && retval1;
          
-         //MessageInterface::ShowMessage
-         //   ("===> after Parse() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
-         //MessageInterface::ShowMessage
-         //   ("===> currentBlockType:%d, retval1=%d\n", currentBlockType, retval1);
-         
+         #if DEBUG_SCRIPT_READING > 1
+         MessageInterface::ShowMessage
+            ("===> after Parse() currentBlock:\n<<<%s>>>\n", currentBlock.c_str());
+         MessageInterface::ShowMessage
+            ("===> currentBlockType:%d, retval1=%d\n", currentBlockType, retval1);
+         #endif
       }
       catch (BaseException &e)
       {
@@ -603,7 +728,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    
    if (emptyChunks == count)
       return false;
-
+   
    // for comments
    std::string preStr = ""; 
    std::string inStr = ""; 
@@ -612,7 +737,30 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    inStr = theTextParser.GetInlineComment();
    
    // Decompose by block type
-   StringArray chunks = theTextParser.ChunkLine();
+   StringArray chunks;
+   try
+   {
+      //StringArray chunks = theTextParser.ChunkLine();
+      chunks = theTextParser.ChunkLine();
+   }
+   catch (BaseException &e)
+   {
+      // if in function mode, throw better message 
+      if (inFunctionMode && currentFunction != NULL)
+      {
+         std::string funcPath = currentFunction->GetStringParameter("FunctionPath");
+         InterpreterException ex
+            ("In function file \"" + funcPath + "\": "
+             "Invalid function definition found ");
+         HandleError(ex, true, false);
+         return false;
+      }
+      else
+      {
+         throw;
+      }
+   }
+   
    count = chunks.size();
    GmatBase *obj = NULL;
    
@@ -637,11 +785,14 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       #ifndef __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
       if (inRealCommandMode)
       {
-         InterpreterException ex
-            ("GMAT currently requires that all object are created before the "
-             "mission sequence begins");
-         HandleError(ex, true, true);
-         return true; // just a warning, so return true
+         if (!inFunctionMode)
+         {
+            InterpreterException ex
+               ("GMAT currently requires that all object are created before the "
+                "mission sequence begins");
+            HandleError(ex, true, true);
+            return true; // just a warning, so return true
+         }
       }
       #endif
       
@@ -671,32 +822,42 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       if (type == "Propagator")
          type = "PropSetup";
       
-      Integer objCounter = 0;
-      for (Integer i = 0; i < count; i++)
+      // Handle creating objects in function mode
+      if (inFunctionMode)
       {
-         obj = CreateObject(type, names[i]);
-         
-         if (obj == NULL)
+         //obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
+         std::string desc = chunks[1] + " " + chunks[2];
+         obj = (GmatBase*)CreateCommand(chunks[0], desc, retval, inCmd);
+      }
+      else
+      {
+         Integer objCounter = 0;
+         for (Integer i = 0; i < count; i++)
          {
-            InterpreterException ex
-               ("Cannot create an object \"" + names[i] + "\". The \"" +
-                type + "\" is unknown object type");
+            obj = CreateObject(type, names[i]);
+            
+            if (obj == NULL)
+            {
+               InterpreterException ex
+                  ("Cannot create an object \"" + names[i] + "\". The \"" +
+                   type + "\" is unknown object type");
+               HandleError(ex);
+               return false;
+            }
+            
+            objCounter++;     
+            obj->FinalizeCreation();
+            
+            SetComments(obj, preStr, inStr);
+         }
+         
+         // if not all objectes are created, return false
+         if (objCounter < count)
+         {
+            InterpreterException ex("All objects are not created");
             HandleError(ex);
             return false;
          }
-         
-         objCounter++;     
-         obj->FinalizeCreation();
-         
-         SetComments(obj, preStr, inStr);
-      }
-      
-      // if not all objectes are created, return false
-      if (objCounter < count)
-      {
-         InterpreterException ex("All objects are not created");
-         HandleError(ex);
-         return false;
       }
       
       logicalBlockCount++;
@@ -780,13 +941,20 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
          obj = (GmatBase*)CreateCommand(chunks[0], chunks[1], retval, inCmd);
       }
       
-      if (obj == NULL)
+      // if in function mode just check for retval, since function definition
+      // line will not create a command (loj: 2008.03.12)
+      if (inFunctionMode && retval)
       {
-         return false;
+         return true;
+      }
+      else
+      {
+         if (obj == NULL)
+            return false;
       }
       
       SetComments(obj, preStr, inStr);
-            
+      
       logicalBlockCount++;
    }
    else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
