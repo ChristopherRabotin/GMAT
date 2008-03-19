@@ -267,7 +267,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    
    // Set function mode and build function definition flag
    inFunctionMode = true;
-   buildFunctionDefinition = false;
+   hasFunctionDefinition = false;
    
    // We don't want parse first comment as header, so set skipHeader to true.
    retval = Interpret(noOp, true);
@@ -277,7 +277,6 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    // Reset function mode and current function
    inFunctionMode = false;
    hasFunctionDefinition = false;
-   buildFunctionDefinition = false;
    currentFunction = NULL;
    
    #ifdef DEBUG_GMAT_FUNCTION
