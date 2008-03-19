@@ -471,6 +471,19 @@ void MessageInterface::OpenLogFile(const std::string &filename, bool append)
    else
       logFile = fopen(logFileName.c_str(), "w");
    
+   if (!logFile)
+   {
+      std::cout << "**** ERROR **** Error setting the log file to " << logFileName
+                << "\nSo setting it to \"GmatLog.txt\" in the executable directory\n";
+      
+      logFileName = "GmatLog.txt";
+      
+      if (append)
+         logFile = fopen(logFileName.c_str(), "a");
+      else
+         logFile = fopen(logFileName.c_str(), "w");
+   }
+   
    if (logFile)
    {
       fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
