@@ -160,9 +160,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
  */
 //------------------------------------------------------------------------------
 MathFactory::MathFactory()
-   #ifndef __UNIT_TEST__
    : Factory(Gmat::MATH_NODE)
-   #endif
 {
    isCaseSensitive = false;
    
@@ -181,9 +179,7 @@ MathFactory::MathFactory()
  */
 //------------------------------------------------------------------------------
 MathFactory::MathFactory(StringArray createList)
-   #ifndef __UNIT_TEST__
    : Factory(createList, Gmat::MATH_NODE)
-   #endif
 {
    isCaseSensitive = true;
 }
@@ -200,9 +196,7 @@ MathFactory::MathFactory(StringArray createList)
  */
 //------------------------------------------------------------------------------
 MathFactory::MathFactory(const MathFactory &fact)
-   #ifndef __UNIT_TEST__
    : Factory(fact)
-   #endif
 {
    isCaseSensitive = true;
    
@@ -224,9 +218,7 @@ MathFactory::MathFactory(const MathFactory &fact)
 //------------------------------------------------------------------------------
 MathFactory& MathFactory::operator=(const MathFactory &fact)
 {
-   #ifndef __UNIT_TEST__
    Factory::operator=(fact);
-   #endif
    isCaseSensitive = true;
    return *this;
 }

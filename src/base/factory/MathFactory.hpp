@@ -21,31 +21,23 @@
 #define MathFactory_hpp
 
 #include "MathNode.hpp"
-
-#ifdef __UNIT_TEST__
-class GMAT_API MathFactory
-#else
 #include "Factory.hpp"
+
 class GMAT_API MathFactory : public Factory
-#endif
 {
 public:
    MathNode* CreateMathNode(const std::string &ofType,
                             const std::string &withName = "");
-
+   
    MathFactory();
    virtual ~MathFactory();
    MathFactory(StringArray createList);
    MathFactory(const MathFactory &fact);
    MathFactory& operator= (const MathFactory &fact);
-
+   
 protected:
    void BuildCreatables();
    
-   #ifdef __UNIT_TEST__
-   StringArray creatables;
-   bool isCaseSensitive;
-   #endif
 };
 
 #endif // MathFactory_hpp
