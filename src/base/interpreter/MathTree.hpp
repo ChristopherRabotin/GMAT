@@ -39,7 +39,8 @@ public:
    
    Real              Evaluate();
    Rmatrix           MatrixEvaluate();
-   bool              Initialize(std::map<std::string, GmatBase *> *objectMap);
+   bool              Initialize(std::map<std::string, GmatBase *> *objectMap,
+                                std::map<std::string, GmatBase *> *globalObjectMap);
    void              GetOutputInfo(Integer &type, Integer &rowCount,
                                    Integer &colCount);
    
@@ -58,6 +59,8 @@ protected:
    
    /// Object store obtained from the Sandbox
    std::map<std::string, GmatBase *> *theObjectMap;
+   /// Global object store obtained from the Sandbox
+   std::map<std::string, GmatBase *> *theGlobalObjectMap;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
    std::map<std::string, ElementWrapper*> *theWrapperMap;
    

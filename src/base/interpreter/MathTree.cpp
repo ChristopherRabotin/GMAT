@@ -71,9 +71,10 @@ MathTree::~MathTree()
  */
 //------------------------------------------------------------------------------
 MathTree::MathTree(const MathTree &mt) :
-   GmatBase        (mt),
-   theTopNode      (mt.theTopNode),
-   theObjectMap    (NULL)
+   GmatBase           (mt),
+   theTopNode         (mt.theTopNode),
+   theObjectMap       (NULL),
+   theGlobalObjectMap (NULL)
 {
 }
 
@@ -96,8 +97,9 @@ MathTree& MathTree::operator=(const MathTree &mt)
     
    GmatBase::operator=(mt);
    
-   theTopNode   = mt.theTopNode;
-   theObjectMap = NULL;
+   theTopNode         = mt.theTopNode;
+   theObjectMap       = NULL;
+   theGlobalObjectMap = NULL;
    
    return *this;
 }
@@ -152,14 +154,17 @@ Rmatrix MathTree::MatrixEvaluate()
 
 
 //------------------------------------------------------------------------------
-// bool Initialize(std::map<std::string, GmatBase *> *objectMap)
+// bool Initialize(std::map<std::string, GmatBase *> *objectMap,
+//                 std::map<std::string, GmatBase *> *globalObjectMap )
 //------------------------------------------------------------------------------
-bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap)
+bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap,
+                          std::map<std::string, GmatBase *> *globalObjectMap )
 {
    if (theTopNode == NULL)
       return true;
 
-   theObjectMap = objectMap;
+   theObjectMap       = objectMap;
+   theGlobalObjectMap = globalObjectMap;
 
    #ifdef DEBUG_MATH_TREE
    MessageInterface::ShowMessage
@@ -279,12 +284,25 @@ bool MathTree::InitializeParameter(MathNode *node)
          
          return true;
       }
+      else if (theGlobalObjectMap->find(newName) != theGlobalObjectMap->end())
+      {
+         node->SetRefObject((*theGlobalObjectMap)[newName], Gmat::PARAMETER,
+                            newName);
+         
+         #ifdef DEBUG_MATH_TREE
+         MessageInterface::ShowMessage
+            ("MathTree::InitializeParameter() Found %s from theGlobalObjectMap\n",
+             refName.c_str());
+         #endif
+         
+         return true;
+      }
       else
       {
          #ifdef DEBUG_MATH_TREE
          MessageInterface::ShowMessage
             ("MathTree::InitializeParameter() Unable to find " + newName +
-             " from theObjectMap\n");
+             " from theObjectMap or theGlobalObjectMap\n");
          #endif
          
          throw InterpreterException("Undefined variable \"" + newName + "\" is used");

@@ -130,11 +130,13 @@ void SolverBranchCommand::StoreLoopData()
 {
    // Make local copies of all of the objects that may be affected by optimize
    // loop iterations
+   // Check the Local Object Store first
    std::map<std::string, GmatBase *>::iterator pair = objectMap->begin();
    GmatBase *obj;
     
    // Loop through the object map, looking for objects we'll need to restore.
-   while (pair != objectMap->end()) {
+   while (pair != objectMap->end()) 
+   {
       obj = (*pair).second;
       // Save copies of all of the spacecraft
       if (obj->GetType() == Gmat::SPACECRAFT)
@@ -164,6 +166,41 @@ void SolverBranchCommand::StoreLoopData()
       }
       ++pair;
    }
+   // Check the Global Object Store next
+   std::map<std::string, GmatBase *>::iterator globalPair = globalObjectMap->begin();
+    
+   // Loop through the object map, looking for objects we'll need to restore.
+   while (globalPair != globalObjectMap->end()) 
+   {
+      obj = (*globalPair).second;
+      // Save copies of all of the spacecraft
+      if (obj->GetType() == Gmat::SPACECRAFT)
+      {
+         Spacecraft *orig = (Spacecraft*)(obj);
+         Spacecraft *sc = new Spacecraft(*orig);
+         // Handle CoordinateSystems
+         if (orig->GetInternalCoordSystem() == NULL)
+            MessageInterface::ShowMessage(
+               "Internal CS is NULL on spacecraft %s prior to optimizer cloning\n",
+               orig->GetName().c_str());
+         if (orig->GetRefObject(Gmat::COORDINATE_SYSTEM, "") == NULL)
+            MessageInterface::ShowMessage(
+               "Coordinate system is NULL on spacecraft %s prior to optimizer cloning\n",
+               orig->GetName().c_str());
+         sc->SetInternalCoordSystem(orig->GetInternalCoordSystem());
+         sc->SetRefObject(orig->GetRefObject(Gmat::COORDINATE_SYSTEM, ""),
+            Gmat::COORDINATE_SYSTEM, "");
+         
+         localStore.push_back(sc);
+      }
+      if (obj->GetType() == Gmat::FORMATION)
+      {
+         Formation *orig = (Formation*)(obj);
+         Formation *form  = new Formation(*orig);
+         localStore.push_back(form);
+      }
+      ++globalPair;
+   }
 }
 
 
@@ -183,7 +220,8 @@ void SolverBranchCommand::ResetLoopData()
    for (std::vector<GmatBase *>::iterator i = localStore.begin();
         i != localStore.end(); ++i) {
       name = (*i)->GetName();
-      GmatBase *gb = (*objectMap)[name];
+      //GmatBase *gb = (*objectMap)[name];
+      GmatBase *gb = FindObject(name);
       if (gb != NULL) {
          if (gb->GetType() == Gmat::SPACECRAFT)
          {

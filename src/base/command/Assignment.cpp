@@ -296,7 +296,7 @@ bool Assignment::Initialize()
       
       try
       {
-         if (mathTree->Initialize(objectMap))
+         if (mathTree->Initialize(objectMap, globalObjectMap))
          {
             if (!topNode->ValidateInputs())
                throw CommandException
