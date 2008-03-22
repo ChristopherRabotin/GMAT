@@ -166,7 +166,8 @@ bool Sandbox::AddObject(GmatBase *obj)
 
 
    // Check to see if the object is already in the map
-   if (objectMap.find(name) == objectMap.end())
+   //if (objectMap.find(name) == objectMap.end())
+   if (FindObject(name) == NULL)
    {
       // If not, store the new object pointer
       #ifdef DEBUG_SANDBOX_CLONING
@@ -182,9 +183,11 @@ bool Sandbox::AddObject(GmatBase *obj)
 
          // Subscribers are already cloned in AddSubscriber()
          if (obj->GetType() == Gmat::SUBSCRIBER)
-            objectMap[name] = obj;
+            //objectMap[name] = obj;
+            SetObjectByNameInMap(name,obj);
          else
-            objectMap[name] = obj->Clone();
+            //objectMap[name] = obj->Clone();
+            SetObjectByNameInMap(name, (obj->Clone()));
          
          if (obj->GetType() == Gmat::SPACECRAFT)
          {
@@ -194,7 +197,8 @@ bool Sandbox::AddObject(GmatBase *obj)
       #ifdef DEBUG_SANDBOX_CLONING
       }
       else
-         objectMap[name] = obj;
+         //objectMap[name] = obj;
+         SetObjectByNameInMap(name, obj);
       #endif
    }
    else
@@ -370,8 +374,10 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
    
    GmatBase* obj = NULL;
    
-   if (objectMap.find(name) != objectMap.end()) {
-      obj = objectMap[name];
+   //if (objectMap.find(name) != objectMap.end()) 
+   if ((obj = FindObject(name)) != NULL) 
+   {
+      //obj = objectMap[name];
       if (type != Gmat::UNKNOWN_OBJECT)
       {
          if (obj->GetType() != type) {
@@ -391,6 +397,10 @@ GmatBase* Sandbox::GetInternalObject(std::string name, Gmat::ObjectType type)
          MessageInterface::ShowMessage("Here is the current object map:\n");
          for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
               i != objectMap.end(); ++i)
+            MessageInterface::ShowMessage("   %s\n", i->first.c_str());
+         MessageInterface::ShowMessage("Here is the current global object map:\n");
+         for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap.begin();
+              i != globalObjectMap.end(); ++i)
             MessageInterface::ShowMessage("   %s\n", i->first.c_str());
       #endif
       
@@ -462,6 +472,8 @@ bool Sandbox::Initialize()
    InitializeInternalObjects();
 
    // Set J2000 Body for all SpacePoint derivatives before anything else
+   // NOTE - at this point, everything should be in the SandboxObjectMap,
+   // and the GlobalObjectMap should be empty
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
       obj = omi->second;
@@ -509,7 +521,6 @@ bool Sandbox::Initialize()
          obj->Initialize();
       }
    }
-
 
    // Spacecraft
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
@@ -644,6 +655,26 @@ bool Sandbox::Initialize()
       }
    }
    
+   // Move global objects to the Global Object Store
+   StringArray movedObjects;
+   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   {
+      obj = omi->second;
+      // Check the isGlobal flag
+      if (obj->GetIsGlobal())
+      {
+         #ifdef DEBUG_SANDBOX_INIT
+            MessageInterface::ShowMessage(
+               "Sandbox::moving object %s to the Global Object Store\n",
+               (omi->first).c_str());
+         #endif
+         globalObjectMap.insert(*omi);
+         movedObjects.push_back(omi->first);
+      }
+   }
+   for (unsigned int ii = 0; ii < movedObjects.size(); ii++)
+      objectMap.erase(movedObjects.at(ii));
+   movedObjects.clear();   
    
    #if DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage(
@@ -678,12 +709,17 @@ bool Sandbox::Initialize()
                ("CallFunction command has empty Function name in line:\n \"" +
                 current->GetGeneratingString(Gmat::SCRIPTING) + "\"");
          
-         if (objectMap.find(funName) == objectMap.end())
+         //if (objectMap.find(funName) == objectMap.end())
+         // NOTE - We are putting all Functions into the GOS,
+         // so they should only be found there   2008.03.21 WCS
+         GmatBase *funObj = NULL;
+         if ((funObj = FindObject(funName)) == NULL)
             throw SandboxException
                ("CallFunction command references undefined Function \"" + funName +
                 "\" in line:\n \"" + current->GetGeneratingString(Gmat::SCRIPTING) + "\"");
          
-         GmatFunction *fun = (GmatFunction*)objectMap[funName];
+         //GmatFunction *fun = (GmatFunction*)objectMap[funName];
+         GmatFunction *fun = (GmatFunction*)funObj;
          if (fun->GetTypeName() == "GmatFunction")
          {
             /// @todo Make the GmatFunction file name handling more robust
@@ -760,7 +796,7 @@ void Sandbox::BuildReferences(GmatBase *obj)
       for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
       {
          CoordinateSystem *fixedCS = NULL;
-         
+
          if (objectMap.find(*i) != objectMap.end())
          {
             GmatBase *ref = objectMap[*i];
@@ -769,7 +805,17 @@ void Sandbox::BuildReferences(GmatBase *obj)
                   " was expected to be a Coordinate System, but it has type " +
                   ref->GetTypeName());
             fixedCS = (CoordinateSystem*)ref;
-            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
+            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i); 
+         }
+         else if (globalObjectMap.find(*i) != globalObjectMap.end())
+         {
+            GmatBase *ref = globalObjectMap[*i];
+            if (ref->IsOfType("CoordinateSystem") == false)
+               throw SandboxException("Object named " + (*i) + 
+                  " was expected to be a Coordinate System, but it has type " +
+                  ref->GetTypeName());
+            fixedCS = (CoordinateSystem*)ref;
+            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i); 
          }
          else
          {
@@ -787,7 +833,8 @@ void Sandbox::BuildReferences(GmatBase *obj)
             InitializeCoordinateSystem(fixedCS);
             fixedCS->Initialize();
             
-            objectMap[*i] = fixedCS;
+            //objectMap[*i] = fixedCS;
+            globalObjectMap[*i] = fixedCS;
             
             #ifdef DEBUG_SANDBOX_INIT
                MessageInterface::ShowMessage(
@@ -1066,15 +1113,18 @@ void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
          oName.c_str(), obj->GetName().c_str());
    #endif
    
-   if (objectMap.find(oName) != objectMap.end())
+   GmatBase *refObj = NULL;
+      //if (objectMap.find(oName) != objectMap.end())
+   if ((refObj = FindObject(oName)) != NULL)
    {
-      GmatBase *refObj = objectMap[oName];
+      //GmatBase *refObj = objectMap[oName];
       obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
    }
    else
    {
       // look SolarSystem
-      GmatBase *refObj = FindSpacePoint(oName);
+      //GmatBase *refObj = FindSpacePoint(oName);
+      refObj = FindSpacePoint(oName);
 
       if (refObj == NULL)
          throw SandboxException("Unknown object " + oName + " requested by " +
@@ -1106,6 +1156,10 @@ bool Sandbox::Execute()
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the current object map:\n");
    for (std::map<std::string, GmatBase *>::iterator i = objectMap.begin();
         i != objectMap.end(); ++i)
+      MessageInterface::ShowMessage("   (%p) %s\n", i->second, i->first.c_str());
+   MessageInterface::ShowMessage("Sandbox::Execute() Here is the current global object map:\n");
+   for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap.begin();
+        i != globalObjectMap.end(); ++i)
       MessageInterface::ShowMessage("   (%p) %s\n", i->second, i->first.c_str());
 
    MessageInterface::ShowMessage("Sandbox::Execute() Here is the mission sequence:\n");
@@ -1273,17 +1327,48 @@ void Sandbox::Clear()
    std::map<std::string, GmatBase *>::iterator omi;
 
    #ifdef DEBUG_SANDBOX_OBJECT_MAPS
-      MessageInterface::ShowMessage("Sandbox OMI List\n");
-      for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
-      {
-         MessageInterface::ShowMessage("   %s", (omi->first).c_str());
-         MessageInterface::ShowMessage(" of type %s\n",
-            (omi->second)->GetTypeName().c_str());
-      }
+   MessageInterface::ShowMessage("Sandbox OMI List\n");
+   for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+      MessageInterface::ShowMessage("   %s", (omi->first).c_str());
+      MessageInterface::ShowMessage(" of type %s\n",
+         (omi->second)->GetTypeName().c_str());
+   }
+   MessageInterface::ShowMessage("Sandbox GOMI List\n");
+   for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
+   {
+      MessageInterface::ShowMessage("   %s", (omi->first).c_str());
+      MessageInterface::ShowMessage(" of type %s\n",
+         (omi->second)->GetTypeName().c_str());
+   }
    #endif
 
 
    for (omi = objectMap.begin(); omi != objectMap.end(); omi++)
+   {
+      if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
+         publisher->Unsubscribe((Subscriber*)(omi->second));
+      
+      #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+         MessageInterface::ShowMessage("Sandbox clearing %s\n",
+            (omi->first).c_str());
+      #endif
+
+      #ifdef DEBUG_SANDBOX_CLONING
+         if (find(clonable.begin(), clonable.end(),
+             (omi->second)->GetType()) != clonable.end())
+      #endif
+      {
+         #ifdef DEBUG_SANDBOX_OBJECT_MAPS
+            MessageInterface::ShowMessage("Deleting '%s'\n",
+               (omi->second)->GetName().c_str());
+         #endif
+         delete omi->second;
+         //objectMap.erase(omi);
+      }
+      /// @todo Subscribers are cloned; where are they deleted?
+   }
+   for (omi = globalObjectMap.begin(); omi != globalObjectMap.end(); omi++)
    {
       if ((omi->second)->GetType() == Gmat::SUBSCRIBER)
          publisher->Unsubscribe((Subscriber*)(omi->second));
@@ -1322,6 +1407,7 @@ void Sandbox::Clear()
 #endif
 
    objectMap.clear();
+   globalObjectMap.clear();
    transientForces.clear();
 
    // Update the sandbox state
@@ -1398,10 +1484,11 @@ void Sandbox::BuildAssociations(GmatBase * obj)
                 i->c_str(), obj->GetName().c_str());
          #endif
 
-         if (objectMap.find(*i) == objectMap.end())
+         GmatBase *el = NULL;
+         if ((el = FindObject(*i)) == NULL)
             throw SandboxException("Sandbox::BuildAssociations: Cannot find "
                                    "hardware element \"" + (*i) + "\"\n");
-         GmatBase *el = objectMap[*i];
+         //GmatBase *el = objectMap[*i];
          GmatBase *newEl = el->Clone();
          #if DEBUG_SANDBOX
             MessageInterface::ShowMessage
@@ -1440,13 +1527,100 @@ SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
 
    if (sp == NULL)
    {
-      if (objectMap.find(spName) != objectMap.end())
+      GmatBase *spObj;
+      if ((spObj = FindObject(spName)) != NULL)
       {
-         if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
-            sp = (SpacePoint*)(objectMap[spName]);
+         //if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
+         if (spObj->IsOfType(Gmat::SPACE_POINT))
+            sp = (SpacePoint*)(spObj);
       }
    }
 
 
    return sp;
 }
+
+
+//------------------------------------------------------------------------------
+// GmatBase* Sandbox::FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ *  Finds an object by name, searching through the SandboxObjectMap first,
+ *  then the GlobalObjectMap
+ *
+ *  @param <spname> The name of the SpacePoint.
+ *
+ *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
+ *          Sandbox.
+ */
+//------------------------------------------------------------------------------
+GmatBase* Sandbox::FindObject(const std::string &name)
+{
+   if (objectMap.find(name) == objectMap.end())
+   {
+     // If not found in the LOS, check the Global Object Store (GOS)
+      if (globalObjectMap.find(name) == globalObjectMap.end())
+         return NULL;
+      else return globalObjectMap[name];
+   }
+   else
+      return objectMap[name];
+}
+
+//------------------------------------------------------------------------------
+// bool Sandbox::SetObjectByNameInMap(const std::string &name,
+//                                    GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ *  Sets the object pointer for the given name in the object map(s).  NOTE that
+ *  an object should only exist in one of the object maps, so both IFs should
+ *  not evaluate to TRUE.
+ *
+ *  @param <name> The name of the object.
+ *  @param <obj>  The object pointer.
+ *
+ *  @return true if successful; flase otherwise
+ */
+//------------------------------------------------------------------------------
+bool Sandbox::SetObjectByNameInMap(const std::string &name,
+                             GmatBase *obj)
+{
+#if DEBUG_SANDBOX_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::SetObjectByNameInMap() name = %s\n",
+       name.c_str());
+#endif
+   bool found = false;
+   // if it's already in a map, set the object pointer for the name
+   if (objectMap.find(name) != objectMap.end())
+   {
+      objectMap[name] = obj;
+#if DEBUG_SANDBOX_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::SetObjectByNameInMap() set object name = %s in objectMap\n",
+       name.c_str());
+#endif
+      found = true;
+   }
+   if (globalObjectMap.find(name) != globalObjectMap.end())
+   {
+      globalObjectMap[name] = obj;
+#if DEBUG_SANDBOX_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::SetObjectByNameInMap() set object name = %s in globalObjectMap\n",
+       name.c_str());
+#endif      found = true;
+   }
+   // if not already in the map, add it to the objectMap
+   // (globals are added to the globalObjectMap later)
+   if (!found)
+      objectMap.insert(std::make_pair(name,obj));
+
+#if DEBUG_SANDBOX_OBJ
+   MessageInterface::ShowMessage
+      ("Sandbox::SetObjectByNameInMap() returning found = %s\n",
+       (found? "TRUE" : "FALSE"));
+#endif   
+   return found;
+}
+

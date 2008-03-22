@@ -122,6 +122,10 @@ private:
    void                              BuildAssociations(GmatBase * obj);
    SpacePoint *                      FindSpacePoint(const std::string &spName);
    
+   GmatBase*                         FindObject(const std::string &name);
+   bool                              SetObjectByNameInMap(const std::string &name,
+                                                          GmatBase *obj);
+   
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;
    #endif
