@@ -1609,7 +1609,8 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() set object name = %s in globalObjectMap\n",
        name.c_str());
-#endif      found = true;
+#endif      
+   found = true;
    }
    // if not already in the map, add it to the objectMap
    // (globals are added to the globalObjectMap later)
