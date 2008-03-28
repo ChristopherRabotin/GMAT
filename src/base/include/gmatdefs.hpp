@@ -147,6 +147,7 @@ namespace Gmat
       OBJECT_TYPE,
       OBJECTARRAY_TYPE,
       ON_OFF_TYPE,
+      ENUMERATION_TYPE,
       TypeCount,
       UNKNOWN_PARAMETER_TYPE = -1
    };
