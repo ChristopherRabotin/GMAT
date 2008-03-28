@@ -952,15 +952,9 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
       
       if (cp == NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a CreateCalculatedPoint type: %s.\n"
-         //    "Make sure %s is correct type and registered to CalculatedPointFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating CalculatedPoint: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create a CalculatedPoint type \"" + type + "\"\n");
       }
-      
       
       // add default bodies
       if (type == "LibrationPoint")
@@ -1080,13 +1074,8 @@ CelestialBody* Moderator::CreateCelestialBody(const std::string &type,
     
       if (body == NULL)
       {
-         //MessageInterface::ShowMessage
-         //   ("Moderator::CreateCelestialBody() Error Creating %s.  Make sure "
-         //    "CelestialBodyFactory is registered and has correct type. \n",
-         //    type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating CelestialBody: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create a CelestialBody type \"" + type + "\"\n");
       }
       
 //      // Manage it if it is a named body
@@ -1163,7 +1152,10 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
       Spacecraft *sc = (Spacecraft*)(theFactoryManager->CreateSpacecraft(type, name));
       
       if (sc == NULL)
-         throw GmatBaseException("Error Creating Spacecraft: " + type + "\n");
+      {
+         throw GmatBaseException
+            ("The Moderator cannot create a Spacecraft type \"" + type + "\"\n");
+      }
       
       if (type == "Spacecraft")
       {
@@ -1302,13 +1294,8 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
       
       if (hw == NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Hardware type: %s.\n"
-         //    "Make sure %s is correct type and registered to HardwareFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating Hardware: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create a Hardware type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named Hardware
@@ -1382,16 +1369,11 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
    if (GetPropagator(name) == NULL)
    {
       Propagator *prop = theFactoryManager->CreatePropagator(type, name);
-    
+      
       if (prop ==  NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Propagator type: %s.\n"
-         //    "Make sure %s is correct type and registered to PropagatorFactory.\n",
-         //   type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating Propagator: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create a Propagator type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named Propagator
@@ -1462,13 +1444,8 @@ PhysicalModel* Moderator::CreatePhysicalModel(const std::string &type,
     
       if (physicalModel ==  NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a PhysicalModel type: %s.\n"
-         //    "Make sure %s is correct type and registered to PhysicalModelFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;         
-         throw GmatBaseException("Error Creating PhysicalModel: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create a PhysicalModel type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named PhysicalModel
@@ -1550,13 +1527,8 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
       
       if (atmosphereModel ==  NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a AtmosphereModel type: %s.\n"
-         //    "Make sure %s is correct type and registered to AtmosphereFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating AtmosphereModel: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create an AtmosphereModel type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named AtmosphereModel
@@ -1628,10 +1600,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
    if (GetBurn(name) == NULL)
    {
       Burn *burn = theFactoryManager->CreateBurn(type, name);
-
+      
       if (burn ==  NULL)
-         throw GmatBaseException("Error Creating Burn: " + type + "\n");
-
+         throw GmatBaseException
+            ("The Moderator cannot create Burn type \"" + type + "\"\n");
+      
       // Set default Axes to VNB
       burn->SetStringParameter(burn->GetParameterID("Axes"), "VNB");
 
@@ -1767,8 +1740,11 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       #endif
       
       if (param == NULL)
-        throw GmatBaseException
-           ("Error creating a parameter \"" + type + "\" named \"" + name + "\"\n");
+      {
+         throw GmatBaseException
+           ("The Moderator cannot create a Parameter type \"" + type +
+            "\" named \"" + name + "\"\n");
+      }
       
       // We don't know the owner type the parameter before create,
       // so validate owner type after create.
@@ -1885,8 +1861,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       }
       catch (BaseException &e)
       {
-         MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
-                                       e.GetFullMessage());
+         #if DEBUG_CREATE_RESOURCE
+         MessageInterface::ShowMessage("In Moderator::CreateParameter()\n" +
+                                       e.GetFullMessage() + "\n");
+         #endif
       }
       
       return param;
@@ -1932,12 +1910,8 @@ ForceModel* Moderator::CreateForceModel(const std::string &name)
    
    if (fm == NULL)
    {
-      //MessageInterface::PopupMessage
-      //   (Gmat::ERROR_, "Cannot create a ForceModel.\n"
-      //    "Make sure ForceModel is correct type and registered to ForceModelFactory.\n");
-      
-      //return NULL;
-      throw GmatBaseException("Error Creating ForceModel\n");
+      throw GmatBaseException
+         ("The Moderator cannot create ForceModel named \"" + name + "\"\n");
    }
    
    // Manage it if it is a named ForceModel
@@ -2026,13 +2000,8 @@ Solver* Moderator::CreateSolver(const std::string &type, const std::string &name
 
       if (solver == NULL)
       {
-         //MessageInterface::PopupMessage
-         //   (Gmat::ERROR_, "Cannot create a Solver type: %s.\n"
-         //    "Make sure %s is correct type and registered to SolverFactory.\n",
-         //    type.c_str(), type.c_str());
-         
-         //return NULL;
-         throw GmatBaseException("Error Creating Solver: " + type + "\n");
+         throw GmatBaseException
+            ("The Moderator cannot create Solver type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named solver
@@ -2233,12 +2202,14 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
       if (cs == NULL)
       {
          MessageInterface::PopupMessage
-            (Gmat::ERROR_, "Cannot create a CoordinateSystem.\n"
+            (Gmat::ERROR_, "The Moderator cannot create a CoordinateSystem.\n"
              "Make sure CoordinateSystem is correct type and registered to "
              "CoordinateSystemFactory.\n");
          
          return NULL;
-         //throw GmatBaseException("Error Creating CoordinateSystem:" + type);
+         
+         //throw GmatBaseException
+         //   ("The Moderator cannot create a CoordinateSystem type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named CoordinateSystem
@@ -2349,7 +2320,9 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
              type.c_str(), type.c_str());
          
          return NULL;
-         //throw GmatBaseException("Error Creating Subscriber:" + type);
+         
+         //throw GmatBaseException
+         //   ("The Moderator cannot create a Subscriber type\"" + type + "\"\n");
       }
       
       try
@@ -2463,7 +2436,9 @@ Function* Moderator::CreateFunction(const std::string &type,
              type.c_str(), type.c_str());
          
          return NULL;
-         //throw GmatBaseException("Error Creating Function:" + type);
+         
+         //throw GmatBaseException
+         //   ("The Moderator cannot create a Function type \"" + type + "\"\n");
       }
       
       // Manage it if it is a named function
@@ -2477,7 +2452,7 @@ Function* Moderator::CreateFunction(const std::string &type,
          MessageInterface::ShowMessage("Moderator::CreateFunction()\n" +
                                        e.GetFullMessage());
       }
-   
+      
       return function;
    }
    else
@@ -2531,7 +2506,10 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
    StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
    
    if (stopCond ==  NULL)
-      throw GmatBaseException("Error Creating StopCondition: " + type + "\n");
+   {
+      throw GmatBaseException
+         ("The Moderator cannot create StopCondition type \"" + type + "\"\n");
+   }
    
    return stopCond;
 }
@@ -2568,7 +2546,9 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
           type.c_str(), type.c_str());
       
       return NULL;
-      //throw GmatBaseException("Error Creating AxisSystem: " + type);
+      
+      //throw GmatBaseException
+      //   ("The Moderator cannot create AxisSystem type \"" + type + "\"\n");
    }
    
    // set origin and j2000body
@@ -2617,7 +2597,10 @@ MathNode* Moderator::CreateMathNode(const std::string &type,
    MathNode *mathNode = theFactoryManager->CreateMathNode(type, name);
    
    if (mathNode ==  NULL)
-      throw GmatBaseException("Error Creating MathNode: " + type + "\n");
+   {
+      throw GmatBaseException
+         ("The Moderator cannot create MathNode type \"" + type + "\"\n");
+   }
    
    return mathNode;
 }
@@ -2712,12 +2695,13 @@ GmatCommand* Moderator::CreateCommand(const std::string &type,
    
    if (cmd == NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a Command type: %s.\n"
-          "Make sure %s is correct type and registered to Commandactory.\n",
-          type.c_str(), type.c_str());
+      //MessageInterface::PopupMessage
+      //   (Gmat::ERROR_, "Cannot create a Command type: %s.\n"
+      //    "Make sure %s is correct type and registered to Commandactory.\n",
+      //    type.c_str(), type.c_str());
       
-      throw GmatBaseException("Error Creating Command: " + type + "\n");
+      throw GmatBaseException
+         ("The Moderator cannot create a Command type \"" + type + "\"\n");
    }
    
    retFlag = true;
@@ -2755,13 +2739,13 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
    
    if (cmd == NULL)
    {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Cannot create a Command type: %s.\n"
-          "Make sure %s is correct type and registered to Commandactory.\n",
-          type.c_str(), type.c_str());
-
-      throw GmatBaseException("Error Creating Command: " + type + "\n");
-      //return NULL;
+      //MessageInterface::PopupMessage
+      //   (Gmat::ERROR_, "Cannot create a Command type: %s.\n"
+      //   "Make sure %s is correct type and registered to Commandactory.\n",
+      //   type.c_str(), type.c_str());
+      
+      throw GmatBaseException
+         ("The Moderator cannot create a Command type \"" + type + "\"\n");
    }
    
    Integer id;
@@ -2992,7 +2976,8 @@ GmatCommand* Moderator::AppendCommand(const std::string &type,
    }
    else
    {
-      throw GmatBaseException("Error Creating Command: " + type + "\n");
+      throw GmatBaseException
+         ("The Moderator cannot create a Command type \"" + type + "\"\n");
    }
    
    return cmd;
