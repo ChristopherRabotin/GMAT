@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CalculatedPoint
 //------------------------------------------------------------------------------
@@ -101,21 +101,24 @@ public:
                                         const std::string &oldName,
                                         const std::string &newName);
    virtual const StringArray& 
-      GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         TakeAction(const std::string &action,  
                                    const std::string &actionData = "");
    
 protected:
-
+   
    enum
    {
       NUMBER_OF_BODIES = SpacePointParamCount, 
       BODY_NAMES,
       CalculatedPointParamCount
    };
-   static const std::string PARAMETER_TEXT[CalculatedPointParamCount - SpacePointParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount];
-
+   
+   static const std::string
+      PARAMETER_TEXT[CalculatedPointParamCount - SpacePointParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[CalculatedPointParamCount - SpacePointParamCount];
+   
    /// number of bodies
    Integer                  numberOfBodies;
    /// list of bodies

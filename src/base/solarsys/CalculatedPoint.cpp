@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CalculatedPoint
 //------------------------------------------------------------------------------
@@ -587,20 +587,19 @@ bool CalculatedPoint::SetRefObject(GmatBase *obj,
                                    const Gmat::ObjectType type,
                                    const std::string &name)
 {
-    //loj: 5/11/05 Added CELESTIAL_BODY and CALCULATED_POINT
-   if (type == Gmat::SPACE_POINT || type == Gmat::CELESTIAL_BODY ||
-       type == Gmat::CALCULATED_POINT)
+   if (obj->IsOfType(Gmat::SPACE_POINT))
    {
       // first check to see if it's already in the list
-      for (unsigned int i = 0; i < bodyList.size(); i++)
-      {
-         if (bodyList.at(i) == (SpacePoint*) obj) return false;
-      }
+      std::vector<SpacePoint*>::iterator pos =
+         find(bodyList.begin(), bodyList.end(), obj);
       
-      bodyList.push_back((SpacePoint*) obj);
+      if (pos == bodyList.end())
+            bodyList.push_back((SpacePoint*) obj);
+      
       numberOfBodies++;
       return true;
    }
+   
    return SpacePoint::SetRefObject(obj, type, name);
 }
 
