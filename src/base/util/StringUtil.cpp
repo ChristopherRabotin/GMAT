@@ -556,6 +556,10 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
       ("GmatStringUtil::SeparateBy() str=<%s>, delim=<%s>, putBracketsTogether=%d\n",
        str.c_str(), delim.c_str(), putBracketsTogether);
    #endif
+
+   bool insertDelimiter = false;
+   if (delim.size() == 1)
+      insertDelimiter = true;
    
    StringTokenizer st(str, delim);
    StringArray tempParts = st.GetAllTokens();
@@ -580,7 +584,7 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
    Integer size = -1;
    bool append = false;
    
-   // go through each part and put brackets together
+   // go through each part and put brackets together, insert back delimitter if only one
    for (int i=0; i<count; i++)
    {         
       index1 = tempParts[i].find_first_of(openBrackets);
@@ -589,12 +593,11 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
       {
          if (append)
          {
-            // preserve comma, semicoln, coln, and blank space (loj: 2008.03.11)
-            //parts[size] = parts[size] + "," + tempParts[i];
-            if (parts[size].find_last_of(",;:") == str.npos)
+            // if only one delimitter, insert it back in (loj: 2008.03.24)
+            if (delim.size() == 1)
+               parts[size] = parts[size] + delim + tempParts[i];
+            else                     
                parts[size] = parts[size] + " " + tempParts[i];
-            else
-               parts[size] = parts[size] + tempParts[i];
          }
          else
          {
@@ -630,12 +633,11 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
                ("===> appending %s\n", tempParts[i].c_str());
             #endif
             
-            // preserve comma, semicoln, coln, and blank space (loj: 2008.03.11)
-            ///parts[size] = parts[size] + "," + tempParts[i];            
-            if (parts[size].find_last_of(",;:") == str.npos)
-               parts[size] = parts[size] + " " + tempParts[i];
-            else
-               parts[size] = parts[size] + tempParts[i];
+            // if only one delimitter, insert it back in (loj: 2008.03.24)
+            if (delim.size() == 1)
+               parts[size] = parts[size] + delim + tempParts[i];
+            else                     
+               parts[size] = parts[size] + " " + tempParts[i];            
          }
          else
          {
@@ -1493,6 +1495,26 @@ void GmatStringUtil::FindLastParenMatch(const std::string &str, Integer &openPar
 
 
 //------------------------------------------------------------------------------
+// bool IsEnclosedWith(const std::string &str, const string &enclosingStr)
+//------------------------------------------------------------------------------
+/*
+ * Returns true if item is enclosed with given enclosing string.
+ *
+ * @param  str  Input string to check for enclosed with
+ * @param  enclosingStr  Input enclosing string to look for enclosed with
+ *
+ * @return true if string is enclosed with given enclosing string
+ * 
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsEnclosedWith(const std::string &str,
+                                    const string &enclosingStr)
+{
+   return (StartsWith(str, enclosingStr) && EndsWith(str, enclosingStr));
+}
+
+
+//------------------------------------------------------------------------------
 // bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true)
 //------------------------------------------------------------------------------
 /*
@@ -1515,11 +1537,11 @@ bool GmatStringUtil::IsEnclosedWithExtraParen(const std::string &str, bool check
    Integer openParen = str.find_first_of('(');
    if (openParen == (Integer)str.npos)
       openParen = -1;
-
+   
    Integer closeParen = str.find_last_of(')');
    if (closeParen == (Integer)str.npos)
       closeParen = -1;
-
+   
    #if DEBUG_STRING_UTIL
    MessageInterface::ShowMessage
       ("IsEnclosedWithExtraParen() openParen=%d, closeParen=%d\n", openParen, closeParen);
@@ -2294,6 +2316,39 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// std::string RemoveEnclosingString(const std::string &str, const std::string &enStr)
+//------------------------------------------------------------------------------
+/*
+ * Removes enclosing string if actually enclosed with the string.
+ *
+ * @param  str  Input string to remove given enclosnig string
+ * @param  enStr The enclosing string to check and remove
+ *
+ * @return string with enclosing string removed if found, original string otherwise
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveEnclosingString(const std::string &str,
+                                                  const std::string &enStr)
+{
+   std::string str1 = str;
+   
+   // First check if string is enclosed with given string
+   if (IsEnclosedWith(str, enStr))
+   {
+      str1 = str.substr(enStr.size());
+      str1 = str1.substr(0, str1.size() - enStr.size());
+   }
+   
+   #ifdef DEBUG_REMOVE_ENCLOSING_STRING
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::RemoveEnclosingString() returning <%s>\n", str1.c_str());
+   #endif
+   
+   return str1;
+}
+
+
+//------------------------------------------------------------------------------
 // bool StartsWith(const std::string &str, const std::string &value)
 //------------------------------------------------------------------------------
 /*
@@ -2303,7 +2358,7 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
 bool GmatStringUtil::StartsWith(const std::string &str, const std::string &value)
 {
    return (str.size() >= value.size()) && 
-          (str.substr(0, value.size()) == value); 
+      (str.substr(0, value.size()) == value);
 }
 
 
@@ -2325,11 +2380,18 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 // bool IsValidName(const std::string &str, bool isObject, bool ignoreParen)
 //------------------------------------------------------------------------------
 /*
- * If validating for object, it returns true if it is not the same as some keywords.
+ * Checks for valid name.
  *
- * If validating for non-Object (variable name) returns true if string contains
- * only alphanumeric characters and doesn't start with number.
- * Underscore is allowed.
+ * Returns true if string contains only alphanumeric characters and doesn't start
+ * with number. Underscore is allowed.
+ *
+ * If validating for object, it also checks for some keyword such as "Create."
+ * If parenthesis is to be ignored, the name will be reassign upto open parenthesis.
+ *
+ * @param  str  The input string to check for valid name
+ * @param  isObject  true if input string is object name (false)
+ * @param  ignoreParen  true if input string has parenthesis and to ignore it
+ *                      when checking (false)
  */
 //------------------------------------------------------------------------------
 bool GmatStringUtil::IsValidName(const std::string &str, bool isObject,
@@ -2338,19 +2400,22 @@ bool GmatStringUtil::IsValidName(const std::string &str, bool isObject,
    // check for valid object name
    if (isObject)
    {
-      if (str == "GMAT" || str == "Create" || str == "=" ||
-          str == ":" || str == ";" || str == "." || str == ",")
+      if (str == "GMAT" || str == "Create")
          return false;
       else
-         return true;
+         for (UnsignedInt i=1; i<str.size(); i++)
+            if (!isalnum(str[i]) && str[i] != '_')
+               return false;
+      
+      return true;
    }
    
    // check for valid variable name
    if (!isalpha(str[0]))
       return false;
-
+   
    std::string str1 = str;
-
+   
    // if ignoring open parenthesis, remove it first
    if (ignoreParen)
    {

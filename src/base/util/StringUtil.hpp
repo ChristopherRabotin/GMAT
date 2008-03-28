@@ -58,6 +58,7 @@ namespace GmatStringUtil
                         Integer width = GmatGlobal::INTEGER_WIDTH);
    
    std::string RemoveExtraParen(const std::string &str);
+   std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);
    
    char GetClosingBracket(const char &openBracket);
    
@@ -96,6 +97,7 @@ namespace GmatStringUtil
    void FindLastParenMatch(const std::string &str, Integer &openParen,
                            Integer &closeParen, Integer start = 0);
    
+   bool IsEnclosedWith(const std::string &str, const std::string &enclosingStr);
    bool IsEnclosedWithExtraParen(const std::string &str, bool checkOps = true);
    bool IsBracketBalanced(const std::string &str, const std::string &bracketPair);
    bool IsParenBalanced(const std::string &str);
