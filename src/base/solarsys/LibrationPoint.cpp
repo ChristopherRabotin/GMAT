@@ -25,6 +25,7 @@
 #include "Rvector3.hpp"
 #include "Rvector6.hpp"
 #include "Rmatrix33.hpp"
+#include "MessageInterface.hpp"
 
 #include <iostream>
 using namespace std;
@@ -34,7 +35,7 @@ using namespace std;
 //---------------------------------
 const Real LibrationPoint::CONVERGENCE_TOLERANCE = 1.0e-8;
 const Real LibrationPoint::MAX_ITERATIONS        = 2000;
-   
+
 const std::string
 LibrationPoint::PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount] =
 {
@@ -611,6 +612,24 @@ bool  LibrationPoint::SetStringParameter(const std::string &label,
    return SetStringParameter(GetParameterID(label),value,index);
 }
 
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& LibrationPoint::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   return refObjectTypes;
+}
+
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
@@ -628,15 +647,56 @@ const StringArray& LibrationPoint::GetRefObjectNameArray(const Gmat::ObjectType 
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::SPACE_POINT)
    {
       static StringArray refs;
-      refs.clear(); //loj: 2/23/07 added
+      refs.clear();
       refs.push_back(primaryBodyName);
       refs.push_back(secondaryBodyName);
       return refs;
    }
    
-   // Not handled here -- invoke the next higher GetRefObject call
+   // Not handled here -- invoke the next higher GetRefObjectNameArray call
    return CalculatedPoint::GetRefObjectNameArray(type);
 }
+
+
+//------------------------------------------------------------------------------
+// bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                   const std::string &name)
+//------------------------------------------------------------------------------
+/**
+ * Sets the reference object.
+ *
+ * @param <obj>   reference object pointer.
+ * @param <type>  type of the reference object.
+ * @param <name>  name of the reference object.
+ *
+ * @return success of the operation.
+ */
+//------------------------------------------------------------------------------
+bool LibrationPoint::SetRefObject(GmatBase *obj, 
+                                  const Gmat::ObjectType type,
+                                  const std::string &name)
+{
+   if (obj == NULL)
+      return false;
+
+   #ifdef DEBUG_LP_OBJECT
+   MessageInterface::ShowMessage
+      ("LibrationPoint::SetRefObject() this=%s, obj=<%p><%s> entered\n",
+       GetName().c_str(), obj, obj->GetName().c_str());
+   #endif
+   
+   if (obj->IsOfType(Gmat::SPACE_POINT))
+   {
+      if (name == primaryBodyName)
+         primaryBody = (SpacePoint*)obj;
+      else if (name == secondaryBodyName)
+         secondaryBody = (SpacePoint*)obj;
+   }
+   
+   // Call parent class to add objects to bodyList
+   return CalculatedPoint::SetRefObject(obj, type, name);
+}
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
@@ -692,6 +752,12 @@ void LibrationPoint::CheckBodies()
    bool foundSecondary = false;
    for (unsigned int i = 0; i < bodyList.size() ; i++)
    {
+      #ifdef DEBUG_CHECK_BODIES
+      MessageInterface::ShowMessage
+         ("   bodyList[%d] = %s\n", i,
+          (bodyList[i] == NULL ? "NULL" : bodyList[i]->GetName().c_str()));
+      #endif
+      
       if (((bodyList.at(i))->GetType() != Gmat::CELESTIAL_BODY) &&
           ((bodyList.at(i))->GetTypeName() != "Barycenter"))
          throw SolarSystemException(

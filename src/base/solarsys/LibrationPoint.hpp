@@ -76,8 +76,12 @@ public:
                                            const std::string &value,
                                            const Integer index);
    
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray& 
                         GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObject(GmatBase *obj, 
+                                     const Gmat::ObjectType type,
+                                     const std::string &name = "");
    
    virtual GmatBase*    Clone() const;
    virtual void         Copy(const GmatBase* orig);
@@ -92,9 +96,11 @@ protected:
       WHICH_POINT,
       LibrationPointParamCount
    };
-   static const std::string PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount];
-   static const Gmat::ParameterType PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCount];
-
+   static const std::string
+      PARAMETER_TEXT[LibrationPointParamCount - CalculatedPointParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCount];
+   
    static const Real CONVERGENCE_TOLERANCE;// = 1.0e-8;
    static const Real MAX_ITERATIONS;//        = 2000;
    
@@ -106,7 +112,7 @@ protected:
    SpacePoint  *secondaryBody;
    
 private:
-      
+   
    //------------------------------------------------------------------------------
    //  void CheckBodies()
    //------------------------------------------------------------------------------
