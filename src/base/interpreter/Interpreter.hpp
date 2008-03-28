@@ -174,6 +174,11 @@ protected:
    bool AssembleConditionalCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleForCommand(GmatCommand *cmd, const std::string &desc);
    bool AssembleGeneralCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleTargetCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleOptimizeCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleFiniteBurnCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleReportCommand(GmatCommand *cmd, const std::string &desc);
+   bool AssembleCreateCommand(GmatCommand *cmd, const std::string &desc);
    bool SetCommandRefObjects(GmatCommand *cmd, const std::string &desc);
    
    // for assignment
