@@ -41,8 +41,8 @@ CoordinateBase::PARAMETER_TEXT[CoordinateBaseParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 CoordinateBase::PARAMETER_TYPE[CoordinateBaseParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE,
+   Gmat::OBJECT_TYPE,
 };
 
 
