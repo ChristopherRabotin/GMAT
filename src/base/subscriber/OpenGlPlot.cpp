@@ -87,24 +87,24 @@ OpenGlPlot::PARAMETER_TEXT[OpenGlPlotParamCount - SubscriberParamCount] =
 const Gmat::ParameterType
 OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
 {
-   Gmat::STRINGARRAY_TYPE,       //"Add"
+   Gmat::OBJECTARRAY_TYPE,       //"Add"
    Gmat::UNSIGNED_INTARRAY_TYPE, //"OrbitColor",
    Gmat::UNSIGNED_INTARRAY_TYPE, //"TargetColor",
-   Gmat::STRING_TYPE,            //"CoordinateSystem"
-   Gmat::STRING_TYPE,            //"ViewPointRef",
-   Gmat::STRING_TYPE,            //"ViewPointReference",
+   Gmat::OBJECT_TYPE,            //"CoordinateSystem"
+   Gmat::OBJECT_TYPE,            //"ViewPointRef",
+   Gmat::OBJECT_TYPE,            //"ViewPointReference",
    Gmat::STRING_TYPE,            //"ViewPointRefType"
    Gmat::RVECTOR_TYPE,           //"ViewPointRefVector",
    Gmat::STRING_TYPE,            //"ViewPointVector",
    Gmat::STRING_TYPE,            //"ViewPointVectorType",
    Gmat::RVECTOR_TYPE,           //"ViewPointVectorVector",
-   Gmat::STRING_TYPE,            //"ViewDirection",
+   Gmat::OBJECT_TYPE,            //"ViewDirection",
    Gmat::STRING_TYPE,            //"ViewDirectionType",
    Gmat::RVECTOR_TYPE,           //"ViewDirectionVector",
    Gmat::REAL_TYPE,              //"ViewScaleFactor",
    Gmat::REAL_TYPE,              //"FixedFovAngle",
-   Gmat::STRING_TYPE,            //"ViewUpCoordinaetSystem"
-   Gmat::STRING_TYPE,            //"ViewUpAxis"
+   Gmat::OBJECT_TYPE,            //"ViewUpCoordinaetSystem"
+   Gmat::ENUMERATION_TYPE,       //"ViewUpAxis"
    
    Gmat::ON_OFF_TYPE,            //"CelestialPlane"
    Gmat::ON_OFF_TYPE,            //"XYPlane"
@@ -2098,8 +2098,8 @@ bool OpenGlPlot::AddSpacePoint(const std::string &name, Integer index, bool show
    {
       objName = mAllSpNameArray[i];
       MessageInterface::ShowMessage
-         ("   status=%d, mAllSpNameArray[%d]=%s, draw=%d, show=%d "
-          "orbColor=%u, targColor=%u\n", status, i, objName.c_str(), mDrawOrbitMap[objName],
+         ("   mAllSpNameArray[%d]=%s, draw=%d, show=%d "
+          "orbColor=%u, targColor=%u\n", i, objName.c_str(), mDrawOrbitMap[objName],
           mShowObjectMap[objName], mOrbitColorMap[objName], mTargetColorMap[objName]);
       MessageInterface::ShowMessage
          ("   mOrbitColorArray[%d]=%u, mTargetColorArray[%d]=%u\n", i, mOrbitColorArray[i],

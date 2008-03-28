@@ -63,8 +63,8 @@ Subscriber::PARAMETER_TEXT[SubscriberParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Subscriber::PARAMETER_TYPE[SubscriberParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRING_TYPE,            // "SolverIterations"
-   Gmat::ON_OFF_TYPE,            // "TargetStatus"
+   Gmat::ENUMERATION_TYPE,         // "SolverIterations"
+   Gmat::ON_OFF_TYPE,              // "TargetStatus"
 };
 
 
