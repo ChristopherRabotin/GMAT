@@ -216,12 +216,16 @@ bool Assignment::InterpretAction()
          throw CommandException(
             "Parentheses or braces are unbalanced on the right-hand-side of an assignment command"); 
       
-      if (rhs.find(',') != rhs.npos)
-      {
-         GmatStringUtil::GetArrayCommaIndex(rhs, commaPos);
-         if (commaPos == -1)
-            throw CommandException("Command contains an unexpected comma on right-hand-side");
-      }
+      // We want to allow the following scripts in the Assignment command.
+      //    Create Formation Formation1;
+      //    GMAT Formation1.Add = {Spacecraft1, Spacecraft2};
+      // So commented out (loj: 2008.03.24)
+      //if (rhs.find(',') != rhs.npos)
+      //{
+      //   GmatStringUtil::GetArrayCommaIndex(rhs, commaPos);
+      //   if (commaPos == -1)
+      //      throw CommandException("Command contains an unexpected comma on right-hand-side");
+      //}
    }
    
    #ifdef DEBUG_ASSIGNMENT_IA
@@ -318,6 +322,10 @@ bool Assignment::Initialize()
       }
    }
    
+   #ifdef DEBUG_ASSIGNMENT_INIT
+   MessageInterface::ShowMessage("Assignment::Initialize() returning true\n");
+   #endif
+   
    return true;
    
 }
@@ -373,7 +381,7 @@ bool Assignment::Execute()
          #ifdef DEBUG_ASSIGNMENT_EXEC
          MessageInterface::ShowMessage("   rhsDataType=%s\n", rhsTypeStr.c_str());
          #endif
-                  
+         
          // If lhs is String, it must be String Object, so check it first
          // ex) UnknownObj1 = str1
          if (lhsDataType == Gmat::STRING_TYPE && lhsWrapperType == Gmat::STRING)
@@ -400,6 +408,8 @@ bool Assignment::Execute()
             break;
          case Gmat::STRING_TYPE:
             sval = rhsWrapper->EvaluateString();
+            // Remove enclosing quotes (loj: 2008.03.26)
+            sval = GmatStringUtil::RemoveEnclosingString(sval, "'");
             break;
          case Gmat::ON_OFF_TYPE:
             sval = rhsWrapper->EvaluateOnOff();
@@ -620,7 +630,7 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
          wrapperObjectNames.push_back(rhs);
    }
    else
-   {      
+   {
       // Add math node elements to wrapper object names
       StringArray tmpArray = mathTree->GetRefObjectNameArray(Gmat::PARAMETER);
       if (tmpArray.size() > 0)
@@ -637,6 +647,12 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
          #endif
       }
    }
+   
+   #ifdef DEBUG_ASSIGNMENT_WRAPPER
+   MessageInterface::ShowMessage
+      ("Assignment::GetWrapperObjectNameArray() returning %d wrapper elements\n",
+       wrapperObjectNames.size());
+   #endif
    
    return wrapperObjectNames;
    
