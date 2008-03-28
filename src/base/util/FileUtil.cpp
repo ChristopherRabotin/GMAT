@@ -29,6 +29,10 @@
 #include <dirent.h>
 #endif
 
+#ifdef __WIN32__
+#include <windows.h>
+#endif
+
 using namespace std;
 using namespace GmatStringUtil;
 
@@ -108,8 +112,10 @@ std::string GmatFileUtil::GetCurrentPath()
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
 {
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() fullPath=<%s>\n", fullPath.c_str());
+   #endif
    
    std::string filePath;
    std::string::size_type lastSlash = fullPath.find_last_of("/\\");
@@ -117,8 +123,10 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
    if (lastSlash != filePath.npos)
       filePath = fullPath.substr(0, lastSlash+1);
    
+   #ifdef DEBUG_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() returning <%s>\n", filePath.c_str());
+   #endif
    
    return filePath;
 }
@@ -154,6 +162,39 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
    #endif
    
    return fileName;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string ParseFileExtension(const std::string &fullPath)
+//------------------------------------------------------------------------------
+/*
+ * This function parses file extension (string after .) from given full path name.
+ *
+ * @param  fullPath  input full path name
+ * @return  The file extension from the full path
+ *
+ */
+//------------------------------------------------------------------------------
+std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
+{
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFileExtension() fullPath=<%s>\n", fullPath.c_str());
+   #endif
+   
+   std::string fileExt;
+   
+   std::string::size_type lastDot = fullPath.find_last_of(".");
+   if (lastDot != fullPath.npos)
+      fileExt = fullPath.substr(lastDot+1);
+   
+   #ifdef DEBUG_PARSE_FILENAME
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::ParseFileExtension() returning <%s>\n", fileExt.c_str());
+   #endif
+   
+   return fileExt;
 }
 
 
@@ -211,6 +252,170 @@ bool GmatFileUtil::DoesFileExist(const std::string &filename)
    {
       return false;
    }
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetFileListFromDirectory(const std::string &dirName, bool addPath)
+//------------------------------------------------------------------------------
+/*
+ * Get list of files from a directory.
+ * The input directory should include directory namd and file spec.
+ * For example, c:\MyDir\*.txt, c:\MyFunctions\*.gmf
+ *
+ * @param  dirName  Directory name with file specification
+ * @param  addPath  If true, it prepends path to file name (false)
+ * @return  String array containing file names in the directory
+ */
+//------------------------------------------------------------------------------
+StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
+                                                   bool addPath)
+{
+   #ifdef DEBUG_FILELIST
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetFileListFromDirectory() dirName=<%s>\n",
+       dirName.c_str());
+   #endif
+   
+   std::string pathName = ParsePathName(dirName);
+   std::string fileExt = ParseFileExtension(dirName);
+   std::string outFile;
+   StringArray fileList;
+   
+   MessageInterface::ShowMessage
+      ("==> pathName=<%s>, fileExt=<%s>\n", pathName.c_str(), fileExt.c_str());
+   
+   //-----------------------------------------------------------------
+   // for windows
+   //-----------------------------------------------------------------
+   #ifdef __WIN32__
+   
+   HANDLE hFind;
+   WIN32_FIND_DATA findData;
+   int errorCode;
+   bool hasError = false;
+   
+   hFind = FindFirstFile(dirName.c_str(), &findData);
+   
+   if(hFind == INVALID_HANDLE_VALUE)
+   {
+      errorCode = GetLastError();
+      if (errorCode == ERROR_FILE_NOT_FOUND)
+      {
+         MessageInterface::ShowMessage
+            ("**** ERROR **** GmatFileUtil::GetFileListFromDirectory() \n"
+             "There are no directory matching \"%s\"\n", dirName.c_str());
+      }
+      else
+      {
+         MessageInterface::ShowMessage
+            ("**** ERROR **** GmatFileUtil::GetFileListFromDirectory() \n"
+             "FindFirstFile() returned error code %d\n", errorCode);
+      }
+      hasError = true;
+   }
+   else
+   {
+      outFile = findData.cFileName;
+
+      // add if the file matches exact file extension (i.e, no backup files allowed)
+      if (ParseFileExtension(outFile) == fileExt)
+      {
+         if (addPath)
+            outFile = pathName + findData.cFileName;
+         fileList.push_back(outFile);
+         
+         #ifdef DEBUG_FILELIST
+         MessageInterface::ShowMessage
+            ("   > added %s to file list\n", findData.cFileName);
+         #endif
+      }
+   }
+   
+   if (!hasError)
+   {
+      while (FindNextFile(hFind, &findData))
+      {
+         outFile = findData.cFileName;
+         if (ParseFileExtension(outFile) == fileExt)
+         {
+            if (addPath)
+               outFile = pathName + findData.cFileName;
+            fileList.push_back(outFile);
+            
+            #ifdef DEBUG_FILELIST
+            MessageInterface::ShowMessage
+               ("   > added %s to file list\n", findData.cFileName);
+            #endif
+         }
+      }
+      
+      errorCode = GetLastError();
+      
+      if (errorCode != ERROR_NO_MORE_FILES)
+      {
+         MessageInterface::ShowMessage
+            ("**** ERROR **** GmatFileUtil::GetFileListFromDirectory() \n"
+             "FindNextFile() returned error code %d\n", errorCode);
+      }
+      
+      if (!FindClose(hFind))
+      {
+         errorCode = GetLastError();
+         MessageInterface::ShowMessage
+            ("**** ERROR **** GmatFileUtil::GetFileListFromDirectory() \n"
+             "FindClose() returned error code %d\n", errorCode);
+      }
+   }
+   #else
+   // add other operating system here
+   #endif
+   
+   #ifdef DEBUG_FILELIST
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetFileListFromDirectory() returning %d files\n",
+       fileList.size());
+   #endif
+   
+   return fileList;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetTextLines(const std::string &fileName)
+//------------------------------------------------------------------------------
+/*
+ * Reads a text file and returns an array of string.
+ *
+ * @param  dirName  Directory name
+ * @return  String array containing file names in the directory
+ */
+//------------------------------------------------------------------------------
+StringArray GmatFileUtil::GetTextLines(const std::string &fileName)
+{
+   StringArray lines;
+   
+   // check if file exist
+   std::ifstream inFile(fileName.c_str());
+   
+   if (!(inFile))
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** GmatFileUtil::GetTextLines() \n"
+          "The file \"" + fileName + "\" does not exist\n");
+      return lines;
+   }
+   
+   std::string oneLine;
+   
+   while (!inFile.eof())
+   {
+      inFile >> oneLine;
+      lines.push_back(oneLine);
+   }
+   
+   inFile.close();
+   return lines;
 }
 
 
