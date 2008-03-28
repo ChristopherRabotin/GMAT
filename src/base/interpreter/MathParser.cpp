@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   MathParser
 //------------------------------------------------------------------------------
@@ -154,8 +154,13 @@ bool MathParser::IsEquation(const std::string &str)
    Real rval;
    std::string::size_type opIndex;
    
-   // If it is just a number, return false
-   if (GmatStringUtil::ToReal(str, &rval))
+   // Check if string is enclosed with quotes
+   if (GmatStringUtil::IsEnclosedWith(str, "'"))
+   {
+      isEq = false;
+   }
+   // Check iff it is just a number
+   else if (GmatStringUtil::ToReal(str, &rval))
    {
       isEq = false;
    }
@@ -166,11 +171,13 @@ bool MathParser::IsEquation(const std::string &str)
    {
       isEq = true;
    }
+   else
+   {
+      // Check ' for matrix transpose and ^(-1) for inverse
+      if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
+         isEq = true;
+   }
    
-   // Check ' for matrix transpose and ^(-1) for inverse
-   if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
-      isEq = true;
-
    #if DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage
       ("MathParser::IsEquation(%s) returning %u\n", str.c_str(), isEq);
