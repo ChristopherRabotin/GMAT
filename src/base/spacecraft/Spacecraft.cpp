@@ -42,10 +42,11 @@
 //#define DEBUG_SC_ATTITUDE
 //#define DEBUG_GET_REAL
 //#define DEBUG_SC_PARAMETER_TEXT
-//#define DEBUG_SC_KEPL_TO_CART
+//#define DEBUG_SC_REF_OBJECT
 //#define DEBUG_SC_EPOCHSTR
 //#define DEBUG_WRITE_PARAMETERS
 //#define DEBUG_SC_ATTITUDE
+//#define DEBUG_SC_SET_STRING
 
 #if DEBUG_SPACECRAFT
 #include <iostream>
@@ -54,7 +55,7 @@
 
 // Spacecraft parameter types
 const Gmat::ParameterType   
-   Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
+Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] = 
    {
       Gmat::STRING_TYPE,      // Epoch 
       Gmat::REAL_TYPE,        // Element1
@@ -69,18 +70,18 @@ const Gmat::ParameterType
       Gmat::STRING_TYPE,      // Element4Units
       Gmat::STRING_TYPE,      // Element5Units
       Gmat::STRING_TYPE,      // Element6Units
-      Gmat::STRING_TYPE,      // StateType
-      Gmat::STRING_TYPE,      // DisplayStateType
-      Gmat::STRING_TYPE,      // AnomalyType
-      Gmat::STRING_TYPE,      // CoordinateSystem
+      Gmat::ENUMERATION_TYPE, // StateType
+      Gmat::ENUMERATION_TYPE, // DisplayStateType
+      Gmat::ENUMERATION_TYPE, // AnomalyType
+      Gmat::OBJECT_TYPE,      // CoordinateSystem
       Gmat::REAL_TYPE,        // DryMass
-      Gmat::STRING_TYPE,      // DateFormat
+      Gmat::ENUMERATION_TYPE, // DateFormat
       Gmat::REAL_TYPE,        // Cd
       Gmat::REAL_TYPE,        // Cr
       Gmat::REAL_TYPE,        // DragArea
       Gmat::REAL_TYPE,        // SRPArea
-      Gmat::STRINGARRAY_TYPE, // Tanks
-      Gmat::STRINGARRAY_TYPE, // Thrusters
+      Gmat::OBJECTARRAY_TYPE, // Tanks
+      Gmat::OBJECTARRAY_TYPE, // Thrusters
       Gmat::REAL_TYPE,        // TotalMass
       Gmat::OBJECT_TYPE,      // Attitude 
    };
@@ -813,6 +814,7 @@ const StringArray&
 {
    static StringArray fullList;  // Maintain scope if the full list is requested
    fullList.clear();
+   
    if (attitude)
    {
       try
@@ -824,20 +826,22 @@ const StringArray&
          // ignore exceptions here
       }
    }
-
+   
    if (type == Gmat::UNKNOWN_OBJECT)
    {
-      //fullList.clear();      
       fullList.push_back(coordSysName);
       return fullList;      
    }
    else
    {
+      if (type == Gmat::ATTITUDE)
+         return fullList;
+      
       if (type == Gmat::FUEL_TANK)
          return tankNames;
       if (type == Gmat::THRUSTER)
          return thrusterNames;
-
+      
       if (type == Gmat::HARDWARE) 
       {
          fullList.clear();
@@ -850,7 +854,6 @@ const StringArray&
       
       if (type == Gmat::COORDINATE_SYSTEM)
       {
-         //fullList.clear();
          fullList.push_back(coordSysName);
          return fullList;
       }
@@ -944,10 +947,13 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
 bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type, 
                               const std::string &name)
 {
-
-   #ifdef DEBUG_SC_KEPL_TO_CART
+   #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage("Entering SC::SetRefObject\n");
    #endif
+   
+   if (obj == NULL)
+      return false;
+   
    // first, try setting it on the attitude (owned object)
    if (attitude)
    {
@@ -992,7 +998,7 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       #if DEBUG_SPACECRAFT_CS
       MessageInterface::ShowMessage
          ("Spacecraft::SetRefObject() coordinateSystem=%s<%p>, cs=%s<%p> on %s\n",
-          GetName().c_str(), coordinateSystem->GetName().c_str(), coordinateSystem,
+          coordinateSystem->GetName().c_str(), coordinateSystem,
           cs->GetName().c_str(), cs, instanceName.c_str());
       #endif
       
@@ -1029,6 +1035,11 @@ bool Spacecraft::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       ownedObjectCount++;
       return true;
    }
+   
+   #ifdef DEBUG_SC_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("Exiting SC::SetRefObject, Calling SpaceObject::SetRefObject()\n");
+   #endif
    
    return SpaceObject::SetRefObject(obj, type, name);
 }
@@ -1337,33 +1348,23 @@ Real Spacecraft::GetRealParameter(const Integer id) const
       //   stateType.c_str());
    #endif
 
-  if ((id >= ELEMENT1_ID && id <= ELEMENT6_ID) ||
+   if ((id >= ELEMENT1_ID && id <= ELEMENT6_ID) ||
       (id >= CART_X      && id < EndMultipleReps))
-  {  
+   {
       #ifdef DEBUG_GET_REAL
          MessageInterface::ShowMessage(
          "In SC::GetReal, calling GetElement ....... \n");
       #endif
       return (const_cast<Spacecraft*>(this))->GetElement(GetParameterText(id));
-  }
-   /* OLD CODE
-   if (id == ELEMENT1_ID) return state[0];
-   if (id == ELEMENT2_ID) return state[1];
-   if (id == ELEMENT3_ID) return state[2];
-   if (id == ELEMENT4_ID) return state[3];
-   if (id == ELEMENT5_ID) return state[4];
-   if (id == ELEMENT6_ID) return state[5];
-   */
+   }
+   
    if (id == DRY_MASS_ID) return dryMass;
    if (id == CD_ID) return coeffDrag;
    if (id == CR_ID) return reflectCoeff;
    if (id == DRAG_AREA_ID) return dragArea;
    if (id == SRP_AREA_ID) return srpArea;
+   if (id == TOTAL_MASS_ID)  return UpdateTotalMass();
    
-   if (id == TOTAL_MASS_ID) 
-   { 
-      return UpdateTotalMass();
-   }
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
       {
@@ -1508,33 +1509,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       state.SetEpoch(value);
       return value;
    }
-
-//   if (label == "DryMass")
-//   {
-//      parmsChanged = true;
-//      return dryMass = value;
-//   }
-//   if (label == "Cd")
-//   {
-//      parmsChanged = true;
-//      return coeffDrag = value;
-//   }
-//   if (label == "DragArea")
-//   {
-//      parmsChanged = true;
-//      return dragArea = value;
-//   }
-//   if (label == "SRPArea")
-//   {
-//      parmsChanged = true;
-//      return srpArea = value;
-//   }
-//   if (label == "Cr")
-//   {
-//      parmsChanged = true;
-//      return reflectCoeff = value;
-//   }
-
+   
    if (label == "DryMass")
    {
       if (value >= 0.0)
@@ -1552,7 +1527,7 @@ Real Spacecraft::SetRealParameter(const std::string &label, const Real value)
       parmsChanged = true;
       return dryMass;
    }
-
+   
    if (label == "Cd")
    {
       if (value >= 0.0)
@@ -1704,7 +1679,7 @@ std::string Spacecraft::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
-// Added 11/15/04 to handle tanks and thrusters
+
 //---------------------------------------------------------------------------
 //  const StringArray& GetStringArrayParameter(const Integer id) const
 //---------------------------------------------------------------------------
@@ -1749,12 +1724,12 @@ const StringArray& Spacecraft::GetStringArrayParameter(const Integer id) const
  */
 bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
 {
-   #ifdef DEBUG_SPACECRAFT_STRINGS
+   #ifdef DEBUG_SC_SET_STRING
       MessageInterface::ShowMessage
          ("Spacecraft::SetStringParameter() string parameter %d (%s) to %s\n", 
          id, GetParameterText(id).c_str(), value.c_str());
    #endif
-
+   
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude)
       {
@@ -1765,16 +1740,18 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          #endif
          return attitude->SetStringParameter(id - ATTITUDE_ID_OFFSET, value);
       }
-      
+   
    if ((id < SpaceObjectParamCount) || (id >= SpacecraftParamCount))
       return SpaceObject::SetStringParameter(id, value);
-      
-   if ((GetParameterType(id) != Gmat::STRING_TYPE) && 
-       (GetParameterType(id) != Gmat::STRINGARRAY_TYPE))
-      throw SpaceObjectException("Parameter " + GetParameterText(id) +
-         " is being accessed as a string, but it is of type " +
-         GetParameterTypeString(GetParameterType(id)));
-
+   
+   // Since we changed to OBJECT_TYPE or ENUMERATION_TYPE,
+   // the lines were commented out (loj: 2008.03.26)
+   //if ((GetParameterType(id) != Gmat::STRING_TYPE) && 
+   //    (GetParameterType(id) != Gmat::STRINGARRAY_TYPE))
+   //   throw SpaceObjectException("Parameter " + GetParameterText(id) +
+   //      " is being accessed as a string, but it is of type " +
+   //      GetParameterTypeString(GetParameterType(id)));
+   
    if (id == SC_EPOCH_ID)
    {
       // Validate first...
@@ -1802,7 +1779,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          throw SpaceObjectException("Unknown state element representation: " + 
             value);
       }
-      #ifdef DEFINE_SPACECRAFT_SET
+      #ifdef DEBUG_SC_SET_STRING
       MessageInterface::ShowMessage("SC::SetString - setting display state type to %s\n",
       value.c_str());
       #endif
@@ -1827,7 +1804,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       {   
          return GmatBase::SetStringParameter(id, value);
       }
-      #if DEBUG_SPACECRAFT
+      #ifdef DEBUG_SC_SET_STRING
           MessageInterface::ShowMessage("\nSpacecraft::SetStringParamter()..."
              "\n   Before change, Anomaly info -> a: %f, e: %f, %s: %f\n", 
              trueAnomaly.GetSMA(),trueAnomaly.GetECC(),trueAnomaly.GetTypeString().c_str(),
@@ -1838,7 +1815,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
       anomalyType = value;
       UpdateElementLabels();
       
-      #if DEBUG_SPACECRAFT
+      #ifdef DEBUG_SC_SET_STRING
           MessageInterface::ShowMessage(
              "\n   After change, Anomaly info -> a: %lf, e: %lf, %s: %lf\n", 
              trueAnomaly.GetSMA(), trueAnomaly.GetECC(), trueAnomaly.GetTypeString().c_str(),
@@ -1870,7 +1847,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
          thrusterNames.push_back(value);
       }
    }
-
+   
+   #ifdef DEBUG_SC_SET_STRING
+   MessageInterface::ShowMessage
+      ("Spacecraft::SetStringParameter() returning true\n");
+   #endif
+   
    return true;
 }
 
@@ -1912,7 +1894,7 @@ bool Spacecraft::SetStringParameter(const std::string &label,
 bool Spacecraft::TakeAction(const std::string &action, 
                             const std::string &actionData)
 {
-   #ifdef DEBUG_SC_KEPL_TO_CART
+   #ifdef DEBUG_SC_REF_OBJECT
    MessageInterface::ShowMessage("Entering SC::TakeAction with action = %s, and actionData = %s\n",
    action.c_str(), actionData.c_str());
    #endif
@@ -1921,7 +1903,7 @@ bool Spacecraft::TakeAction(const std::string &action,
       // Attach tanks to thrusters
       StringArray tankNommes;
       GmatBase *tank;
-
+      
       for (ObjectArray::iterator i = thrusters.begin(); 
            i < thrusters.end(); ++i) {
          tankNommes = (*i)->GetStringArrayParameter("Tank");
@@ -1998,25 +1980,38 @@ bool Spacecraft::TakeAction(const std::string &action,
                   tanks.erase(i);
          }
       }
-
+      
       return true;
    }
    
    if (action == "ApplyCoordinateSystem")
    {
+      #if DEBUG_SPACECRAFT_CS
+      MessageInterface::ShowMessage
+         ("In TakeAction(): Calling StateConverter::SetMu(%p)\n", coordinateSystem);
+      #endif
+      
       if (!stateConverter.SetMu(coordinateSystem))
-      {      throw SpaceObjectException(
-                   "\nError:  Spacecraft has empty coordinate system\n");
+      {
+         throw SpaceObjectException(
+            "\nError:  Spacecraft has empty coordinate system\n");
       }
       
       if (csSet == false)
       {
+         #if DEBUG_SPACECRAFT_CS
+         MessageInterface::ShowMessage
+            ("In TakeAction(): Calling SetStateFromRepresentation()\n");
+         #endif
          Rvector6 st(state.GetState());
          SetStateFromRepresentation(stateType, st); // this doesn't look right to me *****
          
          csSet = true;
       }
       
+      #if DEBUG_SPACECRAFT_CS
+      MessageInterface::ShowMessage("In TakeAction(): returning true\n");
+      #endif
       return true;
    }
    
@@ -2059,6 +2054,18 @@ bool Spacecraft::TakeAction(const std::string &action,
    }
    
    return SpaceObject::TakeAction(action, actionData);
+}
+
+
+//---------------------------------------------------------------------------
+// bool IsOwnedObject(Integer id) const;
+//---------------------------------------------------------------------------
+bool Spacecraft::IsOwnedObject(Integer id) const
+{
+   if (id == ATTITUDE)
+      return true;
+   else
+      return false;
 }
 
 
@@ -2112,8 +2119,10 @@ bool Spacecraft::Initialize()
    }   
    if (!attitude)
    {
+      #ifdef DEBUG_SC_ATTITUDE
       MessageInterface::ShowMessage("Spacecraft %s has no defined attitude object.\n",
                      instanceName.c_str());
+      #endif
       //throw SpaceObjectException("Spacecraft has no attitude set.");
    }
    else
@@ -2405,7 +2414,7 @@ const std::string& Spacecraft::GetGeneratingString(Gmat::WriteMode mode,
    WriteParameters(mode, preface, data);
    
    generatingString = data.str();
-      
+   
    // Then call the parent class method for preface and inline comments
    return SpaceObject::GetGeneratingString(mode, prefix, useName);
 }
@@ -2483,13 +2492,7 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       if (!registered) 
          parmOrder[parmIndex++] = i;
    }
-   
-   //Rvector6 genState; 
-   //coordConverter.Convert(A1Mjd(GetEpoch()), Rvector6(GetState().GetState()), 
-   //                       internalCoordSystem, 
-   //                       genState, coordinateSystem);
-   //Rvector6 repState = GetStateInRepresentation(stateType);
-   
+      
    Rvector6 repState = GetStateInRepresentation(displayStateType);
    
    #if DEBUG_SPACECRAFT_GEN_STRING
@@ -2514,7 +2517,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          parmType = GetParameterType(parmOrder[i]);
          
          // Handle StringArray parameters separately
-         if (parmType != Gmat::STRINGARRAY_TYPE)
+         if (parmType != Gmat::STRINGARRAY_TYPE &&
+             parmType != Gmat::OBJECTARRAY_TYPE)
          {
             // Skip unhandled types
             if (
@@ -2579,6 +2583,8 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
          }
          else 
          {
+            bool writeQuotes = inMatlabMode || parmType == Gmat::OBJECTARRAY_TYPE;
+            
             // Handle StringArrays
             StringArray sar = GetStringArrayParameter(parmOrder[i]);
             if (sar.size() > 0)
@@ -2588,10 +2594,10 @@ void Spacecraft::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                {
                   if (n != sar.begin())
                      stream << ", ";
-                  if (inMatlabMode)
+                  if (writeQuotes)
                      stream << "'";
                   stream << (*n);
-                  if (inMatlabMode)
+                  if (writeQuotes)
                      stream << "'";
                }
                stream << "};\n";
@@ -2823,7 +2829,7 @@ Rvector6 Spacecraft::GetStateInRepresentation(std::string rep)
          finalState[2], finalState[3], finalState[4], 
          finalState[5]);
    #endif
-
+   
    return finalState;
 }
 
@@ -3017,6 +3023,9 @@ bool Spacecraft::SetElement(const std::string &label, const Real &value)
    std::string rep = "";
    Integer id = LookUpLabel(label, rep) - ELEMENT1_ID;
    ///////
+   //MessageInterface::ShowMessage
+   //   ("==> rep=<%s>, stateType=<%s>, csSet=%d\n", rep.c_str(), stateType.c_str(), csSet);
+   
    if ((rep != "") && (stateType != rep))
    {
       //SetStringParameter(STATE_TYPE_ID, rep);
