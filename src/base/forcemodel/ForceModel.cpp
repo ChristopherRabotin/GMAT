@@ -87,15 +87,13 @@ ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
 const Gmat::ParameterType
 ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
 {
-   //Gmat::STRING_TYPE,       // "CentralBody",
    Gmat::OBJECT_TYPE,       // "CentralBody",
-   Gmat::STRINGARRAY_TYPE,  // "PrimaryBodies",
-   Gmat::STRINGARRAY_TYPE,  // "PointMasses",
-   Gmat::STRING_TYPE,       // "Drag",
-   //Gmat::STRING_TYPE,       // "SRP",
+   Gmat::OBJECTARRAY_TYPE,  // "PrimaryBodies",
+   Gmat::OBJECTARRAY_TYPE,  // "PointMasses",
+   Gmat::OBJECT_TYPE,       // "Drag",
    Gmat::ON_OFF_TYPE,       // "SRP",
-   Gmat::STRING_TYPE,       // "ErrorControl",
-   Gmat::STRINGARRAY_TYPE   // "CoordinateSystemList"
+   Gmat::ENUMERATION_TYPE,  // "ErrorControl",
+   Gmat::OBJECTARRAY_TYPE   // "CoordinateSystemList"
 };
 
 
