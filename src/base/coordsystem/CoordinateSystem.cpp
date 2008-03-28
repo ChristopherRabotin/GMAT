@@ -934,6 +934,18 @@ GmatBase* CoordinateSystem::GetRefObject(const Gmat::ObjectType type,
 
 
 //---------------------------------------------------------------------------
+// bool IsOwnedObject(Integer id) const;
+//---------------------------------------------------------------------------
+bool CoordinateSystem::IsOwnedObject(Integer id) const
+{
+   if (id == AXES)
+      return true;
+   else
+      return false;
+}
+
+
+//---------------------------------------------------------------------------
 //  GmatBase* GetOwnedObject(Integer whichOne)
 //---------------------------------------------------------------------------
 /**

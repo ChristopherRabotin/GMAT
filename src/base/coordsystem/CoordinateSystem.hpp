@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  CoordinateSystem
 //------------------------------------------------------------------------------
@@ -130,6 +130,7 @@ public:
    
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
                                      const std::string &name);
+   virtual bool         IsOwnedObject(Integer id) const;
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual const ObjectTypeArray&
                         GetRefObjectTypeArray();
