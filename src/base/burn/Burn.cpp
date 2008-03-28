@@ -48,17 +48,17 @@ Burn::PARAMETER_TEXT[BurnParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Burn::PARAMETER_TYPE[BurnParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::REAL_TYPE, 
-   Gmat::REAL_TYPE, 
-   Gmat::REAL_TYPE, 
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::OBJECT_TYPE,         // "Origin",
+   Gmat::ENUMERATION_TYPE,    // "Axes",
+   Gmat::STRING_TYPE,         // "CoordinateSystem", (Not ready to switch to OBJECT_TYPE)
+   Gmat::ENUMERATION_TYPE,    // "VectorFormat",
+   Gmat::REAL_TYPE,           // "Element1",
+   Gmat::REAL_TYPE,           // "Element2",
+   Gmat::REAL_TYPE,           // "Element3",
+   Gmat::STRING_TYPE,         // "Element1Label",
+   Gmat::STRING_TYPE,         // "Element2Label",
+   Gmat::STRING_TYPE,         // "Element3Label",
+   Gmat::OBJECT_TYPE,         // "SpacecraftName",
 };
 
 
