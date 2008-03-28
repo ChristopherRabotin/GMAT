@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              PropSetup
 //------------------------------------------------------------------------------
@@ -43,8 +43,8 @@ PropSetup::PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE
+   Gmat::OBJECT_TYPE,  // "FM"
+   Gmat::OBJECT_TYPE   // "Type"
 };
 
 //---------------------------------
