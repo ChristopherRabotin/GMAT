@@ -4101,16 +4101,27 @@ std::string Propagate::CreateParameter(const std::string &name)
       ("Propagate::CreateParameter() name=%s, type=%s, owner=%s, dep=%s\n",
        name.c_str(), type.c_str(), owner.c_str(), dep.c_str());
    #endif
-
-   param = theModerator->CreateParameter(type, str, owner, dep);
+   
+   // If Parameter is not found or cannot be created, let the Interpreter
+   // do the rest of work.
+   try
+   {
+      param = theModerator->CreateParameter(type, str, owner, dep);
       
-   #if DEBUG_PROPAGATE_OBJ
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
       MessageInterface::ShowMessage
-         ("Propagate::CreateParameter() name=%s, owner=%s, dep=%s, type=%s\n",
-          param->GetName().c_str(), param->GetStringParameter("Object").c_str(),
-          param->GetStringParameter("DepObject").c_str(),
-          param->GetTypeName().c_str());
-   #endif
+         ("   Parameter found or created: addr=<%p>, name=%s, type=%s, owner=%s, dep=%s\n",
+          param, param->GetName().c_str(), param->GetTypeName().c_str(),
+          param->GetStringParameter("Object").c_str(),
+          param->GetStringParameter("DepObject").c_str());
+      #endif
+   }
+   catch (BaseException &e)
+   {
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("   %s\n", e.GetFullMessage().c_str());
+      #endif
+   }
    
    return str;
 }
