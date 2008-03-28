@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Spacecraft
 //------------------------------------------------------------------------------
@@ -41,97 +41,90 @@ public:
    Spacecraft(const std::string &name, 
       const std::string &typeStr = "Spacecraft");
    Spacecraft(const Spacecraft &a);
-   Spacecraft&       operator=(const Spacecraft &a);
-
+   Spacecraft&          operator=(const Spacecraft &a);
+   
    // Destructor
-   virtual           ~Spacecraft();
+   virtual              ~Spacecraft();
 
-   CoordinateSystem* GetInternalCoordSystem();
-   void              SetInternalCoordSystem(CoordinateSystem *cs);
+   CoordinateSystem*    GetInternalCoordSystem();
+   void                 SetInternalCoordSystem(CoordinateSystem *cs);
    
-   void              SetState(const Rvector6 &cartState);
-   void              SetState(const std::string &elementType, Real *instate);
-   void              SetState(const Real s1, const Real s2, const Real s3, 
-                              const Real s4, const Real s5, const Real s6);
+   void                 SetState(const Rvector6 &cartState);
+   void                 SetState(const std::string &elementType, Real *instate);
+   void                 SetState(const Real s1, const Real s2, const Real s3, 
+                                 const Real s4, const Real s5, const Real s6);
    
-   virtual PropState& 
-                     GetState();
-   virtual Rvector6  GetState(std::string rep);
-   virtual Rvector6  GetState(Integer rep);
-   Rvector6          GetCartesianState();
-   Rvector6          GetKeplerianState();
-   Rvector6          GetModifiedKeplerianState();
+   virtual PropState&   GetState();
+   virtual Rvector6     GetState(std::string rep);
+   virtual Rvector6     GetState(Integer rep);
+   Rvector6             GetCartesianState();
+   Rvector6             GetKeplerianState();
+   Rvector6             GetModifiedKeplerianState();
    
-   Anomaly           GetAnomaly() const;
+   Anomaly              GetAnomaly() const;
    
-   Rmatrix33         GetAttitude(Real a1mjdTime) const;
-   Rvector3          GetAngularVelocity(Real a1mjdTime) const;
-   UnsignedIntArray  GetEulerAngleSequence() const;
+   Rmatrix33            GetAttitude(Real a1mjdTime) const;
+   Rvector3             GetAngularVelocity(Real a1mjdTime) const;
+   UnsignedIntArray     GetEulerAngleSequence() const;
    
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
-   virtual void      Copy(const GmatBase* orig);
-   virtual bool      RenameRefObject(const Gmat::ObjectType type,
-                        const std::string &oldName, const std::string &newName);
+   virtual GmatBase*    Clone(void) const;
+   virtual void         Copy(const GmatBase* orig);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
-   virtual std::string 
-                     GetRefObjectName(const Gmat::ObjectType type) const;
-
-   virtual const     ObjectTypeArray& GetRefObjectTypeArray();
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   
+   virtual const        ObjectTypeArray& GetRefObjectTypeArray();
    virtual const StringArray&
-                     GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool      SetRefObjectName(const Gmat::ObjectType type,
-                        const std::string &name);
-   virtual GmatBase* GetRefObject(const Gmat::ObjectType type,
-                        const std::string &name);
-   virtual bool      SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                        const std::string &name = "");
-
-   virtual ObjectArray& 
-                     GetRefObjectArray(const Gmat::ObjectType type);
-   virtual ObjectArray& 
-                     GetRefObjectArray(const std::string& typeString);
-
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const std::string &name);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name = "");
+   
+   virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
+   virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
+   
    // Parameter accessor methods -- overridden from GmatBase
-   virtual Integer   GetParameterID(const std::string &str) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    
-   virtual bool      IsParameterReadOnly(const Integer id) const;
-   virtual bool      IsParameterReadOnly(const std::string &label) const;
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
    
-   virtual Real      GetRealParameter(const Integer id) const;
-   virtual Real      GetRealParameter(const std::string &label) const;
-   virtual Real      SetRealParameter(const Integer id, const Real value);
-   virtual Real      SetRealParameter(const std::string &label, const Real value);
-
-   virtual std::string 
-                     GetStringParameter(const Integer id) const;
-   virtual std::string 
-                     GetStringParameter(const std::string &label) const;
-   virtual bool      SetStringParameter(const Integer id, const std::string &value);
-   virtual bool      SetStringParameter(const std::string &label, 
-                        const std::string &value);
-
-   const StringArray& 
-                     GetStringArrayParameter(const Integer id) const;
-    
-   virtual std::string 
-                     GetParameterText(const Integer id) const;
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const Integer id, const Real value);
+   virtual Real         SetRealParameter(const std::string &label, const Real value);
+   
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
+   
+   const StringArray&   GetStringArrayParameter(const Integer id) const;
+   
+   virtual std::string  GetParameterText(const Integer id) const;
    virtual Gmat::ParameterType
-                     GetParameterType(const Integer id) const;
-   virtual std::string 
-                     GetParameterTypeString(const Integer id) const;
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
    
-   virtual bool      Initialize();
-
-   virtual bool      TakeAction(const std::string &action, 
-                        const std::string &actionData = "");
-   virtual GmatBase* GetOwnedObject(Integer whichOne);
-
-
+   virtual bool         Initialize();
+   
+   virtual bool         TakeAction(const std::string &action, 
+                                   const std::string &actionData = "");
+   virtual bool         IsOwnedObject(Integer id) const;
+   virtual GmatBase*    GetOwnedObject(Integer whichOne);
+   
+   
    virtual const std::string&  
-                     GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                        const std::string &prefix = "",
-                        const std::string &useName = "");
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
    
    std::string GetEpochString();
    void SetDateFormat(const std::string &dateType);   
