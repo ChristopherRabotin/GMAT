@@ -127,6 +127,7 @@ public:
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
    
+   virtual bool         IsOwnedObject(Integer id) const;
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
    virtual bool         SetIsGlobal(bool globalFlag);
