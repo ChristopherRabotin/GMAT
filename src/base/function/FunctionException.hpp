@@ -14,18 +14,16 @@
  * Exception class used by the Function hierarchy.
  */
 //------------------------------------------------------------------------------
-
-
 #ifndef FUNCTIONEXCEPTION_H
 #define FUNCTIONEXCEPTION_H
 
 #include "BaseException.hpp"
 
-class FunctionException : public BaseException{
+class FunctionException : public BaseException
+{
 public:
-
-	FunctionException(std::string details);
-	virtual ~FunctionException();
+   FunctionException(std::string details = "");
+   virtual ~FunctionException();
    FunctionException(const FunctionException &be);
 };
 
