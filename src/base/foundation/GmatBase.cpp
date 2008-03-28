@@ -70,7 +70,7 @@ GmatBase::PARAM_TYPE_STRING[Gmat::TypeCount] =
    "Integer",     "UnsignedInt", "UnsignedIntArray", "Real",       
    "RealElement", "String",      "StringArray",      "Boolean",     
    "Rvector",     "Rmatrix",     "Time",             "Object",
-   "ObjectArray", "OnOff",
+   "ObjectArray", "OnOff",       "Enumeration",
 };
 
 /**
@@ -685,6 +685,27 @@ ObjectArray& GmatBase::GetRefObjectArray(const std::string& typeString)
 
 
 //---------------------------------------------------------------------------
+// bool IsOwnedObject(Integer id) const
+//---------------------------------------------------------------------------
+/*
+ * Finds out if object property of given id is owned object
+ * This method was added so that Interpreter can querry and create
+ * proper owned objects.
+ *
+ * Any subclass should override this method as necessary.
+ *
+ * @param  id   The object property id to check for owned object
+ *
+ * @return  true if it is owned object
+ */
+//---------------------------------------------------------------------------
+bool GmatBase::IsOwnedObject(Integer id) const
+{
+   return false;
+}
+
+
+//---------------------------------------------------------------------------
 //  Integer GetOwnedObjectCount()
 //---------------------------------------------------------------------------
 /**
@@ -749,8 +770,8 @@ GmatBase* GmatBase::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 bool GmatBase::SetIsGlobal(bool globalFlag)
 {
-	isGlobal = globalFlag;
-	return isGlobal;
+        isGlobal = globalFlag;
+        return isGlobal;
 }
 
 //------------------------------------------------------------------------------
@@ -764,7 +785,7 @@ bool GmatBase::SetIsGlobal(bool globalFlag)
 //------------------------------------------------------------------------------
 bool GmatBase::GetIsGlobal() const
 {
-	return isGlobal;
+        return isGlobal;
 }
 
 //------------------------------------------------------------------------------
@@ -2838,9 +2859,51 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
       if (IsParameterReadOnly(i) == false)
       {
          parmType = GetParameterType(i);
-         // Handle StringArray parameters separately
-         if (parmType != Gmat::STRINGARRAY_TYPE &&
-             parmType != Gmat::OBJECTARRAY_TYPE)
+
+         // Handle STRINGARRAY_TYPE or OBJECTARRAY_TYPE
+         if (parmType == Gmat::STRINGARRAY_TYPE ||
+             parmType == Gmat::OBJECTARRAY_TYPE)
+         {
+            bool writeQuotes = inMatlabMode || parmType == Gmat::STRINGARRAY_TYPE;
+            
+            StringArray sar = GetStringArrayParameter(i);
+            if (sar.size() > 0)
+            {
+               std::string attCmtLn = GetAttributeCommentLine(i);
+               
+               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
+                                        (mode == Gmat::OWNED_OBJECT) ||
+                                        (mode == Gmat::SHOW_SCRIPT)))
+               {
+                  stream << attCmtLn.c_str();
+               }
+               
+               stream << prefix << GetParameterText(i) << " = {";
+               
+               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
+               {
+                  if (n != sar.begin())
+                     stream << ", ";
+                  if (writeQuotes) //(inMatlabMode)
+                     stream << "'";
+                  stream << (*n);
+                  if (writeQuotes)
+                     stream << "'";
+               }
+               
+               attCmtLn  = GetInlineAttributeComment(i);
+               
+               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) ||
+                                        (mode == Gmat::OWNED_OBJECT) ||
+                                        (mode == Gmat::SHOW_SCRIPT)))
+               {
+                  stream << "};" << attCmtLn << "\n";
+               }
+               else
+                  stream << "};\n";
+            }
+         }
+         else
          {
             // Skip unhandled types
             if ( (parmType != Gmat::RMATRIX_TYPE) &&
@@ -2873,44 +2936,6 @@ void GmatBase::WriteParameters(Gmat::WriteMode mode, std::string &prefix,
                   else
                      stream << "\n";
                }
-            }
-         }
-         else
-         {
-            // Handle StringArrays
-            StringArray sar = GetStringArrayParameter(i);
-            if (sar.size() > 0)
-            {
-               std::string attCmtLn = GetAttributeCommentLine(i);
-                  
-               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
-                  (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
-               {
-                  stream << attCmtLn.c_str();
-               }
-        
-               stream << prefix << GetParameterText(i) << " = {";
-               
-               for (StringArray::iterator n = sar.begin(); n != sar.end(); ++n)
-               {
-                  if (n != sar.begin())
-                     stream << ", ";
-                  if (inMatlabMode)
-                     stream << "'";
-                  stream << (*n);
-                  if (inMatlabMode)
-                     stream << "'";
-               }
-               
-               attCmtLn  = GetInlineAttributeComment(i);
-               
-               if ((attCmtLn != "") && ((mode == Gmat::SCRIPTING) || 
-                  (mode == Gmat::OWNED_OBJECT) || (mode == Gmat::SHOW_SCRIPT)))
-               {
-                  stream << "};" << attCmtLn << "\n";
-               }
-               else
-                  stream << "};\n";
             }
          }
       }
@@ -2997,8 +3022,8 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
    
    switch (tid)
    {
+   // Objects write out a string without quotes
    case Gmat::OBJECT_TYPE:
-   case Gmat::STRING_TYPE:     // Strings and objects write out a string
       if (inMatlabMode)
          stream << "'";
       stream << GetStringParameter(id);
@@ -3006,7 +3031,26 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          stream << "'";
       break;
       
-   case Gmat::ON_OFF_TYPE:     // "On" and "Off"
+   // Symbolic constatns write out a string without quotes
+   case Gmat::ENUMERATION_TYPE: 
+      if (inMatlabMode)
+         stream << "'";
+      stream << GetStringParameter(id);
+      if (inMatlabMode)
+         stream << "'";
+      break;
+      
+   // Strings write out a string with quotes (loj: 2008.03.26)
+   case Gmat::STRING_TYPE:      
+      //if (inMatlabMode)
+         stream << "'";
+      stream << GetStringParameter(id);
+      //if (inMatlabMode)
+         stream << "'";
+      break;
+      
+   // On/Off constatns write out a string without quotes
+   case Gmat::ON_OFF_TYPE:
       if (inMatlabMode)
          stream << "'";
       stream << GetOnOffParameter(id);
@@ -3033,7 +3077,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
       break;
       
    case Gmat::REAL_TYPE:
-   case Gmat::TIME_TYPE: // Treat TIME_TYPE as Real (loj: 2007.11.02);
+   case Gmat::TIME_TYPE: // Treat TIME_TYPE as Real
       stream << GetRealParameter(id);
       break;
       
@@ -3043,7 +3087,7 @@ void GmatBase::WriteParameterValue(Integer id, std::stringstream &stream)
          Integer col = GetIntegerParameter("NumCols");
          for (Integer i = 0; i < row; ++i)
          {
-            // Do not write if value is zero since default is zero(03/27/07)
+            // Do not write if value is zero since default is zero
             for (Integer j = 0; j < col; ++j)
             {
                if (GetRealParameter(id, i, j) != 0.0)
