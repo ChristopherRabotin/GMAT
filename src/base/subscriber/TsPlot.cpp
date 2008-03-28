@@ -55,7 +55,7 @@ TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
    Gmat::STRING_TYPE,      // "PlotTitle",
    Gmat::STRING_TYPE,      // "XAxisTitle",
    Gmat::STRING_TYPE,      // "YAxisTitle",
-   Gmat::STRING_TYPE,      // "Grid",
+   Gmat::ON_OFF_TYPE,      // "Grid",
    Gmat::INTEGER_TYPE,     // "DataCollectFrequency",
    Gmat::INTEGER_TYPE,     // "UpdatePlotFrequency",
    Gmat::BOOLEAN_TYPE,     // "ShowPlot",
@@ -73,14 +73,13 @@ TsPlot::PARAMETER_TYPE[TsPlotParamCount - SubscriberParamCount] =
 //------------------------------------------------------------------------------
 TsPlot::TsPlot(const std::string &name, Parameter *xParam,
                Parameter *firstYParam, const std::string &plotTitle,
-               const std::string &xAxisTitle, const std::string &yAxisTitle,
-               bool drawGrid) :
+               const std::string &xAxisTitle, const std::string &yAxisTitle) :
    Subscriber("XYPlot", name)
 {
    // GmatBase data
    parameterCount = TsPlotParamCount;
-    
-   mDrawGrid = drawGrid;
+   
+   mDrawGrid = "On";
    mNumYParams = 0;
    
    mXParamName = "";
@@ -233,6 +232,11 @@ bool TsPlot::AddYParameter(const std::string &paramName, Integer index)
 //------------------------------------------------------------------------------
 bool TsPlot::Initialize()
 {
+   #if DEBUG_TSPLOT_INIT
+   MessageInterface::ShowMessage
+      ("TsPlot::Initialize() active=%d, mNumYParams=%d\n", active, mNumYParams);
+   #endif
+   
    // Check if there are parameters selected for TsPlot
    if (active)
    {
@@ -261,11 +265,6 @@ bool TsPlot::Initialize()
    
    Subscriber::Initialize();
    
-   #if DEBUG_TSPLOT_INIT
-   MessageInterface::ShowMessage
-      ("TsPlot::Initialize() active=%d, mNumYParams=%d\n", active, mNumYParams);
-   #endif
-   
    bool status = false;
    DeletePlotCurves();
    
@@ -281,7 +280,7 @@ bool TsPlot::Initialize()
       #endif
       
       PlotInterface::CreateTsPlotWindow(instanceName, mOldName, mPlotTitle,
-                                        mXAxisTitle, mYAxisTitle, mDrawGrid);
+                                        mXAxisTitle, mYAxisTitle, (mDrawGrid == "On"));
       
       PlotInterface::SetTsPlotTitle(instanceName, mPlotTitle);
       mIsTsPlotWindowSet = true;
@@ -608,6 +607,7 @@ Integer TsPlot::SetIntegerParameter(const Integer id, const Integer value)
    }
 }
 
+
 //------------------------------------------------------------------------------
 // virtual Integer SetIntegerParameter(const std::string &label,
 //                                     const Integer value)
@@ -616,6 +616,55 @@ Integer TsPlot::SetIntegerParameter(const std::string &label,
                                     const Integer value)
 {
    return SetIntegerParameter(GetParameterID(label), value);
+}
+
+
+//---------------------------------------------------------------------------
+//  std::string GetOnOffParameter(const Integer id) const
+//---------------------------------------------------------------------------
+std::string TsPlot::GetOnOffParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case DRAW_GRID:
+      return mDrawGrid;
+   default:
+      return Subscriber::GetOnOffParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// std::string TsPlot::GetOnOffParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string TsPlot::GetOnOffParameter(const std::string &label) const
+{
+   return GetOnOffParameter(GetParameterID(label));
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetOnOffParameter(const Integer id, const std::string &value)
+//---------------------------------------------------------------------------
+bool TsPlot::SetOnOffParameter(const Integer id, const std::string &value)
+{
+   switch (id)
+   {
+   case DRAW_GRID:
+      mDrawGrid = value;
+      return true;
+   default:
+      return Subscriber::SetOnOffParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetOnOffParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool TsPlot::SetOnOffParameter(const std::string &label, const std::string &value)
+{
+   return SetOnOffParameter(GetParameterID(label), value);
 }
 
 
@@ -634,11 +683,6 @@ std::string TsPlot::GetStringParameter(const Integer id) const
       return mXAxisTitle;
    case Y_AXIS_TITLE:
       return mYAxisTitle;
-   case DRAW_GRID:
-      if (mDrawGrid)
-         return "On";
-      else
-         return "Off";
    default:
       return Subscriber::GetStringParameter(id);
    }
@@ -684,16 +728,6 @@ bool TsPlot::SetStringParameter(const Integer id, const std::string &value)
    case Y_AXIS_TITLE:
       mYAxisTitle = value;
       return true;
-   case DRAW_GRID:
-      if (value == "On" || value == "Off")
-      {
-         mDrawGrid = (value == "On");
-         return true;
-      }
-      else
-      {
-         return false;
-      }
    default:
       return Subscriber::SetStringParameter(id, value);
    }
@@ -1181,7 +1215,7 @@ bool TsPlot::Distribute(const Real * dat, Integer len)
                
                return PlotInterface::UpdateTsPlot(instanceName, mOldName, xval, yvals,
                                                   mPlotTitle, mXAxisTitle, mYAxisTitle,
-                                                  update, mDrawGrid);
+                                                  update, (mDrawGrid == "On"));
                if (update)
                   mNumCollected = 0;
             }

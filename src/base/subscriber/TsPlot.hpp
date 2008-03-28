@@ -27,8 +27,7 @@ class TsPlot : public Subscriber
 public:
    TsPlot(const std::string &name, Parameter *xParam = NULL,
           Parameter *firstYParam = NULL, const std::string &plotTitle = "",
-          const std::string &xAxisTitle = "", const std::string &yAxisTitle = "",
-          bool drawGrid = true);
+          const std::string &xAxisTitle = "", const std::string &yAxisTitle = "");
    TsPlot(const TsPlot &orig);
    TsPlot& operator=(const TsPlot& orig);
    virtual ~TsPlot(void);
@@ -70,6 +69,13 @@ public:
                                             const bool value);
    virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
+   
+   virtual std::string  GetOnOffParameter(const Integer id) const;
+   virtual bool         SetOnOffParameter(const Integer id, 
+                                          const std::string &value);
+   virtual std::string  GetOnOffParameter(const std::string &label) const;
+   virtual bool         SetOnOffParameter(const std::string &label, 
+                                          const std::string &value);
    
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
@@ -127,7 +133,7 @@ protected:
    std::string mPlotTitle;
    std::string mXAxisTitle;
    std::string mYAxisTitle;
-   bool mDrawGrid;
+   std::string mDrawGrid;
    bool mIsTsPlotWindowSet;
    
    Integer mDataCollectFrequency;
