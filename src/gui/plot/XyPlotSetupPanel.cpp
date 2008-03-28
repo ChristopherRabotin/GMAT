@@ -415,7 +415,7 @@ void XyPlotSetupPanel::LoadData()
       mObject = mXyPlot;
       
       showPlotCheckBox->SetValue(mXyPlot->IsActive());
-      showGridCheckBox->SetValue(mXyPlot->GetStringParameter("Grid") == "On");
+      showGridCheckBox->SetValue(mXyPlot->GetOnOffParameter("Grid") == "On");
       mSolverIterComboBox->
          SetValue(mXyPlot->GetStringParameter("SolverIterations").c_str());
       
@@ -506,9 +506,9 @@ void XyPlotSetupPanel::SaveData()
    mXyPlot->Activate(showPlotCheckBox->IsChecked());
    
    if (showGridCheckBox->IsChecked())
-      mXyPlot->SetStringParameter("Grid", "On");
+      mXyPlot->SetOnOffParameter("Grid", "On");
    else
-      mXyPlot->SetStringParameter("Grid", "Off");
+      mXyPlot->SetOnOffParameter("Grid", "Off");
    
    mXyPlot->SetStringParameter("SolverIterations",
                                mSolverIterComboBox->GetValue().c_str());
