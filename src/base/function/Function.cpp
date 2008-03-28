@@ -43,10 +43,10 @@ Function::PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount] =
 const Gmat::ParameterType
 Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 {
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,         // "FunctionPath",
+   Gmat::STRING_TYPE,         // "FunctionName",
+   Gmat::STRINGARRAY_TYPE,    // "Input",
+   Gmat::STRINGARRAY_TYPE,    // "Output"
 };
 
 
@@ -71,6 +71,7 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
    #endif
    
    objectTypes.push_back(Gmat::FUNCTION);
+   objectTypeNames.push_back(typeStr);
    objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
    
@@ -83,26 +84,35 @@ Function::Function(const std::string &typeStr, const std::string &nomme) :
       if (functionPath == "")
       {         
          if (typeStr == "MatlabFunction")
+         {
             // matlab uses directory path
             pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
+            functionPath = pathname;
+            
+            #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage
+               ("   functionPath=<%s>\n", functionPath.c_str());
+            #endif
+         }
          else if (typeStr == "GmatFunction")
+         {
             // gmat function uses whole path name
-            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH") +nomme +".gmf";
-         
-         functionPath = pathname;
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         
-         // Remove path and .gmf (loj: 2008.03.12)
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         std::string::size_type dotIndex = functionName.find(".gmf");
-         functionName = functionName.substr(0, dotIndex);
-         
-         #ifdef DEBUG_FUNCTION
-         MessageInterface::ShowMessage
-            ("   functionPath=<%s>\n", functionPath.c_str());
-         MessageInterface::ShowMessage
-            ("   functionName=<%s>\n", functionName.c_str());
-         #endif
+            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH") + nomme + ".gmf";         
+            functionPath = pathname;
+            functionName = GmatFileUtil::ParseFileName(functionPath);
+            
+            // Remove path and .gmf (loj: 2008.03.12)
+            functionName = GmatFileUtil::ParseFileName(functionPath);
+            std::string::size_type dotIndex = functionName.find(".gmf");
+            functionName = functionName.substr(0, dotIndex);
+            
+            #ifdef DEBUG_FUNCTION
+            MessageInterface::ShowMessage
+               ("   functionPath=<%s>\n", functionPath.c_str());
+            MessageInterface::ShowMessage
+               ("   functionName=<%s>\n", functionName.c_str());
+            #endif
+         }
       }
    }
    catch (GmatBaseException &e)
@@ -221,6 +231,28 @@ bool Function::TakeAction(const std::string &action,
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <id> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not,
+ *         throws if the parameter is out of the valid range of values.
+ */
+//---------------------------------------------------------------------------
+bool Function::IsParameterReadOnly(const Integer id) const
+{
+   // We want both path and name when we write out, so skip this parameter
+   if (id == FUNCTION_NAME)
+      return true;
+   
+   return GmatBase::IsParameterReadOnly(id);
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
@@ -335,6 +367,102 @@ std::string Function::GetStringParameter(const std::string &label) const
 }
 
 
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const Integer id, const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param id The integer ID for the parameter.
+ * @param index Index for parameters in arrays.  Use -1 or the index free 
+ *              version to add the value to the end of the array.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//---------------------------------------------------------------------------
+std::string Function::GetStringParameter(const Integer id, 
+                                         const Integer index) const
+{
+   switch (id)
+   {
+   case FUNCTION_INPUT:
+      if (index >= (Integer)inputNames.size())
+      {
+         FunctionException fe;
+         fe.SetDetails("The index of %d for field \"%s\" is out of bounds for the "
+                       "object named \"%s\"", index, GetParameterText(id).c_str(),
+                       GetName().c_str());
+         throw fe;
+      }
+      else
+         return inputNames[index];
+      
+   case FUNCTION_OUTPUT:
+      if (index >= (Integer)outputNames.size())
+      {
+         FunctionException fe;
+         fe.SetDetails("The index of %d for field \"%s\" is out of bounds for the "
+                       "object named \"%s\"", index, GetParameterText(id).c_str(),
+                       GetName().c_str());
+         throw fe;
+      }
+      else
+         return outputNames[index];
+      
+   default:
+      return GmatBase::GetStringParameter(id);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+//  std::string GetStringParameter(const std::string &label,
+//                                 const Integer index) const
+//---------------------------------------------------------------------------
+/**
+ * Retrieve a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param index Index for parameters in arrays.
+ *
+ * @return The string stored for this parameter, or the empty string if there
+ *         is no string association.
+ */
+//---------------------------------------------------------------------------
+std::string Function::GetStringParameter(const std::string &label,
+                                         const Integer index) const
+{
+   return GetStringParameter(GetParameterID(label), index);
+}
+
+
+//---------------------------------------------------------------------------
+//  const StringArray& GetStringArrayParameter(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * Access an array of string data.
+ *
+ * @param <id> The integer ID for the parameter.
+ *
+ * @return The requested StringArray; throws if the parameter is not a 
+ *         StringArray.
+ */
+//---------------------------------------------------------------------------
+const StringArray& Function::GetStringArrayParameter(const Integer id) const
+{
+   switch (id)
+   {
+   case FUNCTION_INPUT:
+      return inputNames;
+   case FUNCTION_OUTPUT:
+      return outputNames;
+   default:
+      return GmatBase::GetStringArrayParameter(id);
+   }
+}
+
+
 //------------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const Real value)
 //------------------------------------------------------------------------------
@@ -413,7 +541,10 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
    case FUNCTION_INPUT:
       {
          if (inputArgMap.find(value) == inputArgMap.end())
+         {
             inputArgMap[value] = NULL;
+            inputNames.push_back(value);
+         }
          else
             throw FunctionException
                ("In function file \"" + functionPath + "\": "
@@ -424,7 +555,10 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
    case FUNCTION_OUTPUT:
       {
          if (outputArgMap.find(value) == outputArgMap.end())
+         {
             outputArgMap[value] = NULL;
+            outputNames.push_back(value);
+         }
          else
             throw FunctionException
                ("In function file \"" + functionPath + "\": "

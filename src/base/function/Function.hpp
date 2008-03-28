@@ -39,6 +39,7 @@ public:
    virtual bool         TakeAction(const std::string &action,
                                    const std::string &actionData = "");
    
+   virtual bool         IsParameterReadOnly(const Integer id) const;
    virtual std::string  GetParameterText(const Integer id) const;
    virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
@@ -46,16 +47,25 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    virtual std::string  GetStringParameter(const Integer id) const;
    virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual std::string  GetStringParameter(const Integer id,
+                                           const Integer index) const;
+   virtual std::string  GetStringParameter(const std::string &label,
+                                           const Integer index) const;
    virtual bool         SetStringParameter(const Integer id, 
                                            const std::string &value);
    virtual bool         SetStringParameter(const std::string &label,
                                            const std::string &value);
-   
+   virtual const StringArray&
+                        GetStringArrayParameter(const Integer id) const;
 protected:
    /// Path for function script
    std::string functionPath;
    /// Function name
    std::string functionName;
+   /// Function input names
+   StringArray inputNames;
+   /// Function output names
+   StringArray outputNames;
    /// Function input name and element wrapper map
    std::map<std::string, ElementWrapper*> inputArgMap;
    /// Function output name element wrapper map
