@@ -95,7 +95,8 @@ OpenGlPlot::PARAMETER_TYPE[OpenGlPlotParamCount - SubscriberParamCount] =
    Gmat::OBJECT_TYPE,            //"ViewPointReference",
    Gmat::STRING_TYPE,            //"ViewPointRefType"
    Gmat::RVECTOR_TYPE,           //"ViewPointRefVector",
-   Gmat::STRING_TYPE,            //"ViewPointVector",
+   //Gmat::STRING_TYPE,            //"ViewPointVector",
+   Gmat::OBJECT_TYPE,            //"ViewPointVector",
    Gmat::STRING_TYPE,            //"ViewPointVectorType",
    Gmat::RVECTOR_TYPE,           //"ViewPointVectorVector",
    Gmat::OBJECT_TYPE,            //"ViewDirection",
