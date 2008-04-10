@@ -28,6 +28,7 @@
 #include "Assignment.hpp"
 #include "MathParser.hpp"
 #include "StringUtil.hpp"
+#include "TextParser.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME
@@ -356,7 +357,7 @@ bool Assignment::Execute()
    bool bval = false;
    std::string sval;
    Rmatrix rmat;
-   GmatBase *obj = NULL;
+   GmatBase *rhsObj = NULL;
    
    Gmat::ParameterType lhsDataType = lhsWrapper->GetDataType();
    Gmat::ParameterType rhsDataType = Gmat::UNKNOWN_PARAMETER_TYPE;
@@ -366,7 +367,8 @@ bool Assignment::Execute()
    Gmat::WrapperDataType rhsWrapperType = Gmat::UNKNOWN_WRAPPER_TYPE;
    
    #ifdef DEBUG_ASSIGNMENT_EXEC
-   MessageInterface::ShowMessage("   lhsDataType=%s\n", lhsTypeStr.c_str());
+   MessageInterface::ShowMessage
+      ("   lhsWrapperType=%d, lhsDataType=%s\n", lhsWrapperType, lhsTypeStr.c_str());
    #endif
    
    try
@@ -379,7 +381,8 @@ bool Assignment::Execute()
          rhsWrapperType = rhsWrapper->GetWrapperType();
          
          #ifdef DEBUG_ASSIGNMENT_EXEC
-         MessageInterface::ShowMessage("   rhsDataType=%s\n", rhsTypeStr.c_str());
+         MessageInterface::ShowMessage
+            ("   rhsWrapperType=%d, rhsDataType=%s\n", rhsWrapperType, rhsTypeStr.c_str());
          #endif
          
          // If lhs is String, it must be String Object, so check it first
@@ -415,7 +418,7 @@ bool Assignment::Execute()
             sval = rhsWrapper->EvaluateOnOff();
             break;
          case Gmat::OBJECT_TYPE:
-            obj = rhsWrapper->EvaluateObject();
+            rhsObj = rhsWrapper->EvaluateObject();
             break;
          default:
             throw CommandException("Unknown RHS data type");
@@ -479,8 +482,8 @@ bool Assignment::Execute()
       
       #if DEBUG_ASSIGNMENT_EXEC
       MessageInterface::ShowMessage
-         ("   ==> Now assign \"%s\" to \"%s\", obj=%p\n",
-          rhs.c_str(), lhs.c_str(), obj);
+         ("   ==> Now assign \"%s\" to \"%s\", rhsObj=%p\n",
+          rhs.c_str(), lhs.c_str(), rhsObj);
       #endif
       
       // Now assign to LHS
@@ -519,9 +522,9 @@ bool Assignment::Execute()
          break;
       case Gmat::STRING_TYPE:
          // Object to String is needed for Remove for Formation
-         if (obj != NULL)
+         if (rhsObj != NULL)
          {
-            lhsWrapper->SetString(obj->GetName());
+            lhsWrapper->SetString(rhsObj->GetName());
          }
          else if ((rhsDataType == Gmat::STRING_TYPE ||
               rhsDataType == Gmat::ON_OFF_TYPE))
@@ -537,9 +540,9 @@ bool Assignment::Execute()
          else
          {
             CommandException ce;
-            if (obj != NULL)
+            if (rhsObj != NULL)
                ce.SetDetails("Cannot set object of type \"%s\" to an undefined "
-                             "object \"%s\"", obj->GetTypeName().c_str(), lhs.c_str());
+                             "object \"%s\"", rhsObj->GetTypeName().c_str(), lhs.c_str());
             else if (lhsWrapperType == Gmat::STRING_OBJECT &&
                      rhsWrapperType == Gmat::VARIABLE)
                ce.SetDetails("Cannot set objet of type \"Variable\" to object of "
@@ -554,20 +557,54 @@ bool Assignment::Execute()
          lhsWrapper->SetOnOff(sval);
          break;
       case Gmat::OBJECT_TYPE:
-         if (obj == NULL)
+         if (rhsObj == NULL)
             throw CommandException("Cannot set Non-Object type to object");
          else
-            lhsWrapper->SetObject(obj);
+            lhsWrapper->SetObject(rhsObj);
          break;
       case Gmat::STRINGARRAY_TYPE:
-         // Object to String is needed for Add for Subscribers/Formation
-         if (obj != NULL)
-            lhsWrapper->SetString(obj->GetName());
+         if (rhsObj != NULL)
+            lhsWrapper->SetString(rhsObj->GetName());
          else
          {
             CommandException ce;
             ce.SetDetails("Cannot set \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
             throw ce;            
+         }
+         break;
+      case Gmat::OBJECTARRAY_TYPE:
+         // Object to String is needed for Add for Subscribers/Formation
+         if (rhsObj != NULL)
+            lhsWrapper->SetObject(rhsObj);
+         else
+         {
+            bool errorCond = true;
+            
+            // Set individually if RHS has more than one object (loj: 2008.04.01)
+            StringArray rhsValues;
+            TextParser tp;
+            if (rhs.find("{") != rhs.npos || rhs.find("}") != rhs.npos)
+               rhsValues = tp.SeparateBrackets(rhs, "{}", " ,");
+            
+            for (UnsignedInt i=0; i<rhsValues.size(); i++)
+            {
+               GmatBase *obj = FindObject(rhsValues[i]);
+               if (obj == NULL)
+               {
+                  errorCond = true;
+                  break;
+               }
+               
+               lhsWrapper->SetObject(obj);
+               errorCond = false;
+            }
+            
+            if (errorCond)
+            {
+               CommandException ce;
+               ce.SetDetails("Cannot set \"%s\" to \"%s\"", rhs.c_str(), lhs.c_str());
+               throw ce;
+            }
          }
          break;
       default:
