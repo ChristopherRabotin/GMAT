@@ -307,6 +307,8 @@ CelestialBody::CelestialBody(const CelestialBody &cBody) :
    angularVelocity        = cBody.angularVelocity;
    defaultMu              = cBody.defaultMu;
    defaultEqRadius        = cBody.defaultEqRadius;
+   isFirstTimeMu          = true;
+   isFirstTimeRadius      = true;
    potentialFileRead      = false;
    
    if (cBody.atmModel)
@@ -364,6 +366,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    potentialFileName   = cBody.potentialFileName;
    angularVelocity     = cBody.angularVelocity;
    hourAngle           = cBody.hourAngle;
+   isFirstTimeMu       = cBody.isFirstTimeMu;
+   isFirstTimeRadius   = cBody.isFirstTimeRadius;
    
    if (atmModel)
       delete atmModel;
@@ -373,7 +377,6 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    else
       atmModel = NULL;
    
-   potentialFileRead   = false;
    defaultMu           = cBody.defaultMu;
    defaultEqRadius     = cBody.defaultEqRadius;
    
@@ -394,6 +397,8 @@ CelestialBody& CelestialBody::operator=(const CelestialBody &cBody)
    rotationSrc         = cBody.rotationSrc;
    
    for (Integer i=0;i<6;i++)  prevState[i] = cBody.prevState[i];
+   
+   potentialFileRead   = false;
    
    return *this;
 }
@@ -702,7 +707,7 @@ Real CelestialBody::GetGravitationalConstant()
          MessageInterface::ShowMessage
             ("For body %s, not using potential file, so using default mu (%.18f)\n",
              instanceName.c_str(), mu, potentialFileName.c_str());
-            
+         
          isFirstTimeMu = false;
       }
    }
