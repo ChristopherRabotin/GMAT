@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         FminconOptimizer
 //------------------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ bool FminconOptimizer::OpenConnection()
             return false;
          }
          /// start the GMATServer here
-         static GmatMainFrame *theMain = GmatAppData::GetMainFrame();
+         static GmatMainFrame *theMain = GmatAppData::Instance()->GetMainFrame();
          theMain->StartServer();
          if (inSource == NULL) inSource = GmatInterface::Instance();
          if (inSource == NULL)  
