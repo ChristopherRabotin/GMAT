@@ -737,9 +737,11 @@ const StringArray& ConfigManager::GetListOfItems(Gmat::ObjectType itemType)
  */
 //------------------------------------------------------------------------------
 GmatBase* ConfigManager::GetItem(const std::string &name)
-{   
+{
+   //MessageInterface::ShowMessage("===> ConfigManager::GetItem() name='%s'\n", name.c_str());
+   
    GmatBase *obj = NULL;
-    
+   
    if (mapping.find(name) != mapping.end())
    {
       if (mapping[name]->GetName() == name)
@@ -747,7 +749,8 @@ GmatBase* ConfigManager::GetItem(const std::string &name)
          obj = mapping[name];
       }
    }
-    
+   
+   //MessageInterface::ShowMessage("===> ConfigManager::GetItem() returning <%p>\n", obj);
    return obj;
 }
 
@@ -1492,3 +1495,13 @@ void ConfigManager::ConfigurationChanged(bool tf)
 {
    objectChanged = tf;
 }
+
+
+//------------------------------------------------------------------------------
+// StringObjectMap* GetObjectMap()
+//------------------------------------------------------------------------------
+StringObjectMap* ConfigManager::GetObjectMap()
+{
+   return &mapping;
+}
+

@@ -108,9 +108,10 @@ public:
    Function*           GetFunction(const std::string &name);
    CoordinateSystem*   GetCoordinateSystem(const std::string &name);
    CalculatedPoint*    GetCalculatedPoint(const std::string &name);
-      
+   
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);
+   StringObjectMap*    GetObjectMap();
    
 private:
    
@@ -132,7 +133,7 @@ private:
    SolarSystem *defaultSolarSystem;
    /// Solar Systems in use
    SolarSystem *solarSystemInUse;
-
+   
    void                AddObject(GmatBase* obj);
    
    // Hide the default constructor and destructor to preserve singleton status
