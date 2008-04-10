@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              RunScriptFolderDialog
 //------------------------------------------------------------------------------
@@ -386,7 +386,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
    if (event.GetEventObject() == mChangeSaveScriptsDirButton)
    {
       wxDirDialog dialog(this, "Select a directory to save scripts", mCompareDir);
-   
+      
       if (dialog.ShowModal() == wxID_OK)
       {
          mSaveScriptsDir = dialog.GetPath();
@@ -410,7 +410,6 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          
          mCurrOutDir = dialog.GetPath();
          mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
-         mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + sep + "AutoSave");
          mSaveFileTextCtrl->SetValue(mCurrOutDir + sep + "CompareNumericResults.txt");
          mOutDirChanged = true;
          
