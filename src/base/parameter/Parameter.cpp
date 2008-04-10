@@ -50,7 +50,7 @@ Parameter::PARAMETER_TEXT[ParameterParamCount] =
 const Gmat::ParameterType
 Parameter::PARAMETER_TYPE[ParameterParamCount] =
 {
-   Gmat::STRING_TYPE,          //"Object",
+   Gmat::OBJECT_TYPE,          //"Object",
    Gmat::STRING_TYPE,          //"Expression",
    Gmat::STRING_TYPE,          //"Description",
    Gmat::STRING_TYPE,          //"Unit",
@@ -859,11 +859,10 @@ std::string Parameter::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Parameter::IsParameterReadOnly(const Integer id) const
 {
-   if ((id == DESCRIPTION) || (id == UNIT) ||
-       (id == DEP_OBJECT) || (id == COLOR) ||
-       (id == EXPRESSION)) //loj: 3/27/07 added EXPRESSION
+   if ((id == DESCRIPTION) || (id == UNIT) || (id == DEP_OBJECT) ||
+       (id == COLOR) || (id == EXPRESSION))
       return true;
-
+   
    return GmatBase::IsParameterReadOnly(id);
 }
 
