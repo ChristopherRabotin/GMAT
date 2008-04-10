@@ -411,7 +411,7 @@ char* GmatInterface::GetParameter(const std::string &name)
 
 
 //------------------------------------------------------------------------------
-// char* GetObject(const std::string &name)
+// char* GetGmatObject(const std::string &name)
 //------------------------------------------------------------------------------
 /*
  * It retrieves an object pointer from the Sandbox, if it is not found in the
@@ -421,11 +421,11 @@ char* GmatInterface::GetParameter(const std::string &name)
  *         object in the Configuration
  */
 //------------------------------------------------------------------------------
-char* GmatInterface::GetObject(const std::string &name)
+char* GmatInterface::GetGmatObject(const std::string &name)
 {
    #ifdef DEBUG_GMAT_INTERFACE
    MessageInterface::ShowMessage
-      ("GmatInterface::GetObject() name=%s\n", name.c_str());
+      ("GmatInterface::GetGmatObject() name=%s\n", name.c_str());
    #endif
    
    static char dataString[MAX_OBJECT_VAL_STRING];
@@ -451,7 +451,7 @@ char* GmatInterface::GetObject(const std::string &name)
    {
       #ifdef DEBUG_GMAT_INTERFACE
       MessageInterface::ShowMessage
-         ("GmatInterface::GetObject() get serialized string of object name:"
+         ("GmatInterface::GetGmatObject() get serialized string of object name:"
           "%s, type=%s\n", obj->GetName().c_str(), obj->GetTypeName().c_str());
       #endif
       

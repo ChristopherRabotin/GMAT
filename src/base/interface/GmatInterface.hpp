@@ -45,7 +45,7 @@ public:
    char* GetCallbackResults();
    
    char* GetRunState();
-   char* GetObject(const std::string &name);
+   char* GetGmatObject(const std::string &name);
    char* GetParameter(const std::string &name);
    
    void CheckUserInterrupt();
