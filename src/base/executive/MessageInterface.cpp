@@ -105,9 +105,10 @@ std::string MessageInterface::GetMessage()
 void MessageInterface::ClearMessage()
 {
 #if !defined __CONSOLE_APP__
-   if (GmatAppData::GetMessageTextCtrl() != NULL)
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   if (gmatAppData->GetMessageTextCtrl() != NULL)
    {
-      GmatAppData::GetMessageTextCtrl()->Clear();
+      gmatAppData->GetMessageTextCtrl()->Clear();
    }
 //   else
 //   {
@@ -124,9 +125,10 @@ void MessageInterface::ClearMessage()
 int MessageInterface::GetNumberOfMessageLines()
 {
 #if !defined __CONSOLE_APP__
-   if (GmatAppData::theMessageWindow != NULL)
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   if (gmatAppData->GetMessageWindow() != NULL)
    {
-      return GmatAppData::theMessageWindow->GetNumberOfLines();
+      return gmatAppData->GetMessageWindow()->GetNumberOfLines();
    }
    else
    {
@@ -186,8 +188,9 @@ void MessageInterface::ShowMessage(const char *msg, ...)
    }
    
 #if !defined __CONSOLE_APP__
-   if (GmatAppData::GetMessageTextCtrl() != NULL)
-      GmatAppData::GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   if (gmatAppData->GetMessageTextCtrl() != NULL)
+      gmatAppData->GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
 #endif
    
    LogMessage(std::string(msgBuffer));
@@ -486,14 +489,11 @@ void MessageInterface::OpenLogFile(const std::string &filename, bool append)
    
    if (logFile)
    {
-      fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
-      fprintf(logFile, "MessageInterface::SetLogFile() Log file set to %s\n",
-              logFileName.c_str());
-      
-      if (append)
-         fprintf(logFile, "The log file mode is append\n");
-      else
-         fprintf(logFile, "The log file mode is create\n");
+      if (!append)
+      {
+         fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
+         fprintf(logFile, "GMAT log file set to %s\n", logFileName.c_str());
+      }
       
       logFileSet = true;
    }
