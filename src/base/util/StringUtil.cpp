@@ -2377,7 +2377,7 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 
 
 //------------------------------------------------------------------------------
-// bool IsValidName(const std::string &str, bool isObject, bool ignoreParen)
+// bool IsValidName(const std::string &str, bool ignoreBracket)
 //------------------------------------------------------------------------------
 /*
  * Checks for valid name.
@@ -2386,40 +2386,31 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
  * with number. Underscore is allowed.
  *
  * If validating for object, it also checks for some keyword such as "Create."
- * If parenthesis is to be ignored, the name will be reassign upto open parenthesis.
+ * If bracket is to be ignored, the name will be reassign upto open bracket.
  *
  * @param  str  The input string to check for valid name
- * @param  isObject  true if input string is object name (false)
- * @param  ignoreParen  true if input string has parenthesis and to ignore it
+ * @param  ignoreBracket  true if input string has bracket and to ignore it
  *                      when checking (false)
  */
 //------------------------------------------------------------------------------
-bool GmatStringUtil::IsValidName(const std::string &str, bool isObject,
-                                 bool ignoreParen)
+bool GmatStringUtil::IsValidName(const std::string &str, bool ignoreBracket)
 {
-   // check for valid object name
-   if (isObject)
-   {
-      if (str == "GMAT" || str == "Create")
-         return false;
-      else
-         for (UnsignedInt i=1; i<str.size(); i++)
-            if (!isalnum(str[i]) && str[i] != '_')
-               return false;
-      
-      return true;
-   }
+   if (str == "")
+      return false;
    
-   // check for valid variable name
+   if (str == "GMAT" || str == "Create")
+      return false;
+   
+   // First letter must start with alphabet
    if (!isalpha(str[0]))
       return false;
    
    std::string str1 = str;
    
    // if ignoring open parenthesis, remove it first
-   if (ignoreParen)
+   if (ignoreBracket)
    {
-      std::string::size_type openParen = str1.find("(");
+      std::string::size_type openParen = str1.find_first_of("([");
       if (openParen != str1.npos)
       {
          str1 = str1.substr(0, openParen);
