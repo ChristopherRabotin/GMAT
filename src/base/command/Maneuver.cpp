@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Maneuver
 //------------------------------------------------------------------------------
@@ -492,7 +492,7 @@ bool Maneuver::InterpretAction()
          MessageInterface::ShowMessage("    %s\n", currentChunks.at(ii).c_str());
    #endif
    // ... and the spacecraft that is maneuvered
-   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ", ");
+   currentChunks = parser.SeparateBrackets(currentChunks[1], "()", ",");
    #ifdef DEBUG_MANEUVER_PARSE
       MessageInterface::ShowMessage("In Maneuver, after Separatebrackets, currentChunks = \n");
       for (unsigned int ii=0; ii<currentChunks.size(); ii++)
