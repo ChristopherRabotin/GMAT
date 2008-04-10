@@ -90,7 +90,7 @@ AttitudePanel::AttitudePanel(GmatPanel *scPanel, wxWindow *parent,
    theScPanel        = scPanel;
    theSpacecraft     = spacecraft;
    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager     = GuiItemManager::GetInstance();
    
    modelArray.clear();
@@ -439,6 +439,11 @@ void AttitudePanel::LoadData()
    theAttitude = (Attitude*) theSpacecraft->GetRefObject(Gmat::ATTITUDE, "");
    if (theAttitude == NULL)   // no attitude yet
    {
+      #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage
+         ("   Attitude is NULL, so try to create %s.\n", attitudeModelArray[0].c_str());
+      #endif
+      
       theAttitude = (Attitude *)theGuiInterpreter->
          CreateObject((attitudeModelArray[0]).c_str(), ""); // Use no name
       newAttitude = true;
@@ -450,82 +455,93 @@ void AttitudePanel::LoadData()
       throw GmatBaseException(ex);
    }
    
-   epoch = theAttitude->GetEpoch();
-   
-   attStateType     = 
-          theAttitude->GetStringParameter("AttitudeDisplayStateType");
-   attRateStateType = 
-          theAttitude->GetStringParameter("AttitudeRateDisplayStateType");
-   attitudeModel    = theAttitude->GetAttitudeModelName();
-   config1ComboBox->SetValue(wxT(attitudeModel.c_str()));
-   
-   eulerSequence  = theAttitude->GetStringParameter("EulerAngleSequence");
-   seq            = Attitude::ExtractEulerSequence(eulerSequence);
-   config4ComboBox->SetValue(wxT(eulerSequence.c_str()));
-   
-   attCoordSystem = theAttitude->GetStringParameter("AttitudeCoordinateSystem");
-   config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
-   if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
-                        GetConfiguredObject(attCoordSystem);
-   //if (newAttitude) attCS = NULL;
-   //else             attCS = (CoordinateSystem*) theAttitude->
-   //                 GetRefObject(Gmat::COORDINATE_SYSTEM, 
-   //                 attCoordSystem);
-   
-   if (attStateType == STATE_TEXT[EULER_ANGLES])
+   try
    {
-      Rvector eaVal = theAttitude->GetRvectorParameter(STATE_TEXT[EULER_ANGLES]);
-      for (x = 0; x < 3; ++x)
+      #ifdef DEBUG_ATTITUDE_PANEL
+      MessageInterface::ShowMessage("   Now retrieve data from the attitude\n");
+      #endif
+      
+      epoch = theAttitude->GetEpoch();
+      
+      attStateType     = 
+         theAttitude->GetStringParameter("AttitudeDisplayStateType");
+      attRateStateType = 
+         theAttitude->GetStringParameter("AttitudeRateDisplayStateType");
+      attitudeModel    = theAttitude->GetAttitudeModelName();
+      config1ComboBox->SetValue(wxT(attitudeModel.c_str()));
+      
+      eulerSequence  = theAttitude->GetStringParameter("EulerAngleSequence");
+      seq            = Attitude::ExtractEulerSequence(eulerSequence);
+      config4ComboBox->SetValue(wxT(eulerSequence.c_str()));
+   
+      attCoordSystem = theAttitude->GetStringParameter("AttitudeCoordinateSystem");
+      config2ComboBox->SetValue(wxT(attCoordSystem.c_str()));
+      if (!attCS) attCS  = (CoordinateSystem*)theGuiInterpreter->
+                     GetConfiguredObject(attCoordSystem);
+      //if (newAttitude) attCS = NULL;
+      //else             attCS = (CoordinateSystem*) theAttitude->
+      //                 GetRefObject(Gmat::COORDINATE_SYSTEM, 
+      //                 attCoordSystem);
+      
+      if (attStateType == STATE_TEXT[EULER_ANGLES])
       {
-         *eulerAngles[x] = theGuiManager->ToWxString(eaVal[x]);
-         ea[x]           = eaVal[x];
-      }
-      DisplayEulerAngles();
-   }
-   else if (attStateType == "Quaternion")
-   {
-      Rvector qVal = theAttitude->GetRvectorParameter("Quaternion");
-      for (x = 0; x < 4; ++x)
-      {
-         *quaternion[x] = theGuiManager->ToWxString(qVal[x]);
-         q[x]           = qVal[x];
-      }
-      DisplayQuaternion();
-   }
-   else // "DirectionCosineMatrix
-   {
-      Rmatrix matVal = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
-      for (x = 0; x < 3; ++x)
-         for (y = 0; y < 3; ++y)
+         Rvector eaVal = theAttitude->GetRvectorParameter(STATE_TEXT[EULER_ANGLES]);
+         for (x = 0; x < 3; ++x)
          {
-            *cosineMatrix[x*3+y] = theGuiManager->ToWxString(matVal(x,y));
-            mat(x,y)             = matVal(x,y);
+            *eulerAngles[x] = theGuiManager->ToWxString(eaVal[x]);
+            ea[x]           = eaVal[x];
          }
-      DisplayDCM();
-   }
+         DisplayEulerAngles();
+      }
+      else if (attStateType == "Quaternion")
+      {
+         Rvector qVal = theAttitude->GetRvectorParameter("Quaternion");
+         for (x = 0; x < 4; ++x)
+         {
+            *quaternion[x] = theGuiManager->ToWxString(qVal[x]);
+            q[x]           = qVal[x];
+         }
+         DisplayQuaternion();
+      }
+      else // "DirectionCosineMatrix
+      {
+         Rmatrix matVal = theAttitude->GetRmatrixParameter("DirectionCosineMatrix");
+         for (x = 0; x < 3; ++x)
+            for (y = 0; y < 3; ++y)
+            {
+               *cosineMatrix[x*3+y] = theGuiManager->ToWxString(matVal(x,y));
+               mat(x,y)             = matVal(x,y);
+            }
+         DisplayDCM();
+      }
    
-   if (attRateStateType == "EulerAngleRates") 
-   {
-      Rvector earVal = theAttitude->GetRvectorParameter("EulerAngleRates");
-      for (x = 0; x < 3; ++x)
+      if (attRateStateType == "EulerAngleRates") 
       {
-         *eulerAngleRates[x] = theGuiManager->ToWxString(earVal[x]);
-         ear[x]              = earVal[x];
+         Rvector earVal = theAttitude->GetRvectorParameter("EulerAngleRates");
+         for (x = 0; x < 3; ++x)
+         {
+            *eulerAngleRates[x] = theGuiManager->ToWxString(earVal[x]);
+            ear[x]              = earVal[x];
+         }
+         DisplayEulerAngleRates();
       }
-      DisplayEulerAngleRates();
-   }
-   else // AngularVelocity
-   {
-      Rvector avVal = theAttitude->GetRvectorParameter("AngularVelocity");
-      for (x = 0; x < 3; ++x)
+      else // AngularVelocity
       {
-         *angVel[x] = theGuiManager->ToWxString(avVal[x]);
-         av[x]      = avVal[x];
+         Rvector avVal = theAttitude->GetRvectorParameter("AngularVelocity");
+         for (x = 0; x < 3; ++x)
+         {
+            *angVel[x] = theGuiManager->ToWxString(avVal[x]);
+            av[x]      = avVal[x];
+         }
+         DisplayAngularVelocity();
       }
-      DisplayAngularVelocity();
+      
+      dataChanged = false;
    }
-
-   dataChanged = false;
+   catch (BaseException &e)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
+   }
 }
 
 
