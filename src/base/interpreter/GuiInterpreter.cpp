@@ -724,7 +724,7 @@ Integer GuiInterpreter::RunScript(Integer sandboxNum)
 void GuiInterpreter::SetInputFocus()
 {
 #if !defined __CONSOLE_APP__
-   GmatMainFrame *mainFrame = GmatAppData::GetMainFrame();
+   GmatMainFrame *mainFrame = GmatAppData::Instance()->GetMainFrame();
    mainFrame->SetFocus();
    if (mainFrame->IsIconized())
       mainFrame->ProcessPendingEvent();
@@ -738,7 +738,7 @@ void GuiInterpreter::SetInputFocus()
 void GuiInterpreter::NotifyRunCompleted()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::GetMainFrame()->NotifyRunCompleted();
+   GmatAppData::Instance()->GetMainFrame()->NotifyRunCompleted();
 #endif
 }
 
@@ -750,8 +750,9 @@ void GuiInterpreter::UpdateResourceTree()
 {
 #if !defined __CONSOLE_APP__
    //close the open windows first
-   GmatAppData::GetMainFrame()->CloseAllChildren();
-   GmatAppData::GetResourceTree()->UpdateResource(true);
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   gmatAppData->GetMainFrame()->CloseAllChildren();
+   gmatAppData->GetResourceTree()->UpdateResource(true);
 #endif
 }
 
@@ -762,7 +763,7 @@ void GuiInterpreter::UpdateResourceTree()
 void GuiInterpreter::UpdateMissionTree()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::GetMissionTree()->UpdateMission(true);
+   GmatAppData::Instance()->GetMissionTree()->UpdateMission(true);
 #endif
 }
 
@@ -773,7 +774,7 @@ void GuiInterpreter::UpdateMissionTree()
 void GuiInterpreter::UpdateOutputTree()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::GetOutputTree()->UpdateOutput(false, true);
+   GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true);
 #endif
 }
 
@@ -784,7 +785,7 @@ void GuiInterpreter::UpdateOutputTree()
 void GuiInterpreter::CloseCurrentProject()
 {
 #if !defined __CONSOLE_APP__
-   GmatAppData::GetMainFrame()->CloseCurrentProject();
+   GmatAppData::Instance()->GetMainFrame()->CloseCurrentProject();
 #endif
 }
 
