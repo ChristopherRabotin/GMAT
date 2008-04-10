@@ -871,7 +871,7 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
 {
    #if DEBUG_TP_SEP_BRACKETS
    MessageInterface::ShowMessage
-      ("TextParser::SeparateBrackets() chunk=%s, bracketPair=%s, delim=%s\n",
+      ("TextParser::SeparateBrackets() chunk='%s', bracketPair='%s', delim='%s'\n",
        chunk.c_str(), bracketPair.c_str(), delim.c_str());
    #endif
    
@@ -931,7 +931,7 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
    #endif
    
    return parts;
-
+   
 }
 
 
