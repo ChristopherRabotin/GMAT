@@ -23,6 +23,8 @@
 #include "GuiItemManager.hpp"
 #include "GmatTreeItemData.hpp"
 
+class GmatMainFrame;
+
 class ResourceTree : public wxTreeCtrl
 {
 public:
@@ -31,7 +33,7 @@ public:
    ResourceTree(wxWindow *parent, const wxWindowID id,
                 const wxPoint& pos, const wxSize& size,
                 long style);
-   
+   void SetMainFrame(GmatMainFrame *gmf);
    void ClearResource(bool leaveScripts);
    void UpdateResource(bool resetCounter);
    bool AddScriptItem(wxString path);
@@ -41,6 +43,7 @@ public:
    bool WasScriptAdded() { return mScriptAdded; }
    
 private:
+   GmatMainFrame  *theMainFrame;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool mScriptFolderRunning;

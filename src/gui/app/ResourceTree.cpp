@@ -76,6 +76,7 @@
 //#define DEBUG_DELETE 1
 //#define DEBUG_COMPARE_REPORT 1
 //#define DEBUG_RUN_SCRIPT_FOLDER 1
+//#define DEBUG_RESOURCE_TREE_UPDATE 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -147,7 +148,8 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
    : wxTreeCtrl(parent, id, pos, size, style)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theMainFrame = NULL;
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mScriptFolderRunning = false;
    mHasUserInterrupted = false;
@@ -157,6 +159,15 @@ ResourceTree::ResourceTree(wxWindow *parent, const wxWindowID id,
    AddDefaultResources();
    
    theGuiManager->UpdateAll();
+}
+
+
+//------------------------------------------------------------------------------
+// void SetMainFrame(GmatMainFrame *gmf)
+//------------------------------------------------------------------------------
+void ResourceTree::SetMainFrame(GmatMainFrame *gmf)
+{
+   theMainFrame = gmf;
 }
 
 
@@ -1063,7 +1074,7 @@ void ResourceTree::AddDefaultVariables(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
 {
-   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
+   StringArray itemNames = GmatAppData::Instance()->GetGuiInterpreter()->
       GetListOfObjects(Gmat::FUNCTION);
    int size = itemNames.size();
    wxString objName;
@@ -1118,7 +1129,7 @@ void ResourceTree::AddDefaultFunctions(wxTreeItemId itemId)
 //------------------------------------------------------------------------------
 void ResourceTree::AddDefaultCoordSys(wxTreeItemId itemId)
 {
-   StringArray itemNames = GmatAppData::GetGuiInterpreter()->
+   StringArray itemNames = GmatAppData::Instance()->GetGuiInterpreter()->
       GetListOfObjects(Gmat::COORDINATE_SYSTEM);
    int size = itemNames.size();
    wxString objName;
@@ -1158,7 +1169,7 @@ void ResourceTree::AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCount
                                            bool restartCounter)
 {
    StringArray itemNames =
-      GmatAppData::GetGuiInterpreter()->GetListOfObjects(Gmat::CALCULATED_POINT);
+      GmatAppData::Instance()->GetGuiInterpreter()->GetListOfObjects(Gmat::CALCULATED_POINT);
    int size = itemNames.size();
    wxString objName;
    wxString objTypeName;
@@ -1220,13 +1231,8 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
 {
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
-   GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
-   
-   #ifdef __USE_NOTEBOOK__
-   mainNotebook->CreatePage(item);
-   #else
-   GmatAppData::GetMainFrame()->CreateChild(item);
-   #endif
+   GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);   
+   theMainFrame->CreateChild(item);
 }
 
 
@@ -1242,13 +1248,8 @@ void ResourceTree::OnItemActivated(wxTreeEvent &event)
 void ResourceTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
-   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   
-   #ifdef __USE_NOTEBOOK__
-   mainNotebook->CreatePage(item);
-   #else
-   GmatAppData::GetMainFrame()->CreateChild(item);
-   #endif
+   GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());   
+   theMainFrame->CreateChild(item);
 }
 
 
@@ -1265,11 +1266,10 @@ void ResourceTree::OnClose(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   
    // if its open, its activated
-   if (GmatAppData::GetMainFrame()->IsChildOpen(item))
+   if (theMainFrame->IsChildOpen(item))
       // close the window
-      GmatAppData::GetMainFrame()->CloseActiveChild();
+      theMainFrame->CloseActiveChild();
    else
       return;
 }
@@ -1319,7 +1319,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          return;
       
       // If user wants to save data from the currently opened panels
-      if (GmatAppData::GetMainFrame()->GetNumberOfChildOpen() > 0)
+      if (theMainFrame->GetNumberOfChildOpen() > 0)
       {
          if (wxMessageBox(_T("GMAT will save data from the currently opened "
                              "panels first.\nDo you want to continue?"), 
@@ -1345,7 +1345,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
           RenameObject(objType, oldName.c_str(), newName.c_str()))
       {
          SetItemText(item, newName);
-         GmatAppData::GetMainFrame()->RenameChild(selItem, newName);
+         theMainFrame->RenameChild(selItem, newName);
          GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
          selItem->SetDesc(newName);
          
@@ -1371,7 +1371,7 @@ void ResourceTree::OnRename(wxCommandEvent &event)
          AddDefaultVariables(mVariableItem);
          
          // update MissionTree for resource rename
-         GmatAppData::GetMissionTree()->UpdateMissionForRename();
+         GmatAppData::Instance()->GetMissionTree()->UpdateMissionForRename();
       }
       else
       {
@@ -1420,7 +1420,7 @@ void ResourceTree::OnDelete(wxCommandEvent &event)
    {
       // delete item and close all opened windows
       this->Delete(itemId);
-      GmatAppData::GetMainFrame()->CloseAllChildren(false, true);
+      theMainFrame->CloseAllChildren(false, true);
       
       theGuiManager->UpdateAll();
    }
@@ -1525,7 +1525,7 @@ void ResourceTree::OnBeginLabelEdit(wxTreeEvent &event)
    
    //kind of redundant because OpenPage returns false for some
    //of the default folders
-   if ((GmatAppData::GetMainFrame()->IsChildOpen(selItem))  ||
+   if ((theMainFrame->IsChildOpen(selItem))  ||
        (isDefaultFolder)                                    ||
        (isDefaultItem))
    {
@@ -2341,7 +2341,7 @@ void ResourceTree::OnAddScript(wxCommandEvent &event)
       if (mScriptAdded)
       {
          // need to set the filename to MainFrame
-         GmatAppData::GetMainFrame()->SetScriptFileName(path.c_str());
+         theMainFrame->SetScriptFileName(path.c_str());
       }
    }
 }
@@ -2361,7 +2361,7 @@ void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
    wxTreeItemId item = GetSelection();
 
    Collapse(item);
-
+   
    while (GetChildrenCount(item) > 0)
    {
       wxTreeItemId lastChild = GetLastChild(item);
@@ -2370,7 +2370,7 @@ void ResourceTree::OnRemoveAllScripts(wxCommandEvent &event)
          ((GmatTreeItemData *)GetItemData(lastChild))->GetItemType();
       
       // close window and delte item
-      GmatAppData::GetMainFrame()->RemoveChild(name, itemType);
+      theMainFrame->RemoveChild(name, itemType);
       Delete(lastChild);
    }
    
@@ -2395,7 +2395,7 @@ void ResourceTree::OnRemoveScript(wxCommandEvent &event)
    wxTreeItemId parentItem = GetItemParent(item);
    
    // close window and delete item
-   GmatAppData::GetMainFrame()->RemoveChild(name, itemType);
+   theMainFrame->RemoveChild(name, itemType);
    Delete(item);
 }
 
@@ -2429,7 +2429,7 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
    wxString filename = item->GetDesc();
    
    if (BuildScript(filename))
-      GmatAppData::GetMainFrame()->RunCurrentMission();
+      theMainFrame->RunCurrentMission();
    
 }
 
@@ -2510,6 +2510,13 @@ void ResourceTree::OnAddScriptFolder(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
 {
+   if (theMainFrame == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("===> OnRunScriptsFromFolder() theMainFrame is not set\n");
+      return;
+   }
+   
    wxTreeItemId item = GetSelection();
    wxString filename;
    wxTreeItemIdValue cookie;
@@ -2558,16 +2565,12 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    bool createRunFolder = dlg.CreateRunFolder();
    wxString sep = fm->GetPathSeparator().c_str();
    
-   wxString currPath = dlg.GetCurrentOutDir() + sep;
+   wxString currOutPath = dlg.GetCurrentOutDir() + sep;
    wxString savePath = dlg.GetSaveScriptsDir() + sep;
    
-   // if running from saved scripts folder, set path to save path
-   if (runFromSavedScripts)
-      currPath = savePath;
-   
    // Create path if not exist
-   if (!::wxDirExists(currPath))
-      ::wxMkdir(currPath);
+   if (!::wxDirExists(currOutPath))
+      ::wxMkdir(currOutPath);
    
    int count = 0;
    mHasUserInterrupted = false;
@@ -2580,14 +2583,14 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    if (compare)
    {
       GmatMdiChildFrame *textFrame =
-         GmatAppData::GetMainFrame()->GetChild("CompareReport");
+         theMainFrame->GetChild("CompareReport");
       
       if (textFrame == NULL)
       {
          GmatTreeItemData *compareItem =
             new GmatTreeItemData("CompareReport", GmatTree::COMPARE_REPORT);
       
-         textFrame = GmatAppData::GetMainFrame()->CreateChild(compareItem);
+         textFrame = theMainFrame->CreateChild(compareItem);
       }
       
       textCtrl = textFrame->GetScriptTextCtrl();
@@ -2613,7 +2616,21 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    wxArrayString failedToRunScripts;
    wxArrayString runInterruptedScripts;
    
+   // Set output path
+   fm->SetAbsPathname(FileManager::OUTPUT_PATH, currOutPath.c_str());
+   
+   // Change log path and append log messages
+   MessageInterface::SetLogPath(currOutPath.c_str(), appendLog);
+   
+   // Write run start time
+   wxDateTime now = wxDateTime::Now();
+   wxString wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+   std::string nowStr = wxNowStr.c_str();
+   
+   MessageInterface::LogMessage(nowStr + "GMAT starting batch run.\n");
+   
    clock_t t1 = clock();
+   bool isFirstScript = true;
    
    while (scriptId.IsOk())
    {     
@@ -2635,20 +2652,20 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
       filename = ((GmatTreeItemData*)GetItemData(scriptId))->GetDesc();
       wxString titleText;
       titleText.Printf("%s - General Mission Analysis Tool (GMAT)", filename.c_str());      
-      GmatAppData::GetMainFrame()->SetTitle(titleText);
+      theMainFrame->SetTitle(titleText);
       
       // Set main frame status bar text
       wxString text;
       text.Printf("Running script %d out of %d: %s\n", count, runCount,
                   filename.c_str());
-      GmatAppData::GetMainFrame()->SetStatusText(text, 1);
+      theMainFrame->SetStatusText(text, 1);
       
       if (compare)
          textCtrl->AppendText(text);
       
       for (int i=0; i<repeatCount; i++)
       {
-         wxString outPath = currPath;
+         wxString outPath = currOutPath;
          
          if (createRunFolder)
          {
@@ -2657,16 +2674,22 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
                ::wxMkdir(outPath);
             
             outPath = outPath + "/";
+            
+            // Set output path
+            fm->SetAbsPathname(FileManager::OUTPUT_PATH, outPath.c_str());
+            
+            // Change log path and append log messages
+            MessageInterface::SetLogPath(outPath.c_str(), appendLog);
+            
+            if (isFirstScript)
+            {
+               MessageInterface::LogMessage(nowStr + "GMAT starting batch run.\n");
+               isFirstScript = false;
+            }
          }
          
-         // Set output path
-         fm->SetAbsPathname(FileManager::OUTPUT_PATH, outPath.c_str());
-         
-         // Change log path and append log messages
-         MessageInterface::SetLogPath(outPath.c_str(), appendLog);
-         
          MessageInterface::ShowMessage
-            ("Starting script %d out of %d: %s\n", count, runCount, filename.c_str());
+            ("\nStarting script %d out of %d: %s\n", count, runCount, filename.c_str());
          
          MessageInterface::ShowMessage
             ("==> Run Count: %d\n", i+1);
@@ -2674,7 +2697,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          // Set main frame status bar repeat count
          wxString text;
          text.Printf("Repeat Count %d", i+1);
-         GmatAppData::GetMainFrame()->SetStatusText(text, 0);
+         theMainFrame->SetStatusText(text, 0);
          
          if (compare)
          {
@@ -2690,7 +2713,7 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
             
             if (builtOk)
             {
-               Integer retval = GmatAppData::GetMainFrame()->RunCurrentMission();
+               Integer retval = theMainFrame->RunCurrentMission();
                
                // if run failed, save to report
                if (retval == -2)
@@ -2728,6 +2751,13 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    
    mScriptFolderRunning = false;
    
+   // Write run end time
+   now = wxDateTime::Now();
+   wxNowStr = now.FormatISODate() + " " + now.FormatISOTime() + " ";
+   nowStr = wxNowStr.c_str();
+   
+   MessageInterface::LogMessage(nowStr + "GMAT ended batch run.\n\n");
+   
    clock_t t2 = clock();
    MessageInterface::ShowMessage
       ("===> Grand Total Run Time: %f seconds\n", (Real)(t2-t1)/CLOCKS_PER_SEC);
@@ -2746,8 +2776,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
    // Report completion
    wxString text;
    text.Printf("Finished running %d scripts\n", runCount);
-   GmatAppData::GetMainFrame()->SetStatusText(text, 1);
-   GmatAppData::GetMainFrame()->SetStatusText("", 0);
+   theMainFrame->SetStatusText(text, 1);
+   theMainFrame->SetStatusText("", 0);
    
    // Set batch mode to false
    GmatGlobal::Instance()->SetBatchMode(false);
@@ -2872,12 +2902,13 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
    #endif
    
    // Set the filename to mainframe, so save will not bring up the file dialog
-   bool fileSet = GmatAppData::GetMainFrame()->SetScriptFileName(filename.c_str());
+   bool fileSet =
+      theMainFrame->SetScriptFileName(filename.c_str());
    
    if (fileSet)
    {
       // Interpret script
-      bool status = GmatAppData::GetMainFrame()->
+      bool status = theMainFrame->
          InterpretScript(filename, readBack, savePath, openScript, multiScripts);
       
       if (!status)
@@ -2886,8 +2917,17 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
          mFailedScriptsList.Add(filename);
       }
       
+      #if DEBUG_RESOURCE_TREE
+      MessageInterface::ShowMessage
+         ("ResourceTree::BuildScript() returning %s\n", (status? "true" : "false"));
+      #endif
+      
       return status;
    }
+   
+   #if DEBUG_RESOURCE_TREE
+   MessageInterface::ShowMessage("ResourceTree::BuildScript() returning false\n");
+   #endif
    
    return false;
 }
