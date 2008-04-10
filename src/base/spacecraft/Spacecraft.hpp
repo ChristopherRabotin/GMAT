@@ -105,6 +105,12 @@ public:
    virtual bool         SetStringParameter(const Integer id, const std::string &value);
    virtual bool         SetStringParameter(const std::string &label, 
                                            const std::string &value);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value,
+                                           const Integer index);
    
    const StringArray&   GetStringArrayParameter(const Integer id) const;
    

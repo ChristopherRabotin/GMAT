@@ -905,7 +905,7 @@ GmatBase* Spacecraft::GetRefObject(const Gmat::ObjectType type,
       case Gmat::ATTITUDE:
          #ifdef DEBUG_SC_ATTITUDE
          MessageInterface::ShowMessage(
-         "In SC::GetRefObject - returning Attitude poinetr\n");
+         "In SC::GetRefObject - returning Attitude poinetr <%p>\n", attitude);
          #endif
          //MessageInterface::ShowMessage("CoordinateSystem named %s\n", name.c_str());
          return attitude;
@@ -1867,6 +1867,7 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
  *
  * @return true if the string is stored, false if not.
  */
+//---------------------------------------------------------------------------
 bool Spacecraft::SetStringParameter(const std::string &label, 
                                     const std::string &value)
 {
@@ -1883,6 +1884,73 @@ bool Spacecraft::SetStringParameter(const std::string &label,
 
    return SetStringParameter(GetParameterID(label),value);
 }
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const std::string &value, 
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::SetStringParameter(const Integer id, const std::string &value, 
+                                    const Integer index)
+{
+   if (index < 0)
+   {
+      SpaceObjectException ex;
+      ex.SetDetails("The index %d is out-of-range for field \"%s\"", index,
+                    GetParameterText(id).c_str());
+      throw ex;
+   }
+   
+   switch (id)
+   {
+   case FUEL_TANK_ID:
+      {
+         if (index < (Integer)tankNames.size())
+            tankNames[index] = value;
+         else
+            // Only add the tank if it is not in the list already
+            if (find(tankNames.begin(), tankNames.end(), value) == tankNames.end()) 
+               tankNames.push_back(value);
+         
+         return true;
+      }
+   case THRUSTER_ID:
+      {
+         if (index < (Integer)thrusterNames.size())
+            thrusterNames[index] = value;
+         else
+            // Only add the tank if it is not in the list already
+            if (find(thrusterNames.begin(), thrusterNames.end(), value) == 
+                thrusterNames.end()) 
+               thrusterNames.push_back(value);
+         
+         return true;
+      }
+   default:
+      return GmatBase::SetStringParameter(id, value, index);
+   }
+}
+
+
+//---------------------------------------------------------------------------
+//  bool SetStringParameter(const std::string &label, const std::string &value,
+//                          const Integer index)
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool Spacecraft::SetStringParameter(const std::string &label, 
+                                    const std::string &value,
+                                    const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
 
 //---------------------------------------------------------------------------
 //  bool TakeAction(const std::string &action, const std::string &actionData)
