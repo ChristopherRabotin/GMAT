@@ -42,8 +42,8 @@ Formation::PARAMETER_TEXT[FormationParamCount - SpaceObjectParamCount] =
 const Gmat::ParameterType
 Formation::PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount] =
 {
-   Gmat::STRINGARRAY_TYPE,
-   Gmat::STRING_TYPE,     
+   Gmat::OBJECTARRAY_TYPE,
+   Gmat::OBJECT_TYPE,     
    Gmat::BOOLEAN_TYPE
 };
 
@@ -690,6 +690,21 @@ const StringArray&
    if (label == "Add")
       return componentNames;
    return SpaceObject::GetStringArrayParameter(label);
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
+//------------------------------------------------------------------------------
+/**
+ * This method returns an array with the names of the referenced objects.
+ *
+ * @return a vector with the names of objects of the requested type.
+ */
+//------------------------------------------------------------------------------
+const StringArray& Formation::GetRefObjectNameArray(const Gmat::ObjectType type)
+{
+   return componentNames;
 }
 
 

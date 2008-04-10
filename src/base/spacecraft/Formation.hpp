@@ -33,9 +33,7 @@ public:
    Formation&           operator=(const Formation& orig);
    
    virtual const Rvector6 GetMJ2000State(const A1Mjd &atTime);
-//   virtual const Rvector3 GetMJ2000Position(const A1Mjd &atTime);
-//   virtual const Rvector3 GetMJ2000Velocity(const A1Mjd &atTime);
-
+   
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -64,26 +62,28 @@ public:
    virtual Real         SetRealParameter(const std::string &label, 
                                          const Real value);
    virtual bool         SetStringParameter(const Integer id, 
-                                          const std::string &value);
+                                           const std::string &value);
    virtual bool         SetStringParameter(const Integer id, 
-                                          const std::string &value,
-                                          const Integer index);
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& 
                         GetStringArrayParameter(const std::string &label) const;
-                       
+   
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+                                     const std::string &name,
+                                     const Integer index);
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name = "");
+                                     const std::string &name = "");
    virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+                                     const std::string &name,
+                                     const Integer index);
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    virtual ObjectArray& GetRefObjectArray(const std::string& typeString);
-
+   
    virtual void         BuildState();
    virtual void         UpdateElements();
    virtual void         UpdateState();
@@ -92,7 +92,7 @@ public:
    virtual void         ClearLastStopTriggered();
    // virtual void SetLastStopTriggered(const std::string &stopCondName);
    // virtual bool WasLastStopTriggered(const std::string &stopCondName);
-
+   
 protected:
    /// List of the object names used in the formation
    StringArray                      componentNames;
@@ -102,7 +102,7 @@ protected:
    Integer                          dimension;
    /// Number of spacecraft in the state
    UnsignedInt                      satCount;
-
+   
    /// Enumerated parameter IDs   
    enum
    {
@@ -110,13 +110,14 @@ protected:
       REMOVED_SPACECRAFT,
       CLEAR_NAMES,
       FormationParamCount
-   }; 
+   };
+   
    /// Array of supported parameters
-   static const std::string PARAMETER_TEXT[FormationParamCount - 
-                                           SpaceObjectParamCount];
+   static const std::string
+      PARAMETER_TEXT[FormationParamCount - SpaceObjectParamCount];
    /// Array of parameter types
-   static const Gmat::ParameterType PARAMETER_TYPE[FormationParamCount - 
-                                                   SpaceObjectParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[FormationParamCount - SpaceObjectParamCount];
    
    bool                 ClearSpacecraftList();
    bool                 RemoveSpacecraft(const std::string &name);
