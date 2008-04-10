@@ -158,8 +158,7 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
 {
    parent = parent;
    
-   // mainNotebook = GmatAppData::GetMainNotebook();
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    mCommandList.Clear();
@@ -197,6 +196,15 @@ MissionTree::MissionTree(wxWindow *parent, const wxWindowID id,
    mActionsOutFile = "MissionTreeActionsOut.txt";
    mResultsFile = "MissionTreeResults.txt";
    #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetMainFrame(GmatMainFrame *gmf)
+//------------------------------------------------------------------------------
+void MissionTree::SetMainFrame(GmatMainFrame *gmf)
+{
+   theMainFrame = gmf;
 }
 
 
@@ -1734,7 +1742,7 @@ void MissionTree::OnItemActivated(wxTreeEvent &event)
        (parent->GetItemType() == GmatTree::OPTIMIZE))
       item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
-   GmatAppData::GetMainFrame()->CreateChild(item);
+   theMainFrame->CreateChild(item);
 }
 
 
@@ -1769,7 +1777,7 @@ void MissionTree::OnDoubleClick(wxMouseEvent &event)
       item->SetItemType(GmatTree::OPTIMIZE_VARY);
    
    // Show panel here. because OnItemActivated() always collapse the node.
-   GmatAppData::GetMainFrame()->CreateChild(item);
+   theMainFrame->CreateChild(item);
 
    //CheckClickIn(position);
 }
@@ -2479,7 +2487,7 @@ void MissionTree::OnShowScript(wxCommandEvent &event)
    std::string str = theGuiInterpreter->GetScript();
 
    ViewTextFrame *vtf =
-      new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Show Script"),
+      new ViewTextFrame(theMainFrame, _T("Show Script"),
        50, 50, 800, 500, "Temporary", "Script");
    
    vtf->AppendText(str.c_str());
@@ -2551,7 +2559,7 @@ bool MissionTree::CheckClickIn(wxPoint position)
                   new MissionTreeItemData(
                                           wxT("Variables"),
                                           GmatTree::VIEW_SOLVER_VARIABLES);
-               GmatAppData::GetMainFrame()->CreateChild(item);
+               theMainFrame->CreateChild(item);
             }
             else if ((position.x <= w-offset-boxWidth*boxNum) &&
                      (position.x >= w-offset-boxWidth*(++boxNum)))
@@ -2560,13 +2568,12 @@ bool MissionTree::CheckClickIn(wxPoint position)
                MissionTreeItemData *item =
                   new MissionTreeItemData(wxT("Goals"),
                                           GmatTree::VIEW_SOLVER_GOALS);
-               GmatAppData::GetMainFrame()->CreateChild(item);
+               theMainFrame->CreateChild(item);
             }
             else
             {
                //MessageInterface::ShowMessage("\nOpen regular panel");
-               //mainNotebook->CreatePage(missionTreeItemData);
-               GmatAppData::GetMainFrame()->CreateChild(missionTreeItemData);
+               theMainFrame->CreateChild(missionTreeItemData);
             }
             
             // get out of while loop
@@ -2644,7 +2651,7 @@ void MissionTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   GmatAppData::GetMainFrame()->CreateChild(item);
+   theMainFrame->CreateChild(item);
 }
 
 
@@ -2678,8 +2685,8 @@ void MissionTree::OnClose(wxCommandEvent &event)
              item->GetDesc().c_str());
          #endif
          
-         if (GmatAppData::GetMainFrame()->IsChildOpen(item))
-            GmatAppData::GetMainFrame()->CloseActiveChild();
+         if (theMainFrame->IsChildOpen(item))
+            theMainFrame->CloseActiveChild();
          
          childId = GetNextChild(currId, cookie);
          
@@ -2692,8 +2699,8 @@ void MissionTree::OnClose(wxCommandEvent &event)
    
    
    // delete selected item panel, if its open, its activated
-   if (GmatAppData::GetMainFrame()->IsChildOpen(currItem))
-      GmatAppData::GetMainFrame()->CloseActiveChild();
+   if (theMainFrame->IsChildOpen(currItem))
+      theMainFrame->CloseActiveChild();
    else
       return;
    

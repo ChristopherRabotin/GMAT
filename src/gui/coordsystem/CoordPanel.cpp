@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CoordPanel
 //------------------------------------------------------------------------------
@@ -30,7 +30,7 @@
 CoordPanel::CoordPanel(wxWindow *parent, bool enableAll)
    : wxPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    mShowPrimaryBody = false;

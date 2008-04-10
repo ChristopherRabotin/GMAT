@@ -48,8 +48,6 @@ private:
    virtual void SaveData();
    void OnPageChange(wxCommandEvent &event);
    
-   GuiInterpreter *theGuiInterpreter;
-   
    Spacecraft *theSpacecraft;
    Spacecraft *currentSpacecraft;
    

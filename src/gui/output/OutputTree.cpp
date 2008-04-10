@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              OutputTree
 //------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ OutputTree::OutputTree(wxWindow *parent, const wxWindowID id,
                            const wxPoint &pos, const wxSize &size, long style)
    : wxTreeCtrl(parent, id, pos, size, style)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    AddIcons();
@@ -351,7 +351,7 @@ void OutputTree::OnItemActivated(wxTreeEvent &event)
    // get some info about this item
    wxTreeItemId itemId = event.GetItem();
    GmatTreeItemData *item = (GmatTreeItemData *)GetItemData(itemId);
-   GmatAppData::GetMainFrame()->CreateChild(item);
+   GmatAppData::Instance()->GetMainFrame()->CreateChild(item);
 }
 
 
@@ -368,7 +368,7 @@ void OutputTree::OnOpen(wxCommandEvent &event)
 {
    // Get info from selected item
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
-   GmatAppData::GetMainFrame()->CreateChild(item);
+   GmatAppData::Instance()->GetMainFrame()->CreateChild(item);
 }
 
 //------------------------------------------------------------------------------
@@ -386,8 +386,9 @@ void OutputTree::OnClose(wxCommandEvent &event)
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    
    // if its open, its activated
-   if (GmatAppData::GetMainFrame()->IsChildOpen(item))
-      GmatAppData::GetMainFrame()->CloseActiveChild();
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   if (gmatAppData->GetMainFrame()->IsChildOpen(item))
+      gmatAppData->GetMainFrame()->CloseActiveChild();
    else
       return;
 }
@@ -455,7 +456,7 @@ void OutputTree::OnBeginLabelEdit(wxTreeEvent &event)
                                
    //kind of redundant because OpenPage returns false for some
    //of the default folders
-   if (GmatAppData::GetMainFrame()->IsChildOpen(selItem))
+   if (GmatAppData::Instance()->GetMainFrame()->IsChildOpen(selItem))
    {
       event.Veto();
    }
@@ -660,21 +661,23 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
    
    StringArray output =
       GmatFileUtil::Compare(filename1.c_str(), filename2.c_str(), colTitles, tol);
-
-   if (GmatAppData::theCompareWindow == NULL)
+   
+   ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
+   if (compWindow == NULL)
    {
-      GmatAppData::theCompareWindow =
-         new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Compare Utility"),
-                           50, 50, 800, 500, "Permanent");
+      compWindow = 
+         new ViewTextFrame(GmatAppData::Instance()->GetMainFrame(),
+                           _T("Compare Utility"), 50, 50, 800, 500, "Permanent");
+      GmatAppData::Instance()->SetCompareWindow(compWindow);
       wxString msg;
-      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
-      GmatAppData:: theCompareWindow->AppendText(msg);
+      msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);  
+      compWindow->AppendText(msg);
    }
    
-   GmatAppData::theCompareWindow->Show(true);
+   compWindow->Show(true);
    
    for (unsigned int i=0; i<output.size(); i++)
-      GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
+      compWindow->AppendText(wxString(output[i].c_str()));
 }
 
 
@@ -720,18 +723,20 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       GmatFileUtil::CompareLines(1, filename1.c_str(), filename2.c_str(), "", "",
                                  file1DiffCount, file2DiffCount, file3DiffCount);
    
-   if (GmatAppData::theCompareWindow == NULL)
+   ViewTextFrame *compWindow = GmatAppData::Instance()->GetCompareWindow();
+   if (compWindow == NULL)
    {
-      GmatAppData::theCompareWindow =
-         new ViewTextFrame(GmatAppData::GetMainFrame(), _T("Compare Utility"),
-                           50, 50, 800, 500, "Permanent");
+      compWindow =
+         new ViewTextFrame(GmatAppData::Instance()->GetMainFrame(),
+                           _T("Compare Utility"), 50, 50, 800, 500, "Permanent");
+      GmatAppData::Instance()->SetCompareWindow(compWindow);
       wxString msg;
       msg.Printf(_T("GMAT Build Date: %s %s\n\n"),  __DATE__, __TIME__);      
-      GmatAppData:: theCompareWindow->AppendText(msg);
+      compWindow->AppendText(msg);
    }
    
-   GmatAppData::theCompareWindow->Show(true);
+   compWindow->Show(true);
    
    for (unsigned int i=0; i<output.size(); i++)
-      GmatAppData::theCompareWindow->AppendText(wxString(output[i].c_str()));
+      compWindow->AppendText(wxString(output[i].c_str()));
 }

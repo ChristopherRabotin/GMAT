@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            ThrusterConfigPanel
 //------------------------------------------------------------------------------
@@ -49,14 +49,10 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 ThrusterConfigPanel::ThrusterConfigPanel(wxWindow *parent, 
-                                  const wxString &name):GmatPanel(parent)
+                                         const wxString &name)
+   : GmatPanel(parent)
 {  
    thrusterName = std::string(name.c_str());
-    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   
-   theGuiManager = GuiItemManager::GetInstance();
-   
    theThruster = (Thruster*)theGuiInterpreter->GetConfiguredObject(thrusterName);
    
    isCoordSysChanged = false;

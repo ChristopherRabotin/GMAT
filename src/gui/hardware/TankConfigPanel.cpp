@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            TankConfigPanel
 //------------------------------------------------------------------------------
@@ -49,10 +49,8 @@ END_EVENT_TABLE()
 TankConfigPanel::TankConfigPanel(wxWindow *parent, const wxString &name):GmatPanel(parent)
 {           
    tankName = std::string(name.c_str());
-    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theFuelTank = (FuelTank*)theGuiInterpreter->GetConfiguredObject(tankName);
-    
+   
    Create();
    Show();
 }

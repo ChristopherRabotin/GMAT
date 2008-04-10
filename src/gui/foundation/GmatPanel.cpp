@@ -50,15 +50,20 @@ END_EVENT_TABLE()
 GmatPanel::GmatPanel(wxWindow *parent, bool showScriptButton)
     : wxPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    canClose = true;
    mDataChanged = false;
    
    mShowScriptButton = showScriptButton;
-
+   
    theParent = parent;
-
+   
+   #ifdef DEBUG_GMATPANEL
+   MessageInterface::ShowMessage
+      ("GmatPanel::GmatPanel() entered. theGuiInterpreter=<%p>\n", theGuiInterpreter);
+   #endif
+   
    int borderSize = 3;
    //wxStaticBox *topStaticBox = new wxStaticBox( this, -1, wxT("") );
    wxStaticBox *middleStaticBox = new wxStaticBox( this, -1, wxT("") );
@@ -216,11 +221,8 @@ void GmatPanel::OnOK(wxCommandEvent &event)
       }
    }
    
-   // Close page from main notebook    
-   // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-   // gmatMainNotebook->ClosePage();
    if (canClose)
-      GmatAppData::GetMainFrame()->CloseActiveChild();
+      GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
 
@@ -233,13 +235,9 @@ void GmatPanel::OnOK(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatPanel::OnCancel(wxCommandEvent &event)
 {
-   // Close page from main notebook
-   // GmatMainNotebook *gmatMainNotebook = GmatAppData::GetMainNotebook();
-   // gmatMainNotebook->ClosePage();
-   
    GmatMdiChildFrame* mdichild = (GmatMdiChildFrame*)theParent->GetParent();
    mdichild->SetDirty(false);
-   GmatAppData::GetMainFrame()->CloseActiveChild();
+   GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
 

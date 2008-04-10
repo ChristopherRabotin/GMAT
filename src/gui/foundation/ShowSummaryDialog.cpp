@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         ShowSummaryDialog
 //------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ void ShowSummaryDialog::Create()
    
    theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
                       wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
-   theSummary->SetFont( GmatAppData::GetFont() );
+   theSummary->SetFont( GmatAppData::Instance()->GetFont() );
    theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
 }
 

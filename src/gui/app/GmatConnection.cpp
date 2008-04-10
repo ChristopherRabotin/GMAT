@@ -89,7 +89,7 @@ wxChar* GmatConnection::OnRequest(const wxString& WXUNUSED(topic),
    {
       wxString tempItem = item;
       tempItem.RemoveLast();
-      data = GmatInterface::Instance()->GetObject(tempItem.c_str());
+      data = GmatInterface::Instance()->GetGmatObject(tempItem.c_str());
    }
    else if (item == "RunState")
    {

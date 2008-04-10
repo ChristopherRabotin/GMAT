@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CompareReportPanel
 //------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ CompareReportPanel::CompareReportPanel(wxWindow *parent, const wxString &name)
                               wxTE_DONTWRAP | wxTE_READONLY | wxTE_MULTILINE);
    
    // set font
-   mTextCtrl->SetFont( GmatAppData::GetFont() );
+   mTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
    
    // create bottom buttons
    theCloseButton =
@@ -91,7 +91,7 @@ CompareReportPanel::CompareReportPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void CompareReportPanel::OnClose(wxCommandEvent &event)
 {
-   GmatAppData::GetMainFrame()->CloseActiveChild();
+   GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------

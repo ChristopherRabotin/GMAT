@@ -28,12 +28,15 @@
 #include <fstream>            // for ofstream for saving actions
 #endif
 
+class GmatMainFrame;
+
 class MissionTree : public DecoratedTree
 {
 public:
    MissionTree(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
                const wxSize& size, long style);
    
+   void SetMainFrame(GmatMainFrame *gmf);
    void ClearMission();
    void UpdateMission(bool resetCounter);
    void UpdateMissionForRename();
@@ -48,6 +51,7 @@ private:
       APPEND, INSERT_BEFORE, INSERT_AFTER
    };
    
+   GmatMainFrame  *theMainFrame;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    

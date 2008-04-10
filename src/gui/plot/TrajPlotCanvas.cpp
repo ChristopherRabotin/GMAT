@@ -201,8 +201,9 @@ TrajPlotCanvas::TrajPlotCanvas(wxWindow *parent, wxWindowID id,
    #endif
    
    // initalize data members
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theStatusBar = GmatAppData::GetMainFrame()->GetStatusBar();
+   GmatAppData *gmatAppData = GmatAppData::Instance();   
+   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
+   theStatusBar = gmatAppData->GetMainFrame()->GetStatusBar();
    mTextTrajFile = NULL;
    mGlList = 0;
    mIsFirstRun = true;
@@ -929,12 +930,13 @@ void TrajPlotCanvas::ViewAnimation(int interval, int frameInc)
    mFrameInc = frameInc;
    mHasUserInterrupted = false;
    
-   GmatAppData::GetMainFrame()->EnableMenuAndToolBar(false, false, true);
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   gmatAppData->GetMainFrame()->EnableMenuAndToolBar(false, false, true);
    
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    DrawFrame();
    
-   GmatAppData::GetMainFrame()->EnableMenuAndToolBar(true, false, true);   
+   gmatAppData->GetMainFrame()->EnableMenuAndToolBar(true, false, true);   
    
    mIsAnimationRunning = false;
    
@@ -1825,7 +1827,7 @@ int TrajPlotCanvas::ReadTextTrajectory(const wxString &filename)
       wxString text;
       text.Printf("Number of data points: %d", numDataPoints);
       theStatusBar->SetStatusText(text, 2);
-      //wxLogStatus(GmatAppData::GetMainFrame(),
+      //wxLogStatus(GmatAppData::Instance()->GetMainFrame(),
       //            wxT("Number of data points: %d"), numDataPoints);
    }
    else
@@ -2166,7 +2168,7 @@ void TrajPlotCanvas::OnMouse(wxMouseEvent& event)
    //mousePosStr.Printf("X = %g Y = %g", fEndX, fEndY);
    mousePosStr.Printf("X = %g Y = %g mouseX = %d, mouseY = %d",
                       fEndX, fEndY, mouseX, mouseY);
-   //wxStatusBar *statusBar = GmatAppData::GetMainFrame()->GetStatusBar();
+   //wxStatusBar *statusBar = GmatAppData::Instance()->GetMainFrame()->GetStatusBar();
    theStatusBar->SetStatusText(mousePosStr, 2);
    
    //wxLogStatus(MdiGlPlot::mdiParentGlFrame,
@@ -4124,7 +4126,7 @@ void TrajPlotCanvas::DrawStatus(const wxString &label1, int frame,
       glCallLists(strlen(label3.c_str()), GL_BYTE, (GLubyte*)label3.c_str());
    }
    
-   //wxLogStatus(GmatAppData::GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
+   //wxLogStatus(GmatAppData::Instance()->GetMainFrame(), wxT("Frame#: %d, Time: %f"), frame,
    //            mTime[frame]);
    
 }

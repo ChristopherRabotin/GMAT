@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              FormationSetupPanel
 //------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ void FormationSetupPanel::SaveData()
    }
 
    theGuiManager->UpdateFormation();
-   GmatAppData::GetResourceTree()->UpdateFormation();
+   GmatAppData::Instance()->GetResourceTree()->UpdateFormation();
 }
 
 

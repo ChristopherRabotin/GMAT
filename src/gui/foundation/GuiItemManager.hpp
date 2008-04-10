@@ -333,7 +333,6 @@ private:
    
    static GuiItemManager *theInstance;
    GuiInterpreter *theGuiInterpreter;
-   SolarSystem *theSolarSystem;
    
    Integer theDataPrecision;
    

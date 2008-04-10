@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatDialog
 //------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    mDataChanged = false;
    int borderSize = 2;
    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    theParent = parent;

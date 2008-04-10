@@ -55,9 +55,7 @@ private:
     Integer tankSize;
     
     Thruster* theThruster;
-    
-    GuiItemManager *theGuiManager;
-    
+   
     bool isCoordSysChanged;
     bool isTankChanged;
     bool isTankEmpty;
@@ -66,8 +64,6 @@ private:
     wxButton *kCoefButton;
     
     wxComboBox *coordsysComboBox;
-//    wxComboBox *originComboBox;
-//    wxComboBox *axisComboBox;
     wxComboBox *tankComboBox;
     
     wxTextCtrl *XTextCtrl;
@@ -76,8 +72,6 @@ private:
     wxTextCtrl *scaleFactorTextCtrl;
     
     wxStaticText *coordsysStaticText;
-//    wxStaticText *originStaticText;
-//    wxStaticText *axisStaticText;
     wxStaticText *tankStaticText;
     wxStaticText *XStaticText;
     wxStaticText *YStaticText;

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ImpulsiveBurnSetupPanel
 //------------------------------------------------------------------------------
@@ -30,7 +30,6 @@ public:
     
 private:
    // member data
-   GuiInterpreter *theGuiInterpreter;
    Burn *theBurn;
    bool isTextModified;
    

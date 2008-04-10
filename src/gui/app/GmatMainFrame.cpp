@@ -27,7 +27,6 @@
 //------------------------------------------------------------------------------
 #include "gmatwxrcs.hpp"
 #include "GmatMainFrame.hpp"
-#include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "MdiGlPlotData.hpp"
 #include "MdiTsPlotData.hpp"
@@ -144,6 +143,7 @@
 //#define DEBUG_SERVER
 //#define DEBUG_CREATE_CHILD
 //#define DEBUG_REMOVE_CHILD
+//#define DEBUG_INTERPRET
 //#define DEBUG_RUN
 //#define DEBUG_SIZE
 //#define DBGLVL_MENUBAR 1
@@ -258,7 +258,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    trajSubframe = (MdiChildTrajFrame *)NULL;
    tsSubframe = (MdiChildTsFrame *)NULL;
    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   theGuiInterpreter = gmatAppData->GetGuiInterpreter();
    
    #ifdef DEBUG_MAINFRAME
    MessageInterface::ShowMessage
@@ -324,19 +325,41 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
 #else
    theMessageWin->SetDefaultSize(wxSize(w, 100));
 #endif
+   
    theMessageWin->SetMinimumSizeY(20);
    theMessageWin->SetMaximumSizeY(h-20);
    theMessageWin->SetOrientation(wxLAYOUT_HORIZONTAL);
    theMessageWin->SetAlignment(wxLAYOUT_BOTTOM);
    theMessageWin->SetSashVisible(wxSASH_TOP, TRUE);
    
-   // create MessageWindow and save in GmatApp for later use
+   // create MessageWindow TextCtrl
    wxTextCtrl *msgTextCtrl =
       new wxTextCtrl(theMessageWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
                      wxTE_MULTILINE);
+   
    msgTextCtrl->SetMaxLength(320000);
-   GmatAppData::GetMessageWindow()->Show(false);
-   GmatAppData::SetMessageTextCtrl(msgTextCtrl);
+   gmatAppData->SetMessageTextCtrl(msgTextCtrl);
+   
+   //-----------------------------------------------------------------
+   #ifdef __USE_FLOATING_MESSAGE_WINDOW__
+   // @todo: Need more testing on this (loj: 2008.04.10)
+   // create floating MessageWindow
+   ViewTextFrame *msgWin =
+      //new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
+      new ViewTextFrame(this, _T("Message Window"),
+                        20, 20, 600, 350, "Permanent");
+   gmatAppData->SetMessageWindow(msgWin);
+   msgWin->Show(true);
+   
+   // create MessageWindow TextCtrl
+   wxTextCtrl *floatingMsgTextCtrl =
+      new wxTextCtrl(msgWin, -1, _T(""), wxDefaultPosition, wxDefaultSize,
+                     wxTE_MULTILINE);
+   
+   msgTextCtrl->SetMaxLength(320000);
+   gmatAppData->SetMessageTextCtrl(floatingMsgTextCtrl);
+   #endif
+   //-----------------------------------------------------------------
    
    // A window w/sash for gmat notebook
    theMainWin = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
@@ -359,11 +382,14 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    theMainWin->SetAlignment(wxLAYOUT_LEFT);
    theMainWin->SetSashVisible(wxSASH_RIGHT, TRUE);
    
+   // Create Resource, Mission, and Output notebook tabs
    new GmatNotebook(theMainWin, -1, wxDefaultPosition,
                     wxDefaultSize, wxCLIP_CHILDREN);
    
-   // set the main frame, because there will no longer be right notebook
-   GmatAppData::SetMainFrame(this);
+   // Set the main frame, because there will no longer be right notebook
+   gmatAppData->SetMainFrame(this);
+   gmatAppData->GetResourceTree()->SetMainFrame(this);
+   gmatAppData->GetMissionTree()->SetMainFrame(this);
    
    mServer = NULL;
    mRunPaused = false;
@@ -410,19 +436,21 @@ GmatMainFrame::~GmatMainFrame()
    if (mServer)
       delete mServer;
    
-   if (GmatAppData::GetMessageWindow() != NULL)
-      GmatAppData::GetMessageWindow()->Close();
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
+   if (gmatAppData->GetMessageWindow() != NULL)
+      gmatAppData->GetMessageWindow()->Close();
    
    // Commented out since Moderator::Finalize() is called from GmatApp (loj: 2008.03.06)
    //if (theGuiInterpreter)
    //   theGuiInterpreter->Finalize();
    
-   GmatAppData::SetMainFrame(NULL);
-   GmatAppData::SetMessageWindow(NULL);   
-   GmatAppData::SetMessageTextCtrl(NULL);
-   GmatAppData::SetResourceTree(NULL);
-   GmatAppData::SetMissionTree(NULL);
-   GmatAppData::SetOutputTree(NULL);
+   gmatAppData->SetMainFrame(NULL);
+   gmatAppData->SetMessageWindow(NULL);   
+   gmatAppData->SetMessageTextCtrl(NULL);
+   gmatAppData->SetResourceTree(NULL);
+   gmatAppData->SetMissionTree(NULL);
+   gmatAppData->SetOutputTree(NULL);
    
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::~GmatMainFrame() exiting.\n");
@@ -712,6 +740,7 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
    wxNode *node = theMdiChildren->GetFirst();
    bool childRemoved = false;
    wxString childTitle;
+   GmatAppData *gmatAppData = GmatAppData::Instance();
    
    while (node)
    {
@@ -758,17 +787,17 @@ void GmatMainFrame::RemoveChild(const wxString &item, GmatTree::ItemType itemTyp
       MessageInterface::ShowMessage("   %s removed\n", item.c_str());
       #endif
       
-      if (GmatAppData::GetOutputTree() != NULL)
+      if (gmatAppData->GetOutputTree() != NULL)
       {
          #ifdef DEBUG_REMOVE_CHILD
          MessageInterface::ShowMessage("   calling GetOutputTree()->RemoveItem()\n");
          #endif
          
-         GmatAppData::GetOutputTree()->RemoveItem(itemType, item);
+         gmatAppData->GetOutputTree()->RemoveItem(itemType, item);
       }
       
       // Change MissionTree node label (loj: 2007.11.15)
-      GmatAppData::GetMissionTree()->ChangeNodeLabel(childTitle);
+      gmatAppData->GetMissionTree()->ChangeNodeLabel(childTitle);
    }
    
    #ifdef DEBUG_REMOVE_CHILD
@@ -890,6 +919,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    
    wxNode *node = theMdiChildren->GetFirst();
    wxCloseEvent event;
+   GmatAppData *gmatAppData = GmatAppData::Instance();
    
    //-------------------------------------------------------
    // delete child frames
@@ -932,7 +962,7 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
             // delete output child except compare
             if (closePlots && type != GmatTree::COMPARE_REPORT)
             {
-               GmatAppData::GetOutputTree()->UpdateOutput(true, closeReports);
+               gmatAppData->GetOutputTree()->UpdateOutput(true, closeReports);
                canDelete = true;
             }
          }
@@ -1084,9 +1114,10 @@ void GmatMainFrame::CloseCurrentProject()
    theGuiInterpreter->ClearCommandSeq();
    MessageInterface::ClearMessage();
    
-   GmatAppData::GetResourceTree()->UpdateResource(true);
-   GmatAppData::GetMissionTree()->UpdateMission(true);
-   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   gmatAppData->GetResourceTree()->UpdateResource(true);
+   gmatAppData->GetMissionTree()->UpdateMission(true);
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
    
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage("GmatMainFrame::CloseCurrentProject() exiting\n");
@@ -1115,7 +1146,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
                                     const wxString &savePath, bool openScript,
                                     bool multiScripts)
 {
-   #ifdef DEBUG_MAINFRAME
+   #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript()\n   filename=%s, readBack=%d\n   "
        "savePath=%s openScript=%d, multiScripts=%d\n", filename.c_str(), readBack,
@@ -1125,14 +1156,15 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    UpdateTitle(filename);
    
    bool success = false;
+   GmatAppData *gmatAppData = GmatAppData::Instance();
    
    // Always refresh the gui before new scritpes are read
    // Pass true to close Script file when reading new scripts (loj: 02.14.2008)
    //CloseAllChildren(false, true, filename);
    CloseAllChildren(true, true, filename);
-   GmatAppData::GetResourceTree()->ClearResource(false);
-   GmatAppData::GetMissionTree()->ClearMission();
-   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
+   gmatAppData->GetResourceTree()->ClearResource(false);
+   gmatAppData->GetMissionTree()->ClearMission();
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
    
    // let's try building the script, Moderator::InterpretScript() will
    // clear all resource and commands
@@ -1157,8 +1189,8 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
       if (success)
       {
          // Update ResourceTree and MissionTree
-         GmatAppData::GetResourceTree()->UpdateResource(true);
-         GmatAppData::GetMissionTree()->UpdateMission(true);
+         gmatAppData->GetResourceTree()->UpdateResource(true);
+         gmatAppData->GetMissionTree()->UpdateMission(true);
          
          // if not running script folder, clear status
          if (!multiScripts)
@@ -1181,6 +1213,11 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    }
    
    mInterpretFailed = !success;
+   
+   #ifdef DEBUG_INTERPRET
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::InterpretScript() returning %d\n", success);
+   #endif
    
    return success;
 }
@@ -1251,7 +1288,7 @@ Integer GmatMainFrame::RunCurrentMission()
       EnableMenuAndToolBar(true, true);
       
       //put items in output tab
-      GmatAppData::GetOutputTree()->UpdateOutput(false, true);
+      GmatAppData::Instance()->GetOutputTree()->UpdateOutput(false, true);
    }
    
    return retval;
@@ -1839,9 +1876,10 @@ void GmatMainFrame::OnLoadDefaultMission(wxCommandEvent& WXUNUSED(event))
    mInterpretFailed = false;
    
    // Update trees
-   GmatAppData::GetResourceTree()->UpdateResource(true);
-   GmatAppData::GetMissionTree()->UpdateMission(true);
-   GmatAppData::GetOutputTree()->UpdateOutput(true, true);
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   gmatAppData->GetResourceTree()->UpdateResource(true);
+   gmatAppData->GetMissionTree()->UpdateMission(true);
+   gmatAppData->GetOutputTree()->UpdateOutput(true, true);
 }
 
 
@@ -1862,14 +1900,15 @@ void GmatMainFrame::OnSaveScript(wxCommandEvent& event)
    #endif
 
    bool scriptSaved = false;
+   GmatAppData *gmatAppData = GmatAppData::Instance();
    
    if (strcmp(mScriptFilename.c_str(), "$gmattempscript$.script") == 0)
    {
       scriptSaved = SaveScriptAs();
       if (scriptSaved)
       {
-         GmatAppData::GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
-         GmatAppData::GetResourceTree()->UpdateResource(false);
+         gmatAppData->GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
+         gmatAppData->GetResourceTree()->UpdateResource(false);
       }
    }
    else
@@ -1929,7 +1968,7 @@ void GmatMainFrame::OnSaveScriptAs(wxCommandEvent& WXUNUSED(event))
 {
    if (SaveScriptAs())
    {
-      GmatAppData::GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
+      GmatAppData::Instance()->GetResourceTree()->AddScriptItem(mScriptFilename.c_str());
       UpdateTitle(mScriptFilename.c_str());
    }
 }
@@ -2443,15 +2482,13 @@ GmatMainFrame::CreateNewOutput(const wxString &title, const wxString &name,
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
 {
-//   GmatAppData::GetResourceTree()->OnNewScript();
    wxString name;
    name.Printf("Script%d.script", ++mScriptCounter);
-
+   
    wxGridSizer *sizer = new wxGridSizer(1, 0, 0);
    GmatMdiChildFrame *newChild =
       new GmatMdiChildFrame(this, name, name, GmatTree::SCRIPT_FILE);
    
-   //panel = new wxScrolledWindow(newChild);
    wxScrolledWindow *scrolledWin = new wxScrolledWindow(newChild);
    ScriptPanel *scriptPanel = new ScriptPanel(scrolledWin, "");
    sizer->Add(scriptPanel, 0, wxGROW|wxALL, 0);
@@ -2464,10 +2501,10 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
        scrolledWin->SetSizer(sizer);
        sizer->Fit(scrolledWin);
        sizer->SetSizeHints(scrolledWin);
-
+       
        // list of open children
        theMdiChildren->Append(newChild);
-
+       
        // djc: Under linux, force the new child to display
        #ifndef __WXMSW__
           newChild->Show();
@@ -2487,9 +2524,10 @@ void GmatMainFrame::OnNewScript(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
 {
-   GmatAppData::GetResourceTree()->OnAddScript(event);
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   gmatAppData->GetResourceTree()->OnAddScript(event);
    
-   if (GmatAppData::GetResourceTree()->WasScriptAdded())
+   if (gmatAppData->GetResourceTree()->WasScriptAdded())
    {
       #ifdef DEBUG_MAINFRAME_OPEN
       MessageInterface::ShowMessage
@@ -3396,32 +3434,33 @@ void GmatMainFrame::OnSelectAll(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnFont(wxCommandEvent& event)
 {
-  wxFontData data;
-  data.SetInitialFont(GmatAppData::GetFont());
-  
-  wxFontDialog dialog(this, data);
-  if (dialog.ShowModal() == wxID_OK)
-  {
-    wxFontData retData = dialog.GetFontData();
-    wxFont newFont = retData.GetChosenFont();
-    
-    // change all script windows to new font
-    wxNode *node = theMdiChildren->GetFirst();
-    while (node)
-    {
-      GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
-      if ((child->GetItemType() == GmatTree::SCRIPT_FILE)   ||
-          (child->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
-          (child->GetItemType() == GmatTree::SCRIPT_EVENT) ||
-          (child->GetItemType() == GmatTree::GMAT_FUNCTION))
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   wxFontData data;
+   data.SetInitialFont(gmatAppData->GetFont());
+   
+   wxFontDialog dialog(this, data);
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxFontData retData = dialog.GetFontData();
+      wxFont newFont = retData.GetChosenFont();
+      
+      // change all script windows to new font
+      wxNode *node = theMdiChildren->GetFirst();
+      while (node)
       {
-         child->GetScriptTextCtrl()->SetFont(newFont);
+         GmatMdiChildFrame *child = (GmatMdiChildFrame *)node->GetData();
+         if ((child->GetItemType() == GmatTree::SCRIPT_FILE)   ||
+             (child->GetItemType() == GmatTree::OUTPUT_REPORT)  ||
+             (child->GetItemType() == GmatTree::SCRIPT_EVENT) ||
+             (child->GetItemType() == GmatTree::GMAT_FUNCTION))
+         {
+            child->GetScriptTextCtrl()->SetFont(newFont);
+         }
+         node = node->GetNext();
       }
-      node = node->GetNext();
-    }
-    
-    GmatAppData::SetFont(newFont);
-  }
+      
+      gmatAppData->SetFont(newFont);
+   }
 }
 
 

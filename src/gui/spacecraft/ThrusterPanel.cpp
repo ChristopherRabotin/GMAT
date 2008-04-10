@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            ThrusterPanel
 //------------------------------------------------------------------------------
@@ -40,14 +40,14 @@ END_EVENT_TABLE()
  * Constructs ThrusterPanel object.
  */
 //------------------------------------------------------------------------------
-   ThrusterPanel::ThrusterPanel(GmatPanel *scPanel, wxWindow *parent,
+ThrusterPanel::ThrusterPanel(GmatPanel *scPanel, wxWindow *parent,
                                 Spacecraft *spacecraft)
    : wxPanel(parent)
 {
    theScPanel = scPanel;
    theSpacecraft = spacecraft;
    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    Create();

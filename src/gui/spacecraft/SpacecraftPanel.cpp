@@ -20,9 +20,8 @@
  * 
  */
 //------------------------------------------------------------------------------
-#include "SpacecraftPanel.hpp"
-#include "GmatAppData.hpp"
 
+#include "SpacecraftPanel.hpp"
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
@@ -49,13 +48,14 @@
  */
 //------------------------------------------------------------------------------
 SpacecraftPanel::SpacecraftPanel(wxWindow *parent, const wxString &scName)
-    :GmatPanel(parent)
+    : GmatPanel(parent)
 {
    #if DEBUG_SPACECRAFT_PANEL
-   MessageInterface::ShowMessage("SpacecraftPanel::SpacecraftPanel() entered\n");
+   MessageInterface::ShowMessage
+      ("SpacecraftPanel::SpacecraftPanel() entered. scName='%s', theGuiInterpreter=<%p>\n",
+       scName.c_str(), theGuiInterpreter);
    #endif
    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theSpacecraft =
       (Spacecraft*)theGuiInterpreter->GetConfiguredObject(std::string(scName.c_str()));
    
@@ -93,7 +93,7 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("SpacecraftPanel::Create() entered\n");
    #endif
-
+   
    SolarSystem *theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
    currentSpacecraft = new Spacecraft(*theSpacecraft);
    
@@ -122,18 +122,13 @@ void SpacecraftPanel::Create()
                   wxDefaultSize, wxGROW );
    actuatorNotebook->SetBackgroundColour(GetBackgroundColour());
    actuatorNotebook->SetForegroundColour(GetBackgroundColour());
-   // wxNotebookSizer
-   // spacecraftSizer = new wxNotebookSizer( spacecraftNotebook );
-   // actuatorSizer = new wxNotebookSizer( actuatorNotebook );
-   
-   // wxSizer
-   // wxGridSizer *theGridSizer = new wxGridSizer( 1, 0, 0 );
    
    //wx*Panel
    sensors = new wxPanel( spacecraftNotebook, -1 );
    
    theOrbitPanel = new OrbitPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
+   
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   OrbitPanel created\n");
    #endif

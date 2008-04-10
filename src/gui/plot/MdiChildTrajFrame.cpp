@@ -83,7 +83,7 @@ MdiChildTrajFrame::MdiChildTrajFrame(wxMDIParentFrame *parent,
    
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
-   GmatAppData::GetMainFrame()->theMdiChildren->Append(this);
+   GmatAppData::Instance()->GetMainFrame()->theMdiChildren->Append(this);
 }
 
 
@@ -570,7 +570,7 @@ void MdiChildTrajFrame::OnShowOptionDialog(wxCommandEvent& event)
                                    mCanvas->GetObjectColorMap());
    
    int x, y, newX;
-   GmatAppData::GetMainFrame()->GetPosition(&x, &y);
+   GmatAppData::Instance()->GetMainFrame()->GetPosition(&x, &y);
    newX = x-20;
    
    if (newX < 0)
@@ -640,7 +640,7 @@ void MdiChildTrajFrame::OnPlotSize(wxSizeEvent& event)
    wxSize size2 = GetSize();
    wxSize size3 = GetClientSize();
 
-   //wxLogStatus(GmatAppData::GetMainFrame(),
+   //wxLogStatus(GmatAppData::Instance()->GetMainFrame(),
    //            wxT("size from event: %dx%d, from frame %dx%d, client %dx%d"),
    //            size1.x, size1.y, size2.x, size2.y, size3.x, size3.y);
    
@@ -659,7 +659,7 @@ void MdiChildTrajFrame::OnMove(wxMoveEvent& event)
    wxPoint pos1 = event.GetPosition();
    wxPoint pos2 = GetPosition();
    
-   //wxLogStatus(GmatAppData::GetMainFrame(),
+   //wxLogStatus(GmatAppData::Instance()->GetMainFrame(),
    //            wxT("position from event: (%d, %d), from frame (%d, %d)"),
    //            pos1.x, pos1.y, pos2.x, pos2.y);
    
@@ -680,7 +680,7 @@ void MdiChildTrajFrame::OnPlotClose(wxCloseEvent &event)
    if (mCanClose)
    {
       // remove from list of frames but do not delete
-      GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
+      GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
       event.Skip();
    }
    else

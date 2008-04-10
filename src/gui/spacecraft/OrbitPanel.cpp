@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           OrbitPanel
 //------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ OrbitPanel::OrbitPanel(GmatPanel *scPanel, wxWindow *parent,
 {
    // initalize data members
    theScPanel = scPanel;
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    
    theSpacecraft = spacecraft;

@@ -50,7 +50,6 @@ ImpulsiveBurnSetupPanel::ImpulsiveBurnSetupPanel(wxWindow *parent,
                                                  const wxString &burnName)
    : GmatPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
    theBurn = (Burn*)theGuiInterpreter->GetConfiguredObject(std::string(burnName.c_str()));
    isTextModified = false;
    canClose = true;

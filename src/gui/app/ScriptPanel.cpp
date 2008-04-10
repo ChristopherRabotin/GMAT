@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ScriptPanel
 //------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ void ScriptPanel::Create()
                  wxTE_MULTILINE | wxTE_PROCESS_ENTER | wxTE_RICH2 | wxGROW | wxHSCROLL);
 #endif
    
-   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
    
    // wxButton
    mBuildButton =
@@ -152,7 +152,7 @@ void ScriptPanel::LoadData()
    
    theSaveAsButton->Enable(true);
    theSaveButton->Enable(false);
-   GmatAppData::GetMainFrame()->SetActiveChildDirty(false);
+   GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(false);
       
    mFileContentsTextCtrl->SetDefaultStyle(wxTextAttr(wxNullColour, *wxWHITE));
    wxTextAttr defStyle = mFileContentsTextCtrl->GetDefaultStyle();
@@ -171,19 +171,21 @@ void ScriptPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptPanel::SaveData()
 {
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
    if (mScriptFilename != mFilename)
    {
       // add new script to tree
-      GmatAppData::GetResourceTree()->AddScriptItem(mFilename);
+      gmatAppData->GetResourceTree()->AddScriptItem(mFilename);
       
       // rename this child window
-      GmatAppData::GetMainFrame()->RenameActiveChild(mFilename);
+      gmatAppData->GetMainFrame()->RenameActiveChild(mFilename);
       mScriptFilename = mFilename;
    }
    
    mFileContentsTextCtrl->SaveFile(mScriptFilename);
    theSaveButton->Enable(false);
-   GmatAppData::GetMainFrame()->SetActiveChildDirty(false);
+   gmatAppData->GetMainFrame()->SetActiveChildDirty(false);
 }
 
 
@@ -268,7 +270,7 @@ void ScriptPanel::OnTextUpdate(wxCommandEvent& event)
          #endif
          
          theSaveButton->Enable(true);
-         GmatAppData::GetMainFrame()->SetActiveChildDirty(true);
+         GmatAppData::Instance()->GetMainFrame()->SetActiveChildDirty(true);
          mOldLastPos = lastPos;
       }
    }
@@ -291,6 +293,8 @@ void ScriptPanel::OnTextOverMaxLen(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ScriptPanel::OnButton(wxCommandEvent& event)
 {
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
    if (event.GetEventObject() == mBuildButton)
    {
       if (theSaveButton->IsEnabled())
@@ -309,8 +313,8 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       
       if ( mFileContentsTextCtrl->GetValue() != "")
       {
-         if (GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
-            GmatAppData::GetMainFrame()->OnScriptBuildObject(event);
+         if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+            gmatAppData->GetMainFrame()->OnScriptBuildObject(event);
       }
       else
       {
@@ -339,8 +343,8 @@ void ScriptPanel::OnButton(wxCommandEvent& event)
       
       if ( mFileContentsTextCtrl->GetValue() != "")
       {
-         if (GmatAppData::GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
-            GmatAppData::GetMainFrame()->OnScriptBuildAndRun(event);
+         if (gmatAppData->GetMainFrame()->SetScriptFileName(mScriptFilename.c_str()))
+            gmatAppData->GetMainFrame()->OnScriptBuildAndRun(event);
       }
       else
       {

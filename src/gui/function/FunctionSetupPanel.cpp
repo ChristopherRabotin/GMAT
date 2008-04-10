@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              FunctionSetupPanel
 //------------------------------------------------------------------------------
@@ -61,11 +61,10 @@ void FunctionSetupPanel::Create()
    int bsize = 3; // border size
    
    wxStaticBox *topStaticBox = new wxStaticBox(this, -1, wxT(""));
-
-    // create sizers
+   
+   // create sizers
    mMiddleSizer = new wxBoxSizer(wxHORIZONTAL);
    mBottomSizer = new wxGridSizer( 1, 0, 0 );
-//   mPageSizer = new wxFlexGridSizer( 0, 3, 0, 0 );
    mPageSizer = new wxBoxSizer(wxVERTICAL);
    mTopSizer = new wxStaticBoxSizer(topStaticBox, wxHORIZONTAL);
    wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -95,7 +94,7 @@ void FunctionSetupPanel::Create()
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
          wxDefaultSize, wxTE_MULTILINE | wxGROW);
-   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
 
    //------------------------------------------------------
    // add to sizer

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatSavePanel
 //------------------------------------------------------------------------------
@@ -44,11 +44,11 @@ END_EVENT_TABLE()
  */
 //------------------------------------------------------------------------------
 GmatSavePanel::GmatSavePanel(wxWindow *parent, bool showScriptButton,
-    wxString filename)
-    : wxPanel(parent)
+                             wxString filename)
+   : wxPanel(parent)
 {
-    
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    canClose = true;
    mShowScriptButton = showScriptButton;
@@ -175,7 +175,7 @@ void GmatSavePanel::OnClose(wxCommandEvent &event)
       }
    }
 
-   GmatAppData::GetMainFrame()->CloseActiveChild();
+   GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------

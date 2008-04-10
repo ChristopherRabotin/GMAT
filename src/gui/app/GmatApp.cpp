@@ -21,23 +21,18 @@
  * This class contains GMAT main application. Program starts here.
  */
 //------------------------------------------------------------------------------
-#include "gmatwxdefs.hpp"
 
+#include "gmatwxdefs.hpp"
 #include "GmatApp.hpp"
 #include "GmatMainFrame.hpp"
 #include "ViewTextFrame.hpp"
 #include "GmatAppData.hpp"
 #include "Moderator.hpp"
-
-//loj: We don't need these.
-//#include "wx/mdi.h"
-//#include "wx/docmdi.h"
-//#include "wx/docview.h"
-//#include "wx/cmdproc.h"
-
 #include <wx/datetime.h>
 #include "wx/splash.h"
 #include "wx/image.h"
+
+//#define DEBUG_GMATAPP
 
 // In single window mode, don't have any child windows; use
 // main window.
@@ -71,12 +66,8 @@ bool GmatApp::OnInit()
    bool status = false;
    
    try
-   {      
-      // create MessageWindow and save in GmatApp for later use
-      GmatAppData::theMessageWindow =
-         new ViewTextFrame((wxFrame *)NULL, _T("Message Window"),
-                           20, 20, 600, 350, "Permanent");
-      GmatAppData::theMessageWindow->Show(false);
+   {
+      GmatAppData *gmatAppData = GmatAppData::Instance();
       
       // create the Moderator - GMAT executive
       theModerator = Moderator::Instance();
@@ -85,7 +76,7 @@ bool GmatApp::OnInit()
       if (theModerator->Initialize(true))
       {
          // get GuiInterpreter
-         GmatAppData::SetGuiInterpreter(theModerator->GetGuiInterpreter());
+         gmatAppData->SetGuiInterpreter(theModerator->GetGuiInterpreter());
          
          // set default size
          wxSize size = wxSize(800, 600);

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            TankPanel
 //------------------------------------------------------------------------------
@@ -40,13 +40,13 @@ END_EVENT_TABLE()
  * Constructs TankPanel object.
  */
 //------------------------------------------------------------------------------
-   TankPanel::TankPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft)
+TankPanel::TankPanel(GmatPanel *scPanel, wxWindow *parent, Spacecraft *spacecraft)
    : wxPanel(parent)
 {
    theScPanel = scPanel;
    theSpacecraft = spacecraft;
     
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
 
    dataChanged = false;

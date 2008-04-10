@@ -119,7 +119,7 @@ MdiChildTsFrame::MdiChildTsFrame(wxMDIParentFrame *parent, bool isMainFrame,
    
    // this should work for MDI frames as well as for normal ones
    SetSizeHints(100, 100);
-   GmatAppData::GetMainFrame()->theMdiChildren->Append(this);
+   GmatAppData::Instance()->GetMainFrame()->theMdiChildren->Append(this);
    
    #if DEBUG_MDI_TS_FRAME
    MessageInterface::ShowMessage("MdiChildTsFrame::MdiChildTsFrame() leaving\n");
@@ -566,7 +566,7 @@ void MdiChildTsFrame::OnHelpView(wxCommandEvent& event)
 //                  curve->GetCurveTitle().c_str(), y);
 //        
 //      //loj: 2/26/04 changed to wxLogStatus
-//      wxLogStatus(GmatAppData::GetMainFrame(), info);
+//      wxLogStatus(GmatAppData::Instance()->GetMainFrame(), info);
 //        
 //      //mLogTextCtrl->AppendText(info);
 //        
@@ -632,7 +632,7 @@ void MdiChildTsFrame::OnPlotClose(wxCloseEvent& event)
    // Add any check before closing
    
    // remove from list of frames but do not delte
-   GmatAppData::GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
+   GmatAppData::Instance()->GetMainFrame()->RemoveChild(GetTitle(), mItemType, false);   
    event.Skip();
 }
 
@@ -759,39 +759,32 @@ double MdiChildTsFrame::GetYMax()
 //------------------------------------------------------------------------------
 void MdiChildTsFrame::OnOpenXyPlotFile(wxCommandEvent& WXUNUSED(event) )
 {
-    wxFileDialog fileDialog(this,
-                            _T("Open Text XY Plot File"),
-                            _T(""),
-                            _T(""),
-                            _T("text XY Plot file (*.txt)|*.txt")
-                            );
-
-    fileDialog.SetDirectory(wxGetCwd());
-
-    if (fileDialog.ShowModal() == wxID_OK)
-    {
-        wxString xyPlotFileName = fileDialog.GetPath();
-
-        ++MdiTsPlot::numChildren;
-//         GmatAppData::GetMainFrame()->xySubframe->SetPlotName("XYPlotFile"
-//                   + MdiTsPlot::numChildren);
-//         GmatAppData::GetMainFrame()->xySubframe->SetTitle(xyPlotFileName);
-        GmatAppData::GetMainFrame()->tsSubframe->SetPlotName("XYPlotFile"
-                  + MdiTsPlot::numChildren);
-        GmatAppData::GetMainFrame()->tsSubframe->SetTitle(xyPlotFileName);
-
-        //-----------------------------------
-        // Read text XY Plot file
-        //-----------------------------------
-        //int dataPoints = GmatAppData::GetMainFrame()->xySubframe->ReadXyPlotFile(xyPlotFileName);
-        int dataPoints =
-           GmatAppData::GetMainFrame()->tsSubframe->ReadXyPlotFile(xyPlotFileName);
-        if (dataPoints > 0)
-        {
-           //GmatAppData::GetMainFrame()->xySubframe->Show(TRUE);
-           GmatAppData::GetMainFrame()->tsSubframe->Show(TRUE);
-           wxLogStatus(GmatAppData::GetMainFrame(),
-                       wxT("Number of lines read: %d"), dataPoints);
-        }
-    }
+   wxFileDialog fileDialog(this, _T("Open Text XY Plot File"),
+                           _T(""), _T(""), _T("text XY Plot file (*.txt)|*.txt"));
+   
+   fileDialog.SetDirectory(wxGetCwd());
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
+   if (fileDialog.ShowModal() == wxID_OK)
+   {
+      wxString xyPlotFileName = fileDialog.GetPath();
+      
+      ++MdiTsPlot::numChildren;
+      gmatAppData->GetMainFrame()->tsSubframe->SetPlotName("XYPlotFile" +
+                                                           MdiTsPlot::numChildren);
+      gmatAppData->GetMainFrame()->tsSubframe->SetTitle(xyPlotFileName);
+      
+      //-----------------------------------
+      // Read text XY Plot file
+      //-----------------------------------
+      int dataPoints =
+         gmatAppData->GetMainFrame()->tsSubframe->ReadXyPlotFile(xyPlotFileName);
+      
+      if (dataPoints > 0)
+      {
+         gmatAppData->GetMainFrame()->tsSubframe->Show(TRUE);
+         wxLogStatus(gmatAppData->GetMainFrame(),
+                     wxT("Number of lines read: %d"), dataPoints);
+      }
+   }
 }

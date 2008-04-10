@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ParameterCreateDialog
 //------------------------------------------------------------------------------
@@ -801,7 +801,7 @@ void ParameterCreateDialog::CreateVariable()
       mIsParamCreated = true;
       theGuiManager->UpdateParameter();
       
-      GmatAppData::GetResourceTree()->UpdateVariable();
+      GmatAppData::Instance()->GetResourceTree()->UpdateVariable();
       mUserVarListBox->Append(varName.c_str());
       
       for (unsigned int i=0; i<mUserVarListBox->GetCount(); i++)
@@ -849,7 +849,7 @@ void ParameterCreateDialog::CreateString()
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
       
-         GmatAppData::GetResourceTree()->UpdateVariable();
+         GmatAppData::Instance()->GetResourceTree()->UpdateVariable();
          mUserStringListBox->Append(strName.c_str());
       
          for (unsigned int i=0; i<mUserStringListBox->GetCount(); i++)
@@ -916,7 +916,7 @@ void ParameterCreateDialog::CreateArray()
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
          
-         GmatAppData::GetResourceTree()->UpdateVariable();
+         GmatAppData::Instance()->GetResourceTree()->UpdateVariable();
          mUserArrayListBox->Append(arrName.c_str());
          
          for (unsigned int i=0; i<mUserArrayListBox->GetCount(); i++)

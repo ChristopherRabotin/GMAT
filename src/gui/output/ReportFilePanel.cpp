@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ReportFilePanel
 //------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ END_EVENT_TABLE()
 ReportFilePanel::ReportFilePanel(wxWindow *parent, wxString reportName)
     : wxPanel(parent)
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    mReportName = reportName;
    
@@ -97,7 +97,7 @@ void ReportFilePanel::Create()
                                            wxTE_READONLY | wxTE_MULTILINE | wxGROW);
    
    // set font
-   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
       
    // create bottom buttons
    theCloseButton =
@@ -174,7 +174,7 @@ void ReportFilePanel::LoadData()
 //------------------------------------------------------------------------------
 void ReportFilePanel::OnClose(wxCommandEvent &event)
 {
-   GmatAppData::GetMainFrame()->CloseActiveChild();
+   GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
 //------------------------------------------------------------------------------

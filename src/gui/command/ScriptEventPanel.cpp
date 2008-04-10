@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ScriptEventPanel
 //------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ void ScriptEventPanel::Create()
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
                      wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
    
-   mFileContentsTextCtrl->SetFont( GmatAppData::GetFont() );
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
    
    //------------------------------------------------------
    // add to sizer

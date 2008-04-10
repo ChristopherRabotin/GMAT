@@ -36,7 +36,7 @@ END_EVENT_TABLE()
 InteractiveMatlabDialog::InteractiveMatlabDialog(wxWindow *parent)
    : wxDialog(parent, -1, wxString(_T("InteractiveMatlabDialog")))
 {
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
    theParent = parent;
 

@@ -4304,6 +4304,8 @@ void GuiItemManager::AddToAllObjectArray()
    {
       #if DBGLVL_GUI_ITEM_ALL_OBJECT > 1
       MessageInterface::ShowMessage("   Adding 1 SolarSystem\n");
+      MessageInterface::ShowMessage
+         ("   SolarSystemInUse=<%p>\n", theGuiInterpreter->GetSolarSystemInUse());
       #endif
       SolarSystem *ss = theGuiInterpreter->GetSolarSystemInUse();
       if (ss)
@@ -4375,10 +4377,8 @@ GuiItemManager::GuiItemManager()
    MessageInterface::ShowMessage("GuiItemManager::GuiItemManager() entered\n");
    #endif
    
-   theDataPrecision = GmatGlobal::Instance()->GetDataPrecision();
-   
-   theGuiInterpreter = GmatAppData::GetGuiInterpreter();
-   theSolarSystem = theGuiInterpreter->GetSolarSystemInUse();
+   theDataPrecision = GmatGlobal::Instance()->GetDataPrecision();   
+   theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    
    theNumScProperty = 0;
    theNumImpBurnProperty = 0;
