@@ -1356,6 +1356,7 @@ const ObjectTypeArray& Propagate::GetRefObjectTypeArray()
    refObjectTypes.clear();
    refObjectTypes.push_back(Gmat::PROP_SETUP);
    refObjectTypes.push_back(Gmat::SPACECRAFT);
+   refObjectTypes.push_back(Gmat::PARAMETER);   
    return refObjectTypes;
 }
 
@@ -1396,6 +1397,12 @@ const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
    {
       refObjectNames.insert(refObjectNames.end(), stopSatNames.begin(),
                             stopSatNames.end());
+   }
+   
+   if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::PARAMETER)
+   {
+      refObjectNames.insert(refObjectNames.end(), stopParamNames.begin(),
+                            stopParamNames.end());
    }
    
    return refObjectNames;
@@ -4085,10 +4092,10 @@ std::string Propagate::CreateParameter(const std::string &name)
 {
    std::string str = name;
    Real rval;
-
+   
    if (GmatStringUtil::ToReal(str, &rval))
        return str;
-
+   
    Moderator *theModerator = Moderator::Instance();
    std::string owner, dep, type;
    Parameter *param;
@@ -4121,6 +4128,8 @@ std::string Propagate::CreateParameter(const std::string &name)
       #ifdef DEBUG_PROPAGATE_ASSEMBLE
       MessageInterface::ShowMessage("   %s\n", e.GetFullMessage().c_str());
       #endif
+      
+      stopParamNames.push_back(name);
    }
    
    return str;

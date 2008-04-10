@@ -185,6 +185,8 @@ protected:
                            triggers;
    /// Names of the spacecraft used in the stopping conditions
    StringArray             stopSatNames;
+   /// Name of the parameter used in the stopping conditions
+   StringArray             stopParamNames;
    /// The spacecraft used by the stopping conditions
    std::vector<SpaceObject *> stopSats;
    /// Stopping condition evaluation requires propagation; the satBuffer lets us
