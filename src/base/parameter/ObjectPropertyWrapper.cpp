@@ -387,6 +387,42 @@ bool ObjectPropertyWrapper::SetInteger(const Integer toValue)
          ("SetInteger() method not valid for wrapper of non-Integer type.\n");
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetObject(const GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Method to set the object of the wrapped object.
+ *
+ * @param <obj> The object pointer to set
+ * @return true if successful; false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetObject(const GmatBase *obj)
+{
+   if (obj == NULL)
+   {
+      throw ParameterException
+         ("Cannot set undefined object to object property \"" +
+          GetDescription() +  "\"");         
+   }
+   
+   #ifdef DEBUG_OBJ_PROP
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::SetObject() obj=<%s>\n", obj->GetName().c_str());
+   #endif
+   
+   Gmat::ParameterType propType = GetDataType();
+   if (propType == Gmat::OBJECT_TYPE || propType == Gmat::OBJECTARRAY_TYPE)
+      return object->SetStringParameter(propID, obj->GetName());
+   else
+      throw GmatBaseException
+         ("SetObject() method not valid for wrapper of non-Object type.\n");
+   
+   return true;
+}
+
+
 //---------------------------------------------------------------------------
 //  void SetupWrapper()
 //---------------------------------------------------------------------------

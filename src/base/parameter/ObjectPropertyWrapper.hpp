@@ -44,17 +44,18 @@ public:
    virtual bool            SetRefObject(GmatBase *obj);
    virtual bool            RenameObject(const std::string &oldName, 
                                         const std::string &newName);
-
+   
    virtual Real            EvaluateReal() const;
    virtual bool            SetReal(const Real toValue);
    virtual std::string     EvaluateString() const;
    virtual bool            SetString(const std::string &toValue); 
    virtual std::string     EvaluateOnOff() const;
-   virtual bool            SetOnOff(const std::string &toValue); 
+   virtual bool            SetOnOff(const std::string &toValue);
    virtual bool            EvaluateBoolean() const;
    virtual bool            SetBoolean(const bool toValue); 
    virtual Integer         EvaluateInteger() const;
    virtual bool            SetInteger(const Integer toValue); 
+   virtual bool            SetObject(const GmatBase* obj);
    
 protected:  
 
