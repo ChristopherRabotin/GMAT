@@ -151,7 +151,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
       #endif
       
       frame =
-         new MdiChildTrajFrame(GmatAppData::GetMainFrame(), 
+         new MdiChildTrajFrame(GmatAppData::Instance()->GetMainFrame(), 
                                wxString(plotName.c_str()),
                                wxString(plotName.c_str()),
                                wxPoint(-1, -1), wxSize(-1, -1),
@@ -172,7 +172,7 @@ bool PlotInterface::CreateGlPlotWindow(const std::string &plotName,
           frame->GetPlotName().c_str());
       #endif
       
-      GmatAppData::GetMainFrame()->Tile();
+      GmatAppData::Instance()->GetMainFrame()->Tile();
       
       ++MdiGlPlot::numChildren;
    }
@@ -455,7 +455,7 @@ bool PlotInterface::IsThere(const std::string &plotName)
    return true;
 #else
 
-   if (GmatAppData::GetMainFrame() != NULL)
+   if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {
       wxString owner = wxString(plotName.c_str());
       
@@ -491,7 +491,9 @@ bool PlotInterface::DeleteGlPlot(const std::string &plotName)
    return true;
 #else
    
-   if (GmatAppData::GetMainFrame() != NULL)
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
+   if (gmatAppData->GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_GL_DELETE
       MessageInterface::ShowMessage
@@ -507,8 +509,8 @@ bool PlotInterface::DeleteGlPlot(const std::string &plotName)
          
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {            
-            GmatAppData::GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_OPENGL_PLOT);
-            GmatAppData::GetMainFrame()->Tile();
+            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_OPENGL_PLOT);
+            gmatAppData->GetMainFrame()->Tile();
             break;
          }
       }
@@ -532,7 +534,7 @@ bool PlotInterface::RefreshGlPlot(const std::string &plotName)
    return true;
 #else
 
-   if (GmatAppData::GetMainFrame() != NULL)
+   if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_GL
       MessageInterface::ShowMessage
@@ -571,7 +573,7 @@ bool PlotInterface::SetGlEndOfRun(const std::string &plotName)
    return true;
 #else
    
-   if (GmatAppData::GetMainFrame() != NULL)
+   if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_GL
          MessageInterface::ShowMessage
@@ -772,7 +774,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
       
       // create a frame, containing a XY plot canvas
       frame =
-         new MdiChildTsFrame(GmatAppData::GetMainFrame(), true,
+         new MdiChildTsFrame(GmatAppData::Instance()->GetMainFrame(), true,
                              wxString(plotName.c_str()),
                              wxString(plotTitle.c_str()),
                              wxString(xAxisTitle.c_str()),
@@ -782,7 +784,7 @@ bool PlotInterface::CreateTsPlotWindow(const std::string &plotName,
       
       frame->Show();
       
-      GmatAppData::GetMainFrame()->Tile();
+      GmatAppData::Instance()->GetMainFrame()->Tile();
 
       ++MdiTsPlot::numChildren;
 
@@ -816,7 +818,9 @@ bool PlotInterface::DeleteTsPlot(const std::string &plotName)
    return true;
 #else
    
-   if (GmatAppData::GetMainFrame() != NULL)
+   GmatAppData *gmatAppData = GmatAppData::Instance();
+   
+   if (gmatAppData->GetMainFrame() != NULL)
    {
       #if DEBUG_PLOTIF_XY
          MessageInterface::ShowMessage("PlotInterface::DeleteTsPlot()\n");
@@ -831,8 +835,8 @@ bool PlotInterface::DeleteTsPlot(const std::string &plotName)
          
          if (frame->GetPlotName().IsSameAs(owner.c_str()))
          {
-            GmatAppData::GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_XY_PLOT);
-            GmatAppData::GetMainFrame()->Tile();
+            gmatAppData->GetMainFrame()->CloseChild(owner, GmatTree::OUTPUT_XY_PLOT);
+            gmatAppData->GetMainFrame()->Tile();
             break;
          }
       }
@@ -1138,7 +1142,7 @@ bool PlotInterface::RefreshTsPlot(const std::string &plotName)
    return true;
 #else
 
-   if (GmatAppData::GetMainFrame() != NULL)
+   if (GmatAppData::Instance()->GetMainFrame() != NULL)
    {        
       #if DEBUG_PLOTIF_XY_UPDATE
          MessageInterface::ShowMessage
