@@ -100,6 +100,8 @@ public:
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
+   virtual const ObjectTypeArray&
+                        GetRefObjectTypeArray();
    virtual const StringArray& 
                         GetRefObjectNameArray(const Gmat::ObjectType type);
    virtual bool         TakeAction(const std::string &action,  

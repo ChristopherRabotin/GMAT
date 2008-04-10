@@ -393,13 +393,8 @@ bool CalculatedPoint::SetStringParameter(const Integer id,
       if (find(bodyNames.begin(), bodyNames.end(), value) == bodyNames.end())
       {
          bodyNames.push_back(value);
-//          return true;
       }
       
-//       return false;     // Name was already in the list
-      
-      // loj: 9/19/06 - for new Interpreter work
-      // It's OK if body was already in the list
       return true;
    }
 
@@ -632,6 +627,25 @@ bool CalculatedPoint::RenameRefObject(const Gmat::ObjectType type,
    }
    return SpacePoint::RenameRefObject(type, oldName, newName);
 }
+
+
+//------------------------------------------------------------------------------
+// const ObjectTypeArray& GetRefObjectTypeArray()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the list of ref object types used by this class.
+ *
+ * @return the list of object types.
+ * 
+ */
+//------------------------------------------------------------------------------
+const ObjectTypeArray& CalculatedPoint::GetRefObjectTypeArray()
+{
+   refObjectTypes.clear();
+   refObjectTypes.push_back(Gmat::SPACE_POINT);
+   return refObjectTypes;
+}
+
 
 //------------------------------------------------------------------------------
 //  const StringArray& GetRefObjectNameArray(const Gmat::ObjectType type)
