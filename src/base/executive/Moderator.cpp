@@ -584,6 +584,11 @@ GmatBase* Moderator::GetConfiguredObject(const std::string &name)
    
    if (obj == NULL)
    {
+      #if DEBUG_CONFIG
+      MessageInterface::ShowMessage
+         ("   Trying SolarSystem, theSolarSystemInUse=<%p>\n", theSolarSystemInUse);
+      #endif
+      
       // try SolarSystem
       if (theSolarSystemInUse)
          obj = (GmatBase*)(theSolarSystemInUse->GetBody(newName));
@@ -871,7 +876,7 @@ SolarSystem* Moderator::CreateSolarSystem(const std::string &name)
 {
    #if DEBUG_SOLAR_SYSTEM
    MessageInterface::ShowMessage
-      ("Moderator::CreateSolarSystem() creating %s\n", name.c_str());
+      ("Moderator::CreateSolarSystem() creating '%s'\n", name.c_str());
    #endif
    
    // There is no factory to create SolarSystem so just create by new
@@ -942,7 +947,7 @@ CalculatedPoint* Moderator::CreateCalculatedPoint(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateCalculatedPoint() type = %s, name = %s\n",
+      ("Moderator::CreateCalculatedPoint() type = '%s', name = '%s'\n",
        type.c_str(), name.c_str());
    #endif
    
@@ -1143,7 +1148,7 @@ SpaceObject* Moderator::CreateSpacecraft(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateSpacecraft() type = %s, name = %s\n",
+      ("Moderator::CreateSpacecraft() type = '%s', name = '%s'\n",
        type.c_str(), name.c_str());
    #endif
    
@@ -1284,7 +1289,7 @@ Hardware* Moderator::CreateHardware(const std::string &type, const std::string &
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateHardware() type = %s, name = %s\n",
+      ("Moderator::CreateHardware() type = '%s', name = '%s'\n",
        type.c_str(), name.c_str());
    #endif
    
@@ -1362,7 +1367,7 @@ Propagator* Moderator::CreatePropagator(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreatePropagator() type = %s, name = %s\n",
+      ("Moderator::CreatePropagator() type = '%s', name = '%s'\n",
        type.c_str(), name.c_str());
    #endif
    
@@ -1515,10 +1520,10 @@ AtmosphereModel* Moderator::CreateAtmosphereModel(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateAtmosphereModel() entered: type = " +
-       type + ", name = " + name + "\n");
+      ("Moderator::CreateAtmosphereModel() type = '%s', name = '%s', body = '%s'\n",
+       type.c_str(), name.c_str(), body.c_str());
    #endif
-
+   
    // if AtmosphereModel name doesn't exist, create AtmosphereModel
    if (GetAtmosphereModel(name) == NULL)
    {
@@ -1592,10 +1597,11 @@ Burn* Moderator::CreateBurn(const std::string &type,
                             const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateBurn() entered: type = " +
-                                 type + ", name = " + name + "\n");
+   MessageInterface::ShowMessage
+      ("Moderator::CreateBurn() type = '%s, name = '%s'\n", type.c_str(),
+       name.c_str());
    #endif
-
+   
    // if Burn name doesn't exist, create Burn
    if (GetBurn(name) == NULL)
    {
@@ -1722,8 +1728,9 @@ Parameter* Moderator::CreateParameter(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateParameter() type=%s, name=%s, ownerName=%s, depName=%s\n",
-       type.c_str(), name.c_str(), ownerName.c_str(), depName.c_str());
+      ("Moderator::CreateParameter() type='%s', name='%s', ownerName='%s', "
+       "depName='%s'\n", type.c_str(), name.c_str(), ownerName.c_str(),
+       depName.c_str());
    #endif
    
    // if Parameter name doesn't exist, create Parameter
@@ -1990,10 +1997,11 @@ bool Moderator::ReconfigureItem(GmatBase *newobj, const std::string &name)
 Solver* Moderator::CreateSolver(const std::string &type, const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateSolver() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage
+      ("Moderator::CreateSolver() type = '%s', name = '%s'\n", type.c_str(),
+       name.c_str());
    #endif
-
+   
    if (GetSolver(name) == NULL)
    {
       Solver *solver = theFactoryManager->CreateSolver(type, name);
@@ -2057,7 +2065,7 @@ PropSetup* Moderator::CreateDefaultPropSetup(const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
-   MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name=%s\n",
+   MessageInterface::ShowMessage("Moderator::CreateDefaultPropSetup() name='%s'\n",
                                  name.c_str());
    #endif
    
@@ -2096,7 +2104,7 @@ PropSetup* Moderator::CreatePropSetup(const std::string &name,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage("====================\n");
-   MessageInterface::ShowMessage("Moderator::CreatePropSetup() name=%s\n",
+   MessageInterface::ShowMessage("Moderator::CreatePropSetup() name='%s'\n",
                                  name.c_str());
    #endif
 
@@ -2188,7 +2196,7 @@ CoordinateSystem* Moderator::CreateCoordinateSystem(const std::string &name,
 {
    #if DEBUG_CREATE_COORDSYS
    MessageInterface::ShowMessage
-      ("Moderator::CreateCoordinateSystem() name=%s, createDefault=%d, "
+      ("Moderator::CreateCoordinateSystem() name='%s', createDefault=%d, "
        "internal=%d, theSolarSystemInUse=%p\n", name.c_str(), createDefault,
        internal, theSolarSystemInUse);
    #endif
@@ -2303,7 +2311,7 @@ Subscriber* Moderator::CreateSubscriber(const std::string &type,
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
-      ("Moderator::CreateSubscriber() entered: type=%s, name=%s, fileName=%s\n"
+      ("Moderator::CreateSubscriber() type='%s', name='%s', fileName='%s'\n"
        "createDefault=%d\n", type.c_str(), name.c_str(), fileName.c_str(),
        createDefault);
    #endif
@@ -2420,8 +2428,9 @@ Function* Moderator::CreateFunction(const std::string &type,
                                     const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateFunction() entered: type = " +
-                                 type + ", name = " + name + "\n");
+   MessageInterface::ShowMessage
+      ("Moderator::CreateFunction() type = '%s', name = '%s'\n", type.c_str(),
+       name.c_str());
    #endif
    
    if (GetFunction(name) == NULL)
@@ -2499,8 +2508,8 @@ StopCondition* Moderator::CreateStopCondition(const std::string &type,
                                               const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage("Moderator::CreateStopCondition() type = '%s', "
+                                 "name = '%s'\n", type.c_str(), name.c_str());
    #endif
    
    StopCondition *stopCond = theFactoryManager->CreateStopCondition(type, name);
@@ -2532,8 +2541,8 @@ AxisSystem* Moderator::CreateAxisSystem(const std::string &type,
                                         const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage("Moderator::CreateAxisSystem() type = '%s', "
+                                 "name = '%s'\n", type.c_str(), name.c_str());
    #endif
    
    AxisSystem *axisSystem = theFactoryManager->CreateAxisSystem(type, name);
@@ -2590,8 +2599,8 @@ MathNode* Moderator::CreateMathNode(const std::string &type,
                                     const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateMathNode() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage("Moderator::CreateMathNode() type = '%s', "
+                                 "name = '%s'\n", type.c_str(), name.c_str());
    #endif
    
    MathNode *mathNode = theFactoryManager->CreateMathNode(type, name);
@@ -2606,8 +2615,7 @@ MathNode* Moderator::CreateMathNode(const std::string &type,
 }
 
 //------------------------------------------------------------------------------
-// Attitude* CreateAttitude(const std::string &type,
-//                          const std::string &name)
+// Attitude* CreateAttitude(const std::string &type, const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates an Attitude object by given type and name.
@@ -2622,8 +2630,8 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
                                     const std::string &name)
 {
    #if DEBUG_CREATE_RESOURCE
-   MessageInterface::ShowMessage("Moderator::CreateAttitude() type = %s, "
-                                 "name = %s\n", type.c_str(), name.c_str());
+   MessageInterface::ShowMessage("Moderator::CreateAttitude() type = '%s', "
+                                 "name = '%s'\n", type.c_str(), name.c_str());
    #endif
    
    Attitude *att = theFactoryManager->CreateAttitude(type, name);
@@ -2676,6 +2684,15 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::InterpretGmatFunction(Function *funct)
 {
+   // Set object map (loj: 2008.03.31)
+   // Just set configured object until Sandbox can call this method
+   // with proper object map
+   
+   theScriptInterpreter->SetObjectMap(theConfigManager->GetObjectMap());   
+   theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+   theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());   
+   theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+   
    return theScriptInterpreter->InterpretGmatFunction(funct);
 }
 
@@ -3802,11 +3819,17 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
       // Need default CS's in case they are used in the script
       CreateDefaultCoordSystems();
       
+      // Set solar system in use and object map (loj: 2008.03.31)
+      theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theScriptInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      
       status = theScriptInterpreter->Interpret(filename);
       
       if (readBack)
       {
-         #if DEBUG_READ_BACK
+         #if DEBUG_INTERPRET
          MessageInterface::ShowMessage("===> newPath=%s\n", newPath.c_str());
          #endif
          
@@ -3820,7 +3843,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
          
          std::string newfile = newpath + fname;
          
-         #if DEBUG_READ_BACK
+         #if DEBUG_INTERPRET
          MessageInterface::ShowMessage
             ("===> newpath=%s\n===> newfile=%s\n", newpath.c_str(), newfile.c_str());
          #endif
@@ -3832,7 +3855,7 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
             int status = system(cmd.c_str());
             if (status != 0)
             {
-               #if DEBUG_READ_BACK
+               #if DEBUG_INTERPRET
                MessageInterface::ShowMessage
                   ("===> cmd=%s, status=%d\n", cmd.c_str(), status);
                #endif
@@ -3913,8 +3936,20 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       
       CreateSolarSystemInUse();
       CreateDefaultCoordSystems();
+
       
-      theScriptInterpreter->SetInStream(ss);
+      // Set solar system in use and object map (loj: 2008.03.31)
+      #if DEBUG_INTERPRET
+      MessageInterface::ShowMessage
+         ("   Setting SolarSystem <%p> and ObjectMap <%p> to theScriptInterpreter\n",
+          theSolarSystemInUse, theConfigManager->GetObjectMap());
+      #endif
+      
+      theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theScriptInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      
       status = theScriptInterpreter->Interpret();
       
       if (status)
@@ -4109,27 +4144,28 @@ void Moderator::CreateSolarSystemInUse()
       if (theSolarSystemInUse != NULL)
          delete theSolarSystemInUse;
       
+      theSolarSystemInUse = NULL;
       theSolarSystemInUse = theDefaultSolarSystem->Clone();
       theSolarSystemInUse->SetName("SolarSystem");
-      //theSolarSystemInUse->CreatePlanetarySource();
+      
+      // set solar system in use
+      SetSolarSystemInUse(theSolarSystemInUse);
       
       #if DEBUG_INITIALIZE
       MessageInterface::ShowMessage
          ("Moderator created solar system in use: %p\n", theSolarSystemInUse);
       #endif
       
-      // delete old theInternalCoordSystem and create new one
-      
+      // delete old theInternalCoordSystem and create new one      
       #if DEBUG_FINALIZE
       MessageInterface::ShowMessage
          (".....deleting (%p)theInternalCoordSystem\n", theInternalCoordSystem);
       #endif
-      delete theInternalCoordSystem;
       
+      delete theInternalCoordSystem;
+      theInternalCoordSystem = NULL;
       CreateInternalCoordSystem();
       
-      // set solar system in use
-      SetSolarSystemInUse(theSolarSystemInUse);
    #else
       theSolarSystemInUse->Copy(theDefaultSolarSystem);
       #if DEBUG_INITIALIZE
@@ -4166,8 +4202,6 @@ void Moderator::CreateInternalCoordSystem()
    MessageInterface::ShowMessage
       (".....created  (%p)theInternalCoordSystem\n",theInternalCoordSystem);
    #endif
-   
-   //theInternalCoordSystem->SetName("InternalEarthMJ2000Eq");
 }
 
 
@@ -4458,7 +4492,7 @@ void Moderator::CreateDefaultMission()
          {
             if (param->GetOwnerType() == Gmat::SPACECRAFT)
             {
-               //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
+               //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
                //param->SetStringParameter("Expression", param->GetName());
                param->SetRefObjectName(Gmat::SPACECRAFT, "DefaultSC");
                
@@ -4473,7 +4507,7 @@ void Moderator::CreateDefaultMission()
             }
             else if (param->GetOwnerType() == Gmat::IMPULSIVE_BURN)
             {
-               //MessageInterface::ShowMessage("name = %s\n", param->GetName().c_str());
+               //MessageInterface::ShowMessage("name = '%s'\n", param->GetName().c_str());
                param->SetRefObjectName(Gmat::IMPULSIVE_BURN, "DefaultIB");
             }
          }
@@ -4542,7 +4576,19 @@ void Moderator::CreateDefaultMission()
       
       // Add propagate command
       AppendCommand(propCommand);
-
+      
+      #if DEBUG_DEFAULT_MISSION
+      MessageInterface::ShowMessage
+         ("-->Setting SolarSystem <%p> and ObjectMap <%p> to theScriptInterpreter\n",
+          theSolarSystemInUse, theConfigManager->GetObjectMap());
+      #endif
+      
+      // Set solar system in use and object map (loj: 2008.03.31)
+      theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theScriptInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
+      theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
+      
       isRunReady = true;
    }
    catch (BaseException &e)
