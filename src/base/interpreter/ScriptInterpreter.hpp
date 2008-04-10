@@ -80,6 +80,7 @@ private:
    void WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode);
    void WriteHardwares(StringArray &objs, Gmat::WriteMode mode);
    void WriteVariablesAndArrays(StringArray &objs, Gmat::WriteMode mode);
+   void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mode);
    void WriteSubscribers(StringArray &objs, Gmat::WriteMode mode);
    void WriteCommandSequence(Gmat::WriteMode mode);
    

@@ -240,6 +240,13 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
        fileName.c_str());
    #endif
    
+   // Check if ObjectMap and SolarSystem is set
+   if (theObjectMap == NULL)
+      throw InterpreterException("The Object Map is not set in the Interpreter.\n");
+   
+   if (theSolarSystem == NULL)
+      throw InterpreterException("The Solar System is not set in the Interpreter.\n");
+   
    std::string msg;
    if (fileName == "")
       msg = "The GMATFunction file name is empty.\n";
@@ -818,6 +825,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       
       count = names.size();
       
+      // Special case for Propagator
       if (type == "Propagator")
          type = "PropSetup";
       
@@ -1006,7 +1014,9 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
                else
                {
                   // check if LHS is a parameter
-                  GmatBase *tempObj = GetConfiguredObject(chunks[0]);
+                  // Changed to call FindObject() (loj: 2008.04.01)
+                  //GmatBase *tempObj = GetConfiguredObject(chunks[0]);
+                  GmatBase *tempObj = FindObject(chunks[0]);
                   if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
                      if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
                         inCommandMode = true;
@@ -1034,7 +1044,9 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
          
          if (parts.size() > 1)
          {
-            GmatBase *tempObj = GetConfiguredObject(parts[0]);
+            // Changed to call FindObject() (loj: 2008.04.01)
+            //GmatBase *tempObj = GetConfiguredObject(parts[0]);
+            GmatBase *tempObj = FindObject(parts[0]);
             if ((tempObj) &&
                 (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
                  (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
@@ -1204,6 +1216,7 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    MessageInterface::ShowMessage("   Found %d Parameters\n", objs.size());
    #endif
    bool foundVarsAndArrays = false;
+   bool foundOtherParameter = false;
    if (objs.size() > 0)
    {
       for (current = objs.begin(); current != objs.end(); ++current)
@@ -1213,11 +1226,16 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
              (object->GetTypeName() == "Variable") ||
              (object->GetTypeName() == "String"))
             foundVarsAndArrays = true;
+         else
+            foundOtherParameter = true;
       }
    }
    
    if (foundVarsAndArrays)
       WriteVariablesAndArrays(objs, mode);
+   
+   if (foundOtherParameter)
+      WriteOtherParameters(objs, mode);
    
    //-----------------------------------
    // Coordinate System
@@ -1403,10 +1421,13 @@ void ScriptInterpreter::WriteSpacecrafts(StringArray &objs, Gmat::WriteMode mode
    
    for (current = objs.begin(); current != objs.end(); ++current)
    {
-      Spacecraft *sc = (Spacecraft*)(GetConfiguredObject(*current));
+      // Changed to call FindObject() (loj: 2008.04.01)
+      //Spacecraft *sc = (Spacecraft*)(GetConfiguredObject(*current));
+      Spacecraft *sc = (Spacecraft*)(FindObject(*current));
       sc->SetInternalCoordSystem(ics);
       sccs = (CoordinateSystem*)
-         GetConfiguredObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         //GetConfiguredObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
+         FindObject(sc->GetRefObjectName(Gmat::COORDINATE_SYSTEM));
       
       if (sccs)
          sc->SetRefObject(sccs, Gmat::COORDINATE_SYSTEM);
@@ -1636,10 +1657,7 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       // Write comment line
       if (i == 0)
-      {
-         ////theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)arrList[i])->GetCommentLine(1));
-      }
       
       if (counter == 1)
          theReadWriter->WriteText("Create Array");
@@ -1665,11 +1683,9 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
    
    for (UnsignedInt i = 0; i<size; i++)
    {
+      // Write comment line
       if (i == 0)
-      {
-         ////theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)arrWithValList[0])->GetCommentLine(2));
-      }
       
       theReadWriter->WriteText(arrWithValList[i]->GetStringParameter("InitialValue"));
    }
@@ -1692,10 +1708,7 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
       
       // Write comment line
       if (i == 0)
-      {
-         ////theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)strList[i])->GetCommentLine(1));
-      }
       
       if (counter == 1)
          theReadWriter->WriteText("Create String");
@@ -1727,13 +1740,64 @@ void ScriptInterpreter::WriteVariablesAndArrays(StringArray &objs,
           strWithValList[i]->GetStringParameter("Expression"))
          continue;
       
+      // Write comment line
       if (i == 0)
-      {
-         ////theReadWriter->WriteText("\n");
          theReadWriter->WriteText(((Parameter*)strWithValList[i])->GetCommentLine(2));
-      }
       
       theReadWriter->WriteText(strWithValList[i]->GetGeneratingString(mode));
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void WriteOtherParameters(StringArray &objs, Gmat::WriteMode mod)
+//------------------------------------------------------------------------------
+/*
+ * This method writes 10 variables and arrays per line.
+ * If variable or array was initialzied (non zero), it writes after Create line.
+ */
+//------------------------------------------------------------------------------
+void ScriptInterpreter::WriteOtherParameters(StringArray &objs,
+                                             Gmat::WriteMode mode)
+{
+   StringArray::iterator current;
+   GmatBase *object =  NULL;
+   bool isFirstTime = true;
+   
+   //-----------------------------------------------------------------
+   // Fill in proper arrays
+   //-----------------------------------------------------------------
+   for (current = objs.begin(); current != objs.end(); ++current)
+   {
+      object = FindObject(*current);
+      if (object != NULL)
+      {
+         std::string typeName = object->GetTypeName();
+         if (typeName != "Array" && typeName != "Variable" &&
+             typeName != "String")
+         {
+            // write only user created calculated parameters with no dots
+            if (object->GetName().find(".") == std::string::npos)
+            {
+               if (isFirstTime)
+               {
+                  WriteSectionDelimiter(objs[0], "Other Paraemters");
+                  isFirstTime = false;
+               }
+               
+               std::string genStr = object->GetGeneratingString(mode);
+               
+               #if DEBUG_SCRIPT_WRITING
+               MessageInterface::ShowMessage
+                  ("WriteOtherParameters() writing typeName=<%s>\n", typeName.c_str());
+               #endif
+               
+               if (object->GetCommentLine() == "")
+                  theReadWriter->WriteText("\n");
+               theReadWriter->WriteText(genStr);
+            }
+         }
+      }
    }
 }
 

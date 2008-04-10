@@ -26,6 +26,7 @@
 #include "TextParser.hpp"
 #include "ScriptReadWriter.hpp"
 #include "ElementWrapper.hpp"
+#include "Validator.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
@@ -57,7 +58,7 @@ class Moderator;
 class GMAT_API Interpreter
 {
 public:
-   Interpreter();
+   Interpreter(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL);
    virtual ~Interpreter();
    
    //------------------------------------------------------------------------------
@@ -99,7 +100,11 @@ public:
    GmatBase* GetConfiguredObject(const std::string &name);
    GmatBase* CreateObject(const std::string &type, const std::string &name,
                           bool manage = true);
+   
+   void SetSolarSystemInUse(SolarSystem *ss);
    SolarSystem* GetSolarSystemInUse();
+   void SetObjectMap(StringObjectMap *objMap);
+   StringObjectMap* GetObjectMap();
    
    const StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
@@ -112,10 +117,16 @@ public:
    
 protected:
    
-   /// A pointer to the ScriptReadWriter used when reading or writing script.
-   ScriptReadWriter* theReadWriter;
    Moderator    *theModerator;
-   TextParser   theTextParser;
+   SolarSystem  *theSolarSystem;
+   // Object map to be used for finding objects
+   StringObjectMap *theObjectMap;
+   
+   /// A pointer to the ScriptReadWriter used when reading or writing script.
+   ScriptReadWriter  *theReadWriter;
+   TextParser        theTextParser;
+   Validator         theValidator;
+   
    bool         inCommandMode;
    bool         inRealCommandMode;
    bool         initialized;
@@ -140,7 +151,7 @@ protected:
    Gmat::BlockType currentBlockType;
    
    /// Error handling data
-   bool continueOnError;
+   bool        continueOnError;
    std::string errorMsg1;
    std::string errorMsg2;
    StringArray errorList;
@@ -216,6 +227,14 @@ protected:
                          const Gmat::ParameterType type,
                          const std::string &value,
                          const Integer index = -1);
+   bool SetPropertyObjectValue(GmatBase *obj, const Integer id,
+                               const Gmat::ParameterType type,
+                               const std::string &value,
+                               const Integer index = -1);
+   bool SetPropertyStringValue(GmatBase *obj, const Integer id,
+                               const Gmat::ParameterType type,
+                               const std::string &value,
+                               const Integer index = -1);
    
    std::string GetPropertyValue(GmatBase *obj, const Integer id);
    
@@ -237,8 +256,8 @@ protected:
    bool IsArrayElement(const std::string &str);
    
    // for error handling
-   void HandleError(BaseException &e, bool writeLine = true, bool warning = false);
-   void HandleErrorMessage(BaseException &e, const std::string &lineNumber,
+   void HandleError(const BaseException &e, bool writeLine = true, bool warning = false);
+   void HandleErrorMessage(const BaseException &e, const std::string &lineNumber,
                            const std::string &line, bool writeLine = true,
                            bool warning = false);
    
@@ -282,11 +301,6 @@ private:
    bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
                             const std::string &msg, bool isNumberAllowed,
                             bool isArrayAllowed);
-   // for wrappers
-   ElementWrapper* CreateElementWrapper(const std::string &desc,
-                                        bool parametersFirst = false);
-   void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
-                               Gmat::WrapperDataType &itsType);
    
 };
 
