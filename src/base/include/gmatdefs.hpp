@@ -27,6 +27,7 @@
 
 #include <string>               // For std::string
 #include <vector>               // For std::vector
+#include <map>                  // For std::map
 
 
 #ifdef _WIN32  // Windows
@@ -68,6 +69,7 @@ typedef std::vector<std::string> StringArray;
 
 class GmatBase;                            // Forward reference for ObjectArray
 typedef std::vector<GmatBase*> ObjectArray;
+typedef std::map<std::string, GmatBase*> StringObjectMap;
 
 typedef struct geoparms
 {
