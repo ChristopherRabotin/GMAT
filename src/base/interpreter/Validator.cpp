@@ -1164,8 +1164,11 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
       {
          // per Steve Hughes 2007.10.16 - arrays are OK - WCS
          // (but not array elements)
-         if ( (!(refObj->IsOfType("Array"))) ||
-              (GmatStringUtil::IsParenPartOfArray(refNames[j])) )
+         // Correctely check array elements (loj: 2008.04.21)
+         //if ( (!(refObj->IsOfType("Array"))) ||
+         //     (GmatStringUtil::IsParenPartOfArray(refNames[j])) )
+         if ( refObj->IsOfType("Array") &&
+              GmatStringUtil::IsParenPartOfArray(refNames[j]))
          {
             theErrorMsg = "\"" + refNames[j] + "\" referenced in the " +
                obj->GetTypeName() + " command is not a saveable object";
