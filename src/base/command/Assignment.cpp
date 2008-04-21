@@ -410,6 +410,7 @@ bool Assignment::Execute()
             rmat = rhsWrapper->EvaluateArray();
             break;
          case Gmat::STRING_TYPE:
+         case Gmat::ENUMERATION_TYPE:
             sval = rhsWrapper->EvaluateString();
             // Remove enclosing quotes (loj: 2008.03.26)
             sval = GmatStringUtil::RemoveEnclosingString(sval, "'");
@@ -521,13 +522,15 @@ bool Assignment::Execute()
          lhsWrapper->SetArray(rmat);
          break;
       case Gmat::STRING_TYPE:
+      case Gmat::ENUMERATION_TYPE:
          // Object to String is needed for Remove for Formation
          if (rhsObj != NULL)
          {
             lhsWrapper->SetString(rhsObj->GetName());
          }
          else if ((rhsDataType == Gmat::STRING_TYPE ||
-              rhsDataType == Gmat::ON_OFF_TYPE))
+                   rhsDataType == Gmat::ENUMERATION_TYPE ||
+                   rhsDataType == Gmat::ON_OFF_TYPE))
          {
             lhsWrapper->SetString(sval);            
          }
