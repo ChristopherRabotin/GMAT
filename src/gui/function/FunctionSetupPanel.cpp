@@ -93,7 +93,7 @@ void FunctionSetupPanel::Create()
    // wxTextCtrl
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
-         wxDefaultSize, wxTE_MULTILINE | wxGROW);
+         wxSize(250,100), wxTE_MULTILINE | wxGROW);
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
 
    //------------------------------------------------------
