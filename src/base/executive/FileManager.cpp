@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            FileManager
 //------------------------------------------------------------------------------
@@ -21,7 +21,8 @@
 #include "MessageInterface.hpp"
 #include "GmatBaseException.hpp"
 #include "StringUtil.hpp"
-#include "FileTypes.hpp" // GmatFile::MAX_PATH_LEN
+#include "FileTypes.hpp"          // for GmatFile::MAX_PATH_LEN
+#include "FileUtil.hpp"           // for GmatFileUtil::
 #include <fstream>
 #include <sstream>
 #include <iomanip>
@@ -34,6 +35,9 @@
 //#define FM_CREATE_DEFAULT_INPUT
 
 //#define DEBUG_FILE_MANAGER
+//#define DEBUG_GMAT_FUNCTION
+//#define DEBUG_FILE_PATH
+//#define DEBUG_SET_PATH
 
 //---------------------------------
 // static data
@@ -286,19 +290,22 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       MessageInterface::ShowMessage("type=%s, name=%s\n", type.c_str(), name.c_str());
       #endif
       
-      if (type == "VERSION")
+      if (!correctVersionFound)
       {
-         // check for version date
-         if (name == VERSION_DATE)
+         if (type == "VERSION")
          {
-            correctVersionFound = true;
-            continue;
-         }
-         else
-         {
-            throw GmatBaseException
-               ("FileManager::ReadStartupFile() the VERSION is incorrect.\n"
-                "The version date it can handle is " + VERSION_DATE + "\n");
+            // check for version date
+            if (name == VERSION_DATE)
+            {
+               correctVersionFound = true;
+               continue;
+            }
+            else
+            {
+               throw GmatBaseException
+                  ("FileManager::ReadStartupFile() the VERSION is incorrect.\n"
+                   "The version date it can handle is " + VERSION_DATE + "\n");
+            }
          }
       }
       
@@ -379,7 +386,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
           pos->first.find("_FUNCTION_") == std::string::npos &&
           pos->first.find("_POT_") == std::string::npos)
          
-         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         outStream << setw(20) << pos->first << " = " << pos->second << "\n";
    }
    
    outStream << "#-----------------------------------------------------------\n";
@@ -392,11 +399,11 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    {
       if (pos->first == "FUNCTION_PATH")
       {
-         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         outStream << setw(20) << pos->first << " = " << pos->second << "\n";
          break;
       }
    }
-      
+   
    //---------------------------------------------
    // write GMAT_FUNCTION_PATH next
    //---------------------------------------------
@@ -405,11 +412,16 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    {
       if (pos->first == "GMAT_FUNCTION_PATH")
       {
-         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         //outStream << setw(20) << pos->first << " = " << pos->second << "\n";
+         
+         // Write all GmatFunction paths
+         for (UnsignedInt i=0; i<mGmatFunctionPaths.size(); i++)
+            outStream << setw(20) << pos->first << " = " << mGmatFunctionPaths[i] << "\n";
+         
          break;
       }
    }
-      
+   
    //---------------------------------------------
    // write MATLAB_FUNCTION_PATH next
    //---------------------------------------------
@@ -418,7 +430,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    {
       if (pos->first == "MATLAB_FUNCTION_PATH")
       {
-         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         outStream << setw(20) << pos->first << " = " << pos->second << "\n";
          break;
       }
    }
@@ -433,7 +445,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    {
       if (pos->first.find("_POT_") != std::string::npos)
       {
-         outStream << setw(20) << pos->first << " = " << pos->second  << "\n";
+         outStream << setw(20) << pos->first << " = " << pos->second << "\n";
       }
    }
    
@@ -743,6 +755,48 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
 
 
 //------------------------------------------------------------------------------
+// std::string ConvertToAbsPath(const std::string &relPath)
+//------------------------------------------------------------------------------
+std::string FileManager::ConvertToAbsPath(const std::string &relPath)
+{
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::ConvertToAbsPath() relPath='%s'\n", relPath.c_str());
+   #endif
+   
+   std::string absPath = relPath;
+   
+   // relPath contains _PATH
+   std::string::size_type index = absPath.find("_PATH");
+   if (index != absPath.npos)
+   {
+      std::string pathSymbol = absPath.substr(0, index+5);
+      std::string remPath = absPath.substr(index+6);
+      
+      #ifdef DEBUG_FILE_PATH
+      MessageInterface::ShowMessage("   pathSymbol='%s'\n", pathSymbol.c_str());
+      MessageInterface::ShowMessage("   remPath='%s'\n", remPath.c_str());
+      #endif
+      
+      if (mPathMap.find(pathSymbol) != mPathMap.end())
+      {
+         // Replace *_PATH with abs path
+         std::string pathname = mPathMap[pathSymbol];
+         absPath = pathname + remPath;
+         absPath = ConvertToAbsPath(absPath);
+      }
+   }
+   
+   #ifdef DEBUG_FILE_PATH
+   MessageInterface::ShowMessage
+      ("FileManager::ConvertToAbsPath() returning '%s'\n", absPath.c_str());
+   #endif
+   
+   return absPath;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetAbsPathname(const FileType type, const std::string &newpath)
 //------------------------------------------------------------------------------
 /**
@@ -820,6 +874,178 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
 }
 
 
+//------------------------------------------------------------------------------
+// void ClearGmatFunctionPath()
+//------------------------------------------------------------------------------
+void FileManager::ClearGmatFunctionPath()
+{
+   mGmatFunctionPaths.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void  AddGmatFunctionPath(const std::string &path)
+//------------------------------------------------------------------------------
+void FileManager::AddGmatFunctionPath(const std::string &path)
+{
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("FileManager::AddGmatFunctionPath() Adding %s to GmatFunctionPath\n",
+       path.c_str());
+   #endif
+   
+   StringArray::iterator pos =
+      find(mGmatFunctionPaths.begin(), mGmatFunctionPaths.end(), path);
+   
+   if (pos == mGmatFunctionPaths.end())
+   {
+      // if new path push back to path names
+      mGmatFunctionPaths.push_back(path);
+   }
+   else
+   {
+      // if existing path remove and push back
+      std::string oldPath = *pos;
+      mGmatFunctionPaths.erase(pos);
+      mGmatFunctionPaths.push_back(oldPath);
+   }
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   for (UnsignedInt i=0; i<mGmatFunctionPaths.size(); i++)
+      MessageInterface::ShowMessage
+         ("   mGmatFunctionPaths[%d]=%s\n", i, mGmatFunctionPaths[i].c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetGmatFunctionPath(const std::string &funcName)
+//------------------------------------------------------------------------------
+/*
+ * Returns the absolute path that has GmatFunction name.
+ * It searches in the most recently added path first.
+ *
+ * @param   funcName  Name of the GmatFunction to be located
+ * @return  Path that has GmatFunction name
+ */
+//------------------------------------------------------------------------------
+std::string FileManager::GetGmatFunctionPath(const std::string &funcName)
+{
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("FileManager::GetGmatFunctionPath() funcName='%s'\n", funcName.c_str());
+   #endif
+   
+   // Search through mGmatFunctionPaths
+   // The most recent path added to the last, so search backwards
+   std::string pathName, fullPath;
+   bool fileFound = false;   
+   StringArray::iterator pos = mGmatFunctionPaths.end() - 1;
+   
+   while (pos != mGmatFunctionPaths.begin() - 1)
+   {
+      pathName = *pos;
+      fullPath = ConvertToAbsPath(pathName) + funcName;
+      
+      #ifdef DEBUG_GMAT_FUNCTION
+      MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
+      #endif
+      
+      if (GmatFileUtil::DoesFileExist(fullPath))
+      {
+         fileFound = true;
+         break;
+      }
+      
+      pos--;
+   }
+   
+   if (fileFound)
+      fullPath = GmatFileUtil::ParsePathName(fullPath);
+   else
+      fullPath = "";
+   
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("FileManager::GetGmatFunctionPath() returning '%s'\n", fullPath.c_str());
+   #endif
+   
+   return fullPath;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetAllGmatFunctionPaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllGmatFunctionPaths()
+{
+   mGmatFunctionFullPaths.clear();
+   
+   for (UnsignedInt i=0; i<mGmatFunctionPaths.size(); i++)
+      mGmatFunctionFullPaths.push_back(ConvertToAbsPath(mGmatFunctionPaths[i]));
+   
+   return mGmatFunctionFullPaths;
+}
+
+
+//------------------------------------------------------------------------------
+// void ClearMatlabFunctionPath()
+//------------------------------------------------------------------------------
+void FileManager::ClearMatlabFunctionPath()
+{
+   mMatlabFunctionPaths.clear();
+}
+
+
+//------------------------------------------------------------------------------
+// void  AddMatlabFunctionPath(const std::string &path)
+//------------------------------------------------------------------------------
+void FileManager::AddMatlabFunctionPath(const std::string &path)
+{
+   #ifdef DEBUG_MATLAB_FUNCTION
+   MessageInterface::ShowMessage
+      ("FileManager::AddMatlabFunctionPath() Adding %s to MatlabFunctionPath\n",
+       path.c_str());
+   #endif
+   
+   StringArray::iterator pos =
+      find(mMatlabFunctionPaths.begin(), mMatlabFunctionPaths.end(), path);
+   
+   if (pos == mMatlabFunctionPaths.end())
+   {
+      // if new path push back to path names
+      mMatlabFunctionPaths.push_back(path);
+   }
+   else
+   {
+      // if existing path remove and push back
+      std::string oldPath = *pos;
+      mMatlabFunctionPaths.erase(pos);
+      mMatlabFunctionPaths.push_back(oldPath);
+   }
+   
+   #ifdef DEBUG_MATLAB_FUNCTION
+   for (UnsignedInt i=0; i<mMatlabFunctionPaths.size(); i++)
+      MessageInterface::ShowMessage
+         ("   mMatlabFunctionPaths[%d]=%s\n", i, mMatlabFunctionPaths[i].c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetAllMatlabFunctionPaths()
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetAllMatlabFunctionPaths()
+{
+   mMatlabFunctionFullPaths.clear();
+   
+   for (UnsignedInt i=0; i<mMatlabFunctionPaths.size(); i++)
+      mMatlabFunctionFullPaths.push_back(ConvertToAbsPath(mMatlabFunctionPaths[i]));
+   
+   return mMatlabFunctionFullPaths;
+}
+
+
 //---------------------------------
 // private methods
 //---------------------------------
@@ -854,6 +1080,13 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
          str2 = str2 + "/";
       
       mPathMap[type] = str2;
+      
+      // Handle Gmat and Matlab Function path
+      if (type == "GMAT_FUNCTION_PATH")
+         AddGmatFunctionPath(str2);
+      else if (type == "MATLAB_FUNCTION_PATH")
+         AddMatlabFunctionPath(str2);
+      
    }
    else if (type.find("_FILE_ABS") != type.npos)
    {

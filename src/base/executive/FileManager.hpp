@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  FileManager
 //------------------------------------------------------------------------------
@@ -100,12 +100,23 @@ public:
    std::string GetFullPathname(const std::string &typeName);
    std::string GetAbsPathname(const FileType type);
    std::string GetAbsPathname(const std::string &typeName);
-
+   
+   std::string ConvertToAbsPath(const std::string &relPath);
+   
    void SetAbsPathname(const FileType type, const std::string &newpath);
    void SetAbsPathname(const std::string &type, const std::string &newpath);
    
+   void ClearGmatFunctionPath();
+   void AddGmatFunctionPath(const std::string &path);
+   std::string GetGmatFunctionPath(const std::string &name);
+   const StringArray& GetAllGmatFunctionPaths();
+   
+   void ClearMatlabFunctionPath();
+   void AddMatlabFunctionPath(const std::string &path);
+   const StringArray& GetAllMatlabFunctionPaths();
+   
 private:
-
+   
    static const std::string VERSION_DATE;
    
    struct FileInfo
@@ -121,6 +132,10 @@ private:
    std::ifstream mInStream;
    std::map<std::string, std::string> mPathMap;
    std::map<std::string, FileInfo*> mFileMap;
+   StringArray mGmatFunctionPaths;
+   StringArray mMatlabFunctionPaths;
+   StringArray mGmatFunctionFullPaths;
+   StringArray mMatlabFunctionFullPaths;
    
    void AddFileType(const std::string &type, const std::string &name);
    void AddAvailablePotentialFiles();
