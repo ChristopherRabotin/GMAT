@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GmatFunction
 //------------------------------------------------------------------------------
@@ -27,15 +27,20 @@ class GMAT_API GmatFunction : public Function
 {
 public:
    GmatFunction(const std::string &nomme);
-
+   
    virtual ~GmatFunction(void);
-
+   
    GmatFunction(const GmatFunction &copy);
    GmatFunction& operator=(const GmatFunction &right);
-                 
+   
    // inherited from GmatBase
    virtual GmatBase* Clone() const;
-
+   virtual void         Copy(const GmatBase* orig);
+   
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
 };
 
 #endif

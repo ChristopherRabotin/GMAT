@@ -17,24 +17,65 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "MatlabFunction.hpp"
+#include "FileManager.hpp"       // for GetCurrentPath()
+#include "FileUtil.hpp"          // for ParseFileName()
+#include "StringUtil.hpp"        // for Trim()
+#include "MessageInterface.hpp"
+
+//#defin DEBUG_MATLAB_FUNCTION
+
 
 //------------------------------------------------------------------------------
-// MatlabFunction(std::string &nomme)
+// MatlabFunction(std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Constructor.
  *
- * @param <nomme> name of the MatlabFunction.
+ * @param <name> name of the MatlabFunction.
  *
  */
-MatlabFunction::MatlabFunction(const std::string &nomme) :
-     Function("MatlabFunction", nomme)
+//------------------------------------------------------------------------------
+MatlabFunction::MatlabFunction(const std::string &name) :
+   Function("MatlabFunction", name)
 {
+   // for initial function path, use FileManager
+   FileManager *fm = FileManager::Instance();
+   std::string pathname;
+   
+   try
+   {
+      // matlab uses directory path
+      pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
+      functionPath = pathname;
+   }
+   catch (GmatBaseException &e)
+   {
+      #ifdef DEBUG_MATLAB_FUNCTION
+      MessageInterface::ShowMessage(e.GetFullMessage());
+      #endif
+      
+      // see if there is FUNCTION_PATH
+      try
+      {
+         pathname = fm->GetFullPathname("FUNCTION_PATH");
+         functionPath = pathname;
+      }
+      catch (GmatBaseException &e)
+      {
+         #ifdef DEBUG_MATLAB_FUNCTION
+         MessageInterface::ShowMessage(e.GetFullMessage());
+         #endif
+      }
+   }
+   
+   #ifdef DEBUG_MATLAB_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Matlab functionPath=<%s>\n", functionPath.c_str());
+   MessageInterface::ShowMessage
+      ("   Matlab functionName=<%s>\n", functionName.c_str());
+   #endif
 }
-
-
 
 
 //------------------------------------------------------------------------------
@@ -42,11 +83,12 @@ MatlabFunction::MatlabFunction(const std::string &nomme) :
 //------------------------------------------------------------------------------
 /**
  * Destructor.
- *
  */
+//------------------------------------------------------------------------------
 MatlabFunction::~MatlabFunction()
 {
 }
+
 
 //------------------------------------------------------------------------------
 // MatlabFunction(const MatlabFunction &copy)
@@ -56,10 +98,12 @@ MatlabFunction::~MatlabFunction()
  *
  * @param <copy> object being copied
  */
+//------------------------------------------------------------------------------
 MatlabFunction::MatlabFunction(const MatlabFunction &copy) :
    Function      (copy)
 {
 }
+
 
 //------------------------------------------------------------------------------
 // MatlabFunction& MatlabFunction::operator=(const MatlabFunction &right)
@@ -81,6 +125,7 @@ MatlabFunction& MatlabFunction::operator=(const MatlabFunction& right)
 
     return *this;
 }
+
 
 //------------------------------------------------------------------------------
 //  GmatBase* Clone() const
@@ -109,5 +154,81 @@ GmatBase* MatlabFunction::Clone() const
 void MatlabFunction::Copy(const GmatBase* orig)
 {
    operator=(*((MatlabFunction *)(orig)));
+}
+
+
+//------------------------------------------------------------------------------
+//  bool SetStringParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/**
+ * Sets the value for a std::string parameter.
+ * 
+ * @param <id> Integer ID of the parameter.
+ * @param <value> New value for the parameter.
+ * 
+ * @return If value of the parameter was set.
+ */
+//------------------------------------------------------------------------------
+bool MatlabFunction::SetStringParameter(const Integer id, const std::string &value)
+{
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("MatlabFunction::SetStringParameter() entered, id=%d, value=%s\n", id, value.c_str());
+   #endif
+   
+   switch (id)
+   {
+   case FUNCTION_PATH:
+      {
+         // Compose full path if it has relative path.
+         // Assuming if first char has '.', it has relative path.
+         std::string temp = GmatStringUtil::Trim(value);
+         if (temp[0] == '.')
+         {
+            FileManager *fm = FileManager::Instance();
+            std::string currPath = fm->GetCurrentPath();
+            
+            #ifdef DEBUG_FUNCTION_SET
+            MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
+            #endif
+            
+            functionPath = currPath + temp.substr(1);
+         }
+         else
+         {
+            functionPath = value;
+         }
+         
+         // Remove path
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         
+         #ifdef DEBUG_FUNCTION_SET
+         MessageInterface::ShowMessage
+            ("   functionPath=<%s>\n", functionPath.c_str());
+         MessageInterface::ShowMessage
+            ("   functionName=<%s>\n", functionName.c_str());
+         #endif
+         
+         return true;
+      }
+   case FUNCTION_NAME:
+      {
+         // Remove path if it has one
+         functionName = GmatFileUtil::ParseFileName(functionPath);
+         return true;
+      }
+   default:
+      return Function::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool MatlabFunction::SetStringParameter(const std::string &label,
+                                        const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
 }
 

@@ -17,11 +17,7 @@
  */
 //------------------------------------------------------------------------------
 
-
 #include "Function.hpp"
-#include "FileManager.hpp"       // for GetPathname()
-#include "FileUtil.hpp"          // for ParseFileName()
-#include "StringUtil.hpp"        // for Trim()
 #include "FunctionException.hpp" // for exception
 #include "MessageInterface.hpp"
 
@@ -51,93 +47,23 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 
 
 //------------------------------------------------------------------------------
-//  Function(std::string typeStr, std::string nomme)
+//  Function(std::string typeStr, std::string name)
 //------------------------------------------------------------------------------
 /**
  * Constructs the Function object (default constructor).
  * 
  * @param <typeStr> String text identifying the object type
- * @param <nomme>   Name for the object
+ * @param <name>   Name for the object
  */
 //------------------------------------------------------------------------------
-Function::Function(const std::string &typeStr, const std::string &nomme) :
-   GmatBase        (Gmat::FUNCTION, typeStr, nomme),
+Function::Function(const std::string &typeStr, const std::string &name) :
+   GmatBase        (Gmat::FUNCTION, typeStr, name),
    functionPath    ("")
 {
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage
-      ("Function::Function() entered, typeStr=%s, nomme=%s\n",
-       typeStr.c_str(), nomme.c_str());
-   #endif
-   
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back(typeStr);
    objectTypeNames.push_back("Function");
    parameterCount = FunctionParamCount;
-   
-   // function path
-   FileManager *fm = FileManager::Instance();
-   std::string pathname;
-   
-   try
-   {
-      if (functionPath == "")
-      {         
-         if (typeStr == "MatlabFunction")
-         {
-            // matlab uses directory path
-            pathname = fm->GetFullPathname("MATLAB_FUNCTION_PATH");
-            functionPath = pathname;
-            
-            #ifdef DEBUG_FUNCTION
-            MessageInterface::ShowMessage
-               ("   functionPath=<%s>\n", functionPath.c_str());
-            #endif
-         }
-         else if (typeStr == "GmatFunction")
-         {
-            // gmat function uses whole path name
-            pathname = fm->GetFullPathname("GMAT_FUNCTION_PATH") + nomme + ".gmf";         
-            functionPath = pathname;
-            functionName = GmatFileUtil::ParseFileName(functionPath);
-            
-            // Remove path and .gmf (loj: 2008.03.12)
-            functionName = GmatFileUtil::ParseFileName(functionPath);
-            std::string::size_type dotIndex = functionName.find(".gmf");
-            functionName = functionName.substr(0, dotIndex);
-            
-            #ifdef DEBUG_FUNCTION
-            MessageInterface::ShowMessage
-               ("   functionPath=<%s>\n", functionPath.c_str());
-            MessageInterface::ShowMessage
-               ("   functionName=<%s>\n", functionName.c_str());
-            #endif
-         }
-      }
-   }
-   catch (GmatBaseException &e)
-   {
-      #ifdef DEBUG_FUNCTION
-      MessageInterface::ShowMessage(e.GetFullMessage());
-      #endif
-      
-      try
-      {
-         // see if there is FUNCTION_PATH
-         pathname = fm->GetFullPathname("FUNCTION_PATH");
-         functionPath = pathname;
-      }
-      catch (GmatBaseException &e)
-      {
-         #ifdef DEBUG_FUNCTION
-         MessageInterface::ShowMessage(e.GetFullMessage());
-         #endif
-      }
-   }
-   
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("Function::Function() exiting\n");
-   #endif
 }
 
 
@@ -484,60 +410,6 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
    
    switch (id)
    {
-   case FUNCTION_PATH:
-      {
-         // Compose full path if it has relative path.
-         // Assuming if first char has '.', it has relative path.
-         std::string temp = GmatStringUtil::Trim(value);
-         if (temp[0] == '.')
-         {
-            FileManager *fm = FileManager::Instance();
-            std::string currPath = fm->GetCurrentPath();
-         
-            #ifdef DEBUG_FUNCTION_SET
-            MessageInterface::ShowMessage("   currPath=%s\n", currPath.c_str());
-            #endif
-            
-            functionPath = currPath + temp.substr(1);
-         }
-         else
-         {
-            functionPath = value;
-         }
-         
-         // Remove path
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         
-         // Remove .gmf if GmatFunction
-         if (GetTypeName() == "GmatFunction")
-         {
-            std::string::size_type dotIndex = functionName.find(".gmf");
-            functionName = functionName.substr(0, dotIndex);
-         }
-         
-         #ifdef DEBUG_FUNCTION_SET
-         MessageInterface::ShowMessage
-            ("   functionPath=<%s>\n", functionPath.c_str());
-         MessageInterface::ShowMessage
-            ("   functionName=<%s>\n", functionName.c_str());
-         #endif
-         
-         return true;
-      }
-   case FUNCTION_NAME:
-      {
-         // Remove path if it has one
-         functionName = GmatFileUtil::ParseFileName(functionPath);
-         
-         // Remove .gmf if GmatFunction
-         if (GetTypeName() == "GmatFunction")
-         {
-            std::string::size_type dotIndex = functionName.find(".gmf");
-            functionName = functionName.substr(0, dotIndex);
-         }
-         
-         return true;
-      }
    case FUNCTION_INPUT:
       {
          if (inputArgMap.find(value) == inputArgMap.end())
