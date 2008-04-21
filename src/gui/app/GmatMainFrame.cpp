@@ -32,9 +32,10 @@
 #include "MdiTsPlotData.hpp"
 #include "GmatNotebook.hpp"
 #include "GmatMenuBar.hpp"
-
 #include "GmatTreeItemData.hpp"
 #include "SolarSystemWindow.hpp"
+#include "GmatMdiChildFrame.hpp"
+// panels
 #include "SpacecraftPanel.hpp"
 #include "TankConfigPanel.hpp"
 #include "ThrusterConfigPanel.hpp"
@@ -69,7 +70,6 @@
 #include "ForPanel.hpp"
 #include "WhilePanel.hpp"
 #include "DoWhilePanel.hpp"
-#include "GmatMdiChildFrame.hpp"
 #include "FormationSetupPanel.hpp"
 #include "CallFunctionPanel.hpp"
 #include "CoordSystemConfigPanel.hpp"
@@ -83,10 +83,13 @@
 #include "LibrationPointPanel.hpp"
 #include "CelestialBodyPanel.hpp"
 #include "CompareReportPanel.hpp"
+// dialogs
 #include "CompareFilesDialog.hpp"
 #include "CompareTextDialog.hpp"
 #include "TextEphemFileDialog.hpp"
 #include "AboutDialog.hpp"
+#include "SetPathDialog.hpp"
+
 #include "FileManager.hpp"
 #include "FileUtil.hpp"               // for Compare()
 
@@ -179,6 +182,8 @@ BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
    
    EVT_MENU(MENU_FILE_NEW_SCRIPT, GmatMainFrame::OnNewScript)
    EVT_MENU(MENU_FILE_OPEN_SCRIPT, GmatMainFrame::OnOpenScript)
+   
+   EVT_MENU(MENU_SET_PATH_AND_LOG, GmatMainFrame::OnSetPath)
    
    EVT_MENU(MENU_EDIT_UNDO, GmatMainFrame::OnUndo)
    EVT_MENU(MENU_EDIT_REDO, GmatMainFrame::OnRedo)
@@ -2555,6 +2560,22 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
       SetStatusText("", 1);
       InterpretScript(mScriptFilename.c_str());
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnSetPath(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles setting path used in the system from the menu bar.
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OnSetPath(wxCommandEvent& event)
+{
+   SetPathDialog dlg(this);
+   dlg.ShowModal();
 }
 
 

@@ -101,7 +101,7 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    fileMenu->Append(MENU_PROJECT_PREFERENCES,
                         wxT("Preferences"), prefMenu, wxT(""));
    
-   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths and Log Level"),
+   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths"),
                     wxT(""));
    fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""));
    
@@ -112,8 +112,8 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    #ifdef __WXMAC__
        wxApp::s_macExitMenuItemId = MENU_PROJECT_EXIT;
    #endif
-  
-   fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
+   
+   //fileMenu->Enable(MENU_SET_PATH_AND_LOG, FALSE);
    fileMenu->Enable(MENU_INFORMATION, FALSE);
    fileMenu->Enable(MENU_FILE_PRINT, FALSE);
    this->Append(fileMenu, wxT("&File"));

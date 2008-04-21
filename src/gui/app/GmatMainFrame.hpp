@@ -159,10 +159,11 @@ private:
    void OnPause(wxCommandEvent &event);
    void OnStop(wxCommandEvent &event);
    void OnHelpAbout(wxCommandEvent &event);
-
+   
    void OnNewScript(wxCommandEvent &event);
    void OnOpenScript(wxCommandEvent &event);
-
+   void OnSetPath(wxCommandEvent &event);
+   
    void OnUndo(wxCommandEvent& event);
    void OnRedo(wxCommandEvent& event);
    void OnCut(wxCommandEvent& event);
