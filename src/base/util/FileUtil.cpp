@@ -240,18 +240,27 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
 //------------------------------------------------------------------------------
 bool GmatFileUtil::DoesFileExist(const std::string &filename)
 {
+   #ifdef DEBUG_FILE_CHECK
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesFileExist() filename=<%s>\n",
+       filename.c_str());
+   #endif
+   
    FILE * pFile;
    pFile = fopen (filename.c_str(), "rt+");
-   
+   bool fileExist = false;
    if (pFile!=NULL)
    {
       fclose (pFile);
-      return true;
+      fileExist = true;
    }
-   else
-   {
-      return false;
-   }
+   
+   #ifdef DEBUG_FILE_CHECK
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::DoesFileExist() returning %d\n", fileExist);
+   #endif
+   
+   return fileExist;
 }
 
 
