@@ -302,7 +302,9 @@ std::string ObjectPropertyWrapper::EvaluateString() const
 bool ObjectPropertyWrapper::SetString(const std::string &toValue)
 {
    Gmat::ParameterType propType = GetDataType();
-   if (propType == Gmat::STRING_TYPE || propType == Gmat::STRINGARRAY_TYPE)
+   if (propType == Gmat::STRING_TYPE ||
+       propType == Gmat::ENUMERATION_TYPE ||
+       propType == Gmat::STRINGARRAY_TYPE)
       return object->SetStringParameter(propID, toValue);
    else
       throw GmatBaseException
