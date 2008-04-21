@@ -80,7 +80,7 @@
  * Default constructor.
  *
  * @param  ss  The solar system to be used for findnig bodies
- * @param  objMap  The object map to be used for finding object
+ * @param  objMap  The object map to be used for finding object 
  */
 //------------------------------------------------------------------------------
 Interpreter::Interpreter(SolarSystem *ss, StringObjectMap *objMap)
@@ -1979,6 +1979,9 @@ bool Interpreter::SetCommandRefObjects(GmatCommand *cmd, const std::string &desc
          std::string msg = 
             "\"" + parts[i] + "\" is an invalid object name in " +
             cmd->GetTypeName() + " command";
+         InterpreterException ex(msg);
+         HandleError(ex);
+         isOk = false;
       }
       else
       {
@@ -2737,13 +2740,15 @@ bool Interpreter::SetValueToObject(GmatBase *toObj, const std::string &value)
    
    if (objType == "String")
    {
+      std::string valueToUse = GmatStringUtil::RemoveEnclosingString(value, "'");
+      
       #ifdef DEBUG_SET
       MessageInterface::ShowMessage
-         ("   Calling %s->SetStringParameter(Value, %s)\n", value.c_str(),
-          toObj->GetName().c_str());
+         ("   Calling %s->SetStringParameter(Value, %s)\n", toObj->GetName().c_str(),
+          valueToUse.c_str());
       #endif
       
-      toObj->SetStringParameter("Value", value);
+      toObj->SetStringParameter("Value", valueToUse);
    }
    else if (objType == "Variable")
    {
