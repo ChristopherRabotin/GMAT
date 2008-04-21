@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                TimeTypes
 //------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ namespace GmatTimeUtil
       Integer minutes;
       Real    seconds;
    };
-
+   
    const Real SECS_PER_DAY = 86400.0;
    const Real SECS_PER_HOUR = 3600.0;
    const Real SECS_PER_MINUTE = 60.0;
@@ -80,7 +80,7 @@ namespace GmatTimeUtil
    const Real A1_TAI_OFFSET = 0.0343817;        // GMAT Math Spec section 2.1
    const Real JD_JAN_5_1941 = 2430000.0;        // old name JULIAN_DATE_OF_010541
    const Real JD_NOV_17_1858 = 2400000.5;       // old name JD_MJD_OFFSET
-
+   
    const Integer DAYS_BEFORE_MONTH[12] =
    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
    const Integer LEAP_YEAR_DAYS_BEFORE_MONTH[12] =
@@ -107,6 +107,6 @@ namespace GmatTimeUtil
    bool IsValidMonthName(const std::string &str);
    std::string GetMonthName(Integer month);
    Integer GetMonth(const std::string &monthName);
-   
+   std::string GetCurrentTime();
 }
 #endif // TimeTypes_hpp

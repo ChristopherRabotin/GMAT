@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                TimeTypes
 //------------------------------------------------------------------------------
@@ -20,13 +20,7 @@
 #include "TimeTypes.hpp"
 #include "StringUtil.hpp"
 #include "UtilityException.hpp"
-
-//const std::string GmatTimeUtil::MonthString::MONTH_NAME_TEXT[12] =
-// const std::string GmatTimeUtil::MONTH_NAME_TEXT[12] =
-// {
-//    "Jan",  "Feb",  "Mar",  "Apr",  "May",  "Jun",
-//    "Jul",  "Aug",  "Sep",  "Oct",  "Nov",  "Dec"
-// };
+#include <ctime>                   // for time()
 
 
 //------------------------------------------------------------------------------
@@ -102,5 +96,20 @@ Integer GmatTimeUtil::GetMonth(const std::string &monthName)
    }
    
    return -1;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetCurrentTime()
+//------------------------------------------------------------------------------
+/*
+ * Returns the current time in "Wed Apr 16 12:30:22 2008" format.
+ */
+//------------------------------------------------------------------------------
+std::string GmatTimeUtil::GetCurrentTime()
+{
+   time_t currTime = time(NULL);
+   char *currTimeStr = ctime(&currTime);
+   return currTimeStr;
 }
 
