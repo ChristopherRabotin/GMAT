@@ -37,6 +37,8 @@ MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
    elementType   (Gmat::REAL_TYPE),
    realValue     (REAL_PARAMETER_UNDEFINED)
 {
+   objectTypes.push_back(Gmat::MATH_NODE);
+   objectTypeNames.push_back("MathNode");   
 }
 
 

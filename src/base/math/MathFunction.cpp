@@ -36,6 +36,7 @@ MathFunction::MathFunction(const std::string &typeStr, const std::string &nomme)
               rightNode   (NULL)
 {
    isFunction = true;
+   objectTypeNames.push_back("MathFunction");   
 }
 
 //------------------------------------------------------------------------------

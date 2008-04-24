@@ -19,13 +19,16 @@
 #include "MathTree.hpp"
 #include "MathFunction.hpp"
 #include "MathElement.hpp"
+#include "FunctionRunner.hpp"
 #include "StringUtil.hpp"            // for GetArrayIndex()
 #include "InterpreterException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_MATH_TREE 1
+//#define DEBUG_MATH_TREE_INIT 1
 //#define DEBUG_MATH_WRAPPERS
 //#define DEBUG_RENAME
+//#define DEBUG_FUNCTION
 
 //------------------------------------------------------------------------------
 //  MathTree()
@@ -102,6 +105,78 @@ MathTree& MathTree::operator=(const MathTree &mt)
    theGlobalObjectMap = NULL;
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetGmatFunctionNames()
+//------------------------------------------------------------------------------
+const StringArray& MathTree::GetGmatFunctionNames()
+{
+   return theGmatFunctionNames;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGmatFunctionNames(StringArray funcList)
+//------------------------------------------------------------------------------
+void MathTree::SetGmatFunctionNames(StringArray funcList)
+{
+   theGmatFunctionNames = funcList;
+}
+
+
+//------------------------------------------------------------------------------
+// std::vector<Function*> GetFunctions() const
+//------------------------------------------------------------------------------
+std::vector<Function*> MathTree::GetFunctions() const
+{
+   return theFunctions;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetFunction(Function *function)
+//------------------------------------------------------------------------------
+void MathTree::SetFunction(Function *function)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetFunction() function=%p\n", function);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetFunctionToRunner() theTopNode=%s, %s\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetFunctionToRunner(theTopNode, function);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetFunction() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// MathNode* GetTopNode()
+//------------------------------------------------------------------------------
+MathNode* MathTree::GetTopNode()
+{
+   return theTopNode;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTopNode(MathNode *node)
+//------------------------------------------------------------------------------
+void MathTree::SetTopNode(MathNode *node)
+{
+   theTopNode = node;
 }
 
 
@@ -261,7 +336,7 @@ bool MathTree::InitializeParameter(MathNode *node)
       
       std::string refName = node->GetRefObjectName(Gmat::PARAMETER);
       
-      #ifdef DEBUG_MATH_TREE
+      #ifdef DEBUG_MATH_TREE_INIT
       MessageInterface::ShowMessage
          ("MathTree::InitializeParameter() refName=%s\n", refName.c_str());
       #endif
@@ -276,7 +351,7 @@ bool MathTree::InitializeParameter(MathNode *node)
          node->SetRefObject((*theObjectMap)[newName], Gmat::PARAMETER,
                             newName);
          
-         #ifdef DEBUG_MATH_TREE
+         #ifdef DEBUG_MATH_TREE_INIT
          MessageInterface::ShowMessage
             ("MathTree::InitializeParameter() Found %s from theObjectMap\n",
              refName.c_str());
@@ -289,7 +364,7 @@ bool MathTree::InitializeParameter(MathNode *node)
          node->SetRefObject((*theGlobalObjectMap)[newName], Gmat::PARAMETER,
                             newName);
          
-         #ifdef DEBUG_MATH_TREE
+         #ifdef DEBUG_MATH_TREE_INIT
          MessageInterface::ShowMessage
             ("MathTree::InitializeParameter() Found %s from theGlobalObjectMap\n",
              refName.c_str());
@@ -299,7 +374,7 @@ bool MathTree::InitializeParameter(MathNode *node)
       }
       else
       {
-         #ifdef DEBUG_MATH_TREE
+         #ifdef DEBUG_MATH_TREE_INIT
          MessageInterface::ShowMessage
             ("MathTree::InitializeParameter() Unable to find " + newName +
              " from theObjectMap or theGlobalObjectMap\n");
@@ -335,7 +410,11 @@ void MathTree::SetMathElementWrappers(MathNode *node)
       if (node->IsNumber())
          return;
       
-      //MessageInterface::ShowMessage("===> Settng wrappers to %s\n", node->GetName().c_str());
+      #ifdef DEBUG_MATH_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   Setting wrappers to '%s'\n", node->GetName().c_str());
+      #endif
+      
       ((MathElement*)(node))->SetMathWrappers(theWrapperMap);
    }
    else
@@ -346,6 +425,39 @@ void MathTree::SetMathElementWrappers(MathNode *node)
       MathNode *right = node->GetRight();
       SetMathElementWrappers(right);
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetFunctionToRunner(MathNode *node, Function *function)
+//------------------------------------------------------------------------------
+void MathTree::SetFunctionToRunner(MathNode *node, Function *function)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetFunctionToRunner() node=%p, function=%p\n", node, function);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetFunction(function);
+   
+   MathNode *left = node->GetLeft();   
+   SetFunctionToRunner(left, function);
+   
+   MathNode *right = node->GetRight();
+   SetFunctionToRunner(right, function);
 }
 
 
@@ -367,7 +479,7 @@ bool MathTree::RenameParameter(MathNode *node, const Gmat::ObjectType type,
       return true;
    
    std::string nodeName = node->GetName();
-
+   
    if (nodeName.find(oldName) != nodeName.npos)
    {
       #ifdef DEBUG_RENAME
@@ -411,35 +523,62 @@ void MathTree::CreateParameterNameArray(MathNode *node)
    if (node == NULL)
       return;
    
-   #ifdef DEBUG_MATH_TREE
+   #ifdef DEBUG_MATH_WRAPPERS
    MessageInterface::ShowMessage
       ("MathTree::GetRefObjectNameArray() node=%s\n", node->GetName().c_str());
    #endif
    
    if (!node->IsFunction())
    {
+      // if math element is not a number
       if (!node->IsNumber())
       {
-         StringArray tmpRefs = node->GetRefObjectNameArray(Gmat::PARAMETER);
-         for (UnsignedInt i=0; i<tmpRefs.size(); i++)
+         StringArray refs = node->GetRefObjectNameArray(Gmat::PARAMETER);
+         for (UnsignedInt i=0; i<refs.size(); i++)
          {
-            #ifdef DEBUG_MATH_TREE
-            MessageInterface::ShowMessage("   %d, %s\n", i, tmpRefs[i].c_str());
+            #ifdef DEBUG_MATH_WRAPPERS
+            MessageInterface::ShowMessage("   %d, %s\n", i, refs[i].c_str());
             #endif
             
             // add if not found in the all ref array
-            if (find(theAllParamArray.begin(), theAllParamArray.end(), tmpRefs[i]) ==
+            if (find(theAllParamArray.begin(), theAllParamArray.end(), refs[i]) ==
                 theAllParamArray.end())
-               theAllParamArray.push_back(tmpRefs[i]);
+               theAllParamArray.push_back(refs[i]);
          }
       }
    }
    else
    {
-      MathNode *left = node->GetLeft();      
+      #ifdef __USE_ARGLIST_FOR_REFNAMES__
+      // add function input arguments if node is a FunctionRunner
+      if (node->IsOfType("FunctionRunner"))
+      {
+         #ifdef DEBUG_MATH_WRAPPERS
+         MessageInterface::ShowMessage
+            ("   It is a FunctionRunner of '%s'\n", node->GetName().c_str());
+         #endif
+         
+         StringArray inputs = ((FunctionRunner*)node)->GetInputs();
+         for (UnsignedInt i=0; i<inputs.size(); i++)
+         {
+            #ifdef DEBUG_MATH_WRAPPERS
+            MessageInterface::ShowMessage("   inputs[%d]='%s'\n", i, inputs[i].c_str());
+            #endif
+            
+            if (inputs[i] == "")
+               continue;
+            
+            if (find(theAllParamArray.begin(), theAllParamArray.end(), inputs[i]) ==
+                theAllParamArray.end())
+               theAllParamArray.push_back(inputs[i]);
+         }
+      }
+      #endif
+      
+      MathNode *left = node->GetLeft();
       CreateParameterNameArray(left);
       
-      MathNode *right = node->GetRight();      
+      MathNode *right = node->GetRight();
       CreateParameterNameArray(right);
    }
 }

@@ -994,6 +994,36 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       // if command has its own InterpretAction(), just return cmd
       if (cmd->InterpretAction())
       {
+         // if command is Assignment, check if GmatFunction needs to be created
+         if (type == "GMAT" && ((Assignment*)cmd)->GetMathTree() != NULL)
+         {
+            #ifdef DEBUG_CREATE_COMMAND
+            MessageInterface::ShowMessage("   It is a math equation\n");
+            #endif
+            
+            Assignment *equation = (Assignment*)cmd;
+            StringArray gmatFuns = equation->GetGmatFunctions();
+            
+            #ifdef DEBUG_CREATE_COMMAND
+            MessageInterface::ShowMessage("   Found %d GmatFunctions\n", gmatFuns.size());
+            #endif
+            
+            for (UnsignedInt i=0; i<gmatFuns.size(); i++)
+            {
+               GmatBase *func = FindObject(gmatFuns[i]);
+               if (func == NULL)
+                  func = CreateObject("GmatFunction", gmatFuns[i]);
+               
+               #ifdef DEBUG_CREATE_COMMAND
+               MessageInterface::ShowMessage
+                  ("   Setting GmatFunction '%s'<%p> to equation<%p>\n",
+                   func->GetName().c_str(), func, equation);
+               #endif
+               
+               equation->SetFunction((Function*)func);
+            }
+         }
+         
          retFlag  = ValidateCommand(cmd);
          
          #ifdef DEBUG_CREATE_COMMAND
@@ -5364,7 +5394,16 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
       while (!inStream.eof())
       {
          // Use global function getline()
-         getline(inStream, line);
+         //getline(inStream, line);
+         if (!GmatFileUtil::GetLine(&inStream, line))
+         {
+            InterpreterException ex
+               ("Error reading the GamtFunction file \"" +
+                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+            HandleError(ex, false);
+            retval = false;
+            break;
+         }
          
          #if DBGLVL_FUNCTION_DEF > 1
          MessageInterface::ShowMessage("   line=<%s>\n", line.c_str());
@@ -5511,7 +5550,7 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
          catch (BaseException &e)
          {
             InterpreterException ex
-               ("The invalid input argument list found in the GamtFunction file \"" +
+               ("The invalid input argument list found in the GmatFunction file \"" +
                 funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
             HandleError(ex, false);
             retval = false;

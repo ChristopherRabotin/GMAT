@@ -120,7 +120,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
    
    #ifdef DEBUG_CHECK_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::CheckUndefinedReference() obj=<%p><%s>, continueOnError\n", obj,
+      ("Validator::CheckUndefinedReference() obj=<%p><%s>, continueOnError=%d\n", obj,
        obj->GetName().c_str(), continueOnError);
    #endif
    
@@ -245,8 +245,9 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
    
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
-      ("Validator::ValidateCommand() cmd=<%p><%s>, continueOnError\n", cmd,
-       cmd->GetTypeName().c_str(), continueOnError);
+      ("Validator::ValidateCommand() cmd=<%p><%s><%s>, continueOnError=%d\n", cmd,
+       cmd->GetTypeName().c_str(), cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       continueOnError);
    #endif
    
    #ifdef DEBUG_VALIDATE_COMMAND
@@ -397,7 +398,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst)
       ("In Validator::CreateElementWrapper, original string is \"%s\"\n",
        desc.c_str(), "\"\n");
    MessageInterface::ShowMessage
-      ("                                   and trimmed string is \"%s\"\n",
+      ("                                    and trimmed string is \"%s\"\n",
        descTrimmed.c_str(), "\"\n");
    #endif
    

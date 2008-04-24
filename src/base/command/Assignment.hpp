@@ -28,6 +28,7 @@
 
 #include "GmatCommand.hpp"
 #include "MathTree.hpp"
+#include "Function.hpp"
 
 class GMAT_API Assignment : public GmatCommand
 {
@@ -37,11 +38,15 @@ public:
    Assignment(const Assignment& a);
    Assignment&          operator=(const Assignment& a);
    
-   MathTree*            GetMathTree() { return mathTree; }
+   MathTree*            GetMathTree();
+   const StringArray&   GetGmatFunctions();
    void                 SetMathWrappers();
    
    std::string          GetLHS() { return lhs; }
    std::string          GetRHS() { return rhs; }
+   
+   virtual void         SetFunction(Function *function);
+   virtual std::vector<Function*> GetFunctions() const;
    
    // inherited from GmatCommand
    virtual bool         InterpretAction();
@@ -82,7 +87,6 @@ protected:
    MathTree             *mathTree;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
    std::map<std::string, ElementWrapper*> mathWrapperMap;
-   
 };
 
 #endif // Assignment_hpp

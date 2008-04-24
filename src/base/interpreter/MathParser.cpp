@@ -21,7 +21,9 @@
 
 #include "MathParser.hpp"
 #include "MathFunction.hpp"
+#include "FunctionRunner.hpp"
 #include "StringUtil.hpp"       // for ParseParameter()
+#include "FileManager.hpp"      // for GetGmatFunctionPath()
 #include "MessageInterface.hpp"
 
 #ifdef __UNIT_TEST__
@@ -45,6 +47,7 @@
 //#define DEBUG_POWER 1
 //#define DEBUG_UNARY 1
 //#define DEBUG_CREATE_NODE 1
+//#define DEBUG_GMAT_FUNCTION 1
 
 //---------------------------------
 // static data
@@ -78,6 +81,15 @@ MathParser::UNIT_CONV_LIST[UnitConvCount] =
 }; 
 
 
+std::string
+MathParser::GMAT_FUNC_LIST[MAX_GMAT_FUNCTIONS] =
+{
+   "", "", "", "", "", "", "", "", "", "",
+   "", "", "", "", "", "", "", "", "", "",
+   "", "", "", "", "", "", "", "", "", "",
+}; 
+
+
 //------------------------------------------------------------------------------
 //  MathParser(std::string typeStr, std::string nomme)
 //------------------------------------------------------------------------------
@@ -90,6 +102,7 @@ MathParser::UNIT_CONV_LIST[UnitConvCount] =
 //------------------------------------------------------------------------------
 MathParser::MathParser()
 {
+   theGmatFuncCount = 0;
 }
 
 
@@ -104,6 +117,7 @@ MathParser::MathParser()
 //------------------------------------------------------------------------------
 MathParser::MathParser(const MathParser &copy)
 {
+   theGmatFuncCount = 0;
 }
 
 
@@ -120,6 +134,8 @@ MathParser::MathParser(const MathParser &copy)
 //------------------------------------------------------------------------------
 MathParser& MathParser::operator=(const MathParser &right)
 {
+   theGmatFuncCount = 0;
+   
    if (this == &right)
       return *this;
    
@@ -142,8 +158,19 @@ MathParser::~MathParser()
 //------------------------------------------------------------------------------
 // bool IsEquation(const std::string &str)
 //------------------------------------------------------------------------------
+/*
+ * Examines if given string is an equation.
+ * Call this method with RHS of assignement.
+ *
+ * @param str The string to be examined for an equation
+ * @return  true if string is an equation, means has math operators and/or functions
+ *
+ */
+//------------------------------------------------------------------------------
 bool MathParser::IsEquation(const std::string &str)
 {
+   theEquation = str;
+   
    #if DEBUG_PARSE_EQUATION
    MessageInterface::ShowMessage
       ("MathParser::IsEquation() str=%s\n", str.c_str());
@@ -159,23 +186,30 @@ bool MathParser::IsEquation(const std::string &str)
    {
       isEq = false;
    }
-   // Check iff it is just a number
+   // Check if it is just a number
    else if (GmatStringUtil::ToReal(str, &rval))
    {
       isEq = false;
    }
-   else if (GetFunctionName(MATH_FUNCTION, str, left) != "" ||
-            GetFunctionName(MATRIX_FUNC, str, left) != "" ||
-            GetFunctionName(UNIT_CONVERSION, str, left) != "" ||
-            FindOperatorFrom(str, 0, left, right, opIndex) != "")
-   {
-      isEq = true;
-   }
    else
    {
-      // Check ' for matrix transpose and ^(-1) for inverse
-      if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
+      // build GmatFunction list first
+      BuildGmatFunctionList(str);
+      
+      if (GetFunctionName(MATH_FUNCTION, str, left) != "" ||
+          GetFunctionName(MATRIX_FUNCTION, str, left) != "" ||
+          GetFunctionName(UNIT_CONVERSION, str, left) != "" ||
+          FindOperatorFrom(str, 0, left, right, opIndex) != "" ||
+          GetFunctionName(GMAT_FUNCTION, str, left) != "")
+      {
          isEq = true;
+      }
+      else
+      {
+         // Check ' for matrix transpose and ^(-1) for inverse
+         if (str.find("'") != str.npos || str.find("^(-1)") != str.npos)
+            isEq = true;
+      }
    }
    
    #if DEBUG_PARSE_EQUATION
@@ -349,17 +383,20 @@ std::string MathParser::FindLowestOperator(const std::string &str,
 
 
 //------------------------------------------------------------------------------
-// MathNode*  Parse(const std::string &theEquation)
+// MathNode*  Parse(const std::string &str)
 //------------------------------------------------------------------------------
 /**
  * Breaks apart the text representation of an equation and uses the compoment
  * pieces to construct the MathTree.
  *
+ * @param  str  Input equation to be parsed
  * @return constructed MathTree pointer
  */
 //------------------------------------------------------------------------------
-MathNode* MathParser::Parse(const std::string &theEquation)
+MathNode* MathParser::Parse(const std::string &str)
 {
+   theEquation = str;
+   
    #if DEBUG_PARSE
    MessageInterface::ShowMessage
       ("=================================================================\n");
@@ -387,17 +424,35 @@ MathNode* MathParser::Parse(const std::string &theEquation)
       ("MathParser::Parse() newEq=%s\n", newEq.c_str());
    #endif
    
+   // build GmatFunction list first
+   BuildGmatFunctionList(newEq);
+   
    MathNode *topNode = ParseNode(newEq);
-
+   
    // Should parameters be created here?
    if (topNode)
       CreateParameter(topNode, 0);
-
+   
    #if DEBUG_PARSE
    WriteNode(topNode, 0);
    #endif
-
+   
    return topNode;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray GetGmatFunctionNames()
+//------------------------------------------------------------------------------
+StringArray MathParser::GetGmatFunctionNames()
+{
+   static StringArray gmatFuncList;
+   gmatFuncList.clear();
+   
+   for (int i=0; i<theGmatFuncCount; i++)
+      gmatFuncList.push_back(GMAT_FUNC_LIST[i]);
+   
+   return gmatFuncList;
 }
 
 
@@ -409,12 +464,12 @@ MathNode* MathParser::ParseNode(const std::string &str)
    #if DEBUG_CREATE_NODE
    MessageInterface::ShowMessage("MathParser::ParseNode() str=%s\n", str.c_str());
    #endif
-
+   
    StringArray items = Decompose(str);
    std::string op = items[0];
    std::string left = items[1];
    std::string right = items[2];
-
+   
    #if DEBUG_CREATE_NODE
    WriteItems("MathParser::ParseNode() After Decompose()", items);
    #endif
@@ -428,7 +483,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       MessageInterface::ShowMessage
          ("=====> Should create MathElement: %s\n", str.c_str());
       #endif
-
+      
       // check for surrounding parenthesis
       Integer open, close;
       bool isOuterParen;
@@ -449,7 +504,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       std::string operands = "( " + left + ", " + right + " )";
       if (right == "")
          operands = "( " + left + " )";
-
+      
       mathNode = CreateNode(op, operands);
       
       MathNode *leftNode = NULL;
@@ -462,7 +517,7 @@ MathNode* MathParser::ParseNode(const std::string &str)
       
       if (left != "")
          leftNode = ParseNode(left);
-
+      
       #if DEBUG_CREATE_NODE
       MessageInterface::ShowMessage
          ("===============> Create right node: %s\n", right.c_str());
@@ -509,18 +564,56 @@ MathNode* MathParser::CreateNode(const std::string &type, const std::string &exp
       ("MathParser::CreateNode() type=%s, exp=%s\n", type.c_str(),
        exp.c_str());
    #endif
-
+   
+   // check if type is GmatFunction
+   std::string actualType = type;
+   if (IsGmatFunction(type))
+      actualType = "FunctionRunner";
    
    #ifdef __UNIT_TEST__
    static MathFactory mf;
-   MathNode *node = mf.CreateMathNode(type, exp);
+   MathNode *node = mf.CreateMathNode(actualType, exp);
    #else
    Moderator* theModerator = Moderator::Instance();
-   MathNode *node = theModerator->CreateMathNode(type, exp);
+   MathNode *node = theModerator->CreateMathNode(actualType, exp);
    #endif
    
    if (node == NULL)
-      throw MathException("Cannot create MathNode of \"" + type + "\"");
+      throw MathException("Cannot create MathNode of \"" + actualType + "\"");
+   
+   if (actualType == "FunctionRunner")
+   {
+      FunctionRunner *fRunner = (FunctionRunner*)node;
+      fRunner->SetFunctionName(type);
+      
+      // add function input arguments
+      std::string exp1 = exp;
+      exp1 = GmatStringUtil::RemoveExtraParen(exp1);
+      StringArray inputs = GmatStringUtil::SeparateBy(exp1, ",", true);
+      for (UnsignedInt i=0; i<inputs.size(); i++)
+      {
+         #if DEBUG_CREATE_NODE > 1
+         MessageInterface::ShowMessage("   inputs[%d] = '%s'\n", i, inputs[i].c_str());
+         #endif
+         
+         if (IsGmatFunction(inputs[i]))
+            fRunner->AddFunctionInput("");
+         else
+            fRunner->AddFunctionInput(inputs[i]);
+      }
+      
+      // add function output arguments
+      fRunner->AddFunctionOutput("");
+      
+      // set function inputs and outputs to FunctionManager through FunctionRunner
+      fRunner->SetFunctionInputs();
+      fRunner->SetFunctionOutputs();
+   }
+   
+   #if DEBUG_CREATE_NODE
+   MessageInterface::ShowMessage
+      ("MathParser::CreateNode() returning node <%p>\n", node);
+   #endif
    
    return node;
 }
@@ -703,9 +796,11 @@ StringArray MathParser::ParseParenthesis(const std::string &str)
          // find math function
          op = GetFunctionName(MATH_FUNCTION, str, left);
          if (op == "")
-            op = GetFunctionName(MATRIX_FUNC, str, left);
+            op = GetFunctionName(MATRIX_FUNCTION, str, left);
          if (op == "")
             op = GetFunctionName(UNIT_CONVERSION, str, left);
+         if (op == "")
+            op = GetFunctionName(GMAT_FUNCTION, str, left);
       }
       
       // See if there is an operator before this function
@@ -1595,11 +1690,17 @@ StringArray MathParser::ParseMathFunctions(const std::string &str)
    
    // find first math function
    std::string fnName = GetFunctionName(MATH_FUNCTION, str, left);
-
+   
    if (fnName == "")
    {
-      FillItems(items, "", "", "");
-      return items;
+      // let's try GmatFunction name
+      fnName = GetFunctionName(GMAT_FUNCTION, str, left);
+      
+      if (fnName == "")
+      {
+         FillItems(items, "", "", "");
+         return items;
+      }
    }
    
    if (left == "")
@@ -1629,7 +1730,7 @@ StringArray MathParser::ParseMatrixOps(const std::string &str)
    std::string left;
    
    // find matrix function
-   std::string fnName = GetFunctionName(MATRIX_FUNC, str, left);
+   std::string fnName = GetFunctionName(MATRIX_FUNCTION, str, left);
 
    if (fnName == "")
    {
@@ -1723,7 +1824,7 @@ bool MathParser::HasFunctionName(const std::string &str, const std::string list[
       if (str == list[i])
          return true;
    }
-
+   
    // Try Capitalized function name
    for (UnsignedInt i=0; i<count; i++)
    {
@@ -1750,6 +1851,25 @@ bool MathParser::IsParenPartOfFunction(const std::string &str)
 
 
 //------------------------------------------------------------------------------
+// bool IsGmatFunction(const std::string &name)
+//------------------------------------------------------------------------------
+bool MathParser::IsGmatFunction(const std::string &name)
+{
+   // if name has open parenthesis, get it up to
+   std::string name1 = name;
+   std::string::size_type index = name1.find("(");
+   if (index != name1.npos)
+      name1 = name1.substr(0, index);
+   
+   for (int i=0; i<theGmatFuncCount; i++)
+      if (name1 == GMAT_FUNC_LIST[i])
+         return true;
+   
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
 // std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
 //                             std::string &left)
 //------------------------------------------------------------------------------
@@ -1764,7 +1884,7 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
    #endif
    
    std::string fnName = "";
-
+   
    switch (functionType)
    {
    case MATH_FUNCTION:
@@ -1772,7 +1892,7 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
          BuildFunction(str, MATH_FUNC_LIST, MathFuncCount, fnName, left);
          break;
       }
-   case MATRIX_FUNC:
+   case MATRIX_FUNCTION:
       {
          BuildFunction(str, MATRIX_FUNC_LIST, MatrixFuncCount, fnName, left);
          break;
@@ -1780,6 +1900,11 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
    case UNIT_CONVERSION:
       {
          BuildFunction(str, UNIT_CONV_LIST, UnitConvCount, fnName, left);
+         break;
+      }
+   case GMAT_FUNCTION:
+      {
+         BuildFunction(str, GMAT_FUNC_LIST, theGmatFuncCount, fnName, left);
          break;
       }
    default:
@@ -1797,6 +1922,44 @@ std::string MathParser::GetFunctionName(UnsignedInt functionType,
 
 
 //------------------------------------------------------------------------------
+// void BuildGmatFunctionList(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Builds GmatFunction list found in the GmatFunction path.
+ */
+//------------------------------------------------------------------------------
+void MathParser::BuildGmatFunctionList(const std::string &str)
+{
+   StringArray names = GmatStringUtil::GetVarNames(str);
+   FileManager *fm = FileManager::Instance();
+   theGmatFuncCount = 0;
+   
+   for (UnsignedInt i=0; i<names.size(); i++)
+   {
+      if (fm->GetGmatFunctionPath(names[i]) != "")
+      {
+         GMAT_FUNC_LIST[theGmatFuncCount++] = names[i];
+         
+         // Check for maximum number of GmatFunction allowed
+         if (theGmatFuncCount >= MAX_GMAT_FUNCTIONS)
+         {
+            MathException ex;
+            ex.SetDetails("It reached the maximum number of GmatFunction %d",
+                          MAX_GMAT_FUNCTIONS);
+            throw ex;
+         }
+      }
+   }
+   
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathParser::BuildGmatFunctionList() found %d GmatFunctions\n",
+       theGmatFuncCount);
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void BuildFunction(const std::string &str, std::string list[],
 //                     UnsignedInt count, std::string &fnName, std::string &left)
 //------------------------------------------------------------------------------
@@ -1805,13 +1968,18 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
                                std::string &left)
 {
    #if DEBUG_FUNCTION
-   MessageInterface::ShowMessage("MathParser::BuildFunction() str=%s\n", str.c_str());
+   MessageInterface::ShowMessage
+      ("MathParser::BuildFunction() str='%s', count=%d\n", str.c_str(), count);
    #endif
    
    std::string::size_type functionIndex = str.npos;
    
    for (UnsignedInt i=0; i<count; i++)
    {
+      #if DEBUG_FUNCTION > 1
+      MessageInterface::ShowMessage("   list[%d]='%s'\n", i, list[i].c_str());
+      #endif
+      
       functionIndex = str.find(list[i] + "(");
       
       // Try function name with first letter capitalized
@@ -1829,7 +1997,7 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
    {
       UnsignedInt index1 = str.find("(", functionIndex);
       UnsignedInt index2 = FindMatchingParen(str, index1);
-
+      
       #if DEBUG_FUNCTION
       MessageInterface::ShowMessage
          ("MathParser::BuildFunction() index1=%u, index2=%u\n", index1, index2);
@@ -1837,7 +2005,7 @@ void MathParser::BuildFunction(const std::string &str, const std::string list[],
       
       left = str.substr(index1+1, index2-index1-1);
    }
-
+   
    #if DEBUG_FUNCTION
    MessageInterface::ShowMessage
       ("MathParser::BuildFunction() fnName=%s, left=%s\n", fnName.c_str(), left.c_str());

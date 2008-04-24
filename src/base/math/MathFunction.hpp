@@ -43,7 +43,12 @@ protected:
 
    MathNode *leftNode;
    MathNode *rightNode;
-
+   
+//    /// Parameter IDs
+//    enum
+//    {
+//       MathFunctionParamCount = MathNodeParamCount,
+//    };
 };
 
 #endif //MathFunction_hpp

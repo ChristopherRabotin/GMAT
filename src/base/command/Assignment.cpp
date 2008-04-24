@@ -38,7 +38,7 @@
 //#define DEBUG_ASSIGNMENT_EXEC 1
 //#define DEBUG_EQUATION 1
 //#define DEBUG_ASSIGNMENT_WRAPPER 1
-
+//#define DEBUG_FUNCTION 1
 
 //------------------------------------------------------------------------------
 //  Assignment()
@@ -120,6 +120,29 @@ Assignment& Assignment::operator=(const Assignment& a)
 
 
 //------------------------------------------------------------------------------
+// MathTree* GetMathTree()
+//------------------------------------------------------------------------------
+MathTree* Assignment::GetMathTree()
+{
+   return mathTree;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetGmatFunctions()
+//------------------------------------------------------------------------------
+const StringArray& Assignment::GetGmatFunctions()
+{
+   static StringArray emptyArray;
+   
+   if (mathTree)
+      return mathTree->GetGmatFunctionNames();
+   else
+      return emptyArray;
+}
+
+
+//------------------------------------------------------------------------------
 // void SetMathWrappers()
 //------------------------------------------------------------------------------
 void Assignment::SetMathWrappers()
@@ -127,6 +150,36 @@ void Assignment::SetMathWrappers()
    // Set math Wrapper map
    if (mathTree)
       mathTree->SetMathWrappers(&mathWrapperMap);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetFunction(Function *function)
+//------------------------------------------------------------------------------
+void Assignment::SetFunction(Function *function)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Assignment::SetFunction() function=%p\n", function);
+   #endif
+   
+   if (mathTree)
+      mathTree->SetFunction(function);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("Assignment::SetFunction() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// std::vector<Function*> GetFunctions()
+//------------------------------------------------------------------------------
+std::vector<Function*> Assignment::GetFunctions() const
+{
+   std::vector<Function*> gf;
+   return gf;    // TBD - will need to ask MathTree for all the functions
+                 // referred to by FunctionRunners
 }
 
 
@@ -206,6 +259,7 @@ bool Assignment::InterpretAction()
       
       mathTree = new MathTree("MathTree", rhs);
       mathTree->SetTopNode(topNode);
+      mathTree->SetGmatFunctionNames(mp.GetGmatFunctionNames());
    }
    else // if not an equation, check for unexpected commas on the right-hand-side
    {
@@ -677,6 +731,9 @@ const StringArray& Assignment::GetWrapperObjectNameArray()
          wrapperObjectNames.insert(wrapperObjectNames.end(),
                                    tmpArray.begin(), tmpArray.end());
       
+      #ifdef DEBUG_ASSIGNMENT_WRAPPER
+      MessageInterface::ShowMessage("   Got the following from the MathTree:\n");
+      #endif
       for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
       {
          mathWrapperMap[wrapperObjectNames[i]] = NULL;

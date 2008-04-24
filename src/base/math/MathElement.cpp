@@ -675,7 +675,12 @@ const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType typ
    
    if (type == Gmat::PARAMETER || Gmat::UNKNOWN_OBJECT)
    {
-      refs.push_back(refObjectName);
+      // for FunctionRunner there may be more thatn one input argument
+      // so handle here (loj: 2008.04.24)
+      
+      StringArray names = GmatStringUtil::SeparateBy(refObjectName, ",", true);
+      refs.insert(refs.end(), names.begin(), names.end());
+      //refs.push_back(refObjectName);
       return refs;
    }
    

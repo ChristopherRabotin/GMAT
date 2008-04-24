@@ -48,10 +48,12 @@ public:
    std::string FindLowestOperator(const std::string &str, Integer &opIndex,
                                   Integer start = 0);
    
-   MathNode* Parse(const std::string &theEquation);
-
+   MathNode* Parse(const std::string &str);
+   
+   StringArray GetGmatFunctionNames();
+   
 protected:
-
+   
    MathNode* ParseNode(const std::string &str);
    MathNode* CreateNode(const std::string &type,
                         const std::string &exp);
@@ -59,7 +61,10 @@ protected:
    StringArray Decompose(const std::string &str);
    
 private:
-
+   
+   std::string theEquation;
+   Integer theGmatFuncCount;
+   
    StringArray ParseParenthesis(const std::string &str);
    StringArray ParseAddSubtract(const std::string &str);
    StringArray ParseMultDivide(const std::string &str);
@@ -68,10 +73,11 @@ private:
    StringArray ParseUnary(const std::string &str);
    StringArray ParseMathFunctions(const std::string &str);
    StringArray ParseUnitConversion(const std::string &str);
-
+   
    bool HasFunctionName(const std::string &str, const std::string list[],
                         UnsignedInt count);
    bool IsParenPartOfFunction(const std::string &str);
+   bool IsGmatFunction(const std::string &name);
    std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
                                std::string &leftStr);
    std::string FindOperatorFrom(const std::string &str, std::string::size_type start,
@@ -85,6 +91,7 @@ private:
    std::string FindOperator(const std::string &str, Integer &opIndex);
    
    std::string GetOperatorName(const std::string &op, bool &opFound);
+   void BuildGmatFunctionList(const std::string &str);
    void BuildFunction(const std::string &str, const std::string list[],
                       UnsignedInt count, std::string &fnName, std::string &leftStr);
    std::string::size_type FindMatchingParen(const std::string &str, std::string::size_type start);
@@ -98,9 +105,10 @@ private:
    enum
    {
       MATH_FUNCTION,
-      MATRIX_FUNC,
+      MATRIX_FUNCTION,
       MATRIX_OP,
       UNIT_CONVERSION,
+      GMAT_FUNCTION,
    };
    
    enum
@@ -132,10 +140,13 @@ private:
       UnitConvCount,
    };
    
+   static const Integer MAX_GMAT_FUNCTIONS = 30;
+   
    static const std::string MATH_FUNC_LIST[MathFuncCount];
    static const std::string MATRIX_FUNC_LIST[MatrixFuncCount];
    static const std::string MATRIX_OP_LIST[MatrixOpCount];
    static const std::string UNIT_CONV_LIST[UnitConvCount];
+   static       std::string GMAT_FUNC_LIST[MAX_GMAT_FUNCTIONS];
 };
 
 
