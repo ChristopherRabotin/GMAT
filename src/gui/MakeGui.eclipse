@@ -116,6 +116,7 @@ OBJECTS = \
     app/RunScriptFolderDialog.o \
     app/ResourceTree.o \
     app/ScriptPanel.o \
+    app/SetPathDialog.o \
     app/TextEphemFileDialog.o \
     burn/FiniteBurnSetupPanel.o \
     burn/ImpulsiveBurnSetupPanel.o \
@@ -150,11 +151,13 @@ OBJECTS = \
     foundation/GmatSavePanel.o \
     foundation/GmatStaticBoxSizer.o \
     foundation/GuiItemManager.o \
+    foundation/MultiPathSetupPanel.o \
     foundation/ParameterCreateDialog.o \
     foundation/ParameterSelectDialog.o \
     foundation/ParameterSetupPanel.o \
     foundation/ShowScriptDialog.o \
     foundation/ShowSummaryDialog.o \
+    foundation/SinglePathSetupPanel.o \
     function/FunctionSetupPanel.o \
     function/MatlabFunctionSetupPanel.o \
     hardware/TankConfigPanel.o \

@@ -142,7 +142,7 @@ void SetPathDialog::SaveData()
    if (mOutputPathPanel->HasDataChanged())
    {
       std::string pathName = mOutputPathPanel->GetFullPathName().c_str();
-      if (wxDir::Exists(pathName))
+      if (wxDir::Exists(pathName.c_str()))
       {
          #ifdef DEBUG_SETPATH_DIALOG
          MessageInterface::ShowMessage("   Saving Log path to '%s'\n", pathName.c_str());
@@ -153,7 +153,9 @@ void SetPathDialog::SaveData()
       }
       else
       {
-         wxMessageBox(wxT("The directory \"" + pathName + "\" does not exist.\n"),
+         wxString str;
+         str.Printf("The directory \" %s \" does not exist.\n", pathName.c_str());
+         wxMessageBox(str,
                       wxT("Directory Error"));
          
          // find page
