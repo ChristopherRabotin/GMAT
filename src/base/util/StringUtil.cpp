@@ -2455,7 +2455,7 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
 }
 
 //------------------------------------------------------------------------------
-// Integer NumberOfOccurrences(const std::string str, const char c)
+// Integer NumberOfOccurrences(const std::string &str, const char c)
 //------------------------------------------------------------------------------
 /*
  * Counts the number of occurrences of the character c in the string str.
@@ -2466,7 +2466,7 @@ bool GmatStringUtil::IsBlank(const std::string &text, bool ignoreEol)
  * @return number of occurrences of c in str
  */
 //------------------------------------------------------------------------------
-Integer GmatStringUtil::NumberOfOccurrences(const std::string str, const char c)
+Integer GmatStringUtil::NumberOfOccurrences(const std::string &str, const char c)
 {
    Integer count = 0;
    Integer strSz = (Integer) str.size();
@@ -2475,4 +2475,44 @@ Integer GmatStringUtil::NumberOfOccurrences(const std::string str, const char c)
    
    return count;
 }
+
+
+//------------------------------------------------------------------------------
+// StringArray GetVarNames(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Searchs all variable names and returns in a std::vector array.
+ *
+ * @see IsValidName() 
+ * @param  str  input string to search for names
+ * @return   item names in array
+ */
+//------------------------------------------------------------------------------
+StringArray GmatStringUtil::GetVarNames(const std::string &str)
+{
+   std::string str1 = str;
+   std::string name;
+   StringArray itemNames;
+   
+   for (UnsignedInt i=0; i<str1.size(); i++)
+   {
+      if (isalnum(str1[i]) || str1[i] == '_')
+      {
+         name = name + str1[i];
+      }
+      else
+      {
+         if (name != "")
+         {
+            // just add new names
+            if (find(itemNames.begin(), itemNames.end(), name) == itemNames.end())
+               itemNames.push_back(name);
+         }
+         name = "";
+      }
+   }
+   
+   return itemNames;
+}
+
 

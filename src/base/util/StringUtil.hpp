@@ -114,7 +114,9 @@ namespace GmatStringUtil
    bool IsValidName(const std::string &str, bool ignoreBracket = false);
    bool IsBlank(const std::string &str, bool ignoreEol = false);
    
-   Integer NumberOfOccurrences(const std::string str, const char c);
+   Integer NumberOfOccurrences(const std::string &str, const char c);
+   
+   StringArray GetVarNames(const std::string &str);
 }
 
 #endif // StringUtil_hpp
