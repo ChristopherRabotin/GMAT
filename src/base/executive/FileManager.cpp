@@ -259,8 +259,8 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    
    while (!mInStream.eof())
    {
-      // Use global function getline()
-      getline(mInStream, line);
+      // Use cross-platform GetLine
+      GmatFileUtil::GetLine(&mInStream, line);      
       
       #ifdef DEBUG_FILE_MANAGER
       MessageInterface::ShowMessage("line=%s\n", line.c_str());
@@ -942,10 +942,15 @@ std::string FileManager::GetGmatFunctionPath(const std::string &funcName)
    bool fileFound = false;   
    StringArray::iterator pos = mGmatFunctionPaths.end() - 1;
    
+   // add .gmf if not found
+   std::string funcName1 = funcName;
+   if (funcName.find(".gmf") == funcName.npos)
+      funcName1 = funcName1 + ".gmf";
+   
    while (pos != mGmatFunctionPaths.begin() - 1)
    {
       pathName = *pos;
-      fullPath = ConvertToAbsPath(pathName) + funcName;
+      fullPath = ConvertToAbsPath(pathName) + funcName1;
       
       #ifdef DEBUG_GMAT_FUNCTION
       MessageInterface::ShowMessage("   fullPath='%s'\n", fullPath.c_str());
