@@ -35,6 +35,7 @@ namespace GmatFileUtil
    std::string ParseFileExtension(const std::string &fullPath);
    bool DoesDirectoryExist(const std::string &dirPath);
    bool DoesFileExist(const std::string &filename);
+   bool GetLine(std::istream *is, std::string &line);
    StringArray GetFileListFromDirectory(const std::string &dirName,
                                         bool addPath = false);
    StringArray GetTextLines(const std::string &fileName);

@@ -265,6 +265,35 @@ bool GmatFileUtil::DoesFileExist(const std::string &filename)
 
 
 //------------------------------------------------------------------------------
+// bool GetLine(std::istream *is, std::string &line)
+//------------------------------------------------------------------------------
+/*
+ * Reads a platform independent line from the input stream.
+ *
+ * @param  is    The input stream pointer
+ * @param  line  The line read from the input stream
+ *
+ * @return  true if a line from the input stream was read successfully.
+ */
+//------------------------------------------------------------------------------
+bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
+{
+   if (is == NULL)
+      return false;
+   
+   char ch;
+   std::string result;
+   
+   while (is->get(ch) && ch != '\r' && ch != '\n' && ch != '\0' &&
+          !is->eof()) 
+      result += ch;
+   
+   line = result;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray GetFileListFromDirectory(const std::string &dirName, bool addPath)
 //------------------------------------------------------------------------------
 /*
