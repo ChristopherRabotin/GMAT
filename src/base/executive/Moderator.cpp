@@ -2672,25 +2672,32 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* InterpretGmatFunction(Function *funct)
+// GmatCommand* InterpretGmatFunction(Function *funct, StringObjectMap *objMap)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a function object pointer by given name.
  *
  * @param <funct>  The GmatFunction pointer
+ * @param <objMap> The object map pointer to be used for finding objects
  *
  * @return A command list that is executed to run the function.
  */
 //------------------------------------------------------------------------------
-GmatCommand* Moderator::InterpretGmatFunction(Function *funct)
+GmatCommand* Moderator::InterpretGmatFunction(Function *funct,
+                                              StringObjectMap *objMap)
 {
    // Set object map (loj: 2008.03.31)
    // Just set configured object until Sandbox can call this method
    // with proper object map
    
-   theScriptInterpreter->SetObjectMap(theConfigManager->GetObjectMap());   
+   StringObjectMap *objMapToUse = objMap;
+   
+   if (objMap == NULL)
+      objMapToUse = theConfigManager->GetObjectMap();
+   
+   theScriptInterpreter->SetObjectMap(objMapToUse);
    theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
-   theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());   
+   theGuiInterpreter->SetObjectMap(objMapToUse);   
    theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
    
    return theScriptInterpreter->InterpretGmatFunction(funct);

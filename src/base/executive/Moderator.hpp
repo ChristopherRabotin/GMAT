@@ -220,7 +220,8 @@ public:
    
    // GmatCommand
    GmatCommand* InterpretGmatFunction(const std::string &fileName);
-   GmatCommand* InterpretGmatFunction(Function *funct);
+   GmatCommand* InterpretGmatFunction(Function *funct,
+                                      StringObjectMap *objMap = NULL);
    GmatCommand* CreateCommand(const std::string &type,
                               const std::string &name, bool &retFlag);
    GmatCommand* CreateDefaultCommand(const std::string &type,
