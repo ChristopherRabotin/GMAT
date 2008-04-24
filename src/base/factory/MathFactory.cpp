@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              MathFactory
 //------------------------------------------------------------------------------
@@ -48,6 +48,7 @@
 #include "Subtract.hpp"
 #include "Tan.hpp"
 #include "Transpose.hpp"
+#include "FunctionRunner.hpp"      // for inline GmatFunction
 
 //#define DEBUG_MATH_FACTORY 1
 
@@ -77,7 +78,7 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
    // eg) cos, Cos, add, Add.
    
    std::string newType = GmatStringUtil::Capitalize(ofType);
-
+   
    #if DEBUG_MATH_FACTORY
    MessageInterface::ShowMessage
       ("MathFactory::CreateMathNode() ofType=%s, newType=%s, withName=%s\n",
@@ -145,7 +146,9 @@ MathNode* MathFactory::CreateMathNode(const std::string &ofType,
       mathNode = new DegToRad(withName);
    else if (newType == "RadToDeg")
       mathNode = new RadToDeg(withName);
-
+   
+   else if (newType == "FunctionRunner")
+      mathNode = new FunctionRunner(withName);
    
    return mathNode;
 }
@@ -286,5 +289,7 @@ void MathFactory::BuildCreatables()
    creatables.push_back("degToRad");  
    creatables.push_back("radToDeg");
    
+   // GmatFunction
+   creatables.push_back("FunctionRunner");  
 }
 
