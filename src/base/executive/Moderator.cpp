@@ -2413,7 +2413,8 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
 
 // Function
 //------------------------------------------------------------------------------
-// Function* CreateFunction(const std::string &type, const std::string &name)
+// Function* CreateFunction(const std::string &type, const std::string &name,
+//                          bool manage = true)
 //------------------------------------------------------------------------------
 /**
  * Creates a function object by given type and name.
@@ -2425,7 +2426,8 @@ Subscriber* Moderator::GetSubscriber(const std::string &name)
  */
 //------------------------------------------------------------------------------
 Function* Moderator::CreateFunction(const std::string &type,
-                                    const std::string &name)
+                                    const std::string &name,
+                                    bool manage)
 {
    #if DEBUG_CREATE_RESOURCE
    MessageInterface::ShowMessage
@@ -2453,7 +2455,7 @@ Function* Moderator::CreateFunction(const std::string &type,
       // Manage it if it is a named function
       try
       {
-         if (function->GetName() != "")
+         if ((function->GetName() != "") && manage)
             theConfigManager->AddFunction(function);
       }
       catch (BaseException &e)

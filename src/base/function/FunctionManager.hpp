@@ -61,6 +61,8 @@ public:
    virtual std::string  GetFunctionName() const;
    virtual void         SetFunction(Function *theFunction);
    virtual Function*    GetFunction() const;
+   virtual void         AddInput(const std::string &withName, Integer atIndex = -999);
+   virtual void         AddOutput(const std::string &withName, Integer atIndex = -999);
    virtual void         SetInputs(const StringArray &inputs);
    virtual void         SetOutputs(const StringArray &outputs);
    
@@ -88,9 +90,9 @@ protected:
    /// the function that this FunctionManager manages
    Function             *f;
    /// the list of input strings for this call of the function
-   StringArray          in;
+   StringArray          ins;
    /// the list of output strings for this call of the function
-   StringArray          out;
+   StringArray          outs;
    /// flag indicating whether or not its the first execution
    bool                 firstExecution;
    /// Output Objects

@@ -36,6 +36,7 @@
 #include "CoordinateSystem.hpp"
 //  #include "Solver.hpp"
 #include "Burn.hpp"
+#include "GmatFunction.hpp"
 
 
 //#define DEBUG_SANDBOX_CLONING
@@ -82,8 +83,10 @@ private:
     
    /// Object store for this run
    std::map<std::string, GmatBase *> objectMap;
-   /// GLobal object store for this run
+   /// Global object store for this run
    std::map<std::string, GmatBase *> globalObjectMap;
+   /// Combined object store for passing to interpreter (via Moderator)
+   std::map<std::string, GmatBase *> combinedObjectMap;
    /// Solar System model for this Sandbox
    SolarSystem                       *solarSys;
    /// CoordinateSystem used internally
@@ -125,6 +128,9 @@ private:
    GmatBase*                         FindObject(const std::string &name);
    bool                              SetObjectByNameInMap(const std::string &name,
                                                           GmatBase *obj);
+   
+   bool                              HandleGmatFunction(GmatCommand *cmd,
+                                        std::map<std::string, GmatBase *> *usingMap);
    
    #ifdef DEBUG_SANDBOX_CLONING
       std::vector<Gmat::ObjectType>  clonable;

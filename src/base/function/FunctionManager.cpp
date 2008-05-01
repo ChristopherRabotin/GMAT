@@ -74,8 +74,8 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    forces              (fm.forces),
    fName               (fm.fName),
    f                   (NULL),  // is that right?
-   in                  (fm.in),
-   out                 (fm.out),
+   ins                 (fm.ins),
+   outs                (fm.outs),
    firstExecution      (true),
    outObjects          (fm.outObjects) // is that right?
 {
@@ -103,8 +103,8 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       forces              = fm.forces;
       fName               = fm.fName;
       f                   = NULL;  // is that right?
-      in                  = fm.in;
-      out                 = fm.out;
+      ins                 = fm.ins;
+      outs                = fm.outs;
       firstExecution      = true;
       outObjects          = fm.outObjects; // is that right?
    }
@@ -132,31 +132,65 @@ void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> &tf)
 void FunctionManager::SetFunctionName(const std::string &itsName)
 {
    fName = itsName;
+   if ((f) && (f->GetTypeName() == "GmatFunction"))   
+      f->SetStringParameter("FunctionName", itsName);
 }
 
 std::string FunctionManager::GetFunctionName() const
 {
+   if (f)   
+      return f->GetStringParameter("FunctionName");
    return fName;
 }
 
 void FunctionManager::SetFunction(Function *theFunction)
 {
    f = theFunction;
+   // need to check to see if it's a GmatFunction here?  why?
 }
 
 Function* FunctionManager::GetFunction() const
 {
    return f;
 }
+void FunctionManager::AddInput(const std::string &withName, Integer atIndex)
+{
+   // -999 means to put it at the end of the list (default value/behavior)
+   if ((atIndex == -999) || (atIndex == (Integer) ins.size()))
+   {
+      ins.push_back(withName);
+      return;
+   }
+   
+   if ((atIndex < 0) || (atIndex > (Integer) ins.size()))
+      throw FunctionException("FunctionManager:: input index out of range - unable to set.\n");
+   // replace an entry
+   ins.at(atIndex) = withName;   
+}
+
+void FunctionManager::AddOutput(const std::string &withName, Integer atIndex)
+{
+   // -999 means to put it at the end of the list (default value/behavior)
+   if ((atIndex == -999) || (atIndex == (Integer) outs.size()))
+   {
+      outs.push_back(withName);
+      return;
+   }
+   
+   if ((atIndex < 0) || (atIndex > (Integer) outs.size()))
+      throw FunctionException("FunctionManager:: input index out of range - unable to set.\n");
+   // replace an entry
+   outs.at(atIndex) = withName;   
+}
 
 void FunctionManager::SetInputs(const StringArray &inputs)
 {
-   in = inputs;
+   ins = inputs;
 }
 
 void FunctionManager::SetOutputs(const StringArray &outputs)
 {
-   out = outputs;
+   outs = outputs;
 }
 
 // Sequence methods
@@ -169,8 +203,19 @@ bool FunctionManager::Execute()
       errMsg += fName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
+   if (firstExecution)
+   {
+      // do a bunch of stuff here to set up FOS, etc.
+      if (!(f->Initialize()))
+      {
+         std::string errMsg = "FunctionManager:: Error initializing function \"";
+         errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+         throw FunctionException(errMsg);
+      }
+      firstExecution = false;
+   }
+   // do some stuff here to re-setup stuff
    return f->Execute();
-   return true;  // TBD
 }
 
 Real FunctionManager::Evaluate()

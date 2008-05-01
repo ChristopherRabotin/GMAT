@@ -198,7 +198,8 @@ public:
    
    // Function
    Function* CreateFunction(const std::string &type,
-                            const std::string &name);
+                            const std::string &name,
+                            bool manage = true);
    Function* GetFunction(const std::string &name);
    
    //----- Non-Configurable Items

@@ -119,6 +119,49 @@ Function& Function::operator=(const Function &f)
    return *this;
 }
 
+bool Function::Initialize()
+{
+   return true;  // TBD
+}
+
+bool Function::Execute()
+{
+   return true;  // TBD
+}
+
+Real Function::Evaluate()
+{
+   Real r = 999.999;
+   return r;  // TBD
+}
+
+Rmatrix Function::MatrixEvaluate()
+{
+   Rmatrix rmat;
+   return rmat;  // TBD
+}
+
+void Function::SetSolarSystem(SolarSystem *ss)
+{
+   solarSys = ss;
+}
+
+void Function::SetTransientForces(std::vector<PhysicalModel*> &tf)
+{
+   forces = tf;
+}
+
+bool Function::IsFunctionControlSequenceSet()
+{
+   if (fcs) return true;
+   return false;
+}
+
+bool Function::SetFunctionControlSequence(GmatCommand *cmd)
+{
+   fcs = cmd;
+   return true;
+}
 
 //------------------------------------------------------------------------------
 // virtual bool TakeAction(const std::string &action,
@@ -452,4 +495,11 @@ bool Function::SetStringParameter(const std::string &label,
 {
    return SetStringParameter(GetParameterID(label), value);
 }
+
+//bool Function::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                            const std::string &name);
+//{
+//   if (type == Gmat::FUNCTION)
+//      
+//}
 

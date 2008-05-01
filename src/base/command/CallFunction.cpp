@@ -240,6 +240,29 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
    return GmatCommand::GetGeneratingString(mode, prefix, useName);
 }
 
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the global asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   GmatCommand::SetGlobalObjectMap(map);
+   // Now, find the function object
+   GmatBase *mapObj;
+   if ((mapObj = FindObject(mFunctionName))  == NULL)
+      //throw CommandException("CallFunction command cannot find Function " +
+      //         mFunctionName + "\n");
+      ; // leave NULL for now
+   mFunction = (Function *)mapObj;
+   fm.SetFunction(mFunction);   
+}
+
+
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string &str) const
@@ -304,7 +327,8 @@ std::string CallFunction::GetStringParameter(const Integer id) const
    switch (id)
    {
    case FUNCTION_NAME:
-      return mFunctionName;
+      return fm.GetFunctionName();
+      //return mFunctionName;
    default:
       return GmatCommand::GetStringParameter(id);
    }
@@ -333,6 +357,7 @@ bool CallFunction::SetStringParameter(const Integer id, const std::string &value
    {
    case FUNCTION_NAME:
       mFunctionName = value;
+      fm.SetFunctionName(value);
       return true;
    case ADD_INPUT:
       return AddInputParameter(value, mNumInputParams);
@@ -664,7 +689,7 @@ bool CallFunction::Initialize()
    #endif
 
    GmatCommand::Initialize();
-   
+
    #ifdef DEBUG_CALL_FUNCTION_INIT
    std::map<std::string, GmatBase*>::iterator pos;
    GmatBase *obj;
@@ -684,16 +709,21 @@ bool CallFunction::Initialize()
    }
    #endif
    
-   GmatBase *mapObj;
-   if ((mapObj = FindObject(mFunctionName))  == NULL)
-      throw CommandException("CallFunction command cannot find Function " +
-               mFunctionName + "\n");
-   mFunction = (Function *)mapObj;
+   //GmatBase *mapObj;  // 2008.04.28 - wcs - already found when globalObjectMap set
+   //if ((mapObj = FindObject(mFunctionName))  == NULL)
+   //   throw CommandException("CallFunction command cannot find Function " +
+   //            mFunctionName + "\n");
+   //mFunction = (Function *)mapObj;
+   //fm->SetFunction(mFunction);   
 
    
-   // need to initialize input parameters
-   mInputList.clear();
+   bool rv = true;  // Initialization return value
    
+   if (mFunction->GetTypeName() != "GmatFunction")
+   {
+  // need to initialize input parameters
+   mInputList.clear();
+   GmatBase *mapObj;
    for (StringArray::iterator i = mInputListNames.begin(); i != mInputListNames.end(); ++i)
    {
       if ((mapObj = FindObject(*i))  == NULL)
@@ -747,17 +777,15 @@ bool CallFunction::Initialize()
           return false;
       }
    
-   
-   bool rv = true;  // Initialization return value
-   
+   }
    // Handle additional initialization for GmatFunctions
    if (mFunction->GetTypeName() == "GmatFunction")
    {
       #ifdef DEBUG_GMAT_FUNCTION_INIT
-         MessageInterface::ShowMessage("Initializing GmatFunction '%s'\n",
+         MessageInterface::ShowMessage("CallFunction::Initialize: Initializing GmatFunction '%s'\n",
             mFunction->GetName().c_str());
       #endif
-         
+      /*   
       if (callcmds == NULL)
          throw CommandException(
             "Error initializing the function call for this command:\n" +
@@ -782,8 +810,10 @@ bool CallFunction::Initialize()
          callcmds->SetStringParameter("CallFunctionOutput", *i);
       
       rv = callcmds->Initialize();
+      */
+      
    }
-   
+
    return rv;
 }
 
@@ -848,7 +878,7 @@ bool CallFunction::Execute()
       
    if (mFunction->GetTypeName() == "GmatFunction")
    {
-      bool rv = true;  // Initialization return value
+      status = fm.Execute();
       
       // There are still 2 things to do here, but let's get this working first:
       //
@@ -856,7 +886,8 @@ bool CallFunction::Execute()
       //     in the GmatFunction.
       // 2.  Add code so that GmatFunctions can nest -- right now, we'll break
       //     when the first EndFunction is encountered.
-      
+      /*
+      bool rv = true;
       GmatCommand *current = callcmds;
       while (current->GetTypeName() != "EndFunction")
       {
@@ -898,7 +929,9 @@ bool CallFunction::Execute()
          ++memberNum;
       }
       status = true;
+   */   
    }
+
 
 
    #ifdef DEBUG_CALL_FUNCTION

@@ -25,6 +25,7 @@
 
 #include "GmatCommand.hpp"
 #include "Function.hpp"
+#include "FunctionManager.hpp"
 
 
 #include "Parameter.hpp"
@@ -52,6 +53,8 @@ public:
                        GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix = "",
                                            const std::string &useName = "");
+   // override this to find Function object and set on FunctionManager
+   virtual void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
 
 
    virtual bool TakeAction(const std::string &action,
@@ -132,6 +135,9 @@ private:
 
    /// CoordinateSystem used internally
    CoordinateSystem *internalCoordSys;
+   
+   /// the manager for the Function
+   FunctionManager fm;
 
    bool ExecuteMatlabFunction();
    void SendInParam(Parameter *param);

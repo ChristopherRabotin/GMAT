@@ -22,6 +22,8 @@
 #include "GmatBase.hpp"
 #include "FunctionException.hpp"
 #include "ElementWrapper.hpp"
+#include "PhysicalModel.hpp"
+#include "GmatCommand.hpp"
 #include <map>
 
 /**
@@ -34,6 +36,15 @@ public:
    virtual ~Function();
    Function(const Function &f);
    Function&                   operator=(const Function &f);
+   
+   virtual bool         Initialize();
+   virtual bool         Execute();
+   virtual Real         Evaluate();
+   virtual Rmatrix      MatrixEvaluate();
+   virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> &tf);
+   virtual bool         IsFunctionControlSequenceSet();
+   virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
@@ -57,8 +68,12 @@ public:
                                            const std::string &value);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
+   
+//   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                                     const std::string &name = "");
+
 protected:
-   /// Path for function script
+   /// Fully-qualified path for function script
    std::string functionPath;
    /// Function name
    std::string functionName;
@@ -70,7 +85,15 @@ protected:
    std::map<std::string, ElementWrapper*> inputArgMap;
    /// Function output name element wrapper map
    std::map<std::string, ElementWrapper*> outputArgMap;
-   
+
+   /// Solar System, set by the local Sandbox, to pass to the function
+   SolarSystem          *solarSys;
+   /// transient forces to pass to the function
+   std::vector<PhysicalModel *> 
+                        forces;
+   /// the function control sequence
+   GmatCommand          *fcs;
+
    enum
    {
       FUNCTION_PATH = GmatBaseParamCount,
