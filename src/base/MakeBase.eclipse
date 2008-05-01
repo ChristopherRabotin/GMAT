@@ -214,8 +214,9 @@ OBJECTS = \
     foundation/GmatBaseException.o \
     foundation/GmatBase.o \
     foundation/SpacePoint.o \
-    function/FunctionException.o \
     function/Function.o \
+    function/FunctionException.o \
+    function/FunctionManager.o \
     function/GmatFunction.o \
     function/MatlabFunction.o \
     interface/InterfaceException.o \
@@ -232,6 +233,7 @@ OBJECTS = \
     interpreter/ScriptInterpreter.o \
     interpreter/ScriptReadWriter.o \
     interpreter/TextParser.o \
+    interpreter/Validator.o \
     math/Abs.o \
     math/Acos.o \
     math/Acosh.o \
@@ -246,6 +248,7 @@ OBJECTS = \
     math/Determinant.o \
     math/Divide.o \
     math/Exp.o \
+    math/FunctionRunner.o \
     math/Log.o \
     math/Log10.o \
     math/Inverse.o \
