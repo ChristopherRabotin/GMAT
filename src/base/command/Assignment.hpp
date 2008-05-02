@@ -39,7 +39,7 @@ public:
    Assignment&          operator=(const Assignment& a);
    
    MathTree*            GetMathTree();
-   const StringArray&   GetGmatFunctions();
+   const StringArray&   GetGmatFunctionNames();
    void                 SetMathWrappers();
    
    std::string          GetLHS() { return lhs; }

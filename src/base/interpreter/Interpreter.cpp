@@ -1002,7 +1002,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             #endif
             
             Assignment *equation = (Assignment*)cmd;
-            StringArray gmatFuns = equation->GetGmatFunctions();
+            StringArray gmatFuns = equation->GetGmatFunctionNames();
             
             #ifdef DEBUG_CREATE_COMMAND
             MessageInterface::ShowMessage("   Found %d GmatFunctions\n", gmatFuns.size());

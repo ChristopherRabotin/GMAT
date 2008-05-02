@@ -55,6 +55,8 @@ Assignment::Assignment  () :
 {
    lhsWrapper = NULL;
    rhsWrapper = NULL;
+   objectTypeNames.push_back("GMAT");
+   objectTypeNames.push_back("Assignment");
 }
 
 
@@ -129,9 +131,9 @@ MathTree* Assignment::GetMathTree()
 
 
 //------------------------------------------------------------------------------
-// const StringArray& GetGmatFunctions()
+// const StringArray& GetGmatFunctionNames()
 //------------------------------------------------------------------------------
-const StringArray& Assignment::GetGmatFunctions()
+const StringArray& Assignment::GetGmatFunctionNames()
 {
    static StringArray emptyArray;
    
