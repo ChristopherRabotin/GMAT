@@ -21,6 +21,8 @@
 
 #include "BranchCommand.hpp"
 #include "MessageInterface.hpp"
+#include "CallFunction.hpp"
+#include "Assignment.hpp"
 #include <sstream>              // for stringstream
 
 //#define DEBUG_BRANCHCOMMAND_DEALLOCATION
@@ -32,6 +34,7 @@
 //#define DEBUG_BRANCHCOMMAND_EXECUTION
 //#define DEBUG_BRANCHCOMMAND_GEN_STRING
 //#define DEBUG_RUN_COMPLETE 1
+//#define DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
 
 //------------------------------------------------------------------------------
 // public methods
@@ -1228,5 +1231,48 @@ void BranchCommand::SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
       
       cmd->ForceSetPrevious(prev);
    }
+}
+
+const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
+{
+   #ifdef DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
+      MessageInterface::ShowMessage("Entering BranchCommand::GetCommandsWithGmatFunctions\n");
+   #endif
+   cmdsWithFunctions.clear();
+   std::vector<GmatCommand*> tmpArray;
+   
+   GmatCommand *brCmd, *subCmd;;
+   for (unsigned int ii = 0; ii < branch.size(); ii++)
+   {
+      brCmd = branch.at(ii);
+      subCmd = brCmd;
+      while ((subCmd != NULL) && (subCmd != this))
+      {
+         #ifdef DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
+            MessageInterface::ShowMessage(
+                  "--- checking a Command of type %s with name %s\n",
+                  (subCmd->GetTypeName()).c_str(), (subCmd->GetName()).c_str());
+         #endif
+         tmpArray.clear();
+         if(subCmd->IsOfType("BranchCommand"))  
+         {
+            tmpArray = ((BranchCommand*)subCmd)->GetCommandsWithGmatFunctions();
+         }
+         else if ((subCmd->GetTypeName() == "CallFunction") ||
+                  (subCmd->GetTypeName() == "Assignment"))
+         {
+            #ifdef DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
+               MessageInterface::ShowMessage(
+                     "--- ADDING a Command of type %s with name %s to the list\n",
+                     (subCmd->GetTypeName()).c_str(), (subCmd->GetName()).c_str());
+            #endif
+            tmpArray.push_back(subCmd);
+         }
+         for (unsigned int jj= 0; jj < tmpArray.size(); jj++)
+            cmdsWithFunctions.push_back(tmpArray.at(jj));
+         subCmd = subCmd->GetNext();
+      }
+   }
+   return cmdsWithFunctions;
 }
 

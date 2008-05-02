@@ -68,6 +68,10 @@ public:
                                       const std::string &actionData = "");
    virtual bool            Execute();
    virtual void            RunComplete();
+   // method to handle GmatFunctions
+   const std::vector<GmatCommand*>
+                           GetCommandsWithGmatFunctions();
+
 
 protected:
       
@@ -95,6 +99,9 @@ protected:
    Integer                 nestLevel;
    /// Currently executing member of the branch.  NULL if branch not executing.
    GmatCommand             *current;
+   
+   std::vector<GmatCommand*>             
+                           cmdsWithFunctions;
    
    bool  ShiftBranches(GmatCommand *startWith, Integer ofBranchNumber);
    void  SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev, bool skipBranchEnd);
