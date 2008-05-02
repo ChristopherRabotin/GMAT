@@ -74,6 +74,7 @@ CallFunction::CallFunction() :
    mNumOutputParams = 0;
 
    parameterCount = CallFunctionParamCount;
+   objectTypeNames.push_back("CallFunction");
 }
 
 
@@ -350,7 +351,8 @@ std::string CallFunction::GetStringParameter(const std::string &label) const
 bool CallFunction::SetStringParameter(const Integer id, const std::string &value)
 {
    #ifdef DEBUG_CALL_FUNCTION
-      MessageInterface::ShowMessage("CallFunction::SetStringParameter\n");
+      MessageInterface::ShowMessage("CallFunction::SetStringParameter with id = %d and value = %s\n",
+            id, value.c_str());
    #endif
 
    switch (id)
@@ -633,8 +635,12 @@ bool CallFunction::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       
    case Gmat::FUNCTION:
-      mFunction = (Function *)obj;
-      mFunctionName = name;
+      if (name == mFunctionName)
+      {
+         mFunction = (Function *)obj;
+         fm.SetFunction(mFunction);
+      }
+      //mFunctionName = name;
       return true;
       
    case Gmat::COMMAND:
