@@ -131,21 +131,36 @@ void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> &tf)
 
 void FunctionManager::SetFunctionName(const std::string &itsName)
 {
+   #ifdef DEBUG_FUNCTION_MANAGER
+      MessageInterface::ShowMessage("entering FM::SetFunctionName with name = %s\n", itsName.c_str());
+   #endif
    fName = itsName;
-   if ((f) && (f->GetTypeName() == "GmatFunction"))   
+   if ((f) && (f->GetTypeName() == "GmatFunction"))  
+   {
+      #ifdef DEBUG_FUNCTION_MANAGER
+         MessageInterface::ShowMessage(" ... and setting name to %s on the function\n", itsName.c_str());
+      #endif
       f->SetStringParameter("FunctionName", itsName);
+   }
 }
 
 std::string FunctionManager::GetFunctionName() const
 {
    if (f)   
-      return f->GetStringParameter("FunctionName");
+   {
+      std::string theFunctionName = f->GetStringParameter("FunctionName");
+      #ifdef DEBUG_FUNCTION_MANAGER
+         MessageInterface::ShowMessage(" ... and getting name of %s from the function\n", theFunctionName.c_str());
+      #endif
+      //return f->GetStringParameter("FunctionName");
+   }
    return fName;
 }
 
 void FunctionManager::SetFunction(Function *theFunction)
 {
    f = theFunction;
+   f->SetStringParameter("FunctionName", fName);
    // need to check to see if it's a GmatFunction here?  why?
 }
 
