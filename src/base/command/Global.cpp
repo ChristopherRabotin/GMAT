@@ -146,6 +146,9 @@ bool Global::Initialize()
 //---------------------------------------------------------------------------
 bool Global::Execute()
 {
+   #ifdef DEBUG_GLOBAL
+      MessageInterface::ShowMessage("Global::Execute() entered\n");
+   #endif
    bool isOK = true;
    Integer sz = objectNames.size();
    for (Integer ii=0; ii<sz; ii++)

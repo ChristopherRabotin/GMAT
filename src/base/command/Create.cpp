@@ -225,7 +225,8 @@ GmatBase* Create::Clone() const
 bool Create::Initialize()
 {
    #ifdef DEBUG_CREATE
-      MessageInterface::ShowMessage("Create::Initialize() entered\n");
+      MessageInterface::ShowMessage("Create::Initialize() entered, for object type %s\n",
+            objType.c_str());
    #endif
       
    ManageObject::Initialize();
@@ -287,9 +288,18 @@ bool Create::Initialize()
 //---------------------------------------------------------------------------
 bool Create::Execute()
 {
+   #ifdef DEBUG_CREATE
+      MessageInterface::ShowMessage("Create::Execute() entered, for object type %s\n",
+            objType.c_str());
+   #endif
    bool isOK = true;
    StringArray useThese = objectNames;
    if (objType == "Array")  useThese = arrayNames;
+   #ifdef DEBUG_CREATE
+      MessageInterface::ShowMessage("Create::Execute() executing for objects:\n");
+      for (unsigned int ii = 0; ii < useThese.size(); ii++)
+         MessageInterface::ShowMessage(" ........ %s\n", (useThese.at(ii)).c_str());
+   #endif
    
    // If the type is Array, use the names without the indices
 

@@ -335,6 +335,10 @@ bool ManageObject::Initialize()
 //---------------------------------------------------------------------------
 bool ManageObject::MakeGlobal(const std::string &objName)
 {
+   #ifdef DEBUG_MANAGE_OBJECT
+      MessageInterface::ShowMessage("ManageObject::MakeGlobal() entered with objName = %s\n",
+            objName.c_str());
+   #endif
    // Check to see if the object is already in the LOS
    GmatBase *mapObj = NULL;
    bool isInLOS = false;
@@ -354,6 +358,10 @@ bool ManageObject::MakeGlobal(const std::string &objName)
       mapObj = (*objectMap)[objName];
       objectMap->erase(objName);
       globalObjectMap->insert(std::make_pair(objName,mapObj));
+      #ifdef DEBUG_MANAGE_OBJECT
+         MessageInterface::ShowMessage("ManageObject::MakeGlobal() objName %s inserted into GOS\n",
+               objName.c_str());
+      #endif
       mapObj->SetIsGlobal(true);
    }
    else
