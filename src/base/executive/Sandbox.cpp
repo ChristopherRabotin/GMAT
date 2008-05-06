@@ -44,7 +44,7 @@
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 //#define DEBUG_MODERATOR_CALLBACK
 //#define DEBUG_FM_INITIALIZATION
-//#define DEBUG_SANDBOX_GMATFUNCTION
+#define DEBUG_SANDBOX_GMATFUNCTION
 
 #ifdef DEBUG_SANDBOX_INIT
       std::map<std::string, GmatBase *>::iterator omIter;
@@ -766,7 +766,7 @@ bool Sandbox::Initialize()
 
       // Handle GmatFunctions
       if ((current->GetTypeName() == "CallFunction") ||
-          (current->GetTypeName() == "Assignment"))
+          (current->IsOfType("Assignment")))
       {
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
             MessageInterface::ShowMessage(
@@ -1750,7 +1750,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
       std::string cfName = cmd->GetStringParameter("FunctionName");
       gfList.push_back(cfName);
    }
-   else if (cmd->GetTypeName() == "Assignment")  
+   else if (cmd->IsOfType("Assignment"))  
    {
       gfList = ((Assignment*) cmd)->GetGmatFunctionNames();
    }
@@ -1771,7 +1771,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
          globalObjectMap.insert(std::make_pair(fName,f));
          if (cmd->GetTypeName() == "CallFunction")  
             ((CallFunction*)cmd)->SetRefObject(f,Gmat::FUNCTION,fName);
-         else if (cmd->GetTypeName() == "Assignment")
+         else if (cmd->IsOfType("Assignment"))
             ((Assignment*) cmd)->SetFunction(f);
       }
       f = (Function*) globalObjectMap[fName];
@@ -1797,7 +1797,7 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
          while (fcsCmd)
          {
             if ((fcsCmd->GetTypeName() == "CallFunction") ||
-                (fcsCmd->GetTypeName() == "Assignment"))
+                (fcsCmd->IsOfType("Assignment")))
             {
                #ifdef DEBUG_SANDBOX_GMATFUNCTION
                   MessageInterface::ShowMessage(
