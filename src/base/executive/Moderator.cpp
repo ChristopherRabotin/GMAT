@@ -58,6 +58,7 @@
 //#define DEBUG_RUN 1
 //#define DEBUG_CREATE_COORDSYS 1
 //#define DEBUG_CREATE_RESOURCE 1
+//#define DEBUG_CREATE_PARAMETER 1
 //#define DEBUG_DEFAULT_COMMAND 1
 //#define DEBUG_COMMAND_APPEND 1
 //#define DEBUG_COMMAND_DELETE 1
@@ -69,6 +70,7 @@
 //#define DEBUG_SEQUENCE_CLEARING 1
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CREATE_VAR 1
+//#define DEBUG_GMAT_FUNCTION 1
 
 //#define __CREATE_DEFAULT_BC__
 //#define __SHOW_FINAL_STATE__
@@ -818,9 +820,11 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   #if DEBUG_CONFIG
-   MessageInterface::ShowMessage("Moderator::ConfigurationChanged() called\n");
-   #endif
+   //#if DEBUG_CONFIG
+   MessageInterface::ShowMessage
+      ("Moderator::ConfigurationChanged() obj type=%s, name='%s', changed=%d\n",
+       obj->GetTypeName().c_str(), obj->GetName().c_str(), tf);
+   //#endif
    
    if (obj != NULL)
    {
@@ -1726,165 +1730,180 @@ Parameter* Moderator::CreateParameter(const std::string &type,
                                       const std::string &depName,
                                       bool manage)
 {
-   #if DEBUG_CREATE_RESOURCE
+   #if DEBUG_CREATE_PARAMETER
    MessageInterface::ShowMessage
       ("Moderator::CreateParameter() type='%s', name='%s', ownerName='%s', "
-       "depName='%s'\n", type.c_str(), name.c_str(), ownerName.c_str(),
-       depName.c_str());
+       "depName='%s', manage=%d\n", type.c_str(), name.c_str(), ownerName.c_str(),
+       depName.c_str(), manage);
    #endif
    
-   // if Parameter name doesn't exist, create Parameter
-   if (GetParameter(name) == NULL)
+   // if managing and Parameter already exist, give warning and return existing
+   // Parameter
+   Parameter *param = GetParameter(name);
+   #if DEBUG_CREATE_PARAMETER
+   MessageInterface::ShowMessage
+      ("   cfg param = <%p><%s>\n", param, param ? param->GetName().c_str() : "NULL");
+   #endif
+   
+   if (param != NULL && manage)
    {
-      Parameter *param = theFactoryManager->CreateParameter(type, name);
-      
-      #if DEBUG_CREATE_RESOURCE
-      if (param == NULL)
-         MessageInterface::ShowMessage("   param = (NULL)\n");
-      else
-         MessageInterface::ShowMessage
-            ("   param = (%p)%s\n", param, param->GetName().c_str());
-      #endif
-      
-      if (param == NULL)
-      {
-         throw GmatBaseException
-           ("The Moderator cannot create a Parameter type \"" + type +
-            "\" named \"" + name + "\"\n");
-      }
-      
-      // We don't know the owner type the parameter before create,
-      // so validate owner type after create.
-      if (ownerName != "")
-      {
-         GmatBase *obj = GetConfiguredObject(ownerName);
-         if (obj)
-         {
-            //MessageInterface::ShowMessage
-            //   ("===> Moderator::CreateParameter() obj=%s, addr=%p\n",
-            //    obj->GetName().c_str(), obj);
-            
-            if (param->GetOwnerType() != obj->GetType())
-            {
-               std::string paramOwnerType =
-                  GmatBase::GetObjectTypeString(param->GetOwnerType());
-               delete param;
-               param = NULL;
-               
-               if (paramOwnerType == "")
-                  throw GmatBaseException
-                     ("Cannot find the object type which has \"" + type +
-                      "\" as a Parameter type");
-               else
-                  throw GmatBaseException
-                     ("Parameter type: " + type + " should be property of " +
-                      paramOwnerType);
-            }
-         }
-      }
-      
-      // If type is Variable, don't set expression
-      if (type != "Variable")
-         param->SetStringParameter("Expression", name);
-      
-      // Set parameter owner and dependent object
-      if (ownerName != "")
-      {
-         param->SetRefObjectName(param->GetOwnerType(), ownerName);
-         param->AddRefObject(GetConfiguredObject(ownerName));
-      }
-      
-      // Set dependent object name
-      if (depName != "")
-         param->SetStringParameter("DepObject", depName);
-      
-      // Set SolarSystem
-      param->SetSolarSystem(theSolarSystemInUse);
-      param->SetInternalCoordSystem(theInternalCoordSystem);
-      
-      if (depName != "")
-         if (param->NeedCoordSystem())
-            param->AddRefObject(GetConfiguredObject(depName));
-      
-      // create parameter dependent coordinate system
-      if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
-          type == "MHA" || type == "LST")
-      {
-         // need body-fixed CS
-         StringTokenizer st(name, ".");
-         StringArray tokens = st.GetAllTokens();
-         
-         if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
-         {
-            //MessageInterface::ShowMessage("==> Create EarthFixed\n");
-            
-            // default EarthFixed
-            CreateCoordinateSystem("EarthFixed");
-            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
-         }
-         else if (tokens.size() == 3)
-         {
-            std::string origin = tokens[1];
-            std::string axisName = origin + "Fixed";
-            
-            //MessageInterface::ShowMessage("==> Create %s\n", axisName.c_str());
-            
-            CoordinateSystem *cs = CreateCoordinateSystem(axisName);
-            
-            // create BodyFixedAxis with origin
-            AxisSystem *axis = CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
-            cs->SetStringParameter("Origin", origin);
-            cs->SetRefObject(GetConfiguredObject(origin), Gmat::SPACE_POINT, origin);
-            cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-            cs->SetStringParameter("J2000Body", "Earth");
-            cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
-            cs->SetSolarSystem(theSolarSystemInUse);
-            cs->Initialize();
-            
-            param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
-         }
-         else
-         {
-            MessageInterface::ShowMessage("===> Invalid parameter name: %s\n",
-                                          name.c_str());
-         }
-      }
-      
-      // Manage it if manage flag is true and it is a named parameter
-      try
-      {
-         // check if object is to be managed (loj: 2008.03.18)
-         if (manage)
-         {
-            bool oldFlag = theConfigManager->HasConfigurationChanged();
-            
-            if (param->GetName() != "")
-               theConfigManager->AddParameter(param);
-            
-            // if system paramter, set configuration changed to old flag.
-            if (param->GetKey() == GmatParam::SYSTEM_PARAM)
-               theConfigManager->ConfigurationChanged(oldFlag);
-         }
-      }
-      catch (BaseException &e)
-      {
-         #if DEBUG_CREATE_RESOURCE
-         MessageInterface::ShowMessage("In Moderator::CreateParameter()\n" +
-                                       e.GetFullMessage() + "\n");
-         #endif
-      }
-      
-      return param;
-   }
-   else
-   {
-      #if DEBUG_CREATE_RESOURCE
+      #if DEBUG_CREATE_PARAMETER
       MessageInterface::ShowMessage
          ("*** WARNING *** Moderator::CreateParameter() Unable to create "
           "Parameter name: %s already exist\n", name.c_str());
+      MessageInterface::ShowMessage
+         ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
+          param);
       #endif
-      return GetParameter(name);
+      
+      return param;
    }
+   
+   
+   // Ceate Parameter
+   param = theFactoryManager->CreateParameter(type, name);
+   
+   #if DEBUG_CREATE_PARAMETER
+   MessageInterface::ShowMessage
+      ("   new param = <%p><%s>\n", param, param ? param->GetName().c_str() : "NULL");
+   #endif
+   
+   if (param == NULL)
+   {
+      throw GmatBaseException
+         ("The Moderator cannot create a Parameter type \"" + type +
+          "\" named \"" + name + "\"\n");
+   }
+   
+   // We don't know the owner type the parameter before create,
+   // so validate owner type after create.
+   if (ownerName != "" && manage)
+   {
+      GmatBase *obj = GetConfiguredObject(ownerName);
+      if (obj)
+      {
+         #if DEBUG_CREATE_PARAMETER
+         MessageInterface::ShowMessage
+            ("   Found owner object, name='%s', addr=<%p>\n", obj->GetName().c_str(), obj);
+         #endif
+         
+         if (param->GetOwnerType() != obj->GetType())
+         {
+            std::string paramOwnerType =
+               GmatBase::GetObjectTypeString(param->GetOwnerType());
+            delete param;
+            param = NULL;
+            
+            if (paramOwnerType == "")
+               throw GmatBaseException
+                  ("Cannot find the object type which has \"" + type +
+                   "\" as a Parameter type");
+            else
+               throw GmatBaseException
+                  ("Parameter type: " + type + " should be property of " +
+                   paramOwnerType);
+         }
+      }
+   }
+   
+   // If type is Variable, don't set expression
+   if (type != "Variable")
+      param->SetStringParameter("Expression", name);
+   
+   // Set parameter owner and dependent object
+   if (ownerName != "")
+   {
+      param->SetRefObjectName(param->GetOwnerType(), ownerName);
+      param->AddRefObject(GetConfiguredObject(ownerName));
+   }
+   
+   // Set dependent object name
+   if (depName != "")
+      param->SetStringParameter("DepObject", depName);
+   
+   // Set SolarSystem
+   param->SetSolarSystem(theSolarSystemInUse);
+   param->SetInternalCoordSystem(theInternalCoordSystem);
+   
+   if (depName != "")
+      if (param->NeedCoordSystem())
+         param->AddRefObject(GetConfiguredObject(depName));
+   
+   // create parameter dependent coordinate system
+   if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
+       type == "MHA" || type == "LST")
+   {
+      // need body-fixed CS
+      StringTokenizer st(name, ".");
+      StringArray tokens = st.GetAllTokens();
+      
+      if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
+      {
+         //MessageInterface::ShowMessage("==> Create EarthFixed\n");
+         
+         // default EarthFixed
+         CreateCoordinateSystem("EarthFixed");
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
+      }
+      else if (tokens.size() == 3)
+      {
+         std::string origin = tokens[1];
+         std::string axisName = origin + "Fixed";
+         
+         //MessageInterface::ShowMessage("==> Create %s\n", axisName.c_str());
+         
+         CoordinateSystem *cs = CreateCoordinateSystem(axisName);
+         
+         // create BodyFixedAxis with origin
+         AxisSystem *axis = CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
+         cs->SetStringParameter("Origin", origin);
+         cs->SetRefObject(GetConfiguredObject(origin), Gmat::SPACE_POINT, origin);
+         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+         cs->SetStringParameter("J2000Body", "Earth");
+         cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
+         cs->SetSolarSystem(theSolarSystemInUse);
+         cs->Initialize();
+         
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
+      }
+      else
+      {
+         MessageInterface::ShowMessage("===> Invalid parameter name: %s\n",
+                                       name.c_str());
+      }
+   }
+   
+   // Manage it if manage flag is true and it is a named parameter
+   try
+   {
+      // check if object is to be managed (loj: 2008.03.18)
+      if (manage)
+      {
+         bool oldFlag = theConfigManager->HasConfigurationChanged();
+         
+         if (param->GetName() != "")
+            theConfigManager->AddParameter(param);
+         
+         // if system paramter, set configuration changed to old flag.
+         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
+            theConfigManager->ConfigurationChanged(oldFlag);
+      }
+   }
+   catch (BaseException &e)
+   {
+      #if DEBUG_CREATE_PARAMETER
+      MessageInterface::ShowMessage("Moderator::CreateParameter()\n" +
+                                    e.GetFullMessage() + "\n");
+      #endif
+   }
+   
+   #if DEBUG_CREATE_PARAMETER
+   MessageInterface::ShowMessage
+      ("Moderator::CreateParameter() returning <%s><%p>\n", param->GetName().c_str(),
+       param);
+   #endif
+   
+   return param;
 }
 
 
@@ -2666,10 +2685,23 @@ Attitude* Moderator::CreateAttitude(const std::string &type,
 //------------------------------------------------------------------------------
 GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 {
-   if (fileName == "")
-      return NULL;
-   else
-      return theScriptInterpreter->InterpretGmatFunction(fileName);
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() fileName='%s'\n", fileName.c_str());
+   #endif
+   
+   GmatCommand *cmd = NULL;
+   if (fileName != "")
+      cmd =  theScriptInterpreter->InterpretGmatFunction(fileName);
+   
+   ResetConfigurationChanged();
+   
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() returning <%p>\n", cmd);
+   #endif
+   
+   return cmd;
 }
 
 
@@ -2688,21 +2720,34 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 GmatCommand* Moderator::InterpretGmatFunction(Function *funct,
                                               StringObjectMap *objMap)
 {
-   // Set object map (loj: 2008.03.31)
-   // Just set configured object until Sandbox can call this method
-   // with proper object map
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() function=<%p>, objMap=<%p>\n",
+       funct, objMap);
+   #endif
+   
+   // If input objMap is NULL, use configured objects,
+   // use input object map otherwise
    
    StringObjectMap *objMapToUse = objMap;
    
    if (objMap == NULL)
       objMapToUse = theConfigManager->GetObjectMap();
    
-   theScriptInterpreter->SetObjectMap(objMapToUse);
+   theScriptInterpreter->SetObjectMap(objMapToUse, true);
    theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
-   theGuiInterpreter->SetObjectMap(objMapToUse);   
+   theGuiInterpreter->SetObjectMap(objMapToUse, true);   
    theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
    
-   return theScriptInterpreter->InterpretGmatFunction(funct);
+   GmatCommand *cmd = NULL;
+   cmd = theScriptInterpreter->InterpretGmatFunction(funct);
+   
+   #if DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("Moderator::InterpretGmatFunction() returning <%p>\n", cmd);
+   #endif
+   
+   return cmd;
 }
 
 
@@ -3537,6 +3582,9 @@ Integer Moderator::RunMission(Integer sandboxNum)
    //MessageInterface::ShowMessage("Moderator::RunMission() entered\n");
    MessageInterface::ShowMessage("Running mission...\n");
    Integer status = 1;
+   
+   //MessageInterface::ShowMessage
+   //   ("==> HasConfigurationChanged()=%d\n", HasConfigurationChanged());
    
    clock_t t1 = clock(); // Should I clock after initilization?
    
