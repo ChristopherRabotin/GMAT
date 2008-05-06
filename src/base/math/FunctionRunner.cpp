@@ -194,21 +194,63 @@ const StringArray& FunctionRunner::GetInputs()
 //------------------------------------------------------------------------------
 // void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
-void FunctionRunner::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
+void FunctionRunner::GetOutputInfo(Integer &type,
+                                   Integer &rowCount, Integer &colCount)
 {
-   Integer type1, row1, col1; // Left node
+   Function *function = theFunctionManager.GetFunction();
+   if (function == NULL)
+      throw MathException("FunctionRunner::GetOutputInfo() function is NULL\n");
+
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("FunctionRunner::GetOutputInfo() entered, this=<%p><%s>, function=<%s><%p>\n",
+       this, GetName().c_str(), function->GetName().c_str(), function);
+   #endif
    
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
+   // check for function output type
+   IntegerArray rowCounts, colCounts;
+   WrapperTypeArray outputTypes = function->GetOutputTypes(rowCounts, colCounts);
+   std::string errMsg;
    
-   //if (type1 != Gmat::REAL_TYPE)
-    //  throw MathException("Left is not scalar, so cannot do FunctionRunner().\n");  
-   //else
-   //{
-   //   type = type1;
-   //   rowCount = row1;
-   //   colCount = col1;
-   //}
+   if (outputTypes.size() == 0)
+   {
+      errMsg = "The function \"" + function->GetName() + "\" does not return"
+         " any value";
+   }
+   else if (outputTypes.size() > 1)
+   {
+      errMsg = "The function \"" + function->GetName() + "\" returns more than "
+         " one value";
+   }
+   else
+   {
+      if (outputTypes[0] == Gmat::VARIABLE)
+      {
+         type = Gmat::REAL_TYPE;
+         rowCount = 1;
+         colCount = 1;
+      }
+      else if (outputTypes[0] == Gmat::ARRAY)
+      {
+         type = Gmat::RMATRIX_TYPE;
+         rowCount = rowCounts[0];
+         colCount = colCounts[0];
+         matrix.SetSize(rowCount, colCount);
+      }
+   }
+   
+   elementType = type;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("FunctionRunner::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
+   
+   if (errMsg != "")
+   {
+      throw MathException("FunctionRunner::GetOutputInfo() " + errMsg);
+   }
 }
 
 
@@ -222,18 +264,18 @@ void FunctionRunner::GetOutputInfo(Integer &type, Integer &rowCount, Integer &co
 //------------------------------------------------------------------------------
 bool FunctionRunner::ValidateInputs()
 {
-   Integer type1, row1, col1; // Left node
+   Function *function = theFunctionManager.GetFunction();
+   if (function == NULL)
+      throw MathException("FunctionRunner::ValidateInputs() function is NULL\n");
    
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   if (leftNode)
-      leftNode->GetOutputInfo(type1, row1, col1);  // TBD ***********
-   //else
-   //   throw MathException("FunctionRunner::ValidateInputs() leftNode is NULL\n");
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("FunctionRunner::ValidateInputs() entered, this=<%p><%s>, function=<%s><%p>\n",
+       this, GetName().c_str(), function->GetName().c_str(), function);
+   #endif
    
-   //if (type1 == Gmat::REAL_TYPE)
-      return true;
-   //else
-   //   return false;
+   // How can we validate input here? Just return true for now.
+   return true;
 }
 
 
@@ -247,7 +289,24 @@ bool FunctionRunner::ValidateInputs()
 //------------------------------------------------------------------------------
 Real FunctionRunner::Evaluate()
 {
-   return -999.999; // TBD
+   Function *function = theFunctionManager.GetFunction();
+   if (function == NULL)
+      throw MathException("FunctionRunner::Evaluate() function is NULL\n");
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("FunctionRunner::Evaluate() entered, this=<%p><%s>, function=<%s><%p>\n",
+       this, GetName().c_str(), function->GetName().c_str(), function);
+   #endif
+   
+   if (elementType == Gmat::RMATRIX_TYPE)
+      throw MathException
+         ("The function \"" + function->GetName() + "\" returns matrix value");
+   
+   // Tell the FunctionManager to build the Function Object Store
+   //theFunctionManager.BuildFunctionObjectStore();
+   
+   return theFunctionManager.Evaluate();   
 }
 
 
@@ -261,8 +320,24 @@ Real FunctionRunner::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix FunctionRunner::MatrixEvaluate()
 {
-   Rmatrix rmat;
-   return rmat; // TBD
+   Function *function = theFunctionManager.GetFunction();
+   if (function == NULL)
+      throw MathException("FunctionRunner::Evaluate() function is NULL\n");
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("FunctionRunner::MatrixEvaluate() entered, this=<%p><%s>, function=<%s><%p>\n",
+       this, GetName().c_str(), function->GetName().c_str(), function);
+   #endif
+   
+   if (elementType == Gmat::REAL_TYPE)
+      throw MathException
+         ("The function \"" + function->GetName() + "\" returns Real value");
+   
+   // Tell the FunctionManager to build the Function Object Store
+   //theFunctionManager.BuildFunctionObjectStore();
+   
+   return theFunctionManager.MatrixEvaluate();
 }
 
 
