@@ -197,5 +197,6 @@ namespace Gmat
 }
 
 typedef std::vector<Gmat::ObjectType> ObjectTypeArray;
+typedef std::vector<Gmat::WrapperDataType> WrapperTypeArray;
 
 #endif //GMATDEFS_HPP
