@@ -637,7 +637,7 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
             if (delim.size() == 1)
                parts[size] = parts[size] + delim + tempParts[i];
             else                     
-               parts[size] = parts[size] + " " + tempParts[i];            
+               parts[size] = parts[size] + "," + tempParts[i];            
          }
          else
          {
@@ -649,7 +649,7 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
             parts.push_back(tempParts[i]);
             size++;
          }
-            
+         
          // if any bracket is not balanced, append
          if (!IsBracketBalanced(parts[size], "()") ||
              !IsBracketBalanced(parts[size], "[]") ||
@@ -2382,11 +2382,10 @@ bool GmatStringUtil::EndsWith(const std::string &str, const std::string &value)
 /*
  * Checks for valid name.
  *
- * Returns true if string contains only alphanumeric characters and doesn't start
- * with number. Underscore is allowed.
- *
- * If validating for object, it also checks for some keyword such as "Create."
- * If bracket is to be ignored, the name will be reassign upto open bracket.
+ * Returns true if string is:
+ *    1. not "GMAT", "Create", or "function" and
+ *    2. does not start with a number and
+ *    3. contains only alphanumeric (underscore is allowed)
  *
  * @param  str  The input string to check for valid name
  * @param  ignoreBracket  true if input string has bracket and to ignore it
@@ -2398,7 +2397,7 @@ bool GmatStringUtil::IsValidName(const std::string &str, bool ignoreBracket)
    if (str == "")
       return false;
    
-   if (str == "GMAT" || str == "Create")
+   if (str == "GMAT" || str == "Create" || str == "function")
       return false;
    
    // First letter must start with alphabet
@@ -2493,6 +2492,7 @@ StringArray GmatStringUtil::GetVarNames(const std::string &str)
    std::string str1 = str;
    std::string name;
    StringArray itemNames;
+   Real rval;
    
    for (UnsignedInt i=0; i<str1.size(); i++)
    {
@@ -2502,7 +2502,7 @@ StringArray GmatStringUtil::GetVarNames(const std::string &str)
       }
       else
       {
-         if (name != "")
+         if (name != "" && !ToReal(name, rval))
          {
             // just add new names
             if (find(itemNames.begin(), itemNames.end(), name) == itemNames.end())
