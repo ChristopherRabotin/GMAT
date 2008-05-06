@@ -27,37 +27,43 @@
 //#define DEBUG_RENAME
 
 //------------------------------------------------------------------------------
-//  MathElement(std::string typeStr, std::string nomme)
+//  MathElement(std::string typeStr, std::string name)
 //------------------------------------------------------------------------------
 /**
  * Constructs the MathElement object (default constructor).
  * 
  * @param <typeStr> String text identifying the object type
- * @param <nomme>   Name for the object
+ * @param <name>   Name for the object
  */
 //------------------------------------------------------------------------------
-MathElement::MathElement(const std::string &typeStr, const std::string &nomme) :
-   MathNode      ("MathElement", nomme),
+MathElement::MathElement(const std::string &typeStr, const std::string &name) :
+   MathNode      ("MathElement", name),
    refObject     (NULL),
    refObjectName ("")
 {
+   #if DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathElement::MathElement() typeStr='%s', name='%s' entered\n", typeStr.c_str(),
+       name.c_str());
+   #endif
+   
    isFunction = false;
    theWrapperMap = NULL;
    
    Real rval;
-   if (GmatStringUtil::ToReal(nomme, &rval))
+   if (GmatStringUtil::ToReal(name, &rval))
    {
       SetRealValue(rval);
       SetNumberFlag(true);
    }
    else
    {
-      SetRefObjectName(Gmat::PARAMETER, nomme);
+      SetRefObjectName(Gmat::PARAMETER, name);
    }
    
    #if DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
-      ("MathElement() type=%s, name=%s created\n", typeStr.c_str(), nomme.c_str());
+      ("MathElement::MathElement() created\n");
    #endif
 }
 
@@ -151,15 +157,25 @@ void MathElement::SetMatrixValue(const Rmatrix &mat)
 //------------------------------------------------------------------------------
 void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   #if DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathElement::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
    type = elementType;
    rowCount = 1;
    colCount = 1;
    
    #if DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
-      ("MathElement::GetOutputInfo() isNumber=%d, refObjectName=%s\n",
-       isNumber, refObjectName.c_str());
+      ("MathElement::GetOutputInfo() isNumber=%d, isFunctionInput=%d, refObjectName=%s\n",
+       isNumber, isFunctionInput, refObjectName.c_str());
    #endif
+   
+   // if this this function input, just return
+   if (isFunctionInput)
+      return;
    
    if (refObjectName == "")
    {
@@ -173,8 +189,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
    {
       #if DEBUG_MATH_ELEMENT
       MessageInterface::ShowMessage
-         ("MathElement::GetOutputInfo() %s is parameter. refObjectName=%s\n",
-          GetName().c_str(), refObjectName.c_str());
+         ("MathElement::GetOutputInfo() %s is parameter\n", GetName().c_str());
       #endif
       
       if (refObject)
@@ -190,7 +205,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
             
             #if DEBUG_MATH_ELEMENT
             MessageInterface::ShowMessage
-               ("===> row=%d, col=%d, newName=%s\n", row, col, newName.c_str());
+               ("   row=%d, col=%d, newName=%s\n", row, col, newName.c_str());
             #endif
             
             // Are we going to allow row/column slicing for future? such as:
@@ -220,7 +235,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
       }
       else
       {
-         throw MathException("The parameter: " + GetName() + " is NULL\n");
+         throw MathException("The output parameter: " + GetName() + " is NULL");
       }
    }
 }
@@ -235,9 +250,13 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
  //------------------------------------------------------------------------------
 bool MathElement::ValidateInputs()
 {
+   // The function inputs shoule be handled by the FunctionRunner
+   if (isFunctionInput)
+      return false;
+   
    if (elementType == Gmat::REAL_TYPE && refObjectName == "")
       return true;
-
+   
    if (refObject)
       return true;
    else
@@ -252,37 +271,26 @@ Real MathElement::Evaluate()
 {
    #ifdef DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
-      ("MathElement::Evaluate() refObjectName=%s\n", refObjectName.c_str());
+      ("MathElement::Evaluate() this='%s', refObjectName='%s', refObject=<%p>, "
+       "elementType=%d\n", GetName().c_str(), refObjectName.c_str(), refObject, elementType);
    #endif
    
+   // If this MathElement is function Input, just return since it is handled in
+   // the FunctionRunner
+   
+   if (isFunctionInput)
+      throw MathException("MathElement::Evaluate() Function input should "
+                          "not be handled here");
+   
    if (refObject)
-   {
-      if (theWrapperMap == NULL)
-         throw MathException("theWrapperMap is NULL");
-      
-      #ifdef DEBUG_MATH_ELEMENT
-      std::map<std::string, ElementWrapper *>::iterator ewi;
-      for (ewi = theWrapperMap->begin(); ewi != theWrapperMap->end(); ++ewi)
-         MessageInterface::ShowMessage
-            ("name=<%s>, wrapper=%p\n", (ewi->first).c_str(), ewi->second);
-      #endif
+   {   
+      ElementWrapper *wrapper = FindWrapper(refObjectName);
       
       if (elementType == Gmat::REAL_TYPE)
-      {
-         realValue = refObject->EvaluateReal();
-      }
-      else if (elementType == Gmat::RMATRIX_TYPE)
-      {
-         if (theWrapperMap->find(refObjectName) == theWrapperMap->end())
-         {
-            MathException me;
-            me.SetDetails("Wrapper name not found for %s\n", refObjectName.c_str());
-            throw me;
-         }
-         
-         ElementWrapper *wrapper = (*theWrapperMap)[refObjectName];
          realValue = wrapper->EvaluateReal();
-      }
+      else if (elementType == Gmat::RMATRIX_TYPE)
+         throw MathException("Internal Error - Cannot Evaluate MathElementType of \"" +
+                             refObjectName + "\"");
       
       #if DEBUG_MATH_ELEMENT
       MessageInterface::ShowMessage
@@ -309,6 +317,19 @@ Real MathElement::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix MathElement::MatrixEvaluate()
 {
+   #ifdef DEBUG_MATH_ELEMENT
+   MessageInterface::ShowMessage
+      ("MathElement::Evaluate() this='%s', refObjectName='%s', refObject=<%p>, "
+       "elementType=%d\n", GetName().c_str(), refObjectName.c_str(), refObject, elementType);
+   #endif
+   
+   // If this MathElement is function Input, just return since it is handled in
+   // the FunctionRunner
+   
+   if (isFunctionInput)
+      throw MathException("MathElement::MatrixEvaluate() Function input should "
+                          "not be handled here");
+   
    if (elementType == Gmat::RMATRIX_TYPE)
    {
       if (refObject)
@@ -320,7 +341,9 @@ Rmatrix MathElement::MatrixEvaluate()
              refObject->GetName().c_str(), rmat.ToString().c_str());
          #endif
          
-         return refObject->GetRmatrix();
+         ElementWrapper *wrapper = FindWrapper(refObjectName);
+         return wrapper->EvaluateArray();
+         //return refObject->GetRmatrix();
       }
       else
       {
@@ -334,7 +357,7 @@ Rmatrix MathElement::MatrixEvaluate()
       }
    }
    else
-      throw MathException("MathElement::MatrixEvaluate() Invalid matrix\n");
+      throw MathException("MathElement::MatrixEvaluate() Invalid matrix");
 }
 
 
@@ -343,7 +366,7 @@ Rmatrix MathElement::MatrixEvaluate()
 //------------------------------------------------------------------------------
 bool MathElement::SetChildren(MathNode *leftChild, MathNode *rightChild)
 {
-   throw MathException("SetChildren() is not valid for MathElement\n");
+   throw MathException("SetChildren() is not valid for MathElement");
 }
 
 
@@ -395,9 +418,9 @@ bool MathElement::RenameRefObject(const Gmat::ObjectType type,
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage("   old refObjectName=%s\n", refObjectName.c_str());
       #endif
-   
+      
       refObjectName = GmatStringUtil::ReplaceName(refObjectName, oldName, newName);
-   
+      
       #ifdef DEBUG_RENAME
       MessageInterface::ShowMessage("   new refObjectName=%s\n", refObjectName.c_str());
       #endif
@@ -526,72 +549,7 @@ bool MathElement::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       case Gmat::PARAMETER:
       {
-         // Handle array index
-         Integer row, col;
-         std::string newName;
-         GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
-         
-         // Check if name is the same
-         //if (refObjectName != name)
-         if (newName != name)
-            throw MathException
-               ("MathElement::SetRefObject() Cannot find parameter name:" +
-                name + "\n");
-         
-         refObject = (Parameter*) obj;
-         
-         refObjectType = refObject->GetTypeName().c_str();
-         
-         //if (refObject->GetReturnType() == Gmat::RMATRIX_TYPE)
-         
-         if (refObjectType == "Array")
-         {
-            Array *arr = (Array*)refObject;     
-            elementType = Gmat::RMATRIX_TYPE;
-            Integer theRowCount = arr->GetRowCount();
-            Integer theColCount = arr->GetColCount();
-            
-            #if DEBUG_MATH_ELEMENT
-            MessageInterface::ShowMessage
-               ("MathElement::SetRefObject() elementType=%d, theRowCount=%d, "
-                "theColCount=%d\n", elementType, theRowCount, theColCount);
-            #endif
-            
-            if (!matrix.IsSized())
-               matrix.SetSize(theRowCount, theColCount);
-            else
-            {
-               #if DEBUG_MATH_ELEMENT
-               MessageInterface::ShowMessage
-                  ("MathElement::SetRefObject() matrix already sized. "
-                   "matrix.size=%d, %d\n", matrix.GetNumRows(),
-                   matrix.GetNumColumns());
-               #endif
-            }
-            
-            matrix = arr->GetRmatrix(); // initial value
-            
-            #if DEBUG_MATH_ELEMENT
-            std::stringstream ss("");
-            ss << matrix;
-            MessageInterface::ShowMessage
-               ("MathElement::SetRefObject() name=%s, matrix=\n%s\n", name.c_str(),
-                ss.str().c_str());
-            #endif
-            
-         }
-         else if (refObject->GetReturnType() == Gmat::REAL_TYPE)
-         {
-            elementType = Gmat::REAL_TYPE;
-            realValue = refObject->GetReal(); // initial value
-            
-            #if DEBUG_MATH_ELEMENT
-            MessageInterface::ShowMessage
-               ("MathElement::SetRefObject() name=%s, elementType=%d, "
-                "realValue=%f\n", GetName().c_str(), elementType, realValue);
-            #endif
-         }
-         
+         SetWrapperObject(obj, name);
          return true;
       }
       default:
@@ -639,13 +597,14 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 {
    #if DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
-      ("==> MathElement::SetRefObjectName() name=%s\n", name.c_str());
+      ("MathElement::SetRefObjectName() name=%s\n", name.c_str());
    #endif
    
    switch (type)
    {
       case Gmat::PARAMETER:
          refObjectName = name;
+         SetWrapperObjectNames(name);
          return true;
          
       default:
@@ -670,21 +629,162 @@ bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::strin
 //------------------------------------------------------------------------------
 const StringArray& MathElement::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
-   static StringArray refs;
-   refs.clear();
-   
    if (type == Gmat::PARAMETER || Gmat::UNKNOWN_OBJECT)
-   {
-      // for FunctionRunner there may be more thatn one input argument
-      // so handle here (loj: 2008.04.24)
-      
-      StringArray names = GmatStringUtil::SeparateBy(refObjectName, ",", true);
-      refs.insert(refs.end(), names.begin(), names.end());
-      //refs.push_back(refObjectName);
-      return refs;
-   }
+      return wrapperObjectNames;
    
    return GmatBase::GetRefObjectNameArray(type);
 }
 
+
+//------------------------------------------------------------------------------
+// void SetWrapperObjectNames(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Sets ElementWrapper object names. This will also set multiple input arguments
+ * for GmatFunction.
+ *
+ * @param  name  The name or name list separated by comma
+ */
+//------------------------------------------------------------------------------
+void MathElement::SetWrapperObjectNames(const std::string &name)
+{
+   wrapperObjectNames = GmatStringUtil::SeparateBy(refObjectName, ",", true);
+   
+   #ifdef DEBUG_MATH_WRAPPERS
+   MessageInterface::ShowMessage
+      ("MathElement::SetWrapperObjectNames() wrapperObjectNames are:\n");
+   for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
+      MessageInterface::ShowMessage("   '%s'\n", wrapperObjectNames[i].c_str());
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetWrapperObject(GmatBase *obj, const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Sets ElementWrapper object. This will also set multiple input arguments
+ * for GmatFunction.
+ *
+ * @param  obj  The object pointer
+ */
+//------------------------------------------------------------------------------
+void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
+{
+   #ifdef DEBUG_MATH_WRAPPERS
+   MessageInterface::ShowMessage
+      ("MathElement::SetWrapperObject() obj=<%p>, name='%s'\n", obj, name.c_str());
+   #endif
+   
+   refObject = (Parameter*) obj;
+   refObjectType = refObject->GetTypeName().c_str();
+   
+   // go through wrapperObjectNames
+   for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
+   {
+      if (name == wrapperObjectNames[i])
+      {
+         #ifdef DEBUG_MATH_WRAPPERS
+         MessageInterface::ShowMessage
+            ("   wrapperName = '%s'\n", wrapperObjectNames[i].c_str());
+         #endif
+         
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         GmatStringUtil::GetArrayIndex(wrapperObjectNames[i], row, col, newName);
+         
+         // Check if name is the same
+         if (newName != name)
+            throw MathException
+               ("MathElement::SetRefObject() Cannot find parameter name:" + name);
+         
+         if (refObjectType == "Array")
+         {
+            Array *arr = (Array*)refObject;     
+            elementType = Gmat::RMATRIX_TYPE;
+            Integer theRowCount = arr->GetRowCount();
+            Integer theColCount = arr->GetColCount();
+            
+            #if DEBUG_MATH_WRAPPERS
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() elementType=%d, theRowCount=%d, "
+                "theColCount=%d\n", elementType, theRowCount, theColCount);
+            #endif
+            
+            if (!matrix.IsSized())
+               matrix.SetSize(theRowCount, theColCount);
+            else
+            {
+               #if DEBUG_MATH_WRAPPERS
+               MessageInterface::ShowMessage
+                  ("MathElement::SetRefObject() matrix already sized. "
+                   "matrix.size=%d, %d\n", matrix.GetNumRows(),
+                   matrix.GetNumColumns());
+               #endif
+            }
+            
+            matrix = arr->GetRmatrix(); // initial value
+            
+            #if DEBUG_MATH_WRAPPERS
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() name=%s, matrix=\n%s\n", name.c_str(),
+                matrix.ToString().c_str());
+            #endif
+            
+         }
+         else if (refObject->GetReturnType() == Gmat::REAL_TYPE)
+         {
+            elementType = Gmat::REAL_TYPE;
+            realValue = refObject->GetReal(); // initial value
+            
+            #if DEBUG_MATH_WRAPPERS
+            MessageInterface::ShowMessage
+               ("MathElement::SetRefObject() name=%s, elementType=%d, "
+                "realValue=%f\n", GetName().c_str(), elementType, realValue);
+            #endif
+         }
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* FindWrapper(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Finds ElementWrapper pointer from the map by given name
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* MathElement::FindWrapper(const std::string &name)
+{
+   #ifdef DEBUG_WRAPPER
+   MessageInterface::ShowMessage
+      ("MathElement::Evaluate() node='%s', name='%s', refObject=<%p>, "
+       "elementType=%d, theWrapperMap=<%p>\n", GetName().c_str(), name.c_str(),
+       refObject, elementType, theWrapperMap);
+   #endif
+   
+   if (theWrapperMap == NULL)
+      throw MathException("internal Error - theWrapperMap is NULL");
+   
+   #ifdef DEBUG_WRAPPER
+   std::map<std::string, ElementWrapper *>::iterator ewi;
+   for (ewi = theWrapperMap->begin(); ewi != theWrapperMap->end(); ++ewi)
+      MessageInterface::ShowMessage
+         ("   name='%s', wrapper=<%p>, wrapperType=%d, wrapperDesc='%s'\n",
+          (ewi->first).c_str(), ewi->second, (ewi->second)->GetWrapperType(),
+          (ewi->second)->GetDescription().c_str());
+   #endif
+   
+   if (theWrapperMap->find(name) == theWrapperMap->end())
+      throw MathException("Internal Error - Cannot find \"" + name +
+                          "\" from theWrapperMap");
+   
+   ElementWrapper *wrapper = (*theWrapperMap)[name];
+   if (wrapper == NULL)
+      throw MathException("the ElementWrapper of \"" + name + "\" is NULL");
+   
+   return wrapper;
+}
 
