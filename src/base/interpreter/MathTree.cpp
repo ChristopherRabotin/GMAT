@@ -113,6 +113,12 @@ MathTree& MathTree::operator=(const MathTree &mt)
 //------------------------------------------------------------------------------
 const StringArray& MathTree::GetGmatFunctionNames()
 {
+   #ifdef DEBUG_GMAT_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::GetGmatFunctionNames() returning %d GmatFunctions\n",
+       theGmatFunctionNames.size());
+   #endif
+   
    return theGmatFunctionNames;
 }
 
@@ -334,54 +340,61 @@ bool MathTree::InitializeParameter(MathNode *node)
       if (node->IsNumber())
          return true;
       
-      std::string refName = node->GetRefObjectName(Gmat::PARAMETER);
+      // Now MathElement can have more than one ref objects due to GmatFunction
+      // input arguments.
+      StringArray refNames = node->GetRefObjectNameArray(Gmat::PARAMETER);
+      std::string undefNames;
       
-      #ifdef DEBUG_MATH_TREE_INIT
-      MessageInterface::ShowMessage
-         ("MathTree::InitializeParameter() refName=%s\n", refName.c_str());
-      #endif
-      
-      // Handle array index
-      Integer row, col;
-      std::string newName;
-      GmatStringUtil::GetArrayIndex(refName, row, col, newName);
-      
-      if (theObjectMap->find(newName) != theObjectMap->end())
+      for (UnsignedInt i=0; i<refNames.size(); i++)
       {
-         node->SetRefObject((*theObjectMap)[newName], Gmat::PARAMETER,
-                            newName);
-         
          #ifdef DEBUG_MATH_TREE_INIT
          MessageInterface::ShowMessage
-            ("MathTree::InitializeParameter() Found %s from theObjectMap\n",
-             refName.c_str());
+            ("MathTree::InitializeParameter() refNames[%d]=%s\n", refNames[i].c_str());
          #endif
          
-         return true;
-      }
-      else if (theGlobalObjectMap->find(newName) != theGlobalObjectMap->end())
-      {
-         node->SetRefObject((*theGlobalObjectMap)[newName], Gmat::PARAMETER,
-                            newName);
+         // Handle array index
+         Integer row, col;
+         std::string newName;
+         GmatStringUtil::GetArrayIndex(refNames[i], row, col, newName);
          
-         #ifdef DEBUG_MATH_TREE_INIT
-         MessageInterface::ShowMessage
-            ("MathTree::InitializeParameter() Found %s from theGlobalObjectMap\n",
-             refName.c_str());
-         #endif
-         
-         return true;
+         if (theObjectMap->find(newName) != theObjectMap->end())
+         {
+            node->SetRefObject((*theObjectMap)[newName], Gmat::PARAMETER,
+                               newName);
+            
+            #ifdef DEBUG_MATH_TREE_INIT
+            MessageInterface::ShowMessage
+               ("MathTree::InitializeParameter() Found %s from theObjectMap\n",
+                refNames[i].c_str());
+            #endif
+         }
+         else if (theGlobalObjectMap->find(newName) != theGlobalObjectMap->end())
+         {
+            node->SetRefObject((*theGlobalObjectMap)[newName], Gmat::PARAMETER,
+                               newName);
+            
+            #ifdef DEBUG_MATH_TREE_INIT
+            MessageInterface::ShowMessage
+               ("MathTree::InitializeParameter() Found %s from theGlobalObjectMap\n",
+                refNames[i].c_str());
+            #endif
+         }
+         else
+         {
+            #ifdef DEBUG_MATH_TREE_INIT
+            MessageInterface::ShowMessage
+               ("MathTree::InitializeParameter() Unable to find " + newName +
+                " from theObjectMap or theGlobalObjectMap\n");
+            #endif
+            
+            undefNames = undefNames + ", " + newName;
+         }
       }
+      
+      if (undefNames == "")
+         return true;
       else
-      {
-         #ifdef DEBUG_MATH_TREE_INIT
-         MessageInterface::ShowMessage
-            ("MathTree::InitializeParameter() Unable to find " + newName +
-             " from theObjectMap or theGlobalObjectMap\n");
-         #endif
-         
-         throw InterpreterException("Undefined variable \"" + newName + "\" is used");
-      }
+         throw InterpreterException("Undefined variable(s) \"" + undefNames + "\" used");
    }
    else
    {
@@ -393,7 +406,6 @@ bool MathTree::InitializeParameter(MathNode *node)
       
       return (result1 && result2);
    }
-
 }
 
 
