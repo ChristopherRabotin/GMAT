@@ -87,6 +87,12 @@ GmatBase* Divide::Clone() const
 //------------------------------------------------------------------------------
 void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   #if DEBUG_DIVIDE
+   MessageInterface::ShowMessage
+      ("Divide::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
@@ -109,7 +115,7 @@ void Divide::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
       ("Divide::GetOutputInfo() type1=%d, row1=%d, col1=%d, type2=%d, "
        "row2=%d, col2=%d\n", type1, row1, col1, type2, row2, col2);
    #endif
-
+   
    if (type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
       if (col1 != col2 && row2 != row2)
          throw MathException("Left and Right dimentions not same, can not divide.\n");
@@ -151,7 +157,6 @@ bool Divide::ValidateInputs()
          return false; 
    else
       return true;
-   //return false;
 }
 
 
@@ -192,10 +197,6 @@ Rmatrix Divide::MatrixEvaluate()
    // Divide matrix by matrix
    if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::RMATRIX_TYPE)
       div = leftNode->MatrixEvaluate() / rightNode->MatrixEvaluate();
-   // Divide scalar by matrix
-//   else if( type1 == Gmat::REAL_TYPE && type2 == Gmat::RMATRIX_TYPE)
-//      div = leftNode->Evaluate() / rightNode->MatrixEvaluate();
-   // Divide matrix by scalar
    else if( type1 == Gmat::RMATRIX_TYPE && type2 == Gmat::REAL_TYPE)
       div = leftNode->MatrixEvaluate() / rightNode->Evaluate();
 

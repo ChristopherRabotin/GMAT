@@ -88,6 +88,12 @@ GmatBase* Subtract::Clone() const
 //------------------------------------------------------------------------------
 void Subtract::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
+   #if DEBUG_SUBTRACT
+   MessageInterface::ShowMessage
+      ("Divide::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
+       GetName().c_str());
+   #endif
+   
    Integer type1, row1, col1; // Left node
    Integer type2, row2, col2; // Right node
    
