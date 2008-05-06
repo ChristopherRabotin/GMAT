@@ -19,6 +19,7 @@
 #include "Moderator.hpp"
 #include "MathParser.hpp"
 #include "NoOp.hpp"
+#include "CommandUtil.hpp"     // for GmatCommandUtil::GetCommandSeqString()
 #include "StringUtil.hpp"      // for GmatStringUtil::
 
 // to allow object creation in command mode, such as inside ScriptEvent
@@ -137,27 +138,32 @@ bool ScriptInterpreter::Interpret()
 
 
 //------------------------------------------------------------------------------
-// bool Interpret(GmatCommand *inCmd, bool skipHeader = false)
+// bool Interpret(GmatCommand *inCmd, bool skipHeader, bool functionMode)
 //------------------------------------------------------------------------------
 /**
  * Parses and creates commands from input stream and append to input command.
  *
  * @param  inCmd  Command which appended to
- * @param  skipHeader Flag indicating first comment block is not a header(false)
+ * @param  skipHeader Flag indicating first comment block is not a header (false)
+ * @param  functionMode Flag indicating function mode interpretation (false)
  * @return true if the stream parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader)
+bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
+                                  bool functionMode)
 {
    Initialize();
    
    #if DEBUG_SCRIPT_READING
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s\n", inCmd,
-       inCmd->GetTypeName().c_str());
+      ("ScriptInterpreter::Interpret(%p) Entered inCmd=%s, skipHeader=%d, "
+       "functionMode=%d\n", inCmd, inCmd->GetTypeName().c_str(), skipHeader,
+       functionMode);
    #endif
    
-   // Since this method is called from ScriptEvent, set command mode to true
+   // Since this method is called from ScriptEvent or InterpretGmatFunction,
+   // set command mode to true
+   inFunctionMode = functionMode;
    inCommandMode = true;
    inRealCommandMode = true;
    
@@ -170,7 +176,7 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader)
    if (retval0)
    {
       retval1 = ReadScript(inCmd, skipHeader);
-
+      
       // call FinalPass if not in function mode (loj: 2008.03.12)
       if (inFunctionMode)
          retval2 = true;
@@ -273,11 +279,11 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    #endif
    
    // Set function mode and build function definition flag
-   inFunctionMode = true;
-   hasFunctionDefinition = false;
+   //inFunctionMode = true;
+   hasFunctionDefinition = true;
    
    // We don't want parse first comment as header, so set skipHeader to true.
-   retval = Interpret(noOp, true);
+   retval = Interpret(noOp, true, true);
    
    funcFile.close();
    
@@ -288,10 +294,12 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    
    #ifdef DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::InterpretGmatFunction() retval=%d\n", retval);
+      ("ScriptInterpreter::InterpretGmatFunction() returning retval=%d\n", retval);
+   std::string fcsStr = GmatCommandUtil::GetCommandSeqString(noOp);
+   MessageInterface::ShowMessage
+      ("----- FCS of '%s': %s\n", fileName.c_str(), fcsStr.c_str());
    #endif
    
-   //@todo remove noOp before return
    // Just return noOP for now (loj: 2008.03.12)
    if (retval)
       return noOp;
@@ -568,6 +576,8 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
    initialized = false;
    Initialize();
    
+   if (inFunctionMode)
+      inCommandMode = true;
    
    // Read header comment and first logical block.
    // If input command is NULL, this method is called from GUI to interpret
@@ -775,6 +785,17 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
    
+   // check for function definition
+   if ( (count > 0 && chunks[0].find("function") == 0) ||
+        (count > 1 && chunks[1].find("function") == 0) )
+   {
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   '%s' is function definition, so just returning true\n", logicalBlock.c_str());
+      #endif
+      return true;
+   }
+   
    if (currentBlockType == Gmat::COMMENT_BLOCK)
    {
       footerComment = currentBlock;
@@ -832,7 +853,6 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       // Handle creating objects in function mode
       if (inFunctionMode)
       {
-         //obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
          std::string desc = chunks[1] + " " + chunks[2];
          obj = (GmatBase*)CreateCommand(chunks[0], desc, retval, inCmd);
       }
@@ -1031,7 +1051,11 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
          }
       }
       
-      //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
+      
+      #ifdef DEBUG_PARSE
+      MessageInterface::ShowMessage
+         ("   inCommandMode=%d, inFunctionMode=%d\n", inCommandMode, inFunctionMode);
+      #endif
       
       bool createAssignment = true;
       
@@ -1042,15 +1066,17 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
          StringArray parts = theTextParser.SeparateDots(chunks[0]);
          //MessageInterface::ShowMessage("===> parts.size()=%d\n", parts.size());
          
+         // If in function mode, always create Assignment command
+         if (!inFunctionMode)
+         {
          if (parts.size() > 1)
          {
-            // Changed to call FindObject() (loj: 2008.04.01)
-            //GmatBase *tempObj = GetConfiguredObject(parts[0]);
             GmatBase *tempObj = FindObject(parts[0]);
             if ((tempObj) &&
                 (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
                  (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
                createAssignment = false;
+         }
          }
       }
       else

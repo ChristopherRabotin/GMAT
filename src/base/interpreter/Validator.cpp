@@ -229,28 +229,27 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
 
 
 //------------------------------------------------------------------------------
-// bool ValidateCommand(GmatCommand *cmd, bool contOnError = true)
+// bool ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
 //------------------------------------------------------------------------------
 /**
  * Checks the input command to make sure it wrappers are set up for it
  * correctly, if necessary.
  *
  * @param <cmd> the command to validate
- * @param <contOnError> flag indicating whether or not to continue on error
+ * @param <contOnError> flag indicating whether or not to continue on error (true)
+ * @param <manage> true if parameter to be managed in the configuration (true)
  */
 //------------------------------------------------------------------------------
-bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
+bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
 {
    continueOnError = contOnError;
    
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
-      ("Validator::ValidateCommand() cmd=<%p><%s><%s>, continueOnError=%d\n", cmd,
-       cmd->GetTypeName().c_str(), cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
-       continueOnError);
-   #endif
-   
-   #ifdef DEBUG_VALIDATE_COMMAND
+      ("Validator::ValidateCommand() cmd=<%p><%s><%s>, continueOnError=%d, "
+       "manage=%d\n", cmd, cmd->GetTypeName().c_str(),
+       cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+       continueOnError, manage);
    MessageInterface::ShowMessage
       ("   Calling %s->GetWrapperObjectNameArray() to get object names\n",
        cmd->GetTypeName().c_str());
@@ -281,7 +280,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
       
       try
       {
-         ElementWrapper *ew = CreateElementWrapper(lhs);
+         ElementWrapper *ew = CreateElementWrapper(lhs, false, manage);
          
          if (ew == NULL)
             return false;
@@ -311,9 +310,9 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
             {
                ElementWrapper *ew = NULL;
                if (IsParameterType(name))
-                  ew = CreateElementWrapper(name, true);
+                  ew = CreateElementWrapper(name, true, manage);
                else
-                  ew = CreateElementWrapper(name);
+                  ew = CreateElementWrapper(name, false, manage);
                
                if (cmd->SetElementWrapper(ew, name) == false)
                {
@@ -339,7 +338,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
       {
          try
          {
-            ElementWrapper *ew = CreateElementWrapper(*i);
+            ElementWrapper *ew = CreateElementWrapper(*i, false, manage);
             
             if (cmd->SetElementWrapper(ew, *i) == false)
             {
@@ -369,7 +368,7 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
 
 //------------------------------------------------------------------------------
 // ElementWrapper* CreateElementWrapper(const std::string &desc,
-//                                      bool parametersFirst)
+//                                      bool parametersFirst, bool manage)
 //------------------------------------------------------------------------------
 /**
  * Creates the appropriate ElementWrapper, based on the description.
@@ -377,13 +376,15 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError)
  * @param  <desc>  description string for the element required
  * @param  <parametersFirst>  true if creating for wrappers for the Parameter
  *                            first then Object Property (false)
+ * @param <manage> true if parameter to be managed in the configuration (true)
  *
  * @return pointer to the created ElementWrapper
  * @exception <Interpreterxception> thrown if wrapper cannot be created
  */
 //------------------------------------------------------------------------------
 ElementWrapper*
-Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst)
+Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
+                                bool manage)
 {
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
@@ -472,7 +473,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst)
          // if parametersFirst, always create parameter wrapper first
          if (parametersFirst)
          {
-            Parameter *param = CreateSystemParameter(descTrimmed);
+            Parameter *param = CreateSystemParameter(descTrimmed, manage);
             if (param)
             {
                #ifdef DEBUG_WRAPPERS
@@ -490,12 +491,12 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst)
          }
          else
          {
-            ew = CreateWrapperWithDot(descTrimmed);
+            ew = CreateWrapperWithDot(descTrimmed, manage);
          }
       }
       else // check to see if it is a Variable or some other parameter
       {
-         ew = CreateOtherWrapper(descTrimmed);
+         ew = CreateOtherWrapper(descTrimmed, manage);
       }
    }
    
@@ -508,10 +509,10 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst)
       if (itsType == Gmat::ARRAY_ELEMENT)
       {
          std::string    rowName = ((ArrayElementWrapper*)ew)->GetRowName();
-         ElementWrapper *row    = CreateElementWrapper(rowName);
+         ElementWrapper *row    = CreateElementWrapper(rowName, false, manage);
          ((ArrayElementWrapper*)ew)->SetRow(row);
          std::string    colName = ((ArrayElementWrapper*)ew)->GetColumnName();
-         ElementWrapper *col    = CreateElementWrapper(colName);
+         ElementWrapper *col    = CreateElementWrapper(colName, false, manage);
          ((ArrayElementWrapper*)ew)->SetColumn(col);
       }
    }
@@ -529,9 +530,11 @@ const StringArray& Validator::GetErrorList()
 
 
 //------------------------------------------------------------------------------
-// ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed)
+// ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed,
+//                                      bool manage)
 //------------------------------------------------------------------------------
-ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed)
+ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
+                                                bool manage)
 {
    // try to parse the string for an owner and type
    // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
@@ -544,7 +547,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed)
    GmatBase *theObj = FindObject(owner);
    if (theObj == NULL)
    {
-      Parameter *param = CreateSystemParameter(descTrimmed);
+      Parameter *param = CreateSystemParameter(descTrimmed, manage);
       
       if (param)
       {
@@ -573,7 +576,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed)
       // if there are two dots, then treat it as a parameter
       if (descTrimmed.find_first_of(".") != descTrimmed.find_last_of("."))
       {
-         Parameter *param = CreateSystemParameter(descTrimmed);
+         Parameter *param = CreateSystemParameter(descTrimmed, manage);
          if (param)
          {
             #ifdef DEBUG_WRAPPERS
@@ -602,7 +605,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed)
          catch (BaseException &be)
          {
             isValidProperty = false;
-            Parameter *param = CreateSystemParameter(descTrimmed);
+            Parameter *param = CreateSystemParameter(descTrimmed, manage);
             if (param)
             {
                #ifdef DEBUG_WRAPPERS
@@ -639,9 +642,10 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed)
 
 
 //------------------------------------------------------------------------------
-// ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed)
+// ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed, bool manage)
 //------------------------------------------------------------------------------
-ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed)
+ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
+                                              bool manage)
 {
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
@@ -853,7 +857,7 @@ Parameter* Validator::GetParameter(const std::string name)
  */
 //------------------------------------------------------------------------------
 Parameter* Validator::CreateSystemParameter(const std::string &str,
-                                              bool manage)
+                                            bool manage)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage

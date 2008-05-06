@@ -28,9 +28,10 @@ class ScriptInterpreter : public Interpreter
 {
 public:        
    static ScriptInterpreter*   Instance();
-
+   
    virtual bool Interpret();
-   virtual bool Interpret(GmatCommand *cmd, bool skipHeader = false);
+   virtual bool Interpret(GmatCommand *cmd, bool skipHeader = false,
+                          bool functionMode = false);
    virtual bool Interpret(const std::string &scriptfile);
    
    GmatCommand* InterpretGmatFunction(const std::string &fileName);

@@ -43,10 +43,12 @@ public:
    void SetObjectMap(StringObjectMap *objMap);
    
    bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
-   bool ValidateCommand(GmatCommand *cmd, bool contOnError = true);
+   bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
+                        bool manage = true);
    
    ElementWrapper* CreateElementWrapper(const std::string &desc,
-                                        bool parametersFirst = false);
+                                        bool parametersFirst = false,
+                                        bool manage = true);
    const StringArray& GetErrorList();
    
 protected:
@@ -66,8 +68,10 @@ protected:
    
    void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
                                Gmat::WrapperDataType &itsType);
-   ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed);
-   ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed);
+   ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed,
+                                        bool manage = true);
+   ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed,
+                                      bool manage = true);
    
    bool IsParameterType(const std::string &desc);
    bool ValidateParameter(const StringArray &refNames, GmatBase *obj);

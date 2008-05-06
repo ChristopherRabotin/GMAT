@@ -103,7 +103,7 @@ public:
    
    void SetSolarSystemInUse(SolarSystem *ss);
    SolarSystem* GetSolarSystemInUse();
-   void SetObjectMap(StringObjectMap *objMap);
+   void SetObjectMap(StringObjectMap *objMap, bool forFunction = false);
    StringObjectMap* GetObjectMap();
    
    const StringArray& GetErrorList() { return errorList; }
