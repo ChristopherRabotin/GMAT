@@ -252,15 +252,43 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 {
+   #ifdef DEBUG_GLOBAL_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("CallFunction::SetGlobalObjectMap() entered, mFunctionName='%s', "
+       "map=<%p>\n", mFunctionName.c_str(), map);
+   #endif
+   
    GmatCommand::SetGlobalObjectMap(map);
+   
    // Now, find the function object
-   GmatBase *mapObj;
-   if ((mapObj = FindObject(mFunctionName))  == NULL)
+   GmatBase *mapObj = FindObject(mFunctionName);
+   
+   #ifdef DEBUG_GLOBAL_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("   mapObj=<%p><%s>\n", mapObj, mapObj ? mapObj->GetName().c_str() : "NULL");
+   #endif
+   
+   if (mapObj == NULL)
+   {
       //throw CommandException("CallFunction command cannot find Function " +
       //         mFunctionName + "\n");
       ; // leave NULL for now
-   mFunction = (Function *)mapObj;
-   fm.SetFunction(mFunction);   
+   }
+   else
+   {
+      mFunction = (Function *)mapObj;
+      
+      #ifdef DEBUG_GLOBAL_OBJECT_MAP
+      MessageInterface::ShowMessage
+         ("   mFunction=<%p><%s>\n", mFunction, mFunction->GetName().c_str());
+      #endif
+      
+      fm.SetFunction(mFunction);
+   }
+   
+   #ifdef DEBUG_GLOBAL_OBJECT_MAP
+   MessageInterface::ShowMessage("CallFunction::SetGlobalObjectMap() exiting\n");
+   #endif
 }
 
 
