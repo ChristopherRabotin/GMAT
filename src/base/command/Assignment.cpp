@@ -138,9 +138,22 @@ const StringArray& Assignment::GetGmatFunctionNames()
    static StringArray emptyArray;
    
    if (mathTree)
+   {
+      #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage
+         ("Assignment::GetGmatFunctionNames() returning %d GmatFunctions "
+          " from the MathTree\n", mathTree->GetGmatFunctionNames().size());
+      #endif
       return mathTree->GetGmatFunctionNames();
+   }
    else
+   {
+      #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage
+         ("Assignment::GetGmatFunctionNames() returning 0 GmatFunctions\n");
+      #endif
       return emptyArray;
+   }
 }
 
 
@@ -179,9 +192,11 @@ void Assignment::SetFunction(Function *function)
 //------------------------------------------------------------------------------
 std::vector<Function*> Assignment::GetFunctions() const
 {
+   if (mathTree)
+      return mathTree->GetFunctions();
+   
    std::vector<Function*> gf;
-   return gf;    // TBD - will need to ask MathTree for all the functions
-                 // referred to by FunctionRunners
+   return gf;
 }
 
 
@@ -346,9 +361,6 @@ bool Assignment::Initialize()
       // Initialize mathTree
       MathNode *topNode = mathTree->GetTopNode();
       
-//       // Set math Wrapper map
-//       mathTree->SetMathWrappers(&mathWrapperMap);
-      
       #ifdef DEBUG_ASSIGNMENT_INIT
       MessageInterface::ShowMessage
          ("Assignment::Initialize() Initializing topNode=%s, %s\n",
@@ -360,9 +372,7 @@ bool Assignment::Initialize()
          if (mathTree->Initialize(objectMap, globalObjectMap))
          {
             if (!topNode->ValidateInputs())
-               throw CommandException
-                  ("Failed to validate equation inputs in\n   \"" +
-                   generatingString + "\"\n");
+               throw CommandException("Failed to validate equation inputs");
          }
          else
          {
