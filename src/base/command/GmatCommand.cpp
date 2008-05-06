@@ -2061,16 +2061,34 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
+   
+   #ifdef DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("GmatCommand::FindObject() objectMap=<%p>, globalObjectMap=<%p>, newName='%s'\n",
+       objectMap, globalObjectMap, newName.c_str());
+   #endif
+   
    // Check for the object in the Local Object Store (LOS) first
-   if (objectMap->find(newName) == objectMap->end())
-   {
-	  // If not found in the LOS, check the Global Object Store (GOS)
-      if (globalObjectMap->find(newName) == globalObjectMap->end())
-         return NULL;
-      else return (*globalObjectMap)[newName];
-   }
-   else
+   if (objectMap && objectMap->find(newName) != objectMap->end())
       return (*objectMap)[newName];
+   
+   // If not found in the LOS, check the Global Object Store (GOS)
+   if (globalObjectMap && globalObjectMap->find(newName) != globalObjectMap->end())
+      return (*globalObjectMap)[newName];
+   
+   return NULL;
+   
+//    // Check for the object in the Local Object Store (LOS) first
+//    if (objectMap->find(newName) == objectMap->end())
+//    {
+//       // If not found in the LOS, check the Global Object Store (GOS)
+//       if (globalObjectMap->find(newName) == globalObjectMap->end())
+//          return NULL;
+//       else return (*globalObjectMap)[newName];
+//    }
+//    else
+//       return (*objectMap)[newName];
+   
 }
 
 
