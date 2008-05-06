@@ -542,8 +542,12 @@ MathNode* MathParser::ParseNode(const std::string &str)
          }
       
       mathNode->SetChildren(leftNode, rightNode);
+      
+      if (mathNode->IsOfType("FunctionRunner"))
+         leftNode->SetFunctionInputFlag(true);
+      
    }
-
+   
    return mathNode;
 }
 
