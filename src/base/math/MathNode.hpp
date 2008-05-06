@@ -36,7 +36,9 @@ public:
    
    bool                 IsFunction() { return isFunction; }
    bool                 IsNumber() { return isNumber; }
+   bool                 IsFunctionInput() { return isFunctionInput; }
    void                 SetNumberFlag(bool flag) { isNumber = flag; }
+   void                 SetFunctionInputFlag(bool flag) { isFunctionInput = flag; }
    
    Integer              GetElementType() { return elementType; }
    
@@ -62,8 +64,9 @@ public:
                                         const std::string &newName);
 protected:
    
-   bool isFunction;
    bool isNumber;
+   bool isFunction;
+   bool isFunctionInput;
    
    /// Element type (is the leaf node a real number or a matrix
    Integer elementType;

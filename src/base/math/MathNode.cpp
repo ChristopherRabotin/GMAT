@@ -31,11 +31,12 @@
  */
 //------------------------------------------------------------------------------
 MathNode::MathNode(const std::string &typeStr, const std::string &nomme) :
-   GmatBase      (Gmat::MATH_NODE, typeStr, nomme),
-   isFunction    (false),
-   isNumber      (false),
-   elementType   (Gmat::REAL_TYPE),
-   realValue     (REAL_PARAMETER_UNDEFINED)
+   GmatBase        (Gmat::MATH_NODE, typeStr, nomme),
+   isNumber        (false),
+   isFunction      (false),
+   isFunctionInput (false),
+   elementType     (Gmat::REAL_TYPE),
+   realValue       (REAL_PARAMETER_UNDEFINED)
 {
    objectTypes.push_back(Gmat::MATH_NODE);
    objectTypeNames.push_back("MathNode");   
@@ -68,8 +69,9 @@ MathNode::~MathNode()
 //------------------------------------------------------------------------------
 MathNode::MathNode(const MathNode &mn) :
    GmatBase        (mn),
-   isFunction      (mn.isFunction),
    isNumber        (mn.isNumber),
+   isFunction      (mn.isFunction),
+   isFunctionInput (mn.isFunction),
    elementType     (mn.elementType),
    realValue       (mn.realValue),
    matrix          (mn.matrix)
@@ -92,11 +94,12 @@ MathNode& MathNode::operator=(const MathNode &mn)
 {
    if (this == &mn)
       return *this;
-        
+   
    GmatBase::operator=(mn);
-
-   isFunction = mn.isFunction;
+   
    isNumber = mn.isNumber;
+   isFunction = mn.isFunction;
+   isFunctionInput = mn.isFunctionInput;
    elementType = mn.elementType;
    realValue = mn.realValue;
    matrix = mn.matrix;
