@@ -58,7 +58,10 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &name) :
    GmatBase        (Gmat::FUNCTION, typeStr, name),
-   functionPath    ("")
+   functionPath    (""),
+   functionName    (""),
+   solarSys        (NULL),
+   fcs             (NULL)
 {
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back(typeStr);
@@ -119,27 +122,143 @@ Function& Function::operator=(const Function &f)
    return *this;
 }
 
+
+//------------------------------------------------------------------------------
+// virtual WrapperTypeArray GetOutputTypes(IntegerArray &rowCounts,
+//                                         IntegeArrayr &colCounts) const
+//------------------------------------------------------------------------------
+WrapperTypeArray Function::GetOutputTypes(IntegerArray &rowCounts,
+                                          IntegerArray &colCounts) const
+{
+   rowCounts = outputRowCounts;
+   colCounts = outputColCounts;
+   return outputWrapperTypes;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetOutputTypes(WrapperTypeArray &outputTypes,
+//                             IntegerArray &rowCounts, IntegerArray &colCounts)
+//------------------------------------------------------------------------------
+/*
+ * Sets function output types. This method is called when parsing the function
+ * file from the Interpreter.
+ */
+//------------------------------------------------------------------------------
+void Function::SetOutputTypes(WrapperTypeArray &outputTypes,
+                              IntegerArray &rowCounts, IntegerArray &colCounts)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Function::SetOutputTypes() setting %d outputTypes\n", outputTypes.size());
+   #endif
+   
+   outputWrapperTypes = outputTypes;
+   outputRowCounts = rowCounts;
+   outputColCounts = colCounts;   
+}
+
+
+//------------------------------------------------------------------------------
+// virtual ElementWrapper*  GetOutputArgument(Integer argNumber)
+//------------------------------------------------------------------------------
+/*
+ * Implements GMAT FUNCTIONS design 27.2.2.3 GmatFunction Execution
+ * step 4 of "Steps Performed on the Firstexecution"
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* Function::GetOutputArgument(Integer argNumber)
+{
+   if (argNumber > (Integer)outputNames.size() ||
+       argNumber > (Integer)outputArgMap.size())
+      return NULL; // Should we throw an exception instead?
+   
+   // Get output name specified by the argNumber
+   std::string argName = outputNames[argNumber];
+   if (outputArgMap.find(argName) != outputArgMap.end())
+      return outputArgMap[argName];
+   else
+      return NULL; // Should we throw an exception instead?
+   
+}
+
+
+//------------------------------------------------------------------------------
+// bool Initialize()
+//------------------------------------------------------------------------------
 bool Function::Initialize()
 {
    return true;  // TBD
 }
 
+
+//------------------------------------------------------------------------------
+// bool Function::Execute()
+//------------------------------------------------------------------------------
 bool Function::Execute()
 {
    return true;  // TBD
 }
 
+
+//------------------------------------------------------------------------------
+// Real Evaluate()
+//------------------------------------------------------------------------------
 Real Function::Evaluate()
 {
-   Real r = 999.999;
-   return r;  // TBD
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Function::Evaluate() <%p><%s> entered.\n", this, this->GetName().c_str());
+   #endif
+   
+   if (outputWrapperTypes.size() == 0)
+      throw FunctionException
+         ("The output argument of function \"" + functionName + "\" is not set.");
+   
+   if (!Execute())
+      throw FunctionException("Failed to execute function \"" + functionName + "\"");
+
+   // To be implemented
+   
+   Real r = -999.999;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("==> Function::Evaluate() returning %.9f\n", r);
+   #endif
+   
+   return r;
 }
 
+
+//------------------------------------------------------------------------------
+// Rmatrix MatrixEvaluate()
+//------------------------------------------------------------------------------
 Rmatrix Function::MatrixEvaluate()
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Function::MatrixEvaluate() <%p><%s> entered.\n", this, this->GetName().c_str());
+   #endif
+   
+   if (outputWrapperTypes.size() == 0)
+      throw FunctionException
+         ("The output argument of function \"" + functionName + "\" is not set.");
+   
+   if (!Execute())
+      throw FunctionException("Failed to execute function \"" + functionName + "\"");
+   
+   // To be implemented
    Rmatrix rmat;
-   return rmat;  // TBD
+   rmat.SetSize(outputRowCounts[0], outputColCounts[0]);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Function::MatrixEvaluate() returning %s\n", rmat.ToString().c_str());
+   #endif
+   
+   return rmat;
 }
+
 
 void Function::SetSolarSystem(SolarSystem *ss)
 {

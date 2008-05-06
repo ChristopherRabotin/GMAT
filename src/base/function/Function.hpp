@@ -35,8 +35,16 @@ public:
    Function(const std::string &typeStr, const std::string &nomme);
    virtual ~Function();
    Function(const Function &f);
-   Function&                   operator=(const Function &f);
+   Function&            operator=(const Function &f);
    
+   virtual WrapperTypeArray
+                        GetOutputTypes(IntegerArray &rowCounts,
+                                       IntegerArray &colCounts) const;
+   virtual void         SetOutputTypes(WrapperTypeArray &outputTypes,
+                                       IntegerArray &rowCounts,
+                                       IntegerArray &colCounts);
+   virtual ElementWrapper*
+                        GetOutputArgument(Integer argNumber);
    virtual bool         Initialize();
    virtual bool         Execute();
    virtual Real         Evaluate();
@@ -85,7 +93,13 @@ protected:
    std::map<std::string, ElementWrapper*> inputArgMap;
    /// Function output name element wrapper map
    std::map<std::string, ElementWrapper*> outputArgMap;
-
+   /// Output wrapper type array
+   WrapperTypeArray outputWrapperTypes;
+   /// Output row count used for returning one Array type
+   IntegerArray outputRowCounts;
+   /// Output column count used for returning one Array type
+   IntegerArray outputColCounts;
+   
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
    /// transient forces to pass to the function
