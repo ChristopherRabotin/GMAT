@@ -24,6 +24,7 @@
 #include "RealUtilities.hpp"       // for Abs()
 #include "StringUtil.hpp"          // for ToString()
 #include "FileTypes.hpp"           // for GmatFile::MAX_PATH_LEN
+#include <algorithm>               // for set_difference()
 
 #ifndef _MSC_VER  // if not Microsoft Visual C++
 #include <dirent.h>
@@ -36,7 +37,8 @@
 using namespace std;
 using namespace GmatStringUtil;
 
-//#define DEBUG_COMPARE_REPORT 1
+//#define DBGLVL_COMPARE_REPORT 1
+//#define DBGLVL_FUNCTION_OUTPUT 2
 
 //------------------------------------------------------------------------------
 // std::string GetPathSeparator()
@@ -53,7 +55,7 @@ std::string GmatFileUtil::GetPathSeparator()
    buffer = getenv("OS");
    if (buffer != NULL)
    {
-      #ifdef DEBUG_FILE_UTIL
+      #ifdef DBGLVL_FILE_UTIL
       MessageInterface::ShowMessage
          ("GmatFileUtil::GetPathSeparator() Current OS is %s\n", buffer);
       #endif
@@ -112,7 +114,7 @@ std::string GmatFileUtil::GetCurrentPath()
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
 {
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -123,7 +125,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
    if (lastSlash != filePath.npos)
       filePath = fullPath.substr(0, lastSlash+1);
    
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParsePathName() returning <%s>\n", filePath.c_str());
    #endif
@@ -145,7 +147,7 @@ std::string GmatFileUtil::ParsePathName(const std::string &fullPath)
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
 {
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileName() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -156,7 +158,7 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
    if (lastSlash != fileName.npos)
       fileName = fileName.substr(lastSlash+1);
    
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileName() returning <%s>\n", fileName.c_str());
    #endif
@@ -178,7 +180,7 @@ std::string GmatFileUtil::ParseFileName(const std::string &fullPath)
 //------------------------------------------------------------------------------
 std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
 {
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileExtension() fullPath=<%s>\n", fullPath.c_str());
    #endif
@@ -189,7 +191,7 @@ std::string GmatFileUtil::ParseFileExtension(const std::string &fullPath)
    if (lastDot != fullPath.npos)
       fileExt = fullPath.substr(lastDot+1);
    
-   #ifdef DEBUG_PARSE_FILENAME
+   #ifdef DBGLVL_PARSE_FILENAME
    MessageInterface::ShowMessage
       ("GmatFileUtil::ParseFileExtension() returning <%s>\n", fileExt.c_str());
    #endif
@@ -240,7 +242,7 @@ bool GmatFileUtil::DoesDirectoryExist(const std::string &dirPath)
 //------------------------------------------------------------------------------
 bool GmatFileUtil::DoesFileExist(const std::string &filename)
 {
-   #ifdef DEBUG_FILE_CHECK
+   #ifdef DBGLVL_FILE_CHECK
    MessageInterface::ShowMessage
       ("GmatFileUtil::DoesFileExist() filename=<%s>\n",
        filename.c_str());
@@ -255,7 +257,7 @@ bool GmatFileUtil::DoesFileExist(const std::string &filename)
       fileExist = true;
    }
    
-   #ifdef DEBUG_FILE_CHECK
+   #ifdef DBGLVL_FILE_CHECK
    MessageInterface::ShowMessage
       ("GmatFileUtil::DoesFileExist() returning %d\n", fileExist);
    #endif
@@ -294,6 +296,212 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
 
 
 //------------------------------------------------------------------------------
+// WrapperTypeArray GetFunctionOutputTypes(std::istream *inStream,
+//                     const StringArray &outputs, std::string &errMsg,
+//                     IntegerArray &outputRows, IntegerArray &outputCols)
+//------------------------------------------------------------------------------
+/*
+ * Retrives function output information from the input stream, keeping the
+ * the order of outputs.
+ *
+ * @param  inStream  the input function stream
+ * @param  outputs   the output name list
+ * @param  errMsg    the error message to be set if any
+ * @param  outputRows  the array of row count to be set
+ * @param  outputRows  the array of column count to be set
+ *
+ * @return  return  the wrapper type array of outputs
+ */
+//------------------------------------------------------------------------------
+WrapperTypeArray
+GmatFileUtil::GetFunctionOutputTypes(std::istream *inStream,
+                                     const StringArray &outputs, std::string &errMsg,
+                                     IntegerArray &outputRows, IntegerArray &outputCols)
+{
+   UnsignedInt outputSize = outputs.size();
+   
+   #if DBGLVL_FUNCTION_OUTPUT
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetFunctionOutputTypes() outputSize = %d\n", outputSize);
+   for (UnsignedInt i=0; i<outputs.size(); i++)
+      MessageInterface::ShowMessage("   outputs[%d]='%s'\n", i, outputs[i].c_str());
+   #endif
+   
+   WrapperTypeArray outputWrapperTypes;
+   std::string line;
+   StringArray outputTypes, outputNames, outputDefs, multiples;
+   errMsg = "";
+   std::string errMsg1, errMsg2;
+   std::string name;
+   Integer row, col;
+
+   // if no output, just return
+   if (outputSize == 0)
+      return outputWrapperTypes;
+   
+   // check for duplicate output names
+   for (UnsignedInt i=0; i<outputSize; i++)
+   {
+      for (UnsignedInt j=0; j<outputSize; j++)
+      {
+         if (i == j)
+            continue;
+         
+         if (outputs[i] == outputs[j])
+            if (find(multiples.begin(), multiples.end(), outputs[i]) == multiples.end())
+               multiples.push_back(outputs[i]);
+      }
+   }
+   
+   if (multiples.size() > 0)
+   {
+      errMsg = "Duplicate output of";
+      
+      for (UnsignedInt i=0; i<multiples.size(); i++)
+         errMsg = errMsg + " \"" + multiples[i] + "\"";
+      return outputWrapperTypes;
+   }
+   
+   
+   // Initialize arrays to be used
+   for (UnsignedInt i=0; i<outputSize; i++)
+   {
+      outputTypes.push_back("");;
+      outputNames.push_back("");;
+      outputDefs.push_back("");;
+   }
+   
+   // Go through each line in the function file
+   while (!inStream->eof())
+   {
+      if (GetLine(inStream, line))
+      {
+         line = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true, true);
+         
+         // Skip empty line or comment line
+         if (line[0] == '\0' || line[0] == '%')
+            continue;
+         
+         StringArray parts = GmatStringUtil::SeparateBy(line, " ,", true);
+         if (parts[0] != "Create")
+            continue;
+         
+         #if DBGLVL_FUNCTION_OUTPUT > 1
+         for (UnsignedInt i=0; i<parts.size(); i++)
+            MessageInterface::ShowMessage("   parts[%d]='%s'\n", i, parts[i].c_str());
+         #endif
+         
+         for (UnsignedInt i=0; i<outputSize; i++)
+         {
+            for (UnsignedInt j=2; j<parts.size(); j++)
+            {
+               GmatStringUtil::GetArrayIndex(parts[j], row, col, name, "[]");
+               
+               if (name == outputs[i])
+               {
+                  // add multiple output defs
+                  if (find(outputNames.begin(), outputNames.end(), name) != outputNames.end())
+                     multiples.push_back(name);
+                  
+                  outputNames[i] = name;
+                  outputTypes[i] = parts[1];
+                  outputDefs[i] = parts[j];
+                  
+                  #if DBGLVL_FUNCTION_OUTPUT > 1
+                  MessageInterface::ShowMessage
+                     ("   i=%d, type='%s', name='%s', def='%s'\n", i, parts[1].c_str(),
+                      name.c_str(), parts[j].c_str());
+                  #endif                  
+               }
+            }
+         }
+      }
+      else
+      {
+         errMsg = "Encountered an error reading a file";
+         return outputWrapperTypes;
+      }
+   }
+   
+   // find missing output definition
+   StringArray missing;
+   set_difference(outputs.begin(), outputs.end(),
+                  outputNames.begin(), outputNames.end(), back_inserter(missing));
+   
+   #if DBGLVL_FUNCTION_OUTPUT
+   MessageInterface::ShowMessage
+      ("   missing.size()=%d, multiples.size()=%d\n", missing.size(), multiples.size());
+   #endif
+   
+   if (missing.size() == 0 && multiples.size() == 0)
+   {
+      // if all output found, figure out the output wrapper types
+      for (UnsignedInt i=0; i<outputSize; i++)
+      {
+         if (outputTypes[i] == "Variable")
+         {
+            outputWrapperTypes.push_back(Gmat::VARIABLE);
+            outputRows.push_back(-1);
+            outputCols.push_back(-1);
+         }
+         else if (outputTypes[i] == "Array")
+         {
+            GmatStringUtil::GetArrayIndex(outputDefs[i], row, col, name, "[]");
+            
+            #if DBGLVL_FUNCTION_OUTPUT > 1
+            MessageInterface::ShowMessage
+               ("   name='%s', row=%d, col=%d\n", name.c_str(), row, col);
+            #endif
+            
+            outputWrapperTypes.push_back(Gmat::ARRAY);
+            outputRows.push_back(row);
+            outputCols.push_back(col);
+         }
+      }
+   }
+   else
+   {
+      if (missing.size() > 0)
+      {
+         errMsg1 = "Missing output declaration of";
+         for (UnsignedInt i=0; i<missing.size(); i++)
+            errMsg1 = errMsg1 + " \"" + missing[i] + "\"";
+      }
+      
+      if (multiples.size() > 0)
+      {
+         for (UnsignedInt i=0; i<multiples.size(); i++)
+            if (multiples[i] != "")
+               errMsg2 = errMsg2 + " \"" + multiples[i] + "\"";
+         
+         if (errMsg2 != "")
+         {
+            if (errMsg1 == "")
+               errMsg2 = "Multiple declaration of" + errMsg2;
+            else
+               errMsg2 = " and multiple declaration of" + errMsg2;
+         }
+      }
+      
+      errMsg = errMsg1 + errMsg2;
+   }
+   
+   
+   #if DBGLVL_FUNCTION_OUTPUT
+   MessageInterface::ShowMessage
+      ("GmatFileUtil::GetFunctionOutputTypes() returning %d outputWrapperTypes\n",
+       outputWrapperTypes.size());
+   for (UnsignedInt i=0; i<outputWrapperTypes.size(); i++)
+      MessageInterface::ShowMessage
+         ("   i=%d, outputWrapperTypes=%d, outputRows=%d, outputCols=%d\n", i,
+          outputWrapperTypes[i], outputRows[i], outputCols[i]);
+   #endif
+   
+   return outputWrapperTypes;
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray GetFileListFromDirectory(const std::string &dirName, bool addPath)
 //------------------------------------------------------------------------------
 /*
@@ -309,7 +517,7 @@ bool GmatFileUtil::GetLine(std::istream *is, std::string &line)
 StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
                                                    bool addPath)
 {
-   #ifdef DEBUG_FILELIST
+   #ifdef DBGLVL_FILELIST
    MessageInterface::ShowMessage
       ("GmatFileUtil::GetFileListFromDirectory() dirName=<%s>\n",
        dirName.c_str());
@@ -363,7 +571,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
             outFile = pathName + findData.cFileName;
          fileList.push_back(outFile);
          
-         #ifdef DEBUG_FILELIST
+         #ifdef DBGLVL_FILELIST
          MessageInterface::ShowMessage
             ("   > added %s to file list\n", findData.cFileName);
          #endif
@@ -381,7 +589,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
                outFile = pathName + findData.cFileName;
             fileList.push_back(outFile);
             
-            #ifdef DEBUG_FILELIST
+            #ifdef DBGLVL_FILELIST
             MessageInterface::ShowMessage
                ("   > added %s to file list\n", findData.cFileName);
             #endif
@@ -409,7 +617,7 @@ StringArray GmatFileUtil::GetFileListFromDirectory(const std::string &dirName,
    // add other operating system here
    #endif
    
-   #ifdef DEBUG_FILELIST
+   #ifdef DBGLVL_FILELIST
    MessageInterface::ShowMessage
       ("GmatFileUtil::GetFileListFromDirectory() returning %d files\n",
        fileList.size());
@@ -471,7 +679,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    textBuffer.push_back("filename1=" + filename1 + "\n");
    textBuffer.push_back("filename2=" + filename2 + "\n");
 
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
    MessageInterface::ShowMessage("filename1=%s\n");
    MessageInterface::ShowMessage("filename2=%s\n");
@@ -545,7 +753,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       minLines.push_back(1);
       maxLines.push_back(1);
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage
          ("column=%3d, item1=% e, item2=% e, diff=% e, minDiff=% e, maxDiff=% e\n",
           i, item1, item1, diff, minDiffs[i], maxDiffs[i]);
@@ -555,7 +763,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    //------------------------------------------
    // now start compare
    //------------------------------------------
-   #if DEBUG_COMPARE_REPORT > 2
+   #if DBGLVL_COMPARE_REPORT > 2
    for (int i=0; i<10; i++)
    {
       if (in1.eof() || in2.eof())
@@ -567,7 +775,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
 
       count++;
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage("============================== line # = %d\n", count);
       #endif
       
@@ -575,7 +783,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       in1.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
       
@@ -586,7 +794,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       if ((Integer)(tokens1.size()) != file1Cols)
          break;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       for (int i=0; i<numCols; i++)
          MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
       #endif
@@ -595,7 +803,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       in2.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
       #endif
       
@@ -606,7 +814,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       if ((Integer)(tokens2.size()) != file1Cols)
          break;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       for (int i=0; i<file1Cols; i++)
          MessageInterface::ShowMessage("tokens2[%d] = %s\n", i, tokens2[i].c_str());
       #endif
@@ -629,7 +837,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
             maxLines[i] = count;
          }
             
-         #if DEBUG_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_REPORT > 1
          MessageInterface::ShowMessage
             ("column=%3d, item1=% e, item2=% e, diff=% e, minDiff=% e, maxDiff=% e\n",
              i, item1, item2, diff, minDiffs[i], maxDiffs[i]);
@@ -644,7 +852,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       ToString(tol, false, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
 
@@ -666,7 +874,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
    }
    textBuffer.push_back(outLine);
    
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -703,7 +911,7 @@ StringArray& GmatFileUtil::Compare(const std::string &filename1,
       
       textBuffer.push_back(outLine);
       
-      #if DEBUG_COMPARE_REPORT
+      #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -736,7 +944,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    if (numDirsToCompare == 3)
       textBuffer.push_back("filename3=" + filename3 + "\n");
 
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
    MessageInterface::ShowMessage("numDirsToCompare=%3\n", numDirsToCompare);
    MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
@@ -860,7 +1068,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
          maxDiffs3.push_back(diff);
       }
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage
          ("column=%3d, baseItem=% e, item=% e, diff=% e, maxDiff=% e\n",
           i, baseItem, baseItem, diff, maxDiffs1[i]);
@@ -870,7 +1078,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    //------------------------------------------
    // now start compare
    //------------------------------------------
-   #if DEBUG_COMPARE_REPORT > 2
+   #if DBGLVL_COMPARE_REPORT > 2
    for (int i=0; i<10; i++)
    {
       if (baseIn.eof() || in1.eof())
@@ -886,7 +1094,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       
       count++;
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage("============================== line # = %d\n", count);
       #endif
 
@@ -896,7 +1104,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
       #endif
       
@@ -907,7 +1115,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       if ((Integer)(baseTokens.size()) != baseCols)
          break;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       for (int i=0; i<numCols; i++)
          MessageInterface::ShowMessage("baseTokens[%d] = %s\n", i, baseTokens[i].c_str());
       #endif
@@ -918,7 +1126,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       in1.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
       
@@ -935,7 +1143,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       in2.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
       #endif
       
@@ -954,7 +1162,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
          in3.getline(buffer, BUFFER_SIZE-1);
          line = buffer;
       
-         #if DEBUG_COMPARE_REPORT > 2
+         #if DBGLVL_COMPARE_REPORT > 2
          MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
          #endif
       
@@ -966,7 +1174,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
             break;
       }
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       for (int i=0; i<baseCols; i++)
          MessageInterface::ShowMessage("tokens1[%d] = %s\n", i, tokens1[i].c_str());
       #endif
@@ -992,7 +1200,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
                maxDiffs3[i] = diff;
          }
          
-         #if DEBUG_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_REPORT > 1
          MessageInterface::ShowMessage
             ("column=%3d, baseItem=% e, item=% e, diff=% e, maxDiff1=% e\n",
              i, baseItem, item, diff, maxDiffs1[i]);
@@ -1007,7 +1215,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       ToString(tol, false, true, 7, 6) + "\n\n";
    textBuffer.push_back(outLine);
 
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
 
@@ -1027,7 +1235,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
    
    textBuffer.push_back(outLine);
    
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -1065,7 +1273,7 @@ StringArray& GmatFileUtil::Compare(Integer numDirsToCompare, const std::string &
       
       textBuffer.push_back(outLine);
       
-      #if DEBUG_COMPARE_REPORT
+      #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -1103,7 +1311,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    if (numDirsToCompare >= 3)
       textBuffer.push_back("filename3=" + filename3 + "\n");
    
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("\n======================================== Compare Utility\n");
    MessageInterface::ShowMessage("numDirsToCompare=%3\n", numDirsToCompare);
    MessageInterface::ShowMessage("basefile =%s\n", basefilename.c_str());
@@ -1169,7 +1377,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       
       count++;
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage("============================== line # = %d\n", count);
       #endif
       
@@ -1179,7 +1387,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       baseIn.getline(buffer, BUFFER_SIZE-1);
       line0 = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> base file: buffer = %s\n", buffer);
       #endif
       
@@ -1189,7 +1397,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       in1.getline(buffer, BUFFER_SIZE-1);
       line1 = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 2
+      #if DBGLVL_COMPARE_REPORT > 2
       MessageInterface::ShowMessage("===> file 1: buffer = %s\n", buffer);
       #endif
 
@@ -1204,7 +1412,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          in2.getline(buffer, BUFFER_SIZE-1);
          line2 = buffer;
       
-         #if DEBUG_COMPARE_REPORT > 2
+         #if DBGLVL_COMPARE_REPORT > 2
          MessageInterface::ShowMessage("===> file 2: buffer = %s\n", buffer);
          #endif
 
@@ -1220,7 +1428,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
          in3.getline(buffer, BUFFER_SIZE-1);
          line3 = buffer;
       
-         #if DEBUG_COMPARE_REPORT > 2
+         #if DBGLVL_COMPARE_REPORT > 2
          MessageInterface::ShowMessage("===> file 3: buffer = %s\n", buffer);
          #endif
          
@@ -1234,14 +1442,14 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
    outLine = "Total lines compared: " + ToString(count) + "\n\n";
    textBuffer.push_back(outLine);
 
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
    outLine = "File1 - Number of Lines different: " + ToString(file1DiffCount) + "\n";
    textBuffer.push_back(outLine);
    
-   #if DEBUG_COMPARE_REPORT
+   #if DBGLVL_COMPARE_REPORT
    MessageInterface::ShowMessage("%s", outLine.c_str());
    #endif
    
@@ -1250,7 +1458,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       outLine = "File2 - Number of Lines different: " + ToString(file2DiffCount) + "\n";
       textBuffer.push_back(outLine);
       
-      #if DEBUG_COMPARE_REPORT
+      #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -1260,7 +1468,7 @@ StringArray& GmatFileUtil::CompareLines(Integer numDirsToCompare,
       outLine = "File3 - Number of Lines different: " + ToString(file3DiffCount) + "\n";
       textBuffer.push_back(outLine);
       
-      #if DEBUG_COMPARE_REPORT
+      #if DBGLVL_COMPARE_REPORT
       MessageInterface::ShowMessage("%s", outLine.c_str());
       #endif
    }
@@ -1298,7 +1506,7 @@ bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
       in.getline(buffer, BUFFER_SIZE-1);
       line = buffer;
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage("file length=%d, line = %s\n",
                                     line.length(), line.c_str());
       #endif
@@ -1312,7 +1520,7 @@ bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
       {
          ch = line[i];
          
-         #if DEBUG_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_REPORT > 1
          MessageInterface::ShowMessage("%c", ch);
          #endif
          
@@ -1324,7 +1532,7 @@ bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
          }
       }
       
-      #if DEBUG_COMPARE_REPORT > 1
+      #if DBGLVL_COMPARE_REPORT > 1
       MessageInterface::ShowMessage("\n");
       #endif
       
@@ -1344,7 +1552,7 @@ bool GmatFileUtil::SkipHeaderLines(ifstream &in, StringArray &tokens)
          rval = atof(tokens[i].c_str());
          colCount++;
          
-         #if DEBUG_COMPARE_REPORT > 1
+         #if DBGLVL_COMPARE_REPORT > 1
          MessageInterface::ShowMessage("rval=%f\n", rval);
          #endif
       }
