@@ -93,7 +93,12 @@ Function::~Function()
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
    GmatBase        (f),
-   functionPath    (f.functionPath)
+   functionPath    (f.functionPath),
+   functionName    (f.functionName),
+   inputNames      (f.inputNames),
+   outputNames     (f.outputNames)//,
+   //inputArgMap     (f.inputArgMap), // do I want to do this?
+   //outputArgMap    (f.outputArgMap) // do I want to do this?
 {
    parameterCount = FunctionParamCount;
 }
@@ -118,6 +123,11 @@ Function& Function::operator=(const Function &f)
    GmatBase::operator=(f);
    
    functionPath  = f.functionPath;
+   functionName  = f.functionName;
+   inputNames    = f.inputNames;
+   outputNames   = f.outputNames;
+   //inputArgMap   = f.inputArgMap;   // do I want to do this?
+   //outputArgMap  = f.outputArgMap;  // do I want to do this?
    
    return *this;
 }
@@ -159,36 +169,51 @@ void Function::SetOutputTypes(WrapperTypeArray &outputTypes,
 }
 
 
-//------------------------------------------------------------------------------
-// virtual ElementWrapper*  GetOutputArgument(Integer argNumber)
-//------------------------------------------------------------------------------
-/*
- * Implements GMAT FUNCTIONS design 27.2.2.3 GmatFunction Execution
- * step 4 of "Steps Performed on the Firstexecution"
- */
-//------------------------------------------------------------------------------
-ElementWrapper* Function::GetOutputArgument(Integer argNumber)
-{
-   if (argNumber > (Integer)outputNames.size() ||
-       argNumber > (Integer)outputArgMap.size())
-      return NULL; // Should we throw an exception instead?
-   
-   // Get output name specified by the argNumber
-   std::string argName = outputNames[argNumber];
-   if (outputArgMap.find(argName) != outputArgMap.end())
-      return outputArgMap[argName];
-   else
-      return NULL; // Should we throw an exception instead?
-   
-}
-
 
 //------------------------------------------------------------------------------
 // bool Initialize()
 //------------------------------------------------------------------------------
 bool Function::Initialize()
 {
-   return true;  // TBD
+   #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage("Entering Function::Initialize for function %s\n",
+            functionName.c_str());
+      MessageInterface::ShowMessage("   and FCS is %s set.\n", (fcs? "correctly" : "NOT"));
+      MessageInterface::ShowMessage("   Pointer for FCS is %p\n", fcs);
+      MessageInterface::ShowMessage("   First command in fcs is %s\n",
+            (fcs->GetTypeName()).c_str());         
+   #endif
+   if (!fcs) return false;
+   GmatCommand *current = fcs;
+   while (current)
+   {
+      #ifdef DEBUG_FUNCTION
+         if (!objectStore)  MessageInterface::ShowMessage("OBJECT STORE is NULL!!!\n");
+         if (!globalObjectStore)  MessageInterface::ShowMessage("GLOBAL OBJECT STORE is NULL!!!\n");
+         if (!solarSys)  MessageInterface::ShowMessage("SOLAR SYSTEM is NULL!!!\n");
+         if (!forces)  MessageInterface::ShowMessage("TRANSIENT FORCES is NULL!!!\n");
+         if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
+         MessageInterface::ShowMessage(" ... or everything is NOT NULL ...\n");
+         MessageInterface::ShowMessage("   Now about to initialize command %s\n",
+               (current->GetName()).c_str());         
+      #endif
+      #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage("   Now about to initialize command %s\n",
+               (current->GetTypeName()).c_str());         
+      #endif
+      current->SetObjectMap(objectStore);
+      MessageInterface::ShowMessage("Object Store set ...\n"); // ********
+      current->SetGlobalObjectMap(globalObjectStore);
+      MessageInterface::ShowMessage("Global object Store set ...\n"); // ********
+      current->SetSolarSystem(solarSys);
+      MessageInterface::ShowMessage("Solar System set ...\n"); // ********
+      current->SetTransientForces(forces);      
+      MessageInterface::ShowMessage("Forces set ...\n"); // ********
+      if (!(current->Initialize()))
+         return false;
+      current = current->GetNext();
+   }
+   return true;
 }
 
 
@@ -197,7 +222,16 @@ bool Function::Initialize()
 //------------------------------------------------------------------------------
 bool Function::Execute()
 {
-   return true;  // TBD
+   if (!fcs) return false;
+   GmatCommand *current = fcs;
+   while (current)
+   {
+      if (!(current->Execute()))
+         return false;
+      current = current->GetNext();
+   }
+   //fcs->RunComplete();   // check this out first
+   return true; 
 }
 
 
@@ -259,27 +293,101 @@ Rmatrix Function::MatrixEvaluate()
    return rmat;
 }
 
+void Function::SetObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   objectStore = map;
+}
+
+void Function::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   globalObjectStore = map;
+}
 
 void Function::SetSolarSystem(SolarSystem *ss)
 {
    solarSys = ss;
 }
 
-void Function::SetTransientForces(std::vector<PhysicalModel*> &tf)
+void Function::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
 }
 
 bool Function::IsFunctionControlSequenceSet()
 {
-   if (fcs) return true;
+   if (fcs != NULL) return true;
    return false;
 }
 
 bool Function::SetFunctionControlSequence(GmatCommand *cmd)
 {
+   #ifdef DEBUG_FUNCTION
+      if (!cmd) MessageInterface::ShowMessage("Trying to set FCS on %s, but it is NULL!!!\n",
+            functionName.c_str());
+      else
+      {
+         MessageInterface::ShowMessage("Setting FCS for function %s with FCS pointer = %p\n",
+               functionName.c_str(), cmd);  
+         MessageInterface::ShowMessage("First command is a %s\n", (cmd->GetTypeName()).c_str());
+      }
+   #endif
    fcs = cmd;
    return true;
+}
+
+bool Function::SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper)
+{
+   if (inputArgMap.find(forName) == inputArgMap.end())
+   {
+      std::string errMsg = "Unknown input argument \"" + forName;
+      errMsg += "\" for function \"" + functionName + "\"";
+      throw FunctionException(errMsg);
+   }
+   inputArgMap[forName] = wrapper;
+   return true;
+}
+
+//------------------------------------------------------------------------------
+// virtual ElementWrapper*  GetOutputArgument(Integer argNumber)
+//------------------------------------------------------------------------------
+/*
+ * Implements GMAT FUNCTIONS design 27.2.2.3 GmatFunction Execution
+ * step 4 of "Steps Performed on the Firstexecution"
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* Function::GetOutputArgument(Integer argNumber)
+{
+   if ((argNumber < 0) || (argNumber > (Integer) outputNames.size()) ||
+       (argNumber> (Integer) outputArgMap.size()))
+   {
+      std::string errMsg = "Function error: argument number out-of-range\n";
+      throw FunctionException(errMsg);
+   }
+   std::string argName = outputNames.at(argNumber);
+   return GetOutputArgument(argName);
+}
+
+
+ElementWrapper* Function::GetOutputArgument(const std::string &byName)
+{
+   if (outputArgMap.find(byName) == outputArgMap.end())
+   {
+      std::string errMsg = "Function error: output \"" + byName;
+      errMsg += "\" from function \"" + functionName;
+      errMsg += "\" does not exist.\n";
+      throw FunctionException(errMsg);
+   }
+   return outputArgMap[byName];
+}
+
+void Function::AddAutomaticObject(GmatBase *obj)
+{
+   automaticObjects.push_back(obj);
+}
+
+ObjectArray Function::GetAutomaticObjects() const
+{
+   return automaticObjects;
 }
 
 //------------------------------------------------------------------------------
@@ -576,8 +684,9 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
       {
          if (inputArgMap.find(value) == inputArgMap.end())
          {
-            inputArgMap[value] = NULL;
+            //inputArgMap[value] = NULL;
             inputNames.push_back(value);
+            inputArgMap.insert(std::make_pair(value,(ElementWrapper*) NULL));
          }
          else
             throw FunctionException
@@ -590,8 +699,9 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
       {
          if (outputArgMap.find(value) == outputArgMap.end())
          {
-            outputArgMap[value] = NULL;
+            //outputArgMap[value] = NULL;
             outputNames.push_back(value);
+            outputArgMap.insert(std::make_pair(value,(ElementWrapper*) NULL));
          }
          else
             throw FunctionException

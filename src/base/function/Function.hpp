@@ -43,16 +43,26 @@ public:
    virtual void         SetOutputTypes(WrapperTypeArray &outputTypes,
                                        IntegerArray &rowCounts,
                                        IntegerArray &colCounts);
-   virtual ElementWrapper*
-                        GetOutputArgument(Integer argNumber);
    virtual bool         Initialize();
    virtual bool         Execute();
    virtual Real         Evaluate();
    virtual Rmatrix      MatrixEvaluate();
+   virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetSolarSystem(SolarSystem *ss);
-   virtual void         SetTransientForces(std::vector<PhysicalModel*> &tf);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual bool         IsFunctionControlSequenceSet();
    virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
+   
+   virtual bool         SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper);
+   virtual ElementWrapper*
+                        GetOutputArgument(Integer argNumber);
+   virtual ElementWrapper*
+                        GetOutputArgument(const std::string &byName);
+   
+   // methods to set/get the automatic objects
+   virtual void         AddAutomaticObject(GmatBase *obj);
+   virtual ObjectArray  GetAutomaticObjects() const;
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
@@ -100,13 +110,22 @@ protected:
    /// Output column count used for returning one Array type
    IntegerArray outputColCounts;
    
+   /// Object store for the Function 
+   std::map<std::string, GmatBase *>
+                        *objectStore;
+   /// Object store obtained from the Sandbox
+   std::map<std::string, GmatBase *>
+                        *globalObjectStore;
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
    /// transient forces to pass to the function
    std::vector<PhysicalModel *> 
-                        forces;
+                        *forces;
    /// the function control sequence
    GmatCommand          *fcs;
+   /// objects automatically created on parsing (but for whom a references object cannot be
+   /// set at that time)
+   ObjectArray          automaticObjects;
 
    enum
    {
