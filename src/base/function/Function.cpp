@@ -57,11 +57,14 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &name) :
-   GmatBase        (Gmat::FUNCTION, typeStr, name),
-   functionPath    (""),
-   functionName    (""),
-   solarSys        (NULL),
-   fcs             (NULL)
+   GmatBase          (Gmat::FUNCTION, typeStr, name),
+   functionPath      (""),
+   functionName      (""),
+   objectStore       (NULL),
+   globalObjectStore (NULL),
+   solarSys          (NULL),
+   forces            (NULL),
+   fcs               (NULL)
 {
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back(typeStr);
@@ -92,13 +95,18 @@ Function::~Function()
  */
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
-   GmatBase        (f),
-   functionPath    (f.functionPath),
-   functionName    (f.functionName),
-   inputNames      (f.inputNames),
-   outputNames     (f.outputNames)//,
-   //inputArgMap     (f.inputArgMap), // do I want to do this?
-   //outputArgMap    (f.outputArgMap) // do I want to do this?
+   GmatBase          (f),
+   functionPath      (f.functionPath),
+   functionName      (f.functionName),
+   inputNames        (f.inputNames),
+   outputNames       (f.outputNames),
+   //inputArgMap       (f.inputArgMap), // do I want to do this?
+   //outputArgMap      (f.outputArgMap), // do I want to do this?
+   objectStore       (NULL),
+   globalObjectStore (NULL),
+   solarSys          (NULL),
+   forces            (NULL),
+   fcs               (NULL)
 {
    parameterCount = FunctionParamCount;
 }
@@ -122,12 +130,17 @@ Function& Function::operator=(const Function &f)
    
    GmatBase::operator=(f);
    
-   functionPath  = f.functionPath;
-   functionName  = f.functionName;
-   inputNames    = f.inputNames;
-   outputNames   = f.outputNames;
-   //inputArgMap   = f.inputArgMap;   // do I want to do this?
-   //outputArgMap  = f.outputArgMap;  // do I want to do this?
+   functionPath      = f.functionPath;
+   functionName      = f.functionName;
+   objectStore       = NULL;
+   globalObjectStore = NULL;
+   solarSys          = f.solarSys;
+   forces            = f.forces;
+   fcs               = NULL;
+   inputNames        = f.inputNames;
+   outputNames       = f.outputNames;
+   //inputArgMap       = f.inputArgMap;   // do I want to do this?
+   //outputArgMap      = f.outputArgMap;  // do I want to do this?
    
    return *this;
 }
