@@ -602,6 +602,7 @@ void GmatCommand::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 //------------------------------------------------------------------------------
 void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
+   forces = tf;
 }
 
 
