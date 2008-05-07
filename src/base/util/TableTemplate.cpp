@@ -303,7 +303,9 @@ TableTemplate<T>::SetSize(int r, int c)
 {
    if (isSizedD == true)
    {
-      throw TableTemplateExceptions::TableAlreadySized();
+      //throw TableTemplateExceptions::TableAlreadySized();
+      // wcs = 2008.05.07 - we need to be able to resize
+      delete [] elementD;
    }
 
    if ((r < 0) || (c < 0))
