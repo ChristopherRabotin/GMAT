@@ -21,6 +21,7 @@
 #include "FunctionException.hpp"
 #include "StringUtil.hpp"
 #include "Array.hpp"
+#include "ElementWrapper.hpp"
 
 //#define DEBUG_FUNCTION_MANAGER
 
@@ -112,6 +113,11 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
    return *this;
 }
 
+void FunctionManager::SetObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   localObjectStore = map;
+}
+
 void FunctionManager::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 {
    globalObjectStore = map;
@@ -123,7 +129,7 @@ void FunctionManager::SetSolarSystem(SolarSystem *ss)
    if ((f) && (f->GetTypeName() == "GmatFunction"))   f->SetSolarSystem(ss);
 }
 
-void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> &tf)
+void FunctionManager::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
    if ((f) && (f->GetTypeName() == "GmatFunction"))   f->SetTransientForces(tf);
@@ -212,25 +218,88 @@ void FunctionManager::SetOutputs(const StringArray &outputs)
 //virtual bool         Initialize();
 bool FunctionManager::Execute()
 {
+   GmatBase *obj, *itsClone;
+   std::string objName;
    if (f == NULL)
    {
       std::string errMsg = "FunctionManager:: Unable to execute Function """;
       errMsg += fName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
+   // Initialize the Validator - I think I need to do this each time - or do I?
+   validator.SetSolarSystem(solarSys);
+   combinedObjectStore = localObjectStore;
+   std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+      combinedObjectStore->insert(std::make_pair(omi->first, omi->second));
+   validator.SetObjectMap(combinedObjectStore);
+   #ifdef DEBUG_FUNCTION_MANAGER
+      MessageInterface::ShowMessage("in FM::Execute - just set Validator's object map\n");
+   #endif
+   
    if (firstExecution)
    {
-      // do a bunch of stuff here to set up FOS, etc.
-      if (!(f->Initialize()))
+      #ifdef DEBUG_FUNCTION_MANAGER
+         MessageInterface::ShowMessage("in FM::Execute - firstExecution\n");
+      #endif
+      functionObjectStore.clear();
+      outObjects.clear();
+      // set up the FOS with the input objects
+      for (unsigned int ii=0; ii<ins.size(); ii++)
       {
-         std::string errMsg = "FunctionManager:: Error initializing function \"";
-         errMsg += f->GetStringParameter("FunctionName") + "\"\n";
-         throw FunctionException(errMsg);
+         if (!(obj = FindObject(ins.at(ii))))
+         {
+            std::string errMsg = "Input \"" + ins.at(ii);
+            errMsg += " not found for function \"" + fName + "\"";
+            throw FunctionException(errMsg);
+         }
+         itsClone = obj->Clone();
+         objName = f->GetStringParameter("Input", ii);
+         functionObjectStore.insert(std::make_pair(objName,obj));
+         ElementWrapper *wrapper = validator.CreateElementWrapper(objName);
+         bool inputOK = f->SetInputElementWrapper(objName, wrapper);
+         if (!inputOK)
+         {
+            std::string errMsg = "Error setting ElementWrapper on function \"" + fName;
+            errMsg += "\" for input \"" + objName + "\"\n";
+            throw FunctionException(errMsg);
+         }
       }
+      for (unsigned int jj = 0; jj < outs.size(); jj++)
+      {
+         if (!(obj = FindObject(outs.at(jj))))
+         {
+            std::string errMsg = "Output \"" + outs.at(jj);
+            errMsg += " not found for function \"" + fName + "\"";
+            throw FunctionException(errMsg);
+         }
+         outObjects.push_back(obj);
+      }
+      f->SetGlobalObjectMap(globalObjectStore);
+      f->SetSolarSystem(solarSys);
+      f->SetTransientForces(forces);
       firstExecution = false;
    }
-   // do some stuff here to re-setup stuff
+   else
+   {
+      ; // do stuff here to re-setup the FOS, etc.
+        // TBD
+   }
+   // pass the FOS into the function
+   f->SetObjectMap(&functionObjectStore);
+   // must re-initialize the function each time, as it may be called in more than
+   // one place
+   if (!(f->Initialize()))
+   {
+      std::string errMsg = "FunctionManager:: Error initializing function \"";
+      errMsg += f->GetStringParameter("FunctionName") + "\"\n";
+      throw FunctionException(errMsg);
+   }
    return f->Execute();
+   // retrieve the output data here ................
+   // TBD
+   // delete the clones here ...
+   // TBD
 }
 
 Real FunctionManager::Evaluate()
@@ -255,5 +324,29 @@ Rmatrix FunctionManager::MatrixEvaluate()
       }
       return f->MatrixEvaluate();
    }
+}
+
+//------------------------------------------------------------------------------
+// GmatBase* FunctionManager::FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* FunctionManager::FindObject(const std::string &name)
+{
+   std::string newName = name;
+   
+   // Ignore array indexing of Array
+   std::string::size_type index = name.find('(');
+   if (index != name.npos)
+      newName = name.substr(0, index);
+   // Check for the object in the Local Object Store (LOS) first
+   if (localObjectStore->find(newName) == localObjectStore->end())
+   {
+     // If not found in the LOS, check the Global Object Store (GOS)
+      if (globalObjectStore->find(newName) == globalObjectStore->end())
+         return NULL;
+      else return (*globalObjectStore)[newName];
+   }
+   else
+      return (*localObjectStore)[newName];
+   return NULL; // should never get to this point
 }
 

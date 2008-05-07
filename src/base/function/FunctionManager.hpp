@@ -30,9 +30,9 @@
 #include "Function.hpp"
 #include "StringUtil.hpp"
 #include "TextParser.hpp"
-#include "ElementWrapper.hpp"
 #include "SolarSystem.hpp"
 #include "PhysicalModel.hpp"
+#include "Validator.hpp"
 
 
 /**
@@ -53,10 +53,10 @@ public:
    FunctionManager&         operator=(const FunctionManager &fm);
    
    
-   //virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetSolarSystem(SolarSystem *ss);
-   virtual void         SetTransientForces(std::vector<PhysicalModel*> &tf);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetFunctionName(const std::string &itsName);
    virtual std::string  GetFunctionName() const;
    virtual void         SetFunction(Function *theFunction);
@@ -77,14 +77,20 @@ protected:
    /// Object store for the Function 
    std::map<std::string, GmatBase *>
                         functionObjectStore;
+   /// Object store obtained from the caller
+   std::map<std::string, GmatBase *>
+                        *localObjectStore;
    /// Object store obtained from the Sandbox
    std::map<std::string, GmatBase *>
                         *globalObjectStore;
+   // Combined object store, used by Validator
+   std::map<std::string, GmatBase *>
+                        *combinedObjectStore;
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
    /// transient forces to pass to the function
    std::vector<PhysicalModel *> 
-                        forces;
+                        *forces;
    /// Name of the function this FunctionManager manages
    std::string          fName;
    /// the function that this FunctionManager manages
@@ -96,10 +102,13 @@ protected:
    /// flag indicating whether or not its the first execution
    bool                 firstExecution;
    /// Output Objects
-   ObjectArray          outObjects; // need ElementWrapper array?
+   ObjectArray          outObjects; 
+   // Validator used to create the ElementWrappers
+   Validator            validator;
    
    //virtual bool         BuildFunctionObjectStore();
    //virtual bool         RefreshFunctionObjectStore();
+   GmatBase* FindObject(const std::string &name);
    
 };
 
