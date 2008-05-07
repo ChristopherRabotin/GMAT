@@ -1962,10 +1962,21 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    if (objTypeStr == "Propagator")
       objTypeStr = "PropSetup";
    
+   #ifdef DEBUG_ASSEMBLE_CREATE
+      MessageInterface::ShowMessage("About to create reference object for Create command\n");
+   #endif
    GmatBase *obj = CreateObject(objTypeStr, name, false);
    
    if (obj == NULL)
+   {
+      #ifdef DEBUG_ASSEMBLE_CREATE
+         MessageInterface::ShowMessage("Reference object for Create command is NULL??\n");
+      #endif
       return false;
+   }
+   
+   // Send the object to the Create command
+   cmd->SetRefObject(obj, Gmat::UNKNOWN_OBJECT, obj->GetName());
    
    #ifdef DEBUG_ASSEMBLE_CREATE
    MessageInterface::ShowMessage
