@@ -40,11 +40,11 @@
 //#define DEBUG_SANDBOX_INIT 1  // there's something wrong with some debug here ... @todo
 //#define DEBUG_SANDBOX_INIT_CS 1
 //#define DEBUG_SANDBOX_INIT_PARAM 1
-//#define DEBUG_SANDBOX_RUN 2
+//#define DEBUG_SANDBOX_RUN 1
 //#define DEBUG_SANDBOX_OBJECT_MAPS
 //#define DEBUG_MODERATOR_CALLBACK
 //#define DEBUG_FM_INITIALIZATION
-#define DEBUG_SANDBOX_GMATFUNCTION
+//#define DEBUG_SANDBOX_GMATFUNCTION
 
 #ifdef DEBUG_SANDBOX_INIT
       std::map<std::string, GmatBase *>::iterator omIter;
@@ -1810,8 +1810,8 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
                fcsCmd->SetSolarSystem(solarSys);
                fcsCmd->SetTransientForces(&transientForces);
                OK += HandleGmatFunction(fcsCmd, &globalObjectMap);
-               if (!(fcsCmd->Initialize())) 
-                  return false;
+               ////if (!(fcsCmd->Initialize())) 
+               ////   return false;
                if (fcsCmd->GetTypeName() == "CallFunction") 
                   ((CallFunction *)fcsCmd)->SetInternalCoordSystem(internalCoordSys);
             }
