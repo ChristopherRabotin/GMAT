@@ -49,6 +49,7 @@ Create::PARAMETER_TYPE[CreateParamCount - ManageObjectParamCount] =
 Create::Create() :
    ManageObject("Create")
 {
+   creations.clear();
 }
 
 
@@ -186,6 +187,10 @@ GmatBase* Create::GetRefObject(const Gmat::ObjectType type,
 bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name)
 {
+   #ifdef DEBUG_CREATE
+      MessageInterface::ShowMessage("Create::SetRefObject() entered, with object %s\n",
+            name.c_str());
+   #endif
    if (creations.size() > 0)
       throw CommandException(
             "Reference object for Create command already set.\n"); 
