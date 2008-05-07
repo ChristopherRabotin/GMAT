@@ -242,6 +242,21 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
 }
 
 //------------------------------------------------------------------------------
+//  void SetObjectMap(std::map<std::string, GmatBase *> *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the local asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void CallFunction::SetObjectMap(std::map<std::string, GmatBase *> *map)
+{
+   objectMap = map;
+   fm.SetObjectMap(map);
+}
+
+//------------------------------------------------------------------------------
 //  void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 //------------------------------------------------------------------------------
 /**
@@ -285,6 +300,7 @@ void CallFunction::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
       
       fm.SetFunction(mFunction);
    }
+   fm.SetGlobalObjectMap(map);
    
    #ifdef DEBUG_GLOBAL_OBJECT_MAP
    MessageInterface::ShowMessage("CallFunction::SetGlobalObjectMap() exiting\n");
@@ -819,6 +835,9 @@ bool CallFunction::Initialize()
          MessageInterface::ShowMessage("CallFunction::Initialize: Initializing GmatFunction '%s'\n",
             mFunction->GetName().c_str());
       #endif
+      fm.SetSolarSystem(solarSys);
+      fm.SetTransientForces(forces);
+      ;  // NoOp, for now at least 
       /*   
       if (callcmds == NULL)
          throw CommandException(

@@ -53,8 +53,9 @@ public:
                        GetGeneratingString(Gmat::WriteMode mode,
                                            const std::string &prefix = "",
                                            const std::string &useName = "");
-   // override this to find Function object and set on FunctionManager
-   virtual void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
+   // override these to set on FunctionManager (and find function object in GOS)
+   virtual void        SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual void        SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
 
 
    virtual bool TakeAction(const std::string &action,
