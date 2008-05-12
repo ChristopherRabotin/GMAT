@@ -11,7 +11,8 @@ gmatTopic = 'GMAT-MATLAB';
 % if computer is 'PCWIN' call dde function to initialize
 % conversation with GMAT
 %-----------------------------------------------------------
-if strcmp(computer,'PCWIN')
+%if strcmp(computer,'PCWIN')
+if ispc
    gmatChannel = ddeinit(gmatService, gmatTopic);
 else
 %   disp('OpenGMAT(): Only PC windows is supported at this time');
