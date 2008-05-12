@@ -53,6 +53,12 @@ end
 str = [str ';'];
 %%disp(str);
 
+% Check if it is unix (MacOS X or Linux)
+if isunix
+   SendGMAT('Poke',str); 
+   return;
+end
+
 %-------------------------------------------------
 % call dde function to send string
 %-------------------------------------------------
