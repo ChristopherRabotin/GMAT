@@ -837,6 +837,7 @@ bool CallFunction::Initialize()
       #endif
       fm.SetSolarSystem(solarSys);
       fm.SetTransientForces(forces);
+      fm.SetGlobalObjectMap(globalObjectMap);
       ;  // NoOp, for now at least 
       /*   
       if (callcmds == NULL)
@@ -881,6 +882,7 @@ bool CallFunction::AddInputParameter(const std::string &paramName, Integer index
       mInputListNames.push_back(paramName);
       mNumInputParams = mInputListNames.size();
       mInputList.push_back(NULL);
+      fm.AddInput(paramName);
       return true;
    }
    
@@ -898,6 +900,7 @@ bool CallFunction::AddOutputParameter(const std::string &paramName, Integer inde
       mOutputListNames.push_back(paramName);
       mNumOutputParams = mOutputListNames.size();
       mOutputList.push_back(NULL);
+      fm.AddOutput(paramName);      
       return true;
    }
 
