@@ -160,6 +160,11 @@ bool Create::SetStringParameter(const Integer id,
 {
    if (id == OBJECT_TYPE)
    {
+      #ifdef DEBUG_CREATE
+         MessageInterface::ShowMessage(
+               "Create::SetStringParameter() setting object type to:  %s\n",
+               value.c_str());
+      #endif
       objType = value;
       return true;
    }
@@ -277,6 +282,12 @@ bool Create::Initialize()
          creations.at(jj)->SetName(objectNames.at(jj));
       }
    }
+   #ifdef DEBUG_CREATE
+      MessageInterface::ShowMessage("Exiting Create::Initialize()\n");
+      MessageInterface::ShowMessage("  and creations list is:\n");
+      for (unsigned int ii=0;ii<creations.size();ii++)
+         MessageInterface::ShowMessage("   %d: %s\n", ii, ((creations.at(ii))->GetName()).c_str());
+   #endif
    return true;
 }
 
@@ -296,6 +307,15 @@ bool Create::Execute()
    #ifdef DEBUG_CREATE
       MessageInterface::ShowMessage("Create::Execute() entered, for object type %s\n",
             objType.c_str());
+      std::map<std::string, GmatBase *>::iterator omi;
+      MessageInterface::ShowMessage("   and at the start,  LOS contains:\n");
+      for (omi = objectMap->begin(); omi != objectMap->end(); ++omi)
+         MessageInterface::ShowMessage("    %s of type %s\n",
+               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
+      MessageInterface::ShowMessage("   and at the start, sGOS contains:\n");
+      for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
+         MessageInterface::ShowMessage("    %s of type %s\n",
+               (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
    #endif
    bool isOK = true;
    StringArray useThese = objectNames;
@@ -343,6 +363,18 @@ bool Create::Execute()
       if ((creations.at(ii))->GetIsGlobal()) 
          isOK += MakeGlobal(useThese.at(ii));
    }
+   #ifdef DEBUG_CREATE
+      std::map<std::string, GmatBase *>::iterator omIter;
+      MessageInterface::ShowMessage("Exiting Create::Execute()\n");
+      MessageInterface::ShowMessage("   and LOS contains:\n");
+      for (omIter = objectMap->begin(); omIter != objectMap->end(); ++omIter)
+         MessageInterface::ShowMessage("    %s of type %s\n",
+               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
+      MessageInterface::ShowMessage("   and GOS contains:\n");
+      for (omIter = globalObjectMap->begin(); omIter != globalObjectMap->end(); ++omIter)
+         MessageInterface::ShowMessage("    %s of type %s\n",
+               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
+   #endif
    return isOK;
 }
 
@@ -360,6 +392,11 @@ void Create::SetArrayInfo()
    for (unsigned int ii = 0; ii < sz; ii++)
    {
       GmatStringUtil::GetArrayIndex(objectNames.at(ii), r, c, itsName, "[]");
+      #ifdef DEBUG_CREATE
+         MessageInterface::ShowMessage(
+               "Create::SetArrayInfo() setting array name, row, column to:  %s  %d  %d\n",
+               itsName.c_str(), r, c);
+      #endif
       arrayNames.push_back(itsName);
       rows.push_back(r);
       columns.push_back(c);
