@@ -99,10 +99,17 @@ protected:
    StringArray          ins;
    /// the list of output strings for this call of the function
    StringArray          outs;
+   /// Saved input wrappers - need to save in order to resend to function at each call
+   /// (since the same function may be called from many places)
+   std::vector<ElementWrapper *> 
+                        inputWrappers;
+   /// wrappers for the output objects
+   std::vector<ElementWrapper *> 
+                        outputWrappers;
    /// flag indicating whether or not its the first execution
    bool                 firstExecution;
    /// Output Objects
-   ObjectArray          outObjects; 
+   //ObjectArray          outObjects; 
    // Validator used to create the ElementWrappers
    Validator            validator;
    
