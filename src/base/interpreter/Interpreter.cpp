@@ -936,6 +936,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
    // Check for CallFunction
    if (type[0] == '[')
    {
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("Interpreter::CreateCommand() detecting [ and creating CallFunction ...\n");
+      #endif
       cmd = AppendCommand("CallFunction", retFlag, inCmd);
       desc1 = type +  "=" + desc;
       cmd->SetGeneratingString(desc1);
