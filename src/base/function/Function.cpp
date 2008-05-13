@@ -201,27 +201,14 @@ bool Function::Initialize()
    while (current)
    {
       #ifdef DEBUG_FUNCTION
-         if (!objectStore)  MessageInterface::ShowMessage("OBJECT STORE is NULL!!!\n");
-         if (!globalObjectStore)  MessageInterface::ShowMessage("GLOBAL OBJECT STORE is NULL!!!\n");
-         if (!solarSys)  MessageInterface::ShowMessage("SOLAR SYSTEM is NULL!!!\n");
-         if (!forces)  MessageInterface::ShowMessage("TRANSIENT FORCES is NULL!!!\n");
          if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
-         MessageInterface::ShowMessage(" ... or everything is NOT NULL ...\n");
-         MessageInterface::ShowMessage("   Now about to initialize command %s\n",
+         else MessageInterface::ShowMessage("   Now about to initialize command %s\n",
                (current->GetName()).c_str());         
       #endif
-      #ifdef DEBUG_FUNCTION
-         MessageInterface::ShowMessage("   Now about to initialize command %s\n",
-               (current->GetTypeName()).c_str());         
-      #endif
       current->SetObjectMap(objectStore);
-      MessageInterface::ShowMessage("Object Store set ...\n"); // ********
       current->SetGlobalObjectMap(globalObjectStore);
-      MessageInterface::ShowMessage("Global object Store set ...\n"); // ********
       current->SetSolarSystem(solarSys);
-      MessageInterface::ShowMessage("Solar System set ...\n"); // ********
       current->SetTransientForces(forces);      
-      MessageInterface::ShowMessage("Forces set ...\n"); // ********
       if (!(current->Initialize()))
          return false;
       current = current->GetNext();
@@ -243,7 +230,9 @@ bool Function::Execute()
          return false;
       current = current->GetNext();
    }
-   //fcs->RunComplete();   // check this out first
+   // @todo - create output wrappers and put into map
+   // create Validator, send it FOS, then can create ElementWrappers with names in map
+   //fcs->RunComplete();   // check this out first - what needs mods?
    return true; 
 }
 
@@ -308,6 +297,19 @@ Rmatrix Function::MatrixEvaluate()
 
 void Function::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
+   #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
+      MessageInterface::ShowMessage("Entering Function::SetObjectMap:\n");
+      std::map<std::string, GmatBase *>::iterator omi;
+      GmatBase *objInMap;
+      std::string strInMap;
+      for (omi = map.begin(); omi != map.end(); ++omi)
+      {
+         strInMap = omi->first;
+         objInMap = omi->second;
+         MessageInterface::ShowMessage("  %s, which is of type %s, with pointer %p\n",
+               strInMap.c_str(), (objInMap->GetTypeName()).c_str(), objInMap);
+      }
+   #endif // -------------------------------------------------------------- end debug ---
    objectStore = map;
 }
 
