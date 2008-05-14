@@ -101,6 +101,15 @@ void Validator::SetObjectMap(StringObjectMap *objMap)
 
 
 //------------------------------------------------------------------------------
+// void SetFunction(Function *func)
+//------------------------------------------------------------------------------
+void Validator::SetFunction(Function *func)
+{
+   theFunction = func;
+}
+
+
+//------------------------------------------------------------------------------
 // bool CheckUndefinedReference(GmatBase *obj, bool contOnError)
 //------------------------------------------------------------------------------
 /*
@@ -885,6 +894,17 @@ Parameter* Validator::CreateSystemParameter(const std::string &str,
          ("   Parameter created with paramType=%s, ownerName=%s, depName=%s\n",
           paramType.c_str(), ownerName.c_str(), depName.c_str());
       #endif
+      
+      // Add unmanaged Parameter to function
+      if (!manage && theFunction != NULL)
+      {
+         #ifdef DEBUG_AUTO_PARAM
+         MessageInterface::ShowMessage
+            ("   Adding '%s' to function automatic object array\n", param->GetName().c_str());
+         #endif
+         
+         theFunction->AddAutomaticObject((GmatBase*)param);
+      }
    }
    else
    {
@@ -929,10 +949,10 @@ Parameter* Validator::CreateSystemParameter(const std::string &str,
  */
 //------------------------------------------------------------------------------
 Parameter* Validator::CreateParameter(const std::string &type, 
-                                        const std::string &name,
-                                        const std::string &ownerName,
-                                        const std::string &depName,
-                                        bool manage)
+                                      const std::string &name,
+                                      const std::string &ownerName,
+                                      const std::string &depName,
+                                      bool manage)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage

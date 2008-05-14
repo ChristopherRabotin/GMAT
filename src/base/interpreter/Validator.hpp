@@ -25,13 +25,15 @@
 #define Validator_hpp
 
 #include "gmatdefs.hpp"
-#include "ElementWrapper.hpp"
-#include "Parameter.hpp"
-#include "GmatCommand.hpp"
 
 // Forward references
 class Moderator;
 class SolarSystem;
+class GmatCommand;
+class Function;
+class Parameter;
+class AxisSystem;
+class ElementWrapper;
 
 class GMAT_API Validator
 {
@@ -41,6 +43,7 @@ public:
    
    void SetSolarSystem(SolarSystem *ss);
    void SetObjectMap(StringObjectMap *objMap);
+   void SetFunction(Function *func);
    
    bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
    bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
@@ -50,8 +53,6 @@ public:
                                         bool parametersFirst = false,
                                         bool manage = true);
    const StringArray& GetErrorList();
-   
-protected:
    
    GmatBase* FindObject(const std::string &name, 
                         const std::string &ofType = "");
@@ -76,10 +77,14 @@ protected:
    bool IsParameterType(const std::string &desc);
    bool ValidateParameter(const StringArray &refNames, GmatBase *obj);
    bool ValidateSaveCommand(GmatBase *obj);
+   
+protected:
+   
    bool HandleError();
    
    Moderator       *theModerator;
    SolarSystem     *theSolarSystem;
+   Function        *theFunction;
    StringObjectMap *theObjectMap;
    StringArray     theParameterList;
    
