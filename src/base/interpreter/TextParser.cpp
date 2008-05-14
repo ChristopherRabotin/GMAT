@@ -249,8 +249,14 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          // remove any eol or semicoln from keyword
          keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true, true);
          
+         // check for "function" 
+         if (keyword == "function")
+         {
+            theBlockType = Gmat::FUNCTION_BLOCK;
+            noCommentLine = i;
+         }
          // check for "Create" or Commands
-         if (keyword == "Create")
+         else if (keyword == "Create")
          {
             theBlockType = Gmat::DEFINITION_BLOCK;
             noCommentLine = i;

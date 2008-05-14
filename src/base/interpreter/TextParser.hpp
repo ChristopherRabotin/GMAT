@@ -29,7 +29,8 @@ namespace Gmat
       COMMENT_BLOCK,
       DEFINITION_BLOCK,
       COMMAND_BLOCK,
-      ASSIGNMENT_BLOCK
+      ASSIGNMENT_BLOCK,
+      FUNCTION_BLOCK,
    };
 };
 
