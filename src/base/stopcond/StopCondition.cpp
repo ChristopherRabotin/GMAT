@@ -945,6 +945,13 @@ bool StopCondition::Initialize()
 //------------------------------------------------------------------------------
 bool StopCondition::Validate()
 {   
+   #if DEBUG_STOPCOND_INIT   
+   MessageInterface::ShowMessage
+      ("StopCondition::Validate() mUseInternalEpoch=%d, mEpochParam=<%p>, "
+       "mStopParam=<%p>, mAllowGoalParam=%d, mGoalParam=<%p>\n", mUseInternalEpoch,
+       mEpochParam, mStopParam, mAllowGoalParam, mGoalParam);
+   #endif
+   
    // check on epoch parameter
    if (!mUseInternalEpoch && mEpochParam == NULL)
    {
@@ -1300,8 +1307,12 @@ bool StopCondition::SetStopParameter(Parameter *param)
 //------------------------------------------------------------------------------
 bool StopCondition::SetGoalParameter(Parameter *param)
 {
-   mGoalParam = param;
+   #ifdef DEBUG_STOPCOND_SET
+   MessageInterface::ShowMessage
+      ("StopCondition::SetGoalParameter() param=<%p>\n", param);
+   #endif
    
+   mGoalParam = param;
    return true;
 }
 
@@ -1439,7 +1450,7 @@ StopCondition::GetRefObjectNameArray(const Gmat::ObjectType type)
 //                   const std::string &name)
 //---------------------------------------------------------------------------
 bool StopCondition::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                     const std::string &name)
+                                 const std::string &name)
 {
    #if DEBUG_BASE_STOPCOND_GET
    MessageInterface::ShowMessage
@@ -1451,9 +1462,9 @@ bool StopCondition::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    {
       if (name == mStopParamName)
          SetStopParameter((Parameter*)obj);
-      else if (name == mGoalStr)
+      if (name == mGoalStr)
          SetGoalParameter((Parameter*)obj);
-      else if (name == mEpochParamName)
+      if (name == mEpochParamName)
          SetEpochParameter((Parameter*)obj);
       
       return true;
