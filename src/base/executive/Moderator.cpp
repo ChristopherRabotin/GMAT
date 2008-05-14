@@ -288,9 +288,11 @@ void Moderator::Finalize()
    #endif
    
    #if DEBUG_FINALIZE > 1
+   //Notes: Do not use %s for command string, it may crash when it encounters
+   // comment with % in the scripts
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
-   MessageInterface::ShowMessage(GetScript().c_str());
+   MessageInterface::ShowMessage(GetScript());
    #endif
    
    #if DEBUG_FINALIZE
@@ -3136,8 +3138,8 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
    
    #if DEBUG_COMMAND_DELETE
    std::string cmdString1 = GmatCommandUtil::GetCommandSeqString(first);
-   MessageInterface::ShowMessage
-      ("     ==> Current sequence=%s\n", cmdString1.c_str());
+   MessageInterface::ShowMessage("     ==> Current sequence:");
+   MessageInterface::ShowMessage(cmdString1);
    #endif
    
    GmatCommand *current = cmd->GetNext();
@@ -3220,8 +3222,8 @@ GmatCommand* Moderator::DeleteCommand(GmatCommand *cmd, Integer sandboxNum)
    
    #if DEBUG_COMMAND_DELETE
    std::string cmdString2 = GmatCommandUtil::GetCommandSeqString(first);
-   MessageInterface::ShowMessage
-      ("     ==> sequence after delete =%s\n", cmdString2.c_str());
+   MessageInterface::ShowMessage("     ==> sequence after delete:");
+   MessageInterface::ShowMessage(cmdString2);
    ShowCommand("==========> Moderator::DeleteCommand() Returning cmd = ", cmd);
    #endif
    
@@ -3993,7 +3995,6 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       
       CreateSolarSystemInUse();
       CreateDefaultCoordSystems();
-
       
       // Set solar system in use and object map (loj: 2008.03.31)
       #if DEBUG_INTERPRET
@@ -4007,6 +4008,8 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
       theGuiInterpreter->SetObjectMap(theConfigManager->GetObjectMap());
       
+      // Set istream and Interpret
+      theScriptInterpreter->SetInStream(ss);
       status = theScriptInterpreter->Interpret();
       
       if (status)
@@ -4028,14 +4031,14 @@ bool Moderator::InterpretScript(std::istringstream *ss, bool clearObjs)
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       isRunReady = false;
    }
-
+   
    ResetConfigurationChanged();
    endOfInterpreter = true;
-
+   
    #if DEBUG_INTERPRET
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
-   MessageInterface::ShowMessage(GetScript().c_str());
+   MessageInterface::ShowMessage(GetScript());
    #endif
    
    return status;
