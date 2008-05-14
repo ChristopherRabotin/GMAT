@@ -88,13 +88,11 @@ public:
    //------------------------------------------------------------------------------
    virtual bool Build(Gmat::WriteMode mode) = 0;
    
-   virtual Parameter* CreateSystemParameter(const std::string &str,
-                                            bool manage = true);
+   virtual Parameter* CreateSystemParameter(const std::string &str);
    virtual Parameter* CreateParameter(const std::string &type,
                                       const std::string &name,
                                       const std::string &ownerName = "",
-                                      const std::string &depName = "",
-                                      bool manage = true);
+                                      const std::string &depName = "");
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
@@ -105,6 +103,8 @@ public:
    SolarSystem* GetSolarSystemInUse();
    void SetObjectMap(StringObjectMap *objMap, bool forFunction = false);
    StringObjectMap* GetObjectMap();
+   void SetFunction(Function *func);
+   Function* GetFunction();
    
    const StringArray& GetErrorList() { return errorList; }
    void SetHeaderComment(const std::string &comment){headerComment = comment;}
@@ -165,7 +165,6 @@ protected:
    GmatBase* FindObject(const std::string &name, 
                         const std::string &ofType = "");
    
-   Parameter* CreateArray( const std::string &arrayStr, bool manage = true);   
    Parameter* GetArrayIndex(const std::string &arrayStr,
                             Integer &row, Integer &col);
    
@@ -270,11 +269,12 @@ protected:
    bool FinalPass();
    
    // for debug
-   void WriteParts(const std::string &title, StringArray &parts);
+   void WriteStringArray(const std::string &title1, const std::string &title2,
+                         StringArray &parts);
    
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
-                                GmatBase *function);
+                                GmatBase *function, bool fullCheck = true);
    bool BuildFunctionDefinition(const std::string &str);
    
 private:
@@ -298,10 +298,6 @@ private:
    bool IsParameterType(const std::string &desc);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
-   bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
-                            const std::string &msg, bool isNumberAllowed,
-                            bool isArrayAllowed);
-   
 };
 
 #endif // INTERPRETER_HPP

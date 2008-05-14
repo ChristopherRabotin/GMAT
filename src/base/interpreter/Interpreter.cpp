@@ -72,7 +72,7 @@
 //#define DEBUG_HANDLE_ERROR
 //#define DEBUG_PARSE_REPORT
 //#define DEBUG_OBJECT_MAP
-//#define DBGLVL_FUNCTION_DEF 2
+//#define DBGLVL_FUNCTION_DEF 1
 
 //------------------------------------------------------------------------------
 // Interpreter(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL)
@@ -154,7 +154,13 @@ void Interpreter::Initialize()
    ignoreError = false;
    
    if (initialized)
+   {
+      #ifdef DEBUG_INIT
+      MessageInterface::ShowMessage
+         ("Interpreter::Initialize() already initialized so just returning\n");
+      #endif
       return;
+   }
    
    // Build a mapping for all of the defined commands
    StringArray cmds = theModerator->GetListOfFactoryItems(Gmat::COMMAND);
@@ -488,7 +494,7 @@ GmatBase* Interpreter::CreateObject(const std::string &type,
       // Handle Parameters
       else if (find(parameterList.begin(), parameterList.end(), type) != 
                parameterList.end())
-         obj = (GmatBase*)CreateParameter(type, name, "", "", manage);
+         obj = (GmatBase*)CreateParameter(type, name, "", "");
       
       // Handle PhysicalModel
       else if (find(physicalModelList.begin(), physicalModelList.end(), type) != 
@@ -615,6 +621,34 @@ StringObjectMap* Interpreter::GetObjectMap()
 
 
 //------------------------------------------------------------------------------
+// void SetFunction(Function *func)
+//------------------------------------------------------------------------------
+/*
+ * Sets Function pointer for function mode interpreting and to the Validator.
+ *
+ * @param  func  The Function pointer to set
+ */
+//------------------------------------------------------------------------------
+void Interpreter::SetFunction(Function *func)
+{
+   currentFunction = func;
+   theValidator.SetFunction(func);
+}
+
+
+//------------------------------------------------------------------------------
+// Function* GetFunction()
+//------------------------------------------------------------------------------
+/*
+ * Retrives Function pointer currently set for function mode interpreting.
+ */
+Function* Interpreter::GetFunction()
+{
+   return currentFunction;
+}
+
+
+//------------------------------------------------------------------------------
 // bool CheckUndefinedReference(GmatBase *obj, bool writeLine)
 //------------------------------------------------------------------------------
 /*
@@ -659,12 +693,8 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
       ("Interpreter::ValidateCommand() cmd=<%p><%s>\n", cmd,
        cmd->GetTypeName().c_str());
    #endif
-   
-   bool manage = true;
-   if (inFunctionMode)
-      manage = false;
-   
-   bool isValid = theValidator.ValidateCommand(cmd, continueOnError, manage);
+      
+   bool isValid = theValidator.ValidateCommand(cmd, continueOnError, !inFunctionMode);
    
    // In function mode, we can ignore the valid flag
    if (inFunctionMode)
@@ -844,59 +874,7 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
 GmatBase* Interpreter::FindObject(const std::string &name, 
                                   const std::string &ofType)
 {
-   #ifdef DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Interpreter::FindObject() entered: name='%s'\n", name.c_str());
-   #endif
-   
-   if (theObjectMap == NULL)
-      throw InterpreterException("The Object Map is not set in the Interpreter.\n");
-   
-   if (theSolarSystem == NULL)
-      throw InterpreterException("The Solar System is not set in the Interpreter.\n");
-   
-   if (name == "")
-      return NULL;
-   
-   if (name == "SolarSystem")
-      return theSolarSystem;
-   
-   GmatBase *obj = NULL;
-   std::string newName = name;
-   
-   // Ignore array indexing of Array
-   std::string::size_type index = name.find_first_of("([");
-   if (index != name.npos)
-   {
-      newName = name.substr(0, index);
-      
-      #ifdef DEBUG_FIND_OBJECT
-      MessageInterface::ShowMessage
-         ("Interpreter::FindObject() entered: newName=%s\n", newName.c_str());
-      #endif
-   }
-   
-   // Find object from the object map
-   if (theObjectMap->find(newName) != theObjectMap->end())
-      if ((*theObjectMap)[newName]->GetName() == newName)
-         obj = (*theObjectMap)[newName];
-   
-   // try SolarSystem if obj is still NULL
-   if (obj == NULL)
-      obj = (GmatBase*)(theSolarSystem->GetBody(newName));
-   
-   // check for the requested type
-   if ((obj != NULL) && (ofType != "") && (!obj->IsOfType(ofType)))
-      obj = NULL;
-   
-   #ifdef DEBUG_FIND_OBJECT
-   MessageInterface::ShowMessage
-      ("Interpreter::FindObject() returning <%p><%s><%s>\n", obj,
-       (obj == NULL) ? "NULL" : obj->GetTypeName().c_str(),
-       (obj == NULL) ? "NULL" : obj->GetName().c_str());
-   #endif
-   
-   return obj;
+   return theValidator.FindObject(name, ofType);
 }
 
 
@@ -951,10 +929,10 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
             && (!commandFound))
    {
       StringArray parts = theTextParser.SeparateSpaces(desc1);
-      //WriteParts("Calling IsObjectType()", parts);
       
-      // Check for valid object type first before creating a command,
-      // since UnknownCommand Variable var1 still creates CallFunction command
+      #ifdef DEBUG_CREATE_COMMAND
+      WriteStringArray("Calling IsObjectType()", "", parts);
+      #endif
       
       if (IsObjectType(parts[0]))
       {
@@ -963,21 +941,7 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
          HandleError(ex);
       }
       else if (!GmatStringUtil::IsValidName(type + desc, true))
-      {
-         // Check if function definition has been built
-         if (inFunctionMode && !hasFunctionDefinition)
-         {
-            std::string funcStr = type + " = " + desc;
-            if (type == "")
-               funcStr = type + desc;
-            
-            if (BuildFunctionDefinition(funcStr))
-            {
-               retFlag = true;
-               return NULL;
-            }
-         }
-         
+      {         
          InterpreterException ex
             ("Found invalid function name \"" + type + desc + "\"");
          HandleError(ex);
@@ -1054,6 +1018,17 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
                equation->SetFunction((Function*)func);
             }
          }
+         
+         // Get GetWrapperObjectNameArray here to create (LOJ: 2008.05.07)
+         StringArray names = cmd->GetWrapperObjectNameArray();
+         
+         #ifdef DEBUG_CREATE_COMMAND         
+         WriteStringArray("RefParameterNames for", cmd->GetTypeName(), names);
+         #endif
+         
+         // Create Parameter
+         for (UnsignedInt i=0; i<names.size(); i++)
+            CreateSystemParameter(names[i]);
          
          retFlag  = ValidateCommand(cmd);
          
@@ -1213,11 +1188,13 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting input\n");
-   WriteParts("CallFunction Input" , inArray);
+   WriteStringArray("CallFunction Input", "", inArray);
    #endif
    
    // Set input to CallFunction
    bool validParam = false;
+   //Real rval;
+   
    if (inArray.size() == 0) //if no inputs, set validParam to true
       validParam = true;
    
@@ -1236,6 +1213,11 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
                validParam = true;
          }
       }
+      // Numbers will be allowed later (loj: 2008.05.14)
+      //else if (GmatStringUtil::ToReal(inArray[i], rval)) // Number
+      //{
+      //   validParam = true;
+      //}
       else // whole object
       {
          GmatBase *obj = FindObject(inArray[i]);
@@ -1263,7 +1245,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Set output to CallFunction
    #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
    MessageInterface::ShowMessage("   Setting output\n");
-   WriteParts("CallFunction Output" , outArray);
+   WriteStringArray("CallFunction Output", "", outArray);
    #endif
    
    for (UnsignedInt i=0; i<outArray.size(); i++)
@@ -1371,7 +1353,7 @@ bool Interpreter::AssembleConditionalCommand(GmatCommand *cmd,
    }
    
    #ifdef DEBUG_ASSEMBLE_COMMAND
-   WriteParts("After parsing conditions()" , parts);
+   WriteStringArray("After parsing conditions()", "", parts);
    #endif
    
    Integer count = parts.size();
@@ -1747,7 +1729,7 @@ bool Interpreter::AssembleFiniteBurnCommand(GmatCommand *cmd, const std::string 
    
    #ifdef DEBUG_ASSEMBLE_COMMAND
    std::string type = cmd->GetTypeName();
-   WriteParts(type, parts);
+   WriteStringArray(type, "", parts);
    #endif
    
    if (parts.size() < 2)
@@ -1766,7 +1748,7 @@ bool Interpreter::AssembleFiniteBurnCommand(GmatCommand *cmd, const std::string 
       StringArray subParts = theTextParser.SeparateBrackets(parts[1], "()", ",");
       
       #ifdef DEBUG_ASSEMBLE_COMMAND
-      WriteParts(type, subParts);
+      WriteStringArray(type, "", subParts);
       #endif
       
       Integer count = subParts.size();
@@ -1833,7 +1815,7 @@ bool Interpreter::AssembleReportCommand(GmatCommand *cmd, const std::string &des
    Integer count = parts.size();
    
    #ifdef DEBUG_ASSEMBLE_REPORT_COMMAND 
-   WriteParts("Parsing Report, parts:", parts);
+   WriteStringArray("Parsing Report, parts:", "", parts);
    #endif
    
    // We can skip checking for configured object if in Function mode
@@ -1929,7 +1911,7 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    StringArray parts = GmatStringUtil::SeparateBy(objNameStr, " ", true);
    
    #ifdef DEBUG_ASSEMBLE_CREATE
-   WriteParts("Create object name parts", parts);
+   WriteStringArray("Create object name parts", "", parts);
    #endif
    
    if (parts.size() == 0)
@@ -1940,9 +1922,14 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
       return false;
    }
    
+   std::string objTypeStrToUse = objTypeStr;
+   // Special case for Propagator
+   if (objTypeStr == "Propagator")
+      objTypeStrToUse = "PropSetup";
+   
    try
    {
-      cmd->SetStringParameter("ObjectType", objTypeStr);
+      cmd->SetStringParameter("ObjectType", objTypeStrToUse);
       for (UnsignedInt i=0; i<parts.size(); i++)
          cmd->SetStringParameter("ObjectNames", parts[i]);
    }
@@ -1959,17 +1946,20 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    //       and set false to unmanage Array objects
    //-------------------------------------------------------------------
    std::string name;
-   if (objTypeStr == "Variable" || objTypeStr == "Array")
+   if (objTypeStrToUse == "Variable" || objTypeStrToUse == "Array")
       name = parts[0];
    
-   // Special case for Propagator
-   if (objTypeStr == "Propagator")
-      objTypeStr = "PropSetup";
+   #ifdef DEBUG_ASSEMBLE_CREATE
+      MessageInterface::ShowMessage
+         ("   About to create reference object of '%s' for Create command\n",
+          objTypeStrToUse.c_str());
+   #endif
+      
+   GmatBase *obj = CreateObject(objTypeStrToUse, name, false);
    
    #ifdef DEBUG_ASSEMBLE_CREATE
-      MessageInterface::ShowMessage("About to create reference object for Create command\n");
+   MessageInterface::ShowMessage("   %s created\n", obj->GetTypeName().c_str());
    #endif
-   GmatBase *obj = CreateObject(objTypeStr, name, false);
    
    if (obj == NULL)
    {
@@ -1980,14 +1970,15 @@ bool Interpreter::AssembleCreateCommand(GmatCommand *cmd, const std::string &des
    }
    
    // Send the object to the Create command
-   cmd->SetRefObject(obj, Gmat::UNKNOWN_OBJECT, obj->GetName());
+   //cmd->SetRefObject(obj, Gmat::UNKNOWN_OBJECT, obj->GetName());
+   cmd->SetRefObject(obj, GmatBase::GetObjectType(objTypeStrToUse), obj->GetName());
    
    #ifdef DEBUG_ASSEMBLE_CREATE
    MessageInterface::ShowMessage
-      ("   obj=<%p>, objType=<%s>, objName=<%s> created\n",
-       obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
+      ("AssembleCreateCommand() returning true, created obj=<%p>, objType=<%s>, "
+       "objName=<%s>\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str());
    #endif
-      
+   
    return true;
 }
 
@@ -2032,7 +2023,7 @@ bool Interpreter::SetCommandRefObjects(GmatCommand *cmd, const std::string &desc
    }
    
    #ifdef DEBUG_ASSEMBLE_COMMAND   
-   WriteParts("object name parts", parts);
+   WriteStringArray("object name parts", "", parts);
    #endif
    
    for (unsigned int i=0; i<numParts; i++)
@@ -2107,7 +2098,7 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateSystemParameter(const std::string &name, bool manage = true)
+// Parameter* CreateSystemParameter(const std::string &name)
 //------------------------------------------------------------------------------
 /**
  * Creates a system Parameter from the input parameter name. If the name contains
@@ -2116,72 +2107,26 @@ GmatCommand* Interpreter::CreateAssignmentCommand(const std::string &lhs,
  *
  * @param  name   parameter name to be parsed for Parameter creation
  *                Such as, sat1.Earth.ECC, sat1.SMA
- * @param  manage true if parameter to be managed in the configuration (true)
  *
  * @return Created Paramteter pointer or pointer of the Parameter by given name
  *         NULL if it is not a system Parameter nor named object is not a Parameter
  *
  */
 //------------------------------------------------------------------------------
-Parameter* Interpreter::CreateSystemParameter(const std::string &str,
-                                              bool manage)
+Parameter* Interpreter::CreateSystemParameter(const std::string &str)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("Interpreter::CreateSystemParameter() str=%s\n", str.c_str());
    #endif
    
-   Parameter *param = NULL;
-   std::string paramType, ownerName, depName;
-   GmatStringUtil::ParseParameter(str, paramType, ownerName, depName);
-   
-   #ifdef DEBUG_CREATE_PARAM
-   MessageInterface::ShowMessage
-      ("   paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
-       ownerName.c_str(), depName.c_str());
-   #endif
-   
-   // Create parameter, if type is a System Parameter
-   if (find(parameterList.begin(), parameterList.end(), paramType) != 
-       parameterList.end())
-   {
-      param = CreateParameter(paramType, str, ownerName, depName, manage);
-      
-      #ifdef DEBUG_CREATE_PARAM
-      MessageInterface::ShowMessage
-         ("   Parameter created with paramType=%s, ownerName=%s, depName=%s\n",
-          paramType.c_str(), ownerName.c_str(), depName.c_str());
-      #endif
-   }
-   else
-   {
-      // Find the object and check if it is a Parameter
-      GmatBase *obj = FindObject(str);
-      if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
-      {
-         param = (Parameter*)obj;
-      
-         #ifdef DEBUG_CREATE_PARAM
-         MessageInterface::ShowMessage("   Parameter <%s> found\n", str.c_str());
-         #endif
-      }
-   }
-   
-   #ifdef DEBUG_CREATE_PARAM
-   MessageInterface::ShowMessage
-      ("Interpreter::CreateSystemParameter() returning <%p><%s><%s>\n", param,
-       (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
-       (param == NULL) ? "NULL" : param->GetName().c_str());
-   #endif
-   
-   return param;
+   return theValidator.CreateSystemParameter(str, !inFunctionMode);
 }
 
 
 //------------------------------------------------------------------------------
 // Parameter* CreateParameter(const std::string &type, const std::string &name,
-//                            const std::string &ownerName, const std::string &depName
-//                            bool manage = true)
+//                            const std::string &ownerName, const std::string &depName)
 //------------------------------------------------------------------------------
 /**
  * Calls the Moderator to create a Parameter.
@@ -2190,7 +2135,6 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str,
  * @param  name       Name for the parameter.
  * @param  ownerName  object name of parameter requested ("")
  * @param  depName    Dependent object name of parameter requested ("")
- * @param  manage     true if created object to be added to configuration (true)
  * 
  * @return Pointer to the constructed Parameter.
  */
@@ -2198,64 +2142,16 @@ Parameter* Interpreter::CreateSystemParameter(const std::string &str,
 Parameter* Interpreter::CreateParameter(const std::string &type, 
                                         const std::string &name,
                                         const std::string &ownerName,
-                                        const std::string &depName,
-                                        bool manage)
+                                        const std::string &depName)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
       ("Interpreter::CreateParameter() type='%s', name='%s', ownerName='%s', "
-       "depName='%s', manage=%d, inFunctionMode=%d\n", type.c_str(), name.c_str(),
-       ownerName.c_str(), depName.c_str(), manage, inFunctionMode);
+       "depName='%s', inFunctionMode=%d\n", type.c_str(), name.c_str(),
+       ownerName.c_str(), depName.c_str(), inFunctionMode);
    #endif
    
-   bool manageParam = true;
-   if (inFunctionMode)
-      manageParam = false;
-   
-   // Check if create an array
-   if (type == "Array")
-      return CreateArray(name, manageParam);
-   else
-      return theModerator->CreateParameter(type, name, ownerName, depName, manageParam);
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateArray(onst std::string &arrayStr, bool manage = true)
-//------------------------------------------------------------------------------
-Parameter* Interpreter::CreateArray(const std::string &arrayStr, bool manage)
-{
-   std::string name;
-   Integer row, col;
-   GmatStringUtil::GetArrayIndex(arrayStr, row, col, name, "[]");
-   
-   if (row == -1)
-   {
-      InterpreterException ex
-         ("Interpreter::CreateArray() invalid number of rows found in: " +
-          arrayStr + "\n");
-      HandleError(ex);
-   }
-   
-   if (col == -1)
-   {
-      InterpreterException ex
-         ("Interpreter::CreateArray() invalid number of columns found in: " +
-          arrayStr + "\n");
-      HandleError(ex);
-   }
-   
-   Parameter *param = theModerator->CreateParameter("Array", name, "", "", manage);
-   
-   #ifdef DEBUG_CREATE_ARRAY
-   MessageInterface::ShowMessage
-      ("Interpreter::CreateArray() name='%s', row=%d, col=%d, now setting size\n",
-       name.c_str(), row, col);
-   #endif
-   
-   ((Array*)param)->SetSize(row, col);
-   
-   return param;
+   return theValidator.CreateParameter(type, name, ownerName, depName, !inFunctionMode);
 }
 
 
@@ -2399,15 +2295,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       ("   inFunctionMode=%d, hasFunctionDefinition=%d\n", inFunctionMode,
        hasFunctionDefinition);
    #endif
-   
-   // Check if it is function definition line
-   if (inFunctionMode && !hasFunctionDefinition)
-   {
-      MessageInterface::ShowMessage("   ==> check function definition\n");
-      if (BuildFunctionDefinition(lhs + " = " + rhs))
-         return NULL;
-   }
-   
+      
    bool retval = false;
    
    // Separate dots
@@ -4606,32 +4494,22 @@ bool Interpreter::IsArrayElement(const std::string &str)
 }
 
 
-//----------------------------------
-// Private
-//----------------------------------
-
 //------------------------------------------------------------------------------
 // AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner)
 //------------------------------------------------------------------------------
 AxisSystem* Interpreter::CreateAxisSystem(std::string type, GmatBase *owner)
 {
-   if (owner == NULL)
+   AxisSystem *axis = theValidator.CreateAxisSystem(type, owner);
+
+   // Handle error messages here
+   if (axis == NULL)
    {
-      InterpreterException ex("Interpreter::CreateAxisSystem needs a "
-         "CoordinateSystem object that acts as its owner; received a NULL "
-         "pointer instead.");
-      HandleError(ex);
+      StringArray errList = theValidator.GetErrorList();
+      for (UnsignedInt i=0; i<errList.size(); i++)
+         HandleError(InterpreterException(errList[i]));
    }
-   if (owner->GetType() != Gmat::COORDINATE_SYSTEM)
-   {
-      InterpreterException ex("Interpreter::CreateAxisSystem needs a "
-         "CoordinateSystem object that acts as its owner; received a pointer "
-         "to " + owner->GetName() + "instead.");
-      HandleError(ex);
-   }
-   AxisSystem* axes = (AxisSystem *)(theModerator->CreateAxisSystem(type, ""));
-   owner->SetRefObject(axes, axes->GetType(), axes->GetName());
-   return axes;
+   
+   return axis;
 }
 
 
@@ -4893,7 +4771,9 @@ bool Interpreter::FinalPass()
       
       // check Function seperately since it has inputs that can be any object type,
       // including Real number (1234.5678) and String literal ('abc')
-      
+      //
+      // We don't want to check this in the FinalPass(), since it will be checked
+      // when ScriptInterpreter::InterpretGmatFunction() is called
       else if (obj->GetType() == Gmat::FUNCTION)
       {
          // If GmatFunction, see if function file exist and the function name
@@ -4901,10 +4781,10 @@ bool Interpreter::FinalPass()
          if (obj->GetTypeName() == "GmatFunction")
          {
             std::string funcPath = obj->GetStringParameter("FunctionPath");
-            retval = CheckFunctionDefinition(funcPath, obj);
+            retval = CheckFunctionDefinition(funcPath, obj, false);
          }
       }
-      
+      //
       //-----------------------------------------------------------------
       // Note: This section needs be modified as needed. 
       // GetRefObjectTypeArray() should be implemented if we want to
@@ -5158,6 +5038,10 @@ bool Interpreter::FinalPass()
 }
 
 
+//----------------------------------
+// Private
+//----------------------------------
+
 //------------------------------------------------------------------------------
 // bool IsObjectType(const std::string &type)
 //------------------------------------------------------------------------------
@@ -5250,12 +5134,14 @@ bool Interpreter::IsObjectType(const std::string &type)
 //------------------------------------------------------------------------------
 bool Interpreter::IsParameterType(const std::string &desc)
 {
-   std::string type, owner, dep;
-   GmatStringUtil::ParseParameter(desc, type, owner, dep);
-   if (theModerator->IsParameter(type))
-      return true;
-   else
-      return false;
+   return theValidator.IsParameterType(desc);
+   
+//    std::string type, owner, dep;
+//    GmatStringUtil::ParseParameter(desc, type, owner, dep);
+//    if (theModerator->IsParameter(type))
+//       return true;
+//    else
+//       return false;
 }
 
 
@@ -5307,82 +5193,13 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
 
 
 //------------------------------------------------------------------------------
-// bool SetCommandParameter(GmatCommand *cmd, const std::string &param,
-//                          const std::string &msg, bool isNumberAllowed,
-//                          bool isArrayAllowed)
+// void WriteStringArray(const std::string &title1, const std::string &title2,
+//                       StringArray &parts)
 //------------------------------------------------------------------------------
-bool Interpreter::SetCommandParameter(GmatCommand *cmd, const std::string &param,
-                                      const std::string &msg, bool isNumberAllowed,
-                                      bool isArrayAllowed)
+void Interpreter::WriteStringArray(const std::string &title1, const std::string &title2,
+                                   StringArray &parts)
 {
-   #ifdef DEBUG_SET
-   MessageInterface::ShowMessage
-      ("Interpreter::SetCommandParameter() cmd=%s, param=%s, isNumberAllowed=%d,"
-       " isArrayAllowed=%d\n", cmd->GetTypeName().c_str(), param.c_str(),
-       isNumberAllowed, isArrayAllowed);
-   #endif
-   
-   GmatBase *obj = FindObject(param);
-   Real rval;
-   
-   if (obj != NULL)
-   {
-      if ((obj->GetTypeName() == "String") ||
-          ((obj->GetTypeName() != "Variable") && !isArrayAllowed))
-      {
-         InterpreterException ex
-            (msg + " has to be \"Variable\" but found \"" +
-             obj->GetTypeName() + "\"");
-         HandleError(ex);
-         return false;
-      }
-      else
-      {
-         if (obj->GetTypeName() == "Array" && !IsArrayElement(param))
-         {
-            InterpreterException ex
-               (msg + " \"" + param + "\" is not a valid Array element");
-            HandleError(ex);
-            return false;
-         }
-         
-         cmd->SetRefObject(obj, Gmat::PARAMETER, param);
-      }
-   }
-   else
-   {
-      // Create parameter if system parameter and isNumberAllowed      
-      if (isNumberAllowed)
-      {
-         std::string type, ownerName, depObj;
-         GmatStringUtil::ParseParameter(param, type, ownerName, depObj);
-         
-         if (theModerator->IsParameter(type))
-         {
-            CreateParameter(type, param, ownerName, depObj);
-            return true;
-         }
-      }
-      
-      if ((!isNumberAllowed) ||
-          (isNumberAllowed && !GmatStringUtil::ToReal(param, rval, true)))
-      {
-         InterpreterException ex(msg + " \"" + param + "\" is undefined");
-         HandleError(ex);
-         return false;
-      }
-   }
-      
-   return true;
-}
-
-
-//------------------------------------------------------------------------------
-// void WriteParts(const std::string &title, StringArray &parts)
-//------------------------------------------------------------------------------
-void Interpreter::WriteParts(const std::string &title, StringArray &parts)
-{
-   MessageInterface::ShowMessage("   ========== %s\n", title.c_str());
+   MessageInterface::ShowMessage("   ========== %s %s\n", title1.c_str(), title2.c_str());
    for (UnsignedInt i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage("   %d:%s\n", i, parts[i].c_str());
    MessageInterface::ShowMessage("\n");
@@ -5390,18 +5207,20 @@ void Interpreter::WriteParts(const std::string &title, StringArray &parts)
 
 
 //------------------------------------------------------------------------------
-// bool CheckFunctionDefinition(const std::string &funcPath, GmatBase *function)
+// bool CheckFunctionDefinition(const std::string &funcPath, GmatBase *function,
+//                              bool fullCheck)
 //------------------------------------------------------------------------------
 /*
  * Opens function file and checks if it has valid function definition line.
  *
  * @param  funcPath  The full path and name of fuction file
  * @param  function  The Function pointer
+ * @param  fullCheck set to true if checking fullly for input and output arguments
  *
  */
 //------------------------------------------------------------------------------
 bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
-                                          GmatBase *function)
+                                          GmatBase *function, bool fullCheck)
 {
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
@@ -5409,83 +5228,145 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
        function, funcPath.c_str());
    #endif
    
+   bool retval = true;
+   
    if (function == NULL)
    {
       MessageInterface::ShowMessage
          ("** INTERNAL ERROR ** Cannot check function definition. "
           "function pointer is NULL\n");
-      return false;
+      retval = false;;
    }
    
-   bool retval = true;
-   
-   // if function path exist, go through validation
-   if (GmatFileUtil::DoesFileExist(funcPath))
+   // check if function path exist
+   if (!GmatFileUtil::DoesFileExist(funcPath))
    {
-      // check for no .gmf or wrong extenstion
-      StringArray parts = GmatStringUtil::SeparateBy(funcPath, ".");
-      if ((parts.size() == 1) ||
-          (parts.size() == 2 && parts[1] != "gmf"))
+      InterpreterException ex
+         ("Nonexistent GmatFunction file \"" + funcPath +
+          "\" referenced in \"" + function->GetName() + "\"\n");
+      HandleError(ex, false);
+      retval = false;
+   }
+   
+   // check for no extension of .gmf or wrong extenstion
+   StringArray parts = GmatStringUtil::SeparateBy(funcPath, ".");
+   if ((parts.size() == 1) ||
+       (parts.size() == 2 && parts[1] != "gmf"))
+   {
+      InterpreterException ex
+         ("The GmatFunction file \"" + funcPath + "\" has no or incorrect file "
+          "extension referenced in \"" + function->GetName() + "\"\n");
+      HandleError(ex, false);
+      retval = false;
+   }
+   
+   if (!retval || !fullCheck)
+      return retval;
+   
+   
+   // check function declaration
+   std::ifstream inStream(funcPath.c_str());
+   std::string line;
+   StringArray outputArgs;
+   
+   while (!inStream.eof())
+   {
+      // Use cross-platform getline()
+      if (!GmatFileUtil::GetLine(&inStream, line))
       {
          InterpreterException ex
-            ("The GmatFunction file \"" + funcPath + "\" has no or incorrect file "
-             "extension referenced in \"" + function->GetName() + "\"\n");
+            ("Error reading the GamtFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
          HandleError(ex, false);
-         return false;
+         retval = false;
+         break;
       }
       
-      // check function declaration
-      std::ifstream inStream(funcPath.c_str());
-      std::string line;
-      StringArray outputArgs;
+      #if DBGLVL_FUNCTION_DEF > 1
+      MessageInterface::ShowMessage("   line=<%s>\n", line.c_str());
+      #endif
       
-      while (!inStream.eof())
+      line = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true, true);
+      
+      // Skip empty line or comment line
+      if (line[0] == '\0' || line[0] == '%')
+         continue;
+      
+      //------------------------------------------------------
+      // Parse function definition line
+      //------------------------------------------------------
+      bool hasOutput = false;
+      if (line.find("=") != line.npos)
+         hasOutput = true;
+      
+      StringArray parts;
+      if (hasOutput)
+         parts = GmatStringUtil::SeparateBy(line, "=", true);
+      else
+         parts = GmatStringUtil::SeparateBy(line, " ", true);
+      
+      StringArray::size_type numParts = parts.size();
+      
+      #if DBGLVL_FUNCTION_DEF > 1
+      WriteStringArray("GmatFunction parts", "", parts);
+      #endif
+         
+      StringArray lhsParts;
+        
+      try
       {
-         // Use cross-platform getline()
-         if (!GmatFileUtil::GetLine(&inStream, line))
-         {
-            InterpreterException ex
-               ("Error reading the GamtFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-            break;
-         }
-         
-         #if DBGLVL_FUNCTION_DEF > 1
-         MessageInterface::ShowMessage("   line=<%s>\n", line.c_str());
-         #endif
-         
-         line = GmatStringUtil::Trim(line, GmatStringUtil::BOTH, true, true);
-         
-         // Skip empty line or comment line
-         if (line[0] == '\0' || line[0] == '%')
-            continue;
-         
-         //------------------------------------------------------
-         // Parse function definition line
-         //------------------------------------------------------
-         bool hasOutput = false;
-         if (line.find("=") != line.npos)
-            hasOutput = true;
-         
-         StringArray parts;
-         if (hasOutput)
-            parts = GmatStringUtil::SeparateBy(line, "=", true);
-         else
-            parts = GmatStringUtil::SeparateBy(line, " ", true);
-         
-         StringArray::size_type numParts = parts.size();
-         
-         #if DBGLVL_FUNCTION_DEF > 1
-         WriteParts("GmatFunction parts", parts);
-         #endif
-         
-         StringArray lhsParts;
-         
+         lhsParts = theTextParser.Decompose(parts[0], "[]", false);
+      }
+      catch (BaseException &e)
+      {
+         InterpreterException ex
+            ("Invalid output argument list found in the GamtFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+         break;
+      }
+      
+      StringArray::size_type numLeft = lhsParts.size();
+      
+      #if DBGLVL_FUNCTION_DEF > 1
+      WriteStringArray("GmatFunction lhsParts", "", lhsParts);
+      #endif
+      
+      //------------------------------------------------------
+      // Check if first part is "function"
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check if first part is function\n");
+      #endif
+      
+      if (numLeft > 0 && lhsParts[0] != "function")
+      {
+         InterpreterException ex
+            ("The \"function\" is missing in the GamtFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+         break;
+      }
+      
+      //------------------------------------------------------
+      // Check for valid output arguments
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check for output arguments\n");
+      #endif
+      
+      if (hasOutput)
+      {
          try
          {
-            lhsParts = theTextParser.Decompose(parts[0], "[]", false);
+            outputArgs =
+               theTextParser.SeparateBrackets(lhsParts[1], "[]", ",");
+            
+            #if DBGLVL_FUNCTION_DEF > 1
+            WriteStringArray("GmatFunction outputArgs", "", outputArgs);
+            #endif
          }
          catch (BaseException &e)
          {
@@ -5497,257 +5378,198 @@ bool Interpreter::CheckFunctionDefinition(const std::string &funcPath,
             break;
          }
          
-         StringArray::size_type numLeft = lhsParts.size();
          
-         #if DBGLVL_FUNCTION_DEF > 1
-         WriteParts("GmatFunction lhsParts", lhsParts);
-         #endif
-         
-         //------------------------------------------------------
-         // Check if first part is "function"
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check if first part is function\n");
-         #endif
-         
-         if (numLeft > 0 && lhsParts[0] != "function")
+         if (outputArgs.size() == 0)
          {
             InterpreterException ex
-               ("The \"function\" is missing in the GamtFunction file \"" +
+               ("The output argument list is empty in the GamtFunction file \"" +
                 funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
             HandleError(ex, false);
             retval = false;
             break;
          }
+      }
+      
+      //------------------------------------------------------
+      // Check for missing function name
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check for missing function name\n");
+      MessageInterface::ShowMessage("   hasOutput=%d, numLeft=%d, numParts=%d\n",
+                                    hasOutput, numLeft, numParts);
+      #endif
          
-         //------------------------------------------------------
-         // Check for valid output arguments
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check for output arguments\n");
-         #endif
-         
-         if (hasOutput)
-         {
-            try
-            {
-               outputArgs =
-                  theTextParser.SeparateBrackets(lhsParts[1], "[]", ",");
-               
-               #if DBGLVL_FUNCTION_DEF > 1
-               WriteParts("GmatFunction outputArgs", outputArgs);
-               #endif
-            }
-            catch (BaseException &e)
-            {
-               InterpreterException ex
-                  ("Invalid output argument list found in the GamtFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-               HandleError(ex, false);
-               retval = false;
-               break;
-            }
-            
-            
-            if (outputArgs.size() == 0)
-            {
-               InterpreterException ex
-                  ("The output argument list is empty in the GamtFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-               HandleError(ex, false);
-               retval = false;
-               break;
-            }
-         }
-         
-         //------------------------------------------------------
-         // Check for missing function name
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check for missing function name\n");
-         MessageInterface::ShowMessage("   hasOutput=%d, numLeft=%d, numParts=%d\n",
-                                       hasOutput, numLeft, numParts);
-         #endif
-         
-         if (numParts <= 1)
-         {
-            InterpreterException ex
-               ("The function name not found in the GamtFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-            break;
-         }
-         
-         //------------------------------------------------------
-         // check function name and input arguments
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check for input arguments\n");
-         #endif
-         
-         StringArray rhsParts;
-         try
-         {
-            rhsParts = theTextParser.Decompose(parts[1], "()", false);
-            
-            #if DBGLVL_FUNCTION_DEF > 1
-            WriteParts("GmatFunction rhsParts", rhsParts);
-            #endif         
-         }
-         catch (BaseException &e)
-         {
-            InterpreterException ex
-               ("The invalid input argument list found in the GmatFunction file \"" +
-                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-            break;
-         }
-         
-         //------------------------------------------------------
-         // Check if function name matches the file name
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check if file has matching function name\n");
-         #endif
-         
-         std::string fileFuncName = rhsParts[0];
-         std::string funcName = function->GetStringParameter("FunctionName");
-         
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage
-            ("   fileFuncName=<%s>, funcName=<%s>\n", fileFuncName.c_str(), funcName.c_str());
-         #endif
-         
-         if (fileFuncName != funcName)
-         {
-            InterpreterException ex
-               ("The function name \"" + fileFuncName + "\" does not match with the"
-                "GmatFunction file name \"" + funcPath + "\" referenced in \"" +
-                function->GetName() + "\"\n");
-            HandleError(ex, false);
-            retval = false;
-         }
-         
-         //------------------------------------------------------
-         // Check for valid input arguments
-         //------------------------------------------------------
-         #if DBGLVL_FUNCTION_DEF > 0
-         MessageInterface::ShowMessage("   Check for input arguments\n");
-         #endif
-         if (rhsParts.size() > 1)
-         {
-            StringArray inputArgs;
-            try
-            {
-               inputArgs =
-                  theTextParser.SeparateBrackets(rhsParts[1], "()", ",");
-               
-               #if DBGLVL_FUNCTION_DEF > 1
-               WriteParts("GmatFunction inputArgs", inputArgs);
-               #endif
-            }
-            catch (BaseException &e)
-            {
-               InterpreterException ex
-                  ("Invalid input argument list found in the GamtFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-               HandleError(ex, false);
-               retval = false;
-               break;
-            }
-            
-            if (inputArgs.size() == 0)
-            {
-               InterpreterException ex
-                  ("The input argument list is empty in the GamtFunction file \"" +
-                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-               HandleError(ex, false);
-               retval = false;
-               break;
-            }
-            
-            // check for duplicate input list
-            if (inputArgs.size() > 1)
-            {
-               StringArray multiples;
-               // check for duplicate input names
-               for (UnsignedInt i=0; i<inputArgs.size(); i++)
-               {
-                  for (UnsignedInt j=0; j<inputArgs.size(); j++)
-                  {
-                     if (i == j)
-                        continue;
-                     
-                     if (inputArgs[i] == inputArgs[j])
-                        if (find(multiples.begin(), multiples.end(), inputArgs[i]) == multiples.end())
-                           multiples.push_back(inputArgs[i]);
-                  }
-               }
-               
-               if (multiples.size() > 0)
-               {
-                  std::string errMsg = "Duplicate input of";
-                  
-                  for (UnsignedInt i=0; i<multiples.size(); i++)
-                     errMsg = errMsg + " \"" + multiples[i] + "\"";
-                  
-                  InterpreterException ex
-                     (errMsg + " found in the GmatFunction file \"" +
-                      funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
-                  HandleError(ex, false);
-                  retval = false;
-                  break;
-               }
-            }
-         }
-         
+      if (numParts <= 1)
+      {
+         InterpreterException ex
+            ("The function name not found in the GamtFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+         HandleError(ex, false);
+         retval = false;
          break;
       }
       
-      if (line == "")
+      //------------------------------------------------------
+      // check function name and input arguments
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check for input arguments\n");
+      #endif
+      
+      StringArray rhsParts;
+      try
+      {
+         rhsParts = theTextParser.Decompose(parts[1], "()", false);
+         
+         #if DBGLVL_FUNCTION_DEF > 1
+         WriteStringArray("GmatFunction rhsParts", "", rhsParts);
+         #endif         
+      }
+      catch (BaseException &e)
       {
          InterpreterException ex
-            ("The GmatFunction file \"" + funcPath + "\" referenced in \"" +
-             function->GetName() + "\" is empty\n");
+            ("The invalid input argument list found in the GmatFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+         break;
+      }
+      
+      //------------------------------------------------------
+      // Check if function name matches the file name
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check if file has matching function name\n");
+      #endif
+      
+      std::string fileFuncName = rhsParts[0];
+      std::string funcName = function->GetStringParameter("FunctionName");
+      
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage
+         ("   fileFuncName=<%s>, funcName=<%s>\n", fileFuncName.c_str(), funcName.c_str());
+      #endif
+      
+      if (fileFuncName != funcName)
+      {
+         InterpreterException ex
+            ("The function name \"" + fileFuncName + "\" does not match with the"
+             "GmatFunction file name \"" + funcPath + "\" referenced in \"" +
+             function->GetName() + "\"\n");
          HandleError(ex, false);
          retval = false;
       }
       
-      // if function definition has been validated, check if all outputs are declared
-      if (retval && outputArgs.size() > 0)
+      //------------------------------------------------------
+      // Check for valid input arguments
+      //------------------------------------------------------
+      #if DBGLVL_FUNCTION_DEF > 0
+      MessageInterface::ShowMessage("   Check for input arguments\n");
+      #endif
+      if (rhsParts.size() > 1)
       {
-         std::string errMsg;
-         IntegerArray rowCounts, colCounts;
-         WrapperTypeArray outputTypes =
-            GmatFileUtil::GetFunctionOutputTypes(&inStream, outputArgs, errMsg,
-                                                 rowCounts, colCounts);
-         
-         if (errMsg != "")
+         StringArray inputArgs;
+         try
+         {
+            inputArgs =
+               theTextParser.SeparateBrackets(rhsParts[1], "()", ",");
+            
+            #if DBGLVL_FUNCTION_DEF > 1
+            WriteStringArray("GmatFunction inputArgs", "", inputArgs);
+            #endif
+         }
+         catch (BaseException &e)
          {
             InterpreterException ex
-               (errMsg + " found in the GmatFunction file \"" +
+               ("Invalid input argument list found in the GamtFunction file \"" +
                 funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
             HandleError(ex, false);
             retval = false;
+            break;
          }
-         else
+         
+         if (inputArgs.size() == 0)
          {
-            ((Function*)function)->SetOutputTypes(outputTypes, rowCounts, colCounts);
+            InterpreterException ex
+               ("The input argument list is empty in the GamtFunction file \"" +
+                funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+            HandleError(ex, false);
+            retval = false;
+            break;
+         }
+         
+         // check for duplicate input list
+         if (inputArgs.size() > 1)
+         {
+            StringArray multiples;
+            // check for duplicate input names
+            for (UnsignedInt i=0; i<inputArgs.size(); i++)
+            {
+               for (UnsignedInt j=0; j<inputArgs.size(); j++)
+               {
+                  if (i == j)
+                     continue;
+                  
+                  if (inputArgs[i] == inputArgs[j])
+                     if (find(multiples.begin(), multiples.end(), inputArgs[i]) == multiples.end())
+                        multiples.push_back(inputArgs[i]);
+               }
+            }
+            
+            if (multiples.size() > 0)
+            {
+               std::string errMsg = "Duplicate input of";
+               
+               for (UnsignedInt i=0; i<multiples.size(); i++)
+                  errMsg = errMsg + " \"" + multiples[i] + "\"";
+               
+               InterpreterException ex
+                  (errMsg + " found in the GmatFunction file \"" +
+                   funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+               HandleError(ex, false);
+               retval = false;
+               break;
+            }
          }
       }
       
-      inStream.close();
+      break;
    }
-   else
+   
+   if (line == "")
    {
       InterpreterException ex
-         ("Nonexistent GmatFunction file \"" + funcPath +
-          "\" referenced in \"" + function->GetName() + "\"\n");
+         ("The GmatFunction file \"" + funcPath + "\" referenced in \"" +
+          function->GetName() + "\" is empty\n");
       HandleError(ex, false);
       retval = false;
    }
+   
+   // if function definition has been validated, check if all outputs are declared
+   if (retval && outputArgs.size() > 0)
+   {
+      std::string errMsg;
+      IntegerArray rowCounts, colCounts;
+      WrapperTypeArray outputTypes =
+         GmatFileUtil::GetFunctionOutputTypes(&inStream, outputArgs, errMsg,
+                                              rowCounts, colCounts);
+      
+      if (errMsg != "")
+      {
+         InterpreterException ex
+            (errMsg + " found in the GmatFunction file \"" +
+             funcPath + "\" referenced in \"" + function->GetName() + "\"\n");
+         HandleError(ex, false);
+         retval = false;
+      }
+      else
+      {
+         ((Function*)function)->SetOutputTypes(outputTypes, rowCounts, colCounts);
+      }
+   }
+   
+   inStream.close();
+   
    
    #if DBGLVL_FUNCTION_DEF > 0
    MessageInterface::ShowMessage
@@ -5782,7 +5604,7 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
    StringArray parts = theTextParser.SeparateBy(str, "=");
    
    #if DBGLVL_FUNCTION_DEF > 1
-   WriteParts("parts", parts);
+   WriteStringArray("parts", "", parts);
    #endif
    
    // if function has no output
@@ -5802,8 +5624,8 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
    StringArray rhsParts = theTextParser.Decompose(rhs, "()", false);
    
    #if DBGLVL_FUNCTION_DEF > 1
-   WriteParts("lhsParts", lhsParts);
-   WriteParts("rhsParts", rhsParts);
+   WriteStringArray("lhsParts", "", lhsParts);
+   WriteStringArray("rhsParts", "", rhsParts);
    #endif
    
    std::string funcName;
@@ -5828,7 +5650,7 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
       inputs = theTextParser.SeparateBy(rhsParts[1], ", ()");
       
       #if DBGLVL_FUNCTION_DEF > 1
-      WriteParts("function inputs", inputs);
+      WriteStringArray("function inputs", "", inputs);
       #endif
    }
    
@@ -5843,7 +5665,7 @@ bool Interpreter::BuildFunctionDefinition(const std::string &str)
       outputs = theTextParser.SeparateBy(lhsParts[1], ", []");
       
       #if DBGLVL_FUNCTION_DEF > 1
-      WriteParts("function outputs", outputs);
+      WriteStringArray("function outputs", "", outputs);
       #endif
    }
    
