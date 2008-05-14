@@ -428,11 +428,7 @@ MathNode* MathParser::Parse(const std::string &str)
    BuildGmatFunctionList(newEq);
    
    MathNode *topNode = ParseNode(newEq);
-   
-   // Should parameters be created here?
-   if (topNode)
-      CreateParameter(topNode, 0);
-   
+      
    #if DEBUG_PARSE
    WriteNode(topNode, 0);
    #endif
@@ -2124,52 +2120,5 @@ void MathParser::WriteNode(MathNode *node, UnsignedInt level)
       }
    }
 #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void CreateParameter(MathNode *node, UnsignedInt level))
-//------------------------------------------------------------------------------
-void MathParser::CreateParameter(MathNode *node, UnsignedInt level)
-{
-   #ifndef __UNIT_TEST__
-   if (node == NULL)
-      return;
-   
-   level++;
-   
-   if (!node->IsFunction())
-   {
-      if (!node->IsNumber())
-      {
-         Moderator* theModerator = Moderator::Instance();
-         std::string owner, type, depObj;
-         std::string name = node->GetName();
-         GmatStringUtil::ParseParameter(name, type, owner, depObj);
-
-         if (name != "" && type != "")
-         {
-            #if DEBUG_MATH_PARSER_PARAM
-            MessageInterface::ShowMessage
-               ("MathParser::CreateParameter() name=%s, type=%s, owner=%s, "
-                "depObj=%s\n", name.c_str(), type.c_str(), owner.c_str(),
-                depObj.c_str());
-            #endif
-
-            theModerator->CreateParameter(type, name, owner, depObj);
-         }
-      }
-   }
-   else
-   {      
-      if (node->GetLeft())
-         CreateParameter(node->GetLeft(), level);
-
-      if (node->GetRight())
-         CreateParameter(node->GetRight(), level);
-   }
-
-   #endif
-   
 }
 

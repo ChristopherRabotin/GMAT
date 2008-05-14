@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   MathParser
 //------------------------------------------------------------------------------
@@ -100,7 +100,6 @@ private:
    
    void WriteItems(const std::string &msg, StringArray &items);
    void WriteNode(MathNode *node, UnsignedInt level);
-   void CreateParameter(MathNode *node, UnsignedInt level);
    
    enum
    {
