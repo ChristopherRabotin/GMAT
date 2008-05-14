@@ -181,26 +181,55 @@ GmatCommand* GmatCommandUtil::GetNextCommand(GmatCommand *cmd)
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* GetPreviousCommand(GmatCommand *cmd)
+// GmatCommand* GetPreviousCommand(GmatCommand *from, GmatCommand *cmd)
 //------------------------------------------------------------------------------
-GmatCommand* GmatCommandUtil::GetPreviousCommand(GmatCommand *cmd)
+/*
+ * Searchs command from the "from" command and returns previous command.
+ *
+ * @param from The command to search from
+ * @return Returns previous command or NULL if command not found
+ */
+//------------------------------------------------------------------------------
+GmatCommand* GmatCommandUtil::GetPreviousCommand(GmatCommand *from,
+                                                 GmatCommand *cmd)
 {
-   if (cmd == NULL)
-      return NULL;
-   
-   GmatCommand *current = cmd->GetNext();
+   GmatCommand *current = from;
    GmatCommand *prevCmd = NULL;
+   GmatCommand *child = NULL;
+   Integer branch = 0;
    
    while (current != NULL)
    {
       if (current == cmd)
-         break;
-
+         return prevCmd;
+      
+      // check branch commands
+      while ((current->GetChildCommand(branch)) != NULL)
+      {
+         child = current->GetChildCommand(branch);
+         
+         while (child != NULL)
+         {
+            #if DEBUG_PREV_COMMAND
+            ShowCommand("   child = ", child);
+            #endif
+            
+            if (child == cmd)
+               return prevCmd;
+            
+            prevCmd = child;
+            child = child->GetNext();
+         }
+         
+         branch++;
+      }
+      
       prevCmd = current;
       current = current->GetNext();
+      
    }
    
-   return prevCmd;
+   return NULL;
 }
 
 
@@ -218,7 +247,7 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
 {
    if (cmd == NULL)
       return NULL;
-
+   
    #if DEBUG_MATCHING_END
    ShowCommand
       ("===> GmatCommandUtil::GetMatchingEnd() cmd = ", cmd);
@@ -265,10 +294,8 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
       Integer branch = 0;
       bool elseFound = false;
       
-      //if ((current->GetChildCommand(0)) != NULL)
       while ((current->GetChildCommand(branch)) != NULL)
       {
-         //child = current->GetChildCommand(0);
          child = current->GetChildCommand(branch);
          
          while (child != NULL)
@@ -277,8 +304,6 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
             ShowCommand("   child = ", child);
             #endif
             
-            //if (child->IsOfType("BranchEnd"))
-            //break;
             if (child->IsOfType("BranchEnd"))
             {
                if (child->GetTypeName() == "Else")
@@ -308,49 +333,6 @@ GmatCommand* GmatCommandUtil::GetMatchingEnd(GmatCommand *cmd)
       
       return child;
    }
-}
-
-
-//------------------------------------------------------------------------------
-// std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true)
-//------------------------------------------------------------------------------
-std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr)
-{
-   char buf[10];
-   GmatCommand *current = cmd;
-   std::string cmdseq, cmdstr;
-   cmdstr = "\n---------- Mission Sequence ----------\n";
-   cmdseq.append(cmdstr);
-   buf[0] = '\0';
-   
-   #if DEBUG_COMMAND_SEQ_STRING
-   MessageInterface::ShowMessage
-      ("===> GmatCommandUtil::GetCommandSeqString(%p)\n", cmd);
-   MessageInterface::ShowMessage("%s", cmdstr.c_str());
-   #endif
-   
-   
-   while (current != NULL)
-   {
-      if (showAddr)
-         sprintf(buf, "(%p)", current);
-      
-      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + "\n";
-      cmdseq.append(cmdstr);
-      
-      #if DEBUG_COMMAND_SEQ_STRING
-      MessageInterface::ShowMessage("%s", cmdstr.c_str());
-      #endif
-      
-      if ((current->GetChildCommand(0)) != NULL)
-         GetSubCommandString(current, 0, cmdseq, showAddr);
-      
-      current = current->GetNext();
-   }
-   
-   cmdseq.append("\n");
-   
-   return cmdseq;
 }
 
 
@@ -536,6 +518,56 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
    }
    
    return false;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true)
+//------------------------------------------------------------------------------
+/*
+ * Returns string of command sequence given by cmd.
+ *
+ * @notes: Do not use %s for command string output, it may crash when it encounters
+ * comment with % in the scripts
+ */
+//------------------------------------------------------------------------------
+std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr)
+{
+   char buf[10];
+   GmatCommand *current = cmd;
+   std::string cmdseq, cmdstr;
+   cmdstr = "\n---------- Mission Sequence ----------\n";
+   cmdseq.append(cmdstr);
+   buf[0] = '\0';
+   
+   #if DEBUG_COMMAND_SEQ_STRING
+   MessageInterface::ShowMessage
+      ("===> GmatCommandUtil::GetCommandSeqString(%p)\n", cmd);
+   MessageInterface::ShowMessage("%s", cmdstr.c_str());
+   #endif
+   
+   
+   while (current != NULL)
+   {
+      if (showAddr)
+         sprintf(buf, "(%p)", current);
+      
+      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + "\n";
+      cmdseq.append(cmdstr);
+      
+      #if DEBUG_COMMAND_SEQ_STRING
+      MessageInterface::ShowMessage("%s", cmdstr.c_str());
+      #endif
+      
+      if ((current->GetChildCommand(0)) != NULL)
+         GetSubCommandString(current, 0, cmdseq, showAddr);
+      
+      current = current->GetNext();
+   }
+   
+   cmdseq.append("\n");
+   
+   return cmdseq;
 }
 
 

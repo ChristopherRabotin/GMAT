@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 CommandUtil
 //------------------------------------------------------------------------------
@@ -26,17 +26,17 @@ namespace GmatCommandUtil
 {
    GmatCommand* GetLastCommand(GmatCommand *cmd);
    GmatCommand* GetNextCommand(GmatCommand *cmd);
-   GmatCommand* GetPreviousCommand(GmatCommand *cmd);
+   GmatCommand* GetPreviousCommand(GmatCommand *from, GmatCommand *cmd);
    GmatCommand* GetMatchingEnd(GmatCommand *cmd);
    GmatCommand* GetParentCommand(GmatCommand *top, GmatCommand *cmd);
    GmatCommand* GetSubParent(GmatCommand *brCmd, GmatCommand *cmd);
-   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true);
    bool IsAfter(GmatCommand *cmd1, GmatCommand *cmd2);
    bool FindObject(GmatCommand *cmd, Gmat::ObjectType objType,
                    const std::string &objName, std::string &cmdName);
    bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
                                   Gmat::ObjectType objType,
                                   const std::string &objName, std::string &cmdName);
+   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true);
    void GetSubCommandString(GmatCommand* brCmd, Integer level,
                             std::string &cmdseq, bool showAddr = true);
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
