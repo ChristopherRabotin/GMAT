@@ -19,7 +19,6 @@
 
 #include "Propagate.hpp"
 #include "Publisher.hpp"
-#include "Moderator.hpp"
 #include "Parameter.hpp"
 #include "StringUtil.hpp" // for Trim()
 #include "AngleUtil.hpp"  // for PutAngleInDegRange()
@@ -42,6 +41,7 @@
 //#define DEBUG_EPOCH_SYNC
 //#define DEBUG_SECANT_DETAILS
 //#define DEBUG_BISECTION_DETAILS
+//#define DEBUG_WRAPPERS
 
 #define TIME_ROUNDOFF 1.0e-6
 #define DEFAULT_STOP_TOLERANCE 1.0e-7
@@ -540,7 +540,9 @@ const std::string& Propagate::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 GmatBase* Propagate::Clone() const
 {
-   MessageInterface::ShowMessage("===> Propagate::Clone() entering\n");
+   #ifdef DEBUG_CLONE
+   MessageInterface::ShowMessage("Propagate::Clone() entered\n");
+   #endif
    return (new Propagate(*this));
 }
 
@@ -1401,8 +1403,8 @@ const StringArray& Propagate::GetRefObjectNameArray(const Gmat::ObjectType type)
    
    if (type == Gmat::UNKNOWN_OBJECT || type == Gmat::PARAMETER)
    {
-      refObjectNames.insert(refObjectNames.end(), stopParamNames.begin(),
-                            stopParamNames.end());
+      refObjectNames.insert(refObjectNames.end(), stopNames.begin(),
+                            stopNames.end());
    }
    
    return refObjectNames;
@@ -1456,6 +1458,121 @@ bool Propagate::InterpretAction()
    AssemblePropagators(loc, generatingString);
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+const StringArray& Propagate::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+   wrapperObjectNames.insert(wrapperObjectNames.end(), stopNames.begin(),
+                             stopNames.end());
+   wrapperObjectNames.insert(wrapperObjectNames.end(), goalNames.begin(),
+                             goalNames.end());
+   return wrapperObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+bool Propagate::SetElementWrapper(ElementWrapper *toWrapper,
+                                  const std::string &withName)
+{
+   #ifdef DEBUG_WRAPPERS   
+   MessageInterface::ShowMessage
+      ("Propagate::SetElementWrapper() entered with toWrapper=<%p>, withName='%s'\n",
+       toWrapper, withName.c_str());
+   #endif
+   
+   if (toWrapper == NULL)
+      return false;
+   
+   // this would be caught by next part, but this message is more meaningful
+   if (toWrapper->GetWrapperType() == Gmat::ARRAY)
+   {
+      throw CommandException("A value of type \"Array\" on command \"" + typeName + 
+                  "\" is not an allowed value.\nThe allowed values are:"
+                  " [ Real Number, Variable, Array Element, or Parameter ]. "); 
+   }
+   
+   CheckDataType(toWrapper, Gmat::REAL_TYPE, "Propagate", true);
+   
+   bool retval = false;
+   ElementWrapper *ew;
+   
+   //-------------------------------------------------------
+   // check stopping condition names
+   //-------------------------------------------------------
+   #ifdef DEBUG_WRAPPERS   
+   MessageInterface::ShowMessage
+      ("   Checking %d Propagate Stop Conditions\n", stopNames.size());
+   for (UnsignedInt i=0; i<stopNames.size(); i++)
+      MessageInterface::ShowMessage("      %s\n", stopNames[i].c_str());
+   #endif
+   
+   Integer sz = stopNames.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (stopNames.at(i) == withName)
+      {
+         #ifdef DEBUG_WRAPPERS   
+         MessageInterface::ShowMessage
+            ("   Found wrapper name \"%s\" in stopNames\n", withName.c_str());
+         #endif
+         if (stopWrappers.at(i) != NULL)
+         {
+            ew = stopWrappers.at(i);
+            stopWrappers.at(i) = toWrapper;
+            
+            // Delete old wrapper if wrapper name not found in the goalNames
+            if (find(goalNames.begin(), goalNames.end(), withName) == goalNames.end())
+               delete ew;
+         }
+         else
+            stopWrappers.at(i) = toWrapper;
+         
+         retval = true;
+      }
+   }
+   
+   //-------------------------------------------------------
+   // check goal names
+   //-------------------------------------------------------
+   #ifdef DEBUG_WRAPPERS   
+   MessageInterface::ShowMessage
+      ("   Checking %d Propagate Stop Goals\n", goalNames.size());
+   for (UnsignedInt i=0; i<goalNames.size(); i++)
+      MessageInterface::ShowMessage("      %s\n", goalNames[i].c_str());
+   #endif
+   
+   sz = goalNames.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (goalNames.at(i) == withName)
+      {
+         #ifdef DEBUG_WRAPPERS   
+         MessageInterface::ShowMessage
+            ("   Found wrapper name \"%s\" in goalNames\n", withName.c_str());
+         #endif
+         if (goalWrappers.at(i) != NULL)
+         {
+            ew = goalWrappers.at(i);
+            goalWrappers.at(i) = toWrapper;
+            
+            // Delete old wrapper if wrapper name not found in the stopNames
+            if (find(stopNames.begin(), stopNames.end(), withName) == stopNames.end())
+               delete ew;
+         }
+         else
+            goalWrappers.at(i) = toWrapper;
+         retval = true;
+      }
+   }
+   
+   return retval;
 }
 
 
@@ -1816,21 +1933,30 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
       MessageInterface::ShowMessage("   Stop = '%s' with value '%s'\n", 
          lhs.c_str(), rhs.c_str());
    #endif
-   
+      
    // Now to work!
    std::string paramType, paramObj, paramSystem;
    GmatStringUtil::ParseParameter(lhs, paramType, paramObj, paramSystem);
-
+   
    // Create the stop parameter
-   Moderator *theModerator = Moderator::Instance();
    std::string paramName;
    if (paramSystem == "")
       paramName = paramObj + "." + paramType;
    else
-      paramName = paramObj + "." + paramSystem + "." + paramType;   
-   theModerator->CreateParameter(paramType, paramName, paramObj, paramSystem);
-   StopCondition *stopCond = theModerator->CreateStopCondition("StopCondition",
-      "StopOn" + paramName);
+      paramName = paramObj + "." + paramSystem + "." + paramType;
+   
+   #ifdef DEBUG_PROPAGATE_ASSEMBLE
+   MessageInterface::ShowMessage("   Creating local StopCondition\n");
+   #endif
+   StopCondition *stopCond = new StopCondition("StopOn" + paramName);
+   if (find(stopNames.begin(), stopNames.end(), paramName) == stopNames.end())
+   {
+      #ifdef DEBUG_PROPAGATE_ASSEMBLE
+      MessageInterface::ShowMessage("   Adding '%s' to stopNames\n", paramName.c_str());
+      #endif
+      stopNames.push_back(paramName);
+      stopWrappers.push_back(NULL);
+   }
    
    // Handle some static member initialization if this is the first opportunity
    if (stopCondEpochID == -1)
@@ -1855,7 +1981,17 @@ void Propagate::ConfigureStoppingCondition(std::string &stopDesc)
       #endif
          
       // create goal parameter
-      std::string component = CreateParameter(rhs);
+      std::string component = rhs;
+      
+      if (find(goalNames.begin(), goalNames.end(), component) == goalNames.end())
+      {
+         #ifdef DEBUG_PROPAGATE_ASSEMBLE
+         MessageInterface::ShowMessage("   Adding '%s' to goalNames\n", component.c_str());
+         #endif
+         goalNames.push_back(component);
+         goalWrappers.push_back(NULL);         
+      }
+      
       stopCond->SetStringParameter("Goal", component);
    }
    else
@@ -4082,57 +4218,6 @@ void Propagate::SetNames(const std::string& name, StringArray& owners,
    elements.push_back(name+".Vx");
    elements.push_back(name+".Vy");
    elements.push_back(name+".Vz");
-}
-
-
-//------------------------------------------------------------------------------
-// std::string CreateParameter(const std::string name)
-//------------------------------------------------------------------------------
-std::string Propagate::CreateParameter(const std::string &name)
-{
-   std::string str = name;
-   Real rval;
-   
-   if (GmatStringUtil::ToReal(str, &rval))
-       return str;
-   
-   Moderator *theModerator = Moderator::Instance();
-   std::string owner, dep, type;
-   Parameter *param;
-   
-   str = GmatStringUtil::Trim(str, GmatStringUtil::BOTH);
-   GmatStringUtil::ParseParameter(str, type, owner, dep);
-   
-   #ifdef DEBUG_PROPAGATE_ASSEMBLE
-   MessageInterface::ShowMessage
-      ("Propagate::CreateParameter() name=%s, type=%s, owner=%s, dep=%s\n",
-       name.c_str(), type.c_str(), owner.c_str(), dep.c_str());
-   #endif
-   
-   // If Parameter is not found or cannot be created, let the Interpreter
-   // do the rest of work.
-   try
-   {
-      param = theModerator->CreateParameter(type, str, owner, dep);
-      
-      #ifdef DEBUG_PROPAGATE_ASSEMBLE
-      MessageInterface::ShowMessage
-         ("   Parameter found or created: addr=<%p>, name=%s, type=%s, owner=%s, dep=%s\n",
-          param, param->GetName().c_str(), param->GetTypeName().c_str(),
-          param->GetStringParameter("Object").c_str(),
-          param->GetStringParameter("DepObject").c_str());
-      #endif
-   }
-   catch (BaseException &e)
-   {
-      #ifdef DEBUG_PROPAGATE_ASSEMBLE
-      MessageInterface::ShowMessage("   %s\n", e.GetFullMessage().c_str());
-      #endif
-      
-      stopParamNames.push_back(name);
-   }
-   
-   return str;
 }
 
 

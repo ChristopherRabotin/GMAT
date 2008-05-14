@@ -22,6 +22,7 @@
 #define Propagate_hpp
 
 #include "GmatCommand.hpp"
+#include "ElementWrapper.hpp"
 #include <list>
 
 
@@ -56,161 +57,173 @@ public:
    Propagate();
    virtual ~Propagate();
    Propagate(const Propagate &prp);
-   Propagate&          operator=(const Propagate &prp);
-
-   // Methods used for configuration
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
-   virtual bool        SetRefObjectName(const Gmat::ObjectType type,
-                                            const std::string &name);
+   Propagate&           operator=(const Propagate &prp);
    
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
+   // Methods used for configuration
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual bool         SetRefObjectName(const Gmat::ObjectType type,
+                                         const std::string &name);
+   
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
    
    virtual const ObjectTypeArray&
-                       GetRefObjectTypeArray();
+                        GetRefObjectTypeArray();
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
    
-   virtual bool        SetObject(const std::string &name,
-                                 const Gmat::ObjectType type,
-                                 const std::string &associate = "",
-                                 const Gmat::ObjectType associateType =
-                                 Gmat::UNKNOWN_OBJECT);
-   virtual bool        SetObject(GmatBase *obj, const Gmat::ObjectType type);
-   virtual GmatBase*   GetObject(const Gmat::ObjectType type, 
-                                 const std::string objName = "");
-   virtual void        ClearObject(const Gmat::ObjectType type);
-
+   virtual bool         SetObject(const std::string &name,
+                                  const Gmat::ObjectType type,
+                                  const std::string &associate = "",
+                                  const Gmat::ObjectType associateType =
+                                  Gmat::UNKNOWN_OBJECT);
+   virtual bool         SetObject(GmatBase *obj, const Gmat::ObjectType type);
+   virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
+                                  const std::string objName = "");
+   virtual void         ClearObject(const Gmat::ObjectType type);
+   
    // inherited from GmatBase
-   virtual GmatBase* Clone(void) const;
+   virtual GmatBase*    Clone(void) const;
    
    virtual const std::string&
-                       GetGeneratingString(Gmat::WriteMode mode =
-                                           Gmat::SCRIPTING,
-                                           const std::string &prefix = "",
-                                           const std::string &useName = "");
-
+                        GetGeneratingString(Gmat::WriteMode mode =
+                                            Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
+   
    // Reference object accessor methods
-   virtual GmatBase*   GetRefObject(const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+   virtual GmatBase*    GetRefObject(const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
    virtual ObjectArray& GetRefObjectArray(const Gmat::ObjectType type);
    
    // Parameter accessor methods
-   virtual std::string GetParameterText(const Integer id) const;
-   virtual Integer     GetParameterID(const std::string &str) const;
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
    virtual Gmat::ParameterType
-                       GetParameterType(const Integer id) const;
-   virtual std::string GetParameterTypeString(const Integer id) const;
-    
-   virtual Integer     GetIntegerParameter(const Integer id) const;
-   virtual Integer     SetIntegerParameter(const Integer id,
-                                           const Integer value);
-   virtual std::string GetStringParameter(const Integer id) const;
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value);
-   virtual bool        SetStringParameter(const Integer id, 
-                                          const std::string &value,
-                                          const Integer index);
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id) const;
+                        GetStringArrayParameter(const Integer id) const;
    virtual const StringArray& 
-                       GetStringArrayParameter(const Integer id, 
-                                               const Integer index) const;
-   virtual bool        GetBooleanParameter(const Integer id) const;
-   virtual bool        SetBooleanParameter(const Integer id,
-                                           const bool value);
-   virtual bool        GetBooleanParameter(const std::string &label) const;
-   virtual bool        SetBooleanParameter(const std::string &label,
-                                           const bool value);
-   virtual Real        GetRealParameter(const Integer id) const;
-   virtual Real        SetRealParameter(const Integer id,
-                                        const Real value);
-   virtual Real        GetRealParameter(const std::string &label) const;
-   virtual Real        SetRealParameter(const std::string &label,
-                                        const Real value);
- 
-   virtual bool        TakeAction(const std::string &action,  
-                                  const std::string &actionData = "");
-    
-   // Methods used to run the command
-   virtual bool        InterpretAction();
-    
-   virtual void        SetTransientForces(std::vector<PhysicalModel*> *tf);
-   virtual bool        Initialize();
-   virtual void        FillFormation(SpaceObject *so, StringArray& owners,
-                                     StringArray& elements);
+                        GetStringArrayParameter(const Integer id, 
+                                                const Integer index) const;
+   virtual bool         GetBooleanParameter(const Integer id) const;
+   virtual bool         SetBooleanParameter(const Integer id,
+                                            const bool value);
+   virtual bool         GetBooleanParameter(const std::string &label) const;
+   virtual bool         SetBooleanParameter(const std::string &label,
+                                            const bool value);
+   virtual Real         GetRealParameter(const Integer id) const;
+   virtual Real         SetRealParameter(const Integer id,
+                                         const Real value);
+   virtual Real         GetRealParameter(const std::string &label) const;
+   virtual Real         SetRealParameter(const std::string &label,
+                                         const Real value);
+   
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+   
+   // Methods used for interpreting the command
+   virtual bool         InterpretAction();
+   
+   // Methods used for setting ElementWrapper
+   virtual const StringArray& 
+                        GetWrapperObjectNameArray();
+   virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
+                                          const std::string &withName);
+   
+   // Methods used for running the command
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   virtual bool         Initialize();
+   virtual void         FillFormation(SpaceObject *so, StringArray& owners,
+                                      StringArray& elements);
    virtual GmatCommand* GetNext();
-   virtual bool        Execute();
-   virtual void        RunComplete();
-
+   virtual bool         Execute();
+   virtual void         RunComplete();
+   
 protected:
    /// Name of the propagator setup(s) used in this command
-   StringArray             propName;
+   StringArray                  propName;
    /// Step direction multipliers used to switch btwn forwards & backwards prop
-   Real                    direction;
+   Real                         direction;
    /// The (1 or more) spacecraft associated with this propagation, grouped by
    /// propagator
-   std::vector<StringArray *>  
-                           satName;
+   std::vector<StringArray *>   satName;
    /// Flag used to determine if the spacecraft are propagated coupled
-   std::string             currentPropMode;
+   std::string                  currentPropMode;
    /// Frequency used to check for user interrupts of the run
-   Integer                 interruptCheckFrequency;
+   Integer                      interruptCheckFrequency;
    /// Flag that specifies if we are rejoining a run in progress
-   bool                    inProgress;
+   bool                         inProgress;
    /// Flag indicating if this command was already fired once before
-   bool                    hasFired;
+   bool                         hasFired;
    /// ID for the spacecraft epoch parameter
-   Integer                 epochID;
+   Integer                      epochID;
    /// Starting epoch for the propagation
-   std::vector<Real>       baseEpoch;
-
+   std::vector<Real>            baseEpoch;
+   
    /// The propagator(s) used by this command
-   std::vector<PropSetup*> prop;
+   std::vector<PropSetup*>      prop;
    /// The spacecraft and formations that are propagated
-   std::vector<SpaceObject *> sats;
+   std::vector<SpaceObject *>   sats;
    /// The stopping conditions
    std::vector<StopCondition *> stopWhen;
    /// The time step that we need to interpolate across
-   Real                    stopInterval;
+   Real                         stopInterval;
    /// Index to the first StopCondition that triggered the stop
-   Integer                 stopTrigger;
+   Integer                      stopTrigger;
    /// Array of triggers
-   std::vector <StopCondition*>
-                           triggers;
+   std::vector <StopCondition*> triggers;
    /// Names of the spacecraft used in the stopping conditions
-   StringArray             stopSatNames;
-   /// Name of the parameter used in the stopping conditions
-   StringArray             stopParamNames;
+   StringArray                  stopSatNames;
+   /// String used in the stopping conditions
+   StringArray                  stopNames;
+   /// String used in the stopping goals
+   StringArray                  goalNames;
+   /// ElementWraper pointers of stoping conditions
+   std::vector<ElementWrapper*> stopWrappers;
+   /// ElementWraper pointers of stoping goals
+   std::vector<ElementWrapper*> goalWrappers;
+   
    /// The spacecraft used by the stopping conditions
-   std::vector<SpaceObject *> stopSats;
+   std::vector<SpaceObject *>   stopSats;
    /// Stopping condition evaluation requires propagation; the satBuffer lets us
    /// restore the Spacecraft and Formations to the state needed for the last 
    /// step 
-   std::vector<Spacecraft *> satBuffer;
-   std::vector<Formation *>  formBuffer;
+   std::vector<Spacecraft *>    satBuffer;
+   std::vector<Formation *>     formBuffer;
    /// The object array used in GetRefObjectArray()
-   ObjectArray             objectArray;
-
+   ObjectArray                  objectArray;
+   
    // Parameters moved from Execute so that it can be reentrant
    /// Time elapsed during this Propagate
-   RealArray               elapsedTime;
+   RealArray                    elapsedTime;
    /// Start epoch for the step
-   RealArray               currEpoch;
+   RealArray                    currEpoch;
    /// The Propagator
-   std::vector<Propagator*> p;
+   std::vector<Propagator*>     p;
    /// The ForceModel
-   std::vector<ForceModel*> fm;
+   std::vector<ForceModel*>     fm;
    
    // Members used to flag most recent detected stop, so we don't stop multiple 
    // times at the same point
    /// Flag used to indicate that the first step logic must be executed
-   bool                     checkFirstStep;
+   bool                         checkFirstStep;
 
    /// Allowed modes of propagation
    enum PropModes
@@ -305,7 +318,6 @@ protected:
    
    void                    AddTransientForce(StringArray *sats, ForceModel *p);
    void                    ClearTransientForces();
-   std::string             CreateParameter(const std::string &name);
    
    void                    AddToBuffer(SpaceObject *so);
    void                    EmptyBuffer();
