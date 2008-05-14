@@ -33,7 +33,7 @@
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_FOOTER 1
 //#define DEBUG_SET_COMMENTS 1
-//#define DEBUG_GMAT_FUNCTION 1
+#define DEBUG_GMAT_FUNCTION 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -106,14 +106,22 @@ ScriptInterpreter::~ScriptInterpreter()
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::Interpret()
 {
+   #if DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::Interpret() entered, Calling Initialize()\n");
+   #endif
+   
    Initialize();
    
    inCommandMode = false;
    inRealCommandMode = false;
-
-   // Before parsing script, check for unmatching control logic
-   bool retval0 = ReadFirstPass();
    
+   // Before parsing script, check for unmatching control logic
+   #if DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage("   Calling ReadFirstPass()\n");
+   #endif
+   
+   bool retval0 = ReadFirstPass();
    bool retval1 = false;
    bool retval2 = false;
    
@@ -169,7 +177,6 @@ bool ScriptInterpreter::Interpret(GmatCommand *inCmd, bool skipHeader,
    
    // Before parsing script, check for unmatching control logic
    bool retval0 = ReadFirstPass();
-   
    bool retval1 = false;
    bool retval2 = false;
    
@@ -296,8 +303,8 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
    MessageInterface::ShowMessage
       ("ScriptInterpreter::InterpretGmatFunction() returning retval=%d\n", retval);
    std::string fcsStr = GmatCommandUtil::GetCommandSeqString(noOp);
-   MessageInterface::ShowMessage
-      ("----- FCS of '%s': %s\n", fileName.c_str(), fcsStr.c_str());
+   MessageInterface::ShowMessage("---------- FCS of '%s'", fileName.c_str());
+   MessageInterface::ShowMessage(fcsStr); //Notes: Do not use %s for command string
    #endif
    
    // Just return noOP for now (loj: 2008.03.12)
@@ -333,7 +340,7 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(Function *funct)
    #endif
    
    // Set urrent function
-   currentFunction = funct;
+   SetFunction(funct);
    
    #ifdef DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage
@@ -407,6 +414,11 @@ bool ScriptInterpreter::Build(const std::string &scriptfile, Gmat::WriteMode mod
 //------------------------------------------------------------------------------
 bool ScriptInterpreter::SetInStream(std::istream *str)
 {
+   #ifdef DEBUG_SCRIPT_READING
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::SetInStream() entered str=<%p>\n", str);
+   #endif
+   
    inStream = str;
    theReadWriter->SetInStream(inStream);
    return true;
@@ -445,8 +457,17 @@ bool ScriptInterpreter::SetOutStream(std::ostream *str)
 bool ScriptInterpreter::ReadFirstPass()
 {
    #if DEBUG_READ_FIRST_PASS
-   MessageInterface::ShowMessage("ScriptInterpreter::ReadFirstPass() entered\n");
+   MessageInterface::ShowMessage
+      ("ScriptInterpreter::ReadFirstPass() entered, inStream=<%p>\n", inStream);
    #endif
+   
+   // Make sure inStream is set
+   if (inStream == NULL)
+   {
+      MessageInterface::ShowMessage
+         ("**** ERROR **** ScriptInterpreter::ReadFirstPass() input stream is NULL");
+      return false;
+   }
    
    char ch;
    bool reachedEndOfFile = false;
@@ -745,18 +766,23 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    if (emptyChunks == count)
       return false;
    
-   // for comments
-   std::string preStr = ""; 
-   std::string inStr = ""; 
+   // check for function definition line
+   if (currentBlockType == Gmat::FUNCTION_BLOCK)
+   {
+      if (BuildFunctionDefinition(sarray[count-1]))
+         return true;
+      else
+         throw InterpreterException("Failed to interpret function definition");
+   }
    
-   preStr = theTextParser.GetPrefaceComment();
-   inStr = theTextParser.GetInlineComment();
+   // Get comments
+   std::string preStr = theTextParser.GetPrefaceComment();
+   std::string inStr = theTextParser.GetInlineComment();
    
    // Decompose by block type
    StringArray chunks;
    try
    {
-      //StringArray chunks = theTextParser.ChunkLine();
       chunks = theTextParser.ChunkLine();
    }
    catch (BaseException &e)
@@ -784,17 +810,6 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    for (int i=0; i<count; i++)
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
-   
-   // check for function definition
-   if ( (count > 0 && chunks[0].find("function") == 0) ||
-        (count > 1 && chunks[1].find("function") == 0) )
-   {
-      #ifdef DEBUG_PARSE
-      MessageInterface::ShowMessage
-         ("   '%s' is function definition, so just returning true\n", logicalBlock.c_str());
-      #endif
-      return true;
-   }
    
    if (currentBlockType == Gmat::COMMENT_BLOCK)
    {
