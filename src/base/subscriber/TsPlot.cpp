@@ -77,6 +77,7 @@ TsPlot::TsPlot(const std::string &name, Parameter *xParam,
    Subscriber("XYPlot", name)
 {
    // GmatBase data
+   objectTypeNames.push_back("XYPlot");
    parameterCount = TsPlotParamCount;
    
    mDrawGrid = "On";
