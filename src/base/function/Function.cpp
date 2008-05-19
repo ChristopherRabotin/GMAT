@@ -395,12 +395,12 @@ ElementWrapper* Function::GetOutputArgument(const std::string &byName)
    return outputArgMap[byName];
 }
 
-void Function::AddAutomaticObject(GmatBase *obj)
+void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj)
 {
-   automaticObjects.push_back(obj);
+   automaticObjects.insert(std::make_pair(withName,obj));
 }
 
-ObjectArray Function::GetAutomaticObjects() const
+StringObjectMap Function::GetAutomaticObjects() const
 {
    return automaticObjects;
 }

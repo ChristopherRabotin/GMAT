@@ -903,7 +903,7 @@ Parameter* Validator::CreateSystemParameter(const std::string &str,
             ("   Adding '%s' to function automatic object array\n", param->GetName().c_str());
          #endif
          
-         theFunction->AddAutomaticObject((GmatBase*)param);
+         theFunction->AddAutomaticObject(param->GetName(),(GmatBase*)param);
       }
    }
    else

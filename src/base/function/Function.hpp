@@ -61,8 +61,9 @@ public:
                         GetOutputArgument(const std::string &byName);
    
    // methods to set/get the automatic objects
-   virtual void         AddAutomaticObject(GmatBase *obj);
-   virtual ObjectArray  GetAutomaticObjects() const;
+   virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj);
+   virtual StringObjectMap  
+                        GetAutomaticObjects() const;
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
@@ -125,7 +126,8 @@ protected:
    GmatCommand          *fcs;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
-   ObjectArray          automaticObjects;
+   std::map<std::string, GmatBase *>          
+                        automaticObjects;
 
    enum
    {
