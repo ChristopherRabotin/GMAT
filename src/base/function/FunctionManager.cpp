@@ -24,6 +24,8 @@
 #include "ElementWrapper.hpp"
 #include "RealTypes.hpp"
 #include "RealUtilities.hpp"
+#include "Variable.hpp"
+#include "StringVar.hpp"
 
 //#define DEBUG_FUNCTION_MANAGER
 //#define DEBUG_FM_EXECUTE
@@ -44,7 +46,8 @@ FunctionManager::FunctionManager() :
    solarSys          (NULL),
    fName             (""),
    f                 (NULL),
-   firstExecution    (true)
+   firstExecution    (true),
+   numVarsCreated    (0)
 {
 }
 
@@ -59,7 +62,7 @@ FunctionManager::FunctionManager() :
 FunctionManager::~FunctionManager()
 {
    functionObjectStore.clear();
-   inputWrappers.clear();
+   //inputWrappers.clear();
    outputWrappers.clear();
 }
 
@@ -82,9 +85,10 @@ FunctionManager::FunctionManager(const FunctionManager &fm) :
    f                   (NULL),  // is that right?
    ins                 (fm.ins),
    outs                (fm.outs),
-   inputWrappers       (fm.inputWrappers),
+   //inputWrappers       (fm.inputWrappers),
    outputWrappers      (fm.outputWrappers), // is that right?
-   firstExecution      (true)
+   firstExecution      (true),
+   numVarsCreated      (fm.numVarsCreated)
 {
 }
 
@@ -113,7 +117,8 @@ FunctionManager& FunctionManager::operator=(const FunctionManager &fm)
       ins                 = fm.ins;
       outs                = fm.outs;
       firstExecution      = true;
-      inputWrappers       = fm.inputWrappers; // is that right?
+      numVarsCreated      = fm.numVarsCreated;
+      //inputWrappers       = fm.inputWrappers; // is that right?
       outputWrappers      = fm.outputWrappers; // is that right?
    }
    
@@ -228,7 +233,7 @@ bool FunctionManager::Execute()
    #ifdef DEBUG_FM_EXECUTE
       MessageInterface::ShowMessage("Entering FM::Execute for %s\n", fName.c_str());
    #endif
-   GmatBase *obj, *itsClone;
+   GmatBase *obj, *objFOS;
    std::string objName;
    if (f == NULL)
    {
@@ -238,11 +243,12 @@ bool FunctionManager::Execute()
    }
    // Initialize the Validator - I think I need to do this each time - or do I?
    validator.SetSolarSystem(solarSys);
-   combinedObjectStore = localObjectStore;
    std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = localObjectStore->begin(); omi != localObjectStore->end(); ++omi)
+      combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
    for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-      combinedObjectStore->insert(std::make_pair(omi->first, omi->second));
-   validator.SetObjectMap(combinedObjectStore);
+      combinedObjectStore.insert(std::make_pair(omi->first, omi->second));
+   validator.SetObjectMap(&combinedObjectStore);
    #ifdef DEBUG_FUNCTION_MANAGER
       MessageInterface::ShowMessage("in FM::Execute - just set Validator's object map\n");
    #endif
@@ -255,34 +261,36 @@ bool FunctionManager::Execute()
          if (outs.size() == 0) MessageInterface::ShowMessage("NOTE - outs is empty - is it supposed to be?\n");
       #endif
       functionObjectStore.clear();
-      inputWrappers.clear();
+      //inputWrappers.clear();
       outputWrappers.clear();
+      numVarsCreated = 0;
       // set up the FOS with the input objects
       for (unsigned int ii=0; ii<ins.size(); ii++)
       {
+         // if the input string does not refer to an object that can be located in the LOS or
+         // GOS, we must try to create an object for it, if it makes sense (e.g. numeric literal, 
+         // string literal, array element)
          if (!(obj = FindObject(ins.at(ii))))
          {
-            std::string errMsg = "Input \"" + ins.at(ii);
-            errMsg += " not found for function \"" + fName + "\"";
-            throw FunctionException(errMsg);
+            obj = CreateObject(ins.at(ii));
+            if (!obj)
+            {
+               std::string errMsg = "FunctionManager: Object not found or created for input string \"";
+               errMsg += ins.at(ii) + "\" for function \"";
+               errMsg += fName + "\"\n";
+               throw FunctionException(errMsg);
+            }
          }
-         itsClone = obj->Clone();
+         // Clone the object, and insert it into the FOS
+         objFOS = obj->Clone();
          objName = f->GetStringParameter("Input", ii);
-         functionObjectStore.insert(std::make_pair(objName,itsClone));
+         functionObjectStore.insert(std::make_pair(objName,objFOS));
          #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
             MessageInterface::ShowMessage("Adding object %s to the FOS\n", objName.c_str());
          #endif // -------------------------------------------------------------- end debug ---
-         ElementWrapper *wrapper = validator.CreateElementWrapper(ins.at(ii));
-         wrapper->SetRefObject(itsClone);
-         inputWrappers.push_back(wrapper);
-         bool inputOK = f->SetInputElementWrapper(objName, wrapper);
-         if (!inputOK)
-         {
-            std::string errMsg = "Error setting ElementWrapper on function \"" + fName;
-            errMsg += "\" for input \"" + objName + "\"\n";
-            throw FunctionException(errMsg);
-         }
       }
+      // Outputs cannot be numeric or string literals or array elements, etc.
+      // They must be found in the object store; and we do not need to clone them
       for (unsigned int jj = 0; jj < outs.size(); jj++)
       {
          if (!(obj = FindObject(outs.at(jj))))
@@ -292,7 +300,7 @@ bool FunctionManager::Execute()
             throw FunctionException(errMsg);
          }
          ElementWrapper *outWrapper = validator.CreateElementWrapper(outs.at(jj));
-         outWrapper->SetRefObject(obj);  // no clone here?  Assuming no number literals in output
+         outWrapper->SetRefObject(obj); 
          outputWrappers.push_back(outWrapper);
          #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
             MessageInterface::ShowMessage("Output wrapper set for %s\n", (outs.at(jj)).c_str());
@@ -302,14 +310,12 @@ bool FunctionManager::Execute()
    }
    else // not the firstExecution
    {
+      // @todo **************
+      // Need to delete all items in the FOS that are not input (so taht they can properly be created 
+      // again in the FCS - or do this at the end?
       for (unsigned int ii=0; ii<ins.size(); ii++)
       {
-         if (!(obj = FindObject(ins.at(ii))))
-         {
-            std::string errMsg = "Input \"" + ins.at(ii);
-            errMsg += " not found for function \"" + fName + "\"";
-            throw FunctionException(errMsg);
-         }
+         // Get the object from the object store first 
          objName = f->GetStringParameter("Input", ii);
          if (functionObjectStore.find(objName) == functionObjectStore.end())
          {
@@ -318,8 +324,38 @@ bool FunctionManager::Execute()
             throw FunctionException(errMsg);
          }
          GmatBase *fosObj = functionObjectStore[objName];
+         // Now find the corresponding input object
+         if (!(obj = FindObject(ins.at(ii))))
+         {
+            if (createdLiterals.find(ins.at(ii)) == createdLiterals.end())
+            {
+               if (createdOthers.find(ins.at(ii)) == createdOthers.end())
+               {
+                  std::string errMsg = "Input \"" + ins.at(ii);
+                  errMsg += " not found for function \"" + fName + "\"";
+                  throw FunctionException(errMsg);
+               }
+               GmatBase *tmpObj  = fosObj;
+               GmatBase *tmpObj2 = createdOthers[ins.at(ii)];
+               obj               = CreateObject(ins.at(ii));
+               if (!obj)
+               {
+                  std::string errMsg2 = "FunctionManager: Object not found or created for input string \"";
+                  errMsg2 += ins.at(ii) + "\" for function \"";
+                  errMsg2 += fName + "\"\n";
+                  throw FunctionException(errMsg2);
+               }
+               createdOthers[ins.at(ii)] = obj;
+               fosObj = obj->Clone();
+               delete tmpObj;
+               delete tmpObj2;
+            }
+            else
+               obj = createdLiterals[ins.at(ii)];
+         }
+         // Update the object in the object store with the current/reset data
          fosObj->Copy(obj);
-         f->SetInputElementWrapper(objName, inputWrappers.at(ii));
+         //f->SetInputElementWrapper(objName, inputWrappers.at(ii));
       }
    }
    // pass the FOS into the function
@@ -335,7 +371,7 @@ bool FunctionManager::Execute()
       errMsg += f->GetStringParameter("FunctionName") + "\"\n";
       throw FunctionException(errMsg);
    }
-   // Now, eceute the function
+   // Now, execute the function
    f->Execute();
    // Now get the outout data
    Real rval = -99999.999;
@@ -506,6 +542,16 @@ Rmatrix FunctionManager::MatrixEvaluate()
    }
 }
 
+void FunctionManager::Finalize()
+{
+   firstExecution = true;
+   
+   ; // @todo - call function to call RunComplete on FCS here?
+     // delete all contents of FOS here?
+   f->Finalize();
+}
+
+
 //------------------------------------------------------------------------------
 // GmatBase* FunctionManager::FindObject(const std::string &name)
 //------------------------------------------------------------------------------
@@ -528,5 +574,84 @@ GmatBase* FunctionManager::FindObject(const std::string &name)
    else
       return (*localObjectStore)[newName];
    return NULL; // should never get to this point
+}
+
+GmatBase* FunctionManager::CreateObject(const std::string &fromString)
+{
+   
+   GmatBase    *obj = NULL;
+   Real        rval;
+   std::string sval;
+   Integer     ival;
+   Variable    *v = NULL;
+   if (GmatStringUtil::IsBlank(fromString)) return obj;
+   // determine the name of the next object to be created (if needed)
+   //std::string newName = "FMvar" + numVarsCreated;
+   std::string str     = GmatStringUtil::Trim(fromString, GmatStringUtil::BOTH);
+   Integer     sz      = (Integer) str.size();
+   
+   // Check first to see if the string is a numeric literal (and assume we want a real)
+   if (GmatStringUtil::ToReal(fromString, &rval))
+   {
+      //v = new Variable(newName);
+      v = new Variable(str);
+      v->SetReal(rval);
+      obj = (GmatBase*) v;
+      createdLiterals.insert(std::make_pair(str,obj));
+   }
+   // Now check to see if it is a string literal, enclosed with single quotes
+   else if ((str[0] == '\'') && (str[sz-1] == '\''))
+   {
+      sval = str.substr(1, sz-2);
+      //StringVar *sv = new StringVar(newName);
+      StringVar *sv = new StringVar(str);
+      sv->SetStringParameter("Value", sval);
+      obj = (GmatBase*) sv;
+      createdLiterals.insert(std::make_pair(str,obj));
+   }
+   else
+   {
+      // otherwise, we assume it is something else, like array element.
+      // NOTE that we are only allowing Real and Array here 
+      ElementWrapper *ew = validator.CreateElementWrapper(fromString);
+      if (ew)
+      {
+         Gmat::WrapperDataType wType = ew->GetWrapperType();
+         switch (wType)
+         {
+            case Gmat::ARRAY :
+            {
+               //Array *array   = new Array(newName);
+               Array *array   = new Array(str);
+               Rmatrix matVal = ew->EvaluateArray();
+               array->SetRmatrix(matVal);
+               obj = (GmatBase*) array;
+               break;
+            }
+            case Gmat::NUMBER :
+            case Gmat::VARIABLE :
+            case Gmat::ARRAY_ELEMENT :
+            case Gmat::INTEGER :       // wat is this anyway?
+            {
+               ival = ew->EvaluateReal();
+               //v = new Variable(newName);
+               v = new Variable(str);
+               v->SetReal(rval);
+               obj = (GmatBase*) v;
+               break;
+            }
+            default:
+            {
+               std::string errMsg = "FunctionManager: error using string \"";
+               errMsg += fromString + "\" to determine an object\n";
+               throw FunctionException(errMsg);
+               break;
+            }
+         }
+      }
+      if (obj) createdOthers.insert(std::make_pair(str, obj));
+   }
+   if (obj) numVarsCreated++;
+   return obj;
 }
 

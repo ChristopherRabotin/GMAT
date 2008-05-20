@@ -71,6 +71,7 @@ public:
    virtual bool         Execute();
    virtual Real         Evaluate();
    virtual Rmatrix      MatrixEvaluate();
+   virtual void         Finalize();
 
 protected:
    
@@ -85,7 +86,7 @@ protected:
                         *globalObjectStore;
    // Combined object store, used by Validator
    std::map<std::string, GmatBase *>
-                        *combinedObjectStore;
+                        combinedObjectStore;
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
    /// transient forces to pass to the function
@@ -99,23 +100,29 @@ protected:
    StringArray          ins;
    /// the list of output strings for this call of the function
    StringArray          outs;
-   /// Saved input wrappers - need to save in order to resend to function at each call
-   /// (since the same function may be called from many places)
-   std::vector<ElementWrapper *> 
-                        inputWrappers;
    /// wrappers for the output objects
    std::vector<ElementWrapper *> 
                         outputWrappers;
    /// flag indicating whether or not its the first execution
    bool                 firstExecution;
+   // number of Variables created for the FOS
+   Integer              numVarsCreated;
    /// Output Objects
    //ObjectArray          outObjects; 
    // Validator used to create the ElementWrappers
    Validator            validator;
+   // Created objects for string or numeric literal inputs
+   std::map<std::string, GmatBase *>
+                        createdLiterals;
+   // Created objects that need to be reevaluated each time (i.e. they are based on
+   // current values of some object (e.g. an array element))
+   std::map<std::string, GmatBase *>
+                        createdOthers;
    
    //virtual bool         BuildFunctionObjectStore();
    //virtual bool         RefreshFunctionObjectStore();
    GmatBase* FindObject(const std::string &name);
+   GmatBase* CreateObject(const std::string &fromString);
    
 };
 
