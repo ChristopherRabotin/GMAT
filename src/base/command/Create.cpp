@@ -288,6 +288,8 @@ bool Create::Initialize()
       for (unsigned int ii=0;ii<creations.size();ii++)
          MessageInterface::ShowMessage("   %d: %s\n", ii, ((creations.at(ii))->GetName()).c_str());
    #endif
+   // ************** try this *******************
+   Execute(); // ********************************
    return true;
 }
 
@@ -316,15 +318,16 @@ bool Create::Execute()
       for (omi = globalObjectMap->begin(); omi != globalObjectMap->end(); ++omi)
          MessageInterface::ShowMessage("    %s of type %s\n",
                (omi->first).c_str(), ((omi->second)->GetTypeName()).c_str());
+      MessageInterface::ShowMessage("Create::Execute() executing for objects (objectNames):\n");
+      for (unsigned int ii = 0; ii < objectNames.size(); ii++)
+         MessageInterface::ShowMessage(" ........ %s\n", (objectNames.at(ii)).c_str());
+      MessageInterface::ShowMessage("Create::Execute() executing for objects (arrayNames):\n");
+      for (unsigned int ii = 0; ii < arrayNames.size(); ii++)
+         MessageInterface::ShowMessage(" ........ %s\n", (arrayNames.at(ii)).c_str());
    #endif
    bool isOK = true;
    StringArray useThese = objectNames;
    if (objType == "Array")  useThese = arrayNames;
-   #ifdef DEBUG_CREATE
-      MessageInterface::ShowMessage("Create::Execute() executing for objects:\n");
-      for (unsigned int ii = 0; ii < useThese.size(); ii++)
-         MessageInterface::ShowMessage(" ........ %s\n", (useThese.at(ii)).c_str());
-   #endif
    
    // If the type is Array, use the names without the indices
 
