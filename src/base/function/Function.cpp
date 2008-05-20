@@ -197,6 +197,23 @@ bool Function::Initialize()
             (fcs->GetTypeName()).c_str());         
    #endif
    if (!fcs) return false;
+   // Initialize the Validator - I think I need to do this each time - or do I?
+   validator.SetSolarSystem(solarSys);
+   std::map<std::string, GmatBase *>::iterator omi;
+   for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+      store.insert(std::make_pair(omi->first, omi->second));
+   for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+      store.insert(std::make_pair(omi->first, omi->second));
+   validator.SetObjectMap(&store);
+   
+   // add automatic objects to the FOS
+   for (omi = automaticObjects.begin(); omi != automaticObjects.end(); ++omi)
+   {
+      if (objectStore->find(omi->first) == objectStore->end())
+         objectStore->insert(std::make_pair(omi->first, omi->second));
+   }
+   
+   
    GmatCommand *current = fcs;
    while (current)
    {
@@ -230,9 +247,24 @@ bool Function::Execute()
          return false;
       current = current->GetNext();
    }
-   // @todo - create output wrappers and put into map
-   // create Validator, send it FOS, then can create ElementWrappers with names in map
-   //fcs->RunComplete();   // check this out first - what needs mods?
+   // create output wrappers and put into map
+   GmatBase *obj;
+   for (unsigned int jj = 0; jj < outputNames.size(); jj++)
+   {
+      if (!(obj = FindObject(outputNames.at(jj))))
+      {
+         std::string errMsg = "Function: Output \"" + outputNames.at(jj);
+         errMsg += " not found for function \"" + functionName + "\"";
+         throw FunctionException(errMsg);
+      }
+      ElementWrapper *outWrapper = validator.CreateElementWrapper(outputNames.at(jj));
+      outWrapper->SetRefObject(obj); 
+      outputArgMap[outputNames.at(jj)] = outWrapper;
+      #ifdef DEBUG_FUNCTION // --------------------------------------------------- debug ---
+         MessageInterface::ShowMessage("Function: Output wrapper created for %s\n", (outputNames.at(jj)).c_str());
+      #endif // -------------------------------------------------------------- end debug ---
+   }
+   Finalize();
    return true; 
 }
 
@@ -293,6 +325,22 @@ Rmatrix Function::MatrixEvaluate()
    #endif
    
    return rmat;
+}
+
+void Function::Finalize()
+{
+   ; // @todo - finalize anything else that needs it as well
+   GmatCommand *current = fcs;
+   while (current)
+   {
+      #ifdef DEBUG_FUNCTION
+         if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
+         else MessageInterface::ShowMessage("   Now about to finalize (call RunComplete on) command %s\n",
+               (current->GetName()).c_str());         
+      #endif
+      current->RunComplete();
+      current = current->GetNext();
+   }
 }
 
 void Function::SetObjectMap(std::map<std::string, GmatBase *> *map)
@@ -746,4 +794,28 @@ bool Function::SetStringParameter(const std::string &label,
 //   if (type == Gmat::FUNCTION)
 //      
 //}
+
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* Function::FindObject(const std::string &name)
+{
+   std::string newName = name;
+   
+   // Ignore array indexing of Array
+   std::string::size_type index = name.find('(');
+   if (index != name.npos)
+      newName = name.substr(0, index);
+   // Check for the object in the Local Object Store (LOS) first
+   if (objectStore->find(newName) == objectStore->end())
+   {
+     // If not found in the LOS, check the Global Object Store (GOS)
+      if (globalObjectStore->find(newName) == globalObjectStore->end())
+         return NULL;
+      else return (*globalObjectStore)[newName];
+   }
+   else
+      return (*objectStore)[newName];
+   return NULL; // should never get to this point
+}
 

@@ -24,6 +24,7 @@
 #include "ElementWrapper.hpp"
 #include "PhysicalModel.hpp"
 #include "GmatCommand.hpp"
+#include "Validator.hpp"
 #include <map>
 
 /**
@@ -47,6 +48,7 @@ public:
    virtual bool         Execute();
    virtual Real         Evaluate();
    virtual Rmatrix      MatrixEvaluate();
+   virtual void         Finalize();
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetSolarSystem(SolarSystem *ss);
@@ -100,7 +102,7 @@ protected:
    StringArray inputNames;
    /// Function output names
    StringArray outputNames;
-   /// Function input name and element wrapper map
+   /// Function input name and element wrapper map  // @todo - is this needed?
    std::map<std::string, ElementWrapper*> inputArgMap;
    /// Function output name element wrapper map
    std::map<std::string, ElementWrapper*> outputArgMap;
@@ -128,6 +130,11 @@ protected:
    /// set at that time)
    std::map<std::string, GmatBase *>          
                         automaticObjects;
+   // Validator used to create the ElementWrappers
+   Validator            validator;
+   /// Object store needed by the validator
+   std::map<std::string, GmatBase *>
+                        store;
 
    enum
    {
@@ -142,6 +149,8 @@ protected:
       PARAMETER_TEXT[FunctionParamCount - GmatBaseParamCount];
    static const Gmat::ParameterType
       PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount];
+   
+   GmatBase* FindObject(const std::string &name);
    
 };
 
