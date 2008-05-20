@@ -998,6 +998,12 @@ bool CallFunction::Execute()
    return status;
 }
 
+void CallFunction::RunComplete()
+{
+   fm.Finalize();
+   GmatCommand::RunComplete();
+}
+
 
 //------------------------------------------------------------------------------
 // bool ExecuteMatlabFunction()

@@ -103,7 +103,7 @@ public:
    // Methods used to run the command
    virtual bool            Initialize();
    virtual bool            Execute();
-
+   virtual void            RunComplete();
 
    std::string FormEvalString();
 
