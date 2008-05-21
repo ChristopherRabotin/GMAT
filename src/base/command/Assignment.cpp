@@ -787,8 +787,9 @@ bool Assignment::SetElementWrapper(ElementWrapper *toWrapper,
    
    #ifdef DEBUG_ASSIGNMENT_WRAPPER
    MessageInterface::ShowMessage
-      ("   Setting wrapper \"%s\" on Assignment \"%s\"\n",
-       withName.c_str(), GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      ("   Setting wrapper \"%s\" of type \"%d\" and of wrapper type \"%d\" on Assignment \"%s\"\n",
+       withName.c_str(), (Integer) (toWrapper->GetDataType()), 
+       (Integer) (toWrapper->GetWrapperType()), GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
    
    if (withName == lhs)
