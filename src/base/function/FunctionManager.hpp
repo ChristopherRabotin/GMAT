@@ -100,9 +100,12 @@ protected:
    StringArray          ins;
    /// the list of output strings for this call of the function
    StringArray          outs;
-   /// wrappers for the output objects
+   /// wrappers for the input objects
    std::vector<ElementWrapper *> 
                         outputWrappers;
+   // wrappers for the output objects
+   std::map<std::string, ElementWrapper *> 
+                        inputWrappers;
    /// flag indicating whether or not its the first execution
    bool                 firstExecution;
    // number of Variables created for the FOS

@@ -285,6 +285,10 @@ bool FunctionManager::Execute()
          objFOS = obj->Clone();
          objName = f->GetStringParameter("Input", ii);
          functionObjectStore.insert(std::make_pair(objName,objFOS));
+         // create an input wrapper for the inputs
+         ElementWrapper *inWrapper = validator.CreateElementWrapper(ins.at(ii), false, false);
+         inWrapper->SetRefObject(objFOS);
+         inputWrappers.insert(std::make_pair(objName, inWrapper));
          #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
             MessageInterface::ShowMessage("Adding object %s to the FOS\n", objName.c_str());
          #endif // -------------------------------------------------------------- end debug ---
@@ -310,13 +314,28 @@ bool FunctionManager::Execute()
    }
    else // not the firstExecution
    {
-      // @todo **************
-      // Need to delete all items in the FOS that are not input (so taht they can properly be created 
-      // again in the FCS - or do this at the end?
+      // Need to delete all items in the FOS that are not inputs (so that they can 
+      // properly be created again in the FCS 
+      StringArray inNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
+      StringArray toDelete;
+      bool        isInput = false;
+      for (omi = functionObjectStore.begin(); omi != functionObjectStore.end(); ++omi)
+      {
+         isInput = false;
+         for (unsigned int qq = 0; qq < inNames.size(); qq++)
+            if (omi->first == inNames.at(qq))  isInput = true;
+         if (!isInput) toDelete.push_back(omi->first);                                     
+      }
+      for (unsigned int kk = 0; kk < toDelete.size(); kk++)
+      {
+         functionObjectStore.erase(toDelete.at(kk));
+      }
+      // Find and/or evaluate the input objects
       for (unsigned int ii=0; ii<ins.size(); ii++)
       {
          // Get the object from the object store first 
-         objName = f->GetStringParameter("Input", ii);
+         //objName = f->GetStringParameter("Input", ii);
+         objName = inNames.at(ii);
          if (functionObjectStore.find(objName) == functionObjectStore.end())
          {
             std::string errMsg = "FunctionManager error: input object \"" + objName;
@@ -355,7 +374,7 @@ bool FunctionManager::Execute()
          }
          // Update the object in the object store with the current/reset data
          fosObj->Copy(obj);
-         //f->SetInputElementWrapper(objName, inputWrappers.at(ii));
+         (inputWrappers[objName])->SetRefObject(fosObj);  // is this necessary? I think so
       }
    }
    // pass the FOS into the function
@@ -363,6 +382,10 @@ bool FunctionManager::Execute()
    f->SetGlobalObjectMap(globalObjectStore);
    f->SetSolarSystem(solarSys);
    f->SetTransientForces(forces);
+   // send all input element wrappers to the function
+   std::map<std::string, ElementWrapper *>::iterator ewi;
+   for (ewi = inputWrappers.begin(); ewi != inputWrappers.end(); ++ewi)
+      f->SetInputElementWrapper(ewi->first, ewi->second);
    // must re-initialize the function each time, as it may be called in more than
    // one place
    if (!(f->Initialize()))
@@ -373,7 +396,7 @@ bool FunctionManager::Execute()
    }
    // Now, execute the function
    f->Execute();
-   // Now get the outout data
+   // Now get the output data
    Real rval = -99999.999;
    Integer ival = -99999;
    bool bval = false;
