@@ -212,20 +212,39 @@ bool Function::Initialize()
       if (objectStore->find(omi->first) == objectStore->end())
          objectStore->insert(std::make_pair(omi->first, omi->second));
    }
-   
+   // first, send all the commands the input wrappers
    
    GmatCommand *current = fcs;
+   std::map<std::string, ElementWrapper *>::iterator wi;
+   StringArray wrapperList = current->GetWrapperObjectNameArray();
+   ElementWrapper *wrapperObj = NULL;
+   unsigned int sz = 0;
+   
    while (current)
    {
       #ifdef DEBUG_FUNCTION
          if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
-         else MessageInterface::ShowMessage("   Now about to initialize command %s\n",
-               (current->GetName()).c_str());         
+         else MessageInterface::ShowMessage("   Now about to initialize command of type %s\n",
+               (current->GetTypeName()).c_str());         
       #endif
       current->SetObjectMap(objectStore);
       current->SetGlobalObjectMap(globalObjectStore);
       current->SetSolarSystem(solarSys);
       current->SetTransientForces(forces);      
+      #ifdef DEBUG_FUNCTION
+         MessageInterface::ShowMessage("   Now about to send required wrappers to command of type %s\n",
+               (current->GetTypeName()).c_str());         
+      #endif
+      wrapperList = current->GetWrapperObjectNameArray();
+      sz          = wrapperList.size();
+      for (unsigned int qq = 0; qq < sz; qq++)
+      {
+         if (inputArgMap.find(wrapperList.at(qq)) != inputArgMap.end())
+         {
+            wrapperObj = inputArgMap[wrapperList.at(qq)];
+            current->SetElementWrapper(wrapperObj, wrapperList.at(qq));
+         }
+      }
       if (!(current->Initialize()))
          return false;
       current = current->GetNext();
@@ -257,14 +276,14 @@ bool Function::Execute()
          errMsg += " not found for function \"" + functionName + "\"";
          throw FunctionException(errMsg);
       }
-      ElementWrapper *outWrapper = validator.CreateElementWrapper(outputNames.at(jj));
+      ElementWrapper *outWrapper = validator.CreateElementWrapper(outputNames.at(jj), false, false);
       outWrapper->SetRefObject(obj); 
       outputArgMap[outputNames.at(jj)] = outWrapper;
       #ifdef DEBUG_FUNCTION // --------------------------------------------------- debug ---
          MessageInterface::ShowMessage("Function: Output wrapper created for %s\n", (outputNames.at(jj)).c_str());
       #endif // -------------------------------------------------------------- end debug ---
    }
-   Finalize();
+   //Finalize();  // @todo - ???
    return true; 
 }
 
@@ -336,7 +355,7 @@ void Function::Finalize()
       #ifdef DEBUG_FUNCTION
          if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
          else MessageInterface::ShowMessage("   Now about to finalize (call RunComplete on) command %s\n",
-               (current->GetName()).c_str());         
+               (current->GetTypeName()).c_str());         
       #endif
       current->RunComplete();
       current = current->GetNext();
@@ -400,6 +419,10 @@ bool Function::SetFunctionControlSequence(GmatCommand *cmd)
 
 bool Function::SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper)
 {
+   #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage("Function::SetInputElementWrapper - for wrapper name \"%s\"\n",
+            forName.c_str());
+   #endif
    if (inputArgMap.find(forName) == inputArgMap.end())
    {
       std::string errMsg = "Unknown input argument \"" + forName;
@@ -433,6 +456,10 @@ ElementWrapper* Function::GetOutputArgument(Integer argNumber)
 
 ElementWrapper* Function::GetOutputArgument(const std::string &byName)
 {
+   #ifdef DEBUG_FUNCTION
+      MessageInterface::ShowMessage("Function::GetOutputArgument - asking for  \"%s\"\n",
+            byName.c_str());
+   #endif
    if (outputArgMap.find(byName) == outputArgMap.end())
    {
       std::string errMsg = "Function error: output \"" + byName;
