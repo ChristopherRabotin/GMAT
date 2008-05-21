@@ -1225,33 +1225,6 @@ bool ConditionalBranch::SetElementWrapper(ElementWrapper *toWrapper,
                   "\" is not an allowed value.\nThe allowed values are:"
                   " [ Real Number, Variable, Array Element, or Parameter ]. "); 
    }
-   //bool typeOK = true;
-   //Gmat::ParameterType baseType;
-   //std::string         baseStr;
-   //try
-   //{
-   //   baseType = toWrapper->GetDataType();
-   //   baseStr  = PARAM_TYPE_STRING[baseType];
-   //   if ( (baseType != Gmat::REAL_TYPE) && (baseType  != Gmat::INTEGER_TYPE) )
-   //      typeOK = false;
-   //   #ifdef DEBUG_WRAPPER_CODE   
-   //   MessageInterface::ShowMessage(
-   //      "   Setting wrapper \"%s\" of type \"%s\" on Conditional Branch command\n", 
-   //      withName.c_str(), baseStr.c_str());
-   //   #endif
-   //}
-   //catch (BaseException &be)
-   //{
-   //   // just ignore it here - will need to check data type of object property 
-   //   // wrappers on initialization
-   //}
-   //if (!typeOK)
-   //{
-   //   throw CommandException("A value of \"" + withName + "\" of base type \"" +
-   //               baseStr + "\" on command \"" + typeName + 
-   //               "\" is not an allowed value.\nThe allowed values are:"
-   //               " [ Real Number, Variable, Array Element, or Parameter ]. "); 
-   //}
    CheckDataType(toWrapper, Gmat::REAL_TYPE, "ConditionalBranch", true);
    
 
