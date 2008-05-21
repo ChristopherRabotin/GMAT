@@ -252,7 +252,7 @@ const std::string& CallFunction::GetGeneratingString(Gmat::WriteMode mode,
 //------------------------------------------------------------------------------
 void CallFunction::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
-   objectMap = map;
+   GmatCommand::SetObjectMap(map);
    fm.SetObjectMap(map);
 }
 
