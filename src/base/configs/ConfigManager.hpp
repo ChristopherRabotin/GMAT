@@ -111,7 +111,7 @@ public:
    
    bool                HasConfigurationChanged();
    void                ConfigurationChanged(bool tf);
-   StringObjectMap*    GetObjectMap();
+   ObjectMap*          GetObjectMap();
    
 private:
    

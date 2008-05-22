@@ -1498,9 +1498,9 @@ void ConfigManager::ConfigurationChanged(bool tf)
 
 
 //------------------------------------------------------------------------------
-// StringObjectMap* GetObjectMap()
+// ObjectMap* GetObjectMap()
 //------------------------------------------------------------------------------
-StringObjectMap* ConfigManager::GetObjectMap()
+ObjectMap* ConfigManager::GetObjectMap()
 {
    return &mapping;
 }
