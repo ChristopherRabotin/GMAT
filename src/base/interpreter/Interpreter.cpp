@@ -44,6 +44,7 @@
 
 //#define __DO_NOT_USE_OBJ_TYPE_NAME__
 
+//#define DEBUG_HANDLE_ERROR
 //#define DEBUG_INIT
 //#define DEBUG_COMMAND_LIST
 //#define DEBUG_OBJECT_LIST
@@ -69,13 +70,12 @@
 //#define DEBUG_SPECIAL_CASE
 //#define DEBUG_VALIDATE_COMMAND
 //#define DEBUG_WRAPPERS
-//#define DEBUG_HANDLE_ERROR
 //#define DEBUG_PARSE_REPORT
 //#define DEBUG_OBJECT_MAP
-//#define DBGLVL_FUNCTION_DEF 1
+//#define DBGLVL_FUNCTION_DEF 2
 
 //------------------------------------------------------------------------------
-// Interpreter(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL)
+// Interpreter(SolarSystem *ss = NULL, ObjectMap *objMap = NULL)
 //------------------------------------------------------------------------------
 /**
  * Default constructor.
@@ -84,7 +84,7 @@
  * @param  objMap  The object map to be used for finding object 
  */
 //------------------------------------------------------------------------------
-Interpreter::Interpreter(SolarSystem *ss, StringObjectMap *objMap)
+Interpreter::Interpreter(SolarSystem *ss, ObjectMap *objMap)
 {
    initialized = false;
    continueOnError = true;   
@@ -572,7 +572,7 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
 
 
 //------------------------------------------------------------------------------
-// void SetObjectMap(StringObjectMap *objMap, bool forFunction)
+// void SetObjectMap(ObjectMap *objMap, bool forFunction)
 //------------------------------------------------------------------------------
 /**
  * Sets object map to be used for finding objects.
@@ -581,7 +581,7 @@ SolarSystem* Interpreter::GetSolarSystemInUse()
  * @param <forFunction> True if setting object map for function (false)
  */
 //------------------------------------------------------------------------------
-void Interpreter::SetObjectMap(StringObjectMap *objMap, bool forFunction)
+void Interpreter::SetObjectMap(ObjectMap *objMap, bool forFunction)
 {
    #ifdef DEBUG_OBJECT_MAP
    MessageInterface::ShowMessage
@@ -608,13 +608,13 @@ void Interpreter::SetObjectMap(StringObjectMap *objMap, bool forFunction)
 
 
 //------------------------------------------------------------------------------
-// StringObjectMap* GetObjectMap()
+// ObjectMap* GetObjectMap()
 //------------------------------------------------------------------------------
 /**
  * @return a current object map in use.
  */
 //------------------------------------------------------------------------------
-StringObjectMap* Interpreter::GetObjectMap()
+ObjectMap* Interpreter::GetObjectMap()
 {
    return theObjectMap;
 }
@@ -690,15 +690,15 @@ bool Interpreter::ValidateCommand(GmatCommand *cmd)
 {
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
-      ("Interpreter::ValidateCommand() cmd=<%p><%s>\n", cmd,
-       cmd->GetTypeName().c_str());
+      ("Interpreter::ValidateCommand() cmd=<%p><%s>, inFunctionMode=%d\n", cmd,
+       cmd->GetTypeName().c_str(), inFunctionMode);
    #endif
-      
-   bool isValid = theValidator.ValidateCommand(cmd, continueOnError, !inFunctionMode);
    
-   // In function mode, we can ignore the valid flag
+   // If in function mode, just return true
    if (inFunctionMode)
       return true;
+   
+   bool isValid = theValidator.ValidateCommand(cmd, continueOnError, !inFunctionMode);
    
    // Handle error messages here
    if (!isValid)
@@ -828,7 +828,7 @@ bool Interpreter::FindPropertyID(GmatBase *obj, const std::string &chunk,
    std::string prop = parts[count-1];
    
    #ifdef DEBUG_SET
-   MessageInterface::ShowMessage("   property=%s\n", prop.c_str());
+   MessageInterface::ShowMessage("   property=<%s>\n", prop.c_str());
    #endif
    
    // Set initial output id and type
@@ -1056,6 +1056,11 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
       retFlag = retval1  && retval3;
    }
    
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("CreateCommand() leaving creating %s, cmd=<%p>\n", type.c_str(), cmd);
+   #endif
+   
    return cmd;;
 }
 
@@ -1067,23 +1072,40 @@ GmatCommand* Interpreter::CreateCommand(const std::string &type,
 GmatCommand* Interpreter::AppendCommand(const std::string &type, bool &retFlag,
                                         GmatCommand *inCmd)
 {
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage
+      ("AppendCommand() type=<%s>, inCmd=<%p>\n", type.c_str(), inCmd);
+   #endif
+   
+   GmatCommand *cmd = NULL;
+   
    if (inCmd == NULL)
    {
-      return theModerator->AppendCommand(type, "", retFlag);
+      cmd = theModerator->AppendCommand(type, "", retFlag);
+      
+      #ifdef DEBUG_CREATE_COMMAND
+      MessageInterface::ShowMessage
+         ("===> Appending command <%>s to the last command\n",
+          cmd->GetTypeName().c_str());
+      #endif
    }
    else
    {
-      GmatCommand *cmd = theModerator->CreateCommand(type, "", retFlag);
+      cmd = theModerator->CreateCommand(type, "", retFlag);
       inCmd->Append(cmd);
       
       #ifdef DEBUG_CREATE_COMMAND
       MessageInterface::ShowMessage
-         ("===> Interpreter::AppendCommand() inCmd=%s, cmd=%s\n",
-          inCmd->GetTypeName().c_str(), cmd->GetTypeName().c_str());
+         ("===> Appending command <%s> to <%s>\n", cmd->GetTypeName().c_str(),
+          inCmd->GetTypeName().c_str());
       #endif
-      
-      return cmd;
    }
+   
+   #ifdef DEBUG_CREATE_COMMAND
+   MessageInterface::ShowMessage("AppendCommand() returning <%p>\n", cmd);
+   #endif
+   
+   return cmd;
 }
 
 
@@ -1109,7 +1131,13 @@ bool Interpreter::AssembleCommand(GmatCommand *cmd, const std::string &desc)
       retval = AssembleConditionalCommand(cmd, desc);
    else
       retval = AssembleGeneralCommand(cmd, desc);
-
+   
+   #ifdef DEBUG_ASSEMBLE_COMMAND
+   MessageInterface::ShowMessage
+      ("AssembleCommand() leaving assembling %s, retval=%d\n",
+       type.c_str(), retval);
+   #endif
+   
    return retval;
 }
 
@@ -1129,13 +1157,15 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    bool retval = true;
    
    // Output
-   std::string::size_type index1 = desc.find("=");
-   std::string lhs = desc.substr(0, index1);
+   std::string::size_type index1 = desc.npos;
+   std::string lhs;
    StringArray outArray;
    
-   // get out parameters if there was an equal sign
-   if (index1 != lhs.npos)
+   // get output arguments if there was an equal sign
+   if (GmatStringUtil::IsThereEqualSign(desc))
    {
+      index1 = desc.find("=");
+      lhs = desc.substr(0, index1);
       outArray = theTextParser.SeparateBrackets(lhs, "[]", " ,", true);
    }
    
@@ -1151,9 +1181,21 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       funcName = desc.substr(index1+1, index2-index1-1);
       std::string rhs = desc.substr(index2);
+      rhs = GmatStringUtil::RemoveOuterString(rhs, "(", ")");
+      
+      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+      MessageInterface::ShowMessage("   rhs=\"%s\"\n", rhs.c_str());
+      #endif
+      
+      // check if single quote found
+      inArray = GmatStringUtil::SeparateByComma(rhs);
+      
+      #ifdef DEBUG_ASSEMBLE_CALL_FUNCTION
+      MessageInterface::ShowMessage("   inArray.size()=%d\n", inArray.size());
+      #endif
       
       // Input
-      inArray = theTextParser.SeparateBrackets(rhs, "()", " ,", true);
+      //inArray = theTextParser.SeparateBrackets(rhs, "()", " ,", true);
    }
    
    funcName = GmatStringUtil::Trim(funcName);
@@ -1166,7 +1208,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Check for blank name
    if (funcName == "")
    {
-      InterpreterException ex("*** ERROR *** Found blank function name");
+      InterpreterException ex("Found blank function name");
       HandleError(ex);
       return false;
    }
@@ -1174,7 +1216,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    // Check for valid name
    if (!GmatStringUtil::IsValidName(funcName))
    {
-      InterpreterException ex("*** ERROR *** Found invalid function name \"" + funcName + "\"");
+      InterpreterException ex("Found invalid function name \"" + funcName + "\"");
       HandleError(ex);
       return false;
    }
@@ -1193,7 +1235,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    
    // Set input to CallFunction
    bool validParam = false;
-   //Real rval;
+   Real rval;
    
    if (inArray.size() == 0) //if no inputs, set validParam to true
       validParam = true;
@@ -1202,7 +1244,7 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
    {
       retval = cmd->SetStringParameter("AddInput", inArray[i]);
       
-      // if input parameter is a system parameter then create (loj: 2007.11.16)
+      // if input parameter is a system Parameter then create (loj: 2007.11.16)
       validParam = false;      
       if (inArray[i].find('.') != std::string::npos)
       {
@@ -1214,10 +1256,14 @@ bool Interpreter::AssembleCallFunctionCommand(GmatCommand *cmd,
          }
       }
       // Numbers will be allowed later (loj: 2008.05.14)
-      //else if (GmatStringUtil::ToReal(inArray[i], rval)) // Number
-      //{
-      //   validParam = true;
-      //}
+      else if (GmatStringUtil::ToReal(inArray[i], rval)) // Number
+      {
+         validParam = true;
+      }
+      else if (GmatStringUtil::IsEnclosedWith(inArray[i], "'")) // String literal
+      {
+         validParam = true;
+      }
       else // whole object
       {
          GmatBase *obj = FindObject(inArray[i]);
@@ -1561,38 +1607,24 @@ bool Interpreter::AssembleGeneralCommand(GmatCommand *cmd,
       // first item is ref. object name
       
       if (type == "Target")
-      {
-         AssembleTargetCommand(cmd, desc);
-      }
+         retval = AssembleTargetCommand(cmd, desc);
       else if (type == "Optimize")
-      {
-         AssembleOptimizeCommand(cmd, desc);
-      }
+         retval = AssembleOptimizeCommand(cmd, desc);
       else if (type == "Report")
-      {
-         return AssembleReportCommand(cmd, desc);
-      }
+         retval = AssembleReportCommand(cmd, desc);
       else
-      {
-         return AssembleFiniteBurnCommand(cmd, desc);
-      }
+         retval = AssembleFiniteBurnCommand(cmd, desc);
    }
    else if (type == "Create")
-   {
       retval = AssembleCreateCommand(cmd, desc);
-   }
    else if (type == "Save" || type == "Global")
-   {
       retval = SetCommandRefObjects(cmd, desc);
-   }
    else
-   {
       retval = false;
-   }
    
    #ifdef DEBUG_ASSEMBLE_COMMAND
    MessageInterface::ShowMessage
-      ("AssembleGeneralCommand() leaving setting %s, retval=%d\n",
+      ("AssembleGeneralCommand() leaving assemblilng %s, retval=%d\n",
        type.c_str(), retval);
    #endif
    
@@ -1815,8 +1847,15 @@ bool Interpreter::AssembleReportCommand(GmatCommand *cmd, const std::string &des
    Integer count = parts.size();
    
    #ifdef DEBUG_ASSEMBLE_REPORT_COMMAND 
-   WriteStringArray("Parsing Report, parts:", "", parts);
+   WriteStringArray("Parsing Report", "", parts);
    #endif
+   
+   // Set ReportFile
+   cmd->SetStringParameter("ReportFile", parts[0]);
+   
+   // Set Parameters
+   for (int i=1; i<count; i++)
+      cmd->SetStringParameter("Add", parts[i]);
    
    // We can skip checking for configured object if in Function mode
    if (!inFunctionMode)
@@ -1874,6 +1913,10 @@ bool Interpreter::AssembleReportCommand(GmatCommand *cmd, const std::string &des
          retval = false;
       }
    }
+   
+   #ifdef DEBUG_ASSEMBLE_REPORT_COMMAND 
+   MessageInterface::ShowMessage("AssembleReportCommand() returning %d\n", retval);
+   #endif
    
    return retval;
 }
@@ -2200,7 +2243,7 @@ Parameter* Interpreter::GetArrayIndex(const std::string &arrayStr,
    {
       if (param->GetTypeName() != "Array")
       {
-         InterpreterException ex("\"" + name + " is not an Array");
+         InterpreterException ex("\"" + name + "\" is not an Array");
          HandleError(ex);
       }
       
@@ -2295,7 +2338,7 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
       ("   inFunctionMode=%d, hasFunctionDefinition=%d\n", inFunctionMode,
        hasFunctionDefinition);
    #endif
-      
+   
    bool retval = false;
    
    // Separate dots
@@ -2346,7 +2389,6 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
          lhsPropName = lhsParts[1];
       else
          lhsPropName = lhs.substr(dot+1);
-      
    }
    else
    {
@@ -2931,7 +2973,7 @@ bool Interpreter::SetPropertyToProperty(GmatBase *toOwner, const std::string &to
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("SetPropertyToProperty() toOwner=%s<%s>, toProp=%s, fromOwner=%s, fromProp=%s\n",
+      ("SetPropertyToProperty() toOwner=%s<%s>, toProp=<%s>, fromOwner=<%s>, fromProp=<%s>\n",
        toOwner->GetName().c_str(), toOwner->GetTypeName().c_str(), toProp.c_str(),
        fromOwner->GetName().c_str(), fromProp.c_str());
    #endif
@@ -3468,7 +3510,7 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::SetPropertyValue() obj=%s, id=%d, type=%d, value=%s, index=%d\n",
+      ("Interpreter::SetPropertyValue() obj=<%s>, id=%d, type=%d, value=<%s>, index=%d\n",
        obj->GetName().c_str(), id, type, value.c_str(), index);
    #endif
    
@@ -3477,9 +3519,12 @@ bool Interpreter::SetPropertyValue(GmatBase *obj, const Integer id,
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("   propertyType=%s\n", GmatBase::PARAM_TYPE_STRING[type].c_str());
+      ("   propertyType=%s\n",
+       type == -1 ? "UNKNOWN_TYPE" : GmatBase::PARAM_TYPE_STRING[type].c_str());
    #endif
    
+   if (type == -1)
+      return false;
    
    switch (type)
    {
@@ -4360,7 +4405,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
 {
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("Interpreter::FindOwnedObject() owner=%s, toProp=%s\n",
+      ("Interpreter::FindOwnedObject() owner=<%s>, toProp=<%s>\n",
        owner->GetName().c_str(), toProp.c_str());
    #endif
    
@@ -4429,8 +4474,7 @@ bool Interpreter::FindOwnedObject(GmatBase *owner, const std::string toProp,
    
    #ifdef DEBUG_SET
    MessageInterface::ShowMessage
-      ("   FindOwnedObject() returning retval=%d, ownedObj=%p\n",
-       retval, *ownedObj);
+      ("   FindOwnedObject() returning retval=%d, ownedObj=%p\n", retval, *ownedObj);
    #endif
    
    return retval;
@@ -5194,12 +5238,14 @@ bool Interpreter::CheckForSpecialCase(GmatBase *obj, Integer id,
 
 //------------------------------------------------------------------------------
 // void WriteStringArray(const std::string &title1, const std::string &title2,
-//                       StringArray &parts)
+//                       const StringArray &parts)
 //------------------------------------------------------------------------------
-void Interpreter::WriteStringArray(const std::string &title1, const std::string &title2,
-                                   StringArray &parts)
+void Interpreter::WriteStringArray(const std::string &title1,
+                                   const std::string &title2,
+                                   const StringArray &parts)
 {
-   MessageInterface::ShowMessage("   ========== %s %s\n", title1.c_str(), title2.c_str());
+   MessageInterface::ShowMessage("   ========== %s%s, has %d parts\n",
+                                 title1.c_str(), title2.c_str(), parts.size());
    for (UnsignedInt i=0; i<parts.size(); i++)
       MessageInterface::ShowMessage("   %d:%s\n", i, parts[i].c_str());
    MessageInterface::ShowMessage("\n");

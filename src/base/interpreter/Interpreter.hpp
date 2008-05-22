@@ -58,7 +58,7 @@ class Moderator;
 class GMAT_API Interpreter
 {
 public:
-   Interpreter(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL);
+   Interpreter(SolarSystem *ss = NULL, ObjectMap *objMap = NULL);
    virtual ~Interpreter();
    
    //------------------------------------------------------------------------------
@@ -101,8 +101,8 @@ public:
    
    void SetSolarSystemInUse(SolarSystem *ss);
    SolarSystem* GetSolarSystemInUse();
-   void SetObjectMap(StringObjectMap *objMap, bool forFunction = false);
-   StringObjectMap* GetObjectMap();
+   void SetObjectMap(ObjectMap *objMap, bool forFunction = false);
+   ObjectMap* GetObjectMap();
    void SetFunction(Function *func);
    Function* GetFunction();
    
@@ -120,7 +120,7 @@ protected:
    Moderator    *theModerator;
    SolarSystem  *theSolarSystem;
    // Object map to be used for finding objects
-   StringObjectMap *theObjectMap;
+   ObjectMap    *theObjectMap;
    
    /// A pointer to the ScriptReadWriter used when reading or writing script.
    ScriptReadWriter  *theReadWriter;
@@ -270,7 +270,7 @@ protected:
    
    // for debug
    void WriteStringArray(const std::string &title1, const std::string &title2,
-                         StringArray &parts);
+                         const StringArray &parts);
    
    // for GamtFunction handling
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
