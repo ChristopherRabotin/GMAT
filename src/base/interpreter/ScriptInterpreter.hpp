@@ -14,8 +14,8 @@
  */
 //------------------------------------------------------------------------------
 
-#ifndef SCRIPTINTERPRETER_HPP
-#define SCRIPTINTERPRETER_HPP
+#ifndef ScriptInterpreter_hpp
+#define ScriptInterpreter_hpp
 
 #include "Interpreter.hpp"
 #include "InterpreterException.hpp"
@@ -55,9 +55,8 @@ protected:
    std::istream *inStream;
    std::ostream *outStream;
    
-   //std::string ReadLogicalBlock();
    bool ReadScript(GmatCommand *cmd = NULL, bool skipHeader = false);
-   bool Parse(const std::string &logicBlock, GmatCommand *inCmd = NULL);
+   bool Parse(GmatCommand *inCmd = NULL);
    bool WriteScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    
    ScriptInterpreter();
@@ -72,9 +71,17 @@ private:
    /// Section delimiter comment
    StringArray sectionDelimiterString;
    
+   bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
+                             GmatBase *obj);
+   bool ParseCommandBlock(const StringArray &chunks, GmatCommand *inCmd,
+                          GmatBase *obj);
+   bool ParseAssignmentBlock(const StringArray &chunks, GmatCommand *inCmd,
+                             GmatBase *obj);
+   bool IsOneWordCommand(const std::string &str);
+   
    void SetComments(GmatBase *obj, const std::string &preStr,
                     const std::string &inStr);
-
+   
    void WriteSectionDelimiter(const std::string &firstObj, const std::string &objDesc);
    void WriteObjects(StringArray &objs, const std::string &objDesc,
                      Gmat::WriteMode mode);
@@ -87,5 +94,5 @@ private:
    
 };
 
-#endif // SCRIPTINTERPRETER_HPP
+#endif // ScriptInterpreter_hpp
 

@@ -33,7 +33,7 @@
 //#define DEBUG_PARSE 1
 //#define DEBUG_PARSE_FOOTER 1
 //#define DEBUG_SET_COMMENTS 1
-#define DEBUG_GMAT_FUNCTION 1
+//#define DEBUG_GMAT_FUNCTION 1
 
 ScriptInterpreter *ScriptInterpreter::instance = NULL;
 
@@ -285,11 +285,11 @@ GmatCommand* ScriptInterpreter::InterpretGmatFunction(const std::string &fileNam
       ("ScriptInterpreter::InterpretGmatFunction() Create <%p>NoOp\n", noOp);
    #endif
    
-   // Set function mode and build function definition flag
-   //inFunctionMode = true;
+   // Set build function definition flag
    hasFunctionDefinition = true;
    
    // We don't want parse first comment as header, so set skipHeader to true.
+   // Set function mode to true
    retval = Interpret(noOp, true, true);
    
    funcFile.close();
@@ -636,7 +636,8 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
          #endif
          
          // Keep previous retval1 value
-         retval1 = Parse(currentBlock, inCmd) && retval1;
+         //retval1 = Parse(currentBlock, inCmd) && retval1;
+         retval1 = Parse(inCmd) && retval1;
          
          #if DEBUG_SCRIPT_READING > 1
          MessageInterface::ShowMessage
@@ -701,7 +702,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
       currentBlockType = theTextParser.EvaluateBlock(currentBlock);
       
       // Keep previous retval1 value
-      retval2 = Parse(currentBlock, inCmd) && retval2;
+      retval2 = Parse(inCmd) && retval2;
       
       #if DEBUG_DELAYED_BLOCK
       MessageInterface::ShowMessage("===> delayedCount:%d, retval2=%d\n", i, retval2);
@@ -729,7 +730,7 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
 
 
 //------------------------------------------------------------------------------
-// bool Parse(const std::string &logicBlock)
+// bool Parse(GmatCommand *inCmd)
 //------------------------------------------------------------------------------
 /**
  * Builds or configures GMAT objects based on the current line of script.
@@ -737,11 +738,11 @@ bool ScriptInterpreter::ReadScript(GmatCommand *inCmd, bool skipHeader)
  * @return true if the file parses successfully, false on failure.
  */
 //------------------------------------------------------------------------------
-bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCmd)
+bool ScriptInterpreter::Parse(GmatCommand *inCmd)
 {
    #ifdef DEBUG_PARSE
    MessageInterface::ShowMessage
-      ("ScriptInterpreter::Parse() logicalBlock = \n<<<%s>>>\n", logicalBlock.c_str());
+      ("ScriptInterpreter::Parse() logicalBlock = \n<<<%s>>>\n", currentBlock.c_str());
    #endif
    
    bool retval = true;
@@ -766,6 +767,9 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
    if (emptyChunks == count)
       return false;
    
+   // actual script line
+   std::string actualScript = sarray[count-1];
+   
    // check for function definition line
    if (currentBlockType == Gmat::FUNCTION_BLOCK)
    {
@@ -774,11 +778,7 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       else
          throw InterpreterException("Failed to interpret function definition");
    }
-   
-   // Get comments
-   std::string preStr = theTextParser.GetPrefaceComment();
-   std::string inStr = theTextParser.GetInlineComment();
-   
+      
    // Decompose by block type
    StringArray chunks;
    try
@@ -811,334 +811,51 @@ bool ScriptInterpreter::Parse(const std::string &logicalBlock, GmatCommand *inCm
       MessageInterface::ShowMessage("   chunks[%d]=%s\n", i, chunks[i].c_str());
    #endif
    
-   if (currentBlockType == Gmat::COMMENT_BLOCK)
+   // Now go through each block type
+   switch (currentBlockType)
    {
-      footerComment = currentBlock;
-      
-      #ifdef DEBUG_PARSE_FOOTER
-      MessageInterface::ShowMessage("footerComment=<<<%s>>>\n", footerComment.c_str());
-      #endif
-      
-      // More to do here for a block of comments (See page 35)
-   }
-   else if (currentBlockType == Gmat::DEFINITION_BLOCK)
-   {
-      // If object creation is not allowed in command mode
-      #ifndef __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
-      if (inRealCommandMode)
+   case Gmat::COMMENT_BLOCK:
       {
-         if (!inFunctionMode)
-         {
-            InterpreterException ex
-               ("GMAT currently requires that all object are created before the "
-                "mission sequence begins");
-            HandleError(ex, true, true);
-            return true; // just a warning, so return true
-         }
-      }
-      #endif
-      
-      if (count < 3)
-      {
-         InterpreterException ex("Missing parameter creating object for");
-         HandleError(ex);
-         return false;
-      }
-      
-      std::string type = chunks[1];
-      StringArray names;
-      if (type == "Array")
-      {
-         if (chunks[2].find('[') == chunks[2].npos)
-            throw InterpreterException("Opening bracket \"[\" not found");
+         footerComment = currentBlock;
          
-         names = theTextParser.Decompose(chunks[2], "[]");
-      }
-      else
-      {
-         names = theTextParser.Decompose(chunks[2], "()");
-      }
-      
-      count = names.size();
-      
-      // Special case for Propagator
-      if (type == "Propagator")
-         type = "PropSetup";
-      
-      // Handle creating objects in function mode
-      if (inFunctionMode)
-      {
-         std::string desc = chunks[1] + " " + chunks[2];
-         obj = (GmatBase*)CreateCommand(chunks[0], desc, retval, inCmd);
-      }
-      else
-      {
-         Integer objCounter = 0;
-         for (Integer i = 0; i < count; i++)
-         {
-            obj = CreateObject(type, names[i]);
-            
-            if (obj == NULL)
-            {
-               InterpreterException ex
-                  ("Cannot create an object \"" + names[i] + "\". The \"" +
-                   type + "\" is unknown object type");
-               HandleError(ex);
-               return false;
-            }
-            
-            objCounter++;     
-            obj->FinalizeCreation();
-            
-            SetComments(obj, preStr, inStr);
-         }
+         #ifdef DEBUG_PARSE_FOOTER
+         MessageInterface::ShowMessage("footerComment=<<<%s>>>\n", footerComment.c_str());
+         #endif
          
-         // if not all objectes are created, return false
-         if (objCounter < count)
-         {
-            InterpreterException ex("All objects are not created");
-            HandleError(ex);
-            return false;
-         }
+         // More to do here for a block of comments (See page 35)
+         break;
       }
-      
-      logicalBlockCount++;
-   }
-   else if (currentBlockType == Gmat::COMMAND_BLOCK)
-   {
-      inCommandMode = true;
-      inRealCommandMode = true;
-      
-      // a call function doesn't have to have parameters
-      // so this code gets a list of the functions and 
-      // checks to see if chunks[0] is a function name
-      StringArray functionNames = GetListOfObjects(Gmat::FUNCTION);
-      bool isFunction = false;
-      
-      for (Integer i=0; i<(Integer)functionNames.size(); i++)
+   case Gmat::DEFINITION_BLOCK:
       {
-         if (functionNames[i] == chunks[0])
+         retval = ParseDefinitionBlock(chunks, inCmd, obj);
+         logicalBlockCount++;
+         break;
+      }
+   case Gmat::COMMAND_BLOCK:
+      {
+         // if TextParser detected as function call
+         if (theTextParser.IsFunctionCall())
          {
-            isFunction = true;
+            #ifdef DEBUG_PARSE
+            MessageInterface::ShowMessage("   TextParser detected as CallFunction\n");
+            #endif
+            
+            obj = (GmatBase*)CreateCommand("CallFunction", actualScript, retval, inCmd);
             break;
          }
-      }
-      
-      if (count < 2)
-      {
-         if ((chunks[0].find("End")           != chunks[0].npos  &&
-              chunks[0].find("EndFiniteBurn") == chunks[0].npos) ||
-             (chunks[0].find("BeginScript")   != chunks[0].npos) ||
-             (chunks[0].find("NoOp")          != chunks[0].npos) ||
-             (chunks[0].find("Else")          != chunks[0].npos) ||
-             (chunks[0].find("Stop")          != chunks[0].npos))
-         {
-            obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
-         }
-         else if (isFunction)
-         {
-            #ifdef DEBUG_PARSE
-            MessageInterface::ShowMessage("   Creating CallFunction\n");
-            #endif
-            
-            obj = (GmatBase*)CreateCommand("CallFunction", chunks[0], retval, inCmd);
-         }
-         else
-         {
-            #ifdef DEBUG_PARSE
-            MessageInterface::ShowMessage
-               ("*** ERROR *** Missing parameter with \"" + chunks[0] +
-                "\" command\n");
-            #endif
-            
-            InterpreterException ex
-               ("Missing parameter with \"" + chunks[0] + "\" command");
-            HandleError(ex);
-            return false;
-         }
-      }
-      else
-      {
-         // check for extra text at the end of one-word commands
-         if ((chunks[0].find("End")           != chunks[0].npos  &&
-              chunks[0].find("EndFiniteBurn") == chunks[0].npos) ||
-             (chunks[0].find("BeginScript")   != chunks[0].npos) ||
-             (chunks[0].find("NoOp")          != chunks[0].npos) ||
-             (chunks[0].find("Else")          != chunks[0].npos) ||
-             (chunks[0].find("Stop")          != chunks[0].npos))
-         {
-            InterpreterException ex
-               ("Unexpected text after \"" + chunks[0] + "\" command");
-            HandleError(ex);
-            return false;
-         }
-         // check for .. in the command block
-         if (chunks[1].find("..") != logicalBlock.npos)
-         {
-            InterpreterException ex("Found invalid syntax \"..\"");
-            HandleError(ex);
-            return false;
-         }
          
-         obj = (GmatBase*)CreateCommand(chunks[0], chunks[1], retval, inCmd);
+         retval = ParseCommandBlock(chunks, inCmd, obj);
+         logicalBlockCount++;
+         break;
       }
-      
-      // if in function mode just check for retval, since function definition
-      // line will not create a command (loj: 2008.03.12)
-      if (inFunctionMode && retval)
+   case Gmat::ASSIGNMENT_BLOCK:
       {
-         return true;
+         retval = ParseAssignmentBlock(chunks, inCmd, obj);
+         logicalBlockCount++;
+         break;
       }
-      else
-      {
-         if (obj == NULL)
-            return false;
-      }
-      
-      SetComments(obj, preStr, inStr);
-      
-      logicalBlockCount++;
-   }
-   else if (currentBlockType == Gmat::ASSIGNMENT_BLOCK)
-   {      
-      // check for .. in the command block
-      if (chunks[0].find("..") != chunks[0].npos ||
-          chunks[1].find("..") != chunks[1].npos)
-      {
-         InterpreterException ex("Found invalid syntax \"..\"");
-         HandleError(ex);
-         return false;
-      }
-      
-      if (count < 2)
-      {
-         InterpreterException ex("Missing parameter assigning object for: ");
-         HandleError(ex);
-         return false;
-      }
-      
-      GmatBase *owner = NULL;
-      std::string attrStr = ""; 
-      std::string attrInLineStr = ""; 
-      Integer paramID = -1;
-      Gmat::ParameterType paramType;
-      
-      //MessageInterface::ShowMessage("===> inCommandMode=%d\n", inCommandMode);
-      
-      if (!inCommandMode)
-      {
-         // check for math operators/functions
-         MathParser mp = MathParser();
-         
-         try
-         {
-            //MessageInterface::ShowMessage
-            //   ("===> chunks[0]=%s, chunks[1]=%s\n", chunks[0].c_str(), chunks[1].c_str());
-            
-            if (mp.IsEquation(chunks[1]))
-            {
-               //MessageInterface::ShowMessage("   ===> Has equal sign\n");
-               
-               // check if LHS is object.property
-               if (FindPropertyID(obj, chunks[0], &owner, paramID, paramType))
-               {
-                  // Since string can have minus sign, check it first
-                  if (obj->GetParameterType(paramID) != Gmat::STRING_TYPE)
-                     inCommandMode = true;
-               }
-               else
-               {
-                  // check if LHS is a parameter
-                  // Changed to call FindObject() (loj: 2008.04.01)
-                  //GmatBase *tempObj = GetConfiguredObject(chunks[0]);
-                  GmatBase *tempObj = FindObject(chunks[0]);
-                  if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
-                     if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
-                        inCommandMode = true;
-               }
-            }
-         }
-         catch (BaseException &e)
-         {
-            #ifdef DEBUG_PARSE
-            MessageInterface::ShowMessage(e.GetFullMessage());
-            #endif
-         }
-      }
-      
-      
-      #ifdef DEBUG_PARSE
-      MessageInterface::ShowMessage
-         ("   inCommandMode=%d, inFunctionMode=%d\n", inCommandMode, inFunctionMode);
-      #endif
-      
-      bool createAssignment = true;
-      
-      if (inCommandMode)
-      {
-         // If LHS is CoordinateSystem property or Subscriber Call MakeAssignment.
-         // Some scripts mixed with definitions and commands
-         StringArray parts = theTextParser.SeparateDots(chunks[0]);
-         //MessageInterface::ShowMessage("===> parts.size()=%d\n", parts.size());
-         
-         // If in function mode, always create Assignment command
-         if (!inFunctionMode)
-         {
-         if (parts.size() > 1)
-         {
-            GmatBase *tempObj = FindObject(parts[0]);
-            if ((tempObj) &&
-                (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
-                 (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
-               createAssignment = false;
-         }
-         }
-      }
-      else
-         createAssignment = false;
-      
-      
-      if (createAssignment)
-         obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1], retval, inCmd);
-      else
-         obj = MakeAssignment(chunks[0], chunks[1]);
-      
-      if (obj == NULL)
-      {
-         #if DEBUG_PARSE
-         MessageInterface::ShowMessage("   obj is NULL, so just return false\n");
-         #endif
-         return false;
-      }
-      
-      // paramID will be assigned from call to Interpreter::FindPropertyID()
-      if ( FindPropertyID(obj, chunks[0], &owner, paramID, paramType) )
-      {
-         attrStr = preStr;
-         attrInLineStr = inStr;
-         
-         if (attrStr != "")
-            owner->SetAttributeCommentLine(paramID, attrStr);
-         
-         if (attrInLineStr != "")
-            owner->SetInlineAttributeComment(paramID, attrInLineStr);
-         
-         //Reset
-         attrStr = ""; 
-         attrInLineStr = ""; 
-         paramID = -1;
-         
-         //MessageInterface::ShowMessage
-         //   ("Owner===>%s\n", owner->GetGeneratingString(Gmat::SCRIPTING).c_str());
-         //MessageInterface::ShowMessage
-         //   ("\n\n\nObj===>%s\n", obj->GetGeneratingString(Gmat::SCRIPTING).c_str());
-      }
-      else
-      {
-         SetComments(obj, preStr, inStr);
-      }
-      
-      logicalBlockCount++;
+   default:
+      break;
    }
    
    #if DEBUG_PARSE
@@ -1341,6 +1058,407 @@ bool ScriptInterpreter::WriteScript(Gmat::WriteMode mode)
    #endif
    
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParseDefinitionBlock(const StringArray &chunks, GmatCommand *inCmd,
+//                           GmatBase *obj)
+//------------------------------------------------------------------------------
+/*
+ * Parses the definition block.
+ *
+ * @param  chunks  Input string array to be used in the parsing
+ * @param  inCmd   Input command pointer to be used to append the new command
+ * @param  obj     Ouput object pointer if created
+ */
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::ParseDefinitionBlock(const StringArray &chunks,
+                                             GmatCommand *inCmd, GmatBase *obj)
+{
+   #ifdef DEBUG_PARSE
+   WriteStringArray("ParseDefinitionBlock()", "", chunks);
+   #endif
+   
+   // Get comments
+   std::string preStr = theTextParser.GetPrefaceComment();
+   std::string inStr = theTextParser.GetInlineComment();
+   
+   Integer count = chunks.size();
+   bool retval = true;
+   
+   // If object creation is not allowed in command mode
+   #ifndef __ALLOW_OBJECT_CREATION_IN_COMMAND_MODE__
+   if (inRealCommandMode)
+   {
+      if (!inFunctionMode)
+      {
+         InterpreterException ex
+            ("GMAT currently requires that all object are created before the "
+             "mission sequence begins");
+         HandleError(ex, true, true);
+         return true; // just a warning, so return true
+      }
+   }
+   #endif
+   
+   if (count < 3)
+   {
+      InterpreterException ex("Missing parameter creating object for");
+      HandleError(ex);
+      return false;
+   }
+   
+   std::string type = chunks[1];
+   StringArray names;
+   if (type == "Array")
+   {
+      if (chunks[2].find('[') == chunks[2].npos)
+         throw InterpreterException("Opening bracket \"[\" not found");
+      
+      names = theTextParser.Decompose(chunks[2], "[]");
+   }
+   else
+   {
+      names = theTextParser.Decompose(chunks[2], "()");
+   }
+   
+   count = names.size();
+   
+   // Special case for Propagator
+   if (type == "Propagator")
+      type = "PropSetup";
+   
+   // Handle creating objects in function mode
+   if (inFunctionMode)
+   {
+      std::string desc = chunks[1] + " " + chunks[2];
+      obj = (GmatBase*)CreateCommand(chunks[0], desc, retval, inCmd);
+   }
+   else
+   {
+      Integer objCounter = 0;
+      for (Integer i = 0; i < count; i++)
+      {
+         obj = CreateObject(type, names[i]);
+            
+         if (obj == NULL)
+         {
+            InterpreterException ex
+               ("Cannot create an object \"" + names[i] + "\". The \"" +
+                type + "\" is unknown object type");
+            HandleError(ex);
+            return false;
+         }
+         
+         objCounter++;     
+         obj->FinalizeCreation();
+         
+         SetComments(obj, preStr, inStr);
+      }
+      
+      // if not all objectes are created, return false
+      if (objCounter < count)
+      {
+         InterpreterException ex("All objects are not created");
+         HandleError(ex);
+         return false;
+      }
+   }
+
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParseCommandBlock(const StringArray &chunks, GmatCommand *inCmd,
+//                        GmatBase *obj)
+//------------------------------------------------------------------------------
+/*
+ * Parses the command block.
+ *
+ * @param  chunks  Input string array to be used in the parsing
+ * @param  inCmd   Input command pointer to be used to append the new command
+ * @param  obj     Ouput object pointer if created
+ */
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::ParseCommandBlock(const StringArray &chunks,
+                                          GmatCommand *inCmd, GmatBase *obj)
+{
+   #ifdef DEBUG_PARSE
+   WriteStringArray("ParseCommandBlock()", "", chunks);
+   #endif
+   
+   // Get comments
+   std::string preStr = theTextParser.GetPrefaceComment();
+   std::string inStr = theTextParser.GetInlineComment();
+   
+   Integer count = chunks.size();
+   bool retval = true;
+   inCommandMode = true;
+   inRealCommandMode = true;
+   bool isFunction = false;
+   
+   // A call function doesn't have to have arguments so this code gets a list
+   // of functions and checks to see if chunks[0] is a function name.
+   // Only Matlab function is required to create before the use in the call function.
+   StringArray functionNames = GetListOfObjects(Gmat::FUNCTION);
+   
+   for (Integer i=0; i<(Integer)functionNames.size(); i++)
+   {
+      if (functionNames[i] == chunks[0])
+      {
+         isFunction = true;
+         break;
+      }
+   }
+   
+   if (count < 2)
+   {
+      // check for one-word commands
+      if (IsOneWordCommand(chunks[0]))
+      {
+         obj = (GmatBase*)CreateCommand(chunks[0], "", retval, inCmd);
+      }
+      else if (isFunction)
+      {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage("   Creating CallFunction\n");
+         #endif
+         
+         obj = (GmatBase*)CreateCommand("CallFunction", chunks[0], retval, inCmd);
+      }
+      else
+      {
+         InterpreterException ex
+            ("Missing parameter with \"" + chunks[0] + "\" command");
+         HandleError(ex);
+         return false;
+      }
+   }
+   else
+   {
+      // check for extra text at the end of one-word commands
+      if (IsOneWordCommand(chunks[0]))
+      {
+         InterpreterException ex
+            ("Unexpected text after \"" + chunks[0] + "\" command");
+         HandleError(ex);
+         return false;
+      }
+      
+      // check for .. in the command block
+      if (chunks[1].find("..") != currentBlock.npos)
+      {
+         InterpreterException ex("Found invalid syntax \"..\"");
+         HandleError(ex);
+         return false;
+      }
+      
+      obj = (GmatBase*)CreateCommand(chunks[0], chunks[1], retval, inCmd);
+   }
+   
+   // if in function mode just check for retval, since function definition
+   // line will not create a command (loj: 2008.03.12)
+   if (inFunctionMode && retval)
+   {
+      return true;
+   }
+   else
+   {
+      if (obj == NULL)
+         return false;
+   }
+   
+   SetComments(obj, preStr, inStr);
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool ParseAssignmentBlock(const StringArray &chunks, GmatCommand *inCmd,
+//                           GmatBase *obj)
+//------------------------------------------------------------------------------
+/*
+ * Parses the assignment block. The assignment block has equal sign, so it
+ * can be either assignment or function call.
+ *
+ * @param  chunks  Input string array to be used in the parsing
+ * @param  inCmd   Input command pointer to be used to append the new command
+ * @param  obj     Ouput object pointer if created
+ */
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
+                                             GmatCommand *inCmd, GmatBase *obj)
+{
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("ParseAssignmentBlock() entered, inCmd=<%p>, obj=<%p>\n", inCmd, obj);
+   WriteStringArray("ParseAssignmentBlock()", "", chunks);
+   #endif
+   
+   Integer count = chunks.size();
+   bool retval = true;
+   
+   // Get comments
+   std::string preStr = theTextParser.GetPrefaceComment();
+   std::string inStr = theTextParser.GetInlineComment();
+   
+   // check for .. in the command block
+   if (chunks[0].find("..") != chunks[0].npos ||
+       chunks[1].find("..") != chunks[1].npos)
+   {
+      InterpreterException ex("Found invalid syntax \"..\"");
+      HandleError(ex);
+      return false;
+   }
+   
+   if (count < 2)
+   {
+      InterpreterException ex("Missing parameter assigning object for: ");
+      HandleError(ex);
+      return false;
+   }
+   
+   GmatBase *owner = NULL;
+   std::string attrStr = ""; 
+   std::string attrInLineStr = ""; 
+   Integer paramID = -1;
+   Gmat::ParameterType paramType;
+   
+   #if DEBUG_PARSE
+   MessageInterface::ShowMessage("   before check, inCommandMode=%d\n", inCommandMode);
+   #endif
+   
+   if (!inCommandMode)
+   {
+      // check for math operators/functions
+      MathParser mp = MathParser();
+      
+      try
+      {
+         if (mp.IsEquation(chunks[1]))
+         {
+            #if DEBUG_PARSE
+            MessageInterface::ShowMessage("   It is a math equation\n");
+            #endif
+            
+            // check if LHS is object.property
+            if (FindPropertyID(obj, chunks[0], &owner, paramID, paramType))
+            {
+               // Since string can have minus sign, check it first
+               if (obj->GetParameterType(paramID) != Gmat::STRING_TYPE)
+                  inCommandMode = true;
+            }
+            else
+            {
+               // check if LHS is a parameter
+               GmatBase *tempObj = FindObject(chunks[0]);
+               if (tempObj && tempObj->GetType() == Gmat::PARAMETER)
+                  if (((Parameter*)tempObj)->GetReturnType() == Gmat::REAL_TYPE)
+                     inCommandMode = true;
+            }
+         }
+      }
+      catch (BaseException &e)
+      {
+         #ifdef DEBUG_PARSE
+         MessageInterface::ShowMessage(e.GetFullMessage());
+         #endif
+      }
+   }
+   
+   
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage
+      ("    after check, inCommandMode=%d, inFunctionMode=%d\n", inCommandMode, inFunctionMode);
+   #endif
+   
+   bool createAssignment = true;
+   
+   if (inCommandMode)
+   {
+      // If LHS is CoordinateSystem property or Subscriber Call MakeAssignment.
+      // Some scripts mixed with definitions and commands
+      StringArray parts = theTextParser.SeparateDots(chunks[0]);
+      
+      // If in function mode, always create Assignment command
+      if (!inFunctionMode)
+      {
+         if (parts.size() > 1)
+         {
+            GmatBase *tempObj = FindObject(parts[0]);
+            if ((tempObj) &&
+                (tempObj->GetType() == Gmat::COORDINATE_SYSTEM ||
+                 (!inRealCommandMode && tempObj->GetType() == Gmat::SUBSCRIBER)))
+               createAssignment = false;
+         }
+      }
+   }
+   else
+   {
+      // See if it is no output function call
+      createAssignment = false;
+   }
+   
+   
+   if (createAssignment)
+      obj = (GmatBase*)CreateAssignmentCommand(chunks[0], chunks[1], retval, inCmd);
+   else
+      obj = MakeAssignment(chunks[0], chunks[1]);
+   
+   if (obj == NULL)
+   {
+      #if DEBUG_PARSE
+      MessageInterface::ShowMessage("   obj is NULL, so just return false\n");
+      #endif
+      return false;
+   }
+   
+   // paramID will be assigned from call to Interpreter::FindPropertyID()
+   if ( FindPropertyID(obj, chunks[0], &owner, paramID, paramType) )
+   {
+      attrStr = preStr;
+      attrInLineStr = inStr;
+      
+      if (attrStr != "")
+         owner->SetAttributeCommentLine(paramID, attrStr);
+      
+      if (attrInLineStr != "")
+         owner->SetInlineAttributeComment(paramID, attrInLineStr);
+      
+      //Reset
+      attrStr = ""; 
+      attrInLineStr = ""; 
+      paramID = -1;
+   }
+   else
+   {
+      SetComments(obj, preStr, inStr);
+   }
+   
+   #ifdef DEBUG_PARSE
+   MessageInterface::ShowMessage("ParseAssignmentBlock() returning %d\n", retval);
+   #endif
+   
+   return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsOneWordCommand(const std::string &str)
+//------------------------------------------------------------------------------
+bool ScriptInterpreter::IsOneWordCommand(const std::string &str)
+{
+   if ((str.find("End")           != str.npos  &&
+        str.find("EndFiniteBurn") == str.npos) ||
+       (str.find("BeginScript")   != str.npos) ||
+       (str.find("NoOp")          != str.npos) ||
+       (str.find("Else")          != str.npos) ||
+       (str.find("Stop")          != str.npos))
+      return true;
+   
+   return false;
 }
 
 
