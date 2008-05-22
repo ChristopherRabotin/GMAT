@@ -21,6 +21,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_FUNCTION
+//#define DEBUG_OBJECT_MAP
 
 //---------------------------------
 // public methods
@@ -36,7 +37,10 @@
 FunctionRunner::FunctionRunner(const std::string &nomme)
    : MathFunction("FunctionRunner", nomme)
 {
-   objectTypeNames.push_back("FunctionRunner");   
+   objectTypeNames.push_back("FunctionRunner");
+   theObjectMap = NULL;
+   theGlobalObjectMap = NULL;
+   theFunction = NULL;
 }
 
 
@@ -84,6 +88,7 @@ void FunctionRunner::SetFunctionName(const std::string &fname)
        GetName().c_str(), fname.c_str());
    #endif
    
+   theFunctionName = fname;
    theFunctionManager.SetFunctionName(fname);
 }
 
@@ -192,6 +197,74 @@ const StringArray& FunctionRunner::GetInputs()
 
 
 //------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the MathTree to set the local asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void FunctionRunner::SetObjectMap(ObjectMap *map)
+{
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FunctionRunner::SetObjectMap() entered, theFunctionName='%s', "
+       "map=<%p>\n", theFunctionName.c_str(), map);
+   #endif
+
+   theObjectMap = map;
+   theFunctionManager.SetObjectMap(map);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the MathTree to set the global asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the global object map
+ */
+//------------------------------------------------------------------------------
+void FunctionRunner::SetGlobalObjectMap(ObjectMap *map)
+{
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FunctionRunner::SetGlobalObjectMap() entered, theFunctionName='%s', "
+       "map=<%p>\n", theFunctionName.c_str(), map);
+   #endif
+   
+   theGlobalObjectMap = map;
+   
+   // Now, find the function object
+   GmatBase *mapObj = FindObject(theFunctionName);
+   
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("=> found the function: <%p><%s>\n", mapObj, mapObj ? mapObj->GetName().c_str() : "NULL");
+   #endif
+   
+   if (mapObj == NULL)
+   {
+      throw MathException("FunctionRunner cannot find the Function \"" +
+                          theFunctionName + "\"");
+   }
+   else
+   {
+      theFunction = (Function *)mapObj;
+      theFunctionManager.SetFunction(theFunction);
+   }
+   
+   theFunctionManager.SetGlobalObjectMap(map);
+   
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage("FunctionRunner::SetGlobalObjectMap() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 void FunctionRunner::GetOutputInfo(Integer &type,
@@ -200,7 +273,7 @@ void FunctionRunner::GetOutputInfo(Integer &type,
    Function *function = theFunctionManager.GetFunction();
    if (function == NULL)
       throw MathException("FunctionRunner::GetOutputInfo() function is NULL\n");
-
+   
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
       ("FunctionRunner::GetOutputInfo() entered, this=<%p><%s>, function=<%s><%p>\n",
@@ -356,4 +429,48 @@ GmatBase* FunctionRunner::Clone() const
    return (new FunctionRunner(*this));
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* FunctionRunner::FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+GmatBase* FunctionRunner::FindObject(const std::string &name)
+{
+   std::string newName = name;
+   
+   // Ignore array indexing of Array
+   std::string::size_type index = name.find('(');
+   if (index != name.npos)
+      newName = name.substr(0, index);
+   
+   #ifdef DEBUG_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("FunctionRunner::FindObject() theObjectMap=<%p>, theGlobalObjectMap=<%p>, "
+       "newName='%s'\n", theObjectMap, theGlobalObjectMap, newName.c_str());
+   if (theObjectMap)
+   {
+      MessageInterface::ShowMessage("Here is the local object map:\n");
+      for (std::map<std::string, GmatBase *>::iterator i = theObjectMap->begin();
+           i != theObjectMap->end(); ++i)
+         MessageInterface::ShowMessage("   %s\n", i->first.c_str());
+   }
+   if (theGlobalObjectMap)
+   {
+      MessageInterface::ShowMessage("Here is the global object map:\n");
+      for (std::map<std::string, GmatBase *>::iterator i = theGlobalObjectMap->begin();
+           i != theGlobalObjectMap->end(); ++i)
+         MessageInterface::ShowMessage("   %s\n", i->first.c_str());
+   }
+   #endif
+   
+   // Check for the object in the Local Object Store (LOS) first
+   if (theObjectMap && theObjectMap->find(newName) != theObjectMap->end())
+      return (*theObjectMap)[newName];
+   
+   // If not found in the LOS, check the Global Object Store (GOS)
+   if (theGlobalObjectMap &&
+       theGlobalObjectMap->find(newName) != theGlobalObjectMap->end())
+      return (*theGlobalObjectMap)[newName];
+   
+   return NULL;
+}
 

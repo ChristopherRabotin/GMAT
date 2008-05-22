@@ -38,6 +38,10 @@ public:
    void                 SetFunctionOutputs();
    const StringArray&   GetInputs();
    
+   // for string to object maps
+   virtual void         SetObjectMap(ObjectMap *map);
+   virtual void         SetGlobalObjectMap(ObjectMap *map);
+   
    // inherited from MathFunction
    virtual void         GetOutputInfo(Integer &type, Integer &rowCount, 
                                       Integer &colCount);
@@ -51,10 +55,14 @@ public:
 protected:
    
    FunctionManager theFunctionManager;
+   ObjectMap       *theObjectMap;
+   ObjectMap       *theGlobalObjectMap;
+   std::string     theFunctionName;
+   Function        *theFunction;
+   StringArray     theInputNames;
+   StringArray     theOutputNames;
    
-   StringArray theInputNames;
-   StringArray theOutputNames;
-   
+   GmatBase* FindObject(const std::string &name);
 };
 
 #endif // FunctionRunner_hpp
