@@ -26,6 +26,7 @@
 #ifndef Assignment_hpp
 #define Assignment_hpp
 
+#include "gmatdefs.hpp"
 #include "GmatCommand.hpp"
 #include "MathTree.hpp"
 #include "Function.hpp"
@@ -49,6 +50,9 @@ public:
    virtual std::vector<Function*> GetFunctions() const;
    
    // inherited from GmatCommand
+   virtual void         SetObjectMap(ObjectMap *map);
+   virtual void         SetGlobalObjectMap(ObjectMap *map);
+   
    virtual bool         InterpretAction();
    virtual bool         Initialize();
    virtual bool         Execute();
@@ -86,7 +90,7 @@ protected:
    /// MathNode pointer for RHS equation
    MathTree             *mathTree;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
-   std::map<std::string, ElementWrapper*> mathWrapperMap;
+   WrapperMap           mathWrapperMap;
 };
 
 #endif // Assignment_hpp

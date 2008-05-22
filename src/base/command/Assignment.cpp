@@ -201,6 +201,51 @@ std::vector<Function*> Assignment::GetFunctions() const
 
 
 //------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the local asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void Assignment::SetObjectMap(ObjectMap *map)
+{
+   GmatCommand::SetObjectMap(map);
+   
+   if (mathTree)
+      mathTree->SetObjectMap(map);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the global asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the global object map
+ */
+//------------------------------------------------------------------------------
+void Assignment::SetGlobalObjectMap(ObjectMap *map)
+{
+   #ifdef DEBUG_GLOBAL_OBJECT_MAP
+   MessageInterface::ShowMessage
+      ("Assignment::SetGlobalObjectMap() entered, map=<%p>\n", map);
+   #endif
+   
+   GmatCommand::SetGlobalObjectMap(map);
+   
+   if (mathTree)
+      mathTree->SetGlobalObjectMap(map);
+   
+   #ifdef DEBUG_GLOBAL_OBJECT_MAP
+   MessageInterface::ShowMessage("Assignment::SetGlobalObjectMap() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // bool InterpretAction()
 //------------------------------------------------------------------------------
 /**
@@ -321,7 +366,9 @@ bool Assignment::Initialize()
 {
    #ifdef DEBUG_ASSIGNMENT_INIT
    MessageInterface::ShowMessage
-      ("Assignment::Initialize() entered for %s\n", generatingString.c_str());
+      ("Assignment::Initialize() entered for %s, It's%s a math equation\n",
+       generatingString.c_str(), (mathTree == NULL ? " not" : ""));
+   ShowObjectMaps();
    #endif
    
    if (GmatCommand::Initialize() == false)
@@ -348,7 +395,8 @@ bool Assignment::Initialize()
       #ifdef DEBUG_ASSIGNMENT_INIT
       for (ewi = mathWrapperMap.begin(); ewi != mathWrapperMap.end(); ++ewi)
          MessageInterface::ShowMessage
-            ("   name=<%s>, wrapper=%p\n", (ewi->first).c_str(), ewi->second);
+            ("   name=<%s>, wrapper=<%p>, type=%d\n", (ewi->first).c_str(), ewi->second,
+             (ewi->second)->GetWrapperType());
       #endif
       
       // Set references for the rhs math element wrappers
