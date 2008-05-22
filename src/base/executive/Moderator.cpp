@@ -2708,7 +2708,7 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
 
 
 //------------------------------------------------------------------------------
-// GmatCommand* InterpretGmatFunction(Function *funct, StringObjectMap *objMap)
+// GmatCommand* InterpretGmatFunction(Function *funct, ObjectMap *objMap)
 //------------------------------------------------------------------------------
 /**
  * Retrieves a function object pointer by given name.
@@ -2719,8 +2719,7 @@ GmatCommand* Moderator::InterpretGmatFunction(const std::string &fileName)
  * @return A command list that is executed to run the function.
  */
 //------------------------------------------------------------------------------
-GmatCommand* Moderator::InterpretGmatFunction(Function *funct,
-                                              StringObjectMap *objMap)
+GmatCommand* Moderator::InterpretGmatFunction(Function *funct, ObjectMap *objMap)
 {
    #if DEBUG_GMAT_FUNCTION
    MessageInterface::ShowMessage
@@ -2731,7 +2730,7 @@ GmatCommand* Moderator::InterpretGmatFunction(Function *funct,
    // If input objMap is NULL, use configured objects,
    // use input object map otherwise
    
-   StringObjectMap *objMapToUse = objMap;
+   ObjectMap *objMapToUse = objMap;
    
    if (objMap == NULL)
       objMapToUse = theConfigManager->GetObjectMap();
@@ -3952,10 +3951,13 @@ bool Moderator::InterpretScript(const std::string &filename, bool readBack,
    endOfInterpreter = true;
    
    #if DEBUG_INTERPRET > 1
+   MessageInterface::ShowMessage(GetScript());
+   #endif
+   
+   #if DEBUG_INTERPRET > 0
    GmatCommand *cmd = GetFirstCommand();
    MessageInterface::ShowMessage(GmatCommandUtil::GetCommandSeqString(cmd));
-   MessageInterface::ShowMessage(GetScript());
-   MessageInterface::ShowMessage("===> Returning status=%d\n", status);
+   MessageInterface::ShowMessage("Moderator::InterpretScript() returning %d\n", status);
    #endif
    
    return status;
