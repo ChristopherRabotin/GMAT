@@ -42,14 +42,18 @@ public:
    
    MathNode*            GetTopNode();
    void                 SetTopNode(MathNode *node);
-   void                 SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMap);
+   void                 SetMathWrappers(WrapperMap *wrapperMap);
    
    Real                 Evaluate();
    Rmatrix              MatrixEvaluate();
-   bool                 Initialize(std::map<std::string, GmatBase *> *objectMap,
-                                   std::map<std::string, GmatBase *> *globalObjectMap);
+   bool                 Initialize(ObjectMap *objectMap,
+                                   ObjectMap *globalObjectMap);
    void                 GetOutputInfo(Integer &type, Integer &rowCount,
                                       Integer &colCount);
+   
+   // for string to object maps
+   void                 SetObjectMap(ObjectMap *map);
+   void                 SetGlobalObjectMap(ObjectMap *map);
    
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
@@ -62,14 +66,14 @@ public:
 protected:
    
    /// Top node of the math tree
-   MathNode *theTopNode;
+   MathNode   *theTopNode;
    
    /// Object store obtained from the Sandbox
-   std::map<std::string, GmatBase *> *theObjectMap;
+   ObjectMap  *theObjectMap;
    /// Global object store obtained from the Sandbox
-   std::map<std::string, GmatBase *> *theGlobalObjectMap;
+   ObjectMap  *theGlobalObjectMap;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
-   std::map<std::string, ElementWrapper*> *theWrapperMap;
+   WrapperMap *theWrapperMap;
    
    /// All parameter name array
    StringArray theParamArray;
@@ -80,6 +84,8 @@ protected:
    bool InitializeParameter(MathNode *node);
    void SetMathElementWrappers(MathNode *node);
    void SetFunctionToRunner(MathNode *node, Function *function);
+   void SetObjectMapToRunner(MathNode *node, ObjectMap *map);
+   void SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map);
    bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
                         const std::string &oldName, const std::string &newName);
    void CreateParameterNameArray(MathNode *node);

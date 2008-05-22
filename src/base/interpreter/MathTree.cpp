@@ -235,19 +235,23 @@ Rmatrix MathTree::MatrixEvaluate()
 
 
 //------------------------------------------------------------------------------
-// bool Initialize(std::map<std::string, GmatBase *> *objectMap,
-//                 std::map<std::string, GmatBase *> *globalObjectMap )
+// bool Initialize(ObjectMap *objectMap, ObjectMap *globalObjectMap)
 //------------------------------------------------------------------------------
-bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap,
-                          std::map<std::string, GmatBase *> *globalObjectMap )
-{
+bool MathTree::Initialize(ObjectMap *objectMap, ObjectMap *globalObjectMap)
+{   
    if (theTopNode == NULL)
+   {
+      #ifdef DEBUG_MATH_TREE_INIT
+      MessageInterface::ShowMessage
+         ("MathTree::Initialize() theTopNode is NULL, so just returning true\n");
+      #endif
       return true;
-
+   }
+   
    theObjectMap       = objectMap;
    theGlobalObjectMap = globalObjectMap;
-
-   #ifdef DEBUG_MATH_TREE
+   
+   #ifdef DEBUG_MATH_TREE_INIT
    MessageInterface::ShowMessage
       ("MathTree::Initialize() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
        theTopNode->GetName().c_str());
@@ -263,6 +267,70 @@ bool MathTree::Initialize(std::map<std::string, GmatBase *> *objectMap,
 void MathTree::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) 
 {
     theTopNode->GetOutputInfo(type, rowCount, colCount);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Assignment to set the local asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the local object map
+ */
+//------------------------------------------------------------------------------
+void MathTree::SetObjectMap(ObjectMap *map)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetObjectMap() map=%p\n", map);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetObjectMapToRunner() theTopNode=%s, %s\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetObjectMapToRunner(theTopNode, map);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetObjectMap() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetGlobalObjectMap(ObjectMap *map)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Assignment to set the global asset store used by the GmatCommand
+ * 
+ * @param <map> Pointer to the global object map
+ */
+//------------------------------------------------------------------------------
+void MathTree::SetGlobalObjectMap(ObjectMap *map)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() map=%p\n", map);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetGlobalObjectMapToRunner() theTopNode=%s, %s\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetGlobalObjectMapToRunner(theTopNode, map);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
+   #endif
 }
 
 
@@ -331,13 +399,29 @@ GmatBase* MathTree::Clone(void) const
 // bool InitializeParameter(MathNode *node)
 //------------------------------------------------------------------------------
 bool MathTree::InitializeParameter(MathNode *node)
-{
+{   
    if (node == NULL)
+   {
+      #ifdef DEBUG_MATH_TREE_INIT
+      MessageInterface::ShowMessage
+         ("MathTree::InitializeParameter() theTopNode is NULL, so just returning true\n");
+      #endif
       return true;
+   }
+   
+   #ifdef DEBUG_MATH_TREE_INIT
+   MessageInterface::ShowMessage
+      ("MathTree::InitializeParameter() node=%s, %s\n   IsFunction=%d, IsNumber=%d, "
+       "IsFunctionInput=%d\n", node->GetTypeName().c_str(), node->GetName().c_str(),
+       node->IsFunction(), node->IsNumber(), node->IsFunctionInput());
+   #endif
    
    if (!node->IsFunction())
    {
       if (node->IsNumber())
+         return true;
+      
+      if (node->IsFunctionInput())
          return true;
       
       // Now MathElement can have more than one ref objects due to GmatFunction
@@ -349,7 +433,7 @@ bool MathTree::InitializeParameter(MathNode *node)
       {
          #ifdef DEBUG_MATH_TREE_INIT
          MessageInterface::ShowMessage
-            ("MathTree::InitializeParameter() refNames[%d]=%s\n", refNames[i].c_str());
+            ("MathTree::InitializeParameter() refNames[%d]=%s\n", i, refNames[i].c_str());
          #endif
          
          // Handle array index
@@ -470,6 +554,72 @@ void MathTree::SetFunctionToRunner(MathNode *node, Function *function)
    
    MathNode *right = node->GetRight();
    SetFunctionToRunner(right, function);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetObjectMapToRunner(MathNode *node, ObjectMap *map)
+//------------------------------------------------------------------------------
+void MathTree::SetObjectMapToRunner(MathNode *node, ObjectMap *map)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetObjectMapToRunner() node=%p, map=%p\n", node, map);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetObjectMap(map);
+   
+   MathNode *left = node->GetLeft();   
+   SetObjectMapToRunner(left, map);
+   
+   MathNode *right = node->GetRight();
+   SetObjectMapToRunner(right, map);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map)
+//------------------------------------------------------------------------------
+void MathTree::SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetGlobalObjectMapToRunner() node=%p, map=%p\n", node, map);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetGlobalObjectMap(map);
+   
+   MathNode *left = node->GetLeft();   
+   SetGlobalObjectMapToRunner(left, map);
+   
+   MathNode *right = node->GetRight();
+   SetGlobalObjectMapToRunner(right, map);
 }
 
 
