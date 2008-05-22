@@ -58,12 +58,16 @@ namespace GmatStringUtil
                         Integer width = GmatGlobal::INTEGER_WIDTH);
    
    std::string RemoveExtraParen(const std::string &str);
+   std::string RemoveOuterString(const std::string &str, const std::string &start,
+                                 const std::string &end);
    std::string RemoveEnclosingString(const std::string &str, const std::string &enStr);
    
    char GetClosingBracket(const char &openBracket);
    
    StringArray SeparateBy(const std::string &str, const std::string &delim,
                           bool putBracketsTogether = false);
+   
+   StringArray SeparateByComma(const std::string &str);
    
    bool ToReal(const std::string &str, Real *value, bool trimParens = false);
    bool ToReal(const std::string &str, Real &value, bool trimParens = false);
@@ -107,6 +111,7 @@ namespace GmatStringUtil
    bool IsBracketPartOfArray(const std::string &str, const std::string &bracketPairs,
                              bool checkOnlyFirst);
    bool IsParenPartOfArray(const std::string &str);
+   bool IsThereEqualSign(const std::string &str);
    bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
    bool IsSingleItem(const std::string &str);
    bool StartsWith(const std::string &str, const std::string &value);

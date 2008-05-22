@@ -543,7 +543,7 @@ char GmatStringUtil::GetClosingBracket(const char &openBracket)
  *
  * @param  str  input string
  * @param  delim  input delimiter
- * @param  putBracketsTogether  true if put brackets together (false)
+ * @param  putBracketsTogether  true if putting brackets together (false)
  *
  */
 //------------------------------------------------------------------------------
@@ -684,7 +684,94 @@ StringArray GmatStringUtil::SeparateBy(const std::string &str,
    #endif
    
    return parts1;
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray SeparateByComma(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Separates string by comma leaving all parenthesis and single quotes intact.
+ * If parenthesis are not balanced, it will just return input string.
+ *
+ * @param  str  input string
+ * @return  StringArray of separated parts
+ */
+//------------------------------------------------------------------------------
+StringArray GmatStringUtil::SeparateByComma(const std::string &str)
+{
+   #if DEBUG_STRING_UTIL_SEP_COMMA
+   MessageInterface::ShowMessage
+      ("GmatStringUtil::SeparateByComma() str=\"%s\"n", str.c_str());
+   #endif
    
+   StringArray parts;
+   parts.push_back(str);
+   
+   // if no comma is found, just return input string
+   std::string::size_type index1 = str.find(",");
+   if (index1 == str.npos)
+      return parts;
+   
+   // Make sure that all parenthesis are balanced
+   if (!IsParenBalanced(str))
+      return parts;
+   
+   // Now go through each character in the string
+   parts.clear();
+   Integer count = str.size();
+   std::string str1 = str;
+   bool insideQuote = false;
+   Integer openCount = 0;
+   std::string part;
+   
+   for (int i=0; i<count; i++)
+   {
+      if (str1[i] == ',')
+      {
+         if (insideQuote || openCount > 0)
+         {
+            part = part + str1[i];
+         }
+         else
+         {
+            parts.push_back(part);
+            part = "";
+         }
+      }
+      else if (str1[i] == '\'')
+      {
+         part = part + str1[i];
+         if (insideQuote)
+            insideQuote = false;
+         else
+            insideQuote = true;
+      }
+      else if (str1[i] == '(')
+      {
+         part = part + str1[i];
+         openCount++;
+      }
+      else if (str1[i] == ')')
+      {
+         part = part + str1[i];
+         openCount--;
+      }
+      else
+      {
+         part = part + str1[i];
+      }
+   }
+   
+   parts.push_back(part);
+
+   // Let's stip off leadin and trailing blanks before returning
+   for (UnsignedInt i=0; i<parts.size(); i++)
+   {
+      parts[i] = Trim(parts[i], BOTH);
+   }
+   
+   return parts;
 }
 
 
@@ -1675,13 +1762,18 @@ bool GmatStringUtil::IsBracketBalanced(const std::string &str,
       else if (str[i] == close)
          openCounter--;
    }
-      
+   
    if (openCounter != 0)
       retval = false;
-
+   
    return retval;
 }
 
+
+//------------------------------------------------------------------------------
+// bool AreAllBracketsBalanced(const std::string &str, 
+//                             const std::string &allPairs)
+//------------------------------------------------------------------------------
 bool GmatStringUtil::AreAllBracketsBalanced(const std::string &str, 
                                             const std::string &allPairs)
 {
@@ -1741,7 +1833,7 @@ bool GmatStringUtil::AreAllBracketsBalanced(const std::string &str,
          }
       }
    }
-      
+   
    if (openCounter != 0)
       retval = false;
 
@@ -2073,6 +2165,42 @@ bool GmatStringUtil::IsParenPartOfArray(const std::string &str)
 
 }
 
+
+//------------------------------------------------------------------------------
+// bool IsThereEqualSign(const std::string &str)
+//------------------------------------------------------------------------------
+/*
+ * Checks if there is equal sign (=) not enclosed with single quotes.
+ * It will return when it finds first equal sign not in quotes.
+ *
+ * @param  return true if it finds equal sign not in qotes, false otherwise
+ */
+//------------------------------------------------------------------------------
+bool GmatStringUtil::IsThereEqualSign(const std::string &str)
+{
+   Integer size = str.size();
+   bool inQuotes = false;
+   
+   for (Integer i=0; i<size; i++)
+   {
+      if (str[i] == '\'')
+      {
+         if (inQuotes)
+            inQuotes = false;
+         else
+            inQuotes = true;
+      }
+      else if (str[i] == '=')
+      {
+         if (!inQuotes)
+            return true;
+      }
+   }
+
+   return false;
+}
+
+
 //------------------------------------------------------------------------------
 // bool HasNoBrackets(const std::string &str, 
 //                    bool parensForArraysAllowed = true)
@@ -2312,6 +2440,38 @@ std::string GmatStringUtil::RemoveExtraParen(const std::string &str)
    #endif
    
    return str2;
+}
+
+
+//------------------------------------------------------------------------------
+// std::string RemoveOuterString(const std::string &str, const std::string &start,
+//                               const std::string end)
+//------------------------------------------------------------------------------
+/*
+ * This method removes outer pair of bracket if it has one.
+ * If input string is "(a(1,1) + 10.0)" it return a(1,1) + 10.0.
+ *
+ * @param  str  Input string
+ * @param  start  Starting string to be checked and removed
+ * @param  end  Ending string to be checked and removed
+ */
+//------------------------------------------------------------------------------
+std::string GmatStringUtil::RemoveOuterString(const std::string &str,
+                                               const std::string &start,
+                                               const std::string &end)
+{
+   #if DEBUG_STRING_UTIL
+   MessageInterface::ShowMessage
+      ("RemoveOuterString() entering str=\"%s\", bracketPair='%s'\n", str.c_str(),
+       bracketPair.c_str());
+   #endif
+   
+   std::string str1 = str;
+   
+   if (StartsWith(str, start) && EndsWith(str, end))
+      str1 = str.substr(1, str.size() - 2);
+   
+   return str1;
 }
 
 
