@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              TextParser
 //------------------------------------------------------------------------------
@@ -48,8 +48,10 @@ public:
    std::string GetInstruction() { return theInstruction; }
    
    void Initialize(const StringArray &commandList);
-   void Reset();
    StringArray& GetChunks() { return theChunks; }
+   bool IsFunctionCall() { return isFunctionCall; }
+   
+   void Reset();
    
    // for parsing
    Gmat::BlockType EvaluateBlock(const std::string &logicalBlock);

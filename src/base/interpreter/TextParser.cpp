@@ -249,6 +249,11 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
          // remove any eol or semicoln from keyword
          keyword = GmatStringUtil::Trim(keyword, GmatStringUtil::BOTH, true, true);
          
+         // make sure keyword is before open parenthesis
+         std::string::size_type openIndex = keyword.find("(");
+         if (openIndex != keyword.npos)
+            keyword = keyword.substr(0, openIndex);
+         
          // check for "function" 
          if (keyword == "function")
          {
@@ -298,13 +303,17 @@ Gmat::BlockType TextParser::EvaluateBlock(const std::string &logicalBlock)
             std::string noInline = str;
             if (commentPos != str.npos)
                noInline = str.substr(0, commentPos);
-            
-            if (noInline.find("=") == str.npos) // Is this checking enough?
+
+            // Since we are allowed to pass string literal, string literal can
+            // be anything letters including equal sign, so we need additional checking.
+            // String literals are enclosed with single quotes (loj: 2008.05.19)
+            // See if it has euqal sign not in quotes.
+            //if (noInline.find("=") == str.npos) // Is this checking enough?
+            if (!GmatStringUtil::IsThereEqualSign(str))
             {
                theBlockType = Gmat::COMMAND_BLOCK;
                isFunctionCall = true;
             }
-            
          }
          
          if (noCommentLine >= 0)
