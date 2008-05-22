@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ClassName
 //------------------------------------------------------------------------------
@@ -17,11 +17,8 @@
  */
 //------------------------------------------------------------------------------
 
-
-
-
-#ifndef INTERPRETEREXCEPTION_HPP
-#define INTERPRETEREXCEPTION_HPP
+#ifndef InterpreterException_hpp
+#define InterpreterException_hpp
 
 #include "BaseException.hpp" // inheriting class's header file
 
@@ -30,12 +27,12 @@
  */
 class InterpreterException : public BaseException
 {
-	public:
-		// class constructor
-		InterpreterException(std::string details);
-		// class destructor
-		~InterpreterException(void);
+public:
+   // class constructor
+   InterpreterException(std::string details = "");
+   // class destructor
+   ~InterpreterException(void);
 };
 
-#endif // INTERPRETEREXCEPTION_HPP
+#endif // InterpreterException_hpp
 
