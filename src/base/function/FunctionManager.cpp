@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 FunctionManager
 //------------------------------------------------------------------------------
@@ -177,6 +177,10 @@ std::string FunctionManager::GetFunctionName() const
 
 void FunctionManager::SetFunction(Function *theFunction)
 {
+   #ifdef DEBUG_FUNCTION_MANAGER
+   MessageInterface::ShowMessage
+      ("FunctionManager::SetFunction() fName='%s', theFunction=<%p>\n", fName.c_str(), theFunction);
+   #endif
    f = theFunction;
    f->SetStringParameter("FunctionName", fName);
    // need to check to see if it's a GmatFunction here?  why?
@@ -549,20 +553,30 @@ Real FunctionManager::Evaluate()
       errMsg += fName + """ - pointer is NULL\n";
       throw FunctionException(errMsg);
    }
+   
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("==> FunctionManager::Evaluate() f=<%p><%s>\n", f, f->GetName().c_str());
+   #endif
+   
    return f->Evaluate();
 }
 
 Rmatrix FunctionManager::MatrixEvaluate()
 {
+   if (f == NULL)
    {
-      if (f == NULL)
-      {
-         std::string errMsg = "FunctionManager:: Unable to return Rmatrix value from Function """;
-         errMsg += fName + """ - pointer is NULL\n";
-         throw FunctionException(errMsg);
-      }
-      return f->MatrixEvaluate();
+      std::string errMsg = "FunctionManager:: Unable to return Rmatrix value from Function """;
+      errMsg += fName + """ - pointer is NULL\n";
+      throw FunctionException(errMsg);
    }
+
+   #ifdef DEBUG_FM_EVAL
+   MessageInterface::ShowMessage
+      ("==> FunctionManager::MatrixEvaluate() f=<%p><%s>\n", f, f->GetName().c_str());
+   #endif
+   
+   return f->MatrixEvaluate();
 }
 
 void FunctionManager::Finalize()
@@ -571,7 +585,8 @@ void FunctionManager::Finalize()
    
    ; // @todo - call function to call RunComplete on FCS here?
      // delete all contents of FOS here?
-   f->Finalize();
+   if (f != NULL && f->IsOfType("GmatFunction")) //loj: added check for GmatFunction
+      f->Finalize();
 }
 
 
@@ -654,9 +669,9 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
             case Gmat::NUMBER :
             case Gmat::VARIABLE :
             case Gmat::ARRAY_ELEMENT :
-            case Gmat::INTEGER :       // wat is this anyway?
+            case Gmat::INTEGER :       // what is this anyway?
             {
-               ival = ew->EvaluateReal();
+               ival = (Integer)ew->EvaluateReal(); //loj: to remove compiler warning
                //v = new Variable(newName);
                v = new Variable(str);
                v->SetReal(rval);
