@@ -245,11 +245,20 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    std::stringstream details;
    
    std::string gen = prefix + "Vary " + solverName + "(";
-   
 
-//   // Iterate through the variables
-   details << variable->GetDescription() << " = " << initialValue->GetDescription() <<  ", ";
-//
+   // loj: added check for NULL pointer to avoid crash and we can still
+   // get generating string (2008.05.22)
+   // Iterate through the variables
+   if (variable)
+      details << variable->GetDescription() << " = ";
+   else
+      details << "Unknown-Variable" << " = ";
+   
+   if (initialValue)
+      details << initialValue->GetDescription() <<  ", ";
+   else
+      details << "Unknown-InitialValue"  <<  ", ";
+   
    // figure out if this is inside a Target or an Optimize branch command, to
    // determine which things should be added to the generatingString
    std::string targOpt  = "";
@@ -273,9 +282,18 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    if (targOpt == "Target")
    {
       details << "{Perturbation = ";
-      details << perturbation->GetDescription();
+      if (perturbation)
+         details << perturbation->GetDescription();
+      else
+         details << "Unknown-Perturbation";
+      
       details << ", MaxStep = ";
-      details << variableMaximumStep->GetDescription();
+      
+      if (variableMaximumStep)
+         details << variableMaximumStep->GetDescription();
+      else
+         details << "Unknown-VariableMaximumStep";
+      
       details << ", ";
    }
    else if (targOpt == "Optimize")
@@ -284,20 +302,33 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
    }
    
    details << "Lower = ";
-   details << variableMinimum->GetDescription();
+   if (variableMinimum)
+      details << variableMinimum->GetDescription();
+   else
+      details << "Unknown-VariableMinimum";
    
    details << ", Upper = ";
-   details << variableMaximum->GetDescription();
+   if (variableMaximum)
+      details << variableMaximum->GetDescription();
+   else
+      details << "Unknown-VariableMaximum";
    
    // add the scale factors for Optimize
    //if (solver && (solver->IsOfType("Optimizer")))
    if (targOpt == "Optimize")
    {
       details << ", AdditiveScaleFactor = ";
-      details << additiveScaleFactor->GetDescription();
+      if (additiveScaleFactor)
+         details << additiveScaleFactor->GetDescription();
+      else
+         details << "Unknown-AdditiveScaleFactor";
+      
       details << ", MultiplicativeScaleFactor = ";
-      details << multiplicativeScaleFactor->GetDescription();
-    }
+      if (multiplicativeScaleFactor)
+         details << multiplicativeScaleFactor->GetDescription();
+      else
+         details << "Unknown-MultiplicativeScaleFactor";
+   }
    
    gen += details.str();
    generatingString = gen + "});";
