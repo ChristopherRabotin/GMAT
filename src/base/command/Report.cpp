@@ -24,6 +24,26 @@
 #include <sstream>
 
 //#define DEBUG_REPORTING 1
+//#define DEBUG_REPORT_SET
+//#define DEBUG_WRAPPERS
+
+//---------------------------------
+// static data
+//---------------------------------
+const std::string
+Report::PARAMETER_TEXT[ReportParamCount - GmatCommandParamCount] =
+{
+   "ReportFile",
+   "Add",
+};
+
+const Gmat::ParameterType
+Report::PARAMETER_TYPE[ReportParamCount - GmatCommandParamCount] =
+{
+   Gmat::STRING_TYPE,        // "ReportFile",
+   Gmat::OBJECTARRAY_TYPE,   // "Add",
+};
+
 
 //---------------------------------
 // public members
@@ -37,11 +57,12 @@
  */
 //------------------------------------------------------------------------------
 Report::Report() :
-   GmatCommand ("Report"),
-   rfName      (""),
-   reporter    (NULL),
-   reportID    (-1),
-   needsHeaders(true)
+   GmatCommand  ("Report"),
+   rfName       (""),
+   reporter     (NULL),
+   reportID     (-1),
+   numParams    (0),
+   needsHeaders (true)
 {
 }
 
@@ -79,6 +100,7 @@ Report::Report(const Report &rep) :
    parms.clear();
    parmRows.clear();
    parmCols.clear();
+   parmWrappers.clear();
 }
 
 
@@ -111,6 +133,205 @@ Report& Report::operator=(const Report &rep)
    }
    
    return *this;
+}
+
+
+//------------------------------------------------------------------------------
+// Integer GetParameterID(const std::string &str) const
+//------------------------------------------------------------------------------
+Integer Report::GetParameterID(const std::string &str) const
+{
+   for (Integer i = GmatCommandParamCount; i < ReportParamCount; i++)
+   {
+      if (str == PARAMETER_TEXT[i - GmatCommandParamCount])
+         return i;
+   }
+   
+   return GmatCommand::GetParameterID(str);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id) const
+//------------------------------------------------------------------------------
+std::string Report::GetStringParameter(const Integer id) const
+{
+   if (id == REPORTFILE)
+      return rfName;
+   
+   return GmatCommand::GetStringParameter(id);
+}
+
+
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+std::string Report::GetStringParameter(const std::string &label) const
+{
+   return GetStringParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool Report::SetStringParameter(const Integer id, const std::string &value)
+{
+   switch (id)
+   {
+   case REPORTFILE:
+      rfName = value;
+      return true;
+   case ADD:
+      #ifdef DEBUG_REPORT_SET
+      MessageInterface::ShowMessage
+         ("Report::SetStringParameter() Adding parameter '%s'\n", value.c_str());
+      #endif
+      return AddParameter(value, numParams);
+   default:
+      return GmatCommand::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+bool Report::SetStringParameter(const std::string &label,
+                                const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const Integer id, const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool Report::SetStringParameter(const Integer id, const std::string &value,
+                                const Integer index)
+{
+   switch (id)
+   {
+   case ADD:
+      return AddParameter(value, index);
+   default:
+      return GmatCommand::SetStringParameter(id, value, index);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual bool SetStringParameter(const std::string &label,
+//                                 const std::string &value,
+//                                 const Integer index)
+//------------------------------------------------------------------------------
+bool Report::SetStringParameter(const std::string &label,
+                                const std::string &value,
+                                const Integer index)
+{
+   return SetStringParameter(GetParameterID(label), value, index);
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetStringArrayParameter(const Integer id) const
+//------------------------------------------------------------------------------
+const StringArray& Report::GetStringArrayParameter(const Integer id) const
+{
+   #ifdef DEBUG_REPORTFILE_GET
+   MessageInterface::ShowMessage
+      ("Report::GetStringArrayParameter() id=%d, actualParmNames.size()=%d, "
+       "numParams=%d\n", id, actualParmNames.size(), numParams);
+   #endif
+   
+   switch (id)
+   {
+   case ADD:
+      return actualParmNames;
+   default:
+      return GmatCommand::GetStringArrayParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// StringArray& GetStringArrayParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+const StringArray& Report::GetStringArrayParameter(const std::string &label) const
+{
+   return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// const StringArray& GetWrapperObjectNameArray()
+//------------------------------------------------------------------------------
+const StringArray& Report::GetWrapperObjectNameArray()
+{
+   wrapperObjectNames.clear();
+   wrapperObjectNames.insert(wrapperObjectNames.end(), actualParmNames.begin(),
+                             actualParmNames.end());
+   return wrapperObjectNames;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetElementWrapper(ElementWrapper *toWrapper, const std::string &withName)
+//------------------------------------------------------------------------------
+bool Report::SetElementWrapper(ElementWrapper *toWrapper,
+                               const std::string &withName)
+{
+   #ifdef DEBUG_WRAPPERS   
+   MessageInterface::ShowMessage
+      ("Report::SetElementWrapper() entered with toWrapper=<%p>, withName='%s'\n",
+       toWrapper, withName.c_str());
+   #endif
+   
+   if (toWrapper == NULL)
+      return false;
+   
+   // Do we need any type checking?
+   // CheckDataType(toWrapper, Gmat::REAL_TYPE, "Report", true);
+   
+   bool retval = false;
+   ElementWrapper *ew;
+   
+   //-------------------------------------------------------
+   // check parameter names
+   //-------------------------------------------------------
+   #ifdef DEBUG_WRAPPERS   
+   MessageInterface::ShowMessage
+      ("   Checking %d Parameters\n", actualParmNames.size());
+   for (UnsignedInt i=0; i<actualParmNames.size(); i++)
+      MessageInterface::ShowMessage("      %s\n", actualParmNames[i].c_str());
+   #endif
+   
+   Integer sz = actualParmNames.size();
+   for (Integer i = 0; i < sz; i++)
+   {
+      if (actualParmNames.at(i) == withName)
+      {
+         #ifdef DEBUG_WRAPPERS   
+         MessageInterface::ShowMessage
+            ("   Found wrapper name \"%s\" in actualParmNames\n", withName.c_str());
+         #endif
+         if (parmWrappers.at(i) != NULL)
+         {
+            ew = parmWrappers.at(i);
+            parmWrappers.at(i) = toWrapper;
+         }
+         else
+         {
+            parmWrappers.at(i) = toWrapper;
+         }
+         
+         retval = true;
+      }
+   }
+   
+   return retval;
 }
 
 
@@ -271,16 +492,18 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          throw CommandException("Report command can only have Parameters "
             "in the list of reported values.\n");
       
-      // Handle Array indexing
-      Integer row, col;
-      std::string newName;      
-      GmatStringUtil::GetArrayIndex(name, row, col, newName);
+      AddParameter(name, numParams);
       
-      parmNames.push_back(newName);
-      actualParmNames.push_back(name);
+//       // Handle Array indexing
+//       Integer row, col;
+//       std::string newName;      
+//       GmatStringUtil::GetArrayIndex(name, row, col, newName);
       
-      parmRows.push_back(row);
-      parmCols.push_back(col);
+//       parmNames.push_back(newName);
+//       actualParmNames.push_back(name);
+      
+//       parmRows.push_back(row);
+//       parmCols.push_back(col);
       
       #ifdef __SHOW_NAMES_IN_REPORTFILE__
       // For compare report column header
@@ -383,7 +606,13 @@ GmatBase* Report::Clone() const
 const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
                                                const std::string &prefix,
                                                const std::string &useName)
-{   
+{
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("Report::GetGeneratingString() rfName='%s', has %d parameters to write\n",
+       rfName.c_str(), actualParmNames.size());
+   #endif
+   
    std::string gen = prefix + "Report " + rfName + " ";
    UnsignedInt numElem = actualParmNames.size();
    
@@ -394,7 +623,7 @@ const std::string& Report::GetGeneratingString(Gmat::WriteMode mode,
       
       gen += actualParmNames[numElem-1];
    }
-   else
+   else if (numElem == 1)
    {
       gen += actualParmNames[0];
    }
@@ -566,5 +795,48 @@ void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
    reporter->ReceiveData(header.c_str(), header.length());
    datastream.str("");
    needsHeaders = false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool AddParameter(const std::string &paramName, Integer index)
+//------------------------------------------------------------------------------
+bool Report::AddParameter(const std::string &paramName, Integer index)
+{
+   #ifdef DEBUG_REPORT_SET
+   MessageInterface::ShowMessage
+      ("Report::AddParameter() Adding parameter '%s', index=%d\n",
+       paramName.c_str(), index);
+   #endif
+   
+   if (paramName != "" && index == numParams)
+   {
+      // if paramName not found, add
+      if (find(actualParmNames.begin(), actualParmNames.end(), paramName) ==
+          actualParmNames.end())
+      {
+         // Handle Array indexing
+         Integer row, col;
+         std::string newName;      
+         GmatStringUtil::GetArrayIndex(paramName, row, col, newName);
+         
+         parmNames.push_back(newName);
+         actualParmNames.push_back(paramName);
+         parmRows.push_back(row);
+         parmCols.push_back(col);
+         parms.push_back(NULL);
+         parmWrappers.push_back(NULL);
+         numParams = actualParmNames.size();
+         
+         #ifdef DEBUG_REPORT_SET
+         MessageInterface::ShowMessage
+            ("   '%s' added, size=%d\n", paramName.c_str(), numParams);
+         #endif
+         
+         return true;
+      }
+   }
+   
+   return false;
 }
 

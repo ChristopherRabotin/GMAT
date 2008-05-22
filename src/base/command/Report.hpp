@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            Report
 //------------------------------------------------------------------------------
@@ -23,6 +23,7 @@
 #include "GmatCommand.hpp"
 #include "ReportFile.hpp"
 #include "Parameter.hpp"
+#include "ElementWrapper.hpp"
 
 /**
  * The Report command is used to write data to a ReportFile at specific times.
@@ -44,26 +45,56 @@ public:
    Report(const Report &rep);
    Report& operator=(const Report &rep);
    
-   virtual bool        TakeAction(const std::string &action,  
-                                  const std::string &actionData = "");
-   virtual std::string GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual GmatBase*    Clone() const;
+   
+   // Parameter accessor methods
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual std::string  GetStringParameter(const Integer id) const;
+   virtual std::string  GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const Integer id,
+                                           const std::string &value,
+                                           const Integer index);
+   virtual bool         SetStringParameter(const std::string &label,
+                                           const std::string &value,
+                                           const Integer index);
    virtual const StringArray&
-                       GetRefObjectNameArray(const Gmat::ObjectType type);
-   virtual bool        RenameRefObject(const Gmat::ObjectType type,
-                                       const std::string &oldName,
-                                       const std::string &newName);
-   virtual bool        SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
-                                    const std::string &name,
-                                    const Integer index);
+                        GetStringArrayParameter(const Integer id) const;
+   virtual const StringArray&
+                        GetStringArrayParameter(const std::string &label) const;
    
-   virtual GmatBase*   Clone() const;
+   // ElementWrapper accessor methods
+   virtual const StringArray& 
+                        GetWrapperObjectNameArray();
+   virtual bool         SetElementWrapper(ElementWrapper* toWrapper,
+                                          const std::string &withName);
+   
+   // Object accessor methods
+   virtual std::string  GetRefObjectName(const Gmat::ObjectType type) const;
+   virtual const StringArray&
+                        GetRefObjectNameArray(const Gmat::ObjectType type);
+   virtual bool         RenameRefObject(const Gmat::ObjectType type,
+                                        const std::string &oldName,
+                                        const std::string &newName);
+   virtual bool         SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                                     const std::string &name,
+                                     const Integer index);
+   
+   // Command methods
+   virtual bool         TakeAction(const std::string &action,  
+                                   const std::string &actionData = "");
+   
+   bool                 Initialize();
+   virtual bool         Execute();
+   
+   // Generating string method
    virtual const std::string&
-                       GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
-                                           const std::string &prefix = "",
-                                           const std::string &useName = "");
-   
-   bool              Initialize();
-   virtual bool      Execute();
+                        GetGeneratingString(Gmat::WriteMode mode = Gmat::SCRIPTING,
+                                            const std::string &prefix = "",
+                                            const std::string &useName = "");
    
 protected:
    /// Name of the subscriber
@@ -76,6 +107,8 @@ protected:
    StringArray                parmNames;
    /// Array of actual parameter names including index
    StringArray                actualParmNames;
+   /// Number of parameters
+   Integer                    numParams;
    /// Array of parameters that get written to the report
    std::vector<Parameter*>    parms;
    /// Flag indicating whether the header data has been written
@@ -84,8 +117,25 @@ protected:
    std::vector<Integer>       parmRows;
    /// Array of parameter column index
    std::vector<Integer>       parmCols;
-
+   /// ElementWraper pointers of parameters
+   std::vector<ElementWrapper*> parmWrappers;
+   
    void WriteHeaders(std::stringstream &datastream, Integer colWidth);
+   bool AddParameter(const std::string &paramName, Integer index);
+   
+   enum
+   {
+      REPORTFILE = GmatCommandParamCount,
+      ADD,
+      ReportParamCount  /// Count of the parameters for this class
+   };
+   
+private:
+
+   static const std::string
+      PARAMETER_TEXT[ReportParamCount - GmatCommandParamCount];
+   static const Gmat::ParameterType
+      PARAMETER_TYPE[ReportParamCount - GmatCommandParamCount];
 };
 
 #endif      // Report_hpp
