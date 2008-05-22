@@ -68,8 +68,10 @@ typedef std::vector<UnsignedInt> UnsignedIntArray;
 typedef std::vector<std::string> StringArray;
 
 class GmatBase;                            // Forward reference for ObjectArray
+class ElementWrapper;
 typedef std::vector<GmatBase*> ObjectArray;
-typedef std::map<std::string, GmatBase*> StringObjectMap;
+typedef std::map<std::string, GmatBase*> ObjectMap;
+typedef std::map<std::string, ElementWrapper*> WrapperMap;
 
 typedef struct geoparms
 {
