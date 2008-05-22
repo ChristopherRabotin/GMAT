@@ -47,7 +47,7 @@
 //#define DEBUG_CREATE_PARAM
 
 //------------------------------------------------------------------------------
-// Validator(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL)
+// Validator(SolarSystem *ss = NULL, ObjectMap *objMap = NULL)
 //------------------------------------------------------------------------------
 /*
  * Default constructor
@@ -56,7 +56,7 @@
  * @param  objMap  The object map to be used for finding object
  */
 //------------------------------------------------------------------------------
-Validator::Validator(SolarSystem *ss, StringObjectMap *objMap)
+Validator::Validator(SolarSystem *ss, ObjectMap *objMap)
 {
    theModerator = Moderator::Instance();
    StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
@@ -92,9 +92,9 @@ void Validator::SetSolarSystem(SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
-// void SetObjectMap(StringObjectMap *objMap)
+// void SetObjectMap(ObjectMap *objMap)
 //------------------------------------------------------------------------------
-void Validator::SetObjectMap(StringObjectMap *objMap)
+void Validator::SetObjectMap(ObjectMap *objMap)
 {
    theObjectMap = objMap;
 }
@@ -264,6 +264,17 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
        cmd->GetTypeName().c_str());
    #endif
    
+   // If objects are not managed, just return true (2008.05.21)
+   if (!manage)
+   {
+      #ifdef DEBUG_VALIDATE_COMMAND
+      MessageInterface::ShowMessage
+         ("In function mode, so just returning true\n");
+      #endif
+      return true;
+   }
+
+   // Now, start creating wrappers
    theErrorList.clear();
    cmd->ClearWrappers();
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();

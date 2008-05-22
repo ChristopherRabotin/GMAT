@@ -38,11 +38,11 @@ class ElementWrapper;
 class GMAT_API Validator
 {
 public:
-   Validator(SolarSystem *ss = NULL, StringObjectMap *objMap = NULL);
+   Validator(SolarSystem *ss = NULL, ObjectMap *objMap = NULL);
    ~Validator();
    
    void SetSolarSystem(SolarSystem *ss);
-   void SetObjectMap(StringObjectMap *objMap);
+   void SetObjectMap(ObjectMap *objMap);
    void SetFunction(Function *func);
    
    bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
@@ -85,7 +85,7 @@ protected:
    Moderator       *theModerator;
    SolarSystem     *theSolarSystem;
    Function        *theFunction;
-   StringObjectMap *theObjectMap;
+   ObjectMap       *theObjectMap;
    StringArray     theParameterList;
    
    /// Error handling data
