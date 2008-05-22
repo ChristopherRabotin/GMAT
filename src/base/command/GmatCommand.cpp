@@ -1877,6 +1877,36 @@ void GmatCommand::ShowCommand(const std::string &prefix,
 
 
 //------------------------------------------------------------------------------
+// virtual void ShowObjectMaps()
+//------------------------------------------------------------------------------
+void GmatCommand::ShowObjectMaps()
+{
+   MessageInterface::ShowMessage
+      ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
+       objectMap, globalObjectMap);
+   
+   if (objectMap)
+   {
+      MessageInterface::ShowMessage("Here is the local object map:\n");
+      for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
+           i != objectMap->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %20s  <%s>\n", i->first.c_str(),
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   if (globalObjectMap)
+   {
+      MessageInterface::ShowMessage("Here is the global object map:\n");
+      for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
+           i != globalObjectMap->end(); ++i)
+         MessageInterface::ShowMessage
+            ("   %20s  <%s>\n", i->first.c_str(),
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+}
+
+
+//------------------------------------------------------------------------------
 // StringArray InterpretPreface()
 //------------------------------------------------------------------------------
 /**
@@ -2065,8 +2095,12 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("GmatCommand::FindObject() objectMap=<%p>, globalObjectMap=<%p>, newName='%s'\n",
-       objectMap, globalObjectMap, newName.c_str());
+      ("GmatCommand::FindObject() entered, name='%s', newName='%s'\n", name.c_str(),
+       newName.c_str());
+   #endif
+   
+   #ifdef DEBUG_FIND_OBJECT
+   ShowObjectMaps();
    #endif
    
    // Check for the object in the Local Object Store (LOS) first

@@ -252,11 +252,12 @@ protected:
    virtual const std::string 
                         BuildMissionSummaryString(const GmatCommand* head = NULL);
 
-   // for Debug (just one copy)
+   // for Debug
    virtual void         ShowCommand(const std::string &prefix,
                                     const std::string &title1, GmatCommand *cmd1,
                                     const std::string &title2 = "",
                                     GmatCommand *cmd2 = NULL);
+   virtual void         ShowObjectMaps();
    
    // for the Parameters in Commands updates
    StringArray          InterpretPreface();
