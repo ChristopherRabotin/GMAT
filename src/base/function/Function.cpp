@@ -475,7 +475,7 @@ void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj)
    automaticObjects.insert(std::make_pair(withName,obj));
 }
 
-StringObjectMap Function::GetAutomaticObjects() const
+ObjectMap Function::GetAutomaticObjects() const
 {
    return automaticObjects;
 }

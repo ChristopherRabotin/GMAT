@@ -64,8 +64,7 @@ public:
    
    // methods to set/get the automatic objects
    virtual void         AddAutomaticObject(const std::string &withName, GmatBase *obj);
-   virtual StringObjectMap  
-                        GetAutomaticObjects() const;
+   virtual ObjectMap    GetAutomaticObjects() const;
    
    // Inherited (GmatBase) methods
    virtual bool         TakeAction(const std::string &action,
