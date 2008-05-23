@@ -257,12 +257,24 @@ bool FunctionManager::Execute()
       MessageInterface::ShowMessage("in FM::Execute - just set Validator's object map\n");
    #endif
    
+   StringArray inNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
+   #ifdef DEBUG_FM_EXECUTE
+      MessageInterface::ShowMessage("in FM::Execute \n");
+      for (unsigned int rr = 0; rr < inNames.size(); rr++)
+         MessageInterface::ShowMessage("  inNames[%d] = %s\n", rr, (inNames.at(rr)).c_str());
+      if (ins.size() == 0) MessageInterface::ShowMessage("NOTE - ins is empty - is it supposed to be?\n");
+      else
+         for (unsigned int qq = 0; qq < ins.size(); qq++)
+            MessageInterface::ShowMessage("  ins[%d] = %s\n", qq, (ins.at(qq)).c_str());
+      if (outs.size() == 0) MessageInterface::ShowMessage("NOTE - outs is empty - is it supposed to be?\n");
+      else
+         for (unsigned int qq = 0; qq < outs.size(); qq++)
+            MessageInterface::ShowMessage("  outs[%d] = %s\n", qq, (outs.at(qq)).c_str());
+   #endif
    if (firstExecution)
    {
       #ifdef DEBUG_FM_EXECUTE
          MessageInterface::ShowMessage("in FM::Execute - firstExecution\n");
-         if (ins.size() == 0) MessageInterface::ShowMessage("NOTE - ins is empty - is it supposed to be?\n");
-         if (outs.size() == 0) MessageInterface::ShowMessage("NOTE - outs is empty - is it supposed to be?\n");
       #endif
       functionObjectStore.clear();
       //inputWrappers.clear();
@@ -285,9 +297,15 @@ bool FunctionManager::Execute()
                throw FunctionException(errMsg);
             }
          }
+         #ifdef DEBUG_FM_EXECUTE
+            MessageInterface::ShowMessage(
+                  "in FM::Execute: object \"%s\" of type \"%s\" found in LOS/GOS \n",
+                  (ins.at(ii)).c_str(), (obj->GetTypeName()).c_str());
+         #endif
          // Clone the object, and insert it into the FOS
          objFOS = obj->Clone();
-         objName = f->GetStringParameter("Input", ii);
+         objName = inNames.at(ii);
+         objFOS->SetName(objName);
          functionObjectStore.insert(std::make_pair(objName,objFOS));
          // create an input wrapper for the inputs
          ElementWrapper *inWrapper = validator.CreateElementWrapper(ins.at(ii), false, false);
@@ -320,7 +338,6 @@ bool FunctionManager::Execute()
    {
       // Need to delete all items in the FOS that are not inputs (so that they can 
       // properly be created again in the FCS 
-      StringArray inNames = f->GetStringArrayParameter(f->GetParameterID("Input"));
       StringArray toDelete;
       bool        isInput = false;
       for (omi = functionObjectStore.begin(); omi != functionObjectStore.end(); ++omi)
@@ -370,6 +387,7 @@ bool FunctionManager::Execute()
                }
                createdOthers[ins.at(ii)] = obj;
                fosObj = obj->Clone();
+               fosObj->SetName(objName);
                delete tmpObj;
                delete tmpObj2;
             }
