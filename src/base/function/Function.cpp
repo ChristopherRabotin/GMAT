@@ -216,9 +216,9 @@ bool Function::Initialize()
    
    GmatCommand *current = fcs;
    std::map<std::string, ElementWrapper *>::iterator wi;
-   StringArray wrapperList = current->GetWrapperObjectNameArray();
-   ElementWrapper *wrapperObj = NULL;
-   unsigned int sz = 0;
+   StringArray     wrapperList = current->GetWrapperObjectNameArray();
+   //ElementWrapper *wrapperObj  = NULL;
+   //unsigned int   sz           = 0;
    
    while (current)
    {
@@ -235,16 +235,18 @@ bool Function::Initialize()
          MessageInterface::ShowMessage("   Now about to send required wrappers to command of type %s\n",
                (current->GetTypeName()).c_str());         
       #endif
-      wrapperList = current->GetWrapperObjectNameArray();
-      sz          = wrapperList.size();
-      for (unsigned int qq = 0; qq < sz; qq++)
-      {
-         if (inputArgMap.find(wrapperList.at(qq)) != inputArgMap.end())
-         {
-            wrapperObj = inputArgMap[wrapperList.at(qq)];
-            current->SetElementWrapper(wrapperObj, wrapperList.at(qq));
-         }
-      }
+      //wrapperList = current->GetWrapperObjectNameArray();
+      //sz          = wrapperList.size();
+      //for (unsigned int qq = 0; qq < sz; qq++)
+      //{
+      //   if (inputArgMap.find(wrapperList.at(qq)) != inputArgMap.end())
+      //   {
+      //      wrapperObj = inputArgMap[wrapperList.at(qq)];
+      //      current->SetElementWrapper(wrapperObj, wrapperList.at(qq));
+       //  }
+      //}
+      if (!validator.ValidateCommand(current, false, true))
+         return false;
       if (!(current->Initialize()))
          return false;
       current = current->GetNext();
