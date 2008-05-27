@@ -168,6 +168,24 @@ const StringArray& ElementWrapper::GetRefObjectNames()
 
 
 //------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * This method retrives a reference object for the wrapper name
+ * 
+ * @param <name> name of the wrapper
+ *
+ * @return reference for success; NULL if name not found
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ElementWrapper::GetRefObject(const std::string &name)
+{
+   return NULL;
+}
+
+
+//------------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
