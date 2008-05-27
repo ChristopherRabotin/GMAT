@@ -196,13 +196,15 @@ bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       MessageInterface::ShowMessage("Create::SetRefObject() entered, with object %s\n",
             name.c_str());
    #endif
-   if (creations.size() > 0)
-      throw CommandException(
-            "Reference object for Create command already set.\n"); 
    if ((!GmatStringUtil::IsBlank(objType)) &&
        !(obj->IsOfType(objType)))
       throw CommandException(
             "Reference object for Create command is not of expected type.\n");
+   if (creations.size() > 0)
+   {
+      throw CommandException(
+            "Reference object for Create command already set.\n"); 
+   }
    creations.push_back(obj);
    return true;
 }
@@ -250,36 +252,36 @@ bool Create::Initialize()
       ex += """ set for Create command.\n";
       throw CommandException(ex);
    }
-   if (creations.size() > 1)
-   {
-      std::string ex = "Too many reference objects of type """ + objType;
-      ex += """ set for Create command.\n";
-      throw CommandException(ex);
-   }
+   // set up the vector of objects if it has not been done already 
+   // (i.e. Initialize may be called more than once )
+   
    // remove the array indices from the names if necessary
-   Integer numNames = (Integer) objectNames.size();
-   if (objType == "Array")
+   if ((Integer) creations.size() == 1)
    {
-      SetArrayInfo();
-      numNames = (Integer) arrayNames.size();
-      creations.at(0)->SetName(arrayNames.at(0));
-      ((Array*) (creations.at(0)))->SetSize(rows.at(0), columns.at(0));
-      // clone the other needed objects from the reference one
-      for (Integer jj = 1; jj < numNames; jj++)
+      Integer numNames = (Integer) objectNames.size();
+      if (objType == "Array")
       {
-         creations.push_back((creations.at(0))->Clone());
-         creations.at(jj)->SetName(arrayNames.at(jj));
-         ((Array*) (creations.at(jj)))->SetSize(rows.at(jj), columns.at(jj));
+         SetArrayInfo();
+         numNames = (Integer) arrayNames.size();
+         creations.at(0)->SetName(arrayNames.at(0));
+         ((Array*) (creations.at(0)))->SetSize(rows.at(0), columns.at(0));
+         // clone the other needed objects from the reference one
+         for (Integer jj = 1; jj < numNames; jj++)
+         {
+            creations.push_back((creations.at(0))->Clone());
+            creations.at(jj)->SetName(arrayNames.at(jj));
+            ((Array*) (creations.at(jj)))->SetSize(rows.at(jj), columns.at(jj));
+         }
       }
-   }
-   else
-   {
-      creations.at(0)->SetName(objectNames.at(0));
-      // clone the other needed objects from the reference one
-      for (Integer jj = 1; jj < numNames; jj++)
+      else
       {
-         creations.push_back((creations.at(0))->Clone());
-         creations.at(jj)->SetName(objectNames.at(jj));
+         creations.at(0)->SetName(objectNames.at(0));
+         // clone the other needed objects from the reference one
+         for (Integer jj = 1; jj < numNames; jj++)
+         {
+            creations.push_back((creations.at(0))->Clone());
+            creations.at(jj)->SetName(objectNames.at(jj));
+         }
       }
    }
    #ifdef DEBUG_CREATE
