@@ -198,13 +198,15 @@ bool Function::Initialize()
    #endif
    if (!fcs) return false;
    // Initialize the Validator - I think I need to do this each time - or do I?
+   validator.SetFunction(this);
    validator.SetSolarSystem(solarSys);
    std::map<std::string, GmatBase *>::iterator omi;
-   for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
-      store.insert(std::make_pair(omi->first, omi->second));
-   for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-      store.insert(std::make_pair(omi->first, omi->second));
-   validator.SetObjectMap(&store);
+   //loj: moved this block inside the while loop
+//    for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+//       store.insert(std::make_pair(omi->first, omi->second));
+//    for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+//       store.insert(std::make_pair(omi->first, omi->second));
+//    validator.SetObjectMap(&store);
    
    // add automatic objects to the FOS
    for (omi = automaticObjects.begin(); omi != automaticObjects.end(); ++omi)
@@ -243,8 +245,19 @@ bool Function::Initialize()
       //   {
       //      wrapperObj = inputArgMap[wrapperList.at(qq)];
       //      current->SetElementWrapper(wrapperObj, wrapperList.at(qq));
-       //  }
+      //   }
       //}
+         
+      // Set object map to Validator
+      store.clear();
+      for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
+         store.insert(std::make_pair(omi->first, omi->second));
+      for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
+         store.insert(std::make_pair(omi->first, omi->second));
+      validator.SetObjectMap(&store);
+      
+      // Let's try to ValidateCommand here, this will validate the comand
+      // and create wrappers also
       if (!validator.ValidateCommand(current, false, true))
          return false;
       if (!(current->Initialize()))
