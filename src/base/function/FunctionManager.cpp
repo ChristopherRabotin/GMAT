@@ -307,12 +307,16 @@ bool FunctionManager::Execute()
          objName = inNames.at(ii);
          objFOS->SetName(objName);
          functionObjectStore.insert(std::make_pair(objName,objFOS));
-         // create an input wrapper for the inputs
+         #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
+            MessageInterface::ShowMessage("Adding object %s to the FOS\n", objName.c_str());
+         #endif // -------------------------------------------------------------- end debug ---
+         // create an element wrapper for the input
          ElementWrapper *inWrapper = validator.CreateElementWrapper(ins.at(ii), false, false);
          inWrapper->SetRefObject(objFOS);
          inputWrappers.insert(std::make_pair(objName, inWrapper));
          #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
-            MessageInterface::ShowMessage("Adding object %s to the FOS\n", objName.c_str());
+            MessageInterface::ShowMessage("Created element wrapper of type %d for \"%s\"",
+                  inWrapper->GetWrapperType(), (ins.at(ii)).c_str());
          #endif // -------------------------------------------------------------- end debug ---
       }
       // Outputs cannot be numeric or string literals or array elements, etc.
@@ -609,17 +613,20 @@ void FunctionManager::Finalize()
 
 
 //------------------------------------------------------------------------------
-// GmatBase* FunctionManager::FindObject(const std::string &name)
+// GmatBase* FunctionManager::FindObject(const std::string &name, bool arrayElementsAllowed = false)
 //------------------------------------------------------------------------------
-GmatBase* FunctionManager::FindObject(const std::string &name)
+GmatBase* FunctionManager::FindObject(const std::string &name, bool arrayElementsAllowed)
 {
    std::string newName = name;
    
    // Ignore array indexing of Array
    std::string::size_type index = name.find('(');
    if (index != name.npos)
-      newName = name.substr(0, index);
+   {
+      if (!arrayElementsAllowed) return NULL; // we deal with array elements separately
+      else                       newName = name.substr(0, index);
    // Check for the object in the Local Object Store (LOS) first
+   }
    if (localObjectStore->find(newName) == localObjectStore->end())
    {
      // If not found in the LOS, check the Global Object Store (GOS)
@@ -635,10 +642,9 @@ GmatBase* FunctionManager::FindObject(const std::string &name)
 GmatBase* FunctionManager::CreateObject(const std::string &fromString)
 {
    
-   GmatBase    *obj = NULL;
+   GmatBase    *obj = NULL, *refObj;
    Real        rval;
    std::string sval;
-   Integer     ival;
    Variable    *v = NULL;
    if (GmatStringUtil::IsBlank(fromString)) return obj;
    // determine the name of the next object to be created (if needed)
@@ -684,12 +690,29 @@ GmatBase* FunctionManager::CreateObject(const std::string &fromString)
                obj = (GmatBase*) array;
                break;
             }
+            case Gmat::ARRAY_ELEMENT :
+            {
+               // get the reference object first ...
+               refObj = FindObject(fromString, true);
+               if (!refObj)
+               {
+                  std::string errMsg = "FunctionManager: Error getting reference object for array element ";
+                  errMsg += fromString + "\n";
+                  throw FunctionException(errMsg);
+               }
+               ew->SetRefObject(refObj);
+               rval = ew->EvaluateReal(); 
+               //v = new Variable(newName);
+               v = new Variable(str);
+               v->SetReal(rval);
+               obj = (GmatBase*) v;
+               break;
+            }
             case Gmat::NUMBER :
             case Gmat::VARIABLE :
-            case Gmat::ARRAY_ELEMENT :
             case Gmat::INTEGER :       // what is this anyway?
             {
-               ival = (Integer)ew->EvaluateReal(); //loj: to remove compiler warning
+               rval = ew->EvaluateReal(); 
                //v = new Variable(newName);
                v = new Variable(str);
                v->SetReal(rval);

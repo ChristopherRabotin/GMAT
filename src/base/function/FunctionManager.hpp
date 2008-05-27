@@ -124,7 +124,7 @@ protected:
    
    //virtual bool         BuildFunctionObjectStore();
    //virtual bool         RefreshFunctionObjectStore();
-   GmatBase* FindObject(const std::string &name);
+   GmatBase* FindObject(const std::string &name, bool arrayElementsAllowed = false);
    GmatBase* CreateObject(const std::string &fromString);
    
 };
