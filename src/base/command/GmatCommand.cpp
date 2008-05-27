@@ -1887,20 +1887,20 @@ void GmatCommand::ShowObjectMaps()
    
    if (objectMap)
    {
-      MessageInterface::ShowMessage("Here is the local object map:\n");
+      MessageInterface::ShowMessage("Here is the Command local object map:\n");
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %20s  <%s>\n", i->first.c_str(),
+            ("   %30s  <%s>\n", i->first.c_str(),
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
    if (globalObjectMap)
    {
-      MessageInterface::ShowMessage("Here is the global object map:\n");
+      MessageInterface::ShowMessage("Here is the Command global object map:\n");
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %20s  <%s>\n", i->first.c_str(),
+            ("   %30s  <%s>\n", i->first.c_str(),
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
 }
@@ -2143,12 +2143,6 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
       for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
       {
          std::string name = *j;
-         //if (objectMap->find(name) == objectMap->end())
-         //{            
-         //   throw CommandException(
-         //      "GmatCommand::SetWrapperReferences failed to find object named \"" + 
-         //      name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
-         //}
          GmatBase *obj = FindObject(name);
          if (obj == NULL)
          {
@@ -2156,13 +2150,11 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
                   "GmatCommand::SetWrapperReferences failed to find object named \"" + 
                   name + "\" in: \n   \"" + GetGeneratingString(Gmat::NO_COMMENTS) + "\"\n");
          }
-
-         //if (wrapper.SetRefObject((*objectMap)[name]) == false)
          if (wrapper.SetRefObject(obj) == false)
          {
-            MessageInterface::ShowMessage(
-               "GmatCommand::SetWrapperReferences failed to set object named \"%s\"\n", 
-               name.c_str());
+            MessageInterface::ShowMessage
+               ("GmatCommand::SetWrapperReferences failed to set object named \"%s\", "
+                "name in the map is \"%s\"\n", name.c_str(), obj->GetName().c_str());
             return false;
          }
          #ifdef DEBUG_WRAPPER_CODE
