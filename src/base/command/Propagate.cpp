@@ -1522,6 +1522,17 @@ bool Propagate::SetElementWrapper(ElementWrapper *toWrapper,
          MessageInterface::ShowMessage
             ("   Found wrapper name \"%s\" in stopNames\n", withName.c_str());
          #endif
+         
+         for (UnsignedInt j=0; j<stopWhen.size(); j++)
+         {
+            #ifdef DEBUG_WRAPPERS   
+            MessageInterface::ShowMessage
+               ("   stopWhen[j]->GetName()='%s'\n", stopWhen[j]->GetName().c_str());
+            #endif
+            if (stopWhen[j]->GetName() == ("StopOn" + withName))
+               stopWhen[j]->SetStopParameter((Parameter*)toWrapper->GetRefObject());
+         }
+         
          if (stopWrappers.at(i) != NULL)
          {
             ew = stopWrappers.at(i);
