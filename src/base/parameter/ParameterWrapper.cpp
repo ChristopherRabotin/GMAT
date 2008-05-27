@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ParameterWrapper
 //------------------------------------------------------------------------------
@@ -113,6 +113,24 @@ ParameterWrapper::~ParameterWrapper()
 Gmat::ParameterType ParameterWrapper::GetDataType() const
 {
    return Gmat::REAL_TYPE;
+}
+
+//------------------------------------------------------------------------------
+//  GmatBase* GetRefObject(const std::string &name = "")
+//------------------------------------------------------------------------------
+/**
+ * This method retrives a reference object for the wrapper name
+ * 
+ * @param <name> name of the wrapper
+ *
+ * @return reference for success; NULL if name not found
+ *
+ */
+//------------------------------------------------------------------------------
+GmatBase* ParameterWrapper::GetRefObject(const std::string &name)
+{
+   // We don't need to check for the name since only one Parameter
+   return (GmatBase*)param;
 }
 
 //---------------------------------------------------------------------------
