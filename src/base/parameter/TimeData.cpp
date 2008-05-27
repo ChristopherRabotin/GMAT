@@ -354,7 +354,8 @@ void TimeData::InitializeRefObjects()
          ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
       #endif
       
-      throw ParameterException("Cannot find Spacecraft object");
+      throw ParameterException
+         ("TimeData::InitializeRefObjects() Cannot find Spacecraft object\n");
    }
    else
    {
