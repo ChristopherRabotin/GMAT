@@ -45,6 +45,10 @@
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_HANDLE_ERROR
 //#define DEBUG_CREATE_PARAM
+//#define DEBUG_OBJECT_MAP
+//#define DEBUG_FUNCTION
+//#define DEBUG_AUTO_PARAM
+//#define DEBUG_FIND_OBJECT
 
 //------------------------------------------------------------------------------
 // Validator(SolarSystem *ss = NULL, ObjectMap *objMap = NULL)
@@ -63,6 +67,7 @@ Validator::Validator(SolarSystem *ss, ObjectMap *objMap)
    copy(parms.begin(), parms.end(), back_inserter(theParameterList));
    
    theSolarSystem = NULL;
+   theFunction = NULL;
    theObjectMap = NULL;
    continueOnError = true;
    
@@ -96,7 +101,25 @@ void Validator::SetSolarSystem(SolarSystem *ss)
 //------------------------------------------------------------------------------
 void Validator::SetObjectMap(ObjectMap *objMap)
 {
-   theObjectMap = objMap;
+   if (objMap != NULL)
+   {
+      #ifdef DEBUG_OBJECT_MAP
+      if (theFunction)
+      {
+         MessageInterface::ShowMessage("Here is the current Validator object map:\n");
+         for (std::map<std::string, GmatBase *>::iterator i = objMap->begin();
+              i != objMap->end(); ++i)
+         {
+            MessageInterface::ShowMessage
+               ("   %30s  <%s>\n", i->first.c_str(),
+                i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+         }
+      }
+      #endif
+      theObjectMap = objMap;
+      // Set object map to use for the Moderator
+      theModerator->SetObjectMap(objMap);
+   }
 }
 
 
@@ -105,6 +128,11 @@ void Validator::SetObjectMap(ObjectMap *objMap)
 //------------------------------------------------------------------------------
 void Validator::SetFunction(Function *func)
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("Validator::SetFunction() function=<%p><%s>\n", func, func->GetName().c_str());
+   #endif
+   
    theFunction = func;
 }
 
@@ -251,7 +279,11 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
 //------------------------------------------------------------------------------
 bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
 {
+   if (cmd == NULL)
+      return false;
+   
    continueOnError = contOnError;
+   std::string typeName = cmd->GetTypeName();
    
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
@@ -268,12 +300,11 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
    if (!manage)
    {
       #ifdef DEBUG_VALIDATE_COMMAND
-      MessageInterface::ShowMessage
-         ("In function mode, so just returning true\n");
+      MessageInterface::ShowMessage("In function mode, so just returning true\n");
       #endif
       return true;
    }
-
+   
    // Now, start creating wrappers
    theErrorList.clear();
    cmd->ClearWrappers();
@@ -305,6 +336,12 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
          if (ew == NULL)
             return false;
          
+         #ifdef DEBUG_WRAPPERS
+         MessageInterface::ShowMessage
+            ("   Setting ElementWrapper for '%s' to '%s'\n",
+             ew->GetDescription().c_str(), typeName.c_str());
+         #endif
+         
          if (cmd->SetElementWrapper(ew, lhs) == false)
          {
             theErrorMsg = "Undefined object \"" + lhs + "\" found in command \"" +
@@ -334,6 +371,12 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
                else
                   ew = CreateElementWrapper(name, false, manage);
                
+               #ifdef DEBUG_WRAPPERS
+               MessageInterface::ShowMessage
+                  ("   Setting ElementWrapper for '%s' to '%s'\n",
+                   ew->GetDescription().c_str(), typeName.c_str());
+               #endif
+               
                if (cmd->SetElementWrapper(ew, name) == false)
                {
                   theErrorMsg = "Undefined object \"" + name + "\" found in Math Assignment";
@@ -359,6 +402,12 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
          try
          {
             ElementWrapper *ew = CreateElementWrapper(*i, false, manage);
+            
+            #ifdef DEBUG_WRAPPERS
+            MessageInterface::ShowMessage
+               ("   Setting ElementWrapper for '%s' to '%s'\n",
+                ew->GetDescription().c_str(), typeName.c_str());
+            #endif
             
             if (cmd->SetElementWrapper(ew, *i) == false)
             {
@@ -427,11 +476,12 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    if (GmatStringUtil::IsEnclosedWith(descTrimmed, "'"))
    {
       ew = new StringWrapper();
+      ew->SetDescription(descTrimmed);
       itsType = Gmat::STRING;
       
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created a StringWrapper for \"%s\"\n",
+         ("In Validator, it's enclosed with quotes so created a StringWrapper for \"%s\"\n",
           descTrimmed.c_str(), "\"\n");
       #endif
    }
@@ -439,6 +489,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    else if (GmatStringUtil::ToReal(descTrimmed,rval))
    {
       ew = new NumberWrapper();
+      ew->SetDescription(descTrimmed);
       #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage(
             "In Validator, created a NumberWrapper for \"%s\"\n",
@@ -478,6 +529,8 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
             else
             {
                ew = new ArrayElementWrapper();
+               ew->SetDescription(descTrimmed);
+               ew->SetRefObject(p);
                itsType = Gmat::ARRAY_ELEMENT;
                #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage(
@@ -501,7 +554,7 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
                      "In Interpreter(1), about to create a ParameterWrapper for \"%s\"\n",
                      descTrimmed.c_str(), "\"\n");
                #endif
-               CreateParameterWrapper(param, &ew, itsType);
+               CreateParameterWrapper(param, descTrimmed, &ew, itsType);
             }
             else
             {
@@ -522,8 +575,11 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
    
    if (ew)
    {
+      // Now SetDescription() and SetRefObject() is called when
+      //     wrapper is created (loj: 2008.05.23)
+      
       // set the description string; this will also setup the wrapper
-      ew->SetDescription(desc);
+      //ew->SetDescription(desc);
       //ew->SetDescription(descTrimmed); // or do I want this?
       // if it's an ArrayElement, set up the row and column wrappers
       if (itsType == Gmat::ARRAY_ELEMENT)
@@ -577,16 +633,17 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
              descTrimmed.c_str(), "\"\n");
          #endif
          
-         CreateParameterWrapper(param, &ew, itsType);
+         CreateParameterWrapper(param, descTrimmed, &ew, itsType);
       }
       else // there is an error
       {
          ew = new StringWrapper();
+         ew->SetDescription(descTrimmed);
          itsType = Gmat::STRING;
                   
          #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage
-            ("In Validator, created a StringWrapper for \"%s\"\n",
+            ("In Validator, it is not a Parameter so created a StringWrapper for \"%s\"\n",
              descTrimmed.c_str(), "\"\n");
          #endif
       }
@@ -605,7 +662,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
                 descTrimmed.c_str(), "\"\n");
             #endif
             
-            CreateParameterWrapper(param, &ew, itsType);
+            CreateParameterWrapper(param, descTrimmed, &ew, itsType);
          }
          else // there is an error
          {
@@ -634,7 +691,7 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
                    descTrimmed.c_str(), "\"\n");
                #endif
                
-               CreateParameterWrapper(param, &ew, itsType);
+               CreateParameterWrapper(param, descTrimmed, &ew, itsType);
             }
             else // there is an error
             {
@@ -646,6 +703,8 @@ ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
          if (isValidProperty)
          {
             ew = new ObjectPropertyWrapper();
+            ew->SetDescription(descTrimmed);
+            ew->SetRefObject(theObj);
             itsType = Gmat::OBJECT_PROPERTY;
             
             #ifdef DEBUG_WRAPPERS
@@ -674,6 +733,8 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
    if ( (p) && (p->IsOfType("Variable")) )
    {
       ew = new VariableWrapper();
+      ew->SetDescription(descTrimmed);
+      ew->SetRefObject(p);
       itsType = Gmat::VARIABLE;
       
       #ifdef DEBUG_WRAPPERS
@@ -685,6 +746,8 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
    else if ( (p) && p->IsOfType("Array") )
    {
       ew = new ArrayWrapper();
+      ew->SetDescription(descTrimmed);
+      ew->SetRefObject(p);
       itsType = Gmat::ARRAY;
       
       #ifdef DEBUG_WRAPPERS
@@ -696,11 +759,13 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
    else if ( (p) && p->IsOfType("String") )
    {
       ew = new StringObjectWrapper();
+      ew->SetDescription(descTrimmed);
+      ew->SetRefObject(p);
       itsType = Gmat::STRING_OBJECT;
       
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created a StringObjectWrapper for \"%s\"\n",
+         ("In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
           descTrimmed.c_str(), "\"\n");
       #endif
    }
@@ -712,7 +777,7 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
           descTrimmed.c_str(), "\"\n");
       #endif
       
-      CreateParameterWrapper(p, &ew, itsType);
+      CreateParameterWrapper(p, descTrimmed, &ew, itsType);
    }
    else
    {
@@ -722,6 +787,8 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
       if (obj != NULL)
       {
          ew = new ObjectWrapper();
+         ew->SetDescription(descTrimmed);
+         ew->SetRefObject(obj);
          itsType = Gmat::OBJECT;
          
          #ifdef DEBUG_WRAPPERS
@@ -736,6 +803,7 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
          if (GmatStringUtil::ToBoolean(descTrimmed, bVal))
          {
             ew = new BooleanWrapper();
+            ew->SetDescription(descTrimmed);
             itsType = Gmat::BOOLEAN;
             
             #ifdef DEBUG_WRAPPERS
@@ -748,6 +816,7 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
                   descTrimmed == "on" || descTrimmed == "off")
          {
             ew = new OnOffWrapper();
+            ew->SetDescription(descTrimmed);
             itsType = Gmat::ON_OFF;
             
             #ifdef DEBUG_WRAPPERS
@@ -759,11 +828,12 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
          else
          {
             ew = new StringWrapper();
+            ew->SetDescription(descTrimmed);
             itsType = Gmat::STRING;
             
             #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Validator, created a StringWrapper for \"%s\"\n",
+               ("In Validator, it's not an On/Off type so created a StringWrapper for \"%s\"\n",
                 descTrimmed.c_str(), "\"\n");
             #endif
          }
@@ -787,12 +857,12 @@ ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
  * @return  object pointer found
  */
 //------------------------------------------------------------------------------
-GmatBase* Validator::FindObject(const std::string &name, 
-                                            const std::string &ofType)
+GmatBase* Validator::FindObject(const std::string &name, const std::string &ofType)
 {
    #ifdef DEBUG_FIND_OBJECT
    MessageInterface::ShowMessage
-      ("Validator::FindObject() entered: name=%s\n", name.c_str());
+      ("Validator::FindObject() entered: name=<%s>, type=<%s>\n",
+       name.c_str(), ofType.c_str());
    #endif
    
    if (theObjectMap == NULL)
@@ -824,8 +894,14 @@ GmatBase* Validator::FindObject(const std::string &name,
    
    // Find object from the object map
    if (theObjectMap->find(newName) != theObjectMap->end())
+   {
+      #ifdef DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("   name of map obj=<%s>\n", (*theObjectMap)[newName]->GetName().c_str());
+      #endif
       if ((*theObjectMap)[newName]->GetName() == newName)
          obj = (*theObjectMap)[newName];
+   }
    
    // try SolarSystem if obj is still NULL
    if (obj == NULL)
@@ -852,8 +928,25 @@ GmatBase* Validator::FindObject(const std::string &name,
 Parameter* Validator::GetParameter(const std::string name)
 {
    GmatBase *obj = FindObject(name);
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage
+      ("Validator::GetParameter() type of <%s> is <%s>\n", name.c_str(),
+       (obj ? obj->GetTypeName().c_str() : "Unknown obj"));
+   #endif
+   
    if (obj && obj->GetType() == Gmat::PARAMETER)
+   {
+      #ifdef DEBUG_WRAPPERS
+      MessageInterface::ShowMessage("Validator::GetParameter() returning <%p>\n", obj);
+      #endif
+      
       return (Parameter*)obj;
+   }
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage("Validator::GetParameter() returning NULL\n");
+   #endif
    
    return NULL;
 }
@@ -876,8 +969,7 @@ Parameter* Validator::GetParameter(const std::string name)
  *
  */
 //------------------------------------------------------------------------------
-Parameter* Validator::CreateSystemParameter(const std::string &str,
-                                            bool manage)
+Parameter* Validator::CreateSystemParameter(const std::string &str, bool manage)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
@@ -1064,25 +1156,29 @@ AxisSystem* Validator::CreateAxisSystem(std::string type, GmatBase *owner)
  * @param <itsType> outpout wrapper type
  */
 //------------------------------------------------------------------------------
-void Validator::CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
-                                            Gmat::WrapperDataType &itsType)
+void Validator::CreateParameterWrapper(Parameter *param, const std::string &desc,
+                                       ElementWrapper **ew, Gmat::WrapperDataType &itsType)
 {
    *ew = NULL;
    
    if (param->IsOfType("String"))
    {
       *ew = new StringObjectWrapper();
+      (*ew)->SetDescription(desc);
+      (*ew)->SetRefObject(param);
       itsType = Gmat::STRING_OBJECT;
       
       #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created a StringObjectWrapper for \"%s\"\n",
+         ("In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
           param->GetName().c_str(), "\"\n");
       #endif
    }
    else
    {
       *ew = new ParameterWrapper();
+      (*ew)->SetDescription(desc);
+      (*ew)->SetRefObject(param);
       itsType = Gmat::PARAMETER_OBJECT;
       
       #ifdef DEBUG_WRAPPERS

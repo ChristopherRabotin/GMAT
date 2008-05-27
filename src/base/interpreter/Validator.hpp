@@ -67,8 +67,8 @@ public:
                                     bool manage = true);
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
    
-   void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
-                               Gmat::WrapperDataType &itsType);
+   void CreateParameterWrapper(Parameter *param, const std::string &desc,
+                               ElementWrapper **ew, Gmat::WrapperDataType &itsType);
    ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed,
                                         bool manage = true);
    ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed,
