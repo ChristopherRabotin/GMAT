@@ -588,11 +588,11 @@ bool NonlinearConstraint::InterpretAction()
       throw CommandException(
            "Missing parentheses, or unexpected characters found, around logical expression argument to NonlinearConstraint command.");
    if (!GmatStringUtil::IsBracketBalanced(cc, "()"))
-      throw CommandException("Parentheses unbalanced in Minimize command.");
+      throw CommandException("Parentheses unbalanced in NonlinearConstraint command.");
    // @todo - if tolerance allowed later, will need to not check for braces here ...
    if ((cc.find('[') != cc.npos) || (cc.find(']') != cc.npos) ||
        (cc.find('{') != cc.npos) || (cc.find('}') != cc.npos) )
-      throw CommandException("Minimize command may not contain brackets or braces.");
+      throw CommandException("NonlinearConstraint command may not contain brackets or braces.");
    
    std::string noSpaces2     = GmatStringUtil::RemoveAll(cc,' ');
    //std::string noSpaces2     = GmatStringUtil::RemoveAll(currentChunks[1],' ');
