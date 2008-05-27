@@ -71,6 +71,10 @@
 //#define DEBUG_CONFIG 1
 //#define DEBUG_CREATE_VAR 1
 //#define DEBUG_GMAT_FUNCTION 1
+//#define DEBUG_OBJECT_MAP
+//#define DEBUG_PARAMETER_REF_OBJ 1
+//#define DEBUG_FIND_OBJECT 2
+
 
 //#define __CREATE_DEFAULT_BC__
 //#define __SHOW_FINAL_STATE__
@@ -238,6 +242,9 @@ bool Moderator::Initialize(bool fromGui)
       MessageInterface::ShowMessage
          (".....created  (%p)%s\n", commands[0], commands[0]->GetTypeName().c_str());
       #endif
+      
+      // set objectMapInUse (loj: 2008.05.23)
+      objectMapInUse = theConfigManager->GetObjectMap();
       
       if (fromGui)
          CreateDefaultMission();
@@ -487,6 +494,114 @@ void Moderator::SetScriptInterpreter(ScriptInterpreter *scriptInterp)
    if (theScriptInterpreter == NULL)
       theScriptInterpreter = scriptInterp;
 }
+
+
+//----- object finding
+//------------------------------------------------------------------------------
+// void SetObjectMap(ObjectMap *objMap)
+//------------------------------------------------------------------------------
+void Moderator::SetObjectMap(ObjectMap *objMap)
+{
+   if (objMap != NULL)
+   {
+      #ifdef DEBUG_OBJECT_MAP
+      MessageInterface::ShowMessage("Here is the current Moderator object map:\n");
+      for (std::map<std::string, GmatBase *>::iterator i = objMap->begin();
+           i != objMap->end(); ++i)
+      {
+         MessageInterface::ShowMessage
+            ("   %30s  <%s>\n", i->first.c_str(),
+             i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+      }
+      #endif
+      
+      objectMapInUse = objMap;
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// GmatBase* FindObject(const std::string &name)
+//------------------------------------------------------------------------------
+/*
+ * Finds object from the objectMapInUse by name
+ */
+//------------------------------------------------------------------------------
+GmatBase* Moderator::FindObject(const std::string &name)
+{
+   #if DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Moderator::FindObject() entered: name=<%s>, objectMapInUse=<%p>\n",
+       name.c_str(), objectMapInUse);
+   #endif
+   
+   if (name == "")
+   {
+      #if DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("Moderator::FindObject() name is blank, so just returning NULL\n");
+      #endif
+      return NULL;
+   }
+   
+   if (objectMapInUse == NULL)
+   {
+      #if DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage
+         ("Moderator::FindObject() objectMapInUse is NULL, so just returning NULL\n");
+      #endif
+      return NULL;
+   }
+   
+   // Ignore array indexing of Array
+   std::string newName = name;
+   std::string::size_type index = name.find_first_of("([");
+   if (index != name.npos)
+   {
+      newName = name.substr(0, index);
+      
+      #if DEBUG_FIND_OBJECT
+      MessageInterface::ShowMessage("   newName=%s\n", newName.c_str());
+      #endif
+   }
+   
+   #if DEBUG_FIND_OBJECT > 1
+   MessageInterface::ShowMessage("Here is the current Moderator object map:\n");
+   for (std::map<std::string, GmatBase *>::iterator i = objectMapInUse->begin();
+        i != objectMapInUse->end(); ++i)
+   {
+      MessageInterface::ShowMessage
+         ("   %30s  <%s>\n", i->first.c_str(),
+          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   }
+   #endif
+   
+   GmatBase *obj = NULL;
+   
+   if (objectMapInUse->find(newName) != objectMapInUse->end())
+      obj = (*objectMapInUse)[newName];
+   
+   // If object not found, try SolarSystem
+   if (obj == NULL)
+   {
+      SolarSystem *ss = NULL;
+      ObjectMap::iterator pos = objectMapInUse->find("SolarSystem");
+      if (pos != objectMapInUse->end())
+         ss = (SolarSystem*)pos->second;
+      
+      if (ss)
+         obj = (GmatBase*)(ss->GetBody(newName));
+   }
+   
+   #if DEBUG_FIND_OBJECT
+   MessageInterface::ShowMessage
+      ("Moderator::FindObject() returning <%p><%s>\n", obj,
+       (obj ? obj->GetTypeName().c_str() : "NULL"));
+   #endif
+   
+   return obj;
+}
+
 
 //----- factory
 //------------------------------------------------------------------------------
@@ -1747,6 +1862,7 @@ Parameter* Moderator::CreateParameter(const std::string &type,
       ("   cfg param = <%p><%s>\n", param, param ? param->GetName().c_str() : "NULL");
    #endif
    
+   // if Parameter was created during GmatFunction parsing, just set reference object
    if (param != NULL && manage)
    {
       #if DEBUG_CREATE_PARAMETER
@@ -1758,6 +1874,8 @@ Parameter* Moderator::CreateParameter(const std::string &type,
           param);
       #endif
       
+      // set Parameter reference object
+      SetParameterRefObject(param, type, name, ownerName, depName);
       return param;
    }
    
@@ -1780,100 +1898,10 @@ Parameter* Moderator::CreateParameter(const std::string &type,
    // We don't know the owner type the parameter before create,
    // so validate owner type after create.
    if (ownerName != "" && manage)
-   {
-      GmatBase *obj = GetConfiguredObject(ownerName);
-      if (obj)
-      {
-         #if DEBUG_CREATE_PARAMETER
-         MessageInterface::ShowMessage
-            ("   Found owner object, name='%s', addr=<%p>\n", obj->GetName().c_str(), obj);
-         #endif
-         
-         if (param->GetOwnerType() != obj->GetType())
-         {
-            std::string paramOwnerType =
-               GmatBase::GetObjectTypeString(param->GetOwnerType());
-            delete param;
-            param = NULL;
-            
-            if (paramOwnerType == "")
-               throw GmatBaseException
-                  ("Cannot find the object type which has \"" + type +
-                   "\" as a Parameter type");
-            else
-               throw GmatBaseException
-                  ("Parameter type: " + type + " should be property of " +
-                   paramOwnerType);
-         }
-      }
-   }
+      CheckParameterType(param, type, ownerName);
    
-   // If type is Variable, don't set expression
-   if (type != "Variable")
-      param->SetStringParameter("Expression", name);
-   
-   // Set parameter owner and dependent object
-   if (ownerName != "")
-   {
-      param->SetRefObjectName(param->GetOwnerType(), ownerName);
-      param->AddRefObject(GetConfiguredObject(ownerName));
-   }
-   
-   // Set dependent object name
-   if (depName != "")
-      param->SetStringParameter("DepObject", depName);
-   
-   // Set SolarSystem
-   param->SetSolarSystem(theSolarSystemInUse);
-   param->SetInternalCoordSystem(theInternalCoordSystem);
-   
-   if (depName != "")
-      if (param->NeedCoordSystem())
-         param->AddRefObject(GetConfiguredObject(depName));
-   
-   // create parameter dependent coordinate system
-   if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
-       type == "MHA" || type == "LST")
-   {
-      // need body-fixed CS
-      StringTokenizer st(name, ".");
-      StringArray tokens = st.GetAllTokens();
-      
-      if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
-      {
-         //MessageInterface::ShowMessage("==> Create EarthFixed\n");
-         
-         // default EarthFixed
-         CreateCoordinateSystem("EarthFixed");
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
-      }
-      else if (tokens.size() == 3)
-      {
-         std::string origin = tokens[1];
-         std::string axisName = origin + "Fixed";
-         
-         //MessageInterface::ShowMessage("==> Create %s\n", axisName.c_str());
-         
-         CoordinateSystem *cs = CreateCoordinateSystem(axisName);
-         
-         // create BodyFixedAxis with origin
-         AxisSystem *axis = CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
-         cs->SetStringParameter("Origin", origin);
-         cs->SetRefObject(GetConfiguredObject(origin), Gmat::SPACE_POINT, origin);
-         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
-         cs->SetStringParameter("J2000Body", "Earth");
-         cs->SetRefObject(GetConfiguredObject("Earth"), Gmat::SPACE_POINT, "Earth");
-         cs->SetSolarSystem(theSolarSystemInUse);
-         cs->Initialize();
-         
-         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
-      }
-      else
-      {
-         MessageInterface::ShowMessage("===> Invalid parameter name: %s\n",
-                                       name.c_str());
-      }
-   }
+   // set Parameter reference object
+   SetParameterRefObject(param, type, name, ownerName, depName);
    
    // Manage it if manage flag is true and it is a named parameter
    try
@@ -1922,10 +1950,18 @@ Parameter* Moderator::CreateParameter(const std::string &type,
 //------------------------------------------------------------------------------
 Parameter* Moderator::GetParameter(const std::string &name)
 {
-   if (name == "")
-      return NULL;
-   else
-      return theConfigManager->GetParameter(name);
+   Parameter *obj = NULL;
+   
+   if (name != "")
+   {
+      // find Parameter from the current object map in use (loj: 2008.05.23)
+      //return theConfigManager->GetParameter(name);
+      GmatBase* obj = FindObject(name);
+      if (obj != NULL)
+         return (Parameter*)obj;
+   }
+   
+   return obj;
 }
 
 // ForceModel
@@ -2730,14 +2766,15 @@ GmatCommand* Moderator::InterpretGmatFunction(Function *funct, ObjectMap *objMap
    // If input objMap is NULL, use configured objects,
    // use input object map otherwise
    
-   ObjectMap *objMapToUse = objMap;
+   //ObjectMap *objMapToUse = objMap;
+   objectMapInUse = objMap;
    
    if (objMap == NULL)
-      objMapToUse = theConfigManager->GetObjectMap();
+      objectMapInUse = theConfigManager->GetObjectMap();
    
-   theScriptInterpreter->SetObjectMap(objMapToUse, true);
+   theScriptInterpreter->SetObjectMap(objectMapInUse, true);
    theScriptInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
-   theGuiInterpreter->SetObjectMap(objMapToUse, true);   
+   theGuiInterpreter->SetObjectMap(objectMapInUse, true);   
    theGuiInterpreter->SetSolarSystemInUse(theSolarSystemInUse);
    
    GmatCommand *cmd = NULL;
@@ -4663,6 +4700,141 @@ void Moderator::CreateDefaultMission()
 }
 
 
+// Parameter reference object setting
+//------------------------------------------------------------------------------
+// void CheckParameterType(Parameter *param, const std::string &type,
+//                         const std::string &ownerName)
+//------------------------------------------------------------------------------
+void Moderator::CheckParameterType(Parameter *param, const std::string &type,
+                                   const std::string &ownerName)
+{
+   GmatBase *obj = FindObject(ownerName);
+   if (obj)
+   {
+      #if DEBUG_CREATE_PARAMETER
+      MessageInterface::ShowMessage
+         ("   Found owner object, name='%s', addr=<%p>\n", obj->GetName().c_str(), obj);
+      #endif
+      
+      if (param->GetOwnerType() != obj->GetType())
+      {
+         std::string paramOwnerType =
+            GmatBase::GetObjectTypeString(param->GetOwnerType());
+         delete param;
+         param = NULL;
+         
+         if (paramOwnerType == "")
+            throw GmatBaseException
+               ("Cannot find the object type which has \"" + type +
+                "\" as a Parameter type");
+         else
+            throw GmatBaseException
+               ("Parameter type: " + type + " should be property of " +
+                paramOwnerType);
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetParameterRefObject(Parameter *param, const std::string &type, ...)
+//------------------------------------------------------------------------------
+/**
+ * Sets parameter reference object
+ *
+ * @param <param> parameter pointer
+ * @param <type> parameter type
+ * @param <name> parameter name
+ * @param <ownerName> parameter owner name
+ * @param <depName> dependent object name
+ */
+//------------------------------------------------------------------------------
+void Moderator::SetParameterRefObject(Parameter *param, const std::string &type,
+                                      const std::string &name,
+                                      const std::string &ownerName,
+                                      const std::string &depName)
+{
+   #if DEBUG_PARAMETER_REF_OBJ
+   MessageInterface::ShowMessage
+      ("Moderator::SetParameterRefObject() param=<%p>, type=<%s>, name=<%s>, "
+       "owner=<%s>, dep=<%s>\n",  param, type.c_str(), name.c_str(), ownerName.c_str(),
+       depName.c_str());
+   #endif
+   
+   // If type is Variable, don't set expression
+   if (type != "Variable")
+      param->SetStringParameter("Expression", name);
+   
+   // Set parameter owner and dependent object
+   if (ownerName != "")
+   {
+      param->SetRefObjectName(param->GetOwnerType(), ownerName);
+      param->AddRefObject((Parameter*)FindObject(ownerName));
+   }
+   
+   std::string newDep = depName;
+   
+   // Set dependent object name if depName is not blnk,
+   // if depName is blank get default dep name
+   if (depName != "")
+      param->SetStringParameter("DepObject", depName);
+   else
+      newDep = param->GetStringParameter("DepObject");
+   
+   // Set SolarSystem
+   param->SetSolarSystem(theSolarSystemInUse);
+   param->SetInternalCoordSystem(theInternalCoordSystem);
+   
+   if (newDep != "")
+      if (param->NeedCoordSystem())
+         param->AddRefObject(FindObject(newDep));
+   
+   // create parameter dependent coordinate system
+   if (type == "Longitude" || type == "Latitude" || type == "Altitude" ||
+       type == "MHA" || type == "LST")
+   {
+      // need body-fixed CS
+      StringTokenizer st(name, ".");
+      StringArray tokens = st.GetAllTokens();
+      
+      if (tokens.size() == 2 || (tokens.size() == 3 && tokens[1] == "Earth"))
+      {
+         //MessageInterface::ShowMessage("==> Create EarthFixed\n");
+         
+         // default EarthFixed
+         CreateCoordinateSystem("EarthFixed");
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, "EarthFixed");
+      }
+      else if (tokens.size() == 3)
+      {
+         std::string origin = tokens[1];
+         std::string axisName = origin + "Fixed";
+         
+         //MessageInterface::ShowMessage("==> Create %s\n", axisName.c_str());
+         
+         CoordinateSystem *cs = CreateCoordinateSystem(axisName);
+         
+         // create BodyFixedAxis with origin
+         AxisSystem *axis = CreateAxisSystem("BodyFixed", "BodyFixed_Earth");
+         cs->SetStringParameter("Origin", origin);
+         cs->SetRefObject(FindObject(origin), Gmat::SPACE_POINT, origin);
+         cs->SetRefObject(axis, Gmat::AXIS_SYSTEM, axis->GetName());
+         cs->SetStringParameter("J2000Body", "Earth");
+         cs->SetRefObject(FindObject("Earth"), Gmat::SPACE_POINT, "Earth");
+         cs->SetSolarSystem(theSolarSystemInUse);
+         cs->Initialize();
+         
+         param->SetRefObjectName(Gmat::COORDINATE_SYSTEM, axisName);
+      }
+      else
+      {
+         MessageInterface::ShowMessage("===> Invalid parameter name: %s\n",
+                                       name.c_str());
+      }
+   }
+}
+
+
 // default objects
 //------------------------------------------------------------------------------
 // Spacecraft* GetDefaultSpacecraft()
@@ -5362,6 +5534,13 @@ Moderator::Moderator()
    theSolarSystemInUse = NULL;
    theInternalCoordSystem = NULL;
    runState = Gmat::IDLE;
+   
+   // The motivation of adding this data member was due to Parameter creation
+   // in function mode. When Parameter is created, the Moderator automatically
+   // sets it's refeence object. For example, Sat.X, it sets Sat object pointer
+   // found from the current object map. Since we don't always want to use
+   // configuration to find object, this objectMapInUse was added. (loj: 2008.05.23)
+   objectMapInUse = NULL;
    
    sandboxes.reserve(Gmat::MAX_SANDBOX);
    commands.reserve(Gmat::MAX_SANDBOX);

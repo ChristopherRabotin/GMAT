@@ -82,6 +82,10 @@ public:
    static void SetGuiInterpreter(GuiInterpreter *guiInterp);
    static void SetScriptInterpreter(ScriptInterpreter *scriptInterp);
    
+   //----- object finding
+   void SetObjectMap(ObjectMap *objMap);
+   GmatBase* FindObject(const std::string &name);
+   
    //----- factory
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
    
@@ -297,6 +301,14 @@ private:
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
+
+   // Parameter reference object setting
+   void CheckParameterType(Parameter *param, const std::string &type,
+                           const std::string &ownerName);
+   void SetParameterRefObject(Parameter *param, const std::string &type,
+                              const std::string &name,
+                              const std::string &ownerName,
+                              const std::string &depName);
    
    // default objects
    Spacecraft* GetDefaultSpacecraft();
@@ -344,6 +356,8 @@ private:
    bool showFinalState;
    std::vector<Sandbox*> sandboxes;
    std::vector<GmatCommand*> commands;
+   
+   ObjectMap *objectMapInUse;
    
    static Moderator *instance;
    static GuiInterpreter *theGuiInterpreter;
