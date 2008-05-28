@@ -108,6 +108,7 @@ OBJECTS = \
     app/GmatConnection.o \
     app/GmatMainFrame.o \
     app/GmatMenuBar.o \
+    app/GuiMessageReceiver.o \
     app/GmatNotebook.o \
     app/GmatServer.o \
     app/GmatTreeItemData.o \

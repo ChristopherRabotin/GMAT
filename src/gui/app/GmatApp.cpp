@@ -32,6 +32,9 @@
 #include "wx/splash.h"
 #include "wx/image.h"
 
+#include "GuiMessageReceiver.hpp"
+
+
 //#define DEBUG_GMATAPP
 
 // In single window mode, don't have any child windows; use
@@ -50,7 +53,10 @@ IMPLEMENT_APP(GmatApp)
 //------------------------------------------------------------------------------
 GmatApp::GmatApp()
 {
-    theModerator = (Moderator *)NULL;
+   GuiMessageReceiver *theMessageReceiver = GuiMessageReceiver::Instance();
+   MessageInterface::SetMessageReceiver(theMessageReceiver);
+   
+   theModerator = (Moderator *)NULL;
 }
 
 
