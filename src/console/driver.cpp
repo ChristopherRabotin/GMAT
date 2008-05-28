@@ -22,6 +22,7 @@
 
 #include "BaseException.hpp"
 #include "ConsoleAppException.hpp"
+#include "ConsoleMessageReceiver.hpp"
 #include "Moderator.hpp"
 
 #include "CommandFactory.hpp"
@@ -93,6 +94,10 @@ void RunScriptInterpreter(std::string script, int verbosity, bool batchmode)
    else
       fin.close();
 
+   ConsoleMessageReceiver *theMessageReceiver = 
+      ConsoleMessageReceiver::Instance();
+   MessageInterface::SetMessageReceiver(theMessageReceiver);
+   
    Moderator *mod = Moderator::Instance();
     
    if (!moderatorInitialized) {

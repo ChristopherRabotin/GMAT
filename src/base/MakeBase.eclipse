@@ -14,8 +14,7 @@ CONSOLETARGET = lib/libGmatConsole.a
 ifeq ($(CONSOLE_APP),1)
 TARGET = $(CONSOLETARGET)
 # Console (no wx code) versions of these objects
-BRIDGEOBJECTS = executive/MessageInterfaceConsole.o \
-					executive/PlotInterfaceConsole.o \
+BRIDGEOBJECTS = executive/PlotInterfaceConsole.o \
 					interpreter/GuiInterpreterConsole.o
 else
 TARGET = $(WXTARGET)
@@ -450,10 +449,10 @@ interpreter/GuiInterpreterConsole.o : interpreter/GuiInterpreter.cpp \
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c interpreter/GuiInterpreter.cpp \
 	                              -o interpreter/GuiInterpreterConsole.o
 
-executive/MessageInterfaceConsole.o : executive/MessageInterface.cpp \
-                                      executive/MessageInterface.hpp
-	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/MessageInterface.cpp \
-	                              -o executive/MessageInterfaceConsole.o
+#executive/MessageInterfaceConsole.o : executive/MessageInterface.cpp \
+#                                      executive/MessageInterface.hpp
+#	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/MessageInterface.cpp \
+#	                              -o executive/MessageInterfaceConsole.o
 
 executive/PlotInterfaceConsole.o : executive/PlotInterface.cpp \
                                    executive/PlotInterface.hpp

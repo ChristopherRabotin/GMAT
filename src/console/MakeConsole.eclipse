@@ -17,7 +17,7 @@ endif
 
 all: clean $(TARGET)
 
-OBJECTS = driver.o ConsoleAppException.o PrintUtility.o
+OBJECTS = driver.o ConsoleAppException.o PrintUtility.o ConsoleMessageReceiver.o
 
 LIBRARIES = -L../base/lib -lGmatConsole
 
