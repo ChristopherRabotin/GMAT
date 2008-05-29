@@ -194,9 +194,9 @@ void GuiMessageReceiver::PopupAbortContinue(const std::string &abortMsg,
                                           const std::string &continueMsg,
                                           const std::string &msg)
 {  
-   GuiMessageReceiver::popupMessage = msg;
-   GuiMessageReceiver::abortMessage = abortMsg;
-   GuiMessageReceiver::continueMessage = continueMsg;
+   popupMessage = msg;
+   abortMessage = abortMsg;
+   continueMessage = continueMsg;
    
 } // end PopupAbortContinue()
 
@@ -210,8 +210,8 @@ void GuiMessageReceiver::PopupAbortContinue(const std::string &abortMsg,
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 {
-   GuiMessageReceiver::popupMessage = msg;
-   GuiMessageReceiver::messageType = msgType;
+   popupMessage = msg;
+   messageType = msgType;
    
    PopupMessage(msgType, msg.c_str());
    
@@ -470,13 +470,7 @@ void GuiMessageReceiver::OpenLogFile(const std::string &filename, bool append)
    if (logFile)
    {
       fprintf(logFile, "GMAT Build Date: %s %s\n\n",  __DATE__, __TIME__);
-      fprintf(logFile, "GuiMessageReceiver::SetLogFile() Log file set to %s\n",
-              logFileName.c_str());
-      
-      if (append)
-         fprintf(logFile, "The log file mode is append\n");
-      else
-         fprintf(logFile, "The log file mode is create\n");
+      fprintf(logFile, "GMAT Log file set to %s\n", logFileName.c_str());
       
       logFileSet = true;
    }
@@ -491,4 +485,3 @@ void GuiMessageReceiver::CloseLogFile()
    if (logFile)
       fclose(logFile);
 }
-

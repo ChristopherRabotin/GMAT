@@ -130,7 +130,7 @@ std::string ConsoleMessageReceiver::GetLogFileName()
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
+      ShowMessage
          ("**** ERROR **** " + e.GetFullMessage() + 
           "So setting log file name to GmatLog.txt");
       
@@ -156,7 +156,7 @@ void ConsoleMessageReceiver::SetLogPath(const std::string &pathname, bool append
    }
    catch (BaseException &e)
    {
-      MessageInterface::ShowMessage
+      ShowMessage
          ("**** ERROR **** " + e.GetFullMessage() + 
           "So setting log file name to GmatLog.txt");
       

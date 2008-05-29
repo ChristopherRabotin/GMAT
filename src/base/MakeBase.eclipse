@@ -78,6 +78,21 @@ HEADERS = -Iinclude \
 
 clean : archclean
 
+ifeq ($(CONSOLE_APP),1)
+
+archclean :
+	rm -rf */*.o
+	rm -rf $(TARGETS)
+	rm -rf */*~
+	rm -rf core
+	rm -rf */core
+	rm -rf bin/*
+	rm -rf obj/*
+	rm -rf $(CONSOLETARGET)
+	rm -rf ../matlab/gmat_mex/src/*.o
+
+else
+
 archclean :
 	rm -rf */*.o
 	rm -rf $(TARGETS)
@@ -87,8 +102,9 @@ archclean :
 	rm -rf bin/*
 	rm -rf obj/*
 	rm -rf $(WXTARGET)
-	rm -rf $(CONSOLETARGET)
 	rm -rf ../matlab/gmat_mex/src/*.o
+
+endif
 
 OBJECTS = \
     attitude/Attitude.o \
