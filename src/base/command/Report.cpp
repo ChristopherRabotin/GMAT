@@ -492,18 +492,7 @@ bool Report::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
          throw CommandException("Report command can only have Parameters "
             "in the list of reported values.\n");
       
-      AddParameter(name, numParams);
-      
-//       // Handle Array indexing
-//       Integer row, col;
-//       std::string newName;      
-//       GmatStringUtil::GetArrayIndex(name, row, col, newName);
-      
-//       parmNames.push_back(newName);
-//       actualParmNames.push_back(name);
-      
-//       parmRows.push_back(row);
-//       parmCols.push_back(col);
+      AddParameter(name, index, (Parameter*)obj);
       
       #ifdef __SHOW_NAMES_IN_REPORTFILE__
       // For compare report column header
@@ -799,22 +788,25 @@ void Report::WriteHeaders(std::stringstream &datastream, Integer colWidth)
 
 
 //------------------------------------------------------------------------------
-// bool AddParameter(const std::string &paramName, Integer index)
+// bool AddParameter(const std::string &paramName, Integer index, Parameter *param)
 //------------------------------------------------------------------------------
-bool Report::AddParameter(const std::string &paramName, Integer index)
+bool Report::AddParameter(const std::string &paramName, Integer index,
+                          Parameter *param)
 {
    #ifdef DEBUG_REPORT_SET
    MessageInterface::ShowMessage
-      ("Report::AddParameter() Adding parameter '%s', index=%d\n",
-       paramName.c_str(), index);
+      ("Report::AddParameter() Adding parameter '%s', index=%d, param=<%p>\n",
+       this, paramName.c_str(), index, param);
    #endif
    
    if (paramName != "" && index == numParams)
    {
+      #ifdef __NO_DUPLICATES__
       // if paramName not found, add
       if (find(actualParmNames.begin(), actualParmNames.end(), paramName) ==
           actualParmNames.end())
       {
+      #endif
          // Handle Array indexing
          Integer row, col;
          std::string newName;      
@@ -824,7 +816,7 @@ bool Report::AddParameter(const std::string &paramName, Integer index)
          actualParmNames.push_back(paramName);
          parmRows.push_back(row);
          parmCols.push_back(col);
-         parms.push_back(NULL);
+         parms.push_back(param);
          parmWrappers.push_back(NULL);
          numParams = actualParmNames.size();
          
@@ -834,7 +826,10 @@ bool Report::AddParameter(const std::string &paramName, Integer index)
          #endif
          
          return true;
+      
+      #ifdef __NO_DUPLICATES__
       }
+      #endif
    }
    
    return false;

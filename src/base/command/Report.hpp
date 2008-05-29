@@ -121,7 +121,8 @@ protected:
    std::vector<ElementWrapper*> parmWrappers;
    
    void WriteHeaders(std::stringstream &datastream, Integer colWidth);
-   bool AddParameter(const std::string &paramName, Integer index);
+   bool AddParameter(const std::string &paramName, Integer index,
+                     Parameter *param = NULL);
    
    enum
    {
