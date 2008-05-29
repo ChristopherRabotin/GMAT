@@ -937,11 +937,11 @@ bool Moderator::HasConfigurationChanged(Integer sandboxNum)
 //------------------------------------------------------------------------------
 void Moderator::ConfigurationChanged(GmatBase *obj, bool tf)
 {
-   //#if DEBUG_CONFIG
+   #if DEBUG_CONFIG
    MessageInterface::ShowMessage
       ("Moderator::ConfigurationChanged() obj type=%s, name='%s', changed=%d\n",
        obj->GetTypeName().c_str(), obj->GetName().c_str(), tf);
-   //#endif
+   #endif
    
    if (obj != NULL)
    {
@@ -1957,7 +1957,7 @@ Parameter* Moderator::GetParameter(const std::string &name)
       // find Parameter from the current object map in use (loj: 2008.05.23)
       //return theConfigManager->GetParameter(name);
       GmatBase* obj = FindObject(name);
-      if (obj != NULL)
+      if (obj != NULL && obj->IsOfType(Gmat::PARAMETER))
          return (Parameter*)obj;
    }
    
@@ -2887,6 +2887,8 @@ GmatCommand* Moderator::CreateDefaultCommand(const std::string &type,
       {
          Subscriber *sub = GetDefaultSubscriber("ReportFile", false);
          Parameter *param = GetDefaultX();
+         cmd->SetStringParameter("ReportFile", sub->GetName());
+         cmd->SetStringParameter("Add", param->GetName());
          cmd->SetRefObject(sub, Gmat::SUBSCRIBER, sub->GetName(), 0);
          cmd->SetRefObject(param, Gmat::PARAMETER, param->GetName(), 0);
       }
