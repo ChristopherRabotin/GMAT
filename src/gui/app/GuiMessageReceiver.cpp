@@ -138,8 +138,11 @@ int GuiMessageReceiver::GetNumberOfMessageLines()
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::ShowMessage(const std::string &msgString)
 {
-   ShowMessage(msgString.c_str());
+   GmatAppData *appData = GmatAppData::Instance();
+   if (appData->GetMessageTextCtrl() != NULL)
+      appData->GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));
    
+   LogMessage(msgString);   
 }
 
 
@@ -213,7 +216,29 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::stri
    popupMessage = msg;
    messageType = msgType;
    
-   PopupMessage(msgType, msg.c_str());
+   // always show message
+   ShowMessage(msg);
+      
+   if (GmatGlobal::Instance()->IsBatchMode() != true)
+   {
+      switch (msgType)
+      {
+      case Gmat::ERROR_:
+         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+                            wxT("GMAT Error"));
+         break;
+      case Gmat::WARNING_:
+         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+                            wxT("GMAT Warning"));
+         break;
+      case Gmat::INFO_:
+         (void)wxMessageBox(wxT(wxString(msg.c_str())),
+                            wxT("Information"));
+         break;
+      default:
+         break;
+      };
+   }
    
 } // end PopupMessage()
 
