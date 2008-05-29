@@ -1,3 +1,18 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                             MessageInterface
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG06CA54C
+//
+/**
+ * Defines operations on messages.
+ */
+//------------------------------------------------------------------------------
 #include "MessageInterface.hpp"
 #include <stdarg.h>              // for va_start() and va_end()
 
@@ -36,7 +51,8 @@ MessageReceiver* MessageInterface::GetMessageReceiver()
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const std::string &msgString)
 {
-   ShowMessage(msgString.c_str());
+   if (theMessageReceiver != NULL)
+      theMessageReceiver->ShowMessage(msgString.c_str());
 }
 
 
@@ -133,8 +149,7 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
          msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
       }
       
-      // always show message
-      theMessageReceiver->ShowMessage(msgBuffer);
+      theMessageReceiver->PopupMessage(msgType, std::string(msgBuffer));
       
       free(msgBuffer);
    }
