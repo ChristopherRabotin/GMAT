@@ -43,6 +43,15 @@
 #include "wx/laywin.h"
 #include "wx/textctrl.h"
 
+namespace GmatGui
+{
+   enum ScriptOption
+   {
+      OPEN_SCRIPT_ON_ERROR,
+      ALWAYS_OPEN_SCRIPT,
+      DO_NOT_OPEN_SCRIPT
+   };
+};
 
 class GmatMainFrame : public wxMDIParentFrame
 {
@@ -65,13 +74,13 @@ public:
    void CloseChild(GmatMdiChildFrame *child);
    void CloseActiveChild();
    bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-                         bool closeReports = true, wxString excludeTitle = "");
+                         bool closeReports = true);
    void MinimizeChildren();
    void SetActiveChildDirty(bool dirty);
    void CloseCurrentProject();
-   bool InterpretScript(const wxString &filename, bool readBack = false,
-                        const wxString &savePath = "", bool openScript = true,
-                        bool multScripts = false);
+   bool InterpretScript(const wxString &filename, Integer scriptOpenOpt = 0,
+                        bool closeScript = false, bool readBack = false,
+                        const wxString &savePath = "", bool multScripts = false);
    Integer RunCurrentMission();
    void StopRunningMission();
    void NotifyRunCompleted();

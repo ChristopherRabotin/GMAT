@@ -894,7 +894,7 @@ void GmatMainFrame::CloseActiveChild()
 
 //------------------------------------------------------------------------------
 // bool CloseAllChildren(bool closeScriptWindow = true, bool closePlots = true,
-//                       bool closeReports = true, wxString excludeTitle = "")
+//                       bool closeReports = true)
 //------------------------------------------------------------------------------
 /*
  * Closes all mdi children frames.
@@ -902,18 +902,16 @@ void GmatMainFrame::CloseActiveChild()
  * @param <closeScriptWindow> true to close script window (true)
  * @param <closePlots> true to close all plot windows (true)
  * @param <closeReports> true to close all reports from Output tab (true)
- * @param <excludeTitle> name of the window to be excluded from closing ("")
  * @return true if all frames is closed false otherwise
  */
 //------------------------------------------------------------------------------ 
 bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
-                                     bool closeReports, wxString excludeTitle)
+                                     bool closeReports)
 {
    #ifdef DEBUG_MAINFRAME_CLOSE
    MessageInterface::ShowMessage
       ("GmatMainFrame::CloseAllChildren() closeScriptWindow=%d, closePlots=%d, "
-       "closeReports=%d\n   excludeTitle = %s\n", closeScriptWindow, closePlots,
-       closeReports, excludeTitle.c_str());
+       "closeReports=%d\n", closeScriptWindow, closePlots, closeReports);
    MessageInterface::ShowMessage
       ("   Number of children = %d\n", theMdiChildren->GetCount());
    #endif
@@ -921,7 +919,6 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
    wxString title;
    GmatTree::ItemType type;
    bool canDelete;
-   
    wxNode *node = theMdiChildren->GetFirst();
    wxCloseEvent event;
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -945,31 +942,27 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       MessageInterface::ShowMessage("   title = %s, type = %d\n", title.c_str(), type);
       #endif
       
-      // if title is not excluded
-      if (child->GetTitle() != excludeTitle)
+      if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
+          (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
       {
-         if ((type >= GmatTree::BEGIN_OF_RESOURCE && type <= GmatTree::END_OF_RESOURCE) ||
-             (type >= GmatTree::BEGIN_OF_COMMAND && type <= GmatTree::END_OF_CONTROL))
+         // check if script file to be closed or not
+         if (type == GmatTree::SCRIPT_FILE)
          {
-            // check if script file to be closed or not
-            if (type == GmatTree::SCRIPT_FILE)
-            {
-               if (closeScriptWindow)
-                  canDelete = true;
-            }
-            else
-            {
+            if (closeScriptWindow)
                canDelete = true;
-            }
          }
-         else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
+         else
          {
-            // delete output child except compare
-            if (closePlots && type != GmatTree::COMPARE_REPORT)
-            {
-               gmatAppData->GetOutputTree()->UpdateOutput(true, closeReports);
-               canDelete = true;
-            }
+            canDelete = true;
+         }
+      }
+      else if (type >= GmatTree::BEGIN_OF_OUTPUT && type <= GmatTree::END_OF_OUTPUT)
+      {
+         // delete output child except compare
+         if (closePlots && type != GmatTree::COMPARE_REPORT)
+         {
+            gmatAppData->GetOutputTree()->UpdateOutput(true, closeReports);
+            canDelete = true;
          }
       }
       
@@ -1012,19 +1005,22 @@ bool GmatMainFrame::CloseAllChildren(bool closeScriptWindow, bool closePlots,
       //-------------------------------------------------
       // Note: The node is deleted from RemoveChild()
       //-------------------------------------------------
-      wxNode *nextNode = theMdiChildren->GetFirst();
-      
-      // if node is not deleted get next node
-      if (!canDelete)
-         nextNode = nextNode->GetNext();
+      wxNode *nextNode = NULL;
+      if (canDelete)
+         nextNode = theMdiChildren->GetFirst();
+      else
+         nextNode = node->GetNext();
       
       #ifdef DEBUG_MAINFRAME_CLOSE
       MessageInterface::ShowMessage
          ("   next node = %p, canDelete = %d\n", nextNode, canDelete);
+      if (nextNode)
+      {
+         child = (GmatMdiChildFrame *)nextNode->GetData();
+         title = child->GetTitle();
+         MessageInterface::ShowMessage("   title=%s\n", title.c_str());
+      }
       #endif
-      
-      if (node == nextNode)
-         break;
       
       node = nextNode;
       
@@ -1131,31 +1127,35 @@ void GmatMainFrame::CloseCurrentProject()
 
 
 //------------------------------------------------------------------------------
-// bool InterpretScript(const wxString &filename, bool readBack = false,
-//                      const wxString &savePath = "", bool openScript = true,
-//                      bool multiScripts = false)
+// bool InterpretScript(const wxString &filename, Integer scriptOpenOpt,
+//                      bool closeScript, bool readBack, const wxString &savePath,
+//                      bool multiScripts)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
  * @param <filename> input script file name
- * @param <readBack> true will read scripts, save, and read back in
- * @param <newPath> new path to be used for saving scripts
- * @param <openScript> true if script file to be opened on error
- * @param <multiScripts> true if running scripts from the folder
+ * @param <ScriptOpenOpt> open script editor option after build script (0)
+ *         0, script file to be opened on error only
+ *         1, script file to be opened always
+ *         2, NO script file to be opened
+ * @param <closeScript> true will close opened script editor (false)
+ * @param <readBack> true will read scripts, save, and read back in (false)
+ * @param <newPath> new path to be used for saving scripts ("")
+ * @param <multiScripts> true if running scripts from the folder (false)
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
-                                    const wxString &savePath, bool openScript,
-                                    bool multiScripts)
+bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpenOpt,
+                                    bool closeScript, bool readBack,
+                                    const wxString &savePath, bool multiScripts)
 {
    #ifdef DEBUG_INTERPRET
    MessageInterface::ShowMessage
-      ("GmatMainFrame::InterpretScript()\n   filename=%s, readBack=%d\n   "
-       "savePath=%s openScript=%d, multiScripts=%d\n", filename.c_str(), readBack,
-       savePath.c_str(), openScript, multiScripts);
+      ("GmatMainFrame::InterpretScript()\n   filename=%s\n   scriptOpenOpt=%d, "
+       "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath=%s\n", filename.c_str(),
+       closeScript, scriptOpenOpt, readBack, multiScripts, savePath.c_str(), multiScripts);
    #endif
    
    UpdateTitle(filename);
@@ -1164,9 +1164,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
    GmatAppData *gmatAppData = GmatAppData::Instance();
    
    // Always refresh the gui before new scritpes are read
-   // Pass true to close Script file when reading new scripts (loj: 02.14.2008)
-   //CloseAllChildren(false, true, filename);
-   CloseAllChildren(true, true, filename);
+   CloseAllChildren(closeScript, true, true);
    gmatAppData->GetResourceTree()->ClearResource(false);
    gmatAppData->GetMissionTree()->ClearMission();
    gmatAppData->GetOutputTree()->UpdateOutput(true, true);
@@ -1200,15 +1198,21 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, bool readBack,
          // if not running script folder, clear status
          if (!multiScripts)
             SetStatusText("", 1);
+         
+         // open script editor
+         if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
+            OpenScript();
+         
       }
       else
       {
          SetStatusText("Errors were Found in the Script!!", 1);
          
-         // open script editor      
-         if (openScript)
+         // open script editor
+         if (scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR ||
+             scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
             OpenScript();
-      }      
+      }
    }
    catch (BaseException &e)
    {
@@ -2558,7 +2562,7 @@ void GmatMainFrame::OnOpenScript(wxCommandEvent& event)
       }
       
       SetStatusText("", 1);
-      InterpretScript(mScriptFilename.c_str());
+      InterpretScript(mScriptFilename.c_str(), GmatGui::OPEN_SCRIPT_ON_ERROR, true);
    }
 }
 
@@ -3294,7 +3298,7 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
    
-   InterpretScript(filename);
+   InterpretScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
 }
 
 
@@ -3307,7 +3311,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
    
    wxString filename = mScriptFilename.c_str();
    
-   if (InterpretScript(filename))      
+   if (InterpretScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT))      
       mRunStatus = RunCurrentMission();
 }
 

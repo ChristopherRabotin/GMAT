@@ -151,9 +151,9 @@ private:
    void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
    void OnRemoveScriptFolder(wxCommandEvent& event);
    
-   bool BuildScript(const wxString &filename, bool readBack = false,
-                    const wxString &savePath = "", bool openScript = true,
-                    bool multiScripts = false);
+   bool BuildScript(const wxString &filename, Integer openScriptOpt = 0,
+                    bool closeScript = false, bool readBack = false,
+                    const wxString &savePath = "", bool multiScripts = false);
    
    // menu
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);

@@ -2411,7 +2411,7 @@ void ResourceTree::OnScriptBuildObject(wxCommandEvent& event)
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
    
-   BuildScript(filename);
+   BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
 }
 
 
@@ -2428,7 +2428,7 @@ void ResourceTree::OnScriptBuildAndRun(wxCommandEvent& event)
    GmatTreeItemData *item = (GmatTreeItemData *) GetItemData(GetSelection());
    wxString filename = item->GetDesc();
    
-   if (BuildScript(filename))
+   if (BuildScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT))
       theMainFrame->RunCurrentMission();
    
 }
@@ -2709,7 +2709,8 @@ void ResourceTree::OnRunScriptsFromFolder(wxCommandEvent &event)
          {
             // Create objects from script only first time, to test re-run
             if (i == 0)
-               builtOk = BuildScript(filename, runFromSavedScripts, savePath, false, true);
+               builtOk = BuildScript(filename, GmatGui::DO_NOT_OPEN_SCRIPT, true,
+                                     runFromSavedScripts, savePath, true);
             
             if (builtOk)
             {
@@ -2874,31 +2875,35 @@ void ResourceTree::OnRemoveScriptFolder(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// bool BuildScript(const wxString &filename, bool readBack = false,
-//                  const wxString &savePath = "", bool openScript = true,
-//                  bool multScript = false)
+// bool BuildScript(const wxString &filename, Integer scriptOpenOpt,
+//                  bool closeScript, bool readBack, const wxString &savePath,
+//                  bool multScript)
 //------------------------------------------------------------------------------
 /**
  * Creates objects from script file.
  *
  * @param <filename> input script file name
+ * @param <scriptOpenOpt> open script editor option after build script (0)
+ *         0, script file to be opened on error only
+ *         1, script file to be opened always
+ *         2, NO script file to be opened
+ * @param <closeScript> true will close opened script editor
  * @param <readBack> true will read scripts, save, and read back in (false)
  * @param <newPath> new path to be used for saving scripts ("")
- * @param <openScript> true if script file to be opened on error (true)
  * @param <multiScripts> true if running scripts from the folder (false)
  *
  * @return true if successful; false otherwise
  */
 //------------------------------------------------------------------------------
-bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
-                               const wxString &savePath, bool openScript,
-                               bool multiScripts)
+bool ResourceTree::BuildScript(const wxString &filename, Integer scriptOpenOpt,
+                               bool closeScript, bool readBack,
+                               const wxString &savePath, bool multiScripts)
 {
    #if DEBUG_RESOURCE_TREE
    MessageInterface::ShowMessage
-      ("ResourceTree::BuildScript() filename=%s, readBack=%d, openScript=%d, "
-       "multiScripts=%d\n   savePath=%s\n", filename.c_str(), readBack, openScript,
-       multiScripts, savePath.c_str());
+      ("ResourceTree::BuildScript() filename=%s, scriptOpenOpt=%d, closeScript=%d, "
+       "readBack=%d, multiScripts=%d\n   savePath=%s\n", filename.c_str(),
+       scriptOpenOpt, closeScript, readBack, multiScripts, savePath.c_str());
    #endif
    
    // Set the filename to mainframe, so save will not bring up the file dialog
@@ -2908,8 +2913,9 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
    if (fileSet)
    {
       // Interpret script
-      bool status = theMainFrame->
-         InterpretScript(filename, readBack, savePath, openScript, multiScripts);
+      bool status =
+         theMainFrame->InterpretScript(filename, scriptOpenOpt, closeScript,
+                                       readBack, savePath, multiScripts);
       
       if (!status)
       {
@@ -2919,7 +2925,7 @@ bool ResourceTree::BuildScript(const wxString &filename, bool readBack,
       
       #if DEBUG_RESOURCE_TREE
       MessageInterface::ShowMessage
-         ("ResourceTree::BuildScript() returning %s\n", (status? "true" : "false"));
+         ("ResourceTree::BuildScript() returning %s\n", (status ? "true" : "false"));
       #endif
       
       return status;
