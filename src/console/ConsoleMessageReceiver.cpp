@@ -36,7 +36,7 @@
 ConsoleMessageReceiver* ConsoleMessageReceiver::theInstance = NULL;
 
 //---------------------------------
-//  public functions
+//  public methods
 //---------------------------------
 
 
@@ -245,7 +245,7 @@ std::string ConsoleMessageReceiver::GetLogFileName()
 /**
  * Turns logging on or off.
  * 
- * @param flag The new loggign state -- true enables logging, and false disables 
+ * @param flag The new logging state -- true enables logging, and false disables 
  *             it.  The logging state is idempotent.
  */
 //------------------------------------------------------------------------------
@@ -458,7 +458,7 @@ void ConsoleMessageReceiver::ClearMessage()
 
 
 //---------------------------------
-//  private functions
+//  private methods
 //---------------------------------
 
 //------------------------------------------------------------------------------

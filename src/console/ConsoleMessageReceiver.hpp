@@ -1,6 +1,6 @@
 //$Id$
 //------------------------------------------------------------------------------
-//                           ConsolMessageReceiver
+//                           ConsoleMessageReceiver
 //------------------------------------------------------------------------------
 // GMAT: General Mission Analysis Tool
 //
@@ -22,6 +22,12 @@
 
 #include "MessageReceiver.hpp"
 
+/**
+ * ConsoleMessageReceiver implements the methods to present messages to the user
+ * on the console.
+ * 
+ * This class is implemented as a singleton.
+ */
 class ConsoleMessageReceiver : public MessageReceiver
 {
 public:

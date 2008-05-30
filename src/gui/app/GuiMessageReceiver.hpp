@@ -24,6 +24,12 @@
 #include "MessageReceiver.hpp"
 
 
+/**
+ * GuiMessageReceiver implements the methods to present messages to the user
+ * in GMAT's message window.
+ * 
+ * This class is implemented as a singleton.
+ */
 class GuiMessageReceiver : public MessageReceiver
 {
 

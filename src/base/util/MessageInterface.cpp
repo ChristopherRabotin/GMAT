@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //                             MessageInterface
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 // **Legal**
 //
@@ -10,25 +10,50 @@
 // number NNG06CA54C
 //
 /**
- * Defines operations on messages.
+ * Implements operations on messages.
  */
 //------------------------------------------------------------------------------
 #include "MessageInterface.hpp"
 #include <stdarg.h>              // for va_start() and va_end()
 
-// Set static data
+//---------------------------------
+//  static data
+//---------------------------------
 MessageReceiver* MessageInterface::theMessageReceiver = NULL;
 const int MessageInterface::MAX_MESSAGE_LENGTH = 10000;
 
 
+//---------------------------------
+//  private methods
+//---------------------------------
+
+
+//------------------------------------------------------------------------------
+// MessageInterface()
+//------------------------------------------------------------------------------
+/**
+ * Constructor.
+ */
+//------------------------------------------------------------------------------
 MessageInterface::MessageInterface()
 {
 }
 
-
+//------------------------------------------------------------------------------
+// ~MessageInterface()
+//------------------------------------------------------------------------------
+/**
+ * Class destructor.
+ */
+//------------------------------------------------------------------------------
 MessageInterface::~MessageInterface()
 {
 }
+
+
+//---------------------------------
+//  public static methods
+//---------------------------------
 
 
 bool MessageInterface::SetMessageReceiver(MessageReceiver *mr)
@@ -46,7 +71,9 @@ MessageReceiver* MessageInterface::GetMessageReceiver()
 //  void ShowMessage(const std::string &msgString)
 //------------------------------------------------------------------------------
 /**
- * Displays the message.
+ * Passes an std::string message to the MessageReceiver.
+ * 
+ * @param msgString The message that is displayed.
  */
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const std::string &msgString)
@@ -60,8 +87,13 @@ void MessageInterface::ShowMessage(const std::string &msgString)
 //  void ShowMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Displays the message.
- */
+ * Passes a variable argument delimited message to the MessageReceiver.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
+ */ 
 //------------------------------------------------------------------------------
 void MessageInterface::ShowMessage(const char *msg, ...)
 {
@@ -99,16 +131,17 @@ void MessageInterface::ShowMessage(const char *msg, ...)
 //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 //------------------------------------------------------------------------------
 /**
- * Pops up message box.
+ * Passes a popup message to the MessageReceiver.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message.
  */
 //------------------------------------------------------------------------------
 void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 {
    if (theMessageReceiver != NULL)
    {
-//      MessageInterface::popupMessage = msg;
-//      MessageInterface::messageType = msgType;
-
       PopupMessage(msgType, msg.c_str());
    }
 } // end PopupMessage()
@@ -118,10 +151,18 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const std::string
 //  static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Pops up message box.
+ * Passes a variable argument delimited popup message to the MessageReceiver.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
  */
 //------------------------------------------------------------------------------
-void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
+void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
+      ...)
 {
    if (theMessageReceiver != NULL)
    {
@@ -155,6 +196,15 @@ void MessageInterface::PopupMessage(Gmat::MessageType msgType, const char *msg, 
    }
 } // end PopupMessage()
 
+//------------------------------------------------------------------------------
+// std::string GetLogFileName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the fully qualified name of the log file from the MessageReceiver.
+ * 
+ * @return The name of the log file, including path information.
+ */
+//------------------------------------------------------------------------------
 std::string MessageInterface::GetLogFileName()
 {
    if (theMessageReceiver == NULL)
@@ -162,30 +212,80 @@ std::string MessageInterface::GetLogFileName()
    return theMessageReceiver->GetLogFileName();
 }
 
+//------------------------------------------------------------------------------
+// void SetLogEnable(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Tells the MessageReceiver to turn logging on or off.
+ * 
+ * @param flag The new logging state -- true enables logging, and false disables 
+ *             it.  The logging state is idempotent.
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::SetLogEnable(bool flag)
 {
    if (theMessageReceiver != NULL)
       theMessageReceiver->SetLogEnable(flag);
 }
 
+//------------------------------------------------------------------------------
+// void SetLogPath(const std::string &pathname, bool append = false)
+//------------------------------------------------------------------------------
+/*
+ * Sends log file path and append state to the MessageReceiver.
+ *
+ * @param  pathname  log file path name, such as "/newpath/test1/"
+ * @param  append  true if appending log message (false)
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::SetLogPath(const std::string &pathname, bool append)
 {
    if (theMessageReceiver != NULL)
       theMessageReceiver->SetLogPath(pathname, append);
 }
 
+//------------------------------------------------------------------------------
+// void SetLogFile(const std::string &filename)
+//------------------------------------------------------------------------------
+/*
+ * Sends the log file path and name to the MessageReceiver.
+ *
+ * @param  filename  log file name, such as "/newpath/test1/GmatLog.txt"
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::SetLogFile(const std::string &filename)
 {
    if (theMessageReceiver != NULL)
       theMessageReceiver->SetLogFile(filename);
 }
 
+//------------------------------------------------------------------------------
+//  void LogMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Sends a message to the MessageReceiver for logging.
+ * 
+ * @param msg The message.
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::LogMessage(const std::string &msg)
 {
    if (theMessageReceiver != NULL)
       theMessageReceiver->LogMessage(msg);
 }
 
+//------------------------------------------------------------------------------
+//  void LogMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Sends a variable argument message to the MessageReceiver for logging.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
+ */
+//------------------------------------------------------------------------------
 void MessageInterface::LogMessage(const char *msg, ...)
 {
    if (theMessageReceiver != NULL)
@@ -193,6 +293,13 @@ void MessageInterface::LogMessage(const char *msg, ...)
             "Hey, you still need to hook up LogMessage in MessageInterface!!!");
 }
 
+//------------------------------------------------------------------------------
+//  void ClearMessage()
+//------------------------------------------------------------------------------
+/**
+ * Tells the MessageReceiver to clear the message window.
+ */  
+//------------------------------------------------------------------------------
 void MessageInterface::ClearMessage()
 {
    if (theMessageReceiver != NULL)
