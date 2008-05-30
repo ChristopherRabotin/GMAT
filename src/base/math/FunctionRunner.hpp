@@ -21,6 +21,8 @@
 
 #include "MathFunction.hpp"
 #include "FunctionManager.hpp"
+#include "SolarSystem.hpp"
+#include "PhysicalModel.hpp"
 #include "RealUtilities.hpp"
 
 class GMAT_API FunctionRunner : public MathFunction
@@ -38,9 +40,11 @@ public:
    void                 SetFunctionOutputs();
    const StringArray&   GetInputs();
    
-   // for string to object maps
+   // for setting objects to FunctionManager
    virtual void         SetObjectMap(ObjectMap *map);
    virtual void         SetGlobalObjectMap(ObjectMap *map);
+   void                 SetSolarSystem(SolarSystem *ss);
+   void                 SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    // inherited from MathFunction
    virtual void         GetOutputInfo(Integer &type, Integer &rowCount, 

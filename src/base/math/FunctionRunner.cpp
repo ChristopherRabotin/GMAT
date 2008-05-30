@@ -22,6 +22,7 @@
 
 //#define DEBUG_FUNCTION
 //#define DEBUG_OBJECT_MAP
+//#define DEBUG_OBJECT_SET
 
 //---------------------------------
 // public methods
@@ -265,6 +266,56 @@ void FunctionRunner::SetGlobalObjectMap(ObjectMap *map)
 
 
 //------------------------------------------------------------------------------
+//  void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Called by the MathTree to set the SolarSystem used by the GmatCommand
+ * 
+ * @param <ss> Pointer to the SolarSystem
+ */
+//------------------------------------------------------------------------------
+void FunctionRunner::SetSolarSystem(SolarSystem *ss)
+{
+   #ifdef DEBUG_OBJECT_SET
+   MessageInterface::ShowMessage
+      ("FunctionRunner::SetSolarSystem() entered, theFunctionName='%s', "
+       "ss=<%p>\n", theFunctionName.c_str(), ss);
+   #endif
+   
+   theFunctionManager.SetSolarSystem(ss);
+   
+   #ifdef DEBUG_OBJECT_SET
+   MessageInterface::ShowMessage("FunctionRunner::SetSolarSystem() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Called by the MathTree to set the transient forces used by the GmatCommand
+ * 
+ * @param <map> Pointer to the vector of transient forces
+ */
+//------------------------------------------------------------------------------
+void FunctionRunner::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   #ifdef DEBUG_OBJECT_SET
+   MessageInterface::ShowMessage
+      ("FunctionRunner::SetTransientForces() entered, theFunctionName='%s', "
+       "tf=<%p>\n", theFunctionName.c_str(), tf);
+   #endif
+   
+   theFunctionManager.SetTransientForces(tf);
+   
+   #ifdef DEBUG_OBJECT_SET
+   MessageInterface::ShowMessage("FunctionRunner::SetTransientForces() exiting\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
 // void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 void FunctionRunner::GetOutputInfo(Integer &type,
@@ -376,9 +427,6 @@ Real FunctionRunner::Evaluate()
       throw MathException
          ("The function \"" + function->GetName() + "\" returns matrix value");
    
-   // Tell the FunctionManager to build the Function Object Store
-   //theFunctionManager.BuildFunctionObjectStore();
-   
    return theFunctionManager.Evaluate();   
 }
 
@@ -406,9 +454,6 @@ Rmatrix FunctionRunner::MatrixEvaluate()
    if (elementType == Gmat::REAL_TYPE)
       throw MathException
          ("The function \"" + function->GetName() + "\" returns Real value");
-   
-   // Tell the FunctionManager to build the Function Object Store
-   //theFunctionManager.BuildFunctionObjectStore();
    
    return theFunctionManager.MatrixEvaluate();
 }
