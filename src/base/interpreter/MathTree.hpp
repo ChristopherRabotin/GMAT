@@ -20,10 +20,18 @@
 #define MATHTREE_HPP_
 
 #include "gmatdefs.hpp"
-#include "MathNode.hpp"
-#include "ElementWrapper.hpp"
-#include "Function.hpp"
+#include "GmatBase.hpp"
+//#include "MathNode.hpp"
+//#include "ElementWrapper.hpp"
+//#include "Function.hpp"
 #include <map>
+
+// Forward references for GMAT core objects
+class MathNode;
+class ElementWrapper;
+class Function;
+class SolarSystem;
+class PhysicalModel;
 
 class GMAT_API MathTree : public GmatBase
 {
@@ -51,9 +59,11 @@ public:
    void                 GetOutputInfo(Integer &type, Integer &rowCount,
                                       Integer &colCount);
    
-   // for string to object maps
+   // for setting objects to FunctionRunner
    void                 SetObjectMap(ObjectMap *map);
    void                 SetGlobalObjectMap(ObjectMap *map);
+   void                 SetSolarSystem(SolarSystem *ss);
+   void                 SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    // Inherited (GmatBase) methods
    virtual GmatBase*    Clone(void) const;
@@ -86,6 +96,8 @@ protected:
    void SetFunctionToRunner(MathNode *node, Function *function);
    void SetObjectMapToRunner(MathNode *node, ObjectMap *map);
    void SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map);
+   void SetSolarSystemToRunner(MathNode *node, SolarSystem *ss);
+   void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf);
    bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
                         const std::string &oldName, const std::string &newName);
    void CreateParameterNameArray(MathNode *node);

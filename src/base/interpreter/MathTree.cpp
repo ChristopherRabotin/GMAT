@@ -334,6 +334,58 @@ void MathTree::SetGlobalObjectMap(ObjectMap *map)
 }
 
 
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+void MathTree::SetSolarSystem(SolarSystem *ss)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() ss=%p\n", ss);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetSolarSystemToRunner() theTopNode=%s, %s\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetSolarSystemToRunner(theTopNode, ss);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+void MathTree::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetTransientForces() tf=%p\n", tf);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetTransientForcesToRunner() theTopNode=%s, %s\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetTransientForcesToRunner(theTopNode, tf);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetTransientForces() returning\n");
+   #endif
+}
+
+
 //---------------------------------------------------------------------------
 // virtual bool RenameRefObject(const Gmat::ObjectType type,
 //                 const std::string &oldName, const std::string &newName)
@@ -620,6 +672,72 @@ void MathTree::SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map)
    
    MathNode *right = node->GetRight();
    SetGlobalObjectMapToRunner(right, map);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetSolarSystemToRunner(MathNode *node, SolarSystem *ss)
+//------------------------------------------------------------------------------
+void MathTree::SetSolarSystemToRunner(MathNode *node, SolarSystem *ss)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetSolarSystemToRunner() node=%p, ss=%p\n", node, ss);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetSolarSystem(ss);
+   
+   MathNode *left = node->GetLeft();   
+   SetSolarSystemToRunner(left, ss);
+   
+   MathNode *right = node->GetRight();
+   SetSolarSystemToRunner(right, ss);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+void MathTree::SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetTransientForcesToRunner() node=%p, tf=%p\n", node, tf);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetTransientForces(tf);
+   
+   MathNode *left = node->GetLeft();   
+   SetTransientForcesToRunner(left, tf);
+   
+   MathNode *right = node->GetRight();
+   SetTransientForcesToRunner(right, tf);
 }
 
 
