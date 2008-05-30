@@ -1,5 +1,24 @@
-#ifndef CONSOLEMESSAGERECEIVER_HPP_
-#define CONSOLEMESSAGERECEIVER_HPP_
+//$Id$
+//------------------------------------------------------------------------------
+//                           ConsolMessageReceiver
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG06CA54C
+//
+// Author: Darrel Conway, based on code by Linda Jun
+// Created: 2008/05/28
+//
+/**
+ * Declares operations on messages for the Console app.
+ */
+//------------------------------------------------------------------------------
+#ifndef ConsoleMessageReceiver_hpp
+#define ConsoleMessageReceiver_hpp
+
 
 #include "MessageReceiver.hpp"
 
@@ -26,6 +45,13 @@ public:
 
    virtual void OpenLogFile(const std::string &filename, bool append = false);
    virtual void CloseLogFile();
+   
+   // Other methods not implemented for the ConsoleMessageReceiver
+   //virtual std::string GetMessage();
+   //virtual int  GetNumberOfMessageLines();
+   //virtual void PopupAbortContinue(const std::string &abortMsg,
+   //                               const std::string &continueMsg,
+   //                               const std::string &msg);
 
 private:
    static ConsoleMessageReceiver* theInstance;
@@ -48,4 +74,4 @@ private:
    virtual ~ConsoleMessageReceiver();
 };
 
-#endif /*CONSOLEMESSAGERECEIVER_HPP_*/
+#endif /*ConsoleMessageReceiver_hpp*/

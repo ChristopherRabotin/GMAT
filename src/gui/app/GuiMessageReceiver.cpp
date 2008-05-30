@@ -41,12 +41,17 @@
 //  static data
 //---------------------------------
 GuiMessageReceiver*  GuiMessageReceiver::instance = NULL;
+
 //---------------------------------
-//  public functions
+//  private functions
 //---------------------------------
 
 //------------------------------------------------------------------------------
 //  GuiMessageReceiver()
+//------------------------------------------------------------------------------
+/**
+ * Constructor, called from the Instance method to create the singleton.
+ */
 //------------------------------------------------------------------------------
 GuiMessageReceiver::GuiMessageReceiver() :
    MAX_MESSAGE_LENGTH      (10000)
@@ -58,10 +63,30 @@ GuiMessageReceiver::GuiMessageReceiver() :
 //------------------------------------------------------------------------------
 //  GuiMessageReceiver()
 //------------------------------------------------------------------------------
+/**
+ * Class destructor.
+ */
+//------------------------------------------------------------------------------
 GuiMessageReceiver::~GuiMessageReceiver()
 {
 }
 
+//---------------------------------
+//  public functions
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// GuiMessageReceiver* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Singleton accessor method
+ * 
+ * This method creates the GuiMessageReceiver singleton if it has not been
+ * constructed, and returns the singleton instance.
+ * 
+ * @return The GuiMessageReceiver instance.
+ */
+//------------------------------------------------------------------------------
 GuiMessageReceiver* GuiMessageReceiver::Instance()
 {
    if (instance == NULL)
@@ -72,10 +97,12 @@ GuiMessageReceiver* GuiMessageReceiver::Instance()
 
 
 //------------------------------------------------------------------------------
-//  void GetMessage()
+//  std::string GetMessage()
 //------------------------------------------------------------------------------
 /**
- * Pops one message from message queue and concatenates.
+ * Pops the messages off the message queue and concatenates them together.
+ * 
+ * @return The concatenated messages.
  */
 //------------------------------------------------------------------------------
 std::string GuiMessageReceiver::GetMessage()
@@ -96,6 +123,10 @@ std::string GuiMessageReceiver::GetMessage()
 //------------------------------------------------------------------------------
 //  void ClearMessage()
 //------------------------------------------------------------------------------
+/**
+ * Clears the message window.
+ */  
+//------------------------------------------------------------------------------
 void GuiMessageReceiver::ClearMessage()
 {
    GmatAppData *appData = GmatAppData::Instance();
@@ -108,6 +139,12 @@ void GuiMessageReceiver::ClearMessage()
 
 //------------------------------------------------------------------------------
 //  int GetNumberOfMessageLines()
+//------------------------------------------------------------------------------
+/**
+ * Returns the number of lines of text in the message window.
+ * 
+ * @return The number of lines used.
+ */
 //------------------------------------------------------------------------------
 int GuiMessageReceiver::GetNumberOfMessageLines()
 {
@@ -133,7 +170,9 @@ int GuiMessageReceiver::GetNumberOfMessageLines()
 //  void ShowMessage(const std::string &msgString)
 //------------------------------------------------------------------------------
 /**
- * Displays the message.
+ * Displays the message passed in as an std::string.
+ * 
+ * @param msgString The message that is displayed.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::ShowMessage(const std::string &msgString)
@@ -150,7 +189,12 @@ void GuiMessageReceiver::ShowMessage(const std::string &msgString)
 //  void ShowMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Displays the message.
+ * Displays a message passed in as a char* and a variable argument list.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::ShowMessage(const char *msg, ...)
@@ -174,7 +218,8 @@ void GuiMessageReceiver::ShowMessage(const char *msg, ...)
    }
    else
    {
-      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+      msgBuffer = 
+         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
    }
    
    GmatAppData *appData = GmatAppData::Instance();
@@ -191,6 +236,10 @@ void GuiMessageReceiver::ShowMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
  * Pops up Abort or Continue message box.
+ * 
+ * @param abortMsg    The abort message
+ * @param continueMsg The continue message
+ * @param msg         The message
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::PopupAbortContinue(const std::string &abortMsg,
@@ -200,7 +249,6 @@ void GuiMessageReceiver::PopupAbortContinue(const std::string &abortMsg,
    popupMessage = msg;
    abortMessage = abortMsg;
    continueMessage = continueMsg;
-   
 } // end PopupAbortContinue()
 
 
@@ -208,7 +256,14 @@ void GuiMessageReceiver::PopupAbortContinue(const std::string &abortMsg,
 //  static void PopupMessage(Gmat::MessageType msgType, const std::string &msg)
 //------------------------------------------------------------------------------
 /**
- * Pops up message box.
+ * Pops up a message in a message box.
+ * 
+ * This method logs informational messages directed at pop-up message boxes and  
+ * shows them in a pop-up.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
@@ -247,7 +302,17 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::stri
 //  static void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Pops up message box.
+ * Pops up a message in a message box.
+ * 
+ * This method logs informational messages directed at pop-up message boxes and
+ * shows the message as a pop-up.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
@@ -308,6 +373,12 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg
 //------------------------------------------------------------------------------
 // std::string GetLogFileName()
 //------------------------------------------------------------------------------
+/**
+ * Retrieves the fully qualified name of the log file.
+ * 
+ * @return The name of the log file, including path information.
+ */
+//------------------------------------------------------------------------------
 std::string GuiMessageReceiver::GetLogFileName()
 {
    FileManager *fm = FileManager::Instance();
@@ -346,6 +417,15 @@ std::string GuiMessageReceiver::GetLogFileName()
 //------------------------------------------------------------------------------
 // void LogMessage(const std::string &msg)
 //------------------------------------------------------------------------------
+/**
+ * Logs the message to the log file.
+ * 
+ * This method displays the input message on the console and writes it to the 
+ * log file.
+ * 
+ * @param msg The message.
+ */
+//------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const std::string &msg)
 {
    std::cout << msg;
@@ -376,7 +456,15 @@ void GuiMessageReceiver::LogMessage(const std::string &msg)
 //  void LogMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Logs the message to a file.
+ * Logs a variable argument formatted message to the log file.
+ * 
+ * This method calls teh std::string vrrersion of LogMessage to do the actual 
+ * logging.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
  */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::LogMessage(const char *msg, ...)
@@ -409,6 +497,13 @@ void GuiMessageReceiver::LogMessage(const char *msg, ...)
 
 //------------------------------------------------------------------------------
 // void SetLogEnable(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Turns logging on or off.
+ * 
+ * @param flag The new loggign state -- true enables logging, and false disables 
+ *             it.  The logging state is idempotent.
+ */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::SetLogEnable(bool flag)
 {
@@ -453,7 +548,7 @@ void GuiMessageReceiver::SetLogPath(const std::string &pathname, bool append)
 // void SetLogFile(const std::string &filename)
 //------------------------------------------------------------------------------
 /*
- * Sets log file path and name.
+ * Calls OpenLogFile() to set the log file path and name and then open the log.
  *
  * @param  filename  log file name, such as "/newpath/test1/GmatLog.txt"
  */
@@ -466,6 +561,13 @@ void GuiMessageReceiver::SetLogFile(const std::string &filename)
 
 //------------------------------------------------------------------------------
 // void OpenLogFile(const std::string &filename, bool append = false)
+//------------------------------------------------------------------------------
+/*
+ * Sets the log file name and opens the log file.
+ *
+ * @param filename  log file name, such as "/newpath/test1/GmatLog.txt"
+ * @param append  true if appending log message
+ */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::OpenLogFile(const std::string &filename, bool append)
 {
@@ -504,6 +606,10 @@ void GuiMessageReceiver::OpenLogFile(const std::string &filename, bool append)
 
 //------------------------------------------------------------------------------
 // void CloseLogFile()
+//------------------------------------------------------------------------------
+/**
+ * Closes the log file.
+ */
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::CloseLogFile()
 {

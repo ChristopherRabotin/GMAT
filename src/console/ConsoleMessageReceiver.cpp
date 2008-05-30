@@ -1,3 +1,21 @@
+//$Id$
+//------------------------------------------------------------------------------
+//                           ConsolMessageReceiver
+//------------------------------------------------------------------------------
+// GMAT: General Mission Analysis Tool
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG06CA54C
+//
+// Author: Darrel Conway, based on code by Linda Jun
+// Created: 2008/05/28
+//
+/**
+ * Implements operations on messages for the Console app.
+ */
+//------------------------------------------------------------------------------
 #include "ConsoleMessageReceiver.hpp"
 
 #include <stdarg.h>                // for va_start(), va_end()
@@ -12,8 +30,28 @@
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "GmatGlobal.hpp"          // for RunBachMode()
 
+//---------------------------------
+//  static data
+//---------------------------------
 ConsoleMessageReceiver* ConsoleMessageReceiver::theInstance = NULL;
 
+//---------------------------------
+//  public functions
+//---------------------------------
+
+
+//------------------------------------------------------------------------------
+// ConsoleMessageReceiver* Instance()
+//------------------------------------------------------------------------------
+/**
+ * Singleton accessor method
+ * 
+ * This method creates the ConsoleMessageReceiver singleton if it has not been
+ * constructed, and returns the singleton instance.
+ * 
+ * @return The ConsoleMessageReceiver instance.
+ */
+//------------------------------------------------------------------------------
 ConsoleMessageReceiver* ConsoleMessageReceiver::Instance()
 {
    if (theInstance == NULL)
@@ -22,22 +60,35 @@ ConsoleMessageReceiver* ConsoleMessageReceiver::Instance()
    return theInstance;
 }
 
-ConsoleMessageReceiver::ConsoleMessageReceiver() :
-   MAX_MESSAGE_LENGTH       (10000),
-   logFile                  (NULL)
-{
-   messageQueue.push("ConsoleMessageReceiver: Starting GMAT ...");
-}
-
-ConsoleMessageReceiver::~ConsoleMessageReceiver()
-{
-}
-
+//------------------------------------------------------------------------------
+//  void ShowMessage(const std::string &msgString)
+//------------------------------------------------------------------------------
+/**
+ * Displays a message passed in as an std::string.
+ * 
+ * This method sends the message to the user's console and to the log file by 
+ * calling the variable argument method, ShowMessage(const char *msg, ...).
+ * 
+ * @param msgString The message that is displayed.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::ShowMessage(const std::string &msg)
 {
    ShowMessage(msg.c_str());
 }
 
+//------------------------------------------------------------------------------
+//  void ShowMessage(const char *msg, ...)
+//------------------------------------------------------------------------------
+/**
+ * Displays a message passed in as a char* and a variable argument list.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::ShowMessage(const char *msg, ...)
 {
    short    ret;
@@ -67,7 +118,26 @@ void ConsoleMessageReceiver::ShowMessage(const char *msg, ...)
    free(msgBuffer);
 }
 
-void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::string &msg)
+//------------------------------------------------------------------------------
+//  void PopupMessage(Gmat::MessageType msgType, const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Pops up a message in a message box.
+ * 
+ * This method logs informational messages directed at pop-up message boxes.  
+ * The Console application does not support pop-ups, so the message cannot be 
+ * shown as a pop-up.
+ * 
+ * This method calls the variable argument version of the method to perform the 
+ * actual logging.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message.
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, 
+      const std::string &msg)
 {
    popupMessage = msg;
    messageType = msgType;
@@ -75,7 +145,26 @@ void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::
    PopupMessage(msgType, msg.c_str());
 }
 
-void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
+//------------------------------------------------------------------------------
+//  void PopupMessage(Gmat::MessageType msgType, const char *msg, ...)
+//------------------------------------------------------------------------------
+/**
+ * Pops up a message in a message box.
+ * 
+ * This method logs informational messages directed at pop-up message boxes.  
+ * The Console application does not support pop-ups, so the message cannot be 
+ * shown as a pop-up.
+ * 
+ * @param msgType The type of message that is displayed, selected from the set
+ *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, 
+      const char *msg, ...)
 {
    short    ret;
    short    size;
@@ -98,7 +187,8 @@ void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char 
    }
    else
    {
-      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+      msgBuffer = 
+         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
    }
    
    LogMessage(std::string(msgBuffer) + "\n");
@@ -106,6 +196,15 @@ void ConsoleMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char 
    free(msgBuffer);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetLogFileName()
+//------------------------------------------------------------------------------
+/**
+ * Retrieves the fully qualified name of the log file.
+ * 
+ * @return The name of the log file, including path information.
+ */
+//------------------------------------------------------------------------------
 std::string ConsoleMessageReceiver::GetLogFileName()
 {
    FileManager *fm = FileManager::Instance();
@@ -140,12 +239,33 @@ std::string ConsoleMessageReceiver::GetLogFileName()
    return fname;
 }
 
+//------------------------------------------------------------------------------
+// void SetLogEnable(bool flag)
+//------------------------------------------------------------------------------
+/**
+ * Turns logging on or off.
+ * 
+ * @param flag The new loggign state -- true enables logging, and false disables 
+ *             it.  The logging state is idempotent.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::SetLogEnable(bool flag)
 {
    logEnabled = flag;
 }
 
-void ConsoleMessageReceiver::SetLogPath(const std::string &pathname, bool append)
+//------------------------------------------------------------------------------
+// void SetLogPath(const std::string &pathname, bool append = false)
+//------------------------------------------------------------------------------
+/*
+ * Sets log file path with keeping log file name as is.
+ *
+ * @param  pathname  log file path name, such as "/newpath/test1/"
+ * @param  append  true if appending log message (false)
+ */
+//------------------------------------------------------------------------------
+void ConsoleMessageReceiver::SetLogPath(const std::string &pathname, 
+      bool append)
 {
    FileManager *fm = FileManager::Instance();
    std::string fname;
@@ -166,11 +286,30 @@ void ConsoleMessageReceiver::SetLogPath(const std::string &pathname, bool append
    OpenLogFile(fname, append);
 }
 
+//------------------------------------------------------------------------------
+// void SetLogFile(const std::string &filename)
+//------------------------------------------------------------------------------
+/*
+ * Calls OpenLogFile() to set the log file path and name and then open the log.
+ *
+ * @param  filename  log file name, such as "/newpath/test1/GmatLog.txt"
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::SetLogFile(const std::string &filename)
 {
    OpenLogFile(filename);
 }
 
+//------------------------------------------------------------------------------
+// void OpenLogFile(const std::string &filename, bool append)
+//------------------------------------------------------------------------------
+/*
+ * Sets the log file name and opens the log file.
+ *
+ * @param filename  log file name, such as "/newpath/test1/GmatLog.txt"
+ * @param append  true if appending log message
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::OpenLogFile(const std::string &filename, 
       bool append)
 {
@@ -186,8 +325,10 @@ void ConsoleMessageReceiver::OpenLogFile(const std::string &filename,
    
    if (!logFile)
    {
-      std::cout << "**** ERROR **** Error setting the log file to " << logFileName
-                << "\nSo setting it to \"GmatLog.txt\" in the executable directory\n";
+      std::cout << "**** ERROR **** Error setting the log file to " 
+                << logFileName
+                << "\nSo setting it to \"GmatLog.txt\" in the "
+                << "executable directory\n";
       
       logFileName = "GmatLog.txt";
       
@@ -215,6 +356,10 @@ void ConsoleMessageReceiver::OpenLogFile(const std::string &filename,
 //------------------------------------------------------------------------------
 // void CloseLogFile()
 //------------------------------------------------------------------------------
+/**
+ * Closes the log file.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::CloseLogFile()
 {
    if (logFile)
@@ -222,6 +367,18 @@ void ConsoleMessageReceiver::CloseLogFile()
 }
 
 
+//------------------------------------------------------------------------------
+//  void LogMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Logs the message to the log file.
+ * 
+ * This method displays the input message on the console and writes it to the 
+ * log file.
+ * 
+ * @param msg The message.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::LogMessage(const std::string &msg)
 {
    std::cout << msg;
@@ -247,6 +404,21 @@ void ConsoleMessageReceiver::LogMessage(const std::string &msg)
    }
 }
 
+//------------------------------------------------------------------------------
+//  void LogMessage(const char *msg, ...)
+//------------------------------------------------------------------------------
+/**
+ * Logs a variable argument formatted message to the log file.
+ * 
+ * This method displays the input message on the console and writes it to the 
+ * log file.
+ * 
+ * @param msg The message, possibly including markers for variable argument 
+ *            substitution.
+ * @param ... The optional list of parameters that are inserted into the msg 
+ *            string.
+ */
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::LogMessage(const char *msg, ...)
 {
    short    ret;
@@ -273,6 +445,43 @@ void ConsoleMessageReceiver::LogMessage(const char *msg, ...)
    free(msgBuffer);
 }
 
+//------------------------------------------------------------------------------
+//  void ClearMessage()
+//------------------------------------------------------------------------------
+/**
+ * Clears the message window.  This console version does nothing.
+ */  
+//------------------------------------------------------------------------------
 void ConsoleMessageReceiver::ClearMessage()
+{
+}
+
+
+//---------------------------------
+//  private functions
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// ConsoleMessageReceiver()
+//------------------------------------------------------------------------------
+/**
+ * Constructor, called from the Instance method to create the singleton.
+ */
+//------------------------------------------------------------------------------
+ConsoleMessageReceiver::ConsoleMessageReceiver() :
+   MAX_MESSAGE_LENGTH       (10000),
+   logFile                  (NULL)
+{
+   messageQueue.push("ConsoleMessageReceiver: Starting GMAT ...");
+}
+
+//------------------------------------------------------------------------------
+// ~ConsoleMessageReceiver()
+//------------------------------------------------------------------------------
+/**
+ * Class destructor.
+ */
+//------------------------------------------------------------------------------
+ConsoleMessageReceiver::~ConsoleMessageReceiver()
 {
 }
