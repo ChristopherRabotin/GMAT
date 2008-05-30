@@ -21,8 +21,6 @@
 #include "StringTokenizer.hpp"
 #include "StringUtil.hpp"
 #include "InterpreterException.hpp"
-#include "Parameter.hpp"
-#include "FileManager.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TP 1

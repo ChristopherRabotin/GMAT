@@ -20,7 +20,6 @@
 #define TextParser_hpp
 
 #include "gmatdefs.hpp"
-#include "GmatBase.hpp"
 
 namespace Gmat
 {
