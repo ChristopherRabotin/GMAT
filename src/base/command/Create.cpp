@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                 Create
 //------------------------------------------------------------------------------
@@ -193,13 +193,14 @@ bool Create::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                           const std::string &name)
 {
    #ifdef DEBUG_CREATE
-      MessageInterface::ShowMessage("Create::SetRefObject() entered, with object %s\n",
-            name.c_str());
+      MessageInterface::ShowMessage("Create::SetRefObject() entered, with object "
+            "type: '%s', name: '%s'\n", obj->GetTypeName().c_str(), name.c_str());
    #endif
    if ((!GmatStringUtil::IsBlank(objType)) &&
        !(obj->IsOfType(objType)))
       throw CommandException(
-            "Reference object for Create command is not of expected type.\n");
+            "Reference object for Create command is not of expected type of \"" +
+            objType + "\"");
    if (creations.size() > 0)
    {
       throw CommandException(
@@ -242,6 +243,18 @@ bool Create::Initialize()
    #endif
       
    ManageObject::Initialize();
+   
+   //---------------------------------- debug
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage("   has %d objects in creations\n", creations.size());
+   
+   for (UnsignedInt i=0; i< creations.size(); i++)
+      MessageInterface::ShowMessage
+         ("      <%p><%s><%s>\n", creations[i], creations[i]->GetName().c_str(),
+          creations[i]->GetTypeName().c_str());
+   #endif
+   //---------------------------------- debug
+   
    // Clone the reference object to create as many of that requested
    // type of object as needed
    if (GmatStringUtil::IsBlank(objType))
