@@ -1320,6 +1320,22 @@ bool ScriptInterpreter::ParseAssignmentBlock(const StringArray &chunks,
       return false;
    }
    
+   // Check for GmatGlobal setting (loj: 2008.05.30)
+   if (chunks[0].find("GmatGlobal.") != std::string::npos)
+   {
+      StringArray lhsParts = theTextParser.SeparateDots(chunks[0]);
+      if (lhsParts[1] == "LogFile")
+      {
+         #if DEBUG_PARSE
+         MessageInterface::ShowMessage
+            ("   Found Global.LogFile, so calling MI::SetLogFile(%s)\n",
+             chunks[1].c_str());
+         #endif
+         MessageInterface::SetLogFile(chunks[1]);
+         return true;
+      }
+   }
+   
    GmatBase *owner = NULL;
    std::string attrStr = ""; 
    std::string attrInLineStr = ""; 
