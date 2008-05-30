@@ -64,7 +64,6 @@
 //#define DEBUG_SET_SOLAR_SYS
 //#define DEBUG_FINAL_PASS
 //#define DEBUG_FINAL_PASS_CS
-//#define DEBUG_FIND_OBJECT
 //#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CHECK_BRANCH
 //#define DEBUG_SPECIAL_CASE
@@ -2358,8 +2357,8 @@ GmatBase* Interpreter::MakeAssignment(const std::string &lhs, const std::string 
    currentBlock = lhs + " = " + rhs;
    
    #ifdef DEBUG_ASSIGNMENT
-   MessageInterface::ShowMessage
-      ("   lhsPartCount=%d, rhsPartCount=%d\n", lhsPartCount, rhsPartCount);
+   WriteStringArray("lhs parts", "", lhsParts);
+   WriteStringArray("rhs parts", "", rhsParts);
    #endif
    
    // check LHS
@@ -3700,6 +3699,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
    {
       // It is object type so get parameter (Bug 743 fix)
       param = theModerator->GetParameter(value);
+      #ifdef DEBUG_SET
+      MessageInterface::ShowMessage
+         ("   theModerator->GetParameter() returned %p\n", param);
+      #endif
    }
    
    try
@@ -3734,6 +3737,10 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
          if (GmatStringUtil::ToReal(value, rval, true) ||
              GmatStringUtil::ToInteger(value, ival, true))
          {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage("   It is a Real or Integer value\n");
+            #endif
+            
             // Handle special case for OpenGlPlot. (loj: 2008.04.01)
             // ViewPointReference, ViewPointVector, and ViewDirection can have 
             // both vector and object name.
@@ -3753,6 +3760,11 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
          GmatBase *configObj = FindObject(value);
          if (configObj)
          {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Found the object type of %s\n", configObj->GetTypeName().c_str());
+            #endif
+            
             // Set as String parameter, so it can be validated in FinalPass()
             bool retval = true;
             if (index != -1)
@@ -3780,6 +3792,11 @@ bool Interpreter::SetPropertyObjectValue(GmatBase *obj, const Integer id,
          }
          else
          {
+            #ifdef DEBUG_SET
+            MessageInterface::ShowMessage
+               ("   Object not found, so try creating owned object\n");
+            #endif
+            
             // Create Owned Object, if it is valid owned object type
             GmatBase *ownedObj = NULL;
             if (obj->IsOwnedObject(id))
