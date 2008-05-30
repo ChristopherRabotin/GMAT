@@ -50,6 +50,8 @@ public:
    virtual std::vector<Function*> GetFunctions() const;
    
    // inherited from GmatCommand
+   virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetObjectMap(ObjectMap *map);
    virtual void         SetGlobalObjectMap(ObjectMap *map);
    
