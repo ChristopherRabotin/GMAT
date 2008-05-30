@@ -201,6 +201,44 @@ std::vector<Function*> Assignment::GetFunctions() const
 
 
 //------------------------------------------------------------------------------
+//  void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
+/**
+ * Called by the Sandbox to set the local solar system for the GmatCommand
+ * 
+ * @param <ss> Pointer to the local solar system
+ */
+//------------------------------------------------------------------------------
+void Assignment::SetSolarSystem(SolarSystem *ss)
+{
+   GmatCommand::SetSolarSystem(ss);
+   
+   if (mathTree)
+      mathTree->SetSolarSystem(solarSys);
+}
+
+
+//------------------------------------------------------------------------------
+//  void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
+/**
+ * Passes the transient force vector into the commands that need them
+ * 
+ * @param tf The vector of transient forces
+ * 
+ * @note The default behavior in the GmatCommands is to ignore the vector.
+ */
+//------------------------------------------------------------------------------
+void Assignment::SetTransientForces(std::vector<PhysicalModel*> *tf)
+{
+   GmatCommand::SetTransientForces(tf);
+   
+   if (mathTree)
+      mathTree->SetTransientForces(forces);
+}
+
+
+//------------------------------------------------------------------------------
 //  void SetObjectMap(ObjectMap *map)
 //------------------------------------------------------------------------------
 /**
@@ -705,6 +743,8 @@ bool Assignment::Execute()
             
             for (UnsignedInt i=0; i<rhsValues.size(); i++)
             {
+               MessageInterface::ShowMessage("==> rhsValues[%d]=<%s>\n", i, rhsValues[i].c_str());
+               
                GmatBase *obj = FindObject(rhsValues[i]);
                if (obj == NULL)
                {
