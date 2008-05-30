@@ -237,18 +237,8 @@ bool Function::Initialize()
          MessageInterface::ShowMessage("   Now about to send required wrappers to command of type %s\n",
                (current->GetTypeName()).c_str());         
       #endif
-      //wrapperList = current->GetWrapperObjectNameArray();
-      //sz          = wrapperList.size();
-      //for (unsigned int qq = 0; qq < sz; qq++)
-      //{
-      //   if (inputArgMap.find(wrapperList.at(qq)) != inputArgMap.end())
-      //   {
-      //      wrapperObj = inputArgMap[wrapperList.at(qq)];
-      //      current->SetElementWrapper(wrapperObj, wrapperList.at(qq));
-      //   }
-      //}
-         
-      // Set object map to Validator
+      // (Re)set object map on Validator (necessary because objects may have been added to the 
+      // Local Object Store or Global Object Store during initialization of previous commands)
       store.clear();
       for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
          store.insert(std::make_pair(omi->first, omi->second));
