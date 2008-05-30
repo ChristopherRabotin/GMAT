@@ -1281,6 +1281,11 @@ bool StopCondition::SetEpochParameter(Parameter *param)
 //------------------------------------------------------------------------------
 bool StopCondition::SetStopParameter(Parameter *param)
 {
+   #ifdef DEBUG_STOP_PARAM
+   MessageInterface::ShowMessage
+      ("StopCondition::SetStopParameter() param=<%p>\n", param);
+   #endif
+   
    if (param != NULL)
    {
       mStopParam = param;
