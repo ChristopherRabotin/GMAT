@@ -121,11 +121,20 @@ protected:
    // current values of some object (e.g. an array element))
    std::map<std::string, GmatBase *>
                         createdOthers;
+   /// Real value output
+   Real                 realResult;
+   /// Rmatrix value output
+   Rmatrix              matResult;
+   /// Flag indicating whether or not there is one nameless result (i.e. called from FunctionRunner)
+   bool                 blankResult;
+   /// Which type of output was saved last - real or rmatrix?
+   std::string          outputType;
    
    //virtual bool         BuildFunctionObjectStore();
    //virtual bool         RefreshFunctionObjectStore();
    GmatBase* FindObject(const std::string &name, bool arrayElementsAllowed = false);
    GmatBase* CreateObject(const std::string &fromString);
+   void      SaveLastResult();
    
 };
 
