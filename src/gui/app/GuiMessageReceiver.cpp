@@ -31,10 +31,11 @@
 #include <fstream>
 #include <sstream>
 #include <queue>                   // for queue
-#include "GuiMessageReceiver.hpp"    // for GuiMessageReceiver functions
+#include "GuiMessageReceiver.hpp"  // for GuiMessageReceiver functions
 #include "BaseException.hpp"
 #include "FileManager.hpp"         // for GetFullPathname()
 #include "GmatGlobal.hpp"          // for RunBachMode()
+#include "FileUtil.hpp"            // for ParsePathName()
 //#include "StringUtil.hpp"          // for GmatStringUtil::Replace()
 
 //---------------------------------
@@ -555,7 +556,16 @@ void GuiMessageReceiver::SetLogPath(const std::string &pathname, bool append)
 //------------------------------------------------------------------------------
 void GuiMessageReceiver::SetLogFile(const std::string &filename)
 {
-   OpenLogFile(filename);
+   std::string fname = filename;
+   
+   if (GmatFileUtil::ParsePathName(fname) == "")
+   {
+      FileManager *fm = FileManager::Instance();
+      std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
+      fname = outPath + fname;
+   }
+   
+   OpenLogFile(fname);
 }
 
 
