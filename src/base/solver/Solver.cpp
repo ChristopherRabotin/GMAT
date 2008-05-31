@@ -39,6 +39,12 @@ Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
    "Variables",
    "MaximumIterations",
    "NumberOfVariables",
+   "RegisteredVariables",
+   "RegisteredComponents",
+   "AllowScaleSetting",
+   "AllowRangeSettings",
+   "AllowStepsizeSetting",
+   "AllowVariablePertSetting",
 };
 
 const Gmat::ParameterType
@@ -50,6 +56,12 @@ Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
    Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::INTEGER_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
+   Gmat::BOOLEAN_TYPE,
 };
 
 const std::string    
@@ -79,6 +91,7 @@ Solver::STYLE_TEXT[MaxStyle - NORMAL_STYLE] =
 //------------------------------------------------------------------------------
 Solver::Solver(const std::string &type, const std::string &name) :
    GmatBase                (Gmat::SOLVER, type, name),
+   isInternal              (true),   
    currentState            (INITIALIZING),
    nestedState             (INITIALIZING),
    textFileMode            ("Normal"),
@@ -95,7 +108,13 @@ Solver::Solver(const std::string &type, const std::string &name) :
    //variableMaximumStep     (NULL),
    pertNumber              (-999), // is this right?
    initialized             (false),
-   instanceNumber          (0)       // 0 indicates 1st instance w/ this name
+   instanceNumber          (0),    // 0 indicates 1st instance w/ this name
+   registeredVariableCount (0),
+   registeredComponentCount(0),
+   AllowScaleFactors       (true),
+   AllowRangeLimits        (true),
+   AllowStepsizeLimit      (true),
+   AllowIndependentPerts   (true)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -132,6 +151,7 @@ Solver::~Solver()
 //------------------------------------------------------------------------------
 Solver::Solver(const Solver &sol) :
    GmatBase                (sol),
+   isInternal              (sol.isInternal),   
    currentState            (sol.currentState),
    nestedState             (sol.currentState),
    textFileMode            (sol.textFileMode),
@@ -149,7 +169,12 @@ Solver::Solver(const Solver &sol) :
    pertNumber              (sol.pertNumber),
    initialized             (false),
    solverTextFile          (sol.solverTextFile),
-   instanceNumber          (sol.instanceNumber)
+   instanceNumber          (sol.instanceNumber),
+   registeredVariableCount (sol.registeredVariableCount),
+   registeredComponentCount(sol.registeredComponentCount),
+   AllowRangeLimits        (sol.AllowRangeLimits),
+   AllowStepsizeLimit      (sol.AllowStepsizeLimit),
+   AllowIndependentPerts   (sol.AllowIndependentPerts)
 {
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
@@ -175,14 +200,16 @@ Solver::Solver(const Solver &sol) :
 //------------------------------------------------------------------------------
 Solver& Solver::operator=(const Solver &sol)
 {
-    if (&sol == this)
-        return *this;
+   if (&sol == this)
+      return *this;
 
-   variableCount         = sol.variableCount;
-   iterationsTaken       = 0;
-   maxIterations         = sol.maxIterations;
-   initialized           = false;
-   solverTextFile        = sol.solverTextFile;
+   registeredVariableCount  = sol.registeredVariableCount;
+   registeredComponentCount = sol.registeredComponentCount;
+   variableCount            = sol.variableCount;
+   iterationsTaken          = 0;
+   maxIterations            = sol.maxIterations;
+   initialized              = false;
+   solverTextFile           = sol.solverTextFile;
    
    variableNames.clear();
    //variable.clear();
@@ -200,7 +227,7 @@ Solver& Solver::operator=(const Solver &sol)
    instanceNumber        = sol.instanceNumber;
    pertNumber            = sol.pertNumber;
 
-    return *this;
+   return *this;
 }
 
 //------------------------------------------------------------------------------
@@ -248,7 +275,7 @@ bool Solver::Initialize()
 
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
-         "In Solver::Initialzie - about to prepare text file for output\n");
+         "In Solver::Initialize - about to prepare text file for output\n");
    #endif
    // Prepare the text file for output
    if (solverTextFile != "")
@@ -257,15 +284,15 @@ bool Solver::Initialize()
       FileManager *fm;
       fm = FileManager::Instance();
       std::string outPath = fm->GetFullPathname(FileManager::OUTPUT_PATH);
-      solverTextFile = outPath + solverTextFile;
+      std::string fullSolverTextFile = outPath + solverTextFile;
    
       if (textFile.is_open())
          textFile.close();
       
       if (instanceNumber == 1)
-         textFile.open(solverTextFile.c_str());
+         textFile.open(fullSolverTextFile.c_str());
       else
-         textFile.open(solverTextFile.c_str(), std::ios::app);
+         textFile.open(fullSolverTextFile.c_str(), std::ios::app);
       if (!textFile.is_open())
          throw SolverException("Error opening targeter text file " +
                                solverTextFile);
@@ -309,8 +336,7 @@ bool Solver::Finalize()
  * @return The ID used for the variable.
  */
 //------------------------------------------------------------------------------
-Integer Solver::SetSolverVariables(Real *data,
-                                                  const std::string &name)
+Integer Solver::SetSolverVariables(Real *data, const std::string &name)
 {
    if (variableNames[variableCount] != name)
       throw SolverException("Mismatch between parsed and configured variable");
@@ -325,7 +351,8 @@ Integer Solver::SetSolverVariables(Real *data,
    catch(const std::exception &re)
    {
       throw SolverException(
-            "Range error setting variable or perturbation in SetSolverVariables\n");
+              "Range error setting variable or perturbation in "
+              "SetSolverVariables\n");
    }
    // Sanity check min and max
    if (data[2] >= data[3])
@@ -602,8 +629,17 @@ std::string Solver::GetParameterTypeString(const Integer id) const
 //---------------------------------------------------------------------------
 bool Solver::IsParameterReadOnly(const Integer id) const
 {
-   if (id == NUMBER_OF_VARIABLES)  return true;
-   return GmatBase::IsParameterReadOnly(id);
+   if ((id == NUMBER_OF_VARIABLES) ||
+       (id == variableNamesID) ||
+       (id == RegisteredVariables) ||
+       (id == RegisteredComponents) ||
+       (id == AllowRangeSettings) ||
+       (id == AllowStepsizeSetting) ||
+       (id == AllowScaleSetting) ||
+       (id == AllowVariablePertSetting))
+      return true;
+
+   return false;//GmatBase::IsParameterReadOnly(id);
 }
 
 
@@ -668,13 +704,22 @@ Integer Solver::SetIntegerParameter(const Integer id,
       if (value > 0)
          maxIterations = value;
       else
-//         MessageInterface::ShowMessage(
-//            "Iteration count for %s must be > 0; requested value was %d\n",
-//            instanceName.c_str(), value);
          throw SolverException(
             "The value entered for the maximum iterations on " + instanceName +
             " is not an allowed value. The allowed value is: [Integer > 0].");
       return maxIterations;
+   }
+   
+   if (id == RegisteredVariables)
+   {
+      registeredVariableCount = value;
+      return registeredVariableCount;
+   }
+   
+   if (id == RegisteredComponents)
+   {
+      registeredComponentCount = value;
+      return registeredComponentCount;
    }
     
    return GmatBase::SetIntegerParameter(id, value);
@@ -697,10 +742,22 @@ Integer Solver::SetIntegerParameter(const Integer id,
 //------------------------------------------------------------------------------
 bool Solver::GetBooleanParameter(const Integer id) const
 {
-    if (id == ShowProgressID)
-        return showProgress;
-
-    return GmatBase::GetBooleanParameter(id);
+   if (id == ShowProgressID)
+       return showProgress;
+   
+   if (id == AllowScaleSetting)
+      return AllowScaleFactors;
+    
+   if (id == AllowRangeSettings)
+      return AllowRangeLimits;
+   
+   if (id == AllowStepsizeSetting)
+      return AllowStepsizeLimit;
+   
+   if (id == AllowVariablePertSetting)
+      return AllowIndependentPerts;
+   
+   return GmatBase::GetBooleanParameter(id);
 }
 
 

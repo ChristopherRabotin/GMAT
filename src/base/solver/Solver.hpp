@@ -50,6 +50,7 @@ public:
       CALCULATING,
       CHECKINGRUN,
       RUNEXTERNAL,
+      RUNSPECIAL,             // Run initial state or solution w/o solving
       FINISHED,
       UNDEFINED_STATE         // This one should stay at the end of the list.
    };
@@ -70,6 +71,9 @@ public:
    Solver(const Solver& sol);
    Solver&             operator=(const Solver& sol);
 
+   bool                IsSolverInternal()
+   {  return isInternal; }
+   
    virtual SolverState GetState();
    virtual SolverState GetNestedState();
    virtual SolverState AdvanceState();
@@ -156,6 +160,10 @@ public:
                                       const std::string &resultType = "") = 0;
 
 protected:
+   /// Flag indicating if this Solver runs integrated into GMAT, or through
+   /// an external controller like MATLAB
+   bool                isInternal;
+   
    /// Current state for the state machine
    SolverState         currentState;
    /// current nested state
@@ -208,6 +216,23 @@ protected:
    Integer              instanceNumber;
    /// The solver text file
    std::ofstream        textFile;
+   
+   // Counters for the numbers of elements sued -- these are a convenience, and 
+   // might not be used in all Solvers
+   /// The (optional) count of the variables set using a Vary command
+   Integer              registeredVariableCount;
+   /// The (optional) count of the elements used as goals or constraints
+   Integer              registeredComponentCount;
+   
+   // Options for the Vary command
+   /// Determines if can control absolute range
+   bool                 AllowScaleFactors;
+   /// Determines if can control absolute range
+   bool                 AllowRangeLimits;
+   /// Determines if can control step limiting 
+   bool                 AllowStepsizeLimit;
+   /// Determines if individual variables can set perts
+   bool                 AllowIndependentPerts;
       
    /// Generic solver parameters.
    enum
@@ -218,6 +243,12 @@ protected:
       variableNamesID,
       maxIterationsID,
       NUMBER_OF_VARIABLES,
+      RegisteredVariables,
+      RegisteredComponents,
+      AllowScaleSetting,
+      AllowRangeSettings,
+      AllowStepsizeSetting,
+      AllowVariablePertSetting,
       SolverParamCount
    };
    

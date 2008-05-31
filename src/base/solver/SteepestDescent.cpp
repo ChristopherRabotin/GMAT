@@ -1,4 +1,4 @@
-//$Id$
+// $Id$
 //------------------------------------------------------------------------------
 //                              SteepestDescent
 //------------------------------------------------------------------------------
@@ -19,6 +19,10 @@
 
 
 #include "SteepestDescent.hpp"
+#include "MessageInterface.hpp"
+
+//#define SD_DEBUG_STATE_MACHINE
+//#define DEBUG_SD_INIT
 
 //------------------------------------------------------------------------------
 // static data
@@ -47,8 +51,10 @@ SteepestDescent::PARAMETER_TYPE[SteepestDescentParamCount - SolverParamCount] =
 //------------------------------------------------------------------------------
 
 SteepestDescent::SteepestDescent(const std::string &name) :
-   Optimizer      ("SteepestDescent", name)
+   InternalOptimizer       ("SteepestDescent", name),
+   objectiveValue          (0.0)
 {
+   objectTypeNames.push_back("SteepestDescent");
    objectiveFnName = "SDObjective";
    tolerance       = 1.0e-5;
    maxIterations   = 200;
@@ -61,7 +67,10 @@ SteepestDescent::~SteepestDescent()
 
 
 SteepestDescent::SteepestDescent(const SteepestDescent& sd) :
-   Optimizer      (sd)
+   InternalOptimizer       (sd),
+   objectiveValue          (sd.objectiveValue),
+   gradient                (sd.gradient),
+   jacobian                (sd.jacobian)
 {
 }
 
@@ -70,7 +79,11 @@ SteepestDescent& SteepestDescent::operator=(const SteepestDescent& sd)
 {
    if (&sd != this)
    {
-      Solver::operator=(sd);
+      InternalOptimizer::operator=(sd);
+
+      objectiveValue = sd.objectiveValue;
+      gradient = sd.gradient;
+      jacobian = sd.jacobian;
    }
    
    return *this;
@@ -116,7 +129,7 @@ bool SteepestDescent::TakeAction(const std::string &action,
       return true;
    }
 
-   return Optimizer::TakeAction(action, actionData);
+   return InternalOptimizer::TakeAction(action, actionData);
 }
 
 
@@ -130,9 +143,117 @@ bool SteepestDescent::TakeAction(const std::string &action,
  * detected.
  */
 //------------------------------------------------------------------------------
+Solver::SolverState  SteepestDescent::AdvanceState()
+{
+   switch (currentState)
+   {
+      case INITIALIZING:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "INITIALIZING\n");
+         #endif
+         iterationsTaken = 0;
+         WriteToTextFile();
+//         ReportProgress();
+         CompleteInitialization();
+      
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", 
+               INITIALIZING, currentState);
+         #endif
+         break;
+      
+      case NOMINAL:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "NOMINAL\n");
+         #endif
+//         ReportProgress();
+         RunNominal();
+//         ReportProgress();
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", NOMINAL,
+               currentState);
+         #endif
+         // ReportProgress();
+         break;
+   
+      case PERTURBING:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "PERTURBING\n");
+         #endif
+         RunPerturbation();
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", PERTURBING,
+               currentState);
+         #endif
+         // ReportProgress();
+         break;
+   
+      case Solver::CALCULATING:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "CALCULATING\n");
+         #endif
+//         ReportProgress();
+         CalculateParameters();
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", CALCULATING,
+               currentState);
+         #endif
+         break;
+            
+      case CHECKINGRUN:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "CHECKINGRUN\n");
+         #endif
+         CheckCompletion();
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", CHECKINGRUN,
+               currentState);
+         #endif
+         // ReportProgress();
+         break;
+   
+      case FINISHED:
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage("Entered state machine; "
+                  "FINISHED\n");
+         #endif
+         RunComplete();
+         #ifdef SD_DEBUG_STATE_MACHINE
+            MessageInterface::ShowMessage(
+               "SteepestDescent State Transitions from %d to %d\n", FINISHED,
+               currentState);
+         #endif
+         // ReportProgress();
+         break;
+         
+      default:
+         throw SolverException(
+                  "Steepest Descent Solver \"" + instanceName + 
+                  "\" encountered an unexpected state.");
+   }
+      
+   return currentState;
+}
+
+//------------------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------
+/**
+ */
+//------------------------------------------------------------------------------
 bool SteepestDescent::Optimize()
 {
-   return false;
+   return true;
 }
 
 
@@ -154,18 +275,15 @@ Integer SteepestDescent::SetSolverResults(Real *data,
                                           const std::string &name,
                                           const std::string &type)
 {
-   { // Handle the objective function here
-      if (objectiveName != name)
-         throw SolverException("Mismatch between parsed and configured "
-            "objective function");
-      objectiveValue = data[0];
-      return 0;
-   }
+   #ifdef DEBUG_STEEPESTDESCENT
+      MessageInterface::ShowMessage("*** Setting Results for '%s' of type '%s'\n",
+            name.c_str(), type.c_str());
+   #endif
 
-   { // Handle constraints here
-   }
-   
-   return -1;
+   if (type == "Objective")
+      objectiveName = name;
+ 
+   return InternalOptimizer::SetSolverResults(data, name, type);
 }
 
 
@@ -182,13 +300,50 @@ Integer SteepestDescent::SetSolverResults(Real *data,
 void SteepestDescent::SetResultValue(Integer id, Real value,
                                            const std::string &resultType)
 {
-    if (currentState == NOMINAL) {
-        objectiveValue = value;
-    }
-        
-    if (currentState == PERTURBING) {
-        achieved[pertNumber] = value;
-    }
+#ifdef DEBUG_STEEPESTDESCENT
+   MessageInterface::ShowMessage("Setting SD result for id = %d, type = %s\n", 
+         id, resultType.c_str());
+#endif
+   
+   // Gradients use the objective function
+   if (resultType == "Objective")
+   {
+      if (currentState == NOMINAL) 
+      {
+         // id (2nd parameter here) for gradients is always 0
+         gradientCalculator.Achieved(-1, 0, 0.0, value);
+      }
+           
+      if (currentState == PERTURBING) 
+      {
+         gradientCalculator.Achieved(pertNumber, 0, perturbation[pertNumber], 
+                                     value);
+      }
+   }
+   else
+   {
+      // build the correct ID number
+      Integer idToUse;
+      if (resultType == "EqConstraint")
+         idToUse = id - 1000;
+      else
+         idToUse = id - 2000 + eqConstraintCount;
+      
+      if (currentState == NOMINAL) 
+      {
+         jacobianCalculator.Achieved(-1, idToUse, 0.0, value);
+      }
+           
+      if (currentState == PERTURBING) 
+      {
+         jacobianCalculator.Achieved(pertNumber, idToUse, perturbation[pertNumber], 
+                                     value);
+      }
+      
+   }
+   
+   
+   /// Add code for the constraint feeds here
 }
 
 
@@ -201,7 +356,26 @@ void SteepestDescent::SetResultValue(Integer id, Real value,
 //------------------------------------------------------------------------------
 bool SteepestDescent::Initialize()
 {
-   return false;
+   // Variable initialization is in the Solver code
+   bool retval = InternalOptimizer::Initialize();
+   
+   if (retval)
+      retval = gradientCalculator.Initialize(registeredVariableCount);
+   
+   if (retval)
+   {
+      if (registeredComponentCount > 0)
+         retval = jacobianCalculator.Initialize(registeredVariableCount, 
+               registeredComponentCount);
+   }
+   
+   #ifdef DEBUG_SD_INIT
+   MessageInterface::ShowMessage
+      ("SteepestDescent::Initialize() completed; %d variables and %d constraints\n",
+       registeredVariableCount, registeredComponentCount);
+   #endif
+
+   return retval;
 }
 
 //------------------------------------------------------------------------------
@@ -214,20 +388,55 @@ bool SteepestDescent::Initialize()
 //------------------------------------------------------------------------------
 void SteepestDescent::RunNominal()
 {
+   pertNumber = -1;
+   currentState = PERTURBING;
 }
 
 void SteepestDescent::RunPerturbation()
 {
+   // Calculate the perts, one at a time
+   if (pertNumber != -1)
+      // Back out the last pert applied
+      variable.at(pertNumber) = lastUnperturbedValue;
+   ++pertNumber;
+
+   if (pertNumber == variableCount)  // Current set of perts have been run
+   {
+      currentState = CALCULATING;
+      pertNumber = -1;
+      return;
+   }
+
+   lastUnperturbedValue = variable.at(pertNumber);
+   variable.at(pertNumber) += perturbation.at(pertNumber);
+   pertDirection.at(pertNumber) = 1.0;
+   
+   if (variable[pertNumber] > variableMaximum[pertNumber])
+   {
+      pertDirection.at(pertNumber) = -1.0;
+      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+   }    
+   if (variable[pertNumber] < variableMinimum[pertNumber])
+   {
+      pertDirection.at(pertNumber) = -1.0;
+      variable[pertNumber] -= 2.0 * perturbation[pertNumber];
+   }
+       
+   WriteToTextFile();
 }
 
 
 void SteepestDescent::CalculateParameters()
 {
+   gradientCalculator.Calculate(gradient);
+   jacobianCalculator.Calculate(jacobian);
+   currentState = CHECKINGRUN;
 }
 
 
 void SteepestDescent::CheckCompletion()
 {
+   currentState = FINISHED;
 }
 
 

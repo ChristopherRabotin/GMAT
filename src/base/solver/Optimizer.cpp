@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         Optimizer
 //------------------------------------------------------------------------------
@@ -58,13 +58,14 @@ const Integer Optimizer::INEQ_CONST_START = 2000;
 
 Optimizer::Optimizer(std::string typeName, std::string name) :
    Solver                  (typeName, name),
-   objectiveFnName         ("Objective"),
+   objectiveDefined        (false),
+   objectiveFnName         (""),
    cost                    (0.0),   // valid value?
    tolerance               (0.0),   // valid value?
    converged               (false),
    eqConstraintCount       (0),
    ineqConstraintCount     (0)
- {
+{
    objectTypeNames.push_back("Optimizer");
    parameterCount = OptimizerParamCount;
 }
@@ -78,7 +79,8 @@ Optimizer::~Optimizer()
 
 Optimizer::Optimizer(const Optimizer &opt) :
    Solver                  (opt),
-   objectiveFnName         ("Objective"),
+   objectiveDefined        (false),
+   objectiveFnName         (""),
    cost                    (opt.cost), 
    tolerance               (opt.tolerance), 
    converged               (false),
@@ -123,6 +125,23 @@ Optimizer&
  
    return *this;
 }
+
+bool Optimizer::IsParameterReadOnly(const Integer id) const
+{
+   if ((id == OBJECTIVE_FUNCTION) ||
+       (id == EQUALITY_CONSTRAINT_NAMES) ||
+       (id == INEQUALITY_CONSTRAINT_NAMES))
+      return true;
+      
+   return Solver::IsParameterReadOnly(id);
+}
+
+
+bool Optimizer::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
 
 bool Optimizer::Initialize()
 {
@@ -169,6 +188,8 @@ Integer Optimizer::SetSolverResults(Real *data,
    {
       // need to check here if the name is not the same as the 
       // objectiveFnName? (error)
+      objectiveDefined = true;
+      objectiveFnName = name;
       cost = data[0];
       return 0;
    }
@@ -276,7 +297,9 @@ std::string Optimizer::GetProgressString()
                Integer localIneqCount     = ineqConstraintNames.size();
                progress << "************************************************"
                         << "********\n"
-                        << "*** Performing Fmincon Optimization "
+                        << "*** Performing "
+                        << typeName 
+                        << " Optimization "
                         << "(using \"" << instanceName << "\")\n";
 
                // Write out the setup data
@@ -294,26 +317,32 @@ std::string Optimizer::GetProgressString()
                   progress << *current;
                }
 
-               progress << "\n   Equality Constraints:  ";
-
-               for (current = eqConstraintNames.begin(), i = 0;
-                    current != eqConstraintNames.end(); ++current)
+               if (localEqCount > 0)
                {
-                  if (current != eqConstraintNames.begin())
-                     progress << ", ";
-                  progress << *current;
+                  progress << "\n   Equality Constraints:  ";
+   
+                  for (current = eqConstraintNames.begin(), i = 0;
+                       current != eqConstraintNames.end(); ++current)
+                  {
+                     if (current != eqConstraintNames.begin())
+                        progress << ", ";
+                     progress << *current;
+                  }
                }
-
-               progress << "\n   Inequality Constraints:  ";
-
-               for (current = ineqConstraintNames.begin(), i = 0;
-                    current != ineqConstraintNames.end(); ++current)
+               
+               if (localIneqCount > 0)
                {
-                  if (current != ineqConstraintNames.begin())
-                     progress << ", ";
-                  progress << *current;
+                  progress << "\n   Inequality Constraints:  ";
+   
+                  for (current = ineqConstraintNames.begin(), i = 0;
+                       current != ineqConstraintNames.end(); ++current)
+                  {
+                     if (current != ineqConstraintNames.begin())
+                        progress << ", ";
+                     progress << *current;
+                  }
                }
-
+               
                progress << "\n****************************"
                         << "****************************";
             }

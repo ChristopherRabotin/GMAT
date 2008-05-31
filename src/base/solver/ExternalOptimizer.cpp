@@ -58,6 +58,8 @@ ExternalOptimizer::ExternalOptimizer(std::string type, std::string name) :
  {
    objectTypeNames.push_back("ExternalOptimizer");
    parameterCount = ExternalOptimizerParamCount;
+   
+   isInternal = false;
 }
 
 
