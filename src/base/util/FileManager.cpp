@@ -19,7 +19,7 @@
 
 #include "FileManager.hpp"
 #include "MessageInterface.hpp"
-#include "GmatBaseException.hpp"
+#include "UtilityException.hpp"
 #include "StringUtil.hpp"
 #include "FileTypes.hpp"          // for GmatFile::MAX_PATH_LEN
 #include "FileUtil.hpp"           // for GmatFileUtil::
@@ -254,7 +254,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
    std::ifstream mInStream(mStartupFileName.c_str());
    
    if (!mInStream)
-      throw GmatBaseException
+      throw UtilityException
          ("FileManager::ReadStartupFile() cannot open:" + fileName);
    
    while (!mInStream.eof())
@@ -279,7 +279,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       if (equal != "=")
       {
          mInStream.close();
-         throw GmatBaseException
+         throw UtilityException
             ("FileManager::ReadStartupFile() expecting '=' at line:\n" +
              std::string(line) + "\n");
       }
@@ -302,7 +302,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
             }
             else
             {
-               throw GmatBaseException
+               throw UtilityException
                   ("FileManager::ReadStartupFile() the VERSION is incorrect.\n"
                    "The version date it can handle is " + VERSION_DATE + "\n");
             }
@@ -312,7 +312,7 @@ void FileManager::ReadStartupFile(const std::string &fileName)
       if (correctVersionFound)
          AddFileType(type, name);
       else
-         throw GmatBaseException
+         throw UtilityException
             ("FileManager::ReadStartupFile() the VERSION not found.\n"
              "It no longer can read old startup file.\n");
    } // end While()
@@ -351,7 +351,7 @@ void FileManager::WriteStartupFile(const std::string &fileName)
    std::ofstream outStream(outFileName.c_str());
    
    if (!outStream)
-      throw GmatBaseException
+      throw UtilityException
          ("FileManager::WriteStartupFile() cannot open:" + fileName);
 
    //---------------------------------------------
@@ -546,7 +546,7 @@ std::string FileManager::GetPathname(const FileType type)
    ss << "FileManager::GetPathname() enum type: " << type
       << " is out of bounds\n";
    
-   throw GmatBaseException(ss.str());
+   throw UtilityException(ss.str());
 }
 
 
@@ -593,7 +593,7 @@ std::string FileManager::GetPathname(const std::string &typeName)
       }
    }
    
-   throw GmatBaseException("FileManager::GetPathname() file type: " + typeName +
+   throw UtilityException("FileManager::GetPathname() file type: " + typeName +
                            " is unknown\n");
 }
 
@@ -619,7 +619,7 @@ std::string FileManager::GetFilename(const FileType type)
    ss << "FileManager::GetFilename() enum type: " << type
       << " is out of bounds\n";
    
-   throw GmatBaseException(ss.str());
+   throw UtilityException(ss.str());
 }
 
 
@@ -645,7 +645,7 @@ std::string FileManager::GetFilename(const std::string &typeName)
    
    //return "UNKNOWN_FILE_TYPE";
    
-   throw GmatBaseException("FileManager::GetFilename() file type: " + typeName +
+   throw UtilityException("FileManager::GetFilename() file type: " + typeName +
                            " is unknown\n");
 }
 
@@ -672,7 +672,7 @@ std::string FileManager::GetFullPathname(const std::string &typeName)
 // std::string GetAbsPathname(const FileType type)
 //------------------------------------------------------------------------------
 /**
- * Retrives full pathname for the type.
+ * Retrieves full pathname for the type.
  *
  * @param <type> file type of which filename to be returned.
  *
@@ -690,7 +690,7 @@ std::string FileManager::GetAbsPathname(const FileType type)
    ss << "FileManager::GetAbsPathname() enum type: " << type <<
       " is out of bounds\n";
    
-   throw GmatBaseException(ss.str());
+   throw UtilityException(ss.str());
 }
 
 
@@ -748,7 +748,7 @@ std::string FileManager::GetAbsPathname(const std::string &typeName)
       }
    }
    
-   throw GmatBaseException
+   throw UtilityException
       (GmatStringUtil::ToUpper(typeName) + " not in the gmat_startup_file\n");
    
 }
@@ -820,7 +820,7 @@ void FileManager::SetAbsPathname(const FileType type, const std::string &newpath
       ss << "FileManager::GetAbsPathname() enum type: " << type <<
          " is out of bounds of file path\n";
    
-      throw GmatBaseException(ss.str());
+      throw UtilityException(ss.str());
    }
 }
 
@@ -867,7 +867,7 @@ void FileManager::SetAbsPathname(const std::string &type, const std::string &new
       }
       else
       {
-         throw GmatBaseException
+         throw UtilityException
             ("FileManager::SetAbsPathname() type doesn't contain _PATH");
       }
    }
@@ -1124,14 +1124,14 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
          
          //loj: Should we just throw an exception?
          //mInStream.close();
-         //throw GmatBaseException
+         //throw UtilityException
          //   ("FileManager::AddFileType() expecting 'PATH/' in line:\n" +
          //    type + " = " + name);
       }
    }
    else
    {
-      throw GmatBaseException
+      throw UtilityException
          ("FileManager::AddFileType() file type should have '_PATH' or '_FILE'"
           " in:\n" + type);
    }

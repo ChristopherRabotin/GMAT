@@ -190,7 +190,6 @@ OBJECTS = \
     coordsystem/TOEEcAxes.o \
     coordsystem/TOEEqAxes.o \
     coordsystem/TrueOfDateAxes.o \
-    executive/FileManager.o \
     executive/Moderator.o \
     executive/PublisherException.o \
     executive/Publisher.o \
@@ -251,7 +250,6 @@ OBJECTS = \
     interpreter/MathTree.o \
     interpreter/ScriptInterpreter.o \
     interpreter/ScriptReadWriter.o \
-    interpreter/TextParser.o \
     interpreter/Validator.o \
     math/Abs.o \
     math/Acos.o \
@@ -409,6 +407,7 @@ OBJECTS = \
     util/ElapsedTime.o \
     util/EopFile.o \
     util/Equinoctial.o \
+    util/FileManager.o \
     util/FileUtil.o \
     util/GmatGlobal.o \
     util/GravityFile.o \
@@ -431,6 +430,7 @@ OBJECTS = \
     util/SphericalRADEC.o \
     util/StringTokenizer.o \
     util/StringUtil.o \
+    util/TextParser.o \
     util/TimeSystemConverter.o \
     util/TimeTypes.o \
     util/UtcDate.o \

@@ -20,7 +20,7 @@
 #include "TextParser.hpp"
 #include "StringTokenizer.hpp"
 #include "StringUtil.hpp"
-#include "InterpreterException.hpp"
+#include "UtilityException.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TP 1
@@ -491,7 +491,7 @@ StringArray TextParser::ChunkLine()
          #endif
          
          sprintf(errorMsg, "The keyword \"Create\" not found in the definition block");
-         throw InterpreterException(errorMsg);
+         throw UtilityException(errorMsg);
       }
       else
       {
@@ -510,7 +510,7 @@ StringArray TextParser::ChunkLine()
             #endif
             
             sprintf(errorMsg, "Object type not found in the definition block");
-            throw InterpreterException(errorMsg);
+            throw UtilityException(errorMsg);
          }
          else
          {
@@ -528,7 +528,7 @@ StringArray TextParser::ChunkLine()
                #endif
                
                sprintf(errorMsg, "Object name not found in the definition block");
-               throw InterpreterException(errorMsg);
+               throw UtilityException(errorMsg);
             }
             else
             {
@@ -552,7 +552,7 @@ StringArray TextParser::ChunkLine()
          #endif
          
          sprintf(errorMsg, "Command name not found in the command block");
-         throw InterpreterException(errorMsg);
+         throw UtilityException(errorMsg);
       }
       else
       {
@@ -590,7 +590,7 @@ StringArray TextParser::ChunkLine()
          #endif
          
          sprintf(errorMsg, "No assignment expression found in the assignment block");
-         throw InterpreterException(errorMsg);
+         throw UtilityException(errorMsg);
       }
       else
       {
@@ -620,7 +620,7 @@ StringArray TextParser::ChunkLine()
                #endif
                
                sprintf(errorMsg, "LHS of \"=\" not found in the assignment block");
-               throw InterpreterException(errorMsg);
+               throw UtilityException(errorMsg);
             }
             else
             {
@@ -637,7 +637,7 @@ StringArray TextParser::ChunkLine()
                   #endif
                   
                   sprintf(errorMsg, "RHS of \"=\" not found in the assignment block");
-                  throw InterpreterException(errorMsg);
+                  throw UtilityException(errorMsg);
                }
                else
                {
@@ -917,7 +917,7 @@ StringArray TextParser::SeparateBrackets(const std::string &chunk,
          
          sprintf(errorMsg, "\"%s\" is not enclosed with \"%s\"", str1.c_str(),
                  bracketPair.c_str());
-         throw InterpreterException(errorMsg);
+         throw UtilityException(errorMsg);
       }
    }
    
@@ -1075,7 +1075,7 @@ char TextParser::GetClosingBracket(const char &openBracket)
       
    default:
       sprintf(errorMsg, "TextParser found unknown open bracket: %c", openBracket);
-      throw InterpreterException(errorMsg);
+      throw UtilityException(errorMsg);
    }
 }
 

@@ -1001,7 +1001,7 @@ void Planet::InitializePlanet(const std::string &cBody)
       
       potentialFileName = filename;
    }
-   catch (GmatBaseException &e)
+   catch (BaseException &e)
    {
       MessageInterface::ShowMessage(e.GetFullMessage());
    }
