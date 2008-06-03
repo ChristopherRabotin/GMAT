@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             Factory
 //------------------------------------------------------------------------------
@@ -21,27 +21,31 @@
 #define Factory_hpp
 
 #include "gmatdefs.hpp"
-#include "Spacecraft.hpp"
-#include "Parameter.hpp"
-#include "Burn.hpp"
-#include "Propagator.hpp"
-#include "ForceModel.hpp"
-#include "PhysicalModel.hpp"
-#include "PropSetup.hpp"
-#include "StopCondition.hpp"
-#include "CalculatedPoint.hpp"
-#include "CelestialBody.hpp"
-#include "SolarSystem.hpp"
-#include "Solver.hpp"
-#include "Subscriber.hpp"
-#include "GmatCommand.hpp"
-#include "AtmosphereModel.hpp"
-#include "Function.hpp"
-#include "Hardware.hpp"
-#include "AxisSystem.hpp" 
-#include "CoordinateSystem.hpp"
-#include "MathNode.hpp"
-#include "Attitude.hpp"
+#include "GmatBase.hpp"
+
+// Forward references
+class Spacecraft;
+class SpaceObject;
+class Parameter;
+class Burn;
+class Propagator;
+class ForceModel;
+class PhysicalModel;
+class PropSetup;
+class StopCondition;
+class CalculatedPoint;
+class CelestialBody;
+class SolarSystem;
+class Solver;
+class Subscriber;
+class GmatCommand;
+class AtmosphereModel;
+class Function;
+class Hardware;
+class AxisSystem;
+class CoordinateSystem;
+class MathNode;
+class Attitude;
 
 class GMAT_API Factory
 {

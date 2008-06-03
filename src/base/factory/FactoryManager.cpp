@@ -771,8 +771,9 @@ const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
          StringArray objs = (*f)->GetListOfCreatableObjects();
          if (!objs.empty())
             entireList.insert(entireList.end(), objs.begin(), objs.end());
-         
-         break;
+            
+         // There may be multiple factories of a given type, so keep looking
+         //break;
       }
       ++f;
    }
