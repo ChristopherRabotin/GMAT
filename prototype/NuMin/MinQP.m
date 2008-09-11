@@ -205,7 +205,7 @@ while Converged == 0
     %       If the matrix of active constraints is not empty then use the
     %       null space method to calculate the step size.  Otherwise, use
     %       the a Newton step.
-    %  Solver the following system:
+    %  Solve the following system:
     %        [  G  -A^T ][p     ] = [g]
     %        [  A   0   ][lambda] = [h]
     %  where
@@ -397,6 +397,10 @@ mE = size(eqInd,1);
 mW = size(W,1);
 mA = mE + mW;
 z  = n + m;                     %  Number of variables in Phase I problem
+
+%----- Determine if the working set is linearly independent.  If it is not,
+%      then remove constraints to make it linearly independent.
+
 
 %----- Calculate a step that satisfies the initial working set, but is as
 %      close to the user's guess as possible.  

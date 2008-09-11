@@ -1,6 +1,13 @@
 function [x,f,Converged,OutPut] = miNLP(costFunc,x0, A, b, Aeq, beq, lb, ...
     ub, nlconstFunc, Options, varargin)
 
+%  To do:  
+%  1)  Fix minQP to remove linearly independent constraints
+%  2)  Fix minQP to identify problems with incompatible constraints.
+%  3)  Fix miNLP to switch to elastic mode when QP subproblem fails.
+%  4)  Add line search and merit function from SNOPT.
+%  5)  Add Hessian update from SNOPT.
+
 %  miNLP finds a constrained minimum of a function of several variables.
 %  miNLP attempts to solve problems of the form:
 %       min F(X)  subject to:  A*X  >= b,  Aeq*X  = beq  (linear constraints)
@@ -88,7 +95,11 @@ n        = length(x0);                  %  Number of optimization variables
 %----- Evaluate the function and gradient at the initial guess
 [f,gradF,numGEval]     = GetDerivatives(costFunc,x0,Options,varargin{:});
 numfEval               = numfEval + numGEval;
-[ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
+if ~isempty(nlconstFunc)
+   [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x0,Options,varargin{:});
+else 
+   ci= []; ce = []; Ji =[]; Je = [];
+end
 
 %----- If there are bound contraints, convert them to linear inequalities
 numBound = sum([(lb > -inf);(ub < inf)]);
@@ -249,7 +260,11 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
         %-----  Evaluate objective,constraints, and merit at at x = x + alpha*p
         [f,gradF,numGEval]     = GetDerivatives(costFunc,x,Options,varargin{:});
         numfEval               = numfEval + numGEval;
-        [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x,Options,varargin{:});
+        if ~isempty(nlconstFunc)
+           [ci,ce,Ji,Je,numGEval] = GetConDerivatives(nlconstFunc,x,Options,varargin{:});
+        else 
+           ci= []; ce = []; Ji =[]; Je = [];
+        end
         [c,J]       = ConCatConstraints(x,ci,ce,Ji,Je,A,b,Aeq,beq,mLI,mLE);
         cviol       = CalcConViolations(c,mE,mI,m);   
         meritFalpha = CalcMeritFunction(f, cviol, mu, Options);
@@ -269,8 +284,13 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
 
     s         = alpha*px;
     lambda    = lambda + alpha*plam;     % N&W Eq.
-    gradLagrangianXK = gradFold - Jold*lambda;
-    gradLagrangian   = gradF - J*lambda;
+    if ~isempty(lambda)
+       gradLagrangianXK = gradFold - Jold*lambda;
+       gradLagrangian   = gradF - J*lambda;
+    else 
+        gradLagrangianXK = gradFold;
+        gradLagrangian   = gradF;
+    end
     y                = gradLagrangian - gradLagrangianXK;
 
     %----------------------------------------------------------------------
@@ -406,28 +426,35 @@ cviol = [eqViol;ineqViol];
 %==========================================================================
 function Converged = CheckConvergence(gradLagrangian, f, fnew, x, xnew, alpha, maxConViolation, Options)
 
-if (norm(gradLagrangian) < Options.TolGrad) && (maxConViolation < Options.TolCon)
+if ~isempty(maxConViolation)
+    if maxConViolation > Options.TolCon
+        Converged = 0;
+        return
+    end
+end
 
+if (norm(gradLagrangian) < Options.TolGrad)
+    
     Converged = 1;
     field = sprintf(['\n Optimization Terminated Successfully \n' ...
         ' Magnitude of gradient of Lagrangian less that Options.tol \n']);
     disp(field)
 
-elseif ( abs(fnew - f) < Options.TolF ) && maxConViolation < Options.TolCon
+elseif ( abs(fnew - f) < Options.TolF ) 
 
     Converged = 2;
     field = sprintf(['\n Optimization Terminated Successfully \n' ...
         ' Absolute value of function improvement \n is less than tolerance']);
     disp(field)
 
-elseif (norm(x - xnew) < Options.TolX) && maxConViolation < Options.TolCon
+elseif (norm(x - xnew) < Options.TolX) 
 
     Converged = 3;
     field = sprintf(['\n Optimization Terminated Successfully \n' ...
         ' Change in x is less than tolerance \n']);
     disp(field)
 
-elseif alpha < Options.TolStep && maxConViolation < Options.TolCon
+elseif alpha < Options.TolStep 
 
     Converged = 4;
     field = sprintf(['\n Optimization Terminated Successfully \n' ...
