@@ -102,12 +102,17 @@ else
 end
 
 %----- If there are bound contraints, convert them to linear inequalities
+%----- Also, if the initial guess breaks a bound constraint, set to bound
 numBound = sum([(lb > -inf);(ub < inf)]);
 Ab       = zeros(numBound,n);
 bb       = zeros(numBound,1);
 cb = 0;
 if ~isempty(lb)
     for i = 1:n;
+        %----- Set guess to bound if guess is lower than bound
+        if x0(i) < lb(i);
+            x0(i) = lb(i);
+        end
         %----- Construct the lower bound constraint matrix
         if lb(i) > -inf
             cb = cb + 1;
@@ -118,6 +123,10 @@ if ~isempty(lb)
 end
 if ~isempty(ub)
     for i = 1:n;
+        %----- Set guess to bound if guess is greater than bound
+        if x0(i) > ub(i);
+            x0(i) = ub(i);
+        end
         %----- Construct the upper bound constraint matrix
         if ub(i) < inf
             cb = cb + 1;
@@ -128,6 +137,9 @@ if ~isempty(ub)
 end
 A = [A;Ab];
 b = [b;bb];
+
+
+
 
 %----- Determine dimensionality of the problem and
 mNLI = size(ci,1);              %  Number of nonlin. ineq. constraints
@@ -325,6 +337,24 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
             r   = theta*y + (1 - theta)*W*s;            %  Ref 1. Eq. 18.14
             W   = W - W*s*s'*W/projHess + r*r'/(s'*r);  %  Ref 1. Eq. 18.16
             W   = (W' + W)*0.5;
+            
+        elseif strcmp(Options.DescentMethod,'SelfScaledBFGS')
+
+            %----- The self-scaled BFGS update.  See section 4.3.3 of
+            %      Eldersveld.
+            projHess = s'*W*s;
+            if s'*y >= projHess;
+                gamma = 1;
+                method = '   BFGS Update';
+                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  %  Ref 1. Eq. 18.16
+                W   = (W' + W)*0.5;
+            elseif 0 < s'*y &&  s'*y <= projHess
+                gamma = y'*s/(projHess);  
+                method = '   Self Scaled BFGS ';
+                W   = gamma*W - gamma*W*s*s'*W/projHess + y*y'/(s'*y);  %  Ref 1. Eq. 18.16
+                W   = (W' + W)*0.5;
+            end    
+
 
         end
 

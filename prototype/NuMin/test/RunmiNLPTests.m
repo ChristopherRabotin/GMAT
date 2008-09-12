@@ -9,12 +9,12 @@
 %   Sept-08-08  S. Hughes:  Created the initial version.
 
 %-----  Set Options Structure for miNLP
-Options.DescentMethod     = 'DampedBFGS';
+Options.DescentMethod     = 'SelfScaledBFGS';
 Options.StepSearchMethod  = 'NocWright';
 Options.FiniteDiffVector  = ones(5,1)*1e-9;
 Options.DerivativeMethod  = 'Analytic';
 Options.MaxIter           = 350;
-Options.MaxFunEvals       = 1750;
+Options.MaxFunEvals       =  750;
 Options.TolCon            = 1e-8;
 Options.TolX              = 1e-8;
 Options.TolF              = 1e-8;
@@ -26,7 +26,7 @@ opt                       = optimset('Display','iter','GradObj','On','GradCon','
                                      'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','On','TolFun',Options.TolF,'TolCon',Options.TolF);
 % TP319'; 
 %-----  Define names of test problems 
-ProblemSet = {'TP395'; 'TP394'; 'TP246';  'TP201' ; 'TP328'; 'TP6'; 'PLR_T1_4'; 'QLR_T1_1';;'SGR_P1_2';   'TP6';'TP1';  'TP218';...
+ProblemSet = {'TP239';'TP238'; 'TP395'; 'TP394'; 'TP246';  'TP201' ; 'TP328'; 'TP6'; 'PLR_T1_4'; 'QLR_T1_1';;'SGR_P1_2';   'TP6';'TP1';  'TP218';...
               'TP369';    'TP242'; 'TP225';'TP254'; 'PQR_T1_6' ; 'LQR_T1_4';'LLR_T1_1'...
               ;'LPR_T1_1'; 'LPR_T1_5';  'SGR_P1_2'; 'PLR_T1_2';'SLR_T1_1'; 'QLR_T1_2' ;   };
 

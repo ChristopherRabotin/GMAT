@@ -10,12 +10,12 @@
 
 global objname conname
 
-Options.DescentMethod     = 'DampedBFGS';
+Options.DescentMethod     = 'SelfScaledBFGS';
 Options.StepSearchMethod  = 'NocWright';
 Options.FiniteDiffVector  = ones(5,1)*1e-9;
 Options.DerivativeMethod  = 'Analytic';
-Options.MaxIter           = 650;
-Options.MaxFunEvals       = 350;
+Options.MaxIter           = 350;
+Options.MaxFunEvals       =  750;
 Options.TolCon            = 1e-8;
 Options.TolX              = 1e-8;
 Options.TolF              = 1e-8;
@@ -26,17 +26,17 @@ Options.QPMethod          = 'minQP';
 opt                       = optimset('Display','iter','GradObj','On','GradCon','On', 'MaxIter',Options.MaxIter ,...
                                      'MaxFunEvals',Options.MaxFunEvals,'DerivativeCheck','Off','TolFun',Options.TolF,'TolCon',Options.TolF);
 %'TP220'; 'TP319'; 'TP328';
-ProblemSet = { 'TP395' ;'TP394' ;'PQR_P1_4'; 'PLR_T1_4'; ;'QLR_T1_1'; 'LQR_T1_4'; 'TP6';'TP1';  'TP218';...
+ProblemSet = {'TP239';'TP238'; 'TP395' ;'TP394' ;'PQR_P1_4'; 'PLR_T1_4'; ;'QLR_T1_1'; 'LQR_T1_4'; 'TP6';'TP1';  'TP218';...
               'TP369';    'TP242'; 'TP225';'TP254'; 'PQR_T1_6' ; 'LQR_T1_4';'LLR_T1_1';...
              'LPR_T1_1'; 'LPR_T1_5';  'SGR_P1_2'; 'PLR_T1_2';'SLR_T1_1'; 'QLR_T1_2' ;  };
 
 % You need SNOPT optimizer for these!!!
-snset('Defaults');
-snprintfile('snoptmain2.out');
-snsummary  ('snoptmain2.sum');
-snspec     ('snoptmain2.spc');
-snseti     ('Major Iteration limit' , Options.MaxIter );
-snset('Minimize');
+%snset('Defaults');
+%snprintfile('snoptmain2.out');
+%snsummary  ('snoptmain2.sum');
+%snspec     ('snoptmain2.spc');
+%snseti     ('Major Iteration limit' , Options.MaxIter );
+%snset('Minimize');
 
 for i = 1:size(ProblemSet,1);
     
@@ -47,7 +47,7 @@ for i = 1:size(ProblemSet,1);
     d       = feval(ProblemSet{i});
     RunData{i}.func =  name;
     
-    %----- Call miNLP and save data
+     %----- Call miNLP and save data
     [x,f,exitFlag,OutPut]       = miNLP(objname,d.x0,d.A,d.b,d.Aeq,d.beq,d.lb,d.ub,conname,Options);
     RunData{i}.miNLP.x         = x;
     RunData{i}.miNLP.f         = f;
@@ -65,9 +65,13 @@ for i = 1:size(ProblemSet,1);
     RunData{i}.fmincon.iter      = OutPut.iterations;
     RunData{i}.fmincon.fevals    = OutPut.funcCount;
     
+    
+
+    
+
     % You need SNOPT optimizer for these!!!
-    [Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
-    [x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTObjCon',[],[], [],iGfun,jGvar);
+    %[Flow,Fupp,iGfun,jGvar] = prepSNOPT(name,x,d);
+    %[x,F,inform] = snopt(d.x0,d.lb,d.ub,Flow,Fupp,'SNOPTObjCon',[],[], [],iGfun,jGvar);
     
     
 end
