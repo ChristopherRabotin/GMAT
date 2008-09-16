@@ -1,0 +1,28 @@
+This file describes the steps you need to take to get GMAT set to run from the 
+bin folder.  
+
+The GMAT repository is set up to build GMAT's executable applications and place
+them in the top level bin folder.  The applications will not run without some 
+additional files.  Those files are platform specific, so they are omitted from 
+the GMAT repository, but are available from GMAT's SourceForge downloads.  Here 
+are the steps you need to take to use them:
+
+1. Download the environment data file archive from SourceForge 
+(http://sourceforge.net/project/showfiles.php?group_id=201258)
+
+2. Unpack the downloaded archive into a new folder.  This will give you a
+subfolder named "gmat" that contains folders named "files" and "matlab", along 
+with a few data files that can be ignored for now.
+
+3. Copy the "files" and (if you use MATLAB) "matlab" folders into the bin folder
+in the GMAT tree.
+
+4. Copy the file named "gmat_startup_file.txt" from the build subfolder for your 
+platform into the bin folder.
+
+Once you have completed these steps, GMAT executables built from source can be 
+run in the bin directory.
+
+Note: If you have write access to the GMAT repository, please be sure the new 
+files are in the subversion ignore file so that you don't inadvertently check 
+them in to the repository.

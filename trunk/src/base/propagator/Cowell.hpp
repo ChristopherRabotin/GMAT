@@ -1,0 +1,62 @@
+//$Header$
+// **************************************************************************
+// GMAT: Goddard Mission Analysis Tool
+//
+// Author: Waka Waktola
+// Created: 2005/05/16
+//
+/**
+ * 
+ */
+// **************************************************************************
+
+#ifndef Cowell_hpp
+#define Cowell_hpp
+
+#include "gmatdefs.hpp"
+#include "Integrator.hpp"
+
+class GMAT_API Cowell : public Integrator
+{
+public:
+   Cowell(const std::string &typeStr, const std::string &nomme = "");
+   virtual ~Cowell(void);
+   Cowell(const Cowell& bs);
+   Cowell& operator=(const Cowell& bs);
+    
+   virtual GmatBase* Clone(void) const;
+   virtual bool Initialize();
+   virtual bool Step(Real dt);
+   virtual bool Step(void);
+   virtual bool RawStep(void);
+   virtual Real EstimateError(void);
+   virtual bool AdaptStep(Real maxerror);
+
+   // Parameter accessor methods -- overridden from GmatBase
+   virtual std::string         GetParameterText(const Integer id) const;
+   virtual Integer             GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType GetParameterType(const Integer id) const;
+   virtual std::string         GetParameterTypeString(const Integer id) const;
+   virtual Real    GetRealParameter(const Integer id) const;
+   virtual Real    GetRealParameter(const std::string &label) const;
+   virtual Real    SetRealParameter(const Integer id, const Real value);
+   virtual Real    SetRealParameter(const std::string &label, const Real value);
+        
+protected:
+
+   enum
+   {  /// Count of the parameters for this class
+      CowellParamCount = IntegratorParamCount
+   };
+   
+   // save for possible later use
+   //static const std::string
+   //PARAMETER_TEXT[CowellParamCount - IntegratorParamCount];
+   //static const Gmat::ParameterType
+   //PARAMETER_TYPE[CowellParamCount - IntegratorParamCount];
+
+private:
+   /// The estimated state
+   Real *estimatedState;
+};
+#endif

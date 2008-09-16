@@ -1,0 +1,5 @@
+//$Header$
+
+open    BITMAP "bitmaps/open.bmp"
+zoomin  BITMAP "bitmaps/zoomin.bmp"
+zoomout BITMAP "bitmaps/zoomout.bmp"

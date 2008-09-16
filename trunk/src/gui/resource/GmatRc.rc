@@ -1,0 +1,4 @@
+//$Header$
+
+#include "wx/msw/wx.rc"
+

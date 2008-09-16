@@ -1,0 +1,89 @@
+//$Header$
+//------------------------------------------------------------------------------
+//                                While
+//------------------------------------------------------------------------------
+// GMAT: Goddard Mission Analysis Tool.
+//
+// **Legal**
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number NNG04CC06P
+//
+// Author:  Wendy Shoan/GSFC/MAB
+// Created: 2004/08/10
+//
+/**
+* Definition for the While command class
+ */
+//------------------------------------------------------------------------------
+
+
+#ifndef While_hpp
+#define While_hpp
+
+#include "gmatdefs.hpp"
+#include "ConditionalBranch.hpp"
+#include "Parameter.hpp"
+
+/**
+* Command that manages processing for entry to the While statement
+ *
+ * The While command manages the While statement.
+ *
+ */
+class GMAT_API While : public ConditionalBranch
+{
+public:
+   // default constructor
+   While();
+   // copy constructor
+   While(const While &wc);
+   // operator =
+   While& operator=(const While &wc);
+   // destructor
+   virtual ~While(void);
+
+   // Inherited methods that need some enhancement from the base class
+   virtual bool         Append(GmatCommand *cmd);
+
+   // Methods used to run the command
+   virtual bool         Execute();
+
+   // inherited from GmatBase
+   // inherited from GmatBase
+   virtual std::string  GetParameterText(const Integer id) const;
+   virtual Integer      GetParameterID(const std::string &str) const;
+   virtual Gmat::ParameterType
+                        GetParameterType(const Integer id) const;
+   virtual std::string  GetParameterTypeString(const Integer id) const;
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
+   virtual GmatBase*    Clone() const;
+   virtual const std::string&
+                        GetGeneratingString(Gmat::WriteMode mode,
+                                            const std::string &prefix,
+                                            const std::string &useName);
+
+protected:
+
+      enum
+   {
+      NEST_LEVEL = ConditionalBranchParamCount,
+      WhileParamCount
+   };
+   
+   static const std::string PARAMETER_TEXT[WhileParamCount - ConditionalBranchParamCount];
+   
+   static const Gmat::ParameterType PARAMETER_TYPE[WhileParamCount - ConditionalBranchParamCount];
+   
+   /// Counter to track how deep the If nesting is
+   Integer                  nestLevel;
+   /// The object array used in GetRefObjectArray()
+   //ObjectArray              objectArray;
+
+};
+#endif  // While_hpp
