@@ -61,7 +61,7 @@ public:
    virtual bool Initialize();
    
    // method for planetary ephemris files
-   void CreatePlanetarySource();
+   void CreatePlanetarySource(bool setDefault = true);
    
    const StringArray& GetPlanetarySourceTypes();
    const StringArray& GetPlanetarySourceNames();
@@ -134,11 +134,14 @@ public:
                                             const bool value);
    virtual bool         SetBooleanParameter(const std::string &label,
                                             const bool value);
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
    virtual const StringArray&
                         GetStringArrayParameter(const Integer id) const;
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
-
    
    virtual Integer      GetOwnedObjectCount();
    virtual GmatBase*    GetOwnedObject(Integer whichOne);
@@ -229,6 +232,7 @@ protected:
    {
       BODIES_IN_USE = GmatBaseParamCount,
       NUMBER_OF_BODIES,
+      EPHEMERIS,
       OVERRIDE_TIME_SYSTEM,
       EPHEM_UPDATE_INTERVAL,
       SolarSystemParamCount

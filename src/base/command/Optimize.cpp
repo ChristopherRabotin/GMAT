@@ -37,7 +37,8 @@
 //#define DEBUG_CALLBACK
 //#define DEBUG_OPTIMIZE_CONSTRUCTION
 //#define DEBUG_OPTIMIZE_INIT
-
+//#define DEBUG_OPTIMIZE_EXECUTION
+   
 //------------------------------------------------------------------------------
 // static data
 //------------------------------------------------------------------------------
@@ -64,8 +65,6 @@ Optimize::PARAMETER_TYPE[OptimizeParamCount - SolverBranchCommandParamCount] =
 //------------------------------------------------------------------------------
 Optimize::Optimize() :
    SolverBranchCommand ("Optimize"),
-   optimizerName       (""),
-   optimizer           (NULL),
    optimizerConverged  (false),
    optimizerInDebugMode(false)
 {
@@ -81,8 +80,6 @@ Optimize::Optimize() :
 //------------------------------------------------------------------------------
 Optimize::Optimize(const Optimize& o) :
    SolverBranchCommand  (o),
-   optimizerName        (o.optimizerName),
-   optimizer            (NULL),
    optimizerConverged   (false),
    optimizerInDebugMode (o.optimizerInDebugMode)
 {
@@ -103,8 +100,6 @@ Optimize& Optimize::operator=(const Optimize& o)
     
    GmatCommand::operator=(o);
 
-   optimizerName        = o.optimizerName;
-   optimizer            = NULL;
    optimizerConverged   = false;
    optimizerInDebugMode = o.optimizerInDebugMode;
    localStore.clear();
@@ -117,8 +112,6 @@ Optimize& Optimize::operator=(const Optimize& o)
 //------------------------------------------------------------------------------
 Optimize::~Optimize()
 {
-   if (optimizer)
-      delete optimizer;
 }
 
 
@@ -180,13 +173,23 @@ const std::string& Optimize::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &prefix,
                                                  const std::string &useName)
 {
-   if (mode == Gmat::NO_COMMENTS)
+   generatingString = "";
+   
+   if (mode != Gmat::NO_COMMENTS)
    {
-      generatingString = "Optimize " + optimizerName + ";";
-      return generatingString;
+      generatingString = prefix;
    }
    
-   generatingString = prefix + "Optimize " + optimizerName + ";";
+   generatingString += "Optimize " + solverName;
+   
+   // Handle the option strings
+   generatingString += GetSolverOptionText();
+   
+   generatingString += ";";
+
+   if (mode == Gmat::NO_COMMENTS)
+      return generatingString;
+
    return SolverBranchCommand::GetGeneratingString(mode, prefix, useName);
 }
 
@@ -199,8 +202,8 @@ bool Optimize::RenameRefObject(const Gmat::ObjectType type,
 {
    if (type == Gmat::SOLVER)
    {
-      if (optimizerName == oldName)
-         optimizerName = newName;
+      if (solverName == oldName)
+         solverName = newName;
    }
    
    return true;
@@ -256,7 +259,7 @@ std::string Optimize::GetParameterTypeString(const Integer id) const
 std::string Optimize::GetStringParameter(const Integer id) const
 {
    if (id == OPTIMIZER_NAME)
-      return optimizerName;
+      return solverName;
     
    return SolverBranchCommand::GetStringParameter(id);
 }
@@ -268,7 +271,7 @@ bool Optimize::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == OPTIMIZER_NAME) 
    {
-      optimizerName = value;
+      solverName = value;
       return true;
    }
     
@@ -292,7 +295,7 @@ bool Optimize::GetBooleanParameter(const Integer id) const
 std::string Optimize::GetRefObjectName(const Gmat::ObjectType type) const
 {
    if (type == Gmat::SOLVER)
-      return optimizerName;
+      return solverName;
    return SolverBranchCommand::GetRefObjectName(type);
 }
 
@@ -304,7 +307,7 @@ bool Optimize::SetRefObjectName(const Gmat::ObjectType type,
 {
    if (type == Gmat::SOLVER) 
    {
-      optimizerName = name;
+      solverName = name;
       return true;
    }
    return SolverBranchCommand::SetRefObjectName(type, name);
@@ -320,26 +323,28 @@ bool Optimize::Initialize()
    #endif
    
    GmatBase *mapObj = NULL;
-   if ((mapObj = FindObject(optimizerName)) == NULL) 
+   if ((mapObj = FindObject(solverName)) == NULL) 
    {
       std::string errorString = "Optimize command cannot find optimizer \"";
-      errorString += optimizerName;
+      errorString += solverName;
       errorString += "\"";
       throw CommandException(errorString);
    }
 
    // Clone the optimizer for local use
-   optimizer = (Solver *)(mapObj->Clone());
-   optimizer->TakeAction("IncrementInstanceCount");
+   theSolver = (Solver *)(mapObj->Clone());
+   theSolver->TakeAction("IncrementInstanceCount");
    mapObj->TakeAction("IncrementInstanceCount");
    
-   if (optimizer->GetStringParameter("ReportStyle") == "Debug")
+   if (theSolver->GetStringParameter("ReportStyle") == "Debug")
       optimizerInDebugMode = true;      
     
    // Set the local copy of the optimizer on each node
    std::vector<GmatCommand*>::iterator node;
    GmatCommand *currentCmd;
+   specialState = Solver::INITIALIZING;
 
+   Integer constraintCount = 0, variableCount = 0, objectiveCount = 0;
    for (node = branch.begin(); node != branch.end(); ++node)
    {
       currentCmd = *node;
@@ -354,10 +359,31 @@ bool Optimize::Initialize()
                "   Optimize Command %d:  %s\n", ++nodeNum, 
                currentCmd->GetTypeName().c_str());       
          #endif
+         
          if ((currentCmd->GetTypeName() == "Vary") || 
              (currentCmd->GetTypeName() == "Minimize") ||
              (currentCmd->GetTypeName() == "NonlinearConstraint"))
-            currentCmd->SetRefObject(optimizer, Gmat::SOLVER, optimizerName);
+         {
+            currentCmd->SetRefObject(theSolver, Gmat::SOLVER, solverName);
+            if (theSolver->IsSolverInternal())
+            {
+               if (currentCmd->GetTypeName() == "Minimize")
+                  ++objectiveCount;
+               if (currentCmd->GetTypeName() == "NonlinearConstraint")
+               {
+                  ++constraintCount;
+               }
+               if (currentCmd->GetTypeName() == "Vary")
+                  ++variableCount;
+               
+               #ifdef DEBUG_OPTIMIZE_EXECUTION
+                  MessageInterface::ShowMessage(
+                     "   *** COUNTS: %d Costs, %d Variables, %d Constraints ***\n",
+                     objectiveCount, variableCount, constraintCount);
+               #endif
+            }               
+         }
+         
          currentCmd = currentCmd->GetNext();
       }
    }
@@ -366,24 +392,27 @@ bool Optimize::Initialize()
 
    if (retval == true) 
    {
-      // Optimizer specific initialization goes here: // wcs - why is this done twice?
-      if ((mapObj = FindObject(optimizerName)) == NULL) 
+      if (theSolver->IsSolverInternal())
       {
-         std::string errorString = "Optimize command cannot find optimizer \"";
-         errorString += optimizerName;
-         errorString += "\"";
-         throw CommandException(errorString);
+         theSolver->SetIntegerParameter(
+               theSolver->GetParameterID("RegisteredVariables"), variableCount);
+         theSolver->SetIntegerParameter(
+               theSolver->GetParameterID("RegisteredComponents"), 
+               constraintCount);
       }
-
-      retval = optimizer->Initialize();
+      retval = theSolver->Initialize();
    }
-   // NOTE that in the future we may have a callback to/from a non_MATLAB
-   // external optimizer
-   #if defined __USE_MATLAB__
-      if (optimizer->IsOfType("ExternalOptimizer") &&
-         (optimizer->GetStringParameter("SourceType") == "MATLAB"))
-         gmatInt->RegisterCallbackServer(this);
-   #endif
+   
+   // Register callbacks for external optimizers
+   if (theSolver->IsOfType("ExternalOptimizer"))
+   {
+      // NOTE that in the future we may have a callback to/from a non_MATLAB
+      // external optimizer
+      #if defined __USE_MATLAB__
+         if (theSolver->GetStringParameter("SourceType") == "MATLAB")
+            gmatInt->RegisterCallbackServer(this);
+      #endif
+   }
 
    return retval;
 }
@@ -401,7 +430,7 @@ bool Optimize::Execute()
    bool retval = true;
    
    // Drive through the state machine.
-   Solver::SolverState state = optimizer->GetState();
+   Solver::SolverState state = theSolver->GetState();
    
    #ifdef DEBUG_OPTIMIZE_COMMANDS
       MessageInterface::ShowMessage("Optimize::Execute(%c%c%d)\n",
@@ -415,6 +444,7 @@ bool Optimize::Execute()
    {
       commandComplete  = false;
       commandExecuting = false;
+      specialState = Solver::INITIALIZING;
    }  
 
    if (!commandExecuting) 
@@ -433,28 +463,187 @@ bool Optimize::Execute()
          MessageInterface::ShowMessage("Resetting the Optimizer\n");
       #endif
 
-      optimizer->TakeAction("Reset");
-      state = optimizer->GetState();
+      theSolver->TakeAction("Reset");
+      state = theSolver->GetState();
       
    }
-   /*  Revisit this if/when we add non-external optimizers !!!!!!!!!!!!!!!!!!!!!
-    * This should be commented out for the fmincon optimizer 
-    * (branch should be executed from ExecuteCallback)
-   */
-/*
-   if (branchExecuting)
+
+   // Branch based on the optimizer model; handle internal optimizers first
+   if (theSolver->IsSolverInternal())
    {
-      //retval = ExecuteBranch(); */
-      //callbackData = "10.0 20.0"; // *************** TEMPORARY testing *********
-      //ExecuteCallback();  // *************** TEMPORARY testing *****************
-     /* if (!branchExecuting && (state == Solver::FINISHED))
+      if (branchExecuting)
       {
-         commandComplete = true;
-      }  
+         retval = ExecuteBranch();
+         if (!branchExecuting && (state == Solver::FINISHED))
+         {
+            commandComplete = true;
+         }  
+      }
+      else
+      {
+         #ifdef DEBUG_OPTIMIZE_EXECUTION
+            MessageInterface::ShowMessage(
+               "Executing the Internal Optimizer %s\n", 
+               theSolver->GetName().c_str());
+         #endif
+            
+         GmatCommand *currentCmd;
+
+         
+         switch (startMode)
+         {
+            case RUN_INITIAL_GUESS:
+               #ifdef DEBUG_START_MODE
+                  MessageInterface::ShowMessage(
+                        "Running as RUN_INITIAL_GUESS, specialState = %d\n",
+                        specialState);
+               #endif
+               switch (specialState) 
+               {
+                  case Solver::INITIALIZING:
+                     currentCmd = branch[0];
+                     optimizerConverged = false;
+                     while (currentCmd != this)  
+                     {
+                        std::string type = currentCmd->GetTypeName();
+                        if ((type == "Optimize") || (type == "Vary") ||
+                            (type == "Minimize") || (type == "NonlinearConstraint"))
+                           currentCmd->Execute();
+                        currentCmd = currentCmd->GetNext();
+                     }
+                     StoreLoopData();
+                     specialState = Solver::NOMINAL;
+                     break;
+                        
+                  case Solver::NOMINAL:
+                     // Execute the nominal sequence
+                     if (!commandComplete) {
+                        branchExecuting = true;
+                        ResetLoopData();
+                     }
+                     specialState = Solver::RUNSPECIAL;
+                     break;
+                     
+                  case Solver::RUNSPECIAL:
+                     // Run once more to publish the data from the converged state
+                     if (!commandComplete)
+                     {
+                        ResetLoopData();
+                        branchExecuting = true;
+                        publisher->SetRunState(Gmat::SOLVEDPASS);
+                     }
+                     theSolver->Finalize();
+                     specialState = Solver::FINISHED;
+
+                     // Final clean-up
+                     optimizerConverged = true;
+                     break;
+                     
+                  case Solver::FINISHED:
+                     commandComplete = true;
+                     #ifdef DEBUG_OPTIMIZE_COMMANDS
+                        MessageInterface::ShowMessage(
+                        "Optimize::Execute - solver in FINISHED state\n");
+                     #endif
+                     optimizerConverged = true;
+      
+                     specialState = Solver::INITIALIZING;
+                     break;
+
+                  default:
+                     break;
+               }                     
+               break;
+               
+            case RUN_SOLUTION:
+               #ifdef DEBUG_START_MODE
+                  MessageInterface::ShowMessage(
+                        "Running as RUN_SOLUTION, state = %d\n", state);
+               #endif
+               throw SolverException(
+                     "Run Solution is not yet implemented for the Target "
+                     "command\n");
+               break;
+            
+            case RUN_AND_SOLVE:
+            default:
+               #ifdef DEBUG_START_MODE
+                  MessageInterface::ShowMessage(
+                        "Running as RUN_AND_SOLVE or default, state = %d\n", 
+                        state);
+               #endif
+         
+               // Here is the usual state machine for the optimizer   
+               switch (state) 
+               {
+                  case Solver::INITIALIZING:
+                     currentCmd = branch[0];
+                     optimizerConverged = false;
+                     while (currentCmd != this)  
+                     {
+                        std::string type = currentCmd->GetTypeName();
+                        if ((type == "Optimize") || (type == "Vary") ||
+                            (type == "Minimize") || (type == "NonlinearConstraint"))
+                           currentCmd->Execute();
+                        currentCmd = currentCmd->GetNext();
+                     }
+                     StoreLoopData();
+                     break;
+      
+                  case Solver::NOMINAL:
+                     // Execute the nominal sequence
+                     if (!commandComplete) {
+                        branchExecuting = true;
+                        ResetLoopData();
+                     }
+                     break;
+                        
+                  case Solver::PERTURBING:
+                     branchExecuting = true;
+                     ResetLoopData();
+                     break;
+                        
+                  case Solver::CALCULATING:
+                     break;
+                     
+                  case Solver::CHECKINGRUN:
+                     break;
+                        
+                  case Solver::FINISHED:
+                     // Final clean-up
+                     commandComplete = true;
+                     #ifdef DEBUG_OPTIMIZE_COMMANDS
+                        MessageInterface::ShowMessage(
+                        "Optimize::Execute - solver in FINISHED state\n");
+                     #endif
+                     optimizerConverged = true;
+      
+                     // Run once more to publish the data from the converged state
+                     if (!commandComplete)
+                     {
+                        ResetLoopData();
+                        branchExecuting = true;
+                        publisher->SetRunState(Gmat::SOLVEDPASS);
+                     }
+                     break;
+      
+                  default:
+                     MessageInterface::ShowMessage("Optimize::invalid state %d\n",
+                           state);
+                     branchExecuting = false;
+                     commandComplete  = true;
+                     optimizerConverged = true;
+               }
+               break;
+         }
+      }
    }
    else
    {
-*/
+      #ifdef DEBUG_OPTIMIZE_EXECUTION
+         MessageInterface::ShowMessage("Executing the External Optimizer %s\n", 
+            theSolver->GetName().c_str());
+      #endif
       GmatCommand *currentCmd;
       publisher->SetRunState(Gmat::SOLVING);
       
@@ -484,39 +673,8 @@ bool Optimize::Execute()
                MessageInterface::ShowMessage(
                "Optimize::Execute - solver in RUNEXTERNAL state\n");
             #endif
-//            // Execute the nominal sequence
-//            if (!commandComplete) 
-//            {
-//               branchExecuting = true;
-//               ResetLoopData();
-//            }
             break;
                
-          /*     
-         case Solver::NOMINAL:
-            // Execute the nominal sequence
-            if (!commandComplete) 
-            {
-               branchExecuting = true;
-               ResetLoopData();
-            }
-            break;
-               
-         case Solver::CHECKINGRUN:
-            // Check for convergence; this is done in the optimizer state
-            // machine, so this case is a NoOp for the Optimize command
-            break;
-   
-         case Solver::PERTURBING:
-            branchExecuting = true;
-            ResetLoopData();
-            break;
-               
-         case Solver::CALCULATING:
-            // Calculate the next set of variables to use; this is performed in
-            // the optimizer -- nothing to be done here
-            break;
-         */      
          case Solver::FINISHED:
             // Final clean-up
             commandComplete = true;
@@ -534,16 +692,11 @@ bool Optimize::Execute()
                publisher->SetRunState(Gmat::SOLVEDPASS);
             }
             break;
-          /*     
-         case Solver::ITERATING:     // Intentional fall-through
-         */
-         default:
-         MessageInterface::ShowMessage("Optimize:: invalid state %d\n");
-            //throw CommandException(
-            //   "Invalid state in the Optimize state machine");
 
+         default:
+            MessageInterface::ShowMessage("Optimize::invalid state %d\n",state);
       }
-   //}
+   }
 
    if (!branchExecuting)
    {
@@ -551,9 +704,9 @@ bool Optimize::Execute()
          MessageInterface::ShowMessage(
             "Optimize::Execute - about to advance the state\n");
       #endif
-      optimizer->AdvanceState();
+      theSolver->AdvanceState();
 
-      if (optimizer->GetState() == Solver::FINISHED) 
+      if (theSolver->GetState() == Solver::FINISHED) 
       {
          optimizerConverged = true;
       }
@@ -567,7 +720,7 @@ bool Optimize::Execute()
       {
          dbgData += (*i)->GetGeneratingString() + "\n---\n";
       }
-      optimizer->SetDebugString(dbgData);
+      theSolver->SetDebugString(dbgData);
    }
    BuildCommandSummary(true);
    return retval;
@@ -579,8 +732,8 @@ bool Optimize::Execute()
 //------------------------------------------------------------------------------
 void Optimize::RunComplete()
 {
-   if (optimizer != NULL)
-      optimizer->Finalize();
+   if (theSolver != NULL)
+      theSolver->Finalize();
    
    SolverBranchCommand::RunComplete();
 }
@@ -599,7 +752,7 @@ bool Optimize::ExecuteCallback()
 
    #ifdef __USE_EXTERNAL_OPTIMIZER__
    if (!optimizer || 
-      (!(optimizer->IsOfType("ExternalOptimizer"))) || 
+      (!(theSolver->IsOfType("ExternalOptimizer"))) || 
       (((ExternalOptimizer*)optimizer)->GetStringParameter("SourceType")
       != "MATLAB"))
    {
@@ -618,8 +771,8 @@ bool Optimize::ExecuteCallback()
    
    callbackExecuting = true;
    // ask Matlab for the value of X
-   Integer     n = optimizer->GetIntegerParameter(
-                   optimizer->GetParameterID("NumberOfVariables"));
+   Integer     n = theSolver->GetIntegerParameter(
+                   theSolver->GetParameterID("NumberOfVariables"));
    
    //Real X[n];
    Real *X = new Real[n];
@@ -635,7 +788,7 @@ bool Optimize::ExecuteCallback()
    delete [] X;
    
    // get the state of the Optimizer
-   Solver::SolverState nState = optimizer->GetNestedState(); 
+   Solver::SolverState nState = theSolver->GetNestedState(); 
    if (nState == Solver::INITIALIZING)
    {
       #ifdef DEBUG_CALLBACK
@@ -644,8 +797,8 @@ bool Optimize::ExecuteCallback()
       #endif
       StoreLoopData();
       // advance to NOMINAL
-      callbackResults = optimizer->AdvanceNestedState(vars);
-      nState          = optimizer->GetNestedState();
+      callbackResults = theSolver->AdvanceNestedState(vars);
+      nState          = theSolver->GetNestedState();
    }
    if (nState != Solver::NOMINAL)
       throw CommandException(
@@ -656,7 +809,7 @@ bool Optimize::ExecuteCallback()
       MessageInterface::ShowMessage(
          "Optimize::ExecuteCallback - state is NOMINAL\n");
    #endif
-   callbackResults = optimizer->AdvanceNestedState(vars);
+   callbackResults = theSolver->AdvanceNestedState(vars);
    ResetLoopData();
 
    try
@@ -688,7 +841,7 @@ bool Optimize::ExecuteCallback()
             MessageInterface::ShowMessage("--- vars[%d] = %.15f\n",
                ii, vars.at(ii));
    #endif
-   callbackResults = optimizer->AdvanceNestedState(vars); 
+   callbackResults = theSolver->AdvanceNestedState(vars); 
    #ifdef DEBUG_CALLBACK
       MessageInterface::ShowMessage("after CALCULATING, data from callback are: \n");
       for (Integer ii = 0; ii < (Integer) callbackResults.size(); ii++)

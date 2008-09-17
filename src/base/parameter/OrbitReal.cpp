@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                OrbitReal
 //------------------------------------------------------------------------------
@@ -399,6 +399,12 @@ bool OrbitReal::SetRefObjectName(const Gmat::ObjectType type,
 GmatBase* OrbitReal::GetRefObject(const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_REF_OBJECT
+   MessageInterface::ShowMessage
+      ("OrbitReal::GetRefObject() this='%s', type=%d, name='%s'\n",
+       this->GetName().c_str(), type, name.c_str());
+   #endif
+   
    GmatBase *obj = OrbitData::GetRefObject(type, name);
    
    if (obj == NULL)

@@ -331,12 +331,14 @@ bool ReportFile::Initialize()
    
    Subscriber::Initialize();
    
-   if (active)
+   // if active and not initialized already, open report file (loj: 2008.08.20)
+   if (active && !isInitialized)
    { 
       if (!OpenReportFile())
          return false;
       
       initial = true;
+      isInitialized = true;
    }
    
    return true;
@@ -967,7 +969,7 @@ void ReportFile::WriteHeaders()
    {
       if (!dstream.is_open())
          return;
-
+      
       // write heading for each item
       for (int i=0; i < mNumParams; i++)
       {
@@ -977,7 +979,7 @@ void ReportFile::WriteHeaders()
           // set longer width of param names or columnWidth
           Integer width = (Integer)mParamNames[i].length() > columnWidth ?
              mParamNames[i].length() : columnWidth;
-
+          
           // parameter name has Gregorian, minimum width is 24
           if (mParamNames[i].find("Gregorian") != mParamNames[i].npos)
              if (width < 24)
@@ -990,7 +992,7 @@ void ReportFile::WriteHeaders()
           
           if (leftJustify)
              dstream.setf(std::ios::left);
-
+          
           dstream << mParamNames[i] << "   ";
       }
       
@@ -1027,7 +1029,7 @@ bool ReportFile::Distribute(int len)
          if (!dstream.is_open())
             if (!OpenReportFile())
                return false;
-   
+         
          if (!dstream.good())
             dstream.clear();
    

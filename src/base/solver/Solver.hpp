@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Solver
 //------------------------------------------------------------------------------
@@ -64,7 +64,37 @@ public:
       DEBUG_STYLE,
       MaxStyle
    };
-    
+
+   /// Modes that the state machine can use when running
+   enum MachineMode
+   {
+      SOLVE = 7000,
+      INITIAL_GUESS,
+      RUN_CORRECTED,
+      UNKNOWN_MACHINE_MODE
+   };
+
+   /// Modes that the state machine can use when a run is finished
+   enum ExitMode
+   {
+      DISCARD = 8000,
+      RETAIN,
+      HALT,
+      UNKNOWN_EXIT_MODE
+   };
+   
+   /// Current status of the Solver
+   enum SolverStatus
+   {
+      CREATED,
+      COPIED,
+      INITIALIZED,
+      RUN,
+      CONVERGED,
+      EXCEEDED_ITERATIONS,
+      UNKNOWN_STATUS
+   };
+
 public:
    Solver(const std::string &type, const std::string &name);
    virtual ~Solver();
@@ -181,8 +211,9 @@ protected:
    /// List of variables
    StringArray         variableNames;
    /// Array used to track the variables in the solver run
-   //Real                *variable;
    std::vector<Real>   variable;
+   /// Array used to track the variables in the solver run
+   std::vector<Real>   variableInitialValues;
    /// The number of iterations taken (increments when the matrix is inverted)
    Integer             iterationsTaken;
    /// Maximum number of iterations allowed
@@ -233,6 +264,16 @@ protected:
    bool                 AllowStepsizeLimit;
    /// Determines if individual variables can set perts
    bool                 AllowIndependentPerts;
+   /// Solver mode used for this instance
+   std::string          solverMode;
+   /// State macjhine setting for the solver mode
+   MachineMode          currentMode;
+   /// String specifying the exit mode
+   std::string          exitModeText;
+   /// Enumerated exit mode setting
+   ExitMode             exitMode;
+   /// The most recent results of using this solver
+   SolverStatus         status;
       
    /// Generic solver parameters.
    enum
@@ -249,6 +290,9 @@ protected:
       AllowRangeSettings,
       AllowStepsizeSetting,
       AllowVariablePertSetting,
+      SolverModeID,
+      ExitModeID,
+      SolverStatusID,
       SolverParamCount
    };
    
@@ -272,6 +316,8 @@ protected:
    virtual void        CheckCompletion();
    virtual void        RunExternal();
    virtual void        RunComplete();
+   
+   void                ResetVariables();
    
    virtual std::string GetProgressString();
    virtual void        FreeArrays();

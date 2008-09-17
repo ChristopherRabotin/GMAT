@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ArrayWrapper
 //------------------------------------------------------------------------------
@@ -25,7 +25,6 @@
 #include "RealUtilities.hpp"
 #include "StringUtil.hpp"
 #include "UtilityException.hpp"
-
 #include "MessageInterface.hpp"
 
 //#define DEBUG_ARRAY_WRAPPER
@@ -156,12 +155,22 @@ const StringArray& ArrayWrapper::GetRefObjectNames()
 /**
  * Method to set the reference object (ObjectProperty) pointer on the wrapped 
  * object.
- *
+ * 
  * @return true if successful; false otherwise.
+ *
+ * @note The description must be set before setting the ref object because
+ *       it's checking for arrayName
  */
 //---------------------------------------------------------------------------
 bool ArrayWrapper::SetRefObject(GmatBase *obj)
 {
+   #ifdef DEBUG_ARRAY_WRAPPER
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetRefObject() obj=<%p>, type='%s', name='%s', "
+       "arrayName='%s'\n", obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       arrayName.c_str());
+   #endif
+   
    bool isOk   = false;
    if ( (obj->IsOfType("Array")) && (obj->GetName() == arrayName) )
    {
@@ -304,6 +313,11 @@ bool ArrayWrapper::SetArray(const Rmatrix &toValue)
 //---------------------------------------------------------------------------
 void ArrayWrapper::SetupWrapper()
 {
+   #ifdef DEBUG_ARRAY_WRAPPER
+   MessageInterface::ShowMessage
+      ("ArrayWrapper::SetupWrapper() description='%s'\n", description.c_str());
+   #endif
+   
    arrayName = description;
    // for now, put the array name in the list of reference objects
    refObjectNames.push_back(arrayName);

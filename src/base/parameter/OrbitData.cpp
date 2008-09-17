@@ -861,10 +861,10 @@ Rvector6 OrbitData::GetRelativeCartState(SpacePoint *origin)
 {
    // get spacecraft state
    Rvector6 scState = GetCartState();
-
+   
    // get origin state
    Rvector6 originState = origin->GetMJ2000State(mCartEpoch);
-
+   
    #ifdef DEBUG_ORBITDATA_RUN
       MessageInterface::ShowMessage
          ("OrbitData::GetRelativeCartState() origin=%s, state=%s\n",
@@ -938,7 +938,6 @@ void OrbitData::InitializeRefObjects()
    }
    
    if (stateTypeId == -1)
-      //stateTypeId = mSpacecraft->GetParameterID("StateType");
       stateTypeId = mSpacecraft->GetParameterID("DisplayStateType");
    
    mSolarSystem =
@@ -959,7 +958,7 @@ void OrbitData::InitializeRefObjects()
    //-----------------------------------------------------------------
    std::string originName =
       FindFirstObjectName(GmatBase::GetObjectType(VALID_OBJECT_TYPE_LIST[SPACE_POINT]));
-
+   
    mOriginDep = false;
    
    if (originName != "")
@@ -972,11 +971,11 @@ void OrbitData::InitializeRefObjects()
       
       mOrigin =
          (SpacePoint*)FindFirstObject(VALID_OBJECT_TYPE_LIST[SPACE_POINT]);
-
+      
       if (!mOrigin)
          throw InvalidDependencyException
             (" is a central body dependent parameter.");
-
+      
       // override gravity constant if origin is CelestialBody
       if (mOrigin->IsOfType(Gmat::CELESTIAL_BODY))
          mGravConst = ((CelestialBody*)mOrigin)->GetGravitationalConstant();
@@ -1029,7 +1028,7 @@ void OrbitData::InitializeRefObjects()
    
    #ifdef DEBUG_ORBITDATA_INIT
    MessageInterface::ShowMessage
-      ("OrbitData::InitializeRefObjects() mOrigin.Name=%s, mGravConst=%f, "
+      ("OrbitData::InitializeRefObjects() exiting, mOrigin.Name=%s, mGravConst=%f, "
        "mOriginDep=%d\n",  mOrigin->GetName().c_str(), mGravConst, mOriginDep);
    #endif
 }

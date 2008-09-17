@@ -1233,6 +1233,9 @@ void BranchCommand::SetPreviousCommand(GmatCommand *cmd, GmatCommand *prev,
    }
 }
 
+//------------------------------------------------------------------------------
+// const std::vector<GmatCommand*> GetCommandsWithGmatFunctions()
+//------------------------------------------------------------------------------
 const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
 {
    #ifdef DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
@@ -1258,8 +1261,8 @@ const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
          {
             tmpArray = ((BranchCommand*)subCmd)->GetCommandsWithGmatFunctions();
          }
-         else if ((subCmd->GetTypeName() == "CallFunction") ||
-                  (subCmd->GetTypeName() == "Assignment"))
+         else if ((subCmd->IsOfType("CallFunction")) ||
+                  (subCmd->IsOfType("Assignment")))
          {
             #ifdef DEBUG_BRANCHCOMMAND_GMATFUNCTIONS
                MessageInterface::ShowMessage(
@@ -1274,5 +1277,62 @@ const std::vector<GmatCommand*> BranchCommand::GetCommandsWithGmatFunctions()
       }
    }
    return cmdsWithFunctions;
+}
+
+//------------------------------------------------------------------------------
+// bool HasAFunction()
+//------------------------------------------------------------------------------
+bool BranchCommand::HasAFunction()
+{
+   #ifdef DEBUG_IS_FUNCTION
+      if (!current)
+         MessageInterface::ShowMessage("In HasAFunction and current is NULL\n");
+      else
+         MessageInterface::ShowMessage("In HasAFunction and current is of type %s\n",
+               (current->GetTypeName()).c_str());
+   #endif
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *currentPtr;
+   
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         // if some command in the branch has a function, return true
+         if (currentPtr->HasAFunction()) return true;
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+   }
+   // otherwise, there are no GmatFunctions in this Branch Command
+   return false;
+}
+
+//------------------------------------------------------------------------------
+// void SetCallingFunction();
+//------------------------------------------------------------------------------
+void BranchCommand::SetCallingFunction(FunctionManager *fm)
+{
+   
+   GmatCommand::SetCallingFunction(fm);
+   
+   std::vector<GmatCommand*>::iterator node;
+   GmatCommand *currentPtr;
+   
+   for (node = branch.begin(); node != branch.end(); ++node)
+   {
+      currentPtr = *node;
+      while (currentPtr != this)
+      {
+         currentPtr->SetCallingFunction(fm);
+         currentPtr = currentPtr->GetNext();
+         if (currentPtr == NULL)
+            throw CommandException("Branch command \"" + generatingString +
+                                   "\" was not terminated!");
+      }
+   }
 }
 

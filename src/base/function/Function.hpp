@@ -13,7 +13,7 @@
 // Created: 2004/09/22
 //
 /**
- * Defines the Funtion base class used for Matlab and Gmat functions.
+ * Defines the Function base class used for Matlab and Gmat functions.
  */
 //------------------------------------------------------------------------------
 #ifndef Function_hpp
@@ -24,6 +24,7 @@
 #include "ElementWrapper.hpp"
 #include "PhysicalModel.hpp"
 #include "GmatCommand.hpp"
+#include "ObjectInitializer.hpp"
 #include "Validator.hpp"
 #include <map>
 
@@ -45,16 +46,19 @@ public:
                                        IntegerArray &rowCounts,
                                        IntegerArray &colCounts);
    virtual bool         Initialize();
-   virtual bool         Execute();
-   virtual Real         Evaluate();
-   virtual Rmatrix      MatrixEvaluate();
+   virtual bool         Execute(ObjectInitializer *objInit);
    virtual void         Finalize();
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
+   virtual void         SetScriptErrorFound(bool errFlag);
+   virtual bool         ScriptErrorFound();
    virtual bool         IsFunctionControlSequenceSet();
    virtual bool         SetFunctionControlSequence(GmatCommand *cmd);
+   virtual GmatCommand* GetFunctionControlSequence();
+   virtual std::string  GetFunctionPathAndName();
    
    virtual bool         SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper);
    virtual ElementWrapper*
@@ -94,47 +98,55 @@ public:
 
 protected:
    /// Fully-qualified path for function script
-   std::string functionPath;
+   std::string          functionPath;
    /// Function name
-   std::string functionName;
+   std::string          functionName;
    /// Function input names
-   StringArray inputNames;
+   StringArray          inputNames;
    /// Function output names
-   StringArray outputNames;
+   StringArray          outputNames;
+   // @todo - should these next five items remain here or move to GmatFunction??
    /// Function input name and element wrapper map  // @todo - is this needed?
    std::map<std::string, ElementWrapper*> inputArgMap;
    /// Function output name element wrapper map
    std::map<std::string, ElementWrapper*> outputArgMap;
    /// Output wrapper type array
-   WrapperTypeArray outputWrapperTypes;
+   WrapperTypeArray     outputWrapperTypes;
    /// Output row count used for returning one Array type
-   IntegerArray outputRowCounts;
+   IntegerArray         outputRowCounts;
    /// Output column count used for returning one Array type
-   IntegerArray outputColCounts;
+   IntegerArray         outputColCounts;
    
    /// Object store for the Function 
-   std::map<std::string, GmatBase *>
-                        *objectStore;
+   ObjectMap            *objectStore;
    /// Object store obtained from the Sandbox
-   std::map<std::string, GmatBase *>
-                        *globalObjectStore;
+   ObjectMap            *globalObjectStore;
    /// Solar System, set by the local Sandbox, to pass to the function
    SolarSystem          *solarSys;
+   /// Internal CS, set by the local Sandbox, to pass to the function
+   CoordinateSystem     *internalCoordSys;
    /// transient forces to pass to the function
    std::vector<PhysicalModel *> 
                         *forces;
+   // @todo - should these next four items remain here or move to GmatFunction??
    /// the function control sequence
    GmatCommand          *fcs;
+   /// have the commands in the FCS been finalized?
+   bool                 fcsFinalized;
    /// objects automatically created on parsing (but for whom a references object cannot be
    /// set at that time)
    std::map<std::string, GmatBase *>          
                         automaticObjects;
    // Validator used to create the ElementWrappers
-   Validator            validator;
+   Validator            *validator;
    /// Object store needed by the validator
    std::map<std::string, GmatBase *>
-                        store;
-
+                        validatorStore;
+   /// the flag indicating script error found in function, this flag is set by Interpreter
+   bool                 scriptErrorFound;
+   /// the flag indicating local objects are initialized
+   bool                 objectsInitialized;
+   
    enum
    {
       FUNCTION_PATH = GmatBaseParamCount,
@@ -150,6 +162,9 @@ protected:
       PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount];
    
    GmatBase* FindObject(const std::string &name);
+   
+   // for debug
+   void ShowObjects(const std::string &title);
    
 };
 

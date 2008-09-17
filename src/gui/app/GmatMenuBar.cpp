@@ -87,22 +87,19 @@ void GmatMenuBar::CreateMenu(GmatTree::ItemType itemType, wxMenu *windowMenu)
    }
    
    fileMenu->Append(MENU_FILE_SAVE_SCRIPT, wxT("&Save to Script"), wxT(""));
-   fileMenu->Append(MENU_FILE_SAVE_SCRIPT_AS, wxT("Save to Script As"),
-                     wxT(""));  
+   fileMenu->Append(MENU_FILE_SAVE_SCRIPT_AS, wxT("Save to Script As"), wxT(""));
    
    fileMenu->AppendSeparator();
-   fileMenu->Append(MENU_LOAD_DEFAULT_MISSION, wxT("Default Project"), 
-                     wxT(""));   
+   fileMenu->Append(MENU_LOAD_DEFAULT_MISSION, wxT("Default Project"), wxT(""));   
+   fileMenu->Append(MENU_EMPTY_PROJECT, wxT("Empty Project"), wxT(""));   
    fileMenu->AppendSeparator();
    
    wxMenu *prefMenu = new wxMenu;
    prefMenu->Append(MENU_PROJECT_PREFERENCES_FONT, wxT("Font"));
    
-   fileMenu->Append(MENU_PROJECT_PREFERENCES,
-                        wxT("Preferences"), prefMenu, wxT(""));
+   fileMenu->Append(MENU_PROJECT_PREFERENCES, wxT("Preferences"), prefMenu, wxT(""));
    
-   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths"),
-                    wxT(""));
+   fileMenu->Append(MENU_SET_PATH_AND_LOG, wxT("Set File Paths"), wxT(""));
    fileMenu->Append(MENU_INFORMATION, wxT("Information"), wxT(""));
    
    fileMenu->AppendSeparator();

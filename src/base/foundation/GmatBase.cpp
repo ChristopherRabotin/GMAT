@@ -969,8 +969,9 @@ Integer GmatBase::GetParameterID(const std::string &str) const
    std::string desc = instanceName;
    if (desc == "")
       desc = typeName;
-   throw GmatBaseException("No parameter defined with description \"" + str + 
-                           "\" on " + desc);
+   throw GmatBaseException
+      ("The object named \"" + GetName() + "\" of type \"" + GetTypeName() + "\" "
+       "has no parameter defined with \"" + str + "\"");
 }
 
 

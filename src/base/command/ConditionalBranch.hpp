@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ConditionalBranch 
 //------------------------------------------------------------------------------
@@ -84,11 +84,7 @@ public:
    virtual std::string  GetParameterTypeString(const Integer id) const;
    
    virtual Integer      GetIntegerParameter(const Integer id) const;
-//   virtual Integer      SetIntegerParameter(const Integer id,
-//                                            const Integer value);
    virtual Integer      GetIntegerParameter(const std::string &label) const;
-//   virtual Integer      SetIntegerParameter(const std::string &label,
-//                                            const Integer value);
    virtual std::string  GetStringParameter(const Integer id,
                                            const Integer index) const;
    virtual bool         SetStringParameter(const Integer id, 
@@ -101,14 +97,8 @@ public:
                                            const Integer index);
    virtual const StringArray& 
                         GetStringArrayParameter(const Integer id) const; 
-   //virtual const StringArray& 
-   //                     GetStringArrayParameter(const Integer id, 
-   //                           const Integer index) const; 
    virtual const StringArray& 
                         GetStringArrayParameter(const std::string &label) const;
-   //virtual const StringArray& 
-   //                     GetStringArrayParameter(const std::string &label, 
-   //                                             const Integer index) const; 
 
    virtual const StringArray& 
                        GetWrapperObjectNameArray();
@@ -135,8 +125,6 @@ protected:
       OPERATOR_STRINGS,
       RIGHT_HAND_STRINGS,
       LOGICAL_OPERATORS,
-      //NUMBER_OF_REF_PARAMS,  // not needed for Parameters in Command mods
-      //REF_PARAMETER_NAMES,
       ConditionalBranchParamCount
    };
 
@@ -179,22 +167,11 @@ protected:
    StringArray                opStrings;
    std::vector<OpType>        opList;
    StringArray                rhsList;
-    /// vector of pointers to ElementWrappers for the rhs
+   /// vector of pointers to ElementWrappers for the rhs
    std::vector<ElementWrapper*> rhsWrappers;
    //StringArray                rhsParamList;
    StringArray                logicalOpStrings;
    std::vector<LogicalOpType> logicalOpList;
-   /// list of parameter objects used by the conditions
-   //std::vector<Parameter*>    params;
-   //StringArray                paramStrings;
-   /// Row of lhs Array parameter
-   //std::vector<Integer>       lhsParamRows;
-   /// Col of lhs Array parameter
-   //std::vector<Integer>       lhsParamCols;
-   /// Row of rhs Array parameter
-   //std::vector<Integer>       rhsParamRows;
-   /// Col of rhs Array parameter
-   //std::vector<Integer>       rhsParamCols;
    
 };
 #endif  // ConditionalBranch_hpp

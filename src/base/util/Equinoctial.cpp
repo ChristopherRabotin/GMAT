@@ -9,7 +9,7 @@ const std::string Equinoctial::DATA_DESCRIPTIONS[NUM_DATA] =
 	"Projection of eccentricity onto y_ep axis",
 	"Projection of eccentricity onto x_ep axis",
 	"Projection of N onto y_ep axis",
-	"Projection of N onto y_ep axis",
+	"Projection of N onto x_ep axis",
 	"Mean Longitude"
 };
 

@@ -83,7 +83,7 @@ public:
    StringArray& GetForceTypeNames();
    std::string GetForceTypeName(Integer index);
    void ClearSpacecraft();
-   PhysicalModel* GetForce(Integer index);
+   PhysicalModel* GetForce(Integer index) const;
    const PhysicalModel* GetForce(std::string forcetype, Integer whichOne = 0) const; 
    bool AddSpaceObject(SpaceObject *so);
    void UpdateSpaceObject(Real newEpoch = -1.0);
@@ -96,11 +96,9 @@ public:
    
    bool GetDerivatives(Real * state, Real dt = 0.0, Integer order = 1);
    Real EstimateError(Real *diffs, Real *answer) const;
-   
-   virtual Integer GetParameterCount(void) const;
-   
-   
+      
    // inherited from GmatBase
+   virtual Integer      GetParameterCount(void) const;
    virtual bool         RenameRefObject(const Gmat::ObjectType type,
                                         const std::string &oldName,
                                         const std::string &newName);
@@ -143,6 +141,12 @@ public:
    virtual const StringArray&
                         GetStringArrayParameter(const std::string &label) const;
    
+   virtual Integer      GetIntegerParameter(const Integer id) const;
+   virtual Integer      GetIntegerParameter(const std::string &label) const;
+   virtual Integer      SetIntegerParameter(const Integer id,
+                                            const Integer value);
+   virtual Integer      SetIntegerParameter(const std::string &label,
+                                            const Integer value);
    static void          SetScriptAlias(const std::string& alias, 
                                        const std::string& typeName);
    static std::string&  GetScriptAlias(const std::string& alias);
@@ -183,6 +187,8 @@ protected:
    StringArray forceTypeNames;
    /// Array of the forces
    std::vector<PhysicalModel *> forceList;
+   /// User defined forces
+   std::vector<PhysicalModel *> userForces;
    
    /// Epoch for the previous state
    Real previousTime;
@@ -213,6 +219,8 @@ protected:
    
    const StringArray&  BuildBodyList(std::string type) const;
    const StringArray&  BuildCoordinateList() const;
+   const StringArray&  BuildUserForceList() const;
+   
    virtual Integer     SetupSpacecraftData(GmatBase *sat, 
                                            PhysicalModel *pm, Integer i);
    void                UpdateTransientForces();
@@ -256,8 +264,14 @@ protected:
       POINT_MASSES,
       DRAG,
       SRP,
-      NORM_TYPE,
+      ERROR_CONTROL,
       COORDINATE_SYSTEM_LIST,
+      
+      // owned object parameters
+      DEGREE,
+      ORDER,
+      POTENTIAL_FILE,
+      USER_DEFINED,
       ForceModelParamCount
    };
    
@@ -277,9 +291,14 @@ protected:
    };
    
    static const std::string 
-   PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
+      PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount];
    static const Gmat::ParameterType 
-   PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];
+      PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount];
+   
+private:
+   
+   Integer GetOwnedObjectId(Integer id, GmatBase **owner) const;
+   
 };
 
 #endif  // ForceModel_hpp

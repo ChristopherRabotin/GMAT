@@ -419,6 +419,8 @@ bool EndFiniteBurn::Initialize()
       // find all of the spacecraft
       StringArray::iterator scName;
       Spacecraft *sc;
+      
+		sats.clear();
       for (scName = satNames.begin(); scName != satNames.end(); ++scName)
       {
          if ((mapObj = FindObject(*scName)) == NULL) 

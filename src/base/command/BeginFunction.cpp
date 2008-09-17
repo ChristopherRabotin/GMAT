@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            BeginFunction
 //------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ BeginFunction::BeginFunction(const BeginFunction& bf) :
    transientForces      (NULL),
    internalCoordSys     (NULL)
 {
-	localMap.clear();
+   localMap.clear();
 }
 
 
@@ -1369,7 +1369,7 @@ void BeginFunction::SetRefFromName(GmatBase *obj, const std::string &oName)
  *  @return true if the command was added to the sequence, false if not.
  */
 //------------------------------------------------------------------------------
-bool BeginFunction::SetInternalCoordSystem(CoordinateSystem *cs)
+void BeginFunction::SetInternalCoordSystem(CoordinateSystem *cs)
 {
 
 
@@ -1377,14 +1377,15 @@ bool BeginFunction::SetInternalCoordSystem(CoordinateSystem *cs)
 
 
    if (!cs)
-      return false;
-
-
+      internalCoordSys = cs;
+      //return false;
+   
+   
 //   MessageInterface::ShowMessage("Set internal coord sys to %s\n", cs->GetTypeName().c_str());
    /// @todo Check initialization and cloning for the internal CoordinateSystem.
    //internalCoordSys = (CoordinateSystem*)(cs->Clone());
-   internalCoordSys = cs;
-   return true;
+   //internalCoordSys = cs;
+   //return true;
 }
 
 

@@ -129,12 +129,15 @@ public:
    Integer RunScript(Integer sandboxNum = 1);
 
    // GUI control
-   void SetInputFocus();
-   void NotifyRunCompleted();
+   virtual void SetInputFocus();
+   virtual void NotifyRunCompleted();
+   virtual void UpdateView(Integer type = 7);
+   virtual void CloseCurrentProject();
+   
    void UpdateResourceTree();
    void UpdateMissionTree();
    void UpdateOutputTree();
-   void CloseCurrentProject();
+   virtual void StartServer();
    
 private:
 

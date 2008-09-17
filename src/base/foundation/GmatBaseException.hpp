@@ -25,7 +25,7 @@ class GmatBaseException : public BaseException
 {
 public:
 
-   GmatBaseException(const std::string &details);
+   GmatBaseException(const std::string &details = "");
    virtual ~GmatBaseException();
    GmatBaseException(const GmatBaseException &gbe);
 };

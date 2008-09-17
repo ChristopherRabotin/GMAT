@@ -36,9 +36,11 @@ namespace GmatCommandUtil
    bool FindObjectFromSubCommands(GmatCommand *brCmd, Integer level,
                                   Gmat::ObjectType objType,
                                   const std::string &objName, std::string &cmdName);
-   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true);
+   std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
+                                   bool showGenStr = false);
    void GetSubCommandString(GmatCommand* brCmd, Integer level,
-                            std::string &cmdseq, bool showAddr = true);
+                            std::string &cmdseq, bool showAddr = true,
+                            bool showGenStr = false);
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
 }

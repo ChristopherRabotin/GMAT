@@ -85,6 +85,7 @@ Subscriber::Subscriber(std::string typeStr, std::string nomme) :
    active (true),
    isEndOfReceive(false),
    isEndOfRun(false),
+   isInitialized(false),
    runstate(Gmat::IDLE),
    currentProvider(0)
 {
@@ -109,6 +110,7 @@ Subscriber::Subscriber(const Subscriber &copy) :
    active (copy.active),
    isEndOfReceive(copy.isEndOfReceive),
    isEndOfRun(copy.isEndOfRun),
+   isInitialized(copy.isInitialized),
    runstate(copy.runstate),
    currentProvider(copy.currentProvider),
    wrapperObjectNames(copy.wrapperObjectNames),
@@ -130,14 +132,15 @@ Subscriber& Subscriber::operator=(const Subscriber& rhs)
 {
    if (this == &rhs)
       return *this;
-
+   
    GmatBase::operator=(rhs);
-    
+   
    data = rhs.data;
    next = rhs.next;
    active = rhs.active;
    isEndOfReceive = rhs.isEndOfReceive;
    isEndOfRun = rhs.isEndOfRun;
+   isInitialized = rhs.isInitialized;
    runstate = rhs.runstate;
    currentProvider = rhs.currentProvider;
    theInternalCoordSystem = NULL;
@@ -165,8 +168,17 @@ Subscriber::~Subscriber()
 bool Subscriber::Initialize()
 {
    isEndOfReceive = false;
-   isEndOfRun = false;   
+   isEndOfRun = false;
    return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsInitialized()
+//------------------------------------------------------------------------------
+bool Subscriber::IsInitialized()
+{
+   return isInitialized;
 }
 
 
@@ -177,7 +189,7 @@ bool Subscriber::ReceiveData(const char *datastream)
 {
    if (!active)        // Not currently processing data
       return true;
-        
+   
    data = datastream;
    return true;
 }
@@ -188,16 +200,22 @@ bool Subscriber::ReceiveData(const char *datastream)
 //------------------------------------------------------------------------------
 bool Subscriber::ReceiveData(const char *datastream,  const int len)
 {
+   #ifdef DEBUG_RECEIVE_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::ReceiveData() active=%d, data='%s', len=%d\n",
+       active, datastream, len);
+   #endif
+   
    if (!active)        // Not currently processing data
       return true;
-
+   
    data = datastream;
    if (!Distribute(len))
    {
       data = NULL;
       return false;
    }
-
+   
    data = NULL;
    return true;
 }
@@ -267,9 +285,9 @@ void Subscriber::SetRunState(Gmat::RunState rs)
 
 
 //------------------------------------------------------------------------------
-// Subscriber* Next(void)
+// Subscriber* Next()
 //------------------------------------------------------------------------------
-Subscriber* Subscriber::Next(void)
+Subscriber* Subscriber::Next()
 {
     return next;
 }
@@ -311,6 +329,12 @@ bool Subscriber::Remove(Subscriber *s, const bool del)
 //------------------------------------------------------------------------------
 void Subscriber::Activate(bool state)
 {
+   #ifdef DEBUG_SUBSCRIBER
+   MessageInterface::ShowMessage
+      ("Subscriber::Activate() entered, state=%d, isInitialized=%d\n",
+       state, isInitialized);
+   #endif
+   
    active = state;
 }
 
@@ -329,6 +353,11 @@ bool Subscriber::IsActive()
 //------------------------------------------------------------------------------
 void Subscriber::SetProviderId(Integer id)
 {
+   #ifdef DEBUG_SUBSCRIBER_PROVIDER
+   MessageInterface::ShowMessage
+      ("Subscriber::SetProviderId() <%s> entered, id=%d\n", GetName().c_str(), id);
+   #endif
+   
    currentProvider = id;
 }
 
@@ -348,6 +377,13 @@ Integer Subscriber::GetProviderId()
 void Subscriber::SetDataLabels(const StringArray& elements)
 {
    theDataLabels.push_back(elements);
+   
+   #ifdef DEBUG_SUBSCRIBER_DATA
+   MessageInterface::ShowMessage
+      ("Subscriber::SetDataLabels() <%s> entered, theDataLabels.size()=%d, "
+       "first label is '%s'\n", GetName().c_str(), theDataLabels.size(),
+       elements[0].c_str());
+   #endif
 }
 
 
@@ -356,6 +392,10 @@ void Subscriber::SetDataLabels(const StringArray& elements)
 //------------------------------------------------------------------------------
 void Subscriber::ClearDataLabels()
 {
+   #ifdef DEBUG_SUBSCRIBER_DATA
+   MessageInterface::ShowMessage("Subscriber::ClearDataLabels() entered\n");
+   #endif
+   
    theDataLabels.clear();
 }
 
@@ -488,8 +528,9 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
    {
       if (paramWrappers[i] == NULL)
          throw SubscriberException
-            ("Subscriber::SetWrapperReference() failed to set reference for "
-             "object named \"" + name + ".\"\nThe wrapper is NULL.\n");
+            ("Subscriber::SetWrapperReference() \"" + GetName() +
+             "\" failed to set reference for object named \"" + name +
+             ".\" The wrapper is NULL.\n");
       
       refname = paramWrappers[i]->GetDescription();
       if (paramWrappers[i]->GetWrapperType() == Gmat::ARRAY_ELEMENT)
@@ -503,7 +544,8 @@ bool Subscriber::SetWrapperReference(GmatBase *obj, const std::string &name)
    
    if (!nameFound)
       throw SubscriberException
-         ("Subscriber::SetWrapperReference() failed to find object named \"" +  name + "\"\n");
+         ("Subscriber::SetWrapperReference() \"" + GetName() +
+          "\" failed to find object named \"" +  name + "\"\n");
    
    #ifdef DEBUG_WRAPPER_CODE   
    MessageInterface::ShowMessage("   setting ref object of wrappers\n");
@@ -674,8 +716,9 @@ bool Subscriber::RenameRefObject(const Gmat::ObjectType type,
    {
       if (paramWrappers[i] == NULL)
          throw SubscriberException
-            ("Subscriber::SetWrapperReference() failed to set reference for "
-             "object named \"" + oldName + ".\"\nThe wrapper is NULL.\n");
+            ("Subscriber::SetWrapperReference() \"" + GetName() +
+             "\" failed to set reference for object named \"" + oldName +
+             ".\" The wrapper is NULL.\n");
       
       std::string desc = paramWrappers[i]->GetDescription();
       

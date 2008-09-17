@@ -32,7 +32,11 @@
 #include "wx/splash.h"
 #include "wx/image.h"
 
+#include "MessageInterface.hpp"
+#include "PlotInterface.hpp"
 #include "GuiMessageReceiver.hpp"
+#include "GuiPlotReceiver.hpp"
+#include "GuiInterpreter.hpp"
 
 
 //#define DEBUG_GMATAPP
@@ -55,6 +59,9 @@ GmatApp::GmatApp()
 {
    GuiMessageReceiver *theMessageReceiver = GuiMessageReceiver::Instance();
    MessageInterface::SetMessageReceiver(theMessageReceiver);
+   
+   GuiPlotReceiver *thePlotReceiver = GuiPlotReceiver::Instance();
+   PlotInterface::SetPlotReceiver(thePlotReceiver);
    
    theModerator = (Moderator *)NULL;
 }
@@ -81,8 +88,14 @@ bool GmatApp::OnInit()
       // initialize the moderator
       if (theModerator->Initialize(true))
       {
+         GuiInterpreter *guiInterp = GuiInterpreter::Instance();
+         theModerator->SetUiInterpreter(guiInterp);
+         theModerator->SetInterpreterMapAndSS(guiInterp);
+         guiInterp->BuildCreatableObjectMaps();
+
          // get GuiInterpreter
-         gmatAppData->SetGuiInterpreter(theModerator->GetGuiInterpreter());
+         gmatAppData->SetGuiInterpreter(
+               (GuiInterpreter *)theModerator->GetUiInterpreter());
          
          // set default size
          wxSize size = wxSize(800, 600);

@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ObjectWrapper
 //------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ GmatBase* ObjectWrapper::EvaluateObject() const
 
 
 //------------------------------------------------------------------------------
-// bool SetObject(const GmatBase *obj)
+// bool SetObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Method to set the object of the wrapped object.
@@ -215,7 +215,7 @@ GmatBase* ObjectWrapper::EvaluateObject() const
  * @return true if successful; false otherwise.
  */
 //------------------------------------------------------------------------------
-bool ObjectWrapper::SetObject(const GmatBase *obj)
+bool ObjectWrapper::SetObject(GmatBase *obj)
 {
    if (obj == NULL)
    {

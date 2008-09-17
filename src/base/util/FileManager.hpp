@@ -1,4 +1,4 @@
-//$Id$
+//$Id:FileManager.hpp 5553 2008-06-03 16:46:30Z djcinsb $
 //------------------------------------------------------------------------------
 //                                  FileManager
 //------------------------------------------------------------------------------
@@ -115,6 +115,9 @@ public:
    void AddMatlabFunctionPath(const std::string &path);
    const StringArray& GetAllMatlabFunctionPaths();
    
+   // Plug-in code
+   const StringArray& GetPluginList();
+   
 private:
    
    static const std::string VERSION_DATE;
@@ -136,6 +139,8 @@ private:
    StringArray mMatlabFunctionPaths;
    StringArray mGmatFunctionFullPaths;
    StringArray mMatlabFunctionFullPaths;
+   
+   StringArray mPluginList;
    
    void AddFileType(const std::string &type, const std::string &name);
    void AddAvailablePotentialFiles();

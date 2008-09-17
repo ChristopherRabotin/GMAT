@@ -37,6 +37,7 @@
 //  #include "Solver.hpp"
 #include "Burn.hpp"
 #include "GmatFunction.hpp"
+#include "ObjectInitializer.hpp"
 
 
 //#define DEBUG_SANDBOX_CLONING
@@ -105,6 +106,8 @@ private:
    Integer                           interruptCount;
    /// Polling frequency
    Integer                           pollFrequency;
+   /// The object initializer
+   ObjectInitializer                 *objInit;
    
    // Additions made for finite maneuvers
    /// List of FiniteThrust objects that are currently available
@@ -113,17 +116,17 @@ private:
    Sandbox(const Sandbox&);
    Sandbox& operator=(const Sandbox&);
    
-   void                              InitializeInternalObjects();
+   //void                              InitializeInternalObjects();
    
    //*********************  TEMPORARY  *****************************************
-   void  InitializeCoordinateSystem(CoordinateSystem *cs);
+   //void  InitializeCoordinateSystem(CoordinateSystem *cs);
    //*********************  END OF TEMPORARY  **********************************
 
-   void                              BuildReferences(GmatBase *obj);
-   void                              SetRefFromName(GmatBase *obj,
-                                                    const std::string &oName);
-   void                              BuildAssociations(GmatBase * obj);
-   SpacePoint *                      FindSpacePoint(const std::string &spName);
+   //void                              BuildReferences(GmatBase *obj);
+   //void                              SetRefFromName(GmatBase *obj,
+   //                                                 const std::string &oName);
+   //void                              BuildAssociations(GmatBase * obj);
+   //SpacePoint *                      FindSpacePoint(const std::string &spName);
    
    GmatBase*                         FindObject(const std::string &name);
    bool                              SetObjectByNameInMap(const std::string &name,

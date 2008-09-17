@@ -522,7 +522,8 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
 
 
 //------------------------------------------------------------------------------
-// std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true)
+// std::string GetCommandSeqString(GmatCommand *cmd, bool showAddr = true,
+//                                 bool showGenStr = false)
 //------------------------------------------------------------------------------
 /*
  * Returns string of command sequence given by cmd.
@@ -531,11 +532,12 @@ bool GmatCommandUtil::FindObjectFromSubCommands(GmatCommand *brCmd, Integer leve
  * comment with % in the scripts
  */
 //------------------------------------------------------------------------------
-std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr)
+std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr,
+                                                 bool showGenStr)
 {
    char buf[10];
    GmatCommand *current = cmd;
-   std::string cmdseq, cmdstr;
+   std::string cmdseq, cmdstr, genStr;
    cmdstr = "\n---------- Mission Sequence ----------\n";
    cmdseq.append(cmdstr);
    buf[0] = '\0';
@@ -552,7 +554,18 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
       if (showAddr)
          sprintf(buf, "(%p)", current);
       
-      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + "\n";
+      genStr = "";
+      if (showGenStr)
+      {
+         if (current->GetTypeName() == "BeginScript")
+            genStr = "<BeginScript>";
+         else if (current->GetTypeName() == "EndScript")
+            genStr = "<EndScript>";
+         else
+            genStr = " <" + current->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
+      }
+      
+      cmdstr = "--- " + std::string(buf) + current->GetTypeName() + genStr + "\n";
       cmdseq.append(cmdstr);
       
       #if DEBUG_COMMAND_SEQ_STRING
@@ -560,7 +573,7 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
       #endif
       
       if ((current->GetChildCommand(0)) != NULL)
-         GetSubCommandString(current, 0, cmdseq, showAddr);
+         GetSubCommandString(current, 0, cmdseq, showAddr, showGenStr);
       
       current = current->GetNext();
    }
@@ -573,17 +586,18 @@ std::string GmatCommandUtil::GetCommandSeqString(GmatCommand *cmd, bool showAddr
 
 //------------------------------------------------------------------------------
 // void GetSubCommandString(GmatCommand* brCmd, Integer level, std::string &cmdseq,
-//                          bool showAddr = true)
+//                          bool showAddr = true, bool showGenStr = false)
 //------------------------------------------------------------------------------
 void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
-                                         std::string &cmdseq, bool showAddr)
+                                          std::string &cmdseq, bool showAddr,
+                                          bool showGenStr)
 {
    char buf[10];
    GmatCommand* current = brCmd;
    Integer childNo = 0;
    GmatCommand* nextInBranch;
    GmatCommand* child;
-   std::string cmdstr;
+   std::string cmdstr, genStr;
    buf[0] = '\0';
    
    while((child = current->GetChildCommand(childNo)) != NULL)
@@ -604,7 +618,15 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
          if (showAddr)
             sprintf(buf, "(%p)", nextInBranch);
          
-         cmdstr = "--- " + std::string(buf) + nextInBranch->GetTypeName() + "\n";
+         genStr = "";
+         if (nextInBranch->GetTypeName() == "BeginScript")
+            genStr = "<BeginScript>";
+         else if (nextInBranch->GetTypeName() == "EndScript")
+            genStr = "<EndScript>";
+         else
+            genStr = " <" + nextInBranch->GetGeneratingString(Gmat::NO_COMMENTS) + ">";
+         
+         cmdstr = "--- " + std::string(buf) + nextInBranch->GetTypeName() + genStr + "\n";
          cmdseq.append(cmdstr);
          
          #if DEBUG_COMMAND_SEQ_STRING
@@ -612,7 +634,7 @@ void GmatCommandUtil::GetSubCommandString(GmatCommand* brCmd, Integer level,
          #endif
          
          if (nextInBranch->GetChildCommand() != NULL)
-            GetSubCommandString(nextInBranch, level+1, cmdseq, showAddr);
+            GetSubCommandString(nextInBranch, level+1, cmdseq, showAddr, showGenStr);
          
          nextInBranch = nextInBranch->GetNext();
       }

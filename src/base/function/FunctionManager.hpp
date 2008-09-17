@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  FunctionManager
 //------------------------------------------------------------------------------
@@ -23,6 +23,7 @@
 
 
 #include <map>              // for mapping between object names and types
+#include <stack>            // for objectMap and caller stacks
 #include <algorithm>        // for find()
 #include "gmatdefs.hpp"
 
@@ -33,6 +34,7 @@
 #include "SolarSystem.hpp"
 #include "PhysicalModel.hpp"
 #include "Validator.hpp"
+#include "ObjectInitializer.hpp"
 
 
 /**
@@ -65,13 +67,19 @@ public:
    virtual void         AddOutput(const std::string &withName, Integer atIndex = -999);
    virtual void         SetInputs(const StringArray &inputs);
    virtual void         SetOutputs(const StringArray &outputs);
+   virtual StringArray  GetOutputs();
+   virtual void         SetInternalCoordinateSystem(CoordinateSystem *internalCS);
    
    // Sequence methods
-   //virtual bool         Initialize();
-   virtual bool         Execute();
-   virtual Real         Evaluate();
-   virtual Rmatrix      MatrixEvaluate();
+   virtual bool         Execute(FunctionManager *callingFM = NULL);
+   virtual Real         Evaluate(FunctionManager *callingFM = NULL);
+   virtual Rmatrix      MatrixEvaluate(FunctionManager *callingFM = NULL);
    virtual void         Finalize();
+
+   //void                 SetCallingFunction(FunctionManager *fm);
+   ObjectMap*           PushToStack();
+   void                 PopFromStack(ObjectMap* cloned, const StringArray &outNames, 
+                                     const StringArray &callingNames);
 
 protected:
    
@@ -113,7 +121,7 @@ protected:
    /// Output Objects
    //ObjectArray          outObjects; 
    // Validator used to create the ElementWrappers
-   Validator            validator;
+   Validator            *validator;
    // Created objects for string or numeric literal inputs
    std::map<std::string, GmatBase *>
                         createdLiterals;
@@ -129,12 +137,35 @@ protected:
    bool                 blankResult;
    /// Which type of output was saved last - real or rmatrix?
    std::string          outputType;
+   /// Object needed to initialize the FOS objects
+   ObjectInitializer    *objInit;
+   /// the internal coordinate system
+   CoordinateSystem     *intCS;
+   /// pointer to the function's function control sequence
+   GmatCommand          *fcs;
+   /// current command being executed
+   GmatCommand          *current;
+   /// Call stack of FOSs for nested/recursive function calls
+   ObjectMapStack       callStack;
+   /// Call stack of LOSs for nested/recursive function calls
+   ObjectMapStack       losStack;
+   /// pointers to the calling function of this function (needs to be a stack 
+   // because we need to be able to handle nested and recursive functions)
+   std::stack<FunctionManager*> callers;
+   // pointer to the current calling function
+   FunctionManager      *callingFunction;
    
-   //virtual bool         BuildFunctionObjectStore();
-   //virtual bool         RefreshFunctionObjectStore();
-   GmatBase* FindObject(const std::string &name, bool arrayElementsAllowed = false);
-   GmatBase* CreateObject(const std::string &fromString);
-   void      SaveLastResult();
+   virtual bool         Initialize();
+   GmatBase*            FindObject(const std::string &name, bool arrayElementsAllowed = false);
+   GmatBase*            CreateObject(const std::string &fromString);
+   void                 SaveLastResult();
+   
+   bool                 EmptyObjectMap(ObjectMap *om);  
+   bool                 DeleteObjectMap(ObjectMap *om);
+   bool                 IsOnStack(ObjectMap *om);
+   
+   void                 ShowObjectMap(ObjectMap *om, const std::string &mapID = "");
+   void                 ShowStackContents(ObjectMapStack omStack, const std::string &stackID = "");
    
 };
 

@@ -37,6 +37,7 @@ SolarSystem::PARAMETER_TEXT[SolarSystemParamCount - GmatBaseParamCount] =
 {
    "BodiesInUse",
    "NumberOfBodies",
+   "Ephemeris",
    "UseTTForEphemeris",
    "EphemerisUpdateInterval",
 };
@@ -46,6 +47,7 @@ SolarSystem::PARAMETER_TYPE[SolarSystemParamCount - GmatBaseParamCount] =
 {
    Gmat::STRINGARRAY_TYPE,
    Gmat::INTEGER_TYPE,
+   Gmat::STRINGARRAY_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::REAL_TYPE,
 };
@@ -234,7 +236,24 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
    theDefaultDeFile  = NULL;
    parameterCount    = SolarSystemParamCount;
    
-   CreatePlanetarySource();
+   // create planetary source first, but do not create default
+   CreatePlanetarySource(false);
+   
+   // copy current planetary source is use
+   thePlanetarySourceTypesInUse = ss.thePlanetarySourceTypesInUse;
+   
+   #ifdef DEBUG_SS_PLANETARY_FILE
+   MessageInterface::ShowMessage
+      ("SolarSystem::copy constructor() num ephem source types=%d\n",
+       thePlanetarySourceTypesInUse.size());
+   for (UnsignedInt i=0; i<thePlanetarySourceTypesInUse.size(); i++)
+      MessageInterface::ShowMessage
+         ("   '%s'\n", thePlanetarySourceTypesInUse[i].c_str());
+   #endif
+   
+   // set current planetary source
+   SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
+   
    CloneBodiesInUse(ss);
 }
 
@@ -245,8 +264,8 @@ SolarSystem::SolarSystem(const SolarSystem &ss) :
 /**
  * Assignment operator for the SolarSystem class.
  *
- * @param ss> the solar system object whose data to assign to "this"
- *            solar system.
+ * @param <ss> the solar system object whose data to assign to "this"
+ *             solar system.
  *
  * @return "this" solarsystem with data of input solarsystem ss.
  */
@@ -264,7 +283,15 @@ SolarSystem& SolarSystem::operator=(const SolarSystem &ss)
    theDefaultSlpFile   = NULL;
    theDefaultDeFile    = NULL;
    
-   CreatePlanetarySource();
+   // create planetary source first, but do not create default
+   CreatePlanetarySource(false);
+   
+   // copy current planetary source in use
+   thePlanetarySourceTypesInUse = ss.thePlanetarySourceTypesInUse;
+   
+   // set current planetary source
+   SetPlanetarySourceTypesInUse(thePlanetarySourceTypesInUse);
+   
    CloneBodiesInUse(ss);
    
    return *this;
@@ -328,9 +355,15 @@ bool SolarSystem::Initialize()
 
 
 //------------------------------------------------------------------------------
-// void CreatePlanetarySource()
+// void CreatePlanetarySource(bool setDefault)
 //------------------------------------------------------------------------------
-void SolarSystem::CreatePlanetarySource()
+/*
+ * Creates planetary epemeris source.
+ *
+ * @param <setDefault> set to true if default ephemeris is to be created (true)
+ */
+//------------------------------------------------------------------------------
+void SolarSystem::CreatePlanetarySource(bool setDefault)
 {
    #ifdef DEBUG_SS_PLANETARY_FILE
    MessageInterface::ShowMessage("SolarSystem initializing planetary source...\n");
@@ -361,7 +394,8 @@ void SolarSystem::CreatePlanetarySource()
    thePlanetarySourceNames.push_back(fm->GetFullPathname("DE405_FILE"));
    
    // Set planetary ephemeris source
-   SetDefaultPlanetarySource();
+   if (setDefault)
+      SetDefaultPlanetarySource();
 }
 
 
@@ -496,9 +530,11 @@ std::string SolarSystem::GetPlanetarySourceName(const std::string &sourceType)
 Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes)
 {
    #ifdef DEBUG_SS_PLANETARY_FILE
-   MessageInterface::
-      ShowMessage("SolarSystem::SetPlanetarySourceTypesInUse() num source types=%d\n",
-                  sourceTypes.size());
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetPlanetarySourceTypesInUse() num source types=%d\n",
+       sourceTypes.size());
+   for (UnsignedInt i=0; i<sourceTypes.size(); i++)
+      MessageInterface::ShowMessage("   '%s'\n", sourceTypes[i].c_str());
    #endif
    
    bool status = false;
@@ -685,6 +721,13 @@ Integer SolarSystem::SetPlanetarySourceTypesInUse(const StringArray &sourceTypes
           PLANETARY_SOURCE_STRING[sourceTypeInUse].c_str());
    
    theCurrentPlanetarySource = PLANETARY_SOURCE_STRING[sourceTypeInUse];
+   
+   #ifdef DEBUG_SS_PLANETARY_FILE
+   MessageInterface::ShowMessage
+      ("SolarSystem::SetPlanetarySourceTypesInUse() returning %d, "
+       "theCurrentPlanetarySource is set to '%s'\n", retCode,
+       theCurrentPlanetarySource.c_str());
+   #endif
    
    return retCode;
 }
@@ -1446,6 +1489,45 @@ bool SolarSystem::SetBooleanParameter(const std::string &label, const bool value
 
 
 //------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+bool SolarSystem::SetStringParameter(const Integer id,
+                                     const std::string &value)
+{
+   if (id == EPHEMERIS)
+   {
+      StringArray parts = GmatStringUtil::SeparateBy(value, "{}, ");
+      
+      #ifdef DEBUG_SS_SET
+      MessageInterface::ShowMessage
+         ("SolarSystem::SetStringParameter() Has %d ephmeris types\n", parts.size());
+      for (UnsignedInt i=0; i<parts.size(); i++)
+         MessageInterface::ShowMessage
+            ("   ephemType[%d] = '%s'\n", i, parts[i].c_str());
+      #endif
+      
+      Integer status = SetPlanetarySourceTypesInUse(parts);
+      if (status == 2)
+         return true;
+      else
+         return false;
+   }
+   
+   return GmatBase::SetStringParameter(id, value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+bool SolarSystem::SetStringParameter(const std::string &label,
+                                     const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);   
+}
+
+
+//------------------------------------------------------------------------------
 //  const StringArray&   GetStringArrayParameter(const Integer id) const
 //------------------------------------------------------------------------------
 /**
@@ -1460,8 +1542,11 @@ bool SolarSystem::SetBooleanParameter(const std::string &label, const bool value
 //------------------------------------------------------------------------------
 const StringArray& SolarSystem::GetStringArrayParameter(const Integer id) const
 {
-   if (id == BODIES_IN_USE) return bodyStrings;
-
+   if (id == BODIES_IN_USE)
+      return bodyStrings;
+   else if (id == EPHEMERIS)
+      return thePlanetarySourceTypes;
+   
    return GmatBase::GetStringArrayParameter(id);
 }
 

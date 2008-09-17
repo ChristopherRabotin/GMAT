@@ -21,17 +21,16 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
-//#include "MathNode.hpp"
-//#include "ElementWrapper.hpp"
-//#include "Function.hpp"
 #include <map>
 
 // Forward references for GMAT core objects
 class MathNode;
 class ElementWrapper;
 class Function;
+class FunctionManager;
 class SolarSystem;
 class PhysicalModel;
+class CoordinateSystem;
 
 class GMAT_API MathTree : public GmatBase
 {
@@ -48,6 +47,8 @@ public:
    std::vector<Function*> GetFunctions() const;
    void                 SetFunction(Function *function);
    
+   virtual void         SetCallingFunction(FunctionManager *fm);
+   
    MathNode*            GetTopNode();
    void                 SetTopNode(MathNode *node);
    void                 SetMathWrappers(WrapperMap *wrapperMap);
@@ -56,6 +57,7 @@ public:
    Rmatrix              MatrixEvaluate();
    bool                 Initialize(ObjectMap *objectMap,
                                    ObjectMap *globalObjectMap);
+   void                 Finalize();
    void                 GetOutputInfo(Integer &type, Integer &rowCount,
                                       Integer &colCount);
    
@@ -63,6 +65,7 @@ public:
    void                 SetObjectMap(ObjectMap *map);
    void                 SetGlobalObjectMap(ObjectMap *map);
    void                 SetSolarSystem(SolarSystem *ss);
+   void                 SetInternalCoordSystem(CoordinateSystem *cs);
    void                 SetTransientForces(std::vector<PhysicalModel*> *tf);
    
    // Inherited (GmatBase) methods
@@ -92,11 +95,14 @@ protected:
    std::vector<Function*> theFunctions;
    
    bool InitializeParameter(MathNode *node);
+   void FinalizeFunctionRunner(MathNode *node);
    void SetMathElementWrappers(MathNode *node);
    void SetFunctionToRunner(MathNode *node, Function *function);
+   void SetCallingFunctionToRunner(MathNode *node, FunctionManager *fm);
    void SetObjectMapToRunner(MathNode *node, ObjectMap *map);
    void SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map);
    void SetSolarSystemToRunner(MathNode *node, SolarSystem *ss);
+   void SetInternalCoordSystemToRunner(MathNode *node, CoordinateSystem *cs);
    void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf);
    bool RenameParameter(MathNode *node, const Gmat::ObjectType type,
                         const std::string &oldName, const std::string &newName);

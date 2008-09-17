@@ -83,7 +83,8 @@ Spacecraft::PARAMETER_TYPE[SpacecraftParamCount - SpaceObjectParamCount] =
       Gmat::OBJECTARRAY_TYPE, // Tanks
       Gmat::OBJECTARRAY_TYPE, // Thrusters
       Gmat::REAL_TYPE,        // TotalMass
-      Gmat::OBJECT_TYPE,      // Attitude 
+      Gmat::OBJECT_TYPE,      // Attitude
+      Gmat::STRING_TYPE,      // UTCGregorian
    };
    
 const std::string 
@@ -116,6 +117,7 @@ Spacecraft::PARAMETER_LABEL[SpacecraftParamCount - SpaceObjectParamCount] =
       "Thrusters", 
       "TotalMass", 
       "Attitude",
+      "UTCGregorian",
    };
 
 const std::string Spacecraft::MULT_REP_STRINGS[EndMultipleReps - CART_X] = 
@@ -1105,6 +1107,10 @@ Integer Spacecraft::GetParameterID(const std::string &str) const
    str.c_str());
    #endif
    
+   // handle special parameter to work in GmatFunction (loj: 2008.06.27)
+   if (str == "UTCGregorian")
+      return UTC_GREGORIAN;
+   
    // first check the multiple reps
    Integer sz = EndMultipleReps - CART_X;
    for (Integer ii = 0; ii < sz; ii++)
@@ -1226,6 +1232,12 @@ bool Spacecraft::IsParameterReadOnly(const Integer id) const
       return true;
    }
    
+   // This is fix for using Epoch.UTCGregorian in GmatFunction
+   if (id == UTC_GREGORIAN)
+   {
+      return true;
+   }
+   
    // if (id == STATE_TYPE) return true;   when deprecated stuff goes away
    
    return SpaceObject::IsParameterReadOnly(id);
@@ -1249,12 +1261,24 @@ bool Spacecraft::IsParameterReadOnly(const std::string &label) const
 }
 
 
+//---------------------------------------------------------------------------
+// std::string GetParameterText(const Integer id) const
+//---------------------------------------------------------------------------
+/*
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
 std::string Spacecraft::GetParameterText(const Integer id) const
 {
    #ifdef DEBUG_SC_PARAMETER_TEXT
    MessageInterface::ShowMessage("SC::GetParameterText - called with id = %d\n",
    id);
    #endif
+   
+   // handle special parameter to work in GmatFunction (loj: 2008.06.27)
+   if (id == UTC_GREGORIAN)
+      return PARAMETER_LABEL[id - SpaceObjectParamCount];
+   
    if ((id >= CART_X) && (id < EndMultipleReps))
    {
       #ifdef DEBUG_SC_PARAMETER_TEXT
@@ -1471,7 +1495,7 @@ Real Spacecraft::SetRealParameter(const Integer id, const Real value)
    if (id >= ATTITUDE_ID_OFFSET)
       if (attitude) 
          return attitude->SetRealParameter(id - ATTITUDE_ID_OFFSET,value);
-
+   
    return SpaceObject::SetRealParameter(id, value);
 }
 
@@ -1762,6 +1786,12 @@ bool Spacecraft::SetStringParameter(const Integer id, const std::string &value)
    else if (id == DATE_FORMAT_ID)
    {
       SetDateFormat(value);
+   }
+   // To handle Epoch.UTCGregorian in GmatFunction Assignment wrapper (loj: 2008.06.27)
+   else if (id == UTC_GREGORIAN)
+   {
+      SetDateFormat("UTCGregorian");
+      SetEpoch(value);
    }
    else if ((id == STATE_TYPE_ID) || (id == DISPLAY_STATE_TYPE_ID))
    {  
@@ -2965,9 +2995,9 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
    #ifdef DEBUG_STATE_INTERFACE
       MessageInterface::ShowMessage(
          "Spacecraft::SetStateFromRepresentation: Setting %s state to %s\n", 
-         rep.c_str(), st.ToString().c_str());
+         rep.c_str(), st.ToString(16).c_str());
    #endif
-
+   
    // First convert from the representation to Cartesian   
    static Rvector6 csState, finalState;
    
@@ -2981,13 +3011,24 @@ void Spacecraft::SetStateFromRepresentation(std::string rep, Rvector6 &st)
          "Spacecraft::SetStateFromRepresentation: state has been converted\n");
    #endif
    
+   if (internalCoordSystem == NULL)
+      throw SpaceObjectException(" The spacecraft internal coordinate system is not set");
+   if (coordinateSystem == NULL)
+      throw SpaceObjectException(" The spacecraft coordinate system is not set");
+   
+   #ifdef DEBUG_STATE_INTERFACE
+   MessageInterface::ShowMessage
+      ("   Now convert to internal CS, internalCoordSystem=<%p>, coordinateSystem=<%p>\n",
+       internalCoordSystem, coordinateSystem);
+   #endif
+   
    // Then convert to the internal CS
    if (internalCoordSystem != coordinateSystem)
       coordConverter.Convert(GetEpoch(), csState, coordinateSystem, finalState, 
          internalCoordSystem);
    else
       finalState = csState;
-
+   
    for (int i=0; i<6; i++)
       state[i] = finalState[i];
    

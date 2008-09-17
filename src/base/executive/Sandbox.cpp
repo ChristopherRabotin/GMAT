@@ -36,6 +36,8 @@
 
 //#define DISABLE_SOLAR_SYSTEM_CLONING
 
+//#define DISALLOW_NESTED_GMAT_FUNCTIONS
+
 //#define DEBUG_SANDBOX_OBJ 1
 //#define DEBUG_SANDBOX_INIT 1  // there's something wrong with some debug here ... @todo
 //#define DEBUG_SANDBOX_INIT_CS 1
@@ -45,6 +47,9 @@
 //#define DEBUG_MODERATOR_CALLBACK
 //#define DEBUG_FM_INITIALIZATION
 //#define DEBUG_SANDBOX_GMATFUNCTION
+//#define DEBUG_SANDBOX_OBJINIT
+//#define DEBUG_SANDBOX_OBJ
+//#define DEBUG_SANDBOX_OBJECT_MAPS
 
 #ifdef DEBUG_SANDBOX_INIT
       std::map<std::string, GmatBase *>::iterator omIter;
@@ -67,7 +72,8 @@ Sandbox::Sandbox() :
    moderator         (NULL),
    state             (IDLE),
    interruptCount    (45),
-   pollFrequency     (50)
+   pollFrequency     (50),
+   objInit           (NULL)
 {
    #ifdef DEBUG_SANDBOX_CLONING
       // List of the objects that can safely be cloned.  This list will be removed
@@ -125,6 +131,9 @@ Sandbox::~Sandbox()
    
    if (sequence)
       delete sequence;
+   
+   if (objInit)
+      delete objInit;
 
    // Delete the local objects
    Clear();
@@ -155,7 +164,10 @@ Sandbox::~Sandbox()
 //------------------------------------------------------------------------------
 bool Sandbox::AddObject(GmatBase *obj)
 {
-   #if DEBUG_SANDBOX_OBJ
+   if (obj == NULL)
+      return false;
+   
+   #ifdef DEBUG_SANDBOX_OBJ
       MessageInterface::ShowMessage
          ("Sandbox::AddObject() objTypeName=%s, objName=%s\n",
           obj->GetTypeName().c_str(), obj->GetName().c_str());
@@ -439,14 +451,15 @@ bool Sandbox::Initialize()
 {
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("Initializing the Sandbox\n");
-      MessageInterface::ShowMessage("The Sandbox Object Map contains:\n");
+      MessageInterface::ShowMessage("At the start, the Sandbox Object Map contains:\n");
       for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
          MessageInterface::ShowMessage("   %s of type %s\n",
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("The Global Object Map contains:\n");
+      MessageInterface::ShowMessage("At the start, the Global Object Map contains:\n");
       for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
          MessageInterface::ShowMessage("   %s of type %s\n",
                (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
+      MessageInterface::ShowMessage(" ........ \n");
    #endif
 
    bool rv = false;
@@ -483,236 +496,44 @@ bool Sandbox::Initialize()
    // Set the solar system references
    if (solarSys == NULL)
       throw SandboxException("No solar system defined in the Sandbox!");
-
-
+   
    // Initialize the solar system, internal coord system, etc.
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("About to Initialize Internal Objects ...\n");
-   #endif
-   InitializeInternalObjects();
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Internal Objects Initialized ...\n");
-   #endif
 
    // Set J2000 Body for all SpacePoint derivatives before anything else
    // NOTE - at this point, everything should be in the SandboxObjectMap,
    // and the GlobalObjectMap should be empty
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("--- Right before setting the J2000 body ---\n");
-      MessageInterface::ShowMessage("The Sandbox Object Map contains:\n");
-      for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("The Global Object Map contains:\n");
-      for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-   #endif
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-      if (obj->IsOfType(Gmat::SPACE_POINT))
-      {
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "Setting J2000 Body for %s in the Sandbox\n",
-               obj->GetName().c_str());
-         #endif
-         SpacePoint *spObj = (SpacePoint *)obj;
-         SpacePoint* j2k = FindSpacePoint(spObj->GetJ2000BodyName());
-         if (j2k)
-            spObj->SetJ2000Body(j2k);
-         else
-            throw SandboxException("Sandbox did not find the Spacepoint \"" +
-               spObj->GetJ2000BodyName() + "\"");
-      }
-   }
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("J2000 Body set ...\n");
+   #ifdef DEBUG_SANDBOX_OBJINIT
+      MessageInterface::ShowMessage("About to create the ObjectInitializer ... \n");
+      MessageInterface::ShowMessage(" and the objInit pointer is %s\n",
+            (objInit? "NOT NULL" : "NULL!!!"));
    #endif
 
-   // The initialization order is:
-   //
-   //  1. CoordinateSystem
-   //  2. Spacecraft
-   //  3. PropSetup and others
-   //  4. System Parameters
-   //  5. Other Parameters
-   //  6. Subscribers.
-
-   // Set reference objects
-
-   // Coordinate Systems
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
+   if (objInit) delete objInit;  // if Initialize is called more than once, delete 'old' objInit
+   objInit = new ObjectInitializer(solarSys, &objectMap, &globalObjectMap, internalCoordSys);
+   try
    {
-      obj = omi->second;
-      if (obj->GetType() == Gmat::COORDINATE_SYSTEM)
-      {
-         #ifdef DEBUG_SC_INIT_CS
-            MessageInterface::ShowMessage("Initializing CS %s\n",
-               obj->GetName().c_str());
-         #endif
-         obj->SetSolarSystem(solarSys);
-         BuildReferences(obj);
-         InitializeCoordinateSystem((CoordinateSystem *)obj);
-         obj->Initialize();
-      }
+      #ifdef DEBUG_SANDBOX_OBJINIT
+         MessageInterface::ShowMessage(
+               "About to call the ObjectInitializer::InitializeObjects ... \n");
+      #endif
+      objInit->InitializeObjects();
+   }
+   catch (BaseException &be)
+   {
+      throw SandboxException("Error initializing objects in Sandbox.\n");
    }
 
-   // Spacecraft
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-      if (obj->GetType() == Gmat::SPACECRAFT)
-      {
-         obj->SetSolarSystem(solarSys);
-         ((Spacecraft *)obj)->SetInternalCoordSystem(internalCoordSys);
-
-         BuildReferences(obj);
-
-         // Setup spacecraft hardware
-         BuildAssociations(obj);
-
-         obj->Initialize();
-      }
-   }
-
-
-   // All others except Parameters and Subscribers
-   // Spacecraft
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-      if ((obj->GetType() != Gmat::COORDINATE_SYSTEM) &&
-          (obj->GetType() != Gmat::SPACECRAFT) &&
-          (obj->GetType() != Gmat::PARAMETER) &&
-          (obj->GetType() != Gmat::SUBSCRIBER))
-      {
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "Sandbox::Initialize objTypeName = %s, objName = %s\n",
-               obj->GetTypeName().c_str(), obj->GetName().c_str());
-         #endif
-
-
-         //*************************** TEMPORARY *******************************
-         if (obj->GetType() != Gmat::PROP_SETUP)
-         {
-            obj->SetSolarSystem(solarSys);
-            if (obj->IsOfType(Gmat::SPACE_POINT))
-               BuildReferences(obj);
-            continue;
-         }
-         #ifdef DEBUG_FM_INITIALIZATION
-            else
-               MessageInterface::ShowMessage("Initializing PropSetup '%s'\n",
-                  obj->GetName().c_str());
-         #endif
-         //********************** END OF TEMPORARY *****************************
-
-
-         BuildReferences(obj);
-         // PropSetup initialization is handled by the commands, since the
-         // state that is propagated may change as spacecraft are added or
-         // removed.
-         if (obj->GetType() != Gmat::PROP_SETUP)
-            obj->Initialize();
-      }
-   }
-
-
-   //MessageInterface::ShowMessage("=====> Initialize System Parameters\n");
-   // System Parameters
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-
-
-      // Treat parameters as a special case -- because system parameters have
-      // to be initialized before other parameters.
-      if (obj->GetType() == Gmat::PARAMETER)
-      {
-         Parameter *param = (Parameter *)obj;
-         // Make sure system parameters are configured before others
-         if (param->GetKey() == GmatParam::SYSTEM_PARAM)
-         {
-            #ifdef DEBUG_SANDBOX_INIT_PARAM
-               MessageInterface::ShowMessage(
-                  "Sandbox::Initialize objTypeName = %s, objName = %s\n",
-                  obj->GetTypeName().c_str(), obj->GetName().c_str());
-            #endif
-            param->SetSolarSystem(solarSys);
-            param->SetInternalCoordSystem(internalCoordSys);
-            BuildReferences(obj);
-            obj->Initialize();
-         }
-      }
-   }
-
-
-   //MessageInterface::ShowMessage("=====> Initialize remaining parameters\n");
-   // Do all remaining Parameters next
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-      if (obj->GetType() == Gmat::PARAMETER)
-      {
-         Parameter *param = (Parameter *)obj;
-         // Make sure system parameters are configured before others
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "Sandbox::Initialize objTypeName = %s, objName = %s\n",
-               obj->GetTypeName().c_str(), obj->GetName().c_str());
-         #endif
-         
-         BuildReferences(obj);
-         param->Initialize();
-      }
-   }
-   
-   
-   //MessageInterface::ShowMessage("=====> Initialize subscribers\n");
-   // Now that the references are all set, handle the Subscribers
-   for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
-   {
-      obj = omi->second;
-      // Parameters were initialized above
-      if (obj->GetType() == Gmat::SUBSCRIBER)
-      {
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "Sandbox::Initialize objTypeName = %s, objName = %s\n",
-               obj->GetTypeName().c_str(), obj->GetName().c_str());
-         #endif
-         
-         BuildReferences(obj);
-         ((Subscriber*)obj)->SetInternalCoordSystem(internalCoordSys);
-         ((Subscriber*)obj)->SetSolarSystem(solarSys);
-         obj->Initialize();
-      }
-   }
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Objects Initialized ...\n");
-      MessageInterface::ShowMessage("Now moving global objects to the GOS ...\n");
-   #endif
-   
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("--- Right before moving things to the GOS --- \n");
-      MessageInterface::ShowMessage("The Sandbox Object Map contains:\n");
-      for (omIter = objectMap.begin(); omIter != objectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-      MessageInterface::ShowMessage("The Global Object Map contains:\n");
-      for (omIter = globalObjectMap.begin(); omIter != globalObjectMap.end(); ++omIter)
-         MessageInterface::ShowMessage("   %s of type %s\n",
-               (omIter->first).c_str(), ((omIter->second)->GetTypeName()).c_str());
-   #endif
    // Move global objects to the Global Object Store
    combinedObjectMap = objectMap;
    StringArray movedObjects;
    for (omi = objectMap.begin(); omi != objectMap.end(); ++omi)
    {
       obj = omi->second;
+      #ifdef DEBUG_SANDBOX_INIT
+         MessageInterface::ShowMessage(
+            "Sandbox::checking object %s (of type %s) \n",
+            (omi->first).c_str(), (obj->GetTypeName()).c_str());
+      #endif
       // Check the isGlobal flag
       if (obj->GetIsGlobal())
       {
@@ -727,7 +548,8 @@ bool Sandbox::Initialize()
    }
    for (unsigned int ii = 0; ii < movedObjects.size(); ii++)
       objectMap.erase(movedObjects.at(ii));
-   movedObjects.clear();   
+   movedObjects.clear();  
+   
    #ifdef DEBUG_SANDBOX_INIT
       MessageInterface::ShowMessage("--- Right AFTER moving things to the GOS --- \n");
       MessageInterface::ShowMessage("The Sandbox Object Map contains:\n");
@@ -750,22 +572,26 @@ bool Sandbox::Initialize()
    // Initialize commands
    while (current)
    {
+      #if DEBUG_SANDBOX_INIT
+      MessageInterface::ShowMessage
+         ("Initializing %s command\n   \"%s\"\n",
+          current->GetTypeName().c_str(),
+          current->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
+      #endif
+      
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
          MessageInterface::ShowMessage(
                "Initializing %s command\n",
                current->GetTypeName().c_str());
-         //"Initializing %s command\n   \"%s\"\n",
-         //current->GetTypeName().c_str(),
-         //current->GetGeneratingString(Gmat::SCRIPTING, "", "").c_str());
       #endif
          
       current->SetObjectMap(&objectMap);
       current->SetGlobalObjectMap(&globalObjectMap);
       current->SetSolarSystem(solarSys);
       current->SetTransientForces(&transientForces);
-
+      
       // Handle GmatFunctions
-      if ((current->GetTypeName() == "CallFunction") ||
+      if ((current->IsOfType("CallFunction")) ||
           (current->IsOfType("Assignment")))
       {
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
@@ -773,8 +599,9 @@ bool Sandbox::Initialize()
                "CallFunction or Assignment found in MCS: calling HandleGmatFunction \n");
          #endif
          HandleGmatFunction(current, &combinedObjectMap);
-         if (current->GetTypeName() == "CallFunction") 
-            ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
+         current->SetInternalCoordSystem(internalCoordSys);
+         //if (current->GetTypeName() == "CallFunction") 
+         //   ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
       }
       if (current->IsOfType("BranchCommand"))
       {
@@ -786,16 +613,23 @@ bool Sandbox::Initialize()
          for (Integer jj = 0; jj < sz; jj++)
          {
             HandleGmatFunction(cmdList.at(jj), &combinedObjectMap);
-            if ((cmdList.at(jj))->GetTypeName() == "CallFunction") 
-               ((CallFunction *)cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
+            (cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
+            //if ((cmdList.at(jj))->GetTypeName() == "CallFunction") 
+            //   ((CallFunction *)cmdList.at(jj))->SetInternalCoordSystem(internalCoordSys);
          }
       }
-      if (current->GetTypeName() == "CallFunction") 
-         ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
+      //if (current->GetTypeName() == "CallFunction") 
+      //   ((CallFunction *)current)->SetInternalCoordSystem(internalCoordSys);
       
       rv = current->Initialize();
       if (!rv)
          return false;
+      
+      // Check to see if the command needs a server startup
+      if (current->NeedsServerStartup())
+         if (moderator->StartServer() == false)
+            throw SandboxException("Unable to start the server needed by the " +
+                     (current->GetTypeName()) + " command");
 
       current = current->GetNext();
    }
@@ -813,417 +647,6 @@ bool Sandbox::Initialize()
 }
 
 
-//------------------------------------------------------------------------------
-// void BuildReferences()
-//------------------------------------------------------------------------------
-/**
- *  Sets all reference objects for the input object.
- */
-//------------------------------------------------------------------------------
-void Sandbox::BuildReferences(GmatBase *obj)
-{
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Entering BuildReferences ...\n");
-   #endif
-   std::string oName;
-
-   obj->SetSolarSystem(solarSys);
-   // PropSetup probably should do this...
-   if ((obj->GetType() == Gmat::PROP_SETUP) ||
-       (obj->GetType() == Gmat::FORCE_MODEL))
-   {
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage("--- it is a PropSetup or ForceModel ...\n");
-      #endif
-      ForceModel *fm = ((PropSetup *)obj)->GetForceModel();
-      fm->SetSolarSystem(solarSys);
-      
-      // Handle the coordinate systems
-      StringArray csList = fm->GetStringArrayParameter("CoordinateSystemList");
-      
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage("Coordinate system list for '%s':\n",
-            fm->GetName().c_str());
-         for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
-            MessageInterface::ShowMessage("   %s\n", i->c_str());
-      #endif
-      // Set CS's on the objects
-      for (StringArray::iterator i = csList.begin(); i != csList.end(); ++i)
-      {
-         CoordinateSystem *fixedCS = NULL;
-
-         if (objectMap.find(*i) != objectMap.end())
-         {
-            GmatBase *ref = objectMap[*i];
-            if (ref->IsOfType("CoordinateSystem") == false)
-               throw SandboxException("Object named " + (*i) + 
-                  " was expected to be a Coordinate System, but it has type " +
-                  ref->GetTypeName());
-            fixedCS = (CoordinateSystem*)ref;
-            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i); 
-         }
-         else if (globalObjectMap.find(*i) != globalObjectMap.end())
-         {
-            GmatBase *ref = globalObjectMap[*i];
-            if (ref->IsOfType("CoordinateSystem") == false)
-               throw SandboxException("Object named " + (*i) + 
-                  " was expected to be a Coordinate System, but it has type " +
-                  ref->GetTypeName());
-            fixedCS = (CoordinateSystem*)ref;
-            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i); 
-         }
-         else
-         {
-            //MessageInterface::ShowMessage("===> create BodyFixed here\n");
-            fixedCS = moderator->CreateCoordinateSystem("", false);
-            AxisSystem *axes = moderator->CreateAxisSystem("BodyFixed", "");
-            fixedCS->SetName(*i);
-            fixedCS->SetRefObject(axes, Gmat::AXIS_SYSTEM, "");
-            fixedCS->SetOriginName(fm->GetStringParameter("CentralBody"));
-            
-            fm->SetRefObject(fixedCS, fixedCS->GetType(), *i);         
-
-            fixedCS->SetSolarSystem(solarSys);
-            BuildReferences(fixedCS); 
-            InitializeCoordinateSystem(fixedCS);
-            fixedCS->Initialize();
-            
-            //objectMap[*i] = fixedCS;
-            // if things have already been moved to the globalObjectStore, put it there
-            if ((globalObjectMap.size() > 0) && (fixedCS->GetIsGlobal()))
-               globalObjectMap[*i] = fixedCS;
-            // otherwise, put it in the Sandbox object map - it will be moved to the GOS later
-            else
-               objectMap[*i] = fixedCS;
-            
-            #ifdef DEBUG_SANDBOX_INIT
-               MessageInterface::ShowMessage(
-                  "Coordinate system %s has body %s\n",
-                  fixedCS->GetName().c_str(), fixedCS->GetOriginName().c_str());
-            #endif
-         }
-      }
-      
-      #ifdef DEBUG_FM_INITIALIZATION
-         MessageInterface::ShowMessage(
-            "Initializing force model references for '%s'\n",
-            (fm->GetName() == "" ? obj->GetName().c_str() :
-                                   fm->GetName().c_str()) );
-      #endif
-
-      try
-      {
-         StringArray fmRefs = fm->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage("fmRefs are:\n");
-            for (unsigned int ii=0; ii < fmRefs.size(); ii++)
-               MessageInterface::ShowMessage(" --- %s\n", (fmRefs.at(ii)).c_str());
-         #endif
-         for (StringArray::iterator i = fmRefs.begin();
-              i != fmRefs.end(); ++i)
-         {
-            oName = *i;
-            try
-            {
-               SetRefFromName(fm, oName);
-            }
-            catch (SandboxException &ex)
-            {
-               // Handle SandboxExceptions first.
-               #ifdef DEBUG_SANDBOX_INIT
-                  MessageInterface::ShowMessage(
-                     "RefObjectName " + oName + " not found; ignoring " +
-                     ex.GetFullMessage() + "\n");
-               #endif
-               //throw ex;
-            }
-            catch (BaseException &ex)
-            {
-               // Post a message and -- otherwise -- ignore the exceptions
-               // Handle SandboxExceptions first.
-               #ifdef DEBUG_SANDBOX_INIT
-                  MessageInterface::ShowMessage(
-                     "RefObjectName not found; ignoring " +
-                     ex.GetFullMessage() + "\n");
-               #endif
-            }
-         }
-      }
-      catch (SandboxException &ex)
-      {
-         // Handle SandboxExceptions first.
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "RefObjectNameArray not found; ignoring " +
-               ex.GetFullMessage() + "\n");
-         #endif
-         //throw ex;
-      }
-      catch (BaseException &ex) // Handles no refObject array
-      {
-         // Post a message and -- otherwise -- ignore the exceptions
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-               "RefObjectNameArray not found; ignoring " +
-               ex.GetFullMessage() + "\n");
-         #endif
-      }
-
-      if (obj->GetType() == Gmat::FORCE_MODEL)
-         return;
-   }
-
-
-   try
-   {
-      // First set the individual reference objects
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage(
-               "Attempting to set individual reference objects ...\n");
-      #endif
-      oName = obj->GetRefObjectName(Gmat::UNKNOWN_OBJECT);
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage(
-               "Attempting to set individual reference objects with name = %s...\n",
-               oName.c_str());
-      #endif
-      SetRefFromName(obj, oName);
-   }
-   catch (SubscriberException &ex)
-   {
-      throw ex;
-   }
-   catch (SandboxException &ex)
-   {
-      // Handle SandboxExceptions first.
-      // For now, post a message and -- otherwise -- ignore exceptions
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
-            ex.GetFullMessage() + "\n");
-      #endif
-      //throw ex;
-   }
-   catch (BaseException &ex)
-   {
-      // Post a message and -- otherwise -- ignore the exceptions
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage("RefObjectName not found; ignoring " +
-            ex.GetFullMessage() + "\n");
-      #endif
-   }
-   
-   
-   // Next handle the array version
-   try
-   {
-      StringArray oNameArray =
-         obj->GetRefObjectNameArray(Gmat::UNKNOWN_OBJECT);
-      for (StringArray::iterator i = oNameArray.begin();
-           i != oNameArray.end(); ++i)
-      {
-         oName = *i;
-         #ifdef DEBUG_SANDBOX_INIT
-            MessageInterface::ShowMessage(
-                  "Attempting to set ARRAY object with name = %s...\n",
-                  oName.c_str());
-         #endif
-         try
-         {
-            SetRefFromName(obj, oName);
-         }
-         catch (SandboxException &ex)
-         {
-            // Handle SandboxExceptions first.
-            #ifdef DEBUG_SANDBOX_INIT
-               MessageInterface::ShowMessage(
-                  "RefObjectName " + oName + " not found; ignoring " +
-                  ex.GetFullMessage() + "\n");
-            #endif
-            //throw ex;
-         }
-         catch (SubscriberException &ex)
-         {
-            throw ex;
-         }
-         catch (BaseException &ex)
-         {
-            // Post a message and -- otherwise -- ignore the exceptions
-            // Handle SandboxExceptions first.
-            #ifdef DEBUG_SANDBOX_INIT
-               MessageInterface::ShowMessage(
-                  "RefObjectName not found; ignoring " +
-                  ex.GetFullMessage() + "\n");
-            #endif
-         }
-      }
-   }
-   catch (SandboxException &ex)
-   {
-      // Handle SandboxExceptions first.
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage(
-            "RefObjectNameArray not found; ignoring " +
-            ex.GetFullMessage() + "\n");
-      #endif
-      //throw ex;
-   }
-   catch (SubscriberException &ex)
-   {
-      throw ex;
-   }
-   catch (BaseException &ex) // Handles no refObject array
-   {
-      // Post a message and -- otherwise -- ignore the exceptions
-      #ifdef DEBUG_SANDBOX_INIT
-         MessageInterface::ShowMessage(
-            "RefObjectNameArray not found; ignoring " +
-            ex.GetFullMessage() + "\n");
-      #endif
-   }
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Exiting BuildReferences ...\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void InitializeInternalObjects()
-//------------------------------------------------------------------------------
-/**
- *  Initializes internal objects in the sandbox.
- */
-//------------------------------------------------------------------------------
-void Sandbox::InitializeInternalObjects()
-{
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Entering InitializeInternalObjects ...\n");
-   #endif
-   SpacePoint *sp, *j2kBod;
-   std::string j2kName, oName;
-
-   solarSys->Initialize();
-   
-   // Set J2000 bodies for solar system objects -- should this happen here?
-   const StringArray biu = solarSys->GetBodiesInUse();
-   for (StringArray::const_iterator i = biu.begin(); i != biu.end(); ++i)
-   {
-      sp = solarSys->GetBody(*i);
-      j2kName = sp->GetStringParameter("J2000BodyName");
-      j2kBod = FindSpacePoint(j2kName);
-      sp->SetJ2000Body(j2kBod);
-   }
-
-   // set ref object for internal coordinate system
-   internalCoordSys->SetSolarSystem(solarSys);
-
-   BuildReferences(internalCoordSys);
-
-   // Set reference origin for internal coordinate system.
-   oName = internalCoordSys->GetStringParameter("Origin");
-   sp = FindSpacePoint(oName);
-   if (sp == NULL)
-      throw SandboxException("Cannot find SpacePoint named \"" +
-         oName + "\" used for the internal coordinate system origin");
-   internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, oName);
-
-
-   // Set J2000 body for internal coordinate system
-   oName = internalCoordSys->GetStringParameter("J2000Body");
-   sp = FindSpacePoint(oName);
-   if (sp == NULL)
-      throw SandboxException("Cannot find SpacePoint named \"" +
-         oName + "\" used for the internal coordinate system J2000 body");
-   internalCoordSys->SetRefObject(sp, Gmat::SPACE_POINT, oName);
-
-
-   internalCoordSys->Initialize();
-}
-
-
-//*********************  TEMPORARY ******************************************************************
-void Sandbox::InitializeCoordinateSystem(CoordinateSystem *cs)
-{
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Entering InitializeCoordinateSystem ...\n");
-   #endif
-   SpacePoint *sp;
-   std::string oName;
-
-
-   // Set the reference objects for the coordinate system
-   BuildReferences(cs);
-
-
-   oName = cs->GetStringParameter("Origin");
-
-
-   GmatBase *axes = cs->GetOwnedObject(0);
-   BuildReferences(axes);
-
-
-   sp = FindSpacePoint(oName);
-   if (sp == NULL)
-      throw SandboxException("Cannot find SpacePoint named \"" +
-         oName + "\" used for the coordinate system " +
-         cs->GetName() + " origin");
-
-
-   cs->SetRefObject(sp, Gmat::SPACE_POINT, oName);
-
-
-   oName = cs->GetStringParameter("J2000Body");
-
-
-   sp = FindSpacePoint(oName);
-   if (sp == NULL)
-      throw SandboxException("Cannot find SpacePoint named \"" +
-         oName + "\" used for the coordinate system " +
-         cs->GetName() + " J2000 body");
-
-   cs->SetRefObject(sp, Gmat::SPACE_POINT, oName);
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Exiting InitializeCoordinateSystem ...\n");
-   #endif
-}
-
-
-//------------------------------------------------------------------------------
-// void SetRefFromName(GmatBase *obj, const std::string &oName)
-//------------------------------------------------------------------------------
-/**
- *  Sets a reference object on an object.
- *
- *  @param <obj>   The object that needs to set the reference.
- *  @param <oName> The name of the reference object.
- */
-//------------------------------------------------------------------------------
-void Sandbox::SetRefFromName(GmatBase *obj, const std::string &oName)
-{
-   #ifdef DEBUG_SANDBOX_INIT
-      MessageInterface::ShowMessage("Setting reference '%s' on '%s'\n", 
-         oName.c_str(), obj->GetName().c_str());
-   #endif
-   
-   GmatBase *refObj = NULL;
-      //if (objectMap.find(oName) != objectMap.end())
-   if ((refObj = FindObject(oName)) != NULL)
-   {
-      //GmatBase *refObj = objectMap[oName];
-      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
-   }
-   else
-   {
-      // look SolarSystem
-      //GmatBase *refObj = FindSpacePoint(oName);
-      refObj = FindSpacePoint(oName);
-
-      if (refObj == NULL)
-         throw SandboxException("Unknown object " + oName + " requested by " +
-                                obj->GetName());
-
-      obj->SetRefObject(refObj, refObj->GetType(), refObj->GetName());
-   }
-}
 
 
 //------------------------------------------------------------------------------
@@ -1533,7 +956,7 @@ bool Sandbox::AddSubscriber(Subscriber *subsc)
    state     = IDLE;
 
    Subscriber *sub = (Subscriber *)(subsc->Clone());
-   #if DEBUG_SANDBOX_OBJ
+   #ifdef DEBUG_SANDBOX_OBJ
       MessageInterface::ShowMessage
          ("Sandbox::AddSubscriber() name = %s\n",
           sub->GetName().c_str());
@@ -1565,74 +988,74 @@ bool Sandbox::AddSubscriber(Subscriber *subsc)
  *  @param <obj> The owner of the clones.
  */
 //------------------------------------------------------------------------------
-void Sandbox::BuildAssociations(GmatBase * obj)
-{
-   // Spacecraft receive clones of the associated hardware objects
-   if (obj->GetType() == Gmat::SPACECRAFT) {
-      StringArray hw = obj->GetRefObjectNameArray(Gmat::HARDWARE);
-      for (StringArray::iterator i = hw.begin(); i < hw.end(); ++i) {
-
-         #if DEBUG_SANDBOX
-            MessageInterface::ShowMessage
-               ("Sandbox::BuildAssociations() setting \"%s\" on \"%s\"\n",
-                i->c_str(), obj->GetName().c_str());
-         #endif
-
-         GmatBase *el = NULL;
-         if ((el = FindObject(*i)) == NULL)
-            throw SandboxException("Sandbox::BuildAssociations: Cannot find "
-                                   "hardware element \"" + (*i) + "\"\n");
-         //GmatBase *el = objectMap[*i];
-         GmatBase *newEl = el->Clone();
-         #if DEBUG_SANDBOX
-            MessageInterface::ShowMessage
-               ("Sandbox::BuildAssociations() created clone \"%s\" of type \"%s\"\n",
-               newEl->GetName().c_str(), newEl->GetTypeName().c_str());
-         #endif
-         if (!obj->SetRefObject(newEl, newEl->GetType(), newEl->GetName()))
-            MessageInterface::ShowMessage
-               ("Sandbox::BuildAssociations() failed to set %s\n",
-               newEl->GetName().c_str());
-         ;
-      }
-
-      obj->TakeAction("SetupHardware");
-   }
-}
-
-
-
-//------------------------------------------------------------------------------
-// SpacePoint* FindSpacePoint(const std::string &spname)
-//------------------------------------------------------------------------------
-/**
- *  Finds a SpacePoint by name.
- *
- *  @param <spname> The name of the SpacePoint.
- *
- *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
- *          Sandbox.
- */
-//------------------------------------------------------------------------------
-SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
-{
-   SpacePoint *sp = solarSys->GetBody(spName);
-
-
-   if (sp == NULL)
-   {
-      GmatBase *spObj;
-      if ((spObj = FindObject(spName)) != NULL)
-      {
-         //if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
-         if (spObj->IsOfType(Gmat::SPACE_POINT))
-            sp = (SpacePoint*)(spObj);
-      }
-   }
-
-
-   return sp;
-}
+//void Sandbox::BuildAssociations(GmatBase * obj)
+//{
+//   // Spacecraft receive clones of the associated hardware objects
+//   if (obj->GetType() == Gmat::SPACECRAFT) {
+//      StringArray hw = obj->GetRefObjectNameArray(Gmat::HARDWARE);
+//      for (StringArray::iterator i = hw.begin(); i < hw.end(); ++i) {
+//
+//         #if DEBUG_SANDBOX
+//            MessageInterface::ShowMessage
+//               ("Sandbox::BuildAssociations() setting \"%s\" on \"%s\"\n",
+//                i->c_str(), obj->GetName().c_str());
+//         #endif
+//
+//         GmatBase *el = NULL;
+//         if ((el = FindObject(*i)) == NULL)
+//            throw SandboxException("Sandbox::BuildAssociations: Cannot find "
+//                                   "hardware element \"" + (*i) + "\"\n");
+//         //GmatBase *el = objectMap[*i];
+//         GmatBase *newEl = el->Clone();
+//         #if DEBUG_SANDBOX
+//            MessageInterface::ShowMessage
+//               ("Sandbox::BuildAssociations() created clone \"%s\" of type \"%s\"\n",
+//               newEl->GetName().c_str(), newEl->GetTypeName().c_str());
+//         #endif
+//         if (!obj->SetRefObject(newEl, newEl->GetType(), newEl->GetName()))
+//            MessageInterface::ShowMessage
+//               ("Sandbox::BuildAssociations() failed to set %s\n",
+//               newEl->GetName().c_str());
+//         ;
+//      }
+//
+//      obj->TakeAction("SetupHardware");
+//   }
+//}
+//
+//
+//
+////------------------------------------------------------------------------------
+//// SpacePoint* FindSpacePoint(const std::string &spname)
+////------------------------------------------------------------------------------
+///**
+// *  Finds a SpacePoint by name.
+// *
+// *  @param <spname> The name of the SpacePoint.
+// *
+// *  @return A pointer to the SpacePoint, or NULL if it does not exist in the
+// *          Sandbox.
+// */
+////------------------------------------------------------------------------------
+//SpacePoint * Sandbox::FindSpacePoint(const std::string &spName)
+//{
+//   SpacePoint *sp = solarSys->GetBody(spName);
+//
+//
+//   if (sp == NULL)
+//   {
+//      GmatBase *spObj;
+//      if ((spObj = FindObject(spName)) != NULL)
+//      {
+//         //if (objectMap[spName]->IsOfType(Gmat::SPACE_POINT))
+//         if (spObj->IsOfType(Gmat::SPACE_POINT))
+//            sp = (SpacePoint*)(spObj);
+//      }
+//   }
+//
+//
+//   return sp;
+//}
 
 
 //------------------------------------------------------------------------------
@@ -1679,7 +1102,7 @@ GmatBase* Sandbox::FindObject(const std::string &name)
 bool Sandbox::SetObjectByNameInMap(const std::string &name,
                              GmatBase *obj)
 {
-#if DEBUG_SANDBOX_OBJ
+#ifdef DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() name = %s\n",
        name.c_str());
@@ -1689,7 +1112,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
    if (objectMap.find(name) != objectMap.end())
    {
       objectMap[name] = obj;
-#if DEBUG_SANDBOX_OBJ
+#ifdef DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() set object name = %s in objectMap\n",
        name.c_str());
@@ -1699,7 +1122,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
    if (globalObjectMap.find(name) != globalObjectMap.end())
    {
       globalObjectMap[name] = obj;
-#if DEBUG_SANDBOX_OBJ
+#ifdef DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() set object name = %s in globalObjectMap\n",
        name.c_str());
@@ -1711,7 +1134,7 @@ bool Sandbox::SetObjectByNameInMap(const std::string &name,
    if (!found)
       objectMap.insert(std::make_pair(name,obj));
 
-#if DEBUG_SANDBOX_OBJ
+#ifdef DEBUG_SANDBOX_OBJ
    MessageInterface::ShowMessage
       ("Sandbox::SetObjectByNameInMap() returning found = %s\n",
        (found? "TRUE" : "FALSE"));
@@ -1740,11 +1163,15 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
 {
    #ifdef DEBUG_SANDBOX_GMATFUNCTION
       MessageInterface::ShowMessage(
-         "Now entering HandleGmatFunction with command of type %s\n",
-         (cmd->GetTypeName()).c_str());
+         "Now entering HandleGmatFunction with command of type %s, '%s'\n",
+         (cmd->GetTypeName()).c_str(), cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
    #endif
+      
    bool OK = false;
+   GmatGlobal *global = GmatGlobal::Instance();
+   std::string matlabExt = global->GetMatlabFuncNameExt();
    StringArray gfList;
+   bool        isMatlabFunction = false;
    if (cmd->GetTypeName() == "CallFunction") 
    {
       std::string cfName = cmd->GetStringParameter("FunctionName");
@@ -1754,62 +1181,107 @@ bool Sandbox::HandleGmatFunction(GmatCommand *cmd,
    {
       gfList = ((Assignment*) cmd)->GetGmatFunctionNames();
    }
+   
+   #ifdef DEBUG_SANDBOX_GMATFUNCTION
+   MessageInterface::ShowMessage("   Has %d GmatFunctions\n", gfList.size());
+   #endif
+   
    for (unsigned int ii = 0; ii < gfList.size(); ii++)
    {
       std::string fName = gfList.at(ii);
       Function *f;
+      isMatlabFunction = false;
+      // if it's a Matlab Function, remove the extension from the name before looking in the GOS
+      // (as Matlab function names are placed into the GOS without the extension)
+      if (fName.find(matlabExt) != fName.npos)
+      {
+         fName = fName.substr(0, fName.find(matlabExt));
+         #ifdef DEBUG_SANDBOX_GMATFUNCTION
+         MessageInterface::ShowMessage
+            ("   actual matlab function name='%s'\n", fName.c_str());
+         #endif
+         isMatlabFunction = true;
+      }
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
-         MessageInterface::ShowMessage(
-            "Now searching globalObjectStore for object %s\n",
+         MessageInterface::ShowMessage("Now searching GOS for object %s\n",
             (gfList.at(ii)).c_str());
       #endif
       // if there is not already a function of that name, create it
       if (globalObjectMap.find(fName) == globalObjectMap.end())
       {
-         // assume that, if it's not in the GOS, we want a GmatFunction
-         f = moderator->CreateFunction("GmatFunction",fName, false);
+         if (isMatlabFunction)
+            f = moderator->CreateFunction("MatlabFunction",fName, false);
+         else
+            f = moderator->CreateFunction("GmatFunction",fName, false);
+         if (!f) 
+            throw SandboxException("Sandbox::HandleGmatFunction - error creating new function\n");
          globalObjectMap.insert(std::make_pair(fName,f));
-         if (cmd->GetTypeName() == "CallFunction")  
-            ((CallFunction*)cmd)->SetRefObject(f,Gmat::FUNCTION,fName);
-         else if (cmd->IsOfType("Assignment"))
-            ((Assignment*) cmd)->SetFunction(f);
       }
-      f = (Function*) globalObjectMap[fName];
+      else // it's already in the GOS, so just grab it
+         f = (Function*) globalObjectMap[fName];
+
+      if (cmd->GetTypeName() == "CallFunction")  
+      {
+         ((CallFunction*)cmd)->SetRefObject(f,Gmat::FUNCTION,fName);
+         cmd->SetStringParameter("FunctionName", fName);
+      }
+      else if (cmd->IsOfType("Assignment"))
+         ((Assignment*) cmd)->SetFunction(f);
       
       #ifdef DEBUG_SANDBOX_GMATFUNCTION
-         MessageInterface::ShowMessage(
-            "Now handling function \"%s\", whose fcs is %s set.\n",
-            (f->GetStringParameter("FunctionName")).c_str(), 
-            ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
+      MessageInterface::ShowMessage(
+         "Now handling function \"%s\", whose fcs is %s set, ",
+         (f->GetStringParameter("FunctionName")).c_str(), 
+         ((f->IsFunctionControlSequenceSet())? "already" : "NOT"));
+      MessageInterface::ShowMessage
+         ("script errors were %sfound.\n", f->ScriptErrorFound() ? "" : "not ");
       #endif
-
+      
+      // if function is GmatFunction and no FCS has built and no script error found,
+      // build FCS
       if ((f->GetTypeName() == "GmatFunction") &&
-          (!(f->IsFunctionControlSequenceSet())))
+          (!(f->IsFunctionControlSequenceSet())) &&
+          (!(f->ScriptErrorFound())))
       {
          #ifdef DEBUG_SANDBOX_GMATFUNCTION
-            MessageInterface::ShowMessage(
-               "About to call InterpretGmatFunction for function %s\n",
-               (f->GetStringParameter("FunctionName")).c_str());
+         MessageInterface::ShowMessage(
+            "About to call InterpretGmatFunction for function %s\n",
+            (f->GetStringParameter("FunctionName")).c_str());
          #endif
          GmatCommand* fcs = moderator->InterpretGmatFunction(f, usingMap);
+         if (fcs == NULL)
+            throw SandboxException("Sandbox::HandleGmatFunction - error creating FCS\n");
+         
          f->SetFunctionControlSequence(fcs);
          GmatCommand* fcsCmd = fcs;
          while (fcsCmd)
          {
+            #ifdef DISALLOW_NESTED_GMAT_FUNCTIONS
+            if (fcsCmd->HasAFunction())
+            {
+               std::string errMsg = "Sandbox::HandleGmatFunction (";
+               errMsg += fName + ") - nested or recursive GmatFunctions not yet supported.\n";
+               throw SandboxException(errMsg);
+            }
+            #endif
             if ((fcsCmd->GetTypeName() == "CallFunction") ||
                 (fcsCmd->IsOfType("Assignment")))
             {
                #ifdef DEBUG_SANDBOX_GMATFUNCTION
-                  MessageInterface::ShowMessage(
-                     "CallFunction or Assignment (%s) detected ... now processing\n",
-                     (cmd->GetTypeName()).c_str());
+               MessageInterface::ShowMessage(
+                  "CallFunction or Assignment (%s)'%s' detected in FCS... now processing\n",
+                  (fcsCmd->GetTypeName()).c_str(),
+                  fcsCmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str());
                #endif
+               
+               // LOJ: Let's handle GmatFunction first (2008.06.02)
+               OK += HandleGmatFunction(fcsCmd, &globalObjectMap);
                // do not set the non-global object map here; it will need to be
                // setup y the FunctionManager at execution
                fcsCmd->SetGlobalObjectMap(&globalObjectMap);
                fcsCmd->SetSolarSystem(solarSys);
                fcsCmd->SetTransientForces(&transientForces);
-               OK += HandleGmatFunction(fcsCmd, &globalObjectMap);
+               //OK += HandleGmatFunction(fcsCmd, &globalObjectMap); //(loj: moved up)
                ////if (!(fcsCmd->Initialize())) 
                ////   return false;
                if (fcsCmd->GetTypeName() == "CallFunction") 

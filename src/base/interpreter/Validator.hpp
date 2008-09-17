@@ -27,6 +27,7 @@
 #include "gmatdefs.hpp"
 
 // Forward references
+class Interpreter;
 class Moderator;
 class SolarSystem;
 class GmatCommand;
@@ -38,20 +39,22 @@ class ElementWrapper;
 class GMAT_API Validator
 {
 public:
-   Validator(SolarSystem *ss = NULL, ObjectMap *objMap = NULL);
-   ~Validator();
    
+   static Validator* Instance();
+   
+   void SetInterpreter(Interpreter *interp);
    void SetSolarSystem(SolarSystem *ss);
    void SetObjectMap(ObjectMap *objMap);
    void SetFunction(Function *func);
    
+   bool StartServer(GmatCommand *cmd);
    bool CheckUndefinedReference(GmatBase *obj, bool contOnError = true);
    bool ValidateCommand(GmatCommand *cmd, bool contOnError = true,
-                        bool manage = true);
+                        Integer manage = 1);
    
    ElementWrapper* CreateElementWrapper(const std::string &desc,
                                         bool parametersFirst = false,
-                                        bool manage = true);
+                                        Integer manage = 1);
    const StringArray& GetErrorList();
    
    GmatBase* FindObject(const std::string &name, 
@@ -61,37 +64,71 @@ public:
                               const std::string &name,
                               const std::string &ownerName = "",
                               const std::string &depName = "",
-                              bool manage = true);
-   Parameter* CreateArray( const std::string &arrayStr, bool manage = true);   
-   Parameter* CreateSystemParameter(const std::string &str,
-                                    bool manage = true);
+                              Integer manage = 1);
+   Parameter* CreateArray( const std::string &arrayStr, Integer manage = 1);   
+   Parameter* CreateSystemParameter(bool &paramCreated, const std::string &str,
+                                    Integer manage = 1);
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
-   
-   void CreateParameterWrapper(Parameter *param, const std::string &desc,
-                               ElementWrapper **ew, Gmat::WrapperDataType &itsType);
-   ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed,
-                                        bool manage = true);
-   ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed,
-                                      bool manage = true);
    
    bool IsParameterType(const std::string &desc);
    bool ValidateParameter(const StringArray &refNames, GmatBase *obj);
    bool ValidateSaveCommand(GmatBase *obj);
    
-protected:
+private:
+
+   bool CreateAssignmentWrappers(GmatCommand *cmd, Integer manage);
    
-   bool HandleError();
+   ElementWrapper* CreateSolarSystemWrapper(GmatBase *obj, const std::string &owner,
+                                            const std::string &depobj,
+                                            const std::string &type,
+                                            Integer manage = 1);
+   ElementWrapper* CreateForceModelWrapper(GmatBase *obj, const std::string &owner,
+                                           const std::string &depobj,
+                                           const std::string &type,
+                                           Integer manage = 1);
+   ElementWrapper* CreateWrapperWithDot(bool parametersFirst, Integer manage = 1);
+   ElementWrapper* CreateValidWrapperWithDot(GmatBase *obj,
+                                             const std::string &type,
+                                             const std::string &owner,
+                                             const std::string &depobj,
+                                             bool parametersFirst,
+                                             Integer manage);
+   ElementWrapper* CreateOtherWrapper(Integer manage = 1);
+   ElementWrapper* CreateParameterWrapper(Parameter *param,
+                                          Gmat::WrapperDataType &itsType);
+   ElementWrapper* CreatePropertyWrapper(GmatBase *obj, const std::string &type,
+                                         Integer manage, bool checkSubProp = true);
+   ElementWrapper* CreateSubPropertyWrapper(GmatBase *obj,
+                                            const std::string &type,
+                                            Integer manage);
    
+   bool ValidateSubCommand(GmatCommand *cmd, Integer level, Integer manage = 1);
+   bool CreateCoordSystemProperty(GmatBase *obj, const std::string &prop,
+                                  const std::string &value);
+   bool CreatePropSetupProperty(GmatBase *obj, const std::string &prop,
+                                const std::string &value);
+   bool CreateForceModelProperty(GmatBase *obj, const std::string &prop,
+                                 const std::string &value);
+   bool HandleError(bool addFunction = true);
+   
+   Interpreter     *theInterpreter;
    Moderator       *theModerator;
    SolarSystem     *theSolarSystem;
+   GmatCommand     *theCommand;
    Function        *theFunction;
    ObjectMap       *theObjectMap;
    StringArray     theParameterList;
+   
+   std::string     theDescription;
    
    /// Error handling data
    bool            continueOnError;
    StringArray     theErrorList;
    std::string     theErrorMsg;
+   
+   static Validator *instance;
+   Validator();
+   ~Validator();      
 };
 
 #endif // Validator_hpp

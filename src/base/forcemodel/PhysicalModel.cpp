@@ -845,10 +845,29 @@ bool PhysicalModel::StateChanged(bool reset)
 /**
  * Specifies whether the PhysicalModel is transient or always applied.
  * 
- * @return true is transient, false (the default) if not.
+ * @return true if transient, false (the default) if not.
  */
 //------------------------------------------------------------------------------
 bool PhysicalModel::IsTransient()
+{
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool IsUserForce()
+//------------------------------------------------------------------------------
+/**
+ * Specifies if a force is set by a user module.
+ * 
+ * Specifies whether the PhysicalModel is an "extra" force added by a plug-in or 
+ * other user method.  Forces added to the ForceModel this way appear in the 
+ * "UserDefined" field of the force model when it is written out or parsed.
+ * 
+ * @return true if the force should be in the "UserDefined" field.
+ */
+//------------------------------------------------------------------------------
+bool PhysicalModel::IsUserForce()
 {
    return false;
 }

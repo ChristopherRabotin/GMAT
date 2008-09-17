@@ -742,6 +742,16 @@ void GuiInterpreter::NotifyRunCompleted()
 #endif
 }
 
+void GuiInterpreter::UpdateView(Integer type)
+{
+   if (type & 0x01)
+      UpdateResourceTree();
+   if (type & 0x02)
+      UpdateMissionTree();
+   if (type & 0x04)
+      UpdateOutputTree();
+}
+
 
 //------------------------------------------------------------------------------
 // void UpdateResourceTree()
@@ -787,6 +797,19 @@ void GuiInterpreter::CloseCurrentProject()
 #if !defined __CONSOLE_APP__
    GmatAppData::Instance()->GetMainFrame()->CloseCurrentProject();
 #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void StartServer()
+//------------------------------------------------------------------------------
+/*
+ * Starts the MATLAB server.
+ */
+//------------------------------------------------------------------------------
+void GuiInterpreter::StartServer()
+{
+   GmatAppData::Instance()->GetMainFrame()->StartServer();   
 }
 
 

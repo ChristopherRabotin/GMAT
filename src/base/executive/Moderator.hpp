@@ -23,7 +23,7 @@
 #include "gmatdefs.hpp"
 // executive
 #include "Sandbox.hpp"
-#include "GuiInterpreter.hpp"
+// #include "GuiInterpreter.hpp"
 #include "ScriptInterpreter.hpp"
 #include "FactoryManager.hpp"
 #include "ConfigManager.hpp"
@@ -57,6 +57,8 @@
 #include "EopFile.hpp"
 #include "ItrfCoefficientsFile.hpp"
 #include "LeapSecsFileReader.hpp"
+// plug-in code
+#include "DynamicLibrary.hpp"
 
 namespace Gmat
 {
@@ -73,21 +75,31 @@ public:
    void SetRunReady(bool flag = true);
    void SetShowFinalState(bool flag = true);
    
+   //----- Plug-in code
+   void LoadPlugins();
+   void LoadAPlugin(std::string pluginName);
+   DynamicLibrary *LoadLibrary(const std::string &libraryName);
+   bool IsLibraryLoaded(const std::string &libName);
+   void (*GetDynamicFunction(const std::string &funName, 
+                             const std::string &libraryName))();
+   
    //----- ObjectType
    std::string GetObjectTypeString(Gmat::ObjectType type);  
    
    //----- interpreter
-   static GuiInterpreter* GetGuiInterpreter();
+   static ScriptInterpreter* GetUiInterpreter();
    static ScriptInterpreter* GetScriptInterpreter();
-   static void SetGuiInterpreter(GuiInterpreter *guiInterp);
+   static void SetUiInterpreter(ScriptInterpreter *uiInterp);
    static void SetScriptInterpreter(ScriptInterpreter *scriptInterp);
    
-   //----- object finding
+   void SetInterpreterMapAndSS(Interpreter *interp);
+   
+   //----- object map
    void SetObjectMap(ObjectMap *objMap);
-   GmatBase* FindObject(const std::string &name);
    
    //----- factory
    const StringArray& GetListOfFactoryItems(Gmat::ObjectType type);
+   const StringArray& GetListOfAllFactoryItems();
    
    //----- configuration
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
@@ -107,9 +119,10 @@ public:
    // SolarSystem
    SolarSystem* GetDefaultSolarSystem();
    SolarSystem* CreateSolarSystem(const std::string &name);
-   SolarSystem* GetSolarSystemInUse();
-   bool SetSolarSystemInUse(const std::string &name);
+   SolarSystem* GetSolarSystemInUse(Integer manage = 1);
    void SetSolarSystemInUse(SolarSystem *ss);
+   void SetInternalSolarSystem(SolarSystem *ss);
+   bool SetSolarSystemInUse(const std::string &name);
    
    // CalculatedPoint
    CalculatedPoint* CreateCalculatedPoint(const std::string &type,
@@ -160,11 +173,11 @@ public:
                               const std::string &name,
                               const std::string &ownerName = "",
                               const std::string &depName = "",
-                              bool manage = true);
+                              Integer manage = 1);
    Parameter* GetParameter(const std::string &name);
    
    // ForceModel
-   ForceModel* CreateForceModel(const std::string &name);
+   ForceModel* CreateForceModel(const std::string &name, Integer manage = 0);
    ForceModel* GetForceModel(const std::string &name);
    bool AddToForceModel(const std::string &forceModelName,
                         const std::string &forceName);
@@ -190,8 +203,10 @@ public:
    // CoordinateSystem
    CoordinateSystem* CreateCoordinateSystem(const std::string &name,
                                             bool createDefault = false,
-                                            bool internal = false);
-   CoordinateSystem* GetCoordinateSystem(const std::string &name);
+                                            bool internal = false,
+                                            Integer manage = 1);
+   CoordinateSystem* GetCoordinateSystem(const std::string &name,
+                                         Integer manage = 1);
    
    // Subscriber
    Subscriber* CreateSubscriber(const std::string &type,
@@ -203,7 +218,7 @@ public:
    // Function
    Function* CreateFunction(const std::string &type,
                             const std::string &name,
-                            bool manage = true);
+                            Integer manage = 1);
    Function* GetFunction(const std::string &name);
    
    //----- Non-Configurable Items
@@ -213,7 +228,8 @@ public:
    
    // AxisSystem
    AxisSystem* CreateAxisSystem(const std::string &type,
-                                const std::string &name);
+                                const std::string &name,
+                                Integer manage = 1);
    
    // MathNode
    MathNode* CreateMathNode(const std::string &type,
@@ -291,24 +307,35 @@ public:
    std::string GetScript(Gmat::WriteMode mode = Gmat::SCRIPTING);
    Integer RunScript(Integer sandboxNum = 1);
    
+   // MATLAB Server Startup Interface
+   bool StartServer();
+   
 private:
-
+   
    // initialization
    void CreatePlanetaryCoeffFile();
    void CreateTimeFile();
    
+   // prepare next script reading
+   void PrepareNextScriptReading(bool clearObjs = true);
+   
+   // create default objects
    void CreateSolarSystemInUse();
    void CreateInternalCoordSystem();
    void CreateDefaultCoordSystems();
    void CreateDefaultMission();
-
+   
    // Parameter reference object setting
    void CheckParameterType(Parameter *param, const std::string &type,
                            const std::string &ownerName);
    void SetParameterRefObject(Parameter *param, const std::string &type,
                               const std::string &name,
                               const std::string &ownerName,
-                              const std::string &depName);
+                              const std::string &depName, Integer manage);
+   
+   // object map
+   GmatBase* FindObject(const std::string &name, Integer manage = 1);
+   bool AddObject(GmatBase *obj);
    
    // default objects
    Spacecraft* GetDefaultSpacecraft();
@@ -344,6 +371,7 @@ private:
    // for Debug
    void ShowCommand(const std::string &title1, GmatCommand *cmd1,
                     const std::string &title2 = "", GmatCommand *cmd2 = NULL);
+   void ShowObjectMap(const std::string &title);
    
    Moderator();
    virtual ~Moderator();
@@ -360,7 +388,7 @@ private:
    ObjectMap *objectMapInUse;
    
    static Moderator *instance;
-   static GuiInterpreter *theGuiInterpreter;
+   static ScriptInterpreter *theUiInterpreter;
    static ScriptInterpreter *theScriptInterpreter;
    ConfigManager *theConfigManager;
    FactoryManager *theFactoryManager;
@@ -369,12 +397,16 @@ private:
    
    SolarSystem *theDefaultSolarSystem;
    SolarSystem *theSolarSystemInUse;
+   SolarSystem *theInternalSolarSystem;
    CoordinateSystem *theInternalCoordSystem;
    StringArray theSpacePointList;
    EopFile *theEopFile;
    ItrfCoefficientsFile *theItrfFile;
    LeapSecsFileReader *theLeapSecsFile;
    Gmat::RunState runState;
+
+   // Dynamic library data table
+   std::map<std::string, DynamicLibrary*>   userLibraries;
 };
 
 #endif // Moderator_hpp

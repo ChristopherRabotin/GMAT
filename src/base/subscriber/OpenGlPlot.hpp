@@ -47,6 +47,7 @@ public:
    
    // methods inherited from Subscriber
    virtual bool         Initialize();
+   virtual void         Activate(bool state = true);
    
    // methods inherited from GmatBase
    virtual GmatBase*    Clone() const;
@@ -150,7 +151,7 @@ protected:
    void     UpdateObjectList(SpacePoint *sp, bool show = false);
    void     PutRvector3Value(Rvector3 &rvec3, Integer id,
                              const std::string &sval, Integer index = -1);
-   
+   void     PutUnsignedIntValue(Integer id, const std::string &sval);
    void     WriteDeprecatedMessage(Integer id) const;
    bool     UpdateSolverData();
    

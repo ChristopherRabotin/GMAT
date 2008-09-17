@@ -116,6 +116,8 @@ public:
    // method to return a list of strings representing the objects of the input
    // type that may be created in the system
    const StringArray&     GetListOfItems(Gmat::ObjectType byType);
+   const StringArray&     GetListOfAllItems();
+   
    // method to return the base type for the input string
    Gmat::ObjectType       GetBaseTypeOf(const std::string &typeName);
    

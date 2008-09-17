@@ -17,6 +17,7 @@
  *    Such as: 100 * Sat1.X; where Sat1.X is already defined
  *             Sat1.X + Sat1.X;
  *             A * B; where A and B are already defined
+ *    Only operator allowed are: +*-/^
  */
 //------------------------------------------------------------------------------
 
@@ -28,8 +29,10 @@
 #include "StringUtil.hpp"         // for Replace()
 #include <sstream>
 
-//#define DEBUG_VARIABLE 1
+//#define DEBUG_VARIABLE_SET 1
+//#define DEBUG_VARIABLE_EVAL 1
 //#define DEBUG_RENAME 1
+//#define DEBUG_GEN_STRING 1
 
 //---------------------------------
 // public methods
@@ -52,12 +55,18 @@ Variable::Variable(const std::string &name, const std::string &valStr,
    : RealVar(name, valStr, "Variable", GmatParam::USER_PARAM, NULL, desc, unit,
              GmatParam::NO_DEP, Gmat::UNKNOWN_OBJECT, false)
 {
+   objectTypeNames.push_back("Variable");
+   
    mParamDb = new ParameterDatabase();
    mExpParser = new ExpressionParser();
    // Set parameter database to be used
    mExpParser->SetParameterDatabase(mParamDb);
    
-   objectTypeNames.push_back("Variable");
+   // Initialize real value and expression
+   mIsNumber = true;
+   mRealValue = 0.0;
+   mExpr = "0";
+   
    #if DEBUG_VARIABLE
    MessageInterface::ShowMessage("Variable::Variable() constructor\n");
    MessageInterface::ShowMessage
@@ -112,7 +121,13 @@ Variable& Variable::operator=(const Variable &right)
       mParamDb = new ParameterDatabase(*right.mParamDb);
       mExpParser = new ExpressionParser();
       mExpParser->SetParameterDatabase(mParamDb);
-      
+      // Set expression to name of right side since expression is used for
+      // writnig in GetGeneratingString() (loj: 2008.08.13)
+      // For example:
+      // var1 = 123.45;
+      // var2 = var1;
+      // We want to write "var2 = var1" instead of "var2 = 123.45"
+      mExpr = right.GetName();
       SetName(thisName);
    }
    
@@ -158,33 +173,43 @@ Real Variable::GetReal()
 //------------------------------------------------------------------------------
 Real Variable::EvaluateReal()
 {
-   if (this->GetName() == mExpr || mExpr == "" || isdigit(mExpr[0]) ||
-       mExpr[0] == '-' || mExpr[0] == '.')
-   {      
-      #if DEBUG_VARIABLE
-      MessageInterface::ShowMessage
-         ("Variable::EvaluateReal() this=%p, name:%s, 1st: mRealValue=%f, "
-          "mExpr=%s\n", this, GetName().c_str(), mRealValue, mExpr.c_str());
-      #endif
-      return mRealValue;
-   }
-   else if (mIsNumberEquation)
-   {
-      return mExpParser->EvalExp(mExpr.c_str());
-   }
-   
-   #if DEBUG_VARIABLE
-   StringArray paramNames = mParamDb->GetNamesOfParameters();
-   for (int i = 0; i<mParamDb->GetNumParameters(); i++)
-      MessageInterface::ShowMessage
-         ("Variable::EvaluateReal() In mParamDb :%s\n", paramNames[i].c_str());
+   #if DEBUG_VARIABLE_EVAL
+   MessageInterface::ShowMessage
+      ("Variable::EvaluateReal() this=<%p>'%s', mExpr=%s, mIsNumber=%d\n",
+       this, GetName().c_str(), mExpr.c_str(), mIsNumber);
    #endif
    
-   // Evaluate the expression
-   mRealValue = mExpParser->EvalExp(mExpr.c_str());
-   //MessageInterface::ShowMessage
-   //   ("==> Variable::EvaluateReal() 2nd: mRealValue=%f\n", mRealValue);
-   return mRealValue;
+   if (mIsNumber)
+   {      
+      #if DEBUG_VARIABLE_EVAL
+      MessageInterface::ShowMessage
+         ("Variable::EvaluateReal() Returning just a number: mRealValue=%f\n",
+          mRealValue);
+      #endif
+      
+      return mRealValue;
+   }
+   else
+   {
+      try
+      {
+         // Evaluate the expression
+         mRealValue = mExpParser->EvalExp(mExpr.c_str());
+         
+         #if DEBUG_VARIABLE_EVAL
+         MessageInterface::ShowMessage
+            ("Variable::EvaluateReal() Returning expression evaluation: "
+             "mRealValue=%f\n", mRealValue);
+         #endif
+         
+         return mRealValue;
+      }
+      catch (BaseException &e)
+      {
+         throw ParameterException
+            (e.GetFullMessage() + " for the Variable \"" + GetName() + "\"");
+      }
+   }
 }
 
 
@@ -211,6 +236,81 @@ GmatBase* Variable::Clone() const
 void Variable::Copy(const GmatBase* orig)
 {
    operator=(*((Variable *)(orig)));
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <id> The integer ID for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, throw if the parameter is not stored.
+ */
+//------------------------------------------------------------------------------
+bool Variable::SetStringParameter(const Integer id, const std::string &value)
+{
+   #if DEBUG_VARIABLE_SET
+   MessageInterface::ShowMessage
+      ("Variable::SetStringParameter() this=<%p>'%s', id=%d, value='%s'\n", this,
+       GetName().c_str(), id, value.c_str());
+   #endif
+   
+   switch (id)
+   {
+   case EXPRESSION:
+      {         
+         // if value is blank or number, call Parent class
+         Real rval;
+         if (value == "" || GmatStringUtil::ToReal(value, &rval))
+         {
+            return RealVar::SetStringParameter(id, value);
+         }
+         else
+         {
+            mValueSet = true;
+            mIsNumber = false;
+            mExpr = value;  
+            
+            #if DEBUG_VARIABLE_SET
+            MessageInterface::ShowMessage
+               ("   Variable expression set to '%s'\n", value.c_str());
+            #endif
+            return true;
+         }
+      }
+   default:
+      return Parameter::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label,
+//                         const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * Change the value of a string parameter.
+ *
+ * @param <label> The (string) label for the parameter.
+ * @param <value> The new string for this parameter.
+ *
+ * @return true if the string is stored, false if not.
+ */
+//------------------------------------------------------------------------------
+bool Variable::SetStringParameter(const std::string &label,
+                                 const std::string &value)
+{
+   #if DEBUG_VARIABLE_SET
+   MessageInterface::ShowMessage
+      ("Variable::SetStringParameter() label=%s value=%s\n",
+       label.c_str(), value.c_str());
+   #endif
+   
+   return SetStringParameter(GetParameterID(label), value);
 }
 
 
@@ -281,9 +381,10 @@ std::string Variable::GetRefObjectName(const Gmat::ObjectType type) const
 bool Variable::SetRefObjectName(const Gmat::ObjectType type,
                                 const std::string &name)
 {
-   #if DEBUG_VARIABLE
+   #if DEBUG_VARIABLE_SET
    MessageInterface::ShowMessage
-      ("Variable::SetRefObjectName() type=%d, name=%s\n", type, name.c_str());
+      ("Variable::SetRefObjectName() this=<%p>'%s', type=%d, name=%s\n", this,
+       GetName().c_str(), type, name.c_str());
    #endif
    
    if (type != Gmat::PARAMETER)
@@ -292,6 +393,11 @@ bool Variable::SetRefObjectName(const Gmat::ObjectType type,
          ("Variable::SetRefObjectName() " + GmatBase::GetObjectTypeString(type) +
           " is not valid object type of " + this->GetTypeName() + "\n");
    }
+   
+   #if DEBUG_VARIABLE_SET
+   MessageInterface::ShowMessage
+      ("   Adding '%s' to '%s' parameter database\n", name.c_str(), GetName().c_str());
+   #endif
    
    mParamDb->Add(name);
    return true;
@@ -399,17 +505,61 @@ const StringArray& Variable::GetRefObjectNameArray(const Gmat::ObjectType type)
 const std::string& Variable::GetGeneratingString(Gmat::WriteMode mode,
                                                  const std::string &prefix,
                                                  const std::string &useName)
-{   
-   Real rval = GetReal();
+{
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("Variable::GetGeneratingString() this=<%s>'%s', mode=%d, prefix='%s', "
+       "useName='%s'\n   mExpr='%s', mRealValue=%f, mIsNumber=%d, mValueSet=%d\n",
+       this, GetName().c_str(), mode, prefix.c_str(), useName.c_str(),
+       mExpr.c_str(), mRealValue, mIsNumber, mValueSet);
+   #endif
    
-   // Write value if it is not zero
-   if (rval != 0.0)
+   bool generateStr = false;
+   
+   if (mode == Gmat::SHOW_SCRIPT)
    {
-      Integer prec = GetDataPrecision();
-      generatingString = "GMAT " + GetName() + " = " +
-         GmatRealUtil::ToString(rval, false, false, false, prec, 1);
-      generatingString = generatingString + ";" + inlineComment + "\n";
+      #ifdef DEBUG_GEN_STRING
+      MessageInterface::ShowMessage("   mode is SHOW_SCRIPT, so generating string\n");
+      #endif
+      generateStr = true;
    }
+   else
+   {
+      if (mIsNumber)
+      {
+         Real rval = GetReal();
+         
+         // Write value if it is set from user or non-zero
+         if (mValueSet || rval != 0.0)
+         {
+            #ifdef DEBUG_GEN_STRING
+            MessageInterface::ShowMessage
+               ("   '%s' is a non-zero number or set by user, so generating string\n",
+                mExpr.c_str());
+            #endif
+            generateStr = true;
+         }
+      }
+      else
+      {
+         #ifdef DEBUG_GEN_STRING
+         MessageInterface::ShowMessage
+            ("   '%s' is not a number, so generating string\n", mExpr.c_str());
+         #endif
+         generateStr = true;
+      }
+   }
+   
+   if (generateStr)
+   {
+      generatingString = "GMAT " + GetName() + " = " + mExpr + ";";
+      generatingString = generatingString + inlineComment + "\n";
+   }
+   
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("Variable::GetGeneratingString() returning\n<%s>\n", generatingString.c_str());
+   #endif
    
    return generatingString;
 }

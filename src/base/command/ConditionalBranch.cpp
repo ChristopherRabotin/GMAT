@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                ConditionalBranch
 //------------------------------------------------------------------------------
@@ -31,9 +31,8 @@
 //#define DEBUG_CONDITIONS_INIT 1
 //#define DEBUG_CONDBR_GET_GEN_STRING
 //#define DEBUG_CONDBR_GET_PARAM
-//#define DEBUG_CONDITIONAL_BRANCH_PARAMS
 //#define DEBUG_WRAPPER_CODE
-
+//#define DEBUG_OBJECT_MAP
 
 //---------------------------------
 // static data
@@ -47,8 +46,6 @@ ConditionalBranch::PARAMETER_TEXT[ConditionalBranchParamCount - BranchCommandPar
    "OperatorStrings",
    "RightHandStrings",
    "LogicalOperators",
-   //"NumberOfRefParams",
-   //"RefParameterNames",
 };
 
 const Gmat::ParameterType
@@ -60,8 +57,6 @@ ConditionalBranch::PARAMETER_TYPE[ConditionalBranchParamCount - BranchCommandPar
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
    Gmat::STRINGARRAY_TYPE,
-   //Gmat::INTEGER_TYPE,
-   //Gmat::STRINGARRAY_TYPE,
 };
 
 const std::string
@@ -115,14 +110,9 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
-      //lhsParamList.push_back((cb.lhsParamList).at(i));
       opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
-      //rhsParamList.push_back((cb.rhsParamList).at(i));
-      // @todo finish copy constructor for the ElementWrappers
-      //lhsWrappers.push_back(((cb.lhsWrappers).at(i))->Clone());
-      //rhsWrappers.push_back(((cb.rhsWrappers).at(i))->Clone());
    }
    
    for (i=0; i < numberOfLogicalOps; i++)
@@ -130,22 +120,6 @@ numberOfLogicalOps (cb.numberOfLogicalOps)
       logicalOpStrings.push_back((cb.logicalOpStrings).at(i));
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
-   
-   //params.clear();
-   //lhsParamRows.clear();
-   //lhsParamCols.clear();
-   //rhsParamRows.clear();
-   //rhsParamCols.clear();
-   //Integer sz = (Integer) params.size();
-   
-   //for (i=0; i < sz; i++)
-   //{
-   //   params.push_back((Parameter*)((cb.params).at(i))->Clone());
-   //   lhsParamRows.push_back(cb.lhsParamRows.at(i));
-   //   lhsParamCols.push_back(cb.lhsParamCols.at(i));
-   //   rhsParamRows.push_back(cb.rhsParamRows.at(i));
-   //   rhsParamCols.push_back(cb.rhsParamCols.at(i));
-   //}
    
    initialized = false;
 }
@@ -169,24 +143,17 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
    numberOfConditions = cb.numberOfConditions;
    numberOfLogicalOps = cb.numberOfLogicalOps;
    lhsList.clear();
-   //lhsParamList.clear();
    opList.clear();
    rhsList.clear();
    ClearWrappers();
-   //rhsParamList.clear();
    Integer i = 0;
    
    for (i=0; i < numberOfConditions; i++)
    {
       lhsList.push_back((cb.lhsList).at(i));
-      //lhsParamList.push_back((cb.lhsList).at(i));
       opStrings.push_back((cb.opStrings).at(i));
       opList.push_back((cb.opList).at(i));
       rhsList.push_back((cb.rhsList).at(i));
-      //rhsParamList.push_back((cb.rhsList).at(i));
-      // @todo finish operator= for the ElementWrappers
-      //lhsWrappers.push_back(((cb.lhsWrappers).at(i))->Clone());
-      //rhsWrappers.push_back(((cb.rhsWrappers).at(i))->Clone());
    }
    
    logicalOpList.clear();
@@ -195,22 +162,6 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
       logicalOpStrings.push_back((cb.logicalOpStrings).at(i));
       logicalOpList.push_back((cb.logicalOpList).at(i));
    }
-
-   //params.clear();
-   //lhsParamRows.clear();
-   //lhsParamCols.clear();
-   //rhsParamRows.clear();
-   //rhsParamCols.clear();
-   //Integer sz = (Integer) params.size();
-   
-   //for (i=0; i < sz; i++)
-   //{
-   //   params.push_back((Parameter*)((cb.params).at(i))->Clone());
-   //   lhsParamRows.push_back(cb.lhsParamRows.at(i));
-   //   lhsParamCols.push_back(cb.lhsParamCols.at(i));
-   //   rhsParamRows.push_back(cb.rhsParamRows.at(i));
-   //   rhsParamCols.push_back(cb.rhsParamCols.at(i));
-   //}
    
    initialized = false;
    return *this;
@@ -226,9 +177,6 @@ ConditionalBranch& ConditionalBranch::operator=(const ConditionalBranch &cb)
 //------------------------------------------------------------------------------
 ConditionalBranch::~ConditionalBranch()
 {
-   // Should delete cloned parameters here, when command is cloned
-   //for (UnsignedInt i=0; i < params.size(); i++)
-   //   delete params[i];
    ClearWrappers();
 }
 
@@ -297,12 +245,6 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       rhsList.push_back(rhs);
       lhsWrappers.push_back(NULL); // placeholder for pointer to ElementWrapper
       rhsWrappers.push_back(NULL); // placeholder for pointer to ElementWrapper
-      //lhsParamList.push_back(newLhs);
-      //rhsParamList.push_back(newRhs);
-      //lhsParamRows.push_back(lhsRow);
-      //lhsParamCols.push_back(lhsCol);
-      //rhsParamRows.push_back(rhsRow);
-      //rhsParamCols.push_back(rhsCol);
       #if DEBUG_CONDITIONS
          MessageInterface::ShowMessage
          ("ConditionalBranch::added condition to end of list\n");
@@ -323,29 +265,11 @@ bool ConditionalBranch::SetCondition(const std::string &lhs,
       opList.at(atIndex)    = ot;
       lhsList.at(atIndex)   = lhs;
       rhsList.at(atIndex)   = rhs;
-
-      // This section of code causing crash when lhs and rhs are set
-      // repetativly from the GUI
-      // We don't need to delete wrappers here, since all wrappers will be
-      // cleared in ClearWrappers() and set new wrappers
-      //ElementWrapper *ew;
-      //ew = lhsWrappers.at(atIndex);
-      //lhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
-      //delete ew;
-      //ew = rhsWrappers.at(atIndex);
-      //rhsWrappers.at(atIndex) = NULL;  // will need a new ElementWrapper pointer
-      //delete ew;
       
       #if DEBUG_CONDITIONS
          MessageInterface::ShowMessage
          ("ConditionalBranch::inserted condition into list\n");
       #endif
-      //lhsParamList.at(atIndex)   = newLhs;
-      //rhsParamList.at(atIndex)   = newRhs;
-      //lhsParamRows.at(atIndex) = lhsRow;
-      //lhsParamCols.at(atIndex) = lhsCol;
-      //rhsParamRows.at(atIndex) = rhsRow;
-      //rhsParamCols.at(atIndex) = rhsCol;
       retVal = true;
    }
    
@@ -440,14 +364,12 @@ bool ConditionalBranch::RemoveCondition(Integer atIndex)
    ew = lhsWrappers.at(atIndex);
    lhsWrappers.erase(lhsWrappers.begin() + atIndex);
    delete ew;
-   //lhsParamList.erase(lhsParamList.begin() + atIndex);
    opStrings.erase(opStrings.begin() + atIndex);
    opList.erase(opList.begin() + atIndex);
    rhsList.erase(rhsList.begin() + atIndex);
    ew = rhsWrappers.at(atIndex);
    rhsWrappers.erase(rhsWrappers.begin() + atIndex);
    delete ew;
-   //rhsParamList.erase(rhsParamList.begin() + atIndex);
    numberOfConditions--;
    return true;
 }
@@ -484,72 +406,57 @@ bool ConditionalBranch::RemoveConditionOperator(Integer atIndex)
 //------------------------------------------------------------------------------
 bool ConditionalBranch::Initialize()
 {
-    bool retval = BranchCommand::Initialize();
-   // old code, not needed now, with Parameters in Command updates
-    // Reset parameter pointers here, because parameters are cloned in the Sandbox
-    //std::string paramName;
-    //Real rval;
-    //params.clear();
-    //for (UnsignedInt i=0; i<lhsParamList.size(); i++)
-    //{
-    //   paramName = lhsParamList[i];
-    //
-    //   #ifdef DEBUG_CONDITIONS_INIT
-    //   MessageInterface::ShowMessage
-    //      ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
-    //   #endif
-    //   
-    //   // if left is just a number, skip
-    //   if (GmatStringUtil::ToReal(paramName, &rval))
-    //      continue;
-    //   
-    //   if (objectMap->find(paramName) != objectMap->end())
-    //      params.push_back((Parameter*)((*objectMap)[paramName]));
-    //   else
-    //      throw CommandException
-    //         ("ConditionalBranch::Initialize() parameter name: " + paramName +
-    //          " not found in the object map\n");
-    //}
-    
-    //for (UnsignedInt i=0; i<rhsParamList.size(); i++)
-    //{
-    //   paramName = rhsParamList[i];
-    //   
-    //   #ifdef DEBUG_CONDITIONS_INIT
-    //   MessageInterface::ShowMessage
-    //      ("ConditionalBranch::Initialize() paramName=%s\n", paramName.c_str());
-    //   #endif
-    //   
-    //   // if right is just a number, skip
-    //   if (GmatStringUtil::ToReal(paramName, &rval))
-    //      continue;
-    //   
-    //   if (objectMap->find(paramName) != objectMap->end())
-    //      params.push_back((Parameter*)((*objectMap)[paramName]));
-    //   else
-    //      throw CommandException
-    //         ("ConditionalBranch::Initialize() parameter name: " + paramName +
-    //          " not found in the object map\n");
-    //}
+   bool retval = BranchCommand::Initialize();
+   
    // Set references for the wrappers   
-   #ifdef DEBUG_CONDITIONAL_BRANCH_PARAMS
-      MessageInterface::ShowMessage("Setting refs for lhs wrappers\n");
+   #ifdef DEBUG_CONDITIONS_INIT
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::Initialize() this='%s', Setting refs for %d lhs wrappers\n",
+       GetGeneratingString(Gmat::NO_COMMENTS).c_str(), lhsWrappers.size());
    #endif
+   #ifdef DEBUG_OBJECT_MAP
+   ShowObjectMaps();
+   #endif
+   
    for (std::vector<ElementWrapper*>::iterator i = lhsWrappers.begin();
         i < lhsWrappers.end(); i++)
    {
+      #ifdef DEBUG_CONDITIONS_INIT
+      MessageInterface::ShowMessage
+         ("   wrapper desc = '%s'\n", (*i)->GetDescription().c_str());
+      #endif
+      
       if (SetWrapperReferences(*(*i)) == false)
-         return false;
+         return false;      
+      
       CheckDataType((*i), Gmat::REAL_TYPE, "Conditional Command");
    }
+   
+   #ifdef DEBUG_CONDITIONS_INIT
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::Initialize() Setting refs for %d rhs wrappers\n",
+       rhsWrappers.size());
+   #endif
+   
    for (std::vector<ElementWrapper*>::iterator j = rhsWrappers.begin();
         j < rhsWrappers.end(); j++)
    {
+      #ifdef DEBUG_CONDITIONS_INIT
+      MessageInterface::ShowMessage
+         ("   wrapper desc = '%s'\n", (*j)->GetDescription().c_str());
+      #endif
+      
       if (SetWrapperReferences(*(*j)) == false)
          return false;
+      
       CheckDataType((*j), Gmat::REAL_TYPE, "Conditional Command");
    }
-    
+   
+   #ifdef DEBUG_CONDITIONS_INIT
+   MessageInterface::ShowMessage
+      ("ConditionalBranch::Initialize() returning %d\n", retval);
+   #endif
+   
    return retval;
 }
 
@@ -577,26 +484,6 @@ bool ConditionalBranch::RenameRefObject(const Gmat::ObjectType type,
       ("ConditionalBranch::RenameRefObject() type=%d, oldName=%s, "
        "newName=%s\n", type, oldName.c_str(), newName.c_str());
    #endif
-   /*   old code
-   if (type == Gmat::PARAMETER)
-   {
-      for (UnsignedInt i=0; i<lhsList.size(); i++)
-         if (lhsList[i] == oldName)
-            lhsList[i] = newName;
-      
-      for (UnsignedInt i=0; i<lhsParamList.size(); i++)
-         if (lhsParamList[i] == oldName)
-            lhsParamList[i] = newName;
-      
-      for (UnsignedInt i=0; i<rhsList.size(); i++)
-         if (rhsList[i] == oldName)
-            rhsList[i] = newName;
-      
-      for (UnsignedInt i=0; i<rhsParamList.size(); i++)
-         if (rhsParamList[i] == oldName)
-            rhsParamList[i] = newName;
-   }
-*/
    for (UnsignedInt i=0; i<lhsList.size(); i++)
    {
       if (lhsList[i] == oldName) lhsList[i] = newName;
@@ -700,23 +587,6 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
                                           const std::string &name,
                                           const Integer index)
 {
-   /*  OLD CODE
-   switch (type)
-   {
-      case Gmat::PARAMETER:
-         if ((index >= 0) && (index < (Integer)params.size()))
-         {
-            return params.at(index);
-         }
-         else
-         {
-            throw CommandException(
-            "ConditionalBranch::GetRefObject() invalid index\n");
-         }
-      default:
-         break;
-   }
-*/
    // Not handled here -- invoke the next higher GetRefObject call
    return BranchCommand::GetRefObject(type, name, index);
 }
@@ -742,65 +612,6 @@ GmatBase* ConditionalBranch::GetRefObject(const Gmat::ObjectType type,
 bool ConditionalBranch::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                      const std::string &name, const Integer index)
 {
-   /*  OLD CODE
-   #ifdef DEBUG_CONDITIONS
-      MessageInterface::ShowMessage(
-         "ConditionalBranch::SetRefObject() entered; Parameters are\n   "
-         "obj with type \"%s\"\n   Gmat::ObjectType = %d\n   name = \"%s\""
-         "\n   index = %d\n", obj->GetTypeName().c_str(), type, name.c_str(), 
-         index);
-   #endif
-   
-   switch (type)
-   {
-      case Gmat::PARAMETER:
-      {
-         std::string newName = name;
-         UnsignedInt openParen = name.find('(');
-   
-         if (openParen != name.npos)
-            newName = name.substr(0, openParen);
-         
-         // if name is not found int the parameter list, add
-         Integer size = params.size();
-         bool paramFound = false;
-         for (int i=0; i<size; i++)
-         {
-            if (params[i]->GetName() == newName)
-            {
-               paramFound = true;
-               break;
-            }
-         }
-
-         if (!paramFound)
-            params.push_back((Parameter *)obj);
-
-         return true;
-//          if (params.empty() && index == 0)
-//          {
-//             params.push_back((Parameter *)obj);
-//             return true;
-//          }
-//          else if (index == size)
-//          {
-//             params.push_back((Parameter *)obj);
-//             return true;
-//          }
-//          else if (index < size)
-//          {
-//             params.at(index) = (Parameter *)obj;
-//             return true;
-//          }
-//          else
-//          {
-//             return false;
-//          }
-      }
-      default:
-         break;
-   }
-   */
    // Not handled here -- invoke the next higher SetRefObject call
    return BranchCommand::SetRefObject(obj, type, name, index);
 }
@@ -906,7 +717,6 @@ Integer ConditionalBranch::GetIntegerParameter(const Integer id) const
    return BranchCommand::GetIntegerParameter(id); 
 }
 
-//Integer      ConditionalBranch::SetIntegerParameter(const Integer id, const Integer value);
 
 //------------------------------------------------------------------------------
 //  Integer  GetIntegerParameter(const std::string &label) const
@@ -951,13 +761,11 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
    errorString += " is out of bounds for ";
    if (id == LEFT_HAND_STRINGS)
    {
-      //if (index < 0 || index >= (Integer) lhsParamList.size())
       if (index < 0 || index >= (Integer) lhsList.size())
       {
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      //return (lhsParamList.at(index));
       return (lhsList.at(index));
    }
    if (id == OPERATOR_STRINGS)   
@@ -971,13 +779,11 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
    }
    if (id == RIGHT_HAND_STRINGS) 
    {
-      //if (index < 0 || index >= (Integer) rhsParamList.size())
       if (index < 0 || index >= (Integer) rhsList.size())
       {
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      //return (rhsParamList.at(index));
       return (rhsList.at(index));
    }
    if (id == LOGICAL_OPERATORS)  
@@ -989,7 +795,6 @@ std::string ConditionalBranch::GetStringParameter(const Integer id,
       }
       return (logicalOpStrings.at(index));
    }
-   //if (id == PARAMETER_NAMES)  return ??;
    
    return BranchCommand::GetStringParameter(id, index);
 }
@@ -1020,20 +825,16 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
    ElementWrapper *ew;
    if (id == LEFT_HAND_STRINGS)
    {
-      //if (index < 0 || index >= (Integer) lhsList.size())
-      //if (index < 0 || index >= (Integer) lhsParamList.size())
       if (index < 0 || index >= (Integer) lhsList.size())
       {
          errorString += "left hand side string list.";
          throw CommandException(errorString);
       }
-      //lhsParamList.at(index) = value;
       lhsList.at(index) = value;
       ew = lhsWrappers.at(index);
       lhsWrappers.at(index) = NULL;
       delete ew;
       return true;
-      //return SetStringArrayValue(id, value, index);
    }
    if (id == OPERATOR_STRINGS)   
    {
@@ -1044,23 +845,19 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
       }
       opStrings.at(index) = value;
       return true;
-      //return SetStringArrayValue(id, value, index);
    }
    if (id == RIGHT_HAND_STRINGS) 
    {
-      //if (index < 0 || index >= (Integer) rhsParamList.size())
       if (index < 0 || index >= (Integer) rhsList.size())
       {
          errorString += "right hand side string list.";
          throw CommandException(errorString);
       }
-      //rhsParamList.at(index) = value;
       rhsList.at(index) = value;
       ew = rhsWrappers.at(index);
       rhsWrappers.at(index) = NULL;
       delete ew;
       return true;
-      //return SetStringArrayValue(id, value, index);
    }
    if (id == LOGICAL_OPERATORS)  
    {
@@ -1071,9 +868,7 @@ bool ConditionalBranch::SetStringParameter(const Integer id,
       }
       logicalOpStrings.at(index) = value;
       return true;
-      //return SetStringArrayValue(id, value, index);
    }
-   //if (id == PARAMETER_NAMES)  return ??;
    
    return BranchCommand::SetStringParameter(id, value, index);
 }
@@ -1143,7 +938,6 @@ ConditionalBranch::GetStringArrayParameter(const Integer id) const
    if (id == OPERATOR_STRINGS)   return opStrings;
    if (id == RIGHT_HAND_STRINGS) return rhsList; //rhsParamList;
    if (id == LOGICAL_OPERATORS)  return logicalOpStrings;
-   //if (id == PARAMETER_NAMES)  return ??;
    
    return BranchCommand::GetStringArrayParameter(id);
 }
@@ -1167,10 +961,6 @@ ConditionalBranch::GetStringArrayParameter(const std::string &label) const
    return GetStringArrayParameter(GetParameterID(label));
 }
 
-//const StringArray& GetStringArrayParameter(const Integer id, 
-//                                           const Integer index) const; 
-//const StringArray& ConditionalBranch::GetStringArrayParameter(const std::string &label, 
-//                                                              const Integer index) const; 
 
 //------------------------------------------------------------------------------
 // const StringArray& GetWrapperObjectNameArray()
@@ -1179,23 +969,21 @@ const StringArray& ConditionalBranch::GetWrapperObjectNameArray()
 {
    wrapperObjectNames.clear();
 
-   for (StringArray::iterator i = lhsList.begin();
-              i < lhsList.end(); i++)
+   for (StringArray::iterator i = lhsList.begin(); i < lhsList.end(); i++)
    {
       if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), 
           (*i)) == wrapperObjectNames.end())
          wrapperObjectNames.push_back((*i));
    }
    
-   for (StringArray::iterator j = rhsList.begin();
-              j < rhsList.end(); j++)
+   for (StringArray::iterator j = rhsList.begin(); j < rhsList.end(); j++)
    {
       if (find(wrapperObjectNames.begin(), wrapperObjectNames.end(), 
           (*j)) == wrapperObjectNames.end())
          wrapperObjectNames.push_back((*j));
    }
-
-
+   
+   
    #ifdef DEBUG_WRAPPERS
       MessageInterface::ShowMessage
          ("ConditionalBranch::GetWrapperObjectNameArray() %s wrapper names are:\n",
@@ -1381,141 +1169,6 @@ bool ConditionalBranch::EvaluateCondition(Integer which)
       #endif
       return false;
    }
-   // OLD CODE
-   //Real        lhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
-   //Real        rhsValue = GmatBase::REAL_PARAMETER_UNDEFINED;
-   //bool        lhFound = false, rhFound = false;
-   //bool        rightIsParm = false;
-   //bool        leftIsParm  = false;
-   //std::string theLHSParmName = "";
-   //std::string theLHSParmName = lhsParamList.at(which);
-   //std::string theRHSParmName = "";
-
-   //#ifdef DEBUG_CONDITIONS
-      //MessageInterface::ShowMessage(
-      //   "ConditionalBranch::EvaluateCondition() entered; which = %d\n   "
-      //   "LHS conditions known:\n", which);      
-      //for (StringArray::iterator l = lhsParamList.begin(); l != lhsParamList.end(); ++l)
-      //   MessageInterface::ShowMessage("      \"%s\"\n", l->c_str());      
-      //MessageInterface::ShowMessage("\n   RHS conditions known:\n");      
-      //for (StringArray::iterator r = rhsParamList.begin(); r != rhsParamList.end(); ++r)
-      //   MessageInterface::ShowMessage("      \"%s\"\n", r->c_str());      
-      //MessageInterface::ShowMessage("\n   Actual parms known:\n");
-      //for (std::vector<Parameter*>::iterator p = params.begin(); 
-      //     p != params.end(); ++p)
-      //   MessageInterface::ShowMessage("      \"%s\"\n", 
-       //     (*p)->GetName().c_str());
-   //#endif
-   
-   //char firstChar = (rhsParamList.at(which)).at(0);
-   //if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
-   //{
-   //   theRHSParmName = rhsParamList.at(which);
-   //   rightIsParm    = true;
-   //}
-   //else
-   //{
-   //   std::istringstream rhsStr(rhsParamList.at(which)); 
-   //   rhsStr >> rhsValue;
-   //}
-   
-   //firstChar = (lhsParamList.at(which)).at(0);
-   //if (isalpha(firstChar))  // if not a real, assume a Parameter. How about .789?
-   //{
-   //   theLHSParmName = lhsParamList.at(which);
-   //   leftIsParm     = true;
-   //}
-   //else
-   //{
-   //   std::istringstream lhsStr(lhsParamList.at(which)); 
-   //   lhsStr >> lhsValue;
-   //}
-   
-   /*  OLD CODE
-   // iterate over the list of reference objects to find the parameter
-   if (rightIsParm || leftIsParm)
-   {
-      #ifdef DEBUG_CONDITIONS
-         MessageInterface::ShowMessage(
-            "ConditionalBranch: left or right is a parameter\n");
-      #endif
-      Integer index;
-      std::vector<Parameter*>::iterator p = params.begin();
-      while (p != params.end())
-      {
-         if (leftIsParm && ((*p)->GetName() == theLHSParmName))
-         {
-            if ((*p)->GetReturnType() == Gmat::REAL_TYPE)
-            {
-               lhsValue = (*p)->EvaluateReal();
-               #ifdef DEBUG_CONDITIONS
-                  MessageInterface::ShowMessage(
-                     "ConditionalBranch: left is a real number with value = %.18f\n",
-                     lhsValue);
-               #endif
-            }
-            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE)
-            {
-               // find position of lhs parameter
-               std::vector<std::string>::iterator pos;
-               pos = find (lhsParamList.begin(), lhsParamList.end(),  theLHSParmName);
-               index = distance(lhsParamList.begin(), pos);
-               
-               if (lhsParamRows[index] == -1 && lhsParamCols[index] == -1)
-                  throw CommandException
-                     ("Parameter " + theLHSParmName +
-                      "has invalid index value in condition.\n");
-               else
-                  lhsValue =
-                     (*p)->EvaluateRmatrix().GetElement(lhsParamRows[index],
-                                                        lhsParamCols[index]);
-               #ifdef DEBUG_CONDITIONS
-                  MessageInterface::ShowMessage(
-                     "ConditionalBranch: left is a real matrix with value = %.12f\n",
-                     lhsValue);
-               #endif
-            }
-            
-            lhFound  = true;
-         }
-         
-         if (rightIsParm && ((*p)->GetName() == theRHSParmName))
-         {
-            if ((*p)->GetReturnType() == Gmat::REAL_TYPE)
-            {
-               rhsValue = (*p)->EvaluateReal();
-            }
-            else if ((*p)->GetReturnType() == Gmat::RMATRIX_TYPE)
-            {
-               // find position of rhs parameter
-               std::vector<std::string>::iterator pos;
-               pos = find (rhsParamList.begin(), rhsParamList.end(),  theRHSParmName);
-               index = distance(rhsParamList.begin(), pos);
-               
-               if (rhsParamRows[index] == -1 && rhsParamCols[index] == -1)
-                  throw CommandException
-                     ("Parameter " + theLHSParmName +
-                      " has invalid index value in condition.\n");
-               else
-                  rhsValue =
-                      (*p)->EvaluateRmatrix().GetElement(rhsParamRows[index],
-                                                         rhsParamCols[index]);
-            }
-            
-            rhFound  = true;
-         }
-         ++p;
-      }
-      
-      if (leftIsParm && !lhFound) 
-         throw CommandException("Parameter " + theLHSParmName +
-              " not found for LHS string in condition\n");// + which);
-      
-      if (rightIsParm && !rhFound)
-         throw CommandException("Parameter " + theRHSParmName +
-              " not found for RHS string in condition\n");// + which);
-   }
-*/
    if ((lhsWrappers.at(which) == NULL) || (rhsWrappers.at(which) == NULL))
    {
       std::string errmsg = "Error evaluating condition \"" + lhsList.at(which);
@@ -1678,7 +1331,6 @@ std::string ConditionalBranch::GetConditionalString()
       MessageInterface::ShowMessage("The right-hand-side = \"%s\"\n", rhsList[i].c_str());
    #endif
       cond += " " + logicalOpStrings[i-1] + " ";
-      //cond = lhsList[0] + " " + opStrings[0] + " " + rhsList[0];
       cond += lhsList[i] + " " + opStrings[i] + " " + rhsList[i];
    }
 

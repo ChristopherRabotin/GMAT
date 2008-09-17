@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           TargetPanel
 //------------------------------------------------------------------------------
@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(TargetPanel, GmatPanel)
    EVT_COMBOBOX(ID_COMBO, TargetPanel::OnComboBoxChange)
+   EVT_BUTTON(ID_APPLYBUTTON, TargetPanel::OnApplyButtonPress)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -76,17 +77,55 @@ void TargetPanel::Create()
       new wxStaticText(this, ID_TEXT, wxT("Solver Name"), wxDefaultPosition,
                        wxDefaultSize, 0);
    
+   wxStaticText *solverModeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Solver Mode"), wxDefaultPosition,
+                       wxDefaultSize, 0);
+   
+   wxStaticText *exitModeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Exit Mode"), wxDefaultPosition,
+                       wxDefaultSize, 0);
+   
    mSolverComboBox =
       theGuiManager->GetBoundarySolverComboBox(this, ID_COMBO, wxSize(180,-1));
+   
+   StringArray options = theCommand->GetStringArrayParameter("SolveModeOptions");
+   wxArrayString theOptions;
+   
+   for (StringArray::iterator i = options.begin(); i != options.end(); ++i)
+      theOptions.Add(i->c_str());
+   
+   mSolverModeComboBox =
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
+                     theOptions, wxCB_READONLY);
+
+   options = theCommand->GetStringArrayParameter("ExitModeOptions");
+   theOptions.Clear();
+   
+   for (StringArray::iterator i = options.begin(); i != options.end(); ++i)
+      theOptions.Add(i->c_str());
+   
+   mExitModeComboBox = 
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
+            theOptions, wxCB_READONLY);;
+   
+   
+   mApplyCorrectionsButton = new wxButton(this, ID_APPLYBUTTON, 
+         wxT("Apply Corrections"));
    
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(2);
    
    pageSizer->Add(solverNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
 
+   pageSizer->Add(solverModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mSolverModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+
+   pageSizer->Add(exitModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mExitModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mApplyCorrectionsButton, 0, wxALIGN_CENTER|wxALL, bsize);
+
+   theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
 }
 
 
@@ -104,6 +143,14 @@ void TargetPanel::LoadData()
          theCommand->GetStringParameter(theCommand->GetParameterID("Targeter"));
       
       mSolverComboBox->SetValue(solverName.c_str());
+       
+      std::string solverMode =
+               theCommand->GetStringParameter("SolveMode");
+      mSolverModeComboBox->SetValue(solverMode.c_str());
+
+      std::string exitMode =
+               theCommand->GetStringParameter("ExitMode");
+      mExitModeComboBox->SetValue(exitMode.c_str());
    }
    catch (BaseException &e)
    {
@@ -120,8 +167,16 @@ void TargetPanel::SaveData()
    try
    {
       std::string solverName = mSolverComboBox->GetValue().c_str();
+      std::string solverMode = mSolverModeComboBox->GetValue().c_str();
+      std::string exitMode   = mExitModeComboBox->GetValue().c_str();
+
       theCommand->SetStringParameter(theCommand->GetParameterID("Targeter"),
                                      solverName);
+      theCommand->SetStringParameter(theCommand->GetParameterID("SolveMode"), 
+            solverMode);
+      theCommand->SetStringParameter(theCommand->GetParameterID("ExitMode"), 
+            exitMode);
+      
       EnableUpdate(false);
    }
    catch (BaseException &e)
@@ -137,4 +192,17 @@ void TargetPanel::SaveData()
 void TargetPanel::OnComboBoxChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnApplyButtonPress(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Method that updates variables with solution values.
+ */
+//------------------------------------------------------------------------------
+void TargetPanel::OnApplyButtonPress(wxCommandEvent& event)
+{
+   theCommand->TakeAction("ApplyCorrections");
 }

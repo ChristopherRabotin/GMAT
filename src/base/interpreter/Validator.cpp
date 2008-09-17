@@ -39,51 +39,42 @@
 #include "StringUtil.hpp"               // for GmatStringUtil::
 #include "Assignment.hpp"
 
-
-//#define DEBUG_VALIDATE_COMMAND
-//#define DEBUG_WRAPPERS
-//#define DEBUG_CHECK_OBJECT
 //#define DEBUG_HANDLE_ERROR
+//#define DEBUG_VALIDATE_COMMAND
+//#define DEBUG_CHECK_OBJECT
 //#define DEBUG_CREATE_PARAM
 //#define DEBUG_OBJECT_MAP
 //#define DEBUG_FUNCTION
+//#define DEBUG_SOLAR_SYSTEM
 //#define DEBUG_AUTO_PARAM
 //#define DEBUG_FIND_OBJECT
+//#define DEBUG_COORD_SYS_PROP
+//#define DEBUG_PROP_SETUP_PROP
+//#define DEBUG_FORCE_MODEL_PROP
+//#define DBGLVL_WRAPPERS 2
+
+//---------------------------------
+// static data
+//---------------------------------
+Validator* Validator::instance = NULL;
 
 //------------------------------------------------------------------------------
-// Validator(SolarSystem *ss = NULL, ObjectMap *objMap = NULL)
+// static Validator* Instance()
 //------------------------------------------------------------------------------
-/*
- * Default constructor
- *
- * @param  ss  The solar system to be used for findnig bodies
- * @param  objMap  The object map to be used for finding object
- */
-//------------------------------------------------------------------------------
-Validator::Validator(SolarSystem *ss, ObjectMap *objMap)
+Validator* Validator::Instance()
 {
-   theModerator = Moderator::Instance();
-   StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
-   copy(parms.begin(), parms.end(), back_inserter(theParameterList));
-   
-   theSolarSystem = NULL;
-   theFunction = NULL;
-   theObjectMap = NULL;
-   continueOnError = true;
-   
-   if (ss)
-      theSolarSystem = ss;
-   
-   if (objMap)
-      theObjectMap = objMap;
+   if (instance == NULL)
+      instance = new Validator;
+   return instance;
 }
 
 
 //------------------------------------------------------------------------------
-// ~Validator()
+// void SetInterpreter(Interpreter *interp)
 //------------------------------------------------------------------------------
-Validator::~Validator()
+void Validator::SetInterpreter(Interpreter *interp)
 {
+   theInterpreter = interp;
 }
 
 
@@ -92,7 +83,19 @@ Validator::~Validator()
 //------------------------------------------------------------------------------
 void Validator::SetSolarSystem(SolarSystem *ss)
 {
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("Validator::SetSolarSystem() ss=<%p>\n", ss);
+   #endif
+   
    theSolarSystem = ss;
+   
+   #ifdef DEBUG_SOLAR_SYSTEM
+   MessageInterface::ShowMessage
+      ("Validator::SetSolarSystem() Setting SolarSystem <%p> to Moderator\n", ss);
+   #endif
+   
+   // Set SolarSyste to use for the Moderator
+   theModerator->SetInternalSolarSystem(ss);
 }
 
 
@@ -106,17 +109,27 @@ void Validator::SetObjectMap(ObjectMap *objMap)
       #ifdef DEBUG_OBJECT_MAP
       if (theFunction)
       {
-         MessageInterface::ShowMessage("Here is the current Validator object map:\n");
+         MessageInterface::ShowMessage
+            ("Validator::SetObjectMap(), Here is the object map in use <%p>, "
+             "it has %d objects\n", objMap, objMap->size());
          for (std::map<std::string, GmatBase *>::iterator i = objMap->begin();
               i != objMap->end(); ++i)
          {
             MessageInterface::ShowMessage
-               ("   %30s  <%s>\n", i->first.c_str(),
+               ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
                 i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
          }
       }
       #endif
+      
       theObjectMap = objMap;
+
+      #ifdef DEBUG_OBJECT_MAP
+      MessageInterface::ShowMessage
+         ("Validator::SetObjectMap() Setting object map <%p> to Moderator\n",
+          objMap);
+      #endif
+      
       // Set object map to use for the Moderator
       theModerator->SetObjectMap(objMap);
    }
@@ -130,10 +143,35 @@ void Validator::SetFunction(Function *func)
 {
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("Validator::SetFunction() function=<%p><%s>\n", func, func->GetName().c_str());
+      ("Validator::SetFunction() function=<%p>'%s'\n", func,
+       func ? func->GetName().c_str() : "NULL");
    #endif
    
    theFunction = func;
+}
+
+
+//------------------------------------------------------------------------------
+// bool StartServer(GmatCommand *cmd)
+//------------------------------------------------------------------------------
+/*
+ * This method starts GmatServer through the Moderator
+ *
+ * @param cmd  The command pointer requesting the server starup
+ *             (currently not used but it may be useful for debugging)
+ *
+ * @return the result of Moderator::StartServer()
+ */
+//------------------------------------------------------------------------------
+bool Validator::StartServer(GmatCommand *cmd)
+{
+   #ifdef DEBUG_SERVER
+   MessageInterface::ShowMessage
+      ("Validator::StartServer() the command <%p>'%s' requested Server startup\n",
+       cmd, cmd->GetTypeName().c_str());
+   #endif
+   
+   return theModerator->StartServer();
 }
 
 
@@ -153,6 +191,9 @@ void Validator::SetFunction(Function *func)
 //------------------------------------------------------------------------------
 bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
 {
+   if (obj == NULL)
+      return false;
+   
    continueOnError = contOnError;
    
    #ifdef DEBUG_CHECK_OBJECT
@@ -266,7 +307,7 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
 
 
 //------------------------------------------------------------------------------
-// bool ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
+// bool ValidateCommand(GmatCommand *cmd, bool contOnError, Integer manage)
 //------------------------------------------------------------------------------
 /**
  * Checks the input command to make sure it wrappers are set up for it
@@ -274,33 +315,50 @@ bool Validator::CheckUndefinedReference(GmatBase *obj, bool contOnError)
  *
  * @param <cmd> the command to validate
  * @param <contOnError> flag indicating whether or not to continue on error (true)
- * @param <manage> true if parameter to be managed in the configuration (true)
+ * @param <manage>  0, if parameter is not managed
+ *                  1, if parameter is added to configuration (default)
+ *                  2, if Parameter is added to function object map
  */
 //------------------------------------------------------------------------------
-bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
+bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, Integer manage)
 {
    if (cmd == NULL)
-      return false;
+   {
+      theErrorMsg = "The input command is NULL";
+      return HandleError();
+   }
    
+   if (theInterpreter == NULL)
+   {
+      theErrorMsg = "The Interpreter is not set";
+      return HandleError();
+   }
+   
+   theCommand = cmd;
    continueOnError = contOnError;
    std::string typeName = cmd->GetTypeName();
    
    #ifdef DEBUG_VALIDATE_COMMAND
+   std::string genStr;
+   if (cmd->GetTypeName() != "BeginScript")
+      genStr = cmd-> GetGeneratingString(Gmat::NO_COMMENTS);
    MessageInterface::ShowMessage
-      ("Validator::ValidateCommand() cmd=<%p><%s><%s>, continueOnError=%d, "
-       "manage=%d\n", cmd, cmd->GetTypeName().c_str(),
-       cmd->GetGeneratingString(Gmat::NO_COMMENTS).c_str(),
+      ("Validator::ValidateCommand() cmd=<%p><%s>\"%s\"\n   continueOnError=%d, "
+       "manage=%d\n", cmd, cmd->GetTypeName().c_str(), genStr.c_str(),
        continueOnError, manage);
+   MessageInterface::ShowMessage
+      ("   theFunction=<%p>'%s'\n", theFunction,
+       theFunction ? theFunction->GetName().c_str() : "NULL");
    MessageInterface::ShowMessage
       ("   Calling %s->GetWrapperObjectNameArray() to get object names\n",
        cmd->GetTypeName().c_str());
    #endif
    
    // If objects are not managed, just return true (2008.05.21)
-   if (!manage)
+   if (manage == 0)
    {
       #ifdef DEBUG_VALIDATE_COMMAND
-      MessageInterface::ShowMessage("In function mode, so just returning true\n");
+      MessageInterface::ShowMessage("Objects are not managed, so just returning true\n");
       #endif
       return true;
    }
@@ -309,104 +367,47 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
    theErrorList.clear();
    cmd->ClearWrappers();
    const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
-   #ifdef DEBUG_WRAPPERS
-      MessageInterface::ShowMessage("In Validate, wrapper names are:\n");
+   #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("In ValidateCommand, has %d wrapper names:\n", wrapperNames.size());
       for (Integer ii=0; ii < (Integer) wrapperNames.size(); ii++)
          MessageInterface::ShowMessage("      %s\n", wrapperNames[ii].c_str());
    #endif
    
-   //---------------------------------------------------------------------------
-   // Special case for Assignment command (LHS = RHS).
-   // Since such as Sat.X can be both Parameter or ObjectProperty, we want to
-   // create a Parameter wapper if RHS is a Parameter for Assignment command.
-   // So special code is needed to tell the CreateElementWrapper() to check for
-   // Parameter first.
-   //---------------------------------------------------------------------------
+   // Set function pointer to command
+   if (theFunction != NULL)
+      cmd->SetCurrentFunction(theFunction);
+   
+   // Handle Assignment command (LHS = RHS) separately
    if (cmd->GetTypeName() == "GMAT")
    {
-      Assignment *acmd = (Assignment*)cmd;
-      
-      // Handle LHS
-      std::string lhs = acmd->GetLHS();
-      
-      try
-      {
-         ElementWrapper *ew = CreateElementWrapper(lhs, false, manage);
-         
-         if (ew == NULL)
-            return false;
-         
-         #ifdef DEBUG_WRAPPERS
-         MessageInterface::ShowMessage
-            ("   Setting ElementWrapper for '%s' to '%s'\n",
-             ew->GetDescription().c_str(), typeName.c_str());
-         #endif
-         
-         if (cmd->SetElementWrapper(ew, lhs) == false)
-         {
-            theErrorMsg = "Undefined object \"" + lhs + "\" found in command \"" +
-               cmd->GetTypeName();
-            return HandleError();
-         }
-      }
-      catch (BaseException &ex)
-      {
-         theErrorMsg = ex.GetFullMessage();
-         return HandleError();
-      }
-      
-      // Handle RHS
-      // Note: Assignment::GetWrapperObjectNameArray() returns only for RHS elements
-      for (StringArray::const_iterator i = wrapperNames.begin();
-           i != wrapperNames.end(); ++i)
-      {
-         std::string name = (*i);
-         if (name != "")
-         {
-            try
-            {
-               ElementWrapper *ew = NULL;
-               if (IsParameterType(name))
-                  ew = CreateElementWrapper(name, true, manage);
-               else
-                  ew = CreateElementWrapper(name, false, manage);
-               
-               #ifdef DEBUG_WRAPPERS
-               MessageInterface::ShowMessage
-                  ("   Setting ElementWrapper for '%s' to '%s'\n",
-                   ew->GetDescription().c_str(), typeName.c_str());
-               #endif
-               
-               if (cmd->SetElementWrapper(ew, name) == false)
-               {
-                  theErrorMsg = "Undefined object \"" + name + "\" found in Math Assignment";
-                  return HandleError();
-               }
-            }
-            catch (BaseException &ex)
-            {
-               theErrorMsg = ex.GetFullMessage();
-               return HandleError();
-            }
-         }
-      }
-      
-      // Set math wrappers to math tree
-      acmd->SetMathWrappers();
+      if (!CreateAssignmentWrappers(cmd, manage))
+         return false;
    }
    else
    {
+      bool paramFirst = false;
+      if (cmd->IsOfType("ConditionalBranch") ||
+          cmd->GetTypeName() == "Report" || cmd->GetTypeName() == "Propagate")
+          paramFirst = true;
+      
       for (StringArray::const_iterator i = wrapperNames.begin();
            i != wrapperNames.end(); ++i)
       {
          try
          {
-            ElementWrapper *ew = CreateElementWrapper(*i, false, manage);
+            ElementWrapper *ew = CreateElementWrapper(*i, paramFirst, manage);
             
-            #ifdef DEBUG_WRAPPERS
+            if (ew == NULL)
+            {
+               theErrorMsg = "Could not create an ElementWrapper for \"" + theDescription + "\"";
+               return HandleError();
+            }
+            
+            #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage
-               ("   Setting ElementWrapper for '%s' to '%s'\n",
-                ew->GetDescription().c_str(), typeName.c_str());
+               ("   (3)Setting ElementWrapper type %d for '%s' to '%s'\n",
+                ew->GetWrapperType(), ew->GetDescription().c_str(), typeName.c_str());
             #endif
             
             if (cmd->SetElementWrapper(ew, *i) == false)
@@ -424,20 +425,28 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
       }
    }
    
+   // Let's try branch command
+   if ((cmd->GetChildCommand(0)) != NULL)
+   {
+      if (!ValidateSubCommand(cmd, 0, manage))
+         return false;
+   }
+   
+   bool retval = CheckUndefinedReference(cmd);
+   
    #ifdef DEBUG_VALIDATE_COMMAND
    MessageInterface::ShowMessage
-      ("Validator::ValidateCommand() Calling CheckUndefinedReference(%s)\n",
-       cmd->GetTypeName().c_str());
+      ("Validator::ValidateCommand() returning %d as result of CheckUndefinedReference(%s)\n",
+       retval, cmd->GetTypeName().c_str());
    #endif
    
-   return CheckUndefinedReference(cmd);
-   
+   return retval;
 }
 
 
 //------------------------------------------------------------------------------
 // ElementWrapper* CreateElementWrapper(const std::string &desc,
-//                                      bool parametersFirst, bool manage)
+//                                      bool parametersFirst, Integer manage)
 //------------------------------------------------------------------------------
 /**
  * Creates the appropriate ElementWrapper, based on the description.
@@ -445,7 +454,9 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
  * @param  <desc>  description string for the element required
  * @param  <parametersFirst>  true if creating for wrappers for the Parameter
  *                            first then Object Property (false)
- * @param <manage> true if parameter to be managed in the configuration (true)
+ * @param <manage>  0, if parameter is not managed
+ *                  1, if parameter is added to configuration (default)
+ *                  2, if Parameter is added to function object map
  *
  * @return pointer to the created ElementWrapper
  * @exception <Interpreterxception> thrown if wrapper cannot be created
@@ -453,47 +464,49 @@ bool Validator::ValidateCommand(GmatCommand *cmd, bool contOnError, bool manage)
 //------------------------------------------------------------------------------
 ElementWrapper*
 Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
-                                bool manage)
+                                Integer manage)
 {
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
    Real           rval;
    // remove extra parens and blank spaces at either end of string
-   std::string    descTrimmed = GmatStringUtil::Trim(desc);
-   descTrimmed = GmatStringUtil::RemoveExtraParen(descTrimmed);
-   descTrimmed = GmatStringUtil::Trim(descTrimmed);  
+   theDescription = GmatStringUtil::Trim(desc);
+   theDescription = GmatStringUtil::RemoveExtraParen(theDescription);
+   theDescription = GmatStringUtil::Trim(theDescription);
    
-   #ifdef DEBUG_WRAPPERS
+   #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
       ("In Validator::CreateElementWrapper, original string is \"%s\"\n",
        desc.c_str(), "\"\n");
    MessageInterface::ShowMessage
-      ("                                    and trimmed string is \"%s\"\n",
-       descTrimmed.c_str(), "\"\n");
+      ("                                 and trimmed string is \"%s\"\n",
+       theDescription.c_str(), "\"\n");
+   MessageInterface::ShowMessage
+      ("   parametersFirst=%d, manage=%d\n", parametersFirst, manage);
    #endif
    
    // first, check to see if it is enclosed with single quotes
-   if (GmatStringUtil::IsEnclosedWith(descTrimmed, "'"))
+   if (GmatStringUtil::IsEnclosedWith(theDescription, "'"))
    {
       ew = new StringWrapper();
-      ew->SetDescription(descTrimmed);
+      ew->SetDescription(theDescription);
       itsType = Gmat::STRING;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, it's enclosed with quotes so created a StringWrapper for \"%s\"\n",
-          descTrimmed.c_str(), "\"\n");
+         (">>> In Validator, it's enclosed with quotes so created a StringWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
       #endif
    }
    // and then, check to see if it is a number
-   else if (GmatStringUtil::ToReal(descTrimmed,rval))
+   else if (GmatStringUtil::ToReal(theDescription,rval))
    {
       ew = new NumberWrapper();
-      ew->SetDescription(descTrimmed);
-      #ifdef DEBUG_WRAPPERS
+      ew->SetDescription(theDescription);
+      #if DBGLVL_WRAPPERS
          MessageInterface::ShowMessage(
-            "In Validator, created a NumberWrapper for \"%s\"\n",
-            descTrimmed.c_str(), "\"\n");
+            ">>> In Validator, created a NumberWrapper for \"%s\"\n",
+            theDescription.c_str(), "\"\n");
       #endif
    }
    else 
@@ -502,15 +515,15 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
       // check to see if it is an array
       bool isOuterParen;
       Integer openParen, closeParen;
-      GmatStringUtil::FindParenMatch(descTrimmed, openParen, closeParen, isOuterParen);
-      #ifdef DEBUG_WRAPPERS
+      GmatStringUtil::FindParenMatch(theDescription, openParen, closeParen, isOuterParen);
+      #if DBGLVL_WRAPPERS > 1
          MessageInterface::ShowMessage(
-            "In Validator, descTrimmed = \"%s\"\n", descTrimmed.c_str());
+            "In Validator, theDescription = \"%s\"\n", theDescription.c_str());
       #endif
       if ((openParen  != -1) && (closeParen != -1) && (closeParen > openParen))
       {
-         std::string arrayName = GmatStringUtil::Trim(descTrimmed.substr(0,openParen));
-         #ifdef DEBUG_WRAPPERS
+         std::string arrayName = GmatStringUtil::Trim(theDescription.substr(0,openParen));
+         #if DBGLVL_WRAPPERS > 1
             MessageInterface::ShowMessage(
                "In Validator, arrayName = \"%s\"\n", arrayName.c_str());
          #endif
@@ -529,58 +542,32 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
             else
             {
                ew = new ArrayElementWrapper();
-               ew->SetDescription(descTrimmed);
+               ew->SetDescription(theDescription);
                ew->SetRefObject(p);
                itsType = Gmat::ARRAY_ELEMENT;
-               #ifdef DEBUG_WRAPPERS
+               #if DBGLVL_WRAPPERS
                MessageInterface::ShowMessage(
-                  "In Validator, created a ArrayElementWrapper for \"%s\"\n",
-                  descTrimmed.c_str(), "\"\n");
+                  ">>> In Validator, created a ArrayElementWrapper for \"%s\"\n",
+                  theDescription.c_str(), "\"\n");
                #endif
             }
          }
       }
       // check to see if it is an object property or a parameter
-      else if (descTrimmed.find(".") != std::string::npos)
+      else if (theDescription.find(".") != std::string::npos)
       {
-         // if parametersFirst, always create parameter wrapper first
-         if (parametersFirst)
-         {
-            Parameter *param = CreateSystemParameter(descTrimmed, manage);
-            if (param)
-            {
-               #ifdef DEBUG_WRAPPERS
-                  MessageInterface::ShowMessage(
-                     "In Interpreter(1), about to create a ParameterWrapper for \"%s\"\n",
-                     descTrimmed.c_str(), "\"\n");
-               #endif
-               CreateParameterWrapper(param, descTrimmed, &ew, itsType);
-            }
-            else
-            {
-               theErrorMsg = "\"" + descTrimmed + "\"" + " is not a valid parameter";
-               HandleError();
-            }
-         }
-         else
-         {
-            ew = CreateWrapperWithDot(descTrimmed, manage);
-         }
+         ew = CreateWrapperWithDot(parametersFirst, manage);
       }
-      else // check to see if it is a Variable or some other parameter
+      // check to see if it is a Variable or some other parameter
+      else
       {
-         ew = CreateOtherWrapper(descTrimmed, manage);
+         ew = CreateOtherWrapper(manage);
       }
    }
    
+   
    if (ew)
    {
-      // Now SetDescription() and SetRefObject() is called when
-      //     wrapper is created (loj: 2008.05.23)
-      
-      // set the description string; this will also setup the wrapper
-      //ew->SetDescription(desc);
-      //ew->SetDescription(descTrimmed); // or do I want this?
       // if it's an ArrayElement, set up the row and column wrappers
       if (itsType == Gmat::ARRAY_ELEMENT)
       {
@@ -592,6 +579,20 @@ Validator::CreateElementWrapper(const std::string &desc, bool parametersFirst,
          ((ArrayElementWrapper*)ew)->SetColumn(col);
       }
    }
+   else
+   {
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         ("Validator::CreateElementWrapper() Could not create an ElementWrapper for \"" +
+          theDescription + "\"\n");
+      #endif
+   }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateElementWrapper() returning <%p>\n", ew);
+   #endif
+   
    return ew;
 }
 
@@ -605,240 +606,665 @@ const StringArray& Validator::GetErrorList()
 }
 
 
+//----------------------------
+// private methods
+//----------------------------
+
+
 //------------------------------------------------------------------------------
-// ElementWrapper* CreateWrapperWithDot(const std::string &descTrimmed,
-//                                      bool manage)
+// bool CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
 //------------------------------------------------------------------------------
-ElementWrapper* Validator::CreateWrapperWithDot(const std::string &descTrimmed,
-                                                bool manage)
+bool Validator::CreateAssignmentWrappers(GmatCommand *cmd, Integer manage)
 {
-   // try to parse the string for an owner and type
-   // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
-   // check for object parameter first
-   Gmat::WrapperDataType itsType = Gmat::NUMBER;
-   ElementWrapper *ew = NULL;
-   std::string type, owner, dep;
-   GmatStringUtil::ParseParameter(descTrimmed, type, owner, dep);
-   // if it's not a valid object, then see if it's a parameter
-   GmatBase *theObj = FindObject(owner);
-   if (theObj == NULL)
+   std::string typeName = cmd->GetTypeName();
+   const StringArray wrapperNames = cmd->GetWrapperObjectNameArray();
+   
+   //---------------------------------------------------------------------------
+   // Special case for Assignment command (LHS = RHS).
+   // Since such as Sat.X can be both Parameter or ObjectProperty, we want to
+   // create a Parameter wapper if RHS is a Parameter for Assignment command.
+   // So special code is needed to tell the CreateElementWrapper() to check for
+   // Parameter first.
+   //---------------------------------------------------------------------------
+   
+   Assignment *acmd = (Assignment*)cmd;
+   
+   std::string lhs = acmd->GetLHS();
+   std::string rhs = acmd->GetRHS();
+   
+   StringArray parts = GmatStringUtil::SeparateDots(lhs);
+   GmatBase *theObj = FindObject(parts[0]);
+   
+   // Check if lhs is PropSetup and need to create a Propagator
+   if (theObj != NULL &&
+       theObj->GetType() == Gmat::PROP_SETUP && parts.size() >= 2)
    {
-      Parameter *param = CreateSystemParameter(descTrimmed, manage);
-      
-      if (param)
+      if (parts[1] == "Type")
       {
-         #ifdef DEBUG_WRAPPERS
-         MessageInterface::ShowMessage
-            ("In Interpreter(2), about to create a ParameterWrapper for \"%s\"\n",
-             descTrimmed.c_str(), "\"\n");
-         #endif
-         
-         CreateParameterWrapper(param, descTrimmed, &ew, itsType);
-      }
-      else // there is an error
-      {
-         ew = new StringWrapper();
-         ew->SetDescription(descTrimmed);
-         itsType = Gmat::STRING;
-                  
-         #ifdef DEBUG_WRAPPERS
-         MessageInterface::ShowMessage
-            ("In Validator, it is not a Parameter so created a StringWrapper for \"%s\"\n",
-             descTrimmed.c_str(), "\"\n");
-         #endif
+         if (!CreatePropSetupProperty(theObj, lhs, rhs))
+         {
+            MessageInterface::ShowMessage
+               ("==> Validator::ValidateCommand() returning false\n");
+            return false;
+         }
       }
    }
-   else
+   
+   // Check if lhs is ForceModel and need to create a PhysicalModel
+   if (theObj != NULL &&
+       theObj->GetType() == Gmat::FORCE_MODEL && parts.size() >= 2)
    {
-      // if there are two dots, then treat it as a parameter
-      if (descTrimmed.find_first_of(".") != descTrimmed.find_last_of("."))
+      if (parts[1] == "PrimaryBodies" || parts[1] == "PointMasses" ||
+          parts[1] == "SRP" || parts[1] == "Drag")
       {
-         Parameter *param = CreateSystemParameter(descTrimmed, manage);
-         if (param)
+         if (!CreateForceModelProperty(theObj, lhs, rhs))
          {
-            #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Interpreter(3), about to create a ParameterWrapper for \"%s\"\n",
-                descTrimmed.c_str(), "\"\n");
+               ("==> Validator::ValidateCommand() returning false\n");
+            return false;
+         }
+      }
+   }
+   
+   // Check if lhs is CoordinateSystem and need to create an AxisSystem
+   if (theObj != NULL &&
+       theObj->GetType() == Gmat::COORDINATE_SYSTEM && parts.size() >= 2)
+   {
+      if (parts[1] == "Axes")
+      {
+         if (!CreateCoordSystemProperty(theObj, lhs, rhs))
+         {
+            MessageInterface::ShowMessage
+               ("==> Validator::ValidateCommand() returning false\n");
+            return false;
+         }
+      }
+   }
+   
+   //-------------------------------------------------------------------
+   // Handle LHS
+   //-------------------------------------------------------------------
+   ElementWrapper *leftEw = NULL;
+   
+   try
+   {         
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("==========> Create Assignment LHS wrapper\n");
+      #endif
+      
+      leftEw = CreateElementWrapper(lhs, false, manage);
+      
+      if (leftEw == NULL)
+         return false;
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   (1)Setting ElementWrapper type %d for '%s' to '%s'\n",
+          leftEw->GetWrapperType(), leftEw->GetDescription().c_str(), typeName.c_str());
+      #endif
+      
+      if (cmd->SetElementWrapper(leftEw, lhs) == false)
+      {
+         theErrorMsg = "Failed to set ElementWrapper for LHS object \"" + lhs +
+            "\" in Assignment";
+         return HandleError();
+      }
+   }
+   catch (BaseException &ex)
+   {
+      theErrorMsg = ex.GetFullMessage();
+      return HandleError(false);
+   }
+   
+   //-------------------------------------------------------------------
+   // Handle RHS
+   //-------------------------------------------------------------------
+   /**
+    * @note
+    * Assignment::GetWrapperObjectNameArray() returns only RHS elements.
+    */
+   //-------------------------------------------------------------------
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage("==========> Create Assignment RHS wrapper\n");
+   MessageInterface::ShowMessage("   Has %d wrapper names\n", wrapperNames.size());
+   #endif
+   
+   // check if there is missing single quote in RHS if LHS is string type(loj: 2008.07.22)
+   // it will catch missing end quote
+   if (leftEw->GetDataType() == Gmat::STRING_TYPE ||
+       leftEw->GetDataType() == Gmat::STRINGARRAY_TYPE)
+   {
+      // first remove ending ; from the RHS
+      rhs = GmatStringUtil::RemoveLastString(rhs, ";");
+      if (GmatStringUtil::HasMissingQuote(rhs, "'"))
+      {
+         std::string fnName;
+         if (theFunction)
+            fnName = "GmatFunction \"" + theFunction->GetFunctionPathAndName() + "\"";
+         
+         theErrorMsg = "Assignment command has missing end quote on the "
+            "right-hand-side in " + fnName + "\n   \"" +
+            cmd->GetGeneratingString(Gmat::NO_COMMENTS) + "\"";
+         return HandleError();
+      }
+   }
+   
+   for (StringArray::const_iterator i = wrapperNames.begin();
+        i != wrapperNames.end(); ++i)
+   {
+      std::string name = (*i);
+      if (name != "")
+      {
+         try
+         {                  
+            ElementWrapper *ew = NULL;
+            if (IsParameterType(name))
+               ew = CreateElementWrapper(name, true, manage);
+            else
+               ew = CreateElementWrapper(name, false, manage);
+            
+            #if DBGLVL_WRAPPERS > 1
+            if (ew == NULL)
+               MessageInterface::ShowMessage("   (2) ElementWrapper is NULL\n");
+            else
+               MessageInterface::ShowMessage
+                  ("   (2)Setting ElementWrapper type %d for '%s' to '%s'\n",
+                   ew->GetWrapperType(), ew->GetDescription().c_str(), typeName.c_str());
             #endif
             
-            CreateParameterWrapper(param, descTrimmed, &ew, itsType);
+            if (cmd->SetElementWrapper(ew, name) == false)
+            {
+               theErrorMsg = "Failed to set ElementWrapper for RHS object \"" + name +
+                  "\" in Assignment";
+               return HandleError();
+            }
          }
-         else // there is an error
+         catch (BaseException &ex)
          {
-            theErrorMsg = "\"" + descTrimmed + "\"" + 
-               " is not a valid object property or parameter";
-            HandleError();
+            theErrorMsg = ex.GetFullMessage();
+            return HandleError(false);
+         }
+      }
+   }
+   
+   // Set math wrappers to math tree
+   acmd->SetMathWrappers();
+   
+   // Handle special case for Formation in GmatFunction(loj: 2008.07.08)
+   // Since spacecrafts are add to formation when Assignment command
+   // is executed, it throws an exception of no spacecraft are set
+   // when Formation::BuildState() is called in Propagate::Initialzize().
+   // Formation.Add = {Sat1, Sat2}
+   if (theFunction != NULL && theObj != NULL &&
+       (theObj->IsOfType(Gmat::FORMATION) && lhs.find(".Add") != lhs.npos))
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   Handling Formation Add\n");
+      #endif
+      TextParser tp;
+      StringArray names = tp.SeparateBrackets(rhs, "{}", " ,", false);
+      for (UnsignedInt i=0; i<names.size(); i++)
+         theObj->SetStringParameter("Add", names[i]);
+   }
+   
+   // Special case for ReporFile, we need to create a wrapper for each
+   // Parameter that is added to ReportFile,
+   // so call Interpreter::ValidateSubscriber() to create wrappers.
+   // ReportFile.Add = {Sat1.A1ModJulian, Sat1.EarthMJ2000Eq.X}
+   if (theFunction != NULL && theObj != NULL &&
+       (theObj->IsOfType("ReportFile") && lhs.find(".Add") != lhs.npos))
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage("   Handling ReportFile Add\n");
+      #endif
+      TextParser tp;
+      StringArray names = tp.SeparateBrackets(rhs, "{}", " ,", false);
+      for (UnsignedInt i=0; i<names.size(); i++)
+         theObj->SetStringParameter("Add", names[i]);
+      
+      if (theInterpreter != NULL)
+      {
+         if (!theInterpreter->ValidateSubscriber(theObj))
+         {
+            theErrorMsg = "Failed to create ElementWrapper for \"" +
+               theDescription + "\"";
+            return HandleError();
          }
       }
       else
       {
-         // if there is no such field for that object, it is a parameter
-         bool isValidProperty = true;
+         theErrorMsg = "Failed to create ElementWrapper for \"" +
+            theDescription + "\". The Interpreter is not set.";
+         return HandleError();
+      }
+   }
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateSolarSystemWrapper(const std::string &owner, ...)
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreateSolarSystemWrapper(GmatBase *obj,
+                                                   const std::string &owner,
+                                                   const std::string &depobj,
+                                                   const std::string &type,
+                                                   Integer manage)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateSolarSystemWrapper() entered, theDescription='%s'"
+       "\n   obj=<%p><%s>, owner='%s', depobj='%s', type='%s'\n", theDescription.c_str(),
+       obj, obj ? obj->GetName().c_str() : "NULL", owner.c_str(), depobj.c_str(),
+       type.c_str());
+   #endif
+   
+   ElementWrapper *ew = NULL;
+   SolarSystem *ss = (SolarSystem *)obj;
+   
+   if (depobj == "")
+   {
+      ew = new ObjectPropertyWrapper();
+      ew->SetDescription(theDescription);
+      ew->SetRefObject(obj);
+      
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         (">>> In Validator, created a ObjectPropertyWrapper for property \"%s\"\n    "
+          "of <%s>'%s', theDescription='%s'\n", type.c_str(), obj->GetTypeName().c_str(),
+          obj->GetName().c_str(), theDescription.c_str());
+      #endif
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+      #endif
+      return ew;
+   }
+   else
+   {
+      // Script has the form of:
+      // GMAT SolarSystem.Earth.NutationUpdateInterval = 60.0;
+      // GMAT SolarSystem.Earth.UseTTForEphemeris = true;
+      // GMAT SolarSystem.Earth.DateFormat  = TAIModJulian;
+      // GMAT SolarSystem.Earth.StateType   = Keplerian;
+      // GMAT SolarSystem.Earth.InitalEpoch = 21544.500371
+      // GMAT SolarSystem.Earth.SMA         = 149653978.978377
+      // GMAT SolarSystem.Ephemeris = {SLP}
+      
+      StringArray parts = GmatStringUtil::SeparateDots(depobj);
+      std::string bodyName = parts[0];
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   bodyName='%s', type='%s'\n", bodyName.c_str(), type.c_str());
+      #endif
+      
+      // Get body from the SolarSystem
+      GmatBase *body = (GmatBase*)ss->GetBody(bodyName);
+      
+      if (body == NULL)
+      {
+         theErrorMsg = "Body: " + bodyName + " not found in the SolarSystem\n";
+         HandleError();
+      }
+      else
+      {
          try
          {
-            theObj->GetParameterID(type);
-         }
-         catch (BaseException &be)
-         {
-            isValidProperty = false;
-            Parameter *param = CreateSystemParameter(descTrimmed, manage);
-            if (param)
-            {
-               #ifdef DEBUG_WRAPPERS
-               MessageInterface::ShowMessage
-                  ("In Interpreter(4), about to create a ParameterWrapper for \"%s\"\n",
-                   descTrimmed.c_str(), "\"\n");
-               #endif
-               
-               CreateParameterWrapper(param, descTrimmed, &ew, itsType);
-            }
-            else // there is an error
-            {
-               theErrorMsg = "\"" + descTrimmed + "\"" + 
-                  " is not a valid object property or parameter";
-               HandleError();
-            }
-         }
-         if (isValidProperty)
-         {
+            body->GetParameterID(type);
             ew = new ObjectPropertyWrapper();
-            ew->SetDescription(descTrimmed);
-            ew->SetRefObject(theObj);
-            itsType = Gmat::OBJECT_PROPERTY;
+            ew->SetDescription(theDescription);
+            ew->SetRefObjectName(bodyName, 0);
+            ew->SetRefObject(body);
             
-            #ifdef DEBUG_WRAPPERS
+            #if DBGLVL_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Validator, created a ObjectPropertyWrapper for \"%s\"\n",
-                descTrimmed.c_str(), "\"\n");
+               (">>> In Validator, created a ObjectPropertyWrapper for property \"%s\"\n    "
+                "of <%s>'%s', theDescription='%s'\n", type.c_str(), body->GetTypeName().c_str(),
+                body->GetName().c_str(), theDescription.c_str());
             #endif
+         }
+         catch (BaseException &e)
+         {
+            theErrorMsg = e.GetFullMessage();
+            HandleError();
          }
       }
    }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+   #endif
    
    return ew;
 }
 
 
 //------------------------------------------------------------------------------
-// ElementWrapper* CreateOtherWrapper(const std::string &descTrimmed, bool manage)
+// ElementWrapper* CreateForceModelWrapper(const std::string &owner, ...)
 //------------------------------------------------------------------------------
-ElementWrapper* Validator::CreateOtherWrapper(const std::string &descTrimmed,
-                                              bool manage)
+ElementWrapper* Validator::CreateForceModelWrapper(GmatBase *obj,
+                                                   const std::string &owner,
+                                                   const std::string &depobj,
+                                                   const std::string &type,
+                                                   Integer manage)
 {
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateForceModelWrapper() entered, theDescription='%s'"
+       "\n   obj=<%p><%s>, owner='%s', depobj='%s', type='%s'\n", theDescription.c_str(),
+       obj, obj ? obj->GetName().c_str() : "NULL", owner.c_str(), depobj.c_str(),
+       type.c_str());
+   #endif
+   
+   ElementWrapper *ew = NULL;
+      
+   //------------------------------------------------------------
+   // Create wrapper for ForceModel object properties
+   //------------------------------------------------------------
+   ew = CreatePropertyWrapper(obj, type, manage, false);
+   if (ew != NULL)
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreateForceModelWrapper() returning <%p>\n", ew);
+      #endif
+      return ew;
+   }
+   
+   //------------------------------------------------------------
+   // Create wrapper for ForceModel owned object properties
+   //------------------------------------------------------------
+   StringArray parts = GmatStringUtil::SeparateDots(depobj);
+   std::string pmType = parts[0];
+   std::string forceType = ForceModel::GetScriptAlias(pmType);
+   std::string propName = type;
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("   Setting pmType=%s, forceType=%s, propName=%s\n", pmType.c_str(),
+       forceType.c_str(), propName.c_str());
+   #endif
+   
+   GmatBase *ownedObj;
+   Integer propId;
+   Gmat::ParameterType propType;
+   if (theInterpreter->FindPropertyID(obj, propName, &ownedObj, propId, propType))
+   {
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         ("   after FindPropertyID(), propId=%d, ownedObj=<%p><%s>'%s'\n",
+          propId, ownedObj, ownedObj ? ownedObj->GetTypeName().c_str() : "NULL",
+          ownedObj ? ownedObj->GetName().c_str() : "NULL");
+      #endif
+      
+      ew = new ObjectPropertyWrapper();
+      ew->SetDescription(theDescription);
+      
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         (">>> In Validator, created a ObjectPropertyWrapper for owned property \"%s\"\n    "
+          "of <%s>'%s', theDescription='%s'\n", propName.c_str(),
+          ownedObj->GetTypeName().c_str(), ownedObj->GetName().c_str(),
+          theDescription.c_str());
+      #endif
+      
+      ew->SetRefObjectName(ownedObj->GetName());
+      ew->SetRefObject(ownedObj);
+      // @note
+      // Handle special case for GmatFunction(loj: 2008.07.07)
+      // For ForceModel, the PhysicalModel is created as local object
+      // but name is added automatically to refObjectNames in SetupWrapper(),
+      // so we need to clear.
+      if (ownedObj->IsOfType(Gmat::PHYSICAL_MODEL))
+         ew->ClearRefObjectNames();
+      
+   }
+   else
+   {
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         ("===> theInterpreter->FindPropertyID() returned false\n");
+      #endif
+   }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateForceModelWrapper() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateWrapperWithDot(bool parametersFirst, Integer manage)
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreateWrapperWithDot(bool parametersFirst, Integer manage)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateWrapperWithDot() entered, theDescription='%s', "
+       "parametersFirst=%d, manage=%d\n", theDescription.c_str(), parametersFirst, manage);
+   #endif
+   
+   // try to parse the string for an owner and type
+   // NOTE - need to check handling of "special cases, e.g.Sat1.X" <<<<<<<<<<
+   // check for object parameter first
+   ElementWrapper *ew = NULL;
+   std::string type, owner, depobj;
+   GmatStringUtil::ParseParameter(theDescription, type, owner, depobj);
+   GmatBase *obj = FindObject(owner);
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("   obj=<%p><%s>'%s', owner='%s', depobj='%s', type='%s'\n", obj,
+       obj ? obj->GetTypeName().c_str() : "NULL", obj ? obj->GetName().c_str() : "NULL", 
+       owner.c_str(), depobj.c_str(), type.c_str());
+   #endif
+   
+   // if cannot find object and manage option is to use configuration,
+   // we cannot continue, so just return NULL (loj: 2008.07.24)
+   if (obj == NULL && manage == 1)
+      return NULL;
+   
+   //-----------------------------------------------------------------
+   // Special case for SolarSystem
+   //-----------------------------------------------------------------
+   if (obj != NULL && obj->GetType() == Gmat::SOLAR_SYSTEM)
+   {
+      ew = CreateSolarSystemWrapper(obj, owner, depobj, type, manage);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreateSolarSystemWrapper() returning <%p>\n", ew);
+      #endif
+      
+      return ew;
+   }
+   
+   //-----------------------------------------------------------------
+   // Special case for ForceModel
+   //-----------------------------------------------------------------
+   if (obj != NULL && obj->GetType() == Gmat::FORCE_MODEL)
+   {
+      ew = CreateForceModelWrapper(obj, owner, depobj, type, manage);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreateForceModelWrapper() returning <%p>\n", ew);
+      #endif
+      
+      return ew;
+   }
+   
+   //-----------------------------------------------------------------
+   // Now continue with the rest
+   //-----------------------------------------------------------------
+   ew = CreateValidWrapperWithDot(obj, type, owner, depobj,
+                                  parametersFirst, manage);
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateWrapperWithDot() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
+   
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateOtherWrapper(Integer manage)
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreateOtherWrapper(Integer manage)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateOtherWrapper() entered, theDescription='%s', manage=%d\n",
+       theDescription.c_str(), manage);
+   #endif
+   
    Gmat::WrapperDataType itsType = Gmat::NUMBER;
    ElementWrapper *ew = NULL;
-   Parameter *p = GetParameter(descTrimmed);
+   Parameter *p = GetParameter(theDescription);
    
    if ( (p) && (p->IsOfType("Variable")) )
    {
       ew = new VariableWrapper();
-      ew->SetDescription(descTrimmed);
+      ew->SetDescription(theDescription);
       ew->SetRefObject(p);
       itsType = Gmat::VARIABLE;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created a VariableWrapper for \"%s\"\n",
-          descTrimmed.c_str(), "\"\n");
+         (">>> In Validator, created a VariableWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
       #endif
    }
    else if ( (p) && p->IsOfType("Array") )
    {
       ew = new ArrayWrapper();
-      ew->SetDescription(descTrimmed);
+      ew->SetDescription(theDescription);
       ew->SetRefObject(p);
       itsType = Gmat::ARRAY;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created an ArrayWrapper for \"%s\"\n",
-          descTrimmed.c_str(), "\"\n");
+         (">>> In Validator, created an ArrayWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
       #endif
    }
    else if ( (p) && p->IsOfType("String") )
    {
       ew = new StringObjectWrapper();
-      ew->SetDescription(descTrimmed);
+      ew->SetDescription(theDescription);
       ew->SetRefObject(p);
       itsType = Gmat::STRING_OBJECT;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
-          descTrimmed.c_str(), "\"\n");
+         (">>> In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
       #endif
    }
    else if ( (p) && p->IsOfType("Parameter") )
    {
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage
-         ("In Interpreter(5), about to create a ParameterWrapper for \"%s\"\n",
-          descTrimmed.c_str(), "\"\n");
+         ("In Validator(5), about to create a ParameterWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
       #endif
       
-      CreateParameterWrapper(p, descTrimmed, &ew, itsType);
+      ew = CreateParameterWrapper(p, itsType);
    }
    else
    {
       // Check see if it is clonable object
-      GmatBase *obj = FindObject(descTrimmed);
+      GmatBase *obj = FindObject(theDescription);
       
       if (obj != NULL)
       {
          ew = new ObjectWrapper();
-         ew->SetDescription(descTrimmed);
+         ew->SetDescription(theDescription);
          ew->SetRefObject(obj);
          itsType = Gmat::OBJECT;
          
-         #ifdef DEBUG_WRAPPERS
+         #if DBGLVL_WRAPPERS
          MessageInterface::ShowMessage
-            ("In Validator, created an ObjectWrapper for \"%s\"\n",
-             descTrimmed.c_str(), "\"\n");
+            (">>> In Validator, created an ObjectWrapper for \"%s\", Set refObj to <%p>'%s'\n",
+             theDescription.c_str(), obj, obj->GetName().c_str());
          #endif
       }
       else
       {
          bool bVal;
-         if (GmatStringUtil::ToBoolean(descTrimmed, bVal))
+         if (GmatStringUtil::ToBoolean(theDescription, bVal))
          {
             ew = new BooleanWrapper();
-            ew->SetDescription(descTrimmed);
+            ew->SetDescription(theDescription);
             itsType = Gmat::BOOLEAN;
             
-            #ifdef DEBUG_WRAPPERS
+            #if DBGLVL_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Validator, created a BooleanWrapper for \"%s\"\n",
-                descTrimmed.c_str(), "\"\n");
+               (">>> In Validator, created a BooleanWrapper for \"%s\"\n",
+                theDescription.c_str(), "\"\n");
             #endif
          }
-         else if (descTrimmed == "On" || descTrimmed == "Off" ||
-                  descTrimmed == "on" || descTrimmed == "off")
+         else if (theDescription == "On" || theDescription == "Off" ||
+                  theDescription == "on" || theDescription == "off")
          {
             ew = new OnOffWrapper();
-            ew->SetDescription(descTrimmed);
+            ew->SetDescription(theDescription);
             itsType = Gmat::ON_OFF;
             
-            #ifdef DEBUG_WRAPPERS
+            #if DBGLVL_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Validator, created a OnOffWrapper for \"%s\"\n",
-                descTrimmed.c_str(), "\"\n");
+               (">>> In Validator, created a OnOffWrapper for \"%s\"\n",
+                theDescription.c_str(), "\"\n");
             #endif
          }
+         #ifdef __ALLOW_MATH_EXP_IN_FUNCTION__
+         // check if it is math equation or single undefined variable
+         // so that number wrapper can be created for "2+2" or "x" for 
+         // GmatFunction input value (loj: 2008.08.27)
+         else if ((GmatStringUtil::IsMathEquation(theDescription)) ||
+                  (GmatStringUtil::IsValidName(theDescription)))
+         {
+            ew = new NumberWrapper();
+            ew->SetDescription(theDescription);
+            itsType = Gmat::NUMBER;
+            
+            #if DBGLVL_WRAPPERS
+            MessageInterface::ShowMessage
+               (">>> In Validator, created a VariableWrapper for \"%s\"\n",
+                theDescription.c_str(), "\"\n");
+            #endif
+         }
+         #endif
          else
          {
             ew = new StringWrapper();
-            ew->SetDescription(descTrimmed);
+            ew->SetDescription(theDescription);
             itsType = Gmat::STRING;
             
-            #ifdef DEBUG_WRAPPERS
+            #if DBGLVL_WRAPPERS
             MessageInterface::ShowMessage
-               ("In Validator, it's not an On/Off type so created a StringWrapper for \"%s\"\n",
-                descTrimmed.c_str(), "\"\n");
+               (">>> In Validator, it's not an On/Off type so created a StringWrapper for \"%s\"\n",
+                theDescription.c_str(), "\"\n");
             #endif
          }
       }
    }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateOtherWrapper() returning <%p>\n", ew);
+   #endif
    
    return ew;
 }
@@ -929,7 +1355,7 @@ Parameter* Validator::GetParameter(const std::string name)
 {
    GmatBase *obj = FindObject(name);
    
-   #ifdef DEBUG_WRAPPERS
+   #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage
       ("Validator::GetParameter() type of <%s> is <%s>\n", name.c_str(),
        (obj ? obj->GetTypeName().c_str() : "Unknown obj"));
@@ -937,14 +1363,14 @@ Parameter* Validator::GetParameter(const std::string name)
    
    if (obj && obj->GetType() == Gmat::PARAMETER)
    {
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS > 1
       MessageInterface::ShowMessage("Validator::GetParameter() returning <%p>\n", obj);
       #endif
       
       return (Parameter*)obj;
    }
    
-   #ifdef DEBUG_WRAPPERS
+   #if DBGLVL_WRAPPERS > 1
    MessageInterface::ShowMessage("Validator::GetParameter() returning NULL\n");
    #endif
    
@@ -953,79 +1379,176 @@ Parameter* Validator::GetParameter(const std::string name)
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateSystemParameter(const std::string &name, bool manage = true)
+// Parameter* CreateSystemParameter(bool &paramCreated, const std::string &name,
+//                                  Integer manage = 1)
 //------------------------------------------------------------------------------
 /**
  * Creates a system Parameter from the input parameter name. If the name contains
  * dots, it consider it as a system parameter.  If it is not a system Parameter
  * it checks if object by given name is a Parameter.
  *
+ * @param paramCreated will set to true if one or more Parameters were created
+ *
  * @param  name   parameter name to be parsed for Parameter creation
  *                Such as, sat1.Earth.ECC, sat1.SMA
- * @param  manage true if parameter to be managed in the configuration (true)
+ * @param  manage   0, if parameter is not managed
+ *                  1, if parameter is added to configuration (default)
+ *                  2, if Parameter is added to function object map
+ * @param paramCreated true if one or more Parameters are created
  *
  * @return Created Paramteter pointer or pointer of the Parameter by given name
  *         NULL if it is not a system Parameter nor named object is not a Parameter
  *
  */
 //------------------------------------------------------------------------------
-Parameter* Validator::CreateSystemParameter(const std::string &str, bool manage)
+Parameter* Validator::CreateSystemParameter(bool &paramCreated,
+                                            const std::string &str, Integer manage)
 {
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Validator::CreateSystemParameter() str=%s\n", str.c_str());
+      ("Validator::CreateSystemParameter() str='%s', manage=%d\n", str.c_str(), manage);
    #endif
    
+   // Since GmatFunction can have such as "GMAT XYPlot.Add = {sat.X, sat.Y};",
+   // we need to create multiple Parameters for valid Parameters.
+   // So see if there is {} and handle all names in the loop (loj: 2008.06.18)
+   // All new Parameters should be added to the function automatic object store.
+   TextParser tp;
    Parameter *param = NULL;
-   std::string paramType, ownerName, depName;
-   GmatStringUtil::ParseParameter(str, paramType, ownerName, depName);
+   paramCreated = false;
    
-   #ifdef DEBUG_CREATE_PARAM
-   MessageInterface::ShowMessage
-      ("   paramType=%s, ownerName=%s, depName=%s\n", paramType.c_str(),
-       ownerName.c_str(), depName.c_str());
-   #endif
-   
-   // Create parameter, if type is a System Parameter
-   if (find(theParameterList.begin(), theParameterList.end(), paramType) != 
-       theParameterList.end())
+   if (str == "")
    {
-      param = CreateParameter(paramType, str, ownerName, depName, manage);
+      #ifdef DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage
+         ("Validator::CreateSystemParameter() returning NULL, input string is blank\n");
+      #endif
+      return NULL;
+   }
+   
+   StringArray names;
+   // If { found add comma to delimiter to handle "GMAT XYPlot.Add = {sat.X, sat.Y}"
+   // otherwise just use space to catch invalid Parameter type
+   // Is this reasonable assumption? (loj: 2008.06.18)
+   if (str.find("{") != str.npos)
+      names = tp.SeparateBrackets(str, "{}", " ,", false);
+   else
+      names = tp.SeparateBrackets(str, "{}", " ", false);
+   
+   for (UnsignedInt i=0; i<names.size(); i++)
+   {
+      #ifdef DEBUG_CREATE_PARAM
+      MessageInterface::ShowMessage("   names[%d]='%s'\n", i, names[i].c_str());   
+      #endif
+      
+      std::string paramType, ownerName, depName;
+      GmatStringUtil::ParseParameter(names[i], paramType, ownerName, depName);
       
       #ifdef DEBUG_CREATE_PARAM
       MessageInterface::ShowMessage
-         ("   Parameter created with paramType=%s, ownerName=%s, depName=%s\n",
-          paramType.c_str(), ownerName.c_str(), depName.c_str());
+         ("   paramType='%s', ownerName='%s', depName='%s'\n", paramType.c_str(),
+          ownerName.c_str(), depName.c_str());
       #endif
       
-      // Add unmanaged Parameter to function
-      if (!manage && theFunction != NULL)
+      // Create parameter, if type is a System Parameter
+      if (find(theParameterList.begin(), theParameterList.end(), paramType) != 
+          theParameterList.end())
       {
-         #ifdef DEBUG_AUTO_PARAM
+         param = CreateParameter(paramType, names[i], ownerName, depName, manage);
+         paramCreated = true;
+         
+         #ifdef DEBUG_CREATE_PARAM
          MessageInterface::ShowMessage
-            ("   Adding '%s' to function automatic object array\n", param->GetName().c_str());
+            ("   Parameter created with paramType='%s', ownerName='%s', depName='%s', "
+             "theFunction=<%p>'%s'\n", paramType.c_str(), ownerName.c_str(), depName.c_str(),
+             theFunction, theFunction ? theFunction->GetName().c_str() : "NULL");
          #endif
          
-         theFunction->AddAutomaticObject(param->GetName(),(GmatBase*)param);
+         // Add unmanaged Parameter to function
+         if (theFunction != NULL)
+         {
+            #ifdef DEBUG_AUTO_PARAM
+            MessageInterface::ShowMessage
+               ("   Adding '%s' to function automatic object array\n", param->GetName().c_str());
+            #endif
+            
+            theFunction->AddAutomaticObject(param->GetName(),(GmatBase*)param);
+         }
       }
-   }
-   else
-   {
-      // Find the object and check if it is a Parameter
-      GmatBase *obj = FindObject(str);
-      if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
+      else
       {
-         param = (Parameter*)obj;
-      
-         #ifdef DEBUG_CREATE_PARAM
-         MessageInterface::ShowMessage("   Parameter <%s> found\n", str.c_str());
-         #endif
+         // Find the object and check if it is a Parameter
+         GmatBase *obj = FindObject(names[i]);
+         if (obj != NULL && obj->GetType() == Gmat::PARAMETER)
+         {
+            param = (Parameter*)obj;
+            
+            #ifdef DEBUG_CREATE_PARAM
+            MessageInterface::ShowMessage("   Parameter <%s> found\n", names[i].c_str());
+            #endif
+         }
       }
    }
    
+   Parameter *realParam = NULL;
+   if (names.size() == 1)
+      realParam = param;
+   
    #ifdef DEBUG_CREATE_PARAM
    MessageInterface::ShowMessage
-      ("Validator::CreateSystemParameter() returning <%p><%s><%s>\n", param,
+      ("Validator::CreateSystemParameter() paramCreated=%d, returning <%p><%s>'%s'\n",
+       paramCreated, realParam,
+       (realParam == NULL) ? "NULL" : realParam->GetTypeName().c_str(),
+       (realParam == NULL) ? "NULL" : realParam->GetName().c_str());
+   #endif
+   
+   return realParam;
+}
+
+
+//------------------------------------------------------------------------------
+// Parameter* CreateParameter(const std::string &type, const std::string &name,
+//                            const std::string &ownerName, const std::string &depName
+//                            Integer manage = 1)
+//------------------------------------------------------------------------------
+/**
+ * Calls the Moderator to create a Parameter.
+ * 
+ * @param  type       Type of parameter requested
+ * @param  name       Name for the parameter.
+ * @param  ownerName  object name of parameter requested ("")
+ * @param  depName    Dependent object name of parameter requested ("")
+ * @param  manage     0, if parameter is not managed
+ *                    1, if parameter is added to configuration (default)
+ *                    2, if Parameter is added to function object map
+ * 
+ * @return Pointer to the constructed Parameter.
+ */
+//------------------------------------------------------------------------------
+Parameter* Validator::CreateParameter(const std::string &type, 
+                                      const std::string &name,
+                                      const std::string &ownerName,
+                                      const std::string &depName,
+                                      Integer manage)
+{
+   #ifdef DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("Validator::CreateParameter() type='%s', name='%s', ownerName='%s', "
+       "depName='%s', manage=%d\n", type.c_str(), name.c_str(),
+       ownerName.c_str(), depName.c_str(), manage);
+   #endif
+
+   Parameter *param = NULL;
+   
+   // Check if create an array
+   if (type == "Array")
+      param = CreateArray(name, manage);
+   else
+      param = theModerator->CreateParameter(type, name, ownerName, depName, manage);
+   
+   #ifdef DEBUG_CREATE_PARAM
+   MessageInterface::ShowMessage
+      ("Validator::CreateParameter() returning <%p><%s>'%s'\n", param,
        (param == NULL) ? "NULL" : param->GetTypeName().c_str(),
        (param == NULL) ? "NULL" : param->GetName().c_str());
    #endif
@@ -1035,47 +1558,9 @@ Parameter* Validator::CreateSystemParameter(const std::string &str, bool manage)
 
 
 //------------------------------------------------------------------------------
-// Parameter* CreateParameter(const std::string &type, const std::string &name,
-//                            const std::string &ownerName, const std::string &depName
-//                            bool manage = true)
+// Parameter* CreateArray(onst std::string &arrayStr, Integer manage = 1)
 //------------------------------------------------------------------------------
-/**
- * Calls the Moderator to create a Parameter.
- * 
- * @param  type       Type of parameter requested
- * @param  name       Name for the parameter.
- * @param  ownerName  object name of parameter requested ("")
- * @param  depName    Dependent object name of parameter requested ("")
- * @param  manage     true if created object to be added to configuration (true)
- * 
- * @return Pointer to the constructed Parameter.
- */
-//------------------------------------------------------------------------------
-Parameter* Validator::CreateParameter(const std::string &type, 
-                                      const std::string &name,
-                                      const std::string &ownerName,
-                                      const std::string &depName,
-                                      bool manage)
-{
-   #ifdef DEBUG_CREATE_PARAM
-   MessageInterface::ShowMessage
-      ("Validator::CreateParameter() type='%s', name='%s', ownerName='%s', "
-       "depName='%s', manage=%d\n", type.c_str(), name.c_str(),
-       ownerName.c_str(), depName.c_str(), manage);
-   #endif
-   
-   // Check if create an array
-   if (type == "Array")
-      return CreateArray(name, manage);
-   else
-      return theModerator->CreateParameter(type, name, ownerName, depName, manage);
-}
-
-
-//------------------------------------------------------------------------------
-// Parameter* CreateArray(onst std::string &arrayStr, bool manage = true)
-//------------------------------------------------------------------------------
-Parameter* Validator::CreateArray(const std::string &arrayStr, bool manage)
+Parameter* Validator::CreateArray(const std::string &arrayStr, Integer manage)
 {
    std::string name;
    Integer row, col;
@@ -1145,48 +1630,392 @@ AxisSystem* Validator::CreateAxisSystem(std::string type, GmatBase *owner)
 
 
 //------------------------------------------------------------------------------
-// void CreateParameterWrapper(Parameter *param, ElementWrapper **ew,
-//                             Gmat::WrapperDataType &itsType)
+// ElementWrapper* CreateValidWrapperWithDot(GmatBase *obj, ...)
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreateValidWrapperWithDot(GmatBase *obj,
+                                                     const std::string &type,
+                                                     const std::string &owner,
+                                                     const std::string &depobj,
+                                                     bool parametersFirst,
+                                                     Integer manage)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateValidWrapperWithDot() entered, obj=<%p><%s>, "
+       "parametersFirst=%d, manage=%d\n", obj, obj ? obj->GetName().c_str() : "NULL",
+       parametersFirst, manage);
+   #endif
+   
+   Gmat::WrapperDataType itsType = Gmat::NUMBER;
+   ElementWrapper *ew = NULL;
+   
+   // if there are two dots, then treat it as a Parameter
+   // @note We can have more than two dots for Parameters in the future
+   if (theDescription.find_first_of(".") != theDescription.find_last_of("."))
+   {
+      // see if reallay create a ParameterWrapper first, there are a few exceptions.
+      bool paramFirst = true;
+      if (parametersFirst)
+      {
+         if (obj->IsOfType(Gmat::BURN))
+            paramFirst = false;
+      }
+      else
+      {
+         if (theFunction != NULL)
+            paramFirst = false;
+      }
+      
+      if (paramFirst)
+      {
+         bool paramCreated = false;
+         Parameter *param = CreateSystemParameter(paramCreated, theDescription, manage);         
+         
+         // param is not NULL if only one Parameter is created,
+         // so create ParameterWrapper
+         if (param)
+         {
+            #if DBGLVL_WRAPPERS > 1
+            MessageInterface::ShowMessage
+               ("In Validator(1), about to create a ParameterWrapper for \"%s\"\n",
+                theDescription.c_str(), "\"\n");
+            #endif
+            ew = CreateParameterWrapper(param, itsType);
+         }
+      }
+   }
+   
+   if (ew == NULL && parametersFirst)
+   {
+      bool paramCreated = false;
+      Parameter *param = CreateSystemParameter(paramCreated, theDescription, manage);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   CreateSystemParameter() returned param=<%p>, paramCreated=%d\n", param,
+          paramCreated);
+      #endif
+      
+      if (param)
+      {
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("In Validator(2), about to create a ParameterWrapper for \"%s\"\n",
+             theDescription.c_str(), "\"\n");
+         #endif
+         ew = CreateParameterWrapper(param, itsType);
+      }
+   }
+   
+   if (ew == NULL)
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("In Validator(3), about to create a ObjectPropertyWrapper for \"%s\"\n",
+          theDescription.c_str(), "\"\n");
+      #endif
+      ew = CreatePropertyWrapper(obj, type, manage);
+   }
+   
+   if (ew == NULL)
+   {
+      bool paramCreated = false;
+      Parameter *param = CreateSystemParameter(paramCreated, theDescription, manage);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   CreateSystemParameter() returned param=<%p>, paramCreated=%d\n", param,
+          paramCreated);
+      #endif
+      
+      // param is not NULL if only one Parameter is created,
+      // so create ParameterWrapper
+      if (param)
+      {
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("In Validator(4), about to create a ParameterWrapper for \"%s\"\n",
+             theDescription.c_str(), "\"\n");
+         #endif
+         ew = CreateParameterWrapper(param, itsType);
+      }
+      else if (paramCreated)
+      {
+         // Multiple automatic objects are already created in CreateSystemParameter(),
+         // so create StringWrapper if Parameters were created.
+         // ReportFile.Add = {sat1.A1ModJulian, sat1.EarthMJ2000Eq.X};
+         #if DBGLVL_WRAPPERS > 1
+         MessageInterface::ShowMessage
+            ("In Validator(4), about to create a StringWrapper for \"%s\"\n",
+             theDescription.c_str(), "\"\n");
+         #endif
+         ew = new StringWrapper();
+         ew->SetDescription(theDescription);
+         itsType = Gmat::STRING;
+      }
+   }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateValidWrapperWithDot() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateParameterWrapper(Parameter *param,
+//                                        Gmat::WrapperDataType &itsType)
 //------------------------------------------------------------------------------
 /*
  * Creates ParameterWrapper.
  *
  * @param <param> Pointer to Paramter
- * @param <ew> Adress of outpout ElementWrapper pointer
  * @param <itsType> outpout wrapper type
  */
 //------------------------------------------------------------------------------
-void Validator::CreateParameterWrapper(Parameter *param, const std::string &desc,
-                                       ElementWrapper **ew, Gmat::WrapperDataType &itsType)
+ElementWrapper* Validator::CreateParameterWrapper(Parameter *param,
+                                                  Gmat::WrapperDataType &itsType)
 {
-   *ew = NULL;
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateParameterWrapper() entered, param=<%p>'%s', theDescription='%s'\n",
+       param, param ? param->GetName().c_str() : "NULL", theDescription.c_str());
+   #endif
+   
+   ElementWrapper *ew = NULL;
+   
+   // @note
+   // Since GmatFunction can have such as "GMAT XYPlot.Add = {sat.X};",
+   // we want to set Parameter name to description. (loj: 2008.06.19)
    
    if (param->IsOfType("String"))
    {
-      *ew = new StringObjectWrapper();
-      (*ew)->SetDescription(desc);
-      (*ew)->SetRefObject(param);
+      ew = new StringObjectWrapper();
+      ew->SetDescription(theDescription);
+      ew->SetRefObject(param);
       itsType = Gmat::STRING_OBJECT;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
+         (">>> In Validator, it's a String so created a StringObjectWrapper for \"%s\"\n",
           param->GetName().c_str(), "\"\n");
       #endif
    }
    else
    {
-      *ew = new ParameterWrapper();
-      (*ew)->SetDescription(desc);
-      (*ew)->SetRefObject(param);
+      ew = new ParameterWrapper();
+      // We want to set Parameter exact name to wrapper so that it can be found
+      // from the object map (loj: 2008.06.30)
+      // For example, "xyplot.IndVar = { Sat.TAIModJulian };"
+      // the description is "{ Sat.TAIModJulian }" which will not work in GmatFunction
+      //ew->SetDescription(theDescription);
+      ew->SetDescription(param->GetName());
+      ew->SetRefObject(param);
       itsType = Gmat::PARAMETER_OBJECT;
       
-      #ifdef DEBUG_WRAPPERS
+      #if DBGLVL_WRAPPERS
       MessageInterface::ShowMessage
-         ("In Validator, created a ParameterWrapper for \"%s\"\n",
-          param->GetName().c_str(), "\"\n");
+         (">>> In Validator, created a ParameterWrapper for Parameter \"%s\"\n",
+          param->GetName().c_str());
       #endif
    }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateParameterWrapper() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreatePropertyWrapper()
+//------------------------------------------------------------------------------
+/*
+ * Creates ElementWrapper for object property.
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreatePropertyWrapper(GmatBase *obj,
+                                                 const std::string &type,
+                                                 Integer manage, bool checkSubProp)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreatePropertyWrapper() entered, obj=<%p><%s><%s>, manage=%d, "
+       "checkSubProp=%d\n", obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", manage, checkSubProp);
+   #endif
+   
+   if (obj == NULL)
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreatePropertyWrapper() returning NULL, input object is NULL,\n");
+      #endif
+      
+      return NULL;
+   }
+   
+   ElementWrapper *ew = NULL;
+   
+   // check if there is such property for that object
+   try
+   { 
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   calling %s %s->GetParameterID(%s)\n", obj->GetTypeName().c_str(),
+          obj->GetName().c_str(), type.c_str());
+      #endif
+      
+      obj->GetParameterID(type);
+      ew = new ObjectPropertyWrapper();
+      ew->SetDescription(theDescription);
+      
+      #if DBGLVL_WRAPPERS
+      MessageInterface::ShowMessage
+         (">>> In Validator, created a ObjectPropertyWrapper for property \"%s\"\n    "
+          "of <%s>'%s', theDescription='%s'\n", type.c_str(), obj->GetTypeName().c_str(),
+          obj->GetName().c_str(), theDescription.c_str());
+      #endif
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   Setting the object <%p><%s> to ObjectPropertyWrapper\n", obj,
+          obj->GetName().c_str());
+      #endif
+      
+      ew->SetRefObject(obj);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreatePropertyWrapper() returning <%p>\n", ew);
+      #endif
+      
+      return ew;
+   }
+   catch (BaseException &be)
+   {
+      ; // do nothing here
+   }
+   
+   // if not checking owend object property
+   if (!checkSubProp)
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreatePropertyWrapper() returning <%p>\n", ew);
+      #endif
+      
+      return ew;
+   }
+   
+   // create wrapper for owned object property
+   ew = CreateSubPropertyWrapper(obj, type, manage);
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreatePropertyWrapper() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
+}
+
+
+//------------------------------------------------------------------------------
+// ElementWrapper* CreateSubPropertyWrapper()
+//------------------------------------------------------------------------------
+/*
+ * Creates ElementWrapper for object property.
+ */
+//------------------------------------------------------------------------------
+ElementWrapper* Validator::CreateSubPropertyWrapper(GmatBase *obj,
+                                                    const std::string &type,
+                                                    Integer manage)
+{
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateSubPropertyWrapper() entered, obj=<%p><%s><%s>, manage=%d\n",
+       obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", manage);
+   #endif
+   
+   if (obj == NULL)
+   {
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("Validator::CreateSubPropertyWrapper() returning NULL, input object is NULL,\n");
+      #endif
+      
+      return NULL;
+   }
+   
+   ElementWrapper *ew = NULL;
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("   Object can have owend objects, so check owend object property\n");
+   #endif
+   
+   Integer ownedId = -1;
+   Gmat::ParameterType owendType;
+   GmatBase *ownedObj = NULL;
+   
+   if (theInterpreter)
+   {
+      theInterpreter->FindPropertyID(obj, theDescription, &ownedObj,
+                                     ownedId, owendType);
+      
+      #if DBGLVL_WRAPPERS > 1
+      MessageInterface::ShowMessage
+         ("   ownedObj=<%p>, ownedId=%d, owendType=%d\n",
+          ownedObj, ownedId, owendType);
+      #endif
+      
+      if (ownedId != -1)
+      {
+         ew = new ObjectPropertyWrapper();
+         ew->SetDescription(theDescription);
+         
+         #if DBGLVL_WRAPPERS
+         MessageInterface::ShowMessage
+            (">>> In Validator, created a ObjectPropertyWrapper for owned property \"%s\"\n    "
+             "of <%s>'%s', theDescription='%s'\n", type.c_str(), ownedObj->GetTypeName().c_str(),
+             ownedObj->GetName().c_str(), theDescription.c_str());
+         #endif
+         
+         ew->SetRefObjectName(ownedObj->GetName(), 0);
+         ew->SetRefObject(ownedObj);
+         
+         // @note
+         // Handle special case for GmatFunction(loj: 2008.07.07)
+         // AxisSystem of CoordinateSystem, or Propagator of PropSetup are
+         // created as local objects, but name is added automatically to
+         // refObjectNames in SetupWrapper(), so we need to clear.
+         // GMAT CS.Axes = ObjectReferenced;
+         // GMAT Prop.Type = BulirschStoer;
+         if ((obj->IsOfType(Gmat::COORDINATE_SYSTEM) &&
+              ownedObj->IsOfType(Gmat::AXIS_SYSTEM)) ||
+             (obj->IsOfType(Gmat::PROP_SETUP) &&
+              ownedObj->IsOfType(Gmat::PROPAGATOR)))
+            ew->ClearRefObjectNames();
+      }
+      else
+      {
+         theErrorMsg = "\"" + theDescription + "\"" + 
+            " does not have a valid field of object or owned object";
+         HandleError();
+      }
+   }
+   
+   #if DBGLVL_WRAPPERS > 1
+   MessageInterface::ShowMessage
+      ("Validator::CreateSubPropertyWrapper() returning <%p>\n", ew);
+   #endif
+   
+   return ew;
 }
 
 
@@ -1270,7 +2099,7 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
    
    ObjectTypeArray refTypes = obj->GetRefObjectTypeArray();
    
-   #ifdef DEBUG_CHECK_OBJECT
+   #ifdef DEBUG_VALIDATE_COMMAND
    for (UnsignedInt i=0; i<refTypes.size(); i++)
       MessageInterface::ShowMessage
          ("   %s\n", GmatBase::GetObjectTypeString(refTypes[i]).c_str());
@@ -1280,7 +2109,7 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
    
    for (UnsignedInt j=0; j<refNames.size(); j++)
    {
-      #ifdef DEBUG_CHECK_OBJECT
+      #ifdef DEBUG_VALIDATE_COMMAND
       MessageInterface::ShowMessage("For Save, name = %s\n", refNames.at(j).c_str()); 
       #endif
       
@@ -1315,7 +2144,194 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
 
 
 //------------------------------------------------------------------------------
-// bool HandleError()
+// bool ValidateSubCommand(GmatCommand *brCmd, Integer level, Integer manage = 1)
+//------------------------------------------------------------------------------
+bool Validator::ValidateSubCommand(GmatCommand *brCmd, Integer level, Integer manage)
+{
+   #ifdef DEBUG_VALIDATE_COMMAND
+   MessageInterface::ShowMessage
+      ("ValidateSubCommand() '%s', level=%d, manage=%d\n",
+       brCmd->GetTypeName().c_str(), level, manage);
+   #endif
+   
+   GmatCommand* current = brCmd;
+   Integer childNo = 0;
+   GmatCommand* nextInBranch;
+   GmatCommand* child;
+   std::string cmdstr;
+   
+   while((child = current->GetChildCommand(childNo)) != NULL)
+   {
+      nextInBranch = child;
+      
+      while ((nextInBranch != NULL) && (nextInBranch != current))
+      {
+         for (int i=0; i<=level; i++)
+         {
+            #ifdef DEBUG_VALIDATE_COMMAND
+            MessageInterface::ShowMessage("---");
+            #endif
+         }
+         
+         cmdstr = nextInBranch->GetGeneratingString(Gmat::NO_COMMENTS) + "\n";
+         
+         #ifdef DEBUG_VALIDATE_COMMAND
+         MessageInterface::ShowMessage("%s", cmdstr.c_str());
+         #endif
+         
+         if (!ValidateCommand(nextInBranch, false, manage))
+         {
+            MessageInterface::ShowMessage
+               ("==> ValidateCommand() returned false\n");
+            return false;
+         }
+         
+         if (!CheckUndefinedReference(nextInBranch))
+         {
+            MessageInterface::ShowMessage
+               ("==> CheckUndefinedReference() returned false\n");
+             return false;
+         }
+         
+         if (nextInBranch->GetChildCommand() != NULL)
+            if (!ValidateSubCommand(nextInBranch, level+1, manage))
+            {
+               MessageInterface::ShowMessage
+                  ("==> ValidateSubCommand() returned false\n");
+               return false;
+            }
+         
+         nextInBranch = nextInBranch->GetNext();
+      }
+      
+      ++childNo;
+   }
+   
+   #ifdef DEBUG_VALIDATE_COMMAND
+   MessageInterface::ShowMessage("ValidateSubCommand() returning true\n");
+   #endif
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CreateCoordSystemProperty(GmatBase *obj, const std::string &prop)
+//------------------------------------------------------------------------------
+bool Validator::CreateCoordSystemProperty(GmatBase *obj, const std::string &prop,
+                                          const std::string &value)
+{
+   #ifdef DEBUG_COORD_SYS_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreateCoordSystemProperty() obj=<%p>'%s', prop='%s', value='%s'\n",
+       obj, obj->GetName().c_str(), prop.c_str(), value.c_str());
+   #endif
+   
+   CreateAxisSystem(value, obj);
+   
+   #ifdef DEBUG_COORD_SYS_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreateCoordSystemProperty() AxisSystem '%s' created\n", value.c_str());
+   #endif
+   
+   #ifdef DEBUG_COORD_SYS_PROP
+   MessageInterface::ShowMessage("   Setting CS ref objects and Initializing...\n");
+   #endif
+   
+   StringArray refNameList = obj->GetRefObjectNameArray(Gmat::SPACE_POINT);
+   for (UnsignedInt j = 0; j < refNameList.size(); j++)
+   {
+      #ifdef DEBUG_COORD_SYS_PROP
+      MessageInterface::ShowMessage
+         ("   refNameList[%d]=%s\n", j, refNameList[j].c_str());
+      #endif
+      
+      GmatBase *refObj = FindObject(refNameList[j]);
+      if ((refObj == NULL) || !(refObj->IsOfType(Gmat::SPACE_POINT)))
+      {            
+         theErrorMsg = "Nonexistent SpacePoint \"" + refNameList[j] +
+            "\" referenced in \"" + obj->GetName() + "\"";
+         return HandleError();
+      }
+      else
+      {
+         obj->SetRefObject(refObj, Gmat::SPACE_POINT, refObj->GetName());
+      }
+   }
+   
+   obj->Initialize();
+   
+   #ifdef DEBUG_COORD_SYS_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreateCoordSystemProperty() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CreatePropSetupProperty(GmatBase *obj, const std::string &prop)
+//------------------------------------------------------------------------------
+bool Validator::CreatePropSetupProperty(GmatBase *obj, const std::string &prop,
+                                        const std::string &value)
+{
+   #ifdef DEBUG_PROP_SETUP_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreatePropSetupProperty() obj=<%p>'%s', prop='%s', value='%s'\n",
+       obj, obj->GetName().c_str(), prop.c_str(), value.c_str());
+   #endif
+   
+   if (obj == NULL)
+      return false;
+   
+   if (obj->GetType() != Gmat::PROP_SETUP)
+   {
+      theErrorMsg = "Validator::CreatePropSetupProperty needs a "
+         "PropSetup object that acts as its owner; received a pointer "
+         "to " + obj->GetName() + "instead.";
+      HandleError();
+      return false;
+   }
+   
+   GmatBase *propagator = (GmatBase*)theModerator->CreatePropagator(value, "");
+   propagator->SetName(value);
+   
+   #ifdef DEBUG_PROP_SETUP_PROP
+   MessageInterface::ShowMessage("   Created a Propagator of type '%s'\n", value.c_str());
+   #endif
+   
+   obj->SetRefObject(propagator, propagator->GetType(), propagator->GetName());
+   
+   #ifdef DEBUG_PROP_SETUP_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreatePropSetupProperty() returning true\n");
+   #endif
+   
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// bool CreateForceModelProperty(GmatBase *obj, const std::string &prop)
+//------------------------------------------------------------------------------
+bool Validator::CreateForceModelProperty(GmatBase *obj, const std::string &prop,
+                                         const std::string &value)
+{
+   #ifdef DEBUG_FORCE_MODEL_PROP
+   MessageInterface::ShowMessage
+      ("Validator::CreateForceModelProperty() obj=<%p>'%s', prop='%s', value='%s'\n",
+       obj, obj->GetName().c_str(), prop.c_str(), value.c_str());
+   #endif
+   
+   if (theInterpreter)
+      return theInterpreter->SetForceModelProperty(obj, prop, value, NULL);
+   else
+      return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HandleError(bool addFunction)
 //------------------------------------------------------------------------------
 /*
  * Handles error condition dependends on the continue on error flag.
@@ -1323,11 +2339,12 @@ bool Validator::ValidateSaveCommand(GmatBase *obj)
  *
  */
 //------------------------------------------------------------------------------
-bool Validator::HandleError()
+bool Validator::HandleError(bool addFunction)
 {
    #ifdef DEBUG_HANDLE_ERROR
    MessageInterface::ShowMessage
-      ("Validator::HandleError() **** TheErrorMsg=\n<%s>\n\n", theErrorMsg.c_str());
+      ("Validator::HandleError() TheErrorMsg=\n   **** ERROR **** %s\n\n",
+       theErrorMsg.c_str());
    #endif
    
    if (continueOnError)
@@ -1337,7 +2354,52 @@ bool Validator::HandleError()
    }
    else
    {
+      std::string fnMsg;
+      if (addFunction)
+      {
+         if (theFunction != NULL)
+         {
+            fnMsg = theFunction->GetFunctionPathAndName();
+            fnMsg = "\n(In Function \"" + fnMsg + "\")\n";
+         }
+      }
+      theErrorMsg = theErrorMsg + fnMsg;
+      
       InterpreterException ex(theErrorMsg);
       throw ex;
    }
 }
+
+
+//------------------------------------------------------------------------------
+// Validator()
+//------------------------------------------------------------------------------
+/*
+ * Default constructor
+ *
+ * @param  ss  The solar system to be used for findnig bodies
+ * @param  objMap  The object map to be used for finding object
+ */
+//------------------------------------------------------------------------------
+Validator::Validator()
+{
+   theModerator = Moderator::Instance();
+   StringArray parms = theModerator->GetListOfFactoryItems(Gmat::PARAMETER);
+   copy(parms.begin(), parms.end(), back_inserter(theParameterList));
+   
+   theSolarSystem = NULL;
+   theCommand = NULL;
+   theFunction = NULL;
+   theObjectMap = NULL;
+   continueOnError = true;
+}
+
+
+//------------------------------------------------------------------------------
+// ~Validator()
+//------------------------------------------------------------------------------
+Validator::~Validator()
+{
+}
+
+

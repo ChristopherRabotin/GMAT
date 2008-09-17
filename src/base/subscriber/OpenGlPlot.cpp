@@ -29,7 +29,7 @@
 
 #define __REMOVE_OBJ_BY_SETTING_FLAG__
 
-//#define DBGLVL_OPENGL_INIT 1
+//#define DBGLVL_OPENGL_INIT 2
 //#define DBGLVL_OPENGL_DATA 1
 //#define DBGLVL_OPENGL_DATA_LABELS 1
 //#define DBGLVL_OPENGL_ADD 1
@@ -598,43 +598,71 @@ bool OpenGlPlot::Initialize()
 {
    Subscriber::Initialize();
    
+   // theInternalCoordSys is used only by OpenGL plot so check. (2008.06.16)
+   if (theInternalCoordSystem == NULL)
+   {
+      active = false;
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off. "
+          "It has a NULL internal coordinate system pointer.\n", GetName().c_str());
+      return false;
+   }
+   
    #if DBGLVL_OPENGL_INIT
    MessageInterface::ShowMessage
-      ("OpenGlPlot::Initialize() %s, isEndOfReceive = %d, mAllSpCount = %d\n",
-       GetName().c_str(), isEndOfReceive, mAllSpCount);
+      ("OpenGlPlot::Initialize() this=<%p>'%s', isEndOfReceive = %d, mAllSpCount = %d\n",
+       this, GetName().c_str(), isEndOfReceive, mAllSpCount);
    #endif
-
+   
    bool foundSc = false;
    bool retval = false;
+   Integer nullCounter = 0;
    
-   if (mAllSpCount > 0)
+   if (mAllSpCount == 0)
    {
-      // check for spacecaft is included in the plot
-      for (int i=0; i<mAllSpCount; i++)
-      {
-         #if DBGLVL_OPENGL_INIT > 1
-         MessageInterface::ShowMessage
-            ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
-             i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
-         #endif
-         
-         if (mAllSpArray[i])
-         {                  
-            if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
-            {
-               foundSc = true;
-               break;
-            }
+      active = false;
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off. "
+          "No SpacePoints were added to plot.\n", GetName().c_str());
+      return false;
+   }
+   
+   // check for spacecaft is included in the plot
+   for (int i=0; i<mAllSpCount; i++)
+   {
+      #if DBGLVL_OPENGL_INIT > 1
+      MessageInterface::ShowMessage
+         ("OpenGlPlot::Initialize() mAllSpNameArray[%d]=%s, addr=%d\n",
+          i, mAllSpNameArray[i].c_str(), mAllSpArray[i]);
+      #endif
+      
+      if (mAllSpArray[i])
+      {                  
+         if (mAllSpArray[i]->IsOfType(Gmat::SPACECRAFT))
+         {
+            foundSc = true;
+            break;
          }
       }
+      else
+         nullCounter++;
+   }
+   
+   if (nullCounter == mAllSpCount)
+   {
+      active = false;
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off. "
+          "%d SpaceObjects have NULL pointers.\n", GetName().c_str(), nullCounter);
+      return false;
    }
    
    if (!foundSc)
    {
       active = false;
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off.\n"
-          "No spacecraft was added to plot.\n", GetName().c_str());
+         (Gmat::WARNING_, "*** WARNING *** The OpenGL plot named \"%s\" will be turned off. "
+          "No Spacecraft was added to plot.\n", GetName().c_str());
       return false;
    }
    
@@ -642,7 +670,7 @@ bool OpenGlPlot::Initialize()
    //--------------------------------------------------------
    // start initializing for OpenGL plot
    //--------------------------------------------------------
-   if (active)
+   if (active && !isInitialized)
    {
       #if DBGLVL_OPENGL_INIT
       MessageInterface::ShowMessage
@@ -759,7 +787,7 @@ bool OpenGlPlot::Initialize()
                 i, mObjectNameArray[i].c_str(), draw, show, mOrbitColorArray[i]);
          }
          #endif
-                  
+         
          #if DBGLVL_OPENGL_INIT
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlSolarSystem(%p)\n", theSolarSystem);
@@ -771,6 +799,10 @@ bool OpenGlPlot::Initialize()
          #if DBGLVL_OPENGL_INIT
          MessageInterface::ShowMessage
             ("   calling PlotInterface::SetGlObject()\n");
+         for (UnsignedInt i=0; i<mObjectArray.size(); i++)
+            MessageInterface::ShowMessage
+               ("      mObjectArray[%d]=<%p>'%s'\n", i, mObjectArray[i],
+                mObjectArray[i]->GetName().c_str());
          #endif
          
          // set all object array and pointers
@@ -821,6 +853,7 @@ bool OpenGlPlot::Initialize()
          PlotInterface::SetGlDrawOrbitFlag(instanceName, mDrawOrbitArray);
          PlotInterface::SetGlShowObjectFlag(instanceName, mShowObjectArray);
          
+         isInitialized = true;
          retval = true;
       }
       else
@@ -842,6 +875,26 @@ bool OpenGlPlot::Initialize()
    #endif
    
    return retval;
+}
+
+
+//------------------------------------------------------------------------------
+// void Activate(bool state)
+//------------------------------------------------------------------------------
+void OpenGlPlot::Activate(bool state)
+{
+   #ifdef DEBUG_OPENGL_ACTIVATE
+   MessageInterface::ShowMessage
+      ("OpenGlPlot::Activate() this=<%p>'%s' entered, state=%d, isInitialized=%d\n",
+       this, GetName().c_str(), state, isInitialized);
+   #endif
+   
+   Subscriber::Activate(state);
+   
+//    if (state == true && !isInitialized)
+//    {
+//       Initialize();
+//    }
 }
 
 
@@ -1446,14 +1499,19 @@ bool OpenGlPlot::SetStringParameter(const Integer id, const std::string &value)
 {
    #if DBGLVL_OPENGL_PARAM_STRING
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetStringParameter()<%s> id=%d<%s>, value=%s\n",
-       instanceName.c_str(), id, GetParameterText(id).c_str(), value.c_str());
+      ("OpenGlPlot::SetStringParameter() this=<%p>'%s', id=%d<%s>, value='%s'\n",
+       this, instanceName.c_str(), id, GetParameterText(id).c_str(), value.c_str());
    #endif
    
    switch (id)
    {
    case ADD:
       return AddSpacePoint(value, mAllSpCount);
+   case ORBIT_COLOR:
+   case TARGET_COLOR:
+      if (value[0] == '[')
+         PutUnsignedIntValue(id, value);
+      return true;
    case COORD_SYSTEM:
       mViewCoordSysName = value;
       return true;
@@ -1615,7 +1673,7 @@ UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
 {
    #if DBGLVL_OPENGL_PARAM
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetUnsignedIntParameter()<%s>\n   id=%d, value=%u, index=%d, "
+      ("OpenGlPlot::SetUnsignedIntParameter() this=%s\n   id=%d, value=%u, index=%d, "
        "mAllSpCount=%d, mOrbitColorArray.size()=%d, mTargetColorArray.size()=%d\n",
        instanceName.c_str(), id, value, index, mAllSpCount, mOrbitColorArray.size(),
        mTargetColorArray.size());
@@ -1629,7 +1687,7 @@ UnsignedInt OpenGlPlot::SetUnsignedIntParameter(const Integer id,
          if (index >= size)
             throw SubscriberException
                ("index out of bounds for " + GetParameterText(id));
-      
+         
          for (int i=0; i<size; i++)
          {
             if (index == i)
@@ -1865,7 +1923,7 @@ const ObjectTypeArray& OpenGlPlot::GetRefObjectTypeArray()
 const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
    mAllRefObjectNames.clear();
-
+   
    // if Draw Earth-Sun lines is on, add Earth and Sun
    if (mSunLine == "On")
    {
@@ -1881,7 +1939,7 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    else if (type == Gmat::SPACE_POINT)
    {
       mAllRefObjectNames = mAllSpNameArray;
-
+      
       if (mViewPointRefType != "Vector")
       {
          if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
@@ -1905,6 +1963,12 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
    }
    else if (type == Gmat::UNKNOWN_OBJECT)
    {
+      #ifdef DEBUG_OPENGL_OBJ
+      MessageInterface::ShowMessage
+         ("mViewPointRefType=%s, mViewPointVecType=%s, mViewDirectionType=%s\n",
+          mViewPointRefType.c_str(), mViewPointVecType.c_str(), mViewDirectionType.c_str());
+      #endif
+      
       mAllRefObjectNames = mAllSpNameArray;
       
       mAllRefObjectNames.push_back(mViewCoordSysName);
@@ -1919,14 +1983,14 @@ const StringArray& OpenGlPlot::GetRefObjectNameArray(const Gmat::ObjectType type
             mAllRefObjectNames.push_back(mViewPointRefName);
       }
       
-      if (mViewPointVecName != "Vector")
+      if (mViewPointVecType != "Vector")
       {
          if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
                   mViewPointVecName) == mAllRefObjectNames.end())
             mAllRefObjectNames.push_back(mViewPointVecName);
       }
       
-      if (mViewDirectionName != "Vector")
+      if (mViewDirectionType != "Vector")
       {
          if (find(mAllRefObjectNames.begin(), mAllRefObjectNames.end(),
                   mViewDirectionName) == mAllRefObjectNames.end())
@@ -1993,27 +2057,41 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 {
    #if DBGLVL_OPENGL_OBJ
    MessageInterface::ShowMessage
-      ("OpenGlPlot::SetRefObject() type=%d, typename:%s, name=%s addr=%d\n",
-       type, obj->GetTypeName().c_str(), obj->GetName().c_str(), obj);
+      ("OpenGlPlot::SetRefObject() this=<%p>'%s', obj=<%p>'%s', type=%d[%s], name='%s'\n",
+       this, GetName().c_str(), obj, obj->GetName().c_str(), type,
+       obj->GetTypeName().c_str(), name.c_str());
    #endif
+   
+   std::string realName = name;
+   if (name == "")
+      realName = obj->GetName();
    
    if (type == Gmat::COORDINATE_SYSTEM)
    {
-      if (name == mViewCoordSysName)
+      if (realName == mViewCoordSysName)
          mViewCoordSystem = (CoordinateSystem*)obj;
-      if (name == mViewUpCoordSysName)
+      if (realName == mViewUpCoordSysName)
          mViewUpCoordSystem = (CoordinateSystem*)obj;
       return true;
    }
    else if (obj->IsOfType(Gmat::SPACE_POINT))
    {
+      #if DBGLVL_OPENGL_OBJ
+      MessageInterface::ShowMessage("   mAllSpCount=%d\n", mAllSpCount);
+      #endif
+      
       for (Integer i=0; i<mAllSpCount; i++)
       {
-         if (mAllSpNameArray[i] == name)
+         #if DBGLVL_OPENGL_OBJ
+         MessageInterface::ShowMessage
+            ("   mAllSpNameArray[%d]='%s'\n", i, mAllSpNameArray[i].c_str());
+         #endif
+         
+         if (mAllSpNameArray[i] == realName)
          {
             #if DBGLVL_OPENGL_OBJ > 1
             MessageInterface::ShowMessage
-               ("   Setting name=%s\n", mAllSpNameArray[i].c_str());
+               ("   Setting object to '%s'\n", mAllSpNameArray[i].c_str());
             #endif
             
             mAllSpArray[i] = (SpacePoint*)(obj);
@@ -2021,19 +2099,19 @@ bool OpenGlPlot::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
       }
       
       // ViewPoint info
-      if (name == mViewPointRefName)
+      if (realName == mViewPointRefName)
          mViewPointRefObj = (SpacePoint*)obj;
       
-      if (name == mViewPointVecName)
+      if (realName == mViewPointVecName)
          mViewPointObj = (SpacePoint*)obj;
       
-      else if (name == mViewDirectionName)
+      else if (realName == mViewDirectionName)
          mViewDirectionObj = (SpacePoint*)obj;
       
       return true;
    }
 
-   return Subscriber::SetRefObject(obj, type, name);
+   return Subscriber::SetRefObject(obj, type, realName);
 }
 
 
@@ -2486,13 +2564,14 @@ void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
       {
          StringArray valArray;
          std::string svalue = sval;
+         svalue = GmatStringUtil::Trim(svalue);
          std::string::size_type index1 = svalue.find_first_of("[");
          if (index1 != svalue.npos)
          {
             std::string::size_type index2 = svalue.find_last_of("]");
             if (index2 != svalue.npos)
             {
-               svalue = svalue.substr(index1, index2-index1);
+               svalue = svalue.substr(index1+1, index2-index1-1);
             }
             else
             {
@@ -2541,6 +2620,22 @@ void OpenGlPlot::PutRvector3Value(Rvector3 &rvec3, Integer id,
                     "BarycenterName, or a 3-vector of numerical values");
       throw se;
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void PutUnsignedIntValue(Integer id, const std::string &sval)
+//------------------------------------------------------------------------------
+void OpenGlPlot::PutUnsignedIntValue(Integer id, const std::string &sval)
+{
+   #ifdef DEBUG_OPENGL_PUT
+   MessageInterface::ShowMessage
+      ("PutUnsignedIntValue() id=%d, sval='%s'\n", id, sval.c_str());
+   #endif
+   
+   UnsignedIntArray vals = GmatStringUtil::ToUnsignedIntArray(sval);
+   for (UnsignedInt i=0; i<vals.size(); i++)
+      SetUnsignedIntParameter(id, vals[i], i);
 }
 
 
@@ -2768,10 +2863,18 @@ bool OpenGlPlot::Distribute(const Real *dat, Integer len)
       mNumCollected++;
       bool update = (mNumCollected % mUpdatePlotFrequency) == 0;
       
+      #if DBGLVL_OPENGL_UPDATE > 1
+      MessageInterface::ShowMessage
+         ("   currentProvider=%d, theDataLabels.size()=%d\n",
+          currentProvider, theDataLabels.size());
+      #endif
+      
       if (currentProvider >= (Integer)theDataLabels.size())
       {
          SubscriberException se;
-         se.SetDetails("The provider id: %d is invalid in OpenGL plot\n", currentProvider);
+         se.SetDetails
+            ("The provider id %d is invalid in OpenGL plot, expected id is "
+             "between 0 and %d\n", currentProvider, theDataLabels.size());
          throw se;
       }
       

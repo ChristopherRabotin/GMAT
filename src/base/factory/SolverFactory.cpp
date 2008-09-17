@@ -67,8 +67,8 @@ Solver* SolverFactory::CreateSolver(const std::string &ofType,
    
    //if (ofType == "QuasiNewton") 
    //   return new QuasiNewton(withName);
-   else if (ofType == "SteepestDescent")
-      return new SteepestDescent(withName);
+//   else if (ofType == "SteepestDescent")
+//      return new SteepestDescent(withName);
    // else if (ofType == "Broyden")
    //   return new Broyden(withName);
    //else if (ofType == "ParametricScanner")
@@ -94,7 +94,7 @@ SolverFactory::SolverFactory() :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-      creatables.push_back("SteepestDescent");
+//      creatables.push_back("SteepestDescent");
       
       #if defined __USE_MATLAB__
       creatables.push_back("FminconOptimizer");
@@ -138,7 +138,7 @@ SolverFactory::SolverFactory(const SolverFactory& fact) :
    if (creatables.empty())
    {
       //creatables.push_back("QuasiNewton");
-      creatables.push_back("SteepestDescent");
+//      creatables.push_back("SteepestDescent");
       
       #if defined __USE_MATLAB__
       creatables.push_back("FminconOptimizer");

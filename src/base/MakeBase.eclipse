@@ -1,3 +1,4 @@
+# $Id$
 # Eclipse makefile for GMAT base library
 # Initial Version - D. Conway - 2005/06/17
 # Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
@@ -7,34 +8,50 @@
 
 include ../BuildEnv.mk
 
+ifeq ($(SHARED_BASE), 1)
+
+ifeq ($(LINUX_MAC), 1)
+
+ifdef MAC_SPECIFIC
+SHARED_EXTENSION = .dylib
+else
+SHARED_EXTENSION = .so
+endif
+
+SHARED_LIB_FLAGS = -shared -Wl --out-implib
+
+else
+
+SHARED_EXTENSION = .dll
+
+endif
+
+WXTARGET = lib/libGmatGui$(SHARED_EXTENSION)
+
+else
+
 WXTARGET = lib/libGmatGui.a
+
+endif
 
 CONSOLETARGET = lib/libGmatConsole.a
 
 ifeq ($(CONSOLE_APP),1)
 TARGET = $(CONSOLETARGET)
 # Console (no wx code) versions of these objects
-BRIDGEOBJECTS = executive/PlotInterfaceConsole.o \
-					interpreter/GuiInterpreterConsole.o
+BRIDGEOBJECTS = 
 else
 TARGET = $(WXTARGET)
 # GUI versions of these objects
 # Note: ExternalOptimizer also uses some wx code, so it is included here
 
 ifeq ($(USE_MATLAB),1)
-BRIDGEOBJECTS = executive/PlotInterface.o \
-                interpreter/GuiInterpreter.o \
-                solver/ExternalOptimizer.o \
+BRIDGEOBJECTS = solver/ExternalOptimizer.o \
                 solver/FminconOptimizer.o       
-
-# executive/MessageInterface.o
-
 else
-
-BRIDGEOBJECTS = executive/PlotInterface.o \
-                interpreter/GuiInterpreter.o
-
-# executive/MessageInterface.o
+BRIDGEOBJECTS = 
+# GuiInterpreter now part of the gui code.
+# interpreter/GuiInterpreter.o
 endif
 endif
 
@@ -65,6 +82,7 @@ HEADERS = -Iinclude \
           -Ifunction \
           -Icoordsystem \
           -Imath \
+          -Iplugin \
           -I../gui/include \
           -I../gui/include/bitmaps \
           -I../gui/app \
@@ -191,6 +209,8 @@ OBJECTS = \
     coordsystem/TOEEqAxes.o \
     coordsystem/TrueOfDateAxes.o \
     executive/Moderator.o \
+    executive/PlotInterface.o \
+    executive/PlotReceiver.o \
     executive/PublisherException.o \
     executive/Publisher.o \
     executive/SandboxException.o \
@@ -231,6 +251,7 @@ OBJECTS = \
     foundation/ElementWrapper.o \
     foundation/GmatBaseException.o \
     foundation/GmatBase.o \
+    foundation/ObjectInitializer.o \
     foundation/SpacePoint.o \
     function/Function.o \
     function/FunctionException.o \
@@ -333,9 +354,9 @@ OBJECTS = \
     parameter/TimeString.o \
     parameter/Variable.o \
     parameter/VariableWrapper.o \
+    plugin/DynamicLibrary.o \
     propagator/AdamsBashforthMoulton.o \
     propagator/BulirschStoer.o \
-    propagator/Cowell.o \
     propagator/DormandElMikkawyPrince68.o \
     propagator/Integrator.o \
     propagator/PredictorCorrector.o \
@@ -438,17 +459,25 @@ OBJECTS = \
     
 #    $(BRIDGEOBJECTS)
 
+# Future classes:
+#    propagator/Cowell.o \
+
+
 
 FORTRAN_OBJECTS = solarsys/msise90_sub.o
 
     # parameter/EquinoctialParameters.o \
     # stopcond/BaseStopCondition.o \
 
-
+ifeq ($(SHARED_BASE), 1)
+$(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
+	$(CPP) -o $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS) $(SHARED_LIB_FLAGS)
+else
 $(TARGET) : $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
 	mkdir -p lib
 	ar rs $(TARGET) $(OBJECTS) $(FORTRAN_OBJECTS) $(BRIDGEOBJECTS)
 	ranlib $(TARGET)
+endif	
 
 $(OBJECTS): %.o: %.cpp %.hpp
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
@@ -475,7 +504,7 @@ interpreter/GuiInterpreterConsole.o : interpreter/GuiInterpreter.cpp \
 #	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/MessageInterface.cpp \
 #	                              -o executive/MessageInterfaceConsole.o
 
-executive/PlotInterfaceConsole.o : executive/PlotInterface.cpp \
-                                   executive/PlotInterface.hpp
-	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/PlotInterface.cpp \
-	                              -o executive/PlotInterfaceConsole.o
+#executive/PlotInterfaceConsole.o : executive/PlotInterface.cpp \
+#                                   executive/PlotInterface.hpp
+#	$(CPP) $(CPPFLAGS) $(HEADERS) -c executive/PlotInterface.cpp \
+#	                              -o executive/PlotInterfaceConsole.o

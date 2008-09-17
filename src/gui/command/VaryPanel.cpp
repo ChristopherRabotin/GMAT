@@ -119,14 +119,14 @@ void VaryPanel::Create()
                                   wxDefaultPosition, wxSize(100,-1), 0);
 
    // Lower
-   wxStaticText *minValueStaticText =
+   minValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Lower"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                    wxDefaultPosition, wxSize(100,-1), 0);
 
    // Upper
-   wxStaticText *maxValueStaticText =
+   maxValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Upper"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
@@ -278,6 +278,10 @@ void VaryPanel::LoadData()
          mAdditiveTextCtrl->Enable(false);
          mMultiplicativeTextCtrl->Enable(false);
       }
+      
+      GmatBase *solver = theGuiInterpreter->GetConfiguredObject(solverName);
+      if (solver != NULL)
+         SetControlEnabling(solver);
 
    }
    catch (BaseException &e)
@@ -445,7 +449,77 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
 void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 {
    mSolverData.solverName = mSolverComboBox->GetStringSelection();
+   
+   std::string solverName = mSolverData.solverName.c_str();
+   GmatBase *slvr = theGuiInterpreter->GetConfiguredObject(solverName);
+   SetControlEnabling(slvr);
+
    EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void SetControlEnabling(GmatBase *slvr)
+//------------------------------------------------------------------------------
+/**
+ * Enables and disables variable controls based on what the solver supports.
+ * 
+ * @param slvr The Solver that the Vary command configured from this panel uses.
+ */
+//------------------------------------------------------------------------------
+void VaryPanel::SetControlEnabling(GmatBase *slvr)
+{
+   if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowScaleSetting")))
+   {
+      additiveStaticText->Enable(true);
+      multiplicativeStaticText->Enable(true);
+      mAdditiveTextCtrl->Enable(true);
+      mMultiplicativeTextCtrl->Enable(true);
+   }
+   else
+   {
+      additiveStaticText->Enable(false);
+      multiplicativeStaticText->Enable(false);
+      mAdditiveTextCtrl->Enable(false);
+      mMultiplicativeTextCtrl->Enable(false);
+   }
+   
+   if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowRangeSettings")))
+   {
+      minValueStaticText->Enable(true);
+      mMinValueTextCtrl->Enable(true);
+      maxValueStaticText->Enable(true);
+      mMaxValueTextCtrl->Enable(true);
+   }
+   else // in target
+   {
+      minValueStaticText->Enable(false);
+      mMinValueTextCtrl->Enable(false);
+      maxValueStaticText->Enable(false);
+      mMaxValueTextCtrl->Enable(false);
+   }      
+   
+   if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowStepsizeSetting")))
+   {
+      maxStepStaticText->Enable(true);
+      mMaxStepTextCtrl->Enable(true);
+   }
+   else
+   {
+      maxStepStaticText->Enable(false);
+      mMaxStepTextCtrl->Enable(false);
+   }
+   
+   if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowVariablePertSetting")))
+   {
+      pertStaticText->Enable(true);
+      mPertTextCtrl->Enable(true);
+   }
+   else
+   {
+      pertStaticText->Enable(false);
+      mPertTextCtrl->Enable(false);
+   }
 }
 
 

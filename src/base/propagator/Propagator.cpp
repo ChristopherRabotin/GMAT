@@ -83,8 +83,6 @@
 const std::string
 Propagator::PARAMETER_TEXT[PropagatorParamCount - GmatBaseParamCount] =
 {
-    //loj: 3/18/04 field name should not have blank spaces
-    //"Step Size (sec)"
     "InitialStepSize"
 };
 
@@ -220,7 +218,7 @@ bool Propagator::RenameRefObject(const Gmat::ObjectType type,
 //------------------------------------------------------------------------------
 std::string Propagator::GetParameterText(const Integer id) const
 {
-    if (id >= STEP_SIZE && id < PropagatorParamCount)
+    if (id >= GmatBaseParamCount && id < PropagatorParamCount)
         return PARAMETER_TEXT[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterText(id);
@@ -235,7 +233,7 @@ std::string Propagator::GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
 Integer Propagator::GetParameterID(const std::string &str) const
 {
-    for (Integer i = STEP_SIZE; i < PropagatorParamCount; i++)
+    for (Integer i = GmatBaseParamCount; i < PropagatorParamCount; i++)
     {
         if (str == PARAMETER_TEXT[i - GmatBaseParamCount])
             return i;
@@ -253,7 +251,7 @@ Integer Propagator::GetParameterID(const std::string &str) const
 //------------------------------------------------------------------------------
 Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
 {
-    if (id >= STEP_SIZE && id < PropagatorParamCount)
+    if (id >= GmatBaseParamCount && id < PropagatorParamCount)
         return PARAMETER_TYPE[id - GmatBaseParamCount];
     else
         return GmatBase::GetParameterType(id);
@@ -268,7 +266,7 @@ Gmat::ParameterType Propagator::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string Propagator::GetParameterTypeString(const Integer id) const
 {
-    if (id >= STEP_SIZE && id < PropagatorParamCount)
+    if (id >= GmatBaseParamCount && id < PropagatorParamCount)
         return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
     else
         return GmatBase::GetParameterTypeString(id);
@@ -283,9 +281,9 @@ std::string Propagator::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 Real Propagator::GetRealParameter(const Integer id) const
 {
-    if (id == STEP_SIZE)
+    if (id == INITIAL_STEP_SIZE)
         return stepSizeBuffer;
-        
+    
     return GmatBase::GetRealParameter(id);
 }
 
@@ -308,7 +306,7 @@ Real Propagator::GetRealParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 Real Propagator::SetRealParameter(const Integer id, const Real value)
 {
-    if (id == STEP_SIZE)
+    if (id == INITIAL_STEP_SIZE)
     {
         stepSizeBuffer = value;
         return stepSize;

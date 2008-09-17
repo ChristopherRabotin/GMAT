@@ -164,6 +164,7 @@ void GmatGlobal::SetActualFormat(bool scientific, bool showPoint, Integer precis
 GmatGlobal::GmatGlobal()
 {
    isBatchMdoe = false;
+   matlabExt = "__m__";
 }
 
 

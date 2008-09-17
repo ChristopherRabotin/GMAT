@@ -130,6 +130,9 @@ FminconOptimizer::FminconOptimizer(std::string name) :
    //functionPath = "/Users/wcshoan/dev/Ec_GMAT/bin/files/matlab_functions";
    //OpenConnection();  
    // ********* END temporary prototype, testing, etc. *****************************//
+   
+   AllowStepsizeLimit = false;
+   AllowIndependentPerts = false;
 }
 
 
@@ -190,7 +193,8 @@ bool FminconOptimizer::Initialize()
    
    // open connection(s) to the external source
    if (!OpenConnection())
-      throw SolverException("Fmincon - Unable to connect to external interface");
+      throw SolverException(
+            "Fmincon - Unable to connect to external interface");
    
    return true;
 }
@@ -992,7 +996,8 @@ void FminconOptimizer::WriteToTextFile(SolverState stateToUse)
       MessageInterface::ShowMessage("%s", message.str().c_str());
    }
 }
-   
+ 
+//#define __USE_MATLAB__
 bool FminconOptimizer::OpenConnection()
 {
    
@@ -1087,8 +1092,8 @@ bool FminconOptimizer::OpenConnection()
             return false;
          }
          /// start the GMATServer here
-         static GmatMainFrame *theMain = GmatAppData::Instance()->GetMainFrame();
-         theMain->StartServer();
+//         static GmatMainFrame *theMain = GmatAppData::Instance()->GetMainFrame();
+//         theMain->StartServer();
          if (inSource == NULL) inSource = GmatInterface::Instance();
          if (inSource == NULL)  
             throw SolverException(

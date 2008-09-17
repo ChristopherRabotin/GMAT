@@ -48,6 +48,10 @@ public:
    void SetIntegerWidth(Integer w) { currentSetting.mIntegerWidth = w; }
    void SetOutputPath(const std::string &path) { currentSetting.mOutputPath = path; }
    
+   // MatlabFunction name extension
+   void SetMatlabFuncNameExt(const std::string &ext) { matlabExt = ext; }
+   std::string GetMatlabFuncNameExt() { return matlabExt; }
+   
    // Run mode
    bool IsBatchMode() { return isBatchMdoe; }
    void SetBatchMode(bool flag) { isBatchMdoe = flag; }
@@ -159,6 +163,8 @@ private:
    IoFormat defaultFormat;
    IoFormat currentFormat;
    IoFormat actualFormat;
+   
+   std::string matlabExt;
    
    /// The singleton instance
    static GmatGlobal *theGmatGlobal;

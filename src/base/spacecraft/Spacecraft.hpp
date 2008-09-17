@@ -169,6 +169,9 @@ protected:
       THRUSTER_ID, 
       TOTAL_MASS_ID, 
       ATTITUDE,
+      
+      // special parameter to handle in GmatFunction
+      UTC_GREGORIAN,
       SpacecraftParamCount
    };
    

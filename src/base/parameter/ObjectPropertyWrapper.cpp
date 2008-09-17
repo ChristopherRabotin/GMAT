@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ObjectPropertyWrapper
 //------------------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
 #include "gmatdefs.hpp"
 #include "GmatBase.hpp"
+#include "ForceModel.hpp"             // for GetScriptAlias()
 #include "ObjectPropertyWrapper.hpp"
 #include "ParameterException.hpp"
 #include "StringUtil.hpp"
@@ -27,7 +28,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_RENAME_OBJ_PROP
-//#define DEBUG_OBJ_PROP
+//#define DEBUG_OPW
 
 //---------------------------------
 // static data
@@ -123,17 +124,68 @@ ObjectPropertyWrapper::~ObjectPropertyWrapper()
 Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
 {
    if (object == NULL)
-      throw ParameterException("The object is NULL, so cannot get data type");
-
+      throw ParameterException
+         ("ObjectPropertyWrapper::GetDataType() The object is NULL, "
+          "so cannot get data type");
+   
    Gmat::ParameterType propType = object->GetParameterType(propID);
    
-   #ifdef DEBUG_OBJ_PROP
+   #ifdef DEBUG_OPW
    MessageInterface::ShowMessage
       ("ObjectPropertyWrapper::GetDataType() returning %d\n", propType);
    #endif
    
    return propType;
 }
+
+
+//------------------------------------------------------------------------------
+// virtual bool SetRefObjectName(const std::string &name, Integer index)
+//------------------------------------------------------------------------------
+/**
+ * This method sets a reference object name for the ElementWrapper 
+ * object.
+ * 
+ * @param <name> name of the ref object to set
+ * @param <index> index of ref object name to set (0)
+ *
+ * @return true for success; false for failure.
+ *
+ */
+//------------------------------------------------------------------------------
+bool ObjectPropertyWrapper::SetRefObjectName(const std::string &name, Integer index)
+{
+   if (index >= (Integer)refObjectNames.size())
+      return false;
+   
+   refObjectNames[index] = name;
+   return true;
+}
+
+
+//------------------------------------------------------------------------------
+//  const StringArray&  GetRefObjectNames() 
+//------------------------------------------------------------------------------
+/**
+ * @see ElementWrapper
+ */
+//------------------------------------------------------------------------------
+const StringArray& ObjectPropertyWrapper::GetRefObjectNames()
+{
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::GetRefObjectNames() entered, object=<%p><%s>'%s'\n   "
+       "description='%s'\n",  object, object ? object->GetTypeName().c_str() : "NULL",
+       object ? object->GetName().c_str() : "NULL", description.c_str());
+   MessageInterface::ShowMessage
+      ("   returning %d ref object names\n", refObjectNames.size());
+   for (UnsignedInt i=0; i<refObjectNames.size(); i++)
+   MessageInterface::ShowMessage("   '%s'\n", refObjectNames[i].c_str());
+   #endif
+   
+   return refObjectNames;
+}
+
 
 //---------------------------------------------------------------------------
 //  bool SetRefObject(GmatBase *obj)
@@ -147,6 +199,24 @@ Gmat::ParameterType ObjectPropertyWrapper::GetDataType() const
 //---------------------------------------------------------------------------
 bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
 {
+   if (obj == NULL)
+   {
+      #ifdef DEBUG_OPW
+      MessageInterface::ShowMessage
+         ("***** In ObjPropWrapper::SetRefObject, the input object is NULL, "
+          "so returning false\n");
+      #endif
+      return false;
+   }
+   
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::SetRefObject() entered, obj=<%p><%s><%s>\n   "
+       "refObjectNames[0]=<%s>, propIDNames[0]=<%s>, ownedObjName=<%s>\n",
+       obj, obj->GetTypeName().c_str(), obj->GetName().c_str(),
+       refObjectNames[0].c_str(), propIDNames[0].c_str(), ownedObjName.c_str());
+   #endif
+   
 //   if (obj->GetName() != refObjectNames[0])
 //   {
 //
@@ -158,12 +228,12 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
 //      errmsg += "\" was expected.\n";
 //      throw ParameterException(errmsg);
 //   }
-
+   
    if (obj->GetName() == refObjectNames[0])
    {
       object = obj;
       propID = object->GetParameterID(propIDNames[0]);
-      #ifdef DEBUG_OBJ_PROP
+      #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
          "In ObjPropWrapper::SetRefObject, setting to object %s\n",
          obj->GetName().c_str());
@@ -171,8 +241,16 @@ bool ObjectPropertyWrapper::SetRefObject(GmatBase *obj)
       #endif
       return true;
    }
-   else return false;
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("***** In ObjPropWrapper::SetRefObject, object name '%s' does not match with "
+       "ref object name '%s', so just returning false\n", obj->GetName().c_str(),
+       refObjectNames[0].c_str());
+   #endif
+   
+   return false;
 }
+
 
 //---------------------------------------------------------------------------
 //  bool RenameObject(const std::string &oldName, const std::string &newName)
@@ -233,7 +311,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    try
    {
       itsValue = object->GetRealParameter(propID);
-      #ifdef DEBUG_OBJ_PROP
+      #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
          "In ObjPropWrapper::EvaluateReal, value = %.12f\n", itsValue);
       #endif
@@ -248,7 +326,7 @@ Real ObjectPropertyWrapper::EvaluateReal() const
    
    return itsValue;
 }
-   
+
 //---------------------------------------------------------------------------
 //  bool SetReal(const Real toValue)
 //---------------------------------------------------------------------------
@@ -267,7 +345,7 @@ bool ObjectPropertyWrapper::SetReal(const Real toValue)
    try
    {
       object->SetRealParameter(propID, toValue);
-      #ifdef DEBUG_OBJ_PROP
+      #ifdef DEBUG_OPW
          MessageInterface::ShowMessage(
          "In ObjPropWrapper::SetReal, value has been set to %.12f\n", toValue);
       #endif
@@ -304,7 +382,10 @@ bool ObjectPropertyWrapper::SetString(const std::string &toValue)
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::STRING_TYPE ||
        propType == Gmat::ENUMERATION_TYPE ||
-       propType == Gmat::STRINGARRAY_TYPE)
+       propType == Gmat::STRINGARRAY_TYPE ||
+       propType == Gmat::OBJECT_TYPE) // Added OBJECT_TYPE to handle "DefaultFM.Drag = None;"
+      return object->SetStringParameter(propID, toValue);
+   else if (propType == Gmat::UNSIGNED_INTARRAY_TYPE)
       return object->SetStringParameter(propID, toValue);
    else
       throw GmatBaseException
@@ -391,7 +472,7 @@ bool ObjectPropertyWrapper::SetInteger(const Integer toValue)
 
 
 //------------------------------------------------------------------------------
-// bool SetObject(const GmatBase *obj)
+// bool SetObject(GmatBase *obj)
 //------------------------------------------------------------------------------
 /**
  * Method to set the object of the wrapped object.
@@ -400,8 +481,17 @@ bool ObjectPropertyWrapper::SetInteger(const Integer toValue)
  * @return true if successful; false otherwise.
  */
 //------------------------------------------------------------------------------
-bool ObjectPropertyWrapper::SetObject(const GmatBase *obj)
+bool ObjectPropertyWrapper::SetObject(GmatBase *obj)
 {
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("ObjectPropertyWrapper::SetObject() obj=<%p><%s>'%s'\n   object=<%p><%s>'%s'\n",
+       obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL",
+       object, object ? object->GetTypeName().c_str() : "NULL",
+       object ? object->GetName().c_str() : "NULL");       
+   #endif
+   
    if (obj == NULL)
    {
       throw ParameterException
@@ -409,17 +499,21 @@ bool ObjectPropertyWrapper::SetObject(const GmatBase *obj)
           GetDescription() +  "\"");         
    }
    
-   #ifdef DEBUG_OBJ_PROP
-   MessageInterface::ShowMessage
-      ("ObjectPropertyWrapper::SetObject() obj=<%s>\n", obj->GetName().c_str());
-   #endif
-   
+   if (object == NULL)
+   {
+      throw ParameterException
+         ("The object is not set \"" + GetDescription() +  "\"");         
+   }
+      
    Gmat::ParameterType propType = GetDataType();
    if (propType == Gmat::OBJECT_TYPE || propType == Gmat::OBJECTARRAY_TYPE)
-      return object->SetStringParameter(propID, obj->GetName());
+   {
+      if (object->SetStringParameter(propID, obj->GetName()))
+         return object->SetRefObject(obj, obj->GetType(), obj->GetName());
+   }
    else
       throw GmatBaseException
-         ("SetObject() method not valid for wrapper of non-Object type.\n");
+         ("ObjectPropertyWrapper::SetObject() method not valid for wrapper of non-Object type.\n");
    
    return true;
 }
@@ -437,13 +531,19 @@ void ObjectPropertyWrapper::SetupWrapper()
 {
    std::string type, owner, depobj;
    GmatStringUtil::ParseParameter(description, type, owner, depobj);
+   
+   #ifdef DEBUG_OPW
+   MessageInterface::ShowMessage
+      ("In ObjPropWrapper::SetupWrapper, desc='%s'\n   owner='%s', depobj='%s', "
+       "type='%s'\n", description.c_str(), owner.c_str(), depobj.c_str(), type.c_str());
+   #endif
    //if (depobj != "")
    //{
    //   throw ParameterException(
    //   "Dependent objects not yet supported for the object property wrapper \"" +
    //   description + "\".\n");
    //   /// @todo Handle object properties that use dependent objects here
-   //}
+   //}   
    if (owner == "")
    {
       throw ParameterException(
@@ -457,10 +557,6 @@ void ObjectPropertyWrapper::SetupWrapper()
       description + "\".\n");
    }
    refObjectNames.push_back(owner);
-   propIDNames.push_back(type);
-   #ifdef DEBUG_OBJ_PROP
-      MessageInterface::ShowMessage(
-      "In ObjPropWrapper::SetupWrapper, owner = %s, type = %s\n", 
-      owner.c_str(), type.c_str());
-   #endif
+   propIDNames.push_back(type);   
+   ownedObjName = depobj;
 }

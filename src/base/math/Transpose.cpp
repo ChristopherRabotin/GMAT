@@ -1,3 +1,4 @@
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Transpose
 //------------------------------------------------------------------------------
@@ -20,6 +21,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_TRANSPOSE 1
+//#define DEBUG_INPUT_OUTPUT
 
 //---------------------------------
 // public methods
@@ -80,32 +82,40 @@ GmatBase* Transpose::Clone() const
    return (new Transpose(*this));
 }
 
+
 //------------------------------------------------------------------------------
 // void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 //------------------------------------------------------------------------------
 void Transpose::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   Integer type1, row1, col1; // Left node
-
-   // Get the type(Real or Matrix), # rows and # columns of the left node
-   leftNode->GetOutputInfo(type1, row1, col1);
-
-   if (type1 != Gmat::RMATRIX_TYPE)
-      throw MathException("Left is not a matrix, so cannot do Transpose().\n"); 
-   else
-   {
-      // output row and col is transpose of leftNode's row and col
-      type = type1;
-      rowCount = col1;
-      colCount = row1;
-   }
-   
-   #if DEBUG_TRANSPOSE
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
-      ("Transpose::GetOutputInfo() type=%d, rowCount=%d, colCount=%d\n",
-       type, rowCount, colCount);
+      ("Transpose::GetOutputInfo() exp=%s, leftNode=<%p><%s>, rightNode=<%p><%s>\n",
+       GetName().c_str(), leftNode, leftNode ? leftNode->GetTypeName().c_str() : "NULL",
+       rightNode, rightNode ? rightNode->GetTypeName().c_str() : "NULL");
    #endif
    
+   if (!leftNode)
+      throw MathException("Transpose::GetOutputInfo() The left node is NULL");
+   
+   Integer type1, row1, col1; // Left node
+   
+   // Get the type(Real or Matrix), # rows and # columns of the left node
+   leftNode->GetOutputInfo(type1, row1, col1);
+   
+   if (type1 != Gmat::RMATRIX_TYPE)
+      throw MathException("Left is not a matrix, so cannot do Transpose().\n");
+   
+   // output row and col is transpose of leftNode's row and col
+   type = type1;
+   rowCount = col1;
+   colCount = row1;
+   
+   #ifdef DEBUG_INPUT_OUTPUT
+   MessageInterface::ShowMessage
+      ("Transpose::GetOutputInfo() returning type=%d, rowCount=%d, colCount=%d\n",
+       type, rowCount, colCount);
+   #endif
 }
 
 
@@ -121,7 +131,7 @@ bool Transpose::ValidateInputs()
 {
    Integer type1, row1, col1; // Left node
 
-   #if DEBUG_TRANSPOSE
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("Transpose::ValidateInputs() left=%s, %s\n",
        leftNode->GetTypeName().c_str(), leftNode->GetName().c_str());

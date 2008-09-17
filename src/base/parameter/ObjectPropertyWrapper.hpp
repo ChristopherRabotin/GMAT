@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ObjectPropertyWrapper
 //------------------------------------------------------------------------------
@@ -41,21 +41,24 @@ public:
    
    virtual Gmat::ParameterType GetDataType() const;
    
-   virtual bool            SetRefObject(GmatBase *obj);
-   virtual bool            RenameObject(const std::string &oldName, 
+   virtual const StringArray&  GetRefObjectNames();
+   virtual bool                SetRefObjectName(const std::string &name,
+                                            Integer index);
+   virtual bool                SetRefObject(GmatBase *obj);
+   virtual bool                RenameObject(const std::string &oldName, 
                                         const std::string &newName);
    
-   virtual Real            EvaluateReal() const;
-   virtual bool            SetReal(const Real toValue);
-   virtual std::string     EvaluateString() const;
-   virtual bool            SetString(const std::string &toValue); 
-   virtual std::string     EvaluateOnOff() const;
-   virtual bool            SetOnOff(const std::string &toValue);
-   virtual bool            EvaluateBoolean() const;
-   virtual bool            SetBoolean(const bool toValue); 
-   virtual Integer         EvaluateInteger() const;
-   virtual bool            SetInteger(const Integer toValue); 
-   virtual bool            SetObject(const GmatBase* obj);
+   virtual Real                EvaluateReal() const;
+   virtual bool                SetReal(const Real toValue);
+   virtual std::string         EvaluateString() const;
+   virtual bool                SetString(const std::string &toValue); 
+   virtual std::string         EvaluateOnOff() const;
+   virtual bool                SetOnOff(const std::string &toValue);
+   virtual bool                EvaluateBoolean() const;
+   virtual bool                SetBoolean(const bool toValue); 
+   virtual Integer             EvaluateInteger() const;
+   virtual bool                SetInteger(const Integer toValue); 
+   virtual bool                SetObject(GmatBase* obj);
    
 protected:  
 
@@ -65,6 +68,8 @@ protected:
    StringArray propIDNames;
    /// parameter Id for the property of the object
    Integer     propID;
+   /// owned object name
+   std::string ownedObjName;
    
    virtual void            SetupWrapper(); 
    

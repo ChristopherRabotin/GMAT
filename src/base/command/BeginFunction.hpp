@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            BeginFunction
 //------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ public:
    void                 InitializeInternalObjects();
    void                 BuildReferences(GmatBase *obj);
    void                 SetRefFromName(GmatBase *obj, const std::string &oName);
-   bool                 SetInternalCoordSystem(CoordinateSystem *ss);
+   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    void                 ClearInputMap();
 
 

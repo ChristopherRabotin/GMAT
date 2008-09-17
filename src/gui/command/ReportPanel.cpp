@@ -187,6 +187,10 @@ void ReportPanel::LoadData()
       StringArray parameterList = theCommand->GetRefObjectNameArray(Gmat::PARAMETER);
       mNumParameters = parameterList.size();
       
+      #ifdef DEBUG_REPORTPANEL_LOAD
+      MessageInterface::ShowMessage("   mNumParameters=%d\n", mNumParameters);
+      #endif
+      
       if (mNumParameters > 0)
       {      
          Parameter *param;
@@ -259,12 +263,22 @@ void ReportPanel::SaveData()
          Parameter *param = NULL;
          mNumParameters = mSelectedListBox->GetCount();
          
+         #ifdef DEBUG_REPORTPANEL_SAVE
+         MessageInterface::ShowMessage("   mNumParameters=%d\n", mNumParameters);
+         #endif
+         
          for (int i=0; i<mNumParameters; i++)
          {
-            std::string selYName =
+            std::string selName =
                std::string(mSelectedListBox->GetString(i).c_str());
-            param = theGuiInterpreter->GetParameter(selYName);
-            theCommand->SetRefObject(param, Gmat::PARAMETER, selYName, 1);
+            
+            #ifdef DEBUG_REPORTPANEL_SAVE
+            MessageInterface::ShowMessage("   selName='%s'\n", selName.c_str());
+            #endif
+            
+            param = theGuiInterpreter->GetParameter(selName);
+            theCommand->SetStringParameter("Add", selName);
+            theCommand->SetRefObject(param, Gmat::PARAMETER, selName, i);
          }
       }
    }

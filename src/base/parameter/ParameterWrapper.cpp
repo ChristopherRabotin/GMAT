@@ -89,6 +89,7 @@ const ParameterWrapper& ParameterWrapper::operator=(const ParameterWrapper &pw)
 
    return *this;
 }
+
 //---------------------------------------------------------------------------
 //  ~ParameterWrapper()
 //---------------------------------------------------------------------------
@@ -112,6 +113,11 @@ ParameterWrapper::~ParameterWrapper()
 //------------------------------------------------------------------------------
 Gmat::ParameterType ParameterWrapper::GetDataType() const
 {
+   // Changed to return Parameter return type (loj: 2008.06.18)
+   if (param)
+      return param->GetReturnType();
+   
+   // What type should we return here?
    return Gmat::REAL_TYPE;
 }
 
@@ -145,6 +151,12 @@ GmatBase* ParameterWrapper::GetRefObject(const std::string &name)
 //---------------------------------------------------------------------------
 bool ParameterWrapper::SetRefObject(GmatBase *obj)
 {
+   #ifdef DEBUG_PW_SET
+   MessageInterface::ShowMessage
+      ("ParameterWrapper::SetRefObject() obj=<%p><%s>\n", obj,
+       obj ? obj->GetName().c_str() : "NULL");
+   #endif
+   
 //   if ( (obj->GetName() != refObjectNames[0]) ||
 //        (!obj->IsOfType("Parameter")) )
 //   {
@@ -187,7 +199,7 @@ Real ParameterWrapper::EvaluateReal() const
    #endif
    return param->EvaluateReal();
 }
-   
+
 //---------------------------------------------------------------------------
 //  bool SetReal(const Real toValue)
 //---------------------------------------------------------------------------
@@ -206,6 +218,76 @@ bool ParameterWrapper::SetReal(const Real toValue)
    return true;
 }
 
+
+//------------------------------------------------------------------------------
+// GmatBase* EvaluateObject() const
+//------------------------------------------------------------------------------
+/**
+ * Method to return the Object pointer of the ParameterWrapper object.
+ *
+ * @return value of the ParameterWrapper object.
+ * 
+ */
+//------------------------------------------------------------------------------
+GmatBase* ParameterWrapper::EvaluateObject() const
+{
+   return param;
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetObject(const GmatBase *obj)
+//------------------------------------------------------------------------------
+/**
+ * Method to set the object of the wrapped object.
+ *
+ * @param <obj> The object pointer to set
+ * @return true if successful; false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool ParameterWrapper::SetObject(const GmatBase *obj)
+{
+   if (obj == NULL)
+   {
+      if (param == NULL)
+         throw ParameterException("Cannot set undefined object to undefined object");
+      else
+         throw ParameterException
+            ("Cannot set undefined object to object of type \"" +
+             param->GetTypeName() +  "\"");
+   }
+   
+   if (param != NULL)
+   {
+      // Let's check the object type
+      if (param->GetTypeName() == obj->GetTypeName())
+      {
+         #ifdef DEBUG_PARAMETER_WRAPPER
+         MessageInterface::ShowMessage
+            ("ParameterWrapper::SetObject() fromType=%s, toType=%s\n",
+             obj->GetTypeName().c_str(), param->GetTypeName().c_str());
+         #endif
+         
+         param->Copy(obj);
+      }
+      else
+      {
+         ParameterException pe;
+         pe.SetDetails("Cannot set object of type \"%s\" to object of type \"%s\"",
+                       obj->GetTypeName().c_str(), param->GetTypeName().c_str());
+         throw pe;
+      }
+   }
+   else
+   {
+      throw ParameterException("Cannot set Parameter \"" + obj->GetName() +
+                               "\" to an undefined object");
+   }
+   
+   return true;
+}
+
+
 //---------------------------------------------------------------------------
 //  bool RenameObject(const std::string &oldName, const std::string &newName)
 //---------------------------------------------------------------------------
@@ -222,7 +304,7 @@ bool ParameterWrapper::RenameObject(const std::string &oldName,
    description = refObjectNames[0];  
    return true;
 }
-                                       
+
 
 //---------------------------------------------------------------------------
 //  void SetupWrapper()

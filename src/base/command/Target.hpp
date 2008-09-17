@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Target
 //------------------------------------------------------------------------------
@@ -80,16 +80,11 @@ public:
    
 
 protected:
-   /// The name of the spacecraft that gets maneuvered
-   std::string         targeterName;
-   /// The targeter instance used to manage the targeter state machine
-   Solver              *targeter;
    /// Flag indicating is the targeter has converged
    bool                targeterConverged;
     
    // Parameter IDs 
    /// ID for the burn object
-   Integer             targeterNameID;
    Integer             TargeterConvergedID;
    bool                targeterInDebugMode;
 };

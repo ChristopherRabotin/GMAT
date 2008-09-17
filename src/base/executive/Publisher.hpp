@@ -65,7 +65,7 @@ private:
    /// List of the subscribers
    std::list<Subscriber*>   subs;
    /// Index used to identify number of registered data providers
-   Integer                  providerCount;
+   Integer                  providerID;
    /// ID for the current data provider
    Integer                  currentProvider;
    /// Arrays used to track objects for published data

@@ -60,7 +60,7 @@ void GmatInterface::OpenScript()
 void GmatInterface::ClearScript()
 {
    mStringStream.str("");
-   Moderator::GetGuiInterpreter()->CloseCurrentProject();
+   Moderator::GetUiInterpreter()->CloseCurrentProject();
 }
 
 
@@ -109,9 +109,7 @@ void GmatInterface::BuildObject()
    
    // flag to clear objects and mission sequence
    mPassedInterpreter = moderator->InterpretScript(mInStringStream, true);
-   
-   Moderator::GetGuiInterpreter()->UpdateResourceTree();
-   Moderator::GetGuiInterpreter()->UpdateMissionTree();
+   Moderator::GetUiInterpreter()->UpdateView(3);
    
    // empty the buffer, once objects are created
    mStringStream.str("");
@@ -146,8 +144,7 @@ void GmatInterface::UpdateObject()
    
    // flag not to clear objects and mission sequence
    moderator->InterpretScript(mInStringStream, false);
-   Moderator::GetGuiInterpreter()->UpdateResourceTree();
-   Moderator::GetGuiInterpreter()->UpdateMissionTree();
+   Moderator::GetUiInterpreter()->UpdateView(3);
    
    // empty the buffer, once objects are created
    mStringStream.str("");
@@ -172,7 +169,7 @@ void GmatInterface::RunScript()
    if (mPassedInterpreter)
       Moderator::Instance()->RunScript();
    
-   Moderator::GetGuiInterpreter()->UpdateOutputTree();
+   Moderator::GetUiInterpreter()->UpdateView(4);
 }
 
 

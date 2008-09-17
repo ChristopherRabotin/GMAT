@@ -40,6 +40,7 @@ public:
    Assignment&          operator=(const Assignment& a);
    
    MathTree*            GetMathTree();
+   virtual bool         HasAFunction();
    const StringArray&   GetGmatFunctionNames();
    void                 SetMathWrappers();
    
@@ -51,6 +52,7 @@ public:
    
    // inherited from GmatCommand
    virtual void         SetSolarSystem(SolarSystem *ss);
+   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
    virtual void         SetObjectMap(ObjectMap *map);
    virtual void         SetGlobalObjectMap(ObjectMap *map);
@@ -58,7 +60,9 @@ public:
    virtual bool         InterpretAction();
    virtual bool         Initialize();
    virtual bool         Execute();
+   virtual void         RunComplete();
    virtual bool         SkipInterrupt();
+   virtual void         SetCallingFunction(FunctionManager *fm);
    
    virtual const StringArray& 
                         GetWrapperObjectNameArray();
@@ -80,7 +84,7 @@ public:
                            const std::string &useName = "");
 
 protected:
-
+   
    /// string on the left side of the equals sign
    std::string          lhs;
    /// string on the right side of the equals sign
@@ -93,6 +97,9 @@ protected:
    MathTree             *mathTree;
    /// Wrapper name and ElementWrapper pointer Map for RHS math element
    WrapperMap           mathWrapperMap;
+   
+   // methods
+   ElementWrapper* RunMathTree(ElementWrapper *lhsWrapper);
 };
 
 #endif // Assignment_hpp

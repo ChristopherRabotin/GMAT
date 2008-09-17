@@ -42,6 +42,7 @@
 //#define DEBUG_SECANT_DETAILS
 //#define DEBUG_BISECTION_DETAILS
 //#define DEBUG_WRAPPERS
+//#define DEBUG_PUBLISH_DATA
 
 #define TIME_ROUNDOFF 1.0e-6
 #define DEFAULT_STOP_TOLERANCE 1.0e-7
@@ -2109,12 +2110,11 @@ bool Propagate::Initialize()
       MessageInterface::ShowMessage("  Direction is %s\n",
                                     (direction == 1.0?"Forwards":"Backwards"));
    #endif
-
+      
    GmatCommand::Initialize();
    
    inProgress = false;
    UnsignedInt index = 0;
-//   prop.clear();
    sats.clear();
    SpaceObject *so;
    std::string pName;
@@ -2134,7 +2134,7 @@ bool Propagate::Initialize()
    prop.clear();
    p.clear();
    fm.clear();
-      
+   
    for (StringArray::iterator i = propName.begin(); i != propName.end(); ++i)
    {
       if (satName.size() <= index)
@@ -2212,11 +2212,20 @@ bool Propagate::Initialize()
          }
       }
       
+      // Set solar system to ForceModel for Propagate inside a GmatFunction(loj: 2008.06.06)
+      fm->SetSolarSystem(solarSys);
+      
       // Check for finite thrusts and update the force model if there are any
       if (finiteBurnActive == true)
          AddTransientForce(satName[index], fm);
       
+      #ifdef DEBUG_PUBLISH_DATA
+      MessageInterface::ShowMessage
+         ("Propagate::Initialize() registering published data\n");
+      #endif
+      
       streamID = publisher->RegisterPublishedData(owners, elements);
+      
       p->SetPhysicalModel(fm);
       p->SetRealParameter("InitialStepSize", 
          fabs(p->GetRealParameter("InitialStepSize")) * direction);
@@ -2225,7 +2234,7 @@ bool Propagate::Initialize()
    } // End of loop through PropSetups
    
    initialized = true;
-
+   
    stopSats.clear();
    // Setup spacecraft array used for stopping conditions
    for (StringArray::iterator sc = stopSatNames.begin(); 
@@ -2573,16 +2582,21 @@ void Propagate::PrepareToPropagate()
          inProgress = false;
          throw;
       }
-
+      
       // Publish the initial data
       pubdata[0] = currEpoch[0];
       memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
+      #ifdef DEBUG_PUBLISH_DATA
+      MessageInterface::ShowMessage
+         ("Propagate::PrepareToPropagate() hasFired, publishing initial %d data to stream %d, 1st data = %f\n",
+          dim+1, streamID, pubdata[0]);
+      #endif
       publisher->Publish(streamID, pubdata, dim+1);
-
+      
       inProgress = true;
       return;
    }
-
+   
    // Reset the initialization data
    Initialize();
 
@@ -2739,8 +2753,13 @@ void Propagate::PrepareToPropagate()
    // Publish the initial data
    pubdata[0] = currEpoch[0];
    memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
+   #ifdef DEBUG_PUBLISH_DATA
+   MessageInterface::ShowMessage
+      ("Propagate::PrepareToPropagate() publishing initial %d data to stream %d, "
+       "1st data = %f\n", dim+1, streamID, pubdata[0]);
+   #endif
    publisher->Publish(streamID, pubdata, dim+1);
-
+   
    hasFired = true;
    inProgress = true;
 
@@ -2878,6 +2897,11 @@ bool Propagate::Execute()
             // Publish the data here
             pubdata[0] = currEpoch[0];
             memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
+            #ifdef DEBUG_PUBLISH_DATA
+            MessageInterface::ShowMessage
+               ("Propagate::Execute() publishing current %d data to stream %d, "
+                "1st data = %f\n", dim+1, streamID, pubdata[0]);
+            #endif
             publisher->Publish(streamID, pubdata, dim+1);
          }
          else
@@ -3511,10 +3535,15 @@ void Propagate::TakeFinalStep(Integer EpochID, Integer trigger)
                secsToStep, stopper->GetStopParameter()->EvaluateReal());
          #endif
       }
-
+      
       // Publish the final data point here
       pubdata[0] = baseEpoch[0] + fm[0]->GetTime() / GmatTimeUtil::SECS_PER_DAY;
       memcpy(&pubdata[1], j2kState, dim*sizeof(Real));
+      #ifdef DEBUG_PUBLISH_DATA
+      MessageInterface::ShowMessage
+         ("Propagate::TakeFinalStep() publishing final %d data to stream %d, "
+          "1st data = %f\n", dim+1, streamID, pubdata[0]);
+      #endif
       publisher->Publish(streamID, pubdata, dim+1);
       
       #if DEBUG_PROPAGATE_EXE

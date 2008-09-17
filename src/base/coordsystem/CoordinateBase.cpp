@@ -27,6 +27,9 @@
 #include "SpacePoint.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_SET_SS
+//#define DEBUG_SET_REF
+
 //---------------------------------
 // static data
 //---------------------------------
@@ -252,6 +255,15 @@ void CoordinateBase::SetJ2000Body(SpacePoint *j2000Ptr)
 {
    j2000Body = j2000Ptr;
 }
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+SolarSystem* CoordinateBase::GetSolarSystem() const
+{
+   return solar;
+}
+
 
 //------------------------------------------------------------------------------
 //  std::string  GetOriginName() const

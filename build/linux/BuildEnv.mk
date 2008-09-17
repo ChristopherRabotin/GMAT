@@ -8,6 +8,7 @@ CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
+SHARED_BASE = 1
 
 # For AMD64 native code, this variable should be set equal to 1
 USE_64_BIT_LONGS = 0

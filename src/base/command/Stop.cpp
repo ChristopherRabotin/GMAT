@@ -100,7 +100,7 @@ Stop& Stop::operator=(const Stop &stop)
 bool Stop::Execute()
 {
    throw CommandException(
-      "Command Sequence intentionally stopped by Stop command.\n");
+      "Command Sequence intentionally interrupted by Stop command.\n");
    return true;
 }
 

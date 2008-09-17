@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  Toggle
 //------------------------------------------------------------------------------
@@ -88,9 +88,8 @@ Toggle& Toggle::operator=(const Toggle& t)
 //------------------------------------------------------------------------------
 bool Toggle::InterpretAction()
 {
-   /// @todo: Clean up this hack for the Toggle::InterpretAction method
    // Sample string:  "Toggle Report On"
-    
+   
    Integer loc = generatingString.find("Toggle", 0) + 6;
    const char *str = generatingString.c_str();
    while (str[loc] == ' ')
@@ -139,42 +138,6 @@ bool Toggle::InterpretAction()
                
       subNames.push_back(parts.at(ii));
    }
-   
-/*
-   Integer cmd = generatingString.find("On", loc);
-   while (generatingString.find("On", cmd+1) != std::string::npos)
-      cmd = generatingString.find("On", cmd+1);
-        
-   if ((cmd == (Integer)std::string::npos) || (cmd <= (Integer)(generatingString.length() - 5))) 
-   {
-      cmd = generatingString.find("Off", loc);
-      while (generatingString.find("Off", cmd+1) != std::string::npos)
-         cmd = generatingString.find("Off", cmd+1);
-            
-      if (cmd == (Integer)std::string::npos)
-         throw CommandException("Must Toggle either 'On' or 'Off'");
-      if (cmd > (Integer)(generatingString.length() - 6)) 
-      {
-         toggleState = false;
-      }
-   }
-   else
-      if (cmd > (Integer)(generatingString.length() - 5)) 
-      {
-         toggleState = true;
-      }
-            
-   // Find the Subscriber list
-   end = generatingString.find(" ", loc);
-   std::string sName = generatingString.substr(loc, end-loc);
-   subNames.push_back(sName);
-    */
-
-   // loj: 2007.10.05 - We need to register in Initialize()
-   // Register with the publisher
-   //if (publisher == NULL)
-   //   publisher = Publisher::Instance();
-   //streamID = publisher->RegisterPublishedData(subNames, subNames);
    
    return true;
 }
@@ -226,15 +189,26 @@ bool Toggle::Initialize()
 bool Toggle::Execute()
 {
    #ifdef DEBUG_TOGGLE
-      MessageInterface::ShowMessage("Toggle::Execute() entered\n");
+      MessageInterface::ShowMessage
+         ("Toggle::Execute() entered, has %d subscriber(s)\n", subs.size());
    #endif
-
-   for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s) {
+      
+   for (std::list<Subscriber *>::iterator s = subs.begin(); s != subs.end(); ++s)
+   {      
+      #ifdef DEBUG_TOGGLE
+      MessageInterface::ShowMessage
+         ("Toggle::Execute() calling %s->Activate(%s)\n", (*s)->GetName().c_str(),
+          toggleState ? "true" : "false");
+      #endif
+      
       (*s)->Activate(toggleState);
    }
-    
-   char data[] = "Toggle executed\n\n";
-   publisher->Publish(streamID, data, strlen(data));
+   
+   // Why do we need this? (loj: 2008.08.01)
+   // This causes an error if Toggle is used in the GmatFunction, so commented out
+   // Publisher Exception: Character data provider has not registered with the Publisher.
+   //char data[] = "Toggle executed\n\n";
+   //publisher->Publish(streamID, data, strlen(data));
    
    BuildCommandSummary(true);
    return true;
@@ -499,6 +473,9 @@ bool Toggle::SetStringParameter(const Integer id, const std::string &value)
    return GmatCommand::SetStringParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// std::string GetStringParameter(const Integer id, const Integer index) const
+//------------------------------------------------------------------------------
 std::string Toggle::GetStringParameter(const Integer id,
                                        const Integer index) const
 {
@@ -512,6 +489,10 @@ std::string Toggle::GetStringParameter(const Integer id,
    return GmatCommand::GetStringParameter(id, index);
 }
 
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value,
+//                         const Integer index)
+//------------------------------------------------------------------------------
 bool Toggle::SetStringParameter(const Integer id, 
                                 const std::string &value,
                                 const Integer index)

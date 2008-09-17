@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                Solver
 //------------------------------------------------------------------------------
@@ -25,6 +25,7 @@
 
 //#define DEBUG_SOLVER_INIT
 //#define DEBUG_SOLVER_CALC
+//#define DEBUG_STATE_MACHINE
 
 //---------------------------------
 // static data
@@ -45,6 +46,9 @@ Solver::PARAMETER_TEXT[SolverParamCount - GmatBaseParamCount] =
    "AllowRangeSettings",
    "AllowStepsizeSetting",
    "AllowVariablePertSetting",
+   "SolverMode",
+   "ExitMode",
+   "SolverStatus"
 };
 
 const Gmat::ParameterType
@@ -62,6 +66,9 @@ Solver::PARAMETER_TYPE[SolverParamCount - GmatBaseParamCount] =
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
    Gmat::BOOLEAN_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::STRING_TYPE,
+   Gmat::INTEGER_TYPE
 };
 
 const std::string    
@@ -114,7 +121,11 @@ Solver::Solver(const std::string &type, const std::string &name) :
    AllowScaleFactors       (true),
    AllowRangeLimits        (true),
    AllowStepsizeLimit      (true),
-   AllowIndependentPerts   (true)
+   AllowIndependentPerts   (true),
+   solverMode              (""),
+   currentMode             (SOLVE),
+   exitMode                (DISCARD),
+   status                  (CREATED)
 {
    objectTypes.push_back(Gmat::SOLVER);
    objectTypeNames.push_back("Solver");
@@ -174,7 +185,11 @@ Solver::Solver(const Solver &sol) :
    registeredComponentCount(sol.registeredComponentCount),
    AllowRangeLimits        (sol.AllowRangeLimits),
    AllowStepsizeLimit      (sol.AllowStepsizeLimit),
-   AllowIndependentPerts   (sol.AllowIndependentPerts)
+   AllowIndependentPerts   (sol.AllowIndependentPerts),
+   solverMode              (sol.solverMode),
+   currentMode             (sol.currentMode),
+   exitMode                (sol.exitMode),
+   status                  (CREATED)
 {
    #ifdef DEBUG_SOLVER_INIT
       MessageInterface::ShowMessage(
@@ -226,7 +241,10 @@ Solver& Solver::operator=(const Solver &sol)
    debugString           = sol.debugString;
    instanceNumber        = sol.instanceNumber;
    pertNumber            = sol.pertNumber;
-
+   solverMode            = sol.solverMode;
+   currentMode           = sol.currentMode;
+   exitMode              = sol.exitMode;
+   status                = COPIED;
    return *this;
 }
 
@@ -260,6 +278,7 @@ bool Solver::Initialize()
       for (Integer i = 0; i < localVariableCount; ++i)
       {
          variable.push_back(0.0);
+         variableInitialValues.push_back(0.0);
          variableMinimum.push_back(-9.999e300);
          variableMaximum.push_back(9.999e300);
          variableMaximumStep.push_back(9.999e300);
@@ -305,6 +324,9 @@ bool Solver::Initialize()
       MessageInterface::ShowMessage(
          "In Solver::Initialize completed\n");
    #endif
+      
+   status = INITIALIZED;
+   
    return true;
 }
 
@@ -346,6 +368,7 @@ Integer Solver::SetSolverVariables(Real *data, const std::string &name)
    try
    {
       variable.at(variableCount) = data[0];
+      variableInitialValues.at(variableCount) = data[0];
       perturbation.at(variableCount) = data[1];
    }
    catch(const std::exception &re)
@@ -409,7 +432,12 @@ Real Solver::GetSolverVariable(Integer id)
          "Solver member requested a parameter outside the range "
          "of the configured variables.");
 
-   //return variable[id];
+   #ifdef DEBUG_STATE_MACHINE
+      MessageInterface::ShowMessage(
+            "   State %d setting variable %d    to value = %.12lf\n", 
+            currentState, id, variable.at(id));
+   #endif
+
    return variable.at(id); 
 }
 
@@ -453,41 +481,41 @@ Solver::SolverState Solver::GetNestedState()
 //------------------------------------------------------------------------------
 Solver::SolverState Solver::AdvanceState()
 {
-    switch (currentState) {
-        case INITIALIZING:
-            CompleteInitialization();
-            break;
+   switch (currentState) {
+      case INITIALIZING:
+         CompleteInitialization();
+         break;
         
-        case NOMINAL:
-            RunNominal();
-            break;
+      case NOMINAL:
+         RunNominal();
+         break;
         
-        case PERTURBING:
-            RunPerturbation();
-            break;
+      case PERTURBING:
+         RunPerturbation();
+         break;
         
-        case ITERATING:
-            RunIteration();
-            break;
+      case ITERATING:
+         RunIteration();
+         break;
         
-        case CALCULATING:
-            CalculateParameters();
-            break;
+      case CALCULATING:
+         CalculateParameters();
+         break;
         
-        case CHECKINGRUN:
-            CheckCompletion();
-            break;
+      case CHECKINGRUN:
+         CheckCompletion();
+         break;
         
-        case RUNEXTERNAL:
-            RunExternal();
-            break;
+      case RUNEXTERNAL:
+         RunExternal();
+         break;
         
-        case FINISHED:
-            RunComplete();
-            break;
+      case FINISHED:
+         RunComplete();
+         break;
         
-        default:
-            throw SolverException("Undefined Solver state");
+      default:
+         throw SolverException("Undefined Solver state");
     };
     
     ReportProgress();
@@ -636,7 +664,10 @@ bool Solver::IsParameterReadOnly(const Integer id) const
        (id == AllowRangeSettings) ||
        (id == AllowStepsizeSetting) ||
        (id == AllowScaleSetting) ||
-       (id == AllowVariablePertSetting))
+       (id == AllowVariablePertSetting) ||
+       (id == SolverModeID) ||
+       (id == ExitModeID) ||
+       (id == SolverStatusID))
       return true;
 
    return false;//GmatBase::IsParameterReadOnly(id);
@@ -678,6 +709,8 @@ Integer Solver::GetIntegerParameter(const Integer id) const
       return maxIterations;
    if (id == NUMBER_OF_VARIABLES)
       return variableCount;
+   if (id == SolverStatusID)
+      return status;
         
    return GmatBase::GetIntegerParameter(id);
 }
@@ -797,6 +830,7 @@ bool Solver::SetBooleanParameter(const Integer id, const bool value)
  * @return The string stored for this parameter, or throw ab=n exception if 
  *         there is no string association.
  */
+//---------------------------------------------------------------------------
 std::string Solver::GetStringParameter(const Integer id) const
 {
    if (id == ReportStyle)
@@ -819,6 +853,7 @@ std::string Solver::GetStringParameter(const Integer id) const
  * @return The string stored for this parameter, or throw ab=n exception if 
  *         there is no string association.
  */
+//---------------------------------------------------------------------------
 std::string Solver::GetStringParameter(const std::string &label) const
 {
    return GetStringParameter(GetParameterID(label));
@@ -836,16 +871,13 @@ std::string Solver::GetStringParameter(const std::string &label) const
  *
  * @return true if the string is stored, throw if the parameter is not stored.
  */
+//---------------------------------------------------------------------------
 bool Solver::SetStringParameter(const Integer id, const std::string &value)
 {
    if (id == ReportStyle)
    {
-//      std::string stylelist ;
-      
       for (Integer i = NORMAL_STYLE; i < MaxStyle; ++i)
       {
-//         stylelist += ", " + STYLE_TEXT[i-NORMAL_STYLE];
-         
          if (value == STYLE_TEXT[i-NORMAL_STYLE])
          {
             textFileMode = value;
@@ -857,9 +889,6 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
          "The value of \"" + value + "\" for field \"Report Style\""
          " on object \"" + instanceName + "\" is not an allowed value.\n"
          "The allowed values are: [Normal, Concise, Verbose, Debug].");
-//         "The allowed values are: [ " + stylelist + " ]. ");
-//      throw SolverException("Requested solver report style, " + value + 
-//         ", is nor supported for " + typeName + " solvers.");
    }
    
    if (id == solverTextFileID) 
@@ -874,8 +903,42 @@ bool Solver::SetStringParameter(const Integer id, const std::string &value)
       return true;
    }
 
+   if (id == SolverModeID) 
+   {
+      if (value == "Solve")
+         currentMode = SOLVE;
+      else if (value == "RunInitialGuess")
+         currentMode = INITIAL_GUESS;
+      else if (value == "RunCorrected")
+         currentMode = RUN_CORRECTED;
+      else
+         throw SolverException("Solver mode " + value +
+                  "not recognized; allowed values are {\"Solve\", "
+                  "\"RunInitialGuess\", \"RunCorrected\"}");
+      solverMode = value;
+      return true;
+   }
+
+   if (id == ExitModeID) 
+   {
+      if (value == "DiscardAndContinue")
+         exitMode = DISCARD;
+      else if (value == "SaveAndContinue")
+         exitMode = RETAIN;
+      else if (value == "Stop")
+         exitMode = HALT;
+      else
+         throw SolverException("Exit mode " + value +
+                  "not recognized; allowed values are {\"DiscardAndContinue\", "
+                  "\"SaveAndContinue\", \"Stop\"}");
+      exitModeText = value;
+      return true;
+   }
+
    return GmatBase::SetStringParameter(id, value);
 }
+
+
 //---------------------------------------------------------------------------
 //  bool SetStringParameter(const Integer id, const std::string &value)
 //---------------------------------------------------------------------------
@@ -894,7 +957,6 @@ bool Solver::SetStringParameter(const std::string &label,
 }
 
 
-// compiler complained again - so here they are ....
 std::string Solver::GetStringParameter(const Integer id,
                                                   const Integer index) const
 {
@@ -988,6 +1050,12 @@ void Solver::SetDebugString(const std::string &str)
 void Solver::CompleteInitialization()
 {
     currentState = NOMINAL;
+    
+    // Reset initial values if in DiscardAndContinue mode
+    if (exitMode == DISCARD)
+    {
+       ResetVariables();
+    }
 }
 
 
@@ -1100,6 +1168,19 @@ void Solver::RunComplete()
 
 
 //------------------------------------------------------------------------------
+//  void ResetVariables()
+//------------------------------------------------------------------------------
+/**
+ * Reset the variable data to its initial values.
+ */
+//------------------------------------------------------------------------------
+void Solver::ResetVariables()
+{
+   variable = variableInitialValues;
+}
+
+
+//------------------------------------------------------------------------------
 //  std::string GetProgressString()
 //------------------------------------------------------------------------------
 /**
@@ -1122,45 +1203,8 @@ std::string Solver::GetProgressString()
 //------------------------------------------------------------------------------
 void Solver::FreeArrays()
 {
-   /*
-   if (textFile.is_open())
-   {
-      textFile.flush();
-      textFile.close();
-   }
-   
-   if (variable)
-   {
-      delete [] variable;
-      variable = NULL;
-   }
-
-    if (perturbation)
-   {
-      delete [] perturbation;
-      perturbation = NULL;
-   }
-            
-   if (variableMinimum)
-   {
-      delete [] variableMinimum;
-      variableMinimum = NULL;
-   }
-
-   if (variableMaximum)
-   {
-      delete [] variableMaximum;
-      variableMaximum = NULL;
-   }
-
-   if (variableMaximumStep)
-   {
-      delete [] variableMaximumStep;
-      variableMaximumStep = NULL;
-   }
-   */
-   //variableNames.clear(); // ????
    variable.clear();
+   variableInitialValues.clear();
    perturbation.clear();
    variableMinimum.clear();
    variableMaximum.clear();

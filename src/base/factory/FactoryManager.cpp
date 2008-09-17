@@ -601,7 +601,40 @@ FactoryManager::CreateCoordinateSystem(const std::string &withName)
 //------------------------------------------------------------------------------
 const StringArray& FactoryManager::GetListOfItems(Gmat::ObjectType byType)
 {
+   entireList.clear();
    return GetList(byType);
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& GetListOfAllItems()
+//------------------------------------------------------------------------------
+/**
+ * Return a list of all items that can be created.
+ *
+ * @return list of all creatable items.
+ */
+//------------------------------------------------------------------------------
+const StringArray& FactoryManager::GetListOfAllItems()
+{
+   entireList.clear();
+   
+   // Build all creatable object list
+   GetList(Gmat::COMMAND);
+   GetList(Gmat::ATMOSPHERE);
+   GetList(Gmat::ATTITUDE);
+   GetList(Gmat::AXIS_SYSTEM);
+   GetList(Gmat::BURN);
+   GetList(Gmat::CALCULATED_POINT);
+   GetList(Gmat::FUNCTION);
+   GetList(Gmat::HARDWARE);
+   GetList(Gmat::PARAMETER);
+   GetList(Gmat::PROPAGATOR);
+   GetList(Gmat::PHYSICAL_MODEL);
+   GetList(Gmat::SOLVER);
+   GetList(Gmat::STOP_CONDITION);
+   GetList(Gmat::SUBSCRIBER);
+   
+   return entireList;
 }
 
 //------------------------------------------------------------------------------
@@ -760,7 +793,7 @@ Factory* FactoryManager::FindFactory(Gmat::ObjectType ofType,
 //------------------------------------------------------------------------------
 const StringArray& FactoryManager::GetList(Gmat::ObjectType ofType)
 {
-   entireList.clear();
+   //entireList.clear();
    
    std::list<Factory*>::iterator f = factoryList.begin();
    while (f != factoryList.end())

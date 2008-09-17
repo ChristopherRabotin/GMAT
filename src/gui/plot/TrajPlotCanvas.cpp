@@ -112,7 +112,7 @@ using namespace FloatAttUtil;
 //#define DEBUG_TRAJCANVAS_CONVERT 1
 //#define DEBUG_TRAJCANVAS_DRAW 2
 //#define DEBUG_TRAJCANVAS_ZOOM 1
-//#define DEBUG_TRAJCANVAS_OBJECT 1
+//#define DEBUG_TRAJCANVAS_OBJECT 2
 //#define DEBUG_TRAJCANVAS_TEXTURE 2
 //#define DEBUG_TRAJCANVAS_PERSPECTIVE 1
 //#define DEBUG_TRAJCANVAS_PROJ 1
@@ -954,7 +954,7 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::SetGlObject() for %s, objCount=%d, colorCount=%d.\n",
+      ("TrajPlotCanvas::SetGlObject() entered for %s, objCount=%d, colorCount=%d.\n",
        mPlotName.c_str(), objNames.size(), objOrbitColors.size());
    #endif
    
@@ -985,6 +985,10 @@ void TrajPlotCanvas::SetGlObject(const StringArray &objNames,
       MessageInterface::ShowMessage("TrajPlotCanvas::SetGlObject() object sizes "
                                     "are not the same. No ojbects added.\n");
    }
+   
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage("TrajPlotCanvas::SetGlObject() leaving\n");
+   #endif
 }
 
 
@@ -1705,7 +1709,7 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
 {
    #if DEBUG_TRAJCANVAS_OBJECT
    MessageInterface::ShowMessage
-      ("TrajPlotCanvas::AddObjectList() object count=%d, color count=%d\n",
+      ("TrajPlotCanvas::AddObjectList() entered, object count=%d, color count=%d\n",
        objNames.GetCount(), objColors.size());
    #endif
    
@@ -1775,6 +1779,10 @@ void TrajPlotCanvas::AddObjectList(const wxArrayString &objNames,
    
    ResetPlotInfo();
    ClearPlot();
+   
+   #if DEBUG_TRAJCANVAS_OBJECT
+   MessageInterface::ShowMessage("TrajPlotCanvas::AddObjectList() leaving\n");
+   #endif
    
 } //AddObjectList()
 

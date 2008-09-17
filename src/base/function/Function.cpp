@@ -21,8 +21,9 @@
 #include "FunctionException.hpp" // for exception
 #include "MessageInterface.hpp"
 
-//#define DEBUG_FUNCTION
 //#define DEBUG_FUNCTION_SET
+//#define DEBUG_FUNCTION_IN_OUT
+//#define DEBUG_FUNCTION_CALL_STACK
 
 //---------------------------------
 // static data
@@ -57,14 +58,19 @@ Function::PARAMETER_TYPE[FunctionParamCount - GmatBaseParamCount] =
  */
 //------------------------------------------------------------------------------
 Function::Function(const std::string &typeStr, const std::string &name) :
-   GmatBase          (Gmat::FUNCTION, typeStr, name),
-   functionPath      (""),
-   functionName      (""),
-   objectStore       (NULL),
-   globalObjectStore (NULL),
-   solarSys          (NULL),
-   forces            (NULL),
-   fcs               (NULL)
+   GmatBase           (Gmat::FUNCTION, typeStr, name),
+   functionPath       (""),
+   functionName       (""),
+   objectStore        (NULL),
+   globalObjectStore  (NULL),
+   solarSys           (NULL),
+   internalCoordSys   (NULL),
+   forces             (NULL),
+   fcs                (NULL),
+   fcsFinalized       (false),
+   validator          (NULL),
+   scriptErrorFound   (false),
+   objectsInitialized (false)
 {
    objectTypes.push_back(Gmat::FUNCTION);
    objectTypeNames.push_back(typeStr);
@@ -95,18 +101,23 @@ Function::~Function()
  */
 //------------------------------------------------------------------------------
 Function::Function(const Function &f) :
-   GmatBase          (f),
-   functionPath      (f.functionPath),
-   functionName      (f.functionName),
-   inputNames        (f.inputNames),
-   outputNames       (f.outputNames),
+   GmatBase           (f),
+   functionPath       (f.functionPath),
+   functionName       (f.functionName),
+   inputNames         (f.inputNames),
+   outputNames        (f.outputNames),
    //inputArgMap       (f.inputArgMap), // do I want to do this?
    //outputArgMap      (f.outputArgMap), // do I want to do this?
-   objectStore       (NULL),
-   globalObjectStore (NULL),
-   solarSys          (NULL),
-   forces            (NULL),
-   fcs               (NULL)
+   objectStore        (NULL),
+   globalObjectStore  (NULL),
+   solarSys           (NULL),
+   internalCoordSys   (NULL),
+   forces             (NULL),
+   fcs                (NULL),
+   fcsFinalized       (f.fcsFinalized),
+   validator          (f.validator),
+   scriptErrorFound   (false),
+   objectsInitialized (false)
 {
    parameterCount = FunctionParamCount;
 }
@@ -130,15 +141,20 @@ Function& Function::operator=(const Function &f)
    
    GmatBase::operator=(f);
    
-   functionPath      = f.functionPath;
-   functionName      = f.functionName;
-   objectStore       = NULL;
-   globalObjectStore = NULL;
-   solarSys          = f.solarSys;
-   forces            = f.forces;
-   fcs               = NULL;
-   inputNames        = f.inputNames;
-   outputNames       = f.outputNames;
+   functionPath       = f.functionPath;
+   functionName       = f.functionName;
+   objectStore        = NULL;
+   globalObjectStore  = NULL;
+   solarSys           = f.solarSys;
+   internalCoordSys   = f.internalCoordSys;
+   forces             = f.forces;
+   fcs                = NULL;
+   fcsFinalized       = f.fcsFinalized;
+   validator          = f.validator;
+   scriptErrorFound   = f.scriptErrorFound;
+   objectsInitialized = f.objectsInitialized;
+   inputNames         = f.inputNames;
+   outputNames        = f.outputNames;
    //inputArgMap       = f.inputArgMap;   // do I want to do this?
    //outputArgMap      = f.outputArgMap;  // do I want to do this?
    
@@ -171,7 +187,7 @@ WrapperTypeArray Function::GetOutputTypes(IntegerArray &rowCounts,
 void Function::SetOutputTypes(WrapperTypeArray &outputTypes,
                               IntegerArray &rowCounts, IntegerArray &colCounts)
 {
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_SET
    MessageInterface::ShowMessage
       ("Function::SetOutputTypes() setting %d outputTypes\n", outputTypes.size());
    #endif
@@ -182,191 +198,35 @@ void Function::SetOutputTypes(WrapperTypeArray &outputTypes,
 }
 
 
-
 //------------------------------------------------------------------------------
-// bool Initialize()
+// bool Initialize()  [default implementation]
 //------------------------------------------------------------------------------
 bool Function::Initialize()
 {
-   #ifdef DEBUG_FUNCTION
-      MessageInterface::ShowMessage("Entering Function::Initialize for function %s\n",
-            functionName.c_str());
-      MessageInterface::ShowMessage("   and FCS is %s set.\n", (fcs? "correctly" : "NOT"));
-      MessageInterface::ShowMessage("   Pointer for FCS is %p\n", fcs);
-      MessageInterface::ShowMessage("   First command in fcs is %s\n",
-            (fcs->GetTypeName()).c_str());         
-   #endif
-   if (!fcs) return false;
-   // Initialize the Validator - I think I need to do this each time - or do I?
-   validator.SetFunction(this);
-   validator.SetSolarSystem(solarSys);
-   std::map<std::string, GmatBase *>::iterator omi;
-   //loj: moved this block inside the while loop
-//    for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
-//       store.insert(std::make_pair(omi->first, omi->second));
-//    for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-//       store.insert(std::make_pair(omi->first, omi->second));
-//    validator.SetObjectMap(&store);
-   
-   // add automatic objects to the FOS
-   for (omi = automaticObjects.begin(); omi != automaticObjects.end(); ++omi)
-   {
-      if (objectStore->find(omi->first) == objectStore->end())
-         objectStore->insert(std::make_pair(omi->first, omi->second));
-   }
-   // first, send all the commands the input wrappers
-   
-   GmatCommand *current = fcs;
-   std::map<std::string, ElementWrapper *>::iterator wi;
-   StringArray     wrapperList = current->GetWrapperObjectNameArray();
-   //ElementWrapper *wrapperObj  = NULL;
-   //unsigned int   sz           = 0;
-   
-   while (current)
-   {
-      #ifdef DEBUG_FUNCTION
-         if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
-         else MessageInterface::ShowMessage("   Now about to initialize command of type %s\n",
-               (current->GetTypeName()).c_str());         
-      #endif
-      current->SetObjectMap(objectStore);
-      current->SetGlobalObjectMap(globalObjectStore);
-      current->SetSolarSystem(solarSys);
-      current->SetTransientForces(forces);      
-      #ifdef DEBUG_FUNCTION
-         MessageInterface::ShowMessage("   Now about to send required wrappers to command of type %s\n",
-               (current->GetTypeName()).c_str());         
-      #endif
-      // (Re)set object map on Validator (necessary because objects may have been added to the 
-      // Local Object Store or Global Object Store during initialization of previous commands)
-      store.clear();
-      for (omi = objectStore->begin(); omi != objectStore->end(); ++omi)
-         store.insert(std::make_pair(omi->first, omi->second));
-      for (omi = globalObjectStore->begin(); omi != globalObjectStore->end(); ++omi)
-         store.insert(std::make_pair(omi->first, omi->second));
-      validator.SetObjectMap(&store);
-      
-      // Let's try to ValidateCommand here, this will validate the comand
-      // and create wrappers also
-      if (!validator.ValidateCommand(current, false, true))
-         return false;
-      if (!(current->Initialize()))
-         return false;
-      current = current->GetNext();
-   }
+   validator = Validator::Instance();
    return true;
 }
 
 
 //------------------------------------------------------------------------------
-// bool Function::Execute()
+// bool Function::Execute(ObjectInitializer *objInit)  [default implementation]
 //------------------------------------------------------------------------------
-bool Function::Execute()
+bool Function::Execute(ObjectInitializer *objInit)
 {
-   if (!fcs) return false;
-   GmatCommand *current = fcs;
-   while (current)
-   {
-      if (!(current->Execute()))
-         return false;
-      current = current->GetNext();
-   }
-   // create output wrappers and put into map
-   GmatBase *obj;
-   for (unsigned int jj = 0; jj < outputNames.size(); jj++)
-   {
-      if (!(obj = FindObject(outputNames.at(jj))))
-      {
-         std::string errMsg = "Function: Output \"" + outputNames.at(jj);
-         errMsg += " not found for function \"" + functionName + "\"";
-         throw FunctionException(errMsg);
-      }
-      ElementWrapper *outWrapper = validator.CreateElementWrapper(outputNames.at(jj), false, false);
-      outWrapper->SetRefObject(obj); 
-      outputArgMap[outputNames.at(jj)] = outWrapper;
-      #ifdef DEBUG_FUNCTION // --------------------------------------------------- debug ---
-         MessageInterface::ShowMessage("Function: Output wrapper created for %s\n", (outputNames.at(jj)).c_str());
-      #endif // -------------------------------------------------------------- end debug ---
-   }
-   //Finalize();  // @todo - ???
    return true; 
 }
 
 
 //------------------------------------------------------------------------------
-// Real Evaluate()
+// bool Function::Finalize()  [default implementation]
 //------------------------------------------------------------------------------
-Real Function::Evaluate()
-{
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage
-      ("Function::Evaluate() <%p><%s> entered.\n", this, this->GetName().c_str());
-   #endif
-   
-   if (outputWrapperTypes.size() == 0)
-      throw FunctionException
-         ("The output argument of function \"" + functionName + "\" is not set.");
-   
-   if (!Execute())
-      throw FunctionException("Failed to execute function \"" + functionName + "\"");
-
-   // To be implemented
-   
-   Real r = -999.999;
-   
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage("==> Function::Evaluate() returning %.9f\n", r);
-   #endif
-   
-   return r;
-}
-
-
-//------------------------------------------------------------------------------
-// Rmatrix MatrixEvaluate()
-//------------------------------------------------------------------------------
-Rmatrix Function::MatrixEvaluate()
-{
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage
-      ("Function::MatrixEvaluate() <%p><%s> entered.\n", this, this->GetName().c_str());
-   #endif
-   
-   if (outputWrapperTypes.size() == 0)
-      throw FunctionException
-         ("The output argument of function \"" + functionName + "\" is not set.");
-   
-   if (!Execute())
-      throw FunctionException("Failed to execute function \"" + functionName + "\"");
-   
-   // To be implemented
-   Rmatrix rmat;
-   rmat.SetSize(outputRowCounts[0], outputColCounts[0]);
-   
-   #ifdef DEBUG_FUNCTION
-   MessageInterface::ShowMessage
-      ("Function::MatrixEvaluate() returning %s\n", rmat.ToString().c_str());
-   #endif
-   
-   return rmat;
-}
-
 void Function::Finalize()
 {
-   ; // @todo - finalize anything else that needs it as well
-   GmatCommand *current = fcs;
-   while (current)
-   {
-      #ifdef DEBUG_FUNCTION
-         if (!current)  MessageInterface::ShowMessage("Current is NULL!!!\n");
-         else MessageInterface::ShowMessage("   Now about to finalize (call RunComplete on) command %s\n",
-               (current->GetTypeName()).c_str());         
-      #endif
-      current->RunComplete();
-      current = current->GetNext();
-   }
 }
 
+//------------------------------------------------------------------------------
+// void SetObjectMap(std::map<std::string, GmatBase *> *map)
+//------------------------------------------------------------------------------
 void Function::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
    #ifdef DEBUG_FM_EXECUTE // ------------------------------------------------- debug ---
@@ -385,30 +245,81 @@ void Function::SetObjectMap(std::map<std::string, GmatBase *> *map)
    objectStore = map;
 }
 
+//------------------------------------------------------------------------------
+// void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
+//------------------------------------------------------------------------------
 void Function::SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
 {
    globalObjectStore = map;
 }
 
+//------------------------------------------------------------------------------
+// void SetSolarSystem(SolarSystem *ss)
+//------------------------------------------------------------------------------
 void Function::SetSolarSystem(SolarSystem *ss)
 {
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("Function::SetSolarSystem() entered, this='%s', ss=<%p>\n",
+       GetName().c_str(), ss);
+   #endif
+   
    solarSys = ss;
 }
 
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void Function::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   #ifdef DEBUG_FUNCTION_SET
+   MessageInterface::ShowMessage
+      ("Function::SetInternalCoordSystem() entered, this='%s', cs=<%p>\n",
+       GetName().c_str(), cs);
+   #endif
+   
+   internalCoordSys = cs;
+}
+
+//------------------------------------------------------------------------------
+// void SetTransientForces(std::vector<PhysicalModel*> *tf)
+//------------------------------------------------------------------------------
 void Function::SetTransientForces(std::vector<PhysicalModel*> *tf)
 {
    forces = tf;
 }
 
+//------------------------------------------------------------------------------
+// void SetScriptErrorFound(bool errFlag)
+//------------------------------------------------------------------------------
+void Function::SetScriptErrorFound(bool errFlag)
+{
+   scriptErrorFound = errFlag;
+}
+
+//------------------------------------------------------------------------------
+// bool ScriptErrorFound()
+//------------------------------------------------------------------------------
+bool Function::ScriptErrorFound()
+{
+   return scriptErrorFound;
+}
+
+//------------------------------------------------------------------------------
+// bool IsFunctionControlSequenceSet()
+//------------------------------------------------------------------------------
 bool Function::IsFunctionControlSequenceSet()
 {
    if (fcs != NULL) return true;
    return false;
 }
 
+//------------------------------------------------------------------------------
+// bool SetFunctionControlSequence(GmatCommand *cmd)
+//------------------------------------------------------------------------------
 bool Function::SetFunctionControlSequence(GmatCommand *cmd)
 {
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_SET
       if (!cmd) MessageInterface::ShowMessage("Trying to set FCS on %s, but it is NULL!!!\n",
             functionName.c_str());
       else
@@ -422,11 +333,32 @@ bool Function::SetFunctionControlSequence(GmatCommand *cmd)
    return true;
 }
 
+//------------------------------------------------------------------------------
+// GmatBase* GetFunctionControlSequence()
+//------------------------------------------------------------------------------
+GmatCommand* Function::GetFunctionControlSequence()
+{
+   return fcs;
+}
+
+//------------------------------------------------------------------------------
+// std::string GetFunctionPathAndName()
+//------------------------------------------------------------------------------
+std::string Function::GetFunctionPathAndName()
+{
+   return functionPath;
+}
+
+//------------------------------------------------------------------------------
+// bool SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper)
+//------------------------------------------------------------------------------
 bool Function::SetInputElementWrapper(const std::string &forName, ElementWrapper *wrapper)
 {
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_SET
       MessageInterface::ShowMessage("Function::SetInputElementWrapper - for wrapper name \"%s\"\n",
             forName.c_str());
+      MessageInterface::ShowMessage
+         ("   wrapper=<%p><%d>\n", wrapper, wrapper->GetWrapperType());
    #endif
    if (inputArgMap.find(forName) == inputArgMap.end())
    {
@@ -459,9 +391,12 @@ ElementWrapper* Function::GetOutputArgument(Integer argNumber)
 }
 
 
+//------------------------------------------------------------------------------
+// ElementWrapper* GetOutputArgument(const std::string &byName)
+//------------------------------------------------------------------------------
 ElementWrapper* Function::GetOutputArgument(const std::string &byName)
 {
-   #ifdef DEBUG_FUNCTION
+   #ifdef DEBUG_FUNCTION_IN_OUT
       MessageInterface::ShowMessage("Function::GetOutputArgument - asking for  \"%s\"\n",
             byName.c_str());
    #endif
@@ -472,14 +407,29 @@ ElementWrapper* Function::GetOutputArgument(const std::string &byName)
       errMsg += "\" does not exist.\n";
       throw FunctionException(errMsg);
    }
-   return outputArgMap[byName];
+   
+   ElementWrapper *ew = outputArgMap[byName];
+   
+   #ifdef DEBUG_FUNCTION_IN_OUT
+   MessageInterface::ShowMessage
+      ("Function::GetOutputArgument(%s) returning <%p>, type=%d\n", byName.c_str(),
+       ew, ew->GetDataType());
+   #endif
+   
+   return ew;
 }
 
+//------------------------------------------------------------------------------
+// void AddAutomaticObject(const std::string &withName, GmatBase *obj)
+//------------------------------------------------------------------------------
 void Function::AddAutomaticObject(const std::string &withName, GmatBase *obj)
 {
    automaticObjects.insert(std::make_pair(withName,obj));
 }
 
+//------------------------------------------------------------------------------
+// ObjectMap GetAutomaticObjects() const
+//------------------------------------------------------------------------------
 ObjectMap Function::GetAutomaticObjects() const
 {
    return automaticObjects;
@@ -779,7 +729,6 @@ bool Function::SetStringParameter(const Integer id, const std::string &value)
       {
          if (inputArgMap.find(value) == inputArgMap.end())
          {
-            //inputArgMap[value] = NULL;
             inputNames.push_back(value);
             inputArgMap.insert(std::make_pair(value,(ElementWrapper*) NULL));
          }
@@ -838,16 +787,61 @@ GmatBase* Function::FindObject(const std::string &name)
    std::string::size_type index = name.find('(');
    if (index != name.npos)
       newName = name.substr(0, index);
+   
    // Check for the object in the Local Object Store (LOS) first
-   if (objectStore->find(newName) == objectStore->end())
-   {
-     // If not found in the LOS, check the Global Object Store (GOS)
-      if (globalObjectStore->find(newName) == globalObjectStore->end())
-         return NULL;
-      else return (*globalObjectStore)[newName];
-   }
-   else
+   if (objectStore && objectStore->find(newName) != objectStore->end())
       return (*objectStore)[newName];
-   return NULL; // should never get to this point
+   
+   // If not found in the LOS, check the Global Object Store (GOS)
+   if (globalObjectStore && globalObjectStore->find(newName) != globalObjectStore->end())
+      return (*globalObjectStore)[newName];
+   
+   // Let's try SolarSystem (loj: 2008.06.12)
+   if (solarSys && solarSys->GetBody(newName))
+      return (GmatBase*)(solarSys->GetBody(newName));
+   
+   return NULL;
+   
+//    // Check for the object in the Local Object Store (LOS) first
+//    if (objectStore->find(newName) == objectStore->end())
+//    {
+//      // If not found in the LOS, check the Global Object Store (GOS)
+//       if (globalObjectStore->find(newName) == globalObjectStore->end())
+//          return NULL;
+//       else return (*globalObjectStore)[newName];
+//    }
+//    else
+//       return (*objectStore)[newName];
+//    return NULL; // should never get to this point
+}
+
+//------------------------------------------------------------------------------
+// void ShowObjects(const std::string &title)
+//------------------------------------------------------------------------------
+void Function::ShowObjects(const std::string &title)
+{
+   MessageInterface::ShowMessage(title);
+   MessageInterface::ShowMessage("this=<%p>, functionName='%s'\n", this, functionName.c_str());
+   MessageInterface::ShowMessage("========================================\n");
+   MessageInterface::ShowMessage("solarSys         = <%p>\n", solarSys);
+   MessageInterface::ShowMessage("internalCoordSys = <%p>\n", internalCoordSys);
+   MessageInterface::ShowMessage("forces           = <%p>\n", forces);
+   MessageInterface::ShowMessage
+      ("Here is objectStore <%p>, it has %d objects\n", objectStore,
+       objectStore->size());
+   for (std::map<std::string, GmatBase *>::iterator i = objectStore->begin();
+        i != objectStore->end(); ++i)
+      MessageInterface::ShowMessage
+         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("Here is globalObjectStore <%p>, it has %d objects\n", globalObjectStore,
+       globalObjectStore->size());
+   for (std::map<std::string, GmatBase *>::iterator i = globalObjectStore->begin();
+        i != globalObjectStore->end(); ++i)
+      MessageInterface::ShowMessage
+         ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
+          i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
+   MessageInterface::ShowMessage("========================================\n");   
 }
 

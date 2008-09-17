@@ -54,14 +54,16 @@
 #include <string.h> 
 
 
+//#define DEBUG_FORCEMODEL
 //#define DEBUG_FORCEMODEL_INIT
 //#define DEBUG_FORCEMODEL_EXE
-//#define FORCE_REFERENCE_OBJECTS
+//#define DEBUG_FORCE_REF_OBJ
 //#define DEBUG_FORCEMODEL_EPOCHS
 //#define DEBUG_SATELLITE_PARAMETERS
 //#define DEBUG_FIRST_CALL
 //#define DEBUG_GEN_STRING
 //#define DEBUG_OWNED_OBJECT_STRINGS
+//#define DEBUG_INITIALIZATION
 
 //---------------------------------
 // static data
@@ -80,7 +82,13 @@ ForceModel::PARAMETER_TEXT[ForceModelParamCount - PhysicalModelParamCount] =
    "Drag",
    "SRP",
    "ErrorControl",
-   "CoordinateSystemList"
+   "CoordinateSystemList",
+   
+   // owned object parameters
+   "Degree",
+   "Order",
+   "PotentialFile",
+   "UserDefined"
 };
 
 
@@ -93,7 +101,13 @@ ForceModel::PARAMETER_TYPE[ForceModelParamCount - PhysicalModelParamCount] =
    Gmat::OBJECT_TYPE,       // "Drag",
    Gmat::ON_OFF_TYPE,       // "SRP",
    Gmat::ENUMERATION_TYPE,  // "ErrorControl",
-   Gmat::OBJECTARRAY_TYPE   // "CoordinateSystemList"
+   Gmat::OBJECTARRAY_TYPE,  // "CoordinateSystemList"
+   
+   // owned object parameters
+   Gmat::INTEGER_TYPE,      // "Degree",
+   Gmat::INTEGER_TYPE,      // "Order",
+   Gmat::STRING_TYPE,       // "PotentialFile",
+   Gmat::OBJECTARRAY_TYPE,  // "UserDefined",
 };
 
 
@@ -152,11 +166,16 @@ ForceModel::ForceModel(const std::string &nomme) :
 //------------------------------------------------------------------------------
 ForceModel::~ForceModel()
 {
+   #ifdef DEBUG_FORCEMODEL
+   MessageInterface::ShowMessage
+      ("ForceModel destructor entered, this=<%p>'%s'\n", this, GetName().c_str());
+   #endif
+   
    if (previousState)
       delete [] previousState;
 //   if (rawState)
 //      delete [] rawState;   
-        
+   
    // Delete the owned forces
    std::vector<PhysicalModel *>::iterator ppm = forceList.begin();
    PhysicalModel *pm;
@@ -174,6 +193,10 @@ ForceModel::~ForceModel()
    #ifdef DEBUG_FORCE_EPOCHS
       if (epochFile.is_open())
          epochFile.close();
+   #endif
+      
+   #ifdef DEBUG_FORCEMODEL
+   MessageInterface::ShowMessage("ForceModel destructor exiting\n");
    #endif
 }
 
@@ -207,6 +230,10 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    earthEq                    (fdf.earthEq),
    earthFixed                 (fdf.earthFixed)
 {
+   #ifdef DEBUG_FORCEMODEL
+   MessageInterface::ShowMessage("ForceModel copy constructor entered\n");
+   #endif
+   
    satIds[0] = satIds[1] = satIds[2] = satIds[3] = satIds[4] = 
    satIds[5] = satIds[6] = -1;
 
@@ -229,6 +256,12 @@ ForceModel::ForceModel(const ForceModel& fdf) :
    for (std::vector<PhysicalModel *>::const_iterator pm = fdf.forceList.begin();
         pm != fdf.forceList.end(); ++pm)
    {
+      #ifdef DEBUG_FORCEMODEL
+      GmatBase *obj = (*pm);
+      MessageInterface::ShowMessage
+         ("   Cloning PhysicalModel <%p><%s>'%s'\n", obj, obj->GetTypeName().c_str(),
+          obj->GetName().c_str());
+      #endif
       forceList.push_back((PhysicalModel*)(*pm)->Clone());
    }
 }
@@ -501,9 +534,9 @@ void ForceModel::ClearSpacecraft()
 
 
 //------------------------------------------------------------------------------
-// PhysicalModel* GetForce(Integer index)
+// PhysicalModel* GetForce(Integer index) const
 //------------------------------------------------------------------------------
-PhysicalModel* ForceModel::GetForce(Integer index)
+PhysicalModel* ForceModel::GetForce(Integer index) const
 {
     if (index >= 0 && index < numForces)
        return forceList[index];
@@ -717,7 +750,7 @@ bool ForceModel::Initialize()
    Integer stateSize = 6;      // Will change if we integrate more variables
    Integer satCount = 1;
    std::vector<SpaceObject *>::iterator sat;
-
+   
    if (!solarSystem)
       throw ForceModelException(
          "Cannot initialize force model; no solar system on '" + 
@@ -727,13 +760,13 @@ bool ForceModel::Initialize()
    if (j2kBody == NULL) 
       throw ForceModelException("Satellite J2000 body (" + j2kBodyName + 
          ") was not found in the solar system");
-
+   
    if (spacecraft.size() > 0)
       satCount = spacecraft.size();
-    
+   
    PropState *state;
    StringArray finiteSats;
-    
+   
    // Calculate the dimension of the state
    dimension = 0;
    for (sat = spacecraft.begin(); sat != spacecraft.end(); ++sat) 
@@ -1727,7 +1760,7 @@ const StringArray&
             centralBodyName) == forceReferenceNames.end())
       forceReferenceNames.push_back(centralBodyName);
    
-   #ifdef FORCE_REFERENCE_OBJECTS
+   #ifdef DEBUG_FORCE_REF_OBJ
       MessageInterface::ShowMessage("Reference object names for '%s'\n", 
          instanceName.c_str());
       for (StringArray::iterator i = forceReferenceNames.begin(); 
@@ -1791,6 +1824,13 @@ void ForceModel::SetSolarSystem(SolarSystem *ss)
 bool ForceModel::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                               const std::string &name)
 {
+   #ifdef DEBUG_FORCE_REF_OBJ
+   MessageInterface::ShowMessage
+      ("ForceModel::SetRefObject() <%s> entered, obj=<%p><%s><%s>, type=%d, name='%s'\n",
+       GetName().c_str(), obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
    bool wasSet = false;
    
    // Handle the CS pointers we always want
@@ -1880,13 +1920,15 @@ Integer ForceModel::GetParameterID(const std::string &str) const
    // force descriptor
    if (alias == "Gravity")
       alias = "PrimaryBodies";
-    
+   
    for (int i = PhysicalModelParamCount; i < ForceModelParamCount; i++)
    {
       if (alias == PARAMETER_TEXT[i - PhysicalModelParamCount])
+      {
          return i;
+      }
    }
-
+   
    return PhysicalModel::GetParameterID(str);
 }
 
@@ -1917,9 +1959,10 @@ std::string ForceModel::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 bool ForceModel::IsParameterReadOnly(const Integer id) const
 {
-   if (id == COORDINATE_SYSTEM_LIST)
+   if (id == COORDINATE_SYSTEM_LIST || id == DEGREE || id == ORDER ||
+       id == POTENTIAL_FILE)
       return true;
-      
+   
    return PhysicalModel::IsParameterReadOnly(id);
 }
 
@@ -1930,7 +1973,7 @@ bool ForceModel::IsParameterReadOnly(const std::string &label) const
 {
    if (label == PARAMETER_TEXT[COORDINATE_SYSTEM_LIST-PhysicalModelParamCount])
       return true;
-      
+   
    return PhysicalModel::IsParameterReadOnly(label);
 }
 
@@ -1965,7 +2008,7 @@ std::string ForceModel::GetStringParameter(const Integer id) const
 //          return "On";
 //       }
       
-      case NORM_TYPE:
+      case ERROR_CONTROL:
          switch (normType)
          {
             case -2:
@@ -1982,7 +2025,15 @@ std::string ForceModel::GetStringParameter(const Integer id) const
                throw ForceModelException("Unrecognized error control method.");
          }
          break;
-      
+
+      case POTENTIAL_FILE:
+         {
+            // Get actual id
+            GmatBase *owner = NULL;
+            Integer actualId = GetOwnedObjectId(id, &owner);
+            return owner->GetStringParameter(actualId);
+         }
+         
       default:
          return PhysicalModel::GetStringParameter(id);
    }
@@ -2017,10 +2068,13 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
       case  DRAG:
          return false;
          
+      case  USER_DEFINED:
+         return false;
+         
 //       case  SRP:
 //          return false;
          
-      case NORM_TYPE:
+      case ERROR_CONTROL:
          if (value == "RSSState")
          {
             normType = -2;
@@ -2047,7 +2101,14 @@ bool ForceModel::SetStringParameter(const Integer id, const std::string &value)
             return true;
          }
          throw ForceModelException("Unrecognized error control method.");
-
+         
+      case POTENTIAL_FILE:
+         {
+            // Get actual id
+            GmatBase *owner = NULL;
+            Integer actualId = GetOwnedObjectId(id, &owner);
+            return owner->SetStringParameter(actualId, value);
+         }
       default:
          return PhysicalModel::SetStringParameter(id, value);
     }
@@ -2128,7 +2189,10 @@ const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
    case POINT_MASSES:
       return BuildBodyList("PointMassForce");
    case COORDINATE_SYSTEM_LIST:
-      return BuildCoordinateList();   
+      return BuildCoordinateList();
+   case USER_DEFINED:
+      return BuildUserForceList();
+
    default:
       return PhysicalModel::GetStringArrayParameter(id);
     }
@@ -2141,6 +2205,77 @@ const StringArray& ForceModel::GetStringArrayParameter(const Integer id) const
 const StringArray& ForceModel::GetStringArrayParameter(const std::string &label) const
 {
     return GetStringArrayParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+Integer ForceModel::GetIntegerParameter(const Integer id) const
+{
+   switch (id)
+   {
+      case DEGREE:
+      case ORDER:
+         {
+            // Get actual id
+            GmatBase *owner = NULL;
+            Integer actualId = GetOwnedObjectId(id, &owner);
+            return owner->GetIntegerParameter(actualId);
+         }
+   default:
+      return PhysicalModel::GetIntegerParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Integer ForceModel::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+Integer ForceModel::SetIntegerParameter(const Integer id, const Integer value)
+{
+   #ifdef DEBUG_FM_SET
+   MessageInterface::ShowMessage
+      ("ForceModel::SetIntegerParameter() id=%d, value=%d\n", id, value);
+   #endif
+   
+   switch (id)
+   {
+   case DEGREE:
+   case ORDER:
+      {
+         // Get actual id
+         GmatBase *owner = NULL;
+         Integer actualId = GetOwnedObjectId(id, &owner);
+         #ifdef DEBUG_FM_SET
+         MessageInterface::ShowMessage
+            ("   Calling SetIntegerParameter() on '%s' of type '%s'\n",
+             owner->GetName().c_str(), owner->GetTypeName().c_str());
+         #endif
+         Integer outval = owner->SetIntegerParameter(actualId, value);
+         return outval;
+      }
+   default:
+      return GmatBase::SetIntegerParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+Integer ForceModel::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
 }
 
 
@@ -2181,13 +2316,38 @@ const StringArray& ForceModel::BuildCoordinateList() const
    {
       if ((*i)->GetTypeName() == "GravityField") 
       {
-// For now, only build the body fixed CS's in list because others already exist.
-//         cslist.push_back((*i)->GetStringParameter("InputCoordinateSystem"));
+         // For now, only build the body fixed CS's in list because others already exist.
+         // If ForceModel is created inside of GmatFunction, not all CS exist, so added
+         // InputCoordinateSystem and TargetCoordinateSystem to list(loj: 2008.06.25)
+         cslist.push_back((*i)->GetStringParameter("InputCoordinateSystem"));
          cslist.push_back((*i)->GetStringParameter("FixedCoordinateSystem"));
-//         cslist.push_back((*i)->GetStringParameter("TargetCoordinateSystem"));
+         cslist.push_back((*i)->GetStringParameter("TargetCoordinateSystem"));
       }
    }
    return cslist;
+}
+
+//------------------------------------------------------------------------------
+// const StringArray& BuildUserForceList() const
+//------------------------------------------------------------------------------
+/**
+ * Builds the list of forces in the force model that are not part of the default
+ * set of forces.
+ * 
+ * @return The list of user forces.
+ */
+//------------------------------------------------------------------------------
+const StringArray& ForceModel::BuildUserForceList() const
+{
+   static StringArray uflist;
+   uflist.clear();
+
+   std::vector<PhysicalModel*>::const_iterator i;
+   for (i = forceList.begin(); i != forceList.end(); ++i) 
+      if ((*i)->IsUserForce())
+         uflist.push_back((*i)->GetTypeName());
+   
+   return uflist;
 }
 
 
@@ -2577,7 +2737,17 @@ std::string ForceModel::BuildForceNameString(PhysicalModel *force)
    
    // Add others here
    
-   return retval;
+   // Handle user defined forces
+   if (force->IsUserForce())
+      retval = force->GetName();
+      
+        #ifdef DEBUG_USER_FORCES
+                MessageInterface::ShowMessage("Force type %s named '%s' %s a user force\n",
+        force->GetTypeName().c_str(), force->GetName().c_str(), 
+        (force->IsUserForce() ? "is" : "is not"));
+        #endif
+        
+        return retval;
 }
 
 
@@ -2718,3 +2888,57 @@ void ForceModel::ReportEpochData()
          "ForceModel::ReportEpochData: Attempting to write epoch data without "
          "opening the data file.");
 }
+
+
+//---------------------------------
+// private methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// Integer GetOwnedObjectId(Integer id, GmatBase **owner) const
+//------------------------------------------------------------------------------
+/*
+ * Retrieves owned object property id.
+ *
+ * @param  id  ForceModel parameter id for for getting owned object parameter id
+ * @param  owner  The pointer to owner to set if id provided found from the owned object
+ *
+ * @return  parameter ID from the owned object
+ */
+//------------------------------------------------------------------------------
+Integer ForceModel::GetOwnedObjectId(Integer id, GmatBase **owner) const
+{
+   Integer actualId = -1;
+   GmatBase *ownedObj = NULL;
+   
+   if (numForces == 0)
+      throw ForceModelException("ForceModel::GetOwnedObjectId() failed, Has empty force list");
+   
+   for (Integer i=0; i<numForces; i++)
+   {
+      ownedObj = GetForce(i);
+      try
+      {
+         actualId = ownedObj->GetParameterID(GetParameterText(id));
+         break;
+      }
+      catch (BaseException &e)
+      {
+         throw;
+      }
+   }
+   
+   *owner = ownedObj;
+   
+   if (owner == NULL)
+      throw ForceModelException("ForceModel::GetOwnedObjectId() failed, Owned force is NULL");
+   
+   #ifdef DEBUG_FM_OWNED_OBJECT
+   MessageInterface::ShowMessage
+      ("ForceModel::GetOwnedObjectId() returning %d, owner=<%p><%s><%s>\n",
+       actualId, *owner, (*owner)->GetTypeName().c_str(), (*owner)->GetName().c_str());
+   #endif
+   
+   return actualId;
+}
+

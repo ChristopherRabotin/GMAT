@@ -74,8 +74,7 @@ private:
    StringArray ParseMathFunctions(const std::string &str);
    StringArray ParseUnitConversion(const std::string &str);
    
-   bool HasFunctionName(const std::string &str, const std::string list[],
-                        UnsignedInt count);
+   bool HasFunctionName(const std::string &str, const StringArray &fnList);
    bool IsParenPartOfFunction(const std::string &str);
    bool IsGmatFunction(const std::string &name);
    std::string GetFunctionName(UnsignedInt functionType, const std::string &str,
@@ -91,9 +90,10 @@ private:
    std::string FindOperator(const std::string &str, Integer &opIndex);
    
    std::string GetOperatorName(const std::string &op, bool &opFound);
+   void BuildAllFunctionList();
    void BuildGmatFunctionList(const std::string &str);
-   void BuildFunction(const std::string &str, const std::string list[],
-                      UnsignedInt count, std::string &fnName, std::string &leftStr);
+   void BuildFunction(const std::string &str, const StringArray &fnList,
+                      std::string &fnName, std::string &leftStr);
    std::string::size_type FindMatchingParen(const std::string &str, std::string::size_type start);
    void FillItems(StringArray &items, const std::string &op,
                   const std::string &left, const std::string &right);
@@ -110,42 +110,11 @@ private:
       GMAT_FUNCTION,
    };
    
-   enum
-   {
-      SIN = 0,
-      COS, TAN, ASIN, ACOS, ATAN2, ATAN,
-      LOG, LOG10, EXP, SQRT, ABS,
-      MathFuncCount,
-   };
-   
-   enum
-   {
-      TRANSPOSE = 0,
-      DET, INV, NORM,
-      MatrixFuncCount,
-   };
-   
-   enum
-   {
-      OP_TRANSPOSE = 0,
-      OP_INV,
-      MatrixOpCount,
-   };
-   
-   enum
-   {
-      DEG_TO_RAD = 0,
-      RAD_TO_DEG,
-      UnitConvCount,
-   };
-   
-   static const Integer MAX_GMAT_FUNCTIONS = 30;
-   
-   static const std::string MATH_FUNC_LIST[MathFuncCount];
-   static const std::string MATRIX_FUNC_LIST[MatrixFuncCount];
-   static const std::string MATRIX_OP_LIST[MatrixOpCount];
-   static const std::string UNIT_CONV_LIST[UnitConvCount];
-   static       std::string GMAT_FUNC_LIST[MAX_GMAT_FUNCTIONS];
+   StringArray realFuncList;
+   StringArray matrixFuncList;
+   StringArray matrixOpList;
+   StringArray unitConvList;
+   StringArray gmatFuncList;
 };
 
 

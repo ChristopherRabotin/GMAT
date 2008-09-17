@@ -28,7 +28,7 @@
 #include <string>               // For std::string
 #include <vector>               // For std::vector
 #include <map>                  // For std::map
-
+#include <stack>                // for std::stack
 
 #ifdef _WIN32  // Windows
 
@@ -72,6 +72,7 @@ class ElementWrapper;
 typedef std::vector<GmatBase*> ObjectArray;
 typedef std::map<std::string, GmatBase*> ObjectMap;
 typedef std::map<std::string, ElementWrapper*> WrapperMap;
+typedef std::stack<ObjectMap*> ObjectMapStack;
 
 typedef struct geoparms
 {

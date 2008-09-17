@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           OptimizePanel
 //------------------------------------------------------------------------------
@@ -75,15 +75,30 @@ void OptimizePanel::Create()
    wxStaticText *solverNameStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver Name"), wxDefaultPosition,
                        wxDefaultSize, 0);
+
+   wxStaticText *solverModeStaticText =
+      new wxStaticText(this, ID_TEXT, wxT("Solver Mode"), wxDefaultPosition,
+                       wxDefaultSize, 0);
    
    mSolverComboBox =
       theGuiManager->GetOptimizerComboBox(this, ID_COMBO, wxSize(180,-1));
    
+   StringArray options = theCommand->GetStringArrayParameter("SolveModeOptions");
+   wxArrayString theOptions;
+   
+   for (StringArray::iterator i = options.begin(); i != options.end(); ++i)
+      theOptions.Add(i->c_str());
+   
+   mSolverModeComboBox =
+      new wxComboBox(this, ID_COMBO, wxT(""), wxDefaultPosition, wxSize(180,-1),
+                     theOptions, wxCB_READONLY);
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(2);
    
    pageSizer->Add(solverNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    pageSizer->Add(mSolverComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(solverModeStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   pageSizer->Add(mSolverModeComboBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
    theMiddleSizer->Add(pageSizer, 0, wxGROW, bsize);
 
@@ -101,9 +116,13 @@ void OptimizePanel::LoadData()
       mObject = theCommand;
       
       std::string solverName =
-         theCommand->GetStringParameter(theCommand->GetParameterID("OptimizerName"));
+         theCommand->GetStringParameter("SolverName");
       
       mSolverComboBox->SetValue(solverName.c_str());
+      
+      std::string solverMode =
+               theCommand->GetStringParameter("SolveMode");
+      mSolverModeComboBox->SetValue(solverMode.c_str());
    }
    catch (BaseException &e)
    {
@@ -120,8 +139,13 @@ void OptimizePanel::SaveData()
    try
    {
       std::string solverName = mSolverComboBox->GetValue().c_str();
-      theCommand->SetStringParameter(theCommand->GetParameterID("OptimizerName"),
+      std::string solverMode = mSolverModeComboBox->GetValue().c_str();
+
+      theCommand->SetStringParameter(theCommand->GetParameterID("SolverName"),
                                      solverName);
+      theCommand->SetStringParameter(theCommand->GetParameterID("SolveMode"), 
+            solverMode);
+
       EnableUpdate(false);
    }
    catch (BaseException &e)

@@ -99,8 +99,6 @@ protected:
    Integer                     *indx;
    /// Vector used for the back substitution
    Real                        *b;
-   /// LU Decomposition of the Jacobian
-   Real                        **ludMatrix;
     
    // Control parameters
    /// Used to turn on central differencing.  Currently not implemented.

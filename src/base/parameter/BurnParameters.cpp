@@ -113,9 +113,11 @@ DeltaVDir1::~DeltaVDir1()
 bool DeltaVDir1::Evaluate()
 {
    mRealValue = BurnData::GetBurnReal(ELEMENT1);
-   
-   //MessageInterface::ShowMessage
-   //   ("===> DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
+
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("DeltaVDir1::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
    
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
@@ -246,6 +248,11 @@ bool DeltaVDir2::Evaluate()
 {
    mRealValue = BurnData::GetBurnReal(ELEMENT2);
     
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("DeltaVDir2::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
+   
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
    else
@@ -359,6 +366,11 @@ bool DeltaVDir3::Evaluate()
 {
    mRealValue = BurnData::GetBurnReal(ELEMENT3);    
 
+   #ifdef DEBUG_BURN_EVAL
+   MessageInterface::ShowMessage
+      ("DeltaVDir3::Evaluate() mRealValue=%f\n", mRealValue);
+   #endif
+   
    if (mRealValue == BurnData::BURN_REAL_UNDEFINED)
       return false;
    else

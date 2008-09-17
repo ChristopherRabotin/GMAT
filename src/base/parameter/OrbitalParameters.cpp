@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             File: OrbitalParameters.cpp
 //------------------------------------------------------------------------------
@@ -115,6 +115,9 @@ VelApoapsis::~VelApoapsis()
 //------------------------------------------------------------------------------
 bool VelApoapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(VEL_APOAPSIS);    
    
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -234,6 +237,9 @@ VelPeriapsis::~VelPeriapsis()
 //------------------------------------------------------------------------------
 bool VelPeriapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(VEL_PERIAPSIS);    
     
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -353,6 +359,9 @@ Apoapsis::~Apoapsis()
 //------------------------------------------------------------------------------
 bool Apoapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
    
    if (cartState == Rvector6::RVECTOR6_UNDEFINED)
@@ -486,7 +495,11 @@ Periapsis::~Periapsis()
 //------------------------------------------------------------------------------
 bool Periapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    Rvector6 cartState = OrbitData::GetRelativeCartState(mOrigin);
+   
    //MessageInterface::ShowMessage
    //   ("===> Periapsis::Evaluate() mOrigin=%s, cartState=%s\n",
    //    mOrigin->GetName().c_str(), cartState.ToString().c_str());
@@ -620,6 +633,9 @@ OrbitPeriod::~OrbitPeriod()
 //------------------------------------------------------------------------------
 bool OrbitPeriod::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(ORBIT_PERIOD);    
 
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -735,6 +751,9 @@ RadApoapsis::~RadApoapsis()
 //------------------------------------------------------------------------------
 bool RadApoapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(RAD_APOAPSIS);    
    
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -850,6 +869,9 @@ RadPeriapsis::~RadPeriapsis()
 //------------------------------------------------------------------------------
 bool RadPeriapsis::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(RAD_PERIAPSIS);    
    
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -964,6 +986,9 @@ C3Energy::~C3Energy()
 //------------------------------------------------------------------------------
 bool C3Energy::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(C3_ENERGY);    
    
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)
@@ -1078,6 +1103,9 @@ Energy::~Energy()
 //------------------------------------------------------------------------------
 bool Energy::Evaluate()
 {
+   if (mOrigin == NULL)
+      OrbitData::InitializeRefObjects();
+   
    mRealValue = OrbitData::GetOtherKepReal(ENERGY);    
    
    if (mRealValue == GmatOrbit::ORBIT_REAL_UNDEFINED)

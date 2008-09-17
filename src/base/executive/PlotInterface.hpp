@@ -23,11 +23,15 @@
 #include "Rvector.hpp"
 #include "SolarSystem.hpp"
 #include "CoordinateSystem.hpp"
+#include "PlotReceiver.hpp"
 
 class PlotInterface
 {
 
 public:
+   
+   static void SetPlotReceiver(PlotReceiver *pr);
+   
    // for OpenGL Plot
    static bool CreateGlPlotWindow(const std::string &plotName,
                                   const std::string &oldName,
@@ -113,12 +117,12 @@ public:
                             const std::string &yAxisTitle,
                             bool updateCanvas, bool drawGrid);
    
-
-   
 private:
 
    PlotInterface();
    ~PlotInterface();
+   
+   static PlotReceiver *thePlotReceiver;
 
 };
 

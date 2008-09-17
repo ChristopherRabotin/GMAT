@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  RealVar
 //------------------------------------------------------------------------------
@@ -37,10 +37,10 @@ public:
    RealVar(const RealVar &copy);
    RealVar& operator= (const RealVar& right);
    virtual ~RealVar();
-
+   
    bool operator==(const RealVar &right) const;
    bool operator!=(const RealVar &right) const;
-
+   
    // methods inherited from Parameter
    virtual bool Initialize();
    virtual std::string ToString();
@@ -72,7 +72,8 @@ protected:
    static const std::string
       PARAMETER_TEXT[RealVarParamCount - ParameterParamCount];
    
-   bool mIsNumberEquation;
+   bool mValueSet;
+   bool mIsNumber;
    Real mRealValue;
    
 private:

@@ -6,7 +6,8 @@
 // Created: 2005/05/16
 //
 /**
- * 
+ * @note This code is a shell for the Cowell integrator.  The integrator is not
+ *       currently implemented.
  */
 // **************************************************************************
 
@@ -34,7 +35,7 @@
  */
 //------------------------------------------------------------------------------
 Cowell::Cowell(const std::string &typeStr, const std::string &nomme) :
-    Integrator ("Cowell", nomme)
+    PredictorCorrector     (?, ?, "Cowell", nomme)
 {
     parameterCount = CowellParamCount;
 }
@@ -58,7 +59,7 @@ Cowell::~Cowell(void)
  */
 //------------------------------------------------------------------------------
 Cowell::Cowell(const Cowell& cw) :
-    Integrator  (cw)
+   PredictorCorrector     (cw)
 {
     parameterCount = CowellParamCount;
 }

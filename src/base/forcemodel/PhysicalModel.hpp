@@ -166,6 +166,7 @@ public:
    virtual bool StateChanged(bool reset = true);
    
    virtual bool IsTransient();
+   virtual bool IsUserForce();
    virtual void SetPropList(std::vector<SpaceObject *> *soList);
 
    // Parameter accessor methods -- inherited from GmatBase
@@ -203,7 +204,7 @@ protected:
    bool initialized;
    /// Flag that is set when SetState() or SetTime() is called
    bool stateChanged;
-
+   
    /// Array of data parameters containing the model data
    Real *modelState;
    /// The state vector in J2000BodyMJ2000Eq coordinates.

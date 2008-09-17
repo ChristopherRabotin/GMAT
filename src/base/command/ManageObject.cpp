@@ -19,6 +19,7 @@
 #include "ManageObject.hpp"
 #include "MessageInterface.hpp"
 #include "CommandException.hpp"
+#include "Array.hpp"
 
 //#define DEBUG_MANAGE_OBJECT
 
@@ -322,59 +323,67 @@ bool ManageObject::Initialize()
    return true;
 }
 
-//---------------------------------------------------------------------------
-//  bool GmatCommand::MakeGlobal(const std::string &objName)
-//---------------------------------------------------------------------------
-/**
- * The method that makes the named object a Global (i.e. moves it
- * from theLOS to the GOS)
- *
- *
- * @return true if successful
- */
-//---------------------------------------------------------------------------
-bool ManageObject::MakeGlobal(const std::string &objName)
+
+bool ManageObject::InsertIntoGOS(GmatBase *obj, const std::string &withName)
 {
    #ifdef DEBUG_MANAGE_OBJECT
-      MessageInterface::ShowMessage("ManageObject::MakeGlobal() entered with objName = %s\n",
-            objName.c_str());
+      MessageInterface::ShowMessage("Entering InsertIntoGOS, with obj = <%p> and name = %s\n",
+            obj, withName.c_str());
    #endif
-   // Check to see if the object is already in the LOS
-   GmatBase *mapObj = NULL;
-   bool isInLOS = false;
-   bool isInGOS = false;
-   if ((objectMap->find(objName) != objectMap->end()))
-      isInLOS = true;
-   if ((globalObjectMap->find(objName) != globalObjectMap->end()))
-      isInGOS = true;
-   if (isInLOS)
+   if (!obj)
    {
-      if (isInGOS)
+      std::string errMsg = "ManageObject::InsertIntoGOS() passed a NULL object\n";
+      throw CommandException(errMsg);
+   }
+   GmatBase *mapObj;
+   std::string ex;
+   std::string objType = obj->GetTypeName();
+   // if it is already in the GOS, make sure the types match
+   if (globalObjectMap->find(withName) != globalObjectMap->end())
+   {
+      mapObj = (*globalObjectMap)[withName];
+      if (!mapObj->IsOfType(objType))
       {
-         std::string ex = "Cannot add more than one object with name """;
-         ex += objName + """  to the Global Object Store\n";
+         ex = "Object of name """ + withName;
+         ex += """, but of a different type, already exists in Global Object Store\n";
          throw CommandException(ex);
       }
-      mapObj = (*objectMap)[objName];
-      objectMap->erase(objName);
-      globalObjectMap->insert(std::make_pair(objName,mapObj));
+      if (objType == "Array")
+      {
+         Integer r1, r2, c1, c2;
+         ((Array*) mapObj)->GetSize(r1, c1);
+         ((Array*) obj)->GetSize(r2, c2);
+         if ((r1 != r2) || (c1 != c2))
+         {
+            ex = "Array of name """ + withName;
+            ex += """, but with different dimensions already exists in Global Object Store\n";
+            throw CommandException(ex);
+         }
+      }
+      ex = "ManageObject::InsertIntoGOS() Cannot add more than "
+         "one object with name \"";
+      ex += withName + "\" to the Global Object Store";
+      // Let's just ignore for now to run TargetHohmannTransfer.gmf (loj: 2008.06.05) 
+      //throw CommandException(ex);
+      MessageInterface::ShowMessage("*** WARNING *** " + ex + ", So ignored.\n");
+      // it is already in there, so we do not need to put this one in; clean it up
       #ifdef DEBUG_MANAGE_OBJECT
-         MessageInterface::ShowMessage("ManageObject::MakeGlobal() objName %s inserted into GOS\n",
-               objName.c_str());
+            MessageInterface::ShowMessage(" Create::object %s was already in object store ...\n",
+                  withName.c_str());
+            MessageInterface::ShowMessage("  pointer for obj = <%p> and pointer for mapObj = <%p>\n",
+                  obj, mapObj);
       #endif
-      mapObj->SetIsGlobal(true);
+      if (mapObj != obj) 
+      {
+         #ifdef DEBUG_MANAGE_OBJECT
+               MessageInterface::ShowMessage(" Create:: object is not the same, though\n",
+                     withName.c_str());
+         #endif
+         return false;
+      }
    }
    else
-   {
-      if (((isInGOS) && 
-          ((*globalObjectMap)[objName] == NULL)) ||
-          (!isInGOS))
-      {
-         std::string ex = "Cannot add NULL object with name """;
-         ex += objName + """  to the Global Object Store\n";
-         throw CommandException(ex);
-      }
-   }
+      // put it into the GOS
+      globalObjectMap->insert(std::make_pair(withName,obj));
    return true;
 }
-

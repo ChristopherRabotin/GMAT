@@ -290,8 +290,8 @@ Parameter* ParameterDatabase::GetParameter(const std::string &name) const
    pos = mStringParamPtrMap->find(name);
    if (pos == mStringParamPtrMap->end())
       throw ParameterDatabaseException
-         ("ParameterDatabase::GetParameter() Parameter name " + name +
-          " not found in the database");
+         ("ParameterDatabase::GetParameter() Cannot find Parameter name \"" + name +
+          "\" in the Database");
    else
       return pos->second;
 }

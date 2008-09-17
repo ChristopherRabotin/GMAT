@@ -89,14 +89,14 @@ HarmonicField::PARAMETER_TEXT[HarmonicFieldParamCount - PhysicalModelParamCount]
 const Gmat::ParameterType
 HarmonicField::PARAMETER_TYPE[HarmonicFieldParamCount - PhysicalModelParamCount] =
 {
-   Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::INTEGER_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::INTEGER_TYPE,   // "MaxDegree",
+   Gmat::INTEGER_TYPE,   // "MaxOrder",
+   Gmat::INTEGER_TYPE,   // "Degree",
+   Gmat::INTEGER_TYPE,   // "Order",
+   Gmat::STRING_TYPE,    // "PotentialFile",
+   Gmat::STRING_TYPE,    // "InputCoordinateSystem",
+   Gmat::STRING_TYPE,    // "FixedCoordinateSystem",
+   Gmat::STRING_TYPE,    // "TargetCoordinateSystem",
 };
 
 
@@ -1149,14 +1149,14 @@ bool HarmonicField::IsParameterReadOnly(const Integer id) const
 {
    if (id < PhysicalModelParamCount)
       return PhysicalModel::IsParameterReadOnly(id);
-      
+   
    if (id >= HarmonicFieldParamCount)
       throw ForceModelException(
          "Attempting to determine accessibility of a parameter outside of the "
          "scope of a HarmonicField object.");
-      
+   
    if ((id == DEGREE) || (id == ORDER) || (id == FILENAME))
       return false;
-      
+   
    return true;
 }

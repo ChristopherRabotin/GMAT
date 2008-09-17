@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            PropSetupException
 //------------------------------------------------------------------------------
@@ -23,9 +23,8 @@
 
 class PropSetupException : public BaseException
 {
-   public:
-      PropSetupException(const std::string& message = 
-                         "Error occurred in PropSetup class") 
-         : BaseException(message) {};
+public:
+   PropSetupException(const std::string& details = "") 
+      : BaseException("PropSetup Exception: ", details) {};
 };
 #endif

@@ -26,6 +26,7 @@
 
 //#define DEBUG_MATH_TREE 1
 //#define DEBUG_MATH_TREE_INIT 1
+//#define DEBUG_MATH_TREE_EVAL 1
 //#define DEBUG_MATH_WRAPPERS
 //#define DEBUG_RENAME
 //#define DEBUG_FUNCTION
@@ -113,10 +114,14 @@ MathTree& MathTree::operator=(const MathTree &mt)
 //------------------------------------------------------------------------------
 const StringArray& MathTree::GetGmatFunctionNames()
 {
-   #ifdef DEBUG_GMAT_FUNCTION
+   #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathTree::GetGmatFunctionNames() returning %d GmatFunctions\n",
-       theGmatFunctionNames.size());
+      ("MathTree::GetGmatFunctionNames() theTopNode type=%s, desc='%s' returning "
+       "%d GmatFunctions\n", theTopNode->GetTypeName().c_str(),
+       theTopNode->GetName().c_str(), theGmatFunctionNames.size());
+   for (UnsignedInt i=0; i<theGmatFunctionNames.size(); i++)
+      MessageInterface::ShowMessage("   '%s'\n", theGmatFunctionNames[i].c_str());
+   
    #endif
    
    return theGmatFunctionNames;
@@ -148,7 +153,8 @@ void MathTree::SetFunction(Function *function)
 {
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("MathTree::SetFunction() function=%p\n", function);
+      ("MathTree::SetFunction() function=<%p>, name='%s'\n", function,
+       function->GetName().c_str());
    #endif
    
    if (theTopNode == NULL)
@@ -156,7 +162,7 @@ void MathTree::SetFunction(Function *function)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   Calling SetFunctionToRunner() theTopNode=%s, %s\n",
+      ("   Calling SetFunctionToRunner() theTopNode type=%s, desc='%s'\n",
        theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
@@ -165,6 +171,33 @@ void MathTree::SetFunction(Function *function)
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage("MathTree::SetFunction() returning\n");
    #endif
+}
+
+//------------------------------------------------------------------------------
+// void SetCallingFunction();
+//------------------------------------------------------------------------------
+void MathTree::SetCallingFunction(FunctionManager *fm)
+{
+#ifdef DEBUG_FUNCTION
+MessageInterface::ShowMessage
+   ("MathTree::SetCallingFunction() fm=<%p>, name='%s'\n", fm,
+         (fm->GetName()).c_str());
+#endif
+
+if (theTopNode == NULL)
+   return;
+
+#ifdef DEBUG_FUNCTION
+MessageInterface::ShowMessage
+   ("   Calling SetCallingFunction() theTopNode type=%s, desc='%s'\n",
+    theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+#endif
+
+SetCallingFunctionToRunner(theTopNode, fm);
+
+#ifdef DEBUG_FUNCTION
+MessageInterface::ShowMessage("MathTree::SetCallingFunction() returning\n");
+#endif
 }
 
 
@@ -211,7 +244,7 @@ void MathTree::SetMathWrappers(std::map<std::string, ElementWrapper*> *wrapperMa
 //------------------------------------------------------------------------------
 Real MathTree::Evaluate()
 {
-   #ifdef DEBUG_MATH_TREE
+   #ifdef DEBUG_MATH_TREE_EVAL
    MessageInterface::ShowMessage
       ("MathTree::Evaluate() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
        theTopNode->GetName().c_str());
@@ -262,6 +295,30 @@ bool MathTree::Initialize(ObjectMap *objectMap, ObjectMap *globalObjectMap)
 
 
 //------------------------------------------------------------------------------
+// void Finalize()
+//------------------------------------------------------------------------------
+void MathTree::Finalize()
+{   
+   if (theTopNode == NULL)
+   {
+      #ifdef DEBUG_MATH_TREE_INIT
+      MessageInterface::ShowMessage
+         ("MathTree::Finalize() theTopNode is NULL, so just returning true\n");
+      #endif
+      return;
+   }
+   
+   #ifdef DEBUG_MATH_TREE_INIT
+   MessageInterface::ShowMessage
+      ("MathTree::Finalize() theTopNode=%s, %s\n", theTopNode->GetTypeName().c_str(),
+       theTopNode->GetName().c_str());
+   #endif
+   
+   FinalizeFunctionRunner(theTopNode);
+}
+
+
+//------------------------------------------------------------------------------
 // void GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) const
 //------------------------------------------------------------------------------
 void MathTree::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount) 
@@ -290,7 +347,7 @@ void MathTree::SetObjectMap(ObjectMap *map)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   Calling SetObjectMapToRunner() theTopNode=%s, %s\n",
+      ("   Calling SetObjectMapToRunner() theTopNode type='%s', desc='%s'\n",
        theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
@@ -322,7 +379,7 @@ void MathTree::SetGlobalObjectMap(ObjectMap *map)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   Calling SetGlobalObjectMapToRunner() theTopNode=%s, %s\n",
+      ("   Calling SetGlobalObjectMapToRunner() theTopNode type='%s', desc='%s'\n",
        theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
@@ -348,11 +405,37 @@ void MathTree::SetSolarSystem(SolarSystem *ss)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   Calling SetSolarSystemToRunner() theTopNode=%s, %s\n",
+      ("   Calling SetSolarSystemToRunner() theTopNode type='%s', desc='%s'\n",
        theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
    SetSolarSystemToRunner(theTopNode, ss);
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MathTree::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() cs=%p\n", cs);
+   #endif
+   
+   if (theTopNode == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   Calling SetInternalCoordSystemToRunner() theTopNode type='%s', desc='%s'\n",
+       theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
+   #endif
+   
+   SetInternalCoordSystemToRunner(theTopNode, cs);
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage("MathTree::SetGlobalObjectMap() returning\n");
@@ -374,7 +457,7 @@ void MathTree::SetTransientForces(std::vector<PhysicalModel*> *tf)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   Calling SetTransientForcesToRunner() theTopNode=%s, %s\n",
+      ("   Calling SetTransientForcesToRunner() theTopNode type=%s, desc='%s'\n",
        theTopNode->GetTypeName().c_str(), theTopNode->GetName().c_str());
    #endif
    
@@ -546,6 +629,39 @@ bool MathTree::InitializeParameter(MathNode *node)
 
 
 //------------------------------------------------------------------------------
+// void FinalizeFunctionRunner(MathNode *node)
+//------------------------------------------------------------------------------
+void MathTree::FinalizeFunctionRunner(MathNode *node)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::FinalizeFunctionRunner() node=%p\n", node);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->Finalize();
+   
+   MathNode *left = node->GetLeft();   
+   FinalizeFunctionRunner(left);
+   
+   MathNode *right = node->GetRight();
+   FinalizeFunctionRunner(right);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetMathElementWrappers(MathNode *node)
 //------------------------------------------------------------------------------
 void MathTree::SetMathElementWrappers(MathNode *node)
@@ -608,6 +724,38 @@ void MathTree::SetFunctionToRunner(MathNode *node, Function *function)
    SetFunctionToRunner(right, function);
 }
 
+//------------------------------------------------------------------------------
+// void SetCallingFunctionToRunner(MathNode *node, Function *function)
+//------------------------------------------------------------------------------
+void MathTree::SetCallingFunctionToRunner(MathNode *node, FunctionManager *fm)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetCallingFunctionToRunner() node=%p, function=%p\n", node, function);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetCallingFunction(fm);
+   
+   MathNode *left = node->GetLeft();   
+   SetCallingFunctionToRunner(left, fm);
+   
+   MathNode *right = node->GetRight();
+   SetCallingFunctionToRunner(right, fm);
+}
+
 
 //------------------------------------------------------------------------------
 // void SetObjectMapToRunner(MathNode *node, ObjectMap *map)
@@ -624,7 +772,7 @@ void MathTree::SetObjectMapToRunner(MathNode *node, ObjectMap *map)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
        node->GetName().c_str());
    #endif
    
@@ -657,7 +805,7 @@ void MathTree::SetGlobalObjectMapToRunner(MathNode *node, ObjectMap *map)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
        node->GetName().c_str());
    #endif
    
@@ -690,7 +838,7 @@ void MathTree::SetSolarSystemToRunner(MathNode *node, SolarSystem *ss)
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
        node->GetName().c_str());
    #endif
    
@@ -709,6 +857,39 @@ void MathTree::SetSolarSystemToRunner(MathNode *node, SolarSystem *ss)
 
 
 //------------------------------------------------------------------------------
+// void SetInternalCoordSystemToRunner(MathNode *node, CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+void MathTree::SetInternalCoordSystemToRunner(MathNode *node, CoordinateSystem *cs)
+{
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("MathTree::SetInternalCoordSystemToRunner() node=%p, cs=%p\n", node, cs);
+   #endif
+   
+   if (node == NULL)
+      return;
+   
+   #ifdef DEBUG_FUNCTION
+   MessageInterface::ShowMessage
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
+       node->GetName().c_str());
+   #endif
+   
+   if (!node->IsFunction())
+      return;
+   
+   if (node->IsOfType("FunctionRunner"))
+      ((FunctionRunner*)(node))->SetInternalCoordSystem(cs);
+   
+   MathNode *left = node->GetLeft();   
+   SetInternalCoordSystemToRunner(left, cs);
+   
+   MathNode *right = node->GetRight();
+   SetInternalCoordSystemToRunner(right, cs);
+}
+
+
+//------------------------------------------------------------------------------
 // void SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf)
 //------------------------------------------------------------------------------
 void MathTree::SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalModel*> *tf)
@@ -723,7 +904,7 @@ void MathTree::SetTransientForcesToRunner(MathNode *node, std::vector<PhysicalMo
    
    #ifdef DEBUG_FUNCTION
    MessageInterface::ShowMessage
-      ("   node type='%s', name='%s'\n", node->GetTypeName().c_str(),
+      ("   node type='%s', desc='%s'\n", node->GetTypeName().c_str(),
        node->GetName().c_str());
    #endif
    

@@ -14,6 +14,7 @@
 //
 /**
  * Defines base class of Real parameters.
+ * All Parameters returning Real number are derived from this class.
  */
 //------------------------------------------------------------------------------
 
@@ -22,7 +23,6 @@
 #include "StringUtil.hpp"          // for GmatStringUtil::ToReal()
 #include "GmatGlobal.hpp"          // for Global settings
 #include "MessageInterface.hpp"
-//#include <sstream>
 
 //#define DEBUG_REAL_VAR 1
 
@@ -73,28 +73,21 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
                  bool isTimeParam, bool isSettable)
    : Parameter(name, typeStr, key, obj, desc, unit, depObj, ownerType, isTimeParam,
                isSettable, true, true)
-{  
-   //mRealValue = REAL_PARAMETER_UNDEFINED;
+{
+   mValueSet = false;
+   mIsNumber = true;
    mRealValue = 0.0;
-   Real rval;
-   mIsNumberEquation = true;
+   mExpr = "0";
    
+   Real rval;
    if (GmatStringUtil::ToReal(valStr, &rval))
    {
       mRealValue = rval;
       mExpr = valStr;
-      mIsNumberEquation = false;
    }
    else
    {
-      for (UnsignedInt i=0; i<mExpr.size(); i++)
-      {
-         if (isalpha(mExpr[i]))
-         {
-            mIsNumberEquation = false;
-            break;
-         }
-      }
+      mIsNumber = false;
    }
    
    mReturnType = Gmat::REAL_TYPE;
@@ -113,6 +106,8 @@ RealVar::RealVar(const std::string &name, const std::string &valStr,
 RealVar::RealVar(const RealVar &copy)
    : Parameter(copy)
 {
+   mValueSet = copy.mValueSet;
+   mIsNumber = copy.mIsNumber;
    mRealValue = copy.mRealValue;
 }
 
@@ -133,9 +128,11 @@ RealVar& RealVar::operator= (const RealVar& right)
    if (this != &right)
    {
       Parameter::operator=(right);
+      mValueSet = right.mValueSet;
+      mIsNumber = right.mIsNumber;
       mRealValue = right.mRealValue;
    }
-
+   
    return *this;
 }
 
@@ -246,24 +243,23 @@ void RealVar::SetReal(Real val)
 {
    #if DEBUG_REAL_VAR
    MessageInterface::ShowMessage
-      ("RealVar::SetReal(Real val) name=%s, val=%.18f\n", GetName().c_str(), val);
+      ("RealVar::SetReal(Real val) name=%s, mExpr='%s', mIsNumber=%d, val=%.18f\n",
+       GetName().c_str(), mExpr.c_str(), mIsNumber, val);
    #endif
    
    mRealValue = val;
    
-   // use default global precision to convert to string (loj: 2008.03.05)
-   mExpr = GmatStringUtil::ToString(mRealValue, false, false, false,
-                                    GmatGlobal::DATA_PRECISION, 1);
-   
-   //std::stringstream ss("");
-   //ss.precision(10);
-   //ss << mRealValue;
-   //mExpr = ss.str();
-   
-   #if DEBUG_REAL_VAR
-   MessageInterface::ShowMessage
-      ("RealVar::SetReal(Real val) mExpr=%s\n", mExpr.c_str());
-   #endif
+   if (mIsNumber)
+   {
+      // use default global precision to convert to string (loj: 2008.03.05)
+      mExpr = GmatStringUtil::ToString(mRealValue, false, false, false,
+                                       GmatGlobal::DATA_PRECISION, 1);
+      
+      #if DEBUG_REAL_VAR
+      MessageInterface::ShowMessage
+         ("RealVar::SetReal(Real val) mExpr=%s\n", mExpr.c_str());
+      #endif
+   }
 }
 
 //------------------------------------
@@ -317,6 +313,7 @@ Real RealVar::SetRealParameter(const Integer id, const Real value)
    switch (id)
    {
    case VALUE:
+      mValueSet = true;
       SetReal(value);
       return value;
    default:
@@ -350,7 +347,7 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 {
    #if DEBUG_REAL_VAR
    MessageInterface::ShowMessage
-      ("RealVar::SetStringParameter() name:%s, id=%d, value=%s\n",
+      ("RealVar::SetStringParameter() name='%s', id=%d, value='%s'\n",
        GetName().c_str(), id, value.c_str());
    #endif
    
@@ -358,30 +355,24 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
    {
    case EXPRESSION:
       {
-         // if value is just a number, convert and set to real value
-         mIsNumberEquation = true;
-         Real temp;
-         if (GmatStringUtil::ToReal(value, &temp))
+         mValueSet = true;
+         // if value is blank, initialize expression to 0
+         if (value != "")
          {
-            mRealValue = temp;
-            mIsNumberEquation = false;
-            
-            #if DEBUG_REAL_VAR
-            MessageInterface::ShowMessage("mRealValue set to %f\n", mRealValue);
-            #endif
-         }
-         else
-         {
-            for (UnsignedInt i=0; i<value.size(); i++)
+            // if value is just a number, convert and set to real value
+            Real rval;
+            if (GmatStringUtil::ToReal(value, &rval))
             {
-               if (isalpha(value[i]))
-               {
-                  mIsNumberEquation = false;
-                  break;
-               }
+               mRealValue = rval;
+               
+               #if DEBUG_REAL_VAR
+               MessageInterface::ShowMessage("mRealValue set to %f\n", mRealValue);
+               #endif
             }
+            
+            mExpr = value;
+            return true;
          }
-         return Parameter::SetStringParameter(id, value);
       }
    default:
       return Parameter::SetStringParameter(id, value);
@@ -405,7 +396,7 @@ bool RealVar::SetStringParameter(const Integer id, const std::string &value)
 bool RealVar::SetStringParameter(const std::string &label,
                                  const std::string &value)
 {
-   #if DEBUG_REAL_VAR > 1
+   #if DEBUG_REAL_VAR
    MessageInterface::ShowMessage("RealVar::SetStringParameter() label=%s value=%s\n",
                                  label.c_str(), value.c_str());
    #endif

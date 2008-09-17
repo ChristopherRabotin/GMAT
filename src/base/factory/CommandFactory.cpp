@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            CommandFactory
 //------------------------------------------------------------------------------
@@ -21,8 +21,9 @@
 #include "gmatdefs.hpp"
 #include "Factory.hpp"
 #include "CommandFactory.hpp"
-#include "Propagate.hpp"      // for Propagate command
+#include "NoOp.hpp"           // for NoOp command
 #include "Toggle.hpp"         // for Toggle command
+#include "Propagate.hpp"      // for Propagate command
 #include "Maneuver.hpp"       // for Maneuver command
 #include "Target.hpp"         // for Target command
 #include "Vary.hpp"           // for Vary command
@@ -58,6 +59,14 @@
 #include "Global.hpp"         // for Global command
 #include "Create.hpp"         // for Create command
 
+//******************************************************************************
+// ElseIf does not work yet. (2008.08.29)
+// The workaround is to use nested If-Else statements.
+// The work that needs to be done concerns the conditions, IIRC - WCS
+#ifdef __INCLUDE_ELSEIF__
+#include "ElseIf.hpp"         // for ElseIf command
+#endif
+//******************************************************************************
 
 //---------------------------------
 //  public methods
@@ -82,7 +91,9 @@
 GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
                                            const std::string &withName)
 {
-    if (ofType == "Propagate")
+    if (ofType == "NoOp")
+        return new NoOp;
+    else if (ofType == "Propagate")
         return new Propagate;
     else if (ofType == "Toggle")
         return new Toggle;
@@ -108,6 +119,10 @@ GmatCommand* CommandFactory::CreateCommand(const std::string &ofType,
         return new If;
     else if (ofType == "Else")
         return new Else;
+#ifdef __INCLUDE_ELSEIF__
+    else if (ofType == "ElseIf")
+        return new ElseIf;
+#endif
     else if (ofType == "EndIf")
         return new EndIf;
     else if (ofType == "GMAT")
@@ -175,6 +190,7 @@ CommandFactory::CommandFactory() :
 {
    if (creatables.empty())
    {
+      creatables.push_back("NoOp");  // default type for this factory
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
       creatables.push_back("Maneuver");
@@ -187,6 +203,9 @@ CommandFactory::CommandFactory() :
       creatables.push_back("EndFor");
       creatables.push_back("If");
       creatables.push_back("Else");
+#ifdef __INCLUDE_ELSEIF__
+      creatables.push_back("ElseIf");
+#endif
       creatables.push_back("EndIf");
       creatables.push_back("While");
       creatables.push_back("EndWhile");
@@ -244,6 +263,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
 {
    if (creatables.empty())
    {
+      creatables.push_back("NoOp");  // default type for this factory
       creatables.push_back("Toggle");  // default type for this factory
       creatables.push_back("Propagate");  // default type for this factory
       creatables.push_back("Maneuver");
@@ -256,6 +276,7 @@ CommandFactory::CommandFactory(const CommandFactory& fact) :
       creatables.push_back("EndFor");
       creatables.push_back("If");
       creatables.push_back("Else");
+      creatables.push_back("ElseIf");
       creatables.push_back("EndIf");
       creatables.push_back("While");
       creatables.push_back("EndWhile");

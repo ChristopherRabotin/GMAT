@@ -49,7 +49,7 @@ LibrationPoint::PARAMETER_TYPE[LibrationPointParamCount - CalculatedPointParamCo
 {
    Gmat::OBJECT_TYPE,
    Gmat::OBJECT_TYPE,
-   Gmat::STRING_TYPE,
+   Gmat::ENUMERATION_TYPE,
 };
 
 //------------------------------------------------------------------------------

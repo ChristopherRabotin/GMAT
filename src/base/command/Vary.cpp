@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                   Vary
 //------------------------------------------------------------------------------
@@ -243,6 +243,7 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
 {
    // Build the local string
    std::stringstream details;
+   details.precision(16);
    
    std::string gen = prefix + "Vary " + solverName + "(";
 
@@ -255,7 +256,10 @@ const std::string& Vary::GetGeneratingString(Gmat::WriteMode mode,
       details << "Unknown-Variable" << " = ";
    
    if (initialValue)
-      details << initialValue->GetDescription() <<  ", ";
+      if (initialValue->GetWrapperType() != Gmat::NUMBER)
+         details << initialValue->GetDescription() <<  ", ";
+      else
+         details << initialValue->EvaluateReal() <<  ", ";
    else
       details << "Unknown-InitialValue"  <<  ", ";
    
@@ -1243,4 +1247,40 @@ void Vary::RunComplete()
    solverDataFinalized = false;
    //ClearWrappers();
    GmatCommand::RunComplete();
+}
+
+//------------------------------------------------------------------------------
+// void SetInitialValue(Solver *theSolver)
+//------------------------------------------------------------------------------
+/**
+ * Updates intial variable values from a solver control sequence.  
+ * 
+ * This method is used to change the initial value of the variable -- for 
+ * example, once a targeter has found a solution, a call to this method sets the 
+ * initial value of the variable to match the solved-for value.
+ * 
+ * @param theSolver The Solver class that requested the variable updates.  
+ *                  Updates are only applied if this Vary command uses the same
+ *                  Solver.
+ */
+//------------------------------------------------------------------------------
+void Vary::SetInitialValue(Solver *theSolver)
+{
+   MessageInterface::ShowMessage("Setting initial value\n");
+   if (solver == theSolver)
+   {
+      Real var = solver->GetSolverVariable(variableID);
+      initialValue->SetReal(var);
+      MessageInterface::ShowMessage(
+            "   Solvers matched; solution value %.12lf reset IV for %s to %.12lf\n",
+            var, initialValueName.c_str(), initialValue->EvaluateReal());
+      
+      if (initialValue->GetWrapperType() == Gmat::NUMBER)
+      {
+         std::stringstream numString;
+         numString.precision(16);
+         numString << var;
+         initialValueName = numString.str();
+      }
+   }
 }

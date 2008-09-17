@@ -46,6 +46,7 @@
 #include "FiniteBurnSetupPanel.hpp"
 #include "DCSetupPanel.hpp"
 #include "SQPSetupPanel.hpp"
+#include "SolverSetupPanel.hpp"
 #include "ManeuverPanel.hpp"
 #include "BeginFiniteBurnPanel.hpp"
 #include "EndFiniteBurnPanel.hpp"
@@ -167,6 +168,7 @@ using namespace GmatMenu;
  */
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(GmatMainFrame, wxMDIParentFrame)
+   EVT_MENU(MENU_EMPTY_PROJECT, GmatMainFrame::OnProjectNew)
    EVT_MENU(MENU_LOAD_DEFAULT_MISSION, GmatMainFrame::OnLoadDefaultMission)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT, GmatMainFrame::OnSaveScript)
    EVT_MENU(MENU_FILE_SAVE_SCRIPT_AS, GmatMainFrame::OnSaveScriptAs)
@@ -366,6 +368,8 @@ GmatMainFrame::GmatMainFrame(wxWindow *parent,  const wxWindowID id,
    #endif
    //-----------------------------------------------------------------
    
+   msgTextCtrl->SetDefaultStyle(wxTextAttr(wxTELETYPE));
+   
    // A window w/sash for gmat notebook
    theMainWin = new wxSashLayoutWindow(this, ID_SASH_WINDOW,
                            wxDefaultPosition, wxSize(200, 30),
@@ -464,25 +468,30 @@ GmatMainFrame::~GmatMainFrame()
 
 
 //------------------------------------------------------------------------------
-// GmatMdiChildFrame* CreateChild(GmatTreeItemData *item)
+// GmatMdiChildFrame* CreateChild(GmatTreeItemData *item, bool restore)
 //------------------------------------------------------------------------------
 /**
  * Adds a page to notebook based on tree item type.
  *
  * @param <item> input GmatTreeItemData.
+ * @param <restore> if true the child will be restored if minimized
+ *
+ * @return created child or NULL If child is already open
  */
 //------------------------------------------------------------------------------
-GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item)
+GmatMdiChildFrame* GmatMainFrame::CreateChild(GmatTreeItemData *item,
+                                              bool restore)
 {
    #ifdef DEBUG_CREATE_CHILD
    MessageInterface::ShowMessage
-      ("GmatMainFrame::CreateChild() item=%s\n", item->GetDesc().c_str());
+      ("GmatMainFrame::CreateChild() item='%s', restore=%d\n",
+       item->GetDesc().c_str(), restore);
    #endif
    
    GmatMdiChildFrame *newChild = NULL;
-
+   
    // if child already open, just return
-   if (IsChildOpen(item))
+   if (IsChildOpen(item, restore))
       return NULL;
    
    GmatTree::ItemType itemType = item->GetItemType();
@@ -588,41 +597,45 @@ Integer GmatMainFrame::GetNumberOfChildOpen(bool incPlots, bool incScripts)
 
 
 //------------------------------------------------------------------------------
-// bool IsChildOpen(GmatTreeItemData *item)
+// bool IsChildOpen(GmatTreeItemData *item, bool restore)
 //------------------------------------------------------------------------------
 /**
  * Determines if page should be opened.  If the page is already opened, sets that
  * page as the selected page.
  *
  * @param <item> input GmatTreeItemData.
+ * @param <restore> if true the child will be restored if minimized
  *
  * @return True if page should be opened, false if it should not be opened.
  */
 //------------------------------------------------------------------------------
-bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item)
+bool GmatMainFrame::IsChildOpen(GmatTreeItemData *item, bool restore)
 {
    wxNode *node = theMdiChildren->GetFirst();
    while (node)
    {
       GmatMdiChildFrame *theChild = (GmatMdiChildFrame *)node->GetData();
-
+      
       #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("GmatMainFrame::IsChildOpen() title=%s\n   desc=%s\n",
           theChild->GetTitle().c_str(), item->GetDesc().c_str());
       #endif
-    
+      
       if ((theChild->GetTitle().IsSameAs(item->GetDesc().c_str())) &&
           (theChild->GetItemType() == item->GetItemType()))
       {
          // move child to the front
-         theChild->Activate();
-         theChild->Restore();
+         if (restore)
+         {
+            theChild->Activate();
+            theChild->Restore();
+         }
          return TRUE;   
       }
       node = node->GetNext();
    }
- 
+   
    return FALSE;
 }
 
@@ -645,19 +658,19 @@ GmatMdiChildFrame* GmatMainFrame::GetChild(const wxString &name)
    while (node)
    {
       theChild = (GmatMdiChildFrame *)node->GetData();
-
+      
       #ifdef DEBUG_MAINFRAME
       MessageInterface::ShowMessage
          ("   theChild=%s\n", theChild->GetTitle().c_str());
       #endif
-
+      
       if (theChild->GetTitle().IsSameAs(name))
       {
          return theChild;
       }
       node = node->GetNext();
    }
-
+   
    return NULL;
 }
 
@@ -1111,8 +1124,9 @@ void GmatMainFrame::CloseCurrentProject()
    MessageInterface::ShowMessage("   clearing trees and message window\n");
    #endif
    
-   theGuiInterpreter->ClearResource();
+   // clear command sequence before resource (loj: 2008.07.10)
    theGuiInterpreter->ClearCommandSeq();
+   theGuiInterpreter->ClearResource();
    MessageInterface::ClearMessage();
    
    GmatAppData *gmatAppData = GmatAppData::Instance();
@@ -1155,7 +1169,7 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
    MessageInterface::ShowMessage
       ("GmatMainFrame::InterpretScript()\n   filename=%s\n   scriptOpenOpt=%d, "
        "closeScript=%d, readBack=%d, multiScripts=%d\n   savePath=%s\n", filename.c_str(),
-       closeScript, scriptOpenOpt, readBack, multiScripts, savePath.c_str(), multiScripts);
+       scriptOpenOpt, closeScript, readBack, multiScripts, savePath.c_str());
    #endif
    
    UpdateTitle(filename);
@@ -1177,6 +1191,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
       if (theGuiInterpreter->
           InterpretScript(filename.c_str(), readBack, savePath.c_str()))
       {
+         #ifdef DEBUG_INTERPRET
+         MessageInterface::ShowMessage("   Successfully interpreated the script\n");
+         #endif
          success = true;
       }  
       else
@@ -1185,8 +1202,9 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
             (Gmat::ERROR_, "Errors were found in the script named \"%s\".\n"
              "Please fix all errors listed in message window.\n", filename.c_str());
          
-         theGuiInterpreter->ClearResource();
+         // Clear command sequence before resource (loj: 2008.07.10)
          theGuiInterpreter->ClearCommandSeq();
+         theGuiInterpreter->ClearResource();
       }
       
       if (success)
@@ -1201,16 +1219,15 @@ bool GmatMainFrame::InterpretScript(const wxString &filename, Integer scriptOpen
          
          // open script editor
          if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
-            OpenScript();
-         
+            OpenScript(false);
       }
       else
       {
          SetStatusText("Errors were Found in the Script!!", 1);
          
          // open script editor
-         if (scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR ||
-             scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT)
+         if (scriptOpenOpt == GmatGui::ALWAYS_OPEN_SCRIPT ||
+             scriptOpenOpt == GmatGui::OPEN_SCRIPT_ON_ERROR)
             OpenScript();
       }
    }
@@ -1804,14 +1821,22 @@ bool GmatMainFrame::SaveScriptAs()
 
 
 //------------------------------------------------------------------------------
-// void OpenScript()
+// void OpenScript(bool restore)
 //------------------------------------------------------------------------------
-void GmatMainFrame::OpenScript()
+/**
+ * Creates script item and opens the script in the text editor.
+ *
+ * @param <restore> if true the child will be restored if minimized
+ */
+//------------------------------------------------------------------------------
+void GmatMainFrame::OpenScript(bool restore)
 {
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OpenScript() entered\n");
+   
    GmatTreeItemData *scriptItem =
       new GmatTreeItemData(mScriptFilename.c_str(), GmatTree::SCRIPT_FILE);
    
-   CreateChild(scriptItem);
+   CreateChild(scriptItem, restore);
 }
 
 
@@ -2159,6 +2184,9 @@ GmatMainFrame::CreateNewResource(const wxString &title, const wxString &name,
    case GmatTree::SQP:
       sizer->Add(new SQPSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
+   case GmatTree::SOLVER:
+      sizer->Add(new SolverSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
+      break;
    case GmatTree::REPORT_FILE:
       sizer->Add(new ReportFileSetupPanel(scrolledWin, name), 0, wxGROW|wxALL, 0);
       break;
@@ -2320,7 +2348,10 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
       sizer->Add(new AssignmentPanel(scrolledWin, cmd), 0, wxGROW|wxALL, 0);
       break;
    default:
-      MessageInterface::ShowMessage("===> returning NULL\n");
+      #ifdef DEBUG_CREATE_CHILD
+      MessageInterface::ShowMessage
+         ("GmatMainFrame::CreateNewCommand() returning NULL\n");
+      #endif
       return NULL;
    }
    
@@ -2347,12 +2378,16 @@ GmatMainFrame::CreateNewCommand(GmatTree::ItemType itemType, GmatTreeItemData *i
    
    // list of open children
    theMdiChildren->Append(newChild);
-
+   
    // djc: Under linux, force the new child to display
    #ifndef __WXMSW__
       newChild->Show();
    #endif
-
+   
+   #ifdef DEBUG_CREATE_CHILD
+   MessageInterface::ShowMessage
+      ("GmatMainFrame::CreateNewCommand() returning <%p>\n", newChild);
+   #endif
    return newChild;
 }
 
@@ -2868,14 +2903,17 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    wxArrayString compDirs = dlg.GetCompareDirectories();
    bool saveCompareResults = dlg.SaveCompareResults();
    wxString saveFileName = dlg.GetSaveFilename();
-
+   wxString basePrefix = dlg.GetBasePrefix();
+   wxArrayString compPrefixes = dlg.GetComparePrefixes();
+   
    #ifdef DEBUG_FILE_COMPARE
    MessageInterface::ShowMessage
       ("GmatMainFrame::OnFileCompareText() baseDir=%s\n   "
        "compDirs[0]=%s\n", baseDir.c_str(), compDirs[0].c_str());
    MessageInterface::ShowMessage
-      ("   numDirsToCompare=%d, numFilesToCompare=%d\n", numDirsToCompare,
-       numFilesToCompare);
+      ("   basePrefix='%s', comparePrefixex[0]='%s', numDirsToCompare=%d, "
+       "numFilesToCompare=%d\n", basePrefix.c_str(), compPrefixes[0].c_str(),
+       numDirsToCompare, numFilesToCompare);
    #endif
    
    wxTextCtrl *textCtrl = NULL;
@@ -2903,12 +2941,14 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    int w, h;
    textFrame->GetSize(&w, &h);
    textFrame->SetSize(w+1, h+1);
-
+   
    // Get files in the base directory
    wxDir dir(baseDir);
    wxString filename;
    wxString filepath;
    wxArrayString baseFileNameArray;
+   wxArrayString noPrefixNameArray;
+   size_t prefixLen = basePrefix.Len();
    
    //How do I specify multiple file ext?
    bool cont = dir.GetFirst(&filename);
@@ -2917,11 +2957,20 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       if (filename.Contains(".report") || filename.Contains(".txt") ||
           filename.Contains(".data") || filename.Contains(".script"))
       {
-         filepath = baseDir + "/" + filename;
-         
-         // remove any backup files
-         if (filename.Last() == 't' || filename.Last() == 'a')
-            baseFileNameArray.push_back(filepath.c_str());
+         // if file has prefix
+         if (filename.Left(prefixLen) == basePrefix)
+         {
+            filepath = baseDir + "/" + filename;
+            
+            // remove any backup files
+            if (filename.Last() == 't' || filename.Last() == 'a')
+            {
+               wxString noPrefixName = filename;
+               noPrefixName.Replace(basePrefix, "", false);
+               noPrefixNameArray.push_back(noPrefixName.c_str());
+               baseFileNameArray.push_back(filepath.c_str());
+            }
+         }
       }
       
       cont = dir.GetNext(&filename);
@@ -2929,7 +2978,7 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
    
    wxString tempStr;
    int fileCount = 0;
-   wxString baseFileName;
+   wxString noPrefixName, baseFileName;
    int file1DiffCount = 0;
    int file2DiffCount = 0;
    int file3DiffCount = 0;
@@ -2944,14 +2993,26 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       
       tempStr.Printf("%d", i+1);
       textCtrl->AppendText("==> File Compare Count: " + tempStr + "\n");
-
-      baseFileName = baseFileNameArray[i];
-      wxFileName filename(baseFileName);
       
+      baseFileName = baseFileNameArray[i];
+      noPrefixName = noPrefixNameArray[i];
+      wxFileName filename(noPrefixName);
       wxArrayString compareNames;
       
+      #ifdef DEBUG_FILE_COMPARE
+      MessageInterface::ShowMessage("   baseFileName='%s'\n", baseFileName.c_str());
+      MessageInterface::ShowMessage("   noPrefixName='%s'\n", noPrefixName.c_str());
+      #endif
+      
       for (int j=0; j<numDirsToCompare; j++)
+      {
          compareNames.Add(filename.GetFullName());
+         
+         #ifdef DEBUG_FILE_COMPARE
+         MessageInterface::ShowMessage
+            ("   compareNames[%d]='%s'\n", j, compareNames[j].c_str());
+         #endif
+      }
       
       // set compare file names
       wxString filename1;
@@ -2959,14 +3020,14 @@ void GmatMainFrame::OnFileCompareText(wxCommandEvent& event)
       wxString filename3;
       
       if (numDirsToCompare >= 1)
-         filename1 = compDirs[0] + "/" + compareNames[0];
+         filename1 = compDirs[0] + "/" + compPrefixes[0] + compareNames[0];
       
       if (numDirsToCompare >= 2)
-         filename2 = compDirs[1] + "/" + compareNames[1];
+         filename2 = compDirs[1] + "/" + compPrefixes[1] + compareNames[1];
       
       if (numDirsToCompare >= 3)
-         filename3 = compDirs[2] + "/" + compareNames[2];
-
+         filename3 = compDirs[2] + "/" + compPrefixes[2] + compareNames[2];
+      
       StringArray output;
       
       output =
@@ -3296,6 +3357,8 @@ void GmatMainFrame::EnableMenuAndToolBar(bool enable, bool missionRunning,
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 {
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OnScriptBuildObject() entered\n");
+   
    wxString filename = ((GmatMdiChildFrame *)GetActiveChild())->GetTitle();
    
    InterpretScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT);
@@ -3307,11 +3370,11 @@ void GmatMainFrame::OnScriptBuildObject(wxCommandEvent& WXUNUSED(event))
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 {
-   //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptBuildAndRun()\n");
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OnScriptBuildAndRun()\n");
    
    wxString filename = mScriptFilename.c_str();
    
-   if (InterpretScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT))      
+   if (InterpretScript(filename, GmatGui::ALWAYS_OPEN_SCRIPT))
       mRunStatus = RunCurrentMission();
 }
 
@@ -3327,7 +3390,7 @@ void GmatMainFrame::OnScriptBuildAndRun(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void GmatMainFrame::OnScriptRun(wxCommandEvent& WXUNUSED(event))
 {
-   //MessageInterface::ShowMessage("====> GmatMainFrame::OnScriptRun()\n");
+   //MessageInterface::ShowMessage("===> GmatMainFrame::OnScriptRun()\n");
    mRunStatus = RunCurrentMission();
 }
 

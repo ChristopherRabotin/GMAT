@@ -42,14 +42,16 @@ public:
    
    virtual Gmat::ParameterType GetDataType() const;
    
-   virtual GmatBase*       GetRefObject(const std::string &name = "");
-   virtual bool            SetRefObject(GmatBase *obj);
-   virtual bool            RenameObject(const std::string &oldName, 
-                                        const std::string &newName);
+   virtual GmatBase*    GetRefObject(const std::string &name = "");
+   virtual bool         SetRefObject(GmatBase *obj);
+   virtual bool         RenameObject(const std::string &oldName, 
+                                     const std::string &newName);
    
-   virtual Real            EvaluateReal() const;
-   virtual bool            SetReal(const Real toValue);
+   virtual Real         EvaluateReal() const;
+   virtual bool         SetReal(const Real toValue);
    
+   virtual GmatBase*    EvaluateObject() const;
+   virtual bool         SetObject(const GmatBase* obj);
    
 protected:  
 

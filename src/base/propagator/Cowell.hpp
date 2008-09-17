@@ -6,7 +6,8 @@
 // Created: 2005/05/16
 //
 /**
- * 
+ * @note This code is a shell for the Cowell integrator.  The integrator is not
+ *       currently implemented.
  */
 // **************************************************************************
 
@@ -16,7 +17,14 @@
 #include "gmatdefs.hpp"
 #include "Integrator.hpp"
 
-class GMAT_API Cowell : public Integrator
+/**
+ * The Cowell predictor-corrector integrator
+ * 
+ * This code is a shell for the Cowell integrator.  The integrator is not 
+ * yet implemented.
+ * 
+ */
+class GMAT_API Cowell : public PredictorCorrector
 {
 public:
    Cowell(const std::string &typeStr, const std::string &nomme = "");

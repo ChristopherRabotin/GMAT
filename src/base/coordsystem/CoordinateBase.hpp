@@ -59,6 +59,7 @@ public:
    virtual bool                RequiresJ2000Body();
    virtual void                SetJ2000BodyName(const std::string &toName);
    virtual void                SetJ2000Body(SpacePoint *j2000Ptr);
+   virtual SolarSystem*        GetSolarSystem() const;
    virtual std::string         GetOriginName() const;
    virtual SpacePoint*         GetOrigin() const;
    virtual std::string         GetJ2000BodyName() const;

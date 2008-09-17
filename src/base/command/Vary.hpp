@@ -102,6 +102,9 @@ public:
    virtual bool        Initialize();
    virtual bool        Execute();
    virtual void        RunComplete();
+   
+   // Used to apply corrections to the command
+   virtual void        SetInitialValue(Solver *theSolver);
     
 protected:
    // Parameter IDs
@@ -129,51 +132,6 @@ protected:
    std::string         solverName;
    /// The solver instance used to manage the state machine
    Solver              *solver;
-
-/** 
- * The following lines are the old code, superceded now by the wrapper code
-
-   /// Name(s) of the variable(s)
-   StringArray         variableName;
-   /// Initial variable value(s)
-   std::vector<Real>   initialValue;
-   /// Current (nominal) variable value(s)
-   std::vector<Real>   currentValue;
-   /// Variable perturbation(s)
-   std::vector<Real>   perturbation;
-   /// Absolute minimum value
-   std::vector<Real>   variableMinimum;
-   /// Absolute maximum value
-   std::vector<Real>   variableMaximum;
-   /// Maximum step allowed
-   std::vector<Real>   variableMaximumStep;
-   /// solver ID for the parameters
-   std::vector<Integer> variableId;
-   /// Pointers to the objects that the variables affect
-   std::vector<GmatBase*> pobject;
-   /// Object ID for the parameters
-   std::vector<Integer> parmId;
-
-   /// additive scale factor for optimizers
-   std::vector<Real>   additiveScaleFactor;
-   /// multiplicative scale factor for optimizers
-   std::vector<Real>   multiplicativeScaleFactor;
-
-   /// solver ID for the parameters
-   Integer             variableId;
-   /// Pointers to the object that the variable affects
-   GmatBase            *pobject;
-   /// Object ID for the object parameter
-   Integer             parmId;
-   /// The solver instance used to manage the state machine
-//   Solver              *solver;
-
-*/
-
-   /**
-    * The following code was reworked ti use ElementWrappers, and so that there 
-    * is only one variable allowed per Vary command.
-    */
 
    /// Name(s) of the variable(s)
    std::string         variableName;

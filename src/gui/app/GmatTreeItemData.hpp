@@ -147,6 +147,7 @@ namespace GmatTree
       BARYCENTER,
       LIBRATION_POINT,
       
+      SOLVER,
       DIFF_CORR,
       BROYDEN,
       QUASI_NEWTON,

@@ -38,6 +38,8 @@
 //#define DEBUG_GMAT_FUNCTION
 //#define DEBUG_FILE_PATH
 //#define DEBUG_SET_PATH
+#define DEBUG_PLUGIN_DETECTION
+
 
 //---------------------------------
 // static data
@@ -939,17 +941,20 @@ std::string FileManager::GetGmatFunctionPath(const std::string &funcName)
    // Search through mGmatFunctionPaths
    // The most recent path added to the last, so search backwards
    std::string pathName, fullPath;
-   bool fileFound = false;   
-   StringArray::iterator pos = mGmatFunctionPaths.end() - 1;
+   bool fileFound = false;
    
    // add .gmf if not found
    std::string funcName1 = funcName;
    if (funcName.find(".gmf") == funcName.npos)
       funcName1 = funcName1 + ".gmf";
    
-   while (pos != mGmatFunctionPaths.begin() - 1)
+   // MSVC gives a runtime error here, so use reverse_iterator (loj: 2008.07.08)
+   //StringArray::iterator pos = mGmatFunctionPaths.end() - 1;
+   StringArray::reverse_iterator rpos = mGmatFunctionPaths.rbegin();
+   //while (pos != mGmatFunctionPaths.begin() - 1)
+   while (rpos != mGmatFunctionPaths.rend())
    {
-      pathName = *pos;
+      pathName = *rpos;
       fullPath = ConvertToAbsPath(pathName) + funcName1;
       
       #ifdef DEBUG_GMAT_FUNCTION
@@ -962,7 +967,8 @@ std::string FileManager::GetGmatFunctionPath(const std::string &funcName)
          break;
       }
       
-      pos--;
+      //rpos--;
+      rpos++;
    }
    
    if (fileFound)
@@ -1051,6 +1057,20 @@ const StringArray& FileManager::GetAllMatlabFunctionPaths()
 }
 
 
+//------------------------------------------------------------------------------
+// const StringArray& GetPluginList()
+//------------------------------------------------------------------------------
+/**
+ * Accesses the list of plug-in libraries parsed from the startup file.
+ * 
+ * @return The list of plug-in libraries
+ */
+//------------------------------------------------------------------------------
+const StringArray& FileManager::GetPluginList()
+{
+   return mPluginList;
+}
+
 //---------------------------------
 // private methods
 //---------------------------------
@@ -1128,6 +1148,14 @@ void FileManager::AddFileType(const std::string &type, const std::string &name)
          //   ("FileManager::AddFileType() expecting 'PATH/' in line:\n" +
          //    type + " = " + name);
       }
+   }
+   else if (type == "PLUGIN")
+   {
+      #ifdef DEBUG_PLUGIN_DETECTION
+         MessageInterface::ShowMessage("Adding plug-in %s to plugin list\n", 
+               name.c_str());
+      #endif
+      mPluginList.push_back(name);
    }
    else
    {
@@ -1251,5 +1279,3 @@ FileManager::FileManager()
    
 #endif  
 }
-
-

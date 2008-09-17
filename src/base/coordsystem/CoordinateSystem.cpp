@@ -34,6 +34,7 @@
 //#define DEBUG_DESTRUCTION
 //#define DEBUG_CONSTRUCTION
 //#define DEBUG_CS_INIT 1
+//#define DEBUG_CS_SET_REF
 
 //---------------------------------
 // static data
@@ -46,15 +47,17 @@ CoordinateSystem::PARAMETER_TEXT[CoordinateSystemParamCount - CoordinateBasePara
    "UpdateInterval",
    "OverrideOriginInterval",
    //"InternalState",
+   "Epoch",
 };
 
 const Gmat::ParameterType
 CoordinateSystem::PARAMETER_TYPE[CoordinateSystemParamCount - CoordinateBaseParamCount] =
 {
-   Gmat::OBJECT_TYPE,
-   Gmat::REAL_TYPE,
-   Gmat::BOOLEAN_TYPE,
-   //Gmat::RVECTOR_TYPE,
+   Gmat::OBJECT_TYPE,     // "Axes",
+   Gmat::REAL_TYPE,       // "UpdateInterval",
+   Gmat::BOOLEAN_TYPE,    // "OverrideOriginInterval",
+   //Gmat::RVECTOR_TYPE,    // "InternalState",
+   Gmat::REAL_TYPE,       // "Epoch",
 };
 
 
@@ -667,6 +670,39 @@ bool CoordinateSystem::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool CoordinateSystem::IsParameterReadOnly(const Integer id) const
+{
+   if (id == EPOCH)
+      return true;
+   
+   return CoordinateBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool CoordinateSystem::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
+
 //------------------------------------------------------------------------------
 //  std::string  GetParameterText(const Integer id) const
 //------------------------------------------------------------------------------
@@ -764,6 +800,10 @@ Real CoordinateSystem::GetRealParameter(const Integer id) const
    {
       if (axes) return axes->GetRealParameter("UpdateInterval");
    }
+   else if (id == EPOCH) 
+   {
+      if (axes) return axes->GetRealParameter("Epoch");
+   }
    return CoordinateBase::GetRealParameter(id);
 }
 
@@ -782,10 +822,23 @@ Real CoordinateSystem::GetRealParameter(const Integer id) const
 //------------------------------------------------------------------------------
 Real CoordinateSystem::SetRealParameter(const Integer id, const Real value)
 {
-   if (id == UPDATE_INTERVAL) 
+   #ifdef DEBUG_CS_SET
+   MessageInterface::ShowMessage
+      ("CoordinateSystem::SetRealParameter()entered, axes=<%p>, id=%d, "
+       "value=%f\n", axes, id, value);
+   #endif
+   
+   if (id == UPDATE_INTERVAL)
    {
-      if (axes) return axes->SetRealParameter("UpdateInterval", value);
+      if (axes)
+         return axes->SetRealParameter("UpdateInterval", value);
    }
+   else if (id == EPOCH)
+   {
+      if (axes)
+         return axes->SetRealParameter("Epoch", value);
+   }
+   
    return CoordinateBase::SetRealParameter(id,value);
 }
 
@@ -867,6 +920,44 @@ std::string CoordinateSystem::GetStringParameter(const std::string &label) const
    return GetStringParameter(GetParameterID(label));
 }
 
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const Integer id, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::SetStringParameter(const Integer id,
+                                          const std::string &value)
+{
+   switch (id)
+   {
+   case AXES:
+      return true;
+   default:
+      return CoordinateBase::SetStringParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// bool SetStringParameter(const std::string &label, const std::string &value)
+//------------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//------------------------------------------------------------------------------
+bool CoordinateSystem::SetStringParameter(const std::string &label,
+                                          const std::string &value)
+{
+   return SetStringParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const Integer id) const
+//------------------------------------------------------------------------------
 bool CoordinateSystem::GetBooleanParameter(const Integer id) const
 {
    if (id == OVERRIDE_ORIGIN_INTERVAL) 
@@ -877,13 +968,19 @@ bool CoordinateSystem::GetBooleanParameter(const Integer id) const
    return CoordinateBase::GetBooleanParameter(id); 
 }
 
+//------------------------------------------------------------------------------
+// bool GetBooleanParameter(const std::string &label) const
+//------------------------------------------------------------------------------
 bool CoordinateSystem::GetBooleanParameter(const std::string &label) const
 {
    return GetBooleanParameter(GetParameterID(label));
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const Integer id, const bool value)
+//------------------------------------------------------------------------------
 bool CoordinateSystem::SetBooleanParameter(const Integer id,
-                                     const bool value)
+                                           const bool value)
 {
    if (id == OVERRIDE_ORIGIN_INTERVAL)
    {
@@ -895,12 +992,14 @@ bool CoordinateSystem::SetBooleanParameter(const Integer id,
    return CoordinateBase::SetBooleanParameter(id, value);
 }
 
+//------------------------------------------------------------------------------
+// bool SetBooleanParameter(const std::string &label, const bool value)
+//------------------------------------------------------------------------------
 bool CoordinateSystem::SetBooleanParameter(const std::string &label,
-                                     const bool value)
+                                           const bool value)
 {
    return SetBooleanParameter(GetParameterID(label), value);
 }
-
 
 
 //------------------------------------------------------------------------------
@@ -1071,6 +1170,10 @@ const StringArray& CoordinateSystem::GetRefObjectNameArray(const Gmat::ObjectTyp
 bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
                                     const std::string &name)
 {
+   #ifdef DEBUG_CS_SET_REF
+      MessageInterface::ShowMessage("Entering CS::SetRefObject with obj of type %s and name '%s'\n",
+            (obj->GetTypeName()).c_str(), name.c_str());
+   #endif
    if (obj == NULL)
       return false;
    
@@ -1083,6 +1186,9 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
 //          MessageInterface::ShowMessage
 //             ("===> CoordinateSystem::SetRefObject() %s, before axes=%p, obj=%p\n",
 //              GetName().c_str(), axes, obj);
+         #ifdef DEBUG_CS_SET_REF
+            MessageInterface::ShowMessage("CS::SetRefObject - object is of type AXIS_SYSTEM\n");
+         #endif
 
          AxisSystem *oldAxis = axes;
          
@@ -1112,6 +1218,9 @@ bool CoordinateSystem::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
    
    if (retval)
       return true;
+   #ifdef DEBUG_CS_SET_REF
+      MessageInterface::ShowMessage("CS::SetRefObject - object is NOT of type AXIS_SYSTEM\n");
+   #endif
    
    // Not handled here -- invoke the next higher SetRefObject call
    return CoordinateBase::SetRefObject(obj, type, name);

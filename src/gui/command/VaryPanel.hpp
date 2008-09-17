@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                    VaryPanel
 //------------------------------------------------------------------------------
@@ -61,7 +61,9 @@ private:
    wxTextCtrl *mMaxValueTextCtrl;
    wxTextCtrl *mAdditiveTextCtrl;
    wxTextCtrl *mMultiplicativeTextCtrl;
-   
+
+   wxStaticText *minValueStaticText;
+   wxStaticText *maxValueStaticText;
    wxStaticText *pertStaticText;
    wxStaticText *maxStepStaticText;
    wxStaticText *additiveStaticText;
@@ -87,6 +89,8 @@ private:
    void OnTextChange(wxCommandEvent& event);    
    void OnSolverSelection(wxCommandEvent &event);
    void OnButton(wxCommandEvent& event);
+   
+   void SetControlEnabling(GmatBase *slvr);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();

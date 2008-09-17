@@ -108,6 +108,8 @@ public:
                                         const std::string &newName);
    
    // Parameter access methods - overridden from GmatBase 
+   virtual bool         IsParameterReadOnly(const Integer id) const;
+   virtual bool         IsParameterReadOnly(const std::string &label) const;
    virtual std::string  GetParameterText(const Integer id) const;     
    virtual Integer      GetParameterID(const std::string &str) const; 
    virtual Gmat::ParameterType
@@ -121,6 +123,10 @@ public:
                                          const Real value);
    std::string          GetStringParameter(const Integer id) const;
    std::string          GetStringParameter(const std::string &label) const;
+   virtual bool         SetStringParameter(const Integer id, 
+                                           const std::string &value);
+   virtual bool         SetStringParameter(const std::string &label, 
+                                           const std::string &value);
    virtual bool         GetBooleanParameter(const Integer id) const; 
    virtual bool         GetBooleanParameter(const std::string &label) const; 
    virtual bool         SetBooleanParameter(const Integer id,
@@ -147,6 +153,9 @@ protected:
       UPDATE_INTERVAL,
       OVERRIDE_ORIGIN_INTERVAL,
       //INTERNAL_STATE,   // currently, no access allowed
+
+      // owned object parameters
+      EPOCH,
       CoordinateSystemParamCount
    };
    

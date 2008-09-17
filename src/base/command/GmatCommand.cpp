@@ -38,8 +38,12 @@
 //#define DEBUG_COMMAND_REMOVE 1
 //#define DEBUG_RUN_COMPLETE 1
 //#define DEBUG_WRAPPER_CODE
+//#define DEBUG_FIND_OBJECT
 //#define DEBUG_SEPARATE
 //#define DEBUG_GEN_STRING 1
+//#define DEBUG_IS_FUNCTION
+//#define DEBUG_INTERPRET_PREFACE
+//#define DEBUG_CMD_CALLING_FUNCTION
 
 //---------------------------------
 //  static members
@@ -85,12 +89,15 @@ Integer GmatCommand::satTotalMassID;
 GmatCommand::GmatCommand(const std::string &typeStr) :
    GmatBase             (Gmat::COMMAND, typeStr),
    initialized          (false),
+   currentFunction      (NULL),
+   callingFunction      (NULL),
    next                 (NULL),
    previous             (NULL),
    level                (-1),   // Not set
    objectMap            (NULL),
    globalObjectMap      (NULL),
    solarSys             (NULL),
+   internalCoordSys     (NULL),
    publisher            (NULL),
    streamID             (-1),
    depthChange          (0),
@@ -180,11 +187,14 @@ GmatCommand::GmatCommand(const GmatCommand &c) :
    association          (c.association),
    objects              (c.objects),
    initialized          (false),
+   currentFunction      (c.currentFunction),
+   callingFunction      (c.callingFunction),
    next                 (NULL),
    level                (-1),   // Not set
    objectMap            (c.objectMap),
    globalObjectMap      (c.globalObjectMap),
    solarSys             (c.solarSys),
+   internalCoordSys     (c.internalCoordSys),
    publisher            (c.publisher),
    streamID             (c.streamID),
    depthChange          (c.depthChange),
@@ -226,6 +236,8 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
 
    GmatBase::operator=(c);
    initialized = false;
+   currentFunction = c.currentFunction;
+   callingFunction = c.callingFunction;
    objects.clear();
    association.clear();
    ClearObjects();             // Drop any previously set object pointers
@@ -236,6 +248,7 @@ GmatCommand& GmatCommand::operator=(const GmatCommand &c)
    objectMap = c.objectMap;
    globalObjectMap = c.globalObjectMap;
    solarSys = c.solarSys;
+   internalCoordSys = c.internalCoordSys;
    publisher = c.publisher;
    generatingString = c.generatingString;
    streamID = c.streamID;
@@ -365,6 +378,38 @@ const std::string& GmatCommand::GetGeneratingString(Gmat::WriteMode mode,
    #endif
    
    return generatingString;
+}
+
+// Added Set/GetCurrentFunction() because we need to add function name
+// in the error message ((LOJ: 2008.09.09)
+
+//------------------------------------------------------------------------------
+// virtual void SetCurrentFunction(Function *function)
+//------------------------------------------------------------------------------
+void GmatCommand::SetCurrentFunction(Function *function)
+{
+   currentFunction = function;
+}
+
+//------------------------------------------------------------------------------
+// virtual Function* GetCurrentFunction()
+//------------------------------------------------------------------------------
+Function* GmatCommand::GetCurrentFunction()
+{
+   return currentFunction;
+}
+
+//------------------------------------------------------------------------------
+// void SetCallingFunction();
+//------------------------------------------------------------------------------
+void GmatCommand::SetCallingFunction(FunctionManager *fm)
+{
+   #ifdef DEBUG_CMD_CALLING_FUNCTION
+      MessageInterface::ShowMessage(
+            "NOW setting calling function on command of type %s\n",
+            (GetTypeName()).c_str());
+   #endif
+   callingFunction = fm;
 }
 
 //------------------------------------------------------------------------------
@@ -556,7 +601,33 @@ bool GmatCommand::SetObject(GmatBase *obj, const Gmat::ObjectType type)
 //------------------------------------------------------------------------------
 void GmatCommand::SetSolarSystem(SolarSystem *ss)
 {
+   #ifdef DEBUG_COMMAND_SET
+   MessageInterface::ShowMessage
+      ("GmatCommand::SetSolarSystem() entered, ss=<%p>\n", ss);
+   #endif
+   
    solarSys = ss;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void SetInternalCoordSystem(CoordinateSystem *cs)
+//------------------------------------------------------------------------------
+/*
+ * Sets internal coordinate system which state is propagated.
+ *
+ * @note Current Internal coordinate system used is MJ2000Eq of j2000body as
+ *       origin and current j2000body is Earth.
+ */
+//------------------------------------------------------------------------------
+void GmatCommand::SetInternalCoordSystem(CoordinateSystem *cs)
+{
+   #ifdef DEBUG_COMMAND_SET
+   MessageInterface::ShowMessage
+      ("GmatCommand::SetInternalCoordSystem() entered, cs=<%p>\n", cs);
+   #endif
+   
+   internalCoordSys = cs;
 }
 
 
@@ -573,6 +644,16 @@ void GmatCommand::SetObjectMap(std::map<std::string, GmatBase *> *map)
 {
    objectMap = map;
 }
+
+
+//------------------------------------------------------------------------------
+// virtual ObjectMap* GetObjectMap()
+//------------------------------------------------------------------------------
+ObjectMap* GmatCommand::GetObjectMap()
+{
+   return objectMap;
+}
+
 
 //------------------------------------------------------------------------------
 //  void SetGlobalObjectMap(std::map<std::string, GmatBase *> *map)
@@ -618,6 +699,19 @@ void GmatCommand::SetTransientForces(std::vector<PhysicalModel*> *tf)
 void GmatCommand::SetPublisher(Publisher *p)
 {
    publisher = p;
+}
+
+
+//------------------------------------------------------------------------------
+//  Publisher* GetPublisher()
+//------------------------------------------------------------------------------
+/**
+ * Returns the Publisher used for data generated by the GmatCommand
+ */
+//------------------------------------------------------------------------------
+Publisher* GmatCommand::GetPublisher()
+{
+   return publisher;
 }
 
 
@@ -1831,6 +1925,32 @@ void GmatCommand::ConfigurationChanged(bool tf, bool setAll)
          next->ConfigurationChanged(tf, setAll);
 }
 
+bool GmatCommand::HasAFunction()
+{
+   // this default implementation just returns false
+   return false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool NeedsServerStartup()
+//------------------------------------------------------------------------------
+/**
+ * Indicates in the engine needs to start an external process to run the command
+ * 
+ * The Sandbox calls this method and tells the Moderator to start the MATLAB
+ * engine if a true value is returned.  Note that the method name is not MATLAB 
+ * specific; future builds may provide additional interfaces so that specific
+ * servers can be started -- for example, Octave -- rather than just assuming 
+ * that MATLAB is the engine to start.
+ * 
+ * @return true if a server needs to start, false otherwise.
+ */
+//------------------------------------------------------------------------------
+bool GmatCommand::NeedsServerStartup()
+{
+   return false;
+}
 
 //------------------------------------------------------------------------------
 // void ShowCommand(const std::string &prefix = "",
@@ -1877,32 +1997,39 @@ void GmatCommand::ShowCommand(const std::string &prefix,
 
 
 //------------------------------------------------------------------------------
-// virtual void ShowObjectMaps()
+// virtual void ShowObjectMaps(const std::string &str)
 //------------------------------------------------------------------------------
-void GmatCommand::ShowObjectMaps()
+void GmatCommand::ShowObjectMaps(const std::string &str)
 {
+   MessageInterface::ShowMessage
+      ("%s\n======================================================================\n",
+       str.c_str());
    MessageInterface::ShowMessage
       ("GmatCommand::ShowObjectMaps() objectMap=<%p>, globalObjectMap=<%p>\n",
        objectMap, globalObjectMap);
    
    if (objectMap)
    {
-      MessageInterface::ShowMessage("Here is the Command local object map:\n");
+      MessageInterface::ShowMessage
+         ("Here is the Command local object map for %s:\n", this->GetTypeName().c_str());
       for (std::map<std::string, GmatBase *>::iterator i = objectMap->begin();
            i != objectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %30s  <%s>\n", i->first.c_str(),
+            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
    if (globalObjectMap)
    {
-      MessageInterface::ShowMessage("Here is the Command global object map:\n");
+      MessageInterface::ShowMessage
+         ("Here is the Command global object map for %s:\n", this->GetTypeName().c_str());
       for (std::map<std::string, GmatBase *>::iterator i = globalObjectMap->begin();
            i != globalObjectMap->end(); ++i)
          MessageInterface::ShowMessage
-            ("   %30s  <%s>\n", i->first.c_str(),
+            ("   %30s  <%p><%s>\n", i->first.c_str(), i->second,
              i->second == NULL ? "NULL" : (i->second)->GetTypeName().c_str());
    }
+   MessageInterface::ShowMessage
+      ("======================================================================\n");
 }
 
 
@@ -1920,9 +2047,24 @@ void GmatCommand::ShowObjectMaps()
 //------------------------------------------------------------------------------
 StringArray GmatCommand::InterpretPreface()
 {
+   #ifdef DEBUG_INTERPRET_PREFACE
+      MessageInterface::ShowMessage("In GmatCommand::InterpretPreface, generatingString = %s\n",
+            generatingString.c_str());
+   #endif
    parser.EvaluateBlock(generatingString);
    StringArray blocks = parser.DecomposeBlock(generatingString);
    StringArray chunks = parser.ChunkLine();
+   
+   #ifdef DEBUG_INTERPRET_PREFACE
+      MessageInterface::ShowMessage("   ater call to parser, generatingString = %s\n",
+            generatingString.c_str());
+      MessageInterface::ShowMessage("   and blocks are:\n");
+      for (unsigned int ii = 0; ii < blocks.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", (blocks.at(ii)).c_str());
+      MessageInterface::ShowMessage("   and chunks are:\n");
+      for (unsigned int ii = 0; ii < chunks.size(); ii++)
+         MessageInterface::ShowMessage("      %s\n", (chunks.at(ii)).c_str());
+   #endif
    
    // First comes the command keyword
    // @note "GMAT" keyword is automatically removed
@@ -2102,6 +2244,13 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    #ifdef DEBUG_FIND_OBJECT
    ShowObjectMaps();
    #endif
+
+   // Check for SolarSystem (loj: 2008.06.25)
+   if (name == "SolarSystem")
+      if (solarSys)
+         return solarSys;
+      else
+         return NULL;
    
    // Check for the object in the Local Object Store (LOS) first
    if (objectMap && objectMap->find(newName) != objectMap->end())
@@ -2111,19 +2260,11 @@ GmatBase* GmatCommand::FindObject(const std::string &name)
    if (globalObjectMap && globalObjectMap->find(newName) != globalObjectMap->end())
       return (*globalObjectMap)[newName];
    
-   return NULL;
+   // Let's try SolarSystem (loj: 2008.06.04)
+   if (solarSys && solarSys->GetBody(newName))
+      return (GmatBase*)(solarSys->GetBody(newName));
    
-//    // Check for the object in the Local Object Store (LOS) first
-//    if (objectMap->find(newName) == objectMap->end())
-//    {
-//       // If not found in the LOS, check the Global Object Store (GOS)
-//       if (globalObjectMap->find(newName) == globalObjectMap->end())
-//          return NULL;
-//       else return (*globalObjectMap)[newName];
-//    }
-//    else
-//       return (*objectMap)[newName];
-   
+   return NULL;   
 }
 
 
@@ -2135,7 +2276,8 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
    if (&wrapper != NULL)
    {
       #ifdef DEBUG_WRAPPER_CODE
-         MessageInterface::ShowMessage("   Setting refs for wrapper \"%s\"\n", 
+         MessageInterface::ShowMessage
+            ("GmatCommand::SetWrapperReferences() Setting refs for wrapper \"%s\"\n", 
             wrapper.GetDescription().c_str());
       #endif
       StringArray onames = wrapper.GetRefObjectNames();
@@ -2143,6 +2285,9 @@ bool GmatCommand::SetWrapperReferences(ElementWrapper &wrapper)
       for (StringArray::const_iterator j = onames.begin(); j != onames.end(); ++j)
       {
          std::string name = *j;
+         #ifdef DEBUG_WRAPPER_CODE
+         MessageInterface::ShowMessage("      name='%s'\n", name.c_str());
+         #endif
          GmatBase *obj = FindObject(name);
          if (obj == NULL)
          {

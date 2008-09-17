@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  ObjectWrapper
 //------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ public:
    virtual bool         SetReal(const Real val);
    
    virtual GmatBase*    EvaluateObject() const;
-   virtual bool         SetObject(const GmatBase* obj);
+   virtual bool         SetObject(GmatBase* obj);
    
 protected:  
 

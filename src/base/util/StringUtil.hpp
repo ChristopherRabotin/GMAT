@@ -33,6 +33,8 @@ namespace GmatStringUtil
    
    std::string RemoveAll(const std::string &str, char ch, Integer start = 0);
    std::string RemoveLastNumber(const std::string &str, Integer &lastNumber);
+   std::string RemoveLastString(const std::string &str, const std::string &lastStr,
+                                bool removeAll = false);
    
    std::string RemoveSpaceInBrackets(const std::string &str,
                                      const std::string &bracketPair);
@@ -66,8 +68,8 @@ namespace GmatStringUtil
    
    StringArray SeparateBy(const std::string &str, const std::string &delim,
                           bool putBracketsTogether = false);
-   
    StringArray SeparateByComma(const std::string &str);
+   StringArray SeparateDots(const std::string &str);
    
    bool ToReal(const std::string &str, Real *value, bool trimParens = false);
    bool ToReal(const std::string &str, Real &value, bool trimParens = false);
@@ -75,6 +77,10 @@ namespace GmatStringUtil
    bool ToInteger(const std::string &str, Integer &value, bool trimParens = false);
    bool ToBoolean(const std::string &str, bool *value, bool trimParens = false);
    bool ToBoolean(const std::string &str, bool &value, bool trimParens = false);
+   
+   RealArray ToRealArray(const std::string &str);
+   IntegerArray ToIntegerArray(const std::string &str);
+   UnsignedIntArray ToUnsignedIntArray(const std::string &str);
    
    void ParseParameter(const std::string &str, std::string &type,
                        std::string &owner, std::string &dep);
@@ -112,12 +118,16 @@ namespace GmatStringUtil
                              bool checkOnlyFirst);
    bool IsParenPartOfArray(const std::string &str);
    bool IsThereEqualSign(const std::string &str);
+   bool IsThereMathSymbol(const std::string &str);
    bool HasNoBrackets(const std::string &str, bool parensForArraysAllowed = true);
    bool IsSingleItem(const std::string &str);
    bool StartsWith(const std::string &str, const std::string &value);
    bool EndsWith(const std::string &str, const std::string &value);
+   bool IsValidNumber(const std::string &str);
    bool IsValidName(const std::string &str, bool ignoreBracket = false);
    bool IsBlank(const std::string &str, bool ignoreEol = false);
+   bool HasMissingQuote(const std::string &str, const std::string &quote);
+   bool IsMathEquation(const std::string &str);
    
    Integer NumberOfOccurrences(const std::string &str, const char c);
    

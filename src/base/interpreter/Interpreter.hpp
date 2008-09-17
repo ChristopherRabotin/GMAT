@@ -26,7 +26,6 @@
 #include "TextParser.hpp"
 #include "ScriptReadWriter.hpp"
 #include "ElementWrapper.hpp"
-#include "Validator.hpp"
 
 // Forward references for GMAT core objects
 class Spacecraft;
@@ -46,7 +45,7 @@ class Subscriber;
 class Burn;
 class Function;
 class Moderator;
-
+class Validator;
 
 /**
  * Interpreter is the base class for the GMAT Interpreter subsystem.  
@@ -96,8 +95,9 @@ public:
    
    const StringArray& GetListOfObjects(Gmat::ObjectType type);
    GmatBase* GetConfiguredObject(const std::string &name);
+   GmatBase* FindObject(const std::string &name, const std::string &ofType = "");
    GmatBase* CreateObject(const std::string &type, const std::string &name,
-                          bool manage = true);
+                          Integer manage = 1);
    
    void SetSolarSystemInUse(SolarSystem *ss);
    SolarSystem* GetSolarSystemInUse();
@@ -115,17 +115,38 @@ public:
    // to check subscriber
    bool ValidateSubscriber(GmatBase *obj);
    
+   bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
+                              const std::string &value, GmatBase *fromObj);
+   
+   bool FindOwnedObject(GmatBase *owner, const std::string toProp,
+                        GmatBase **ownedObj, Integer &id, Gmat::ParameterType &type);
+   
+   bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
+                       Integer &id, Gmat::ParameterType &type);
+   
+   void BuildCreatableObjectMaps();
+   StringArray GetCreatableList(Gmat::ObjectType type, Integer subType = 0);
+
+   virtual void SetInputFocus();
+   virtual void NotifyRunCompleted();
+   virtual void UpdateView(Integer type = 7);
+   virtual void CloseCurrentProject();
+   virtual void StartServer();
+   
 protected:
    
    Moderator    *theModerator;
    SolarSystem  *theSolarSystem;
+   Validator    *theValidator;
+   
    // Object map to be used for finding objects
    ObjectMap    *theObjectMap;
+   // String array to be used for finding temporary object names
+   StringArray  tempObjectNames;
    
    /// A pointer to the ScriptReadWriter used when reading or writing script.
    ScriptReadWriter  *theReadWriter;
    TextParser        theTextParser;
-   Validator         theValidator;
    
    bool         inCommandMode;
    bool         inRealCommandMode;
@@ -154,16 +175,11 @@ protected:
    bool        continueOnError;
    std::string errorMsg1;
    std::string errorMsg2;
+   std::string debugMsg;
    StringArray errorList;
    
    void Initialize();
    void RegisterAliases();
-   
-   bool FindPropertyID(GmatBase *obj, const std::string &chunk, GmatBase **owner,
-                       Integer &id, Gmat::ParameterType &type);
-   
-   GmatBase* FindObject(const std::string &name, 
-                        const std::string &ofType = "");
    
    Parameter* GetArrayIndex(const std::string &arrayStr,
                             Integer &row, Integer &col);
@@ -171,6 +187,7 @@ protected:
    AxisSystem* CreateAxisSystem(std::string type, GmatBase *owner);
    
    // for commands
+   bool         IsCommandType(const std::string &type);
    GmatCommand* CreateCommand(const std::string &type, const std::string &desc,
                               bool &retFlag, GmatCommand *inCmd = NULL);
    GmatCommand* AppendCommand(const std::string &type, bool &retFlag,
@@ -242,17 +259,15 @@ protected:
    
    bool SetComplexProperty(GmatBase *obj, const std::string &prop,
                            const std::string &value);
-   bool SetForceModelProperty(GmatBase *obj, const std::string &prop,
-                              const std::string &value, GmatBase *fromObj);
    bool SetSolarSystemProperty(GmatBase *obj, const std::string &prop,
                                const std::string &value);
-   
-   bool FindOwnedObject(GmatBase *owner, const std::string toProp,
-                        GmatBase **ownedObj, Integer &id, Gmat::ParameterType &type);
    
    // for setting/getting array value
    Real GetArrayValue(const std::string &arrayStr, Integer &row, Integer &col);
    bool IsArrayElement(const std::string &str);
+   
+   // for Variable expression
+   bool ParseVariableExpression(Parameter *var, const std::string &exp);
    
    // for error handling
    void HandleError(const BaseException &e, bool writeLine = true, bool warning = false);
@@ -276,6 +291,7 @@ protected:
    bool CheckFunctionDefinition(const std::string &funcPathAndName,
                                 GmatBase *function, bool fullCheck = true);
    bool BuildFunctionDefinition(const std::string &str);
+   void ClearTempObjectNames();
    
 private:
       
@@ -298,6 +314,7 @@ private:
    bool IsParameterType(const std::string &desc);
    bool CheckForSpecialCase(GmatBase *obj, Integer id, std::string &value);
    bool CheckUndefinedReference(GmatBase *obj, bool writeLine = true);
+   bool HandleMathTree(GmatCommand *cmd);
 };
 
 #endif // INTERPRETER_HPP

@@ -1,3 +1,4 @@
+# $Id$
 # Eclipse makefile for the GMAT GUI
 # Initial Version - D. Conway - 2005/06/17
 # Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
@@ -30,7 +31,33 @@ else
 TARGETS = $(WXTARGET)
 CLEANTARGET = archclean
 endif
+
+ifeq ($(SHARED_BASE), 1)
+
+ifeq ($(LINUX_MAC), 1)
+
+ifdef MAC_SPECIFIC
+SHARED_EXTENSION = .dylib
+else
+SHARED_EXTENSION = .so
+endif
+
+LIBS = -L../base/lib -lGmatGui
+LIBNAME = ../base/lib/libGmatGui$(SHARED_EXTENSION)
+
+else
+
+LIBNAME = ../base/lib/libGmatGui.dll
+LIBS = $(LIBNAME)
+
+endif
+
+
+else
+
 LIBS = ../base/lib/libGmatGui.a
+
+endif
 
 all: prep $(TARGETS) 
 
@@ -63,6 +90,7 @@ HEADERS = -I../base/include \
           -I../base/function \
           -I../base/math \
           -I../base/coordsystem \
+          -I../base/plugin \
           -Iinclude \
           -Iinclude/bitmaps \
           -Iinclude/il \
@@ -108,10 +136,12 @@ OBJECTS = \
     app/GmatConnection.o \
     app/GmatMainFrame.o \
     app/GmatMenuBar.o \
+    app/GuiInterpreter.o \
     app/GuiMessageReceiver.o \
     app/GmatNotebook.o \
     app/GmatServer.o \
     app/GmatTreeItemData.o \
+    app/GuiPlotReceiver.o \
     app/InteractiveMatlabDialog.o \
     app/MissionTreeItemData.o \
     app/RunScriptFolderDialog.o \
@@ -194,6 +224,7 @@ OBJECTS = \
     solver/SQPSetupPanel.o \
     solver/SolverCreatePanel.o \
     solver/SolverGoalsPanel.o \
+    solver/SolverSetupPanel.o \
     solver/SolverVariablesPanel.o \
     spacecraft/AttitudePanel.o \
     spacecraft/BallisticsMassPanel.o \
@@ -206,16 +237,56 @@ OBJECTS = \
     view/ViewTextDialog.o \
     view/ViewTextFrame.o 
 
+ifeq ($(SHARED_BASE), 1)
+
+ifdef MAC_SPECIFIC
+$(WXTARGET) : $(OBJECTS) $(LIBNAME)
+   $(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+   cp -f $(WXTARGET) ../../bin/.
+else
+
+ifeq ($(LINUX_MAC), 1)
+$(WXTARGET) : $(OBJECTS) $(LIBNAME)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	mv -f $(WXTARGET)* ../../bin/.
+	cp -f $(LIBNAME) ../../bin/.
+else
+$(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBNAME)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	mv -f $(WXTARGET)* ../../bin/.
+	cp -f $(LIBNAME) ../../bin/.
+endif
+
+endif
+
+else
+
+ifdef MAC_SPECIFIC
 $(WXTARGET) : $(OBJECTS) $(LIBS)
 	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
 	cp -f $(WXTARGET) ../../bin/.
+else
+
+ifeq ($(LINUX_MAC), 1)
+$(WXTARGET) : $(OBJECTS) $(LIBS)
+	$(CPP) $(OBJECTS) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	mv -f $(WXTARGET)* ../../bin/.
+else
+$(WXTARGET) : $(OBJECTS) $(GMAT_ICON_O) $(LIBS)
+	$(CPP) $(OBJECTS) $(GMAT_ICON_O) $(LIBS) -o $(WXTARGET) $(LINK_FLAGS)
+	mv -f $(WXTARGET)* ../../bin/.
+endif
+
+endif
+
+endif
 
 macrez:
 	echo "linking Carbon and wx resource files ......."
-#	$(REZ) -o $(WXTARGET)
 	$(REZ) -d WXUSINGDLL -o $(WXTARGET)
 	cp -f $(WXTARGET) ../../bin/.
 	@chmod -R 755 ../../bin
+#  $(REZ) -o $(WXTARGET)
 
 macosx: 
 	echo "building Mac application bundle ......."
@@ -224,10 +295,10 @@ macosx:
 	mkdir -p $(MACOS_DIR)
 	mkdir -p $(RES_DIR)
 	mkdir -p $(LIBS_DIR)
-#	echo -n "APPL????" > $(MAC_PKGINFO)
-#	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-#	./install_libs_into_bundle
+#  echo -n "APPL????" > $(MAC_PKGINFO)
+#  ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+#  cp -f $(GMAT_ICONS) $(MAC_ICONS) 
+#  ./install_libs_into_bundle
 
 macmatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
@@ -236,7 +307,8 @@ macmatlab:
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./install_libs_into_bundle
+	./$(INSTALL_WX_LIBS)
+#	./install_libs_into_bundle
 
 macnomatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
@@ -244,10 +316,14 @@ macnomatlab:
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./install_libs_into_bundle
+	./$(INSTALL_WX_LIBS)
+#	./install_libs_into_bundle
 
 .cpp.o:
 	$(CPP) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
 
 .c.o:
 	$(C) $(CPPFLAGS) $(HEADERS) -c -o $@ $<
+
+$(GMAT_ICON_O):
+	windres -o $(GMAT_ICON_O) $(GMAT_ICON_RC)

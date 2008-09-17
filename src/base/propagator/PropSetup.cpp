@@ -27,16 +27,38 @@
 #include "Moderator.hpp"
 #include "MessageInterface.hpp"
 
+//#define DEBUG_PROPSETUP
+//#define DEBUG_PROPSETUP_SET
+
 //---------------------------------
 // static data
 //---------------------------------
+
+/**
+ * @note
+ * Since we set some Propagator's property through PropSetup, such as
+ * 'Propagator.InitialStepSize', properties owend by owning objects were
+ * added here so that Validator can create corresponding element wrappers 
+ * without going through owning object's property list to make Validator
+ * job easy. The Validator will simply call GetParameterID() of PropSetup
+ * to find out valid property or not. (LOJ: 2008.06.12)
+ */
 
 const std::string
 PropSetup::PARAMETER_TEXT[PropSetupParamCount - GmatBaseParamCount] =
 
 {
    "FM",
-   "Type"              // To match the script spec
+   "Type",
+   "InitialStepSize",
+   "Accuracy",
+   "ErrorThreshold",
+   "SmallestInterval",
+   "MinStep",
+   "MaxStep",
+   "MaxStepAttempts",
+   "LowerError",
+   "TargetError",
 };
 
 
@@ -44,7 +66,16 @@ const Gmat::ParameterType
 PropSetup::PARAMETER_TYPE[PropSetupParamCount - GmatBaseParamCount] =
 {
    Gmat::OBJECT_TYPE,  // "FM"
-   Gmat::OBJECT_TYPE   // "Type"
+   Gmat::OBJECT_TYPE,  // "Type"
+   Gmat::REAL_TYPE,    // "InitialStepSize",
+   Gmat::REAL_TYPE,    // "Accuracy",
+   Gmat::REAL_TYPE,    // "ErrorThreshold",
+   Gmat::REAL_TYPE,    // "SmallestInterval",
+   Gmat::REAL_TYPE,    // "MinStep",
+   Gmat::REAL_TYPE,    // "MaxStep",
+   Gmat::INTEGER_TYPE, // "MaxStepAttempts",
+   Gmat::REAL_TYPE,    // "LowerError",
+   Gmat::REAL_TYPE,    // "TargetError",
 };
 
 //---------------------------------
@@ -75,7 +106,7 @@ PropSetup::PropSetup(const std::string &name, Propagator *propagator,
        mPropagator = propagator;
    else 
        mPropagator = new RungeKutta89("");
-
+   
    if (forceModel != NULL)
    {
        mForceModel = forceModel;
@@ -99,19 +130,28 @@ PropSetup::PropSetup(const PropSetup &propSetup)
    : GmatBase(propSetup)
 {
    ownedObjectCount = propSetup.ownedObjectCount;
-
+   
    // PropSetup data
    mInitialized = false;
-
+   
    if (propSetup.mPropagator != NULL)
-      mPropagator = (Propagator *)propSetup.mPropagator->Clone();
+      mPropagator = (Propagator *)(propSetup.mPropagator->Clone());
    else
       mPropagator = NULL;
-      
+   
    if (propSetup.mForceModel != NULL)
-      mForceModel = (ForceModel *)propSetup.mForceModel->Clone();
+      mForceModel = (ForceModel *)(propSetup.mForceModel->Clone());
    else
       mForceModel = NULL;
+   
+   #ifdef DEBUG_PROPSETUP
+   MessageInterface::ShowMessage
+      ("In PropSetup copy constructor, Cloned Propagator=<%p><%s>'%s'\n   "
+       "Cloned ForceModel=<%p><%s>'%s'\n", mPropagator,
+       mPropagator->GetTypeName().c_str(), mPropagator->GetName().c_str(),
+       mForceModel,  mForceModel->GetTypeName().c_str(),
+       mForceModel->GetName().c_str());
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -126,26 +166,41 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
    if (this != &right)
    {
       GmatBase::operator=(right);
-
+      
       // PropSetup data
       mInitialized = false;
       
       if (mPropagator != NULL)
+      {
+         #ifdef DEBUG_PROPSETUP
+         MessageInterface::ShowMessage
+            ("PropSetup::operator= Deleting Propagator <%p><%s>'%s'\n", mPropagator,
+             mPropagator->GetTypeName().c_str(), mPropagator->GetName().c_str());
+         #endif
          delete mPropagator;
+      }
+      
       if (mForceModel != NULL)
+      {
+         #ifdef DEBUG_PROPSETUP
+         MessageInterface::ShowMessage
+            ("PropSetup::operator= Deleting ForceModel <%p><%s>'%s'\n", mForceModel,
+             mForceModel->GetTypeName().c_str(), mForceModel->GetName().c_str());
+         #endif
          delete mForceModel;
-         
+      }
+      
       if (right.mPropagator != NULL)
          mPropagator = (Propagator*)(right.mPropagator->Clone());
       else
          mPropagator = NULL;
-         
+      
       if (right.mForceModel != NULL)
          mForceModel = (ForceModel*)(right.mForceModel->Clone());
       else
          mForceModel = NULL;
    }
-
+   
    return *this;
 }
 
@@ -159,9 +214,24 @@ PropSetup& PropSetup::operator= (const PropSetup &right)
 PropSetup::~PropSetup()
 {
    if (mPropagator)
+   {
+      #ifdef DEBUG_PROPSETUP
+      MessageInterface::ShowMessage
+         ("PropSetup::~PropSetup() Deleting Propagator <%p><%s>'%s'\n", mPropagator,
+          mPropagator->GetTypeName().c_str(), mPropagator->GetName().c_str());
+      #endif
       delete mPropagator;
+   }
+   
    if (mForceModel)
+   {
+      #ifdef DEBUG_PROPSETUP
+      MessageInterface::ShowMessage
+         ("PropSetup::~PropSetup() Deleting ForceModel <%p><%s>'%s'\n", mForceModel,
+          mForceModel->GetTypeName().c_str(), mForceModel->GetName().c_str());
+      #endif
       delete mForceModel;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -188,7 +258,7 @@ Propagator* PropSetup::GetPropagator()
 {
    #if DEBUG_PROPSETUP_GET
    MessageInterface::ShowMessage
-      ("PropSetup::GetPropagator() mPropagator=%d name=%s\n",
+      ("PropSetup::GetPropagator() mPropagator=<%p>, name='%s'\n",
        mPropagator, mPropagator->GetName().c_str());
    #endif
    
@@ -218,18 +288,17 @@ ForceModel* PropSetup::GetForceModel()
 //------------------------------------------------------------------------------
 void PropSetup::SetPropagator(Propagator *propagator)
 {
-   #if DEBUG_PROPSETUP_SET
+   #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage("PropSetup::SetPropagator() entered \n");
    #endif
    
    if (propagator == NULL)
-      throw PropSetupException(
-         "PropSetup::SetPropagator failed: propagator is NULL");
+      throw PropSetupException("SetPropagator() failed: propagator is NULL");
    
    if (mPropagator != NULL)
       delete mPropagator;
-
-   mPropagator = (Propagator*)propagator->Clone();
+   
+   mPropagator = (Propagator*)(propagator->Clone());
 }
 
 //------------------------------------------------------------------------------
@@ -243,24 +312,30 @@ void PropSetup::SetPropagator(Propagator *propagator)
 //------------------------------------------------------------------------------
 void PropSetup::SetForceModel(ForceModel *forceModel)
 {
-   #if DEBUG_PROPSETUP_SET
+   if (forceModel == NULL)
+      throw PropSetupException("SetForceModel() failed: ForceModel is NULL");
+   
+   #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
-      ("PropSetup::SetForceModel() mForceModel=%s forceModel=%s\n",
-       mForceModel->GetName().c_str(), forceModel->GetName().c_str());
+      ("PropSetup::SetForceModel() current ForceModel=<%p>'%s'\n   new ForceModel=<%p>'%s'\n",
+       mForceModel, mForceModel->GetName().c_str(), forceModel, forceModel->GetName().c_str());
    #endif
    
-   if (forceModel == NULL)
-      throw PropSetupException(
-         "PropSetup::SetForceModel failed: ForceModel is NULL");
-   
    if (mForceModel != NULL)
-      delete mForceModel;
+   {
+      #ifdef DEBUG_PROPSETUP_SET
+      MessageInterface::ShowMessage
+         ("   Deleting ForceModel <%p><%s>'%s'\n", mForceModel,
+          mForceModel->GetTypeName().c_str(), mForceModel->GetName().c_str());
+      #endif
+      mForceModel = NULL;
+   }
    
-   mForceModel = (ForceModel*)forceModel->Clone();
+   mForceModel = (ForceModel*)(forceModel->Clone());
    
-   #if DEBUG_PROPSETUP_SET
+   #ifdef DEBUG_PROPSETUP_SET
    MessageInterface::ShowMessage
-      ("PropSetup::SetForceModel() after forceModel->Clone() mForceModel=%p\n",
+      ("PropSetup::SetForceModel() after forceModel->Clone() mForceModel=<%p>\n",
        mForceModel);
    #endif
 }
@@ -367,6 +442,41 @@ bool PropSetup::RenameRefObject(const Gmat::ObjectType type,
 }
 
 
+//---------------------------------------------------------------------------
+// virtual bool SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+//                           const std::string &name = "");
+//---------------------------------------------------------------------------
+/*
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool PropSetup::SetRefObject(GmatBase *obj, const Gmat::ObjectType type,
+                             const std::string &name)
+{
+   #ifdef DEBUG_PROPSETUP_SET
+   MessageInterface::ShowMessage
+      ("PropSetup::SetRefObject() entered, obj=<%p><%s><%s>, type=%d, name='%s'\n",
+       obj, obj ? obj->GetTypeName().c_str() : "NULL",
+       obj ? obj->GetName().c_str() : "NULL", type, name.c_str());
+   #endif
+   
+   if (obj == NULL)
+      return false;
+   
+   switch (type)
+   {
+   case Gmat::PROPAGATOR:
+      SetPropagator((Propagator*)obj);
+      return true;
+   case Gmat::FORCE_MODEL:
+      SetForceModel((ForceModel*)obj);
+      return true;;
+   default:
+      return false;
+   }
+}
+
+
 //------------------------------------------------------------------------------
 //  GmatBase* Clone(void) const
 //------------------------------------------------------------------------------
@@ -430,14 +540,10 @@ GmatBase* PropSetup::GetOwnedObject(Integer whichOne)
 //------------------------------------------------------------------------------
 Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
-      return PropSetup::PARAMETER_TYPE[id - GmatBaseParamCount];
-   default:
+   if (id >= GmatBaseParamCount && id < PropSetupParamCount)
+      return PARAMETER_TYPE[id - GmatBaseParamCount];
+   else
       return GmatBase::GetParameterType(id);
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -449,14 +555,10 @@ Gmat::ParameterType PropSetup::GetParameterType(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PropSetup::GetParameterTypeString(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
+   if (id >= GmatBaseParamCount && id < PropSetupParamCount)
       return GmatBase::PARAM_TYPE_STRING[GetParameterType(id)];
-   default:
+   else
       return GmatBase::GetParameterTypeString(id);
-   }
 }
 
 //------------------------------------------------------------------------------
@@ -468,15 +570,12 @@ std::string PropSetup::GetParameterTypeString(const Integer id) const
 //------------------------------------------------------------------------------
 std::string PropSetup::GetParameterText(const Integer id) const
 {
-   switch (id)
-   {
-   case PROPAGATOR_NAME:
-   case FORCE_MODEL_NAME:
-      return PropSetup::PARAMETER_TEXT[id - GmatBaseParamCount];
-   default:
+   if (id >= GmatBaseParamCount && id < PropSetupParamCount)
+      return PARAMETER_TEXT[id - GmatBaseParamCount];
+   else
       return GmatBase::GetParameterText(id);
-   }
 }
+
 
 //------------------------------------------------------------------------------
 // Integer GetParameterID(const std::string str)
@@ -495,6 +594,42 @@ Integer PropSetup::GetParameterID(const std::string &str) const
    
    return GmatBase::GetParameterID(str);
 }
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const Integer id) const
+//---------------------------------------------------------------------------
+/**
+ * @see GmatBase
+ */
+//---------------------------------------------------------------------------
+bool PropSetup::IsParameterReadOnly(const Integer id) const
+{
+   if (id == FORCE_MODEL_NAME || id == PROPAGATOR_NAME)
+      return false;
+   else if (id >= INITIAL_STEP_SIZE && id <= TARGET_ERROR)
+      return true;
+   else
+      return GmatBase::IsParameterReadOnly(id);
+}
+
+
+//---------------------------------------------------------------------------
+//  bool IsParameterReadOnly(const std::string &label) const
+//---------------------------------------------------------------------------
+/**
+ * Checks to see if the requested parameter is read only.
+ *
+ * @param <label> Description for the parameter.
+ *
+ * @return true if the parameter is read only, false (the default) if not.
+ */
+//---------------------------------------------------------------------------
+bool PropSetup::IsParameterReadOnly(const std::string &label) const
+{
+   return IsParameterReadOnly(GetParameterID(label));
+}
+
 
 //------------------------------------------------------------------------------
 // std::string GetStringParameter(const Integer id)
@@ -547,7 +682,7 @@ std::string PropSetup::GetStringParameter(const std::string &label) const
 bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
 {
    Moderator *theModerator = Moderator::Instance();
-
+   
    switch (id)
    {
       /** @todo Check behavior of PropSetup::SetStringParm -- should be used to 
@@ -579,15 +714,15 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
             ForceModel *fm = theModerator->GetForceModel(value);
             if (fm)
             {
-               #if DEBUG_PROPSETUP_SET
+               #ifdef DEBUG_PROPSETUP_SET
                MessageInterface::ShowMessage
                   ("PropSetup::SetStringParameter() before SetForceModel() "
-                   "mForceModel=%p\n", mForceModel);
+                   "mForceModel=<%p>\n", mForceModel);
                #endif
                
                SetForceModel(fm);
                
-               #if DEBUG_PROPSETUP_SET
+               #ifdef DEBUG_PROPSETUP_SET
                MessageInterface::ShowMessage
                   ("PropSetup::SetStringParameter() after  SetForceModel() "
                    "mForceModel=%p\n", mForceModel);
@@ -600,12 +735,13 @@ bool PropSetup::SetStringParameter(const Integer id, const std::string &value)
                   return true;
                else
                   throw PropSetupException
-                     ("Unable to reconfigure Force model \"" + value + "\".");
+                     ("SetStringParameter() unable to reconfigure ForceModel \"" + value + "\".");
                
             }
             else 
-               throw PropSetupException("Force model '" + value + 
-                  "' does not exist.");
+               throw PropSetupException
+                  ("SetStringParameter() unable to set ForceModel \"" + value +
+                   "\". It does not exist.");
          }
          return false;
       }
@@ -627,6 +763,143 @@ bool PropSetup::SetStringParameter(const std::string &label,
 {
    return SetStringParameter(GetParameterID(label), value);
 }
+
+
+//------------------------------------------------------------------------------
+// virtual Real GetRealParameter(const Integer id) const
+//------------------------------------------------------------------------------
+/*
+ * This method provides call-through to propagator
+ */
+//------------------------------------------------------------------------------
+Real PropSetup::GetRealParameter(const Integer id) const
+{
+   switch (id)
+   {
+      case ACCURACY:
+      case INITIAL_STEP_SIZE:
+      case ERROR_THRESHOLD:
+      case SMALLEST_INTERVAL:
+      case MIN_STEP:
+      case MAX_STEP:
+      case MAX_STEP_ATTEMPTS:
+      case LOWER_ERROR:
+      case TARGET_ERROR:
+         {
+            // Get actual id
+            Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
+            return mPropagator->GetRealParameter(actualId);
+         }
+   default:
+      return GmatBase::GetRealParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Real GetRealParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Real PropSetup::GetRealParameter(const std::string &label) const
+{
+   return GetRealParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Real SetRealParameter(const Integer id, const Real value)
+//------------------------------------------------------------------------------
+/*
+ * This method provides call-through to propagator
+ */
+//------------------------------------------------------------------------------
+Real PropSetup::SetRealParameter(const Integer id, const Real value)
+{
+   switch (id)
+   {
+      case ACCURACY:
+      case INITIAL_STEP_SIZE:
+      case ERROR_THRESHOLD:
+      case SMALLEST_INTERVAL:
+      case MIN_STEP:
+      case MAX_STEP:
+      case MAX_STEP_ATTEMPTS:
+      case LOWER_ERROR:
+      case TARGET_ERROR:
+         {
+            // Get actual id
+            Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
+            return mPropagator->SetRealParameter(actualId, value);
+         }
+   default:
+      return GmatBase::SetRealParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Real SetRealParameter(const std::string &label, const Real value)
+//------------------------------------------------------------------------------
+Real PropSetup::SetRealParameter(const std::string &label, const Real value)
+{
+   return SetRealParameter(GetParameterID(label), value);
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetIntegerParameter(const Integer id) const
+//------------------------------------------------------------------------------
+Integer PropSetup::GetIntegerParameter(const Integer id) const
+{
+   switch (id)
+   {
+      case MAX_STEP_ATTEMPTS:
+         {
+            // Get actual id
+            Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
+            return mPropagator->GetIntegerParameter(actualId);
+         }
+   default:
+      return GmatBase::GetIntegerParameter(id);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer GetIntegerParameter(const std::string &label) const
+//------------------------------------------------------------------------------
+Integer PropSetup::GetIntegerParameter(const std::string &label) const
+{
+   return GetIntegerParameter(GetParameterID(label));
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const Integer id, const Integer value)
+//------------------------------------------------------------------------------
+Integer PropSetup::SetIntegerParameter(const Integer id, const Integer value)
+{
+   switch (id)
+   {
+      case MAX_STEP_ATTEMPTS:
+         {
+            // Get actual id
+            Integer actualId = GetOwnedObjectId(id, Gmat::PROPAGATOR);
+            return mPropagator->SetIntegerParameter(actualId, value);
+         }
+   default:
+      return GmatBase::SetIntegerParameter(id, value);
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// virtual Integer SetIntegerParameter(const std::string &label, const Integer value)
+//------------------------------------------------------------------------------
+Integer PropSetup::SetIntegerParameter(const std::string &label, const Integer value)
+{
+   return SetIntegerParameter(GetParameterID(label), value);
+}
+
 
 //------------------------------------------------------------------------------
 // bool Initialize()
@@ -730,7 +1003,7 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
       
       #if DEBUG_PROPSETUP_GEN_STRING
       MessageInterface::ShowMessage
-         ("PropSetup::GetGeneratingString() fMName=%s, mForceModel=%p, "
+         ("PropSetup::GetGeneratingString() fMName='%s', mForceModel=<%p>, "
           "showForceModel=%d\n", fMName.c_str(), mForceModel, showForceModel);
       #endif
       
@@ -743,3 +1016,35 @@ const std::string& PropSetup::GetGeneratingString(Gmat::WriteMode mode,
       
    return generatingString;
 }
+
+
+//---------------------------------
+// private methods
+//---------------------------------
+
+//------------------------------------------------------------------------------
+// Integer GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const
+//------------------------------------------------------------------------------
+Integer PropSetup::GetOwnedObjectId(Integer id, Gmat::ObjectType objType) const
+{
+   Integer actualId = -1;
+   
+   if (mPropagator == NULL || mForceModel == NULL)
+      throw PropSetupException
+         ("PropSetup::GetOwnedObjectId() failed: Propagator or ForceModel is NULL");
+   
+   try
+   {
+      if (objType == Gmat::PROPAGATOR)
+         actualId = mPropagator->GetParameterID(GetParameterText(id));
+      else if (objType == Gmat::FORCE_MODEL)
+         actualId = mForceModel->GetParameterID(GetParameterText(id));
+   }
+   catch (BaseException &e)
+   {
+      throw;
+   }
+   
+   return actualId;
+}
+

@@ -22,8 +22,10 @@
 #include "MessageInterface.hpp"
 #include <sstream>
 
-//#define DEBUG_MATH_ELEMENT 1
-//#define DEBUG_MATH_WRAPPERS 1
+//#define DEBUG_MATH_ELEMENT
+//#define DEBUG_WRAPPERS
+//#define DEBUG_INPUT_OUTPUT
+//#define DEBUG_EVALUATE
 //#define DEBUG_RENAME
 
 //------------------------------------------------------------------------------
@@ -41,13 +43,14 @@ MathElement::MathElement(const std::string &typeStr, const std::string &name) :
    refObject     (NULL),
    refObjectName ("")
 {
-   #if DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
       ("MathElement::MathElement() typeStr='%s', name='%s' entered\n", typeStr.c_str(),
        name.c_str());
    #endif
    
    isFunction = false;
+   objectTypeNames.push_back("MathElement");   
    theWrapperMap = NULL;
    
    Real rval;
@@ -61,7 +64,7 @@ MathElement::MathElement(const std::string &typeStr, const std::string &name) :
       SetRefObjectName(Gmat::PARAMETER, name);
    }
    
-   #if DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
       ("MathElement::MathElement() created\n");
    #endif
@@ -130,7 +133,7 @@ void MathElement::SetMathWrappers(std::map<std::string, ElementWrapper*> *wrappe
 {
    theWrapperMap = wrapperMap;
    
-   #ifdef DEBUG_MATH_WRAPPERS
+   #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
       ("MathElement::SetMathWrappers() theWrapperMap=%p, Node=%s\n",
        theWrapperMap, GetName().c_str());
@@ -157,7 +160,7 @@ void MathElement::SetMatrixValue(const Rmatrix &mat)
 //------------------------------------------------------------------------------
 void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCount)
 {
-   #if DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("MathElement::GetOutputInfo() this=<%p><%s><%s>\n", this, GetTypeName().c_str(),
        GetName().c_str());
@@ -167,7 +170,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
    rowCount = 1;
    colCount = 1;
    
-   #if DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_INPUT_OUTPUT
    MessageInterface::ShowMessage
       ("MathElement::GetOutputInfo() isNumber=%d, isFunctionInput=%d, refObjectName=%s\n",
        isNumber, isFunctionInput, refObjectName.c_str());
@@ -187,7 +190,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
    }
    else
    {
-      #if DEBUG_MATH_ELEMENT
+      #ifdef DEBUG_INPUT_OUTPUT
       MessageInterface::ShowMessage
          ("MathElement::GetOutputInfo() %s is parameter\n", GetName().c_str());
       #endif
@@ -203,7 +206,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
             std::string newName;
             GmatStringUtil::GetArrayIndex(refObjectName, row, col, newName);
             
-            #if DEBUG_MATH_ELEMENT
+            #ifdef DEBUG_INPUT_OUTPUT
             MessageInterface::ShowMessage
                ("   row=%d, col=%d, newName=%s\n", row, col, newName.c_str());
             #endif
@@ -227,7 +230,7 @@ void MathElement::GetOutputInfo(Integer &type, Integer &rowCount, Integer &colCo
             }
          }
          
-         #if DEBUG_MATH_ELEMENT
+         #ifdef DEBUG_INPUT_OUTPUT
          MessageInterface::ShowMessage
             ("MathElement::GetOutputInfo() type=%d, row=%d, col=%d\n", type,
              rowCount, colCount);
@@ -269,7 +272,7 @@ bool MathElement::ValidateInputs()
 //------------------------------------------------------------------------------
 Real MathElement::Evaluate()
 {
-   #ifdef DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
       ("MathElement::Evaluate() this='%s', refObjectName='%s', refObject=<%p>, "
        "elementType=%d\n", GetName().c_str(), refObjectName.c_str(), refObject, elementType);
@@ -283,16 +286,22 @@ Real MathElement::Evaluate()
                           "not be handled here");
    
    if (refObject)
-   {   
+   {
+      #ifdef DEBUG_EVALUATE
+      MessageInterface::ShowMessage
+         ("   refObject=<%p><%p>'%s'\n", refObject, refObject->GetTypeName().c_str(),
+          refObject->GetName().c_str());
+      #endif
+      
       ElementWrapper *wrapper = FindWrapper(refObjectName);
       
       if (elementType == Gmat::REAL_TYPE)
          realValue = wrapper->EvaluateReal();
       else if (elementType == Gmat::RMATRIX_TYPE)
-         throw MathException("Internal Error - Cannot Evaluate MathElementType of \"" +
+         throw MathException("MathElement::Evaluate() Cannot Evaluate MathElementType of \"" +
                              refObjectName + "\"");
       
-      #if DEBUG_MATH_ELEMENT
+      #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage
          ("MathElement::Evaluate() It's a parameter: %s realValue = %f\n",
           refObject->GetName().c_str(), realValue);
@@ -302,7 +311,7 @@ Real MathElement::Evaluate()
    }
    else
    {
-      #if DEBUG_MATH_ELEMENT
+      #ifdef DEBUG_EVALUATE
       MessageInterface::ShowMessage
          ("MathElement::Evaluate() It's a number: realValue = %f\n", realValue);
       #endif
@@ -317,7 +326,7 @@ Real MathElement::Evaluate()
 //------------------------------------------------------------------------------
 Rmatrix MathElement::MatrixEvaluate()
 {
-   #ifdef DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_EVALUATE
    MessageInterface::ShowMessage
       ("MathElement::Evaluate() this='%s', refObjectName='%s', refObject=<%p>, "
        "elementType=%d\n", GetName().c_str(), refObjectName.c_str(), refObject, elementType);
@@ -334,7 +343,7 @@ Rmatrix MathElement::MatrixEvaluate()
    {
       if (refObject)
       {
-         #if DEBUG_MATH_ELEMENT
+         #ifdef DEBUG_EVALUATE
          Rmatrix rmat = refObject->GetRmatrix();
          MessageInterface::ShowMessage
             ("MathElement::Evaluate() It's an Array: %s matVal =\n%s\n",
@@ -343,11 +352,10 @@ Rmatrix MathElement::MatrixEvaluate()
          
          ElementWrapper *wrapper = FindWrapper(refObjectName);
          return wrapper->EvaluateArray();
-         //return refObject->GetRmatrix();
       }
       else
       {
-         #if DEBUG_MATH_ELEMENT
+         #ifdef DEBUG_EVALUATE
          MessageInterface::ShowMessage
             ("MathElement::Evaluate() It's a Rmatrix. matVal =\n%s\n",
              matrix.ToString().c_str());
@@ -595,7 +603,7 @@ std::string MathElement::GetRefObjectName(const Gmat::ObjectType type) const
  //------------------------------------------------------------------------------
 bool MathElement::SetRefObjectName(const Gmat::ObjectType type, const std::string &name)
 {
-   #if DEBUG_MATH_ELEMENT
+   #ifdef DEBUG_MATH_ELEMENT
    MessageInterface::ShowMessage
       ("MathElement::SetRefObjectName() name=%s\n", name.c_str());
    #endif
@@ -650,7 +658,7 @@ void MathElement::SetWrapperObjectNames(const std::string &name)
 {
    wrapperObjectNames = GmatStringUtil::SeparateBy(refObjectName, ",", true);
    
-   #ifdef DEBUG_MATH_WRAPPERS
+   #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
       ("MathElement::SetWrapperObjectNames() wrapperObjectNames are:\n");
    for (UnsignedInt i=0; i<wrapperObjectNames.size(); i++)
@@ -671,7 +679,7 @@ void MathElement::SetWrapperObjectNames(const std::string &name)
 //------------------------------------------------------------------------------
 void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
 {
-   #ifdef DEBUG_MATH_WRAPPERS
+   #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
       ("MathElement::SetWrapperObject() obj=<%p>, name='%s'\n", obj, name.c_str());
    #endif
@@ -684,7 +692,7 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
    {
       if (name == wrapperObjectNames[i])
       {
-         #ifdef DEBUG_MATH_WRAPPERS
+         #ifdef DEBUG_WRAPPERS
          MessageInterface::ShowMessage
             ("   wrapperName = '%s'\n", wrapperObjectNames[i].c_str());
          #endif
@@ -706,7 +714,7 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
             Integer theRowCount = arr->GetRowCount();
             Integer theColCount = arr->GetColCount();
             
-            #if DEBUG_MATH_WRAPPERS
+            #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage
                ("MathElement::SetRefObject() elementType=%d, theRowCount=%d, "
                 "theColCount=%d\n", elementType, theRowCount, theColCount);
@@ -716,7 +724,7 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
                matrix.SetSize(theRowCount, theColCount);
             else
             {
-               #if DEBUG_MATH_WRAPPERS
+               #ifdef DEBUG_WRAPPERS
                MessageInterface::ShowMessage
                   ("MathElement::SetRefObject() matrix already sized. "
                    "matrix.size=%d, %d\n", matrix.GetNumRows(),
@@ -726,7 +734,7 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
             
             matrix = arr->GetRmatrix(); // initial value
             
-            #if DEBUG_MATH_WRAPPERS
+            #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage
                ("MathElement::SetRefObject() name=%s, matrix=\n%s\n", name.c_str(),
                 matrix.ToString().c_str());
@@ -738,7 +746,7 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
             elementType = Gmat::REAL_TYPE;
             realValue = refObject->GetReal(); // initial value
             
-            #if DEBUG_MATH_WRAPPERS
+            #ifdef DEBUG_WRAPPERS
             MessageInterface::ShowMessage
                ("MathElement::SetRefObject() name=%s, elementType=%d, "
                 "realValue=%f\n", GetName().c_str(), elementType, realValue);
@@ -758,17 +766,17 @@ void MathElement::SetWrapperObject(GmatBase *obj, const std::string &name)
 //------------------------------------------------------------------------------
 ElementWrapper* MathElement::FindWrapper(const std::string &name)
 {
-   #ifdef DEBUG_WRAPPER
+   #ifdef DEBUG_WRAPPERS
    MessageInterface::ShowMessage
-      ("MathElement::Evaluate() node='%s', name='%s', refObject=<%p>, "
+      ("MathElement::FindWrapper() node='%s', name='%s', refObject=<%p>, "
        "elementType=%d, theWrapperMap=<%p>\n", GetName().c_str(), name.c_str(),
        refObject, elementType, theWrapperMap);
    #endif
    
    if (theWrapperMap == NULL)
-      throw MathException("internal Error - theWrapperMap is NULL");
+      throw MathException("MathElement::FindWrapper() theWrapperMap is NULL");
    
-   #ifdef DEBUG_WRAPPER
+   #ifdef DEBUG_WRAPPERS
    std::map<std::string, ElementWrapper *>::iterator ewi;
    for (ewi = theWrapperMap->begin(); ewi != theWrapperMap->end(); ++ewi)
       MessageInterface::ShowMessage
@@ -778,12 +786,18 @@ ElementWrapper* MathElement::FindWrapper(const std::string &name)
    #endif
    
    if (theWrapperMap->find(name) == theWrapperMap->end())
-      throw MathException("Internal Error - Cannot find \"" + name +
+      throw MathException("MathElement::FindWrapper() Cannot find \"" + name +
                           "\" from theWrapperMap");
    
    ElementWrapper *wrapper = (*theWrapperMap)[name];
    if (wrapper == NULL)
-      throw MathException("the ElementWrapper of \"" + name + "\" is NULL");
+      throw MathException
+         ("MathElement::FindWrapper() The ElementWrapper of \"" + name + "\" is NULL");
+   
+   #ifdef DEBUG_WRAPPERS
+   MessageInterface::ShowMessage
+      ("MathElement::FindWrapper() returning wrapper <%p>\n", wrapper);
+   #endif
    
    return wrapper;
 }

@@ -223,7 +223,40 @@ bool PlanetReal::Validate()
 //------------------------------------------------------------------------------
 bool PlanetReal::Initialize()
 {
-   InitializeRefObjects();
+   try
+   {
+      #if DEBUG_PLANET_REAL
+      MessageInterface::ShowMessage
+         ("===> PlanetReal::Initialize() calling InitializeRefObjects() on %s\n",
+          instanceName.c_str());
+      #endif
+      
+      InitializeRefObjects();
+   }
+   catch(InvalidDependencyException &e)
+   {
+      #if DEBUG_PLANET_REAL
+      MessageInterface::ShowMessage
+         ("PlanetReal::Initialize() Fail to initialize Parameter: %s\n",
+          this->GetName().c_str());
+      #endif
+      
+      throw ParameterException
+         ("Incorrect parameter dependency: " + GetName() + ".\n" +
+          this->GetTypeName() + e.GetFullMessage() + "\n");
+   }
+   catch(BaseException &e)
+   {
+      #if DEBUG_PLANET_REAL
+      MessageInterface::ShowMessage
+         ("OrbitReal::Initialize() Fail to initialize Parameter: %s\n",
+          this->GetName().c_str());
+      #endif
+      
+      throw ParameterException
+         (e.GetFullMessage() + " in " + GetName() + "\n");
+   }
+   
    return true;
 }
 
@@ -279,6 +312,12 @@ std::string PlanetReal::GetRefObjectName(const Gmat::ObjectType type) const
 //------------------------------------------------------------------------------
 const StringArray& PlanetReal::GetRefObjectNameArray(const Gmat::ObjectType type)
 {
+   #if DEBUG_PLANET_REAL
+   MessageInterface::ShowMessage
+      ("===> PlanetReal::GetRefObjectNameArray() calling PlanetData::GetRefObjectNameArray() on %s\n",
+       instanceName.c_str());
+   #endif
+   
    return PlanetData::GetRefObjectNameArray(type);
 }
 
@@ -298,6 +337,12 @@ const StringArray& PlanetReal::GetRefObjectNameArray(const Gmat::ObjectType type
 bool PlanetReal::SetRefObjectName(const Gmat::ObjectType type,
                                   const std::string &name)
 {
+   #ifdef DEBUG_PLANET_REAL
+   MessageInterface::ShowMessage
+      ("PlanetReal::SetRefObjectName() this='%s', type=%d, name='%s'\n",
+       GetName().c_str(), type, name.c_str());
+   #endif
+   
    //loj: 5/27/05 write parameter name, if failed to set
    bool ret = PlanetData::SetRefObjectName(type, name);
    if (!ret)

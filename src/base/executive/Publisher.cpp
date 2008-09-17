@@ -23,9 +23,10 @@
 #include "Moderator.hpp"
 #include <string>
 
-//#define DEBUG_PUBLISHER_REGISTER 1
-//#define DEBUG_PUBLISHER_PUBLISH 1
-//#define DEBUG_PUBLISHER_CLEAR 1
+//#define DBGLVL_PUBLISHER_SUBS 1
+//#define DBGLVL_PUBLISHER_REGISTER 2
+//#define DBGLVL_PUBLISHER_PUBLISH 1
+//#define DBGLVL_PUBLISHER_CLEAR 1
 
 // Initialize the singleton
 Publisher* Publisher::instance = NULL;
@@ -44,7 +45,7 @@ Publisher* Publisher::Instance()
 // Publisher(void)
 //------------------------------------------------------------------------------
 Publisher::Publisher() :
-   providerCount       (0),
+   providerID          (-1),
    currentProvider     (-1),
    runState            (Gmat::IDLE),
    internalCoordSystem (NULL),
@@ -67,14 +68,14 @@ Publisher::~Publisher()
 //------------------------------------------------------------------------------
 bool Publisher::Subscribe(Subscriber *s)
 {
-   #if DEBUG_PUBLISHER
+   #if DBGLVL_PUBLISHER_SUBS
    MessageInterface::ShowMessage
       ("Publisher::Subscribe() sub = %s\n", s->GetName().c_str());
    #endif
    
    if (!s)
       return false;
-
+   
    subs.push_back(s);
    s->SetProviderId(currentProvider);
    return true;
@@ -85,6 +86,11 @@ bool Publisher::Subscribe(Subscriber *s)
 //------------------------------------------------------------------------------
 bool Publisher::Unsubscribe(Subscriber *s)
 {
+   #if DBGLVL_PUBLISHER_SUBS
+   MessageInterface::ShowMessage
+      ("Publisher::Unsubscribe() sub = %s\n", s->GetName().c_str());
+   #endif
+   
    if (!s)
       return false;
    
@@ -97,7 +103,7 @@ bool Publisher::Unsubscribe(Subscriber *s)
 //------------------------------------------------------------------------------
 bool Publisher::UnsubscribeAll()
 {
-   #if DEBUG_PUBLISHER_CLEAR
+   #if DBGLVL_PUBLISHER_SUBS
    MessageInterface::ShowMessage
       ("Publisher::UnsubscribeAll() entered. Clearing %d subscribers\n",
        subs.size());
@@ -113,7 +119,7 @@ bool Publisher::UnsubscribeAll()
    {
       if ((iter->first).find("Local-") != std::string::npos)
       {
-         #ifdef DEBUG_PUBLISHER
+         #if DBGLVL_PUBLISHER
          MessageInterface::ShowMessage
             ("Publisher::UnsubscribeAll() deleting %s\n", iter->first.c_str());
          #endif
@@ -131,18 +137,34 @@ bool Publisher::UnsubscribeAll()
 //------------------------------------------------------------------------------
 bool Publisher::Publish(Integer id, Real *data, Integer count)
 {
-   // No subscribers
-   if (subs.empty()) {
-      return false;
-   }
-
-   #if DEBUG_PUBLISHER_PUBLISH > 1
-   MessageInterface::ShowMessage("Publisher::Publish(Real) id = %d\n", id);
+   #if DBGLVL_PUBLISHER_PUBLISH > 1
+   MessageInterface::ShowMessage
+      ("Publisher::Publish(Real) entered, id=%d, providerID=%d, count=%d\n",
+       id, providerID, count);
    #endif
    
-   if ((id < 0) || (id >= providerCount))
-      throw PublisherException
-         ("Real data provider has not registered with the Publisher.");
+   // No subscribers
+   if (subs.empty())
+   {
+      //#if DBGLVL_PUBLISHER_PUBLISH
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Publisher::Publish() There are no subscribers, "
+          "so just returning false\n");
+      //#endif      
+      return false;
+   }
+   
+   if ((id < 0) || (id > providerID))
+   {
+      //throw PublisherException
+      //   ("Real data provider has not registered with the Publisher.");
+      //#if DBGLVL_PUBLISHER_PUBLISH
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Publisher::Publish() Real data provider has not "
+          "registered with the Publisher, so just returning false\n");
+      //#endif
+      return false;
+   }
    
    if (id != currentProvider) {
       currentProvider = id;
@@ -151,7 +173,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    
    // Convert the data into a string for distribution
    char stream[4096] = "";
-    
+   
    for (Integer i = 0; i < count; ++i)
    {
       sprintf(stream, "%s%12lf", stream, data[i]);
@@ -162,7 +184,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    }
    
    
-   #if DEBUG_PUBLISHER_PUBLISH
+   #if DBGLVL_PUBLISHER_PUBLISH
    MessageInterface::ShowMessage
       ("Publisher::Publish() calling ReceiveData() number of sub = %d\n",
        subs.size());
@@ -171,7 +193,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
-      #if DEBUG_PUBLISHER_PUBLISH > 1
+      #if DBGLVL_PUBLISHER_PUBLISH > 1
       MessageInterface::ShowMessage("Publisher::Publish() sub = %s\n",
                                     (*current)->GetName().c_str());
       #endif
@@ -185,6 +207,7 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    return true;
 }
 
+
 //------------------------------------------------------------------------------
 // bool Publish(char *data, Integer count = 0)
 //------------------------------------------------------------------------------
@@ -196,11 +219,11 @@ bool Publisher::Publish(Integer id, char *data, Integer count)
    if (subs.empty())
       return false;
 
-   #if DEBUG_PUBLISHER_PUBLISH > 1
+   #if DBGLVL_PUBLISHER_PUBLISH > 1
    MessageInterface::ShowMessage("Publisher::Publish(char) id = %d\n", id);
    #endif
    
-   if ((id < 0) || (id >= providerCount))
+   if ((id < 0) || (id > providerID))
    {
       throw PublisherException
          ("Character data provider has not registered with the Publisher.");
@@ -247,11 +270,11 @@ bool Publisher::Publish(Integer id, Integer *data, Integer count)
    if (subs.empty())
       return false;
    
-   #if DEBUG_PUBLISHER_PUBLISH > 1
+   #if DBGLVL_PUBLISHER_PUBLISH > 1
    MessageInterface::ShowMessage("Publisher::Publish(Integer) id = %d\n", id);
    #endif
    
-   if ((id < 0) || (id >= providerCount))
+   if ((id < 0) || (id > providerID))
       throw PublisherException
          ("Integer data provider has not registered with the Publisher.");
 
@@ -330,14 +353,14 @@ bool Publisher::NotifyEndOfRun()
 //------------------------------------------------------------------------------
 void Publisher::ClearPublishedData()
 {   
-   #if DEBUG_PUBLISHER_CLEAR
+   #if DBGLVL_PUBLISHER_CLEAR
    MessageInterface::ShowMessage
       ("Publisher::ClearPublishedData() Clearing %d providers\n", objectMap.size());
    #endif
    
    objectMap.clear();
    elementMap.clear();
-   providerCount = 0;
+   providerID = -1;
    currentProvider = -1;
    
    // Clear subscriber's data
@@ -357,34 +380,56 @@ void Publisher::ClearPublishedData()
 Integer Publisher::RegisterPublishedData(const StringArray& owners, 
                                          const StringArray& elements)
 {
-   #if DEBUG_PUBLISHER_REGISTER > 1
+   #if DBGLVL_PUBLISHER_REGISTER > 1
    MessageInterface::ShowMessage("Publisher::RegisterPublishedData() entered\n");
    for (unsigned int i=0; i<owners.size(); i++)
       MessageInterface::ShowMessage("   owner[%d]=%s\n", i, owners[i].c_str());
    for (unsigned int i=0; i<elements.size(); i++)
       MessageInterface::ShowMessage("   elements[%d]=%s\n", i, elements[i].c_str());   
-   MessageInterface::ShowMessage("   providerCount=%d\n", providerCount);
+   MessageInterface::ShowMessage
+      ("   providerID=%d, subs.size()=%d\n", providerID, subs.size());
    #endif
    
+   if (subs.empty())
+   {
+      // Let's just show warning (loj: 2008.06.17)
+      //throw PublisherException("There are no registered subscribers.");
+      MessageInterface::ShowMessage
+         ("*** WARNING *** Publisher::RegisterPublishedData() There are no "
+          "subscribers to register data\n");
+      return providerID;
+   }
+   
+   // Do this only when there are subscribers (loj: 2008.06.17)
+   //objectMap.push_back(StringArray(owners));
+   //elementMap.push_back(StringArray(elements));
+   
+   // Increment provider count only when there are registered subscribers (loj: 2008.06.17)
+   //++providerID;
    objectMap.push_back(StringArray(owners));
    elementMap.push_back(StringArray(elements));
+   ++providerID;
    
    std::list<Subscriber*>::iterator current = subs.begin();
    while (current != subs.end())
    {
+      
+      #if DBGLVL_PUBLISHER_REGISTER > 1
+      MessageInterface::ShowMessage
+         ("   calling <%s>->SetDataLabels()\n", (*current)->GetName().c_str());
+      #endif
+      
       (*current)->SetDataLabels(elements);
       current++;
    }
    
-   ++providerCount;
-   
-   #ifdef DEBUG_PUBLISHER_REGISTER
+   #if DBGLVL_PUBLISHER_REGISTER
    MessageInterface::ShowMessage("   objectMap.size()=%d\n", objectMap.size());
    MessageInterface::ShowMessage
-      ("Publisher::RegisterPublishedData() returning %d\n", providerCount-1);
+      ("Publisher::RegisterPublishedData() returning %d\n", providerID);
    #endif
    
-   return providerCount-1;
+   return providerID;
 }
 
 
@@ -393,7 +438,7 @@ Integer Publisher::RegisterPublishedData(const StringArray& owners,
 //------------------------------------------------------------------------------
 const StringArray& Publisher::GetStringArrayParameter(const std::string& type)
 {
-   if ((currentProvider < 0) || (currentProvider >= providerCount))
+   if ((currentProvider < 0) || (currentProvider > providerID))
       throw PublisherException("Data provider id out of range.");
    
    if (type == "SpaceObjectMap")
@@ -467,8 +512,8 @@ void Publisher::SetDataMJ2000EqOrigin(CelestialBody *cb)
 {
    if (cb == NULL)
       return;
-
-   #ifdef DEBUG_PUBLISHER
+   
+   #if DBGLVL_PUBLISHER_DATA_REP
    MessageInterface::ShowMessage
       ("Publisher::SetDataMJ2000EqOrigin() cb=%s<%p>\n", cb->GetName().c_str(),
        cb);
@@ -502,8 +547,8 @@ void Publisher::SetDataMJ2000EqOrigin(CelestialBody *cb)
          newCs->Initialize();
          coordSysMap[csName] = newCs;
          dataCoordSystem = newCs;
-
-         #ifdef DEBUG_PUBLISHER
+         
+         #if DBGLVL_PUBLISHER_DATA_REP
          MessageInterface::ShowMessage
             ("   ===> %s not found in the map, so created <%p>\n", csName.c_str(),
              newCs);

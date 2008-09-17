@@ -149,9 +149,30 @@ bool Global::Execute()
    #ifdef DEBUG_GLOBAL
       MessageInterface::ShowMessage("Global::Execute() entered\n");
    #endif
-   bool isOK = true;
-   Integer sz = objectNames.size();
+   GmatBase    *mapObj;
+   std::string ex;
+   Integer     sz = objectNames.size();
    for (Integer ii=0; ii<sz; ii++)
-      isOK += MakeGlobal(objectNames.at(ii));
-   return isOK;
+   {
+      // get it from the LOS, if it's there
+      if (objectMap->find(objectNames.at(ii)) != objectMap->end())
+      {
+         mapObj = (*objectMap)[objectNames.at(ii)];
+         if (InsertIntoGOS(mapObj, objectNames.at(ii)))
+            objectMap->erase(objectNames.at(ii));
+      }
+      else if (globalObjectMap->find(objectNames.at(ii)) != globalObjectMap->end())
+      {
+         mapObj = (*globalObjectMap)[objectNames.at(ii)];
+         InsertIntoGOS(mapObj, objectNames.at(ii));
+      }
+      else
+      {
+         ex = "Global::Execute - object of name \"" + objectNames.at(ii);
+         ex += "\" not found.\n";
+         throw CommandException(ex);
+      }
+   }
+      
+   return true;
 }

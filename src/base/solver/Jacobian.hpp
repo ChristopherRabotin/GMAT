@@ -41,7 +41,7 @@ public:
    bool                 Calculate(std::vector<Real> &jac);
 
 protected:
-   /// The number of dependent parameters in teh Jacobian matrix
+   /// The number of dependent parameters in the Jacobian matrix
    UnsignedInt                         numComponents;    
    /// Results from a nominal run, used for forward and backward differencing
    std::vector<Real>                   nominal;

@@ -21,7 +21,8 @@
 #include "StringVar.hpp"
 #include "MessageInterface.hpp"
 
-//#define DEBUG_STRINGVAR 1
+//#define DEBUG_STRINGVAR
+//#define DEBUG_GEN_STRING
 
 //---------------------------------
 // static data
@@ -113,7 +114,16 @@ StringVar& StringVar::operator= (const StringVar& right)
       
       Parameter::operator=(right);
       mStringValue = right.mStringValue;
-      
+      // Set expression so that we can preserve string value when we write (loj: 2008.08.13)
+      // Set expression to name of right side since expression is used for
+      // writnig in GetGeneratingString() (loj: 2008.08.13)
+      // For example:
+      // str1 = 'this is str1'
+      // str2 = str1;
+      // We want to write "str2 = str1" instead of "str2 = 'this is str1'
+      mExpr = right.GetName();
+      // Set depObjectName so that we can check whether to add quotes when we write (loj: 2008.08.13)
+      mDepObjectName = right.GetName();
       SetName(thisName);
    }
    
@@ -178,7 +188,7 @@ bool StringVar::operator!=(const StringVar &right) const
 //------------------------------------------------------------------------------
 std::string StringVar::ToString()
 {
-   return mExpr;
+   return mStringValue;
 }
 
 
@@ -193,7 +203,7 @@ std::string StringVar::ToString()
 //------------------------------------------------------------------------------
 std::string StringVar::GetString() const
 {
-   return mExpr;
+   return mStringValue;
 }
 
 
@@ -208,7 +218,7 @@ std::string StringVar::GetString() const
 //------------------------------------------------------------------------------
 std::string StringVar::EvaluateString()
 {
-   return mExpr;
+   return mStringValue;
 }
 
 
@@ -263,7 +273,12 @@ std::string StringVar::GetStringParameter(const Integer id) const
    switch (id)
    {
    case VALUE:
-      return mExpr;
+      #ifdef DEBUG_STRINGVAR
+      MessageInterface::ShowMessage
+         ("StringVar::GetStringParameter(%d) returning '%s'\n", id,
+          mStringValue.c_str());
+      #endif
+      return mStringValue;
    default:
       return Parameter::GetStringParameter(id);
    }
@@ -284,16 +299,29 @@ std::string StringVar::GetStringParameter(const std::string &label) const
 //------------------------------------------------------------------------------
 bool StringVar::SetStringParameter(const Integer id, const std::string &value)
 {
-   #if DEBUG_STRINGVAR
-   MessageInterface::ShowMessage("StringVar::SetStringParameter() id=%d, value=%s\n",
-                                 id, value.c_str());
+   #ifdef DEBUG_STRINGVAR
+   MessageInterface::ShowMessage
+      ("StringVar::SetStringParameter() id=%d, value=%s\n", id, value.c_str());
    #endif
    
    switch (id)
    {
-   case VALUE:
+   case EXPRESSION:
       mExpr = value;
+      mStringValue = value; // set as initial value
+      #ifdef DEBUG_STRINGVAR
+      MessageInterface::ShowMessage
+         ("StringVar::SetStringParameter() returning true, "
+          "both mExpr and mStringValue are set to '%s'\n", value.c_str());
+      #endif
+      return true;
+   case VALUE:
       mStringValue = value;
+      #ifdef DEBUG_STRINGVAR
+      MessageInterface::ShowMessage
+         ("StringVar::SetStringParameter() returning true, "
+          "mStringValue is set to '%s'\n", value.c_str());
+      #endif
       return true;
    default:
       return Parameter::SetStringParameter(id, value);
@@ -308,9 +336,10 @@ bool StringVar::SetStringParameter(const Integer id, const std::string &value)
 bool StringVar::SetStringParameter(const std::string &label,
                                    const std::string &value)
 {
-   #if DEBUG_STRINGVAR
-   MessageInterface::ShowMessage("StringVar::SetStringParameter() label=%s value=%s\n",
-                                 label.c_str(), value.c_str());
+   #ifdef DEBUG_STRINGVAR
+   MessageInterface::ShowMessage
+      ("StringVar::SetStringParameter() label=%s value=%s\n",
+       label.c_str(), value.c_str());
    #endif
    
    return SetStringParameter(GetParameterID(label), value);
@@ -335,18 +364,42 @@ const std::string& StringVar::GetGeneratingString(Gmat::WriteMode mode,
                                                   const std::string &prefix,
                                                   const std::string &useName)
 {
-   // Note:
-   // Do not write "Create name" since multiple Strings will be written from
-   // the ScriptInterpreter
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("StringVar::GetGeneratingString() this=<%p>'%s' entered, mode=%d, prefix='%s', "
+       "useName='%s'\n", this, GetName().c_str(), mode, prefix.c_str(), useName.c_str());
+   MessageInterface::ShowMessage
+      ("   mExpr='%s', mDepObjectName='%s'\n", mExpr.c_str(), mDepObjectName.c_str());
+   #endif
    
-   std::string sval = GetString();
-
-   // Write value if it is not blank
-   if (sval != "")
+   // @note
+   // Do not write "Create name" since multiple Strings per line will be written from
+   // the ScriptInterpreter
+      
+   // Write value if it is not blank or blank and SHOW_SCRIPT mode
+   if (mExpr != "" ||
+       mExpr == "" && mode == Gmat::SHOW_SCRIPT)
    {
-      generatingString = "GMAT " + GetName() + " = " + sval;
-      generatingString = generatingString + ";" + inlineComment + "\n";
+      // if value is other StringVar object, do not put quotes
+      if (mExpr != "" && mExpr == mDepObjectName)
+         generatingString = "GMAT " + GetName() + " = " + mExpr;
+      else
+         generatingString = "GMAT " + GetName() + " = '" + mExpr + "'";
+      
+      if (mode == Gmat::NO_COMMENTS)
+         generatingString = generatingString + ";\n";
+      else
+         generatingString = generatingString + ";" + inlineComment + "\n";
    }
+   else
+   {
+      generatingString = "";
+   }
+   
+   #ifdef DEBUG_GEN_STRING
+   MessageInterface::ShowMessage
+      ("StringVar::GetGeneratingString() returning\n   <%s>\n", generatingString.c_str());
+   #endif
    
    return generatingString;
 }

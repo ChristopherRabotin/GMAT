@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CompareTextDialog
 //------------------------------------------------------------------------------
@@ -30,8 +30,11 @@ public:
    Integer GetNumDirsToCompare() { return mNumDirsToCompare; }
    Integer GetNumFilesToCompare() { return mNumFilesToCompare; }
    wxString GetBaseDirectory() { return mBaseDirectory; }
-   wxArrayString GetCompareDirectories() { return mCompareDirs; }
+   wxString GetBasePrefix() { return mBasePrefix; }
    wxString GetSaveFilename() { return mSaveFileName; }
+   wxArrayString GetCompareDirectories() { return mCompareDirs; }
+   wxArrayString GetComparePrefixes() { return mComparePrefixes; }
+   
 protected:
    
    // override methods from GmatDialog
@@ -41,7 +44,9 @@ protected:
    virtual void ResetData();
    
    wxTextCtrl *mBaseDirTextCtrl;
+   wxTextCtrl *mBasePrefixTextCtrl;
    wxTextCtrl *mCompareDirTextCtrl;
+   wxTextCtrl *mComparePrefixTextCtrl;
    wxTextCtrl *mNumFilesInBaseDirTextCtrl;
    wxTextCtrl *mNumFilesInCompareDirTextCtrl;
    wxTextCtrl *mNumDirsToCompareTextCtrl;
@@ -50,9 +55,11 @@ protected:
    
    wxComboBox *mCompareDirsComboBox;
    wxCheckBox *mSaveResultCheckBox;
-
+   
    wxButton *mBaseDirButton;
+   wxButton *mBasePrefixButton;
    wxButton *mCompareDirButton;
+   wxButton *mComparePrefixButton;
    wxButton *mSaveBrowseButton;
    
    // event handling
@@ -85,13 +92,15 @@ private:
    Integer mNumFilesToCompare;
    Integer mNumDirsToCompare;
    wxString mBaseDirectory;
-   wxArrayString mCompareDirs;
+   wxString mBasePrefix;
    wxString mSaveFileName;
+   wxArrayString mCompareDirs;
+   wxArrayString mComparePrefixes;
    wxArrayString mFileNamesInBaseDir;
    wxArrayString mFileNamesInCompareDir;
-
+   
    void UpdateFileInfo(Integer dir, bool isBaseDir);
-   wxArrayString GetFilenames(const wxString &dirname);
+   wxArrayString GetFilenames(const wxString &dirname, const wxString &prefix);
 };
 
 #endif

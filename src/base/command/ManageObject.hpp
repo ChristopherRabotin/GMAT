@@ -74,7 +74,7 @@ protected:
    /// array of names for the objects to manage
    StringArray objectNames;
    
-   bool MakeGlobal(const std::string &objName);
+   bool InsertIntoGOS(GmatBase *obj, const std::string &withName);
 
 };
 

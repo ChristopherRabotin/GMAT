@@ -22,7 +22,7 @@
 #include "MessageInterface.hpp"
 
 //#define DEBUG_REFDATA_OBJECT 1
-//#define DEBUG_REFDATA_OBJECT_GET 1
+//#define DEBUG_REFDATA_OBJECT_GET 2
 //#define DEBUG_REFDATA_FIND 1
 //#define DEBUG_REFDATA_ADD 1
 //#define DEBUG_RENAME 1
@@ -200,8 +200,8 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
       {
          #if DEBUG_REFDATA_OBJECT_GET > 1
          MessageInterface::ShowMessage
-            ("RefData::GetRefObjectNameArray() objType=%d name: %s\n",
-             mRefObjList[i].objType, mRefObjList[i].objName.c_str());
+            ("   objType=%d, name='%s'\n", mRefObjList[i].objType,
+             mRefObjList[i].objName.c_str());
          #endif
          
          mAllRefObjectNames.push_back(mRefObjList[i].objName);
@@ -215,8 +215,7 @@ const StringArray& RefData::GetRefObjectNameArray(const Gmat::ObjectType type)
          {
             #if DEBUG_REFDATA_OBJECT_GET > 1
             MessageInterface::ShowMessage
-               ("RefData::GetRefObjectNameArray() type=%d name: %s\n", type,
-                mRefObjList[i].objName.c_str());
+               ("   type=%d, name='%s'\n", type, mRefObjList[i].objName.c_str());
             #endif
             
             mAllRefObjectNames.push_back(mRefObjList[i].objName);

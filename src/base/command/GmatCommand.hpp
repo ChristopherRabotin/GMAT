@@ -1,4 +1,4 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  GmatCommand
 //------------------------------------------------------------------------------
@@ -42,6 +42,12 @@
 // Forward reference for the transient force vector
 class PhysicalModel;
 
+// forward refernce for the calling FunctionManager
+class FunctionManager;
+
+// forward refernce for the function containg this command
+class Function;
+
 
 /**
  * GMAT GmatCommand Base Class, used for timeline elements in the script
@@ -71,7 +77,13 @@ public:
                            Gmat::WriteMode mode = Gmat::SCRIPTING,
                            const std::string &prefix = "",
                            const std::string &useName = "");
-           
+   
+   // Methods for function
+   virtual void         SetCurrentFunction(Function *function);
+   virtual Function*    GetCurrentFunction();
+   
+   virtual void         SetCallingFunction(FunctionManager *fm);
+   
    // other methods for setting up the object w.r.t the elements needed
    virtual const StringArray& 
                         GetWrapperObjectNameArray();
@@ -94,12 +106,14 @@ public:
    virtual GmatBase*    GetObject(const Gmat::ObjectType type, 
                                   const std::string objName = "");
    
+   virtual void         SetInternalCoordSystem(CoordinateSystem *cs);
    virtual void         SetSolarSystem(SolarSystem *ss);
    virtual void         SetObjectMap(std::map<std::string, GmatBase *> *map);
+   virtual ObjectMap*   GetObjectMap();
    virtual void         SetGlobalObjectMap(std::map<std::string, GmatBase *> *map);
    virtual void         SetTransientForces(std::vector<PhysicalModel*> *tf);
-   
    virtual void         SetPublisher(Publisher *p);
+   virtual Publisher*   GetPublisher();
    
    // Access methods inherited from GmatBase
    virtual std::string GetParameterText(const Integer id) const;
@@ -159,7 +173,7 @@ public:
    
    Integer              DepthIncrement();
    bool                 HasPropStateChanged();
-            
+   
    //---------------------------------------------------------------------------
    //  bool GmatCommand::Execute()
    //---------------------------------------------------------------------------
@@ -179,7 +193,9 @@ public:
    
    bool                HasConfigurationChanged();
    virtual void        ConfigurationChanged(bool tf, bool setAll = false);
-
+   virtual bool        HasAFunction();
+   virtual bool        NeedsServerStartup();
+   
 protected:
    enum
    {
@@ -204,6 +220,11 @@ protected:
    StringArray          objects;
    /// Flag used to determine if associations have been made
    bool                 initialized;
+   // pointer to the function that contains this command
+   Function            *currentFunction;
+   // pointer to the function that is calling this command (ignored for all but
+   // CallFunction and Assignment)
+   FunctionManager      *callingFunction;
    /// Pointer to the next GmatCommand in the sequence; NULL at the end
    GmatCommand          *next;
    /// Pointer to the previous GmatCommand in the sequence; NULL if at the start
@@ -218,6 +239,8 @@ protected:
                         *globalObjectMap;
    /// Solar System, set by the local Sandbox
    SolarSystem          *solarSys;
+   /// Internal coordinate system, set by the local Sandbox
+   CoordinateSystem     *internalCoordSys;
    /// transient forces to pass to the function
    std::vector<PhysicalModel *> 
                         *forces;
@@ -257,7 +280,7 @@ protected:
                                     const std::string &title1, GmatCommand *cmd1,
                                     const std::string &title2 = "",
                                     GmatCommand *cmd2 = NULL);
-   virtual void         ShowObjectMaps();
+   virtual void         ShowObjectMaps(const std::string &title = "");
    
    // for the Parameters in Commands updates
    StringArray          InterpretPreface();

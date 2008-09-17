@@ -48,6 +48,7 @@ public:
    virtual ~Subscriber(void);
    
    virtual bool         Initialize();
+   virtual bool         IsInitialized();
    virtual bool         ReceiveData(const char * datastream);
    virtual bool         ReceiveData(const char * datastream, const Integer len);
    virtual bool         ReceiveData(const Real * datastream, const Integer len = 0);
@@ -55,12 +56,12 @@ public:
    virtual bool         SetEndOfRun();
    virtual void         SetRunState(Gmat::RunState rs);
    
-   Subscriber*          Next(void);
+   Subscriber*          Next();
    bool                 Add(Subscriber *s);
    bool                 Remove(Subscriber *s, const bool del);
    
-   void                 Activate(bool state = true);
-   bool                 IsActive();
+   virtual void         Activate(bool state = true);
+   virtual bool         IsActive();
    
    virtual void         SetProviderId(Integer id);
    virtual Integer      GetProviderId();
@@ -140,6 +141,7 @@ protected:
    bool active;
    bool isEndOfReceive;
    bool isEndOfRun;
+   bool isInitialized;
    
    /// The current run state, so actions based on state can be taken
    Gmat::RunState runstate;

@@ -110,7 +110,7 @@ DerivativeModel& DerivativeModel::operator=(const DerivativeModel& dm)
 // void SetDifferenceMode(derivativeMode mode)
 //------------------------------------------------------------------------------
 /**
- * Stes teh mode used to calculate the derivative.
+ * Sets the mode used to calculate the derivative.
  * 
  * @param mode The new difference mode.  Difference modes are idempotent.
  */
