@@ -26,11 +26,11 @@ SHARED_EXTENSION = .dll
 
 endif
 
-WXTARGET = lib/libGmatGui$(SHARED_EXTENSION)
+WXTARGET = lib/libGmatBase$(SHARED_EXTENSION)
 
 else
 
-WXTARGET = lib/libGmatGui.a
+WXTARGET = lib/libGmatBase.a
 
 endif
 

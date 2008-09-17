@@ -7,7 +7,7 @@ TARGET = ../bin/gmatConsole
 LIBRARY = base/lib/libGmatConsole.a
 else
 TARGET = ../bin/gmat
-LIBRARY = base/lib/libGmatGui.a
+LIBRARY = base/lib/libGmatBase.a
 endif
 
 all: prep $(TARGET)
@@ -23,13 +23,13 @@ prep:
 	
 base: $(LIBRARY)
 
-../bin/gmat: base/lib/libGmatGui.a gui/gmat
+../bin/gmat: base/lib/libGmatBase.a gui/gmat
 
 gui/gmat:
 	cd base; make -f MakeBase.eclipse all
 	cd gui; make -f MakeGui.eclipse all
 
-base/lib/libGmatGui.a:
+base/lib/libGmatBase.a:
 	cd base; make -f MakeBase.eclipse all
 
 ../bin/gmatConsole: base/lib/libGmatConsole.a

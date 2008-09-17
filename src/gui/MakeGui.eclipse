@@ -42,12 +42,12 @@ else
 SHARED_EXTENSION = .so
 endif
 
-LIBS = -L../base/lib -lGmatGui
-LIBNAME = ../base/lib/libGmatGui$(SHARED_EXTENSION)
+LIBS = -L../base/lib -lGmatBase
+LIBNAME = ../base/lib/libGmatBase$(SHARED_EXTENSION)
 
 else
 
-LIBNAME = ../base/lib/libGmatGui.dll
+LIBNAME = ../base/lib/libGmatBase.dll
 LIBS = $(LIBNAME)
 
 endif
@@ -55,7 +55,7 @@ endif
 
 else
 
-LIBS = ../base/lib/libGmatGui.a
+LIBS = ../base/lib/libGmatBase.a
 
 endif
 
