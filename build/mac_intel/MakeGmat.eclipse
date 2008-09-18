@@ -16,7 +16,7 @@ else
 TARGET = ../bin/gmatNoMatlab
 TARGETNAME = gmatNoMatlab
 endif
-LIBRARY = base/lib/libGmatGui.a
+LIBRARY = base/lib/libGmatBase.a
 endif
 
 all: clean2 $(TARGET)
@@ -35,9 +35,9 @@ clean2:
 	
 base: $(LIBRARY)
 
-../bin/gmat: base/lib/libGmatGui.a gui/gmat
+../bin/gmat: base/lib/libGmatBase.a gui/gmat
 
-../bin/gmatNoMatlab: base/lib/libGmatGui.a gui/gmatNoMatlab
+../bin/gmatNoMatlab: base/lib/libGmatBase.a gui/gmatNoMatlab
 
 gui/gmat:
 	cd base; make -f MakeBase.eclipse all
@@ -47,7 +47,7 @@ gui/gmatNoMatlab:
 	cd base; make -f MakeBase.eclipse all
 	cd gui; make -f MakeGui.eclipse all
 
-base/lib/libGmatGui.a:
+base/lib/libGmatBase.a:
 	cd base; make -f MakeBase.eclipse all
 	
 base/lib/libGmatConsole.a:
