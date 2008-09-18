@@ -7,7 +7,7 @@ PROGRAM = gmatConsole.exe
 LIBRARY = base/lib/libGmatConsole.a
 else
 PROGRAM = gmat.exe
-LIBRARY = base/lib/libGmatGui.a
+LIBRARY = base/lib/libGmatBase.a
 endif
 
 TARGET = ../bin/$(PROGRAM)
