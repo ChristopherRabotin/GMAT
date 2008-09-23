@@ -26,11 +26,19 @@ SHARED_EXTENSION = .dll
 
 endif
 
+ifeq ($(USE_MATLAB),1)
 WXTARGET = lib/libGmatBase$(SHARED_EXTENSION)
+else
+WXTARGET = lib/libGmatBaseNoMatlab$(SHARED_EXTENSION)
+endif
 
 else
 
+ifeq ($(USE_MATLAB),1)
 WXTARGET = lib/libGmatBase.a
+else
+WXTARGET = lib/libGmatBaseNoMatlab.a
+endif
 
 endif
 

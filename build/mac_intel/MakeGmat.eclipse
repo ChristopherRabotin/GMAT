@@ -1,4 +1,5 @@
-# Windows makefile for GMAT, using Eclipse
+# $Id$
+# Mac makefile for GMAT, using Eclipse
 # Mac OS X 10.4 version 2006.01.24 W. Shoan/GSFC/MAB
 
 include BuildEnv.mk
@@ -12,11 +13,12 @@ else
 ifeq ($(USE_MATLAB),1)
 TARGET = ../bin/gmat
 TARGETNAME = gmat
+LIBRARY = base/lib/libGmatBase.a
 else
 TARGET = ../bin/gmatNoMatlab
 TARGETNAME = gmatNoMatlab
+LIBRARY = base/lib/libGmatBaseNoMatlab.a
 endif
-LIBRARY = base/lib/libGmatBase.a
 endif
 
 all: clean2 $(TARGET)
@@ -35,9 +37,9 @@ clean2:
 	
 base: $(LIBRARY)
 
-../bin/gmat: base/lib/libGmatBase.a gui/gmat
+../bin/gmat: $(LIBRARY) gui/gmat
 
-../bin/gmatNoMatlab: base/lib/libGmatBase.a gui/gmatNoMatlab
+../bin/gmatNoMatlab: $(LIBRARY) gui/gmatNoMatlab
 
 gui/gmat:
 	cd base; make -f MakeBase.eclipse all
@@ -47,7 +49,7 @@ gui/gmatNoMatlab:
 	cd base; make -f MakeBase.eclipse all
 	cd gui; make -f MakeGui.eclipse all
 
-base/lib/libGmatBase.a:
+$(LIBRARY):
 	cd base; make -f MakeBase.eclipse all
 	
 base/lib/libGmatConsole.a:

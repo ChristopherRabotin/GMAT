@@ -1,3 +1,4 @@
+# $Id$
 # Windows makefile for GMAT, using Eclipse
 
 include BuildEnv.mk
@@ -7,7 +8,11 @@ PROGRAM = gmatConsole.exe
 LIBRARY = base/lib/libGmatConsole.a
 else
 PROGRAM = gmat.exe
+ifeq ($(USE_MATLAB),1)
 LIBRARY = base/lib/libGmatBase.a
+else
+LIBRARY = base/lib/libGmatBaseNoMatlab.a
+endif
 endif
 
 TARGET = ../bin/$(PROGRAM)
@@ -17,6 +22,7 @@ all: $(TARGET)
 clean:
 	cd base; make -f MakeBase.eclipse clean
 	cd gui; make -f MakeGui.eclipse clean
+	cd console; make -f MakeConsole.eclipse clean
 	rm -rf $(TARGET) $(LIBRARY) gui/gmat.exe
 
 #	cd test/TestScriptInterpreter; make -f MakeConsole.eclipse clean

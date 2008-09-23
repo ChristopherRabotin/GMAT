@@ -42,20 +42,34 @@ else
 SHARED_EXTENSION = .so
 endif
 
+ifeq ($(USE_MATLAB),1)
 LIBS = -L../base/lib -lGmatBase
 LIBNAME = ../base/lib/libGmatBase$(SHARED_EXTENSION)
+else
+LIBS = -L../base/lib -lGmatBaseNoMatlab
+LIBNAME = ../base/lib/libGmatBaseNoMatlab$(SHARED_EXTENSION)
+endif
 
 else
 
+ifeq ($(USE_MATLAB),1)
 LIBNAME = ../base/lib/libGmatBase.dll
 LIBS = $(LIBNAME)
+else
+LIBNAME = ../base/lib/libGmatBaseNoMatlab.dll
+LIBS = $(LIBNAME)
+endif
 
 endif
 
 
 else
 
+ifeq ($(USE_MATLAB),1)
 LIBS = ../base/lib/libGmatBase.a
+else
+LIBS = ../base/lib/libGmatBaseNoMatlab.a
+endif
 
 endif
 

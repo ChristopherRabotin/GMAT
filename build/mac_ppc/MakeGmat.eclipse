@@ -1,4 +1,5 @@
-# Windows makefile for GMAT, using Eclipse
+# $Id$
+# Mac makefile for GMAT, using Eclipse
 
 include BuildEnv.mk
 
@@ -7,7 +8,11 @@ TARGET = ../bin/gmatConsole
 LIBRARY = base/lib/libGmatConsole.a
 else
 TARGET = ../bin/gmat
+ifeq ($(USE_MATLAB),1)
 LIBRARY = base/lib/libGmatBase.a
+else
+LIBRARY = base/lib/libGmatBaseNoMatlab.a
+endif
 endif
 
 all: prep $(TARGET)
@@ -24,13 +29,13 @@ prep:
 	
 base: $(LIBRARY)
 
-../bin/gmat: base/lib/libGmatBase.a gui/gmat
+../bin/gmat: $(LIBRARY) gui/gmat
 
 gui/gmat:
 	cd base; make -f MakeBase.eclipse all
 	cd gui; make -f MakeGui.eclipse all
 
-base/lib/libGmatBase.a:
+$(LIBRARY):
 	cd base; make -f MakeBase.eclipse all
 
 ../bin/gmatConsole: base/lib/libGmatConsole.a
