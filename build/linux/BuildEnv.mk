@@ -44,9 +44,10 @@ WX_28_DEFINES =
 endif
 endif
 
-# The Console app does not support MATLAB linkage for now
+# The Console app does not support MATLAB linkage or shared base libraries for now
 ifeq ($(CONSOLE_APP), 1)
 USE_MATLAB = 0
+SHARED_BASE = 0
 endif
 
 # Compiler options
@@ -151,7 +152,8 @@ endif
 
 ifeq ($(USE_MATLAB),1)
 CONSOLE_LINK_FLAGS = $(MATLAB_LIB) $(MATLAB_LIBRARIES) -L../../base/lib \
-                    -lgfortran $(DEBUG_FLAGS) $(PROFILE_FLAGS)
+                    -lgfortran -ldl $(DEBUG_FLAGS) $(PROFILE_FLAGS)
 else
-CONSOLE_LINK_FLAGS = -L../../base/lib -lgfortran $(DEBUG_FLAGS) $(PROFILE_FLAGS) 
+CONSOLE_LINK_FLAGS = -L../../base/lib -lgfortran -ldl $(DEBUG_FLAGS) \
+                     $(PROFILE_FLAGS)
 endif

@@ -32,7 +32,7 @@ HEADERS = -I../base/include -I../base/foundation \
           -I../base/configs -I../base/burn \
           -I../base/solver -I../base/function \
           -I../base/coordsystem -I../base/attitude \
-          -I../base/math
+          -I../base/math -I../base/plugin
 
 clean : archclean
 
@@ -54,3 +54,5 @@ $(TARGET): $(OBJECTS)
 	$(FORTRAN_LIB) -o $(TARGET)
 	mkdir -p ../../bin
 	cp $(TARGET) ../../bin/$(TARGET)
+#	cp  ../base/lib/libGmatConsole* ../../bin/
+	

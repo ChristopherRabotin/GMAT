@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 # Build environment file for Linux
 # Modifed for Mac OS 10.3  W. Shoan - 2005.11.10
 # Modifed for Mac OS 10.4  W. Shoan - 2006.01.19
@@ -34,9 +34,10 @@ else
 USE_PROFILING = 0
 endif
 
-# currently cannot use MATLAB with console version 
+# currently cannot use MATLAB or shared base library with console version 
 ifeq ($(CONSOLE_APP), 1)
 USE_MATLAB = 0
+SHARED_BASE = 0
 endif
 
 # MATLAB specific data
@@ -171,7 +172,7 @@ endif
 # ifeq ($(USE_MATLAB),1)
 # CONSOLE_LINK_FLAGS = $(MATLAB_LIB) $(MATLAB_LIBRARIES) -L../../base/lib \
 #            			$(FORTRAN_LIB) \
-#                     -lg2c $(DEBUG_FLAGS) 
+#                     -lg2c -ldl $(DEBUG_FLAGS) 
 # else
-CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -lg2c $(DEBUG_FLAGS) 
+CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -lg2c -ldl $(DEBUG_FLAGS) 
 # endif

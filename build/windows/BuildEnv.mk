@@ -1,4 +1,4 @@
-# $Header$
+# $Id$
 # Build environment file for Windows
 
 # Flags used to control the build
@@ -26,9 +26,10 @@ else
 WX_28_DEFINES = 
 endif
 
-# The Console app does not support MATLAB linkage for now
+# The Console app does not support MATLAB linkage or shared base libraries for now
 ifeq ($(CONSOLE_APP), 1)
 USE_MATLAB = 0
+SHARED_BASE = 0
 endif
 
 # Compiler options
