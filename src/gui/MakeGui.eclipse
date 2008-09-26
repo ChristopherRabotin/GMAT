@@ -140,6 +140,7 @@ archclean :
 cleanmacosx :
 	echo 'cleaning macosx apps .......'
 	rm -rf $(TOP_DIR)/bin/GMAT.app
+	rm -rf $(TOP_DIR)/bin/GMATNoMatlab.app
 
 OBJECTS = \
     app/AboutDialog.o \
@@ -321,7 +322,7 @@ macmatlab:
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_WX_LIBS)
+	./$(INSTALL_WX_LIBS) GMAT
 #	./install_libs_into_bundle
 
 macnomatlab:
@@ -330,7 +331,7 @@ macnomatlab:
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
-	./$(INSTALL_WX_LIBS)
+	./$(INSTALL_WX_LIBS) GMATNoMatlab
 #	./install_libs_into_bundle
 
 .cpp.o:
