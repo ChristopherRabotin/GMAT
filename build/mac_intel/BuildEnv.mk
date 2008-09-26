@@ -17,14 +17,21 @@ WX_28_SYNTAX = 1
 # Not currently used 
 USE_SHARED = 1
 
+# flag indicating whether or not to build as a shared library
+SHARED_BASE = 0
+
 # *** EDIT THIS *** - put the top of the GMAT project directory structure here ....
-TOP_DIR = /Users/wcshoan/Documents/workspace/gmat_svn
+TOP_DIR = <your top directory here>
 # *** EDIT THIS *** - this is where you installed the version of wxMac that you're using ...
-WX_HOME = /Applications/wxmac-2.8.7/osx-build
+WX_HOME = /Applications/wxmac-2.8.8/osx-build
+#WX_HOME = /Applications/wxmac-2.8.7/osx-build
 # *** EDIT THIS *** - 'sudo make install' of wxMac will put things here ......
 WX_INSTALLED = /usr/local/bin
 # *** EDIT THIS *** - this is where you installed MATLAB ......
 MATLAB = /Applications/MATLAB_R2007b
+# *** EDIT THIS *** - this should match the version of wxMac you are using
+#INSTALL_WX_LIBS = install_libs_into_bundle_2_8_7
+INSTALL_WX_LIBS = install_libs_into_bundle_2_8_8
 
 BUILD = release
 
@@ -42,7 +49,7 @@ endif
 
 # MATLAB specific data
 MATLAB_INCLUDE = -I${MATLAB}/extern/include \
-				-I$(TOP_DIR)/matlab/gmat_mex/src
+				-I$(TOP_DIR)/src/matlab/gmat_mex/src
 MATLAB_LIB = -L${MATLAB}/bin/maci \
 			-L$(MATLAB)/bin \
              -L${MATLAB}/sys/os/maci
@@ -92,9 +99,14 @@ MAC_SPECIFIC = 1
 
 # For MacOS application
 ifeq ($(MAC_SPECIFIC),1)
+ifeq ($(USE_MATLAB),1)
 EXECUTABLE 	= $(TOP_DIR)/bin/GMAT
+else
+EXECUTABLE  = $(TOP_DIR)/bin/GMATNoMatlab
+endif
 # *** EDIT THIS *** - put the version number of the wxMac that you're using here ...
-WX_VERSION   = 2.8.7
+#WX_VERSION   = 2.8.7
+WX_VERSION   = 2.8.8
 GMAT_INFO    = $(TOP_DIR)/src/gui/Info_GMAT.plist
 CONTENTS_DIR = $(EXECUTABLE).app/Contents
 MACOS_DIR    = $(CONTENTS_DIR)/MacOS
@@ -113,7 +125,8 @@ REZ = /Developer/Tools/Rez -d __DARWIN__ -t APPL -d __WXMAC__ Carbon.r
 # *** EDIT THIS *** - Point to where the FORTRAN libraries are
 #FORTRAN_LIB = -L/sw/lib  
 #FORTRAN_LIB = -L/usr/local/lib -lgcc_s.1 -lgfortran 
-FORTRAN_LIB = -L/usr/local/lib -lgfortran 
+#FORTRAN_LIB = -L/usr/local/lib -lgfortran 
+FORTRAN_LIB = -L/usr/local/gfortran/lib -lgfortran 
 
 else 
 REZ = 
@@ -158,7 +171,7 @@ endif
 ifeq ($(USE_MATLAB),1)
 LINK_FLAGS = $(WXLINKFLAGS)\
              $(MATLAB_LIB) $(MATLAB_LIBRARIES) \
-             $(FORTRAN_LIB) -framework OpenGL -framework AGL -headerpad_max_install_names \
+             $(FORTRAN_LIB) -framework OpenGL -framework AGL -headerpad_max_install_names\
              -lwx_mac_gl-2.8 $(IL_LIBRARIES) $(DEBUG_FLAGS)
 #             -lwx_mac_gl-2.8 -lg2c $(IL_LIBRARIES) $(DEBUG_FLAGS)
 else
@@ -174,5 +187,6 @@ endif
 #            			$(FORTRAN_LIB) \
 #                     -lg2c -ldl $(DEBUG_FLAGS) 
 # else
-CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -lg2c -ldl $(DEBUG_FLAGS) 
+#CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -lg2c -ldl $(DEBUG_FLAGS) 
+CONSOLE_LINK_FLAGS = -L../../base/lib $(FORTRAN_LIB) -ldl $(DEBUG_FLAGS) 
 # endif

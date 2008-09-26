@@ -35,13 +35,13 @@ MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
 #MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
 #-----------------------------------------------------------
 SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
-SLP_FILE             = SLP_PATH/mn2000.pc
+SLP_FILE             = SLP_PATH/DBS_mn2000.pc
 SLP_TIME_COEFF_FILE  = SLP_PATH/timcof.pc
 #-----------------------------------------------------------
 DE_PATH              = ROOT_PATH/planetary_ephem/de/
-DE200_FILE           = DE_PATH/winp1941.200
-DE202_FILE           = DE_PATH/winp1950.202
-DE405_FILE           = DE_PATH/winp1941.405
+DE200_FILE           = DE_PATH/leDE1941.200
+DE202_FILE           = DE_PATH/leDE1950.202
+DE405_FILE           = DE_PATH/leDE1941.405
 #-----------------------------------------------------------
 EARTH_POT_PATH       = ROOT_PATH/gravity/earth/
 JGM2_FILE            = EARTH_POT_PATH/JGM2.cof
