@@ -146,11 +146,11 @@ bool Publisher::Publish(Integer id, Real *data, Integer count)
    // No subscribers
    if (subs.empty())
    {
-      //#if DBGLVL_PUBLISHER_PUBLISH
+      #if DBGLVL_PUBLISHER_PUBLISH
       MessageInterface::ShowMessage
          ("*** WARNING *** Publisher::Publish() There are no subscribers, "
           "so just returning false\n");
-      //#endif      
+      #endif      
       return false;
    }
    
