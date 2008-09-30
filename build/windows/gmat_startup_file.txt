@@ -1,13 +1,13 @@
 VERSION = 2005-07-13
 #-------------------------------------------------------------------------------
 # ! Do not remove or change VERSION date, it won't work otherwise!!
-# Only the new FileManager, version after 2005/07/13, reconizes this new format.
+# Only the new FileManager, version after 2005/07/13, recognizes this new format.
 #-------------------------------------------------------------------------------
 # 
 # Path/File naming convention:
 #   - Path name should end with PATH
 #   - File name should end with FILE
-#   - Path/File names are case sensative
+#   - Path/File names are case sensitive
 #
 # You can add potential file and texture files by following the naming
 # convention.
@@ -21,7 +21,7 @@ VERSION = 2005-07-13
 # In order for an object plugin to work inside GMAT, the plugin dll must be placed
 # in the folder containing the GMAT executable. Once placed in the correct folder
 # the PLUGIN line below must be set equal to the plugin name minus the dll 
-# extenstion with the comment (#) removed from the front of the line.
+# extension with the comment (#) removed from the front of the line.
 #
 #-------------------------------------------------------------------------------
 ROOT_PATH            = ./files/
