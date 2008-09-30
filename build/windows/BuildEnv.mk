@@ -3,21 +3,22 @@
 
 # Flags used to control the build
 USE_MATLAB = 1
-USE_DEVIL = 1
+USE_DEVIL = 0
 CONSOLE_APP = 0
 DEBUG_BUILD = 0
 PROFILE_BUILD = 0
 WX_28_SYNTAX = 1
-# WX_SHARED = 0
+SHARED_BASE = 1
+#WX_SHARED = 1
 
 # MATLAB specific data
-MATLAB_INCLUDE = -IC:/Program\ Files/MATLAB/Matlab71SP3/extern/include
-MATLAB_LIB = -LC:/Program\ Files/MATLAB/Matlab71SP3/bin/win32
+MATLAB_INCLUDE = -IC:/Program\ Files/MATLAB/R2007B/extern/include
+MATLAB_LIB = -LC:/Program\ Files/MATLAB/R2007B/bin/win32
 MATLAB_LIBRARIES = -leng -lmx -lmat
 
 # DevIL data
-IL_HEADERS = -I../../DevIL/il -I../DevIL
-IL_LIBRARIES = -L../../devIL -lilu -lilut -lDevIL
+IL_HEADERS = -ID:/DevIL/include/il -ID:/DevIL/include
+IL_LIBRARIES = -LD:/devIL/dlls -lilu -lilut -lDevIL
 
 # wxWidgets settings
 ifeq ($(WX_28_SYNTAX), 1)
@@ -32,16 +33,32 @@ USE_MATLAB = 0
 SHARED_BASE = 0
 endif
 
+# GMAT application icon for Windows only
+GMAT_ICON_RC = D:/Projects/GMAT/Icons/GmatIcon.rc
+GMAT_ICON_O  = D:/Projects/GMAT/Icons/GmatIcon.o
+
 # Compiler options
 CPP = g++
 C = gcc
 FORTRAN = g77
-FORTRAN_LIB = -lg2c
+FORTRAN_LIB = -LC:/MinGW/lib -lg2c
 
 ifeq ($(PROFILE_BUILD), 1)
 PROFILE_FLAGS = -pg
 else
 PROFILE_FLAGS = 
+endif
+
+ifeq ($(SHARED_BASE), 1)
+
+ifeq ($(USE_MATLAB), 1)
+SHARED_LIB_FLAGS = $(FORTRAN_LIB) $(MATLAB_LIB) $(MATLAB_LIBRARIES) -shared -Wl --out-implib
+else
+SHARED_LIB_FLAGS = $(FORTRAN_LIB) -shared -Wl --out-implib
+endif
+
+else
+SHARED_LIB_FLAGS = 
 endif
 
 OPTIMIZATIONS =  -DwxUSE_UNIX=0 -D_X86_=1 -DWIN32 -DWINVER=0x0400 -D__WIN95__ \
@@ -102,10 +119,10 @@ ifeq ($(USE_DEVIL),1)
 ifeq ($(USE_MATLAB),1)
 LINK_FLAGS = $(WXLINKFLAGS)\
              $(MATLAB_LIB) $(MATLAB_LIBRARIES) \
-             -lg2c $(DEBUG_FLAGS) $(IL_LIBRARIES)
+             $(FORTRAN_LIB) $(DEBUG_FLAGS) $(IL_LIBRARIES)
 else
 LINK_FLAGS = $(WXLINKFLAGS)\
-             -lg2c $(DEBUG_FLAGS) $(IL_LIBRARIES)
+             $(FORTRAN_LIB) $(DEBUG_FLAGS) $(IL_LIBRARIES)
 endif
 
 else
@@ -113,9 +130,10 @@ else
 ifeq ($(USE_MATLAB),1)
 LINK_FLAGS = $(WXLINKFLAGS)\
              $(MATLAB_LIB) $(MATLAB_LIBRARIES) \
-             -lg2c $(DEBUG_FLAGS)
+             $(FORTRAN_LIB) $(DEBUG_FLAGS)
 else
-LINK_FLAGS = $(WXLINKFLAGS) -lg2c $(DEBUG_FLAGS)
+LINK_FLAGS = $(WXLINKFLAGS)\
+             $(FORTRAN_LIB) $(DEBUG_FLAGS)
 endif
 
 endif
@@ -125,5 +143,5 @@ ifeq ($(USE_MATLAB),1)
 CONSOLE_LINK_FLAGS = $(MATLAB_LIB) $(MATLAB_LIBRARIES) -L../base/lib \
                     -lgfortran $(DEBUG_FLAGS) $(PROFILE_FLAGS)
 else
-CONSOLE_LINK_FLAGS = -L../base/lib -lg2c $(DEBUG_FLAGS) 
+CONSOLE_LINK_FLAGS = -L../base/lib $(FORTRAN_LIB) $(DEBUG_FLAGS) 
 endif
