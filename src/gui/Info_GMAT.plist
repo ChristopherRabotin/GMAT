@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLongVersionString</key>
-	<string>GMAT (Mac OS/ppc) version Alpha</string>
+	<string>GMAT (Mac OS/Intel) version Alpha</string>
 	<key>CFBundleName</key>
 	<string>GMAT</string>
 	<key>CFBundlePackageType</key>

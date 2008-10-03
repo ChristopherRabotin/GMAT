@@ -317,21 +317,29 @@ macosx:
 
 macmatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMAT/" $(GMAT_INFO) >$(MAC_PKG)
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMATML/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
-	ln -f $(TOP_DIR)/src/gui/RunGMAT $(MAC_SCRIPT)
+	ln -f $(TOP_DIR)/src/gui/RunGMATML $(MAC_SCRIPT_DIR)/RunGMATML
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./$(INSTALL_WX_LIBS) GMAT
-#	./install_libs_into_bundle
 
 macnomatlab:
 	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
-	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
+	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/RunGMATNoML/" $(GMAT_INFO) >$(MAC_PKG)
 	echo -n "APPL????" > $(MAC_PKGINFO)
 	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+	ln -f $(TOP_DIR)/src/gui/RunGMATNoML $(MAC_SCRIPT_DIR)/RunGMATNoML
 	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
 	./$(INSTALL_WX_LIBS) GMATNoMatlab
+
+#macnomatlab:
+#	sed -e "s/IDENTIFIER/`echo GMAT | sed -e 's,\.\./,,g' | \
+#	sed -e 's,/,.,g'`/" -e "s/EXECUTABLE/GMAT/" $(GMAT_INFO) >$(MAC_PKG)
+#	echo -n "APPL????" > $(MAC_PKGINFO)
+#	ln -f $(TOP_DIR)/bin/$(WXTARGET) $(MAC_APP)
+#	cp -f $(GMAT_ICONS) $(MAC_ICONS) 
+#	./$(INSTALL_WX_LIBS) GMATNoMatlab
 #	./install_libs_into_bundle
 
 .cpp.o:
