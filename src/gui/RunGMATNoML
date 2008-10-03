@@ -1,0 +1,15 @@
+#!/bin/bash
+# Set up the environment for GMAT first
+# This assumes that the user has set the FORTRANFORGMAT environment variable in her/his environment.plist file.  
+# FORTRANFORGMAT should point to the directory where gfortran has been installed, i.e. /usr/local/gfortran
+# Intel ...
+if [[ `arch` = "i386" ]]; then
+export DYLD_LIBRARY_PATH=$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+else   # PowerPC ...
+export DYLD_LIBRARY_PATH=$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+fi
+export PATH=$FORTRANFORGMAT/lib:$PATH
+here="${0%/*}"
+cmd='GMAT'
+
+exec "$here/$cmd" "$@"

@@ -1,0 +1,17 @@
+#!/bin/bash
+# Set up the environment for GMAT first
+# This assumes that the user has set the MATLABFORGMAT environment variable in her/his environment.plist file.  
+# MATLABFORGMAT should point to the directory where MATLAB has been installed, i.e. /Applications/MATLAB_R2007b
+# This also assumes that the user has set the FORTRANFORGMAT environment variable in her/his environment.plist file.  
+# FORTRANFORGMAT should point to the directory where gfortran has been installed, i.e. /usr/local/gfortran
+# Intel ...
+if [[ `arch` = "i386" ]]; then
+export DYLD_LIBRARY_PATH=$MATLABFORGMAT/bin/maci:/$MATLABFORGMAT/sys/os/maci:$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+else   # PowerPC ...
+export DYLD_LIBRARY_PATH=$MATLABFORGMAT/bin/mac:/$MATLABFORGMAT/sys/os/mac:$FORTRANFORGMAT/lib:$DYLD_LIBRARY_PATH
+fi
+export PATH=$MATLABFORGMAT/bin:$FORTRANFORGMAT/lib:$PATH
+here="${0%/*}"
+cmd='GMAT'
+
+exec "$here/$cmd" "$@"
