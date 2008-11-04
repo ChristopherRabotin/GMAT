@@ -1,1 +1,119 @@
 \section{Overview and Philosophy}
+
+
+According to our proposed approach we organize the objects and
+models to perform OD into four categories:  estimators, measurement
+participants, measurement models, and dynamics models.  In this
+section, we discuss each of these classes of objects in more detail
+and describe the philosophy and functionality for each of the four
+categories.
+
+Measurement Participants The first category of objects is
+Measurement Participants which are defined as any physical object
+that is part of a measurement process.  Examples include:
+
+?   Spacecraft and sensors ?   Ground station and sensors ?
+Aircraft and sensors ?   Celestial objects ?   Other
+
+For example,  an altimeter measurement for a LEO spacecraft has two
+participants: Earth and the spacecraft.  For a GPS pseudorange
+measurement, the participants include the GPS constellation and the
+user spacecraft.   For a two-way range measurement between a ground
+station and a spacecraft, both the ground station and the spacecraft
+are participants in the measurement.
+
+In GMAT, measurement participants are created and configured
+separately from measurements.  For example, if the user requires a
+Doppler measurement between say Hubble and Canberra, they first
+configure a spacecraft to model Hubble, and then they configure a
+ground station to model Canberra.  Once the Hubble and Canberra
+objects are configured, the user creates a measurement object and
+configures it to create a Doppler measurement between Hubble and
+Canberra.
+
+
+GPS Constellation Measurement Models A measurement model describes
+how measurement participants interact to produce a measurement
+quantity used in the OD process.  Once configured, a measurement
+model provides the following information: observed measurement
+values (whether they are read from a file or simulated),  the
+computed (or expected) value of the measurement, and the measurement
+partial derivatives.   In summary, Measurement Models provide:
+
+?   Truth quantities ?   Observed ?   Simulated ?   Computed
+(expected) quantities ?   Partial derivatives
+
+To configure a measurement model, the measurement participants must
+be created and appropriately configured.   Fields on the Measurement
+Model object allow the user to define many different types of
+measurements given the specified list of participants.   If observed
+measurements are available from a standard file format, the user
+configures the measurement Model to read data from the desired file.
+In this case, the user must set object Ids on the measuement
+participants to match the Ids on the measurement file.  GMAT uses
+the file format and measurement Ids to determine how computed values
+are to be calculated.
+
+When observed values are not available, a user can configure a
+Measurement Model to simulate the desired measurements.  In this
+case, GMAT will compute both the observed and expected values for a
+measurement, or by using the SimulateData command, GMAT will simply
+write the requirested simulation data to a measurement file.    A
+script snippet that contains a sample measurement model is shown
+below.  Each field for the Measurement Model object is discussed in
+detail in Table 1.  Note that for complex, such as GPS psuedorange,
+there will be many more fields.  These fields are not included here.
+
+Below is a script example of a simple measurement model.  The
+participants in the measurement are ODSat and Canberra, which are
+assumed to have been configured in a previous script segment.   The
+measurement types are Azimuth, Elevation, and Range.  The DataSource
+field allows the user to tell GMAT whether to read the observations
+from a file, or to simulate the data. The FileFormat and Filename
+fields allow the user to specify the observations data file if it is
+available.    The fields  LightTimeModel, IonosphericModel, and
+TroposphereModel,allow the user to specify the model for these error
+corrections, where None is an option if the error source is to be
+neglected.   All fields with the prefix field ".Sim" are for
+configuration of the data simulator for this measurement.
+
+\verbatiminput{GSMeasurement.script}
+\verbatiminput{BatchLeastSquares.script}
+\verbatiminput{ExtendedKalmanFilter.script}
+
+Estimators
+
+The third component required for an estimation problem is a solver.
+The user will have many solvers to choose from including but not
+limited to
+
+?   Initial orbit determination ?   Batch (least squares, other) ?
+Filters (SRIF, EKF, UKF)
+
+In GMAT the solver is a relatively simple object compared to the
+measurement model and the measurement  participants.  The job of the
+solver is to query configured measurement models for the observed
+and computed values  and the partial derivatives  and use this
+information  to generate state estimates.  Hence,  the estimator in
+GMAT knows little about the details of the measurement model
+computations or the configurations of the participants.
+
+A sample script segment for a BatchLeastSquare he user will specify
+the SolveFor and Consider parameters on the estimator, along with
+what measurements they would like the solver to process.
+
+%Create BatchLeastSquares BLSE BLSI.Measurements = BLSI.Propagator =
+%BLSE.SolveFor = BLSE.Consider = BLSE.SolutionEpoch =
+%BLSE.AbsoluteConvergenceTol = BLSE.Propagator =
+%
+%Create ExtendedKalmanFilter EKF EKF.Measurements = EKF.Propagator =
+%EKF.SolveFor = EKF.Consider = EKF.SolutionEpoch = EKF.Propagator =
+%EKF.ProcessNoiseModel = EKF.Smoothing = Dynamics Models
+
+Dynamics Models ?   Participant dynamics ?   Variational equations ?
+Process Noise
+
+Commands and Application Control
+
+Application Control Modes ?   RunEstimator ?   SimulateData ?
+RunEstimatorSequence

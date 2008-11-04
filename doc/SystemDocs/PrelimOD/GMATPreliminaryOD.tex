@@ -11,6 +11,9 @@
 \usepackage{makeidx}
 \makeindex
 
+%  for showing script lines as they appear in GMAT
+\usepackage{verbatim}
+
 % Allows alignment of multiple columns of text
 \usepackage{array}
 
@@ -181,6 +184,49 @@ basicstyle=\ttfamily, numberstyle=\tiny, numbers=none}
 \tableofcontents
 
 \chapter{Introduction}
+
+This document contains a high level description of intended orbit
+determination features for the General Mission Analysis Tool (GMAT).
+The document contains two fundamental types of information:  how the
+user would interact with GMAT to perform orbit determination, and a
+high level view of how GMAT will solve orbit determination problems.
+The user perspective is documented by discussing components in GMAT
+that would  enable OD applications and through use cases that
+suggest how components may be configured to solve common OD
+problems.    The system perspective is documented by describing the
+system components GMAT will employ to perform OD and how these
+components interact including activity diagrams, sequence diagrams
+and important classes and methods.
+
+At the time of this writing, the General Mission Analysis Tool
+(GMAT) does not support estimation of orbit or attitude related
+data.   This document is the product of an intensive design session
+performed at AFRL/RDSM in Maui with the goal to determine high level
+user interface and architectural design specifications for new
+estimation capabilities.   Our goals for the 8 day meeting were:
+
+1)  Define high level functionality and detailed use cases 2)
+Identify major system components:  objects, commands, and
+application control 3)  Describe how components interact to solve
+basic OD problems 4)  Identify priorities for development effort 5)
+Continue development of prototype batch least squares functionality
+
+Section 2 of this document  discusses how a user might interact with
+GMAT to define and solve estimation problems.  This includes how to
+configure estimators, how to define what quantities are to be
+estimated and considered, and what measurements are to be included
+in the estimation process.  For complex scenarios that involve
+events, we propose a method for defining the event sequence so the
+estimator can estimate their properties.  We also present an
+approach for defining complex OD problems with smoothing and complex
+measurement and solve for parameters.
+
+Section three of this document is a system level perspective of how
+identified features may be implemented in the system.  We identify
+new system components and discuss how they interact to solve
+estimation problems.    Finally, in section 4, we present a catalog
+of use cases that describe the estimation problem to be solved and
+illustrate how the user would configure GMAT to solve the problem.
 
 \chapter{User Interfaces}
     \input{OverviewandPhilosophy}
