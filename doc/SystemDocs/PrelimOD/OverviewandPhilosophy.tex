@@ -7,12 +7,12 @@ have to configure measurement models, provide truth data or define
 simulation parameters, and configure numerical solvers to determine
 the best state estimate. Below we discuss how the user will provide
 these and other types of information to define and solve OD problems
-in GMAT.  In a sense, this is an attempt to write a short user's
-guide  before writing the software.  This approach is useful in
-several ways: it defines how a user will interact with GMAT and
-allows analysts to provide feedback on the interfaces before the
-system is written, and it gives some insight into various designs
-for the the underlying software architecture.
+in GMAT.  In a sense, this portion of the document is a  short
+user's guide  written before developing the software. This approach
+is useful in several ways: it defines how a user will interact with
+GMAT and allows analysts to provide feedback on the interfaces
+before the system is written, and it gives some insight into various
+designs for the the underlying software architecture.
 
 We begin this chapter with a high level view of OD from the
 perspective of a user who needs to apply GMAT to orbit
@@ -33,28 +33,14 @@ To uniquely define an orbit determination problem, a user must often
 provide hundreds of pieces of information ranging from clock drift
 parameters, process noise characteristics, spacecraft physical
 properties, ground station properties, and atmospheric modelling
-parameters to name just a few. This section explains how theses
+parameters to name just a few. This section explains how these
 pieces of information will be organized in GMAT and the philosophy
 behind the organization of the data.  The goal is to provide an
 intuitive interface for orbit determination analysis and explain
 where a user would go to set types of data, and why the choices have
-been made. 
+been made.
 
-To solve OD problems in GMAT, a user will have to create and
-configure many objects that model physical components involved in
-the measurement process such as spacecraft, receivers, clocks,
-transmitters and celestial objects to name a few. A user will also
-have to configure measurement models, provide truth data or define
-simulation parameters, and configure numerical solvers to determine
-the best state estimate. Below we discuss how the user will provide
-these and other types of information to define and solve OD
-problems. This information is useful in several ways: it defines how
-a user will interact with GMAT and allows analysts to provide
-feedback on the interfaces before the system is written, and it
-gives some insight into how the underlying software architecture
-will be organized.  We begin with a high level view and
-categorization of models and algorithms that a user will have
-control over.
+
 
 According to our proposed approach we organize the objects and
 models to perform OD into four categories:  estimators, measurement
