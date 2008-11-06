@@ -1,5 +1,60 @@
+
+To solve OD problems in GMAT, a user will have to create and
+configure many objects that model physical components involved in
+the measurement process such as spacecraft, receivers, clocks,
+transmitters and celestial objects to name a few.  A user will also
+have to configure measurement models, provide truth data or define
+simulation parameters, and configure numerical solvers to determine
+the best state estimate. Below we discuss how the user will provide
+these and other types of information to define and solve OD problems
+in GMAT.  In a sense, this is an attempt to write a short user's
+guide  before writing the software.  This approach is useful in
+several ways: it defines how a user will interact with GMAT and
+allows analysts to provide feedback on the interfaces before the
+system is written, and it gives some insight into various designs
+for the the underlying software architecture.
+
+We begin this chapter with a high level view of OD from the
+perspective of a user who needs to apply GMAT to orbit
+determination. We provide a categorization of models and algorithms
+that a user will have control over and explain the overall
+philosophy of the user interface in GMAT.  The high level
+categorization explains where in the GMAT script and GUI a user
+would need to go to set various types of information such as
+dynamics models, process noise parameters, and measurement models to
+name a few.  Next, we provide a detailed view of the primary objects
+and commands required for orbit determination in GMAT.  These
+sections go into detail on what fields are on each objects, and what
+commands would be employed for different types of analysis.
+
 \section{Overview and Philosophy}
 
+To uniquely define an orbit determination problem, a user must often
+provide hundreds of pieces of information ranging from clock drift
+parameters, process noise characteristics, spacecraft physical
+properties, ground station properties, and atmospheric modelling
+parameters to name just a few. This section explains how theses
+pieces of information will be organized in GMAT and the philosophy
+behind the organization of the data.  The goal is to provide an
+intuitive interface for orbit determination analysis and explain
+where a user would go to set types of data, and why the choices have
+been made. 
+
+To solve OD problems in GMAT, a user will have to create and
+configure many objects that model physical components involved in
+the measurement process such as spacecraft, receivers, clocks,
+transmitters and celestial objects to name a few. A user will also
+have to configure measurement models, provide truth data or define
+simulation parameters, and configure numerical solvers to determine
+the best state estimate. Below we discuss how the user will provide
+these and other types of information to define and solve OD
+problems. This information is useful in several ways: it defines how
+a user will interact with GMAT and allows analysts to provide
+feedback on the interfaces before the system is written, and it
+gives some insight into how the underlying software architecture
+will be organized.  We begin with a high level view and
+categorization of models and algorithms that a user will have
+control over.
 
 According to our proposed approach we organize the objects and
 models to perform OD into four categories:  estimators, measurement
@@ -31,6 +86,17 @@ objects are configured, the user creates a measurement object and
 configures it to create a Doppler measurement between Hubble and
 Canberra.
 
+\begin{figure}[htbp!]
+    \begin{center}
+    \begin{picture}(270,150)
+    \special{psfile=ODObjects.eps
+    hscale= 85 vscale= 85 hoffset = -130 voffset = -440}
+    \end{picture}
+    \end{center}
+    \vspace{0.2 in}
+    \label{Fig:ODObjects}
+    \caption{ Objects and Commands for OD Applications }
+\end{figure}
 
 GPS Constellation Measurement Models A measurement model describes
 how measurement participants interact to produce a measurement
