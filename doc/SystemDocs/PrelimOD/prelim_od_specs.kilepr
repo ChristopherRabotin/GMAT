@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .jpeg .png
 kileprversion=1
 kileversion=1.9.2
-lastDocument=GMATPreliminaryOD.tex
+lastDocument=StateOverview.tex
 masterDocument=
 name=Prelim_OD_Specs
 pkg_extIsRegExp=false
@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:Commands.tex]
 archive=true
-column=7340144
-encoding=
-highlight=
-line=0
+column=0
+encoding=UTF-8
+highlight=LaTeX
+line=1
 open=false
 
 [item:CoverPage.tex]
@@ -57,11 +57,11 @@ open=false
 
 [item:GMATPreliminaryOD.tex]
 archive=true
-column=0
+column=11
 encoding=UTF-8
 highlight=LaTeX
-line=204
-open=true
+line=206
+open=false
 
 [item:HardwareModels.tex]
 archive=true
@@ -117,7 +117,7 @@ column=33
 encoding=UTF-8
 highlight=LaTeX
 line=0
-open=true
+open=false
 
 [item:PropStateVectorDesign.tex]
 archive=true
@@ -142,6 +142,14 @@ encoding=
 highlight=
 line=0
 open=false
+
+[item:StateOverview.tex]
+archive=true
+column=65
+encoding=UTF-8
+highlight=LaTeX
+line=21
+open=true
 
 [item:UseCases.tex]
 archive=true
