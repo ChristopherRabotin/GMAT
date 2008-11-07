@@ -1,6 +1,52 @@
 \section{Measurement Models}
 
+\subsection{General Form of Measurement Models}
+
+Measurement models for orbit determination involve modelling of some
+physical property of electromagnetic wave propagation and
+analytically relating the computed measurement value to the
+spacecraft state. \cite{GTDS:89} GMAT supports numerous measurement
+models of varying complexity from simple two-way range, to GPS
+carrier phase measurements.
+
+The general form of the measurement model used by GMAT is
+%%
+%\begin{equation}
+%   \mathcal{O}_c = f_g\left(\mathbf{r}_p^k(t^k), \dot{\mathbf{r}}_p^k(t^k),\mathbf{q}_p^k(t^k),\boldsymbol{\omega}_p^k(t^k)
+%   \right) + \Delta f_{iono} + \Delta f_{tropo} + \Delta f_{rel}+ \Delta f_{abber} + \sigma_n + b
+%\end{equation}
+%%
+%
+%%
+%\begin{tabbing}[htbp!]
+%12345678 \= dummy line \kill
+%$\mathcal{O}_c$  \>  Computed value of the measurement\\
+%$\mathbf{f}_g$ \> The geometric model specific to the measurement type\\
+%$\mathbf{r}_p$ \> Position of $k^{th}$ participant\\
+%$\dot{\mathbf{r}}_v$ \> Velocity of $k^{th}$ participant\\
+%$\mathbf{r}_o$ \> Observer position\\
+%$\dot{\mathbf{r}}_o$    \> Observer velocity\\
+%$t$    \> Measurement time tag\\
+%$b$    \> Measurement bias\\
+%$\delta a$    \> Atmospheric correction\\
+%$\delta r$     \> Relativistic correction\\
+%\end{tabbing}
+
+
 \subsection{Range}
+
+ two primary models for spacecraft
+range: geometric and radiometric. In both cases the range is a
+measure of the distance between an observer and a vehicle.  The
+geometric range is calculated using vector geometry and ignores
+signal propagation times and error sources.  Most, if not all,
+ground trackers provide the user with the round trip signal
+propagation time.  The radiometric range model uses the best
+estimate spacecraft state to determine an expected value for the
+round trip signal propagation time from observer to spacecraft and
+back to the observer.  Hence, the raw radiometric value is a measure
+of round trip range.
+
 
 \begin{equation}
     \mathcal{R}_1^{(j)} = \rho^{(m,j)}_1(t_i) +c\left(b_r^{(m)}(t_i) - b_t^{(j)}(t_t)\right) + \Delta \rho^{(j)}_{iono}(t_i) + \Delta \rho^{(j)}_{tropo}(t_i) + \sigma_{SA}^{(j)} + \sigma_n^{(j)} + b_m
@@ -32,23 +78,7 @@ iteratively by using fixed point iteration on the following equation
 
 
 
-GMAT supports two primary models for spacecraft range: geometric and
-radiometric. In both cases the range is a measure of the distance
-between an observer and a vehicle.
- The geometric range is calculated using vector geometry and ignores signal propagation
-  times and error sources.  Most, if not all, ground trackers provide the user with
-  the round trip signal propagation time.  The radiometric range model uses the best
-   estimate spacecraft state to determine an expected value for the round trip signal
-   propagation time from observer to spacecraft and back to the observer.  Hence,
-   the raw radiometric value is a measure of round trip range.
 
-The general form of the measurement model used by GMAT is
-%
-\begin{equation}
-   \mathcal{O}_c = \mathbf{f}_k\left(\mathbf{r}_v(t + \delta t), \dot{\mathbf{r}}_v(t + \delta t),
-   \mathbf{r}_o, \dot{\mathbf{r}}_o\right) + b + \delta_a + \delta_r
-\end{equation}
-%
 %
 \begin{tabbing}[htbp!]
 12345678 \= dummy line \kill
