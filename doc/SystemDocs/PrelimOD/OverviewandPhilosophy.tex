@@ -40,82 +40,43 @@ intuitive interface for orbit determination analysis and explain
 where a user would go to set different types of data, and why the
 choices have been made.
 
-To explain the organization of models and data, we present three
-levels of detail - high, intermediate, and low - into the
-organization of data and models for orbit determination
-applications.  The high level view groups all models into five
-categories and explains how these groups interact in the estimation
-process.  These high level categories are: measurement participants,
-measurements, estimators, dynamics, and commands. The intermediate
-level view contains more detail about what types of data are set on
-each object and model. For example, in the intermediate level view,
-you learn where clock bias information is located and where process
-noise information is located.  The low level view describes the
-actual field names and settings contained in the five categories.
-For example, in the low level view, you learn the script syntax to
-set process noise parameters, and the different process noise models
-that are available.
+To explain the organization of models and data, we present several
+levels of detail into the organization of data and models for orbit
+determination applications.  The first level view all models and
+data into six categories and explains how these groups interact in
+the estimation process.  These high level categories are:
+measurement participants, measurements, estimators, dynamics models,
+commands, and output.  Here we present which types of data are set
+on each object and model. For example, you learn where clock bias
+information is located and where process noise information is
+located.   The second level view we present a simple estimation
+example using the proposed script language and walk you through each
+step to set up a batch least squares problem for a spacecraft and
+one ground station.  Finally, we present a reference section that
+describes all field names and settings contained in the five
+categories. For example, in the reference section, you learn the
+script syntax to set process noise parameters, and the different
+process noise models that are available.
 
-Let's begin with the high level view.
+Let's begin with a introductory user perspective on to the primary
+system components used in orbit determination.
 
-\subsection{High Level View of System Components}
+\subsection{Introduction to System Components and Philosophy}
 
-According to our proposed approach we organize the objects and
-models to perform OD into four categories:  estimators, measurement
-participants, measurement models, and dynamics models.  In this
-section, we discuss each of these classes of objects in more detail
-and describe the philosophy and functionality for each of the four
-categories.
-
-\begin{figure}[htbp!]
-    \begin{center}
-    \begin{picture}(270,150)
-    \special{psfile=ODObjects.eps
-    hscale= 85 vscale= 85 hoffset = -130 voffset = -440}
-    \end{picture}
-    \end{center}
-    \vspace{0.2 in}
-    \label{Fig:ODObjects}
-    \caption{High Level View: Objects and Commands for OD Applications }
-\end{figure}
-
-
-Measurement Participants The first category of objects is
-Measurement Participants which are defined as any physical object
-that is part of a measurement process.  Examples include:
-
-?   Spacecraft and sensors ?   Ground station and sensors ? Aircraft
-and sensors ?   Celestial objects ?   Other, passive or active
-
-For example,  an altimeter measurement for a LEO spacecraft has two
-participants: Earth and the spacecraft.  For a GPS pseudorange
-measurement, the participants include the GPS constellation and the
-user spacecraft.   For a two-way range measurement between a ground
-station and a spacecraft, both the ground station and the spacecraft
-are participants in the measurement.
-
-In GMAT, measurement participants are created and configured
-separately from measurements.  For example, if the user requires a
-Doppler measurement between say Hubble and Canberra, they first
-configure a spacecraft to model Hubble, and then they configure a
-ground station to model Canberra.  Once the Hubble and Canberra
-objects are configured, the user creates a measurement object and
-configures it to create a Doppler measurement between Hubble and
-Canberra.
-
-
-GPS Constellation Measurement Models A measurement model describes
-how measurement participants interact to produce a measurement
-quantity used in the OD process.  Once configured, a measurement
-model provides the following information: observed measurement
-values (whether they are read from a file or simulated),  the
-computed (or expected) value of the measurement, and the measurement
-partial derivatives.   In summary, Measurement Models provide:
-
-?   Truth quantities ?   Observed ?   Simulated ?   Computed
-(expected) quantities ?   Partial derivatives
-
-\subsection{Intermediate Level View of System Components}
+In GMAT, the objects and models used for orbit determination
+applications can be categorized into 6 groups:  measurement
+participants, measurements, dynamics models, estimators, commands,
+and output.  Below we describe each of these groups and the
+philosophy and functionality for each category in turn.  Fig.~
+\ref{Fig:ODOrganization} shows a listing of each category with a
+list of objects in models in each category.  Items in bold are
+objects in GMAT that can be created using the \st{Create} command.
+For example, you can create a clock named ``GPSClock" by using the
+lines \st{Create Clock GPSClock}. Items that appear in italics in
+Fig.~\ref{Fig:ODOrganization} are setttings and models available on
+the object below which they appear.  For example, on a receiver, you
+can set attenuation and bore site parameters.   Let's now look at
+measurement participants in more detail.\\
 
 \begin{figure}[htbp!]
     \begin{center}
@@ -128,6 +89,90 @@ partial derivatives.   In summary, Measurement Models provide:
     \label{Fig:ODOrganization}
     \caption{Intermediate Level View: Objects and Commands Data and Settings }
 \end{figure}
+
+
+%\begin{figure}[htbp!]
+%    \begin{center}
+%    \begin{picture}(270,150)
+%    \special{psfile=ODObjects.eps
+%    hscale= 85 vscale= 85 hoffset = -130 voffset = -440}
+%    \end{picture}
+%    \end{center}
+%    \vspace{0.2 in}
+%    \label{Fig:ODObjects}
+%    \caption{High Level View: Objects and Commands for OD Applications }
+%\end{figure}
+
+
+\textit{Measurement Participants}\\
+
+Measurement participants are modles of physical objects that
+``participate" in the process of creating a measured quantity that
+is related to the spacecraft state.  Examples of measurement
+participants include spacecraft, ground stations, celestial objects.
+Measurement particpants can be actively or passively involved in the
+measurement process. In the case of celestial navigation, a star may
+serve as a passive participant.  In the a two-way range measurement,
+the participants may be a ground station and a spacecraft.
+
+In GMAT, measurement participants are created and configured
+separately from measurement models (which are discussed below).  For
+example, if a user requires a Doppler measurement between say Hubble
+and Canberra, they first configure a spacecraft to model Hubble, and
+then they configure a ground station to model Canberra. Once the
+Hubble and Canberra objects are configured, the user creates a
+measurement object and configures it to create a Doppler measurement
+between Hubble and Canberra.  The philosophy is that measurement
+participants exist independently from the measurement process, e.g.,
+a spacecraft exists and advances in time even when measurements are
+not being taken.  In this way, the separation of measurement
+participants and measurements is similar to what happens in the real
+applications.\\
+
+\textit{Measurements}\\
+
+In orbit determination, observed quantities used in the estimation
+process are measurements of some property of electromagnetic wave
+propagation among participants in the measurement process.
+\cite{GTDS:89}  GMAT contains many types of measurements as shown in
+Fig. \ref{Fig:ODOrganization} including Ground Station, TDRSS, GPS,
+Celestial Object and Crosslink measurements.  An orbit determination
+analyst may want to process simulated measurements to determine the
+achievable accuracy for a given set of measurements and tracking
+data schedule.  Operationally, analysts use observed measurement
+values to generate best estimates for the spacecraft state. In GMAT,
+a measurement object supports all of these functions by the
+providing the following data:  observed measurement values (whether
+they are read from a file or simulated), the computed (or expected)
+value of the measurement, and the measurement partial derivatives.
+
+Measurement objects are quite complex as a large amount of
+user-provided data is required to perform the functions described
+above.  For observations, you must provide GMAT with the file
+format, name, and location.  When there is more data on a file than
+you wish to process, you must provide data editing criteria and
+information on which measurement types to include.  For computation
+of the expected value you must provide the model with participants
+for the measurements and a propagator to use to advance the state of
+the participants.  Finally, for simulated data you must provide an
+participants and a propagator along with measurement error models
+such as bias and noise.\\
+
+\textit{Estimators}\\
+
+GMAT contains several estimators including batch, sequential, and
+initial orbit determination solvers.  These algorithms solve for a
+state estimate by processing measurements generated by measurement
+objects configured by the user.  Hence, you must provide a list of
+all measurements to include in a particular estimation run.  In
+addition, the solver object is where the user specifies which
+parameters are to be treated as solve-for and consider quantities.
+Further data that is provided on the solver object is shown in Fig.
+\ref{Fig:ODOrganization} and includes process noise parameters and
+convergence tolerances to name a few.
+
+\subsection{Intermediate Level View of System Components}
+
 
 %To configure a measurement model, the measurement participants must
 %be created and appropriately configured.   Fields on the Measurement

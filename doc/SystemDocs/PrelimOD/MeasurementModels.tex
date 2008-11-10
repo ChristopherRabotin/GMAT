@@ -7,9 +7,13 @@ physical property of electromagnetic wave propagation and
 analytically relating the computed measurement value to the
 spacecraft state. \cite{GTDS:89} GMAT supports numerous measurement
 models of varying complexity from simple two-way range, to GPS
-carrier phase measurements.
+carrier phase measurements.  The sections below contain the
+mathematical specifications for all measurement models including
+measurement corrections.  We start with ground station models
+including one-way and two-way range, angles measurements, and
+doppler measurements including instantaneous and integrated Doppler.
 
-The general form of the measurement model used by GMAT is
+% The general form of the measurement model used by GMAT is
 %%
 %\begin{equation}
 %   \mathcal{O}_c = f_g\left(\mathbf{r}_p^k(t^k), \dot{\mathbf{r}}_p^k(t^k),\mathbf{q}_p^k(t^k),\boldsymbol{\omega}_p^k(t^k)
@@ -35,8 +39,7 @@ The general form of the measurement model used by GMAT is
 
 \subsection{Range}
 
- two primary models for spacecraft
-range: geometric and radiometric. In both cases the range is a
+ \cite{DatSim:08} In both cases the range is a
 measure of the distance between an observer and a vehicle.  The
 geometric range is calculated using vector geometry and ignores
 signal propagation times and error sources.  Most, if not all,
@@ -49,8 +52,11 @@ of round trip range.
 
 
 \begin{equation}
-    \mathcal{R}_1^{(j)} = \rho^{(m,j)}_1(t_i) +c\left(b_r^{(m)}(t_i) - b_t^{(j)}(t_t)\right) + \Delta \rho^{(j)}_{iono}(t_i) + \Delta \rho^{(j)}_{tropo}(t_i) + \sigma_{SA}^{(j)} + \sigma_n^{(j)} + b_m
+    \mathcal{R}_2 = \rho^{(m,j)}_2(t_i) +c\left(b_r^{(m)}(t_i) - b_t(t_t)\right)
+     + \Delta \rho_{iono}(t_i) + \Delta \rho_{tropo}(t_i)
+      + \sigma_{SA} + \sigma_n + b_m
 \end{equation}
+
 
 \begin{tabbing}
 12345678912345 \= Reynolds number based on length $s$ \kill
