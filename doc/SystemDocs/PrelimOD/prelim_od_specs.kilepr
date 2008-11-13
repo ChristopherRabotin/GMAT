@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .jpeg .png
 kileprversion=1
 kileversion=1.9.2
-lastDocument=StateOverview.tex
+lastDocument=Commands.tex
 masterDocument=
 name=Prelim_OD_Specs
 pkg_extIsRegExp=false
@@ -20,8 +20,8 @@ archive=true
 column=0
 encoding=UTF-8
 highlight=LaTeX
-line=1
-open=false
+line=62
+open=true
 
 [item:CoverPage.tex]
 archive=true
@@ -60,7 +60,7 @@ archive=true
 column=0
 encoding=UTF-8
 highlight=LaTeX
-line=206
+line=274
 open=true
 
 [item:HardwareModels.tex]
