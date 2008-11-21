@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .jpeg .png
 kileprversion=1
 kileversion=1.9.2
-lastDocument=Commands.tex
+lastDocument=StateOverview.tex
 masterDocument=
 name=Prelim_OD_Specs
 pkg_extIsRegExp=false
@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:Commands.tex]
 archive=true
-column=0
+column=63
 encoding=UTF-8
 highlight=LaTeX
-line=62
+line=36
 open=true
 
 [item:CoverPage.tex]
@@ -117,7 +117,7 @@ column=18
 encoding=UTF-8
 highlight=LaTeX
 line=89
-open=true
+open=false
 
 [item:PropStateVectorDesign.tex]
 archive=true
