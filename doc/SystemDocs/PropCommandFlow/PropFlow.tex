@@ -1,6 +1,9 @@
-\documentclass[11pt]{article}
+\documentclass[10pt]{article}
 
-\usepackage{graphicx}
+\usepackage{graphics,color}
+% Note that png and jpg extensions are used for graphics
+\DeclareGraphicsExtensions{.png,.jpg}
+
 
 % Construct the basic page sizes
 \oddsidemargin  0.0in
@@ -16,7 +19,7 @@
 \title{Program Flow for a Propagation Enabled Command}
 \author{Darrel J. Conway\\\textit{Thinking Systems, Inc.}\\
 Steven P. Hughes\\\textit{Goddard Space Flight Center}}
-\date{December 4, 2008}
+\date{December 5, 2008}
 \maketitle
 
 \begin{abstract}
@@ -33,7 +36,7 @@ The commands governing propagation in GMAT all pass through five stages in the c
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[width=2in]{Images/PropagationCommandLifetime.png}
+\includegraphics[125,190]{Images/PropagationCommandLifetime.png}
 \caption{Stages in the Lifetime of a Propagation Enabled Command}
 \label{fig:PropLifetime}
 \end{center}
@@ -63,18 +66,20 @@ The text above describes at a high level the process followed for all propagatio
 
 \section{Components used in Propagation}
 
-Here I'll put in some descriptions of the prop state manager, PropSetup, etc.  Here's the list:
+The components used in propagation, along with select estimation components, are described in the following list.  These components comprise the set of elements affected by the propagation in GMAT.
 
 \begin{description}
-\item[PropSetup ]
-\item[Propagator]
-\item[Integrator]
-\item[ODEModel]
-\item[PhysicalModel]
-\item[GmatState]
-\item[StateManager]
-\item[PropagationStateManager]
-\item[EstimationStateManager]
+\item[PropSetup ]  A PropSetup is a container class consisting of a Propagator, a PropagationStateManager, and, for numerical integration, an ODEModel used to calculate the differentials needed for propagation. 
+\item[Propagator]  GMAT's Propagators implement the evolution operators used to move a state vector through time.  GMAT's design supports three types of propagators: numerical integrators, analytic propagators, and ephemeris readers.
+\item[Integrator]  The Integrator classes implement numerical integrators that, coupled with an ODEModel, solve the differential equations of motion to model the evolution of a state vector over time.
+\item[ODEModel]  The ODEModel class implements a container class that collects PhysicalModel instances and uses these objects, along with a state vector, to calculate the associated values of the differential equations that need to be integrated.  The ODEModel uses superposition where needed, and includes the implementation needed to calculate the differential equation data in an order matching the arrangement of the state vector.
+\item[PhysicalModel]  Differential equations are implemented in GMAT through subclasses of the PhysicalModel base class.  Each constituent of the ODEModel is a PhysicalModel, set to return the appropriate values from the corresponding differential equations when a call is made to the subclass's GetDerivatives() method.
+\item[GmatState]  Processes that work on a collection of real numbers and an associated epoch can do so through an instance of the GmatState class.  The GmatState class consists of a vector of numbers and an epoch, along with identifiers that can provide programmatic and user accessible information about the contents of the vector.  The vector is sized to match the amount of state data needed by the process requiring state information.
+\item[StateManager]  The State Manager is a helper class that manages state information and the process of bookkeeping among system components required for propagation and estimation.  The design of the State Manager class is based on the Mediator design pattern\cite{DesignPatterns}.  It promotes loose coupling among system components by using a many-to-one relationship instead of a many-to-many relationship.  Using the mediator pattern for the State Managers, the classes that use state managers do not have to communicate directly with the objects supplying state data.  The StateManager intermediary handles the interfaces between the objects and the code needing state data, keeping the using code streamlined and efficient while providing an interface for disparate types of objects to supply the needed information.  Additionally, the StateManager is designed to allow for extension of GMAT, so that new objects can be added to the system that supply state data, without requiring changes to the classes that use these new data.
+
+The PropagationStateManager and the EstimationStateManager are derived from the StateManager base class, and implement additional features needed for propagation and estimation.
+\item[PropagationStateManager]  The propagation subsystem uses a PropagationStateManager to coordinate state information between the propagators and the other objects in the mission.  The PropagationStateManager acts as a mediator between its propagator and the objects that are being propagated.  It maps data between a mission's elements and the propagation state vector.   As a result, the propagator acts on a vector of numbers, modeling the evolution of that vector without needing information about the source of the numbers.  Similarly, the objects being propagated need only respond to updates to the corresponding state data, without any direct knowledge of the source of those updates.
+\item[EstimationStateManager]  GMAT's estimators use EstimationStateManagers to connect the estimation state vector and related elements to the objects supplying the state data.  The EstimationStateManager acts as a mediator between its estimator and the elements that are being estimated.  It maps data between a mission's elements and the estimation state vector.   As a result, the estimator acts on a vector of numbers, estimating that vector without needing information about the source of the numbers.  Similarly, the objects being estimated need only respond to updates to the corresponding state data, without any direct knowledge of the source of those updates.
 \item[SpacePoint]
 \item[SpaceObject]
 \end{description}
@@ -115,7 +120,7 @@ TBWD  (To be written and drawn)
 
 \begin{figure}[htb] 
    \centering
-   \includegraphics[width=5.5in]{Images/PersistenceStart.png} 
+   \includegraphics[371,186]{Images/PersistenceStart.png} 
    \caption{Objects at the Start of the Propagate Command Initialization}
    \label{fig:PersistenceStart}
 \end{figure}
@@ -126,19 +131,26 @@ The steps followed in the Initialize() method are shown in Figure~\ref{fig:Propa
 
 \begin{figure}[p] 
    \centering
-   \includegraphics[width=6.5in]{Images/PropagateInitialize.png} 
+   \includegraphics[495,526]{Images/PropagateInitialize.png} 
    \caption{Steps Followed in the Propagate Command Initialization}
    \label{fig:PropagateInitialize}
 \end{figure}
 
 \begin{figure}[htb] 
    \centering
-   \includegraphics[width=5.5in]{Images/PersistenceCloned.png} 
+   \includegraphics[372,233]{Images/PersistenceCloned.png} 
    \caption{Objects after the Propagate Command Cloning}
    \label{fig:PersistenceCloned}
 \end{figure}
 
 \subsection{Preparing for Execution}
+
+\begin{figure}[htb] 
+   \centering
+   \includegraphics[380,335]{Images/SettingthePropagationState.png} 
+   \caption{Details of the steps taken to setup the Propagation State and ODE Model}
+   \label{fig:P2PSetPropSate}
+\end{figure}
 
 \subsection{Execution}
 
@@ -150,11 +162,8 @@ The steps followed in the Initialize() method are shown in Figure~\ref{fig:Propa
 
 \begin{thebibliography}{99}
 
-    %-------------------------------------
-    %  Guidance Papers
-    %-------------------------------------
-
-    \bibitem{GMAT:2008} The GMAT Development Team, \textbf{General Mission Analysis Tool (GMAT) Architectural Specification}, 2008.
+\bibitem{DesignPatterns} Gamma, Helm, Johnson, and Vlissides, \textbf{Design Patterns}, Addison Wesley, 1995.
+\bibitem{GMAT:2008} The GMAT Development Team, \textbf{General Mission Analysis Tool (GMAT) Architectural Specification}, 2008.
 
 \end{thebibliography}
 
