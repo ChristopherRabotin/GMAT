@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 <svg
+   xmlns:ns="http://creativecommons.org/ns#"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:cc="http://web.resource.org/cc/"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
@@ -12,14 +13,14 @@
    height="1052.3622047"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.46"
+   inkscape:version="0.45"
    sodipodi:docname="ComponentPersistence.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    sodipodi:docbase="/home/djc/TS_Code/gmat/doc/SystemDocs/PrelimOD/Images"
-   sodipodi:modified="true"
    inkscape:export-filename="/Users/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/PrelimOD/Images/PersistenceCloned.png"
    inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   inkscape:export-ydpi="90"
+   sodipodi:modified="TRUE">
   <defs
      id="defs4">
     <inkscape:perspective
@@ -42,25 +43,31 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1.3155765"
      inkscape:cx="369.79752"
-     inkscape:cy="521.56459"
+     inkscape:cy="491.15967"
      inkscape:document-units="px"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer2"
      showgrid="false"
-     inkscape:window-width="1440"
-     inkscape:window-height="852"
-     inkscape:window-x="22"
-     inkscape:window-y="23"
+     inkscape:window-width="1920"
+     inkscape:window-height="1145"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      showguides="true"
      inkscape:guide-bbox="true" />
   <metadata
      id="metadata7">
     <rdf:RDF>
-      <cc:Work
+      <ns:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-      </cc:Work>
+      </ns:Work>
+      <ns:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </ns:Work>
       <cc:Work
          rdf:about="">
         <dc:format>image/svg+xml</dc:format>
@@ -779,7 +786,7 @@
     <g
        id="g3284"
        transform="translate(-2,0)"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -801,7 +808,7 @@
          id="text4392"
          y="315.36218"
          x="38.589844"
-         style="font-size:28px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:28px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            id="tspan4396"
            y="315.36218"
@@ -834,7 +841,7 @@
              id="tspan2903"
              x="41.946289"
              y="355.98523"
-             style="font-weight:bold;-inkscape-font-specification:Bitstream Vera Sans Bold">PropSetups</tspan></text>
+             style="font-weight:bold">PropSetups</tspan></text>
         <text
            xml:space="preserve"
            style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -873,7 +880,7 @@
              id="tspan2934"
              x="156.48535"
              y="356.48529"
-             style="font-weight:bold;-inkscape-font-specification:Bitstream Vera Sans Bold">PropObjects</tspan></text>
+             style="font-weight:bold">PropObjects</tspan></text>
         <text
            xml:space="preserve"
            style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
@@ -912,7 +919,7 @@
              id="tspan2944"
              x="313.1416"
              y="355.48529"
-             style="font-weight:bold;-inkscape-font-specification:Bitstream Vera Sans Bold">PropParms</tspan></text>
+             style="font-weight:bold">PropParms</tspan></text>
         <text
            xml:space="preserve"
            style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
@@ -944,16 +951,16 @@
        y="279.36212"
        rx="8.0132599"
        ry="8.0132599"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+       style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
        x="598.54871"
        y="298.3327"
        id="text3220"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
@@ -969,16 +976,16 @@
        x="458.9248"
        y="306.51959"
        ry="8.0132599"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceStart.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:20px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+       style="font-size:20px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
        x="498.02805"
        y="329.58337"
        id="text2616"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
@@ -988,7 +995,7 @@
     <g
        id="g2782"
        transform="translate(-123.59772,12.787968)"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -1003,7 +1010,7 @@
          id="text2759"
          y="356.40536"
          x="623.11115"
-         style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="356.40536"
            x="626.58771"
@@ -1047,7 +1054,7 @@
     <g
        id="g2840"
        transform="translate(369.40228,-133.21203)"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -1062,7 +1069,7 @@
          id="text2799"
          y="504.87997"
          x="266.89368"
-         style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:20px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            id="tspan2803"
            y="504.87997"
@@ -1094,7 +1101,7 @@
     <g
        id="g3165"
        transform="translate(-10.816159,21.787968)"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -1110,9 +1117,9 @@
          id="text2885"
          y="542.23645"
          x="610.24304"
-         style="font-size:19.98331451px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:19.98331451px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
-           style="font-size:17.48539734px;font-weight:bold;text-align:center;text-anchor:middle;-inkscape-font-specification:Bitstream Vera Sans Bold"
+           style="font-size:17.48539734px;font-weight:bold;text-align:center;text-anchor:middle"
            y="542.23645"
            x="610.24304"
            id="tspan2887"
@@ -1130,7 +1137,7 @@
          id="text2891"
          y="565.42212"
          x="584.51849"
-         style="font-size:9.99165726px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:9.99165726px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="565.42212"
            x="584.51849"
@@ -1149,14 +1156,14 @@
          id="text2897"
          y="564.35883"
          x="697.11005"
-         style="font-size:9.99165726px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:9.99165726px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="564.35883"
            x="697.11005"
            id="tspan2899"
            sodipodi:role="line">fm, an</tspan><tspan
            id="tspan3152"
-           y="576.84839"
+           y="576.8484"
            x="697.11005"
            sodipodi:role="line">ODEModel</tspan></text>
       <rect
@@ -1172,18 +1179,18 @@
          id="text2903"
          y="565.73438"
          x="526.08466"
-         style="font-size:9.99165726px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:9.99165726px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;display:inline;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="565.73438"
            x="526.08466"
            id="tspan2905"
            sodipodi:role="line">Propagation</tspan><tspan
            id="tspan2907"
-           y="578.22394"
+           y="578.22395"
            x="526.08466"
            sodipodi:role="line">State</tspan><tspan
            id="tspan2909"
-           y="590.7135"
+           y="590.71352"
            x="526.08466"
            sodipodi:role="line">Manager</tspan></text>
       <rect
@@ -1200,7 +1207,7 @@
          id="text2915"
          y="610.46143"
          x="479.41586"
-         style="font-size:8.74269867px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:8.74269867px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="610.46143"
            x="479.41586"
@@ -1220,7 +1227,7 @@
          id="text2923"
          y="611.23193"
          x="535.88025"
-         style="font-size:8.74269867px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:8.74269867px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="611.23193"
            x="535.88025"
@@ -1241,7 +1248,7 @@
            transform="scale(1,-1)" />
         <text
            xml:space="preserve"
-           style="font-size:8.74269867px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+           style="font-size:8.74269867px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="531.93127"
            y="701.11865"
            id="text2931"><tspan
@@ -1266,23 +1273,23 @@
        x="11.722729"
        y="411.44479"
        rx="12.144435"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:32px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="43.371582"
+       style="font-size:32px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="19.371582"
        y="443.36218"
        id="text2743"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
          id="tspan2745"
-         x="43.371582"
+         x="19.371582"
          y="443.36218"
-         style="font-size:28px">prop (a PropSetup clone)</tspan></text>
+         style="font-size:28px;font-weight:bold">prop (a PropSetup clone)</tspan></text>
     <rect
        style="fill:#d5ffe6;fill-opacity:1;stroke:#000000;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect2679"
@@ -1292,16 +1299,16 @@
        y="457.86218"
        ry="14.500002"
        rx="14.500004"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
        x="168.51562"
        y="477.86218"
        id="text2681"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
@@ -1317,16 +1324,16 @@
        y="458.36218"
        ry="14.500007"
        rx="14.5"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+       style="font-size:16px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
        x="342.49609"
        y="479.36218"
        id="text2689"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
@@ -1337,21 +1344,21 @@
        style="fill:#d5ffe6;fill-opacity:1;stroke:#000000;stroke-width:1.00000012;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="rect2711"
        width="118.08099"
-       height="286"
+       height="168.18092"
        x="15.959509"
        y="457.86218"
        ry="14.500005"
        rx="14.500006"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
-       style="font-size:16px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+       style="font-size:16px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
        x="75"
        y="478.36218"
        id="text2713"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
@@ -1366,58 +1373,58 @@
          x="75"
          y="518.36218"
          id="tspan2722">Manager</tspan></text>
-    <g
-       id="g2841"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+    <rect
+       style="fill:#80ffb3;stroke:#000000;stroke-width:1"
+       id="rect2863"
+       width="65"
+       height="84.380318"
+       x="2"
+       y="-614.74249"
+       rx="6.5000005"
+       ry="7.5000005"
+       transform="scale(1,-1)"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         transform="scale(1,-1)"
-         ry="7.5"
-         rx="6.5000005"
-         y="-736.36218"
-         x="2"
-         height="206"
-         width="65"
-         id="rect2863"
-         style="fill:#80ffb3;stroke:#000000;stroke-width:1" />
-      <text
-         id="text2867"
-         y="549.98523"
+       inkscape:export-ydpi="90" />
+    <text
+       xml:space="preserve"
+       style="font-size:14px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="4.6953125"
+       y="549.98523"
+       id="text2867"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2869"
          x="4.6953125"
-         style="font-size:14px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
-         xml:space="preserve"><tspan
-           y="549.98523"
-           x="4.6953125"
-           id="tspan2869"
-           sodipodi:role="line">Objects</tspan></text>
-    </g>
-    <g
-       id="g2849"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+         y="549.98523">Objects</tspan></text>
+    <rect
+       style="fill:#80ffb3;stroke:#000000;stroke-width:0.99999994;display:inline"
+       id="rect2865"
+       width="67"
+       height="84.380295"
+       x="83"
+       y="-614.74237"
+       rx="6.5"
+       ry="7.4999986"
+       transform="scale(1,-1)"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         transform="scale(1,-1)"
-         ry="7.5"
-         rx="6.5"
-         y="-736.36218"
-         x="83"
-         height="206"
-         width="67"
-         id="rect2865"
-         style="fill:#80ffb3;stroke:#000000;stroke-width:1;display:inline" />
-      <text
-         id="text2871"
-         y="551.21912"
+       inkscape:export-ydpi="90" />
+    <text
+       xml:space="preserve"
+       style="font-size:14px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="95.11377"
+       y="551.21912"
+       id="text2871"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2873"
          x="95.11377"
-         style="font-size:14px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
-         xml:space="preserve"><tspan
-           y="551.21912"
-           x="95.11377"
-           id="tspan2873"
-           sodipodi:role="line">State</tspan></text>
-    </g>
+         y="551.21912">State</tspan></text>
     <flowRoot
        xml:space="preserve"
        id="flowRoot2915"
@@ -1431,7 +1438,7 @@
          id="flowPara2921" /></flowRoot>    <g
        id="g2873"
        transform="translate(-35,-182)"
-       inkscape:export-filename="/Users/djc/Documents/LaTeX/Images/PersistenceCloned.png"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -1448,7 +1455,7 @@
          id="text2831"
          y="695.21912"
          x="388.73145"
-         style="font-size:14px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans;-inkscape-font-specification:Bitstream Vera Sans Bold"
+         style="font-size:14px;font-style:normal;font-weight:bold;text-align:center;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
            y="695.21912"
            x="388.73145"
@@ -1477,5 +1484,67 @@
            x="388.72168"
            sodipodi:role="line">SRP</tspan></text>
     </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="AfterInit"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="12.161969"
+       y="572.16382"
+       id="text2638"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2640"
+         x="12.161969"
+         y="572.16382">&amp;sat</tspan></text>
+    <rect
+       style="fill:#80ffb3;stroke:#000000;stroke-width:1;display:inline"
+       id="rect2650"
+       width="98.165047"
+       height="84.380325"
+       x="82.998207"
+       y="-614.74243"
+       rx="6.5"
+       ry="7.500001"
+       transform="scale(1,-1)"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <text
+       xml:space="preserve"
+       style="font-size:14px;font-style:normal;font-weight:bold;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="95.111977"
+       y="551.3913"
+       id="text2652"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2654"
+         x="95.111977"
+         y="551.3913">State</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="93.495132"
+       y="573.48468"
+       id="text2642"
+       inkscape:export-filename="/home/djc/TS_Code/gmat/doc/SystemDocs/PropCommandFlow/Images/PersistenceInitialized.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2644"
+         x="93.495132"
+         y="573.48468">&amp;sat.State</tspan><tspan
+         sodipodi:role="line"
+         x="93.495132"
+         y="593.48468"
+         id="tspan2646">&amp;sat.STM</tspan></text>
   </g>
 </svg>

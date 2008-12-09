@@ -21,7 +21,7 @@ column=63
 encoding=UTF-8
 highlight=LaTeX
 line=36
-open=true
+open=false
 
 [item:CoverPage.tex]
 archive=true
@@ -61,7 +61,7 @@ column=0
 encoding=UTF-8
 highlight=LaTeX
 line=274
-open=true
+open=false
 
 [item:HardwareModels.tex]
 archive=true
@@ -149,7 +149,7 @@ column=49
 encoding=UTF-8
 highlight=LaTeX
 line=19
-open=true
+open=false
 
 [item:UseCases.tex]
 archive=true
