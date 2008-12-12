@@ -6,7 +6,7 @@
 %==========================================================================
 %==========================================================================
 
-InitSolarSystem;
+SolarSystem = SolarSystem_Initialize();
 
 %==========================================================================
 %==========================================================================
@@ -61,6 +61,13 @@ for i = 1:size(ObjectStore.Objects,2)
        ObjectStore.Objects{i} = Spacecraft_Initialize(ObjectStore.Objects{i});
        
     end
+    
+    if ObjectStore.Types{i} == 3
+        
+       ObjectStore.Objects{i} = Measurement_Initialize(ObjectStore.Objects{i});
+       
+    end
+    
     
     if ObjectStore.Types{i} == 4
         

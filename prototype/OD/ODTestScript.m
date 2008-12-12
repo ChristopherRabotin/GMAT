@@ -47,15 +47,15 @@ Canberra.Z = 2324;
 %-----  Define the Propagator   
 %==========================================================================
 %==========================================================================
-ODProp_FM.CentralBody = 'Earth';
-ODProp_FM.PointMasses = {'Earth'};
-ODProp_FM.SRP         = 'Off';
-ODProp.FM = ODProp_FM;
-ODProp.Type = 'RungeKutta89';
+ODProp_FM.CentralBody  = 'Earth';
+ODProp_FM.PointMasses  = {'Earth'};
+ODProp_FM.SRP          = 'Off';
+ODProp.FM              = ODProp_FM;
+ODProp.Type            = 'RungeKutta89';
 ODProp.InitialStepSize = 60;
-ODProp.Accuracy = 9.999999999999999e-12;
-ODProp.MinStep = 0.001;
-ODProp.MaxStep = 2700;
+ODProp.Accuracy        = 9.999999999999999e-12;
+ODProp.MinStep         = 0.001;
+ODProp.MaxStep         = 2700;
 ODProp.MaxStepAttempts = 50;
 
 RunPrototype
