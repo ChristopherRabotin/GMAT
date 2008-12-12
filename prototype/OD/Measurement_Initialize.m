@@ -9,7 +9,7 @@ global ObjectStore
 %==========================================================================
 %==========================================================================
 
-for i = 1:size(Measurement.Measurements,1)
+for i = 1:size(Measurement.Measurements,2)
     
     %  Extact the ith data type
     currMeasurement = Measurement.Measurements{i};
@@ -24,7 +24,7 @@ for i = 1:size(Measurement.Measurements,1)
     %  Set pointers to participants.  These are locations of objects in
     %  ObjectStore.
     %  THIS IS A HARD CODED KLUDGE
-    Measurement.Particpants{1} = [1 2];
-    Measurement.Particpants{2} = [1 2];
+    Measurement.Participants{1} = [1 2];
+    Measurement.Participants{2} = [1 2];
        
 end

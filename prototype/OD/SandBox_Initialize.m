@@ -1,4 +1,4 @@
-
+global ObjectStore SolarSystem jd_ref;
 
 %==========================================================================
 %==========================================================================
@@ -14,7 +14,7 @@ SolarSystem = SolarSystem_Initialize();
 %==========================================================================
 %==========================================================================
 
-global ObjectStore SolarSystem jd_ref;
+
 
 %---- Hard code initializing objects into Object Store.  Eventually this
 %     should be done in an automated way.

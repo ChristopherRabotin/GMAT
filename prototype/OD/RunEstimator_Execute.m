@@ -15,17 +15,21 @@ Propagator = RunEstimator_PreparetoPropagate(Propagator,Estimator);
 %---- Run the State Machine
 %==========================================================================
 %==========================================================================
-EpochVec   = Propagator.Epoch + [0:300:3600]/86400;
+EpochVec   = Propagator.Epoch + [0:300:86400]/86400;
 for i = 1:size(EpochVec,2)
 
-    %  Take a step
+    %  Step to next measurement epoch
     NewEpoch   = EpochVec(i); 
     Propagator = Propagator_SteptoEpoch(Propagator,NewEpoch);
     
-    %  Call the measurement models
-    %  for i = 1:
+    %  Call the measurement model
+    [g,dgdx] = GSMeasurement_Evaluate(ObjectStore.Objects{3});
+    Y(i,1) = g;
+    Htilde(i,:) = dgdx;
     
 end
 
 ObjectStore.Objects{1}
 ObjectStore.Objects{1}.STM
+
+keyboard
