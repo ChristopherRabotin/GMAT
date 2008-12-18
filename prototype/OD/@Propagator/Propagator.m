@@ -16,10 +16,10 @@ classdef Propagator < handle
     % Set the methods
     methods
         
-%         function e = Initialize(name,dept)
-%             e.Name = name;
-%             e.Department = dept;
-%         end % employee
+        %  Initialize
+        function obj = Initialize(obj)
+             
+        end  
         
     end
 end

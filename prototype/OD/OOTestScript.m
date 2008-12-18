@@ -1,3 +1,4 @@
+PrepareGMAT
 
 %==========================================================================
 %==========================================================================
@@ -20,34 +21,37 @@ ODSat.Cd    = 1.8;
 %------  Define the batch least squares solver
 %==========================================================================
 %==========================================================================
-CanberraData.Measurements{1} = {'Range','ODSat','Canberra'};
-CanberraData.Measurements{2} = {'RangeRate','ODSat','Canberra'};
+CanberraData = Measurement();
+CanberraData.AddMeasurement{1} = {'Range','ODSat','Canberra'};
+CanberraData.AddMeasurement{2} = {'RangeRate','ODSat','Canberra'};
 
 %==========================================================================
 %==========================================================================
 %------  Define the batch least squares solver
 %==========================================================================
 %==========================================================================
+BLS = BatchEstimator();
 BLS.MaxIterations   = 20;
 BLS.Measurements{1} = CanberraData;
 BLS.SolveFor        = {'Sat.CartesianState','Sat.Cr',...
                        'Sat.Cd','CanberraData.Range.Bias'};
-         
+ 
 %==========================================================================
 %==========================================================================
 %-----  Define the ground station properties    
 %==========================================================================
 %==========================================================================
-Canberra.X = -4450.8 ;
-Canberra.Y = 2676.1;
-Canberra.Z = -3691.38 ;
+Canberra = GroundStation();
+Canberra.X = -5469.41801615453;
+Canberra.Y = -2385.88742555;
+Canberra.Z =  2245.20260041136;
 
 %==========================================================================
 %==========================================================================
 %-----  Define the Propagator   
 %==========================================================================
 %==========================================================================
-ODProp = Propagator;
+ODProp = Propagator();
 ODProp_FM.CentralBody  = 'Earth';
 ODProp_FM.PointMasses  = {'Earth'};
 ODProp_FM.SRP          = 'Off';
@@ -59,4 +63,4 @@ ODProp.MinStep         = 0.001;
 ODProp.MaxStep         = 2700;
 ODProp.MaxStepAttempts = 50;
 
-RunPrototype
+RunGMAT
