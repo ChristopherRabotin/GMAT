@@ -66,7 +66,7 @@ ESM.PropParamId{1} = [1 2];
 %----- HARD CODE FOR NOW. BUT FIX LATER.
 ESM.EstimObjects    = [1];         % pointers to objects in ObjectStore
 ESM.EstimObjectsId  = [ 1 ];
-ESM.EstimParamId{1} = [1 2 3];
+ESM.EstimParamId{1} = [1 ];
 
 Solver.ESM = ESM;
  

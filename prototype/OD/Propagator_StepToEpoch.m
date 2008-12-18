@@ -9,7 +9,7 @@ global ObjectStore
 %==========================================================================
 
 %  Perform the Propagation
-[t,X] = Propagator_ODE78('Propagator_ODEModel', 0, (PropEpoch - Propagator.Epoch)*86400, Propagator.PSV, 1e-9 , [], [], Propagator); 
+[t,X] = Propagator_ODE78('Propagator_ODEmodel', 0, (PropEpoch - Propagator.Epoch)*86400, Propagator.PSV, 1e-9 , [], [], Propagator); 
 
 %  Extract state from ephemeris output and update the propagator
 numSteps = size(t,1);

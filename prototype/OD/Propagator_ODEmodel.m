@@ -36,7 +36,7 @@ while i < NumPropElements
         
         %  Call the ODEmodel for orbit cartesian state
         xCurrElement = x(xCounter:xCounter+sizeCurrElement-1);
-        xdot = ODEmodel_CartOrbit(t,xCurrElement,PropSTM,ForceModel);
+        xdot = ODEModel_CartOrbit(t,xCurrElement,PropSTM,ForceModel);
         
         i = i + 2;
         xCounter = xCounter + sizeCurrElement;
