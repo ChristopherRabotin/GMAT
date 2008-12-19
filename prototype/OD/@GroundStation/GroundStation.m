@@ -19,8 +19,8 @@ classdef GroundStation < handle
     methods
 
         %-----  Initialize
-        function obj = Initialize(obj)
-             
+        function obj = Initialize(obj,Sandbox)
+            x = 2;
         end  
 
     end

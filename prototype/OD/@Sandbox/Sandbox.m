@@ -23,10 +23,27 @@ classdef Sandbox < handle
 
             for i = 1:Sandbox.numObj
                 obj = Sandbox.ObjectHandles{i};
-                obj = obj.Initialize;
+                obj = obj.Initialize(Sandbox);
             end
             
         end % Initialize
+        
+        %----- Get the handle of the requested object name
+        function hand = GetHandle(Sandbox,name)
+            
+            %  Loop over number of objects
+            hand = {};
+            c = 0;
+            while isempty(hand) & c <= Sandbox.numObj - 1;
+                
+                c = c + 1;
+                if strcmp(Sandbox.ObjectNames{c},name)
+                    hand = Sandbox.ObjectHandles{c};
+                end
+            
+            end
+            
+        end
 
     end
 
