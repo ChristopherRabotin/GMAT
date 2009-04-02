@@ -23,10 +23,19 @@ MMSRef.VX = 4.43353923085319;
 MMSRef.VY = 8.266695838139212;
 MMSRef.VZ = -1.56943034698562;
 
+MMSRef.X = 7100.000000000000;
+MMSRef.Y = 0.000000000000;
+MMSRef.Z = 1300.000000000000;
+MMSRef.VX = 0.000000000000;
+MMSRef.VY = 7.350000000000;
+MMSRef.VZ = 1.000000000000;
+
 % --------------------------------------
 %          Propagate the Spacecraft
 % --------------------------------------
 TOF     = 86400*.5;
+TOF     = 60;
+
 [t, X, Phi] = Propagate(MMSRef,ForceModel,TOF);
 
 % --------------------------------------
@@ -42,11 +51,3 @@ disp(['               X-Comp.            Y-Comp.           Z- Comp.    ']);
 disp(['Position   ' num2str( X(n,1:3),12) ]);
 disp(['Velocity   ' num2str( X(n,4:6),12) ]);
 disp('  ')
-
-
-
-
-
-
-
-

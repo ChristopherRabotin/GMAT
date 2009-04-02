@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:PropFlow.tex]
 archive=true
-column=75
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=298
+line=308
 open=true
 
 [item:propflow.kilepr]
