@@ -3,7 +3,7 @@ img_extIsRegExp=false
 img_extensions=.eps .pdf .dvi .ps .fig .gif .jpg .jpeg .png
 kileprversion=1
 kileversion=1.9.2
-lastDocument=GMAT-Architectural-Specification.tex
+lastDocument=PropagatorStates.tex
 masterDocument=GMAT-Architectural-Specification.tex
 name=GmatArchitecturalSpecification
 pkg_extIsRegExp=false
@@ -17,10 +17,10 @@ QuickBuild=
 
 [item:ArchCoverPage.tex]
 archive=true
-column=0
+column=30
 encoding=
-highlight=
-line=0
+highlight=LaTeX
+line=10
 open=false
 
 [item:ArchitectureIntro.tex]
@@ -65,9 +65,9 @@ open=false
 
 [item:CoordinateSystems.tex]
 archive=true
-column=143286736
+column=68
 encoding=
-highlight=
+highlight=LaTeX
 line=0
 open=false
 
@@ -85,6 +85,14 @@ column=1
 encoding=
 highlight=
 line=0
+open=false
+
+[item:Estimation.tex]
+archive=true
+column=57
+encoding=UTF-8
+highlight=LaTeX
+line=4
 open=false
 
 [item:ExecComponents.tex]
@@ -140,7 +148,7 @@ archive=true
 column=9
 encoding=UTF-8
 highlight=LaTeX
-line=230
+line=272
 open=true
 
 [item:GmatFunctionEndToEnd.tex]
@@ -225,27 +233,27 @@ open=false
 
 [item:PropagatorOverview.tex]
 archive=true
-column=54
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=74
-open=false
+line=423
+open=true
 
 [item:PropagatorStates.tex]
 archive=true
-column=29
+column=3
 encoding=UTF-8
 highlight=LaTeX
-line=154
-open=false
+line=74
+open=true
 
 [item:Propagators.tex]
 archive=true
-column=38
+column=16
 encoding=
 highlight=LaTeX
-line=10
-open=false
+line=44
+open=true
 
 [item:Publisher.tex]
 archive=true
