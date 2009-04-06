@@ -421,4 +421,86 @@ described in Chapters~\ref{chapter:Commands} and~\ref{chapter:SpecificCommands}.
 %
 % \section{The State Vector}
 %
+\section{\label{section:PropagationExample}Example: Propagation of Two Spacecraft}
 
+In this section, the object creation and interactions will be examined in some detail for the
+following script:
+
+\begin{quote}
+\texttt{Create Spacecraft sat1 sat2\\
+sat1.TA = 90.0;\\
+sat2.TA = 91.0;\\
+\\
+Create ForceModel fm\\
+fm.CentralBody = Earth\\
+fm.PrimaryBodies = \{Earth\}\\
+fm.Drag = MSISE90\\
+fm.SRP = On\\
+fm.GravityField.Earth.Degree = 4\\
+fm.GravityField.Earth.Order = 4\\
+fm.PointMasses = \{Sun, Luna\}\\
+\\
+Create Propagator prop\\
+prop.FM = fm\\
+prop.Type = PrinceDormand78\\
+prop.InitialStepSize = 60\\
+prop.Accuracy = 1.0e-12\\
+prop.MinStep = 1.0e-6\\
+prop.MaxStep = 2700.0\\
+prop.MaxStepAttempts = 50\\
+\\
+Propagate prop(sat1, sat2) \{sat1.ElapsedDays = 1.0\}}
+\end{quote}
+
+GMAT collects the integrator and force model in a container called a PropSetup.  GMAT's PropSetup
+class has a member pointer for a Propagator and a second pointer for an ODEModel.  Each PropSetup
+also has a StateManager member -- in the case of propagation, the StateManager is an instance of the
+PropagationStateManager class -- that communicates with the other objects in the system to retrieve
+the values of the data that needs to be propagated and arranges those data into a single vector that
+the force model and integrator understand. GMAT's propagation subsystem -- that is, the integrator
+and associated ODEModel -- use this data vector and an associated mapping of ordinary differential
+equations to calculate a new vector of numbers at some different time.  In other words, GMAT's
+propagation subsystem has minimal knowledge of the objects that are being propagated.  At the level
+of the evolution algorithm, the propagation subsystem merely maps a vector of numbers at some epoch
+into a new vector of number at some other epoch.  The propagation state manager associated with the
+PropSetup container handles the communications of that vector numbers with the corresponding data in
+the objects.
+
+Returning to our example, when the scripting listed above is built, GMAT constructs two spacecraft
+named sat1 and sat2.  These spacecraft are added to GMAT's configuration.  Next GMAT creates an
+ODEModel named fm and adds it to the configuration.  Then GMAT creates a PropSetup named prop and
+ adds it to the configuration\footnote{The command ``Create Propagator prop'' uses GMAT's factories
+to build a PropSetup container named prop.}.  The PropSetup, prop, includes a member instance of the
+PropagationStateManager class, and two pointers: a pointer to a Propagator object and a pointer to
+an ODEModel object, both initialized to NULL.  The object configuration lines, omitted in this
+example, populate the Propagator side of that PropSetup.  Finally, the line ``prop.FM = fm''
+assigns the ODEModel named fm to the PropSetup.  This object creation and configuration is stored
+in GMAT's configuration for use during a run.
+
+The Propagate command is treated similarly.  An instance of the Propagate command is created using
+GMAT's factory subsystem and then placed in the Mission Control Sequence.  The command is passed
+the string that was used to construct it, and that string is decomposed into its constituent
+elements.  Once that phase is complete, the Propagate command has strings defining the PropSetup
+used for propagation, the names of the objects that need to be propagated, and strings defining the
+condition or conditions that terminate propagation.  In our example, the Propagate instance has a
+single string defining the PropSetup it uses, ``prop'', a StringArray defining the objects that are
+propagated using that PropSetup -- ``sat1'' and ``sat2'' -- and strings identifying the object used
+to determine when to stop -- ``sat1'' -- the type of condition that terminates propagation --
+``ElapsedDays'' -- and the value that that condition should have when it propagation ends
+--~``1.0''.
+
+\begin{table}
+\begin{center}
+% use packages: array
+\begin{tabular}{llll}
+Object & Elements & References & Comments \\
+sat1 & state vector & none &  \\
+sat2 & state vector & none &  \\
+fm &  & member forces &  \\
+prop & psm 'fm' ['sat1' 'sat2'] & Integrator &  \\
+prop.psm &  &  &
+\end{tabular}
+\caption[Parameter Configuration after Parsing]{Parameter Configuration for Objects Created after
+Script Parsing}
+\end{center}
+\end{table}

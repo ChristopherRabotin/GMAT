@@ -145,10 +145,10 @@ open=false
 
 [item:GMAT-Architectural-Specification.tex]
 archive=true
-column=9
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=272
+line=254
 open=true
 
 [item:GmatFunctionEndToEnd.tex]
@@ -233,18 +233,18 @@ open=false
 
 [item:PropagatorOverview.tex]
 archive=true
-column=0
+column=52
 encoding=UTF-8
 highlight=LaTeX
-line=423
+line=451
 open=true
 
 [item:PropagatorStates.tex]
 archive=true
-column=3
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=74
+line=75
 open=true
 
 [item:Propagators.tex]

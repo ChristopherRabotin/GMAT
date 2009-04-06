@@ -7,25 +7,60 @@ data from the objects in GMAT's current model so that the code that implements t
 simulation can act on the data in a generic fashion.  The synchronization between the data that
 is manipulated and the objects that supply these data is handled by classes derived from the
 StateManager class.  These interactions are described at a high level in this chapter.  Specific
-uses of the state vector and manager can be found in teh chapters describing propagation
+uses of the state vector and managers can be found in the chapters describing propagation
 (Chapter~\ref{chapter:PropagatorOverview}) and orbit determination
 (Chapter~\ref{chapter:Estimation}).
 
 \section{Design Motivation and Overview}
 
 The combination of one or more GmatState objects and one or more associated StateManagers as
-implemented in GMAT follows the Mediator design pattern.  The GmatState acts as an intermediary
-between the objects in the model and the algorithms that access and manipulate the data associated
-with those objects.
+implemented in GMAT follows the Mediator design pattern.  The GmatState acts as an object
+that accumulates data from the elements of GMAT's mission into a format that can be used by the
+algorithms that manipulate these data to run a mission.  Once these algorithms complete their work,
+the changed data in the GmatState object is then passed back to the objects representing physical
+entities in the model.  The coordination of the GmatState with the objects providing the state data
+is handled by an instance of a class derived from the StateManager class.
 
-You can see an example of this mediation in GMAT's propagation subsystem.  Consider a mission
-consisting of two spacecraft that are propagated for a day using a Runge-Kutta integrator and a
-force model consisting of a 4x4 geopotential model, point mass effects from the Sun and Moon, solar
-radiation pressure, and atmospheric drag modeled using the MSISE-90 atmosphere model.  In GMAT, the
-user configures four objects to model this system: two spacecraft, an ODEModel that holds the force
-model, and a Runge-Kutta integrator.  The mission control sequence that uses these objects is a
-single Propagate command.  Ignoring the details of the object configuration, the setup for this
-mission can be scripted:
+GMAT uses this intermediary to keep the propagation and estimation processes as generic as
+possible.  In GMAT, the propagation algorithms work by advancing an arbitrarily sized vector of
+numbers over time.  Knowledge about the way these numbers evolve is all predefined when the
+propagators are set up prior to the actual evolution.  This predefined setup and subsequent
+application of the propagation algorithm streamlines the process of changing the state of GMAT's
+objects as the model epoch changes.  It also makes the definition of the propagation vector
+flexible and extensible.  New elements that need to evolve over time can be added to GMAT's
+propagation subsystem by defining an ID for the new propagation type, supplying the corresponding
+evolution providers (for instance, a PhysicalModel defining ordinary differential equations used
+to integrate the new element), and changes making this new element visible to the propagation
+enabled commands.
+
+Similarly, in GMAT estimation is constructed to apply an estimation algorithm to an arbitrarily
+sized vector of numbers.  The connection between the state vector used in the estimation process and
+the objects defined in GMAT's mission is made when the estimation subsystem is initialized.  The
+synchronization of data between the estimation vector and the mission obects is managed by an
+instance of a class derived from the StateManager class.  This abstraction of the estimation state
+vector from the mission defined objects is used to keep the estiamtion subsystem extensible and
+flexible in the same way as is provided for the propagation subsystem.
+
+An added feature of this design is that any other algorithms that work on a vector of numbers
+and an associated epoch can use GMAT's objects to build this generic data set simply by deriving a
+new StateManager appropriate to the algorithm and using that StateManager to handle the data
+interchange between the state vector and the associated GMAT objects.  Implementors that need such
+new capablities in GMAT need only study the patterns implemented in the estimation and propagation
+subsystems in order gain insight into how to extend GMAT for these new capabilities.
+
+\subsection[A Propagation State Example]{An Example: State and State Management in Propagation}
+
+You can see an example of this mediation\footnote{A more detailed look at the objects and
+interactions in this example can be found in Section~\ref{section:PropagationExample}.  This
+section is intended to illustrate how the objects, state and state manager operate in teh context
+of the example mission.} in GMAT's propagation subsystem. Consider a mission consisting of two
+spacecraft that are propagated for a day using a Runge-Kutta integrator and a force model consisting
+of a 4x4 geopotential model, point mass effects from the Sun and Moon, solar radiation pressure, and
+atmospheric drag modeled using the MSISE-90 atmosphere model.  In GMAT, the user configures four
+objects to model this system: two spacecraft, an ODEModel that holds the force model, and a
+Runge-Kutta integrator.  The mission control sequence that uses these objects is a single Propagate
+command.  Ignoring the details of the object configuration, the setup for this mission can be
+scripted:
 
 \begin{quote}
 \texttt{Create Spacecraft sat1 sat2\\
@@ -34,45 +69,11 @@ Create ForceModel fm\\
 Create Propagator prop\\
 prop.FM = fm\\
 \\
-Propagate prop(sat1, sat2) {sat1.ElapsedDays = 1.0}}
+\% The Mission Control Sequence\\
+Propagate prop(sat1, sat2) \{sat1.ElapsedDays = 1.0\}}
 \end{quote}
 
-\noindent GMAT collects the integrator and force model in a container called a PropSetup (see
-Section~\ref{section:PropSetup}).  GMAT's PropSetup class has a member pointer for a Propagator and
-a second pointer for an ODEModel.  Each PropSetup also has a StateManager member -- in the case of
-propagation, the StateManager is an instance of the PropagationStateManager class -- that
-communicates with the other objects in the system to retrieve the values of the data that needs to
-be propagated and arranges those data into a single vector that the force model and integrator
-understand. GMAT's propagation subsystem -- that is, the integrator and associated ODEModel -- use
-this data vector and an associated mapping of ordinary differential equations to calculate a new
-vector of numbers at some different time.  In other words, GMAT's propagation subsystem has minimal
-knowledge of the objects that are being propagated.  At the level of the evolution algorithm, the
-propagation subsystem merely maps a vector of numbers at some epoch into a new vector of number at
-some other epoch.  The propagation state manager associated with the PropSetup container handles
-the communications of that vector numbers with the corresponding data in the objects.
 
-Returning to our example, when the scripting listed above is built, GMAT constructs two spacecraft
-named sat1 and sat2.  These spacecraft are added to GMAT's configuration.  Next GMAT creates an
-ODEModel named fm and adds it to the configuration.  Then GMAT creates a PropSetup named prop and
- adds it to the configuration\footnote{The command ``Create Propagator prop'' uses GMAT's factories
-to build a PropSetup container named prop.}.  The PropSetup, prop, includes a member instance of the
-PropagationStateManager class, and two pointers: a pointer to a Propagator object and a pointer to
-an ODEModel object, both initialized to NULL.  The object configuration lines, omitted in this
-example, populate the Propagator side of that PropSetup.  Finally, the line ``prop.FM = fm''
-assigns the ODEModel named fm to the PropSetup.  This object creation and configuration is stored
-in GMAT's configuration for use during a run.
-
-The Propagate command is treated similarly.  An instance of teh Proapgate command is created using
-GMAT's factory subsystem and then placed in the Mission Control Sequence.  The command is passed
-the string that was used to consttruct it, and that string is decompoed into its constituent
-elements.  Once that phase is complete, the Propagate command has strings defining the PropSetup
-used for propagation, the names of the objects that need to be propagated, and strings defining the
-condition or conditions that terminate propagation.  In our example, the Propagate instance has a
-single string defining the PropSetup it uses, ``prop'', a StringArray defining the objects that are
-propagated using that PropSetup -- ``sat1'' and ``sat2'' -- and strings identifying the object used
-to determine when to stop -- ``sat1'' -- the type of condition that terminates propagation --
-``ElapsedDays'' -- and the value that that condition should have when it propagation ends
---~``1.0''.
 
 %\section{\label{section:MissionStateOverview}The Mission State}
 
