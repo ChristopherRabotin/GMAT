@@ -73,6 +73,50 @@ prop.FM = fm\\
 Propagate prop(sat1, sat2) \{sat1.ElapsedDays = 1.0\}}
 \end{quote}
 
+\noindent From the perspective of the state vetor and manager, the behavior required by this
+scripting can be broken into four phases followed by GMAT's propagation subsystem when running a
+mission: (1) Script Parsing, (2) Initialization in the Sandbox, (3) Final Preparation before
+propagation, and (4) Propagation.  (The fifth phase in the life of a propagation enabled
+command, command finalization, does not have a direct affect on the state and state manager
+elements in this script.)  The following paragraphs provide an overview of how state and the state
+manager behave in each of these phases.
+
+\begin{enumerate}
+\item \textbf{Script Parsing}  During script parsing, all four of the resources in the script --
+two spacecraft, the force model, and the PropSetup -- are created and placed in GMAT's global
+configuration.  Three of these resources contain GmatState members: each Spacecraft uses a
+GmatState to hold the orbital state and epoch information, and the ODEModel (defined by the
+ForceModel line) contains a GmatState pointer, which is not yet initialized.  The PropSetup defined
+by the Propagator line contains an instance of the PropagationStateManager class, a subclass of
+StateManager.  That PropagationStateManager, in turn, contains a GmatState object that will be used
+by the PropSetup's propagator as the container for the raw data that gets propagated.
+
+\item \textbf{Initialization}  When a run is started that uses these objects, GMAT clones each
+object into the Sandbox used for the run.  That places a copy of the object, including each member
+GmatState and PropagationStateManager, into the Sandbox's object store.  The objects in the object
+store are then initialized.  As part of this process, object references that won't change because
+of actions performed in the Mission Control Sequence are set.  For this script, the ODEModel
+containing the force model is passed into PropSetup during this initialization.
+
+Once the objects have been initialized, the Mission Control Sequence performs its initialization.
+Each command is passed the Sandbox object stores (that is, the local object map and the global
+object store) and the local solar system.  Each command is then issued an instttruction to perform
+its initialization.  For our example, the only command in the Mission Control Sequence is a
+Propagate command.  On initialization, this command retrieves the PropSetup it needs and clones it
+for use by teh command.  This cloning makes copies of the Propagator and (if set) the ODEModel.
+The Propagate command then locates each of teh other referenced objects it uses.  It passes the
+objects calling for propagation (in this case, sat1 and sat2) into the PropagationStateManager
+associated with the PropSetup.  Once these objects have been set, the command initializes the
+PropagationStateManager by calling the methods that build the state vector and associate the
+objects with the elements of that vector.  The resulting state is passed to the local ODEModel,
+completing the part of the command initialization concerned with the state vector and state manager.
+
+\item \textbf{Preparation for Propagation}  The final piece of initialization that occurs prior to
+propagation captures all of the data from the objects.
+
+\item \textbf{Propagation}
+\end{enumerate}
+
 
 
 %\section{\label{section:MissionStateOverview}The Mission State}
@@ -101,7 +145,7 @@ Propagate prop(sat1, sat2) \{sat1.ElapsedDays = 1.0\}}
 % be calculated.  A more complete example of this process is presented in
 % Section~\ref{section:IntegratorExample}.
 
-\section{The MissionState Class}
+\section{The GmatState Class}
 
 % The MissionState class plays two roles in GMAT.  It acts as a container class that takes pointers
 % to the objects that supply state data, providing a central location for the state data for mission
@@ -113,37 +157,6 @@ Propagate prop(sat1, sat2) \{sat1.ElapsedDays = 1.0\}}
 % constructed based on the needs of the propagator, and
 %
 % GMAT's Numerical Integrators
-
-\subsection{Enumerations used in the MissionState}
-
-The MissionState uses several enumerations used to identify propagation components efficiently.
-This section describes each of these enumerations.
-
-\paragraph{PropMode}  The PropMode enumeration identifies the type of propagation used with a given
-set of state elements.
-
-\begin{itemize}
-\item \textbf{ANALYTIC\_PROP}
-\item \textbf{INTEGRATE}
-\item \textbf{PRECALCULATED\_PROP}
-\end{itemize}
-
-\paragraph{ElementType}  The ElementType enumeration identifies the kind of component contained in
-a PropVector
-
-\begin{itemize}
-\item \textbf{CARTESIAN\_START}
-\item \textbf{CARTESIAN}
-\item \textbf{EQUINOCTIAL\_START}
-\item \textbf{EQUINOCTIAL}
-\item \textbf{STM\_START}
-\item \textbf{STM}
-\item \textbf{QUARTERNION\_START}
-\item \textbf{QUARTERNION}
-\item \textbf{MASS}
-\item \textbf{USER\_DEFINED}
-\item \textbf{UNKNOWN\_ELEMENT\_TYPE}
-\end{itemize}
 
 \subsection{MissionState Attributes}
 
@@ -237,6 +250,37 @@ Spacecraft}
 \end{center}
 \end{figure}
 
+
+\subsection{Enumerations used in State Management}
+
+The MissionState uses several enumerations used to identify propagation components efficiently.
+This section describes each of these enumerations.
+
+\paragraph{PropMode}  The PropMode enumeration identifies the type of propagation used with a given
+set of state elements.
+
+\begin{itemize}
+\item \textbf{ANALYTIC\_PROP}
+\item \textbf{INTEGRATE}
+\item \textbf{PRECALCULATED\_PROP}
+\end{itemize}
+
+\paragraph{ElementType}  The ElementType enumeration identifies the kind of component contained in
+a PropVector
+
+\begin{itemize}
+\item \textbf{CARTESIAN\_START}
+\item \textbf{CARTESIAN}
+\item \textbf{EQUINOCTIAL\_START}
+\item \textbf{EQUINOCTIAL}
+\item \textbf{STM\_START}
+\item \textbf{STM}
+\item \textbf{QUARTERNION\_START}
+\item \textbf{QUARTERNION}
+\item \textbf{MASS}
+\item \textbf{USER\_DEFINED}
+\item \textbf{UNKNOWN\_ELEMENT\_TYPE}
+\end{itemize}
 
 
 
