@@ -52,7 +52,7 @@ subsystems in order gain insight into how to extend GMAT for these new capabilit
 
 You can see an example of this mediation\footnote{A more detailed look at the objects and
 interactions in this example can be found in Section~\ref{section:PropagationExample}.  This
-section is intended to illustrate how the objects, state and state manager operate in teh context
+section is intended to illustrate how the objects, state and state manager operate in the context
 of the example mission.} in GMAT's propagation subsystem. Consider a mission consisting of two
 spacecraft that are propagated for a day using a Runge-Kutta integrator and a force model consisting
 of a 4x4 geopotential model, point mass effects from the Sun and Moon, solar radiation pressure, and
@@ -96,101 +96,116 @@ object into the Sandbox used for the run.  That places a copy of the object, inc
 GmatState and PropagationStateManager, into the Sandbox's object store.  The objects in the object
 store are then initialized.  As part of this process, object references that won't change because
 of actions performed in the Mission Control Sequence are set.  For this script, the ODEModel
-containing the force model is passed into PropSetup during this initialization.
+containing the force model is passed into PropSetup.  The PropSetup is initialized, but the
+internal components -- the Propagator and, if applicable, ODEModel, are not yet initialized; that
+piece of initialization is deferred until the next phase of the process.
 
 Once the objects have been initialized, the Mission Control Sequence performs its initialization.
 Each command is passed the Sandbox object stores (that is, the local object map and the global
 object store) and the local solar system.  Each command is then issued an instttruction to perform
 its initialization.  For our example, the only command in the Mission Control Sequence is a
 Propagate command.  On initialization, this command retrieves the PropSetup it needs and clones it
-for use by teh command.  This cloning makes copies of the Propagator and (if set) the ODEModel.
-The Propagate command then locates each of teh other referenced objects it uses.  It passes the
+for use by the command.  This cloning makes copies of the Propagator and (if set) the ODEModel.
+The Propagate command then locates each of the other referenced objects it uses.  It passes the
 objects calling for propagation (in this case, sat1 and sat2) into the PropagationStateManager
 associated with the PropSetup.  Once these objects have been set, the command initializes the
 PropagationStateManager by calling the methods that build the state vector and associate the
 objects with the elements of that vector.  The resulting state is passed to the local ODEModel,
 completing the part of the command initialization concerned with the state vector and state manager.
 
-\item \textbf{Preparation for Propagation}  The final piece of initialization that occurs prior to
-propagation captures all of the data from the objects.
+\item \textbf{Preparation for Propagation}  The final step that occurs prior to propagation updates
+the elements involved in propagation to capture changes that may have occurred from previous
+events in the Mission Control Sequence, and then retrieves the current data for the state vector
+from the objects.  During this phase, the ODEModel uses the PropagationStateManager to construct the
+mapping between elements of the state vector and the components of the ODEModel that supply
+derivative information for integration.  During this phase in initialization, the Propagator and
+ODEModel themselves get initialized.
 
-\item \textbf{Propagation}
+\item \textbf{Propagation}  In many ways the actual propagation phase is the simplest of those
+described here.  GMAT's propagators evolve the state vector using the coded propagation algorithm.
+Each time a propagation step completes, a call is made to the PropagationStateManager to update the
+affected objects with the propagated data.  Occasionally -- for example, while evaluating stopping
+conditions -- the propagator backs out a step by requesting a refresh from the
+PropagationStateManager.
 \end{enumerate}
 
+The details of each of the steps described above can be found in
+Chapter~\ref{chapter:PropagatorOverview}.  The following sections describe the GmatState and
+StateManager classes.
 
-
-%\section{\label{section:MissionStateOverview}The Mission State}
-
-% The current values of spacecraft data, the state transition matrix, and other elements that evolve
-% in GMAT's model are held, in the propagation subsystem, in the mission state\footnote{Here -- and
-% throughout this chapter -- the term ``mission state'' and the word ``state'' represent this
-% collection of data elements, unless otherwise specified.  Other chapters in the architectural
-% specification may use the word ``state'' for different purposes -- for example, the Solver classes
-% all function through finite state machines, where the current location of the system in the
-% solution process is assigned a specific status, called a state, and move from one of these
-% enumerated stated to another as the solution process is executed.}.  GMAT's mission state can be
-% further decomposed into static components, components that evolve through numerical integration,
-% components that have analytic evolution operators, and components that are modeled over time using
-% stochastic models.
-%
-% \section{Classes Supporting the Mission State}
-%
-% The mission state data is culled from the objects that make use of the data contained in the
-%state,
-% and passed into the elements that the propagators use to calculate the state evolution.  As an
-% example, each Spacecraft object manages data representing the position and velocity of that
-% particular Spacecraft.  When GMAT needs to model the motion of that spacecraft, it gathers the
-% epoch and corresponding position and velocity information in a mission state, and passes that
-% mission state to the evolution operator so that the motion associated with the change of epoch can
-% be calculated.  A more complete example of this process is presented in
-% Section~\ref{section:IntegratorExample}.
 
 \section{The GmatState Class}
 
-% The MissionState class plays two roles in GMAT.  It acts as a container class that takes pointers
-% to the objects that supply state data, providing a central location for the state data for mission
-% elements that use it.  It also supplies the accumulated state data to those elements in the form
-% that they need in order to process it and take actions, and routes any resulting changes in state
-% to the objects that receive those changes.
-%
-% The MissionState class collects data into vectors used by the propagators.  These vectors are
-% constructed based on the needs of the propagator, and
-%
-% GMAT's Numerical Integrators
+The GmatState is a helper class designed for processes that need a general purpose vector of real
+number data, an epoch for those data, and information that lets the process decode the data in a
+meaningful way.  GMAT uses instances of the GmatState class in the Spacecraft class to store the
+epoch and orbital elements for each spacecraft, in the propagation subsystem to store the data that
+evolved over time in the simunation, and in the estimation subsystem for the estimation state
+vector.  The GmatState can be used as a standalone entity, or on conjuction with a StateManager.
 
-\subsection{MissionState Attributes}
+Each element of the GmatState can have properties associated with it that provide information about
+the type of data in that element.  These ancillary data include an identifier for the data type,
+a text string that describes the data member in a dot-delimited format, and an index pointing to
+other data in the state vector associated with the element.  An example of the settings for these
+data can be found by looking at the layout of the Cartesian state data for a spacecraft in teh
+vector assembled by the PropagationStateManager prior to propagation.  Table~\ref{table:GmatState}
+shows this layout for a spacecraft named sat.
+
+\begin{table}
+\begin{center}
+% use packages: array
+\begin{tabular}{llll}
+\textbf{theData} & \textbf{dataID} & \textbf{dataType} & \textbf{associate} \\
+7100.0 & 3700 & sat.CartesianState.1 & 0 \\
+0.0 & 3700 & sat.CartesianState.2 & 0 \\
+1000.0 & 3700 & sat.CartesianState.3 & 0 \\
+0.0 & 3700 & sat.CartesianState.4 & 0 \\
+7.35 & 3700 & sat.CartesianState.5 & 0 \\
+1.0 & 3700 & sat.CartesianState.6 & 0
+\end{tabular}
+\end{center}
+\caption[GmatState for Propagation]{\label{table:GmatState}GmatState for a Spacecraft as seen in
+Propagation}
+\end{table}
+
+\subsection{GmatState Attributes}
 
 \begin{itemize}
-\item\textbf{Real epoch} The epoch of the state data managed by the MissionState.  GMAT requires
-that all such state data in a MissionState use the same epoch.
-\item\textbf{ObjectArray dataSource} The vector of objects that are propagated
-\item\textbf{std::vector<PropMode> propModes} The propagation mode for each object that is
-propagated.
-\item\textbf{Integer dimension} Total number of elements that are propagated
-\item\textbf{PropVector thePropVector} The state data to be propagated
+\item\textbf{GmatEpoch theEpoch} The epoch of the state data managed by the GmatState.  GMAT
+requires that all such state data in a GmatState use the same epoch.
+\item\textbf{Real *theData} The state data.
+\item\textbf{Integer *dataIDs}  The id associated with the state data.
+\item\textbf{Integer *associatedElements}  The index of the first element associated with each
+element.
+\item\textbf{StringArray dataTypes}  Text descriptors of the elements.
+\item\textbf{Integer stateSize} Total number of elements that are in the state.
+
 \end{itemize}
 
-\subsubsection{MissionState Methods}
+\subsection{GmatState Methods}
 
 \begin{itemize}
-\item\textbf{bool AddSource(GmatBase* src, PropMode mode, ElementType type, Integer elementId)}
-Registers an object as a data provider with the MissionState.  The mode parameter identifies the
-type of propagation desired: analytic, numerically integrated, or from an ephemeris source.  The
-type parameter identified the kind of element that is propagated.  The elementId parameter is the ID
-for the start of the data that is propagated.  All propagated data must be accessible using the
-generic access methods defined for GmatBase objects, so that the elementId can be used to access
-these data.
-\item\textbf{bool Initialize()}  Performs preliminary setup of the PropVector prior to propagation.
-\item \textbf{bool PrepareToPropagate()}  Completes pre-propagation setup.
+\item\textbf{Real\& operator[](const Integer index)}  Sets an element of the state vector.
+\item\textbf{Real operator[](const Integer index) const}  Reads an element of the state vector.
+\item\textbf{void SetSize(const Integer size)}  Resizes the state vector to a new size.
+\item\textbf{Integer GetSize() const} Retrieves the current size of the state vector.
+\item\textbf{Real* GetState()}  Retrieves the state vector.  This method provides direct access to
+the entire state vector.  It is used to enhance performance over that provided by element-by-element
+access methods.
+\item\textbf{bool SetState(const Real *data, const Integer size, const Integer start = 0)}  Sets
+all or part of the state vector to new values.  The new data is input through the data inputn
+parameter, which is a vector of length given by the size parameter.  These data are written into
+the state vector starting at the element specified by the start parameter.  The method traps writes
+that would exceeed the valid range for the state vector.
+\item\textbf{GmatEpoch GetEpoch() const}  Retrieves the epoch.
+\item\textbf{GmatEpoch SetEpoch(const GmatEpoch ep)}  Sets the epoch.
+\item\textbf{bool SetElementProperties(const Integer index, const Integer id, const std::string
+\&textId, const Integer associate)}
+\item\textbf{const StringArray\& GetElementDescriptions()}
+\item\textbf{Integer GetAssociateIndex(const Integer id)}
 \end{itemize}
 
-\section{\label{section:propVector}The PropVector Class}
-
-%The propVector component of the MissionState is a Real array of data sized to match the data vector
-%needed by GMAT's numerical integrators for propagation.  The propVector is constructed by the
-%MisisonState when the PrepareToPropagate methos if executed by the command that controls the
-%propagation.  Figure~\ref{figure:PropVectorComponents} shows a representative layout for a
-%propVector.
+\subsection{\label{section:GmatStateSetup}Representative Layouts for a GmatState}
 
 Figure~\ref{figure:PropVectorComponents} shows a representative layout of the data in a PropVector
 for a single spacecraft.  The vector displayed here is the PropVector used by a numerical
@@ -253,34 +268,14 @@ Spacecraft}
 
 \subsection{Enumerations used in State Management}
 
-The MissionState uses several enumerations used to identify propagation components efficiently.
-This section describes each of these enumerations.
-
-\paragraph{PropMode}  The PropMode enumeration identifies the type of propagation used with a given
-set of state elements.
-
-\begin{itemize}
-\item \textbf{ANALYTIC\_PROP}
-\item \textbf{INTEGRATE}
-\item \textbf{PRECALCULATED\_PROP}
-\end{itemize}
-
-\paragraph{ElementType}  The ElementType enumeration identifies the kind of component contained in
-a PropVector
-
-\begin{itemize}
-\item \textbf{CARTESIAN\_START}
-\item \textbf{CARTESIAN}
-\item \textbf{EQUINOCTIAL\_START}
-\item \textbf{EQUINOCTIAL}
-\item \textbf{STM\_START}
-\item \textbf{STM}
-\item \textbf{QUARTERNION\_START}
-\item \textbf{QUARTERNION}
-\item \textbf{MASS}
-\item \textbf{USER\_DEFINED}
-\item \textbf{UNKNOWN\_ELEMENT\_TYPE}
-\end{itemize}
-
-
-
+   enum StateElementId
+   {
+      UNKNOWN\_STATE = -1,
+      CARTESIAN\_STATE = 3700,          // Integrable state representations
+      EQUINOCTIAL\_STATE,
+      ORBIT\_STATE\_TRANSITION\_MATRIX,   // 6x6 STM for the orbit
+      MASS\_FLOW,                       // m dot
+      PREDEFINED\_STATE\_MAX,
+      USER\_DEFINED\_BEGIN = 3800,
+      USER\_DEFINED\_END = 3999          // Allow up to 200 dynamic entries
+   };

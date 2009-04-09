@@ -233,18 +233,18 @@ open=false
 
 [item:PropagatorOverview.tex]
 archive=true
-column=52
+column=11
 encoding=UTF-8
 highlight=LaTeX
-line=451
+line=452
 open=true
 
 [item:PropagatorStates.tex]
 archive=true
-column=0
+column=1
 encoding=UTF-8
 highlight=LaTeX
-line=254
+line=170
 open=true
 
 [item:Propagators.tex]
