@@ -89,11 +89,11 @@ open=false
 
 [item:Estimation.tex]
 archive=true
-column=57
+column=42
 encoding=UTF-8
 highlight=LaTeX
-line=4
-open=false
+line=1
+open=true
 
 [item:ExecComponents.tex]
 archive=true
@@ -145,10 +145,10 @@ open=false
 
 [item:GMAT-Architectural-Specification.tex]
 archive=true
-column=0
+column=9
 encoding=UTF-8
 highlight=LaTeX
-line=254
+line=272
 open=true
 
 [item:GmatFunctionEndToEnd.tex]
@@ -241,10 +241,10 @@ open=true
 
 [item:PropagatorStates.tex]
 archive=true
-column=1
+column=0
 encoding=UTF-8
 highlight=LaTeX
-line=170
+line=342
 open=true
 
 [item:Propagators.tex]

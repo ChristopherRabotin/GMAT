@@ -13,7 +13,7 @@
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="0.45"
-   sodipodi:docbase="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images"
+   sodipodi:docbase="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images"
    sodipodi:docname="PropVectorMaster.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    sodipodi:modified="TRUE">
@@ -31,7 +31,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1"
      inkscape:cx="375"
-     inkscape:cy="680"
+     inkscape:cy="683.885"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      inkscape:window-width="1920"
@@ -52,585 +52,633 @@
   <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     style="display:inline">
     <rect
-       style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.81102592;stroke-opacity:1"
-       id="rect2160"
-       width="125.18897"
-       height="412.18903"
-       x="69.90551"
-       y="42.2677"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
+       id="rect2551"
+       width="178.99997"
+       height="476"
+       x="383"
+       y="35.362183"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
-    <text
-       xml:space="preserve"
-       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="74"
-       y="56.362183"
-       id="text2162"
-       sodipodi:linespacing="125%"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;display:inline"
+       id="rect2555"
+       width="178.99997"
+       height="476"
+       x="560"
+       y="35.362183"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"><tspan
-         sodipodi:role="line"
-         id="tspan2164"
-         x="74"
-         y="56.362183">PropVector: </tspan><tspan
-         sodipodi:role="line"
-         x="74"
-         y="73.862183"
-         id="tspan2206">   1 Spacecraft</tspan></text>
+       inkscape:export-ydpi="90" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.99999994;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect2513"
+       width="178.99997"
+       height="476"
+       x="203.99997"
+       y="35.362183"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
     <g
-       id="g2194"
-       transform="translate(-294,-24)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+       id="g2531"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
-         y="109.23963"
-         x="383.87744"
-         height="123.24511"
-         width="92.24511"
-         id="rect2174"
-         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.75489241;stroke-opacity:1" />
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         y="42.2677"
+         x="37.90551"
+         height="412.18903"
+         width="125.18897"
+         id="rect2160"
+         style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.81102592;stroke-opacity:1" />
       <text
-         id="text2176"
-         y="149.36218"
-         x="403"
-         style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         sodipodi:linespacing="125%"
+         id="text2162"
+         y="56.362183"
+         x="42"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
+           y="56.362183"
+           x="42"
+           id="tspan2164"
+           sodipodi:role="line">GmatState: </tspan><tspan
+           id="tspan2206"
+           y="73.862183"
+           x="42"
+           sodipodi:role="line">   1 Spacecraft</tspan></text>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         transform="translate(-326,-24)"
+         id="g2194">
+        <rect
+           style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.75489241;stroke-opacity:1"
+           id="rect2174"
+           width="92.24511"
+           height="123.24511"
+           x="383.87744"
+           y="109.23963" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="403"
            y="149.36218"
-           x="403"
-           id="tspan2178"
-           sodipodi:role="line">X</tspan><tspan
-           id="tspan2180"
-           y="164.36218"
-           x="403"
-           sodipodi:role="line">Y</tspan><tspan
-           id="tspan2182"
-           y="179.36218"
-           x="403"
-           sodipodi:role="line">Z</tspan><tspan
-           id="tspan2184"
-           y="194.36218"
-           x="403"
-           sodipodi:role="line">VX</tspan><tspan
-           id="tspan2186"
-           y="209.36218"
-           x="403"
-           sodipodi:role="line">VY</tspan><tspan
-           id="tspan2188"
-           y="224.36218"
-           x="403"
-           sodipodi:role="line">VZ</tspan></text>
-      <text
-         sodipodi:linespacing="125%"
-         id="text2190"
-         y="126.36218"
-         x="387"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="126.36218"
+           id="text2176"><tspan
+             sodipodi:role="line"
+             id="tspan2178"
+             x="403"
+             y="149.36218">X</tspan><tspan
+             sodipodi:role="line"
+             x="403"
+             y="164.36218"
+             id="tspan2180">Y</tspan><tspan
+             sodipodi:role="line"
+             x="403"
+             y="179.36218"
+             id="tspan2182">Z</tspan><tspan
+             sodipodi:role="line"
+             x="403"
+             y="194.36218"
+             id="tspan2184">VX</tspan><tspan
+             sodipodi:role="line"
+             x="403"
+             y="209.36218"
+             id="tspan2186">VY</tspan><tspan
+             sodipodi:role="line"
+             x="403"
+             y="224.36218"
+             id="tspan2188">VZ</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="387"
-           id="tspan2192"
-           sodipodi:role="line">Trajectory:</tspan></text>
-    </g>
-    <g
-       id="g2224"
-       transform="translate(-166.49999,-5.7887539)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="219.33754"
-         x="255.97534"
-         height="101.0493"
-         width="93.049301"
-         id="rect2208"
-         style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.95070088;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2210"
-         y="235.36218"
-         x="264"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="235.36218"
+           y="126.36218"
+           id="text2190"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2192"
+             x="387"
+             y="126.36218"
+             style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Trajectory:</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         transform="translate(-198.49999,-5.7887539)"
+         id="g2224">
+        <rect
+           style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.95070088;stroke-opacity:1"
+           id="rect2208"
+           width="93.049301"
+           height="101.0493"
+           x="255.97534"
+           y="219.33754" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="264"
-           id="tspan2212"
-           sodipodi:role="line">STM:</tspan></text>
-      <text
-         id="text2214"
-         y="255.36218"
-         x="273"
-         style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
+           y="235.36218"
+           id="text2210"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2212"
+             x="264"
+             y="235.36218"
+             style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">STM:</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="273"
            y="255.36218"
-           x="273"
-           id="tspan2216"
-           sodipodi:role="line">dX/X0</tspan><tspan
-           id="tspan2218"
-           y="270.36218"
-           x="273"
-           sodipodi:role="line">dX/dY0</tspan><tspan
-           id="tspan2220"
-           y="285.36218"
-           x="273"
-           sodipodi:role="line">...</tspan><tspan
-           id="tspan2222"
-           y="300.36218"
-           x="273"
-           sodipodi:role="line">dVZ/dVZ0</tspan></text>
-    </g>
-    <g
-       id="g2240"
-       transform="translate(-0.5000056,92)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="323.26718"
-         x="89.904999"
-         height="26.190008"
-         width="93.19001"
-         id="rect2234"
-         style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2236"
-         y="340.36218"
-         x="95"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="340.36218"
+           id="text2214"><tspan
+             sodipodi:role="line"
+             id="tspan2216"
+             x="273"
+             y="255.36218">dX/X0</tspan><tspan
+             sodipodi:role="line"
+             x="273"
+             y="270.36218"
+             id="tspan2218">dX/dY0</tspan><tspan
+             sodipodi:role="line"
+             x="273"
+             y="285.36218"
+             id="tspan2220">...</tspan><tspan
+             sodipodi:role="line"
+             x="273"
+             y="300.36218"
+             id="tspan2222">dVZ/dVZ0</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         transform="translate(-32.500006,92)"
+         id="g2240">
+        <rect
+           style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1"
+           id="rect2234"
+           width="93.19001"
+           height="26.190008"
+           x="89.904999"
+           y="323.26718" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="95"
-           id="tspan2238"
-           sodipodi:role="line">Mass</tspan></text>
-    </g>
-    <g
-       id="g2261"
-       transform="translate(1.4999982,-5.3499914)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="325.31445"
-         x="87.952278"
-         height="89.095444"
-         width="93.095444"
-         id="rect2245"
-         style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.90455967;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2247"
-         y="340.36218"
-         x="94"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
            y="340.36218"
+           id="text2236"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2238"
+             x="95"
+             y="340.36218"
+             style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Mass</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/PropVectorComponents.png"
+         transform="translate(-30.500002,-5.3499914)"
+         id="g2261">
+        <rect
+           style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.90455967;stroke-opacity:1"
+           id="rect2245"
+           width="93.095444"
+           height="89.095444"
+           x="87.952278"
+           y="325.31445" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="94"
-           id="tspan2249"
-           sodipodi:role="line">Attitude:</tspan></text>
-      <text
-         id="text2251"
-         y="360.36218"
-         x="107"
-         style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
+           y="340.36218"
+           id="text2247"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2249"
+             x="94"
+             y="340.36218"
+             style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Attitude:</tspan></text>
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="107"
            y="360.36218"
-           x="107"
-           id="tspan2253"
-           sodipodi:role="line">Q1</tspan><tspan
-           id="tspan2255"
-           y="375.36218"
-           x="107"
-           sodipodi:role="line">Q2</tspan><tspan
-           id="tspan2257"
-           y="390.36218"
-           x="107"
-           sodipodi:role="line">Q3</tspan><tspan
-           id="tspan2259"
-           y="405.36218"
-           x="107"
-           sodipodi:role="line">Q4</tspan></text>
+           id="text2251"><tspan
+             sodipodi:role="line"
+             id="tspan2253"
+             x="107"
+             y="360.36218">Q1</tspan><tspan
+             sodipodi:role="line"
+             x="107"
+             y="375.36218"
+             id="tspan2255">Q2</tspan><tspan
+             sodipodi:role="line"
+             x="107"
+             y="390.36218"
+             id="tspan2257">Q3</tspan><tspan
+             sodipodi:role="line"
+             x="107"
+             y="405.36218"
+             id="tspan2259">Q4</tspan></text>
+      </g>
     </g>
-    <rect
-       style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.81102592;stroke-opacity:1"
-       id="rect2285"
-       width="125.18897"
-       height="412.18903"
-       x="232.40552"
-       y="42.26767"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+    <g
+       id="g2354"
+       transform="translate(-2,36)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90" />
-    <text
-       xml:space="preserve"
-       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="236.5"
-       y="56.362152"
-       id="text2287"
-       sodipodi:linespacing="125%"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90"><tspan
-         sodipodi:role="line"
-         id="tspan2289"
+       inkscape:export-ydpi="90">
+      <rect
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         y="42.26767"
+         x="232.40552"
+         height="412.18903"
+         width="125.18897"
+         id="rect2285"
+         style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.81102592;stroke-opacity:1" />
+      <text
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         sodipodi:linespacing="125%"
+         id="text2287"
+         y="56.362152"
          x="236.5"
-         y="56.362152">PropVector: </tspan><tspan
-         sodipodi:role="line"
-         x="236.5"
-         y="73.862152"
-         id="tspan2291">   3 Spacecraft</tspan></text>
-    <g
-       id="g2385"
-       transform="translate(-87.000019,-5.0000076)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="90.038048"
-         x="338.1759"
-         height="26.648214"
-         width="92.648216"
-         id="rect2295"
-         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2311"
-         y="107.36215"
-         x="341.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
          xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="107.36215"
+           y="56.362152"
+           x="236.5"
+           id="tspan2289"
+           sodipodi:role="line">GmatState: </tspan><tspan
+           id="tspan2291"
+           y="73.862152"
+           x="236.5"
+           sodipodi:role="line">   3 Spacecraft</tspan></text>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.000019,-5.0000076)"
+         id="g2385">
+        <rect
+           style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1"
+           id="rect2295"
+           width="92.648216"
+           height="26.648214"
+           x="338.1759"
+           y="90.038048" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="341.5"
-           id="tspan2313"
-           sodipodi:role="line">Trajectory 1</tspan></text>
-    </g>
-    <g
-       id="g2390"
-       transform="translate(-87.499985,-41.681824)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="218.10165"
-         x="338.23947"
-         height="25.521015"
-         width="93.521011"
-         id="rect2317"
-         style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2319"
-         y="234.36215"
-         x="346.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="234.36215"
-           x="346.5"
-           id="tspan2321"
-           sodipodi:role="line">STM 1</tspan></text>
-    </g>
-    <g
-       id="g2333"
-       transform="translate(160.99999,34.454514)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="323.26718"
-         x="89.904999"
-         height="26.190008"
-         width="93.19001"
-         id="rect2335"
-         style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2337"
-         y="340.36218"
-         x="95"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="340.36218"
-           x="95"
-           sodipodi:role="line"
-           id="tspan2400">Mass 1</tspan></text>
-    </g>
-    <g
-       id="g2395"
-       transform="translate(-88.499996,-56.363579)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="324.09998"
-         x="339.23782"
-         height="24.524332"
-         width="93.52433"
-         id="rect2343"
-         style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2345"
-         y="339.36215"
-         x="345.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="339.36215"
-           x="345.5"
-           id="tspan2347"
-           sodipodi:role="line">Attitude 1</tspan></text>
-    </g>
-    <g
-       id="g2412"
-       transform="translate(-87.000019,25.272748)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="90.038048"
-         x="338.1759"
-         height="26.648214"
-         width="92.648216"
-         id="rect2414"
-         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2416"
-         y="107.36215"
-         x="341.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
            y="107.36215"
-           x="341.5"
-           id="tspan2418"
-           sodipodi:role="line">Trajectory 2</tspan></text>
-    </g>
-    <g
-       id="g2420"
-       transform="translate(-87.499985,-11.409068)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="218.10165"
-         x="338.23947"
-         height="25.521015"
-         width="93.521011"
-         id="rect2422"
-         style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2424"
-         y="234.36215"
-         x="346.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="234.36215"
+           id="text2311"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2313"
+             x="341.5"
+             y="107.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Trajectory 1</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.499985,-41.681824)"
+         id="g2390">
+        <rect
+           style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1"
+           id="rect2317"
+           width="93.521011"
+           height="25.521015"
+           x="338.23947"
+           y="218.10165" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="346.5"
-           id="tspan2426"
-           sodipodi:role="line">STM 2</tspan></text>
-    </g>
-    <g
-       id="g2428"
-       transform="translate(160.99999,64.727272)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="323.26718"
-         x="89.904999"
-         height="26.190008"
-         width="93.19001"
-         id="rect2430"
-         style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2432"
-         y="340.36218"
-         x="95"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="340.36218"
+           y="234.36215"
+           id="text2319"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2321"
+             x="346.5"
+             y="234.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">STM 1</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(160.99999,34.454514)"
+         id="g2333">
+        <rect
+           style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1"
+           id="rect2335"
+           width="93.19001"
+           height="26.190008"
+           x="89.904999"
+           y="323.26718" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="95"
-           sodipodi:role="line"
-           id="tspan2434">Mass 2</tspan></text>
-    </g>
-    <g
-       id="g2436"
-       transform="translate(-88.499996,-26.090884)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="324.09998"
-         x="339.23782"
-         height="24.524332"
-         width="93.52433"
-         id="rect2438"
-         style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2440"
-         y="339.36215"
-         x="345.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="339.36215"
+           y="340.36218"
+           id="text2337"
+           sodipodi:linespacing="125%"><tspan
+             id="tspan2400"
+             sodipodi:role="line"
+             x="95"
+             y="340.36218"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Mass 1</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-88.499996,-56.363579)"
+         id="g2395">
+        <rect
+           style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1"
+           id="rect2343"
+           width="93.52433"
+           height="24.524332"
+           x="339.23782"
+           y="324.09998" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="345.5"
-           id="tspan2442"
-           sodipodi:role="line">Attitude 2</tspan></text>
-    </g>
-    <g
-       id="g2444"
-       transform="translate(-87.000019,55.545476)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="90.038048"
-         x="338.1759"
-         height="26.648214"
-         width="92.648216"
-         id="rect2446"
-         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2448"
-         y="107.36215"
-         x="341.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
+           y="339.36215"
+           id="text2345"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2347"
+             x="345.5"
+             y="339.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Attitude 1</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.000019,25.272748)"
+         id="g2412">
+        <rect
+           style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1"
+           id="rect2414"
+           width="92.648216"
+           height="26.648214"
+           x="338.1759"
+           y="90.038048" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="341.5"
            y="107.36215"
-           x="341.5"
-           id="tspan2450"
-           sodipodi:role="line">Trajectory 3</tspan></text>
-    </g>
-    <g
-       id="g2452"
-       transform="translate(-87.499985,18.86366)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="218.10165"
-         x="338.23947"
-         height="25.521015"
-         width="93.521011"
-         id="rect2454"
-         style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2456"
-         y="234.36215"
-         x="346.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="234.36215"
+           id="text2416"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2418"
+             x="341.5"
+             y="107.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Trajectory 2</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.499985,-11.409068)"
+         id="g2420">
+        <rect
+           style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1"
+           id="rect2422"
+           width="93.521011"
+           height="25.521015"
+           x="338.23947"
+           y="218.10165" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="346.5"
-           id="tspan2458"
-           sodipodi:role="line">STM 3</tspan></text>
-    </g>
-    <g
-       id="g2460"
-       transform="translate(160.99999,95)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="323.26718"
-         x="89.904999"
-         height="26.190008"
-         width="93.19001"
-         id="rect2462"
-         style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2464"
-         y="340.36218"
-         x="95"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="340.36218"
+           y="234.36215"
+           id="text2424"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2426"
+             x="346.5"
+             y="234.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">STM 2</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(160.99999,64.727272)"
+         id="g2428">
+        <rect
+           style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1"
+           id="rect2430"
+           width="93.19001"
+           height="26.190008"
+           x="89.904999"
+           y="323.26718" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="95"
-           sodipodi:role="line"
-           id="tspan2466">Mass 3</tspan></text>
-    </g>
-    <g
-       id="g2468"
-       transform="translate(-88.499996,4.1818441)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
-       inkscape:export-xdpi="90"
-       inkscape:export-ydpi="90">
-      <rect
-         y="324.09998"
-         x="339.23782"
-         height="24.524332"
-         width="93.52433"
-         id="rect2470"
-         style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
-      <text
-         sodipodi:linespacing="125%"
-         id="text2472"
-         y="339.36215"
-         x="345.5"
-         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-         xml:space="preserve"><tspan
-           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
-           y="339.36215"
+           y="340.36218"
+           id="text2432"
+           sodipodi:linespacing="125%"><tspan
+             id="tspan2434"
+             sodipodi:role="line"
+             x="95"
+             y="340.36218"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Mass 2</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-88.499996,-26.090884)"
+         id="g2436">
+        <rect
+           style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1"
+           id="rect2438"
+           width="93.52433"
+           height="24.524332"
+           x="339.23782"
+           y="324.09998" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
            x="345.5"
-           id="tspan2474"
-           sodipodi:role="line">Attitude 3</tspan></text>
+           y="339.36215"
+           id="text2440"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2442"
+             x="345.5"
+             y="339.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Attitude 2</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.000019,55.545476)"
+         id="g2444">
+        <rect
+           style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.35178807;stroke-opacity:1"
+           id="rect2446"
+           width="92.648216"
+           height="26.648214"
+           x="338.1759"
+           y="90.038048" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="341.5"
+           y="107.36215"
+           id="text2448"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2450"
+             x="341.5"
+             y="107.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Trajectory 3</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-87.499985,18.86366)"
+         id="g2452">
+        <rect
+           style="fill:#d5d5ff;fill-opacity:1;stroke:#000000;stroke-width:0.47898757;stroke-opacity:1"
+           id="rect2454"
+           width="93.521011"
+           height="25.521015"
+           x="338.23947"
+           y="218.10165" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="346.5"
+           y="234.36215"
+           id="text2456"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2458"
+             x="346.5"
+             y="234.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">STM 3</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(160.99999,95)"
+         id="g2460">
+        <rect
+           style="fill:#afe9c6;fill-opacity:1;stroke:#000000;stroke-width:0.80999255;stroke-opacity:1"
+           id="rect2462"
+           width="93.19001"
+           height="26.190008"
+           x="89.904999"
+           y="323.26718" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="95"
+           y="340.36218"
+           id="text2464"
+           sodipodi:linespacing="125%"><tspan
+             id="tspan2466"
+             sodipodi:role="line"
+             x="95"
+             y="340.36218"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Mass 3</tspan></text>
+      </g>
+      <g
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatPropVector.png"
+         transform="translate(-88.499996,4.1818441)"
+         id="g2468">
+        <rect
+           style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1"
+           id="rect2470"
+           width="93.52433"
+           height="24.524332"
+           x="339.23782"
+           y="324.09998" />
+        <text
+           xml:space="preserve"
+           style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+           x="345.5"
+           y="339.36215"
+           id="text2472"
+           sodipodi:linespacing="125%"><tspan
+             sodipodi:role="line"
+             id="tspan2474"
+             x="345.5"
+             y="339.36215"
+             style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans">Attitude 3</tspan></text>
+      </g>
     </g>
     <rect
        style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.64004135;stroke-opacity:1"
        id="rect2484"
        width="125.35995"
-       height="256.36002"
-       x="389.32004"
-       y="43.182175"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       height="272.36002"
+       x="411.32004"
+       y="78.182175"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
        style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="393.5"
-       y="57.362152"
+       x="411.5"
+       y="92.362152"
        id="text2486"
        sodipodi:linespacing="125%"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
          id="tspan2488"
-         x="393.5"
-         y="57.362152">PropVector: </tspan><tspan
+         x="411.5"
+         y="92.362152">GmatState: </tspan><tspan
          sodipodi:role="line"
-         x="393.5"
-         y="74.862152"
-         id="tspan2490">   3 Spacecraft</tspan></text>
+         x="411.5"
+         y="109.86215"
+         id="tspan2861">   Selected Prop</tspan><tspan
+         sodipodi:role="line"
+         x="411.5"
+         y="127.36215"
+         id="tspan2865">   Elements</tspan></text>
     <g
        id="g2492"
-       transform="translate(69.99998,-3.999996)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(91.99998,47.000007)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -655,8 +703,8 @@
     </g>
     <g
        id="g2500"
-       transform="translate(69.50001,-42.499998)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(91.50001,8.500005)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -681,8 +729,8 @@
     </g>
     <g
        id="g2508"
-       transform="translate(317.99999,-59.00003)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(339.99999,-8.000027)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -707,8 +755,8 @@
     </g>
     <g
        id="g2524"
-       transform="translate(69.99998,25.6667)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(91.99998,76.666703)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -733,8 +781,8 @@
     </g>
     <g
        id="g2548"
-       transform="translate(68.5,-88.666638)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(90.5,-37.666635)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -759,8 +807,8 @@
     </g>
     <g
        id="g2556"
-       transform="translate(69.99998,55.33337)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(91.99998,106.33337)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -785,8 +833,8 @@
     </g>
     <g
        id="g2564"
-       transform="translate(69.50001,-12.833302)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/ThreeSatActivePropVector.png"
+       transform="translate(91.50001,38.166701)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -809,38 +857,238 @@
            id="tspan2570"
            sodipodi:role="line">STM 3</tspan></text>
     </g>
+    <g
+       id="g2521"
+       transform="translate(670,42)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         transform="matrix(0.55,0,0,0.6,-201.85,4.944873)"
+         d="M -413 12.362183 A 20 20 0 1 1  -453,12.362183 A 20 20 0 1 1  -413 12.362183 z"
+         sodipodi:ry="20"
+         sodipodi:rx="20"
+         sodipodi:cy="12.362183"
+         sodipodi:cx="-433"
+         id="path2515"
+         style="fill:#f9f9f9;fill-opacity:1;stroke:#000000;stroke-width:1.74077654;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         sodipodi:type="arc" />
+      <text
+         id="text2517"
+         y="18.194214"
+         x="-446.19141"
+         style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-weight:bold"
+           y="18.194214"
+           x="-446.19141"
+           id="tspan2519"
+           sodipodi:role="line">A</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g2526"
+       transform="translate(851,42)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         transform="matrix(0.55,0,0,0.6,-201.85,4.944873)"
+         d="M -413 12.362183 A 20 20 0 1 1  -453,12.362183 A 20 20 0 1 1  -413 12.362183 z"
+         sodipodi:ry="20"
+         sodipodi:rx="20"
+         sodipodi:cy="12.362183"
+         sodipodi:cx="-433"
+         id="path2528"
+         style="fill:#f9f9f9;fill-opacity:1;stroke:#000000;stroke-width:1.74077654;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         sodipodi:type="arc" />
+      <text
+         id="text2530"
+         y="18.194214"
+         x="-446.19141"
+         style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-weight:bold"
+           y="18.194214"
+           x="-446.19141"
+           id="tspan2532"
+           sodipodi:role="line">B</tspan></text>
+    </g>
+    <g
+       style="display:inline"
+       id="g2534"
+       transform="translate(1032,42)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <path
+         transform="matrix(0.55,0,0,0.6,-201.85,4.944873)"
+         d="M -413 12.362183 A 20 20 0 1 1  -453,12.362183 A 20 20 0 1 1  -413 12.362183 z"
+         sodipodi:ry="20"
+         sodipodi:rx="20"
+         sodipodi:cy="12.362183"
+         sodipodi:cx="-433"
+         id="path2536"
+         style="fill:#f9f9f9;fill-opacity:1;stroke:#000000;stroke-width:1.74077654;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         sodipodi:type="arc" />
+      <text
+         id="text2538"
+         y="18.194214"
+         x="-446.19141"
+         style="font-size:16px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-weight:bold"
+           y="18.194214"
+           x="-446.19141"
+           id="tspan2540"
+           sodipodi:role="line">C</tspan></text>
+    </g>
     <rect
        style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.48086283;stroke-opacity:1"
        id="rect2588"
        width="125.51913"
-       height="144.5192"
-       x="540.24042"
-       y="43.102661"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/gThreeSatAttitudePropVector.png"
+       height="150.5192"
+       x="591.24042"
+       y="78.102585"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       id="g2846"
+       transform="translate(0,10)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="125.73633"
+         x="609.73779"
+         height="24.524332"
+         width="93.52433"
+         id="rect2622"
+         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text2624"
+         y="140.9985"
+         x="614"
+         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;font-family:Bitstream Vera Sans"
+           y="140.9985"
+           x="614"
+           id="tspan2626"
+           sodipodi:role="line">Trajectory 1</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="595.5"
+       y="92.362106"
+       id="text2590"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"><tspan
+         sodipodi:role="line"
+         id="tspan2592"
+         x="595.5"
+         y="92.362106">GmatState: </tspan><tspan
+         sodipodi:role="line"
+         x="595.5"
+         y="109.86211"
+         id="tspan2594">   Trajectory </tspan><tspan
+         id="tspan2811"
+         sodipodi:role="line"
+         x="595.5"
+         y="127.36211">   Portion</tspan></text>
+    <g
+       id="g2851"
+       transform="translate(0,10)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="156.00903"
+         x="609.73779"
+         height="24.524332"
+         width="93.52433"
+         id="rect2654"
+         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text2656"
+         y="171.27121"
+         x="614"
+         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;font-family:Bitstream Vera Sans"
+           y="171.27121"
+           x="614"
+           id="tspan2658"
+           sodipodi:role="line">Trajectory 2</tspan></text>
+    </g>
+    <g
+       id="g2856"
+       transform="translate(0,10)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90">
+      <rect
+         y="186.28174"
+         x="609.73779"
+         height="24.524332"
+         width="93.52433"
+         id="rect2686"
+         style="fill:#ffccaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text2688"
+         y="201.54391"
+         x="614"
+         style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+         xml:space="preserve"><tspan
+           style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;font-family:Bitstream Vera Sans"
+           y="201.54391"
+           x="614"
+           id="tspan2690"
+           sodipodi:role="line">Trajectory 3</tspan></text>
+    </g>
+    <rect
+       style="fill:#e2e3db;fill-opacity:1;stroke:#000000;stroke-width:0.48086286;stroke-opacity:1"
+       id="rect2426"
+       width="125.51913"
+       height="151.5192"
+       x="591.24042"
+       y="249.10258"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <text
        xml:space="preserve"
        style="font-size:14px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="544.5"
-       y="57.362183"
-       id="text2590"
+       x="595.5"
+       y="263.36209"
+       id="text2428"
        sodipodi:linespacing="125%"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/gThreeSatAttitudePropVector.png"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90"><tspan
          sodipodi:role="line"
-         id="tspan2592"
-         x="544.5"
-         y="57.362183">PropVector: </tspan><tspan
+         id="tspan2430"
+         x="595.5"
+         y="263.36209">GmatState: </tspan><tspan
          sodipodi:role="line"
-         x="544.5"
-         y="74.862183"
-         id="tspan2594">   3 Spacecraft</tspan></text>
+         x="595.5"
+         y="280.86209"
+         id="tspan2432">   Attitude</tspan><tspan
+         id="tspan2813"
+         sodipodi:role="line"
+         x="595.5"
+         y="298.36209">   Portion</tspan></text>
     <g
-       id="g2620"
-       transform="translate(219.5,-233.36358)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/gThreeSatAttitudePropVector.png"
+       id="g2434"
+       transform="translate(270.50002,-17.36366)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -848,11 +1096,11 @@
          x="339.23782"
          height="24.524332"
          width="93.52433"
-         id="rect2622"
+         id="rect2436"
          style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
-         id="text2624"
+         id="text2438"
          y="339.36215"
          x="345.5"
          style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -860,13 +1108,13 @@
            style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
            y="339.36215"
            x="345.5"
-           id="tspan2626"
+           id="tspan2440"
            sodipodi:role="line">Attitude 1</tspan></text>
     </g>
     <g
-       id="g2652"
-       transform="translate(219.5,-203.09088)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/gThreeSatAttitudePropVector.png"
+       id="g2442"
+       transform="translate(270.50002,12.90904)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -874,11 +1122,11 @@
          x="339.23782"
          height="24.524332"
          width="93.52433"
-         id="rect2654"
+         id="rect2444"
          style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
-         id="text2656"
+         id="text2446"
          y="339.36215"
          x="345.5"
          style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -886,13 +1134,13 @@
            style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
            y="339.36215"
            x="345.5"
-           id="tspan2658"
+           id="tspan2448"
            sodipodi:role="line">Attitude 2</tspan></text>
     </g>
     <g
-       id="g2684"
-       transform="translate(219.5,-172.81816)"
-       inkscape:export-filename="/home/djc/TS_Code/GMATDocuments/SystemDocs/ArchitecturalSpecification/Images/gThreeSatAttitudePropVector.png"
+       id="g2450"
+       transform="translate(270.50002,43.18176)"
+       inkscape:export-filename="/home/djc/TS_Code/GMAT_Trunk/doc/SystemDocs/ArchitecturalSpecification/Images/ThreeStateVectors.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90">
       <rect
@@ -900,11 +1148,11 @@
          x="339.23782"
          height="24.524332"
          width="93.52433"
-         id="rect2686"
+         id="rect2452"
          style="fill:#ffeeaa;fill-opacity:1;stroke:#000000;stroke-width:0.47567046;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
-         id="text2688"
+         id="text2454"
          y="339.36215"
          x="345.5"
          style="font-size:12px;font-style:normal;font-weight:normal;line-height:125%;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -912,7 +1160,7 @@
            style="font-size:13px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Bitstream Vera Sans"
            y="339.36215"
            x="345.5"
-           id="tspan2690"
+           id="tspan2456"
            sodipodi:role="line">Attitude 3</tspan></text>
     </g>
   </g>

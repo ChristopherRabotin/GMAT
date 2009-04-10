@@ -9,7 +9,7 @@ is manipulated and the objects that supply these data is handled by classes deri
 StateManager class.  These interactions are described at a high level in this chapter.  Specific
 uses of the state vector and managers can be found in the chapters describing propagation
 (Chapter~\ref{chapter:PropagatorOverview}) and orbit determination
-(Chapter~\ref{chapter:Estimation}).
+(Chapter~\ref{chapter:EstimationOverview}).
 
 \section{Design Motivation and Overview}
 
@@ -147,7 +147,7 @@ Each element of the GmatState can have properties associated with it that provid
 the type of data in that element.  These ancillary data include an identifier for the data type,
 a text string that describes the data member in a dot-delimited format, and an index pointing to
 other data in the state vector associated with the element.  An example of the settings for these
-data can be found by looking at the layout of the Cartesian state data for a spacecraft in teh
+data can be found by looking at the layout of the Cartesian state data for a spacecraft in the
 vector assembled by the PropagationStateManager prior to propagation.  Table~\ref{table:GmatState}
 shows this layout for a spacecraft named sat.
 
@@ -207,11 +207,18 @@ that would exceeed the valid range for the state vector.
 
 \subsection{\label{section:GmatStateSetup}Representative Layouts for a GmatState}
 
-Figure~\ref{figure:PropVectorComponents} shows a representative layout of the data in a PropVector
-for a single spacecraft.  The vector displayed here is the PropVector used by a numerical
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[63,207]{Images/PropVectorComponents.png}
+\caption{\label{figure:PropVectorComponents}Representative Elements of a GmatState}
+\end{center}
+\end{figure}
+
+Figure~\ref{figure:PropVectorComponents} shows a representative layout of the data in a GmatState
+for a single spacecraft.  The vector displayed here is the GmatState used by a numerical
 integrator that is modeling the evolution of the spacecraft's trajectory, state transition matrix,
-and attitude during a finite burn maneuver.  When a MissionState object assembles a PropVector, it
-follows a set of ordering rules designed to make the data in the PropVector fall in a specific
+and attitude during a finite burn maneuver.  When a PropagationStateManager assembles a GmatState,
+it follows a set of ordering rules designed to make the data in the GmatState fall in a specific
 order so that access from the propagators is simplified.  The general order, as shown in this
 example, is to place trajectory data first in the vector, followed by associated matrices that
 evolve along with the trajectory, then attitude data followed by associated attitde matrices, then
@@ -220,62 +227,116 @@ propagation) during maneuvers.
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[63,207]{Images/PropVectorComponents.png}
-\caption{\label{figure:PropVectorComponents}Representative Elements of a PropVector}
+\includegraphics[268,239]{Images/ThreeStateVectors.png}
+\caption[State Element Arrangement Examples]{\label{figure:ThreeSatPropVector}Element Arrangement
+of a GmatState for Three Propagation Schemes}
 \end{center}
 \end{figure}
 
-This ordering can be seen more explicitly in Figure~\ref{figure:ThreeSatPropVector}.  The
-PropVector shown in this figure is a vector constructed for three spacecraft, where the mission
-needs to propagate the trajectory, state transition matrix, and attitude for all three while
-maneuvering all three simultaneously.
+This ordering can be seen more explicitly in the subfigures of
+Figure~\ref{figure:ThreeSatPropVector}.  In subfigure A, the GmatState shown is a vector constructed
+for three spacecraft, where the mission needs to propagate the trajectory, state transition matrix,
+and attitude for all three while maneuvering all three simultaneously.  Subfigure B shows another
+example, where the propagation need not integrate every element of all of the spacecraft.  In this
+example, the trajectory is integrated for all three spacecraft.  The state transition matrix is only
+propagated for the first and third spacecraft, the attitude is propagated for the second, and the
+first spacecraft is depleting mass during a maneuver.  Subfigure C shows a mixed mode propagation,
+where the trajectory for our three spacecraft is propagated using a precalculated, ephemeris based
+propagator and the attitude is propagated numerically.  Since there are two propagators involved in
+this case, the state data is contained in two separate GmatStates.
+
+\section{\label{section:StateManager}The StateManager Class}
+
+The GmatState described above provides a container for state data so that algorithms that need to
+work with that data can manipulate it in an abstract way, without direct knowledge of the objects
+that supply the data.  The StateManager class hierarchy provides the tools that build GmatStates
+and interface the new state objects to the objects supplying the data.  StateManagers are tailored
+to the specific subsystems that contain them.  Examples of the subsystem StateManagers can be found
+in the Propagation subsystem (Chapter~\ref{chapter:PropagatorOverview}) and the Estimation
+subsystem (Chapter~\ref{chapter:EstimationOverview}).
+
+The StateManager class hierarchy, including the propagation and estimation state managers, is shown
+in Figure~\ref{figure:StateManagementClasses}.  The StateManager class defines some basic data
+structures and interfaces shared by all state managers.  These elements are described in the
+following sections.
 
 \begin{figure}[htb]
 \begin{center}
-\includegraphics[63,207]{Images/ThreeSatPropVector.png}
-\caption{\label{figure:ThreeSatPropVector}Element Arrangement of a PropVector for Three
-Spacecraft}
+\includegraphics[250,125]{Images/StateManagementClasses.png}
+\caption{\label{figure:StateManagementClasses}State Management Classes}
 \end{center}
 \end{figure}
 
-Figure~\ref{figure:SelectPropVector} shown another example, where the propagation need not
-integrate every element of all of the spacecraft.  In this example, the trajector is integrated for
-all three spacecraft.  The state transition matrix is only propagated for the first and third
-spacecraft, the attitude is propagated for the second, and the first spacecraft is depleting mass
-during a maneuver.
+\subsection{Attributes}
 
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[63,129]{Images/ThreeSatActivePropVector.png}
-\caption{\label{figure:SelectPropVector}Three Spacecraft Arrangement for Select
-Propagation}
-\end{center}
-\end{figure}
+The StateManager base class contains the following member data elements:
 
-Figure~\ref{figure:AttitudePropVector} \textbf{This figure needs updating to include the second
-PropVector for the trajectory piece} shows a mixed mode propagation, where the trajectory for our
-three spacecraft is propagated using a precalculated, ephemeris based propagator and the attitude is
-propagated numerically.
+\begin{itemize}
+\item\textbf{Integer stateSize}:  The size required for the GmatState vector.
+\item\textbf{GmatState state}:  The managed GmatState.
+\item\textbf{ObjectArray objects}:  A vector of objects that supply data for the GmatState.
+\item\textbf{std::vector<Integer> epochIDs}:  A vector of IDs on the objects used to validate epoch
+data when the GmatState is manipulated.
+\item\textbf{std::map<GmatBase*, StringArray*> elements}:  The mapping between objects and the
+corresponding elements that they provide in the GmatState.
+\item\textbf{GmatBase* current}:  A pointer to the most recently used object, provided for
+convenience.
+\end{itemize}
 
-\begin{figure}[htb]
-\begin{center}
-\includegraphics[63,73]{Images/ThreeSatAttitudePropVector.png}
-\caption{\label{figure:AttitudePropVector}PropVector for Attitude Only Propagation on Three
-Spacecraft}
-\end{center}
-\end{figure}
+\subsection{Methods}
 
+The StateManager class implements methods that define core state management capabilities, and
+defines the interfaces for methods that must be implemented in the derived classes.  These methods
+are described here:
+
+\subsubsection{Implemented Methods}
+
+\begin{itemize}
+\item\textbf{virtual Integer GetCount(Gmat::StateElementId elementType = Gmat::UNKNOWN\_STATE)}:
+Retrieves the number of objects that support the specified type.
+\item\textbf{virtual bool UpdateState()}:  DEfines an interface for updating the state vector when
+that vector cannot be updated by other means.  The default implenmentation has no affect.
+\item\textbf{virtual GmatState* GetState()}:  Retrieves the GmatState managed by a StateManager
+instance.
+\item\textbf{virtual bool GetStateObjects(ObjectArray\& pObjects, Gmat::ObjectType type =
+Gmat::UNKNOWN\_OBJECT)}:  Fills the input object array with pointers to the objects of the
+specified type that supply data for the managed GmatState.
+\end{itemize}
+
+\subsection{Abstract Methods}
+
+\begin{itemize}
+\item\textbf{virtual bool SetObject(GmatBase* theObject) = 0}:  Adds an object to the list of
+objects that supply data for the managed GmatState.
+\item\textbf{virtual bool SetProperty(std::string propName) = 0}:  Sets the property string for an
+element of the state vector.
+\item\textbf{virtual bool BuildState() = 0}:  Assembles the GmatStaet vector from the current lists
+of objects and properties.
+\item\textbf{virtual bool MapObjectsToVector() = 0}:  Retrieves data from GMAT's objects and fills
+these data into the GmatState vector.
+\item\textbf{virtual bool MapVectorToObjects() = 0}:  Sets data on GMAT's objects based on the
+contents of the GmatState vector.
+\end{itemize}
 
 \subsection{Enumerations used in State Management}
 
-   enum StateElementId
-   {
-      UNKNOWN\_STATE = -1,
-      CARTESIAN\_STATE = 3700,          // Integrable state representations
-      EQUINOCTIAL\_STATE,
-      ORBIT\_STATE\_TRANSITION\_MATRIX,   // 6x6 STM for the orbit
-      MASS\_FLOW,                       // m dot
-      PREDEFINED\_STATE\_MAX,
-      USER\_DEFINED\_BEGIN = 3800,
-      USER\_DEFINED\_END = 3999          // Allow up to 200 dynamic entries
-   };
+GMAT defines an enumeration, the StateElementId, which is used to identify the elements of the
+state vector component by component.  This enumeration identifies the predefined component types
+that a GmatStae can contain, and includes provisions for extending the element definition.  The
+current set of element identifiers can be found in the file gmatdefs.hpp in the base/include
+folder of GMAT's source code.  StateEleemntId is contained in the Gmat namespace.  The following
+definitions can be found there at this writing:
+
+\begin{itemize}
+\item\textbf{UNKNOWN\_STATE = -1}:  Identifier if the element type is not known.
+\item\textbf{CARTESIAN\_STATE = 3700}: The element is a member of the Cartesian state for an object.
+\item\textbf{EQUINOCTIAL\_STATE}: The element is a member of the equinoctial state for an object.
+\item\textbf{ORBIT\_STATE\_TRANSITION\_MATRIX}: The element is a member of the 6x6 orbit stae tra
+nsition matrix for an object.
+\item\textbf{MASS\_FLOW}: The element is the mass element used when mass is depleted from an object.
+\item\textbf{PREDEFINED\_STATE\_MAX}: The identifier for the end of the predefined portion of the
+enumeration.
+\item\textbf{USER\_DEFINED\_BEGIN = 3800}:  The start of the user defined portion of the
+enumeration.
+\item\textbf{USER\_DEFINED\_END = 3999}:  The end of the user defined portion of the enumeration.
+\end{itemize}
