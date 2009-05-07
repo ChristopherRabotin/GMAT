@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GMAT", "VC-wxGUI\VC-wxGUI.vcproj", "{A9F8600B-733F-476F-9660-56B5410F4287}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GMATConsole", "VC-Console\VC-Console.vcproj", "{29772D27-C2BC-4660-8BD5-C995D9056E70}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9F8600B-733F-476F-9660-56B5410F4287}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A9F8600B-733F-476F-9660-56B5410F4287}.Debug|Win32.Build.0 = Debug|Win32
+		{A9F8600B-733F-476F-9660-56B5410F4287}.Release|Win32.ActiveCfg = Release|Win32
+		{A9F8600B-733F-476F-9660-56B5410F4287}.Release|Win32.Build.0 = Release|Win32
+		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Debug|Win32.ActiveCfg = Debug|Win32
+		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Debug|Win32.Build.0 = Debug|Win32
+		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Release|Win32.ActiveCfg = Release|Win32
+		{29772D27-C2BC-4660-8BD5-C995D9056E70}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
