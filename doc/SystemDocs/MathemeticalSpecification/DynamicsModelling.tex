@@ -1,0 +1,1511 @@
+\chapter{Dynamics Modelling}
+
+One of the fundamental capabilities of GMAT is to model the motion
+of spacecraft in many different flight regimes.  The flight regimes,
+such as low Earth, or Libration Points, are determined by which
+forces and perturbations dominate the dynamics.  In this chapter we
+present how GMAT models the dynamics of spacecraft in motion.  We
+discuss how GMAT calculates many different types of forces including
+multiple non-spherical gravity perturbations, third-body effects,
+and atmospheric drag among others. We being by looking at the
+general form of the equations of motion.
+
+\section{Orbit Dynamics}
+
+
+\subsection{Orbit State Equations}
+
+ Let's begin by defining the position and velocity of a
+spacecraft with respect to the central body of integration as \br
+and \bv. From Newton's Second Law we know that
+%
+\begin{equation}
+    m \frac{d^2 \mathbf{r}}{d^2 t} = \sum F
+\end{equation}
+%
+which says that the mass, times the acceleration, is equal to the
+sum of the forces.  Solving for the acceleration gives us the
+second order differential equation
+%
+\begin{equation}
+   \frac{d^2 \mathbf{r}}{d^2 t} = \sum \frac{F}{m}
+   \label{Eq:SCAcc}
+\end{equation}
+%
+GMAT has the capability to model many different types of
+accelerations experienced by spacecraft in orbit.  If we include
+all of the possible forces GMAT can model in the summation on the
+left hand side of Eq.~(\ref{Eq:SCAcc}), then we would have
+
+\begin{equation} \begin{split}
+    \frac{d^2\mathbf{r}}{dt^2}
+    =  &-\frac{\mu}{r^3}\mathbf{r} +  \nabla \phi_{sj}^o +
+    %
+    G\sum_{\stackrel{k=1}{k \neq j}}^{n_b}m_k \left(\frac{\mathbf{r}_{ks}}{r_{ks}^3} -
+     \frac{\mathbf{r}_{kj} }{r_{kj}^3}   \right)\\
+     %
+   & + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left( \nabla
+    \phi_{ks}^o +
+     \nabla\phi_{kj}^o
+     \right)+ \frac{\dot{m}_s }{m}\frac{d\mathbf{r}}{dt}\\ & - \frac{1}{2}\rho v_{rel}^2 \frac{C_d A}{m_s}\hat{\mathbf{v}}_{rel}
+     +\frac{   P_{SR}C_R A_{\odot}   }{m_s}\hat{\mathbf{r}}_{s\odot}\\
+     \end{split} \label{Eq:CompleteEOM}
+\end{equation}
+%
+\begin{table}[h]
+\centering
+\begin{tabular}{p{2.0 in} p{1.0 in} }
+  \hline\hline
+  % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
+  Description & Term \\
+  \hline
+  Central Body Point Mass & $ -\displaystyle\frac{\mu}{r^3}\mathbf{r}$ \\
+  & \\
+  Central Body Direct Nonspherical &  $\nabla \phi_{sj}^o$  \\
+  & \\
+  Direct Third Body Point Mass & $G\displaystyle\sum_{\stackrel{k=1}{k \neq j}}^{n_b}m_k \left(\frac{\mathbf{r}_{ks}}{r_{ks}^3}\right)$ \\
+   & \\
+  Indirect Third Body Point Mass &  $G\displaystyle\sum_{\stackrel{k=1}{k \neq j}}^{n_b}m_k \left( -
+     \frac{\mathbf{r}_{kj} }{r_{kj}^3}   \right)$ \\
+      & \\
+   Third Body Direct Nonspherical & $\displaystyle\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left( \nabla
+    \phi_{ks}^o\right)$  \\
+    &\\
+    Third Body Indirect Nonspherical &  $\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(
+     \nabla\phi_{kj}^o \right)$\\
+    & \\
+   Spacecraft Thrust &$\displaystyle\frac{\dot{m}_s }{m}\frac{d\mathbf{r}}{dt}$\\
+   &\\
+   Atmospheric Drag & $- \displaystyle\frac{1}{2}\rho v_{rel}^2 \displaystyle\frac{C_d
+   A}{m_s}\hat{\mathbf{v}}_{rel}$\\
+   &\\
+   Solar Radiation Pressure & $\displaystyle\frac{   P_{SR}C_R A_{\odot}   }{m_s}\hat{\mathbf{r}}_{s\odot}$\\
+  \hline\hline
+\end{tabular}
+\end{table}
+%
+
+
+In general, Eq.~(\ref{Eq:CompleteEOM}) does not have an analytic
+solution so GMAT uses numerical integration to find approximate,
+although very accurate, solutions.  GMAT uses first order
+numerical integrators, so we must take the three second order
+differential equations in Eq.~(\ref{Eq:CompleteEOM}) and convert
+them to six first order equations.  So, we define a new variable
+$\mathbf{x}$ such that
+%
+\begin{equation}
+    \mathbf{x} = \left[\mbr^T \hspace{.2 in} \mbv^T  \right]^T = \left[x \hspace{.2 in} y \hspace{.2 in} z \hspace{.2 in} \dot{x} \hspace{.2 in}
+    \dot{y} \hspace{.2 in} \dot{z}  \right]^T
+\end{equation}
+%
+then taking the derivative we arrive at
+%
+\begin{equation}
+    \dot{\mathbf{x}} = \left[\dot{\mbr}^T \hspace{.2 in} \dot{\mbv}^T  \right]^T = \left[\dot{x} \hspace{.2 in}
+    \dot{y}
+    \hspace{.2 in} \dot{z} \hspace{.2 in} \ddot{x} \hspace{.2 in}
+    \ddot{y} \hspace{.2 in} \ddot{z}  \right]^T
+\end{equation}
+
+\subsection{State Transition Matrix Equations}
+
+\begin{equation}
+     \dot{\boldsymbol{\Phi}}(t,t_o) = \tilde{\mathbf{A}}\boldsymbol{\Phi}(t,t_o)
+\end{equation}
+%
+where
+%
+\begin{equation}
+     \tilde{\mathbf{A}} = \frac{\partial \dot{\mathbf{x}}}{\partial \mathbf{x}}
+\end{equation}
+%
+subject to the initial conditions
+%
+\begin{equation}
+     \boldsymbol{\Phi}(t_o,t_o) = \mathbf{I}_{6\times6}
+\end{equation}
+
+
+If we define $\mathbf{x}$ as
+%
+\begin{equation}
+     \mathbf{x} = \left(\begin{array}{cc}
+                 \mathbf{r}\\
+                 \mathbf{v}
+          \end{array}\right)
+\end{equation}
+%
+then
+%
+%
+\begin{equation}
+     \dot{\mathbf{x}} = \left(\begin{array}{cc}
+                 \mathbf{v}\\
+                 \mathbf{a}
+          \end{array}\right)
+\end{equation}
+%
+Now we can write $\tilde{\mathbf{A}}$ as
+%
+\begin{equation}
+     \tilde{\mathbf{A}} = \frac{\partial \dot{\mathbf{x}}}{\partial
+     \mathbf{x}}=
+     \left(\begin{array}{ccc}
+              \displaystyle\frac{\partial \mathbf{v}}{\partial \mathbf{r}} & \displaystyle\frac{\partial \mathbf{v}}{\partial
+              \mathbf{v}}\vspace{.1 in}\\
+              %
+              \displaystyle\frac{\partial \mathbf{a}}{\partial \mathbf{r}} & \displaystyle\frac{\partial \mathbf{a}}{\partial
+              \mathbf{v}}
+     \end{array}\right)
+\end{equation}
+%
+For convenience, lets use the following notation
+%
+\begin{equation}
+    \mathbf{A} = \displaystyle\frac{\partial \mathbf{v}}{\partial \mathbf{r}}
+\end{equation}
+%
+\begin{equation}
+    \mathbf{B} = \displaystyle\frac{\partial \mathbf{v}}{\partial
+              \mathbf{v}}
+\end{equation}
+%
+\begin{equation}
+    \mathbf{C} = \displaystyle\frac{\partial \mathbf{a}}{\partial \mathbf{r}}
+\end{equation}
+%
+\begin{equation}
+    \mathbf{D} = \displaystyle\frac{\partial \mathbf{a}}{\partial \mathbf{v}}
+\end{equation}
+
+\subsection{Multiple Spacecraft Propgation and Coupled Propagation of the Equations of Motion}
+
+\section{Force Modelling}
+
+\subsection{Non-Spherical Gravity }
+
+GMAT integrates all spacecraft equations of motion using the
+Earth's Mean J2000 axis system. However, the user can choose
+central bodies other than the Earth as the origin of the
+coordinate system of integration.  Gravitational forces are
+conservative and only a function of position.  To calculate the
+gravitational force due to a non-spherical body, we need to
+determine the position of the spacecraft in the body fixed frame
+$\mathcal{F}_F$.  However, the equations of motion are expressed
+in terms of the position of the spacecraft in the inertial frame.
+
+
+
+We know from dynamics that the acceleration in an inertial frame
+can be calculated using
+%
+\begin{equation}
+   \mathbf{a}_{cb} = \nabla U \label{Eq:a_cb}
+\end{equation}
+%
+where $U$ is the gravitational potential.  The potential for a
+nonspherical body comes from the solution to Laplace's equation:
+%
+\begin{equation}
+     \nabla^2 U= 0
+\end{equation}
+%
+The solution to this equation is most easily expressed in spherical,
+body-fixed coordinates because it allows for a convenient separation
+of variables.
+
+In spherical coordinates the gradient of the gravitational potential
+is
+%
+\begin{equation}
+   \nabla U = \frac{\partial U}{\partial r}\mathbf{u}_r +
+   \frac{1}{r}\frac{\partial U}{\partial \phi} \mathbf{u}_\phi
+   + \frac{1}{r \cos{\phi}}\frac{\partial U}{\partial
+   \lambda}\mathbf{u}_\lambda \label{Eq:SphericalGradient}
+\end{equation}
+%
+We see that there are two singularities in
+Eq.~(\ref{Eq:SphericalGradient}).  The first is when $r = 0$, which
+is a nonphysical case and we will not discuss it further.  The
+second singularity occurs when $ \phi = \pm 90^\circ$.  Pines
+\cite{Pines:73} developed a uniform expression of the gravitational
+potential that avoids the singularity at the poles:
+%
+\begin{equation}\begin{split}
+    U = & \frac{\mu}{r}  \biggl[   1 + \sum_{n=1}^\infty \left(\frac{R_{\otimes}}{r}\right)^n
+    \sum_{m=0}^{n} A_{nm}(u)[C_{nm} cos{(m \lambda)} \cos^m{\phi} \\
+    %
+    & +S_{nm}sin{(m \lambda)} \cos^m{\phi} ]    \biggr]\end{split}
+    \label{Eq:Pines1}
+\end{equation}
+%
+Examining this form of the potential it is easy to see that there is
+not a singularity at the poles when taking the gradient in spherical
+coordinates.  Pines rewrites Eq.~(\ref{Eq:Pines1}) as
+%
+\begin{equation}\begin{split}
+    U = & \frac{\mu}{r}  \biggl[   1 + \sum_{n=1}^\infty \left(\frac{R_{\otimes}}{r}\right)^n
+    \sum_{m=0}^{n} A_{nm}(u)[C_{nm} r_m(s,t) \\
+    %
+    & +S_{nm} i_m(s,t) ]    \biggr]\end{split}
+    \label{Eq:PinesPotential}
+\end{equation}
+%
+where $C_{nm}$ and $S_{nm}$ are the gravitational coefficients, $s$,
+$t$, and $u$ are given by
+%
+\begin{equation}
+     s = x/r, \hspace{.2 in} t = y/r, \hspace{.2 in} u = z/r =
+     \sin{\phi} \nonumber
+\end{equation}
+%
+and $r_m(s,t)$ and $i_m(s,t)$ are calculated using the recursive
+relationships
+%
+\begin{equation}
+    \begin{split}
+        r_0 = 1, \hspace{.2 in} r_1 = s, \hspace{.2 in} i_0 = 0,
+        \hspace{.2 in} i_1 = t \nonumber\\
+        %
+        r_m = sr_{m-1} - ti_{m-1}, \hspace{ .2 in} i_m = si_{m-1} +
+        tr_{m-1} \nonumber
+    \end{split}
+\end{equation}
+
+
+The coefficients $A_{nm}(u)$ are called ``derived" Legendre
+functions and are given by
+%
+\begin{equation}
+    A_{nm}(u) = \frac{d^m}{du^m}(P_n(u))
+\end{equation}
+%
+where we know from Rodrigues' \cite{Lundberg:88} formula that
+%
+\begin{equation}
+    P_{n0}(u) = P_n(u) = \frac{1}{2^n n!}\frac{d^n}{du^n}(u^2 - 1)^n
+\end{equation}
+%
+and
+%
+\begin{equation}
+    P_{nm}(u) = (1 - u^2)^{m/2}\frac{d^m}{du^m}P_n(u)
+\end{equation}
+%
+
+For numerical reasons it is useful to normalize some of the terms in
+the potential function, $U$.  By normalizing the spherical
+coefficients and the derived Legendre polynomials we can improve the
+stability of recursive algorithms used to calculate the Legendre
+polynomials and improved numerical problems.  We use the
+nondimensionalization approach and described by
+Lundberg\cite{Lundberg:88}.  Lundberg chooses the normalization
+factor so that the normalized spherical harmonics $\bar{C}_{nm}$ and
+$\bar{S}_{nm}$ will have a mean square value of one on the unit
+sphere.  The normalized Legendre functions, $\bar{P}_{nm}$, are
+defined so that the product of the spherical harmonic coefficients
+and the corresponding Legendre functions remain constant, or
+%
+\begin{equation}
+   \bar{P}_{nm}\bar{C}_{nm} = P_{nm}C_{nm}  \hspace{.5 in}  \bar{P}_{nm}\bar{S}_{nm} = P_{nm}S_{nm}
+\end{equation}
+%
+GMAT uses the normalization factor $N_{nm}$ given by
+%
+\begin{equation}
+    N_{nm} =  \left[ \frac{(n-m)!(2n+1)!}{(n+m)!} \right]^{1/2}
+\end{equation}
+%
+The non-dimensional spherical harmonic coefficients and Legendre
+functions are
+%
+\begin{equation}
+     \bar{P}_{nm} = N_{nm}P_{nm} \hspace{.25 in} \bar{C}_{nm} =
+     \frac{C_{nm}}{N_{nm}} \hspace{.25 in} \bar{S}_{nm} =
+     \frac{S_{nm}}{N_{nm}}
+\end{equation}
+%
+The derived Legendre polynomials are normalized using
+%
+\begin{equation}
+    \bar{A}_{nm} = N_{nm} A_{nm} \label{Eq:LegendreNormalization}
+\end{equation}
+%
+where $\bar{A}_{nm}$ are the normalized Legendre polynomials.
+Lundberg\cite{Lundberg:88} showed that there are several recursive
+algorithms to compute $\bar{A}_{nm}$  but that only two are stable.
+GMAT uses the following algorithm to recursively calculate the
+derived Legendre polynomicals
+%
+\begin{equation}
+     \begin{split}
+     \bar{A}_{nm} = & u\left[ \frac{(2n+1)(2n-1)}{(n-m)(n+m)}
+     \right]^{1/2}\bar{A}_{n-1,m}  \\
+     %
+     & - \left[ \frac{(2n+1)(n-m-1)(n+m-1)}{(2n-3)(n+m)(n-m)}
+     \right]^{1/2}\bar{A}_{n-2,m}
+     \end{split}
+\end{equation}
+%
+The recursive algorithm is started using
+%
+\begin{eqnarray}
+     \bar{A}_{11} & = & \sqrt{3} \cos{\phi}\\
+     \bar{A}_{nn} & = & \cos{\phi}\sqrt{\frac{2n+1}{2n}}\bar{A}_{n-1,n-1}
+\end{eqnarray}
+%
+The above equations are normalized using
+Eq.~(\ref{Eq:LegendreNormalization}) and used in
+
+
+The acceleration due to nonspherical gravity can be written as
+%
+\begin{equation}
+   \begin{split}
+   \mathbf{a}_g = & \left( \frac{\partial U}{\partial r} - \frac{s}{r}\frac{\partial U}{\partial s}
+    -\frac{t}{r}\frac{\partial U}{\partial t} -\frac{u}{r}\frac{\partial U}{\partial u}
+    \right) \hat{\mathbf{r}}\\
+    %
+    & + \left( \frac{1}{r}\frac{\partial U}{\partial s} \hspace{.1
+    in} \frac{1}{r}\frac{\partial U}{\partial t}  \hspace{.1
+    in} \frac{1}{r}\frac{\partial U}{\partial u}\right)^T
+    \end{split} \label{Eq:NonSphericalAcc}
+\end{equation}
+%
+
+
+To simplify the partial derivatives in
+Eq.~(\ref{Eq:NonSphericalAcc}), Pines defines some intermediate
+variables as follows
+%
+\begin{eqnarray}
+     \rho   & = & a/r \\
+     \rho_0 & = & \mu/r \nonumber \\
+     \rho_1 & = & \rho \rho_0 \\
+     \rho_n & = & \rho \rho_{n-1} \hspace{.2 in} \mbox{for $n>1$}\nonumber
+\end{eqnarray}
+%
+Using Lundberg's nondimensionalization approach, we can write
+%
+\begin{eqnarray}
+     \bar{D}_{nm}(s,t) & = & \bar{C}_{nm}r_m(s,t) + \bar{S}_{nm}i_m(s,t) \nonumber\\
+     \bar{E}_{nm}(s,t) & = & \bar{C}_{nm}r_{m-1}(s,t) + \bar{S}_{nm}i_{m-1}(s,t) \nonumber\\
+     \bar{F}_{nm}(s,t) & = & \bar{S}_{nm}r_{m-1}(s,t) - \bar{C}_{nm}i_{m-1}(s,t) \nonumber\\
+     \bar{G}_{nm}(s,t) & = & \bar{C}_{nm}r_{m-2}(s,t) + \bar{S}_{nm}i_{m-2}(s,t) \nonumber\\
+     \bar{H}_{nm}(s,t) & = & \bar{S}_{nm}r_{m-2}(s,t) - \bar{C}_{nm}i_{m-2}(s,t) \nonumber\\
+\end{eqnarray}
+%
+The partial derivatives in Eq.~(\ref{Eq:NonSphericalAcc}) can be
+written as
+%
+\begin{equation}
+    \begin{split}
+   &\frac{\partial U}{\partial r} - \frac{s}{r}\frac{\partial U}{\partial s}
+    -\frac{t}{r}\frac{\partial U}{\partial t} -\frac{u}{r}\frac{\partial U}{\partial u}
+     =\\
+     -\sum_{n=0}^{\infty}&\frac{\rho_{n+1}}{R_\otimes}\sum_{m=0}^{n}c_{n+1,m+1}\bar{A}_{n+1,m+1}\bar{D}_{nm}
+    \end{split} \label{Eq:a4}
+\end{equation}
+%
+\begin{equation}
+    \frac{1}{r}\frac{\partial U}{\partial s} =
+    \sum_{n=0}^{\infty}\frac{\rho_{n+1}}{R_\otimes}\sum_{m=0}^{n}\bar{A}_{nm}(u) m \bar{E}_{nm}
+\end{equation}
+%
+\begin{equation}
+    \frac{1}{r}\frac{\partial U}{\partial t} =
+    \sum_{n=0}^{\infty}\frac{\rho_{n+1}}{R_\otimes}\sum_{m=0}^{n}\bar{A}_{nm}(u) m \bar{F}_{nm}
+\end{equation}
+%
+\begin{equation}
+    \frac{1}{r}\frac{\partial U}{\partial s} =
+    \sum_{n=0}^{\infty}\frac{\rho_{n+1}}{R_\otimes}\sum_{m=0}^{n}c_{n,m+1}\bar{A}_{n,m+1}(u)\bar{D}_{nm}
+\end{equation}
+%
+where
+%
+\begin{eqnarray}
+    c_{n,m+1}   & = & \left[(n-m)(n+m+1) \right]^{1/2}  \nonumber\\
+    c_{n+1,m+1} & = & \left[\frac{( n + m + 2) (n + m + 1 )}{(2n+3)(2n+2)}
+    \right]^{1/2}  \nonumber
+\end{eqnarray}
+
+
+To calculate the nonzero portion of the sensitivity matrix, we begin
+by calcluting the following 9 terms:
+%
+\begin{eqnarray}
+    a_{11} & = & \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}m(m-1)\bar{A}_{nm}\bar{G}_{nm}\\
+    %
+    a_{12} & = & \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}m(m-1)\bar{A}_{nm}\bar{H}_{nm}\\
+    %
+    a_{13} & = & \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}mc_{n,m+1}\bar{A}_{n,m+1}\bar{E}_{nm}\\
+    %
+    a_{14} & = & -\sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}mc_{n+1,m+1}\bar{A}_{n+1,m+1}\bar{E}_{nm}\\
+    %
+    a_{23} & = & \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}mc_{n,m+1}\bar{A}_{n,m+1}\bar{F}_{nm}\\
+    %
+    a_{24} & = & -\sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}mc_{n+1,m+1}\bar{A}_{n+1,m+1}\bar{F}_{nm}\\
+    %
+    a_{33} & = & \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}c_{n,m+2}\bar{A}_{n,m+2}\bar{D}_{nm}\\
+    %
+    a_{34} & = & -\sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}c_{n+1,m+2}\bar{A}_{n+1,m+2}\bar{D}_{nm}\\
+    %
+    a_{44} & = &
+    \sum_{n=0}^{\infty}\frac{\rho_{n+2}}{R_\otimes^2}\sum_{m=0}^{n}c_{n+2,m+2}\bar{A}_{n+2,m+2}\bar{D}_{nm}
+\end{eqnarray}
+%
+where
+%
+\begin{eqnarray}
+    c_{n+1,m+2} &=& c_{n+1,m+1}  \left[(n-m)( n + m + 3)
+    \right]^{1/2} \nonumber\\
+    %
+    c_{n,m+2} &=& c_{n,m+1} \left[( n - m - 1)(n + m +2 )
+    \right]^{1/2} \nonumber\\
+    %
+    c_{n+2,m+2} &=&
+    c_{n+1,m+1}\left[\frac{(n+m+4)(n+m+3)}{(2n+5)(2n+4)}\right]^{1/2} \nonumber
+\end{eqnarray}
+
+Finally,
+%
+\begin{equation}
+   \mathbf{C}_g = \frac{\partial \mathbf{a}_g}{\partial \mathbf{r}}
+\end{equation}
+%
+where $\mathbf{C}_g$ is a symmetric matrix with components given by
+%
+\begin{eqnarray}
+   c_{11} & = & a_{11} + s^2a_{44} + a_4/r + 2sa_{14} \\
+%
+   c_{12} & = & c_{21} = a_{12}+ sta_{44} + sa_{24} + ta_{14}\\
+%
+   c_{13} & = & c_{31} = a_{13}+ sua_{44} + sa_{34} + ua_{14}\\
+%
+   c_{22} & = & -a_{11} +t^2a_{44} + a_4/r +2ta_{24}\\
+%
+   c_{23} & = & c_{32} = a_{23} + tua_{44} + ua_{24} + ta_{34}\\
+%
+   c_{33} & = & a_{33} + u^2a_{44} + a_4/r + 2*u*a_{34}
+\end{eqnarray}
+%
+Note that
+%
+\begin{equation}
+    a_4 = \frac{\partial U}{\partial r} - \frac{s}{r}\frac{\partial U}{\partial s}
+    -\frac{t}{r}\frac{\partial U}{\partial t} -\frac{u}{r}\frac{\partial U}{\partial u}
+\end{equation}
+%
+and is given in Eq.~(\ref{Eq:a4}).
+
+\subsection{$n$-Body Point Mass Gravity}
+
+The gravitational perturbation due to $n$ point masses is well know.
+However, we will derive the governing differential equation here, as
+well as the componenents of the sensitivity matrix.
+ Let's begin by defining some notation referring to
+Fig.\ref{fig:NBody}. Assume the $j^{\mbox{th}}$ body is the central
+body of the integration.
+%
+\begin{figure}[h!]
+\centerline{
+\begin{picture}(100,500)
+\special{psfile= Images/NBodyDiagram.eps hoffset= -135 voffset= -45
+hscale=85 vscale=85} \makebox(-20,585){$\hat{\mathbf{x}}_{I}$}
+\makebox(270,700){$\hat{\mathbf{y}}_{I}$} \makebox(-330,770){$
+\tilde{\mathbf{r}}_{s}$} \makebox(-330,877){$\mathbf{r}$}
+\makebox(-270,900){$\mathbf{r}_{sk}$}
+\makebox(-390,964){$\mathbf{r}_{k}$}
+\makebox(-500,814){$\tilde{\mathbf{r}}_{j}$}
+\makebox(-500,980){Central Body} \makebox(-320,995){$k^{th}$ Body}
+\end{picture}}\vskip -4.0 in  \caption{ N-Body Illustration} \label{fig:NBody}
+\end{figure}
+%
+%
+\begin{itemize}
+   %
+   \item  $\tilde{\mathbf{r}}_s$ is the position of the spacecraft with respect
+   a hypothesized inertial frame.
+   %
+   \item  $\tilde{\mathbf{r}}_j$ is the position of the central body with respect
+   a hypothesized inertial frame.
+   %
+   \item  $\tilde{\mathbf{r}}_k$ is the position of the $k^{th}$ gravitational body with respect
+   a hypothesized inertial frame.
+   %
+   \item  $\mathbf{r}$ is the position of the spacecraft with respect
+   to the central body of integration ($j^{th}$ body).
+   %
+   \item  $\mathbf{r}_k$ is the position of the $k^{th}$ gravitational body with respect
+   to the central body.
+   %
+\end{itemize}
+
+We need the governing differential equation that describes the
+motion of the spacecraft with respect to the central body.  However,
+we know that we must apply Newton's 2nd Law in an inertial frame.
+So, we begin by defining the relative position of the spacecraft
+with respect to the central body.  From inspection of
+Fig.\ref{fig:NBody} we see that
+%
+\begin{equation}
+     \tilde{\mathbf{r}}_j +  \mathbf{r} = \tilde{\mathbf{r}}_s
+\end{equation}
+%
+By reordering and taking the second derivative with respect to time
+we obtain
+%
+\begin{equation}
+     \ddot{\mathbf{r}} = \ddot{\tilde{\mathbf{r}}}_s - \ddot{\tilde{\mathbf{r}}}_j
+     \label{Eq:SCRelativeODE}
+\end{equation}
+%
+We can apply Newton's 2nd Law to the spacecraft and obtain
+%
+\begin{equation}
+     m_s \ddot{\tilde{\mathbf{r}}}_s = \sum_{k=1}^n F_k =
+     G\sum_{k=1}^n \frac{m_s m_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3} \left(\mathbf{r}_{k} -
+     \mathbf{r}\right)
+\end{equation}
+%
+where $\left(\mathbf{r}_{k} - \mathbf{r}\right)$ is a vector from
+the spacecraft to the $k^{th}$ body, $m_s$ is the mass of the
+spacecraft, and $m_k$ is the mass of the $k^{th}$ body.  We can
+write $\ddot{\tilde{\mathbf{r}}}_s$ as simply
+%
+\begin{equation}
+    \ddot{\tilde{\mathbf{r}}}_s =
+     G\sum_{k=1}^n \frac{m_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3} \left(\mathbf{r}_{k} -
+     \mathbf{r}\right) \label{Eq:SCInertialODE}
+\end{equation}
+%
+We can apply Newton's 2nd Law to the $j^{th}$ body and obtain
+%
+\begin{equation}
+     m_j \ddot{\tilde{\mathbf{r}}}_j = \frac{G m_s
+     m_j}{r^3}\mathbf{r} +
+     G\sum_{\stackrel{k=1}{k \neq j}}^{n} \frac{m_j m_k}{\| \mathbf{r}_{k}\|^3}\mathbf{r}_{k}
+\end{equation}
+%
+where the first term is the influence of the spacecraft on the
+central body, and the second term is the influence of the $k$ point
+mass gravitational bodies.  We can write
+$\ddot{\tilde{\mathbf{r}}}_j$ as simply
+%
+\begin{equation}
+     \ddot{\tilde{\mathbf{r}}}_j = \frac{G m_s
+     }{r^3}\mathbf{r} +
+     G\sum_{\stackrel{k=1}{k \neq j}}^{n} \frac{ m_k}{\|
+     \mathbf{r}_{k}\|^3}\mathbf{r}_{k} \label{Eq:CentalBodyInertialODE}
+\end{equation}
+%
+Substituting Eq.~(\ref{Eq:SCInertialODE}) and
+(\ref{Eq:CentalBodyInertialODE}) into (\ref{Eq:SCRelativeODE}) we
+get
+%
+\begin{equation}
+     \ddot{\mathbf{r}} =      G\sum_{k=1}^n \frac{m_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3} \left(\mathbf{r}_{k} -
+     \mathbf{r}\right) - \frac{G m_s
+     }{r^3}\mathbf{r} -
+     G\sum_{\stackrel{k=1}{k \neq j}}^{n} \frac{ m_k}{\|
+     \mathbf{r}_{k}\|^3}\mathbf{r}_{k}
+\end{equation}
+%
+Finally, collecting terms yields
+%
+\begin{equation}
+     \mathbf{a}_{pm} = \ddot{\mathbf{r}} =   \underbrace{- \frac{\mu_j
+     }{r^3}\mathbf{r}}_1  +  G \sum_{\stackrel{k=1}{k \neq j}}^{n} m_k\left( \underbrace{\frac{\mathbf{r}_{k} -
+     \mathbf{r}}{\| \mathbf{r}_{k} - \mathbf{r}\|^3}}_2  -
+     \underbrace{
+      \frac{ \mathbf{r}_{k}}{\|
+     \mathbf{r}_{k}\|^3}}_3\right)
+\end{equation}
+%
+We can break down the acceleration in the equation above into three
+physical categories.   The first term is the acceleration on the
+spacecraft due to a point mass central body.   The second type of
+terms are called direct terms.  They account for the force of the
+$k^{th}$ body on the spacecraft.  The third type of terms are called
+indirect.  They account for the force of the $k^{th}$ body on the
+central body.
+
+Let's look at the contributions to the sensitivity matrix due to
+point mass perturbations.  We notice that $\mathbf{a}_{pm}$ is not a
+function of velocity.  So,
+%
+\begin{equation}
+    \mathbf{A}_{pm} = \mathbf{D}_{pm}  = \mathbf{0}_{3\times3}
+\end{equation}
+%
+We also know that
+%
+\begin{equation}
+    \mathbf{B}_{pm} = \mathbf{I}_{3\times3}
+\end{equation}
+%
+This leaves $\mathbf{C}_{pm}$ as the only non-trivial term for point
+mass gravitational effects.  Let's look first at the derivatives of
+the point mass term.  We can use the vector identity in
+Eq.~(\ref{Eq:vecIDaveca3}) to arrive at
+%
+\begin{equation}
+     \frac{\partial }{\partial \mathbf{r}} \left(- \frac{\mu_j
+     }{r^3}\mathbf{r}\right) =  -\frac{\mu_j}{r^3} \mathbf{I}_3
+     + 3\mu_j\frac{\mathbf{r}\mathbf{r}^T}{r^5}
+\end{equation}
+
+Similarly, applying Eq.~(\ref{Eq:vecIDaveca3}) to the direct terms
+we see that
+%
+\begin{equation}\begin{split}
+     \frac{\partial }{\partial \mathbf{r}} \left( \sum_{\stackrel{k=1}{k \neq j}}^{n} \mu_k \frac{\mathbf{r}_{k} -
+     \mathbf{r}}{\| \mathbf{r}_{k} - \mathbf{r}\|^3}\right) = &\\ -\sum_{\stackrel{k=1}{k \neq j}}^{n}
+     \frac{\mu_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3}\mathbf{I}_3 + 3\sum_{\stackrel{k=1}{k \neq
+     j}}^{n}\mu_k &\left( \frac{\left( \mathbf{r}_{k} - \mathbf{r} \right)\left( \mathbf{r}_{k} -
+     \mathbf{r} \right)^T}{\left( \|\mathbf{r}_{k} - \mathbf{r} \right)\|^5}  \right)
+     \end{split}
+\end{equation}
+%
+Finally, the derivative of the indirect terms are zero and we have
+%
+\begin{equation} \begin{split}
+   &\mathbf{C}_{pm} =  \underbrace{-\frac{\mu_j}{r^3} \mathbf{I}_3
+     + 3\mu_j\frac{\mathbf{r}\mathbf{r}^T}{r^5}}_{ 1 }\\
+     %
+      &\underbrace{
+     %
+     -  \sum_{\stackrel{k=1}{k \neq j}}^{n}
+     \frac{\mu_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3}\mathbf{I}_3 + 3\sum_{\stackrel{k=1}{k \neq
+     j}}^{n} \mu_k \left( \frac{\left( \mathbf{r}_{k} - \mathbf{r} \right)\left( \mathbf{r}_{k} -
+     \mathbf{r} \right)^T}{\left( \|\mathbf{r}_{k} - \mathbf{r} \right)\|^5}  \right)
+       }_{2}
+     %
+     \end{split}
+\end{equation}
+%
+Combining similar terms we can express the result as
+%
+\begin{equation} \begin{split}
+   &\mathbf{C}_{pm} =  -  \left( \frac{\mu_j}{r^3} + \sum_{\stackrel{k=1}{k \neq j}}^{n}
+     \frac{\mu_k}{\| \mathbf{r}_{k} - \mathbf{r}\|^3} \right)\mathbf{I}_3 \\
+          %
+      &
+     %
+     + 3 \left( \mu_j\frac{\mathbf{r}\mathbf{r}^T}{r^5}
+       + \sum_{\stackrel{k=1}{k \neq
+     j}}^{n} \mu_k \left( \frac{\left( \mathbf{r}_{k} - \mathbf{r} \right)\left( \mathbf{r}_{k} -
+     \mathbf{r} \right)^T}{\left( \|\mathbf{r}_{k} - \mathbf{r} \right)\|^5}
+     \right) \right)
+     %
+     \end{split}
+\end{equation}
+
+
+\subsection{Atmospheric Drag}
+
+\begin{equation}
+  \mathbf{a}_d = - \displaystyle\frac{1}{2}\rho v_{rel}^2 \displaystyle\frac{C_d
+   A}{m_s}\hat{\mathbf{v}}_{rel}
+\end{equation}
+%
+where
+%
+\begin{equation}
+    \mathbf{v}_{rel} = \mathbf{v} - \boldsymbol{\omega}_\otimes \times
+    \mathbf{r}
+\end{equation}
+%
+where $\boldsymbol{\omega}_\otimes$ is the Earth's angular velocity
+vector in the FK5 system.
+
+GMAT does not currently support calculating the STM using drag.  The
+components of the sensitivity matrix  $\tilde{\mathbf A}$ contain
+derivatives of the atmospheric density with respect to position.
+These derivatives are non trivial for most density models and are
+not currently included in GMAT.
+
+\subsection{Solar Radiation Pressure}
+
+\begin{equation}
+     \mathbf{a}_s = -P_{SR}\displaystyle\frac{   C_R A    }{m_s}\hat{\mathbf{s}}
+\end{equation}
+%
+where $\hat{\mathbf{s}}$ is a unitized vector pointing from the
+spacecraft to the sun
+%
+\begin{equation}
+    \mathbf{s} = \mathbf{r}_s - \mathbf{r}
+\end{equation}
+%
+where $\mathbf{r}_s$ is the Sun's position vector and $\mathbf{r}$
+is the spacecrafts position vector.
+
+
+
+\begin{equation}
+    \mathbf{A}_{s} = \mathbf{D}_{s}  = \mathbf{0}_{3\times3}
+\end{equation}
+%
+\begin{equation}
+    \mathbf{B}_{s} = \mathbf{I}_{3\times3}
+\end{equation}
+%
+\begin{equation}
+    \mathbf{C}_{s} = P_{SR}\displaystyle\frac{   C_R A
+    }{m_s}\left( \frac{1}{s^3}\mathbf{I}_3 - 3 \frac{ \mathbf{s}\mathbf{s}^T}{s^5}\right)
+\end{equation}
+%
+where
+%
+\begin{equation}
+    s = \| \mathbf{s} \|
+\end{equation}
+
+\subsection{Spacecraft Thrust}
+
+\begin{footnotesize}
+
+\begin{equation}
+\begin{split}
+    F_T(T,P) = C_1 + C_2 P +  (C_3 + C_4 P + C_5 P^2 + C_6 P^{C_7}\\ +  C_8P^{C_9}
+     + C_{10}P^{C_{11}}
+    + C_{12}(C_{13})^{C_{14}P})\left(\frac{T}{T_{ref}}\right)^{1 + C_{15} + C_{16}P }
+    \label{Eq:ThrustPolynomial}
+     \end{split}
+\end{equation}
+
+%
+\begin{equation}
+\begin{split}
+    I_{sp}(T,P) = K_1 + K_2 P + (K_3 + K_4 P + K_5 P^2 + K_6 P^{K_7} \\ + K_8P^{K_9} + K_{10}P^{K_{11}}
+    + K_{12}(K_{13})^{K_{14}P})\left(\frac{T}{T_{ref}}\right)^{1 + K_{15} + K_{16}P }
+         \end{split}
+\end{equation}
+\end{footnotesize}
+
+\begin{equation}
+    \dot{m} =  f_d\frac{F_T(T,P)}{I_{sp}(T,P)g}
+\end{equation}
+
+\begin{equation}
+    \mathbf{T} = f_s f_d F_T(T,P) \mathbf{R}_{iT}\hat{\mathbf{T}}_d
+\end{equation}
+%
+where $F_T(T,P)$ is given in equation \ref{Eq:ThrustPolynomial},
+$f_s$ and $f_d$ are the thrust scale factor and duty cycle
+respectively, $\mathbf{R}_{iT}$ is the rotation matrix from the
+thruster coordinate system to the EarthMJ2000 equatorial system, and
+$\hat{\mathbf{T}_d}$ is the unitized thrust direction in the
+thruster coordinate system.
+
+\begin{table}[h!]
+\centering \caption{ Thrust and Isp Coefficient Units }
+      \begin{tabular}{llll}
+      \hline\hline
+         Coeff. & Unit \\
+         \hline
+         %---New Row---%
+         $C_1$ & N & $K_1$ & s \\
+         %---New Row---%
+         $C_2$ & N/Pa & $K_2$ & s/Pa\\
+         %---New Row---%
+         $C_3$ & N  & $K_3$ & s  \\
+         %---New Row---%
+         $C_4$ & N/Pa & $K_4$ & s/Pa \\
+         %---New Row---%
+         $C_5$ & N/Pa$^2$ & $K_5$ & s/Pa$^2$ \\
+         %---New Row---%
+         $C_6$ & N/Pa$^{C_7}$ & $K_6$ & s/Pa$^{C_7}$ \\
+         %---New Row---%
+         $C_7$ & None & $K_7$ & None  \\
+         %---New Row---%
+         $C_8$ & N/Pa$^{C_9}$ & $K_8$ & s/Pa$^{C_9}$ \\
+         %---New Row---%
+         $C_9$ & None & $K_9$ & None \\
+         %---New Row---%
+         $C_{10}$ & N/Pa$^{C_{11}}$  & $K_{10}$ & s/Pa$^{C_{11}}$  \\
+         %---New Row---%
+         $C_{11}$ & None & $K_{11}$ & None \\
+         %---New Row---%
+         $C_{12}$ & N & $K_{12}$ & s\\
+         %---New Row---%
+         $C_{13}$ & None & $K_{13}$ & None \\
+         %---New Row---%
+         $C_{14}$ & 1/Pa  & $K_{14}$ & 1/Pa  \\
+         %---New Row---%
+         $C_{15}$ & None & $K_{15}$ & None \\
+         %---New Row---%
+         $C_{16}$ & 1/Pa & $K_{16}$ & 1/Pa  \\
+      \hline\hline
+      \label{Table:OE_RigorouslyJ2Inv}
+\end{tabular} \normalsize
+\end{table}
+
+\textbf{VNB Thruster System}
+
+It is possible to specify thrust with respect to rotating
+coordinates systems.  Then, during integration of the equations of
+motion, GMAT uses the coordinate system definition to determine the
+thrust in the inertial system being used for numerical integration
+of the equations of motion.    One of the coordinate systems useful
+in mission analysis is the Velocity-Normal-Binormal (VNB) system
+based on the motion of a spacecraft with respect to a reference
+origin. One way to configure a thruster to use a local VNB system is
+to set \st{CoordinateSystem} to local.  Internally, GMAT creates a
+coordinate system based on the \st{Axes} and \st{Origin} specified
+chosen for the thruster. We illustrate this below by example. The
+thruster named \st{Thruster1} is configured to use a local VNB
+coordinate system based on the motion of the owner-spacecraft and
+the Earth.
+
+\noindent\st{Create Thruster Thruster1}\\
+\st{Thruster1.CoordinateSystem = Local;}\\
+\st{Thruster1.Origin = Earth;}\\
+\st{Thruster1.Axes   = VNB;}\\
+
+To convert the thrust from the requested local VNB system to the
+inertial system, GMAT creates a coordinate system configured as
+shown below. The \st{Origin} field on the thruster is used in two
+places on the coordinate system: as both the \st{Origin} and the
+\st{Primary}. The axes are set to ObjectReferenced, and the $x$-axis
+and $y$-axis are respectively set to ``V'' and ``N''.
+
+\noindent\st{ Create CoordinateSystem SATVNB;}\\
+\st{ GMAT SATVNB.Origin = DefaultSC; }\\
+\st{ GMAT SATVNB.Axes = ObjectReferenced;}\\
+\st{ GMAT SATVNB.Primary = Earth;}\\
+\st{ GMAT SATVNB.Secondary = DefaultSC;}\\
+\st{ GMAT SATVNB.XAxis = V; }\\
+\st{ GMAT SATVNB.YAxis = N; }\\
+
+Using this system, the $x$-axis is in the velocity direction, the
+$n$-axis is in the velocity direction, and the $z$-axis completes
+the right-handed set. Note, the secondary body is not set until the
+thruster is assigned to a spacecraft, and then, the secondary is set
+to be the owner- spacecraft.  The script snippet above shows the
+configuration after the thruster has been attached to spacecraft
+``DefaultSC'', using, for example, the script line
+%
+\st{DefaultSC.Thrusters = \{Thruster1\}};
+
+\noindent \textbf{LVLH Thruster System}\\
+
+The LVLH system, similarly to the VNB system, is a local system that
+is constructed based on the motion of the owner spacecraft with
+respect to an origin and axes system chosen by the user.  As an
+example, below the thruster named \st{Thruster1} is configured to
+use a local LVLH coordinate system based on the motion of the owner
+spacecraft ``MySat'' and the moon.
+
+\noindent\st{Create Thruster Thruster1}\\
+\st{Thruster1.CoordinateSystem = Local;}\\
+\st{Thruster1.Origin = Luna;}\\
+\st{Thruster1.Axes   = LVLH;}\\
+
+Internally, GMAT creates a coordinate system configured as shown
+below.  The \st{Origin} field on the thruster is used in two places
+on the coordinate system, as both the \st{Origin} and the
+\st{Primary}.  The axes are set to  \st{ObjectReferenced}.
+
+\noindent\st{ Create CoordinateSystem SATVNB;}\\
+\st{ GMAT SATVNB.Origin = MySat; }\\
+\st{ GMAT SATVNB.Axes = ObjectReferenced;}\\
+\st{ GMAT SATVNB.Primary = Luna;}\\
+\st{ GMAT SATVNB.Secondary = MySat;}\\
+\st{ GMAT SATVNB.XAxis = -R; }\\
+\st{ GMAT SATVNB.YAxis = -N; }\\
+
+Using this system, the $y$-axis is opposite of orbit normal, the
+$z$-axis points towards the origin, and the $x$-axis completes the
+right-handed set.
+
+
+\input{Attitude}
+\input{SpacecraftModel}
+\input{EnvironmentModels}
+
+%\section{Appendix 1:  Derivation of the Orbital Equations of
+%Motion}
+%
+%
+%
+%\section{Notation}
+%
+%
+%%\begin{tabbing}
+%%12345678 \= Reynolds number based on length $s$ \kill
+%%$\mathbf{r}$        \> Position vector \\
+%%$\mathbf{v}$        \> Velocity vector \\
+%%$m$              \> Number of spacecraft in formation \\
+%%$n_k$              \> Number of maneuvers along $k^{th}$ trajectory \\
+%%$t$                 \> Time \\
+%%$\boldsymbol\Phi$   \> State transition matrix \\
+%%$\mathbf{A}$   \> Upper left 3x3 partition of $\boldsymbol\Phi$ \\
+%%$\mathbf{B}$   \> Upper right 3x3 partition of $\boldsymbol\Phi$ \\
+%%$\mathbf{C}$   \> Lower left 3x3 partition of $\boldsymbol\Phi$\\
+%%$\mathbf{D}$   \> Lower right 3x3 partition of $\boldsymbol\Phi$
+%%\\
+%%$\Delta\mathbf{v}_{jk}$   \> $j^{th}$ impulsive maneuver on $k^{th}$ trajectory\\
+%%$\Delta v_{jk}$   \> Magnitude of $j^{th}$  maneuver on $k^{th}$ trajectory\\
+%%$\mathcal{P}_{ok}$  \>  Initial trajectory of $k^{th}$ spacecraft\\
+%%$\mathcal{P}_{fk}$  \>  Final trajectory of $k^{th}$ spacecraft\\
+%%$N$                  \>  Number of Boundary Value Problems\\
+%%$\mathbf{X}$     \>  Vector of independent variables\\
+%%$\mathbf{C}$     \>  Vector of constants\\
+%%\end{tabbing}
+%%
+%%\subsection{Subscripts}
+%%\begin{tabbing}
+%%12345678 \= \kill
+%%$i$   \> Maneuver location index , ($2 \leq i \leq n_k-1$) \\
+%%$j$   \> Maneuver epoch index, ($1 \leq j \leq n_k$) \\
+%%$k$   \> Trajectory index , ($1 \leq k \leq m$) \\
+%%$o$   \> Initial conditions \\
+%%$f$   \> Final conditions \\
+%%$I$  \>  Inertial Frame
+%%\end{tabbing}
+%%
+%%\subsection{Superscripts}
+%%\begin{tabbing}
+%%12345678  \= \kill
+%%$r$       \> Position solution \\
+%%$v$       \> Velocity solution \\
+%%$+$       \> Post-maneuver condition\\
+%%$-$       \> Pre-maneuver condition
+%%\end{tabbing}
+%
+%\section{Spacecraft Equations of Motion}
+%
+%
+%%
+%\begin{figure}[!]
+%\centerline{
+%\begin{picture}(100,500)
+%\special{psfile= NBodyDiagram.eps hoffset= -135 voffset= -45
+%hscale=85 vscale=85} \makebox(-20,585){$\hat{\mathbf{x}}_{I}$}
+%\makebox(270,700){$\hat{\mathbf{y}}_{I}$}
+%\makebox(-330,770){$\mathbf{r}_{s}$}
+%\makebox(-330,877){$\mathbf{r}$}
+%\makebox(-270,900){$\mathbf{r}_k$}
+%\makebox(-390,964){$\mathbf{r}_{kj}$}
+%\makebox(-500,814){$\mathbf{r}_{j}$} \makebox(-500,980){Central
+%Body} \makebox(-320,995){$k^{th}$ Body}
+%\end{picture}}\vskip -4.0 in  \caption{ N Body Illustration} \label{fig:NBody}
+%\end{figure}
+%
+%\section{General Form}
+%
+%
+%
+%In general, the equations of motion can be written as
+%%
+%\begin{equation}
+%  \frac{d}{dt}\left( m_s \displaystyle\frac{d \mathbf{r}_s}{dt}\right) = \sum
+%  \mathbf{F}_k
+%\end{equation}
+%%
+%where $\mathbf{r}_s$ is the spacecraft's position with respect to
+%an inertial frame, and $m_s$ is the spacecraft mass.  Expanding
+%the left hand side we get
+%%
+%\begin{equation}
+%  \dot{m}_s\displaystyle\frac{d \mathbf{r}_s}{dt} + m_s \frac{d^2
+%  \mathbf{r}_s}{dt^2}= \mathbf{F}_G + \mathbf{F}_T + \mathbf{F}_D
+%  + \mathbf{F}_S + \mathbf{F}_O\label{Eq:EOMLHSExp}
+%\end{equation}
+%%
+%where $\mathbf{F}_g$ is the force due to gravity, $\mathbf{F}_T$
+%is the force due to thrust, $\mathbf{F}_D$ is the force due to
+%drag, $\mathbf{F}_S$ is the force due to solar radiation pressure,
+%and $\mathbf{F}_O$ are other forces. We usually want the equations
+%of motion of the spacecraft expressed with respect to a central
+%body. So, we note that
+%%
+%\begin{equation}
+%     \mathbf{r}_s = \mathbf{r}_j + \mathbf{r}
+%\end{equation}
+%%
+%Taking the first and second time derivatives gives us
+%%
+%%\begin{equation}
+%%     \frac{d\mathbf{r}_s}{dt} = \frac{d\mathbf{r}_j}{dt} +
+%%     \frac{d\mathbf{r}}{dt} \label{Eq:InertDeriv1}
+%%\end{equation}
+%%
+%\begin{equation}
+%     \frac{d^2\mathbf{r}_s}{dt^2} = \frac{d^2\mathbf{r}_j}{dt^2} +
+%     \frac{d^2\mathbf{r}}{dt^2} \label{Eq:InertDeriv2}
+%\end{equation}
+%%
+%We can substitute Eq.~(\ref{Eq:InertDeriv2}) into
+%Eq.~(\ref{Eq:EOMLHSExp}) to get
+%%
+%\begin{equation}
+%       \dot{m}_s\displaystyle\frac{d \mathbf{r}_s}{dt} + m_s \left( \frac{d^2\mathbf{r}_j}{dt^2} +
+%     \frac{d^2\mathbf{r}}{dt^2}\right)= \mathbf{F}_G + \mathbf{F}_T + \mathbf{F}_D
+%  + \mathbf{F}_S + \mathbf{F}_O \label{Eq:EOMAllExpanded}
+%\end{equation}
+%%
+%The term that contains $\dot{m}_s$ appears to be problematic.
+%However, if $\dot{m}_s \neq 0$, then we have a force due to
+%thrust, $\mathbf{F}_T$, acting on the spacecraft.  In an inertial
+%frame, this thrust is written as
+%%
+%\begin{equation}
+%     \mathbf{F}_T = \dot{m}_s \left(\frac{d \mathbf{r}_s}{dt} +
+%     \mathbf{v}_e\right)\label{Eq:InertialFt}
+%\end{equation}
+%%
+%where $\mathbf{v}_e$ is the velocity of the exhaust with respect
+%to the spacecraft.  Substituting Eq.~(\ref{Eq:InertialFt}) into
+%Eq.~(\ref{Eq:EOMAllExpanded}) we arrive at.
+%%
+%\begin{equation}
+%          \frac{d^2\mathbf{r}}{dt^2} =
+%      \underbrace{\frac{\mathbf{F}_G}{m_s}-\frac{d^2\mathbf{r}_j}{dt^2}}_{gravity terms} +
+%      \frac{\mathbf{F}_D}{m_s}
+%  + \frac{\mathbf{F}_S}{m_s} + \frac{\mathbf{F}_O}{m_s}  +
+%  \frac{\dot{m}_s}{m_s}\mathbf{v}_e\label{Eq:EOMGeneral}
+%\end{equation}
+%
+%\subsection{Gravitational Acceleration}
+%
+%\begin{itemize}
+%     \item  $\mathbf{r}_{j}$ = Position vector of central body
+%     in inertial frame
+%     %
+%     \item  $ m_s $ =  Spacecraft mass
+%     %
+%     \item  $\mathbf{r}_{s}$ =  Spacecraft position w/r/t inertial
+%     frame
+%     %
+%     \item $\mathbf{r}$ = Spacecraft position vector w/r/t central
+%     body
+%     %
+%     \item $\mathbf{r}_{kj}$ = Position vector from central body to  $k^{th}$ body
+%     %
+%     \item $\mathbf{r}_sk$ = Vector from the $k^{th}$ body to
+%     the spacecraft
+%     %
+%     \item $\mathbf{F}_k$ = Force of $k^{th}$ body on s/c
+%     %
+%     \item $n_b$ = Number of secondary bodies
+%\end{itemize}
+%
+%Let's take a look at the gravitational terms in
+%Eq.~(\ref{Eq:EOMGeneral})
+%%
+%\begin{equation}
+%          \frac{d^2\mathbf{r}}{dt^2}
+%          =\frac{\mathbf{F}_G}{m_s}-\frac{d^2\mathbf{r}_j}{dt^2}\label{Eq:GravEOM}
+%\end{equation}
+%%
+%$\mathbf{F}_g$ is the force on the spacecraft due to gravity.  It
+%is useful to start by assuming that the Earth and spacecraft are
+%point masses.  Then we know from Newton's Law of Gravitation that
+%%
+%\begin{equation}
+%     \mathbf{F}_G = -\frac{G m_s m_j}{r^3}\mathbf{r}
+%\end{equation}
+%%
+%and
+%%
+%\begin{equation}
+%    \frac{d^2\mathbf{r}_j}{dt^2} = \frac{G m_s }{r^3}\mathbf{r}
+%\end{equation}
+%%
+%Substituting these equations into Eq.~(\ref{Eq:GravEOM}) yields
+%%
+%\begin{equation}
+%   \frac{d^2\mathbf{r}}{dt^2} = -\frac{G m_s }{r^3}\mathbf{r} -
+%   \frac{G m_j }{r^3}\mathbf{r} = -\frac{G \left(m_s +m_j
+%     \right)}{r^3}\mathbf{r}
+%\end{equation}
+%%
+%This is the well known two-body orbital equation of motion
+%%
+%\begin{equation}
+%        \frac{d^2\mathbf{r}}{dt^2} = -\frac{\mu}{r^3}\mathbf{r}
+%        \label{Eq:TwoBodyEOM}
+%\end{equation}
+%%
+%where $\mu = G \left(m_s +m_j \right)$
+%
+%Now lets consider the case when there are other gravitational
+%bodies in the system and that all of the gravitational bodies are
+%non-spherical.  However, we'll assume the mass distribution of the
+%spacecraft is negligible.  In this case we can write the forces on
+%the spacecraft that are in addition to the central body force as
+%%
+%\begin{equation}
+%   \frac{ \mathbf{F}_G}{m_s} = \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b} \nabla \left(\phi_{sk}^s + \phi_{sk}^o
+%    \right)
+%\end{equation}
+%%
+%where $\nabla$ is the gradient operator, $\phi$ a bodies
+%gravitational potential, a superscript ``$s$" denotes the
+%spherical portion of gravitational potential, and a superscript
+%``$o$" denotes the oblate portion the gravitational potential.
+%From physics we know that
+%%
+%\begin{equation}
+%    \frac{d^2 \mathbf{r}}{dt^2} = \nabla \phi
+%\end{equation}
+%%
+%where we choose to define the potential $\phi$ according to
+%%
+%\begin{equation}
+%     \phi = \frac{\mu}{r}
+%\end{equation}
+%%
+%Then, for the spherical terms, we know that
+%%
+%\begin{equation}
+%    \nabla \phi_{sk}^s = -\frac{G m_k }{r_{sk}^3}\mathbf{r}_{sk} =
+%    \frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}
+%\end{equation}
+%%
+%%
+%\begin{equation}
+%    \frac{\mathbf{F}_G}{m_s} =  \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(\frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}   + \nabla
+%    \phi_{k}^o\right)      \label{Eq:FG}
+%\end{equation}
+%
+%
+%We can apply Newton's laws to the central body to arrive at
+%%
+%\begin{equation}
+%     \frac{d^2\mathbf{r}_j}{dt^2} = \frac{1}{m_j}\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\nabla\left(
+%     \phi_{kj}^s + \phi_{kj}^o
+%     \right) = \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(-
+%     \frac{G m_k}{r_{kj}^3}\mathbf{r}_{kj} +
+%     \frac{\nabla\phi_{kj}^o}{m_j}
+%     \right) \label{Eq:CBEOM}
+%\end{equation}
+%%
+%Eqs.~(\ref{Eq:FG}) and(\ref{Eq:CBEOM}) represent the forces in
+%addition to the two-body point mass force in the equations of
+%motion.  Augmenting Eq.~(\ref{Eq:TwoBodyEOM}) with
+%Eqs.~(\ref{Eq:FG}) and(\ref{Eq:CBEOM}) we arrive at
+%%
+%\begin{equation}\begin{split}
+%    \frac{d^2\mathbf{r}}{dt^2}
+%    = &-\frac{\mu}{r^3}\mathbf{r} +
+%    %
+%    \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(\frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}   + \nabla
+%    \phi_{ks}^o\right)\\
+%     &+
+%     %
+%    \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(-
+%     \frac{G m_k}{r_{kj}^3}\mathbf{r}_{kj} +
+%     \nabla\phi_{kj}^o
+%     \right)
+%\end{split}\end{equation}
+%%
+%Grouping similar terms we arrive at
+%%
+%\begin{equation}\begin{split}
+%    \frac{d^2\mathbf{r}}{dt^2}
+%    =  &-\frac{\mu}{r^3}\mathbf{r} +  \nabla \phi_{sj}^o +
+%    %
+%    G\sum_{\stackrel{k=1}{k \neq j}}^{n_b}m_k \left(\frac{\mathbf{r}_{ks}}{r_{ks}^3} -
+%     \frac{\mathbf{r}_{kj} }{r_{kj}^3}   \right)\\
+%     %
+%   & + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left( \nabla
+%    \phi_{ks}^o +
+%     \nabla\phi_{kj}^o
+%     \right)
+%\end{split} \end{equation}
+%
+%
+%%\section{Spacecraft Equations of Motion}
+%%
+%%
+%%%
+%%\begin{figure}[!]
+%%\centerline{
+%%\begin{picture}(100,500)
+%%\special{psfile= NBodyDiagram.eps hoffset= -155 voffset= -45
+%%hscale=85 vscale=85} \makebox(-20,585){$\hat{\mathbf{x}}_{I}$}
+%%\makebox(270,700){$\hat{\mathbf{y}}_{I}$}
+%%\makebox(-330,770){$\mathbf{r}_{s}$}
+%%\makebox(-330,877){$\mathbf{r}$}
+%%\makebox(-270,900){$\mathbf{r}_k$}
+%%\makebox(-390,964){$\mathbf{r}_{kj}$}
+%%\makebox(-500,814){$\mathbf{r}_{j}$} \makebox(-500,980){Central
+%%Body} \makebox(-320,995){$k^{th}$ Body}
+%%\end{picture}}\vskip -4.0 in  \caption{ N Body Illustration} \label{fig:NBody}
+%%\end{figure}
+%%
+%%\section{General Form}
+%%
+%%
+%%
+%%In general, the equations of motion can be written as
+%%%
+%%\begin{equation}
+%%  \frac{d}{dt}\left( m_s \displaystyle\frac{d \mathbf{r}_s}{dt}\right) = \sum
+%%  \mathbf{F}_k
+%%\end{equation}
+%%%
+%%where $\mathbf{r}_s$ is the spacecraft's position with respect to
+%%an inertial frame, and $m_s$ is the spacecraft mass.  Expanding
+%%the left hand side we get
+%%%
+%%\begin{equation}
+%%  \dot{m}_s\displaystyle\frac{d \mathbf{r}_s}{dt} + m_s \frac{d^2
+%%  \mathbf{r}_s}{dt^2}= \mathbf{F}_G + \mathbf{F}_T + \mathbf{F}_D
+%%  + \mathbf{F}_S + \mathbf{F}_O\label{Eq:EOMLHSExp}
+%%\end{equation}
+%%%
+%%where $\mathbf{F}_g$ is the force due to gravity, $\mathbf{F}_T$
+%%is the force due to thrust, $\mathbf{F}_D$ is the force due to
+%%drag, $\mathbf{F}_S$ is the force due to solar radiation pressure,
+%%and $\mathbf{F}_O$ are other forces. We usually want the equations
+%%of motion of the spacecraft expressed with respect to a central
+%%body. So, we note that
+%%%
+%%\begin{equation}
+%%     \mathbf{r}_s = \mathbf{r}_j + \mathbf{r}
+%%\end{equation}
+%%%
+%%Taking the first and second time derivatives gives us
+%%%
+%%%\begin{equation}
+%%%     \frac{d\mathbf{r}_s}{dt} = \frac{d\mathbf{r}_j}{dt} +
+%%%     \frac{d\mathbf{r}}{dt} \label{Eq:InertDeriv1}
+%%%\end{equation}
+%%%
+%%\begin{equation}
+%%     \frac{d^2\mathbf{r}_s}{dt^2} = \frac{d^2\mathbf{r}_j}{dt^2} +
+%%     \frac{d^2\mathbf{r}}{dt^2} \label{Eq:InertDeriv2}
+%%\end{equation}
+%%%
+%%We can substitute Eq.~(\ref{Eq:InertDeriv2}) into
+%%Eq.~(\ref{Eq:EOMLHSExp}) to get
+%%%
+%%\begin{equation}
+%%       \dot{m}_s\displaystyle\frac{d \mathbf{r}_s}{dt} + m_s \left( \frac{d^2\mathbf{r}_j}{dt^2} +
+%%     \frac{d^2\mathbf{r}}{dt^2}\right)= \mathbf{F}_G + \mathbf{F}_T + \mathbf{F}_D
+%%  + \mathbf{F}_S + \mathbf{F}_O \label{Eq:EOMAllExpanded}
+%%\end{equation}
+%%%
+%%The term that contains $\dot{m}_s$ appears to be problematic.
+%%However, if $\dot{m}_s \neq 0$, then we have a force due to
+%%thrust, $\mathbf{F}_T$, acting on the spacecraft.  In an inertial
+%%frame, this thrust is written as
+%%%
+%%\begin{equation}
+%%     \mathbf{F}_T = \dot{m}_s \left(\frac{d \mathbf{r}_s}{dt} +
+%%     \mathbf{v}_e\right)\label{Eq:InertialFt}
+%%\end{equation}
+%%%
+%%where $\mathbf{v}_e$ is the velocity of the exhaust with respect
+%%to the spacecraft.  Substituting Eq.~(\ref{Eq:InertialFt}) into
+%%Eq.~(\ref{Eq:EOMAllExpanded}) we arrive at.
+%%%
+%%\begin{equation}
+%%          \frac{d^2\mathbf{r}}{dt^2} =
+%%      \underbrace{\frac{\mathbf{F}_G}{m_s}-\frac{d^2\mathbf{r}_j}{dt^2}}_{gravity terms} +
+%%      \frac{\mathbf{F}_D}{m_s}
+%%  + \frac{\mathbf{F}_S}{m_s} + \frac{\mathbf{F}_O}{m_s}  +
+%%  \frac{\dot{m}_s}{m_s}\mathbf{v}_e\label{Eq:EOMGeneral}
+%%\end{equation}
+%%
+%%\subsection{Gravitational Acceleration}
+%%
+%%\begin{itemize}
+%%     \item  $\mathbf{r}_{j}$ = Position vector of central body
+%%     in inertial frame
+%%     %
+%%     \item  $ m_s $ =  Spacecraft mass
+%%     %
+%%     \item  $\mathbf{r}_{s}$ =  Spacecraft position w/r/t inertial
+%%     frame
+%%     %
+%%     \item $\mathbf{r}$ = Spacecraft position vector w/r/t central
+%%     body
+%%     %
+%%     \item $\mathbf{r}_{kj}$ = Position vector from central body to  $k^{th}$ body
+%%     %
+%%     \item $\mathbf{r}_{sk}$ = Vector from the $k^{th}$ body to
+%%     the spacecraft
+%%     %
+%%     \item $\mathbf{F}_k$ = Force of $k^{th}$ body on s/c
+%%     %
+%%     \item $n_b$ = Number of secondary bodies
+%%\end{itemize}
+%%
+%%Let's take a look at the gravitational terms in
+%%Eq.~(\ref{Eq:EOMGeneral})
+%%%
+%%\begin{equation}
+%%          \frac{d^2\mathbf{r}}{dt^2}
+%%          =\frac{\mathbf{F}_G}{m_s}-\frac{d^2\mathbf{r}_j}{dt^2}\label{Eq:GravEOM}
+%%\end{equation}
+%%%
+%%$\mathbf{F}_g$ is the force on the spacecraft due to gravity.  It
+%%is useful to start by assuming that the Earth and spacecraft are
+%%point masses.  Then we know from Newton's Law of Gravitation that
+%%%
+%%\begin{equation}
+%%     \mathbf{F}_G = -\frac{G m_s m_j}{r^3}\mathbf{r}
+%%\end{equation}
+%%%
+%%and
+%%%
+%%\begin{equation}
+%%    \frac{d^2\mathbf{r}_j}{dt^2} = \frac{G m_s }{r^3}\mathbf{r}
+%%\end{equation}
+%%%
+%%Substituting these equations into Eq.~(\ref{Eq:GravEOM}) yields
+%%%
+%%\begin{equation}
+%%   \frac{d^2\mathbf{r}}{dt^2} = -\frac{G m_s }{r^3}\mathbf{r} -
+%%   \frac{G m_j }{r^3}\mathbf{r} = -\frac{G \left(m_s +m_j
+%%     \right)}{r^3}\mathbf{r}
+%%\end{equation}
+%%%
+%%This is the well known two-body orbital equation of motion
+%%%
+%%\begin{equation}
+%%        \frac{d^2\mathbf{r}}{dt^2} = -\frac{\mu}{r^3}\mathbf{r}
+%%        \label{Eq:TwoBodyEOM}
+%%\end{equation}
+%%%
+%%where $\mu = G \left(m_s +m_j \right)$
+%%
+%%Now lets consider the case when there are other gravitational
+%%bodies in the system and that all of the gravitational bodies are
+%%non-spherical.  However, we'll assume the mass distribution of the
+%%spacecraft is negligible.  In this case we can write the forces on
+%%the spacecraft that are in addition to the central body force as
+%%%
+%%\begin{equation}
+%%   \frac{ \mathbf{F}_G}{m_s} = \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b} \nabla \left(\phi_{sk}^s + \phi_{sk}^o
+%%    \right)
+%%\end{equation}
+%%%
+%%where $\nabla$ is the gradient operator, $\phi$ a bodies
+%%gravitational potential, a superscript ``$s$" denotes the
+%%spherical portion of gravitational potential, and a superscript
+%%``$o$" denotes the oblate portion the gravitational potential.
+%%From physics we know that
+%%%
+%%\begin{equation}
+%%    \frac{d^2 \mathbf{r}}{dt^2} = \nabla \phi
+%%\end{equation}
+%%%
+%%where we choose to define the potential $\phi$ according to
+%%%
+%%\begin{equation}
+%%     \phi = \frac{\mu}{r}
+%%\end{equation}
+%%%
+%%Then, for the spherical terms, we know that
+%%%
+%%\begin{equation}
+%%    \nabla \phi_{sk}^s = -\frac{G m_k }{r_{sk}^3}\mathbf{r}_{sk} =
+%%    \frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}
+%%\end{equation}
+%%%
+%%%
+%%\begin{equation}
+%%    \frac{\mathbf{F}_G}{m_s} =  \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(\frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}   + \nabla
+%%    \phi_{k}^o\right)      \label{Eq:FG}
+%%\end{equation}
+%%
+%%
+%%We can apply Newton's laws to the central body to arrive at
+%%%
+%%\begin{equation}\begin{split}
+%%     \frac{d^2\mathbf{r}_j}{dt^2} = \frac{1}{m_j}\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\nabla\left(
+%%     \phi_{kj}^s + \phi_{kj}^o
+%%     \right) = \\\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(-
+%%     \frac{G m_k}{r_{kj}^3}\mathbf{r}_{kj} +
+%%     \frac{\nabla\phi_{kj}^o}{m_j}
+%%     \right) \label{Eq:CBEOM}
+%%     \end{split}
+%%\end{equation}
+%%%
+%%Eqs.~(\ref{Eq:FG}) and(\ref{Eq:CBEOM}) represent the forces in
+%%addition to the two-body point mass force in the equations of
+%%motion.  Augmenting Eq.~(\ref{Eq:TwoBodyEOM}) with
+%%Eqs.~(\ref{Eq:FG}) and(\ref{Eq:CBEOM}) we arrive at
+%%%
+%%\begin{equation}\begin{split}
+%%    \frac{d^2\mathbf{r}}{dt^2}
+%%    = -\frac{\mu}{r^3}\mathbf{r} +
+%%    %
+%%    \nabla \phi_{sj}^o + \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(\frac{G m_k }{r_{ks}^3}\mathbf{r}_{ks}   + \nabla
+%%    \phi_{ks}^o\right) +\\
+%%     %
+%%    \sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left(-
+%%     \frac{G m_k}{r_{kj}^3}\mathbf{r}_{kj} +
+%%     \nabla\phi_{kj}^o
+%%     \right)\end{split}
+%%\end{equation}
+%%%
+%%Grouping similar terms we arrive at
+%%%%
+%%%\begin{equation}\begin{split}
+%%%    \frac{d^2\mathbf{r}}{dt^2}
+%%%    =  -\frac{\mu}{r^3}\mathbf{r} +  \nabla \phi_{sj}^o +
+%%%    %
+%%%    G\sum_{\stackrel{k=1}{k \neq j}}^{n_b}m_k \left(\frac{\mathbf{r}_{ks}}{r_{ks}^3} -
+%%%     \frac{\mathbf{r}_{kj} }{r_{kj}^3}   \right)
+%%%     %
+%%%   + \\\sum_{\stackrel{k=1}{k \neq j}}^{n_b}\left( \nabla
+%%%    \phi_{ks}^o +
+%%%     \nabla\phi_{kj}^o
+%%%     \right)\end{split}
+%%%\end{equation}
+%%
+%%
+%%
+%% Let's
+%%return to equation Eq.~(\ref{Eq:a_cb}). We need to calculate
+%%$\mba_{cb}$ in cartesian coordinates.  However, we know the
+%%potential in spherical coordinates.  So, we need to use the chain
+%%rule to take the derivative and we see that
+%%%
+%%\begin{equation}\begin{split}
+%%   \{\mathbf{a}_{cb}\}_F = \nabla U(r,\phi,\lambda)  = \frac{\partial U(r,\phi,\lambda)}{\partial \mbr_F}
+%%   =\\\frac{\partial U}{\partial r}\frac{\partial r}{\partial \mbr_F} +
+%%   \frac{\partial U}{\partial \phi}\frac{\partial \phi}{\partial
+%%   \mbr_F}+ \frac{\partial U}{\partial \lambda}\frac{\partial \lambda}{\partial \mbr_F}
+%%   \label{Eq:a_cb2}\end{split}
+%%\end{equation}
+%%%
+%%The six partial derivatives in Eq.~(\ref{Eq:a_cb2}) are given in the
+%%GTDS\cite{GTDS} math spec as
+%%%
+%%\begin{equation}\begin{split}
+%%     \frac{\partial U}{\partial r} = &-\frac{\mu}{r^2}\sum_{\ell =
+%%     2}^{\infty}\sum_{m=0}^{\ell}\left(
+%%     \frac{R_{\otimes}}{r}\right)^\ell(\ell + 1)P_{\ell m} \left[sin{\phi}  \right]\\
+%%    %
+%%      &\left( C_{\ell m}\cos{m \lambda}+ S_{\ell m}\sin{m \lambda}  \right)
+%%\end{split}\end{equation}
+%%%
+%%\begin{equation}\begin{split}
+%%     \frac{\partial U}{\partial \phi} = &\frac{\mu}{r}\sum_{\ell =
+%%     2}^{\infty}\sum_{m=0}^{\ell}\left(
+%%     \frac{R_{\otimes}}{r}\right)^\ell\left( P_{\ell, m+1} \left[sin{\phi}  \right] - m \tan{\phi}P_{\ell m}\left[\sin{\phi}\right]\right)\\ &
+%%    %
+%%      \left( C_{\ell m}\cos{m \lambda}+ S_{\ell m}\sin{m \lambda}
+%%     \right)
+%%\end{split}\end{equation}
+%%\begin{equation}\begin{split}
+%%     \frac{\partial U}{\partial \lambda} = & \frac{\mu}{r}\sum_{\ell =
+%%     2}^{\infty}\sum_{m=0}^{\ell}\left(
+%%     \frac{R_{\otimes}}{r}\right)^\ell m  P_{\ell, m} \left[sin{\phi}  \right]
+%%     \\
+%%     %
+%%     &  \left( S_{\ell m}\cos{m \lambda}+ C_{\ell m}\sin{m \lambda}
+%%     \right)
+%%\end{split}\end{equation}
+%%

@@ -1,0 +1,207 @@
+\contentsline {chapter}{\numberline {1}Time }{9}{chapter.1}
+\contentsline {section}{\numberline {1.1}Time Systems}{9}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Atomic Time: TAI and A.1}{9}{subsection.1.1.1}
+\contentsline {subsection}{\numberline {1.1.2}Universal Time: UTC and UT1}{9}{subsection.1.1.2}
+\contentsline {subsection}{\numberline {1.1.3}Dynamic Time: TT, TDB and TCB}{10}{subsection.1.1.3}
+\contentsline {section}{\numberline {1.2}Time Formats}{10}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Julian Date and Modified Julian Date}{11}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}Gregorian Date}{11}{subsection.1.2.2}
+\contentsline {section}{\numberline {1.3}Conclusions}{12}{section.1.3}
+\contentsline {chapter}{\numberline {2}Coordinate Systems}{13}{chapter.2}
+\contentsline {section}{\numberline {2.1}General Coordinate System \\ Transformations }{13}{section.2.1}
+\contentsline {section}{\numberline {2.2}Pseudo-Rotating Coordinate\\ Systems}{15}{section.2.2}
+\contentsline {section}{\numberline {2.3}The $\mathcal {F}_{J_{2k}}$ Inertial System and FK5 Reduction}{15}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Overview of FK5 Reduction}{15}{subsection.2.3.1}
+\contentsline {subsubsection}{Precession}{17}{section*.1}
+\contentsline {subsubsection}{Nutation}{17}{section*.2}
+\contentsline {subsubsection}{Sidereal Time}{17}{section*.3}
+\contentsline {subsection}{\numberline {2.3.2}Precession Calculations}{17}{subsection.2.3.2}
+\contentsline {subsection}{\numberline {2.3.3}Nutation Calculations}{17}{subsection.2.3.3}
+\contentsline {subsubsection}{ 1980 Nutation Theory }{18}{section*.4}
+\contentsline {subsubsection}{ 1996 Nutation Theory }{18}{section*.5}
+\contentsline {subsection}{\numberline {2.3.4}Sidereal Time Calculations}{19}{subsection.2.3.4}
+\contentsline {subsection}{\numberline {2.3.5}Polar Motion Calculations}{19}{subsection.2.3.5}
+\contentsline {section}{\numberline {2.4} Deriving $\mathbf {R}_{J_{2k},i}$ and $\mathaccentV {dot}05F{\mathbf {R}}_{J_{2k},i}$ for Various Coordinate Systems }{19}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}Equator System}{19}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}MJ2000 Ecliptic (MJ2000Ec) }{20}{subsection.2.4.2}
+\contentsline {subsection}{\numberline {2.4.3}True of Epoch Equator (TOEEq) }{20}{subsection.2.4.3}
+\contentsline {subsection}{\numberline {2.4.4}Mean of Epoch Equator (MOEEq)}{21}{subsection.2.4.4}
+\contentsline {subsection}{\numberline {2.4.5}True of Date Equator (TODEq)}{21}{subsection.2.4.5}
+\contentsline {subsection}{\numberline {2.4.6}Mean of Date Equator (MODEq)}{21}{subsection.2.4.6}
+\contentsline {subsection}{\numberline {2.4.7}Mean of Date Ecliptic (MODEc)}{22}{subsection.2.4.7}
+\contentsline {subsection}{\numberline {2.4.8}True of Date Ecliptic (TODEc)}{22}{subsection.2.4.8}
+\contentsline {subsection}{\numberline {2.4.9}Topocentric Horizon}{22}{subsection.2.4.9}
+\contentsline {subsection}{\numberline {2.4.10}Celestial Body Fixed}{22}{subsection.2.4.10}
+\contentsline {subsection}{\numberline {2.4.11}Body Inertial}{23}{subsection.2.4.11}
+\contentsline {subsection}{\numberline {2.4.12}Object Referenced}{25}{subsection.2.4.12}
+\contentsline {subsection}{\numberline {2.4.13}Geocentric Solar Ecliptic (GSE) }{25}{subsection.2.4.13}
+\contentsline {subsection}{\numberline {2.4.14} Geocentric Solar Magnetic (GSM)}{26}{subsection.2.4.14}
+\contentsline {section}{\numberline {2.5}Appendix 1: Derivatives of ObjectReferenced Unit Vectors}{27}{section.2.5}
+\contentsline {chapter}{\numberline {3}Calculation Objects}{31}{chapter.3}
+\contentsline {section}{\numberline {3.1}Spacecraft State Representations}{31}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Definitions}{31}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}Cartesian State to Keplerian Elements}{31}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {3.1.3}Keplerian Elements to Cartesian \\ State}{34}{subsection.3.1.3}
+\contentsline {subsection}{\numberline {3.1.4}Equinoctial Elements to Cartesian \\State}{35}{subsection.3.1.4}
+\contentsline {subsection}{\numberline {3.1.5}Cartesian State to Equinoctial \\ Elements}{36}{subsection.3.1.5}
+\contentsline {subsection}{\numberline {3.1.6}Cartesian State to SphericalAZFPA State}{36}{subsection.3.1.6}
+\contentsline {subsection}{\numberline {3.1.7}SphericalAZFPA State to Cartesian State}{37}{subsection.3.1.7}
+\contentsline {subsection}{\numberline {3.1.8}Cartesian State to SphericalRADEC State}{38}{subsection.3.1.8}
+\contentsline {subsection}{\numberline {3.1.9}SphericalRADEC State to Cartesian State}{38}{subsection.3.1.9}
+\contentsline {subsection}{\numberline {3.1.10}Keplerian or Cartesian, to Modified Keplerian Elements}{38}{subsection.3.1.10}
+\contentsline {subsection}{\numberline {3.1.11}Modified Keplerian Elements to Keplerian Elements}{38}{subsection.3.1.11}
+\contentsline {section}{\numberline {3.2}Simple Parameters}{39}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}A1Gregorian}{39}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}A1ModJulian}{39}{subsection.3.2.2}
+\contentsline {subsection}{\numberline {3.2.3}Altitude}{40}{subsection.3.2.3}
+\contentsline {subsection}{\numberline {3.2.4}AOP}{40}{subsection.3.2.4}
+\contentsline {subsection}{\numberline {3.2.5}Apoapsis}{40}{subsection.3.2.5}
+\contentsline {subsection}{\numberline {3.2.6}AZI}{41}{subsection.3.2.6}
+\contentsline {subsection}{\numberline {3.2.7}BdotT and BdotR}{41}{subsection.3.2.7}
+\contentsline {subsection}{\numberline {3.2.8}BetaAngle}{42}{subsection.3.2.8}
+\contentsline {subsection}{\numberline {3.2.9}BVectorAngle and BVectorMag}{42}{subsection.3.2.9}
+\contentsline {subsection}{\numberline {3.2.10}C3Energy}{42}{subsection.3.2.10}
+\contentsline {subsection}{\numberline {3.2.11}DEC}{42}{subsection.3.2.11}
+\contentsline {subsection}{\numberline {3.2.12}DECV}{43}{subsection.3.2.12}
+\contentsline {subsection}{\numberline {3.2.13}ECC}{43}{subsection.3.2.13}
+\contentsline {subsection}{\numberline {3.2.14}FPA}{43}{subsection.3.2.14}
+\contentsline {subsection}{\numberline {3.2.15}EA}{43}{subsection.3.2.15}
+\contentsline {subsection}{\numberline {3.2.16}Energy}{43}{subsection.3.2.16}
+\contentsline {subsection}{\numberline {3.2.17}HMAG}{43}{subsection.3.2.17}
+\contentsline {subsection}{\numberline {3.2.18}HX,HY, and HZ}{44}{subsection.3.2.18}
+\contentsline {subsection}{\numberline {3.2.19}HA}{44}{subsection.3.2.19}
+\contentsline {subsection}{\numberline {3.2.20}INC}{44}{subsection.3.2.20}
+\contentsline {subsection}{\numberline {3.2.21}Latitude}{44}{subsection.3.2.21}
+\contentsline {subsection}{\numberline {3.2.22}Longitude}{45}{subsection.3.2.22}
+\contentsline {subsection}{\numberline {3.2.23}LST}{45}{subsection.3.2.23}
+\contentsline {subsection}{\numberline {3.2.24}MA}{46}{subsection.3.2.24}
+\contentsline {subsection}{\numberline {3.2.25}MHA}{46}{subsection.3.2.25}
+\contentsline {subsection}{\numberline {3.2.26}MM}{46}{subsection.3.2.26}
+\contentsline {subsection}{\numberline {3.2.27}OrbitPeriod}{46}{subsection.3.2.27}
+\contentsline {subsection}{\numberline {3.2.28}PercentShadow }{46}{subsection.3.2.28}
+\contentsline {subsection}{\numberline {3.2.29}RA}{47}{subsection.3.2.29}
+\contentsline {subsection}{\numberline {3.2.30}RAV}{47}{subsection.3.2.30}
+\contentsline {subsection}{\numberline {3.2.31}RAAN}{48}{subsection.3.2.31}
+\contentsline {subsection}{\numberline {3.2.32}RadApo}{48}{subsection.3.2.32}
+\contentsline {subsection}{\numberline {3.2.33}RadPer}{48}{subsection.3.2.33}
+\contentsline {subsection}{\numberline {3.2.34}RMAG}{48}{subsection.3.2.34}
+\contentsline {subsection}{\numberline {3.2.35}SemilatusRectum}{48}{subsection.3.2.35}
+\contentsline {subsection}{\numberline {3.2.36}SMA}{48}{subsection.3.2.36}
+\contentsline {subsection}{\numberline {3.2.37}TA}{49}{subsection.3.2.37}
+\contentsline {subsection}{\numberline {3.2.38}TAIModJulian}{49}{subsection.3.2.38}
+\contentsline {subsection}{\numberline {3.2.39}TTModJulian}{49}{subsection.3.2.39}
+\contentsline {subsection}{\numberline {3.2.40}TTGregorian}{49}{subsection.3.2.40}
+\contentsline {subsection}{\numberline {3.2.41}Umbra and Penumbra }{49}{subsection.3.2.41}
+\contentsline {subsection}{\numberline {3.2.42}UTCModJulian}{50}{subsection.3.2.42}
+\contentsline {subsection}{\numberline {3.2.43}VelApoapsis}{50}{subsection.3.2.43}
+\contentsline {subsection}{\numberline {3.2.44}VelPeriapsis}{51}{subsection.3.2.44}
+\contentsline {subsection}{\numberline {3.2.45}VMAG}{51}{subsection.3.2.45}
+\contentsline {section}{\numberline {3.3} Other Calculations }{51}{section.3.3}
+\contentsline {subsection}{\numberline {3.3.1}MA to TA}{51}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.2}EA to TA}{51}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.3}HA to TA}{52}{subsection.3.3.3}
+\contentsline {section}{\numberline {3.4} Libration Points }{52}{section.3.4}
+\contentsline {section}{\numberline {3.5} Barycenter }{54}{section.3.5}
+\contentsline {chapter}{\numberline {4}Dynamics Modelling}{55}{chapter.4}
+\contentsline {section}{\numberline {4.1}Orbit Dynamics}{55}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Orbit State Equations}{55}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}State Transition Matrix Equations}{56}{subsection.4.1.2}
+\contentsline {subsection}{\numberline {4.1.3}Multiple Spacecraft Propgation and Coupled Propagation of the Equations of Motion}{56}{subsection.4.1.3}
+\contentsline {section}{\numberline {4.2}Force Modelling}{56}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Non-Spherical Gravity }{56}{subsection.4.2.1}
+\contentsline {subsection}{\numberline {4.2.2}$n$-Body Point Mass Gravity}{58}{subsection.4.2.2}
+\contentsline {subsection}{\numberline {4.2.3}Atmospheric Drag}{60}{subsection.4.2.3}
+\contentsline {subsection}{\numberline {4.2.4}Solar Radiation Pressure}{60}{subsection.4.2.4}
+\contentsline {subsection}{\numberline {4.2.5}Spacecraft Thrust}{60}{subsection.4.2.5}
+\contentsline {section}{\numberline {4.3}Attitude}{61}{section.4.3}
+\contentsline {subsection}{\numberline {4.3.1}Attitude Propagation}{61}{subsection.4.3.1}
+\contentsline {subsubsection}{Internal State Representation and Attitude Initial Conditions}{61}{section*.6}
+\contentsline {subsubsection}{Kinematic Attitude Propagation}{62}{section*.7}
+\contentsline {subsubsection}{Coordinate System Fixed Mode}{62}{section*.8}
+\contentsline {subsubsection}{Spinning Spacecraft Mode}{62}{section*.9}
+\contentsline {subsection}{\numberline {4.3.2}6 DOF Modelling}{63}{subsection.4.3.2}
+\contentsline {subsection}{\numberline {4.3.3}Attitude Parameterizations \\ and Conversions}{63}{subsection.4.3.3}
+\contentsline {subsubsection}{Conversion: Quaternions to DCM}{63}{section*.10}
+\contentsline {subsubsection}{Conversion: DCM to Quaternions}{63}{section*.11}
+\contentsline {subsubsection}{Conversion: DCM to Euler\\ Axis/Angle}{64}{section*.12}
+\contentsline {subsubsection}{Conversion: Euler Axis/Angle to DCM}{64}{section*.13}
+\contentsline {subsubsection}{Conversion: Euler Angles to DCM}{64}{section*.14}
+\contentsline {subsubsection}{Conversion: DCM to Euler Angles}{65}{section*.15}
+\contentsline {subsubsection}{Conversion: Angular Velocity to \\ Euler Angles Rates}{65}{section*.16}
+\contentsline {subsubsection}{Conversion: Euler Angles Rates to Angular Velocity}{65}{section*.17}
+\contentsline {subsubsection}{Conversion: Quaternions to Euler Angles}{65}{section*.18}
+\contentsline {subsubsection}{Conversion: Euler Angles to Quaternions}{65}{section*.19}
+\contentsline {subsubsection}{Euler Angles to $\mathbf {R}$ Matrix}{65}{section*.20}
+\contentsline {subsubsection}{Euler Rates and Angular Velocity}{67}{section*.21}
+\contentsline {section}{\numberline {4.4}Spacecraft Model}{70}{section.4.4}
+\contentsline {subsection}{\numberline {4.4.1}Thruster Models}{70}{subsection.4.4.1}
+\contentsline {subsubsection}{Mono-Propellant Chemical Thruster}{70}{section*.22}
+\contentsline {subsubsection}{Bi-Propellant Chemical Thruster}{70}{section*.23}
+\contentsline {subsubsection}{Thruster Pulse Modelling}{71}{section*.24}
+\contentsline {subsubsection}{Thruster Hot Fire Test Data \\ and Thruster Models}{71}{section*.25}
+\contentsline {subsection}{\numberline {4.4.2}Tank Models}{73}{subsection.4.4.2}
+\contentsline {subsubsection}{Pressurant Tank}{73}{section*.26}
+\contentsline {subsubsection}{Blowdown Tank}{74}{section*.27}
+\contentsline {subsubsection}{Pressure Regulated Tank}{77}{section*.28}
+\contentsline {subsubsection}{Heat Transfer}{78}{section*.29}
+\contentsline {subsubsection}{ Physiochemical Properties }{78}{section*.30}
+\contentsline {subsection}{\numberline {4.4.3}Mass Properties}{80}{subsection.4.4.3}
+\contentsline {subsubsection}{Spherical Tank}{80}{section*.31}
+\contentsline {section}{\numberline {4.5}Environment Models}{81}{section.4.5}
+\contentsline {subsection}{\numberline {4.5.1}Ephemerides}{81}{subsection.4.5.1}
+\contentsline {subsubsection}{Analytic Ephemeris Model}{81}{section*.32}
+\contentsline {subsection}{\numberline {4.5.2}Atmospheric Density}{81}{subsection.4.5.2}
+\contentsline {subsubsection}{Jacchia Roberts}{81}{section*.33}
+\contentsline {subsubsection}{MSISE-90}{81}{section*.34}
+\contentsline {subsubsection}{Exponential Atmosphere}{81}{section*.35}
+\contentsline {chapter}{\numberline {5}Numerical Integrators}{83}{chapter.5}
+\contentsline {section}{\numberline {5.1}Runge-Kutta Integrators}{83}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}Constructor \& Destructor Documentation}{84}{subsection.5.1.1}
+\contentsline {subsubsection}{\rightskip 0pt plus 5cm\relax Runge\discretionary {-}{}{}Kutta::Runge\discretionary {-}{}{}Kutta (int {\em st}, int {\em order})}{84}{section*.36}
+\contentsline {section}{\numberline {5.2}Prince-Dormand Integrators}{84}{section.5.2}
+\contentsline {section}{\numberline {5.3}Adams Bashforth Moulton}{84}{section.5.3}
+\contentsline {section}{\numberline {5.4}Bulirsch-Stoer}{84}{section.5.4}
+\contentsline {section}{\numberline {5.5}Stopping Condition Algorithm}{84}{section.5.5}
+\contentsline {section}{\numberline {5.6}Integrator Coefficients}{84}{section.5.6}
+\contentsline {chapter}{\numberline {6}Mathematics in GMAT Scripting}{87}{chapter.6}
+\contentsline {section}{\numberline {6.1}Basic Operators}{87}{section.6.1}
+\contentsline {section}{\numberline {6.2}Math Functions}{87}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}max}{87}{subsection.6.2.1}
+\contentsline {subsection}{\numberline {6.2.2}min}{87}{subsection.6.2.2}
+\contentsline {subsection}{\numberline {6.2.3}abs}{87}{subsection.6.2.3}
+\contentsline {subsection}{\numberline {6.2.4}mean}{87}{subsection.6.2.4}
+\contentsline {subsection}{\numberline {6.2.5}dot}{87}{subsection.6.2.5}
+\contentsline {subsection}{\numberline {6.2.6}cross}{87}{subsection.6.2.6}
+\contentsline {subsection}{\numberline {6.2.7}norm}{87}{subsection.6.2.7}
+\contentsline {subsection}{\numberline {6.2.8}det}{87}{subsection.6.2.8}
+\contentsline {subsection}{\numberline {6.2.9}inv}{87}{subsection.6.2.9}
+\contentsline {subsection}{\numberline {6.2.10}eig}{88}{subsection.6.2.10}
+\contentsline {subsection}{\numberline {6.2.11}sin, cos, tan}{88}{subsection.6.2.11}
+\contentsline {subsection}{\numberline {6.2.12}asin, acos, atan, atan2}{88}{subsection.6.2.12}
+\contentsline {subsection}{\numberline {6.2.13}sinh, cosh, tanh}{88}{subsection.6.2.13}
+\contentsline {subsection}{\numberline {6.2.14}asinh, acosh, atanh}{88}{subsection.6.2.14}
+\contentsline {subsection}{\numberline {6.2.15}transpose}{88}{subsection.6.2.15}
+\contentsline {subsection}{\numberline {6.2.16}DegToRad}{88}{subsection.6.2.16}
+\contentsline {subsection}{\numberline {6.2.17}RadToDeg}{88}{subsection.6.2.17}
+\contentsline {subsection}{\numberline {6.2.18}log}{88}{subsection.6.2.18}
+\contentsline {subsection}{\numberline {6.2.19}log10}{88}{subsection.6.2.19}
+\contentsline {subsection}{\numberline {6.2.20}exp}{88}{subsection.6.2.20}
+\contentsline {subsection}{\numberline {6.2.21}sqrt}{88}{subsection.6.2.21}
+\contentsline {chapter}{\numberline {7}Solvers}{89}{chapter.7}
+\contentsline {section}{\numberline {7.1}Differential Correction}{89}{section.7.1}
+\contentsline {section}{\numberline {7.2}Broyden's Method}{89}{section.7.2}
+\contentsline {section}{\numberline {7.3}Newton's Method}{89}{section.7.3}
+\contentsline {section}{\numberline {7.4}Matlab fmincon}{89}{section.7.4}
+\contentsline {section}{\numberline {7.5}The Vary Command}{89}{section.7.5}
+\contentsline {chapter}{\numberline {8}Event Functions}{91}{chapter.8}
+\contentsline {section}{\numberline {8.1}Event Function Mathematical Definition}{91}{section.8.1}
+\contentsline {section}{\numberline {8.2}Issues in Locating Zero Crossings}{92}{section.8.2}
+\contentsline {section}{\numberline {8.3}Root Finding Options in GMAT}{92}{section.8.3}
+\contentsline {section}{\numberline {8.4}Algorithm for Event Functions }{93}{section.8.4}
+\contentsline {section}{\numberline {8.5}Appendix 1: Root Finding Algorithms}{96}{section.8.5}
+\contentsline {section}{\numberline {8.6}Quadratic Polynomial }{96}{section.8.6}
+\contentsline {section}{\numberline {8.7}Cubic Spline (Not-a-Knot) }{96}{section.8.7}
+\contentsline {chapter}{\numberline {9}Measurement Models}{99}{chapter.9}
+\contentsline {section}{\numberline {9.1}Range}{99}{section.9.1}
+\contentsline {chapter}{\numberline {10}MathSpecAppendices}{103}{chapter.10}
+\contentsline {section}{\numberline {10.1}Vector Identities}{103}{section.10.1}

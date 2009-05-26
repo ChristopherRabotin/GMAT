@@ -1,0 +1,51 @@
+\section{Environment Models}
+
+
+\subsection{Ephemerides}
+
+\subsubsection{Analytic Ephemeris Model}
+
+\begin{itemize}
+     \item For a new body, the user must input the central body by
+     choosing from the 9 Planets or the sun.
+     %
+     \item The user must provide the epoch.
+     %
+     \item  The user must provide the keplerian elements, in the
+     central body centered, MJ2000Eq axis system.
+     %
+     \item  The user can provide a $\mu$ value for use in the
+     solution of the equations of motion.
+     %
+\end{itemize}
+
+The body should store the users original input for the state and
+epoch, and the state and epoch calculated at the last request for
+state information. Then, when the next request is made for state
+information, the epoch and state from the last request are used as
+the input state for next calculation.
+
+\subsection{Atmospheric Density}
+
+\begin{equation}
+28K_p + 0.03e^{K_p} = A_p + 100\left(1 - e^{(-0.08A_p)}\right)
+\end{equation}
+
+\subsubsection{Jacchia Roberts}
+
+\subsubsection{MSISE-90}
+
+A. E. Hedin, Extension of the MSIS Thermospheric Model into the
+Middle and Lower Atmosphere, J. Geophys. Res. 96, 1159, 1991.
+
+Discuss observed vs. adjusted for F10.7 values, also URSI Series D
+
+For testing http://nssdc.gsfc.nasa.gov/space/model/models/msis.html
+
+http://www.agu.org/journals/ja/ja0212/2002JA009430/ \\
+go to auxillary material on the left side menu and open the
+tables-datasets.doc
+
+Other useful models http://nssdc.gsfc.nasa.gov/space/model/
+
+\subsubsection{Exponential Atmosphere}
