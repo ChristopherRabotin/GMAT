@@ -1206,23 +1206,136 @@ derivative is negligibly small so that
 %-------------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------------
 
-The True of Epoch Equator axis system is defined as follows:
-%
+
+The Topocentric coordinate system has its origin at a ground station
+with the following axes definitions
 \begin{itemize}
-\item $x$-axis:  Lies in the local plane of the horizon define by the users
-                 choice of \st{AltitudeReference} and points
-                 South.
+\item $x$-axis:  Completes the right handed set and points south in
+the local horizon system.
 %
-\item $y$-axis:  Lies in the local plane of the horizon define by the users
-                 choice of \st{AltitudeReference} and points
-                 East .
+\item $y$-axis:  Points due East.
 %
-\item $z$-axis:  Normal to the local plane of the horizon.  If the user selects \st{AltitudeReference}
-                 to \st{Ellipsoid}, then the local horizontal is
-                 defined by the normal to the ellipsoid and
-                 Similarly, if  \st{AltitudeReference} is set to
-                 \st{Sphere}.
+\item $z$-axis:  Normal to the local horizon.  The local horizon is
+defined by the selection of the \st{HorizonReference} which is
+either \st{Sphere} or \st{Ellipsoid}.
 \end{itemize}
+
+The calculation of the Topocentric to MJ2000Eq systems is different
+for the different ground system state representations.  If the
+ground station location is provided in cartesian representation, we
+must calculate the spherical representation with respect to the
+desired horizon. We define the axes of the topocentric coordinate
+system, expressed in the body fixed system as $\hat{\mathbf{x}}$,
+$\hat{\mathbf{y}}$, and $\hat{\mathbf{z}}$. If the user has provided
+the  cartesian representation for the ground station location, we
+use the following algorithm to determine $\mathbf{R}_{IT}$ and
+$\dot{\mathbf{R}}_{IT}$, the rotation matrix from topocentric to
+inertial and its
+derivative respctively.\\
+
+
+
+\noindent If \st{HorizonReference} is \st{Sphere}
+%
+\begin{equation}
+     \hat{\mathbf{z}} = \frac{\mathbf{r}_s}{r_s}
+\end{equation}
+If \st{HorizonReference} is \st{Ellipsoid}
+\begin{equation}
+     r_{xy} = \sqrt{ x^2 + y^2 }
+\end{equation}
+%
+Calculate the geocentric latitude to use as an initial guess to find
+the geodetic latitude
+%
+\begin{equation}
+     \phi_{gd}  \approx \mbox{atan2}(z,  r_{xy}  );
+\end{equation}
+%
+\begin{equation}
+    e^2 = 2f-f^2
+\end{equation}
+%
+
+\noindent Set $\delta = 1.0$ to initialize the loop, then,
+
+
+\noindent While ( $\delta > 10^{-11}$ )
+%
+\begin{eqnarray}
+   \phi' & = & \phi_{gd}\\
+   C & = & \frac{R} { \sqrt{1 - e^2\sin^2{\phi}}    }\\
+   \phi_{gd} & = & \mbox{atan} \left( \frac{z + C
+   e^2\sin{\phi}}{r_{xy}}
+   \right)\\
+   \delta & = & | \phi_{gd} - \phi' |
+\end{eqnarray}
+%
+EndWhile\\
+
+
+The longitude  of the station location, $\lambda$,  is calculate
+using
+
+\begin{equation}
+    \lambda = \mbox{atan2}(y_F,x_F)
+\end{equation}
+
+%
+Finally,
+%
+\begin{equation}
+     \hat{\mathbf{z}} = \left(
+     \begin{array}{cc}
+          \cos{\phi_{gd}}\cos{\lambda}\\
+          \cos{\phi_{gd}}\sin{\lambda}\\
+          \sin{\phi_{gd}}
+     \end{array}
+     \right) \label{Eq:GeodeLatToz}
+\end{equation}
+
+\begin{equation}
+     \hat{\mathbf{y}} = \hat{\mathbf{k}}
+     \times \hat{\mathbf{z}}
+\end{equation}
+%
+where
+%
+\begin{equation}
+     \hat{\mathbf{k}} = [0 \hspace{.05 in} 0 \hspace{.05 in} 1]^T
+\end{equation}
+%
+\begin{equation}
+     \hat{\mathbf{x}} = \hat{\mathbf{y}}
+     \times \hat{\mathbf{z}}
+\end{equation}
+%
+\begin{equation}
+     \mathbf{R}_{FT} = [\hat{\mathbf{x}} \hspace{.05 in} \hat{\mathbf{y}}\hspace{.05 in} \hat{\mathbf{z}}]
+\end{equation}
+
+The last step is to determine the rotation matrix from the
+topocenric system to the inertial system by using the rotation
+matrix from body fixed to inertial, $\mathbf{R}_{IF}$, at the
+desired epoch, $t$.  We determine the body fixed rotation matrix
+using the algorithm in Sec. 3.1.9.  Once we have evaluated
+$\mathbf{R}_{IF}$ and $\dot{\mathbf{R}}_{IF}$ we calculate
+$\mathbf{R}_{IT}$ and $\dot{\mathbf{R}}_{IT}$ using
+%
+\begin{eqnarray}
+      \mathbf{R}_{IT} &=& \mathbf{R}_{IF}
+      \mathbf{R}_{FT}\mathbf{R}_{IF}^T\\
+%
+      \dot{\mathbf{R}}_{IT} &=& \dot{\mathbf{R}}_{IF}
+      \mathbf{R}_{FT}\mathbf{R}_{IF}^T + \mathbf{R}_{IF}
+      \mathbf{R}_{FT}\dot{\mathbf{R}}_{IF}^T \label{Eq:TopoRdot}
+\end{eqnarray}
+
+If the user provides the spherical components with respect to the
+Ellipsoid, we only require Eqs.~(\ref{Eq:GeodeLatToz})-
+(\ref{Eq:TopoRdot}) to calculate  $\mathbf{R}_{IF}$ and
+$\dot{\mathbf{R}}_{IF}$ . If the user
+
 
 %-------------------------------------------------------------------------------------
 %-------------------------------------------------------------------------------------
