@@ -121,10 +121,10 @@ has four special cases:  elliptic inclined, circular inclined,
 elliptic equatorial, and circular equatorial.  Certain orbital
 elements are undefined for some of the cases.  For example, the
 right ascension of the ascending node, $\Omega$, is undefined for
-equatorial orbits.  However, computer systems don't handle
-undefined values gracefully.  In this section, we'll see how the
-orbital elements are defined for each of the special cases, and
-how GMAT calculates the orbital elements for each case.
+equatorial orbits.  However, computer systems don't handle undefined
+values gracefully.  In this section, we'll see how the orbital
+elements are defined for each of the special cases, and how GMAT
+calculates the orbital elements for each case\cite{Vallado:01}.
 
 %
 \begin{table*} \caption{The Cartesian State}
@@ -150,7 +150,9 @@ how GMAT calculates the orbital elements for each case.
 \end{table*}
 
 \begin{table*} \caption{The Keplerian Elements (also see Fig. \ref{fig:KeplerianElements})}
-\centering \index{Keplerian elements!definition}
+\centering \index{Keplerian elements!definition} (See Table
+\ref{Table:ElementSpecialCases} for definitions of elements for near
+circular and near equatorial orbits.)
 \begin{tabular}{p{.5 in} p{1.5 in} p{3.5 in}}
   \hline\hline
   % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
@@ -181,6 +183,7 @@ how GMAT calculates the orbital elements for each case.
 %
 \begin{table*} \caption{Keplerian Elements for Special Cases}
  \centering \index{Keplerian elements!special cases}
+ \label{Table:ElementSpecialCases}
 \begin{tabular}{p{1.25 in} p{1.35 in} p{3.2 in}  }
   \hline\hline
   % after \\: \hline or \cline{col1-col2} \cline{col3-col4} ...
@@ -374,11 +377,11 @@ cartesian} \index{Cartesian state!from Keplerian}
 
 The transformation from the Keplerian elements to the cartesian
 state is one of the most common state transformations in
-astrodynamics.  We previously defined both state types and refer
-you to Tables \ref{Table:CartesianStates} and
-\ref{Table:KeplerianElements} for their definitions.  Below we
-show the algorithm that GMAT uses to convert from the Keplerian
-elements to the Cartesian state.
+astrodynamics.  We previously defined both state types and refer you
+to Tables \ref{Table:CartesianStates} and
+\ref{Table:KeplerianElements} for their definitions.  Below we show
+the algorithm that GMAT uses to convert from the Keplerian elements
+to the Cartesian state\cite{Vallado:01}.
 
 \noindent Give:  $a$, $e$, $i$, $\Omega$, $\omega$, $\nu$, and
 $\mu$
@@ -3152,4 +3155,233 @@ following equation
 %
 \begin{equation}
      \mathbf{v}_b = \displaystyle\frac{\displaystyle\sum_{i=1}^n m_i \mathbf{v}_i}{\displaystyle\sum_{i=1}^n m_i}
+\end{equation}
+
+\section{Ground Station Model}
+
+This section contains algorithms for converting the station location
+parameters to body fixed and inertial cartesian coordinates. Ground
+stations are defined in the body fixed frame of the
+\st{CentralBody}. The user can define the ground system location
+using several methods.  GMAT internally uses the cartesian location
+of the ground station with respect to the body fixed coordinate
+system. If the user provides the ground station location in
+cartesian elements, no transformation is required to obtain the body
+fixed representation. For spherical elements with respect to the
+Geocentric reference, GMAT uses the following transformation to
+calculate the cartesian station location in the body fixed frame,
+%
+\begin{eqnarray}
+    \mathbf{r}_F = \left(
+        \begin{array}{cc}
+          \cos{\phi}\cos{\lambda}\\
+          \cos{\phi}\sin{\lambda}\\
+          \sin{\phi}
+          \end{array}
+          \right)
+\end{eqnarray}
+%
+If the station location is defined in terms of the Geodetic
+reference, then the cartesian location is calculated as
+follows\cite{Vallado}:
+%
+\begin{eqnarray}
+    C &=& \displaystyle\frac{R_b}{\sqrt{1 - e_b^2\sin^2{\phi}}}\\
+%
+    S &=& C\left(1 - e_b^2\right)
+\end{eqnarray}
+%
+\begin{eqnarray}
+    r_{xy} &=& \left( C + h_{e\ell\ell}\right)\cos{\phi}\\
+%
+    r_{z} &=& \left( S + h_{e\ell\ell}\right)\sin{\phi}
+\end{eqnarray}
+%
+\begin{eqnarray}
+    \mathbf{r}_F = \left(
+        \begin{array}{cc}
+          r_{xy}\cos{\lambda}\\
+          r_{xy}\sin{\lambda}\\
+          r_{z}
+          \end{array}
+          \right)
+\end{eqnarray}
+%
+To calculate the body-centered MJ2000Eq representation, we calculate
+the rotation matrix from fixed to inertial, $\mathbf{R}_{IF}$, using
+the algorithm in Sec \ref{Sec:Fixed} of the GMAT Mathematical
+Specification. Then,
+%
+\begin{equation}
+    \mathbf{r}_I = \mathbf{R}_{IF}\mathbf{r}_F
+\end{equation}
+
+\section{Geometric Measurements}
+
+The azimuth and elevation angle measurements are fundamental
+quantities employed in orbit determination - primarily when dealing
+with optical telescope data.  These angles are defined in the
+topocentric-horizon coordinate system (SEZ) where azimuth, $\beta$,
+is defined positive clockwise from local North, and elevation,
+$\delta$, is defined positive above the local horizon. In reality,
+the range measurement is not provided by optical telescopes where we
+typically deal with azimuth and elevation. However, for the
+geometric model, we compute the range in  order to compute azimuth
+and elevation. In this regard, the geometric model for range was
+previously described and we will use the same notation.
+
+
+
+%----------------------------------------------------------------------------------
+%---------------------------------- Assumptions -----------------------------------
+%----------------------------------------------------------------------------------
+
+The general form of the measurement model used by GMAT is
+%
+\begin{equation}
+   \mathcal{O}_c = \mathbf{f}_k\left(\mathbf{r}(t), \dot{\mathbf{r}}(t),
+   \mathbf{r}_s, \dot{\mathbf{r}}_s\right) +\mathcal{O}_b + \boldsymbol\delta_a + \boldsymbol\delta_r
+\end{equation}
+%
+%
+\begin{tabbing}[htbp!]
+123456 \= dummy line \kill
+$\mathbf{f}_k$ \> The kinematic model \\
+$\mathbf{r}$ \> Space object position\\
+$\dot{\mathbf{r}}$ \> Space object velocity\\
+$\mathbf{r}_s$ \> Site position\\
+$\dot{\mathbf{r}}_s$    \> Site velocity\\
+$t$    \> Measurement time tag\\
+$\mathcal{O}_b$    \> Measurement bias\\
+$\boldsymbol\delta a$    \> Atmospheric correction\\
+$\boldsymbol\delta r$     \> Relativistic correction\\
+\end{tabbing}
+
+%----------------------------------------------------------------------------------
+%--------------------------------- Definitions ------------------------------------
+%----------------------------------------------------------------------------------
+\subsection*{Definitions}
+\begin{tabbing}[htbp!]
+123  \= space \kill
+$\mathcal{F}^I$ \> Inertial Coordinate System\\
+$\mathcal{F}^F$ \> Body Fixed Coordinate System\\
+T \> Topocentric-horizon Coordinate System\\
+$R_{BI}$ \> Rotation matrix converting $\mathcal{F}^I$ to $\mathcal{F}^B$ \\
+$\beta$ \> Azimuth angle\\
+$\delta$ \> Elevation angle\\
+$\mathbf{r}^{I}$ \> Object position in $\mathcal{F}^I$\\
+$\dot{\mathbf{r}}^{I}$ \> Object velocity in $\mathcal{F}^I$\\
+$\mathbf{r}^{F}_s$ \> Site position in $\mathcal{F}^F$\\
+$\dot{\mathbf{r}}^{F}_s$    \> Site velocity in $\mathcal{F}^F$\\
+$t$    \> Measurement time tag\\
+$\beta_b$    \> Azimuth Measurement bias\\
+$\delta_b$    \> Elevation Measurement bias\\
+\end{tabbing}
+-------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------
+%--------------------------------- Mathematical Model -----------------------------
+%----------------------------------------------------------------------------------
+\subsection*{Mathematical Model}
+
+GMAT supports a geometric model for space object azimuth and
+elevation. The azimuth angle is a measure of the angle between an
+observer's local North and a line of sight vector to a space object.
+The elevation angle is a measure of the angle between the local
+horizon plane of the observer and the line of sight vector to a
+space object. The geometric azimuth and elevation model is
+calculated using vector geometry and ignores signal propagation,
+atmospheric distortion, and other error sources.
+
+In order to compute azimuth and elevation we must first obtain the
+range to the space object from the observer in the
+topocentric-horizon reference frame. Let's assume that we have the
+position vectors of both the observer and the space object in the
+Earth Centered Inertial (I) coordinate system. The kinematic model
+for geometric range is simply
+%
+\begin{equation}
+    \boldsymbol\rho^{I} =  \mathbf{r}^{I} - \mathbf{r}^{I}_{site} = \begin{bmatrix} \rho_x & \rho_y & \rho_z \end{bmatrix}^T
+\end{equation}
+
+The I range can be mapped into the Earth Centered Earth Fixed (F)
+coordinate system through the FK5 reduction. The FK5 reduction can
+be encapsulated into a rotation matrix which we will not expand here
+due to its complexity.
+\begin{equation}
+\boldsymbol\rho^{F}  = R_{FK5}\boldsymbol\rho^{I}\label{eq:FK5rot}
+\end{equation}
+In some cases, the observer location will be expressed in terms of
+geodetic Earth coordinates latitude, longitude, and height above the
+geoid. In this case, we must use these coordinates along with the
+local sidereal time to directly compute it's F position which can
+then be differenced from the space object position that has been
+taken through the FK5 rotation.
+
+Now, let's assume that we are working with
+\begin{gather}
+\boldsymbol\rho^{F} =  \mathbf{r}^{F} - \mathbf{r}_{site}^{F}\\
+\dot{\boldsymbol\rho}^{F}  = \dot{\mathbf{r}}^{F} -
+\dot{\mathbf{r}}_{site}^{F}
+\end{gather}
+ For approximate cases, one can ignore the velocity of the observer site and set
+\begin{equation}
+ \dot{\boldsymbol\rho}^{F}  \approx \dot{\mathbf{r}}^{F}
+\end{equation}
+ We need to map the F range and range rate into the topocentric-horizon reference frame (T). This is accomplished via the following rotation
+ \begin{equation}
+R^{T/F} = \begin{bmatrix}
+\sin(\phi_{gd})\cos(\lambda) & \sin(\phi_{gd})\sin(\lambda) & -\cos(\phi_{gd}) \\
+-\sin(\lambda) & \cos(\lambda) & 0\\
+\cos(\phi_{gd})\cos(\lambda) & \cos(\phi_{gd})\sin(\lambda) & \sin(\phi_{gd})
+\end{bmatrix}
+\end{equation}
+where $\phi_{gd}$ is the geodetic latitude and $\lambda$ is the
+longitude of the observer site. In reality this transformation
+matrix is obtained internally within GMAT by a call to the
+coordinate transformation class, which leads to
+\begin{gather}
+\boldsymbol\rho^{T}  = R^{T/F} \boldsymbol\rho^{F}=\begin{bmatrix} \rho_s & \rho_e & \rho_z \end{bmatrix}^T\\
+\dot{\boldsymbol\rho}^{T}  = R^{T/F}
+\dot{\boldsymbol\rho}^{F}=\begin{bmatrix} \dot{\rho}_s &
+\dot{\rho}_e & \dot{\rho}_z \end{bmatrix}^T \label{eq:Trot}
+\end{gather}
+Now we are ready to compute the azimuth and elevation angles.
+Elevation is simply calculated as
+\begin{equation}
+\sin(\delta) = \frac{\rho_z}{\|\boldsymbol\rho^{T}\|}
+\end{equation}
+Provided that the elevation is not equal to $90^\circ$, we can
+compute the azimuth as
+\begin{equation}
+\tan{\beta} = \frac{\rho_e}{-\rho_s}
+\end{equation}
+In the case where the elevation is exactly equation to $90^\circ$,
+we can compute the azimuth as
+\begin{equation}
+\tan{\beta} = \frac{\dot{\rho}_e}{-\dot{\rho}_s}
+\end{equation}
+
+Now consider that the state vector $\mathbf{s}$ consists of the
+space object position and velocity
+\begin{equation}
+ \mathbf{s} = \begin{bmatrix} \mathbf{r} & \dot{\mathbf{r}} \end{bmatrix}^T
+\end{equation}
+Then the Cartesian partial derivatives of the geometric elevation
+can be expressed as
+\begin{equation}
+\frac{\partial\delta}{\partial\mathbf{s}} = \frac{-\rho_z}{\|\boldsymbol\rho^{T}\|^{3}\cos\delta}\begin{bmatrix} \rho_s & \rho_e & \rho_z \end{bmatrix}^T
+\end{equation}
+When the elevation is not $90^{\circ}$, the Cartesian partial
+derivatives of the geometric azimuth can be expressed as
+\begin{equation}
+\frac{\partial\beta}{\partial\mathbf{s}} = \begin{bmatrix}
+\frac{-\rho_e}{\rho^2_s\sec^{2}\beta} & \frac{1}{\rho_s\sec^{2}\beta} & 0 & 0 & 0 & 0
+\end{bmatrix}^T
+\end{equation}
+For the case when the elevation is exactly $90^{\circ}$, the
+Cartesian partial derivatives of the geometric azimuth can be
+expressed as
+\begin{equation}
+\frac{\partial\beta}{\partial\mathbf{s}} = \begin{bmatrix} 0 & 0 & 0 & \frac{-\dot{\rho}_e}{\dot{\rho}^2_s\sec^{2}\beta} & \frac{1}{\dot{\rho}_s\sec^{2}\beta} & 0\end{bmatrix}^T
 \end{equation}
