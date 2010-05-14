@@ -205,7 +205,7 @@ rho   = 0.7;
 sigma = 1.0;
 tau   = 0.5;
 eta   = 0.4;
-mu    = 1;
+mu    = 1; 
 for i = 1:m
    muvec(i,1) = norm(gradF)/norm(J(:,i));
 end
@@ -280,9 +280,9 @@ while ~Converged && iter <= Options.MaxIter && numfEval <= Options.MaxFunEvals
         [c,J]       = ConCatConstraints(x,ci,ce,Ji,Je,A,b,Aeq,beq,mLI,mLE);
         cviol       = CalcConViolations(c,mE,mI,m);   
         meritFalpha = CalcMeritFunction(f, cviol, mu, Options);
-        
+
         %-----  Check sufficient decrease condition
-        if meritFalpha > meritF + eta*alpha*dirDeriv
+        if (meritFalpha > meritF + eta*alpha*dirDeriv && abs(dirDeriv) > 1.e-8)
             alpha = alpha*tau;
         else
             foundStep = 1;
