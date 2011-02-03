@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:xi="http://www.w3.org/2001/XInclude"
+xmlns:svg="http://www.w3.org/2000/svg"
+xmlns:m="http://www.w3.org/1998/Math/MathML"
+xmlns:html="http://www.w3.org/1999/xhtml"
+xmlns:db="http://docbook.org/ns/docbook">
+
+<title>Begin Finite Burn</title>
+<para>This was created using the June 18, 2008 build of GMAT.</para>
+<section>
+<title>Overview</title>
+<para>The Begin Finite Burn and End Finite Burn commands are very simple.  When the Begin Finite Burn command is entered into the mission sequence it will initiate the thrusters of the spacecraft until the End Finite Burn command is reached.  After the finite burn is turned off, the spacecraft's thrusters will shut down.</para>
+<section>
+<title>Listing of Objects and Commands that interact</title>
+<itemizedlist>
+<listitem><para>Spacecraft</para>
+<itemizedlist>
+<listitem><para>A spacecraft must exist so the finite burn has an object to apply itself to, and a Begin Finite Burn command is how to do just that. </para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>Finite Burn</para>
+<itemizedlist>
+<listitem><para>To apply a Begin Finite Burn command, a Finite Burn must exist in the resource tree under the Burns folder. </para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+</section>
+</section>
+<section>
+<title>Using the GUI</title>
+<para>In the dialog boxes of both the Begin and End commands there are two fields that incorporate a finite burn from the resource tree and any spacecraft created for the mission.  All of the spacecraft are in a list alongside radio buttons and are checked or unchecked, depending on whether or not the burn should be applies to them.  </para>
+<itemizedlist>
+<listitem><para>Apply - Drop Down Menu</para>
+<itemizedlist>
+<listitem><para>This menu lists all of the finite burns created, and from this, one burn can be selected to be used on the spacecraft checked in the adjacent menu.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>To - Radio Button List</para>
+<itemizedlist>
+<listitem><para>Here all of the spacecraft are listed and are accompanied by a radio button.  If the box is checked, that spacecraft will experience the finite burn wherever it is set to occur in the mission sequence.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<screenshot><info><title>Figure: Default Name and Settings for the Begin Finite Burn Command Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
+fileref="???"></imagedata></imageobject>
+<caption><para>Figure: Default Name and Settings for the Begin Finite Burn Command Dialog Box</para></caption></mediaobject></screenshot>
+</section>
+<section>
+<title>Using the script</title>
+<section>
+<title>Script Syntax</title>
+<programlisting><code>BeginFiniteBurn ManeuverName (SpacecraftName); 
+EndFiniteBurn DefaultFB(DefaultSC);
+</code></programlisting>
+</section>
+</section>
+<section>
+<title>Reference Table</title>
+<informaltable>
+<tgroup cols="2">
+<tbody>
+<row>
+<entry><para>ManeuverName</para>
+</entry>
+<entry><para>Default: DefaultFB.</para>
+<para>Options: { Any finite burn existing in the resource tree or created in the script }</para>
+<para>The ManeuverName option allows the user to choose between any previously created finite burn.  As an example, to maneuver DefaultSC using DefaultFB, the script linewould appear as Manevuer DefaultFB(DefaultSC).</para>
+<para>Units: N/A. </para>
+</entry>
+</row>
+<row>
+<entry><para>SpacecraftName</para>
+</entry>
+<entry><para>Default: DefaultSC.</para>
+<para>Options: { Any spacecraft existing in the resource tree or created in the script }</para>
+<para>The SpacecraftName option allows the user to select which spacecraft to maneuver using the maneuver selected in the ManeuverName option.</para>
+<para>Units: N/A.</para>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</section>
+</section>
