@@ -12,7 +12,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 <section>
 <title>Overview</title>
 <para>GMAT was designed to allow users to run GMAT scripts through MATLAB__�__. This feature gives the user greater control and flexibility of GMAT that cannot be done with just the GMAT to MATLAB__�__ interface or GMAT alone. For example, if a user would like to dynamically change scripts and run them, that can currently only be done using the Matlab__�__ to GMAT interface. A MATLAB__�__ script can also be generated to run GMAT scripts that are located in mutliple folders.</para>
-<para>If, after running through this tutorial, you still have difficulties with the interfaces between MATLAB__�__ and GMAT working, visit our [http://gmat.ed-pages.com/forum/viewforum.php?f=14|Matlab Help forum] or our [http://gmat.ed-pages.com/forum/viewtopic.php?f=14&t=65|Matlab<->GMAT Interface FAQ] forum topic.</para>
+<para>If, after running through this tutorial, you still have difficulties with the interfaces between MATLAB__�__ and GMAT working, visit our [http://gmat.ed-pages.com/forum/viewforum.php?f=14|Matlab Help forum] or our [http://gmat.ed-pages.com/forum/viewtopic.php?f=14&amp;t=65|Matlab&lt;->GMAT Interface FAQ] forum topic.</para>
 <section>
 <title>Files and Folders to be used</title>
 <itemizedlist>
