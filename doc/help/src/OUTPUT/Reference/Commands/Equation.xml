@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:xi="http://www.w3.org/2001/XInclude"
+xmlns:svg="http://www.w3.org/2000/svg"
+xmlns:m="http://www.w3.org/1998/Math/MathML"
+xmlns:html="http://www.w3.org/1999/xhtml"
+xmlns:db="http://docbook.org/ns/docbook">
+
+<title>Equation</title>
+<para>This was created using the July 2, 2008 build of GMAT.</para>
+<section>
+<title>Overview</title>
+<para> </para>
+<para>The Equation command uses the Equation to make one variable equal to some combination of previously defined variables and values.  It is highly useful for storing values so that they aren't lost.  Additionally, it is very useful for advanced commands.</para>
+<section>
+<title>Listing of Objects and Commands that interact</title>
+<itemizedlist>
+<listitem><para>ParameterSelectDialog</para>
+<itemizedlist>
+<listitem><para>The standard box for Propagate and other commands, the box can select variables that can contain values which were established using the Assignment command. Additionally, the parameters listed can be changed using the Assignment command.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>Variable</para>
+<itemizedlist>
+<listitem><para>Most often used in conjunction with the Assignment command, the variable object is set up to store values.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>Spacecraft</para>
+<itemizedlist>
+<listitem><para>Can be used in conjunction with the Assignment command so that one spacecraft can take on the characteristics of another spacecraft.  This technique is useful for storing conditions of a particular spacecraft before the values of the spacecraft are changed through Target sequences and Propagate commands.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+</section>
+</section>
+<section>
+<title>Using the GUI</title>
+<itemizedlist>
+<listitem><para>Arg1 (left side of equal sign)</para>
+<itemizedlist>
+<listitem><para>This is where the variable that will be taking on a new value is typed.  It can never be a value, but generally will be a variable or spacecraft.  If it is a spacecraft, this is the spacecraft that will be changing its old conditions.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>Arg2 (Right side of equal sign)</para>
+<itemizedlist>
+<listitem><para>This is what the variable/spacecraft is set equal to whatever is placed in this box.  The right side can contain variables and values.  It can also contain any of the math operations listed in the Math Operators in Scripting under the Reference-Misc menu in GMAT Help.</para></listitem>
+</itemizedlist></listitem>
+</itemizedlist>
+<screenshot><info><title>Figure: Default Name and Settings for the Equation Command Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
+fileref="???"></imagedata></imageobject>
+<caption><para>Figure: Default Name and Settings for the Equation Command Dialog Box</para></caption></mediaobject></screenshot>
+</section>
+<section>
+<title>Using the script</title>
+<section>
+<title>Script Syntax</title>
+<programlisting><code><font face="courier new">GMAT Arg1 = Arg2;</font>
+</code></programlisting>
+</section>
+<section>
+<title>Script Examples</title>
+<programlisting><code>% Setting a variable to a number
+ <font face="courier new">GMAT testVar = 24;</font>
+ % Setting a variable to the value of a math statement
+ <font face="courier new">GMAT testVar = (testVar2 + 50)/2;</font>
+</code></programlisting>
+</section>
+</section>
+<section>
+<title>Reference Table</title>
+<informaltable>
+<tgroup cols="2">
+<tbody>
+<row>	
+<entry><para>Arg1</para>
+</entry>              
+<entry><para> Default: N/A. </para>
+<para>Options: [[Spacecraft Parameter, Array element, Variable, or any other single element                     user defined parameter]</para>
+<para> The Arg1 option allows the user to set                     Arg1 to Arg2. </para>
+<para>Units: N/A.</para>
+</entry>
+</row>
+<row>	
+<entry><para>Arg2</para>
+</entry>              
+<entry><para>Default: N/A. </para>
+<para>Options: [[Spacecraft Parameter, Array element, Variable, any other single element                     user defined parameter, or a combination of the aforementioned parameters using math operators]</para>
+<para>                    The Arg2 option allows the user to define Arg1. </para>
+<para>Units: N/A.</para>
+</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</section>
+</section>
