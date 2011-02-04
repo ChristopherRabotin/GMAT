@@ -96,16 +96,15 @@ fileref="???"></imagedata></imageobject>
 <section>
 <title>Creating and Modifying Objects</title>
 <itemizedlist>
-<listitem><para>__Spacecraft__</para>
+<listitem><para>Spacecraft</para>
 <itemizedlist>
 <listitem><para>Rename DefaultSC to LEOsat</para></listitem>
 <listitem><para>Change the Epoch Format to UTCGregorian</para></listitem>
 <listitem><para>Set the Epoch to Jan 01 2000 11:59:28.000</para></listitem>
 <listitem><para>Switch the State Type to Keplarian</para></listitem>
 <listitem><para>Set SMA = 6738.95113401 , ECC = 0.00168481942805 , INC = 96.8535019521 , RAAN = 279.829547746 , AOP = 246.130924803 , TA = 308.589822969</para></listitem>
-<listitem><para>Note that when you click 'Apply' in this window, some of the values for your orbital elements may change but this is normal and does not require you to change them back again</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>''Script Syntax: ''
+<listitem><para>Note that when you click 'Apply' in this window, some of the values for your orbital elements may change but this is normal and does not require you to change them back again</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create Spacecraft LEOsat;
 GMAT LEOsat.DateFormat = UTCGregorian;
 GMAT LEOsat.Epoch = '01 Jan 2000 11:59:28.000';
@@ -118,21 +117,19 @@ GMAT LEOsat.RAAN = 279.829547746;
 GMAT LEOsat.AOP = 246.1309248029877;
 GMAT LEOsat.TA = 308.5898229690123;
 </code></programlisting>
-<para>{img src=show_image.php?id=299 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<screenshot><info><title>Figure: LEOsat Spacecraft Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<itemizedlist>
-<listitem><para>__Propagators__</para>
+<caption><para>Figure: LEOsat Spacecraft Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+
+<listitem><para>Propagators</para>
 <itemizedlist>
 <listitem><para>Rename DefaultProp to LEOprop</para></listitem>
 <listitem><para>Change both the Degree and Order of the gravity model to 10 to make it more realistic</para></listitem>
 <listitem><para>Set the Atmosphere Model to JacchiaRoberts</para></listitem>
 <listitem><para>Add the Sun, and Luna as Point Masses</para></listitem>
-<listitem><para>Check the Use Solar Radiation Pressure box</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>''Script Syntax:''
+<listitem><para>Check the Use Solar Radiation Pressure box</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create ForceModel LEOprop_ForceModel;
 GMAT LEOprop_ForceModel.CentralBody = Earth;
 GMAT LEOprop_ForceModel.PrimaryBodies = {Earth};
@@ -158,17 +155,16 @@ GMAT LEOprop.MinStep = 0.001;
 GMAT LEOprop.MaxStep = 2700;
 GMAT LEOprop.MaxStepAttempts = 50;
 </code></programlisting>
-<para>{img src=show_image.php?id=296 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<screenshot><info><title>Figure: LEOprop Propagator Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
+<caption><para>Figure: LEOprop Propagator Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+
+
+<listitem><para>Solvers</para>
 <itemizedlist>
-<listitem><para>__Solvers__</para>
-<itemizedlist>
-<listitem><para>Create a ((Differential Corrector Object)) under Solvers > Boundary Value Solvers</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>''Script Syntax:''
+<listitem><para>Create a ((Differential Corrector Object)) under Solvers > Boundary Value Solvers</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create DifferentialCorrector DefaultDC;
 GMAT DefaultDC.ShowProgress = true;
 GMAT DefaultDC.ReportStyle = Normal;
@@ -177,21 +173,19 @@ GMAT DefaultDC.Variables = {dV.V, dV.N};
 GMAT DefaultDC.MaximumIterations = 25;
 GMAT DefaultDC.UseCentralDifferences = false;
 </code></programlisting>
-<para>{img src=show_image.php?id=298 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<screenshot><info><title>Figure: DefaultDC Boundary Value Solver Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<itemizedlist>
-<listitem><para>__Plots/Reports__</para>
+<caption><para>Figure: DefaultDC Boundary Value Solver Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+
+
+<listitem><para>Plots/Reports</para>
 <itemizedlist>
 <listitem><para>Rename DefaultOpenGL to SMAview</para>
 <itemizedlist>
 <listitem><para>Uncheck Draw XY Plane</para></listitem>
-<listitem><para>Change the View Point Vector to  [[ 15000 , 3000 , 0 ]</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+''Script Syntax:''
+<listitem><para>Change the View Point Vector to  [ 15000 , 3000 , 0 ]</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create OpenGLPlot SMAview;
 GMAT SMAview.SolverIterations = Current;
 GMAT SMAview.Add = {LEOsat, Earth};
@@ -206,19 +200,18 @@ GMAT SMAview.ViewUpCoordinateSystem = EarthMJ2000Eq;
 GMAT SMAview.ViewUpAxis = Z;
 GMAT SMAview.XYPlane = Off;
 </code></programlisting>
-<para>{img src=show_image.php?id=297 align="center"}</para>
-<para>
 <screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<itemizedlist>
+<caption><para></para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+
 <listitem><para>Create an OpenGL Plot named RAANview</para>
 <itemizedlist>
 <listitem><para>Add Earth to the Selected Celestial Objects list</para></listitem>
 <listitem><para>Uncheck Draw XY Plane</para></listitem>
 <listitem><para>Change the View Point Vector to  [[ 1800 , 0 , 15000 ]</para></listitem>
 <listitem><para>Change the View Up Definition Axis to X.</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create OpenGLPlot RAANview;
 GMAT RAANview.SolverIterations = Current;
 GMAT RAANview.Add = {LEOsat, Earth};
@@ -234,6 +227,7 @@ GMAT RAANview.ViewUpAxis = X;
 GMAT RAANview.CelestialPlane = Off;
 GMAT RAANview.XYPlane = Off;
 </code></programlisting></listitem>
+</itemizedlist></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
 </section>
@@ -297,7 +291,7 @@ GMAT RAANview.XYPlane = Off;
 <listitem><para>279.829547746 is Achieve2's Value</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
-<para>''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Propagate LEOprop(LEOsat) {LEOsat.ElapsedSecs = 8640.0};
 While LEOsat.ElapsedDays &lt; 10
    Propagate LEOprop(LEOsat);
@@ -308,7 +302,7 @@ While LEOsat.ElapsedDays &lt; 10
          Achieve DC1(LEOsat.Earth.SMA = 6738.951134009997, {Tolerance = 0.05});
       EndTarget;  % For targeter DefaultDC
    EndIf;
-   If LEOsat.EarthMJ2000Eq.RAAN < 279.709 | LEOsat.EarthMJ2000Eq.RAAN > 279.949
+   If LEOsat.EarthMJ2000Eq.RAAN &lt; 279.709 | LEOsat.EarthMJ2000Eq.RAAN > 279.949
       Propagate LEOprop(LEOsat) {LEOsat.EarthMJ2000Eq.VZ = 0.0};
       Target DC1;
          Vary DC1(DefaultIB.N = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = -3.14159, Upper = 3.14159});
@@ -318,36 +312,32 @@ While LEOsat.ElapsedDays &lt; 10
    EndIf;
 EndWhile;
 </code></programlisting>
-<para>{img src=show_image.php?id=291 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<screenshot><info><title>Figure: Propagate1 Propagate Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<para>{img src=show_image.php?id=292 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<caption><para>Figure: Propagate1 Propagate Command</para></caption></mediaobject></screenshot>
+
+<screenshot><info><title>Figure: While1 While Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<para>{img src=show_image.php?id=293 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<caption><para>Figure: While1 While Command</para></caption></mediaobject></screenshot>
+
+<screenshot><info><title>Figure: If1 If Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<para>{img src=show_image.php?id=294 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<caption><para>Figure: If1 If Command</para></caption></mediaobject></screenshot>
+
+<screenshot><info><title>Figure: Vary1 Vary Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-<para>{img src=show_image.php?id=295 align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
+<caption><para>Figure: Vary1 Vary Command</para></caption></mediaobject></screenshot>
+
+<screenshot><info><title>Figure: Achieve1 Achieve Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
+<caption><para>Figure: Achieve1 Achieve Command</para></caption></mediaobject></screenshot>
 </section>
 <section>
 <title>Running the Mission</title>
 <para>[tiki-index.php?page=LEO+Station+Keeping+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Image of Output Tree]</para>
 <para>The views that you created are good for seeing how well the mission sequence is keeping LEOsat in its orbit.  The SMA view shows some thickness to it while the RAAN view shows barely any at all.  You may now try and change the mission parameters as outlined in the mission tree section to see how the spacecraft's drift is affected.</para>
-<para>{img src=show_image.php?id=300 imalign="center" width=1025px}</para>
+<screenshot><info><title>Figure: Output</title></info><mediaobject><imageobject><imagedata align="center"
+fileref="???"></imagedata></imageobject>
+<caption><para>Figure: Output</para></caption></mediaobject></screenshot>
 </section>
 </section>
