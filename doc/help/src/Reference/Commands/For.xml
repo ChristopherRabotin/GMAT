@@ -1,109 +1,178 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>For</title>
 
-<title>For</title>
-<para>This was created using the June 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The for loop is a control flow statement that allows portions of code to be executed iteratively using an explicit loop variable (Wikipedia). GMAT for loops are three-expression loops that allow the user to set the initial value of the loop variable, its increment, and the test to exit the loop.  A parameter must be defined explicitly using a <font face="courier new">Create Variable</font> statement or GUI equivalent before it can be used in a for loop command statement.  The parameters used to define <font face="courier new">Start</font>, <font face="courier new">Increment</font>, and <font face="courier new">End</font> can be any of the following GMAT parameters:  numeric literal (real number), variable, array element, object property.</para>
-</section>
-<section>
-<title>Interfaces</title>
-<para>The GUI for the For Loop command is divided into four sections.  </para>
-<itemizedlist>
-<listitem><para>The first section, the index, is where the counter variable name is displayed.</para></listitem>
-<listitem><para>The second section, the start, is the number with which the counter variable is first stored with.</para></listitem>
-<listitem><para>The third section, the increment, is the value that the counter variable will change by each time the program goes through the loop.</para></listitem>
-<listitem><para>The fourth section, the end, is the value of the counter variable when the loop is exited. </para></listitem>
-</itemizedlist>
-<screenshot><info><title>Figure: Default Name and Settings for the For Loop command Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Default Name and Settings for the For Loop command Dialog Box</para></caption></mediaobject></screenshot>
-<section>
-<title>Script Syntax</title>
-<para><I>(Simple For Loop)</I></para>
-<programlisting><code><font face="courier new">For <I>Variable</I> = Start:End;
-&nbsp &nbsp  <Statements> ;
-EndFor; } </font>
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The for loop is a control flow statement that allows portions of
+    code to be executed iteratively using an explicit loop variable
+    (Wikipedia). GMAT for loops are three-expression loops that allow the user
+    to set the initial value of the loop variable, its increment, and the test
+    to exit the loop. A parameter must be defined explicitly using a Create
+    Variable statement or GUI equivalent before it can be used in a for loop
+    command statement. The parameters used to define Start, Increment, and End
+    can be any of the following GMAT parameters: numeric literal (real
+    number), variable, array element, object property.</para>
+  </section>
+
+  <section>
+    <title>Interfaces</title>
+
+    <para>The GUI for the For Loop command is divided into four
+    sections.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>The first section, the index, is where the counter variable name
+        is displayed.</para>
+      </listitem>
+
+      <listitem>
+        <para>The second section, the start, is the number with which the
+        counter variable is first stored with.</para>
+      </listitem>
+
+      <listitem>
+        <para>The third section, the increment, is the value that the counter
+        variable will change by each time the program goes through the
+        loop.</para>
+      </listitem>
+
+      <listitem>
+        <para>The fourth section, the end, is the value of the counter
+        variable when the loop is exited.</para>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the For Loop command
+        Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the For Loop command
+          Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <para>(Simple For Loop)</para>
+
+      <programlisting><code>For Variable = Start:End;
+
+EndFor; }
 </code></programlisting>
-<para><I>(Expanded For Loop)</I></para>
-<programlisting><code><font face="courier new">For <I>Variable</I> = Start:Increment:End; 
-&nbsp &nbsp <Statements>;
-EndFor;</font>
+
+      <para>(Expanded For Loop)</para>
+
+      <programlisting><code>For Variable = Start:Increment:End;
+
+EndFor;
 </code></programlisting>
-</section>
-<section>
-<title>Script Examples</title>
-<programlisting><code>% Output the value of the For loop <font face="courier new"><I>Variable</I></font> to a file
-<font face="courier new">For I = 1:1:10;
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>% Output the value of the For loop Variable to a file
+For I = 1:1:10;
 GMAT testVar = I;
 Report DefaultReportFile I;
 EndFor;
 </code></programlisting>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>	
-<entry><para><I>Variable</I></para>
-</entry>	
-<entry><para>Default: No Default. </para>
-<para>Options:[ Variable ]: </para>
-<para>The <I>Variable</I> field    allows the user to define the variable that to be incremented during the loop process.</para>
-<para>Units: N/A.</para>
-</entry>
-</row>
-<row>	
-<entry><para>Start</para>
-</entry>	
-<entry><para>Default: 1. </para>
-<para>Options: [ Real Number, Array element, Variable, or any user defined    parameter ]. </para>
-<para>The Start option allows the user to set the starting value of the For Loop. </para>
-<para>Units: N/A.</para>
-</entry>
-</row>
-<row>	
-<entry><para>Increment</para>
-</entry>	
-<entry><para>Default: 1. </para>
-<para>Options: [ Real Number, Array element, Variable, or any user defined    parameter ]. </para>
-<para>The Increment option allows the user to set the increment value of the For Loop. When the increment value is not included in a for loop statement, the default value is used.</para>
-<para>Units: N/A.</para>
-</entry>
-</row>
-<row>	
-<entry><para>End</para>
-</entry>	
-<entry><para>Default: 10. </para>
-<para>Options: [ Real Number, Array, Variable, or any user defined    parameter ]. </para>
-<para>The End option allows the user to set the ending    value of the For Loop. </para>
-<para>Units: N/A.</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
-<section>
-<title>Objects and Command Interactions</title>
-</section>
-<section>
-<title>For Loop Behavior</title>
-<para>When the <font face="courier new">Increment</font> option is left out of the</para>
-<para>    script syntax the default value is used. If an <font face="courier new">Increment</font> value of 0 is used,</para>
-<para>    the For Loop should not execute but GMAT should continue to run. If <font face="courier new"> End>Start</font> and</para>
-<para>   <font face="courier new">Increment</font>&lt;0, then the For Loop should not execute. If <font face="courier new"> Start>End </font> and</para>
-<para>    <font face="courier new">Increment</font>>0, then the For Loop should not execute. </para>
-<para><font face="courier new">End</font> can be equal to <font face="courier new">Start</font>, but the For Loop will</para>
-<para>    not execute. </para>
-</section>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>Variable</para></entry>
+
+            <entry><para>Default: No Default. </para> <para>Options:[ Variable
+            ]: </para> <para>The Variable field allows the user to define the
+            variable that to be incremented during the loop process.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Start</para></entry>
+
+            <entry><para>Default: 1. </para> <para>Options: [ Real Number,
+            Array element, Variable, or any user defined parameter ]. </para>
+            <para>The Start option allows the user to set the starting value
+            of the For Loop. </para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Increment</para></entry>
+
+            <entry><para>Default: 1. </para> <para>Options: [ Real Number,
+            Array element, Variable, or any user defined parameter ]. </para>
+            <para>The Increment option allows the user to set the increment
+            value of the For Loop. When the increment value is not included in
+            a for loop statement, the default value is used.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>End</para></entry>
+
+            <entry><para>Default: 10. </para> <para>Options: [ Real Number,
+            Array, Variable, or any user defined parameter ]. </para>
+            <para>The End option allows the user to set the ending value of
+            the For Loop. </para> <para>Units: N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+
+  <section>
+    <title>Objects and Command Interactions</title>
+
+    <para></para>
+  </section>
+
+  <section>
+    <title>For Loop Behavior</title>
+
+    <para>When the Increment option is left out of the</para>
+
+    <para>script syntax the default value is used. If an Increment value of 0
+    is used,</para>
+
+    <para>the For Loop should not execute but GMAT should continue to run. If
+    End&gt;Start and</para>
+
+    <para>Increment&lt;0, then the For Loop should not execute. If
+    Start&gt;End and</para>
+
+    <para>Increment&gt;0, then the For Loop should not execute.</para>
+
+    <para>End can be equal to Start, but the For Loop will</para>
+
+    <para>not execute.</para>
+  </section>
 </section>

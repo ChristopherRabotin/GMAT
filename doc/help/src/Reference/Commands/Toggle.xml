@@ -43,19 +43,19 @@ fileref="???"></imagedata></imageobject>
 <title>Using the script</title>
 <section>
 <title>Script Syntax</title>
-<programlisting><code><font face="courier new">Toggle <I>OutputNames</I> Arg</font>
+<programlisting><code>Toggle OutputNames Arg
 </code></programlisting>
 </section>
 <section>
 <title>Script Examples</title>
 <programlisting><code>% Turn off Report file for the first day of propagation
-<font face="courier new">Toggle ReportFile1 Off
+Toggle ReportFile1 Off
 Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
 Toggle ReportFile1 On
-Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});</font>
+Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
 
 % Turn off XYPlot and Report file for the first day of propagation 
-<font face="courier new">Toggle XYPlot1 ReportFile1 Off
+Toggle XYPlot1 ReportFile1 Off
 Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1});
 
 Toggle XYPlot1 ReportFile1 On
@@ -69,7 +69,7 @@ Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1})
 <tgroup cols="2">
 <tbody>
 <row>	
-<entry><para><I>OutputNames</para>
+<entry><para>OutputNames</para>
 </entry>	
 <entry><para>Default: DefaultOpenGL . Options:[[ Any OpenGL, Report,    XYplot, or any other Plot/Report type ]: The Toggle option allows the user    to assign the Plot/Report(s) to be toggled. When more than one Plot/Report is    being toggled they need to be separated by a space. Units: N/A.</para>
 </entry>

@@ -15,22 +15,22 @@ xmlns:db="http://docbook.org/ns/docbook">
 <section>
 <title>Possible Coupling with Other Objects</title>
 <itemizedlist>
-<listitem><para> Optimize Command</para>
+<listitem><para>Optimize Command</para>
 <itemizedlist>
-<listitem><para> NonLinearConstraints are used in Optimize Command.</para></listitem>
+<listitem><para>NonLinearConstraints are used in Optimize Command.</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
 <itemizedlist>
-<listitem><para> Optimizers (Solvers)</para>
+<listitem><para>Optimizers (Solvers)</para>
 <itemizedlist>
-<listitem><para> Must set optimizer in order to apply NonLinearConstraints.</para></listitem>
+<listitem><para>Must set optimizer in order to apply NonLinearConstraints.</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
 </section>
 </section>
 <section>
 <title>Using the GUI</title>
-<para>The NonLinearConstraint dialog contains four menus, which are Optimizer, Constraint, sign of equality or inequality and Constraint Value. </para>
+<para>The NonLinearConstraint dialog contains four menus, which are Optimizer, Constraint, sign of equality or inequality and Constraint Value.</para>
 <itemizedlist>
 <listitem><para> Optimizer - Drop Down Menus</para>
 <itemizedlist>
@@ -70,7 +70,7 @@ fileref="???"></imagedata></imageobject>
 <title>Using the Script</title>
 <section>
 <title>Script Syntax</title>
-<programlisting><code>NonLinearConstraint <I>OptimizerName</I> (<font face="courier new">{logical expression}</font>)
+<programlisting><code>NonLinearConstraint OptimizerName ({logical expression})
 </code></programlisting>
 </section>
 <section>
@@ -92,10 +92,10 @@ NonLinearConstraint fminconSQP( Sat.SMA >= 7000a );
 <tgroup cols="2">
 <tbody>
 <row>
-<entry><para><I>OptimizeName</I></para>
+<entry><para>OptimizeName</para>
 </entry>
 <entry><para>Default: SQP1.</para>
-<para>Options: { Any existing fmincon solver } </para>
+<para>Options: { Any existing fmincon solver }</para>
 <para>The OptimizerName option allows the user to specify which solver to use in satisfying nonlinear constraints.</para>
 <para>Units: N/A.</para>
 </entry>
@@ -104,12 +104,9 @@ NonLinearConstraint fminconSQP( Sat.SMA >= 7000a );
 <entry><para>{logical expression}</para>
 </entry>
 <entry><para>Default: DefaultSC.SMA = 7000.</para>
-<para>Options: { Arg1 &lt;= Arg2 where <= can be >= ; &lt;= ; = }</para>
-<para>The logical expression field allows the user to specify the constraint to be satisfied upon convergence of the solver given by <I>OptimizerName</I>. Arg1 and Arg2 can be any of the following: Real Number, a 1-D Array (column vector),Array element, Variable, Spacecraft Parameter or any other numeric user defined parameter. If Arg1 is a 1-D Array, then Arg2 must be a 1-D Array with the same dimensions and vice-versa.</para>
+<para>Options: { Arg1 &lt;= Arg2 where &lt;= can be >= ; &lt;= ; = }</para>
+<para>The logical expression field allows the user to specify the constraint to be satisfied upon convergence of the solver given by OptimizerName. Arg1 and Arg2 can be any of the following: Real Number, a 1-D Array (column vector),Array element, Variable, Spacecraft Parameter or any other numeric user defined parameter. If Arg1 is a 1-D Array, then Arg2 must be a 1-D Array with the same dimensions and vice-versa.</para>
 <para>Units: N/A.</para>
-</entry> 
-</row>
-<para></para></para>
 </entry> 
 </row>
 </tbody>

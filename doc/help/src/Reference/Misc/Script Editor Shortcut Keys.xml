@@ -9,12 +9,12 @@ xmlns:db="http://docbook.org/ns/docbook">
 
 <title>Script Editor Shortcut Keys</title>
 <section>
-<title>===Reference: Script Editor Shortcut Keys===</title>
+<title>Reference: Script Editor Shortcut Keys</title>
 <para>The GMAT Script Editor provides a user with text editor capabilities inside of the GMAT GUI. This article provides a listing of the current shortcut keys used in the Script Editor by release date. Shortcut key are subject to change in future releases. Check back to this article for Script Editor shortcut key updates.</para>
 <para>Would you like to take part in discussions for possible changes to the current shortcut keys? If so, visit the following forum topic:</para>
-<para>[http://gmat.ed-pages.com/forum/viewtopic.php?f=2&t=107|Proposed Shortcut Keys inside GMAT (Text Fields)]</para>
+<para>[http://gmat.ed-pages.com/forum/viewtopic.php?f=2&amp;t=107|Proposed Shortcut Keys inside GMAT (Text Fields)]</para>
 <section>
-<title>===2008-09-30 and 2007-12-10===</title>
+<title>2008-09-30 and 2007-12-10</title>
 <para>||Ctrl + C | Copy</para>
 <para>Ctrl + X | Cut</para>
 <para>Ctrl + V | Paste</para>
@@ -30,7 +30,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 <para>Ctrl + track mouse scroll | Enlarge/Decrease text size in script editor||</para>
 </section>
 <section>
-<title>===2007-08-23===</title>
+<title>2007-08-23</title>
 <para>||Ctrl + C | Copy</para>
 <para>Ctrl + X | Cut</para>
 <para>Ctrl + V | Paste</para>

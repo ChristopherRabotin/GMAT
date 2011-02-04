@@ -39,13 +39,13 @@ fileref="???"></imagedata></imageobject>
 <title>Using the script</title>
 <section>
 <title>Script Syntax</title>
-<programlisting><code><font face="courier new">Maneuver <I>BurnName (SpacecraftName) ;</I></font>
+<programlisting><code>Maneuver BurnName (SpacecraftName) ;
 </code></programlisting>
 </section>
 <section>
 <title>Script Examples</title>
 <programlisting><code>% Impulsive Burn
-<font face="courier new">Maneuver DefaultIB(DefaultSC);</font>
+Maneuver DefaultIB(DefaultSC);
 </code></programlisting>
 </section>
 </section>
@@ -55,24 +55,23 @@ fileref="???"></imagedata></imageobject>
 <tgroup cols="2">
 <tbody>
 <row>	
-<entry><para><I>BurnName</I></para>
+<entry><para>BurnName</para>
 </entry>	
 <entry><para>Default: DefaultIB. </para>
-<para>Options:[ Any impulsive burn    existing in the resource tree or created in the script]:</para>
-<para>    The <I>BurnName</I> field allows the user to choose between    any previously created impulsive burn.  As an example, to    maneuver <I>DefaultSC</I> using DefaultIB, the script line    would appear as Manevuer DefaultIB(DefaultSC).</para>
-<para>  Units: N/A.</para>
+<para>Options:[ Any impulsive burn existing in the resource tree or created in the script]:</para>
+<para>The BurnName field allows the user to choose between any previously created impulsive burn.  As an example, to maneuver DefaultSC using DefaultIB, the script line would appear as Manevuer DefaultIB(DefaultSC).</para>
+<para>Units: N/A.</para>
 </entry>
 </row>
 <row>    
-<entry><para><I>SpacecraftName</I></para>
+<entry><para>SpacecraftName</para>
 </entry>	
-<entry><para>Default: DefaultSC.  </para>
-<para>Options:[ Any spacecraft existing in the     resource tree or created in the script]:</para>
-<para>        The <I>SpacecraftName</I> field allows the user to select    which spacecraft to maneuver using the maneuver selected in the    <I>BurnName</I> field.    </para>
-<para>    Units: N/A.</para>
+<entry><para>Default: DefaultSC.</para>
+<para>Options:[ Any spacecraft existing in the resource tree or created in the script]:</para>
+<para>The SpacecraftName field allows the user to select which spacecraft to maneuver using the maneuver selected in the BurnName field.</para>
+<para>Units: N/A.</para>
 </entry>
 </row>
-<row>
 </tbody>
 </tgroup>
 </informaltable>
