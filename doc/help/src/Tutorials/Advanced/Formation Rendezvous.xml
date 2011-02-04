@@ -48,7 +48,7 @@ fileref="???"></imagedata></imageobject>
 <section>
 <title>Objects Required</title>
 <itemizedlist>
-<listitem><para>spacecraft: Sat1, Sat2, Sat3, Sat4</para></listitem>
+<listitem><para>Spacecraft: Sat1, Sat2, Sat3, Sat4</para></listitem>
 <listitem><para>Impulsive Burn: Burn1</para></listitem>
 <listitem><para>Propagator: RKV_LowEarth</para></listitem>
 <listitem><para>Differential Corrector: DC</para></listitem>
@@ -59,7 +59,7 @@ fileref="???"></imagedata></imageobject>
 <section>
 <title>Creating and Modifying Objects</title>
 <itemizedlist>
-<listitem><para>__Spacecraft__</para>
+<listitem><para>Spacecraft</para>
 <itemizedlist>
 <listitem><para>Sat1</para>
 <itemizedlist>
@@ -67,11 +67,8 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Use coordination system EarthMJ2000Eq</para></listitem>
 <listitem><para>Change the Epoch Format to UTCGregorian</para></listitem>
 <listitem><para>Set the Epoch to 01 Jan 2000 11:59:27.966</para></listitem>
-<listitem><para>Use Keplerian State Type</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+
-<para>+''Script Syntax:''</para>
+<listitem><para>Use Keplerian State Type</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create Spacecraft Sat1;
 GMAT Sat1.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
 GMAT Sat1.CoordinateSystem = EarthMJ2000Eq;
@@ -86,6 +83,8 @@ GMAT Sat1.TA  = 90;
 <screenshot><info><title>Figure: Sat1 Spacecraft Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Sat1 Spacecraft Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+</itemizedlist>
 <itemizedlist>
 <listitem><para>Sat2</para>
 <itemizedlist>
@@ -94,8 +93,7 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Change the Epoch Format to UTCGregorian</para></listitem>
 <listitem><para>Set the Epoch to 01 Jan 2000 11:59:27.966</para></listitem>
 <listitem><para>Use Keplerian State Type</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create Spacecraft Sat2;
 GMAT Sat2.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
 GMAT Sat2.CoordinateSystem = EarthMJ2000Eq;
@@ -107,6 +105,7 @@ GMAT Sat2.AOP   = 180.95;
 GMAT Sat2.RAAN  = 284.39;
 GMAT Sat2.TA    = 264.90;      
 </code></programlisting>
+</listitem></itemizedlist></listitem></itemizedlist>
 <itemizedlist>
 <listitem><para>Sat3</para>
 <itemizedlist>
@@ -115,8 +114,7 @@ GMAT Sat2.TA    = 264.90;
 <listitem><para>Change the Epoch Format to UTCGregorian</para></listitem>
 <listitem><para>Set the Epoch to 01 Jan 2000 11:59:27.966</para></listitem>
 <listitem><para>Use Keplerian State Type</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create Spacecraft Sat3;
 GMAT Sat3.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
 GMAT Sat3.CoordinateSystem = EarthMJ2000Eq;
@@ -128,6 +126,7 @@ GMAT Sat3.AOP   = 181.54;
 GMAT Sat3.RAAN  = 287.90;
 GMAT Sat3.TA    = 261.81;      
 </code></programlisting>
+</listitem></itemizedlist></listitem></itemizedlist>
 <itemizedlist>
 <listitem><para>Sat4</para>
 <itemizedlist>
@@ -136,8 +135,7 @@ GMAT Sat3.TA    = 261.81;
 <listitem><para>Change the Epoch Format to UTCGregorian</para></listitem>
 <listitem><para>Set the Epoch to 01 Jan 2000 11:59:27.966</para></listitem>
 <listitem><para>Use Keplerian State Type</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create Spacecraft Sat4;
 GMAT Sat4.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
 GMAT Sat4.CoordinateSystem = EarthMJ2000Eq;
@@ -149,18 +147,20 @@ GMAT Sat4.AOP   = 182.141;
 GMAT Sat4.RAAN  = 291.82;
 GMAT Sat4.TA    = 258.67;
 </code></programlisting>
+</listitem></itemizedlist></listitem></itemizedlist>
+</listitem></itemizedlist>
+
+
 <itemizedlist>
-<listitem><para>__Propagators__</para>
+<listitem><para>Propagators</para>
 <itemizedlist>
 <listitem><para>Add propagator RKV_LowEarth</para></listitem>
 <listitem><para>Remove primary bodies or gravity models from all propagators</para></listitem>
 <listitem><para>Use RKV_LowEarth propagator</para></listitem>
 <listitem><para>Set the integrator Min Step Size to 0.001</para></listitem>
 <listitem><para>Set the integrator Max Step Size to 900</para></listitem>
-<listitem><para>Set Earth, Sun, Luna and Jupiter as Point Masses</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+
-<para>+''Script Syntax:''</para>
+<listitem><para>Set Earth, Sun, Luna and Jupiter as Point Masses</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create ForceModel LowEarth;
 GMAT LowEarth.PointMasses = {Earth, Sun, Luna, Jupiter};
 
@@ -173,16 +173,16 @@ GMAT RKV_LowEarth.FM      = LowEarth;
 <screenshot><info><title>Figure: RKV_LowEarth Propagator Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: RKV_LowEarth Propagator Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+</itemizedlist>
+
 <itemizedlist>
-<listitem><para>__Burns__</para>
+<listitem><para>Burns</para>
 <itemizedlist>
 <listitem><para>Add impulsive burn Burn1</para></listitem>
 <listitem><para>Origin is Earth</para></listitem>
-<listitem><para>Set V to 0.0001</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<listitem><para>Set V to 0.0001</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create ImpulsiveBurn Burn1;
 GMAT Burn1.Origin = Earth;
 GMAT Burn1.Axes = VNB;
@@ -191,14 +191,15 @@ GMAT Burn1.Element1 = .0001;
 <screenshot><info><title>Figure: Burn1 Impulsive Burn Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Burn1 Impulsive Burn Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+</itemizedlist>
+
 <itemizedlist>
-<listitem><para>__Solvers__</para>
+<listitem><para>Solvers</para>
 <itemizedlist>
 <listitem><para>Set DifferentialCorrector DC</para></listitem>
-<listitem><para>Use the target text file DifferentialCorrectorDC.data</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+
-<para>+''Script Syntax:''</para>
+<listitem><para>Use the target text file DifferentialCorrectorDC.data</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create DifferentialCorrector DC;
 GMAT DC.ShowProgress = true;
 GMAT DC.ReportStyle = 'Normal';
@@ -208,19 +209,20 @@ GMAT DC.MaximumIterations = 25;
 <screenshot><info><title>Figure: DC Differential Corrector Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: DC Differential Corrector Object</para></caption></mediaobject></screenshot>
+</listitem></itemizedlist></listitem>
+</itemizedlist>
+
 <itemizedlist>
-<listitem><para>__Coordinate Systems__</para>
+<listitem><para>Coordinate Systems</para>
 <itemizedlist>
 <listitem><para>Add two new systems Sat1LVLH, Sat2VNB</para></listitem>
 <listitem><para>Sat1LVLH</para>
 <itemizedlist>
 <listitem><para>Type of Axes is ObjectReferenced</para></listitem>
 <listitem><para>Origin of system is Sat1</para></listitem>
-<listitem><para>Primary is Earth</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+
-<para>+''Script Syntax:''</para>
+<listitem><para>Primary is Earth</para>
+
+<para>Script Syntax:</para>
 <programlisting><code>Create CoordinateSystem EarthMoonRot;
 Create CoordinateSystem Sat1LVLH;
 GMAT Sat1LVLH.Axes    = ObjectReferenced;
@@ -232,28 +234,30 @@ GMAT Sat1LVLH.ZAxis   = -R;
 <screenshot><info><title>Figure: Sat1LVLH Coordinate System Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Sat1LVLH Coordinate System Object</para></caption></mediaobject></screenshot>
-<itemizedlist>
+</listitem></itemizedlist></listitem>
+
 <listitem><para>Sat2VNB</para>
 <itemizedlist>
 <listitem><para>Type of Axes is ObjectReferenced</para></listitem>
 <listitem><para>Origin of system is Sat2</para></listitem>
 <listitem><para>Primary is Earth</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create CoordinateSystem Sat2VNB;
 GMAT Sat2VNB.Axes    = ObjectReferenced;
 GMAT Sat2VNB.Origin  = Sat2;
 GMAT Sat2VNB.Primary = Earth;
 GMAT Sat2VNB.XAxis   = V;
 GMAT Sat2VNB.YAxis   = N;
-</code></programlisting>
+</code></programlisting></listitem>
+</itemizedlist></listitem></itemizedlist>
+</listitem></itemizedlist>
+
+
 <itemizedlist>
-<listitem><para>__Plots/Reports__</para>
+<listitem><para>Plots/Reports</para>
 <itemizedlist>
-<listitem><para>Data Report saved to a file </para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>+
-<para>+''Script Syntax:''</para>
+<listitem><para>Data Report saved to a file </para>
+<para>Script Syntax:</para>
 <programlisting><code>Create ReportFile DataReport;
 GMAT DataReport.Filename = ./output/SampleMissions/Ex_FormationRendezvous.report;
 GMAT DataReport.Precision = 16;
@@ -263,14 +267,14 @@ GMAT DataReport.ColumnWidth = 20;
 <screenshot><info><title>Figure: Data Report Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Data Report Object</para></caption></mediaobject></screenshot>
-<itemizedlist>
+</listitem>
+
 <listitem><para>XY Plots</para>
 <itemizedlist>
 <listitem><para>Add plots Sat2wrtSat1LVLH, Sat1wrtSat2VNB and Sat2wrtSat1VNB2</para>
 <itemizedlist>
 <listitem><para>Sat2wrtSat1LVLH: XZ plots of Sat2 in Sat1VNB</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create XYPlot Sat2wrtSat1LVLH;
 GMAT Sat2wrtSat1LVLH.SolverIterations = None;
 GMAT Sat2wrtSat1LVLH.IndVar   = Sat2.Sat1LVLH.X;
@@ -280,27 +284,30 @@ GMAT Sat2wrtSat1LVLH.Grid     = On
 <screenshot><info><title>Figure: Sat2wrtSat1LVLH XY Plot Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Sat2wrtSat1LVLH XY Plot Object</para></caption></mediaobject></screenshot>
-<itemizedlist>
+</listitem>
+
+
 <listitem><para>Sat1wrtSat2VNB: XY plots of Sat1 in Sat2VNB</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create XYPlot Sat1wrtSat2VNB;
 GMAT Sat1wrtSat2VNB.SolverIterations = None;
 GMAT Sat1wrtSat2VNB.IndVar       = Sat1.Sat2VNB.X;
 GMAT Sat1wrtSat2VNB.Add          = Sat1.Sat2VNB.Y;
 GMAT Sat1wrtSat2VNB.Grid         = On;
-</code></programlisting>
-<itemizedlist>
+</code></programlisting></listitem>
+
 <listitem><para>Sat2wrtSat1VNB2: YZ plots of Sat1 in Sat2VNB</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create XYPlot Sat1wrtSat2VNB2;
 GMAT Sat1wrtSat2VNB2.SolverIterations = None;
 GMAT Sat1wrtSat2VNB2.IndVar       = Sat1.Sat2VNB.Y;
 GMAT Sat1wrtSat2VNB2.Add          = Sat1.Sat2VNB.Z;
 GMAT Sat1wrtSat2VNB2.Grid         = On;
-</code></programlisting>
-<itemizedlist>
+</code></programlisting></listitem>
+</itemizedlist></listitem></itemizedlist></listitem>
+
+
+
 <listitem><para>OpenGL Plots</para>
 <itemizedlist>
 <listitem><para>Add plot Sat2InSat1LVLH</para></listitem>
@@ -311,8 +318,7 @@ GMAT Sat1wrtSat2VNB2.Grid         = On;
 <listitem><para>Select coordination system Sat1LVLH</para></listitem>
 <listitem><para>Select X as View Up Axis</para></listitem>
 <listitem><para>Select Earth as the View Point Reference and the View Direction body from those drop down menus</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Create OpenGLPlot Sat2InSat1LVLH;
 GMAT Sat2InSat1LVLH.Add = {Sat2, Sat3, Sat4};
 GMAT Sat2InSat1LVLH.CoordinateSystem = Sat1LVLH;
@@ -336,19 +342,8 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;
 </code></programlisting>
 <screenshot><info><title>Figure: Sat2InSat1LVLH OpenGL Plot Object</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Sat2InSat1LVLH OpenGL Plot Object</para></caption></mediaobject></screenshot></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
+<caption><para>Figure: Sat2InSat1LVLH OpenGL Plot Object</para></caption></mediaobject></screenshot>
+</listitem>
 </itemizedlist></listitem>
 </itemizedlist></listitem>
 </itemizedlist></listitem>
@@ -450,8 +445,7 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Report8</para>
 <itemizedlist>
 <listitem><para>Refer to Report4 for parameters list</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<para>Script Syntax:</para>
 <programlisting><code>Toggle Sat1wrtSat2VNB On;
 Toggle Sat2InSat1LVLH On;
 Toggle Sat1wrtSat2VNB2 On;
@@ -486,6 +480,9 @@ fileref="???"></imagedata></imageobject>
 </itemizedlist></listitem>
 </itemizedlist>
 </section>
+
+
+
 <section>
 <title>Target1 Sequence</title>
 <itemizedlist>
@@ -499,9 +496,9 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Lower ( Limit ) = - 0.3</para></listitem>
 <listitem><para>Upper ( Limit ) = 0.3</para></listitem>
 <listitem><para>Max Step =  0.05</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Vary2</para>
 <itemizedlist>
 <listitem><para>Set the variable N using Burn1</para></listitem>
@@ -511,8 +508,7 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Upper ( Limit ) = 0.3</para></listitem>
 <listitem><para>Max Step = 0.05</para></listitem>
 </itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>Vary3</para>
 <itemizedlist>
 <listitem><para>Set the variable B using Burn1</para></listitem>
@@ -522,22 +518,19 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Upper ( Limit ) = 0.3</para></listitem>
 <listitem><para>Max Step = 0.05</para></listitem>
 </itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>Maneuver1</para>
 <itemizedlist>
 <listitem><para>Utilizes the Burn1 for Sat2</para></listitem>
 </itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>Propagate2</para>
 <itemizedlist>
 <listitem><para>Use RKV_LowEarth propagator </para></listitem>
 <listitem><para>Set the stopping condition parameter to be 5498.65387429 elapsed secs</para></listitem>
 </itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev1</para>
+
+<listitem><para>Achieve1</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
@@ -546,8 +539,9 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Tolerance = 0.0001</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev2</para>
+</listitem>
+
+<listitem><para>Achieve2</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
@@ -556,8 +550,9 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Tolerance = 0.0001</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev3</para>
+</listitem>
+
+<listitem><para>Achieve3</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
@@ -566,30 +561,34 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Tolerance = 0.0001</para></listitem>
 </itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report9</para>
 <itemizedlist>
 <listitem><para>Refer to Report1 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report10</para>
 <itemizedlist>
 <listitem><para>Refer to Report2 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report11</para>
 <itemizedlist>
 <listitem><para>Refer to Report3 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report12</para>
 <itemizedlist>
-<listitem><para>Refer to Report4 for parameters list</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<listitem><para>Refer to Report4 for parameters list</para></listitem>
+</itemizedlist>
+</listitem>
+
+<listitem>
+<para>Script Syntax:</para>
 <programlisting><code>Target DC;
 
      Vary DC(Burn1.V = 0.0001, {Perturbation = 0.0001, MaxStep = 0.05, Lower = -0.3, Upper = 0.3});
@@ -621,16 +620,21 @@ fileref="???"></imagedata></imageobject>
 <caption><para>Figure: Maneuver1 Maneuver Command</para></caption></mediaobject></screenshot>
 <screenshot><info><title>Figure: Achieve1 Achieve Command</title></info><mediaobject><imageobject><imagedata align="center"
 fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Achieve1 Achieve Command</para></caption></mediaobject></screenshot></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
+<caption><para>Figure: Achieve1 Achieve Command</para></caption></mediaobject></screenshot>
+</listitem>
+</itemizedlist></listitem></itemizedlist>
 </section>
+
+
+
+
+
 <section>
 <title>Target2 Sequence</title>
 <itemizedlist>
 <listitem><para>Target2</para>
 <itemizedlist>
+
 <listitem><para>Vary4</para>
 <itemizedlist>
 <listitem><para>Set the variable V using Burn1</para></listitem>
@@ -639,9 +643,9 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Lower ( Limit ) = - 1.0</para></listitem>
 <listitem><para>Upper ( Limit ) = 1.0</para></listitem>
 <listitem><para>Max Step =  0.5 km/s </para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Vary5</para>
 <itemizedlist>
 <listitem><para>Set the variable N using Burn1</para></listitem>
@@ -650,9 +654,9 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Lower ( Limit ) = - 1.0</para></listitem>
 <listitem><para>Upper ( Limit ) = 1.0</para></listitem>
 <listitem><para>Max Step = 0.5</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Vary6</para>
 <itemizedlist>
 <listitem><para>Set the variable B using Burn1</para></listitem>
@@ -661,103 +665,106 @@ fileref="???"></imagedata></imageobject>
 <listitem><para>Lower ( Limit ) = - 1.0</para></listitem>
 <listitem><para>Upper ( Limit ) = 1.0</para></listitem>
 <listitem><para>Max Step = 0.5</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Maneuver2</para>
 <itemizedlist>
 <listitem><para>Utilizes the Burn1 for Sat2</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Propagate3</para>
 <itemizedlist>
 <listitem><para>Use RKV_LowEarth propagator </para></listitem>
 <listitem><para>Set the stopping condition parameter to 5498.65387429 elapsed secs</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev4</para>
+</listitem>
+
+<listitem><para>Achieve4</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
 <listitem><para>Sat2.VX = Sat1.VX</para></listitem>
 <listitem><para>Tolerance = 0.0001</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev5</para>
+</itemizedlist></listitem></itemizedlist>
+</listitem>
+
+<listitem><para>Achieve5</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
 <listitem><para>Sat2.VY = Sat1.VY</para></listitem>
 <listitem><para>Tolerance = 0.0001</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Achiev6</para>
+</itemizedlist></listitem></itemizedlist>
+</listitem>
+
+<listitem><para>Achieve6</para>
 <itemizedlist>
 <listitem><para>Goal</para>
 <itemizedlist>
 <listitem><para>Sat2.VZ = Sat1.VZ</para></listitem>
 <listitem><para>Tolerance = 0.0001</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
+</itemizedlist></listitem></itemizedlist>
+</listitem>
+
 <listitem><para>Report13</para>
 <itemizedlist>
 <listitem><para>Refer to Report1 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report14</para>
 <itemizedlist>
 <listitem><para>Refer to Report2 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report15</para>
 <itemizedlist>
 <listitem><para>Refer to Report3 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report16</para>
 <itemizedlist>
 <listitem><para>Refer to Report4 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Propagate4</para>
 <itemizedlist>
 <listitem><para>Use RKV_LowEarth propagator</para></listitem>
 <listitem><para>Set the stopping condition parameter to 0.2 elapsed days</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report17</para>
 <itemizedlist>
 <listitem><para>Refer to Report1 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report18</para>
 <itemizedlist>
 <listitem><para>Refer to Report2 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report19</para>
 <itemizedlist>
 <listitem><para>Refer to Report3 for parameters list</para></listitem>
-</itemizedlist></listitem>
 </itemizedlist>
-<itemizedlist>
+</listitem>
+
 <listitem><para>Report20</para>
 <itemizedlist>
-<listitem><para>Refer to Report4 for parameters list</para>
-<para>+</para>
-<para>+''Script Syntax:''</para>
+<listitem><para>Refer to Report4 for parameters list</para></listitem>
+</itemizedlist>
+</listitem>
+
+<listitem>
+<para>Script Syntax:</para>
 <programlisting><code>Target DC;
 
      Vary DC(Burn1.V = 0.0001, {Perturbation = 0.0001, MaxStep = 0.5, Lower = -1.0, Upper = 1.0});
@@ -785,13 +792,17 @@ Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
 Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
 Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
 Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;
-</code></programlisting></listitem>
-</itemizedlist></listitem>
+</code></programlisting>
+</listitem>
+
 </itemizedlist></listitem>
 </itemizedlist>
 </section>
 </section>
 </section>
+
+
+
 <section>
 <title>Running the Mission</title>
 <para>[tiki-editpage.php#_b_Resource_Mission_and_Output_trees_b_|Image of Output Tree]</para>
