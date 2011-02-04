@@ -130,7 +130,6 @@ GMAT Spacecraft1.Cr = 1.8;
 <para>Units:  N/A.</para>
 </entry>
 </row>
-<row>
 </tbody>
 </tgroup>
 </informaltable> 
@@ -279,6 +278,7 @@ GMAT Spacecraft1.Cr = 1.8;
 <para>The AngularVelocityZ component is the z-component of the spacecraft's body axes with respect to the system defined by AttitudeCoordinateSystem.</para>
 <para>Units:  deg/sec.</para>
 </entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable> 

@@ -109,7 +109,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>FuelMass </para>
 </entry>	
 <entry><para> Default:  756. </para>
-<para>Options:  [[Real Number&ge;0]: </para>
+<para>Options:  [Real Number ≥ 0]</para>
 <para>The FuelMass field is  the mass of fuel in the tank.  </para>
 <para>Units:  kg.  </para>
 </entry>
@@ -118,7 +118,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para> Pressure </para>
 </entry>	
 <entry><para> Default:  1500. </para>
-<para>Options:  [[Real Number&ge;0]:</para>
+<para>Options:  [Real Number ≥ 0]</para>
 <para>The Pressure field isthe pressure of the fuel in the tank. </para>
 <para>Units:  kPa.  </para>
 </entry>
@@ -127,7 +127,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>  Temperature </para>
 </entry>	
 <entry><para> Default:  20. </para>
-<para>Options:  [[Real Number]:</para>
+<para>Options:  [Real Number]</para>
 <para> The Temperature field is the	temperature of the fuel in the tank.  </para>
 <para>Units:  C. </para>
 </entry>
@@ -136,7 +136,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>RefTemperature </para>
 </entry>	
 <entry><para> Default:  20. </para>
-<para>Options:  [[Real Number]:</para>
+<para>Options:  [Real Number]</para>
 <para>  RefTemperature  </para>
 <para>Units: C. </para>
 </entry>
@@ -145,7 +145,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>Volume </para>
 </entry>	
 <entry><para> Default:  0.75. </para>
-<para>Options:  [[Real Number&ge;0]: </para>
+<para>Options:  [Real Number ≥ 0]</para>
 <para>The Volume field is the volume of the tank.</para>
 <para>	Units: m<superscript>3</superscript>.</para>
 </entry>
@@ -154,7 +154,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>FuelDensity </para>
 </entry>	
 <entry><para> Default:  1260. </para>
-<para>Options:   [[Real Number&ge;0]: </para>
+<para>Options:   [Real Number ≥ 0]</para>
 <para>The FuelDensity parameter is the fuel density. </para>
 <para>Units:  kg/m<superscript>3</superscript> </para>
 </entry>
@@ -163,7 +163,7 @@ GMAT FuelTank1.PressureRegulated = true;
 <entry><para>PressureRegulated </para>
 </entry>	
 <entry><para>Default:  true. </para>
-<para>Options:  [[true, false]:</para>
+<para>Options:  [true, false]</para>
 <para>  The PressureRegulated flag allows the userto choose between a pressure regulated tank or a blow down tank.  If PressureRegulated is true, then thepressure is held constant as fuel mass is depleted.  If PressureRegulated is false, then the pressuredecreases as fuel is depleted. </para>
 </entry>
 </row>

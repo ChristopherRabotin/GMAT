@@ -64,21 +64,20 @@ fileref="???"></imagedata></imageobject>
 <title>Using the Script</title>
 <section>
 <title>Script Syntax</title>
-<para>^</para>
-<para>Create Libration Point <Name>;</para>
-<para><Name>.Primary = <Body>;</para>
-<para><Name>.Secondary = <Body2>;</para>
-<para><Name>.Point = <'L1', 'L2', 'L3', 'L4', 'L5'></para>
-<para>^</para>
+<programlisting><code>
+Create Libration Point ;
+.Primary = ;
+.Secondary = ;
+.Point = &lt;'L1', 'L2', 'L3', 'L4', 'L5'>
+</code></programlisting>
 </section>
 <section>
 <title>Sample Script</title>
-<para>^</para>
-<para>Create LibrationPoint Libration1;</para>
-<para>GMAT Libration1.Primary = Sun;</para>
-<para>GMAT Libration1.Secondary = Earth;</para>
-<para>GMAT Libration1.Point = 'L1';</para>
-<para>^</para>
+<programlisting><code>Create LibrationPoint Libration1;
+GMAT Libration1.Primary = Sun;
+GMAT Libration1.Secondary = Earth;
+GMAT Libration1.Point = 'L1';
+</code></programlisting>
 </section>
 </section>
 <section>
@@ -99,7 +98,7 @@ fileref="???"></imagedata></imageobject>
 <entry><para>Secondary</para>
 </entry>	
 <entry><para>Default:  Earth. </para>
-<para> Options: [    Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, or any Barycenter. ( The Primary and Secondary bodies cannot be the same )]: </para>
+<para> Options: [Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto, or any Barycenter. ( The Primary and Secondary bodies cannot be the same )]: </para>
 <para>The Secondary field    tells GMAT which body to consider the secondary body in the    calculation of the location of a libration point. </para>
 <para> Units:  N/A. </para>
 </entry>

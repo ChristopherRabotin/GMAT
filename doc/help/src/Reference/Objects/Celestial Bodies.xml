@@ -63,32 +63,32 @@ fileref="???"></imagedata></imageobject>
 <title>Using the script</title>
 <section>
 <title>Script Syntax</title>
-<para>^</para>
-<para>Create Planet Earth;</para>
-<para>GMAT Earth.BodyType = 'Planet';</para>
-<para>GMAT Earth.Mass = 5.973331957140716e+024;</para>
-<para>GMAT Earth.EquatorialRadius = 6378.1363;</para>
-<para>GMAT Earth.Flattening = 0.0033527;</para>
-<para>GMAT Earth.PolarRadius = 6356.75232242699;</para>
-<para>GMAT Earth.Mu = 398600.4415;</para>
-<para>GMAT Earth.PosVelSource = 'DE_405';</para>
-<para>GMAT Earth.State = [[ 0 0 0 0 0 0 ];</para>
-<para>GMAT Earth.StateTime = 0;</para>
-<para>GMAT Earth.CentralBody = 'Sun';</para>
-<para>GMAT Earth.BodyNumber = 2;</para>
-<para>GMAT Earth.RefBodyNumber = 3;</para>
-<para>GMAT Earth.SourceFilename = './files/planetary_ephem/de/winp1941.405';</para>
-<para>GMAT Earth.SourceFile = ./files/planetary_ephem/de/winp1941.405;</para>
-<para>GMAT Earth.UsePotentialFileFlag = false;</para>
-<para>GMAT Earth.PotentialFileName = './files/gravity/earth/JGM2.cof';</para>
-<para>GMAT Earth.AngularVelocity = [[ 0 0 7.2921158553e-005 ];</para>
-<para>GMAT Earth.HourAngle = 0;</para>
-<para>GMAT Earth.AtmosphereModelName = '';</para>
-<para>GMAT Earth.Order = 4;</para>
-<para>GMAT Earth.Degree = 4;</para>
-<para>GMAT Earth.RotationDataSource = 'NotApplicable';</para>
-<para>GMAT Earth.NutationUpdateInterval = 60;</para>
-<para>^</para>
+<programlisting><code>
+Create Planet Earth;
+GMAT Earth.BodyType = 'Planet';
+GMAT Earth.Mass = 5.973331957140716e+024;
+GMAT Earth.EquatorialRadius = 6378.1363;
+GMAT Earth.Flattening = 0.0033527;
+GMAT Earth.PolarRadius = 6356.75232242699;
+GMAT Earth.Mu = 398600.4415;
+GMAT Earth.PosVelSource = 'DE_405';
+GMAT Earth.State = [[ 0 0 0 0 0 0 ];
+GMAT Earth.StateTime = 0;
+GMAT Earth.CentralBody = 'Sun';
+GMAT Earth.BodyNumber = 2;
+GMAT Earth.RefBodyNumber = 3;
+GMAT Earth.SourceFilename = './files/planetary_ephem/de/winp1941.405';
+GMAT Earth.SourceFile = ./files/planetary_ephem/de/winp1941.405;
+GMAT Earth.UsePotentialFileFlag = false;
+GMAT Earth.PotentialFileName = './files/gravity/earth/JGM2.cof';
+GMAT Earth.AngularVelocity = [[ 0 0 7.2921158553e-005 ];
+GMAT Earth.HourAngle = 0;
+GMAT Earth.AtmosphereModelName = '';
+GMAT Earth.Order = 4;
+GMAT Earth.Degree = 4;
+GMAT Earth.RotationDataSource = 'NotApplicable';
+GMAT Earth.NutationUpdateInterval = 60;
+</code></programlisting>
 </section>
 </section>
 <section>
@@ -102,14 +102,14 @@ fileref="???"></imagedata></imageobject>
 </entry>
 <entry><para>Default: 398600.4414.</para>
 <para>Options: { Real Number ~060~ 0 }</para>
-<para>The Mu field allows the user to define the gravitational parameter of a celestial body. Units: km^3/sec^2. z</para>
+<para>The Mu field allows the user to define the gravitational parameter of a celestial body. Units: km<superscript>3</superscript>/sec<superscript>2</superscript>. z</para>
 </entry>
 </row>
 <row>
-<entry><para>Equatorial Radius
-<entry><para>Default: 6378.1363.  </para>
+<entry><para>Equatorial Radius</para></entry>
+<entry><para>Default: 6378.1363.</para>
 <para>Options: { Real Number ~060~ 0 }</para>
-<para>The EquatorialRadius field allows the user to define the equatorial radius of a celestial body. </para>
+<para>The EquatorialRadius field allows the user to define the equatorial radius of a celestial body.</para>
 <para>Units: km. </para>
 </entry>
 </row>
@@ -126,8 +126,8 @@ fileref="???"></imagedata></imageobject>
 </entry>
 <entry><para>Default:  21544.500371.</para>
 <para>Options:  { Real Number }</para>
-<para>    The InitialEpoch field allows the user to define the initial epoch, in A1 Modified Julian Date, for a celestial body. The initial epoch is only used when the user selects Analytic for the Ephemeris field on the solar system. In this case, GMAT solves Kepler's problem to determine theposition and velocity of a celestial body, using the initial epoch and state information described below.</para>
-<para>    Units: A1ModJulian.</para>
+<para>The InitialEpoch field allows the user to define the initial epoch, in A1 Modified Julian Date, for a celestial body. The initial epoch is only used when the user selects Analytic for the Ephemeris field on the solar system. In this case, GMAT solves Kepler's problem to determine theposition and velocity of a celestial body, using the initial epoch and state information described below.</para>
+<para>Units: A1ModJulian.</para>
 </entry>
 </row>
 <row>
@@ -144,7 +144,7 @@ fileref="???"></imagedata></imageobject>
 </entry>
 <entry><para>Default:  0.017046.</para>
 <para>Options: [Real Number >=0 }</para>
-<para>    The ECC field allows the user to define the  eccentricity of a celestial body's orbit about its  central body. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
+<para>The ECC field allows the user to define the  eccentricity of a celestial body's orbit about its  central body. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
 <para>Units: None. </para>
 </entry>
 </row>

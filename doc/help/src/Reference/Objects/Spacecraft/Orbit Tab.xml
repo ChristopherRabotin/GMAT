@@ -47,8 +47,8 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>Coordinate System</para>
 </entry>
-<entry><para>Default: EarthMJ2000Eq. </para>
-<para>Options: { EarthMJ2000Eq, EarthMJ2000Ec, EarthFixed, or any user defined system }  </para>
+<entry><para>Default: EarthMJ2000Eq.</para>
+<para>Options: { EarthMJ2000Eq, EarthMJ2000Ec, EarthFixed, or any user defined system }</para>
 <para>The Coordinate System field allows the user to choose which coordinate system with which to define the orbit state vector.  The Coordinate System field has a dependency upon the State Type field.  If the coordinate system chosen by the user does not have a gravitational body at the origin, then the state types Keplerian, ModifiedKeplerian, and Equinoctial are not permitted.  This is because these state types require a � value.  </para>
 <para>Units:  N/A.</para>
 </entry>
@@ -56,9 +56,9 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>Epoch Format</para>
 </entry>
-<entry><para>Default: TAIModJulian. </para>
-<para>Options: { A1ModJulian, TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, UTCGregorian, TTGregorian } </para>
-<para>The Epoch Format field allows the user to specify the format for defining a spacecraft's initial epoch. Epoch Format determines both the time system (TAI, TT, etc) and the time format (Modified Julian or Gregorian). </para>
+<entry><para>Default: TAIModJulian.</para>
+<para>Options: { A1ModJulian, TAIModJulian, UTCModJulian, TTModJulian, A1Gregorian, TAIGregorian, UTCGregorian, TTGregorian }</para>
+<para>The Epoch Format field allows the user to specify the format for defining a spacecraft's initial epoch. Epoch Format determines both the time system (TAI, TT, etc) and the time format (Modified Julian or Gregorian).</para>
 <para>Units:  N/A.</para>
 </entry>
 </row>
@@ -75,16 +75,16 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </tbody>
 </tgroup>
 </informaltable> 
-<para>__Cartesian State Type __</para>
+<para>Cartesian State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
 <row>
 <entry><para>X</para>
 </entry>
-<entry><para>Default: 7100. </para>
+<entry><para>Default: 7100.</para>
 <para>Options: { Real Number }</para>
-<para>X is the x-component of the Spacecraft state in the coordinate system chosen in the Spacecraft Coordinate System field.  </para>
+<para>X is the x-component of the Spacecraft state in the coordinate system chosen in the Spacecraft Coordinate System field.</para>
 <para>Units: km.</para>
 </entry>
 </row>
@@ -93,25 +93,25 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </entry> 
 <entry><para>Default: 0. </para>
 <para>Options: { Real Number } </para>
-<para>Y is the y-component of the Spacecraft state in the coordinate system chosen in the Spacecraft  Coordinate System field.  </para>
+<para>Y is the y-component of the Spacecraft state in the coordinate system chosen in the Spacecraft  Coordinate System field.</para>
 <para>Units: km.</para>
 </entry>
 </row>
 <row>
 <entry><para>Z</para>
 </entry>  
-<entry><para>Default: 1300. </para>
-<para>Options: { Real Number } </para>
-<para>Z is the z-component of the Spacecraft state in the coordinate system chosen in the Spacecraft Coordinate System field.  </para>
+<entry><para>Default: 1300.</para>
+<para>Options: { Real Number }</para>
+<para>Z is the z-component of the Spacecraft state in the coordinate system chosen in the Spacecraft Coordinate System field.</para>
 <para>Units: km.</para>
 </entry>
 </row>
 <row>
 <entry><para>VX</para>
 </entry>
-<entry><para>Default: 0. </para>
-<para>Options: { Real Number } </para>
-<para>VX is the x-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field. </para>
+<entry><para>Default: 0.</para>
+<para>Options: { Real Number }</para>
+<para>VX is the x-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field.</para>
 <para>Units: km/sec.</para>
 </entry>
 </row>
@@ -119,8 +119,8 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <entry><para>VY</para>
 </entry>
 <entry><para>Default: 7.35.</para>
-<para> Options: { Real Number } </para>
-<para>VY is the y-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field.  </para>
+<para> Options: { Real Number }</para>
+<para>VY is the y-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field. </para>
 <para>Units: km/sec.</para>
 </entry>
 </row>
@@ -128,16 +128,16 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <entry><para>VZ</para>
 </entry> 
 <entry><para>Default: 1.0. </para>
-<para>Options: { Real Number } </para>
-<para>VZ is the z-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field.  </para>
+<para>Options: { Real Number }</para>
+<para>VZ is the z-component of the Spacecraft velocity in the coordinate system chosen in the Spacecraft Coordinate System field.</para>
 <para>Units: km/sec.</para>
 </entry>
 </row>
 </tbody>
 </tgroup>
 </informaltable> 
-<para><p>NOTE: Default values for the remaining state types are obtained through transformations of the default <font face="courier new">Cartesian</font> spacecraft state values. The <font face="courier new">Keplerian, ModifiedKeplerian,</font> and <font face="courier new">Equinoctial</font> are dependant on the origin of the <font face="courier new">CoordinateSystem</font>, because the state types require a � value.</p></para>
-<para>__Keplerian State Type__</para>
+<para>NOTE: Default values for the remaining state types are obtained through transformations of the default Cartesian spacecraft state values. The Keplerian, ModifiedKeplerian, and Equinoctial are dependant on the origin of the CoordinateSystem, because the state types require a � value.</para>
+<para>Keplerian State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
@@ -146,7 +146,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </entry>
 <entry><para>Default: 7191.938817629013. </para>
 <para>Options: { abs(SMA) > 1 meter } </para>
-<para>The SMA field is the spacecraft orbit's osculating Keplerian semimajor axis in the coordinate system chosen in the Spacecraft Coordinate System field. SMA must be strictly greater than 1 m or less than -1 m to avoid numerical issues in the conversions to other state types. For circular and elliptical orbits ( 0 &lt;= ECC < 0.9999999 ) SMA should only be greater than 1 m and for hyperbolic orbits (ECC > 1.0000001) SMA should be less than -1 m. GMAT does not support the creation of parabolic orbits.</para>
+<para>The SMA field is the spacecraft orbit's osculating Keplerian semimajor axis in the coordinate system chosen in the Spacecraft Coordinate System field. SMA must be strictly greater than 1 m or less than -1 m to avoid numerical issues in the conversions to other state types. For circular and elliptical orbits ( 0 &lt;= ECC &lt; 0.9999999 ) SMA should only be greater than 1 m and for hyperbolic orbits (ECC > 1.0000001) SMA should be less than -1 m. GMAT does not support the creation of parabolic orbits.</para>
 <para>Units: km.</para>
 </entry>
 </row>
@@ -154,7 +154,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <entry><para>ECC</para>
 </entry>
 <entry><para>Default: 0.02454974900598137. </para>
-<para>Options: { 0.0 &lt;= ECC  <= 0.9999999, or ECC >= 1.0000001} </para>
+<para>Options: { 0.0 &lt;= ECC  &lt;= 0.9999999, or ECC >= 1.0000001} </para>
 <para>The ECC field is the spacecraft orbit's osculating eccentricity. For circular or elliptic orbits, ECC must be greater than or equal to 0.0, and less than or equal to 0.9999999 to avoid numerical issues in the conversion to other state types as the Keplerian elements are undefined for parabolic orbits. For hyperbolic orbits ECC must be greater than or equal to 1.0000001. See also the SMA description.  </para>
 <para>Units: Dimensionless.</para>
 </entry>
@@ -162,8 +162,8 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>INC</para>
 </entry>
-<entry><para>Default:  12.85008005658097. </para>
-<para>Options: { Real Number } </para>
+<entry><para>Default:  12.85008005658097.</para>
+<para>Options: { Real Number }</para>
 <para>The INC field is the spacecraft orbit's osculating inclination, in degrees, with respect to the selected coordinate system.  </para>
 <para>Units: degrees.</para>
 </entry>
@@ -171,8 +171,8 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>RAAN</para>
 </entry>
-<entry><para>Default: 306.6148021947984. </para>
-<para>Options: { Real Number } </para>
+<entry><para>Default: 306.6148021947984.</para>
+<para>Options: { Real Number }</para>
 <para>The RAAN field is the spacecraft orbit's osculating right ascension of the ascending node, in degrees, with respect to the selected coordinate system.  </para>
 <para>Units: degrees.</para>
 </entry>
@@ -181,7 +181,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <entry><para>AOP</para>
 </entry>
 <entry><para>Default:  314.1905515359921.</para>
-<para>Options: { Real Number } </para>
+<para>Options: { Real Number }</para>
 <para>The AOP field is the spacecraft orbit's osculating argument of periapsis, in degrees, with respect to the selected coordinate system.  </para>
 <para>Units: degrees.</para>
 </entry>
@@ -198,7 +198,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </tbody>
 </tgroup>
 </informaltable> 
-<para>__Modified Keplerian State Type__</para>
+<para>Modified Keplerian State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
@@ -247,15 +247,15 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </tbody>
 </tgroup>
 </informaltable> 
-<para>__Spherical AZFPA State Type__</para>
+<para>Spherical AZFPA State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
 <row>
 <entry><para>RMAG</para>
 </entry>
-<entry><para>Default:  7218.032973047435. </para>
-<para>Options: { Real Number > 0 } </para>
+<entry><para>Default:  7218.032973047435.</para>
+<para>Options: { Real Number > 0 }</para>
 <para>The RMAG field allows the user to set the magnitude of the spacecraft's position vector.</para>
 <para>Units: km.</para>
 </entry>
@@ -263,18 +263,18 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>RA</para>
 </entry>
-<entry><para>Default:  0. </para>
-<para>Options: { Real Number } </para>
-<para>The RA field allows the user to set the spacecraft's right ascension.  </para>
+<entry><para>Default:  0.</para>
+<para>Options: { Real Number }</para>
+<para>The RA field allows the user to set the spacecraft's right ascension.</para>
 <para>Units: degrees.</para>
 </entry>
 </row>
 <row>
 <entry><para>DEC</para>
 </entry>
-<entry><para>Default:  10.37584492005105. </para>
+<entry><para>Default:  10.37584492005105.</para>
 <para>Options: { Real Number }</para>
-<para>The DEC field allows the user to set the spacecraft's declination.  </para>
+<para>The DEC field allows the user to set the spacecraft's declination.</para>
 <para>Units: degrees.</para>
 </entry>
 </row>
@@ -308,7 +308,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </tbody>
 </tgroup>
 </informaltable> 
-<para>__Spherical RADEC State Type__</para>
+<para>Spherical RADEC State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
@@ -357,7 +357,7 @@ GMAT DefaultSC.TA = 99.88774933204884;
 </tbody>
 </tgroup>
 </informaltable> 
-<para>__Equinoctial State Type__</para>
+<para>Equinoctial State Type</para>
 <informaltable>
 <tgroup cols="2">
 <tbody>
@@ -370,36 +370,36 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <row>
 <entry><para>h</para>
 </entry>
-<entry><para>Default: -0.02423431419337062. </para>
+<entry><para>Default: -0.02423431419337062.</para>
 <para>Options: { Real Number } </para>
-<para>The h field is the projection of the eccentricity vector onto the <I>y<subscript>ep</subscript></I> axes. The <I>F<subscript>ep</subscript></I> system is a system used in calculating the equinoctial elements and is beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses <I>F<subscript>ep</subscript></I> and the calculation of the equinoctial elements in detail.  </para>
+<para>The h field is the projection of the eccentricity vector onto the y<subscript>ep</subscript> axes. The F<subscript>ep</subscript> system is a system used in calculating the equinoctial elements and is beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses F<subscript>ep</subscript> and the calculation of the equinoctial elements in detail.  </para>
 <para>Units: None.</para>
 </entry>
 </row>
 <row>
 <entry><para>k</para>
 </entry>
-<entry><para>Default: -0.003922778585859663. </para>
-<para>Options: { Real Number } </para>
-<para>The k field is the projection of the eccentricity vector onto the <I>x<subscript>ep</subscript></I> axes.  The <I>F<subscript>ep</subscript></I> system is a system used in calculating the equinoctial elements and is beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses <I>F<subscript>ep</subscript></I> and the calculation of the equinoctial elements in detail.  </para>
+<entry><para>Default: -0.003922778585859663.</para>
+<para>Options: { Real Number }</para>
+<para>The k field is the projection of the eccentricity vector onto the x<subscript>ep</subscript> axes.  The F<subscript>ep</subscript> system is a system used in calculating the equinoctial elements and is beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses F<subscript>ep</subscript> and the calculation of the equinoctial elements in detail.  </para>
 <para>Units: None.</para>
 </entry>
 </row>
 <row>
 <entry><para>p</para>
 </entry> 
-<entry><para>Default: -0.09038834725719359. </para>
+<entry><para>Default: -0.09038834725719359.</para>
 <para>Options: { Real Number }</para>
-<para>The p field is the projection of the N vector onto the <I>y<subscript>ep</subscript></I> axes.  The N vector and the <I>F<subscript>ep</subscript></I> system are used in calculating the equinoctial elements and are beyond the scope of this discussion. The GMAT Mathematical Specifications document  discusses N and <I>F<subscript>ep</subscript></I> and the calculation of the equinoctial elements in detail.  </para>
+<para>The p field is the projection of the N vector onto the y<subscript>ep</subscript> axes.  The N vector and the F<subscript>ep</subscript> system are used in calculating the equinoctial elements and are beyond the scope of this discussion. The GMAT Mathematical Specifications document  discusses N and F<subscript>ep</subscript> and the calculation of the equinoctial elements in detail.  </para>
 <para>Units: None.</para>
 </entry>
 </row>
 <row>
 <entry><para>q</para>
 </entry>
-<entry><para>Default: 0.06716454898232072. </para>
-<para>Options: { Real Number } </para>
-<para>The q field is the projection of the N vector onto the <I>x<subscript>ep</subscript></I> axes.  The N vector and the <I>F<subscript>ep</subscript></I> system are used in calculating the equinoctial elements and are beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses N and <I>F<subscript>ep</subscript></I> and the calculation of the  equinoctial elements in detail.  </para>
+<entry><para>Default: 0.06716454898232072.</para>
+<para>Options: { Real Number }</para>
+<para>The q field is the projection of the N vector onto the x<subscript>ep</subscript> axes.  The N vector and the F<subscript>ep</subscript> system are used in calculating the equinoctial elements and are beyond the scope of this discussion. The GMAT Mathematical Specifications document discusses N and F<subscript>ep</subscript> and the calculation of the  equinoctial elements in detail.  </para>
 <para>Units: None.</para>
 </entry>
 </row>
@@ -421,22 +421,22 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <section>
 <title>Behavior when Changing the Coordinate System</title>
 <para>When you select a Coordinate System for a spacecraft, you specify the origin and axes set with respect to which the state is defined.    When you change  the coordinate system via the GUI, the GUI performs the conversion from the initial coordinate system to the new system.   Similarly, when you specify a state component via the script, that state component is set in the coordinate system defined in the CoordinateSystem field.  For example, the following lines would result in the X-component of the Cartesian state of MySat to be 1000, in the EarthFixed system.</para>
-<para><font face="courier new">MySat.CoordinateSystem = EarthFixed;</font></para>
-<para><font face="courier new">MySat.X = 1000;</font></para>
+<para>MySat.CoordinateSystem = EarthFixed;</para>
+<para>MySat.X = 1000;</para>
 <para>Internally, GMAT stores the state representation of a spacecraft with respect to a reference celestial body and expressed with respect to the MJ2000 Earth Equator.   When the script lines above are executed in a script, GMAT converts the state to the specified coordinate system, in this case EarthFixed, sets the  X  component to 1000, and then converts the state back to the internal representation.</para>
 </section>
 <section>
 <title>Behavior when Changing the State Type/Representation</title>
 <para>When you select a state type (also called state representation) for a spacecraft you select the state representation to input state data from available types such as Cartesian, Keplerian, and Equinoctial to name a few.   Internally, GMAT uses the Cartesian state representation of a spacecraft with respect to a reference celestial body and expressed with respect to the MJ2000 Earth Equator.    When you change the state type via the GUI, the GUI performs the conversion from the initial type to the new type.   When  you specify a state component via the script, that state component is set in the coordinate system defined in the CoordinateSystem field.   For example, the following lines would result in the SMA of MySat to be set to 7000, in the EarthFixed system.</para>
-<para><font face="courier new">MySat.CoordinateSystem = EarthFixed;</font></para>
-<para><font face="courier new">MySat.INC = 25;</font></para>
+<para>MySat.CoordinateSystem = EarthFixed;</para>
+<para>MySat.INC = 25;</para>
 <para>When the script lines above are executed in a script, GMAT converts the state to the specified coordinate system and then to the specified state type -- in this case EarthFixed and Keplerian respectively -- sets the INC component to 25, and then converts the state back to the internal representation.</para>
 </section>
 <section>
 <title>Behavior when Changing the Epoch</title>
-<para>When you select an <font face="courier new">Epoch Format</font> for a spacecraft, you define the time system (TAI, UTC, etc.) and whether the epoch is expressed in the Gregorian or Modified Julian format.  When you specify the <font face="courier new">Epoch</font>, you define the initial epoch of the spacecraft in the specified coordinate system and state representation.</para>
+<para>When you select an Epoch Format for a spacecraft, you define the time system (TAI, UTC, etc.) and whether the epoch is expressed in the Gregorian or Modified Julian format.  When you specify the Epoch, you define the initial epoch of the spacecraft in the specified coordinate system and state representation.</para>
 <para>If your choice for a spacecraft's coordinate system is a time varying system such as the EarthFixed system, then when you change the spacecraft's epoch, you also change the spacecraft's inertial state representation. For example, the following lines would result in the cartesian state of MySat to be set to [7000 0 1300 0 7.35 1] in the EarthFixed system at 01 Dec 2000 12:00:00.000 UTC.</para>
-<para><font face="courier new"></para>
+<para></para>
 <para>Create Spacecraft MySat;</para>
 <para>MySat.DateFormat = UTCGregorian;</para>
 <para>MySat.Epoch      = '01 Dec 2000 12:00:00.000';</para>
@@ -447,28 +447,28 @@ GMAT DefaultSC.TA = 99.88774933204884;
 <para>MySat.VX = 0;</para>
 <para>MySat.VY = 7.35;</para>
 <para>MySat.VZ = 1;</para>
-<para></font> </para>
+<para></para>
 <para>The corresponding EarthMJ2000Eq representation is </para>
-<para><font face="courier new"></para>
+<para></para>
 <para>X = -2320.302657017663 </para>
 <para>Y = -6604.250753206916</para>
 <para>Z =  1300.025987664349</para>
-<para></font> </para>
+<para></para>
 <para>You can change the epoch of a spacecraft in the mission sequence using a script line like this:</para>
-<para><font face="courier new"> MySat.Epoch  = '02 Dec 2000 12:00:00.000'; </font> </para>
+<para> MySat.Epoch  = '02 Dec 2000 12:00:00.000';  </para>
 <para>When the above line is executed in the mission sequence, GMAT converts the state to the specified coordinate system and then to the specified state type � in this case EarthFixed and Cartesian respectively � sets the epoch to the value of 02 Dec 2000 12:00:00.000, and then converts the state back to the internal representation.  Again, it is important to realize the because the coordinate system in this case is time varying, changing the spacecraft epoch has resulted in a change to the spacecraft's inertial state representation.  After the epoch is changed to 02 Dec 2000 12:00:00.000, the EarthMJ2000Eq state representation is now </para>
-<para><font face="courier new"></para>
+<para></para>
 <para>X = -2237.878170605275</para>
-<para>Y = -6738.089240761469     </para>
+<para>Y = -6738.089240761469</para>
 <para>Z = 1300.021029469492</para>
-<para></font> </para>
+<para></para>
 </section>
 </section>
 <section>
 <title>Object and Command Interactions</title>
 <para>The Spacecraft object Orbit tab interacts with the following resources:</para>
 <itemizedlist>
-<listitem><para> CoordinateSystem</para></listitem>
+<listitem><para>CoordinateSystem</para></listitem>
 </itemizedlist>
 </section>
 </section>

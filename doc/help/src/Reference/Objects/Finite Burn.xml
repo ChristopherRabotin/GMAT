@@ -17,6 +17,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 <title>Reference Table</title>
 <informaltable>
 <tgroup cols="2">
+<tbody>
 <row>
 <entry><para>Origin</para>
 </entry>
@@ -69,7 +70,7 @@ GMAT FiniteBurn1.BurnScaleFactor = 1;
 </code></programlisting>
 </section>
 <section>
-<title> Objects and Commands Interactions</title>
+<title>Objects and Commands Interactions</title>
 <itemizedlist>
 <listitem><para>Spacecraft</para>
 <itemizedlist>
