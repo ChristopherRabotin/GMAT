@@ -29,6 +29,8 @@ and present on the system path for the current user:
 
 * HTML Help Workshop (to generate .chm)
     Download: http://www.microsoft.com/downloads/en/details.aspx?FamilyID=00535334-c8a6-452f-9aa0-d597d16580cc&displaylang=en
+
+* Java
     
 -----------------------------------------------------------------
 Usage
