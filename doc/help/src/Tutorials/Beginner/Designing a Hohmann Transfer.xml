@@ -66,8 +66,6 @@
 
       <para>To create a differential for use in the mission sequence:</para>
 
-      <para></para>
-
       <orderedlist>
         <listitem>
           <para>Expand the Solvers folder in the Resources tree by clicking on
@@ -75,8 +73,8 @@
         </listitem>
 
         <listitem>
-          <para>Right click the Boundary Value Solvers folder and select
-          Add-&gt;DifferentialCorrector to create DC1.</para>
+          <para>Right click the Boundary Value Solvers folder and select Add
+          --&gt; DifferentialCorrector to create DC1.</para>
         </listitem>
       </orderedlist>
 
@@ -164,10 +162,9 @@
         </listitem>
       </itemizedlist>
 
-      <para>''Script Syntax:''</para>
+      <para>Script Syntax:</para>
 
-      <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};
-</code></programlisting>
+      <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};</code></programlisting>
 
       <screenshot>
         <info>
@@ -218,9 +215,7 @@
                   </listitem>
                 </itemizedlist>
               </listitem>
-            </itemizedlist>
 
-            <itemizedlist>
               <listitem>
                 <para>Achieve1:</para>
 
@@ -240,15 +235,14 @@
           </listitem>
         </itemizedlist>
 
-        <para>''Script Syntax:''</para>
+        <para>Script Syntax:</para>
 
         <programlisting><code>Target DC1;
    Vary DC1(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
    Maneuver DefaultIB(DefaultSC);
    Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis};
    Achieve DC1(DefaultSC.Earth.RMAG = 42165.0, {Tolerance = 0.1});
-EndTarget;  % For targeter DC1
-</code></programlisting>
+EndTarget;  % For targeter DC1</code></programlisting>
 
         <screenshot>
           <info>
@@ -354,14 +348,13 @@ EndTarget;  % For targeter DC1
           </listitem>
         </itemizedlist>
 
-        <para>''Script Syntax:''</para>
+        <para>Script Syntax:</para>
 
         <programlisting><code>Target DefaultDC;
    Vary DefaultDC(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
    Maneuver DefaultIB(DefaultSC);
    Achieve DefaultDC(DefaultSC.Earth.SMA = 42165.0, {Tolerance = 0.1});
-EndTarget;
-</code></programlisting>
+EndTarget;</code></programlisting>
       </section>
 
       <section>
@@ -374,10 +367,9 @@ EndTarget;
           </listitem>
         </itemizedlist>
 
-        <para>''Script Syntax:''</para>
+        <para>Script Syntax:</para>
 
-        <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 86400.0};
-</code></programlisting>
+        <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 86400.0};</code></programlisting>
       </section>
     </section>
   </section>

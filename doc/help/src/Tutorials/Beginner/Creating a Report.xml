@@ -35,9 +35,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Commands modified (use if you have trouble with this
           tutorial):</para>
@@ -63,15 +61,11 @@
           <para>Objective: Use the Report Object to output parameters to an
           ascii file</para>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Assume: N/A</para>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Find: N/A</para>
         </listitem>
@@ -118,9 +112,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Variables/Arrays/Strings:</para>
 
@@ -142,7 +134,7 @@
         <para>The ReportFile has two features that both allow a user to output
         data to an ASCII text file. One feature of a ReportFile is to output
         data at every integrator step and the other is to output data at the
-        user's discretion using -+Report+- commands in the Mission
+        user's discretion using Report commands in the Mission
         Sequence.</para>
 
         <itemizedlist>
@@ -464,9 +456,7 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
             DefaultSC.EarthMJ2000Eq.VX, DefaultSC.EarthMJ2000Eq.VY,
             DefaultSC.EarthMJ2000Eq.VZ</para>
           </listitem>
-        </itemizedlist>
 
-        <itemizedlist>
           <listitem>
             <para>Select the ManualReport ReportFile before closing the Report
             command properties panel.</para>
@@ -524,10 +514,8 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
           <listitem>
             <para>Enter the following between the BeginScript/EndScript text
             and click OK to exit the panel:</para>
-          </listitem>
-        </itemizedlist>
 
-        <programlisting><code>GMAT DecoratedReport.WriteHeaders = Off; % Turn report headers off 
+            <programlisting><code>GMAT DecoratedReport.WriteHeaders = Off; % Turn report headers off 
 stringVar = '=================================================='; % Heading
 Report DecoratedReport stringVar; % Outputs the string variable to the report
 stringVar = GMAT Report File in Time X Y Z VX VY VZ format; % Heading
@@ -536,35 +524,35 @@ stringVar = '=================================================='; % Heading
 Report DecoratedReport stringVar; % Outputs the string variable to the report
 GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></programlisting>
 
-        <para>Observe how WriteHeaders was turned off while outputting string
-        data. If you don't do this, you will get the word stringVar showing up
-        above each report output line.</para>
+            <para>Observe how WriteHeaders was turned off while outputting
+            string data. If you don't do this, you will get the word stringVar
+            showing up above each report output line.</para>
+          </listitem>
 
-        <itemizedlist>
           <listitem>
             <para>Verify that your settings are identical to the image
             below.</para>
 
             <para>(Folder icons and command numbers may not be the
             same)</para>
+
+            <screenshot>
+              <info>
+                <title>Figure: Mission Tree Configuration 3</title>
+              </info>
+
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" fileref="???"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Mission Tree Configuration 3</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
           </listitem>
         </itemizedlist>
-
-        <screenshot>
-          <info>
-            <title>Figure: Mission Tree Configuration 3</title>
-          </info>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" fileref="???"></imagedata>
-            </imageobject>
-
-            <caption>
-              <para>Figure: Mission Tree Configuration 3</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
 
         <para>This concludes the configuration of the commands needed for the
         Mission Sequence.</para>

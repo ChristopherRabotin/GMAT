@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -112,8 +112,7 @@
         script, you set this epoch using the following two lines:</para>
 
         <programlisting><code>Sat.DateFormat = UTCGregorian;
-Sat.Epoch = 22 Jul 2014 11:29:10.811;
-</code></programlisting>
+Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
         <screenshot>
           <info>
@@ -190,8 +189,6 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;
             </caption>
           </mediaobject>
         </screenshot>
-
-        <para></para>
       </section>
     </section>
 
@@ -319,8 +316,6 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;
             </caption>
           </mediaobject>
         </screenshot>
-
-        <para></para>
       </section>
     </section>
 
@@ -402,8 +397,6 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;
           </caption>
         </mediaobject>
       </screenshot>
-
-      <para></para>
     </section>
   </section>
 
@@ -531,8 +524,8 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;
           <orderedlist>
             <listitem>
               <para>Locate the Stopping Conditions group, and right click in
-              the field that currently says -+DefaultSC.ElapsedSecs+- located
-              in the Parameter column.</para>
+              the field that currently says DefaultSC.ElapsedSecs located in
+              the Parameter column.</para>
             </listitem>
 
             <listitem>
@@ -637,4 +630,4 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;
       </mediaobject>
     </screenshot>
   </section>
-</chapter>
+</section>

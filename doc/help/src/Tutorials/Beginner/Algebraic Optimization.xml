@@ -53,9 +53,7 @@
 
           <para>G = 8</para>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Find: Values X1 and X2</para>
         </listitem>
@@ -109,9 +107,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Solvers</para>
 
@@ -157,28 +153,28 @@
                   <para>Diagnostics</para>
                 </listitem>
               </itemizedlist>
+
+              <screenshot>
+                <info>
+                  <title>Figure: SQPfmincon Boundary Value Solver
+                  Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: SQPfmincon Boundary Value Solver
+                    Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <screenshot>
-        <info>
-          <title>Figure: SQPfmincon Boundary Value Solver Object</title>
-        </info>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" fileref="???"></imagedata>
-          </imageobject>
-
-          <caption>
-            <para>Figure: SQPfmincon Boundary Value Solver Object</para>
-          </caption>
-        </mediaobject>
-      </screenshot>
-
-      <itemizedlist>
         <listitem>
           <para>Plots/Reports</para>
 
@@ -196,26 +192,26 @@
                   ./output/SampleMissions/Ex_AlgebraicOptimization.report</para>
                 </listitem>
               </itemizedlist>
+
+              <screenshot>
+                <info>
+                  <title>Figure: Data ReportFile System Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: Data ReportFile System Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
             </listitem>
           </itemizedlist>
         </listitem>
       </itemizedlist>
-
-      <screenshot>
-        <info>
-          <title>Figure: Data ReportFile System Object</title>
-        </info>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" fileref="???"></imagedata>
-          </imageobject>
-
-          <caption>
-            <para>Figure: Data ReportFile System Object</para>
-          </caption>
-        </mediaobject>
-      </screenshot>
     </section>
   </section>
 
@@ -254,9 +250,7 @@
                 </listitem>
               </itemizedlist>
             </listitem>
-          </itemizedlist>
 
-          <itemizedlist>
             <listitem>
               <para>Vary X2 using SQPfmincon</para>
 
@@ -266,9 +260,7 @@
                 </listitem>
               </itemizedlist>
             </listitem>
-          </itemizedlist>
 
-          <itemizedlist>
             <listitem>
               <para>Equation1 F = ( X1 - 2 )<superscript>2</superscript> + (
               X2 - 2 )<superscript>2</superscript></para>
@@ -287,9 +279,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Report to file Data the values of variables F, G, X1,
           X2</para>

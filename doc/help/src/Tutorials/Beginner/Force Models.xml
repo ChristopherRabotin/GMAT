@@ -70,9 +70,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Find: (Observation only)</para>
         </listitem>
@@ -108,17 +106,12 @@
     </section>
 
     <section>
-       
-
       <title>Creating and Modifying Objects</title>
-
-       
 
       <itemizedlist>
         <listitem>
-          <para>__Spacecraft__ (''Note: Figure below shows how the resulting
-          Sat1 properties window should look like. Similar for other
-          steps)''</para>
+          <para>Spacecraft (Note: Figure below shows how the resulting Sat1
+          properties window should look like. Similar for other steps)</para>
 
           <itemizedlist>
             <listitem>
@@ -149,104 +142,89 @@
               <para>Set the remaining orbital elements to zero</para>
             </listitem>
           </itemizedlist>
+
+          <screenshot>
+            <info>
+              <title>Figure: Sat1 Spacecraft Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: Sat1 Spacecraft Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
         </listitem>
-      </itemizedlist>
 
-       
-
-      <para>{img src=show_image.php?name=FMsat1.jpg align="center"}</para>
-
-       
-
-      <para>
-        <screenshot>
-          <info>
-            <title />
-          </info>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" fileref="???" />
-            </imageobject>
-
-            <caption>
-              <para />
-            </caption>
-          </mediaobject>
-        </screenshot>
-      </para>
-
-       
-
-      <itemizedlist>
         <listitem>
-          <para>__Propagators__</para>
+          <para>Propagators</para>
 
           <itemizedlist>
             <listitem>
               <para>RKV89PointMass</para>
+
+              <para>This propagator simply sets the Earth as a point mass and
+              uses it as the Force Model. All other propagators below, except
+              for one (RKV8912x12), use Earth as a point mass as well. Figure
+              below shows this propagator properties' window; windows for
+              other propagators will look similarly.</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Rename DefaultProp to RKV89PointMass</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Initial Step Size to 30</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Accuracy at 1e-012</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Min Step Size to 30</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Max Step Size to 30</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Degree in the Gravity Group box to 0</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Order in the Gravity Group box to 0</para>
+                </listitem>
+              </itemizedlist>
+
+              <screenshot>
+                <info>
+                  <title>Figure: RKV89PointMass Propagator Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: RKV89PointMass Propagator Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
             </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
 
-      +~hs~~hs~~hs~This propagator simply sets the Earth as a point mass and uses it as the Force Model. All other propagators below, except for one (RKV8912x12), use Earth as a point mass as well. Figure below shows this propagator properties' window; windows for other propagators will look similarly. 
-
-      <itemizedlist>
-        <listitem>
-          <para>Rename DefaultProp to RKV89PointMass</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Initial Step Size to 30</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Accuracy at 1e-012</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Min Step Size to 30</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Max Step Size to 30</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Degree in the Gravity Group box to 0</para>
-        </listitem>
-
-        <listitem>
-          <para>Set the Order in the Gravity Group box to 0</para>
-
-          <para>{img src=show_image.php?name=FMrkv89pointmass.jpg
-          align="center"}</para>
-
-          <para>
-            <screenshot>
-              <info>
-                <title />
-              </info>
-
-              <mediaobject>
-                <imageobject>
-                  <imagedata align="center" fileref="???" />
-                </imageobject>
-
-                <caption>
-                  <para />
-                </caption>
-              </mediaobject>
-            </screenshot>
-          </para>
-
-          <itemizedlist>
             <listitem>
               <para>RKV89ThirdBodies</para>
 
-              <para>+~hs~~hs~~hs~This propagator adds all the planets except
-              Mercury and Pluto as point masses to the Force Model.</para>
+              <para>This propagator adds all the planets except Mercury and
+              Pluto as point masses to the Force Model.</para>
 
               <itemizedlist>
                 <listitem>
@@ -280,295 +258,258 @@
                 <listitem>
                   <para>Add Sun, Luna, and all the planets except Mercury and
                   Pluto to the Point Masses field</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
 
-                  <itemizedlist>
-                    <listitem>
-                      <para>RKV8912x12</para>
+            <listitem>
+              <para>RKV8912x12</para>
 
-                      <para>+~hs~~hs~~hs~Unlike other propagators, this one
-                      does not set Earth as a point mass in the Force Model;
-                      it uses instead a 12x12 JGM-2 Gravity Model.</para>
+              <para>Unlike other propagators, this one does not set Earth as a
+              point mass in the Force Model; it uses instead a 12x12 JGM-2
+              Gravity Model.</para>
 
-                      <itemizedlist>
-                        <listitem>
-                          <para>Add a Propagator and rename it
-                          RKV8912x12</para>
-                        </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Add a Propagator and rename it RKV8912x12</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Set the Initial Step Size to 30</para>
-                        </listitem>
+                <listitem>
+                  <para>Set the Initial Step Size to 30</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Set the Accuracy at 1e-012</para>
-                        </listitem>
+                <listitem>
+                  <para>Set the Accuracy at 1e-012</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Set the Min Step Size to 30</para>
-                        </listitem>
+                <listitem>
+                  <para>Set the Min Step Size to 30</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Set the Max Step Size to 30 as well</para>
-                        </listitem>
+                <listitem>
+                  <para>Set the Max Step Size to 30 as well</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Raise the Degree in the Gravity Group box to
-                          12</para>
-                        </listitem>
+                <listitem>
+                  <para>Raise the Degree in the Gravity Group box to 12</para>
+                </listitem>
 
-                        <listitem>
-                          <para>Raise the Order in the Gravity Group box to
-                          12</para>
+                <listitem>
+                  <para>Raise the Order in the Gravity Group box to 12</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
 
-                          <itemizedlist>
-                            <listitem>
-                              <para>RKV89MSISE90</para>
+            <listitem>
+              <para>RKV89MSISE90</para>
 
-                              <para>+~hs~~hs~~hs~The Force Model in this
-                              Propagator calculates drag on the spacecraft based
-                              on the MSISE90 Atmospheric Model.</para>
+              <para>The Force Model in this Propagator calculates drag on the
+              spacecraft based on the MSISE90 Atmospheric Model.</para>
 
-                              <itemizedlist>
-                                <listitem>
-                                  <para>Add a Propagator and rename it
-                                  RKV89MSISE90</para>
-                                </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Add a Propagator and rename it RKV89MSISE90</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Set the Accuracy at 1e-012</para>
-                                </listitem>
+                <listitem>
+                  <para>Set the Accuracy at 1e-012</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Set the Min Step Size to 30</para>
-                                </listitem>
+                <listitem>
+                  <para>Set the Min Step Size to 30</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Set the Max Step Size to 30 as well</para>
-                                </listitem>
+                <listitem>
+                  <para>Set the Max Step Size to 30 as well</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Lower the Degree in the Gravity Group box to
-                                  0</para>
-                                </listitem>
+                <listitem>
+                  <para>Lower the Degree in the Gravity Group box to 0</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Lower the Order in the Gravity Group box down
-                                  to 0</para>
-                                </listitem>
+                <listitem>
+                  <para>Lower the Order in the Gravity Group box down to
+                  0</para>
+                </listitem>
 
-                                <listitem>
-                                  <para>Set the Atmosphere Model under the Drag Group
-                                  Box to MSISE90</para>
+                <listitem>
+                  <para>Set the Atmosphere Model under the Drag Group Box to
+                  MSISE90</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
 
-                                  <itemizedlist>
-                                    <listitem>
-                                      <para>RKV89JR</para>
+            <listitem>
+              <para>RKV89JR</para>
 
-                                      <para>+~hs~~hs~~hs~The Force Model in this
-                                      Propagator calculates drag on the spacecraft based
-                                      on the Jacchia-Roberts Atmosphere Model.</para>
+              <para>The Force Model in this Propagator calculates drag on the
+              spacecraft based on the Jacchia-Roberts Atmosphere Model.</para>
 
-                                      <itemizedlist>
-                                        <listitem>
-                                          <para>Add a Propagator and rename it RKV89JR</para>
-                                        </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Add a Propagator and rename it RKV89JR</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Set the Initial Step Size to 30</para>
-                                        </listitem>
+                <listitem>
+                  <para>Set the Initial Step Size to 30</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Set the Accuracy at 1e-012</para>
-                                        </listitem>
+                <listitem>
+                  <para>Set the Accuracy at 1e-012</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Set the Min Step Size to 30</para>
-                                        </listitem>
+                <listitem>
+                  <para>Set the Min Step Size to 30</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Set the Max Step Size to 30 as well</para>
-                                        </listitem>
+                <listitem>
+                  <para>Set the Max Step Size to 30 as well</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Lower the Degree in the Gravity Group box to
-                                          0</para>
-                                        </listitem>
+                <listitem>
+                  <para>Lower the Degree in the Gravity Group box to 0</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Lower the Order in the Gravity Group box down
-                                          to 0</para>
-                                        </listitem>
+                <listitem>
+                  <para>Lower the Order in the Gravity Group box down to
+                  0</para>
+                </listitem>
 
-                                        <listitem>
-                                          <para>Set the Atmosphere Model under the Drag Group
-                                          Box to JacchiaRoberts</para>
+                <listitem>
+                  <para>Set the Atmosphere Model under the Drag Group Box to
+                  JacchiaRoberts</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
 
-                                          <itemizedlist>
-                                            <listitem>
-                                              <para>RKV89SRP</para>
+            <listitem>
+              <para>RKV89SRP</para>
 
-                                              <para>+~hs~~hs~~hs~This propagator is like the first
-                                              one (RKV89PointMass), with the only difference that
-                                              it accounts for the Solar Radiation Pressure.</para>
+              <para>This propagator is like the first one (RKV89PointMass),
+              with the only difference that it accounts for the Solar
+              Radiation Pressure.</para>
 
-                                              <itemizedlist>
-                                                <listitem>
-                                                  <para>Add a Propagator and rename it RKV89SRP</para>
-                                                </listitem>
+              <itemizedlist>
+                <listitem>
+                  <para>Add a Propagator and rename it RKV89SRP</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Set the Initial Step Size to 30</para>
-                                                </listitem>
+                <listitem>
+                  <para>Set the Initial Step Size to 30</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Set the Accuracy at 1e-012</para>
-                                                </listitem>
+                <listitem>
+                  <para>Set the Accuracy at 1e-012</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Set the Min Step Size to 30</para>
-                                                </listitem>
+                <listitem>
+                  <para>Set the Min Step Size to 30</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Set the Max Step Size to 30 as well</para>
-                                                </listitem>
+                <listitem>
+                  <para>Set the Max Step Size to 30 as well</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Lower the Degree in the Gravity Group box to
-                                                  0</para>
-                                                </listitem>
+                <listitem>
+                  <para>Lower the Degree in the Gravity Group box to 0</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Lower the Order in the Gravity Group box down
-                                                  to 0</para>
-                                                </listitem>
+                <listitem>
+                  <para>Lower the Order in the Gravity Group box down to
+                  0</para>
+                </listitem>
 
-                                                <listitem>
-                                                  <para>Check the Use Solar Radiation Pressure Check
-                                                  box</para>
-
-                                                  <itemizedlist>
-                                                    <listitem>
-                                                      <para>__Burns__</para>
-
-                                                      <itemizedlist>
-                                                        <listitem>
-                                                          <para>Delete DefaultIB in the Resource tree</para>
-                                                        </listitem>
-                                                      </itemizedlist>
-                                                    </listitem>
-                                                  </itemizedlist>
-
-                                                  <itemizedlist>
-                                                    <listitem>
-                                                      <para>__Plots/Reports__</para>
-
-                                                      <itemizedlist>
-                                                        <listitem>
-                                                          <para>OpenGLSat1 OpenGL Plot</para>
-
-                                                          <itemizedlist>
-                                                            <listitem>
-                                                              <para>Rename DefaultOpenGL to OpenGLSat1</para>
-                                                            </listitem>
-
-                                                            <listitem>
-                                                              <para>Set the Axis under the View Up Definition
-                                                              Group box to X</para>
-                                                            </listitem>
-                                                          </itemizedlist>
-                                                        </listitem>
-                                                      </itemizedlist>
-                                                    </listitem>
-                                                  </itemizedlist>
-
-                                                  <para>{img src=show_image.php?name=FMopenglsat1.jpg
-                                                  align="center"}</para>
-
-                                                  <para>
-                                                    <screenshot>
-                                                      <info>
-                                                        <title />
-                                                      </info>
-
-                                                      <mediaobject>
-                                                        <imageobject>
-                                                          <imagedata align="center" fileref="???" />
-                                                        </imageobject>
-
-                                                        <caption>
-                                                          <para />
-                                                        </caption>
-                                                      </mediaobject>
-                                                    </screenshot>
-                                                  </para>
-
-                                                  <itemizedlist>
-                                                    <listitem>
-                                                      <para>ForceModelRpt Report</para>
-
-                                                      <itemizedlist>
-                                                        <listitem>
-                                                          <para>Create a Report Named ForceModelRpt</para>
-                                                        </listitem>
-
-                                                        <listitem>
-                                                          <para>Remove all Parameters from the Parameter
-                                                          List</para>
-                                                        </listitem>
-
-                                                        <listitem>
-                                                          <para>Select the File as being
-                                                          ./output/SampleMissions/Ex_ForceModels.report</para>
-
-                                                          <para>{img
-                                                          src=show_image.php?name=FMforcemodelrpt.jpg
-                                                          align="center"}</para>
-
-                                                          <para>
-                                                            <screenshot>
-                                                              <info>
-                                                                <title />
-                                                              </info>
-
-                                                              <mediaobject>
-                                                                <imageobject>
-                                                                  <imagedata align="center" fileref="???" />
-                                                                </imageobject>
-
-                                                                <caption>
-                                                                  <para />
-                                                                </caption>
-                                                              </mediaobject>
-                                                            </screenshot>
-                                                          </para>
-                                                        </listitem>
-                                                      </itemizedlist>
-                                                    </listitem>
-                                                  </itemizedlist>
-                                                </listitem>
-                                              </itemizedlist>
-                                            </listitem>
-                                          </itemizedlist>
-                                        </listitem>
-                                      </itemizedlist>
-                                    </listitem>
-                                  </itemizedlist>
-                                </listitem>
-                              </itemizedlist>
-                            </listitem>
-                          </itemizedlist>
-                        </listitem>
-                      </itemizedlist>
-                    </listitem>
-                  </itemizedlist>
+                <listitem>
+                  <para>Check the Use Solar Radiation Pressure Check
+                  box</para>
                 </listitem>
               </itemizedlist>
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-       
+        <listitem>
+          <para>Burns</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Delete DefaultIB in the Resource tree</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Plots/Reports</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>OpenGLSat1 OpenGL Plot</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Rename DefaultOpenGL to OpenGLSat1</para>
+                </listitem>
+
+                <listitem>
+                  <para>Set the Axis under the View Up Definition Group box to
+                  X</para>
+                </listitem>
+              </itemizedlist>
+
+              <screenshot>
+                <info>
+                  <title>Figure: OpenGLSat1 OpenGL Plot Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: OpenGLSat1 OpenGL Plot Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
+            </listitem>
+
+            <listitem>
+              <para>ForceModelRpt Report</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Create a Report Named ForceModelRpt</para>
+                </listitem>
+
+                <listitem>
+                  <para>Remove all Parameters from the Parameter List</para>
+                </listitem>
+
+                <listitem>
+                  <para>Select the File as being
+                  ./output/SampleMissions/Ex_ForceModels.report</para>
+                </listitem>
+              </itemizedlist>
+
+              <screenshot>
+                <info>
+                  <title>Figure: ForceModelRpt Report Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: ForceModelRpt Report Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
     </section>
   </section>
 
@@ -600,41 +541,37 @@
       </listitem>
     </itemizedlist>
 
-    <para>{img src=show_image.php?name=FMreport1.jpg align="center"}</para>
+    <screenshot>
+      <info>
+        <title>Figure: Report1 Report Command</title>
+      </info>
 
-    <para><screenshot>
-        <info>
-          <title></title>
-        </info>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
 
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" fileref="???"></imagedata>
-          </imageobject>
+        <caption>
+          <para>Figure: Report1 Report Command</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
 
-          <caption>
-            <para></para>
-          </caption>
-        </mediaobject>
-      </screenshot></para>
+    <screenshot>
+      <info>
+        <title>Figure: Equation1 Equation Command</title>
+      </info>
 
-    <para>{img src=show_image.php?name=FMequation1.jpg align="center"}</para>
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
 
-    <para><screenshot>
-        <info>
-          <title></title>
-        </info>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" fileref="???"></imagedata>
-          </imageobject>
-
-          <caption>
-            <para></para>
-          </caption>
-        </mediaobject>
-      </screenshot></para>
+        <caption>
+          <para>Figure: Equation1 Equation Command</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
 
     <itemizedlist>
       <listitem>
@@ -650,32 +587,28 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 1. Set it exactly as
         Report1</para>
+
+        <screenshot>
+          <info>
+            <title>Figure: Propagate1 Propagate Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Propagate1 Propagate Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
       </listitem>
     </itemizedlist>
-
-    <para>{img src=show_image.php?name=FMpropagate1.jpg align="center"}</para>
-
-    <para><screenshot>
-        <info>
-          <title></title>
-        </info>
-
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center" fileref="???"></imagedata>
-          </imageobject>
-
-          <caption>
-            <para></para>
-          </caption>
-        </mediaobject>
-      </screenshot></para>
 
     <itemizedlist>
       <listitem>
@@ -692,9 +625,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 2. Set it exactly as
         Report1</para>
@@ -716,9 +647,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 3. Set it exactly as
         Report1</para>
@@ -740,9 +669,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 4. Set it exactly as
         Report1</para>
@@ -764,9 +691,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 5. Set it exactly as
         Report1</para>
@@ -788,9 +713,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Insert a Report after Propagate 6: Set it exactly as
         Report1</para>
