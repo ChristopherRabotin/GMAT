@@ -22,14 +22,15 @@ xmlns:db="http://docbook.org/ns/docbook">
 <section>
 <title>Mission Description</title>
 <itemizedlist>
-<listitem><para>Objective: The goal here is to find values of variables X1 and X2 that minimize a criterion function F, with a constraint that X1+X2=8, as follows: </para></listitem>
-</itemizedlist>{DIV(type=>blockquote)}
-<para>F =  ( X1 - 2 ){TAG(tag=>sup)}2{TAG} + ( X2 - 2 ){TAG(tag=>sup)}2{TAG}</para>
+<listitem><para>Objective: The goal here is to find values of variables X1 and X2 that minimize a criterion function F, with a constraint that X1+X2=8, as follows:</para>
+
+<para>F =  ( X1 - 2 )<superscript>2</superscript> + ( X2 - 2 )<superscript>2</superscript></para>
 <para>G =  X1 + X2</para>
 <para>G = 8</para>
-<para>{DIV}</para>
+</listitem>
+</itemizedlist>
 <itemizedlist>
-<listitem><para>Find:   Values X1 and X2</para></listitem>
+<listitem><para>Find: Values X1 and X2</para></listitem>
 </itemizedlist>
 </section>
 </section>
@@ -46,7 +47,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 <section>
 <title>Creating and Modifying Objects</title>
 <itemizedlist>
-<listitem><para>__Variables/Strings/Arrays__</para>
+<listitem><para>Variables/Strings/Arrays</para>
 <itemizedlist>
 <listitem><para>Variable X1 = 0</para></listitem>
 <listitem><para>Variable X2 = 0</para></listitem>
@@ -55,7 +56,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 </itemizedlist></listitem>
 </itemizedlist>
 <itemizedlist>
-<listitem><para>__Solvers__</para>
+<listitem><para>Solvers</para>
 <itemizedlist>
 <listitem><para>SQPfmincon Optimizer (Figure below shows the resulting SQPfmincon window)</para>
 <itemizedlist>
@@ -75,7 +76,7 @@ xmlns:db="http://docbook.org/ns/docbook">
 fileref="???"></imagedata></imageobject>
 <caption><para>Figure: SQPfmincon Boundary Value Solver Object</para></caption></mediaobject></screenshot>
 <itemizedlist>
-<listitem><para>__Plots/Reports__</para>
+<listitem><para>Plots/Reports</para>
 <itemizedlist>
 <listitem><para>Data ReportFile</para>
 <itemizedlist>
@@ -113,7 +114,7 @@ fileref="???"></imagedata></imageobject>
 </itemizedlist></listitem>
 </itemizedlist>
 <itemizedlist>
-<listitem><para>Equation1 F = ( X1 - 2 ){TAG(tag=>sup)}2{TAG} + ( X2 - 2 ){TAG(tag=>sup)}2{TAG}</para></listitem>
+<listitem><para>Equation1 F = ( X1 - 2 )<superscript>2</superscript> + ( X2 - 2 )<superscript>2</superscript></para></listitem>
 <listitem><para>Minimize the value of F using SQPfmincon</para></listitem>
 <listitem><para>Equation2 G = X2 + X1</para></listitem>
 <listitem><para>Nonlinear Constraint G = 8 using SQPfmincon</para></listitem>
