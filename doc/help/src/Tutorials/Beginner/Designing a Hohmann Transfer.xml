@@ -1,159 +1,453 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Designing a Hohmann Transfer</title>
 
-<title>Designing a Hohmann Transfer</title>
-<para>This tutorial created using the July 2, 2008 version of GMAT</para>
-<section>
-<title>Objective and Overview</title>
-<para>The objective of this tutorial is to use differential correction to perform a Hohmann Transfer. To focus on the configuration of the target sequence, we make extensive use of the default configurations for spacecraft, propagators, and maneuvers. The basic steps are.</para>
-<orderedlist>
-<listitem><para>Create and configure a differential corrector.</para></listitem>
-<listitem><para>Modify the default Orbit View to visualize the trajectory.</para></listitem>
-<listitem><para>Add a target sequence to the mission to raise apogee to GEO altitude</para></listitem>
-<listitem><para>Add a second target sequence to circularize the orbit.</para></listitem>
-<listitem><para>Run the mission, save the solution, and rerun the mission using the converged solution.</para></listitem>
-</orderedlist>
-<para>You can download the script file and run it beforehand to see the final results of this tutorial:  [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=46|HohmannTransferDesign.script]</para>
-</section>
-<section>
-<title>Creating and Configuring the Resource Tree</title>
-<para>Begin by loading the default mission ( click the new mission button in the toolbar) or starting a new GMAT session.  For this tutorial, we will use the default configurations for DefaultSC, DefaultProp, and the default impulsive burn.  DefaultSC is configured to a near circular orbit and DefaultProp is configured to use Earth as the central body with Earth 10x10 gravity field and perturbations from the Sun and Moon.  The default impulsive burn is in the VNB coordinate system.  You may want to open the dialog boxes for these objects and look more closely at them as we will leave the settings of those objects at their default values.</para>
-<section>
-<title>Creating the Differential Corrector</title>
-<para>To create a differential for use in the mission sequence:</para>
-<para> </para>
-<orderedlist>
-<listitem><para>Expand the Solvers folder in the Resources tree by clicking on the box with a plus sign in it.</para></listitem>
-<listitem><para>Right click the Boundary Value Solvers folder and select Add->DifferentialCorrector to create DC1.</para></listitem>
-</orderedlist>
-<para>We'll leave the settings for the differential corrector at the default values.</para>
-</section>
-<section>
-<title>Modifying the default Orbit View</title>
-<para>We need to make minor modifications to Default Orbit View so that the entire final orbit will fit in the graphics window.</para>
-<orderedlist>
-<listitem><para>Open the dialog box for the DefaultOrbitView</para></listitem>
-<listitem><para>Change the Solver Iterations input field, located in the Drawing Option group box, to the value All</para></listitem>
-<listitem><para>Change the View Scale Factor input field to the value 5</para></listitem>
-<listitem><para>Change the View Up Definition Axis to X</para></listitem>
-<listitem><para>Click the Ok button to save changes and close the dialog box.</para></listitem>
-</orderedlist>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-</section>
-</section>
-<section>
-<title>Creating and Configuring the Mission Tree</title>
-<para>In this section you will create two targeting segments. The first targeting segment will raise orbit apogee to GEOsynchronous altitude (42165km).  The second targeting sequence will circularize the orbit.  Each targeting segment we will employ a Target command,  a Vary command, a Maneuver, and Achieve command inside of the Target branch command.</para>
-<section>
-<title>Initial Propagate Sequence</title>
-<itemizedlist>
-<listitem><para>Propagate1</para>
-<itemizedlist>
-<listitem><para>Set the stopping condition parameter as the Earth's periapsis.  It can be found be right-clicking on DefaultSC.ElapsedSecs, under the Parameter heading.</para></listitem>
-<listitem><para>The previous step will bring up the Parameter Select Dialog Box.  Select Periapsis under the Object Properties list and click the  Add Selected Item(s) button.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>''Script Syntax:''</para>
-<programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};
+  <para>This tutorial created using the July 2, 2008 version of GMAT</para>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <para>The objective of this tutorial is to use differential correction to
+    perform a Hohmann Transfer. To focus on the configuration of the target
+    sequence, we make extensive use of the default configurations for
+    spacecraft, propagators, and maneuvers. The basic steps are.</para>
+
+    <orderedlist>
+      <listitem>
+        <para>Create and configure a differential corrector.</para>
+      </listitem>
+
+      <listitem>
+        <para>Modify the default Orbit View to visualize the
+        trajectory.</para>
+      </listitem>
+
+      <listitem>
+        <para>Add a target sequence to the mission to raise apogee to GEO
+        altitude</para>
+      </listitem>
+
+      <listitem>
+        <para>Add a second target sequence to circularize the orbit.</para>
+      </listitem>
+
+      <listitem>
+        <para>Run the mission, save the solution, and rerun the mission using
+        the converged solution.</para>
+      </listitem>
+    </orderedlist>
+
+    <para>You can download the script file and run it beforehand to see the
+    final results of this tutorial:
+    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=46|HohmannTransferDesign.script]</para>
+  </section>
+
+  <section>
+    <title>Creating and Configuring the Resource Tree</title>
+
+    <para>Begin by loading the default mission ( click the new mission button
+    in the toolbar) or starting a new GMAT session. For this tutorial, we will
+    use the default configurations for DefaultSC, DefaultProp, and the default
+    impulsive burn. DefaultSC is configured to a near circular orbit and
+    DefaultProp is configured to use Earth as the central body with Earth
+    10x10 gravity field and perturbations from the Sun and Moon. The default
+    impulsive burn is in the VNB coordinate system. You may want to open the
+    dialog boxes for these objects and look more closely at them as we will
+    leave the settings of those objects at their default values.</para>
+
+    <section>
+      <title>Creating the Differential Corrector</title>
+
+      <para>To create a differential for use in the mission sequence:</para>
+
+      <para></para>
+
+      <orderedlist>
+        <listitem>
+          <para>Expand the Solvers folder in the Resources tree by clicking on
+          the box with a plus sign in it.</para>
+        </listitem>
+
+        <listitem>
+          <para>Right click the Boundary Value Solvers folder and select
+          Add-&gt;DifferentialCorrector to create DC1.</para>
+        </listitem>
+      </orderedlist>
+
+      <para>We'll leave the settings for the differential corrector at the
+      default values.</para>
+    </section>
+
+    <section>
+      <title>Modifying the default Orbit View</title>
+
+      <para>We need to make minor modifications to Default Orbit View so that
+      the entire final orbit will fit in the graphics window.</para>
+
+      <orderedlist>
+        <listitem>
+          <para>Open the dialog box for the DefaultOrbitView</para>
+        </listitem>
+
+        <listitem>
+          <para>Change the Solver Iterations input field, located in the
+          Drawing Option group box, to the value All</para>
+        </listitem>
+
+        <listitem>
+          <para>Change the View Scale Factor input field to the value 5</para>
+        </listitem>
+
+        <listitem>
+          <para>Change the View Up Definition Axis to X</para>
+        </listitem>
+
+        <listitem>
+          <para>Click the Ok button to save changes and close the dialog
+          box.</para>
+        </listitem>
+      </orderedlist>
+
+      <para><screenshot>
+          <info>
+            <title></title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para></para>
+            </caption>
+          </mediaobject>
+        </screenshot></para>
+    </section>
+  </section>
+
+  <section>
+    <title>Creating and Configuring the Mission Tree</title>
+
+    <para>In this section you will create two targeting segments. The first
+    targeting segment will raise orbit apogee to GEOsynchronous altitude
+    (42165km). The second targeting sequence will circularize the orbit. Each
+    targeting segment we will employ a Target command, a Vary command, a
+    Maneuver, and Achieve command inside of the Target branch command.</para>
+
+    <section>
+      <title>Initial Propagate Sequence</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Propagate1</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Set the stopping condition parameter as the Earth's
+              periapsis. It can be found be right-clicking on
+              DefaultSC.ElapsedSecs, under the Parameter heading.</para>
+            </listitem>
+
+            <listitem>
+              <para>The previous step will bring up the Parameter Select
+              Dialog Box. Select Periapsis under the Object Properties list
+              and click the Add Selected Item(s) button.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+
+      <para>''Script Syntax:''</para>
+
+      <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};
 </code></programlisting>
-<screenshot><info><title>Figure: Propagate1 Propagate Command</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Propagate1 Propagate Command</para></caption></mediaobject></screenshot>
-<section>
-<title>First Targeting Sequence</title>
-<itemizedlist>
-<listitem><para>Target1: Insert this after Propagate1</para>
-<itemizedlist>
-<listitem><para>Vary1: Append this Vary to Target1</para></listitem>
-<listitem><para>Maneuver1: Insert this Maneuver after Vary</para></listitem>
-<listitem><para>Propagate2</para>
-<itemizedlist>
-<listitem><para>This propagate should be inserted after the Maneuver</para></listitem>
-<listitem><para>Set the stopping parameter as Earth's apoapsis.  This process is the same as before when setting the first propagate command's stopping parameter as Earth's periapsis</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Achieve1:</para>
-<itemizedlist>
-<listitem><para>This will go after Propagate2.</para></listitem>
-<listitem><para>Note: From here on it will be assumed that you will follow the order of commands shown in the mission tree.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>''Script Syntax:''</para>
-<programlisting><code>Target DC1;
+
+      <screenshot>
+        <info>
+          <title>Figure: Propagate1 Propagate Command</title>
+        </info>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" fileref="???"></imagedata>
+          </imageobject>
+
+          <caption>
+            <para>Figure: Propagate1 Propagate Command</para>
+          </caption>
+        </mediaobject>
+      </screenshot>
+
+      <section>
+        <title>First Targeting Sequence</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Target1: Insert this after Propagate1</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Vary1: Append this Vary to Target1</para>
+              </listitem>
+
+              <listitem>
+                <para>Maneuver1: Insert this Maneuver after Vary</para>
+              </listitem>
+
+              <listitem>
+                <para>Propagate2</para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para>This propagate should be inserted after the
+                    Maneuver</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Set the stopping parameter as Earth's apoapsis. This
+                    process is the same as before when setting the first
+                    propagate command's stopping parameter as Earth's
+                    periapsis</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+            </itemizedlist>
+
+            <itemizedlist>
+              <listitem>
+                <para>Achieve1:</para>
+
+                <itemizedlist>
+                  <listitem>
+                    <para>This will go after Propagate2.</para>
+                  </listitem>
+
+                  <listitem>
+                    <para>Note: From here on it will be assumed that you will
+                    follow the order of commands shown in the mission
+                    tree.</para>
+                  </listitem>
+                </itemizedlist>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist>
+
+        <para>''Script Syntax:''</para>
+
+        <programlisting><code>Target DC1;
    Vary DC1(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
    Maneuver DefaultIB(DefaultSC);
    Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis};
    Achieve DC1(DefaultSC.Earth.RMAG = 42165.0, {Tolerance = 0.1});
 EndTarget;  % For targeter DC1
 </code></programlisting>
-<screenshot><info><title>Figure: Appending a Targeting Sequence</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Appending a Targeting Sequence</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Target1 Target Command</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Target1 Target Command</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Vary1 Vary Command</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Vary1 Vary Command</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Maneuver1 Maneuver Command</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Maneuver1 Maneuver Command</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Achieve1 Achieve Command</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Achieve1 Achieve Command</para></caption></mediaobject></screenshot>
-</section>
-<section>
-<title>Second Targeting Sequence</title>
-<itemizedlist>
-<listitem><para>Target2:</para>
-<itemizedlist>
-<listitem><para>Vary2</para></listitem>
-<listitem><para>Maneuver2</para></listitem>
-<listitem><para>Achieve2: set the Goal field to be earth's SMA</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>''Script Syntax:''</para>
-<programlisting><code>Target DefaultDC;
+
+        <screenshot>
+          <info>
+            <title>Figure: Appending a Targeting Sequence</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Appending a Targeting Sequence</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Target1 Target Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Target1 Target Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Vary1 Vary Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Vary1 Vary Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Maneuver1 Maneuver Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Maneuver1 Maneuver Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Achieve1 Achieve Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Achieve1 Achieve Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+      </section>
+
+      <section>
+        <title>Second Targeting Sequence</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Target2:</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Vary2</para>
+              </listitem>
+
+              <listitem>
+                <para>Maneuver2</para>
+              </listitem>
+
+              <listitem>
+                <para>Achieve2: set the Goal field to be earth's SMA</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist>
+
+        <para>''Script Syntax:''</para>
+
+        <programlisting><code>Target DefaultDC;
    Vary DefaultDC(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
    Maneuver DefaultIB(DefaultSC);
    Achieve DefaultDC(DefaultSC.Earth.SMA = 42165.0, {Tolerance = 0.1});
 EndTarget;
 </code></programlisting>
-</section>
-<section>
-<title>Final Propagate Sequence</title>
-<itemizedlist>
-<listitem><para>Propagate3: set the stopping condition parameter to be one elapsed day (86400 seconds).</para></listitem>
-</itemizedlist>
-<para>''Script Syntax:''</para>
-<programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 86400.0};
+      </section>
+
+      <section>
+        <title>Final Propagate Sequence</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Propagate3: set the stopping condition parameter to be one
+            elapsed day (86400 seconds).</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>''Script Syntax:''</para>
+
+        <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 86400.0};
 </code></programlisting>
-</section>
-</section>
-</section>
-<section>
-<title>Running the Mission</title>
-<para>[tiki-index.php?page=Designing+a+Hohmann+Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and Output trees]</para>
-<para>The openGL image below was stopped after the first propagate command. The spacecraft started at its initial conditions and propagated forward to the periapsis point of the first orbit. The next openGL image leaves off where the last image stopped. The transfer orbit is targeted and the spacecraft propagates from the initial orbit periapsis point to the transfer orbit apoapsis point. This image has the solver/targeter iterations turned off. The final image shown below shows all the orbits. The teal-ish lines represent the solver/targeter iterations for the transfer orbit. You don't see these kind of line for the target sequence from the transfer to final orbit because there is no propagation involved. The targeting only occurs at one spot.</para>
-<screenshot><info><title>Figure: Output After Initial Propagate Sequence</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Output After Initial Propagate Sequence</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Output After First and Second Targeting Sequences</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Output After First and Second Targeting Sequences</para></caption></mediaobject></screenshot>
-<screenshot><info><title>Figure: Output After Final Propagate Sequence</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Output After Final Propagate Sequence</para></caption></mediaobject></screenshot>
-</section>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Running the Mission</title>
+
+    <para>[tiki-index.php?page=Designing+a+Hohmann+Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource
+    Mission and Output trees]</para>
+
+    <para>The openGL image below was stopped after the first propagate
+    command. The spacecraft started at its initial conditions and propagated
+    forward to the periapsis point of the first orbit. The next openGL image
+    leaves off where the last image stopped. The transfer orbit is targeted
+    and the spacecraft propagates from the initial orbit periapsis point to
+    the transfer orbit apoapsis point. This image has the solver/targeter
+    iterations turned off. The final image shown below shows all the orbits.
+    The teal-ish lines represent the solver/targeter iterations for the
+    transfer orbit. You don't see these kind of line for the target sequence
+    from the transfer to final orbit because there is no propagation involved.
+    The targeting only occurs at one spot.</para>
+
+    <screenshot>
+      <info>
+        <title>Figure: Output After Initial Propagate Sequence</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Output After Initial Propagate Sequence</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <screenshot>
+      <info>
+        <title>Figure: Output After First and Second Targeting
+        Sequences</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Output After First and Second Targeting
+          Sequences</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <screenshot>
+      <info>
+        <title>Figure: Output After Final Propagate Sequence</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Output After Final Propagate Sequence</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
 </section>
