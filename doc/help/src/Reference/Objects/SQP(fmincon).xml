@@ -54,8 +54,7 @@ GMAT SQP1.DiffMaxChange = 1e-4;
 GMAT SQP1.DiffMinChange = 1e-7;
 GMAT SQP1.ShowProgress  = true;
 GMAT SQP1.ReportStyle   = 'Verbose';
-GMAT SQP1.ReportFile    = '\output\OptimizerProgress.txt';
-</code></programlisting>
+GMAT SQP1.ReportFile    = '\output\OptimizerProgress.txt';</code></programlisting>
   </section>
 
   <section>

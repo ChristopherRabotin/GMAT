@@ -32,9 +32,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
-
-      <itemizedlist>
+		
         <listitem>
           <para>Propagator</para>
 
@@ -45,9 +43,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
-
-      <itemizedlist>
+		
         <listitem>
           <para>Spacecraft</para>
 
@@ -77,9 +73,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
-
-    <itemizedlist>
+	  
       <listitem>
         <para>EphemerisUpdateInterval</para>
 
@@ -94,9 +88,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
-
-    <itemizedlist>
+	  
       <listitem>
         <para>UseTTForEphemeris</para>
 
@@ -115,9 +107,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
-
-    <itemizedlist>
+	  
       <listitem>
         <para>EphemerisFile</para>
 
@@ -131,9 +121,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
-
-    <itemizedlist>
+	  
       <listitem>
         <para>AnalyticModel</para>
       </listitem>

@@ -1,69 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Celestial Bodies</title>
 
-<title>Celestial Bodies</title>
-<para>This was created using the July 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The Celestial Bodies are the main bodies of the Solar System and the Moon.  They are part of the resource tree and are under Solar System.  They can be selected for a large variety of options for points of reference.</para>
-<section>
-<title>Listing of Objects and Commands that interact</title>
-<itemizedlist>
-<listitem><para> Coordinate System</para>
-<itemizedlist>
-<listitem><para>Interacts with the celestial body in that the body can be selected as the origin of the coordinate system or as a primary or secondary point for defining the axes.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>OpenGL plot</para>
-<itemizedlist>
-<listitem><para>Interacts with a celestial body in a number of ways.  It can be selected to be drawn onto the plot, with the color of the orbit an option.  A celestial body can also be selected as the View Point Reference or the View Direction.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Propagator</para>
-<itemizedlist>
-<listitem><para>Can interact with a celestial body in a number of ways. Under the Force Model heading, any celestial body can be chosen for use as the central body, as the primary bodies, and the secondary bodies.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Bary Center</para>
-<itemizedlist>
-<listitem><para>Can interact with celestial bodies in that a bary center is calculated using some number of celestial bodies which can be selected.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Libration point</para>
-<itemizedlist>
-<listitem><para>Can interact with celestial bodies in that a libration point is calculated using two celestial bodies which can be selected.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Spacecraft</para>
-<itemizedlist>
-<listitem><para>Interacts with celestial bodies in that for a number of parameters describe how the spacecraft is positioned in relation to a celestial body.  This can include the periapsis, apoapsis, and altitude, as well as a great many of other parameters.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-</section>
-</section>
-<section>
-<title>Using the GUI</title>
-<para>The first three parameters describe how the body is shaped.  These parameters include the mu constant, the equatorial radius, and the flattening factor.  The last 7 parameters describe the orbit of the body at that particular moment in time about some central body.</para>
-<screenshot><info><title>Figure: Celestial Body Object Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Celestial Body Object Dialog Box</para></caption></mediaobject></screenshot>
-</section>
-<section>
-<title>Using the script</title>
-<section>
-<title>Script Syntax</title>
-<programlisting><code>
+  <para>This was created using the July 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The Celestial Bodies are the main bodies of the Solar System and the
+    Moon. They are part of the resource tree and are under Solar System. They
+    can be selected for a large variety of options for points of
+    reference.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Coordinate System</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Interacts with the celestial body in that the body can be
+              selected as the origin of the coordinate system or as a primary
+              or secondary point for defining the axes.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>OpenGL plot</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Interacts with a celestial body in a number of ways. It
+              can be selected to be drawn onto the plot, with the color of the
+              orbit an option. A celestial body can also be selected as the
+              View Point Reference or the View Direction.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Propagator</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Can interact with a celestial body in a number of ways.
+              Under the Force Model heading, any celestial body can be chosen
+              for use as the central body, as the primary bodies, and the
+              secondary bodies.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Bary Center</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Can interact with celestial bodies in that a bary center
+              is calculated using some number of celestial bodies which can be
+              selected.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Libration point</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Can interact with celestial bodies in that a libration
+              point is calculated using two celestial bodies which can be
+              selected.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Interacts with celestial bodies in that for a number of
+              parameters describe how the spacecraft is positioned in relation
+              to a celestial body. This can include the periapsis, apoapsis,
+              and altitude, as well as a great many of other
+              parameters.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>The first three parameters describe how the body is shaped. These
+    parameters include the mu constant, the equatorial radius, and the
+    flattening factor. The last 7 parameters describe the orbit of the body at
+    that particular moment in time about some central body.</para>
+
+    <screenshot>
+      <info>
+        <title>Figure: Celestial Body Object Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Celestial Body Object Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>
 Create Planet Earth;
 GMAT Earth.BodyType = 'Planet';
 GMAT Earth.Mass = 5.973331957140716e+024;
@@ -87,137 +156,170 @@ GMAT Earth.AtmosphereModelName = '';
 GMAT Earth.Order = 4;
 GMAT Earth.Degree = 4;
 GMAT Earth.RotationDataSource = 'NotApplicable';
-GMAT Earth.NutationUpdateInterval = 60;
-</code></programlisting>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<para>Fields Associated with All Celestial Bodies (Using Default Values for Earth as an Example)</para>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>Mu</para>
-</entry>
-<entry><para>Default: 398600.4414.</para>
-<para>Options: { Real Number ~060~ 0 }</para>
-<para>The Mu field allows the user to define the gravitational parameter of a celestial body. Units: km<superscript>3</superscript>/sec<superscript>2</superscript>. z</para>
-</entry>
-</row>
-<row>
-<entry><para>Equatorial Radius</para></entry>
-<entry><para>Default: 6378.1363.</para>
-<para>Options: { Real Number ~060~ 0 }</para>
-<para>The EquatorialRadius field allows the user to define the equatorial radius of a celestial body.</para>
-<para>Units: km. </para>
-</entry>
-</row>
-<row>
-<entry><para>Flattening</para>
-</entry>
-<entry><para>Default:  0.00335270.</para>
-<para>Options:  { Real Number }</para>
-<para>The Flattening field allows the user to define the mass of a celestial body.Units: None.</para>
-</entry>
-</row>
-<row>
-<entry><para>InitialEpoch</para>
-</entry>
-<entry><para>Default:  21544.500371.</para>
-<para>Options:  { Real Number }</para>
-<para>The InitialEpoch field allows the user to define the initial epoch, in A1 Modified Julian Date, for a celestial body. The initial epoch is only used when the user selects Analytic for the Ephemeris field on the solar system. In this case, GMAT solves Kepler's problem to determine theposition and velocity of a celestial body, using the initial epoch and state information described below.</para>
-<para>Units: A1ModJulian.</para>
-</entry>
-</row>
-<row>
-<entry><para>SMA</para>
-</entry>
-<entry><para>Default:  149653978.978377.</para>
-<para>Options: { Real Number >= 0 }</para>
-<para>The SMA field allows the user to define the semimajor axis of a celestial body's orbit about its central body. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: km. </para>
-</entry>
-</row>
-<row>
-<entry><para>ECC</para>
-</entry>
-<entry><para>Default:  0.017046.</para>
-<para>Options: [Real Number >=0 }</para>
-<para>The ECC field allows the user to define the  eccentricity of a celestial body's orbit about its  central body. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: None. </para>
-</entry>
-</row>
-<row>
-<entry><para>INC</para>
-</entry>
-<entry><para>Default:  23.439034.</para>
-<para>Options: { Real Number }</para>
-<para>The INC field allows the user to define the inclination of a celestial body's orbit about its  central body, in the FK5 coordinate system.  (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: deg.</para>
-</entry>
-</row>
-<row>
-<entry><para>RAAN</para>
-</entry>
-<entry><para>Default:  0.000186.</para>
-<para>Options: { Real Number }</para>
-<para>The RAAN field allows the user to define the right ascension of the ascending node of a celestialbody's orbit about its  central body, in the FK5 coordinate system.  (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: deg. </para>
-</entry>
-</row>
-<row>
-<entry><para>AOP</para>
-</entry>
-<entry><para>Default:  101.741639.</para>
-<para>Options: { Real Number }</para>
-<para>The AOP field allows the user to define the argument of periapsis of a celestial body's orbit about its central body, in the FK5 coordinate system. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: deg.</para>
-</entry>
-</row>
-<row>
-<entry><para>TA</para>
-</entry>
-<entry><para>Default:  358.127085.</para>
-<para>Options: { Real Number }</para>
-<para>The TA field allows the user to define the true anomaly of a celestial body's orbit about its  central body. (Only used when the user selects Analytic for the Ephemeris field on the Solar System.)</para>
-<para>Units: deg. </para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-<para>Special Fields Associated with Earth</para>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>NutationUpdate Interval</para>
-</entry>
-<entry><para>Default:  60.</para>
-<para>Options: { Real Number >=0 }</para>
-<para>The NutationUpdateInterval field, on the Earth Celestial Body, determines how often GMAT updates the Nutation matrix used in FK5 reduction.  If NutationUpdateInterval is set to zero, the Nutation is updated every time  a request is made to calculate the orientation of the Earth. If NutationUpdateInterval is set to a real number greater than zero, then GMAT only updates the Nutation matrix if the number of seconds defined by NutationUpdateInterval have elapsed since the last request for the Earth's orientation data.</para>
-<para>Units: sec. </para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-<para>Special Fields Associated with Luna</para>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>RotationData Source</para>
-</entry>
-<entry><para>Default: {DE405}.</para>
-<para>Options: { DE405, IAU2002 }</para>
-<para>The RotationDataSource, on the Luna Celestial Body, determines what source GMAT uses to obtain data describing the orientation of the moon with respect to the FK5 system. The RotationDataSource field is only used for lunar orientation data when calculating moon-based coordinate systems with the axes types of {Fixed} and {Equator}.</para>
-<para>Units: N/A</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
+GMAT Earth.NutationUpdateInterval = 60;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <para>Fields Associated with All Celestial Bodies (Using Default Values
+    for Earth as an Example)</para>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>Mu</para></entry>
+
+            <entry><para>Default: 398600.4414.</para> <para>Options: { Real
+            Number &lt; 0 }</para> <para>The Mu field allows the user to
+            define the gravitational parameter of a celestial body. Units:
+            km<superscript>3</superscript>/sec<superscript>2</superscript>.
+            z</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Equatorial Radius</para></entry>
+
+            <entry><para>Default: 6378.1363.</para> <para>Options: { Real
+            Number &lt; 0 }</para> <para>The EquatorialRadius field allows the
+            user to define the equatorial radius of a celestial body.</para>
+            <para>Units: km.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Flattening</para></entry>
+
+            <entry><para>Default: 0.00335270.</para> <para>Options: { Real
+            Number }</para> <para>The Flattening field allows the user to
+            define the mass of a celestial body.Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>InitialEpoch</para></entry>
+
+            <entry><para>Default: 21544.500371.</para> <para>Options: { Real
+            Number }</para> <para>The InitialEpoch field allows the user to
+            define the initial epoch, in A1 Modified Julian Date, for a
+            celestial body. The initial epoch is only used when the user
+            selects Analytic for the Ephemeris field on the solar system. In
+            this case, GMAT solves Kepler's problem to determine theposition
+            and velocity of a celestial body, using the initial epoch and
+            state information described below.</para> <para>Units:
+            A1ModJulian.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>SMA</para></entry>
+
+            <entry><para>Default: 149653978.978377.</para> <para>Options: {
+            Real Number &gt;= 0 }</para> <para>The SMA field allows the user
+            to define the semimajor axis of a celestial body's orbit about its
+            central body. (Only used when the user selects Analytic for the
+            Ephemeris field on the Solar System.)</para> <para>Units:
+            km.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ECC</para></entry>
+
+            <entry><para>Default: 0.017046.</para> <para>Options: [Real Number
+            &gt;=0 }</para> <para>The ECC field allows the user to define the
+            eccentricity of a celestial body's orbit about its central body.
+            (Only used when the user selects Analytic for the Ephemeris field
+            on the Solar System.)</para> <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>INC</para></entry>
+
+            <entry><para>Default: 23.439034.</para> <para>Options: { Real
+            Number }</para> <para>The INC field allows the user to define the
+            inclination of a celestial body's orbit about its central body, in
+            the FK5 coordinate system. (Only used when the user selects
+            Analytic for the Ephemeris field on the Solar System.)</para>
+            <para>Units: deg.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>RAAN</para></entry>
+
+            <entry><para>Default: 0.000186.</para> <para>Options: { Real
+            Number }</para> <para>The RAAN field allows the user to define the
+            right ascension of the ascending node of a celestialbody's orbit
+            about its central body, in the FK5 coordinate system. (Only used
+            when the user selects Analytic for the Ephemeris field on the
+            Solar System.)</para> <para>Units: deg.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>AOP</para></entry>
+
+            <entry><para>Default: 101.741639.</para> <para>Options: { Real
+            Number }</para> <para>The AOP field allows the user to define the
+            argument of periapsis of a celestial body's orbit about its
+            central body, in the FK5 coordinate system. (Only used when the
+            user selects Analytic for the Ephemeris field on the Solar
+            System.)</para> <para>Units: deg.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>TA</para></entry>
+
+            <entry><para>Default: 358.127085.</para> <para>Options: { Real
+            Number }</para> <para>The TA field allows the user to define the
+            true anomaly of a celestial body's orbit about its central body.
+            (Only used when the user selects Analytic for the Ephemeris field
+            on the Solar System.)</para> <para>Units: deg.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>Special Fields Associated with Earth</para>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>NutationUpdate Interval</para></entry>
+
+            <entry><para>Default: 60.</para> <para>Options: { Real Number
+            &gt;=0 }</para> <para>The NutationUpdateInterval field, on the
+            Earth Celestial Body, determines how often GMAT updates the
+            Nutation matrix used in FK5 reduction. If NutationUpdateInterval
+            is set to zero, the Nutation is updated every time a request is
+            made to calculate the orientation of the Earth. If
+            NutationUpdateInterval is set to a real number greater than zero,
+            then GMAT only updates the Nutation matrix if the number of
+            seconds defined by NutationUpdateInterval have elapsed since the
+            last request for the Earth's orientation data.</para> <para>Units:
+            sec.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <para>Special Fields Associated with Luna</para>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>RotationData Source</para></entry>
+
+            <entry><para>Default: {DE405}.</para> <para>Options: { DE405,
+            IAU2002 }</para> <para>The RotationDataSource, on the Luna
+            Celestial Body, determines what source GMAT uses to obtain data
+            describing the orientation of the moon with respect to the FK5
+            system. The RotationDataSource field is only used for lunar
+            orientation data when calculating moon-based coordinate systems
+            with the axes types of {Fixed} and {Equator}.</para> <para>Units:
+            N/A</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
 </section>

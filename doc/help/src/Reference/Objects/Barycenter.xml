@@ -1,77 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Barycenter</title>
 
-<title>Barycenter</title>
-<para>This was created using the July 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>A barycenter is the center of mass of two or more objects and is located under the Solar System folder in the resource tree. The Barycenter object allows you to create a special point that can be used as a reference point or a point to be used for the plots. </para>
-<section>
-<title>Listing of Objects and Commands that interact</title>
-<itemizedlist>
-<listitem><para>Coordinate Systems </para>
-<itemizedlist>
-<listitem><para>Interacts with the barycenter object selecting it as the origin of the coordinate system or as a primary or secondary point for defining the axes.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para> OpenGL Plot</para>
-<itemizedlist>
-<listitem><para>It can be selected as a celestial object to be drawn onto the plot, a View Point Reference, or the View Direction within the dialog box.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-</section>
-</section>
-<section>
-<title>Using the GUI</title>
-<itemizedlist>
-<listitem><para>Available Bodies</para>
-<itemizedlist>
-<listitem><para>Under this column are the list of celestial bodies that can be combined to make a barycenter or the center of mass.  This list includes: Sun, Mercury, Venus, Jupiter, Saturn, Uranus, Neptune, Pluto, Earth, and Luna.  As some of these bodies are added to Bodies Selected, they are automatically removed from the list of available bodies.  When a body is selected in the Available Bodies column, the right arrow can be clicked to move it to the Bodies Selected column.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Bodies Selected</para>
-<itemizedlist>
-<listitem><para>The barycenter is calculated using the bodies that are under this column.  This column should contain two or more bodies for this object to be effective, unless a body's center of mass is significantly off center.  By default, Earth and Luna start in this column.  If an object in this column is selected and the left arrow is clicked, that object is cleared from the Body Selected column and moved back to the list of potential bodies used in the Available Bodies column.  If the double left arrow is clicked, all of the bodies in the Bodies Selected column are moved to the Bodies Selected column.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<screenshot><info><title>Figure: Barycenter Object Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Barycenter Object Dialog Box</para></caption></mediaobject></screenshot>
-</section>
-<section>
-<title>Using the Script</title>
-<section>
-<title>Script Syntax</title>
-<para>^</para>
-<para>Create Barycenter EarthMoonBary;</para>
-<para>GMAT EarthMoonBary.BodyNames = {Earth, Luna};</para>
-<para>^</para>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>~060~BodyNames~062~</para>
-</entry>
-<entry><para>Default: Earth, Luna.  </para>
-<para>Options: { Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto. (At least one body must be selected!) }</para>
-<para>The BodyNames field is a list that contains the bodies used to define a barycenter. In a script, the list must be surrounded by curly braces. (i.e. BaryCenterName.BodyNames = { Earth, Luna })</para>
-<para>    Units:  N/A. </para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
+  <para>This was created using the July 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>A barycenter is the center of mass of two or more objects and is
+    located under the Solar System folder in the resource tree. The Barycenter
+    object allows you to create a special point that can be used as a
+    reference point or a point to be used for the plots.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Coordinate Systems</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Interacts with the barycenter object selecting it as the
+              origin of the coordinate system or as a primary or secondary
+              point for defining the axes.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>OpenGL Plot</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>It can be selected as a celestial object to be drawn onto
+              the plot, a View Point Reference, or the View Direction within
+              the dialog box.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>Available Bodies</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Under this column are the list of celestial bodies that can
+            be combined to make a barycenter or the center of mass. This list
+            includes: Sun, Mercury, Venus, Jupiter, Saturn, Uranus, Neptune,
+            Pluto, Earth, and Luna. As some of these bodies are added to
+            Bodies Selected, they are automatically removed from the list of
+            available bodies. When a body is selected in the Available Bodies
+            column, the right arrow can be clicked to move it to the Bodies
+            Selected column.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Bodies Selected</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>The barycenter is calculated using the bodies that are under
+            this column. This column should contain two or more bodies for
+            this object to be effective, unless a body's center of mass is
+            significantly off center. By default, Earth and Luna start in this
+            column. If an object in this column is selected and the left arrow
+            is clicked, that object is cleared from the Body Selected column
+            and moved back to the list of potential bodies used in the
+            Available Bodies column. If the double left arrow is clicked, all
+            of the bodies in the Bodies Selected column are moved to the
+            Bodies Selected column.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Barycenter Object Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Barycenter Object Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the Script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Create Barycenter EarthMoonBary;
+GMAT EarthMoonBary.BodyNames = {Earth, Luna};</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>&lt;BodyNames&gt;</para></entry>
+
+            <entry><para>Default: Earth, Luna.</para> <para>Options: { Sun,
+            Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
+            Neptune, Pluto. (At least one body must be selected!) }</para>
+            <para>The BodyNames field is a list that contains the bodies used
+            to define a barycenter. In a script, the list must be surrounded
+            by curly braces. (i.e. BaryCenterName.BodyNames = { Earth, Luna
+            })</para> <para>Units: N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
 </section>

@@ -1,47 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Variable</title>
 
-<title>Variable</title>
-<para>This was created using the June 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The Variable object allows you to create and name a variable and assign to it a real number value.  A variable can be used in numerous commands which allows you to customize the mission sequence to your application.  In the simplest case, a variable can be defined by a simple assignment to a numeric literal.  In more complex cases, a variable can be defined using an assignment that contains a complicated mathematical expression.  </para>
-</section>
-<section>
-<title>Interfaces</title>
-<screenshot><info><title>Figure: Parameter Create Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Parameter Create Dialog Box</para></caption></mediaobject></screenshot>
-<section>
-<title>Script Syntax</title>
-<programlisting><code>GMAT [Variable Name] = [expression]
-</code></programlisting>
-</section>
-<section>
-<title>Script Examples</title>
-<programlisting><code>Create Variable pi Energy mu SMA
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The Variable object allows you to create and name a variable and
+    assign to it a real number value. A variable can be used in numerous
+    commands which allows you to customize the mission sequence to your
+    application. In the simplest case, a variable can be defined by a simple
+    assignment to a numeric literal. In more complex cases, a variable can be
+    defined using an assignment that contains a complicated mathematical
+    expression.</para>
+  </section>
+
+  <section>
+    <title>Interfaces</title>
+
+    <screenshot>
+      <info>
+        <title>Figure: Parameter Create Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Parameter Create Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>GMAT [Variable Name] = [expression]</code></programlisting>
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>Create Variable pi Energy mu SMA
 mu     = 398600.4415;
 pi     = 3.14159265358979;
 Energy = MySpacecraft.VMAG^2/2 - mu/r; 
-SMA    = -mu/2/Energy;
-</code></programlisting>
-</section>
-</section>
-<section>
-<title>Object and Commands Interactions</title>
-<itemizedlist>
-<listitem><para>((Spacecraft Object))</para></listitem>
-<listitem><para>((Report Command))</para></listitem>
-<listitem><para>((Equation Command))</para></listitem>
-<listitem><para>((Vary Command))</para></listitem>
-<listitem><para>((Achieve Command))</para></listitem>
-<listitem><para>((Minimize Command))</para></listitem>
-</itemizedlist>
-</section>
+SMA    = -mu/2/Energy;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Object and Commands Interactions</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>((Spacecraft Object))</para>
+      </listitem>
+
+      <listitem>
+        <para>((Report Command))</para>
+      </listitem>
+
+      <listitem>
+        <para>((Equation Command))</para>
+      </listitem>
+
+      <listitem>
+        <para>((Vary Command))</para>
+      </listitem>
+
+      <listitem>
+        <para>((Achieve Command))</para>
+      </listitem>
+
+      <listitem>
+        <para>((Minimize Command))</para>
+      </listitem>
+    </itemizedlist>
+  </section>
 </section>
