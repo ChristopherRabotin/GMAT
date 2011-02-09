@@ -1,95 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Optimize</title>
 
-<title>Optimize</title>
-<para>This tutorial was started from the default settings in the June 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The optimize command in GMAT allows variables to optimize by using a solver fmincon object. </para>
-<section>
-<title>Possible Coupling with Other Objects</title>
-<itemizedlist>
-<listitem><para> fmincon Object</para>
-<itemizedlist>
-<listitem><para> Must set in order to use Optimize Command.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Minimize</para>
-<itemizedlist>
-<listitem><para> Must be defined if you would like to minimize variable in an optimize sequence.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Vary</para></listitem>
-<listitem><para>NonLinearConstraint</para></listitem>
-</itemizedlist>
-</section>
-</section>
-<section>
-<title>Using the GUI</title>
-<para>The Optimize dialog contains only solver user can selected. Also, in optimize sequence user can give some commands.</para>
-<itemizedlist>
-<listitem><para> Solver Name - Drop Down Menus</para>
-<itemizedlist>
-<listitem><para> Must select solver applying for optimize sequence</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>{img src=show_image.php?name=OPTIMIZECOMMAND.JPG align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-</section>
-<section>
-<title>Using the Script</title>
-<section>
-<title>Script Syntax</title>
-<para>^</para>
-<para>-+Optimize SolverName;+-</para>
-<para>-+~060~Statements~062~;+-</para>
-<para>-+EndOptimize;+-</para>
-<para>^</para>
-</section>
-<section>
-<title>Script Examples</title>
-<para>^</para>
-<para>-+% Beginning and ending syntax for the Optimize command+-</para>
-<para>-+Optimize DefaultDC;+-</para>
-<para>-+EndOptimize;+-</para>
-<para>^</para>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para><I>SolverName</I></para>
-</entry>
-<entry><para>Default: DefaultSQP.</para>
-<para>Options: { Any existung optimizer } </para>
-<para>The <I>SolverName</I> field allows the user to choose between any previously created optimizer for use in an optimization sequence. For example, to begin a optimization sequence using DefaultSQP, the script is Optimize DefaultSQP.</para>
-<para>Units: N/A.</para>
-</entry>
-</row>
-<row>
-<entry><para>~060~Statements~062~</para>
-</entry>
-<entry><para>Default: None.</para>
-<para>Options: { Any non-targeter and non-optimizer command lines used in the mission sequence, as well as the optimizer dependent command lines Vary, NonLinearConstraint, and Minimize. }</para>
-<para>Units: N/A.</para>
-</entry> 
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
+  <para>This tutorial was started from the default settings in the June 9,
+  2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The optimize command in GMAT allows variables to optimize by using a
+    solver fmincon object.</para>
+
+    <section>
+      <title>Possible Coupling with Other Objects</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>fmincon Object</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Must set in order to use Optimize Command.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Minimize</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Must be defined if you would like to minimize variable in
+              an optimize sequence.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Vary</para>
+        </listitem>
+
+        <listitem>
+          <para>NonLinearConstraint</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>The Optimize dialog contains only solver user can selected. Also, in
+    optimize sequence user can give some commands.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Solver Name - Drop Down Menus</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Must select solver applying for optimize sequence</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Optimize Command Dialog Box without setting
+        fmincon</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Optimize Command Dialog Box without setting
+          fmincon</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the Script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Optimize SolverName;
+   &lt;Statements&gt;;
+EndOptimize;</code></programlisting>
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>% Beginning and ending syntax for the Optimize command
+Optimize DefaultDC;
+
+EndOptimize;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>SolverName</para></entry>
+
+            <entry><para>Default: DefaultSQP.</para> <para>Options: { Any
+            existung optimizer } </para> <para>The SolverName field allows the
+            user to choose between any previously created optimizer for use in
+            an optimization sequence. For example, to begin a optimization
+            sequence using DefaultSQP, the script is Optimize
+            DefaultSQP.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>&lt;Statements&gt;</para></entry>
+
+            <entry><para>Default: None.</para> <para>Options: { Any
+            non-targeter and non-optimizer command lines used in the mission
+            sequence, as well as the optimizer dependent command lines Vary,
+            NonLinearConstraint, and Minimize. }</para> <para>Units:
+            N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
 </section>

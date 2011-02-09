@@ -1,65 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>ScriptEvent</title>
 
-<title>ScriptEvent</title>
-<para>This was created using the June 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The ScriptEvent command allows a user to enter in script within the GUI in the mission sequence.  This can be useful in a number of ways if its easier to enter the script than to use the GUI interface.  Also, if multiple things needed to be changed rapidly, this could be useful.  Additionally, the ScriptEvent allows a user to have more freedom if the GUI is problematic and won't allow the user to perform the desired operation.</para>
-</section>
-<section>
-<title>Using the GUI</title>
-<itemizedlist>
-<listitem><para>Field</para>
-<itemizedlist>
-<listitem><para>You can type the script commands needed between -+BeginScript+- and -+EndScript;+-.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<screenshot><info><title>Figure: Default Name and Settings for the ScriptEvent Dialog Box</title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para>Figure: Default Name and Settings for the ScriptEvent Dialog Box</para></caption></mediaobject></screenshot>
-</section>
-<section>
-<title>Using the script</title>
-<section>
-<title>Script Syntax</title>
-<para>^</para>
-<para>-+BeginScript+-</para>
-<para>-+~hs~~hs~~060~Statements~062~+-</para>
-<para>-+EndScript;+-</para>
-<para>^</para>
-</section>
-<section>
-<title>Script Examples</title>
-<para>^</para>
-<para>-+% Assignment Command inside Script Event+-</para>
-<para>-+BeginScript+-</para>
-<para>-+~hs~~hs~GMAT testVar = 24;+-</para>
-<para>-+EndScript;+-</para>
-<para>^</para>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>     ~060~Statements~062~</para>
-</entry>
-<entry><para>     Default: N/A</para>
-<para>     Options: { Any valid line of GMAT script }</para>
-<para>     Units: N/A</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The ScriptEvent command allows a user to enter in script within the
+    GUI in the mission sequence. This can be useful in a number of ways if its
+    easier to enter the script than to use the GUI interface. Also, if
+    multiple things needed to be changed rapidly, this could be useful.
+    Additionally, the ScriptEvent allows a user to have more freedom if the
+    GUI is problematic and won't allow the user to perform the desired
+    operation.</para>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>You can type the script commands needed between
+            BeginScript and EndScript;.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the ScriptEvent Dialog
+        Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the ScriptEvent Dialog
+          Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>BeginScript
+     &lt;Statements&gt;
+EndScript;</code></programlisting>
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>% Assignment Command inside Script Event
+
+BeginScript
+     GMAT testVar = 24;
+EndScript;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para> &lt;Statements&gt;</para></entry>
+
+            <entry><para> Default: N/A</para> <para> Options: { Any valid line
+            of GMAT script }</para> <para> Units: N/A</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
 </section>

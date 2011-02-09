@@ -1,131 +1,209 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section version="5.0" xmlns="http://docbook.org/ns/docbook"
-xmlns:xlink="http://www.w3.org/1999/xlink"
-xmlns:xi="http://www.w3.org/2001/XInclude"
-xmlns:svg="http://www.w3.org/2000/svg"
-xmlns:m="http://www.w3.org/1998/Math/MathML"
-xmlns:html="http://www.w3.org/1999/xhtml"
-xmlns:db="http://docbook.org/ns/docbook">
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>If</title>
 
-<title>If</title>
-<para>This was created using the Default settings in the June 9, 2008 build of GMAT.</para>
-<section>
-<title>Overview</title>
-<para>The If command gives you the ability to use a logical statement within GMAT.  At some point during a mission sequence, when a  particular command should only be executed when a certain condition is met, use of the If command is recommended.  The If  command also gives you the ability to make a command's execution reliant upon multiple conditions.</para>
-<section>
-<title>Listing of Objects and Commands that interact</title>
-<itemizedlist>
-<listitem><para>Parameters</para>
-<itemizedlist>
-<listitem><para>Whatever parameters of object type Spacecraft, Variable, or Array, that are present within the Parameter Select Dialog box,  are available to this field.  Numerical values are also available.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-</section>
-</section>
-<section>
-<title>Using the GUI</title>
-<para>The If Command Dialog box looks similar to the other control logic Dialog boxes.  Basically, you may change the parameters on  the left hand side (LHS) and right hand side (RHS) of the logical expression, as well as the condition operator between them.   This means that the expression can compare nearly any values from the mission you wish.  In addition to this there is the  ability to have the If statement dependent upon more than one condition.  Or and And operators, along with their accompanying  logical statements, may be added under the initial If to further refine the conditions that must be met.</para>
-<itemizedlist>
-<listitem><para>LHS/RHS - Field</para>
-<itemizedlist>
-<listitem><para>These fields can either be set to a numerical value or whatever object value is available in the parameter select dialog box.   The objects available in that dialog box depend upon what resources have been created in the mission tree.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Condition - Field</para>
-<itemizedlist>
-<listitem><para>This may be set as equal, not equal, greater/less than, and greater/less than or equal to.  This comparison applies to the  LHS and RHS on the same line as it.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<itemizedlist>
-<listitem><para>Logic Selection - Field</para>
-<itemizedlist>
-<listitem><para>Selecting And/Or here will allow you to use another logical expression to better create your If statement's condition.   Multiple lines may be added to the If statement in this way.</para></listitem>
-</itemizedlist></listitem>
-</itemizedlist>
-<para>{img src=show_image.php?name=IfMain.jpg align="center"}</para>
-<para>
-<screenshot><info><title></title></info><mediaobject><imageobject><imagedata align="center"
-fileref="???"></imagedata></imageobject>
-<caption><para></para></caption></mediaobject></screenshot></para>
-</section>
-<section>
-<title>Using the script</title>
-<para>Using the If command in the script is quite simple.  If you have ever programmed before in the higher level languages such as C, Matlab, or Java, GMAT will be very familiar.  The statement reads like you see it basically: If the given statement after the 'If' is true, then execute the statement(s) following until the 'EndIf' is reached.</para>
-<section>
-<title>Script Syntax</title>
-<itemizedlist>
-<listitem><para>Simple If Statement</para></listitem>
-</itemizedlist>^
-<para>-+If ~060~logical expression~062~;+-</para>
-<para>-+~hs~~hs~~060~Statements~062~;+-</para>
-<para>-+EndIf;+-</para>
-<para>^</para>
-<itemizedlist>
-<listitem><para>Compound If statement</para></listitem>
-</itemizedlist>^
-<para>-+If ~060~logical expression~062~ | ~060~logical expression~062~ ~038~ ~060~logical expression~062~;+-</para>
-<para>-+~hs~~hs~~060~Statements~062~;+-</para>
-<para>-+EndIf;+-</para>
-<para>^</para>
-</section>
-<section>
-<title>Script Examples</title>
-<para>^</para>
-<para>-+If DefaultSC.ElapsedDays ~060~ 1;+-</para>
-<para>-+~hs~~hs~Propagate DefaultProp( DefaultSC , { DefaultSC.ElapsedDays = 0.01 });+-</para>
-<para>-+EndIf;+-</para>
-<para>-+If MyVariable ~060~ MyArray(1,1);+-</para>
-<para>-+~hs~~hs~MyArray(1,1) = 5;+-</para>
-<para>-+EndIf;+-</para>
-<para>-+If DefaultSC.Earth.TA ~060~ MyArray(1,2);+-</para>
-<para>-+~hs~~hs~Propagate DefaultProp( DefaultSC );+-</para>
-<para>-+EndIf;+-</para>
-<para>^</para>
-</section>
-</section>
-<section>
-<title>Reference Table</title>
-<informaltable>
-<tgroup cols="2">
-<tbody>
-<row>
-<entry><para>	~060~If Command~062~</para>
-</entry>
-<entry><para>        Default: DefaultSC.ElapsedDays ~060~ 1.0.</para>
-<para>        Options: { <b>Arg1</b> ~060~ <b>Arg2</b> and ~060~ can be  ~062~, ~060~, ~062~=, ~060~=, ==, ~126~= }</para>
-<para>        <b> Arg1</b> and <b>Arg2</b> can be any of the following: Real Number, Array element,  Variable, Spacecraft Parameter or any other user defined parameter.</para>
-<para>        Units: N/A.</para>
-</entry>
-</row>
-<row>
-<entry><para>	~060~Statements~062~</para>
-</entry>
-<entry><para>        Default: N/A.</para>
-<para>        Options: { Any script line that can be in the mission sequence }</para>
-<para>        Units: N/A.</para>
-</entry>
-</row>
-<row>
-<entry><para>	~124~</para>
-</entry>
-<entry><para>        Default: N/A.</para>
-<para>        Options: { N/A }</para>
-<para>        The ~124~ option allows the user to set an OR operator in between ~060~logical  expression~062~s.</para>
-<para>        Units: N/A.</para>
-</entry>
-</row>
-<row>
-<entry><para>	~038~</para>
-</entry>
-<entry><para>        Default: N/A.</para>
-<para>        Options: { N/A }</para>
-<para>        The ~038~ option allows the user to set an AND operator in between ~060~logical  expression~062~s</para>
-<para>        Units: N/A.</para>
-</entry>
-</row>
-</tbody>
-</tgroup>
-</informaltable>
-</section>
+  <para>This was created using the Default settings in the June 9, 2008 build
+  of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The If command gives you the ability to use a logical statement
+    within GMAT. At some point during a mission sequence, when a particular
+    command should only be executed when a certain condition is met, use of
+    the If command is recommended. The If command also gives you the ability
+    to make a command's execution reliant upon multiple conditions.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Parameters</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Whatever parameters of object type Spacecraft, Variable,
+              or Array, that are present within the Parameter Select Dialog
+              box, are available to this field. Numerical values are also
+              available.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>The If Command Dialog box looks similar to the other control logic
+    Dialog boxes. Basically, you may change the parameters on the left hand
+    side (LHS) and right hand side (RHS) of the logical expression, as well as
+    the condition operator between them. This means that the expression can
+    compare nearly any values from the mission you wish. In addition to this
+    there is the ability to have the If statement dependent upon more than one
+    condition. Or and And operators, along with their accompanying logical
+    statements, may be added under the initial If to further refine the
+    conditions that must be met.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>LHS/RHS - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>These fields can either be set to a numerical value or
+            whatever object value is available in the parameter select dialog
+            box. The objects available in that dialog box depend upon what
+            resources have been created in the mission tree.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Condition - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This may be set as equal, not equal, greater/less than, and
+            greater/less than or equal to. This comparison applies to the LHS
+            and RHS on the same line as it.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Logic Selection - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Selecting And/Or here will allow you to use another logical
+            expression to better create your If statement's condition.
+            Multiple lines may be added to the If statement in this
+            way.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the If Command Dialog
+        Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the If Command Dialog
+          Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <para>Using the If command in the script is quite simple. If you have ever
+    programmed before in the higher level languages such as C, Matlab, or
+    Java, GMAT will be very familiar. The statement reads like you see it
+    basically: If the given statement after the 'If' is true, then execute the
+    statement(s) following until the 'EndIf' is reached.</para>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Simple If Statement</para>
+
+          <programlisting><code>If &lt;logical expression&gt;;
+   &lt;Statements&gt;;
+EndIf;</code></programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Compound If statement</para>
+
+          <programlisting><code>If &lt;logical expression&gt; | &lt;logical expression&gt; &amp; &lt;logical expression&gt;;
+   &lt;Statements&gt;;
+EndIf;</code></programlisting>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>If DefaultSC.ElapsedDays &lt; 1;
+   Propagate DefaultProp( DefaultSC , { DefaultSC.ElapsedDays = 0.01 });
+EndIf;
+
+If MyVariable &lt; MyArray(1,1);
+   MyArray(1,1) = 5;
+EndIf;
+
+If DefaultSC.Earth.TA &lt; MyArray(1,2);
+   Propagate DefaultProp( DefaultSC );
+EndIf;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para> &lt;If Command&gt;</para></entry>
+
+            <entry><para> Default: DefaultSC.ElapsedDays &lt; 1.0.</para>
+            <para> Options: { Arg1 &lt; Arg2 and &lt; can be &gt;, &lt;,
+            &gt;=, &lt;=, ==, ~126~= }</para> <para> Arg1 and Arg2 can be any
+            of the following: Real Number, Array element, Variable, Spacecraft
+            Parameter or any other user defined parameter.</para> <para>
+            Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para> &lt;Statements&gt;</para></entry>
+
+            <entry><para> Default: N/A.</para> <para> Options: { Any script
+            line that can be in the mission sequence }</para> <para> Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para> |</para></entry>
+
+            <entry><para> Default: N/A.</para> <para> Options: { N/A }</para>
+            <para> The | option allows the user to set an OR operator in
+            between &lt;logical expression&gt;s.</para> <para> Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para> &amp;</para></entry>
+
+            <entry><para> Default: N/A.</para> <para> Options: { N/A }</para>
+            <para> The &amp; option allows the user to set an AND operator in
+            between &lt;logical expression&gt;s</para> <para> Units:
+            N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
 </section>

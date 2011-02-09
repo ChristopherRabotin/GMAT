@@ -78,15 +78,13 @@
 
       <programlisting><code>For Variable = Start:End;
 
-EndFor; }
-</code></programlisting>
+EndFor; }</code></programlisting>
 
       <para>(Expanded For Loop)</para>
 
       <programlisting><code>For Variable = Start:Increment:End;
 
-EndFor;
-</code></programlisting>
+EndFor;</code></programlisting>
     </section>
 
     <section>
@@ -96,8 +94,7 @@ EndFor;
 For I = 1:1:10;
 GMAT testVar = I;
 Report DefaultReportFile I;
-EndFor;
-</code></programlisting>
+EndFor;</code></programlisting>
     </section>
   </section>
 
@@ -110,8 +107,8 @@ EndFor;
           <row>
             <entry><para>Variable</para></entry>
 
-            <entry><para>Default: No Default. </para> <para>Options:[ Variable
-            ]: </para> <para>The Variable field allows the user to define the
+            <entry><para>Default: No Default.</para> <para>Options:[ Variable
+            ]</para> <para>The Variable field allows the user to define the
             variable that to be incremented during the loop process.</para>
             <para>Units: N/A.</para></entry>
           </row>
@@ -119,17 +116,17 @@ EndFor;
           <row>
             <entry><para>Start</para></entry>
 
-            <entry><para>Default: 1. </para> <para>Options: [ Real Number,
-            Array element, Variable, or any user defined parameter ]. </para>
+            <entry><para>Default: 1.</para> <para>Options: [ Real Number,
+            Array element, Variable, or any user defined parameter ].</para>
             <para>The Start option allows the user to set the starting value
-            of the For Loop. </para> <para>Units: N/A.</para></entry>
+            of the For Loop.</para> <para>Units: N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>Increment</para></entry>
 
-            <entry><para>Default: 1. </para> <para>Options: [ Real Number,
-            Array element, Variable, or any user defined parameter ]. </para>
+            <entry><para>Default: 1.</para> <para>Options: [ Real Number,
+            Array element, Variable, or any user defined parameter ].</para>
             <para>The Increment option allows the user to set the increment
             value of the For Loop. When the increment value is not included in
             a for loop statement, the default value is used.</para>
@@ -158,21 +155,11 @@ EndFor;
   <section>
     <title>For Loop Behavior</title>
 
-    <para>When the Increment option is left out of the</para>
-
-    <para>script syntax the default value is used. If an Increment value of 0
-    is used,</para>
-
-    <para>the For Loop should not execute but GMAT should continue to run. If
-    End&gt;Start and</para>
-
-    <para>Increment&lt;0, then the For Loop should not execute. If
-    Start&gt;End and</para>
-
-    <para>Increment&gt;0, then the For Loop should not execute.</para>
-
-    <para>End can be equal to Start, but the For Loop will</para>
-
-    <para>not execute.</para>
+    <para>When the Increment option is left out of the script syntax the
+    default value is used. If an Increment value of 0 is used, the For Loop
+    should not execute but GMAT should continue to run. If End&gt;Start and
+    Increment&lt;0, then the For Loop should not execute. If Start&gt;End and
+    Increment&gt;0, then the For Loop should not execute. End can be equal to
+    Start, but the For Loop will not execute.</para>
   </section>
 </section>

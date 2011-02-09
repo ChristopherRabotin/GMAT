@@ -30,9 +30,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-      </itemizedlist>
 
-      <itemizedlist>
         <listitem>
           <para>Optimize Command</para>
 
@@ -67,9 +65,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-    </itemizedlist>
 
-    <itemizedlist>
       <listitem>
         <para>Variable to be Minimized - Drop Down Menus</para>
 
@@ -82,12 +78,10 @@
       </listitem>
     </itemizedlist>
 
-    <para>{img src=show_image.php?name=MINIMIZECOMMAND.JPG
-    align="center"}</para>
-
     <para><screenshot>
         <info>
-          <title></title>
+          <title>Figure: Default Minimize Command Dialog Box without setting
+          fmincon and variable to be minimized</title>
         </info>
 
         <mediaobject>
@@ -96,7 +90,8 @@
           </imageobject>
 
           <caption>
-            <para></para>
+            <para>Figure: Default Minimize Command Dialog Box without setting
+            fmincon and variable to be minimized</para>
           </caption>
         </mediaobject>
       </screenshot></para>
@@ -108,8 +103,7 @@
     <section>
       <title>Script Syntax</title>
 
-      <programlisting><code>Minimize OptimizerName (Arg)
-</code></programlisting>
+      <programlisting><code>Minimize OptimizerName (Arg)</code></programlisting>
     </section>
 
     <section>
@@ -122,8 +116,7 @@ Minimize fminconSQP(Sat.ECC);
 Minimize fminconSQP(DeltaV);
 
 % Minimize the first component of MyArray, using fminconSQP
-Minimize fminconSQP(MyArray(1,1));
-</code></programlisting>
+Minimize fminconSQP(MyArray(1,1));</code></programlisting>
     </section>
   </section>
 

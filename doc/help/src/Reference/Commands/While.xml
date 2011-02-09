@@ -152,15 +152,19 @@
 
       <itemizedlist>
         <listitem>
-          <para>Simple While Loop<programlisting><code>While &lt;logical expression&gt;;
+          <para>Simple While Loop</para>
+
+          <programlisting><code>While &lt;logical expression&gt;;
     &lt;Statements&gt;;
-EndWhile;</code></programlisting></para>
+EndWhile;</code></programlisting>
         </listitem>
 
         <listitem>
-          <para>Compound While Loop<programlisting><code>While &lt;logical expression&gt; | &lt;logical expression&gt; &amp; &lt;logical expression&gt;;
+          <para>Compound While Loop</para>
+
+          <programlisting><code>While &lt;logical expression&gt; | &lt;logical expression&gt; &amp; &lt;logical expression&gt;;
     &lt;Statements&gt;
-EndWhile;</code></programlisting></para>
+EndWhile;</code></programlisting>
         </listitem>
       </itemizedlist>
     </section>
