@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="RunningGMATScriptsfromMATLAB"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -22,9 +23,12 @@
     are located in mutliple folders.</para>
 
     <para>If, after running through this tutorial, you still have difficulties
-    with the interfaces between MATLAB® and GMAT working, visit our <link
-    linkend="???">MATLAB Help Forum</link> or our <link
-    linkend="???">MATLAB&lt;-&gt;GMAT Interface FAQ</link> forum topic.</para>
+    with the interfaces between MATLAB® and GMAT working, visit our
+    <link /><ulink
+    url="http://gmat.ed-pages.com/forum/viewforum.php?f=14">MATLAB Help
+    Forum</ulink> or our <ulink
+    url="http://gmat.ed-pages.com/forum/viewtopic.php?f=14&amp;t=65">MATLAB&lt;-&gt;GMAT
+    Interface FAQ</ulink> forum topic.</para>
 
     <section>
       <title>Files and Folders to be used</title>
@@ -40,13 +44,15 @@
         </listitem>
 
         <listitem>
-          <para><xref linkend="???" /> - MATLAB® script that runs the GMAT
-          script</para>
+          <para><link
+          xlink:href="files/scripts/runMatlabToGMAT.m">runMatlabToGMAT.m</link>
+          - MATLAB® script that runs the GMAT script</para>
         </listitem>
 
         <listitem>
-          <para><xref linkend="???" /> - simplified MATLAB® script that runs
-          the GMAT script</para>
+          <para><link
+          xlink:href="files/scripts/runMatlabToGMATsimple.m">runMatlabToGMATsimple.m</link>
+          - simplified MATLAB® script that runs the GMAT script</para>
         </listitem>
       </itemizedlist>
     </section>
@@ -122,7 +128,7 @@
         how GMAT is controlled by MATLAB® . This MATLAB® script is heavily
         commented to explain what is being done. If you still have questions,
         feel free to post them at our GMAT Source Forge forums
-        (http://sourceforge.net/projects/gmat/|http://sourceforge.net/projects/gmat/)</para>
+        (<ulink url="http://sourceforge.net/projects/gmat/"/>)</para>
       </listitem>
     </orderedlist>
 

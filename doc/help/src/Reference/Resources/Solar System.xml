@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+<section version="5.0" xml:id="SolarSystem"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -32,7 +33,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-		
+
         <listitem>
           <para>Propagator</para>
 
@@ -43,7 +44,7 @@
             </listitem>
           </itemizedlist>
         </listitem>
-		
+
         <listitem>
           <para>Spacecraft</para>
 
@@ -73,7 +74,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-	  
+
       <listitem>
         <para>EphemerisUpdateInterval</para>
 
@@ -88,7 +89,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-	  
+
       <listitem>
         <para>UseTTForEphemeris</para>
 
@@ -107,7 +108,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-	  
+
       <listitem>
         <para>EphemerisFile</para>
 
@@ -121,7 +122,7 @@
           </listitem>
         </itemizedlist>
       </listitem>
-	  
+
       <listitem>
         <para>AnalyticModel</para>
       </listitem>

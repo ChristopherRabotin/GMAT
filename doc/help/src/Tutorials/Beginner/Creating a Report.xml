@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="CreatingaReport"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -18,7 +19,8 @@
     parameters out to a file using two different reporting techniques, as well
     as how to use strings to improve the readability of a report file.</para>
 
-    <para>Download the script file: <xref linkend="???" /></para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/ReportTutorial.script">ReportFile.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -30,7 +32,7 @@
 
           <itemizedlist>
             <listitem>
-              <para><link linkend="???">Report Object</link></para>
+              <para><link linkend="ReportFile">ReportFile</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -41,11 +43,12 @@
 
           <itemizedlist>
             <listitem>
-              <para><link linkend="???">Report Command</link></para>
+              <para><link linkend="Report">Report Command</link></para>
             </listitem>
 
             <listitem>
-              <para><link linkend="???">ScriptEvent Command</link></para>
+              <para><link linkend="ScriptEvent">ScriptEvent
+              Command</link></para>
             </listitem>
           </itemizedlist>
         </listitem>

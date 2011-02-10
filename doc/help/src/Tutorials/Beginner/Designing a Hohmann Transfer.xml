@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="DesigningaHohmannTransfer"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -45,7 +46,7 @@
 
     <para>You can download the script file and run it beforehand to see the
     final results of this tutorial: <link
-    linkend="???">HohmannTransferDesign.script</link></para>
+    xlink:href="files/scripts/HohmannTransferDesign.script">HohmannTransferDesign.script</link></para>
   </section>
 
   <section>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="L2TransferwithSwingby"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -24,8 +25,8 @@
     viewpoints with different coordinate systems.</para>
 
     <para>You can download the script file and run it beforehand to see the
-    final results of this tutorial:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=41|LunarTransferToL2-tutorial.script]</para>
+    final results of this tutorial: <link
+    xlink:href="files/scripts/LunarTransferToL2-tutorial.script">LunarTransferToL2-tutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -90,9 +91,9 @@
             </listitem>
 
             <listitem>
-              <para>value ?V from LEO to achieve a given energy; value B·T
+              <para>value ΔV from LEO to achieve a given energy; value B·T
               with respect to the Moon, required to achieve the given energy;
-              and value ?V to place the spacecraft into an orbit about the
+              and value ΔV to place the spacecraft into an orbit about the
               Sun-Earth Lagrangian point L2</para>
             </listitem>
           </itemizedlist>
@@ -919,7 +920,7 @@
             <para>Maneuver1 applies the rough maneuver of TOI to Sat, so as to
             bring it near the Moon, for the first targeting sequence. At this
             point there is no intent for Sat to reach the exact desired
-            location. Rather, the value ?V=3.1 km/s is an estimate of what
+            location. Rather, the value ΔV=3.1 km/s is an estimate of what
             will be required.</para>
           </listitem>
 
@@ -1933,8 +1934,7 @@
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=L2+Transfer+Using+Lunar+Swingby#_b_Resource_Mission_and_Output_trees_b_|Resource
-    Mission and Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>You have now configured the mission - it is time to run it and see
     the results. First, make sure you save the changes you've made. Then click
@@ -1952,8 +1952,7 @@
 
     <screenshot>
       <info>
-        <title>mg src=show_image.php?name=L2TRANSFERmoonview.JPEG
-        imalign="center</title>
+        <title></title>
       </info>
 
       <mediaobject>
@@ -1962,16 +1961,14 @@
         </imageobject>
 
         <caption>
-          <para>mg src=show_image.php?name=L2TRANSFERmoonview.JPEG
-          imalign="center</para>
+          <para></para>
         </caption>
       </mediaobject>
     </screenshot>
 
     <screenshot>
       <info>
-        <title>mg src=show_image.php?name=L2TRANSFERearthview.JPEG
-        imalign="center</title>
+        <title></title>
       </info>
 
       <mediaobject>
@@ -1980,16 +1977,14 @@
         </imageobject>
 
         <caption>
-          <para>mg src=show_image.php?name=L2TRANSFERearthview.JPEG
-          imalign="center</para>
+          <para></para>
         </caption>
       </mediaobject>
     </screenshot>
 
     <screenshot>
       <info>
-        <title>mg src=show_image.php?name=L2TRANSFERaboveL2.JPEG
-        imalign="center</title>
+        <title>Figure: Output</title>
       </info>
 
       <mediaobject>
@@ -1998,8 +1993,7 @@
         </imageobject>
 
         <caption>
-          <para>mg src=show_image.php?name=L2TRANSFERaboveL2.JPEG
-          imalign="center</para>
+          <para>Figure: Output</para>
         </caption>
       </mediaobject>
     </screenshot>

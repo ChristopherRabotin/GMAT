@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+<section version="5.0" xml:id="Else" xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -17,12 +17,12 @@
     languages, especially Matlab. The Else command adds another dimension to
     an If statement. You use an Else statement when you want something to
     happen when the conditions of an If statement are not met. For example, an
-    If statement who's condition is "x &lt; 5" will only execute the
-    script within its scope when x is indeed less than 5. GMAT would
-    otherwise pass over the If statement's associated script and continue.
-    However, having an Else statement after the If will ensure that the lines
-    of script within the scope of that Else are executed when x is equal
-    to 5 or greater.</para>
+    If statement who's condition is "x &lt; 5" will only execute the script
+    within its scope when x is indeed less than 5. GMAT would otherwise pass
+    over the If statement's associated script and continue. However, having an
+    Else statement after the If will ensure that the lines of script within
+    the scope of that Else are executed when x is equal to 5 or
+    greater.</para>
 
     <section>
       <title>Listing of Objects and Commands that interact</title>

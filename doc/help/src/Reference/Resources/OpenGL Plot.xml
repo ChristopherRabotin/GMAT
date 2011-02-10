@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+<section version="5.0" xml:id="OpenGLPlot"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -525,8 +526,8 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>UpdatePlotFrequency</para></entry>
 
-            <entry><para>Default: 50</para> <para>Options: { Integer >=
-            1 }</para> <para>The UpdatePlotFrequency field allows the user to
+            <entry><para>Default: 50</para> <para>Options: { Integer &gt;= 1
+            }</para> <para>The UpdatePlotFrequency field allows the user to
             specify how often to update an OpenGL plot is updated with new
             data collected during the process of propagating spacecraft and
             running a mission. Data is collected for a plot according the
@@ -541,7 +542,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>NumPointsToRedraw</para></entry>
 
-            <entry><para>Default: 0</para> <para>Options: { Integer >= 0
+            <entry><para>Default: 0</para> <para>Options: { Integer &gt;= 0
             }</para> <para>When NumPointsToRedraw is set to zero, all
             ephemeris points are drawn. When NumPointsToRedraw is set to a
             positive integer, say 10 for example, only the last 10 collected
@@ -592,8 +593,8 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
             <entry><para>Remove</para></entry>
 
             <entry><para>Default: No Default</para> <para>Options: { Any
-            object included in the Add list }</para> <para>The Remove
-            subfield removes a spacecraft,celestial body, libration point, or
+            object included in the Add list }</para> <para>The Remove subfield
+            removes a spacecraft,celestial body, libration point, or
             barycenter from a plot. The user can remove any object that has
             been added to a plot by using the name used to add the
             object.</para> <para>Units: N/A</para></entry>
@@ -620,31 +621,31 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>EclipticPlane</para></entry>
 
-            <entry><para>Default: Off</para> <para>Options: { On , Off }
-            Note: Only allowed for OpenGL plots with Coordinate Systems that
-            use the MJ2000Eq axis system</para> <para>The EclipticPlane field
-            allows the user to tell GMAT to draw a grid representing the
-            ecliptic plane in an OpenGL plot. Note, the ecliptic plane can
-            currently only be drawn for plots whose coordinate system uses the
-            MJ2000Eq axis system.</para> <para>Units: N/A</para></entry>
+            <entry><para>Default: Off</para> <para>Options: { On , Off } Note:
+            Only allowed for OpenGL plots with Coordinate Systems that use the
+            MJ2000Eq axis system</para> <para>The EclipticPlane field allows
+            the user to tell GMAT to draw a grid representing the ecliptic
+            plane in an OpenGL plot. Note, the ecliptic plane can currently
+            only be drawn for plots whose coordinate system uses the MJ2000Eq
+            axis system.</para> <para>Units: N/A</para></entry>
           </row>
 
           <row>
             <entry><para>XYPlane</para></entry>
 
-            <entry><para>Default: On</para> <para>Options: { On , Off
-            }</para> <para>The XYPlane flag allows the user to tell GMAT to
-            draw a grid representing the XY-plane of the coordinate system
-            selected under the CoordinateSystem field of the OpenGL
-            plot.</para> <para>Units: N/A</para></entry>
+            <entry><para>Default: On</para> <para>Options: { On , Off }</para>
+            <para>The XYPlane flag allows the user to tell GMAT to draw a grid
+            representing the XY-plane of the coordinate system selected under
+            the CoordinateSystem field of the OpenGL plot.</para> <para>Units:
+            N/A</para></entry>
           </row>
 
           <row>
             <entry><para>Axes</para></entry>
 
-            <entry><para>Default: On</para> <para>Options: { On , Off
-            }</para> <para>The Axis flag allows the user to tell GMAT to draw
-            the Cartesian axis system associated with the coordinate system
+            <entry><para>Default: On</para> <para>Options: { On , Off }</para>
+            <para>The Axis flag allows the user to tell GMAT to draw the
+            Cartesian axis system associated with the coordinate system
             selected under the CoordinateSystem field of an OpenGL
             plot.</para> <para>Units: N/A</para></entry>
           </row>
@@ -652,20 +653,19 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>Grid</para></entry>
 
-            <entry><para>Default: On</para> <para>Options: { On , Off
-            }</para> <para>The Grid flag allows the user to tell GMAT to draw
-            a grid representing the longitude and latitude lines celestial
-            bodies added to an OpenGL plot.</para> <para>Units:
-            N/A</para></entry>
+            <entry><para>Default: On</para> <para>Options: { On , Off }</para>
+            <para>The Grid flag allows the user to tell GMAT to draw a grid
+            representing the longitude and latitude lines celestial bodies
+            added to an OpenGL plot.</para> <para>Units: N/A</para></entry>
           </row>
 
           <row>
             <entry><para>EarthSunLines</para></entry>
 
-            <entry><para>Default: On</para> <para>Options: { On , Off
-            }</para> <para>The EarthSunLines allows the user to tell GMAT to
-            draw a line that starts at the center of Earth and points towards
-            the Sun.</para> <para>Units: N/A</para></entry>
+            <entry><para>Default: On</para> <para>Options: { On , Off }</para>
+            <para>The EarthSunLines allows the user to tell GMAT to draw a
+            line that starts at the center of Earth and points towards the
+            Sun.</para> <para>Units: N/A</para></entry>
           </row>
 
           <row>
@@ -705,15 +705,15 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>ViewPointReference</para></entry>
 
-            <entry><para>Default: Earth</para> <para>Options: {
-            SpacecraftName CelestialBodyName LibrationPointName
-            BarycenterName, or a 3-vector of numerical values }</para> <para>
-            The ViewPointReference field is an optional field that allows the
-            user to change the reference point from which ViewPointVector is
-            measured. ViewPointReference} defaults to the origin of the
-            coordinate system for the plot. A ViewPointReference can be any
-            spacecraft, celestial body, libration point, or barycenter.</para>
-            <para>Units: N/A</para></entry>
+            <entry><para>Default: Earth</para> <para>Options: { SpacecraftName
+            CelestialBodyName LibrationPointName BarycenterName, or a 3-vector
+            of numerical values }</para> <para> The ViewPointReference field
+            is an optional field that allows the user to change the reference
+            point from which ViewPointVector is measured. ViewPointReference}
+            defaults to the origin of the coordinate system for the plot. A
+            ViewPointReference can be any spacecraft, celestial body,
+            libration point, or barycenter.</para> <para>Units:
+            N/A</para></entry>
           </row>
 
           <row>
@@ -736,27 +736,27 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>ViewScaleFactor</para></entry>
 
-            <entry><para>Default: 1</para> <para>Options: { Real Number
-            >= 0 }</para> <para>The ViewScaleFactor field scales
-            ViewPointVector before adding it to ViewPointReference. The
-            ViewScaleFactor allows the user to back away from an object to fit
-            in the field of view.</para> <para>Units: None</para></entry>
+            <entry><para>Default: 1</para> <para>Options: { Real Number &gt;=
+            0 }</para> <para>The ViewScaleFactor field scales ViewPointVector
+            before adding it to ViewPointReference. The ViewScaleFactor allows
+            the user to back away from an object to fit in the field of
+            view.</para> <para>Units: None</para></entry>
           </row>
 
           <row>
             <entry><para>ViewDirection</para></entry>
 
-            <entry><para>Default: Earth</para> <para>Options: {
-            SpacecraftName CelestialBodyName LibrationPointName
-            BarycenterName, or a 3-vector of numerical values }</para> <para>
-            The ViewDirection field allows the user to select the direction of
-            view in an OpenGL plot. The user can specify the view direction by
-            choosing an object to point at such as a spacecraft,celestial
-            body, libration point,or barycenter. Alternatively, the user can
-            specify a vector of the form [x y z]. If the user specification
-            of ViewDirection, ViewPointReference, and ViewPointVector, results
-            in a zero vector, GMAT uses [0 0 10000] for ViewDirection.</para>
-            <para>Units: km or N/A</para></entry>
+            <entry><para>Default: Earth</para> <para>Options: { SpacecraftName
+            CelestialBodyName LibrationPointName BarycenterName, or a 3-vector
+            of numerical values }</para> <para> The ViewDirection field allows
+            the user to select the direction of view in an OpenGL plot. The
+            user can specify the view direction by choosing an object to point
+            at such as a spacecraft,celestial body, libration point,or
+            barycenter. Alternatively, the user can specify a vector of the
+            form [x y z]. If the user specification of ViewDirection,
+            ViewPointReference, and ViewPointVector, results in a zero vector,
+            GMAT uses [0 0 10000] for ViewDirection.</para> <para>Units: km or
+            N/A</para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -770,17 +770,17 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>UseInitialView</para></entry>
 
-            <entry><para>Default: On</para> <para>Options: { On , Off
-            }</para> <para>The UseInitialView field allows the user to
-            control the view of an OpenGL plot between multiple runs of a
-            mission sequence. The first time a specific OpenGL plot is
-            created, GMAT will automatically use the view as defined by the
-            fields associated with View Definition, View Up Direction, and
-            Field of View. However, if the user changes the view using the
-            mouse, GMAT will retain this view upon rerunning the mission if
-            UseInitialView is set to false. If UseInitialView is set to true,
-            the view for an OpenGL plot will be returned to the view defined
-            by the initial settings.</para> <para>Units: N/A</para></entry>
+            <entry><para>Default: On</para> <para>Options: { On , Off }</para>
+            <para>The UseInitialView field allows the user to control the view
+            of an OpenGL plot between multiple runs of a mission sequence. The
+            first time a specific OpenGL plot is created, GMAT will
+            automatically use the view as defined by the fields associated
+            with View Definition, View Up Direction, and Field of View.
+            However, if the user changes the view using the mouse, GMAT will
+            retain this view upon rerunning the mission if UseInitialView is
+            set to false. If UseInitialView is set to true, the view for an
+            OpenGL plot will be returned to the view defined by the initial
+            settings.</para> <para>Units: N/A</para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -816,8 +816,8 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>ViewUpAxis</para></entry>
 
-            <entry><para>Default: Z</para> <para>Options: { X , -X , Y , -Y
-            , Z , -Z }</para> <para>The ViewUpAxis allows the user to define
+            <entry><para>Default: Z</para> <para>Options: { X , -X , Y , -Y ,
+            Z , -Z }</para> <para>The ViewUpAxis allows the user to define
             which axis of the ViewUpCoordinateSystem that will appear as the
             up direction in an OpenGL plot. See the comments under
             ViewUpCoordinateSystem for more details of fields used to

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+<chapter version="5.0" xml:id="ForceModels"
+         xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
          xmlns:svg="http://www.w3.org/2000/svg"
@@ -21,8 +22,8 @@
     accuracy, or reducing computing time.</para>
 
     <para>You can download the script file and run it beforehand to see the
-    final results of this tutorial:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=42|ForceModelsTutorial.script]</para>
+    final results of this tutorial: <link
+    xlink:href="files/scripts/ForceModelsTutorial.script">ForceModelsTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -30,8 +31,9 @@
       <itemizedlist>
         <listitem>
           <para>Basic Understanding of how to create and propagate a
-          spacecraft, as in Tutorial ((Creating and Propagating a
-          Spacecraft))</para>
+          spacecraft, as in Tutorial <link
+          linkend="CreatingandPropagatingaSpacecraft">Creating and Propagating
+          a Spacecraft</link></para>
         </listitem>
       </itemizedlist>
     </section>
@@ -516,8 +518,7 @@
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para>[tiki-editpage.php#_b_Resource_Mission_and_Output_trees_b_|Image of
-    Mission Tree]</para>
+    <para><link linkend="???">Image of Mission Tree</link></para>
 
     <para>In addition to the default layout, this mission sequence includes an
     initial Report and Equation, followed by a series of alternating
@@ -746,8 +747,7 @@
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-editpage.php#_b_Resource_Mission_and_Output_trees_b_|Image of
-    Output Tree]</para>
+    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>When running the mission, you will see the spacecraft Sat1 orbit the
     earth. Every one tenth of a day there is a switch to the Propagator that
