@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>SQP(fmincon)</title>
+
+  <para>This was created using the July 2, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Object Overview</title>
+
+    <para>fmincon is an Nonlinear Programming solver provided in MATLAB's
+    Optimization Toolbox. fmincon performs nonlinear constrained optimization
+    and supports linear and nonlinear constraints. This optimizer is only
+    available to users who have both MATLAB and MATLAB's Optimization
+    toolbox.</para>
+
+    <para>GMAT contains an interface to the fmincon optimizer and it appear as
+    if fmincon is a built in optimizer in GMAT. Field names for this object
+    have been copied from those used in MATLABS optimset function for
+    consistency with MATLAB as opposed to other solvers in GMAT.</para>
+  </section>
+
+  <section>
+    <title>Interface Overview</title>
+
+    <screenshot>
+      <info>
+        <title>Figure: FminconOptimizer Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: FminconOptimizer Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <programlisting><code>Create FminconOptimizer SQP1;
+GMAT SQP1.MaxIter       = 25;
+GMAT SQP1.MaxFunEvals   = 250;
+GMAT SQP1.TolX          = 1e-5;
+GMAT SQP1.TolFun        = 1e-5;
+GMAT SQP1.TolCon        = 1e-5;
+GMAT SQP1.DiffMaxChange = 1e-4;
+GMAT SQP1.DiffMinChange = 1e-7;
+GMAT SQP1.ShowProgress  = true;
+GMAT SQP1.ReportStyle   = 'Verbose';
+GMAT SQP1.ReportFile    = '\output\OptimizerProgress.txt';</code></programlisting>
+  </section>
+
+  <section>
+    <title>Field Descriptions</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>DiffMax</para> <para>Change</para></entry>
+
+            <entry><para>Default: 0.1 . </para> <para>Options: [Real Number
+            &gt; 0]</para> <para>The DiffMaxChange parameter is the upper
+            limit on the perturbation used in MATLAB's finite differencing
+            algorithm. For fmincon, you don't specify a single perturbation
+            value, but rather give MATLAB a range, and it uses an adaptive
+            algorithm that attempts to find the optimal perturbation.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DiffMin</para> <para>Change</para></entry>
+
+            <entry><para>Default: 1e-8 .</para> <para>Options: [Real Number
+            &gt; 0]</para> <para>The DiffMinChange parameter is the lower
+            limit on the perturbation used in MATLAB's finite differencing
+            algorithm. For fmincon, you don't specify a single perturbation
+            value, but rather give MATLAB a range, and it uses an adaptive
+            algorithm that attempts to find the optimal perturbatin.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>MaxFunEvals</para></entry>
+
+            <entry><para>Default: 1000.</para> <para>Options: [Integer &gt;
+            0]</para> <para>The MaxFunEvals parameter allows the user to set
+            the maximum number of cost function evaluations in an attempt to
+            find an optimal solution. This is equivalent to setting the
+            maximum number of passes through an optimization loop in a GMAT
+            script. If a solution is not found before the maximum function
+            evaluations, fmincon outputs an ExitFlag of zero, and GMAT
+            continues.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>MaxIter</para></entry>
+
+            <entry><para>Default: 400.</para> <para>Options: [Integer &gt;
+            0]</para> <para>The MaxIter parameter allows the user to set the
+            maximum allowable number of optimizer iterations. Depending upon
+            the nature of the problem, and whether gradients are provided, it
+            may take many function evaluations for each optimizer iteration.
+            The MaxIter parameter allows the user to control the maximum
+            function evaluations, and maximum iterations independently.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>TolX</para></entry>
+
+            <entry><para>Default: 1e-4.</para> <para>Options: [Real Number
+            &gt; 0]</para> <para>The TolX parameter is the termination
+            toler-ance on the vector of independent variables, and is used
+            only if the user sets a value. </para> <para>Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>TolFun</para></entry>
+
+            <entry><para>Default: 1e-4.</para> <para>Options: [Real Number
+            &gt; 0]</para> <para>The TolFun parameter is the convergence
+            tolerance on the cost function value. </para> <para>Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>TolCon</para></entry>
+
+            <entry><para>Default: 1e-4 .</para> <para>Options: [Real Number
+            &gt; 0]</para> <para>The TolCon parameter is the convergence
+            tolerance on the constraint functions. </para> <para>Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ShowProgress</para></entry>
+
+            <entry><para>Default: true .</para> <para>Options: [ true ,
+            false]</para> <para>The ShowProgress field determines whether data
+            pertaining to iterations of the solver is displayed in the message
+            window. When ShowProgress is true, the amount of information
+            contained in the message window is controlled by the ReportSytle
+            field. </para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ReportStyle</para></entry>
+
+            <entry><para>Default: Normal .</para> <para>Options: [ Normal ,
+            Concise, Verbose, Debug]</para> <para>The ReportStyel field
+            determines the amount and type of data written to the message
+            window for each iteration of the solver (When ShowProgress is
+            true). ADD DESCRIPTIONS OF CONCISE,VERBOSE, ADN NORMAL. I CAN'T
+            RUN THE OPTIMIZER RIGHT NOW SO I CAN'T TELL WHAT EACH SETTING
+            DOES. </para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ReportFile</para></entry>
+
+            <entry><para>Default: Normal .</para> <para>Options: [
+            .\output\OptimizerData.txt ]</para> <para>The ReportFile field
+            contains the path and file name of the report file. </para>
+            <para>Units: N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+
+  <section>
+    <title>Using an fminconOptimizer</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>Optimize Command</para>
+      </listitem>
+
+      <listitem>
+        <para>Minimize</para>
+      </listitem>
+
+      <listitem>
+        <para>Nonlinear Constraint</para>
+      </listitem>
+    </itemizedlist>
+  </section>
+</section>

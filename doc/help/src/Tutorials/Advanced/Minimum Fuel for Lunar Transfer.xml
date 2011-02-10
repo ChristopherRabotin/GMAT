@@ -1,0 +1,1423 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Minimum Fuel for Lunar Transfer</title>
+
+  <para>This tutorial was started from the default settings in the July 2,
+  2008 build of GMAT.</para>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <para>This mission demonstrates further use of optimization sequences.
+    This optimization sequence minimizes the amount of fuel from the Earth to
+    the moon using a standard two-burn trajectory to the moon. Note that this
+    is not a low energy boundary orbit.</para>
+
+    <para>Download the script file:
+    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=50|Ex_MinFuelLunarCapture.script]</para>
+
+    <section>
+      <title>Prerequisites</title>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Mission Description</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Objective:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Minimal Fuel Requirements to go from LEO to Orbit about
+              Moon</para>
+            </listitem>
+
+            <listitem>
+              <para>Luna.SMA = 7600</para>
+            </listitem>
+
+            <listitem>
+              <para>Luna.ECC = 0.2</para>
+            </listitem>
+
+            <listitem>
+              <para>MoonMJ2000Eq.INC = 85</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Assume:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Epoch.UTCGregorian = 22 Jul 2014 11:29:10.811;</para>
+            </listitem>
+
+            <listitem>
+              <para>Using the CoordinateSystem = EarthMJ2000Eq;</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X = -137380.19843385062;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y = 75679.878675370544;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Z = 21487.638751878556;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VX = -0.23245320142355028;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VY = -0.44627539677580192;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VZ = 0.085612056628771024;</para>
+                </listitem>
+
+                <listitem>
+                  <para>DryMass = 1000;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Cd = 2.2000000000000002;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Cr = 1.7;</para>
+                </listitem>
+
+                <listitem>
+                  <para>DragArea = 15;</para>
+                </listitem>
+
+                <listitem>
+                  <para>SRPArea = 1;</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Find:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Minimum burn requirements for Transfer Orbit
+              Insertion</para>
+            </listitem>
+
+            <listitem>
+              <para>Minimum burn requirements for Lunar Orbit Insertion</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Resource, Mission, and Output trees</title>
+
+      <screenshot>
+        <info>
+          <title>Figure: Minimum Fuel for Lunar Transfer Resource, Mission,
+          and Output trees</title>
+        </info>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" fileref="???"></imagedata>
+          </imageobject>
+
+          <caption>
+            <para>Figure: Minimum Fuel for Lunar Transfer Resource, Mission,
+            and Output trees</para>
+          </caption>
+        </mediaobject>
+      </screenshot>
+    </section>
+  </section>
+
+  <section>
+    <title>Creating and Configuring the Resource Tree</title>
+
+    <section>
+      <title>Objects Required</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Spacecraft: MMSRef, DummySat</para>
+        </listitem>
+
+        <listitem>
+          <para>Burns: LSI, LOI (Lunar Orbit Insertion)</para>
+        </listitem>
+
+        <listitem>
+          <para>Propagators: LunarSB, MoonCentered</para>
+        </listitem>
+
+        <listitem>
+          <para>Optimizer: SQP1</para>
+        </listitem>
+
+        <listitem>
+          <para>Plots/Reports: OGL_EarthMJ2K, OGL_MoonMJ2K, LunarINC,
+          LunarSMA, LunarECC, TotaldVPlot, IterateData</para>
+        </listitem>
+
+        <listitem>
+          <para>Coordinate Systems: EarthMJ2000Eq, EarthMJ2000Ec, EarthSunRot,
+          MoonMJ2000Eq, EarthMoonRot</para>
+        </listitem>
+
+        <listitem>
+          <para>Variables: dV1Mag, dV2Mag, TotaldV, Iteration,
+          SolutionData</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>Creating and Modifying Objects</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>MMSRef</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X = -137380.19843385062;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y = 75679.878675370544;</para>
+                </listitem>
+
+                <listitem>
+                  <para>Z = 21487.638751878556;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VX = -0.23245320142355028;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VY = -0.44627539677580192;</para>
+                </listitem>
+
+                <listitem>
+                  <para>VZ = 0.085612056628771024;</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>DummySat</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Use Default values</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create Spacecraft MMSRef DummySat;
+GMAT MMSRef.Epoch.UTCGregorian = 22 Jul 2014 11:29:10.811;
+GMAT MMSRef.CoordinateSystem = EarthMJ2000Eq;
+GMAT MMSRef.DisplayStateType = Cartesian;
+GMAT MMSRef.AnomalyType = TA;
+GMAT MMSRef.X = -137380.19843385062;
+GMAT MMSRef.Y = 75679.878675370544;
+GMAT MMSRef.Z = 21487.638751878556;
+GMAT MMSRef.VX = -0.23245320142355028;
+GMAT MMSRef.VY = -0.44627539677580192;
+GMAT MMSRef.VZ = 0.085612056628771024;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: MMSRef Spacecraft Object'</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: MMSRef Spacecraft Object'</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+        </listitem>
+
+        <listitem>
+          <para>Propagators</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>LunarSB</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Max Step Size = 45000</para>
+                </listitem>
+
+                <listitem>
+                  <para>Use Point Masses for Sun, Luna, and Earth</para>
+                </listitem>
+
+                <listitem>
+                  <para>No primary bodies, gravity models, atmosphere, or
+                  magnetic field models</para>
+                </listitem>
+              </itemizedlist>
+
+              <para>Script Syntax:</para>
+
+              <programlisting><code>Create ForceModel LunarSB_ForceModel;
+GMAT LunarSB_ForceModel.CentralBody = Earth;
+GMAT LunarSB_ForceModel.PointMasses = {Earth, Sun, Luna};
+GMAT LunarSB_ForceModel.Drag = None;
+GMAT LunarSB_ForceModel.SRP = Off;
+GMAT LunarSB_ForceModel.ErrorControl = RSSStep;
+
+Create Propagator LunarSB;
+GMAT LunarSB.FM = LunarSB_ForceModel;
+GMAT LunarSB.Type = RungeKutta89;
+GMAT LunarSB.InitialStepSize = 60;
+GMAT LunarSB.Accuracy = 9.999999999999999e-012;
+GMAT LunarSB.MinStep = 0.001;
+GMAT LunarSB.MaxStep = 45000;
+GMAT LunarSB.MaxStepAttempts = 50;</code></programlisting>
+
+              <screenshot>
+                <info>
+                  <title>Figure: LunarSB Propagator Object</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center" fileref="???"></imagedata>
+                  </imageobject>
+
+                  <caption>
+                    <para>Figure: LunarSB Propagator Object</para>
+                  </caption>
+                </mediaobject>
+              </screenshot>
+            </listitem>
+
+            <listitem>
+              <para>MoonCentered</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Max Step Size = 15000</para>
+                </listitem>
+
+                <listitem>
+                  <para>Central Body = Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>Use Point Masses for Sun, Luna, and Earth</para>
+                </listitem>
+
+                <listitem>
+                  <para>No primary bodies, gravity models, atmosphere, or
+                  magnetic field models</para>
+                </listitem>
+              </itemizedlist>
+
+              <para>Script Syntax:</para>
+
+              <programlisting><code>Create ForceModel MoonCentered_ForceModel;
+GMAT MoonCentered_ForceModel.CentralBody = Luna;
+GMAT MoonCentered_ForceModel.PointMasses = {Earth, Sun, Luna};
+GMAT MoonCentered_ForceModel.Drag = None;
+GMAT MoonCentered_ForceModel.SRP = Off;
+GMAT MoonCentered_ForceModel.ErrorControl = RSSStep;
+
+Create Propagator MoonCentered;
+GMAT MoonCentered.FM = MoonCentered_ForceModel;
+GMAT MoonCentered.Type = RungeKutta89;
+GMAT MoonCentered.InitialStepSize = 60;
+GMAT MoonCentered.Accuracy = 9.999999999999999e-012;
+GMAT MoonCentered.MinStep = 0.001;</code></programlisting>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Burns</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>LSI</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>V = 0.14676929889000001; N = 0.046042675892; B =
+                  0.090223244096999999;</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>LOI</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Origin: Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>V = -.652</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create ImpulsiveBurn LSI;
+GMAT LSI.Origin = Earth;
+GMAT LSI.Axes = VNB;
+GMAT LSI.VectorFormat = Cartesian;
+GMAT LSI.V = 0.14676929889000001;
+GMAT LSI.N = 0.046042675892;
+GMAT LSI.B = 0.090223244096999999;
+
+Create ImpulsiveBurn LOI
+GMAT LOI.Origin = Luna;
+GMAT LOI.Axes   = VNB;
+GMAT LOI.V      = -0.652;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: LSI Burn Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: LSI Burn Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+        </listitem>
+
+        <listitem>
+          <para>Variables/Strings/Arrays</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Variable dV1Mag</para>
+            </listitem>
+
+            <listitem>
+              <para>Variable dV2Mag</para>
+            </listitem>
+
+            <listitem>
+              <para>Variable TotaldV</para>
+            </listitem>
+
+            <listitem>
+              <para>Variable Iteration</para>
+            </listitem>
+
+            <listitem>
+              <para>String SolutionData</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>SolutionData = ----------------- Solution Data
+                  -------------------</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create Variable dV1Mag dV2Mag TotaldV Iteration;
+Create String SolutionData
+SolutionData = '----------------- Solution Data -------------------';</code></programlisting>
+        </listitem>
+
+        <listitem>
+          <para>Coordinate Systems</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>EarthSunRot</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>ObjectReferenced</para>
+                </listitem>
+
+                <listitem>
+                  <para>Primary: Sun, Secondary: Earth</para>
+                </listitem>
+
+                <listitem>
+                  <para>XAxis: R</para>
+                </listitem>
+
+                <listitem>
+                  <para>ZAxis: N</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>MoonMJ2000Eq</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Origin: Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>Axes: MJ2000Eq</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create CoordinateSystem EarthSunRot;
+GMAT EarthSunRot.Origin = Earth;
+GMAT EarthSunRot.J2000Body = Earth;
+GMAT EarthSunRot.Axes = ObjectReferenced;
+GMAT EarthSunRot.Epoch = 21545.000000397937;
+GMAT EarthSunRot.UpdateInterval = 60;
+GMAT EarthSunRot.XAxis = R;
+GMAT EarthSunRot.ZAxis = N;
+GMAT EarthSunRot.Primary = Sun;
+GMAT EarthSunRot.Secondary = Earth;
+
+Create CoordinateSystem MoonMJ2000Eq;
+GMAT MoonMJ2000Eq.Origin = Luna;
+GMAT MoonMJ2000Eq.Axes = MJ2000Eq;
+
+Create CoordinateSystem EarthMoonRot;
+GMAT EarthMoonRot.Origin = Luna;
+GMAT EarthMoonRot.Axes = ObjectReferenced;
+GMAT EarthMoonRot.XAxis = R;
+GMAT EarthMoonRot.ZAxis = N;
+GMAT EarthMoonRot.Primary = Earth;
+GMAT EarthMoonRot.Secondary = Luna;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: EarthSunRot Coordinate System Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: EarthSunRot Coordinate System Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+        </listitem>
+
+        <listitem>
+          <para>Solvers</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>SQP1</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Tol Fun: 1e-3</para>
+                </listitem>
+
+                <listitem>
+                  <para>Tol Con: 1e-3</para>
+                </listitem>
+
+                <listitem>
+                  <para>Tol X: 1e-3</para>
+                </listitem>
+
+                <listitem>
+                  <para>Max Iter: 50</para>
+                </listitem>
+
+                <listitem>
+                  <para>Diff Min Change: 1e-5</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create FminconOptimizer SQP1;
+GMAT SQP1.ShowProgress = true;
+GMAT SQP1.ReportStyle = Normal;
+GMAT SQP1.TargeterTextFile = FminconOptimizerSQP1.data;
+GMAT SQP1.MaximumIterations = 25;
+GMAT SQP1.ObjectiveFunction = Objective;
+GMAT SQP1.Tolerance = 0;
+GMAT SQP1.SourceType = MATLAB;
+GMAT SQP1.DiffMaxChange = 0.1000;
+GMAT SQP1.DiffMinChange = 1.0000e-5;
+GMAT SQP1.MaxFunEvals = 1000;
+GMAT SQP1.MaxIter = 50;
+GMAT SQP1.TolX = 1.0000e-03;
+GMAT SQP1.TolFun = 1.0000e-03;
+GMAT SQP1.TolCon = 1.0000e-03;
+GMAT SQP1.DerivativeCheck = Off;
+GMAT SQP1.Diagnostics = Off;
+GMAT SQP1.Display = iter;
+GMAT SQP1.GradObj = Off; 
+GMAT SQP1.GradConstr = Off;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: SQP1 Optimizer Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: SQP1 Optimizer Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+        </listitem>
+
+        <listitem>
+          <para>Plots/Reports</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>OpenGLPlot OGL_EarthMJ2K</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Objects viewed: MMSRef, Earth, Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>Collect data every 5 steps</para>
+                </listitem>
+
+                <listitem>
+                  <para>Number of Points to redraw: 150</para>
+                </listitem>
+
+                <listitem>
+                  <para>No Solving Iterations displayed</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Scale Factor: 30</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Up Definition: X Axis</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>OpenGLPlot OGL_MoonMJ2K</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Objects viewed: MMSRef, Earth, Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>Collect data every 5 steps</para>
+                </listitem>
+
+                <listitem>
+                  <para>NUmber of points to redraw: 75</para>
+                </listitem>
+
+                <listitem>
+                  <para>Show All Solver Iterations</para>
+                </listitem>
+
+                <listitem>
+                  <para>CoordinateSystem: MoonMJ200Eq</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Reference: Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Direction: Luna</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Up Definition Coordinate System:
+                  MoonMJ2000Eq</para>
+                </listitem>
+
+                <listitem>
+                  <para>View Up Definition Axis: X-Axis</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create OpenGLPlot OGL_EarthMJ2K;
+GMAT OGL_EarthMJ2K.Add = {MMSRef, Earth, Luna};
+GMAT OGL_EarthMJ2K.CoordinateSystem = EarthMJ2000Eq;
+GMAT OGL_EarthMJ2K.ViewPointReference = Earth;
+GMAT OGL_EarthMJ2K.ViewDirection = Earth;
+GMAT OGL_EarthMJ2K.ViewScaleFactor = 30;
+GMAT OGL_EarthMJ2K.FixedFovAngle = 50;
+GMAT OGL_EarthMJ2K.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OGL_EarthMJ2K.ViewUpAxis = X;
+GMAT OGL_EarthMJ2K.CelestialPlane = Off;
+GMAT OGL_EarthMJ2K.XYPlane = On;
+GMAT OGL_EarthMJ2K.WireFrame = Off;
+GMAT OGL_EarthMJ2K.SolverIterations = None;
+GMAT OGL_EarthMJ2K.Axes = On;
+GMAT OGL_EarthMJ2K.PerspectiveMode = Off;
+GMAT OGL_EarthMJ2K.UseFixedFov = Off;
+GMAT OGL_EarthMJ2K.DataCollectFrequency = 5;
+GMAT OGL_EarthMJ2K.UpdatePlotFrequency = 50;
+GMAT OGL_EarthMJ2K.NumPointsToRedraw = 150;
+GMAT OGL_EarthMJ2K.UseInitialView = On;
+
+Create OpenGLPlot OGL_MoonMJ2K;
+GMAT OGL_MoonMJ2K.Add = {MMSRef, Earth, Luna};
+GMAT OGL_MoonMJ2K.CoordinateSystem = MoonMJ2000Eq;
+GMAT OGL_MoonMJ2K.ViewPointReference = Luna;
+GMAT OGL_MoonMJ2K.ViewDirection = Luna;
+GMAT OGL_MoonMJ2K.ViewScaleFactor = 1;
+GMAT OGL_MoonMJ2K.FixedFovAngle = 45;
+GMAT OGL_MoonMJ2K.ViewUpCoordinateSystem = MoonMJ2000Eq;
+GMAT OGL_MoonMJ2K.ViewUpAxis = X;
+GMAT OGL_MoonMJ2K.CelestialPlane = Off;
+GMAT OGL_MoonMJ2K.XYPlane = On;
+GMAT OGL_MoonMJ2K.WireFrame = Off;
+GMAT OGL_MoonMJ2K.SolverIterations = All;
+GMAT OGL_MoonMJ2K.Axes = On;
+GMAT OGL_MoonMJ2K.SunLine = Off;
+GMAT OGL_MoonMJ2K.PerspectiveMode = Off;
+GMAT OGL_MoonMJ2K.UseFixedFov = Off;
+GMAT OGL_MoonMJ2K.DataCollectFrequency = 5;
+GMAT OGL_MoonMJ2K.UpdatePlotFrequency = 50;
+GMAT OGL_MoonMJ2K.NumPointsToRedraw = 75;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: OGL_EarthMJ2K Open GLPlot Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: OGL_EarthMJ2K Open GLPlot Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+
+          <itemizedlist>
+            <listitem>
+              <para>XYPlot LunarINC</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X: Iteration</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y: MoonMJ2000Eq.INC</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>XYPlot LunarSMA</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X: Iteration</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y: Luna.SMA</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>XYPlot LunarECC</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X: Iteration</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y: Luna.ECC</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>XYPlot TotaldVPlot</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>X: Iteration</para>
+                </listitem>
+
+                <listitem>
+                  <para>Y: TotaldV</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create XYPlot LunarINC
+GMAT LunarINC.IndVar = Iteration;
+GMAT LunarINC.Add    = { MMSRef.MoonMJ2000Eq.INC };
+GMAT LunarINC.Grid 	 = On;
+GMAT LunarINC.SolverIterations = All;
+
+Create XYPlot LunarSMA
+GMAT LunarSMA.IndVar = Iteration;
+GMAT LunarSMA.Add    = { MMSRef.Luna.SMA };
+GMAT LunarSMA.Grid   = On;
+GMAT LunarSMA.SolverIterations = All;
+
+Create XYPlot LunarECC
+GMAT  LunarECC.IndVar = Iteration;
+GMAT LunarECC.Add     = { MMSRef.Luna.ECC };
+GMAT LunarECC.Grid    = On;
+GMAT LunarECC.SolverIterations = All;
+
+Create XYPlot TotaldVPlot;
+TotaldVPlot.IndVar = Iteration;
+TotaldVPlot.Add    = TotaldV;
+TotaldVPlot.SolverIterations = All;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: LunarINC XY Plot Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: LunarINC XY Plot Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+
+          <itemizedlist>
+            <listitem>
+              <para>ReportFile IterateData</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Filename:
+                  ./output/SampleMissions/Ex_MinFuelLunarCapture.report</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+          </itemizedlist>
+
+          <para>Script Syntax:</para>
+
+          <programlisting><code>Create ReportFile IterateData;
+IterateData.Filename = ./output/SampleMissions/Ex_MinFuelLunarCapture.report;</code></programlisting>
+
+          <screenshot>
+            <info>
+              <title>Figure: IterateData FileReport Object</title>
+            </info>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata align="center" fileref="???"></imagedata>
+              </imageobject>
+
+              <caption>
+                <para>Figure: IterateData FileReport Object</para>
+              </caption>
+            </mediaobject>
+          </screenshot>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Creating and Configuring the Mission Tree</title>
+
+    <para>[tiki-index.php?page=Minimum Fuel for Lunar
+    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
+    Output trees]</para>
+
+    <para>This mission is set-up very similarly to how the Lunar Transfer
+    Tutorial is set-up, except that optimization sequences are used instead of
+    targeting sequences.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Optimization Sequence Setup</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Turn off the plots until the proper moment to record data
+            and propagate spacecraft until periapsis</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Optimization Sequence and Final Commands</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Vary LSI in all directions, perform the burn and propagate
+            to Lunar periapsis, period of time, or until it exits region of
+            space.</para>
+          </listitem>
+
+          <listitem>
+            <para>Nonlinear Constraints on BdotT, BdotR, and Luna.RMag to
+            constrain how far from the moon it can go</para>
+          </listitem>
+
+          <listitem>
+            <para>Vary LOI in all directions and perform burn</para>
+          </listitem>
+
+          <listitem>
+            <para>Nonlinear Constraints dictating goals of mission</para>
+          </listitem>
+
+          <listitem>
+            <para>Propagate for period of time or until it exits region of
+            space</para>
+          </listitem>
+
+          <listitem>
+            <para>Create Equations to find the magnitude of the burns and take
+            the sum of the two burns</para>
+          </listitem>
+
+          <listitem>
+            <para>Minimize the Total amount of dV required by the two
+            burns</para>
+          </listitem>
+
+          <listitem>
+            <para>Toggle on plots to record data, propagate dummy spacecraft
+            for data to be recorded, toggle off plots</para>
+          </listitem>
+
+          <listitem>
+            <para>Report Parameters to report file</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <section>
+      <title>Creating and Modifying Command Sequences</title>
+
+      <section>
+        <title>Optimization Sequence Setup</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Toggle off LunarINC, LunarSMA, LunarECC, and
+            TotaldVPlot</para>
+          </listitem>
+
+          <listitem>
+            <para>Propagate MMSRef til Periapsis using LunarSB
+            propagator</para>
+          </listitem>
+
+          <listitem>
+            <para>Equation1: Iteration = 0</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Script Syntax:</para>
+
+        <programlisting><code>Toggle LunarINC Off; 
+Toggle LunarSMA Off; 
+Toggle LunarECC Off;
+Toggle TotaldVPlot Off;
+Propagate LunarSB(MMSRef, {MMSRef.Periapsis});
+Iteration = 0;</code></programlisting>
+
+        <screenshot>
+          <info>
+            <title>Figure: Toggle Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Toggle Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Propagate Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Propagate Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Equation1 Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Equation1 Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+      </section>
+
+      <section>
+        <title>Optimization Sequence and Final Commands</title>
+
+        <itemizedlist>
+          <listitem>
+            <para>Equation2: Iteration = Iteration + 1</para>
+          </listitem>
+
+          <listitem>
+            <para>Vary LSI.V</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = .1462, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Vary LSI.N</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = .0460, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Vary LSI.B</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = .1086, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Maneuver MMSRef using LSI</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Propagate MMSRef til for 1.5 days using LunarSB
+            propagator</para>
+          </listitem>
+
+          <listitem>
+            <para>Propagate MMSRef using MoonCentered propagator til: Luna
+            Periapsis, 8 days have elapsed, Luna.RMAG = 1000, Earth.RMAG =
+            3000.</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Nonlinear Constraint: MMSRef.MoonMJ2000Eq.BdotT &lt;=
+            20000.0</para>
+          </listitem>
+
+          <listitem>
+            <para>NonlinearConstraint: MMSRef.Luna.RMAG &gt;= 2000</para>
+          </listitem>
+
+          <listitem>
+            <para>NonlinearConstraint: MMSRef.MoonMJ2000Eq.BdotR &lt;=
+            15000.0</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Vary LOI.V</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = -.752, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Vary LOI.N</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = 0, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Vary LOI.B</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Initial Guess = 0, Lower = -1, Upper = 1</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Maneuver MMSRef using LOI</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>NonlinearConstraint: MMSRef.Luna.SMA = 7600</para>
+          </listitem>
+
+          <listitem>
+            <para>NonlinearConstraint: MMSRef.Luna.ECC = 0.2</para>
+          </listitem>
+
+          <listitem>
+            <para>NonlinearConstraint: MMSRef.MoonMJ2000Eq.INC = 85</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Propagate MMSRef using MoonCentered propagator til:
+            Luna.Periapsis, 5 days have elapsed, Luna.RMAG = 1000, Earth.RMAG
+            = 3000</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Equation3: dV1Mag = sqrt( LSI.Element1^2 + LSI.Element2^2 +
+            LSI.Element3^2 )</para>
+          </listitem>
+
+          <listitem>
+            <para>Equation4: dV2Mag = sqrt( LOI.Element1^2 + LOI.Element2^2 +
+            LOI.Element3^2 )</para>
+          </listitem>
+
+          <listitem>
+            <para>Equation5: TotaldV = ( dV1Mag + dV2Mag )</para>
+          </listitem>
+
+          <listitem>
+            <para>Minimize TotaldV</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Report to IterateData: TotaldV, Luna.SMA, Luna.ECC,
+            MoonMJ2000Eq.INC</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Toggle On LunarINC, LunarSMA, LunarECC, TotaldVPlot</para>
+          </listitem>
+
+          <listitem>
+            <para>Propagate DummySat using LunarSB</para>
+          </listitem>
+
+          <listitem>
+            <para>Toggle Off LunarINC, LunarSMA, LunarECC, TotaldVPlot</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>End Optimization Sequence</para>
+          </listitem>
+        </itemizedlist>
+
+        <itemizedlist>
+          <listitem>
+            <para>Report to IterateData: TotaldV, dV1Mag, dV2Mag,
+            MMSRef.Luna.SMA, MMSRef.Luna.ECC MMSRef.MoonMJ2000Eq.INC,
+            LSI.Element1, LSI.Element2, LSI.Element3, LOI.Element1,
+            LOI.Element2 LOI.Element3</para>
+          </listitem>
+
+          <listitem>
+            <para>Propagate MMSRef using MoonCentered propagator for 15
+            days</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>Script Syntax:</para>
+
+        <programlisting><code>Optimize SQP1
+
+     Iteration = Iteration + 1;
+
+     Vary SQP1(LSI.V = 0.1462 ,   { Lower = -1, Upper = 1, MultiplicativeScaleFactor = 1});
+     Vary SQP1(LSI.N = 0.0460 ,   { Lower = -1, Upper = 1, MultiplicativeScaleFactor = 1});
+     Vary SQP1(LSI.B = 0.1086 ,   { Lower = -1, Upper = 1, MultiplicativeScaleFactor = 1});
+     Maneuver LSI(MMSRef);
+     
+     Propagate LunarSB(MMSRef, {MMSRef.ElapsedDays = 1.5});
+     Propagate MoonCentered(MMSRef, {MMSRef.Luna.Periapsis, MMSRef.ElapsedDays = 8, MMSRef.Luna.RMAG = 1000, MMSRef.Earth.RMAG = 3000});
+
+     NonlinearConstraint SQP1(MMSRef.MoonMJ2000Eq.BdotT &lt;= 20000.0); 
+     NonlinearConstraint SQP1(MMSRef.Luna.RMAG &gt;= 2000);
+     NonlinearConstraint SQP1(MMSRef.MoonMJ2000Eq.BdotR &lt;= 15000.0); 
+
+     Vary SQP1(LOI.V = -0.75198120104, { Lower = -1, Upper = 1});
+     Vary SQP1(LOI.N = 0, {  Lower = -1, Upper = 1});
+     Vary SQP1(LOI.B = 0, { Lower = -1, Upper = 1});
+     Maneuver LOI(MMSRef); 
+
+     NonlinearConstraint SQP1(MMSRef.Luna.SMA = 7600);   
+     NonlinearConstraint SQP1(MMSRef.Luna.ECC = 0.2);  
+     NonlinearConstraint SQP1(MMSRef.MoonMJ2000Eq.INC = 85);   
+
+     Propagate MoonCentered(MMSRef, {MMSRef.Luna.Periapsis, MMSRef.ElapsedDays = 5, MMSRef.Luna.RMAG = 1000, MMSRef.Earth.RMAG = 3000}); 
+     
+     dV1Mag = sqrt( LSI.Element1^2 + LSI.Element2^2 + LSI.Element3^2 );
+     dV2Mag = sqrt( LOI.Element1^2 + LOI.Element2^2 + LOI.Element3^2 ); 
+     TotaldV = ( dV1Mag + dV2Mag );
+     Minimize SQP1(TotaldV);
+
+     Report IterateData TotaldV  MMSRef.Luna.SMA MMSRef.Luna.ECC MMSRef.MoonMJ2000Eq.INC;
+
+     Toggle LunarINC On; 
+     Toggle LunarSMA On; 
+     Toggle LunarECC On;
+     Toggle TotaldVPlot On;
+     Propagate LunarSB(DummySat);
+     Toggle LunarINC Off; 
+     Toggle LunarSMA Off; 
+     Toggle LunarECC Off;
+     Toggle TotaldVPlot Off;
+
+EndOptimize
+
+Report IterateData TotaldV dV1Mag dV2Mag 
+Report IterateData MMSRef.Luna.SMA MMSRef.Luna.ECC MMSRef.MoonMJ2000Eq.INC;
+Report IterateData LSI.Element1 LSI.Element2 LSI.Element3
+Report IterateData LOI.Element1 LOI.Element2 LOI.Element3
+
+Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlisting>
+
+        <screenshot>
+          <info>
+            <title>Figure: Vary Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Vary Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Maneuver Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Maneuver Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Nonlinear Constant Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Nonlinear Constant Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Minimize Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Minimize Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <screenshot>
+          <info>
+            <title>Figure: Report Command</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" fileref="???"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Report Command</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+      </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Running the Mission</title>
+
+    <para>[tiki-index.php?page=Minimum Fuel for Lunar
+    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
+    Output trees]</para>
+
+    <para>The XY plots should look like the ones observed in the screenshot.
+    Notice that the SMA, INC, and ECC plots converge upon the desired values.
+    Additionally, notice how the TotaldVPlot decreases as time goes on. The
+    values that are lower in this plot, on the left side, are iterations that
+    did not complete the required objectives. The Moon plot should show
+    multiple iterations eventually converging upon an iteration that circles
+    the moon. The Earth plot shows a straight line from the Earth to the path
+    of the moon, where you can see the spacecraft follow a sinusoidal shape
+    along the moon's path. This shows the spacecraft orbiting the moon. The
+    spacecraft does not travel in a straight line, this is due to a mistake in
+    the programming of when the plot is on.</para>
+
+    <screenshot>
+      <info>
+        <title>Figure: Output</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Output</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+</chapter>

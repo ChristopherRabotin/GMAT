@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Coordinate Systems</title>
+
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>Coordinate Systems are critical to GMAT for several reasons. They
+    are what every object represented within the software is referenced to.
+    They are used by GMAT as the basis for which all calculations are made.
+    They also provide the reference for any OpenGL Plot that is
+    created.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>[tiki-index.php?page=S%2FC+Thruster|Thruster]</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The Thruster object allows you to set a coordinate system
+              as its reference.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>[tiki-index.php?page=Spacecraft|Spacecraft]</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>In the spacecraft dialog box you may change what
+              coordinate system the spacecraft's position is defined in
+              reference, whatever the state type may be set as.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>[tiki-index.php?page=OpenGL+Plots|OpenGL Plot]</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Coordinate Systems are very key to the display of OpenGL
+              Plots. They rely on coordinate systems to set how exactly the
+              view of the plot will look using both the View Definition and
+              View Up Definition sections of the OpenGL Plot dialog
+              box.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Parameter Select Dialog Box</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Whenever you may select a parameter using the parameter
+              select dialog box, you have the option of selecting certain
+              options such X, Y, Z, and several others that will require to
+              set a coordinate system for them to reference.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>Firstly, you cannot edit the three default coordinate systems. You
+    may add as many as you need to complete your mission. When you add a
+    coordinate system, you will see a dialog box asking you to name the new
+    coordinate system. You may also set its origin and axes type. Depending on
+    the type of axes you set, you will be able to change certain parameters of
+    it. The only difference between the dialog boxes for creating and
+    modifying an existing coordinate system that you have created is that the
+    former will have a field for you to enter the new system's name where as
+    the latter will already be named and not have this option.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Coordinate System Name - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This is an option only if you are creating a new coordinate
+            system. This will be the name of the new coordinate system you
+            create.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Origin - Drop Down Menu</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This is where the origin, otherwise known as the point [[0 ,
+            0 , 0] on the Axes, will be.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Axes - Group Box</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Type - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>This is where you select what type of axes you want for
+                the coordinate system. For a number of these options, there
+                are no other parameters to change and this will be the only
+                changeable option in the Axes group box.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Primary - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>This and the 'Secondary' drop down menu are only
+                changeable when the Axes type is set to Object
+                Referenced.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Secondary - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>The Object Referenced coordinate system will always be
+                fixed with respect to this and the Primary object.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Epoch Format - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Unchangeable</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Epoch - Field</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>If the coordinate system you select requires a set
+                epoch, this is where it will be changed.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>X - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Along with the 'Primary' and 'Secondary' drop down
+                menus, X, Y, and Z may only be set when the Axes type is
+                object referenced.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Y - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Setting one of these axes to R will mean it is the axis
+                that always points between the two objects. V will be the axis
+                of their relative velocity. These are both expressed in an
+                inertial frame of reference.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Z - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Setting one of these axes to N will mean it is the
+                orthogonal axis to R and V.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Update Interval - Field</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>If the selected axes type changes with respect to
+                another object such as a planet, it may need to be updated
+                every so often in order to maintain a correct position. This
+                value is, in seconds, how much time passes in between these
+                updates.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Create Coordinate
+        System Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Create Coordinate
+          System Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Create CoordinateSystem EarthMJ2000Eq;
+GMAT EarthMJ2000Eq.Origin = Earth;
+GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
+GMAT EarthMJ2000Eq.UpdateInterval = 60;
+GMAT EarthMJ2000Eq.OverrideOriginInterval = false;</code></programlisting>
+    </section>
+  </section>
+</section>

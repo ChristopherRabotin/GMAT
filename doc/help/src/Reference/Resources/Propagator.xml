@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Propagator</title>
+
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>In GMAT, a Propagator is a combination of an integrator and a force
+    model. Hence, a Propagator contains a physical model of the space
+    environment that is used to model the motion of a spacecraft as it moves
+    forwards or backwards in time (VOP formulation is not currently
+    supported). You configure a Propagator by selecting among different
+    numerical integrators and environment models to create a Propagator
+    appropriate to the flight regime of your spacecraft during its mission.
+    GMAT supports numerous numerical integrators as well as Force Models like
+    point mass and non-spherical gravity, atmospheric drag (Earth), and solar
+    radiation pressure.</para>
+
+    <para>To propagate spacecraft in GMAT, you first create and configure a
+    Propagator object in the script or in the Resource Tree. Then, in the
+    mission sequence, you create a Propagate command, the topic of another
+    section, and select among previously existing Propagators and Spacecraft.
+    Hence, a Propagator is different from a Propagate command: A Propagator is
+    a resource and is found in the GUI under the resource tree, and a
+    Propagate Event is configured under the Mission Tree and is how you
+    instruct GMAT to propagate spacecraft.</para>
+  </section>
+
+  <section>
+    <title>Interfaces</title>
+
+    <para>The Propagator dialog box is illustrated below and contains two
+    group boxes: the Integrator group and the Force Model group. This section
+    discusses the items in each group on the Propagate Panel. It will present
+    how to configure a propagator and discuss all possible user settable
+    fields in detail.</para>
+
+    <section>
+      <title>Integrator Group</title>
+
+      <para>The Integrator group allows you to select and configure a
+      numerical integrator appropriate to your application. You select the
+      type of numerical integrator in the -+Type+- pull-down menu. After
+      selecting the integrator type, the fields below the -+Type+- pull-down
+      menu dynamically configure to allow you to set relevant parameters for
+      the selected integrator type. All integrators except for
+      Adams-Bashforth-Moulton (ABM) are configured using the same fields. The
+      ABM integrator has the following additional fields:
+      -+MinIntegrationerror+- and -+NomIntegrationerror+-.</para>
+    </section>
+
+    <section>
+      <title>Force Model Group</title>
+
+      <para>The Force Model group allows you to configure a force model
+      appropriate to the flight regime of your application. The central body
+      of propagation and error control method are also defined here. On a
+      Propagator, GMAT classifies all celestial bodies into two mutually
+      exclusive categories: Primary Bodies, and Point Masses. Primary bodies
+      can have a complex force model that includes non-spherical gravity,
+      drag, and magnetic field. Point mass bodies only have a point-mass
+      gravitational force.</para>
+
+      <para>You can add a Primary Body by clicking the Select button in the
+      Primary Bodies group box. Once you have added a Primary Body (or
+      mulitiple bodies in future versions), the pull down menu allows you to
+      configure the force model for each Primary Body. The text box, next to
+      the Select button contains a list of all Primary Bodies so you can see
+      which bodies are being treated with complex force models. In future
+      versions, GMAT will support multiple primary bodies on a propagator
+      allowing you to use a non-spherical gravity model for the Earth and Moon
+      simultaneously.</para>
+
+      <para>Configuring certain fields in the Force Model group affects the
+      availability of other fields. For example, if you remove all bodies from
+      the Primary Bodies list, the Gravity Field, Atmosphere Model, and
+      Magnetic Field groups are disabled. Similarly, in the Gravity Field
+      group, the search button and the Model File field are only active if
+      "Other" is selected in the -+Type+- pull-down. In the Atmosphere Model
+      group, the Setup button is only active when -+MSISE90+- or
+      -+JacchiaRoberts+- are selected in the -+Type+- pull-down.</para>
+
+      <para>GMAT allows you to define Solar flux properties if you select
+      either the -+MSISE90+- or -+JacchiaRoberts+- atmosphere models. By
+      selecting one of these models in the -+Type+- pull-down menu in the
+      Atmosphere Model group, the Setup button is enabled. Clicking on the
+      Setup button brings up the panel illustrated below. Here you can input
+      Solar flux values. GMAT does not currently support flux files though
+      future versions will.</para>
+
+      <screenshot>
+        <info>
+          <title>Figure: Default Name and Settings for the Propagator Object
+          Dialog Box</title>
+        </info>
+
+        <mediaobject>
+          <imageobject>
+            <imagedata align="center" fileref="???"></imagedata>
+          </imageobject>
+
+          <caption>
+            <para>Figure: Default Name and Settings for the Propagator Object
+            Dialog Box</para>
+          </caption>
+        </mediaobject>
+      </screenshot>
+
+      <programlisting><code>Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-012;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 2700;
+GMAT DefaultProp.MaxStepAttempts = 50;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <section>
+      <title>Force Model Group Box Fields</title>
+
+      <informaltable>
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry><para>ErrorControl</para></entry>
+
+              <entry><para>Default: RSSStep</para> <para>Options: { RSSStep,
+              RSSState, LargestState, LargestStep }</para> <para>The
+              ErrorControl field allows you to choose how a Propagator
+              measures the error in an integration step. The algorithm
+              selected in the ErrorControl field is used to determine the
+              error in the current step, and this error is compared to the
+              value set in the Accuracy field to determine if the step has an
+              acceptable error or needs to be improved. </para> <para>All
+              error measurements are relative error, however, the reference
+              for the relative error changes depending upon the selection of
+              ErrorControl. RSSStep is the Root Sum Square (RSS) relative
+              error measured with respect to the current step. RSSState is the
+              (RSS) relative error measured with respect to the current state.
+              LargestStep is the state vector component with the largest
+              relative error measured with respect to the current step.
+              LargestState is the state vector component with the largest
+              relative error measured with respect to the current state. For a
+              more detailed discussion see the GMAT Mathematical
+              Specification. Units: N/A.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>CentralBody</para></entry>
+
+              <entry><para>Default: Earth</para> <para>Options: { Sun,
+              Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
+              Neptune, Pluto }</para> <para>The CentralBody field allows the
+              user to select the origin for the propagation. All propagation
+              occurs in the FK5 axes system, about the CentralBody chosen by
+              the user. The CentralBody must be a gravitational body and so
+              cannot be a LibrationPoint or other special point. Units:
+              N/A.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>PrimaryBodies</para></entry>
+
+              <entry><para>Default: Earth</para> <para>Options: { Sun,
+              Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
+              Neptune, Pluto }</para> <para>The PrimaryBodies field is a list
+              of all celestial bodies that are to be modelled with a force
+              model more complex than point mass gravity. Lists are surrounded
+              by curly braces. For each PrimaryBody, the user can choose a
+              drag, magnetic field, and aspherical gravity model. There is a
+              coupling between the PrimaryBodies filed and the PointMasses
+              field. A primary body can be any planet or moon not included in
+              the PointMasses field. Units: N/A. </para></entry>
+            </row>
+
+            <row>
+              <entry><para>Gravity.PrimaryBody.PotentialFile</para></entry>
+
+              <entry><para>Default: JGM2</para> <para>Options:
+              {CentralBody-based models, Other. See Comments }</para>
+              <para>This field allows the user to define the source for the
+              non-spherical gravity coefficients for a primary body. If a
+              gravity file is located in the Primary Body's potential path as
+              defined in the startup file, you only need to specify the model
+              name and not the entire path. For example, if the JGM2
+              coefficients file is contained in the directory defined in the
+              startup file by the line EARTH\_POT\_PATH, then you only need to
+              specify the model name JGM2. If the model is not contained in
+              the body's potential path, you must supply the entire path as
+              well as the file name. If GMAT does not successfully find the
+              file requested, it uses the default gravity model as defined in
+              the startup file. From the GUI, only models for Earth appear if
+              Earth is the active primary body. This is to avoid allowing the
+              user to select a lunar potential model for the Earth. If the
+              Other option is selected the user has the ability of selecting a
+              gravity model file on their local computer. Units: None.
+              </para></entry>
+            </row>
+
+            <row>
+              <entry><para>Gravity.PrimaryBody.Degree</para></entry>
+
+              <entry><para>Default: 4</para> <para>Options: { Integer &gt;= 0
+              and &lt; the maximum specified by the model, Order &lt;=
+              Degree}</para> <para>This field allows the user to select the
+              the degree, or number of zonal terms, in the non-spherical
+              gravity model. Ex. Gravity.Earth.Degree = 2 tells GMAT to use
+              only the J2 zonal term for the Earth. The value for Degree must
+              be less than the maximum degree specified by the Model. Units:
+              None.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Gravity.PrimaryBody.Order</para></entry>
+
+              <entry><para>Default: 4</para> <para>Options: { Integer &gt;= 0
+              and &lt; the maximum specified by the model, Order &lt;=
+              Degree}</para> <para>This field allows the user to select the
+              the order, or number of tesseral terms, in the non-spherical
+              gravity model. Ex. Gravity.Earth.Order = 2 tells GMAT to use 2
+              tesseral terms. Note: Order must be greater than or equal to
+              Degree. Units: None.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Drag</para></entry>
+
+              <entry><para>Default: None.</para> <para>Options: { None,
+              JacchiaRoberts, MSISE90, Exponential }</para> <para>The Drag
+              field allows a user to specify a drag model. Currently, only one
+              drag model can be chosen for a particular propagator and only
+              Earth models are available. Units: N/A. Note: This field will be
+              deprecated in future versions of GMAT. Currently, the Drag field
+              and the Drag.AtmosphereModel field must be set to the same
+              value.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Drag.AtmosphereModel</para></entry>
+
+              <entry><para>Default: None.</para> <para>Options: { None,
+              JacchiaRoberts, MSISE90, Exponential }</para> <para>The
+              Drag.AtmosphereModel field allows a user to specify a drag
+              model. Currently, only one drag model can be chosen for a
+              particular propagator and only Earth models are available.
+              Units: N/A.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Drag.F107</para></entry>
+
+              <entry><para>Default: 150</para> <para>Options: { Real Number
+              &gt;= 0 }</para> <para>The Drag.F107 field allows you to set the
+              F<subscript>10.7</subscript> solar flux value used in computing
+              atmospheric density. F<subscript>10.7</subscript> is the solar
+              radiation at a wavelength of 10.7 cm. Units:
+              W/m<superscript>2</superscript>/Hz</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Drag.F107A</para></entry>
+
+              <entry><para>Default: 150</para> <para>Options: { Real Number
+              &gt;= 0 }</para> <para>The Drag.F107A field allows you to set
+              the average F<subscript>10.7</subscript> value.
+              F<subscript>10.7</subscript> is the average of
+              F<subscript>10.7</subscript> over one month. Units:
+              W/m<superscript>2</superscript>/Hz</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Drag.MagneticIndex</para></entry>
+
+              <entry><para>Default: 3</para> <para>Options: { 0 &lt;= Real
+              Number &lt;= 9 }</para> <para>The Drag.MagneticIndex index field
+              allows you to set the k<subscript>p</subscript> value for use in
+              atmospheric density calculations. k<subscript>p</subscript> is a
+              planetary 3-hour-average, geomagnetic index that measures
+              magnetic effects of solar radiation. Units: None.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>PointMasses</para></entry>
+
+              <entry><para>Default: None</para> <para>Options: { Sun, Mercury,
+              Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune,
+              Pluto }</para> <para>A PointMass is a planet or moon that is
+              modelled by a point source located at its center of gravity. A
+              PointMass body can be any planet or moon not included in the
+              PrimaryBodies field. Units: N/A.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>SRP</para></entry>
+
+              <entry><para>Default: Off</para> <para>Options: { On, Off
+              }</para> <para>The SRP field allows the user to include the
+              force due to solar radiation pressure in the total sum of
+              forces. Units: N/A.</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para></para>
+
+      <para></para>
+    </section>
+
+    <section>
+      <title>Integrator Group Box Fields</title>
+
+      <informaltable>
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry><para> Type</para></entry>
+
+              <entry><para>Default: RungeKutta89</para> <para>Options: {
+              RungeKutta89, RungeKutta68, RungeKutta56, PrinceDormand45,
+              PrinceDormand78, BulirschStoer, AdamsBashforthMoulton }</para>
+              <para>The Type field is used to set the type of numerical
+              integrator.</para></entry>
+            </row>
+
+            <row>
+              <entry><para>InitialStepSize</para></entry>
+
+              <entry><para>Default: 60 (sec)</para> <para>Options: { Real
+              Number }</para> <para>The InitialStepSize is the size of the
+              first attempted step by the integrator. If the step defined by
+              InitialStepSize does not satisfy Accuracy, the integrator adapts
+              the step according an algorithm defined in the mathematical
+              specifications document to find an acceptable first step that
+              meets the user's requested.</para> <para>Units:
+              seconds</para></entry>
+            </row>
+
+            <row>
+              <entry><para>Accuracy</para></entry>
+
+              <entry><para>Default: 1e-11</para> <para>Options: { Real Number
+              &gt;= 0 }</para> <para>The Accuracy field is used to set the
+              desired accuracy for an integration step. When you set a value
+              for Accuracy, GMAT uses the method selected in ErrorControl
+              field on the Force Model, to determine a metric of the accuracy.
+              For each step, the integrator ensures that the accuracy, as
+              calculated using the method defined by ErrorControl, is less
+              than the limit defined by Accuracy. If an integrator exceeds
+              MaxStepAttempts trying to meet the requested accuracy, and error
+              message is thrown and propagation stops.</para> <para>Units:
+              N/A</para></entry>
+            </row>
+
+            <row>
+              <entry><para>MinStep</para></entry>
+
+              <entry><para>Default: .001 (sec)</para> <para>Options: { Real
+              Number &gt; 0, MinStep &lt;= MaxStep }</para> <para>The MinStep
+              field is used to set the minimum allowable step size.</para>
+              <para>Units: seconds</para></entry>
+            </row>
+
+            <row>
+              <entry><para>MaxStep</para></entry>
+
+              <entry><para>Default: 2700.0 (sec.)</para> <para>Options: { Real
+              Number &gt; 0, MinStep &lt;= MaxStep }</para> <para>The MaxStep
+              field is used to set the maximum allowable step size.</para>
+              <para>Units: seconds</para></entry>
+            </row>
+
+            <row>
+              <entry><para>MaxStepAttempts</para></entry>
+
+              <entry><para>Default: 50</para> <para>Options: { Integer &gt; 0
+              }</para> <para>The MaxStepAttempts field allows the user to set
+              the number of attempts the integrator takes to meet the
+              tolerance defined by Accuracy.</para> <para>Units:
+              None</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+
+      <para>Fields associated only with Adams-Bashforth-Moulton
+      Integrator</para>
+
+      <informaltable>
+        <tgroup cols="2">
+          <tbody>
+            <row>
+              <entry><para>MinIntegrationerror</para></entry>
+
+              <entry><para>Default: 1.0e-13</para> <para>Options: { Real
+              Number &gt; 0, MinIntegrationerror &lt; NomIntegrationerror &lt;
+              Accuracy }</para> <para>The MinIntegrationerror field is used by
+              the ABM integrator (and other predictor-corrector integrators
+              when implemented) as the desired integration error to be
+              obtained when the step size is changed. Predictor-Corrector
+              integrators adapt step size when the obtained integration error
+              falls outside of the range of acceptable steps, as determined by
+              the bounds set by the MinIntegrationerror and Accuracy fields.
+              The integrator then applies an internal calculation to recompute
+              the step size, attempting to hit the NomIntegrationerror, and
+              restarts the integrator.</para> <para>Units: N/A</para></entry>
+            </row>
+
+            <row>
+              <entry><para>NomIntegrationerror</para></entry>
+
+              <entry><para>Default: 1.0e-11</para> <para>Options: { Real
+              Number &gt; 0, MinIntegrationerror , NomIntegrationerror ,
+              Accuracy }</para> <para>The NomIntegrationerror field is used by
+              the ABM integrator (and other predictor-corrector integrators
+              when implemented) as the desired integration error to be
+              obtained when the step size is changed. Predictor-Corrector
+              integrators adapt step size when the obtained integration error
+              falls outside of the range of acceptable steps, as determined by
+              the bounds set by the MinIntegrationerror and Accuracy fields.
+              The integrator then applies an internal calculation to recompute
+              the step size, attempting to hit the NomIntegrationerror, and
+              restarts the integrator.</para> <para>Units: N/A</para></entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
+    </section>
+  </section>
+
+  <section>
+    <title>Object and Command Interactions</title>
+
+    <para>A Propagator Requires Other Objects/Commands of Type: Force Model
+    (Script Only). (Note: There are slight differences in how you configure a
+    Propagator in the script and GUI and we refer you to the script example
+    shown in the script section for details. Effort has been made to reduce
+    any difference between the script and GUI.)</para>
+  </section>
+</section>

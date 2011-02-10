@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Ballistic Mass Tab</title>
+
+  <para>This was created using the July 2, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The ballistic and mass properties of a spacecraft include the
+    drymass, coefficient of reflectivity and and coefficient of drag to name a
+    few. These properties are grouped under the Ballistic/Mass tab on the
+    spacecraft dialog box.</para>
+  </section>
+
+  <section>
+    <title>Interfaces</title>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Spacecraft Ballistic
+        Mass Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Spacecraft Ballistic
+          Mass Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <programlisting><code>GMAT Sc.DryMass = 850;
+GMAT Sc.Cd = 2.2;
+GMAT Sc.Cr = 1.8;
+GMAT Sc.DragArea = 15;
+GMAT Sc.SRPArea = 1;</code></programlisting>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>Cd</para></entry>
+
+            <entry><para>Default: 2.2.</para> <para>Options: { Real Number
+            ~062~ 0 }</para> <para>Cd is the spacecraft's drag coefficient
+            assuming a spherical spacecraft.</para> <para>Units:
+            Dimensionless.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Cr</para></entry>
+
+            <entry><para>Default: 2.2.</para> <para>Options: { 0 ~060~= Real
+            Number ~060~= 2.0 }</para> <para>Cr is the spacecraft's
+            coefficient of reflectivity.</para> <para>Units:
+            Dimensionless.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DragArea</para></entry>
+
+            <entry><para>Default: 15.0.</para> <para>Options: { Real Number
+            ~062~ 0 }</para> <para>The DragArea is the area of the spacecraft
+            that is used in calculating atmospheric drag.</para> <para>Units:
+            m~094~2</para></entry>
+          </row>
+
+          <row>
+            <entry><para>SRPArea</para></entry>
+
+            <entry><para>Default: 1.0.</para> <para>Options: { Real Number
+            ~062~ 0 }</para> <para>The SRPArea is the area of the spacecraft
+            that is used in calculating the force due to solar radiation
+            pressure. SRPArea is the average surface area as seen from the
+            Sun.</para> <para>Units: m~094~2</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DryMass</para></entry>
+
+            <entry><para>Default: 850.0.</para> <para>Options: { Real Number
+            ~062~ 0 }</para> <para>The DryMass is the mass of the spacecraft
+            without the mass of tanks and fuel.</para> <para>Units:
+            kg</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <section>
+      <title>Objects and Command Interactions</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The properties in this section of the spacecraft object
+              involve what the spacecraft will experience while on the
+              mission, thus a spacecraft object is essential.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</section>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Report</title>
+
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The report command allows the user find parameters of the orbit and
+    the spacecraft at particular moments in time. This command is inserted
+    into the mission tree at various locations in the mission tree. The
+    parameters found by this command are placed into a report file that can be
+    accessed at a later time.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>ReportFile</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Object where the parameters retrieved by the report
+              command.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>The report command has two main boxes. The first box allows one to
+    select which report the parameters will be stored in. The second box
+    interacts with the ParameterSelectDialog and allows the user to pick which
+    parameters are desired to be seen at that particular moment.</para>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Report Command Dialog
+        Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center" fileref="???"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Report Command
+          Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Report  ReportName  DataList</code></programlisting>
+    </section>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>%Report the time and position of DefaultSC
+
+Report DefaultReport DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para> ReportName</para></entry>
+
+            <entry><para> Default: N/A </para> <para> Options: { Any
+            ReportFile created }</para> <para> The ReportName option allows
+            the user to specift the ReportFile for data output. </para> <para>
+            Units: N/A</para></entry>
+          </row>
+
+          <row>
+            <entry><para> DataList</para></entry>
+
+            <entry><para> Default: N/A</para> <para> Options: { Spacecraft
+            parameter, Array, Variable, String, or any other single user
+            defined parameter }</para> <para> The DataList option allows the
+            user to output data to the Filename specified by the ReportName.
+            Multiple objects can be in the DataList when they are separated by
+            spaces. </para> <para> Units: N/A</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</section>
