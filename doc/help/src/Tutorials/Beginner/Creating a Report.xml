@@ -18,8 +18,7 @@
     parameters out to a file using two different reporting techniques, as well
     as how to use strings to improve the readability of a report file.</para>
 
-    <para>Download the script file: <link
-    linkend="???">ReportTutorial.script</link></para>
+    <para>Download the script file: <xref linkend="???" /></para>
 
     <section>
       <title>Prerequisites</title>
@@ -31,7 +30,7 @@
 
           <itemizedlist>
             <listitem>
-              <para><xref linkend="???" /></para>
+              <para><link linkend="???">Report Object</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -42,11 +41,11 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Report Command))</para>
+              <para><link linkend="???">Report Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((ScriptEvent Command))</para>
+              <para><link linkend="???">ScriptEvent Command</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
