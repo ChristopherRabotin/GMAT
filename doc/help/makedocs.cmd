@@ -1,3 +1,11 @@
+@rem build Xalan classpath
+set xalancp='contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar'
+set xalancp=%xalancp%':contrib/xalan-j/xml-apis.jar:contrib/xalan-j/xercesImpl.jar'
+set xalancp=%xalancp%':contrib/docbook-xsl-ns/extensions/xalan27.jar'
+set xercesParser='org.apache.xerces.parsers.XIncludeParserConfiguration'
+
+mkdir build
+
 @rem validate the XML
 java -jar contrib/jing/bin/jing.jar ^
 	'http://www.docbook.org/xml/5.0/rng/docbookxi.rng' ^
@@ -32,9 +40,12 @@ xsltproc --stringparam base.dir build/chm/ ^
 	src/help.xml
 
 @rem DocBook -> HTML (single page)
-xsltproc -o build/help.html ^
-	contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl ^
-	src/help.xml
+java -cp %xalancp%	\
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% \
+	org.apache.xalan.xslt.Process \
+	-IN src/help.xml \
+	-XSL contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl \
+	-OUT build/help.html
 
 @rem DocBook -> HTML (multiple pages)
 xsltproc --stringparam base.dir build/html/ ^
