@@ -12,16 +12,21 @@ java -jar contrib/jing/bin/jing.jar ^
 	src/help.xml
 
 @rem DocBook -> XSL-FO -> PDF (letter)
-xsltproc -o build/help-letter.fo ^
-	contrib/docbook-xsl-ns/fo/docbook.xsl ^
-	src/help.xml
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% ^
+	org.apache.xalan.xslt.Process ^
+	-IN src/help.xml ^
+	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl ^
+	-OUT build/help-letter.fo
 fop help-letter.fo help-letter-fo.pdf
 
 @rem DocBook -> XSL-FO -> PDF (A4)
-xsltproc -o build/help-a4.fo ^
-	--stringparam paper.type A4 ^
-	contrib/docbook-xsl-ns/fo/docbook.xsl ^
-	src/help.xml
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% ^
+	org.apache.xalan.xslt.Process ^
+	-IN src/help.xml ^
+	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl ^
+	-OUT build/help-a4.fo
 fop help-a4.fo help-a4-fo.pdf
 
 @rem DocBook -> LaTeX -> PDF (letter)
@@ -35,19 +40,25 @@ python C:/Python27/Scripts/dblatex -o build/help-a4-latex.pdf ^
 	src/help.xml
 
 @rem DocBook -> CHM
-xsltproc --stringparam base.dir build/chm/ ^
-	contrib/docbook-xsl-ns/htmlhelp/htmlhelp.xsl ^
-	src/help.xml
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% ^
+	org.apache.xalan.xslt.Process ^
+	-PARAM base.dir ../build/chm/ ^
+	-IN src/help.xml ^
+	-XSL contrib/docbook-xsl-ns/htmlhelp/htmlhelp.xsl
 
 @rem DocBook -> HTML (single page)
-java -cp %xalancp%	\
-	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% \
-	org.apache.xalan.xslt.Process \
-	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl \
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% ^
+	org.apache.xalan.xslt.Process ^
+	-IN src/help.xml ^
+	-XSL contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl ^
 	-OUT build/help.html
 
 @rem DocBook -> HTML (multiple pages)
-xsltproc --stringparam base.dir build/html/ ^
-	contrib/docbook-xsl-ns/xhtml-1_1/chunk.xsl ^
-	src/help.xml
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xercesParser% ^
+	org.apache.xalan.xslt.Process ^
+	-PARAM base.dir ../build/html/ ^
+	-IN src/help.xml ^
+	-XSL contrib/docbook-xsl-ns/xhtml-1_1/chunk.xsl
