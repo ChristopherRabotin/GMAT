@@ -63,27 +63,28 @@ SMA    = -mu/2/Energy;</code></programlisting>
 
     <itemizedlist>
       <listitem>
-        <para>((Spacecraft Object))</para>
+        <para><link linkend="SpacecraftOverview">Spacecraft
+        Object</link></para>
       </listitem>
 
       <listitem>
-        <para>((Report Command))</para>
+        <para><link linkend="Report">Report Command</link></para>
       </listitem>
 
       <listitem>
-        <para>((Equation Command))</para>
+        <para><link linkend="Equation">Equation Command</link></para>
       </listitem>
 
       <listitem>
-        <para>((Vary Command))</para>
+        <para><link linkend="Vary">Vary Command</link></para>
       </listitem>
 
       <listitem>
-        <para>((Achieve Command))</para>
+        <para><link linkend="Achieve">Achieve Command</link></para>
       </listitem>
 
       <listitem>
-        <para>((Minimize Command))</para>
+        <para><link linkend="Minimize">Minimize Command</link></para>
       </listitem>
     </itemizedlist>
   </section>

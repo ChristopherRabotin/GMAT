@@ -25,7 +25,7 @@
 
       <itemizedlist>
         <listitem>
-          <para>[tiki-index.php?page=S%2FC+Thruster|Thruster]</para>
+          <para><link linkend="Thruster">Thruster</link></para>
 
           <itemizedlist>
             <listitem>
@@ -36,7 +36,7 @@
         </listitem>
 
         <listitem>
-          <para>[tiki-index.php?page=Spacecraft|Spacecraft]</para>
+          <para><link linkend="SpacecraftOverview">Spacecraft</link></para>
 
           <itemizedlist>
             <listitem>
@@ -48,7 +48,7 @@
         </listitem>
 
         <listitem>
-          <para>[tiki-index.php?page=OpenGL+Plots|OpenGL Plot]</para>
+          <para><link linkend="OpenGLPlot">OpenGL Plot</link></para>
 
           <itemizedlist>
             <listitem>

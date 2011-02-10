@@ -47,8 +47,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>[tiki-index.php?page=Spacecraft+Object-Orbit+Tab|Orbit Tab
-      Link]</para>
+      <para><link linkend="OrbitTab">Orbit Tab Link</link></para>
     </section>
 
     <section>
@@ -78,8 +77,7 @@
         </listitem>
       </itemizedlist>
 
-      <para>[tiki-index.php?page=Spacecraft+Object-Attitude+Tab|Attitude Tab
-      Link]</para>
+      <para><link linkend="AttitudeTab">Attitude Tab Link</link></para>
     </section>
 
     <section>
@@ -109,8 +107,8 @@
         </listitem>
       </itemizedlist>
 
-      <para>[tiki-index.php?page=Spacecraft+Object-Ballistic/Mass+Tab|Ballistic/Mass
-      Tab Link]</para>
+      <para><link linkend="BallisticMassTab">Ballistic/Mass Tab
+      Link</link></para>
     </section>
 
     <section>

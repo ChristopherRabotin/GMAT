@@ -24,7 +24,7 @@
 
       <itemizedlist>
         <listitem>
-          <para>((Report Object))</para>
+          <para><link linkend="ReportFile">ReportFile</link></para>
 
           <itemizedlist>
             <listitem>
@@ -35,7 +35,7 @@
         </listitem>
 
         <listitem>
-          <para>((Report Command))</para>
+          <para><link linkend="Report">Report Command</link></para>
 
           <itemizedlist>
             <listitem>
