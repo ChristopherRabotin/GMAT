@@ -1,8 +1,8 @@
 @rem build Xalan classpath
-set xalancp='contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar'
-set xalancp=%xalancp%':contrib/xalan-j/xml-apis.jar:contrib/xalan-j/xercesImpl.jar'
-set xalancp=%xalancp%':contrib/docbook-xsl-ns/extensions/xalan27.jar'
-set xercesParser='org.apache.xerces.parsers.XIncludeParserConfiguration'
+set xalancp=contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar
+set xalancp=%xalancp%:contrib/xalan-j/xml-apis.jar:contrib/xalan-j/xercesImpl.jar
+set xalancp=%xalancp%:contrib/docbook-xsl-ns/extensions/xalan27.jar
+set xercesParser=org.apache.xerces.parsers.XIncludeParserConfiguration
 
 mkdir build
 
