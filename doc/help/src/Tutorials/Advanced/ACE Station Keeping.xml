@@ -24,8 +24,8 @@
     slightly by small maneuvers due to the unstable nature of Sun-Earth
     L<subscript>1</subscript>.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=39|ACEStationKeepingTutorial.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/ACEStationKeepingTutorial.script">ACEStationKeepingTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -40,11 +40,13 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Creating and Propagating a Spacecraft))</para>
+              <para><link linkend="CreatingandPropagatingaSpacecraft">Creating
+              and Propagating a Spacecraft</link></para>
             </listitem>
 
             <listitem>
-              <para>((Designing a Hohmann Transfer))</para>
+              <para><link linkend="DesigningaHohmannTransfer">Designing a
+              Hohman Transfer</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -54,43 +56,49 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Spacecraft Object))</para>
+              <para><link linkend="SpacecraftOverview">Spacecraft
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Impulsive Burn Object))</para>
+              <para><link linkend="ImpulsiveBurn">Impulsive Burn
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Propagator Object))</para>
+              <para><link linkend="Propagator">Propagator Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Barycenter Object))</para>
+              <para><link linkend="Barycenter">Barycenter Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Libration Point Object))</para>
+              <para><link linkend="LibrationPoint">Libration Point
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Differential Corrector Object))</para>
+              <para><link linkend="DifferentialCorrector">Differential
+              Corrector Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((OpenGL Plot Object))</para>
+              <para><link linkend="OpenGLPlot">OpenGL Plot
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Report Object))</para>
+              <para><link linkend="ReportFile">ReportFile</link></para>
             </listitem>
 
             <listitem>
-              <para>((Variable Object))</para>
+              <para><link linkend="Variable">Variable Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Coordinate System Objects))</para>
+              <para><link linkend="CoordinateSystems">Coordinate System
+              Objects</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -100,35 +108,35 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Report Command))</para>
+              <para><link linkend="Report">Report Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Equation Command))</para>
+              <para><link linkend="Equation">Equation Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((For Command))</para>
+              <para><link linkend="For">For Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Target Command))</para>
+              <para><link linkend="Target">Target Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Vary Command))</para>
+              <para><link linkend="Vary">Vary Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Maneuver Command))</para>
+              <para><link linkend="Maneuver">Maneuver Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Propagate Command))</para>
+              <para><link linkend="Propagate">Propagate Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Achieve Command))</para>
+              <para><link linkend="Achieve">Achieve Command</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -197,8 +205,8 @@
     complete the mission outlined within this tutorial. One spacecraft, a
     single burn to control that spacecraft, and a simple propagator, will be
     needed. To better see and analyze the spacecraft's motions, we will also
-    need several Plots/Reports, ((Variable Object)), and Coordinate
-    Systems.</para>
+    need several Plots/Reports, <link linkend="Variable">Variable
+    Object</link>, and Coordinate Systems.</para>
 
     <section>
       <title>Objects Required</title>
@@ -404,8 +412,9 @@ Create LibrationPoint ESL1;</code></programlisting>
           <itemizedlist>
             <listitem>
               <para>To create the necessary variables, insert the line of code
-              below into the script just after the setup of the ((Coordinate
-              System Objects))</para>
+              below into the script just after the setup of the <link
+              linkend="CoordinateSystems">Coordinate System
+              Objects</link></para>
             </listitem>
           </itemizedlist>
 
@@ -500,8 +509,10 @@ GMAT EarthSunRotCS.Primary = Sun;</code></programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Create a ((Differential Corrector Object)) under Solvers
-              &gt; Boundary Value Solvers and name it DefaultDC</para>
+              <para>Create a <link
+              linkend="DifferentialCorrector">Differential Corrector
+              Object</link> under Solvers &gt; Boundary Value Solvers and name
+              it DefaultDC</para>
             </listitem>
 
             <listitem>
@@ -613,9 +624,9 @@ GMAT L1View.XYPlane = Off;</code></programlisting>
 
                 <listitem>
                   <para>Switch both the View Definition and the View Up
-                  Direction ((Coordinate System Objects)) to EarthSunRotCS
-                  (Note: Don't forget to create this System first as
-                  well)</para>
+                  Direction <link linkend="CoordinateSystems">Coordinate
+                  System Objects</link> to EarthSunRotCS (Note: Don't forget
+                  to create this System first as well)</para>
                 </listitem>
 
                 <listitem>
@@ -681,8 +692,7 @@ GMAT ESL1Ephem.ColumnWidth = 20;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para>[tiki-index.php?page=ACE+Station+Keeping+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Image
-    of Mission Tree]</para>
+    <para><link linkend="???">Image of Mission Tree</link></para>
 
     <para>Now that we have all the resources at out disposal to complete this
     mission, we will go ahead and start building the mission tree. ACE's
@@ -738,9 +748,9 @@ GMAT ESL1Ephem.ColumnWidth = 20;</code></programlisting>
             <para>Target1: (Note: In the 6-16-2008 build of GMAT, and for
             several builds thereafter, the targeter requires an extra
             parameter. If you are working with a version soon after 6-09-2008,
-            use the line "((Target Command)) DefaultDC {ExitMode =
-            SaveAndContinue};" instead of the normal target line in the
-            script)</para>
+            use the line "<link linkend="Target">Target Command</link>
+            DefaultDC {ExitMode = SaveAndContinue};" instead of the normal
+            target line in the script)</para>
 
             <itemizedlist>
               <listitem>
@@ -1007,8 +1017,7 @@ EndFor;</code></programlisting>
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=ACE+Station+Keeping+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Image
-    of Output Tree]</para>
+    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>While running this setup, you should see the spacecraft ACE make
     seven half-loops around the Sun-Earth L<subscript>1</subscript> Libration
@@ -1024,12 +1033,13 @@ EndFor;</code></programlisting>
     rather than a visual one.</para>
 
     <para>By now you should understand not only how to setup the required
-    objects for this mission such as the Barycenter, Libration Point,
-    ((Coordinate System Objects)), Reports, ((Variable Object)), and different
-    views for the ((OpenGL Plot Object)), but also how to apply these to
-    create an effective and well documented mission. Below are the screen
-    captures of both the output tree (where you can view the report output
-    information) and the output window itself.</para>
+    objects for this mission such as the Barycenter, Libration Point, <link
+    linkend="CoordinateSystems">Coordinate System Objects</link>, Reports,
+    <link linkend="Variable">Variable Object</link>, and different views for
+    the <link linkend="OpenGLPlot">OpenGL Plot Object</link>, but also how to
+    apply these to create an effective and well documented mission. Below are
+    the screen captures of both the output tree (where you can view the report
+    output information) and the output window itself.</para>
 
     <screenshot>
       <info>

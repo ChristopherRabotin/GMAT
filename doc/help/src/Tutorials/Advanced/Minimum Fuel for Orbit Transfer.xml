@@ -27,8 +27,8 @@
     time/point that it leaves the initial orbit are both varied as
     well.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=51|Ex_LowEarthMinFuelTransfer.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/Ex_LowEarthMinFuelTransfer.script">Ex_LowEarthMinFuelTransfer.script</link></para>
 
     <para>Note: This mission is the same as the Optimization sample mission
     largely, except the Optimization mission has a few errors in it and does
@@ -731,9 +731,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para>[tiki-index.php?page=Minimum Fuel for Orbit
-    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
-    Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The spacecraft propagates a single orbit and then the optimizing
     sequence starts. First the time of the transfer orbit insertion burn is
@@ -1385,9 +1383,7 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=Minimum Fuel for Orbit
-    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
-    Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The SMAPlot should have a large spike but be largely constant
     otherwise at about 10000. The INC plot starts increasing then decreasing,

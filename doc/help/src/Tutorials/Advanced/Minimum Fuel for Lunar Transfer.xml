@@ -20,8 +20,8 @@
     the moon using a standard two-burn trajectory to the moon. Note that this
     is not a low energy boundary orbit.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=50|Ex_MinFuelLunarCapture.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/Ex_MinFuelLunarCapture.script">Ex_MinFuelLunarCapture.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -907,9 +907,7 @@ IterateData.Filename = ./output/SampleMissions/Ex_MinFuelLunarCapture.report;</c
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para>[tiki-index.php?page=Minimum Fuel for Lunar
-    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
-    Output trees]</para>
+    <para><link linkend="???">Resource Mmission and Output Trees</link></para>
 
     <para>This mission is set-up very similarly to how the Lunar Transfer
     Tutorial is set-up, except that optimization sequences are used instead of
@@ -1389,9 +1387,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=Minimum Fuel for Lunar
-    Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource Mission and
-    Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The XY plots should look like the ones observed in the screenshot.
     Notice that the SMA, INC, and ECC plots converge upon the desired values.

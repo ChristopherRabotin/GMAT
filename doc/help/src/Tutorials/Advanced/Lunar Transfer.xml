@@ -21,8 +21,8 @@
     solve for several initially unknown variables and apply them to give your
     spacecraft a more efficient path to the moon.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=34|LunarTransferTutorial.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/LunarTransferTutorials.script">LunarTransferTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -37,11 +37,13 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Creating and Propagating a Spacecraft))</para>
+              <para><link linkend="CreatingandPropagatingaSpacecraft">Creating
+              and Propagating a Spacecraft</link></para>
             </listitem>
 
             <listitem>
-              <para>((Designing a Hohmann Transfer))</para>
+              <para><link linkend="DesigningaHohmannTransfer">Designing a
+              Hohmann Transfer</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -525,8 +527,7 @@ GMAT EarthMoonOGL.ViewUpCoordinateSystem = EarthMJ2000Eq;</code></programlisting
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para>[tiki-index.php?page=Lunar+Transfer+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Resource
-    Mission and Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>This mission calls three targeting sequences to accomplish the
     mission, which are explained below. The goal of the mission is to vary
@@ -1092,8 +1093,7 @@ Propagate MoonProp(Sat) {Sat.ElapsedDays = 2.0};</code></programlisting>
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=Lunar+Transfer+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Resource
-    Mission and Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>You have now configured the mission, and it is time to run it and
     see the results. First, save the changes you've made and then click the

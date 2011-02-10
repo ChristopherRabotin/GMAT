@@ -24,8 +24,8 @@
     the spacecraft can accomplish formation flying and formation
     rendezvous.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=34|FormationRendezvousTutorial.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/FormationRendezvousTutorial.script">FormationRendezvousTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -726,8 +726,7 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para>[tiki-editpage.php#_b_Resource_Mission_and_Output_trees_b_|Image of
-    Output Tree]</para>
+    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>This mission consists of first sequence, two targeting sequences.
     The first sequence includes some reports, an equation and a propagator,
@@ -1642,8 +1641,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-editpage.php#_b_Resource_Mission_and_Output_trees_b_|Image of
-    Output Tree]</para>
+    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>According to this tutorial, you complete this mission program.
     Firstly please save all, then click green arrow which indicates running

@@ -23,8 +23,8 @@
     example for using control logic and targeting sequences in the same
     mission.</para>
 
-    <para>Download the script file:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=49|LEOStationKeepingTutorial.script]</para>
+    <para>Download the script file: <link
+    xlink:href="files/scripts/LEOStationKeepingTutorial.script">LEOStationKeepingTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -50,11 +50,13 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Creating and Propagating a Spacecraft))</para>
+              <para><link linkend="CreatingandPropagatingaSpacecraft">Creaitng
+              and Propagating a Spacecraft</link></para>
             </listitem>
 
             <listitem>
-              <para>((Designing a Hohmann Transfer))</para>
+              <para><link linkend="DesigningaHohmannTransfer">Designing a
+              Hohmann Transfer</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -64,27 +66,32 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Spacecraft Object-Orbit Tab))</para>
+              <para><link linkend="OrbitTab">Spacecraft Object-Orbit
+              Tab</link></para>
             </listitem>
 
             <listitem>
-              <para>((Impulsive Burn Object))</para>
+              <para><link linkend="ImpulsiveBurn">Impulsive Burn
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Propagator Object))</para>
+              <para><link linkend="Propagator">Propagator Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Differential Corrector Object))</para>
+              <para><link linkend="DifferentialCorrector">Differential
+              Corrector Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((OpenGL Plot Object))</para>
+              <para><link linkend="OpenGLPlot">OpenGL Plot
+              Object</link></para>
             </listitem>
 
             <listitem>
-              <para>((Coordinate System Objects))</para>
+              <para><link linkend="CoordinateSystems">Coordinate System
+              Objects</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -94,19 +101,19 @@
 
           <itemizedlist>
             <listitem>
-              <para>((While Command))</para>
+              <para><link linkend="While">While Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((If))</para>
+              <para><link linkend="If">If</link></para>
             </listitem>
 
             <listitem>
-              <para>((Maneuver Command))</para>
+              <para><link linkend="Maneuver">Maneuver Command</link></para>
             </listitem>
 
             <listitem>
-              <para>((Propagate Command))</para>
+              <para><link linkend="Propagate">Propagate Command</link></para>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -367,8 +374,9 @@ GMAT LEOprop.MaxStepAttempts = 50;
 
           <itemizedlist>
             <listitem>
-              <para>Create a ((Differential Corrector Object)) under Solvers
-              &gt; Boundary Value Solvers</para>
+              <para>Create a <link
+              linkend="DifferentialCorrector">Differential Corrector
+              Object</link> under Solvers &gt; Boundary Value Solvers</para>
             </listitem>
           </itemizedlist>
 
@@ -502,8 +510,7 @@ GMAT RAANview.XYPlane = Off;
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para>[tiki-index.php?page=LEO+Station+Keeping+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Image
-    of Mission Tree]</para>
+    <para><link linkend="???">Image of Mission Tree</link></para>
 
     <para>The mission sequence presented here is relatively simple one. As
     said before, it is a good example of how to use loops, if statements, and
@@ -752,8 +759,7 @@ EndWhile;
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=LEO+Station+Keeping+Tutorial#_b_Resource_Mission_and_Output_trees_b_|Image
-    of Output Tree]</para>
+    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>The views that you created are good for seeing how well the mission
     sequence is keeping LEOsat in its orbit. The SMA view shows some thickness
