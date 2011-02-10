@@ -44,8 +44,8 @@
     </orderedlist>
 
     <para>You can download the script file and run it beforehand to see the
-    final results of this tutorial:
-    [http://gmat.ed-pages.com/wiki/tiki-download_file.php?fileId=46|HohmannTransferDesign.script]</para>
+    final results of this tutorial: <link
+    linkend="???">HohmannTransferDesign.script</link></para>
   </section>
 
   <section>
@@ -377,8 +377,7 @@ EndTarget;</code></programlisting>
   <section>
     <title>Running the Mission</title>
 
-    <para>[tiki-index.php?page=Designing+a+Hohmann+Transfer#_b_Resource_Mission_and_Output_trees_b_|Resource
-    Mission and Output trees]</para>
+    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The openGL image below was stopped after the first propagate
     command. The spacecraft started at its initial conditions and propagated

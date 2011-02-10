@@ -18,8 +18,8 @@
     parameters out to a file using two different reporting techniques, as well
     as how to use strings to improve the readability of a report file.</para>
 
-    <para>Download the script file:
-    [tiki-download_file.php?fileId=2|ReportTutorial.script]</para>
+    <para>Download the script file: <link
+    linkend="???">ReportTutorial.script</link></para>
 
     <section>
       <title>Prerequisites</title>
@@ -31,7 +31,7 @@
 
           <itemizedlist>
             <listitem>
-              <para>((Report Object))</para>
+              <para><xref linkend="???" /></para>
             </listitem>
           </itemizedlist>
         </listitem>

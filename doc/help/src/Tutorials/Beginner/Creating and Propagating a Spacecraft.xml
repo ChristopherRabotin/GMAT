@@ -70,10 +70,9 @@
           </listitem>
 
           <listitem>
-            <para>See the
-            [tiki-index.php?page=Creating+and+Propagating+a+Spacecraft_b_Resource_Mission_and_Output_trees_b_|resource
-            tree figure] for a view of the tree after creating a new
-            spacecraft and naming it Sat.</para>
+            <para>See the <link linkend="???">resource tree figure</link> for
+            a view of the tree after creating a new spacecraft and naming it
+            Sat.</para>
           </listitem>
         </orderedlist>
       </section>
