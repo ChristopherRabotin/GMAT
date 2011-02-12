@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="Thruster" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Thruster</title>
+
+  <para>This was created using the June 9, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The Thruster uses the fuel tank and directs the thrust of the rocket
+    engine while in space. It is used for finite burns.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>BeginFiniteBurn/EndFiniteBurn</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>These commands use the tank and the thruster to start a
+              finite burn, where the delta V is not instantaneous.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Fuel Tank</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>This object contains the fuel used to power the thruster
+              and subsequently the finite burn.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>FiniteBurn</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>This takes the parameters of the tank and the thruster and
+              apply it to a coordinate system, with a scaling method available
+              if wanted.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>This is the object that the burn is applied to.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>Coordinate System</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This is the coordinate system used for determining the
+            directions that the thruster will be fired in.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>X Direction, Y Direction, Z Direction</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>These enable the user to determine precisely what the vector
+            is of the thrust in relation to the chosen coordinate
+            system.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Thrust Scale Factor</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This is the factor by which the thrust will be multiplied
+            by, thus strengthening or weakening the thrust.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Tank</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This chooses which tank is wanted to be accessed for
+            fuel.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Edit Thruster Coefficients</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Here you can change the performance of the thruster. For
+            more information see
+            http://gmat.gsfc.nasa.gov/docs/GMATMathSpec.pdf on pg 87.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Edit Impulse Coefficients</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Here you can change the impulse of the thruster. For more
+            information see http://gmat.gsfc.nasa.gov/docs/GMATMathSpec.pdf on
+            pg 87.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Thruster object
+        Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="images/Resource_Thruster_Default.jpeg"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Thruster object
+          Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Examples</title>
+
+      <programlisting><code>Create Thruster Thruster1;
+GMAT Thruster1.Element1 = 1;
+GMAT Thruster1.Element2 = 0;
+GMAT Thruster1.Element3 = 0;
+GMAT Thruster1.C1 = 500;
+GMAT Thruster1.C2 = 0;
+GMAT Thruster1.C3 = 0;
+GMAT Thruster1.C4 = 0;
+GMAT Thruster1.C5 = 0;
+GMAT Thruster1.C6 = 0;
+GMAT Thruster1.C7 = 0;
+GMAT Thruster1.C8 = 0;
+GMAT Thruster1.C9 = 0;
+GMAT Thruster1.C10 = 0;
+GMAT Thruster1.C11 = 1;
+GMAT Thruster1.C12 = 0;
+GMAT Thruster1.C13 = 0;
+GMAT Thruster1.C14 = 0;
+GMAT Thruster1.K1 = 2150;
+GMAT Thruster1.K2 = 0;
+GMAT Thruster1.K3 = 0;
+GMAT Thruster1.K4 = 0;
+GMAT Thruster1.K5 = 0;
+GMAT Thruster1.K6 = 0;
+GMAT Thruster1.K7 = 0;
+GMAT Thruster1.K8 = 0;
+GMAT Thruster1.K9 = 0;
+GMAT Thruster1.K10 = 0;
+GMAT Thruster1.K11 = 1;
+GMAT Thruster1.K12 = 0;
+GMAT Thruster1.K13 = 0;
+GMAT Thruster1.K14 = 0;
+GMAT Thruster1.CoordinateSystem = 'MJ2000EarthEquator';
+GMAT Thruster1.ThrustScaleFactor = 1;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>CoordinateSystem</para></entry>
+
+            <entry><para>Default: EarthMJ2000Eq.</para> <para>Options:
+            [EarthMJ2000Eq, EarthMJ2000Ec, EarthMJ2000Eq, or anyuser defined
+            system]</para> <para>The CoordinateSystem field for a
+            thrusterdetermines what coordinate system the orientation
+            parametersX_Direction, Y_Direction, and Z_Direction arereferenced
+            to. This is a temporary fix in GMAT. Eventually, theuser will
+            specify the attitude of aspacecraft, and then X_Direction,
+            Y_Direction, and Z_Direction will be referenced to the spacecraft
+            body frame. </para></entry>
+          </row>
+
+          <row>
+            <entry><para>Axis</para></entry>
+
+            <entry><para>Default: VNB.</para> <para>Options:
+            [InertialVNB]</para> <para> The Axis field allows the user to
+            define a localcoordinate system for a thruster. Note that there is
+            a couplingbetween the Axis parameter and the
+            CoordinateSystemparameter for a thruster. Only one of the two
+            canbe specified. </para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Origin</para></entry>
+
+            <entry><para>Default: Earth.</para> <para>Options:[Sun, Mercury,
+            Venus, Earth, Luna, Mars,Jupiter, Saturn, Uranus, Neptune,
+            Pluto]</para> <para>The Origin fieldallows the user to define a
+            local origin for a thruster. Note thatthere is a coupling between
+            the Origin parameter and theCoordinateSystem parameter for a
+            thruster. Only one of the twocan be specified. </para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>X_Direction</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: [Real
+            Number]</para> <para>X_Direction, divided by the RSS of the three
+            directioncomponents, forms the x direction of the spacecraft
+            thrust vector direction.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Y_Direction</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Y_Direction, divided by the RSS of the three
+            directioncomponents, forms the y direction of the spacecraft
+            thrust vector direction.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Z_Direction</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Z_Direction, divided by the RSS of the three
+            directioncomponents, forms the z direction of the spacecraft
+            thrust vector direction.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ThrustScaleFactor</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: [Real
+            Number&gt;0]</para> <para>ThrustScaleFactor is a scale factor that
+            is multiplied by the thrust vector for a given thruster, before
+            the thrust vector is added into the total accleration.</para>
+            <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Tank</para></entry>
+
+            <entry><para> Default: None.</para> <para>Options: [Tank
+            Name]</para> <para> The Tank field specifies which tank the
+            thruster draws propellant from.</para> <para> The constants
+            C<subscript>i</subscript> below are used in the following equation
+            to calculate thrust F<subscript>T</subscript> as a function of
+            pressure P and temperature T </para> <para>
+            F<subscript>T</subscript>(P,T) &amp;nbsp = &amp;nbsp
+            {C<subscript>1</subscript>+C<subscript>2</subscript>P+C<subscript>3</subscript>P<superscript>2</superscript>+C<subscript>4</subscript>P<superscript>C<subscript>5</subscript></superscript>+C<subscript>6</subscript>P<superscript>C<subscript>7</subscript></superscript>+C<subscript>8</subscript>P<superscript>C<subscript>9</subscript></superscript>
+            +C<subscript>10</subscript>C<subscript>11</subscript><superscript>C<subscript>12</subscript>P</superscript>}(T/T<subscript>ref</subscript>)<superscript>1+C<subscript>13</subscript>+C<subscript>14</subscript>P</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>C1</para></entry>
+
+            <entry><para>Default: 500.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C2</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N/kPa.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C3</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N/kPa<superscript>2</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>C4</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N/kPa<superscript>C5</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>C5</para></entry>
+
+            <entry><para>Default: 0. </para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C6</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N/kPa<superscript>C7</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>C7</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units: None
+            </para></entry>
+          </row>
+
+          <row>
+            <entry><para>C8</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N/kPa<superscript>C9</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>C9</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C10</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            N.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C11</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C12</para></entry>
+
+            <entry><para>Default: 0. </para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            1/kPa.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C13</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units:
+            None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>C14</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Thrust coefficient.</para> <para>Units
+            1/kPa.</para> <para>The constants K<subscript>i</subscript> below
+            are used in the following equation tocalculate Isp as a function
+            of pressure P and temperatureT</para>
+            <para>I<subscript>sp</subscript>(P,T) &amp;nbsp = &amp;nbsp
+            {K<subscript>1</subscript>+K<subscript>2</subscript>P+K<subscript>3</subscript>P<superscript>2</superscript>+K<subscript>4</subscript>P<superscript>K<subscript>5</subscript></superscript>+K<subscript>6</subscript>P<superscript>K<subscript>7</subscript></superscript>+K<subscript>8</subscript>P<superscript>K<subscript>9</subscript></superscript>+
+            K<subscript>10</subscript>K<subscript>11</subscript><superscript>K<subscript>12</subscript>P</superscript>}
+            (T/T<subscript>ref</subscript>)<superscript>1+K<subscript>13</subscript>+K<subscript>14</subscript>P</superscript></para></entry>
+          </row>
+
+          <row>
+            <entry><para>K1</para></entry>
+
+            <entry><para>Default: 2150.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/sec</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K2</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/(sec?kPa).</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K3</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/(sec?kPa<superscript>2</superscript>)</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K4</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options:[Real Number]</para>
+            <para>Isp coefficient.</para> <para>Units:
+            m/(sec?kPa<superscript>K5</superscript>).</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K5</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K6</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/(sec?kPa<superscript>K7</superscript>).</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K7</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K8</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/(sec?kPa<superscript>K9</superscript>.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K9</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K10</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            m/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K11</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            None</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K12</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            1/kPa.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K13</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units:
+            None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>K14</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: [Real
+            Number]</para> <para>Isp coefficient.</para> <para>Units
+            1/kPa.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</section>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="MathOperatorsinScripting"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Math Operators in Scripting</title>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <para>The objective of this reference article is to inform GMAT users of
+    the Math Operators available to them and their syntax in scripting.</para>
+
+    <para>(i.e. GMAT MyVar = 5 + 6 * sqrt(4))</para>
+
+    <para>All examples assume variables and arrays, MyVar* and MyArr*, have
+    already been created.</para>
+  </section>
+
+  <section>
+    <title>Addition</title>
+
+    <para>GMAT MyVar = 4 + 5;</para>
+  </section>
+
+  <section>
+    <title>Subtraction</title>
+
+    <para>GMAT MyVar = 3 - 1;</para>
+  </section>
+
+  <section>
+    <title>Division</title>
+
+    <para>GMAT MyVar = 8 / 2;</para>
+  </section>
+
+  <section>
+    <title>Multiplication</title>
+
+    <para>GMAT MyVar = 12 * 2;</para>
+  </section>
+
+  <section>
+    <title>Exponentiation</title>
+
+    <para>GMAT MyVar = 2 ^ 2;</para>
+  </section>
+
+  <section>
+    <title>Trigonometry</title>
+
+    <para>Standard Units of Radians</para>
+
+    <section>
+      <title>Sine</title>
+
+      <para>sin()</para>
+    </section>
+
+    <section>
+      <title>Cosine</title>
+
+      <para>cos()</para>
+    </section>
+
+    <section>
+      <title>Tangent</title>
+
+      <para>tan()</para>
+    </section>
+
+    <section>
+      <title>Arcsine</title>
+
+      <para>asin()</para>
+    </section>
+
+    <section>
+      <title>Arccosine</title>
+
+      <para>acos()</para>
+    </section>
+
+    <section>
+      <title>Arctangent</title>
+
+      <para>atan()</para>
+    </section>
+
+    <section>
+      <title>atan2</title>
+
+      <para>atan2()</para>
+    </section>
+  </section>
+
+  <section>
+    <title>Square Root</title>
+
+    <para>GMAT MyVar = sqrt(4);</para>
+  </section>
+
+  <section>
+    <title>norm</title>
+
+    <para>norm()</para>
+  </section>
+
+  <section>
+    <title>Logarithm</title>
+
+    <para>log()</para>
+
+    <para>log10()</para>
+
+    <para>exp()</para>
+  </section>
+
+  <section>
+    <title>Matrix Manipulation</title>
+
+    <para>inv()</para>
+
+    <para>()^()</para>
+
+    <para>transpose()</para>
+
+    <para>()'</para>
+
+    <para>det()</para>
+  </section>
+
+  <section>
+    <title>Radians and Degrees</title>
+
+    <para>DegToRad()</para>
+
+    <para>RadToDeg()</para>
+  </section>
+</section>

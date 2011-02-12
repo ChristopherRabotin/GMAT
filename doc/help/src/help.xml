@@ -11,39 +11,39 @@
 	<title>GMAT User Guide</title>
 	<part>
 		<title>Introduction</title>
-		<xi:include href="Introduction/Introducing GMAT.xml"/>
-		<xi:include href="Introduction/GMAT Interface Design-Philosophy.xml"/>
-		<xi:include href="Introduction/System Requirements.xml"/>
-		<xi:include href="Introduction/Installation.xml"/>
-		<xi:include href="Introduction/Support and Resources.xml"/>
+		<xi:include href="Intro_IntroducingGMAT.xml"/>
+		<xi:include href="Intro_GMATInterfaceDesignPhilosophy.xml"/>
+		<xi:include href="Intro_SystemRequirements.xml"/>
+		<xi:include href="Intro_Installation.xml"/>
+		<xi:include href="Intro_SupportandResources.xml"/>
 	</part>
 	
 	<part>
 		<title>How To</title>
-		<xi:include href="How To/Reporting mission parameters.xml"/>
-		<xi:include href="How To/Running scripts from MATLAB.xml"/>
-		<xi:include href="How To/Creating ephemeris files.xml"/>
-		<xi:include href="How To/Visualizing a trajectory.xml"/>
+		<xi:include href="HowTo_ReportingMissionParameters.xml"/>
+		<xi:include href="HowTo_RunningScriptsfromMATLAB.xml"/>
+		<xi:include href="HowTo_CreatingEphemerisFiles.xml"/>
+		<xi:include href="HowTo_VisualizingaTrajectory.xml"/>
 	</part>
 	
 	<part>
 		<title>Samples and Tutorials</title>
 
-		<xi:include href="Tutorials/Beginner/Creating and Propagating a Spacecraft.xml"/>
-		<xi:include href="Tutorials/Beginner/Designing a Hohmann Transfer.xml"/>
-		<xi:include href="Tutorials/Beginner/Creating a Report.xml"/>
-		<xi:include href="Tutorials/Beginner/Running GMAT Scripts from MATLAB.xml"/>
-		<xi:include href="Tutorials/Beginner/Force Models.xml"/>
-		<xi:include href="Tutorials/Beginner/Algebraic Optimization.xml"/>
+		<xi:include href="Tut_PropSpacecraft.xml"/>
+		<xi:include href="Tut_HohmannTransfer.xml"/>
+		<xi:include href="Tut_CreatingReport.xml"/>
+		<xi:include href="Tut_MATLAB.xml"/>
+		<xi:include href="Tut_ForceModels.xml"/>
+		<xi:include href="Tut_AlgebraicOptimization.xml"/>
 
-		<xi:include href="Tutorials/Advanced/Mars B-Plane Targeting.xml"/>
-		<xi:include href="Tutorials/Advanced/L2 Transfer with Swingby.xml"/>
-		<xi:include href="Tutorials/Advanced/ACE Station Keeping.xml"/>
-		<xi:include href="Tutorials/Advanced/Lunar Transfer.xml"/>
-		<xi:include href="Tutorials/Advanced/Formation Rendezvous.xml"/>
-		<xi:include href="Tutorials/Advanced/Minimum Fuel for Orbit Transfer.xml"/>
-		<xi:include href="Tutorials/Advanced/Minimum Fuel for Lunar Transfer.xml"/>
-		<xi:include href="Tutorials/Advanced/LEO Station Keeping.xml"/>
+		<xi:include href="Tut_MarsB-PlaneTargeting.xml"/>
+		<xi:include href="Tut_L2Transfer.xml"/>
+		<xi:include href="Tut_ACEStationKeeping.xml"/>
+		<xi:include href="Tut_LunarTransfer.xml"/>
+		<xi:include href="Tut_FormationRendezvous.xml"/>
+		<xi:include href="Tut_MinFuelOrbitTransfer.xml"/>
+		<xi:include href="Tut_MinFuelLunarTransfer.xml"/>
+		<xi:include href="Tut_LEOStationKeeping.xml"/>
 
 	</part>
 	
@@ -55,66 +55,66 @@
 			
 			<section>
 				<title>Spacecraft</title>
-				<xi:include href="Reference/Resources/Spacecraft/Spacecraft Overview.xml"/>
-				<xi:include href="Reference/Resources/Spacecraft/Orbit Tab.xml"/>
-				<xi:include href="Reference/Resources/Spacecraft/Attitude Tab.xml"/>
-				<xi:include href="Reference/Resources/Spacecraft/Ballistic Mass Tab.xml"/>
+				<xi:include href="Resource_SpacecraftOverview.xml"/>
+				<xi:include href="Resource_SpacecraftOrbit.xml"/>
+				<xi:include href="Resource_SpacecraftAttitude.xml"/>
+				<xi:include href="Resource_SpacecraftBallisticMass.xml"/>
 			</section>
 			
-			<xi:include href="Reference/Resources/Propagator.xml"/>
-			<xi:include href="Reference/Resources/ReportFile.xml"/>
-			<xi:include href="Reference/Resources/Fuel Tank.xml"/>
-			<xi:include href="Reference/Resources/Thruster.xml"/>
-			<xi:include href="Reference/Resources/SQP(fmincon).xml"/>
-			<xi:include href="Reference/Resources/Solar System.xml"/>
-			<xi:include href="Reference/Resources/DifferentialCorrector.xml"/>
-			<xi:include href="Reference/Resources/Celestial Bodies.xml"/>
-			<xi:include href="Reference/Resources/OpenGL Plot.xml"/>
-			<xi:include href="Reference/Resources/XYPlot.xml"/>
-			<xi:include href="Reference/Resources/Coordinate Systems.xml"/>
-			<xi:include href="Reference/Resources/Finite Burn.xml"/>
-			<xi:include href="Reference/Resources/Variable.xml"/>
-			<xi:include href="Reference/Resources/String.xml"/>
-			<xi:include href="Reference/Resources/Array.xml"/>
-			<xi:include href="Reference/Resources/Barycenter.xml"/>
-			<xi:include href="Reference/Resources/Libration Point.xml"/>
-			<xi:include href="Reference/Resources/Impulsive Burn.xml"/>
+			<xi:include href="Resource_Propagator.xml"/>
+			<xi:include href="Resource_ReportFile.xml"/>
+			<xi:include href="Resource_FuelTank.xml"/>
+			<xi:include href="Resource_Thruster.xml"/>
+			<xi:include href="Resource_SQP(fmincon).xml"/>
+			<xi:include href="Resource_SolarSystem.xml"/>
+			<xi:include href="Resource_DifferentialCorrector.xml"/>
+			<xi:include href="Resource_CelestialBodies.xml"/>
+			<xi:include href="Resource_OpenGLPlot.xml"/>
+			<xi:include href="Resource_XYPlot.xml"/>
+			<xi:include href="Resource_CoordinateSystems.xml"/>
+			<xi:include href="Resource_FiniteBurn.xml"/>
+			<xi:include href="Resource_Variable.xml"/>
+			<xi:include href="Resource_String.xml"/>
+			<xi:include href="Resource_Array.xml"/>
+			<xi:include href="Resource_Barycenter.xml"/>
+			<xi:include href="Resource_LibrationPoint.xml"/>
+			<xi:include href="Resource_ImpulsiveBurn.xml"/>
 			
 		</chapter>
 		
 		<chapter>
 			<title>Commands</title>
 			
-			<xi:include href="Reference/Commands/Propagate.xml"/>
-			<xi:include href="Reference/Commands/While.xml"/>
-			<xi:include href="Reference/Commands/If.xml"/>
-			<xi:include href="Reference/Commands/Target.xml"/>
-			<xi:include href="Reference/Commands/Report.xml"/>
-			<xi:include href="Reference/Commands/For.xml"/>
-			<xi:include href="Reference/Commands/Maneuver.xml"/>
-			<xi:include href="Reference/Commands/Equation.xml"/>
-			<xi:include href="Reference/Commands/Toggle.xml"/>
-			<xi:include href="Reference/Commands/Vary.xml"/>
-			<xi:include href="Reference/Commands/BeginFiniteBurn.xml"/>
-			<xi:include href="Reference/Commands/Achieve.xml"/>
-			<xi:include href="Reference/Commands/Stop.xml"/>
-			<xi:include href="Reference/Commands/ScriptEvent.xml"/>
-			<xi:include href="Reference/Commands/Else.xml"/>
-			<xi:include href="Reference/Commands/NonLinearConstraint.xml"/>
-			<xi:include href="Reference/Commands/Minimize.xml"/>
-			<xi:include href="Reference/Commands/Optimize.xml"/>
-			<xi:include href="Reference/Commands/Call Function.xml"/>
+			<xi:include href="Command_Propagate.xml"/>
+			<xi:include href="Command_While.xml"/>
+			<xi:include href="Command_If.xml"/>
+			<xi:include href="Command_Target.xml"/>
+			<xi:include href="Command_Report.xml"/>
+			<xi:include href="Command_For.xml"/>
+			<xi:include href="Command_Maneuver.xml"/>
+			<xi:include href="Command_Equation.xml"/>
+			<xi:include href="Command_Toggle.xml"/>
+			<xi:include href="Command_Vary.xml"/>
+			<xi:include href="Command_BeginFiniteBurn.xml"/>
+			<xi:include href="Command_Achieve.xml"/>
+			<xi:include href="Command_Stop.xml"/>
+			<xi:include href="Command_ScriptEvent.xml"/>
+			<xi:include href="Command_Else.xml"/>
+			<xi:include href="Command_NonLinearConstraint.xml"/>
+			<xi:include href="Command_Minimize.xml"/>
+			<xi:include href="Command_Optimize.xml"/>
+			<xi:include href="Command_CallFunction.xml"/>
 			
 		</chapter>
 		
 		<chapter>
 			<title>Miscellaneous</title>
 			
-			<xi:include href="Reference/Miscellaneous/Math Operators in Scripting.xml"/>
-			<xi:include href="Reference/Miscellaneous/Script Editor Shortcut Keys.xml"/>
-			<xi:include href="Reference/Miscellaneous/Process Resources.xml"/>
-			<xi:include href="Reference/Miscellaneous/GMAT Commands in MATLAB.xml"/>
-			<xi:include href="Reference/Miscellaneous/GMAT Console Instructions.xml"/>
+			<xi:include href="Misc_MathOperatorsinScripting.xml"/>
+			<xi:include href="Misc_ScriptEditorShortcutKeys.xml"/>
+			<xi:include href="Misc_ProcessResources.xml"/>
+			<xi:include href="Misc_GMATCommandsinMATLAB.xml"/>
+			<xi:include href="Misc_GMATConsoleInstructions.xml"/>
 			
 		</chapter>
 	</part>

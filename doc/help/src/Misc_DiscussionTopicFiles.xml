@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="DiscussionTopicFiles"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Discussion Topic Files</title>
+
+  <section>
+    <title>Objective and Overview</title>
+
+    <para>Due to the web interface of mailing lists and forums it is difficult
+    to know when an attachment is made in a post/thread without clicking on
+    each post/thread. In order to alleviate the burden of searching through
+    each post/thread, we have organized a listing of wiki pages that contain
+    the files relevant to the respective discussion. If you don't see an
+    attachment referred to in an email or post, add a comment to this page
+    using the discussion link located above the page.</para>
+  </section>
+
+  <section>
+    <title>Discussion Topics</title>
+
+    <para>((FilesForUserFunctionReqs|User-Defined Functions))</para>
+
+    <para>((FilesForSubscriberReqs|Subscribers in Functions))</para>
+  </section>
+
+  <section>
+    <title>Reference Documents</title>
+
+    <para>The latest draft specification for GMAT. This document is not yet
+    reviewed, and subject to frequent revision:</para>
+
+    <para>[tiki-download_file.php?fileId=17|GMAT-Architectural-Specification.pdf]</para>
+  </section>
+</section>

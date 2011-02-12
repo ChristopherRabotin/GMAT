@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="XYPlot" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>XYPlot</title>
+
+  <para>This was created using the June 18, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The XY Plot is a graph under the Plots/Reports folder in the
+    resource tree that plots data onto the X and Y axes of the graph. Any two
+    parameters can be chosen to plot from the Parameter Select dialog box when
+    the View radio button is clicked. The plot has the capability to be turned
+    on and/or off throughout the mission if desirable.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>Spacecraft interact with an XY Plot throughout the entire
+              mission. The data retrieved from the spacecraft, as it carries
+              out the command, is what gets plotted onto the graph.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Toggle Command</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>A Toggle can be inserted into the mission sequence to
+              control when the XY Plot is to plot data by subscribing it to
+              the Toggle list. If it is necessary to only plot data at a
+              certain point during the mission, besides at the beginning or
+              end points, then two Toggle commands can be added to switch it
+              on and off.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>The XY Plots dialog box has a group box, two fields, and a couple
+    View buttons that open the Parameter Select dialog box. When the mission
+    is run, the XY Plot will set aside a portion of the screen for itself
+    alongside any other plots created in the resource tree.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Options - Group Box</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This group box located on the far left column gives the
+            options of whether the plot shows the faint background grid, none,
+            some, or all of the solver iterations, the color of the plotted
+            data, or whether the plot even appears while running the
+            mission.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Selected X - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This field is where an X parameter is chosen to be plotted
+            on the X axes.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Selected Y - Field</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>This field is where an Y parameter is chosen to be plotted
+            on the Y axes.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the XY Plot Dialog
+        Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="images/Resource_XYPlot_Default.jpeg"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the XY Plot Dialog
+          Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = Current;
+GMAT XYPlot1.IndVar = Sat.A1ModJulian;
+GMAT XYPlot1.Add = {Sat.EarthMJ2000Eq.X};
+GMAT XYPlot1.Grid = On;
+GMAT XYPlot1.ShowPlot = true;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>IndVar</para></entry>
+
+            <entry><para>Default: DefaultSC.A1ModJulian</para> <para>Options:
+            { Any user variable, array element, or spacecraft parameter
+            }</para> <para>The IndVar field allows the user to define the
+            independent variable for an xy-plot. Only one variable can be
+            defined as an independent variable. For example, the line
+            MyXYPlot.IndVar = DefaultSC.A1ModJulian sets the independent
+            variable to be the epoch of DefaultSC in the A1 time system and
+            modified Julian format.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Add</para></entry>
+
+            <entry><para>Default: DefaultSC.EarthMJ2000Eq.X.</para>
+            <para>Options: { Any user variable, array element, or spacecraft
+            parameter }</para> <para>The Add field allows the user to add
+            dependent variables to an xy-plot. All dependent variables are
+            plotted on the y-axisvs the independent variable defined by
+            IndVar. To define multiple dependent variables, they should be
+            included in curly braces. For example, MyXYPlot.Add =
+            DefaultSC.EarthMJ2000Eq.Y , DefaultSC.EarthMJ2000Eq.Z. The GUI's
+            Selected field is the equivalent of the script's Add field. In the
+            event of no Add command or no objects in the Selected field, GMAT
+            should run without the XYPlot and a warning message displayed in
+            the message window. The following warning message is sufficient:
+            XYPlot will be turned off. No object has been selected for
+            plotting.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Grid</para></entry>
+
+            <entry><para>Default: On.</para> <para>Options: { On, Off }</para>
+            <para>When the Grid field is set to On, then a grid is drawn on an
+            xy-plot. When the Grid field is set to Off, then a grid is not
+            drawn.</para> <para> Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>SolverIterations</para></entry>
+
+            <entry><para>Default: Off. </para> <para>Options: { On, Off }
+            </para> <para>The SolverIterations field determines whether or not
+            perturbed trajectories are plotted during a solver (Targeter,
+            Optimize) sequence. When SolverIterations is set to On, solver
+            iterations are shown on the plot. When SolverIterations is set to
+            Off, solver iterations are not shown on the plot.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ShowPlot</para></entry>
+
+            <entry><para>Default: true.</para> <para>Options: { true, false
+            }</para> <para>The ShowPlot field allows the user to turn off a
+            plot for a particular run, without deleting the plot object, or
+            removing it from the script. If you select true, then the plot
+            will be shown. If you select false, then the plot will not be
+            shown. </para> <para>Units: N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</section>

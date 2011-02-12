@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="AttitudeTab"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Attitude Tab</title>
+
+  <para>This was created using the June 18, 2008 build of GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>In this section, you will write a brief summary of what the object
+    or command does and how it works in basic terms.</para>
+
+    <section>
+      <title>Listing of Objects and Commands that interact</title>
+
+      <itemizedlist>
+        <listitem>
+          <para>Spacecraft</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>In order to access the attitude controls a spacecraft must
+              exist.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+
+        <listitem>
+          <para>Coordinate System</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>The Attitude Model supplies the option of using any system
+              either created or preexisting in the project to use when
+              defining a spacecraft's attitude during the mission.</para>
+            </listitem>
+          </itemizedlist>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
+    <title>Using the GUI</title>
+
+    <para>This Section will describe the layout of the GUI dialog box, mostly
+    at the group box level, and give a brief overview of what can be changed
+    here.</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Group Box</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Attitude Model - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Either a fixed or spinning coordinate system is chosen
+                here to tell GMAT how to calculate spacecraft attitude
+                properties.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Coordinate System - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>Any previously existing system or any created in the
+                project are available to choose from. The system selected will
+                depend on the mission information desired and is based on
+                allowed error and other calculations.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+
+          <listitem>
+            <para>Euler Angle Sequence - Drop Down Menu</para>
+
+            <itemizedlist>
+              <listitem>
+                <para>All combinations of Euler Angles are available here. The
+                sequence chosen is dependent upon the type of information
+                needed.</para>
+              </listitem>
+            </itemizedlist>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+
+      <listitem>
+        <para>Attitude Initial Conditions - Group Box</para>
+      </listitem>
+
+      <listitem>
+        <para>Attitude Rate Initial Conditions - Group Box</para>
+      </listitem>
+    </itemizedlist>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Spacecraft Attitude
+        Dialog Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="images/Resource_SpacecraftAttitude_Default.jpeg"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Spacecraft Attitude
+          Dialog Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+  </section>
+
+  <section>
+    <title>Using the script</title>
+
+    <section>
+      <title>Script Syntax</title>
+
+      <programlisting><code>Create Spacecraft Spacecraft1;
+GMAT Spacecraft1.DateFormat = TAIModJulian;
+GMAT Spacecraft1.Epoch = '21545.000000000';
+GMAT Spacecraft1.CoordinateSystem = EarthMJ2000Eq;
+GMAT Spacecraft1.DisplayStateType = Cartesian;
+GMAT Spacecraft1.X = 7100;
+GMAT Spacecraft1.Y = 0;
+GMAT Spacecraft1.Z = 1300;
+GMAT Spacecraft1.VX = 0;
+GMAT Spacecraft1.VY = 7.35;
+GMAT Spacecraft1.VZ = 1;
+GMAT Spacecraft1.DryMass = 850;
+GMAT Spacecraft1.Cd = 2.2;
+GMAT Spacecraft1.Cr = 1.8;</code></programlisting>
+    </section>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>Attitude Mode</para></entry>
+
+            <entry><para>Default: CSFixed.</para> <para>Options: { CSFixed,
+            Spinner }</para> <para>The AttitudeMode mode field allows the user
+            to specify the attitude dynamics model to be used by GMAT to
+            propagate a spacecraft's attitude. The attitude dynamics model
+            uses the initial attitude state and the algorithm associated with
+            AttitudeMode to advance the attitude state in time.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Attitude Coordinate System</para></entry>
+
+            <entry><para>Default: EarthMJ2000Eq.</para> <para>Options: {
+            EarthMJ2000Eq, EarthMJ2000Ec, EarthMJ2000Eq, or any user defined
+            system }A spacecraft's initial body axes orientation as defined by
+            the quaternions or some other parameterizations are expressed with
+            respect to the AttitudeCoordinateSystem. Unlike an orbit state, an
+            attitude state is really information that uniquely defines a
+            rotation matrix. A spacecraft's attitude is the orientation of the
+            spacecraft's body-fixed frame with respect to the inertial frame.
+            However, it is often more convenient to define the initial
+            attitude with respect to an intermediate frame than with respect
+            to an inertial frame. The Attitude CoordinateSystem allows the
+            user to define the initial orientation of a spacecraft's body
+            axes, with respect to any frame GMAT knows how to
+            calculate.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Attitude StateType</para></entry>
+
+            <entry><para>Default: EulerAngles.</para> <para>Options: {
+            EulerAngles, Quaternions, DCM }</para> <para>The AttitudeStateType
+            field allows the user to choose among different attitude
+            parameterizations when defining the attitude initial
+            conditions.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Attitude Rate StateType</para></entry>
+
+            <entry><para>Default: EulerAngleRates.</para> <para>Options: {
+            EulerAngleRates, AngularVelocity }</para> <para>The
+            AttitudeRateStateType field allows the user to define the attitude
+            parameterization to be used in defining the initial attitude
+            rate.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Euler Angle Sequence</para></entry>
+
+            <entry><para>Default: 312.</para> <para>Options: { 123, 132, 121,
+            131, 213, 231, 212, 232, 312, 321, 313, 323 }</para> <para>The
+            EulerAngleSequence field allows the user to define the Euler
+            sequence used in rotating from the body-fixed to the inertial
+            axes. For example, if EulerAngleSequence is selected as 321, then
+            the first rotation is a 3 rotation through EulerAngle1, the second
+            rotation is a 2 rotation through EulerAngle2, and the third
+            rotation is a 1 rotation through EulerAngle3.</para> <para>Units:
+            N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>EulerAngle1</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>EulerAngle1 is one of three Euler angles that can
+            be used to define the initial conditions of a spacecraft.
+            EulerAngle1 corresponds to the first rotation performed in the
+            sequence that goes from the spacecraft body frame to the inertial
+            frame. For example, if the EulerAngleSequence field is set to 321,
+            the first rotation from the body to the inertial frame would be a
+            3-rotation throughEulerAngle1.</para> <para>Units:
+            degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>EulerAngle2</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>EulerAngle2 is one of three Euler angles that can
+            be used to define the initial conditions of a spacecraft.
+            EulerAngle2 corresponds to the second rotation performed in the
+            sequence that goes from the spacecraft body frame to the inertial
+            frame. For example, if the EulerAngleSequence field is set to 321,
+            the second rotation from the body to the inertial frame would be a
+            2-rotation through EulerAngle2.</para> <para>Units:
+            degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>EulerAngle3</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>EulerAngle3 is one of three Euler angles that can
+            be used to define the initial conditions of a spacecraft.
+            EulerAngle3 corresponds to the third rotation performed in the
+            sequence that goes from the spacecraft body frame to the inertial
+            frame. For example, if the EulerAngleSequence field is set to 321,
+            the third rotation from the body to the inertial frame would be a
+            1-rotation through EulerAngle3.</para> <para>Units:
+            degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>q1</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The q1 parameter is the first element of the
+            quaternion. GMAT normalizes the quaternion to be of length
+            1.</para> <para>Units: degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>q2</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The q2 parameter is the second element of the
+            quaternion.GMAT normalizes the quaternion to be of length
+            1.</para> <para>Units: degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>q3</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The q3 parameter is the third element of the
+            quaternion. GMAT normalizes the quaternion to be of length
+            1.</para> <para>Units: degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>q4</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: { Real Number
+            }</para> <para>The q4 parameter is the fourth element of the
+            quaternion. GMAT normalizes the quaternion to be of length
+            1.</para> <para>Units: degrees.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DCM11</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: { Real Number
+            }</para> <para>The DCM11 parameter is the upper left component of
+            the direction cosine matrix that rotates from the spacecraft body
+            frame to the inertial frame. GMAT normalizes the attitude matrix
+            to have a determinant of 1. The default DCM matrix is the identity
+            matrix.</para> <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DCM12</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The DCM12 parameter is the R_{12} component of the
+            direction cosine matrix that rotates from the spacecraft body
+            frame to the inertial frame. GMAT normalizes the attitude matrix
+            to have a determinant of 1. The default DCM matrix is the identity
+            matrix.</para> <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>DCM33</para></entry>
+
+            <entry><para>Default: 1.</para> <para>Options: { Real Number
+            }</para> <para>The DCM33 parameter is the R_{33} component of the
+            direction cosine matrix that rotates from the spacecraft body
+            frame to the inertial frame. GMAT normalizes the attitude matrix
+            to have a determinant of 1. The default DCM matrix is the identity
+            matrix.</para> <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>EulerAngle Rate1</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The EulerAngleRate1 defines the time-rate-of-change
+            of EulerAngle1, expressed in the the system defined by
+            AttitudeCoordinateSystem.</para> <para>Units:
+            deg/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>EulerAngle Rate2</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The EulerAngleRate2 defines the time-rate-of-change
+            of EulerAngle2, expressed in the the system defined by
+            AttitudeCoordinateSystem. Units: deg/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>EulerAngle Rate3</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The EulerAngleRate3 defines the time-rate-of-change
+            of EulerAngle3, expressed in the the system defined by
+            AttitudeCoordinateSystem.</para> <para>Units:
+            deg/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Angular VelocityX</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The AngularVelocityX component is the x-component
+            of the spacecraft's body axes with respect to the system defined
+            by AttitudeCoordinateSystem.</para> <para>Units:
+            deg/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Angular VelocityY</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The AngularVelocityY component is the y-component
+            of the spacecraft's body axes with respect to the system defined
+            by AttitudeCoordinateSystem.</para> <para>Units:
+            deg/sec.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Angular VelocityZ</para></entry>
+
+            <entry><para>Default: 0.</para> <para>Options: { Real Number
+            }</para> <para>The AngularVelocityZ component is the z-component
+            of the spacecraft's body axes with respect to the system defined
+            by AttitudeCoordinateSystem.</para> <para>Units:
+            deg/sec.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+</section>

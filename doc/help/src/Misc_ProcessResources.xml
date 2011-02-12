@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="ProcessResources"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>Process Resources</title>
+
+  <section>
+    <title>Overview</title>
+
+    <para>This page contains links and references for process improvement. The
+    items below have been or may be useful to this project...they are not
+    endorsements!!</para>
+
+    <para>Document Status: Very Early Draft (This means unreviewed by the
+    team!!)</para>
+
+    <para>Primary Author: S. Hughes</para>
+  </section>
+
+  <section>
+    <title>General Process References</title>
+
+    <para>http://en.wikipedia.org/wiki/Capability_Maturity_Model</para>
+
+    <para>http://en.wikipedia.org/wiki/Process_area_%28CMMI%29</para>
+
+    <para>http://software.gsfc.nasa.gov/</para>
+
+    <para>http://en.wikipedia.org/wiki/Rational_Unified_Process</para>
+
+    <para>http://en.wikipedia.org/wiki/Feature_Driven_Development</para>
+  </section>
+
+  <section>
+    <title>Configuration Management</title>
+
+    <para>http://www.amazon.com/Software-Configuration-Management-Handbook-Second/dp/1580538827/ref!si3rdrbbproduct</para>
+
+    <para>http://www.amazon.com/gp/product/0201741172/refcm_cr_pr_product_top</para>
+
+    <para>http://www.cmcrossroads.com/bradapp/acme/scm-readings.html#SEI_SCM_Docs</para>
+
+    <para>http://www.perforce.com/perforce/bestpractices.html</para>
+  </section>
+
+  <section>
+    <title>Reviews</title>
+
+    <para></para>
+  </section>
+</section>

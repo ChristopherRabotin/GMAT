@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="GMATCommandsinMATLAB"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>GMAT Commands in MATLAB</title>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The following list of commands are originally from GMAT, but are
+    designed to be called from MATLAB® to be run in GMAT. Under the Interfaces
+    folder in the resource tree, the MATLAB® Server must be started so MATLAB®
+    can call GMAT commands and run them in GMAT. After a command is entered
+    into MATLAB®, run the and then notice that GMAT automatically executes the
+    command.</para>
+  </section>
+
+  <section>
+    <title>Commands</title>
+
+    <section>
+      <title>GMAT Commands with Similar Syntax</title>
+
+      <para>The commands below all have similar MATLAB® syntax and can be seen
+      by opening up any one of the files. The script files send the functions
+      from MATLAB® to GMAT and into their respective places in the mission
+      sequence. The commands are then built and run in the sequence as they
+      would normally have been if originally created and used in GMAT.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Achieve</para>
+        </listitem>
+
+        <listitem>
+          <para>Assignment</para>
+        </listitem>
+
+        <listitem>
+          <para>BeginFiniteBurn</para>
+        </listitem>
+
+        <listitem>
+          <para>BeginScript</para>
+        </listitem>
+
+        <listitem>
+          <para>BuildGMAT</para>
+        </listitem>
+
+        <listitem>
+          <para>Case</para>
+        </listitem>
+
+        <listitem>
+          <para>Create</para>
+        </listitem>
+
+        <listitem>
+          <para>Else</para>
+        </listitem>
+
+        <listitem>
+          <para>ElseIf</para>
+        </listitem>
+
+        <listitem>
+          <para>EndFiniteBurn</para>
+        </listitem>
+
+        <listitem>
+          <para>EndFor</para>
+        </listitem>
+
+        <listitem>
+          <para>EndIf</para>
+        </listitem>
+
+        <listitem>
+          <para>EndOptimize</para>
+        </listitem>
+
+        <listitem>
+          <para>EndScript</para>
+        </listitem>
+
+        <listitem>
+          <para>EndTarget</para>
+        </listitem>
+
+        <listitem>
+          <para>EndWhile</para>
+        </listitem>
+
+        <listitem>
+          <para>For</para>
+        </listitem>
+
+        <listitem>
+          <para>GMAT</para>
+        </listitem>
+
+        <listitem>
+          <para>If</para>
+        </listitem>
+
+        <listitem>
+          <para>Maneuver</para>
+        </listitem>
+
+        <listitem>
+          <para>Minimize</para>
+        </listitem>
+
+        <listitem>
+          <para>NonLinearConstraint</para>
+        </listitem>
+
+        <listitem>
+          <para>Optimize</para>
+        </listitem>
+
+        <listitem>
+          <para>PenDown</para>
+        </listitem>
+
+        <listitem>
+          <para>PenUp</para>
+        </listitem>
+
+        <listitem>
+          <para>Propagate</para>
+        </listitem>
+
+        <listitem>
+          <para>Report</para>
+        </listitem>
+
+        <listitem>
+          <para>Save</para>
+        </listitem>
+
+        <listitem>
+          <para>SendGMATObject</para>
+        </listitem>
+
+        <listitem>
+          <para>Stop</para>
+        </listitem>
+
+        <listitem>
+          <para>Target</para>
+        </listitem>
+
+        <listitem>
+          <para>Toggle</para>
+        </listitem>
+
+        <listitem>
+          <para>Vary</para>
+        </listitem>
+
+        <listitem>
+          <para>While</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+
+    <section>
+      <title>MATLAB® Commands with Similar Syntax</title>
+
+      <para>The purpose of the following files is to identify and convert any
+      line of structured GMAT code into a readable string for MATLAB®. Once a
+      string or array of strings is converted, GMAT is called and the strings
+      are sent back into a GMAT script to be built and then run. An example of
+      a multilevel string, depending on the object and parameter being
+      defined, is when an spacecraft is called with X, Y, and Z
+      coordinates.</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>SBInput2Str</para>
+        </listitem>
+
+        <listitem>
+          <para>Struct2Str</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+</section>

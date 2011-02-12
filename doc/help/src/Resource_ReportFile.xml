@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section version="5.0" xml:id="ReportFile"
+         xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         xmlns:svg="http://www.w3.org/2000/svg"
+         xmlns:m="http://www.w3.org/1998/Math/MathML"
+         xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns:db="http://docbook.org/ns/docbook">
+  <title>ReportFile</title>
+
+  <para>This was created using the $MONTH$ $DATE$, $YEAR$ build of
+  GMAT.</para>
+
+  <section>
+    <title>Overview</title>
+
+    <para>The Report Object is a file where values and qualities of objects
+    can be stored so that they can be viewed at a later time.</para>
+  </section>
+
+  <section>
+    <title>Interfaces</title>
+
+    <screenshot>
+      <info>
+        <title>Figure: Default Name and Settings for the Report Object Dialog
+        Box</title>
+      </info>
+
+      <mediaobject>
+        <imageobject>
+          <imagedata align="center"
+                     fileref="images/Resource_ReportFile_Default.jpeg"></imagedata>
+        </imageobject>
+
+        <caption>
+          <para>Figure: Default Name and Settings for the Report Object Dialog
+          Box</para>
+        </caption>
+      </mediaobject>
+    </screenshot>
+
+    <programlisting><code>Create ReportFile ReportFile1;
+GMAT ReportFile1.SolverIterations = Current;
+GMAT ReportFile1.Filename = 'ReportFile1.txt';
+GMAT ReportFile1.Precision = 16;
+GMAT ReportFile1.Add = {DefaultSC.A1ModJulian, DefaultSC.EarthMJ2000Eq.X};
+GMAT ReportFile1.WriteHeaders = On;
+GMAT ReportFile1.LeftJustify = On;
+GMAT ReportFile1.ZeroFill = Off;
+GMAT ReportFile1.ColumnWidth = 20;</code></programlisting>
+  </section>
+
+  <section>
+    <title>Reference Table</title>
+
+    <informaltable>
+      <tgroup cols="2">
+        <tbody>
+          <row>
+            <entry><para>FileName</para></entry>
+
+            <entry><para>Default: /RunReports/ReportFile1.txt.</para>
+            <para>Options: [Valid File Path and Name]</para> <para>The
+            FileName field allows the user to define the file path and file
+            name for a report.</para> <para>Units: None.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Precision</para></entry>
+
+            <entry><para>Default: 16.</para> <para>Options: [ Integer &gt; 0
+            ]</para> <para>The Precision field allows the user to set the
+            precision of thevariable written to a report.</para> <para>Units:
+            Same as variable being reported.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>Add</para></entry>
+
+            <entry><para>Default: N/A.</para> <para>Options: [Any user-defined
+            parameter. Ex.Variables, Arrays, S/C parameters]</para> <para>The
+            \st{Add} field allows a userto add user-defined variables to a
+            report file. To add multipleuser-defined variables, enclose the
+            variables with curly brackets.Ex. MyReportName.Add ={Sat.X, Sat.Y,
+            Var1, Array(1,1)}; TheGUI's Selected field is the equivalent of
+            the script's Add field.In the event of no Add command or no
+            objects in the Selected field, GMATshould run without the Report
+            output and a warning message displayed in the message window.
+            Thefollowing warning message is sufficient: Report plot will be
+            turned off. No object has beenselected for reporting.</para>
+            <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>WriteReport</para></entry>
+
+            <entry><para>Default: On .</para> <para>Options: [On,Off]</para>
+            <para>The WriteReport field specifies whether to write data tothe
+            report FileName.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>WriteHeaders</para></entry>
+
+            <entry><para>Default: On .</para> <para>Options: [On,Off]</para>
+            <para>The WriteHeaders field specifies whether to includeheaders
+            that describe the variables in a report.</para> <para>Units:
+            N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>LeftJustify</para></entry>
+
+            <entry><para>Default: On.</para> <para>Options: [On, Off]</para>
+            <para>When the LeftJustify field is set to On, then the data
+            isleft justified and appears at the left most side of the column.
+            Ifthe LeftJustify field is set to Off, then the data iscentered in
+            the column.</para> <para>Units: N/A.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ZeroFill</para></entry>
+
+            <entry><para>Default: On.</para> <para>Options: [On, Off]</para>
+            <para>Units: N/A .</para></entry>
+          </row>
+
+          <row>
+            <entry><para>ColumnWidth</para></entry>
+
+            <entry><para>Default: 20.</para> <para>Options: [ Integer &gt; 0
+            ]</para> <para>The ColumnWidth field is used to define the width
+            of the datacolumns in a report file. The value for ColumnWidth is
+            appliedto all columns of data. For example, if ColumnWidth is set
+            to20, then each data column will be 20 white-spaces wide.</para>
+            <para>Units: Characters.</para></entry>
+          </row>
+
+          <row>
+            <entry><para>SolverIterations</para></entry>
+
+            <entry><para>Default: Off.</para> <para>Options: [On, Off]</para>
+            <para>The SolverIterations field determines whether or not data
+            associated with perturbed trajectories during a solver (Targeter,
+            Optimize) sequence is written to a report file. When
+            SolverIterations is set to On, solver iterations are written to
+            the report file. When SolverIterations is Off, the solver
+            iterations are not written to the report file.</para> <para>Units:
+            N/A.</para></entry>
+          </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
+  </section>
+
+  <section>
+    <title>Objects and Commands Interactions</title>
+
+    <itemizedlist>
+      <listitem>
+        <para>Report Command</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>Located in the mission tree and will retrieve values at that
+            particular time and insert them at the bottom of the report
+            file.</para>
+          </listitem>
+        </itemizedlist>
+      </listitem>
+    </itemizedlist>
+  </section>
+</section>
