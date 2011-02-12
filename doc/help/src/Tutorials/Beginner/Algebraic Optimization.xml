@@ -164,7 +164,8 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center" fileref="???"></imagedata>
+                    <imagedata align="center"
+                               fileref="../../../build/files/images/Tut_AlgebraicOpt_SQPfminconBoundaryValueSolverObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
