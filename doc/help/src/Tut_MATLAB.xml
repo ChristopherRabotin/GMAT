@@ -9,8 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Running GMAT Scripts from MATLAB</title>
 
-  <para>This tutorial was written for GMAT 2011a.</para>
-
   <section>
     <title>Overview</title>
 

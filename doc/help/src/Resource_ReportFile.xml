@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>ReportFile</title>
 
-  <para>This was created using the $MONTH$ $DATE$, $YEAR$ build of
-  GMAT.</para>
-
   <section>
     <title>Overview</title>
 

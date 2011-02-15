@@ -9,8 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Creating and Propagating a Spacecraft</title>
 
-  <para>This tutorial was written for GMAT 2011a.</para>
-
   <section>
     <title>Objective and Overview</title>
 

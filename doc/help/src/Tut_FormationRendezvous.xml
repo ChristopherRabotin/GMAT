@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Formation Rendezvous</title>
 
-  <para>This tutorial was started from the default settings in the June 9,
-  2008 build of GMAT.</para>
-
   <section>
     <title>Objective and Overview</title>
 
