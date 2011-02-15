@@ -102,3 +102,11 @@ java -cp %xalancp%	^
 	-XSL contrib\docbook-xsl-ns\xhtml-1_1\chunk.xsl
 echo --------------------
 echo.
+
+rem move output files
+echo Collecting output files...
+xcopy build\*.pdf output /i /s /e /q
+xcopy build\*.chm output /i /s /e /q
+xcopy build\help.html output /i /s /e /q
+xcopy build\html output\html /i /s /e /q
+xcopy build\files output\files /i /s /e /q
