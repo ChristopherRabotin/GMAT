@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Lunar Transfer</title>
 
-  <para>This tutorial was started from the default settings in the June 9,
-  2008 build of GMAT.</para>
-
   <section>
     <title>Objective and Overview</title>
 
@@ -99,26 +96,65 @@
     </section>
 
     <section>
-      <title>Resource, Mission, and Output trees</title>
+      <title>Resource, Mission, and Output Trees</title>
 
-      <screenshot>
-        <info>
-          <title>Figure: Lunar Transfer Resource, Mission, and Output
-          trees</title>
-        </info>
+      <informaltable colsep="none" frame="none">
+        <tgroup cols="3">
+		<colspec colname='c1'/>
+		<colspec colname='c2'/>
+		<colspec colname='c3'/>
+          <tbody>
+            <row>
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Lunar Transfer Resource, Mission, and
+                    Output Trees</title>
+                  </info>
 
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center"
-                       fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
-          </imageobject>
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
+                    </imageobject>
+                  </mediaobject>
+                </screenshot></entry>
 
-          <caption>
-            <para>Figure: Lunar Transfer Resource, Mission, and Output
-            trees</para>
-          </caption>
-        </mediaobject>
-      </screenshot>
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Lunar Transfer Resource, Mission, and
+                    Output Trees</title>
+                  </info>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees2.jpeg"></imagedata>
+                    </imageobject>
+
+                  </mediaobject>
+                </screenshot></entry>
+
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Lunar Transfer Resource, Mission, and
+                    Output Trees</title>
+                  </info>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees3.jpeg"></imagedata>
+                    </imageobject>
+                  </mediaobject>
+                </screenshot></entry>
+            </row>
+			<row>
+				<entry namest="c1" nameend="c3" align='center'>Figure: Lunar Transfer Resource, Mission, and
+                      Output Trees</entry>
+			</row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </section>
   </section>
 

@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Creating a Report</title>
 
-  <para>This tutorial was started from the default settings in the September
-  30, 2008 build of GMAT.</para>
-
   <section>
     <title>Objective and Overview</title>
 
@@ -75,26 +72,65 @@
     </section>
 
     <section>
-      <title>Resource, Mission, and Output trees</title>
+      <title>Resource, Mission, and Output Trees</title>
 
-      <screenshot>
-        <info>
-          <title>Figure: Creating a Report Resource, Mission, and Output
-          trees</title>
-        </info>
+      <informaltable colsep="none" frame="none">
+        <tgroup cols="3">
+		<colspec colname='c1'/>
+		<colspec colname='c2'/>
+		<colspec colname='c3'/>
+          <tbody>
+            <row>
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Creating a Report Resource, Mission, and
+                    Output Trees</title>
+                  </info>
 
-        <mediaobject>
-          <imageobject>
-            <imagedata align="center"
-                       fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees1.bmp"></imagedata>
-          </imageobject>
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees1.bmp"></imagedata>
+                    </imageobject>
+                  </mediaobject>
+                </screenshot></entry>
 
-          <caption>
-            <para>Figure: Creating a Report Resource, Mission, and Output
-            trees</para>
-          </caption>
-        </mediaobject>
-      </screenshot>
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Creating a Report Resource, Mission, and
+                    Output Trees</title>
+                  </info>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees2.bmp"></imagedata>
+                    </imageobject>
+
+                  </mediaobject>
+                </screenshot></entry>
+
+              <entry><screenshot>
+                  <info>
+                    <title>Figure: Creating a Report Resource, Mission, and
+                    Output Trees</title>
+                  </info>
+
+                  <mediaobject>
+                    <imageobject>
+                      <imagedata align="center"
+                                 fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees3.bmp"></imagedata>
+                    </imageobject>
+                  </mediaobject>
+                </screenshot></entry>
+            </row>
+			<row>
+				<entry namest="c1" nameend="c3" align="center">Figure: Creating a Report Resource, Mission, and
+                      Output Trees</entry>
+			</row>
+          </tbody>
+        </tgroup>
+      </informaltable>
     </section>
   </section>
 

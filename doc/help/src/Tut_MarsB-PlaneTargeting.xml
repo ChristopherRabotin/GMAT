@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>Mars B-Plane Targeting</title>
 
-  <para>This tutorial was started from the default settings in the June 9,
-  2008 build of GMAT.</para>
-
   <section>
     <title>Objective and Overview</title>
 
@@ -1113,22 +1110,59 @@
   <section>
     <title>The resulting view of Resource, Mission, and Output Trees</title>
 
-    <screenshot>
-      <info>
-        <title>Figure: Resource, Mission, and Output Trees</title>
-      </info>
+    <informaltable colsep="none" frame="none">
+      <tgroup cols="3">
+	  <colspec colname='c1'/>
+	  <colspec colname='c2'/>
+	  <colspec colname='c3'/>
+        <tbody>
+          <row>
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Resource, Mission, and Output Trees</title>
+                </info>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center"
-                     fileref="files/images/Tut_MarsBPlane_ResourceMissionandOutputTrees1.jpeg"></imagedata>
-        </imageobject>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_MarsBPlane_ResourceMissionandOutputTrees1.jpeg"></imagedata>
+                  </imageobject>
+                </mediaobject>
+              </screenshot></entry>
 
-        <caption>
-          <para>Figure: Resource, Mission, and Output Trees</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Resource, Mission, and Output Trees</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_MarsBPlane_ResourceMissionandOutputTrees2.jpeg"></imagedata>
+                  </imageobject>
+
+                </mediaobject>
+              </screenshot></entry>
+
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Resource, Mission, and Output Trees</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_MarsBPlane_ResourceMissionandOutputTrees3.jpeg"></imagedata>
+                  </imageobject>
+                </mediaobject>
+              </screenshot></entry>
+          </row>
+		  <row>
+			<entry namest="c1" nameend="c3" align='center'>Figure: Resource, Mission, and Output Trees</entry>
+		  </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </section>
 
   <section>

@@ -9,9 +9,6 @@
          xmlns:db="http://docbook.org/ns/docbook">
   <title>L2 Transfer with Swingby</title>
 
-  <para>This tutorial was started from the default settings in the June 9,
-  2008 build of GMAT.</para>
-
   <section>
     <title>Objective and Overview</title>
 
@@ -798,7 +795,7 @@
     <title>Creating and Configuring the Mission Sequence</title>
 
     <section>
-      <title>Resource Mission and Output trees</title>
+      <title>Resource Mission and Output Trees</title>
 
       <para>To accomplish the mission, three targeting sequences are used,
       together with a relatively complicated set of equations and control
@@ -1914,41 +1911,102 @@
   </section>
 
   <section>
-    <title>The resulting view of Resource, Mission, and Output trees</title>
+    <title>The resulting view of Resource, Mission, and Output Trees</title>
 
-    <screenshot>
-      <info>
-        <title>Figure: Resource tree</title>
-      </info>
+    <informaltable colsep="none" frame="none">
+      <tgroup cols="2">
+	  <colspec colname='c1'/>
+	  <colspec colname='c2'/>
+        <tbody>
+          <row>
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Resource tree</title>
+                </info>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center"
-                     fileref="files/images/Tut_L2Transfer_ResourceTree1.jpeg"></imagedata>
-        </imageobject>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_L2Transfer_ResourceTree1.jpeg"></imagedata>
+                  </imageobject>
+                </mediaobject>
+              </screenshot></entry>
 
-        <caption>
-          <para>Figure: Resource tree</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Resource tree</title>
+                </info>
 
-    <screenshot>
-      <info>
-        <title>Figure: Mission and Output trees</title>
-      </info>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_L2Transfer_ResourceTree2.jpeg"></imagedata>
+                  </imageobject>
+                </mediaobject>
+              </screenshot></entry>
+          </row>
+		  <row>
+			<entry namest="c1" nameend="c2" align='center'>Figure: Resource tree</entry>
+		  </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center"
-                     fileref="files/images/Tut_L2Transfer_MissionandOutputTrees1.jpeg"></imagedata>
-        </imageobject>
+    <informaltable colsep="none" frame="none">
+      <tgroup cols="3">
+	  <colspec colname='c1'/>
+	  <colspec colname='c2'/>
+	  <colspec colname='c3'/>
+        <tbody>
+          <row>
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Mission and Output Trees</title>
+                </info>
 
-        <caption>
-          <para>Figure: Mission and Output trees</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_L2Transfer_MissionandOutputTrees1.jpeg"></imagedata>
+                  </imageobject>
+
+                </mediaobject>
+              </screenshot></entry>
+
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Mission and Output Trees</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_L2Transfer_MissionandOutputTrees2.jpeg"></imagedata>
+                  </imageobject>
+
+                </mediaobject>
+              </screenshot></entry>
+
+            <entry><screenshot>
+                <info>
+                  <title>Figure: Mission and Output Trees</title>
+                </info>
+
+                <mediaobject>
+                  <imageobject>
+                    <imagedata align="center"
+                               fileref="files/images/Tut_L2Transfer_MissionandOutputTrees3.jpeg"></imagedata>
+                  </imageobject>
+
+                </mediaobject>
+              </screenshot></entry>
+          </row>
+		  <row>
+			<entry namest="c1" nameend="c3" align='center'>Figure: Mission and Output Trees</entry>
+		  </row>
+        </tbody>
+      </tgroup>
+    </informaltable>
   </section>
 
   <section>
