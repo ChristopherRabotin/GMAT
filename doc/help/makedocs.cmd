@@ -21,57 +21,56 @@ echo --------------------
 echo.
 
 rem DocBook -> XSL-FO -> PDF (letter)
-rem echo PDF (letter)
-rem java -cp %xalancp%	^
-rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
-rem 	org.apache.xalan.xslt.Process ^
-rem 	-IN help.xml ^
-rem 	-XSL ..\contrib\docbook-xsl-ns\fo\docbook.xsl ^
-rem 	-OUT ..\build\help-letter.fo
-rem start /b ..\contrib\fop\fop.cmd help-letter.fo help-letter-fo.pdf
-rem echo --------------------
-rem echo.
-
-rem DocBook -> XSL-FO -> PDF (A4)
-rem echo PDF (A4)
-rem java -cp %xalancp%	^
-rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
-rem 	org.apache.xalan.xslt.Process ^
-rem 	-IN help.xml ^
-rem 	-XSL ..\contrib\docbook-xsl-ns\fo\docbook.xsl ^
-rem 	-OUT ..\build\help-a4.fo
-rem start /b ..\contrib\fop\fop.cmd help-a4.fo help-a4-fo.pdf
-rem echo --------------------
-rem echo.
-
-rem DocBook -> LaTeX -> PDF (letter)
-rem echo LaTeX PDF (letter)
-rem python C:\Python27\Scripts\dblatex -o help-letter-latex.pdf ^
-rem 	-P latex.class.options=letterpaper ^
-rem 	help.xml
-rem echo --------------------
-rem echo.
-
-rem DocBook -> LaTeX -> PDF (A4)
-rem echo LaTeX PDF (A4)
-rem python C:\Python27\Scripts\dblatex -o help-a4-latex.pdf ^
-rem 	-P latex.class.options=a4paper ^
-rem 	help.xml
-rem echo --------------------
-rem echo.
-
-rem DocBook -> CHM
-echo Windows Help
+echo PDF (letter)
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
- 	org.apache.xalan.xslt.Process ^
-	-PARAM base.dir ..\build\chm\ ^
-	-PARAM manifest.in.base.dir 1 ^
-	-PARAM chunk.first.sections 1 ^
-	-PARAM img.src.path c:\users\pshock\desktop\gmat\help\build\files\ ^
+	org.apache.xalan.xslt.Process ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
-hhc htmlhelp.hhp
+	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
+	-OUT build\help-letter.fo
+start /b contrib\fop\fop.cmd help-letter.fo help-letter-fo.pdf
+echo --------------------
+echo.
+
+rem DocBook -> XSL-FO -> PDF (A4)
+echo PDF (A4)
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
+	org.apache.xalan.xslt.Process ^
+	-IN src\help.xml ^
+	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
+	-OUT build\help-a4.fo
+start /b contrib\fop\fop.cmd help-a4.fo help-a4-fo.pdf
+echo --------------------
+echo.
+
+rem DocBook -> LaTeX -> PDF (letter)
+echo LaTeX PDF (letter)
+python C:\Python27\Scripts\dblatex -o help-letter-latex.pdf ^
+	-P latex.class.options=letterpaper ^
+	src\help.xml
+echo --------------------
+echo.
+
+rem DocBook -> LaTeX -> PDF (A4)
+echo LaTeX PDF (A4)
+python C:\Python27\Scripts\dblatex -o help-a4-latex.pdf ^
+	-P latex.class.options=a4paper ^
+	src\help.xml
+echo --------------------
+echo.
+
+rem DocBook -> CHM
+rem echo Windows Help
+rem java -cp %xalancp%	^
+rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
+rem  	org.apache.xalan.xslt.Process ^
+rem 	-PARAM base.dir ..\build\chm\ ^
+rem 	-PARAM manifest.in.base.dir 0 ^
+rem 	-PARAM chunk.first.sections 1 ^
+rem 	-IN src\help.xml ^
+rem 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
+rem hhc htmlhelp.hhp
 echo --------------------
 echo.
 
