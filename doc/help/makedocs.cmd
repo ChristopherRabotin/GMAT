@@ -10,6 +10,9 @@ set xalancp=%xalancp%;contrib\docbook-xsl-ns\extensions\xalan27.jar
 rem set Java options
 set xmlparser=org.apache.xerces.parsers.XIncludeParserConfiguration
 
+rem set up environment
+xcopy src\files build\files /i /s /e /q
+
 rem validate the XML
 echo Validating document...
 java ^
@@ -28,7 +31,7 @@ java -cp %xalancp%	^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-letter.fo
-start /b contrib\fop\fop.cmd help-letter.fo help-letter-fo.pdf
+call contrib\fop\fop.cmd build\help-letter.fo build\help-letter-fo.pdf
 echo --------------------
 echo.
 
@@ -40,13 +43,13 @@ java -cp %xalancp%	^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-a4.fo
-start /b contrib\fop\fop.cmd help-a4.fo help-a4-fo.pdf
+call contrib\fop\fop.cmd build\help-a4.fo build\help-a4-fo.pdf
 echo --------------------
 echo.
 
 rem DocBook -> LaTeX -> PDF (letter)
 echo LaTeX PDF (letter)
-python C:\Python27\Scripts\dblatex -o help-letter-latex.pdf ^
+python C:\Python27\Scripts\dblatex -o build\help-letter-latex.pdf ^
 	-P latex.class.options=letterpaper ^
 	src\help.xml
 echo --------------------
@@ -54,46 +57,48 @@ echo.
 
 rem DocBook -> LaTeX -> PDF (A4)
 echo LaTeX PDF (A4)
-python C:\Python27\Scripts\dblatex -o help-a4-latex.pdf ^
+python C:\Python27\Scripts\dblatex -o build\help-a4-latex.pdf ^
 	-P latex.class.options=a4paper ^
 	src\help.xml
 echo --------------------
 echo.
 
 rem DocBook -> CHM
-rem echo Windows Help
-rem java -cp %xalancp%	^
-rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
-rem  	org.apache.xalan.xslt.Process ^
-rem 	-PARAM base.dir ..\build\chm\ ^
-rem 	-PARAM manifest.in.base.dir 0 ^
-rem 	-PARAM chunk.first.sections 1 ^
-rem 	-IN src\help.xml ^
-rem 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
-rem hhc htmlhelp.hhp
+echo Windows Help
+
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
+ 	org.apache.xalan.xslt.Process ^
+	-PARAM base.dir ..\build\chm\ ^
+	-PARAM manifest.in.base.dir 1 ^
+	-PARAM chunk.first.sections 1 ^
+	-IN src\help.xml ^
+	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
+xcopy src\files build\chm\files /i /s /e /q
+hhc build\chm\htmlhelp.hhp
+move build\chm\htmlhelp.chm build\help.chm
 echo --------------------
 echo.
 
 rem DocBook -> HTML (single page)
-rem echo HTML (single page)
-rem java -cp %xalancp%	^
-rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
-rem 	org.apache.xalan.xslt.Process ^
-rem 	-PARAM img.src.path ..\build\files\ ^
-rem 	-IN src\help.xml ^
-rem 	-XSL contrib\docbook-xsl-ns\xhtml-1_1\docbook.xsl ^
-rem 	-OUT build\help.html
-rem echo --------------------
-rem echo.
+echo HTML (single page)
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
+	org.apache.xalan.xslt.Process ^
+	-IN src\help.xml ^
+	-XSL contrib\docbook-xsl-ns\xhtml-1_1\docbook.xsl ^
+	-OUT build\help.html
+echo --------------------
+echo.
 
 rem DocBook -> HTML (multiple pages)
-rem echo HTML (multiple pages)
-rem java -cp %xalancp%	^
-rem 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
-rem 	org.apache.xalan.xslt.Process ^
-rem 	-PARAM base.dir ..\build\html\ ^
-rem 	-PARAM img.src.path ..\files\ ^
-rem 	-IN src\help.xml ^
-rem 	-XSL contrib\docbook-xsl-ns\xhtml-1_1\chunk.xsl
-rem echo --------------------
-rem echo.
+echo HTML (multiple pages)
+java -cp %xalancp%	^
+	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
+	org.apache.xalan.xslt.Process ^
+	-PARAM base.dir ..\build\html\ ^
+	-PARAM img.src.path ..\ ^
+	-IN src\help.xml ^
+	-XSL contrib\docbook-xsl-ns\xhtml-1_1\chunk.xsl
+echo --------------------
+echo.

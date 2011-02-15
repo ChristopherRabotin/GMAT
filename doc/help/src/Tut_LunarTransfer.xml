@@ -110,7 +110,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
+                       fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -217,7 +217,7 @@ Create Spacecraft InitSat;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LunarTransfer_SatSpacecraftObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LunarTransfer_SatSpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -255,7 +255,7 @@ Create Propagator EarthOnly;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_LunarTransfer_NearEarthPropPropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_LunarTransfer_NearEarthPropPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -343,7 +343,7 @@ GMAT TOI.Element1 = 2;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_LunarTransfer_TOIImpulsiveBurnObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_LunarTransfer_TOIImpulsiveBurnObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -389,7 +389,7 @@ GMAT TOI.Element1 = 2;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LunarTransfer_RAANVariableObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LunarTransfer_RAANVariableObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -438,7 +438,7 @@ GMAT EarthMoonRot.Secondary = Earth;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LunarTransfer_EarthMoonRotCoordinateSystemObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LunarTransfer_EarthMoonRotCoordinateSystemObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -485,7 +485,7 @@ GMAT EarthOGL.ViewUpAxis = X;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_LunarTransfer_EarthOGLOpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_LunarTransfer_EarthOGLOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -782,7 +782,7 @@ EndTarget;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_LunarTransfer_Target1TargetCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_LunarTransfer_Target1TargetCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -799,7 +799,7 @@ EndTarget;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_LunarTransfer_Vary1VaryCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_LunarTransfer_Vary1VaryCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -816,7 +816,7 @@ EndTarget;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_LunarTransfer_Maneuver1ManeuverCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_LunarTransfer_Maneuver1ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -833,7 +833,7 @@ EndTarget;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_LEO_Propagate1PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_LEO_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -886,7 +886,7 @@ GMAT Sat = InitSat;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_LunarTransfer_Equation1EquationCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_LunarTransfer_Equation1EquationCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1121,7 +1121,7 @@ Propagate MoonProp(Sat) {Sat.ElapsedDays = 2.0};</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_LunarTransfer_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_LunarTransfer_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

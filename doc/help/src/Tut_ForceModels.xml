@@ -153,7 +153,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_ForceModels_Sat1SpacecraftObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_ForceModels_Sat1SpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -214,7 +214,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_ForceModels_RKV89PointMassPropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_ForceModels_RKV89PointMassPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -468,7 +468,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_ForceModels_OpenGLSat1OpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_ForceModels_OpenGLSat1OpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -504,7 +504,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_ForceModels_ForceModelRptReportObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_ForceModels_ForceModelRptReportObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -554,7 +554,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_ForceModels_Report1ReportCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_ForceModels_Report1ReportCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -571,7 +571,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_ForceModels_Equation1EquationCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_ForceModels_Equation1EquationCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -607,7 +607,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_ForceModels_Propagate1PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_ForceModels_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -741,7 +741,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_ForceModels_ForceModelsResourceMissionandOutputTrees1.jpeg"></imagedata>
+                     fileref="files/images/Tut_ForceModels_ForceModelsResourceMissionandOutputTrees1.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -776,7 +776,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_ForceModels_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_ForceModels_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

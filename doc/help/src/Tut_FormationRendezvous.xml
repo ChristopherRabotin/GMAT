@@ -81,7 +81,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_FormRendezvous_FormationRendezvousResourceMissionandOutputTrees.jpeg"></imagedata>
+                       fileref="files/images/Tut_FormRendezvous_FormationRendezvousResourceMissionandOutputTrees.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -189,7 +189,7 @@ GMAT Sat1.TA  = 90;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_FormRendezvous_Sat1SpacecraftObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_FormRendezvous_Sat1SpacecraftObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -373,7 +373,7 @@ GMAT RKV_LowEarth.FM      = LowEarth;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_FormRendezvous_RKV_LowEarthPropagatorObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_FormRendezvous_RKV_LowEarthPropagatorObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -415,7 +415,7 @@ GMAT Burn1.Element1 = .0001;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_FormRendezvous_Burn1ImpulsiveBurnObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_FormRendezvous_Burn1ImpulsiveBurnObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -455,7 +455,7 @@ GMAT DC.MaximumIterations = 25;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_FormRendezvous_DCDifferentialCorrectorObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_FormRendezvous_DCDifferentialCorrectorObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -508,7 +508,7 @@ GMAT Sat1LVLH.ZAxis   = -R;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_FormRendezvous_Sat1LVLHCoordinateSystemObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_FormRendezvous_Sat1LVLHCoordinateSystemObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -570,7 +570,7 @@ GMAT DataReport.ColumnWidth = 20;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_FormRendezvous_DataReportObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_FormRendezvous_DataReportObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -610,7 +610,7 @@ GMAT Sat2wrtSat1LVLH.Grid     = On;</code></programlisting>
                         <mediaobject>
                           <imageobject>
                             <imagedata align="center"
-                                       fileref="images/Tut_FormRendezvous_Sat2wrtSat1LVLHXYPlotObject.jpeg"></imagedata>
+                                       fileref="files/images/Tut_FormRendezvous_Sat2wrtSat1LVLHXYPlotObject.jpeg"></imagedata>
                           </imageobject>
 
                           <caption>
@@ -717,7 +717,7 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_FormRendezvous_Sat2InSat1LVLHOpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_FormRendezvous_Sat2InSat1LVLHOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -951,7 +951,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_FormRendezvous_Toggle1ToggleCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_FormRendezvous_Toggle1ToggleCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -968,7 +968,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_FormRendezvous_Report1ReportCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_FormRendezvous_Report1ReportCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -985,7 +985,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_FormRendezvous_Equation1EquationCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_FormRendezvous_Equation1EquationCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1002,7 +1002,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_FormRendezvous_Propagator1PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_FormRendezvous_Propagator1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1278,7 +1278,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_FormRendezvous_Target1TargetCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_FormRendezvous_Target1TargetCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -1295,7 +1295,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_FormRendezvous_Vary1VaryCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_FormRendezvous_Vary1VaryCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -1312,7 +1312,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_FormRendezvous_Maneuver1ManeuverCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_FormRendezvous_Maneuver1ManeuverCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -1329,7 +1329,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_FormRendezvous_Achieve1AchieveCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_FormRendezvous_Achieve1AchieveCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -1673,7 +1673,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_FormRendezvous_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_FormRendezvous_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

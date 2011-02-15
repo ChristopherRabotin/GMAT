@@ -212,7 +212,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_L2Transfer_SatSpacecraftObjectOrbitTab.jpeg"></imagedata>
+                           fileref="files/images/Tut_L2Transfer_SatSpacecraftObjectOrbitTab.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -229,7 +229,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_L2Transfer_SatSpacecraftObjectBallisticMassTab.jpeg"></imagedata>
+                           fileref="files/images/Tut_L2Transfer_SatSpacecraftObjectBallisticMassTab.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -261,7 +261,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_BurnObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_BurnObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -304,7 +304,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_ESML2LibrationPointSpecialPointObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_ESML2LibrationPointSpecialPointObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -336,7 +336,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_BarycenterSpecialPointObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_BarycenterSpecialPointObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -382,7 +382,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_PropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_PropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -442,7 +442,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_EarthMoonRotCoordinateSystemObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_EarthMoonRotCoordinateSystemObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -557,7 +557,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_SystemViewOpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_SystemViewOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -744,7 +744,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_L2Transfer_DataDataReportObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_L2Transfer_DataDataReportObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -781,7 +781,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_L2Transfer_Equation1VariableObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_L2Transfer_Equation1VariableObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -1055,7 +1055,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_Toggle1ToggleCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_Toggle1ToggleCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1072,7 +1072,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_Vary1VaryCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_Vary1VaryCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1089,7 +1089,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_Propagate1PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1106,7 +1106,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_Achieve1AchieveCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_Achieve1AchieveCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1308,7 +1308,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_While.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_While.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1570,7 +1570,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_IfStatement.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_IfStatement.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1674,7 +1674,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_ReportCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_ReportCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1901,7 +1901,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_L2Transfer_ForLoop.jpeg"></imagedata>
+                         fileref="files/images/Tut_L2Transfer_ForLoop.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1924,7 +1924,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_ResourceTree1.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_ResourceTree1.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -1941,7 +1941,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_MissionandOutputTrees1.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_MissionandOutputTrees1.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -1978,7 +1978,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output1.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output1.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -1995,7 +1995,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output2.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output2.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -2012,7 +2012,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output3.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output3.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -2029,7 +2029,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output4.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output4.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -2046,7 +2046,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output5.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output5.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -2063,7 +2063,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_L2Transfer_Output6.jpeg"></imagedata>
+                     fileref="files/images/Tut_L2Transfer_Output6.jpeg"></imagedata>
         </imageobject>
 
         <caption>

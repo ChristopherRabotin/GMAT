@@ -145,7 +145,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_MinFuelLunarTrans_MinimumFuelforLunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
+                       fileref="files/images/Tut_MinFuelLunarTrans_MinimumFuelforLunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -268,7 +268,7 @@ GMAT MMSRef.VZ = 0.085612056628771024;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_MMSRefSpacecraftObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_MMSRefSpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -326,7 +326,7 @@ GMAT LunarSB.MaxStepAttempts = 50;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelLunarTrans_LunarSBPropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelLunarTrans_LunarSBPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -430,7 +430,7 @@ GMAT LOI.V      = -0.652;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_LSIBurnObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_LSIBurnObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -553,7 +553,7 @@ GMAT EarthMoonRot.Secondary = Luna;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_EarthSunRotCoordinateSystemObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_EarthSunRotCoordinateSystemObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -625,7 +625,7 @@ GMAT SQP1.GradConstr = Off;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_SQP1OptimizerObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_SQP1OptimizerObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -765,7 +765,7 @@ GMAT OGL_MoonMJ2K.NumPointsToRedraw = 75;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_OGL_EarthMJ2KOpenGLPlotObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_OGL_EarthMJ2KOpenGLPlotObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -865,7 +865,7 @@ TotaldVPlot.SolverIterations = All;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_LunarINCXYPlotObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_LunarINCXYPlotObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -900,7 +900,7 @@ IterateData.Filename = ./output/SampleMissions/Ex_MinFuelLunarCapture.report;</c
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelLunarTrans_IterateDataFileReportObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelLunarTrans_IterateDataFileReportObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -1023,7 +1023,7 @@ Iteration = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_ToggleCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_ToggleCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1040,7 +1040,7 @@ Iteration = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1057,7 +1057,7 @@ Iteration = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_Equation1Command.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_Equation1Command.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1321,7 +1321,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_VaryCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_VaryCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1338,7 +1338,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_ManeuverCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1355,7 +1355,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_NonlinearConstraintCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_NonlinearConstraintCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1372,7 +1372,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_MinimizeCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_MinimizeCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1389,7 +1389,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelLunarTrans_ReportCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelLunarTrans_ReportCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1426,7 +1426,7 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_MinFuelLunarTrans_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_MinFuelLunarTrans_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

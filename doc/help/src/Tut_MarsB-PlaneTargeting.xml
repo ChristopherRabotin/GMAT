@@ -194,7 +194,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MarsBPlane_MarsSupplySpacecraftObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MarsBPlane_MarsSupplySpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -234,7 +234,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MarsBPlane_EarthPropPropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MarsBPlane_EarthPropPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -294,7 +294,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MarsBPlane_TOIImpulsiveBurnObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MarsBPlane_TOIImpulsiveBurnObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -348,7 +348,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MarsBPlane_EarthSunCoordCoordinateSystemObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MarsBPlane_EarthSunCoordCoordinateSystemObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -426,7 +426,7 @@
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MarsBPlane_MarsTOIDCDifferentialCorrectorObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MarsBPlane_MarsTOIDCDifferentialCorrectorObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -452,7 +452,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MarsBPlane_DataDataReportObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MarsBPlane_DataDataReportObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -485,7 +485,7 @@
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MarsBPlane_MarsviewOpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MarsBPlane_MarsviewOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -704,7 +704,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MarsBPlane_Report1ReportCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MarsBPlane_Report1ReportCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -721,7 +721,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MarsBPlane_Equation1EquationCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MarsBPlane_Equation1EquationCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -738,7 +738,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MarsBPlane_Propagate1PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MarsBPlane_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -755,7 +755,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MarsBPlane_Maneuver1ManeuverCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MarsBPlane_Maneuver1ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -857,7 +857,7 @@
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_MarsBPlane_Target1TargetCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_MarsBPlane_Target1TargetCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -874,7 +874,7 @@
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_MarsBPlane_Vary1VaryCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_MarsBPlane_Vary1VaryCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -891,7 +891,7 @@
               <mediaobject>
                 <imageobject>
                   <imagedata align="center"
-                             fileref="images/Tut_MarsBPlane_Achieve1AchieveCommand.jpeg"></imagedata>
+                             fileref="files/images/Tut_MarsBPlane_Achieve1AchieveCommand.jpeg"></imagedata>
                 </imageobject>
 
                 <caption>
@@ -1121,7 +1121,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_MarsBPlane_ResourceMissionandOutputTrees1.jpeg"></imagedata>
+                     fileref="files/images/Tut_MarsBPlane_ResourceMissionandOutputTrees1.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -1150,7 +1150,7 @@
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_MarsBPlane_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_MarsBPlane_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

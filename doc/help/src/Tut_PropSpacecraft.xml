@@ -122,7 +122,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_PropSpacecraft_SpacecraftEpochSetup.jpeg"></imagedata>
+                         fileref="files/images/Tut_PropSpacecraft_SpacecraftEpochSetup.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -183,7 +183,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"></imagedata>
+                         fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -292,7 +292,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_PropSpacecraft_ForceModelPointMassConfiguration.jpeg"></imagedata>
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelPointMassConfiguration.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -312,7 +312,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"></imagedata>
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -394,7 +394,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"></imagedata>
+                       fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -460,7 +460,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.jpeg"></imagedata>
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -510,7 +510,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.jpeg"></imagedata>
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -566,7 +566,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.jpeg"></imagedata>
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -589,7 +589,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_PropSpacecraft_PropagateCommandConfiguration.bmp"></imagedata>
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.bmp"></imagedata>
               </imageobject>
 
               <caption>
@@ -631,7 +631,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.bmp"></imagedata>
+                     fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.bmp"></imagedata>
         </imageobject>
 
         <caption>

@@ -132,7 +132,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_MinFuelOrbitTrans_MinimumFuelOrbitTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
+                       fileref="files/images/Tut_MinFuelOrbitTrans_MinimumFuelOrbitTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -254,7 +254,7 @@ GMAT Sat.TA = 360;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelOrbitTrans_SatSpacecraftObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelOrbitTrans_SatSpacecraftObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -317,7 +317,7 @@ Create Propagator DefaultProp;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelOrbitTrans_DefaultPropPropagatorObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelOrbitTrans_DefaultPropPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -372,7 +372,7 @@ GMAT dv2.Axes   = VNB;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelOrbitTrans_dv1BurnObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelOrbitTrans_dv1BurnObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -516,7 +516,7 @@ GMAT SQPfmincon.GradConstr      = Off;   % {On, Off}</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelOrbitTrans_SQPfminconBoundaryValueSolverObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelOrbitTrans_SQPfminconBoundaryValueSolverObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -616,7 +616,7 @@ INCPlot.Add    = Sat.INC;</code></programlisting>
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_MinFuelOrbitTrans_CostXYPlotObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_MinFuelOrbitTrans_CostXYPlotObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -652,7 +652,7 @@ GMAT IterateData.ColumnWidth = 16;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelOrbitTrans_IterateDataReportObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelOrbitTrans_IterateDataReportObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -721,7 +721,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_MinFuelOrbitTrans_DefaultOpenGLSystemObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_MinFuelOrbitTrans_DefaultOpenGLSystemObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -828,7 +828,7 @@ GMAT Iterate = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_Toggle1Command.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_Toggle1Command.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -845,7 +845,7 @@ GMAT Iterate = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_PropagateCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -862,7 +862,7 @@ GMAT Iterate = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_Equation1Command.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_Equation1Command.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -963,7 +963,7 @@ GMAT Iterate = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_Vary1Command.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_Vary1Command.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -980,7 +980,7 @@ GMAT Iterate = 0;</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_IfCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_IfCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1294,7 +1294,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_ManeuverCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1311,7 +1311,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_NonlinearConstraintCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_NonlinearConstraintCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1328,7 +1328,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_MinimizeCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_MinimizeCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1345,7 +1345,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
           <mediaobject>
             <imageobject>
               <imagedata align="center"
-                         fileref="images/Tut_MinFuelOrbitTrans_ScriptEventCommand.jpeg"></imagedata>
+                         fileref="files/images/Tut_MinFuelOrbitTrans_ScriptEventCommand.jpeg"></imagedata>
             </imageobject>
 
             <caption>
@@ -1417,7 +1417,7 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_MinFuelOrbitTrans_Output.jpeg"></imagedata>
+                     fileref="files/images/Tut_MinFuelOrbitTrans_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -1434,7 +1434,7 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_MinFuelOrbitTrans_GLPlotEnlargedCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_MinFuelOrbitTrans_GLPlotEnlargedCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>

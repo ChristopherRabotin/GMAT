@@ -183,7 +183,7 @@
         <mediaobject>
           <imageobject>
             <imagedata align="center"
-                       fileref="images/Tut_LEO_TheResourceMissionandOutputTreesforthisParticularLEOStationKeepingMission1.jpeg"></imagedata>
+                       fileref="files/images/Tut_LEO_TheResourceMissionandOutputTreesforthisParticularLEOStationKeepingMission1.jpeg"></imagedata>
           </imageobject>
 
           <caption>
@@ -290,7 +290,7 @@ GMAT LEOsat.TA = 308.5898229690123;
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LEO_LEOsatSpacecraftObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LEO_LEOsatSpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -362,7 +362,7 @@ GMAT LEOprop.MaxStepAttempts = 50;
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LEO_LEOpropPropagatorObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LEO_LEOpropPropagatorObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -402,7 +402,7 @@ GMAT DefaultDC.UseCentralDifferences = false;
             <mediaobject>
               <imageobject>
                 <imagedata align="center"
-                           fileref="images/Tut_LEO_DefaultDCBoundaryValueSolverObject.jpeg"></imagedata>
+                           fileref="files/images/Tut_LEO_DefaultDCBoundaryValueSolverObject.jpeg"></imagedata>
               </imageobject>
 
               <caption>
@@ -454,7 +454,7 @@ GMAT SMAview.XYPlane = Off;</code></programlisting>
                 <mediaobject>
                   <imageobject>
                     <imagedata align="center"
-                               fileref="images/Tut_LEO_L1ViewOpenGLPlotObject.jpeg"></imagedata>
+                               fileref="files/images/Tut_LEO_L1ViewOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
                   <caption>
@@ -685,7 +685,7 @@ EndWhile;</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_LEO_Propagate1PropagateCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_LEO_Propagate1PropagateCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -702,7 +702,7 @@ EndWhile;</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_LEO_While1WhileCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_LEO_While1WhileCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -718,7 +718,7 @@ EndWhile;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/Tut_LEO_If1IfCommand.jpeg"></imagedata>
+          <imagedata align="center" fileref="files/images/Tut_LEO_If1IfCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -735,7 +735,7 @@ EndWhile;</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_LEO_Vary1VaryCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_LEO_Vary1VaryCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -752,7 +752,7 @@ EndWhile;</code></programlisting>
       <mediaobject>
         <imageobject>
           <imagedata align="center"
-                     fileref="images/Tut_LEO_Achieve1AchieveCommand.jpeg"></imagedata>
+                     fileref="files/images/Tut_LEO_Achieve1AchieveCommand.jpeg"></imagedata>
         </imageobject>
 
         <caption>
@@ -780,7 +780,7 @@ EndWhile;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="images/Tut_LEO_Output.jpeg"></imagedata>
+          <imagedata align="center" fileref="files/images/Tut_LEO_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>
