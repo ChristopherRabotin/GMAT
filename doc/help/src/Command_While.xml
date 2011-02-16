@@ -103,8 +103,9 @@
       <listitem>
         <para>Condition - Field<itemizedlist>
             <listitem>
-              <para>The condition column supplies the iequality symbols (&lt;,
-              &gt;, &lt;=, &gt;=, ==, and ~=) for the expression.</para>
+              <para>The condition column supplies the inequality symbols
+              (&lt;, &gt;, &lt;=, &gt;=, ==, and ~=) for the
+              expression.</para>
             </listitem>
           </itemizedlist></para>
       </listitem>

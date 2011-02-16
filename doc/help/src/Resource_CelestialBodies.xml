@@ -214,8 +214,8 @@ GMAT Earth.NutationUpdateInterval = 60;</code></programlisting>
             <entry><para>SMA</para></entry>
 
             <entry><para>Default: 149653978.978377.</para> <para>Options: {
-            Real Number &gt;= 0 }</para> <para>The SMA field allows the user
-            to define the semimajor axis of a celestial body's orbit about its
+            Real Number ≥ 0 }</para> <para>The SMA field allows the user to
+            define the semimajor axis of a celestial body's orbit about its
             central body. (Only used when the user selects Analytic for the
             Ephemeris field on the Solar System.)</para> <para>Units:
             km.</para></entry>
@@ -224,11 +224,12 @@ GMAT Earth.NutationUpdateInterval = 60;</code></programlisting>
           <row>
             <entry><para>ECC</para></entry>
 
-            <entry><para>Default: 0.017046.</para> <para>Options: { Real Number
-            &gt;=0 }</para> <para>The ECC field allows the user to define the
-            eccentricity of a celestial body's orbit about its central body.
-            (Only used when the user selects Analytic for the Ephemeris field
-            on the Solar System.)</para> <para>Units: None.</para></entry>
+            <entry><para>Default: 0.017046.</para> <para>Options: { Real
+            Number ≥0 }</para> <para>The ECC field allows the user to define
+            the eccentricity of a celestial body's orbit about its central
+            body. (Only used when the user selects Analytic for the Ephemeris
+            field on the Solar System.)</para> <para>Units:
+            None.</para></entry>
           </row>
 
           <row>
@@ -285,17 +286,16 @@ GMAT Earth.NutationUpdateInterval = 60;</code></programlisting>
           <row>
             <entry><para>NutationUpdate Interval</para></entry>
 
-            <entry><para>Default: 60.</para> <para>Options: { Real Number
-            &gt;=0 }</para> <para>The NutationUpdateInterval field, on the
-            Earth Celestial Body, determines how often GMAT updates the
-            Nutation matrix used in FK5 reduction. If NutationUpdateInterval
-            is set to zero, the Nutation is updated every time a request is
-            made to calculate the orientation of the Earth. If
-            NutationUpdateInterval is set to a real number greater than zero,
-            then GMAT only updates the Nutation matrix if the number of
-            seconds defined by NutationUpdateInterval have elapsed since the
-            last request for the Earth's orientation data.</para> <para>Units:
-            sec.</para></entry>
+            <entry><para>Default: 60.</para> <para>Options: { Real Number ≥0
+            }</para> <para>The NutationUpdateInterval field, on the Earth
+            Celestial Body, determines how often GMAT updates the Nutation
+            matrix used in FK5 reduction. If NutationUpdateInterval is set to
+            zero, the Nutation is updated every time a request is made to
+            calculate the orientation of the Earth. If NutationUpdateInterval
+            is set to a real number greater than zero, then GMAT only updates
+            the Nutation matrix if the number of seconds defined by
+            NutationUpdateInterval have elapsed since the last request for the
+            Earth's orientation data.</para> <para>Units: sec.</para></entry>
           </row>
         </tbody>
       </tgroup>

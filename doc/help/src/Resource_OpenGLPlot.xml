@@ -509,7 +509,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>DataCollectFrequency</para></entry>
 
-            <entry><para>Default: 1</para> <para>Options: { Integer &gt;= 1
+            <entry><para>Default: 1</para> <para>Options: { Integer ≥ 1
             }</para> <para>The DataCollectFrequency field allows the user to
             define how data is collected for plotting. It is often inefficient
             to draw every ephemeris point associated with a trajectory. Often,
@@ -524,7 +524,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>UpdatePlotFrequency</para></entry>
 
-            <entry><para>Default: 50</para> <para>Options: { Integer &gt;= 1
+            <entry><para>Default: 50</para> <para>Options: { Integer ≥ 1
             }</para> <para>The UpdatePlotFrequency field allows the user to
             specify how often to update an OpenGL plot is updated with new
             data collected during the process of propagating spacecraft and
@@ -540,7 +540,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>NumPointsToRedraw</para></entry>
 
-            <entry><para>Default: 0</para> <para>Options: { Integer &gt;= 0
+            <entry><para>Default: 0</para> <para>Options: { Integer ≥ 0
             }</para> <para>When NumPointsToRedraw is set to zero, all
             ephemeris points are drawn. When NumPointsToRedraw is set to a
             positive integer, say 10 for example, only the last 10 collected
@@ -734,8 +734,8 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           <row>
             <entry><para>ViewScaleFactor</para></entry>
 
-            <entry><para>Default: 1</para> <para>Options: { Real Number &gt;=
-            0 }</para> <para>The ViewScaleFactor field scales ViewPointVector
+            <entry><para>Default: 1</para> <para>Options: { Real Number ≥ 0
+            }</para> <para>The ViewScaleFactor field scales ViewPointVector
             before adding it to ViewPointReference. The ViewScaleFactor allows
             the user to back away from an object to fit in the field of
             view.</para> <para>Units: None</para></entry>
