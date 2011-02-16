@@ -146,50 +146,50 @@ Lower = 0, Upper = 3.14159});</code></programlisting>
           <row>
             <entry><para>SolverName</para></entry>
 
-            <entry><para>Default: DefaultDC. Options: [ Any user defined
-            solver ] the SolverName option allows the user to choose which
-            solver to assign to the vary command. units: N/A. </para></entry>
+            <entry><para>Default: DefaultDC.</para><para>Options: [ Any user defined
+            solver ]</para><para>The SolverName option allows the user to choose which
+            solver to assign to the vary command.</para><para>Units: N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>Variable</para></entry>
 
-            <entry><para>Default: DefaultIB.V.Options: [ Spacecrafy paremeter,
+            <entry><para>Default: DefaultIB.V.</para><para>Options: [ Spacecrafy paremeter,
             Array element, Variable, or any other single element user defined
-            parameter, excluding numbers ] The Variable option allows the user
+            parameter, excluding numbers ]</para><para>The Variable option allows the user
             to select any single element user defined parameter, except a
             number, to vary. For example, DefaultIB.V, DefaultIB.N,
             DefaultIB.Element1, DefaultSC.TA, Array(1,1), and Variable are all
             valid values. The three element burn vector or multidimensional
-            Arrays are not valid values. Units: N/A.</para></entry>
+            Arrays are not valid values.</para><para>Units: N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>InitialGuess</para></entry>
 
-            <entry><para> Default: 0.5. Options: [ Real Number, Array element,
+            <entry><para> Default: 0.5.</para><para>Options: [ Real Number, Array element,
             Variable, or any user defined parameter that obeys the conditions
-            for the selected Variable object] The InitialGuess option allows
+            for the selected Variable object]</para><para>The InitialGuess option allows
             the user to set the initial guess for the selected Variable.
-            Units: km/s.</para></entry>
+            </para><para>Units: km/s.</para></entry>
           </row>
 
           <row>
             <entry><para>Lower</para></entry>
 
-            <entry><para>Default: 0.0 . Options: [ Real Number, Array element,
-            Variable, or any user defined parameter (Upper &gt; Lower ) ] The
+            <entry><para>Default: 0.0 .</para><para>Options: [ Real Number, Array element,
+            Variable, or any user defined parameter (Upper &gt; Lower ) ]</para><para>The
             Lower option allows the user to set Arg3 to the lower bound of the
-            quantity being varied. Units: N/A. </para></entry>
+            quantity being varied.</para><para>Units: N/A. </para></entry>
           </row>
 
           <row>
             <entry><para>Upper</para></entry>
 
-            <entry><para> Default: 3.14159 . Options: [ Real Number, Array
+            <entry><para> Default: 3.14159 .</para><para>Options: [ Real Number, Array
             element, Variable, or any user defined parameter (Upper &gt; Lower
-            ) ] The Upper option allows the user to set Arg4 to the upper
-            bound of the quantity being varied. Units: N/A. </para></entry>
+            ) ]</para><para>The Upper option allows the user to set Arg4 to the upper
+            bound of the quantity being varied.</para><para>Units: N/A. </para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -203,21 +203,21 @@ Lower = 0, Upper = 3.14159});</code></programlisting>
           <row>
             <entry><para>Perturbation</para></entry>
 
-            <entry><para>Default: 1e-4 . Options: [ Real Number, Array
-            element, Variable, or any user defined parameter &gt; 0 ] The
+            <entry><para>Default: 1e-4 .</para><para>Options: [ Real Number, Array
+            element, Variable, or any user defined parameter &gt; 0 ]</para><para>The
             Perturbation option is set by specifying a value for Arg1. The
             value of Arg1 is the perturbation size in calculating the finite
-            difference derivative. Units: N/A.</para></entry>
+            difference derivative.</para><para>Units: N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>MaxStep</para></entry>
 
-            <entry><para>Default: 0.2 . Options: [ Real Number, Array element,
-            Variable, or any user defined parameter &gt; 0 ] The MaxStep
+            <entry><para>Default: 0.2 .</para><para>Options: [ Real Number, Array element,
+            Variable, or any user defined parameter &gt; 0 ]</para><para>The MaxStep
             option is set by specifying a value for Arg2. The value of Arg2
             limits the size of the step taken during an interaction of the
-            differential corrector. Units: N/A. </para></entry>
+            differential corrector.</para><para>Units: N/A. </para></entry>
           </row>
         </tbody>
       </tgroup>
@@ -231,23 +231,23 @@ Lower = 0, Upper = 3.14159});</code></programlisting>
           <row>
             <entry><para>Additive Scale Factor</para></entry>
 
-            <entry><para>Default: 0 . Options: [ Real Number, Array element,
-            Variable, or any user defined parameter ] The AdditiveScaleFactor
+            <entry><para>Default: 0 .</para><para>Options: [ Real Number, Array element,
+            Variable, or any user defined parameter ]</para><para>The AdditiveScaleFactor
             Field is used to nondimensionalize the independent variable.
             fmincon sees only the nondimensional form of the variable. The
             nondimensionalization is performed using the following equation:
             x<subscript>n</subscript> = (x<subscript>d</subscript> - a)/m .
             (x<subscript>n</subscript> is the non-dimensional parameter.
             x<subscript>d</subscript> is the dimensional parameter. a=
-            additive scale factor. m= multiplicative scale factor.) Units:
+            additive scale factor. m= multiplicative scale factor.)</para><para>Units:
             N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>Multiplicative Scale Factor}</para></entry>
 
-            <entry><para>Default: 1.0 . Options: [ Real Number, Array element,
-            Variable, or any user defined parameter ] The
+            <entry><para>Default: 1.0 .</para><para>Options: [ Real Number, Array element,
+            Variable, or any user defined parameter ]</para><para>The
             MultiplicativeScaleFactor Field is used to nondimensionalize the
             independent variable. fmincon sees only the nondimensional form of
             the variable. The nondimensionalization is performed using the
@@ -255,7 +255,7 @@ Lower = 0, Upper = 3.14159});</code></programlisting>
             (x<subscript>d</subscript> - a)/m . (x<subscript>n</subscript> is
             the non-dimensional parameter. x<subscript>d</subscript> is the
             dimensional parameter. a= additive scale factor. m= multiplicative
-            scale factor.) Units: N/A.</para></entry>
+            scale factor.)</para><para>Units: N/A.</para></entry>
           </row>
         </tbody>
       </tgroup>

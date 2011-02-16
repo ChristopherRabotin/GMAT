@@ -105,7 +105,7 @@ EndFor;</code></programlisting>
           <row>
             <entry><para>Variable</para></entry>
 
-            <entry><para>Default: No Default.</para> <para>Options:[ Variable
+            <entry><para>Default: No Default.</para> <para>Options: [ Variable
             ]</para> <para>The Variable field allows the user to define the
             variable that to be incremented during the loop process.</para>
             <para>Units: N/A.</para></entry>
@@ -123,7 +123,7 @@ EndFor;</code></programlisting>
           <row>
             <entry><para>Increment</para></entry>
 
-            <entry><para>Default: 1.</para> <para>Options: [ Real Number,
+            <entry><para>Default: 1.</para><para>Options: [ Real Number,
             Array element, Variable, or any user defined parameter ].</para>
             <para>The Increment option allows the user to set the increment
             value of the For Loop. When the increment value is not included in
@@ -134,10 +134,10 @@ EndFor;</code></programlisting>
           <row>
             <entry><para>End</para></entry>
 
-            <entry><para>Default: 10. </para> <para>Options: [ Real Number,
-            Array, Variable, or any user defined parameter ]. </para>
+            <entry><para>Default: 10.</para><para>Options: [ Real Number,
+            Array, Variable, or any user defined parameter ].</para>
             <para>The End option allows the user to set the ending value of
-            the For Loop. </para> <para>Units: N/A.</para></entry>
+            the For Loop.</para><para>Units: N/A.</para></entry>
           </row>
         </tbody>
       </tgroup>

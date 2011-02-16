@@ -113,19 +113,20 @@ Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedDays = 1})</code></programlis
           <row>
             <entry><para>OutputNames</para></entry>
 
-            <entry><para>Default: DefaultOpenGL . Options:[ Any OpenGL,
-            Report, XYplot, or any other Plot/Report type ] The Toggle option
+            <entry><para>Default: DefaultOpenGL.</para><para>Options: [ Any OpenGL,
+            Report, XYplot, or any other Plot/Report type ]</para><para>The Toggle option
             allows the user to assign the Plot/Report(s) to be toggled. When
             more than one Plot/Report is being toggled they need to be
-            separated by a space. Units: N/A.</para></entry>
+            separated by a space.</para><para>Units: N/A.</para></entry>
           </row>
 
           <row>
             <entry><para>Arg</para></entry>
 
-            <entry><para>Default: On. Options:[ On or Off ] The Arg option
-            allows the user to turn off or on the data output to a
-            Plot/Report. Units: N/A.</para></entry>
+            <entry><para>Default: On.</para>
+			<para>Options: [ On or Off ]</para>
+			<para>The Arg option allows the user to turn off or on the data output to a
+            Plot/Report.</para><para>Units: N/A.</para></entry>
           </row>
         </tbody>
       </tgroup>

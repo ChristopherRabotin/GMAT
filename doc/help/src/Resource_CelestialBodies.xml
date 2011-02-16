@@ -141,7 +141,7 @@ GMAT Earth.Flattening = 0.0033527;
 GMAT Earth.PolarRadius = 6356.75232242699;
 GMAT Earth.Mu = 398600.4415;
 GMAT Earth.PosVelSource = 'DE_405';
-GMAT Earth.State = [[ 0 0 0 0 0 0 ];
+GMAT Earth.State = [ 0 0 0 0 0 0 ];
 GMAT Earth.StateTime = 0;
 GMAT Earth.CentralBody = 'Sun';
 GMAT Earth.BodyNumber = 2;
@@ -150,7 +150,7 @@ GMAT Earth.SourceFilename = './files/planetary_ephem/de/winp1941.405';
 GMAT Earth.SourceFile = ./files/planetary_ephem/de/winp1941.405;
 GMAT Earth.UsePotentialFileFlag = false;
 GMAT Earth.PotentialFileName = './files/gravity/earth/JGM2.cof';
-GMAT Earth.AngularVelocity = [[ 0 0 7.2921158553e-005 ];
+GMAT Earth.AngularVelocity = [ 0 0 7.2921158553e-005 ];
 GMAT Earth.HourAngle = 0;
 GMAT Earth.AtmosphereModelName = '';
 GMAT Earth.Order = 4;
@@ -224,7 +224,7 @@ GMAT Earth.NutationUpdateInterval = 60;</code></programlisting>
           <row>
             <entry><para>ECC</para></entry>
 
-            <entry><para>Default: 0.017046.</para> <para>Options: [Real Number
+            <entry><para>Default: 0.017046.</para> <para>Options: { Real Number
             &gt;=0 }</para> <para>The ECC field allows the user to define the
             eccentricity of a celestial body's orbit about its central body.
             (Only used when the user selects Analytic for the Ephemeris field

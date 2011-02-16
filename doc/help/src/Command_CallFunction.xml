@@ -180,7 +180,7 @@
       <title>Script Syntax</title>
 
       <programlisting><code>%Function call with Inputs and Outputs
-GMAT [[OutputList] = Function(InputList)
+GMAT [OutputList] = Function(InputList)
 
 %Function call with Outputs only
 GMAT [OutputList] = Function
@@ -214,36 +214,36 @@ GMAT [ ] = clearAll( )</code></programlisting>
       <tgroup cols="2">
         <tbody>
           <row>
-            <entry><para> OutputList</para></entry>
+            <entry><para>OutputList</para></entry>
 
-            <entry><para> Default: None</para> <para> Options: [ Variables,
+            <entry><para>Default: None</para><para>Options: [ Variables,
             Arrays, S/C, Paramters, any other user-defined parameters, or
             blank. Multiple outputs must be expressed in a comma delimited
-            list format ]</para> <para> The OutputList option allows the user
+            list format ]</para><para>The OutputList option allows the user
             to set the output of Function to a user defined parameter.</para>
-            <para> Units: N/A</para></entry>
+            <para>Units: N/A</para></entry>
           </row>
 
           <row>
-            <entry><para> InputList</para></entry>
+            <entry><para>InputList</para></entry>
 
-            <entry><para> Default: None</para> <para> Options: [ Variables,
+            <entry><para>Default: None</para><para> Options: [ Variables,
             Arrays, S/C, Paramters, any other user-defined parameters, or
             blank. Multiple inputs must be expressed in a comma delimited list
-            format. ]</para> <para> The InputList option allows the user to
+            format. ]</para><para>The InputList option allows the user to
             set the input of Function to a user defined parameter.</para>
-            <para> Units: N/A</para></entry>
+            <para>Units: N/A</para></entry>
           </row>
 
           <row>
-            <entry><para> Function</para></entry>
+            <entry><para>Function</para></entry>
 
-            <entry><para> Default: None</para> <para> Options: [ GMAT of
-            Matlab Function ]</para> <para> The Function option allows the
+            <entry><para>Default: None</para><para>Options: [ GMAT of
+            Matlab Function ]</para><para>The Function option allows the
             user to set the function that will be called in a specific
             location of the mission sequence. The function has to be defined
-            before it can be used in the CallFunction Command.</para> <para>
-            Units: N/A</para></entry>
+            before it can be used in the CallFunction Command.</para>
+			<para>Units: N/A</para></entry>
           </row>
         </tbody>
       </tgroup>
