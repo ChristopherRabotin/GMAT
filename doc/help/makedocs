@@ -1,12 +1,21 @@
 #!/bin/sh
 
 # build Xalan classpath
-xalancp='contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar'
-xalancp=${xalancp}':contrib/xalan-j/xml-apis.jar:contrib/xalan-j/xercesImpl.jar'
+xalancp='contrib/xalan-j/xalan.jar'
+xalancp=${xalancp}':contrib/xalan-j/serializer.jar'
+xalancp=${xalancp}':contrib/xalan-j/xml-apis.jar'
+xalancp=${xalancp}':contrib/xalan-j/xercesImpl.jar'
 xalancp=${xalancp}':contrib/docbook-xsl-ns/extensions/xalan27.jar'
 
 # set Java options
 xmlparser='org.apache.xerces.parsers.XIncludeParserConfiguration'
+
+# set up environment
+echo 'Setting up environment...'
+if [ ! -d build ]; then
+	mkdir build
+fi
+svn export --force src/files build/files
 
 # validate the XML
 echo 'Validating document...'
@@ -75,7 +84,15 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	-PARAM base.dir ../build/html/ \
+	-PARAM img.src.path ../ \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/xhtml-1_1/chunk.xsl
 echo '--------------------'
 echo
+
+# move output files
+echo 'Collecting output files...'
+if [ ! -d output ]; then
+	mkdir output
+fi
+cp -fpR build/*.pdf build/help.html build/html build/files output
