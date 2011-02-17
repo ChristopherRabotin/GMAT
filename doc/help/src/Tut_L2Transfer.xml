@@ -1913,7 +1913,7 @@
   <section>
     <title>The resulting view of Resource, Mission, and Output Trees</title>
 
-    <informaltable colsep="none" frame="none">
+    <informaltable colsep="0" frame="none">
       <tgroup cols="2">
         <colspec colname="c1" />
 
@@ -1956,7 +1956,7 @@
       </tgroup>
     </informaltable>
 
-    <informaltable colsep="none" frame="none">
+    <informaltable colsep="0" frame="none">
       <tgroup cols="3">
         <colspec colname="c1" />
 

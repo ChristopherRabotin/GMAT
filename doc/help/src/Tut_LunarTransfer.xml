@@ -98,7 +98,7 @@
     <section>
       <title>Resource, Mission, and Output Trees</title>
 
-      <informaltable colsep="none" frame="none">
+      <informaltable colsep="0" frame="none">
         <tgroup cols="3">
 		<colspec colname='c1'/>
 		<colspec colname='c2'/>
@@ -580,7 +580,7 @@ GMAT EarthMoonOGL.ViewUpCoordinateSystem = EarthMJ2000Eq;</code></programlisting
     BdotT with a BdotR of zero. (Note: If the dot product of B and T vectors
     is unfamiliar to you, Analytical Graphics Inc., makers of STK, has a good
     website
-	<ulink url="https://www.analyticalgraphics.com/resources/help/stk613/helpSystem/extfile/gator/eq-bplane.htm">explaining</ulink>
+	<link xlink:href="https://www.analyticalgraphics.com/resources/help/stk613/helpSystem/extfile/gator/eq-bplane.htm">explaining</link>
     it).</para>
 
     <itemizedlist>

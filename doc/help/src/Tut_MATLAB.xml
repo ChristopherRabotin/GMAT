@@ -22,11 +22,10 @@
 
     <para>If, after running through this tutorial, you still have difficulties
     with the interfaces between MATLAB® and GMAT working, visit our
-    <link /><ulink
-    url="http://gmat.ed-pages.com/forum/viewforum.php?f=14">MATLAB Help
-    Forum</ulink> or our <ulink
-    url="http://gmat.ed-pages.com/forum/viewtopic.php?f=14&amp;t=65">MATLAB&lt;-&gt;GMAT
-    Interface FAQ</ulink> forum topic.</para>
+    <link xlink:href="http://gmat.ed-pages.com/forum/viewforum.php?f=14">MATLAB Help
+    Forum</link> or our <link
+    xlink:href="http://gmat.ed-pages.com/forum/viewtopic.php?f=14&amp;t=65">MATLAB&lt;-&gt;GMAT
+    Interface FAQ</link> forum topic.</para>
 
     <section>
       <title>Files and Folders to be used</title>
@@ -126,8 +125,8 @@
         tutorial. Be sure to open the runMatlabToGMAT.m script, to understand
         how GMAT is controlled by MATLAB® . This MATLAB® script is heavily
         commented to explain what is being done. If you still have questions,
-        feel free to post them at our GMAT Source Forge forums (<ulink
-        url="http://sourceforge.net/projects/gmat/" />)</para>
+        feel free to post them at our GMAT Source Forge forums (<link
+        xlink:href="http://sourceforge.net/projects/gmat/" />)</para>
       </listitem>
     </orderedlist>
 
