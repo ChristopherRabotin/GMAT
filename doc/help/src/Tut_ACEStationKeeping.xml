@@ -740,8 +740,6 @@ GMAT ESL1Ephem.ColumnWidth = 20;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para><link linkend="???">Image of Mission Tree</link></para>
-
     <para>Now that we have all the resources at out disposal to complete this
     mission, we will go ahead and start building the mission tree. ACE's
     mission if fairly straight forward at the level we will be dealing with.
@@ -1072,8 +1070,6 @@ EndFor;</code></programlisting>
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>While running this setup, you should see the spacecraft ACE make
     seven half-loops around the Sun-Earth L<subscript>1</subscript> Libration

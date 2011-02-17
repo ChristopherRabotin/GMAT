@@ -519,8 +519,6 @@
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para><link linkend="???">Image of Mission Tree</link></para>
-
     <para>In addition to the default layout, this mission sequence includes an
     initial Report and Equation, followed by a series of alternating
     Propagates and Reports. Consequently, the mission runs several different
@@ -790,8 +788,6 @@
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>When running the mission, you will see the spacecraft Sat1 orbit the
     earth. Every one tenth of a day there is a switch to the Propagator that

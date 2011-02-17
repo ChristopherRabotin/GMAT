@@ -570,8 +570,6 @@ GMAT EarthMoonOGL.ViewUpCoordinateSystem = EarthMJ2000Eq;</code></programlisting
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
-
     <para>This mission calls three targeting sequences to accomplish the
     mission, which are explained below. The goal of the mission is to vary
     three unknowns, achieve them, and successfully transfer into a lunar,
@@ -1140,8 +1138,6 @@ Propagate MoonProp(Sat) {Sat.ElapsedDays = 2.0};</code></programlisting>
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>You have now configured the mission, and it is time to run it and
     see the results. First, save the changes you've made and then click the

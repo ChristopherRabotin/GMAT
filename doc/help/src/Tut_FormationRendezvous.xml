@@ -732,8 +732,6 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para><link linkend="???">Image of Output Tree</link></para>
-
     <para>This mission consists of first sequence, two targeting sequences.
     The first sequence includes some reports, an equation and a propagator,
     and the purpose is observation of the achievement of the formation flying
@@ -1654,8 +1652,6 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>According to this tutorial, you complete this mission program.
     Firstly please save all, then click green arrow which indicates running

@@ -553,8 +553,6 @@ GMAT RAANview.XYPlane = Off;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Sequence</title>
 
-    <para><link linkend="???">Image of Mission Tree</link></para>
-
     <para>The mission sequence presented here is relatively simple one. As
     said before, it is a good example of how to use loops, if statements, and
     targeting loops to achieve a goal. Again, this is not a perfect
@@ -805,8 +803,6 @@ EndWhile;</code></programlisting>
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Image of Output Tree</link></para>
 
     <para>The views that you created are good for seeing how well the mission
     sequence is keeping LEOsat in its orbit. The SMA view shows some thickness

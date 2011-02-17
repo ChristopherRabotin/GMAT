@@ -245,7 +245,7 @@
    Achieve DC1(DefaultSC.Earth.RMAG = 42165.0, {Tolerance = 0.1});
 EndTarget;  % For targeter DC1</code></programlisting>
 
-        <informaltable colsep="none" frame="none">
+        <informaltable colsep="0" frame="none">
           <tgroup cols="2">
 		  <colspec colname='c1'/>
 		  <colspec colname='c2'/>
@@ -404,8 +404,6 @@ EndTarget;</code></programlisting>
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The openGL image below was stopped after the first propagate
     command. The spacecraft started at its initial conditions and propagated

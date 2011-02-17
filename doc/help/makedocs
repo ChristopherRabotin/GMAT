@@ -22,7 +22,7 @@ echo 'Validating document...'
 java \
     -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
     -jar contrib/jing/bin/jing.jar \
-	'http://www.docbook.org/xml/5.0/rng/docbookxi.rng' \
+	contrib/docbook/docbookxi.rng \
 	src/help.xml
 echo '--------------------'
 echo

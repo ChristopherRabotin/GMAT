@@ -440,8 +440,6 @@
   <section>
     <title>Running the Mission</title>
 
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
-
     <para>There is no plot for this mission sequence. Its results - values X1,
     X2, and the minimum value of the optimized function F - can be found by
     calling ReportFile Data.</para>

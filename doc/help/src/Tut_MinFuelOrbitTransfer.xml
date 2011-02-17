@@ -775,8 +775,6 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
-
     <para>The spacecraft propagates a single orbit and then the optimizing
     sequence starts. First the time of the transfer orbit insertion burn is
     varied to determine the best time to start the orbit insertion. The two if
@@ -1435,8 +1433,6 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The SMAPlot should have a large spike but be largely constant
     otherwise at about 10000. The INC plot starts increasing then decreasing,

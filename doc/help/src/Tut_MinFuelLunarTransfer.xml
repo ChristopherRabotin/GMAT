@@ -952,8 +952,6 @@ IterateData.Filename = ./output/SampleMissions/Ex_MinFuelLunarCapture.report;</c
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para><link linkend="???">Resource Mmission and Output Trees</link></para>
-
     <para>This mission is set-up very similarly to how the Lunar Transfer
     Tutorial is set-up, except that optimization sequences are used instead of
     targeting sequences.</para>
@@ -1439,8 +1437,6 @@ Propagate MoonCentered(MMSRef, {MMSRef.ElapsedDays = 15});</code></programlistin
 
   <section>
     <title>Running the Mission</title>
-
-    <para><link linkend="???">Resource Mission and Output Trees</link></para>
 
     <para>The XY plots should look like the ones observed in the screenshot.
     Notice that the SMA, INC, and ECC plots converge upon the desired values.
