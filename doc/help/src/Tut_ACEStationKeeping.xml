@@ -195,7 +195,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_ACE_ACEResourceMissionandOutputTrees1.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -209,7 +209,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_ACE_ACEResourceMissionandOutputTrees2.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -223,7 +223,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_ACE_ACEResourceMissionandOutputTrees3.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -334,7 +334,7 @@ GMAT ACE.VZ = 0.0315715361;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_ACE_ACESpacecraftObjectObject.jpeg"></imagedata>
               </imageobject>
 
@@ -388,7 +388,7 @@ GMAT DefaultProp.MaxStepAttempts = 100;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_ACE_DefaultPropPropagatorObject.jpeg"></imagedata>
               </imageobject>
 
@@ -426,7 +426,7 @@ Create LibrationPoint ESL1;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_ACE_ESL1SpecialPointObject.jpeg"></imagedata>
               </imageobject>
 
@@ -510,7 +510,7 @@ GMAT EarthSunL1CS.Secondary = Earth;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ACE_EarthSunL1CSCoordinateSystemObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -584,7 +584,7 @@ GMAT DefaultDC.UseCentralDifferences = false;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_ACE_DefaultDCBoundaryValueSolverObject.jpeg"></imagedata>
               </imageobject>
 
@@ -650,7 +650,7 @@ GMAT L1View.XYPlane = Off;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ACE_L1ViewOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -938,7 +938,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Equation1EquationCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -955,7 +955,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Report1ReportCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -972,7 +972,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_For1ForCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -989,7 +989,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Target1TargetCommandCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -1006,7 +1006,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Vary1VaryCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -1023,7 +1023,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Maneuver1ManeuverCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -1040,7 +1040,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Propagate1PropagateCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -1057,7 +1057,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ACE_Achieve1AchieveCommandCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -1100,7 +1100,7 @@ EndFor;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="files/images/Tut_ACE_Output.jpeg"></imagedata>
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="files/images/Tut_ACE_Output.jpeg"></imagedata>
         </imageobject>
 
         <caption>

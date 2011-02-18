@@ -135,7 +135,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_MinFuelOrbitTrans_MinimumFuelOrbitTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -149,7 +149,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_MinFuelOrbitTrans_MinimumFuelOrbitTransferResourceMissionandOutputTrees2.jpeg"></imagedata>
                     </imageobject>
 
@@ -164,7 +164,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_MinFuelOrbitTrans_MinimumFuelOrbitTransferResourceMissionandOutputTrees3.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -289,7 +289,7 @@ GMAT Sat.TA = 360;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_MinFuelOrbitTrans_SatSpacecraftObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -352,7 +352,7 @@ Create Propagator DefaultProp;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_MinFuelOrbitTrans_DefaultPropPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -407,7 +407,7 @@ GMAT dv2.Axes   = VNB;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_MinFuelOrbitTrans_dv1BurnObject.jpeg"></imagedata>
               </imageobject>
 
@@ -551,7 +551,7 @@ GMAT SQPfmincon.GradConstr      = Off;   % {On, Off}</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_MinFuelOrbitTrans_SQPfminconBoundaryValueSolverObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -651,7 +651,7 @@ INCPlot.Add    = Sat.INC;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_MinFuelOrbitTrans_CostXYPlotObject.jpeg"></imagedata>
               </imageobject>
 
@@ -687,7 +687,7 @@ GMAT IterateData.ColumnWidth = 16;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_MinFuelOrbitTrans_IterateDataReportObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -756,7 +756,7 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_MinFuelOrbitTrans_DefaultOpenGLSystemObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -861,7 +861,7 @@ GMAT Iterate = 0;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_Toggle1Command.jpeg"></imagedata>
             </imageobject>
 
@@ -878,7 +878,7 @@ GMAT Iterate = 0;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -895,7 +895,7 @@ GMAT Iterate = 0;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_Equation1Command.jpeg"></imagedata>
             </imageobject>
 
@@ -996,7 +996,7 @@ GMAT Iterate = 0;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_Vary1Command.jpeg"></imagedata>
             </imageobject>
 
@@ -1013,7 +1013,7 @@ GMAT Iterate = 0;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_IfCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1327,7 +1327,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1344,7 +1344,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_NonlinearConstraintCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1361,7 +1361,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_MinimizeCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1378,7 +1378,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_MinFuelOrbitTrans_ScriptEventCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1420,14 +1420,7 @@ EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
         <para>Script Syntax:</para>
 
-        <programlisting><code>Report IterateData SolutionData;
-Report IterateData TOF Cost;
-Report IterateData Sat.SMA Sat.ECC Sat.INC;
-Report IterateData dv1.Element1 dv1.Element2 dv1.Element3;
-Report IterateData dv2.Element1 dv2.Element2 dv2.Element3;
-
-Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programlisting>
-      </section>
+        </section>
     </section>
   </section>
 
@@ -1448,7 +1441,7 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_MinFuelOrbitTrans_Output.jpeg"></imagedata>
         </imageobject>
 
@@ -1465,7 +1458,7 @@ Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};</code></programl
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_MinFuelOrbitTrans_GLPlotEnlargedCommand.jpeg"></imagedata>
         </imageobject>
 

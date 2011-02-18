@@ -161,7 +161,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_AlgebraicOpt_SQPfminconBoundaryValueSolverObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -200,7 +200,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_AlgebraicOpt_DataReportFileSystemObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -294,7 +294,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_AlgebraicOpt_VaryX1Command.jpeg"></imagedata>
           </imageobject>
 
@@ -311,7 +311,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_AlgebraicOpt_Equation1Command.jpeg"></imagedata>
           </imageobject>
 
@@ -328,7 +328,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_AlgebraicOpt_NonlinearConstraintCommand.jpeg"></imagedata>
           </imageobject>
 
@@ -345,7 +345,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_AlgebraicOpt_MinimizeFCommand.jpeg"></imagedata>
           </imageobject>
 
@@ -362,7 +362,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_AlgebraicOpt_ReportCommand.jpeg"></imagedata>
           </imageobject>
 
@@ -392,7 +392,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_AlgebraicOpt_AlgebraicOptimizationResourceMissionandOutputTrees1.jpeg"></imagedata>
                   </imageobject>
                 </mediaobject>
@@ -406,7 +406,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_AlgebraicOpt_AlgebraicOptimizationResourceMissionandOutputTrees2.jpeg"></imagedata>
                   </imageobject>
 
@@ -421,7 +421,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_AlgebraicOpt_AlgebraicOptimizationResourceMissionandOutputTrees3.jpeg"></imagedata>
                   </imageobject>
 
@@ -451,7 +451,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_AlgebraicOpt_DataReportFile.jpeg"></imagedata>
         </imageobject>
 

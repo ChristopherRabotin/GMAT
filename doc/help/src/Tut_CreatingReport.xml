@@ -89,7 +89,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees1.bmp"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -103,7 +103,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees2.bmp"></imagedata>
                     </imageobject>
 
@@ -118,7 +118,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_Report_CreatingaReportResourceMissionandOutputTrees3.bmp"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -206,7 +206,7 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_PlotsReportsResourceTreeFolder.jpeg"></imagedata>
             </imageobject>
 
@@ -256,7 +256,7 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_AutoReportReportFileSettings.jpeg"></imagedata>
             </imageobject>
 
@@ -311,7 +311,7 @@ GMAT AutoReport.ColumnWidth = 20;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_ManualReportReportFileSettings.jpeg"></imagedata>
             </imageobject>
 
@@ -413,7 +413,7 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_StringVariableCreation.jpeg"></imagedata>
             </imageobject>
 
@@ -467,7 +467,7 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_MissionTreeConfiguration1.jpeg"></imagedata>
             </imageobject>
 
@@ -532,7 +532,7 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_MissionTreeConfiguration2.jpeg"></imagedata>
             </imageobject>
 
@@ -588,7 +588,7 @@ GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></pr
 
               <mediaobject>
                 <imageobject>
-                  <imagedata align="center"
+                  <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                              fileref="files/images/Tut_Report_MissionTreeConfiguration3.jpeg"></imagedata>
                 </imageobject>
 
@@ -626,7 +626,7 @@ GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></pr
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_AutoReportOutputResults.jpeg"></imagedata>
             </imageobject>
 
@@ -653,7 +653,7 @@ GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></pr
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_ManualReportOutputResults.jpeg"></imagedata>
             </imageobject>
 
@@ -682,7 +682,7 @@ GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></pr
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Report_DecoratedReportOutputResults.jpeg"></imagedata>
             </imageobject>
 

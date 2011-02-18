@@ -149,7 +149,7 @@
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_ForceModels_Sat1SpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
@@ -210,7 +210,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_RKV89PointMassPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -464,7 +464,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_OpenGLSat1OpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -500,7 +500,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_ForceModelRptReportObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -548,7 +548,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ForceModels_Report1ReportCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -565,7 +565,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ForceModels_Equation1EquationCommand.jpeg"></imagedata>
         </imageobject>
 
@@ -601,7 +601,7 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_ForceModels_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -742,7 +742,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_ForceModelsResourceMissionandOutputTrees1.jpeg"></imagedata>
                   </imageobject>
                 </mediaobject>
@@ -756,7 +756,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_ForceModelsResourceMissionandOutputTrees2.jpeg"></imagedata>
                   </imageobject>
 
@@ -771,7 +771,7 @@
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_ForceModels_ForceModelsResourceMissionandOutputTrees3.jpeg"></imagedata>
                   </imageobject>
                 </mediaobject>
@@ -807,7 +807,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_ForceModels_Output.jpeg"></imagedata>
         </imageobject>
 

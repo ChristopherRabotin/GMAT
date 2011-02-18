@@ -59,7 +59,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center" fileref="files/images/Command_For_Default.bmp"></imagedata>
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="files/images/Command_For_Default.bmp"></imagedata>
         </imageobject>
 
         <caption>

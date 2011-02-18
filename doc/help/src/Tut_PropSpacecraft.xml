@@ -113,7 +113,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_PropSpacecraft_SpacecraftEpochSetup.jpeg"></imagedata>
             </imageobject>
 
@@ -174,7 +174,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"></imagedata>
             </imageobject>
 
@@ -283,7 +283,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_PropSpacecraft_ForceModelPointMassConfiguration.jpeg"></imagedata>
             </imageobject>
 
@@ -303,7 +303,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"></imagedata>
             </imageobject>
 
@@ -385,7 +385,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"></imagedata>
           </imageobject>
 
@@ -451,7 +451,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
@@ -501,7 +501,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
@@ -557,7 +557,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.jpeg"></imagedata>
               </imageobject>
 
@@ -580,7 +580,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.bmp"></imagedata>
               </imageobject>
 
@@ -622,7 +622,7 @@ Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.bmp"></imagedata>
         </imageobject>
 

@@ -10,6 +10,11 @@ xalancp=${xalancp}':contrib/docbook-xsl-ns/extensions/xalan27.jar'
 # set Java options
 xmlparser='org.apache.xerces.parsers.XIncludeParserConfiguration'
 
+# set XSL options
+xslopts='-PARAM use.extensions 1'
+xslopts=${xslopts}' -PARAM graphicsize.extension 1'
+xslopts=${xslopts}' -PARAM shade.verbatim 1 '
+
 # set up environment
 echo 'Setting up environment...'
 if [ ! -d build ]; then
@@ -32,6 +37,8 @@ echo 'PDF (letter)'
 java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
+	${xslopts} \
+	-PARAM paper.type USletter \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
 	-OUT build/help-letter.fo
@@ -44,6 +51,8 @@ echo 'PDF (A4)'
 java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
+	${xslopts} \
+	-PARAM paper.type A4 \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
 	-OUT build/help-a4.fo
@@ -55,6 +64,7 @@ echo
 echo 'LaTeX PDF (letter)'
 dblatex -o build/help-letter-latex.pdf \
 	-P latex.class.options=letterpaper \
+	-T simple \
 	src/help.xml
 echo '--------------------'
 echo
@@ -63,6 +73,7 @@ echo
 echo 'LaTeX PDF (A4)'
 dblatex -o build/help-a4-latex.pdf \
 	-P latex.class.options=a4paper \
+	-T simple \
 	src/help.xml
 echo '--------------------'
 echo
@@ -72,6 +83,7 @@ echo 'HTML (single page)'
 java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
+	${xslopts} \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl \
 	-OUT build/help.html
@@ -83,6 +95,7 @@ echo 'HTML (multiple pages)'
 java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
+	${xslopts} \
 	-PARAM base.dir ../build/html/ \
 	-PARAM img.src.path ../ \
 	-IN src/help.xml \

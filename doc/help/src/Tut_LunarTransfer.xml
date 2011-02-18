@@ -113,7 +113,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees1.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -127,7 +127,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees2.jpeg"></imagedata>
                     </imageobject>
 
@@ -142,7 +142,7 @@
 
                   <mediaobject>
                     <imageobject>
-                      <imagedata align="center"
+                      <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                  fileref="files/images/Tut_LunarTransfer_LunarTransferResourceMissionandOutputTrees3.jpeg"></imagedata>
                     </imageobject>
                   </mediaobject>
@@ -235,15 +235,6 @@
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create Spacecraft Sat;
-GMAT Sat.DateFormat = UTCGregorian;
-GMAT Sat.DisplayStateType = Keplerian;
-GMAT Sat.SMA = 6554.999999999999;
-GMAT Sat.ECC = 0.0009999999999997056;
-GMAT Sat.INC = 28.50000000000001;
-Create Spacecraft InitSat;</code></programlisting>
 
           <screenshot>
             <info>
@@ -252,7 +243,7 @@ Create Spacecraft InitSat;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_LunarTransfer_SatSpacecraftObject.jpeg"></imagedata>
               </imageobject>
 
@@ -276,12 +267,6 @@ Create Spacecraft InitSat;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ForceModel EarthOnly_ForceModel;
-GMAT EarthOnly_ForceModel.PointMasses = {Sun};
-
-Create Propagator EarthOnly;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -290,7 +275,7 @@ Create Propagator EarthOnly;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_LunarTransfer_NearEarthPropPropagatorObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -310,13 +295,6 @@ Create Propagator EarthOnly;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ForceModel NearEarthProp_ForceModel;
-GMAT NearEarthProp_ForceModel.PointMasses = {Sun, Luna};
-
-Create Propagator NearEarthProp;
-GMAT NearEarthProp.FM = NearEarthProp_ForceModel;</code></programlisting>
             </listitem>
 
             <listitem>
@@ -338,17 +316,6 @@ GMAT NearEarthProp.FM = NearEarthProp_ForceModel;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ForceModel NearMoonProp_ForceModel;
-GMAT NearMoonProp_ForceModel.CentralBody = Luna;
-GMAT NearMoonProp_ForceModel.PrimaryBodies = {Luna};
-GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth};
-GMAT NearMoonProp_ForceModel.GravityField.Luna.PotentialFile = 
-'LP165P.cof';
-
-Create Propagator NearMoonProp;
-GMAT NearMoonProp.FM = NearMoonProp_ForceModel;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -366,10 +333,6 @@ GMAT NearMoonProp.FM = NearMoonProp_ForceModel;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ImpulsiveBurn TOI;
-GMAT TOI.Element1 = 2;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -378,7 +341,7 @@ GMAT TOI.Element1 = 2;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_LunarTransfer_TOIImpulsiveBurnObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -392,9 +355,6 @@ GMAT TOI.Element1 = 2;</code></programlisting>
             <listitem>
               <para>LOI:</para>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ImpulsiveBurn LOI;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -413,9 +373,6 @@ GMAT TOI.Element1 = 2;</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create Variable RAAN AOP V;</code></programlisting>
 
           <screenshot>
             <info>
@@ -424,7 +381,7 @@ GMAT TOI.Element1 = 2;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_LunarTransfer_RAANVariableObject.jpeg"></imagedata>
               </imageobject>
 
@@ -458,13 +415,6 @@ GMAT TOI.Element1 = 2;</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create CoordinateSystem EarthMoonRot;
-GMAT EarthMoonRot.Origin = Luna;
-GMAT EarthMoonRot.Axes = ObjectReferenced;
-GMAT EarthMoonRot.Primary = Luna;
-GMAT EarthMoonRot.Secondary = Earth;</code></programlisting>
 
           <screenshot>
             <info>
@@ -473,7 +423,7 @@ GMAT EarthMoonRot.Secondary = Earth;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_LunarTransfer_EarthMoonRotCoordinateSystemObject.jpeg"></imagedata>
               </imageobject>
 
@@ -506,12 +456,6 @@ GMAT EarthMoonRot.Secondary = Earth;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot EarthOGL;
-GMAT EarthOGL.Add = {Sat, Earth, Luna};
-GMAT EarthOGL.ViewScaleFactor = 15;
-GMAT EarthOGL.ViewUpAxis = X;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -520,7 +464,7 @@ GMAT EarthOGL.ViewUpAxis = X;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_LunarTransfer_EarthOGLOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -551,15 +495,6 @@ GMAT EarthOGL.ViewUpAxis = X;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot EarthMoonOGL;
-GMAT EarthMoonOGL.Add = {Sat, Luna, Earth};
-GMAT EarthMoonOGL.ViewDirection = Luna;
-GMAT EarthMoonOGL.ViewUpAxis = Z;
-GMAT EarthMoonOGL.ViewPointReference = Earth;
-GMAT EarthMoonOGL.CoordinateSystem = EarthMJ2000Eq;
-GMAT EarthMoonOGL.ViewUpCoordinateSystem = EarthMJ2000Eq;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -794,19 +729,6 @@ GMAT EarthMoonOGL.ViewUpCoordinateSystem = EarthMJ2000Eq;</code></programlisting
           </listitem>
         </itemizedlist>
 
-        <para>Script Syntax:</para>
-
-        <programlisting><code>GMAT InitSat = Sat;
-Target DC1;
-   Vary DC1(Sat.RAAN = 270, {Perturbation = .01, MaxStep = 15, Lower = -5360, Upper = 5360});
-   Vary DC1(Sat.AOP = 0, {Perturbation = .01, MaxStep = 15, Lower = -5360, Upper = 5360});
-   Vary DC1(TOI.Element1 = 3.1, {Perturbation = 0.00001, MaxStep = 0.005, Lower = 3.05, Upper = 3.25});
-   Maneuver TOI(Sat);
-   Propagate EarthOnly(Sat) {Sat.Earth.Apoapsis};
-   Achieve DC1(Sat.EarthMoonRot.X = 10000, {Tolerance = 1});
-   Achieve DC1(Sat.EarthMoonRot.Y = 0, {Tolerance = 1});
-   Achieve DC1(Sat.EarthMoonRot.Z = 0, {Tolerance = 1});
-EndTarget;</code></programlisting>
 
         <screenshot>
           <info>
@@ -815,7 +737,7 @@ EndTarget;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_LunarTransfer_Target1TargetCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -832,7 +754,7 @@ EndTarget;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_LunarTransfer_Vary1VaryCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -849,7 +771,7 @@ EndTarget;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_LunarTransfer_Maneuver1ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -866,7 +788,7 @@ EndTarget;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_LEO_Propagate1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -883,7 +805,7 @@ EndTarget;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center" fileref="???"></imagedata>
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="???"></imagedata>
             </imageobject>
 
             <caption>
@@ -906,11 +828,6 @@ EndTarget;</code></programlisting>
           </listitem>
         </itemizedlist>
 
-        <para>Script Syntax:</para>
-
-        <programlisting><code>GMAT Sat.RAAN = RAAN;
-GMAT Sat.AOP = AOP;
-GMAT Sat = InitSat;</code></programlisting>
 
         <screenshot>
           <info>
@@ -919,7 +836,7 @@ GMAT Sat = InitSat;</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_LunarTransfer_Equation1EquationCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1043,24 +960,6 @@ GMAT Sat = InitSat;</code></programlisting>
           </listitem>
         </itemizedlist>
 
-        <para>Script Syntax:</para>
-
-        <programlisting><code>GMAT Sat = InitSat;
-GMAT RAAN = Sat.RAAN;
-GMAT AOP = Sat.AOP;
-
-Target DefaultDC;
-   Vary DefaultDC(TOI.Element1 = TOI.Element1, {Perturbation = 0.0001, MaxStep = 0.2, Lower = -9.999999e300, Upper = 
-      9.999999e300});
-   Vary DefaultDC(Sat.AOP = AOP, {Perturbation = 0.1, MaxStep = 15} 
-
-   Vary DefaultDC(Sat.RAAN = RAAN, {Perturbation = 0.1, MaxStep = 15} 
-   Maneuver TOI(Sat);
-   Propagate EarthMoonProp(Sat) {Sat.ElapsedDays = 2.0};
-   Propagate MoonProp(Sat) {Sat.Luna.Periapsis};
-   Achieve DefaultDC(Sat.Luna.Altitude = 300, {Tolerance = 1.0});
-   Achieve DefaultDC(Sat.EarthToMoon.BdotT = 0.0, {Tolerance = 1.0});
-EndTarget;</code></programlisting>
       </section>
 
       <section>
@@ -1120,18 +1019,6 @@ EndTarget;</code></programlisting>
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Target DC1;
-   Vary DC1(LOI.Element1 = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = -4, Upper = 3.14159});
-   Maneuver LOI(Sat);
-   Propagate NearMoonProp(Sat) {Sat.Luna.Apoapsis};
-   Achieve DC1(Sat.Luna.Altitude = 300, {Tolerance = 1});
-   Achieve DC1(Sat.Luna.ECC = 0, {Tolerance = 0.1});
-EndTarget;
-Propagate NearMoonProp(Sat) {Sat.ElapsedDays = 2};
-Propagate MoonProp(Sat) {Sat.ElapsedDays = 2.0};</code></programlisting>
       </section>
     </section>
   </section>
@@ -1152,7 +1039,7 @@ Propagate MoonProp(Sat) {Sat.ElapsedDays = 2.0};</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_LunarTransfer_Output.jpeg"></imagedata>
         </imageobject>
 

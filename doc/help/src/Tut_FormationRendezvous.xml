@@ -77,7 +77,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_FormRendezvous_FormationRendezvousResourceMissionandOutputTrees.jpeg"></imagedata>
           </imageobject>
 
@@ -185,7 +185,7 @@ GMAT Sat1.TA  = 90;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_FormRendezvous_Sat1SpacecraftObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -369,7 +369,7 @@ GMAT RKV_LowEarth.FM      = LowEarth;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_FormRendezvous_RKV_LowEarthPropagatorObject.jpeg"></imagedata>
               </imageobject>
 
@@ -411,7 +411,7 @@ GMAT Burn1.Element1 = .0001;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_FormRendezvous_Burn1ImpulsiveBurnObject.jpeg"></imagedata>
               </imageobject>
 
@@ -451,7 +451,7 @@ GMAT DC.MaximumIterations = 25;</code></programlisting>
 
             <mediaobject>
               <imageobject>
-                <imagedata align="center"
+                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                            fileref="files/images/Tut_FormRendezvous_DCDifferentialCorrectorObject.jpeg"></imagedata>
               </imageobject>
 
@@ -504,7 +504,7 @@ GMAT Sat1LVLH.ZAxis   = -R;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_FormRendezvous_Sat1LVLHCoordinateSystemObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -566,7 +566,7 @@ GMAT DataReport.ColumnWidth = 20;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_FormRendezvous_DataReportObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -606,7 +606,7 @@ GMAT Sat2wrtSat1LVLH.Grid     = On;</code></programlisting>
 
                         <mediaobject>
                           <imageobject>
-                            <imagedata align="center"
+                            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                        fileref="files/images/Tut_FormRendezvous_Sat2wrtSat1LVLHXYPlotObject.jpeg"></imagedata>
                           </imageobject>
 
@@ -713,7 +713,7 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
 
                 <mediaobject>
                   <imageobject>
-                    <imagedata align="center"
+                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                fileref="files/images/Tut_FormRendezvous_Sat2InSat1LVLHOpenGLPlotObject.jpeg"></imagedata>
                   </imageobject>
 
@@ -945,7 +945,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_FormRendezvous_Toggle1ToggleCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -962,7 +962,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_FormRendezvous_Report1ReportCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -979,7 +979,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_FormRendezvous_Equation1EquationCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -996,7 +996,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_FormRendezvous_Propagator1PropagateCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -1272,7 +1272,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
               <mediaobject>
                 <imageobject>
-                  <imagedata align="center"
+                  <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                              fileref="files/images/Tut_FormRendezvous_Target1TargetCommand.jpeg"></imagedata>
                 </imageobject>
 
@@ -1289,7 +1289,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
               <mediaobject>
                 <imageobject>
-                  <imagedata align="center"
+                  <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                              fileref="files/images/Tut_FormRendezvous_Vary1VaryCommand.jpeg"></imagedata>
                 </imageobject>
 
@@ -1306,7 +1306,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
               <mediaobject>
                 <imageobject>
-                  <imagedata align="center"
+                  <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                              fileref="files/images/Tut_FormRendezvous_Maneuver1ManeuverCommand.jpeg"></imagedata>
                 </imageobject>
 
@@ -1323,7 +1323,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
               <mediaobject>
                 <imageobject>
-                  <imagedata align="center"
+                  <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                              fileref="files/images/Tut_FormRendezvous_Achieve1AchieveCommand.jpeg"></imagedata>
                 </imageobject>
 
@@ -1665,7 +1665,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_FormRendezvous_Output.jpeg"></imagedata>
         </imageobject>
 

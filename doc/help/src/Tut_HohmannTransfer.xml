@@ -118,7 +118,7 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Hohmann_DefaultOpenGL.jpeg"></imagedata>
             </imageobject>
 
@@ -173,7 +173,7 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata align="center"
+            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                        fileref="files/images/Tut_Hohmann_Propagate1PropagateCommand.jpeg"></imagedata>
           </imageobject>
 
@@ -258,7 +258,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
                     <mediaobject>
                       <imageobject>
-                        <imagedata align="center"
+                        <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                    fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence1.jpeg"></imagedata>
                       </imageobject>
                     </mediaobject>
@@ -271,7 +271,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
                     <mediaobject>
                       <imageobject>
-                        <imagedata align="center"
+                        <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                                    fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence2.jpeg"></imagedata>
                       </imageobject>
                     </mediaobject>
@@ -291,7 +291,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Hohmann_Target1TargetCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -308,7 +308,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Hohmann_Vary1VaryCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -325,7 +325,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -342,7 +342,7 @@ EndTarget;  % For targeter DC1</code></programlisting>
 
           <mediaobject>
             <imageobject>
-              <imagedata align="center"
+              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                          fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.jpeg"></imagedata>
             </imageobject>
 
@@ -424,7 +424,7 @@ EndTarget;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_Hohmann_OutputAfterInitialPropagateSequence.jpeg"></imagedata>
         </imageobject>
 
@@ -442,7 +442,7 @@ EndTarget;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_Hohmann_OutputAfterFirstandSecondTargetingSequences.jpeg"></imagedata>
         </imageobject>
 
@@ -460,7 +460,7 @@ EndTarget;</code></programlisting>
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Tut_Hohmann_OutputAfterFinalPropagateSequence.jpeg"></imagedata>
         </imageobject>
 

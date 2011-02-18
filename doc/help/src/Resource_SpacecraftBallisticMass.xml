@@ -29,7 +29,7 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata align="center"
+          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
                      fileref="files/images/Resource_SpacecraftBallisticMass_Default.jpeg"></imagedata>
         </imageobject>
 

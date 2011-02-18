@@ -10,8 +10,13 @@ set xalancp=%xalancp%;contrib\docbook-xsl-ns\extensions\xalan27.jar
 rem set Java options
 set xmlparser=org.apache.xerces.parsers.XIncludeParserConfiguration
 
+rem set XSL options
+set xslopts=-PARAM use.extensions 1
+set xslopts=%xslopts% -PARAM graphicsize.extension 1
+set xslopts=%xslopts% -PARAM shade.verbatim 1
+
 rem set up environment
-xcopy src\files build\files /i /s /e /q
+xcopy src\files build\files /i /s /e /q /v /y
 
 rem validate the XML
 echo Validating document...
@@ -28,6 +33,8 @@ echo PDF (letter)
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
+	%xslopts% ^
+	-PARAM paper.type USletter ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-letter.fo
@@ -40,6 +47,8 @@ echo PDF (A4)
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
+	%xslopts% ^
+	-PARAM paper.type A4 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-a4.fo
@@ -49,16 +58,20 @@ echo.
 
 rem DocBook -> LaTeX -> PDF (letter)
 echo LaTeX PDF (letter)
-python C:\Python27\Scripts\dblatex -o build\help-letter-latex.pdf ^
+python C:\Python27\Scripts\dblatex ^
+	-o build\help-letter-latex.pdf ^
 	-P latex.class.options=letterpaper ^
+	-T simple ^
 	src\help.xml
 echo --------------------
 echo.
 
 rem DocBook -> LaTeX -> PDF (A4)
 echo LaTeX PDF (A4)
-python C:\Python27\Scripts\dblatex -o build\help-a4-latex.pdf ^
+python C:\Python27\Scripts\dblatex ^
+	-o build\help-a4-latex.pdf ^
 	-P latex.class.options=a4paper ^
+	-T simple ^
 	src\help.xml
 echo --------------------
 echo.
@@ -69,12 +82,13 @@ echo Windows Help
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
  	org.apache.xalan.xslt.Process ^
+ 	%xslopts% ^
 	-PARAM base.dir ..\build\chm\ ^
 	-PARAM manifest.in.base.dir 1 ^
 	-PARAM chunk.first.sections 1 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
-xcopy src\files build\chm\files /i /s /e /q
+xcopy src\files build\chm\files /i /s /e /q /v /y
 hhc build\chm\htmlhelp.hhp
 move build\chm\htmlhelp.chm build\help.chm
 echo --------------------
@@ -85,6 +99,7 @@ echo HTML (single page)
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
+	%xslopts% ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\xhtml-1_1\docbook.xsl ^
 	-OUT build\help.html
@@ -96,6 +111,7 @@ echo HTML (multiple pages)
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
+	%xslopts% ^
 	-PARAM base.dir ..\build\html\ ^
 	-PARAM img.src.path ..\ ^
 	-IN src\help.xml ^
@@ -105,8 +121,8 @@ echo.
 
 rem move output files
 echo Collecting output files...
-xcopy build\*.pdf output /i /s /e /q
-xcopy build\*.chm output /i /s /e /q
-xcopy build\help.html output /i /s /e /q
-xcopy build\html output\html /i /s /e /q
-xcopy build\files output\files /i /s /e /q
+xcopy build\*.pdf output /i /s /e /q /v /y
+xcopy build\*.chm output /i /s /e /q /v /y
+xcopy build\help.html output /i /s /e /q /v /y
+xcopy build\html output\html /i /s /e /q /v /y
+xcopy build\files output\files /i /s /e /q /v /y
