@@ -265,18 +265,6 @@
             </caption>
           </mediaobject>
         </screenshot>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Create ReportFile AutoReport;
-GMAT AutoReport.SolverIterations = Current;
-GMAT AutoReport.Filename = './output/AutoReport.txt';
-GMAT AutoReport.Precision = 16;
-GMAT AutoReport.Add = {DefaultSC.UTCGregorian, DefaultSC.EarthMJ2000Eq.X, DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z, DefaultSC.EarthMJ2000Eq.VX, DefaultSC.EarthMJ2000Eq.VY, DefaultSC.EarthMJ2000Eq.VZ};
-GMAT AutoReport.WriteHeaders = On;
-GMAT AutoReport.LeftJustify = On;
-GMAT AutoReport.ZeroFill = Off;
-GMAT AutoReport.ColumnWidth = 20;</code></programlisting>
       </section>
 
       <section>
@@ -321,16 +309,6 @@ GMAT AutoReport.ColumnWidth = 20;</code></programlisting>
           </mediaobject>
         </screenshot>
 
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Create ReportFile ManualReport;
-GMAT ManualReport.SolverIterations = Current;
-GMAT ManualReport.Filename = './output/ManualReport.txt';
-GMAT ManualReport.Precision = 16;
-GMAT ManualReport.WriteHeaders = On;
-GMAT ManualReport.LeftJustify = On;
-GMAT ManualReport.ZeroFill = Off;
-GMAT ManualReport.ColumnWidth = 20;</code></programlisting>
       </section>
 
       <section>
@@ -363,18 +341,6 @@ GMAT ManualReport.ColumnWidth = 20;</code></programlisting>
             .</para>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Create ReportFile DecoratedReport;
-GMAT DecoratedReport.SolverIterations = Current;
-GMAT DecoratedReport.Filename = './output/DecoratedReport.txt';
-GMAT DecoratedReport.Precision = 16;
-GMAT DecoratedReport.Add = {DefaultSC.UTCGregorian, DefaultSC.EarthMJ2000Eq.X, DefaultSC.EarthMJ2000Eq.Y, DefaultSC.EarthMJ2000Eq.Z, DefaultSC.EarthMJ2000Eq.VX, DefaultSC.EarthMJ2000Eq.VY, DefaultSC.EarthMJ2000Eq.VZ};
-GMAT DecoratedReport.WriteHeaders = On;
-GMAT DecoratedReport.LeftJustify = On;
-GMAT DecoratedReport.ZeroFill = Off;
-GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
       </section>
 
       <section>
@@ -422,10 +388,6 @@ GMAT DecoratedReport.ColumnWidth = 20;</code></programlisting>
             </caption>
           </mediaobject>
         </screenshot>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Create String stringVar;</code></programlisting>
       </section>
     </section>
 

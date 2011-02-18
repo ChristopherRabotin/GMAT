@@ -162,10 +162,6 @@
         </listitem>
       </itemizedlist>
 
-      <para>Script Syntax:</para>
-
-      <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Periapsis};</code></programlisting>
-
       <screenshot>
         <info>
           <title>Figure: Propagate1 Propagate Command</title>
@@ -235,15 +231,6 @@
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Target DC1;
-   Vary DC1(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
-   Maneuver DefaultIB(DefaultSC);
-   Propagate DefaultProp(DefaultSC) {DefaultSC.Earth.Apoapsis};
-   Achieve DC1(DefaultSC.Earth.RMAG = 42165.0, {Tolerance = 0.1});
-EndTarget;  % For targeter DC1</code></programlisting>
 
         <informaltable colsep="0" frame="none">
           <tgroup cols="2">
@@ -375,14 +362,6 @@ EndTarget;  % For targeter DC1</code></programlisting>
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Target DefaultDC;
-   Vary DefaultDC(DefaultIB.V = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0.0, Upper = 3.14159});
-   Maneuver DefaultIB(DefaultSC);
-   Achieve DefaultDC(DefaultSC.Earth.SMA = 42165.0, {Tolerance = 0.1});
-EndTarget;</code></programlisting>
       </section>
 
       <section>
@@ -394,10 +373,6 @@ EndTarget;</code></programlisting>
             elapsed day (86400 seconds).</para>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 86400.0};</code></programlisting>
       </section>
     </section>
   </section>

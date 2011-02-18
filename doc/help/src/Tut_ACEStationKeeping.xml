@@ -315,18 +315,6 @@
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ((Spacecraft Object)) ACE;
-GMAT ACE.DateFormat = UTCGregorian;
-GMAT ACE.Epoch = '09 Dec 2005 12:59:60.000';
-GMAT ACE.X = -528665.5773210001;
-GMAT ACE.Y = -1325445.164527;
-GMAT ACE.Z = -525969.843578;
-GMAT ACE.VX = 0.240435056;
-GMAT ACE.VY = -0.068342458;
-GMAT ACE.VZ = 0.0315715361;</code></programlisting>
-
           <screenshot>
             <info>
               <title>Figure: ACE Spacecraft Object Object</title>
@@ -370,17 +358,6 @@ GMAT ACE.VZ = 0.0315715361;</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ForceModel DefaultProp_ForceModel;
-GMAT DefaultProp_ForceModel.CentralBody = Earth;
-GMAT DefaultProp_ForceModel.PointMasses = {Sun, Earth, Luna};
-Create Propagator DefaultProp;
-GMAT DefaultProp.FM = DefaultProp_ForceModel;
-GMAT DefaultProp.MinStep = 9.999999999999999e-022;
-GMAT DefaultProp.MaxStep = 86400;
-GMAT DefaultProp.MaxStepAttempts = 100;</code></programlisting>
-
           <screenshot>
             <info>
               <title>Figure: DefaultProp Propagator Object</title>
@@ -413,13 +390,7 @@ GMAT DefaultProp.MaxStepAttempts = 100;</code></programlisting>
               ESL1</para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create Barycenter DefaultBC;
-Create LibrationPoint ESL1;</code></programlisting>
-
-          <screenshot>
+         <screenshot>
             <info>
               <title>Figure: ESL1 Special Point Object</title>
             </info>
@@ -445,10 +416,6 @@ Create LibrationPoint ESL1;</code></programlisting>
               <para>Rename DefaultIB to dV</para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ImpulsiveBurn dV;</code></programlisting>
         </listitem>
 
         <listitem>
@@ -462,10 +429,6 @@ Create LibrationPoint ESL1;</code></programlisting>
               Objects</link></para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create Variable TotaldV VX VY VZ dVX dVY dVZ I;</code></programlisting>
         </listitem>
 
         <listitem>
@@ -495,13 +458,6 @@ Create LibrationPoint ESL1;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create CoordinateSystem EarthSunL1CS;
-GMAT EarthSunL1CS.Origin = ESL1;
-GMAT EarthSunL1CS.Axes = ObjectReferenced;
-GMAT EarthSunL1CS.Primary = Sun;
-GMAT EarthSunL1CS.Secondary = Earth;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -539,13 +495,6 @@ GMAT EarthSunL1CS.Secondary = Earth;</code></programlisting>
                   Earth, respectively</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create CoordinateSystem EarthSunRotCS;
-GMAT EarthSunRotCS.Origin = Earth;
-GMAT EarthSunRotCS.Axes = ObjectReferenced;
-GMAT EarthSunRotCS.Primary = Sun;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -566,16 +515,6 @@ GMAT EarthSunRotCS.Primary = Sun;</code></programlisting>
               section</para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create DifferentialCorrector DefaultDC;
-GMAT DefaultDC.ShowProgress = true;
-GMAT DefaultDC.ReportStyle = Normal;
-GMAT DefaultDC.TargeterTextFile = targeter_DefaultDC.data;
-GMAT DefaultDC.Variables = {dV.V, dV.N};
-GMAT DefaultDC.MaximumIterations = 25;
-GMAT DefaultDC.UseCentralDifferences = false;</code></programlisting>
 
           <screenshot>
             <info>
@@ -630,19 +569,6 @@ GMAT DefaultDC.UseCentralDifferences = false;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot L1View;
-GMAT L1View.SolverIterations = None;
-GMAT EarthSunRotView.Add = {ACE, Earth};
-GMAT L1View.TargetColor = [ 8421440 0 ];
-GMAT L1View.CoordinateSystem = EarthSunL1CS;
-GMAT L1View.ViewPointReference = ESL1;
-GMAT L1View.ViewDirection = ESL1;
-GMAT L1View.ViewScaleFactor = 12;
-GMAT L1View.ViewUpCoordinateSystem = EarthSunL1CS;
-GMAT L1View.XYPlane = Off;</code></programlisting>
-
               <screenshot>
                 <info>
                   <title>Figure: L1View OpenGL Plot Object</title>
@@ -690,20 +616,6 @@ GMAT L1View.XYPlane = Off;</code></programlisting>
                   None</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot EarthSunRotView;
-GMAT EarthSunRotView.SolverIterations = None;
-GMAT EarthSunRotView.Add = {ACE, Earth, Luna};
-GMAT EarthSunRotView.OrbitColor = [ 255 32768 12632256 ];
-GMAT EarthSunRotView.TargetColor = [ 8421440 0 0 ];
-GMAT EarthSunRotView.CoordinateSystem = EarthSunRotCS;
-GMAT EarthSunRotView.ViewPointVector = [ 0 0 30000 ];
-GMAT EarthSunRotView.ViewScaleFactor = 100;
-GMAT EarthSunRotView.ViewUpCoordinateSystem = EarthSunRotCS;
-GMAT EarthSunRotView.ViewUpAxis = Y;
-GMAT EarthSunRotView.XYPlane = Off;</code></programlisting>
             </listitem>
 
             <listitem>
@@ -720,16 +632,6 @@ GMAT EarthSunRotView.XYPlane = Off;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ReportFile ESL1Ephem;
-GMAT ESL1Ephem.SolverIterations = Current;
-GMAT ESL1Ephem.Filename = './output/SampleMissions/Ex_ACEStationKeeping.report';
-GMAT ESL1Ephem.Precision = 16;
-GMAT ESL1Ephem.WriteHeaders = On;
-GMAT ESL1Ephem.LeftJustify = On;
-GMAT ESL1Ephem.ZeroFill = Off;
-GMAT ESL1Ephem.ColumnWidth = 20;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -896,40 +798,6 @@ GMAT ESL1Ephem.ColumnWidth = 20;</code></programlisting>
         </itemizedlist>
       </listitem>
     </itemizedlist>
-
-    <para>Script Syntax:</para>
-
-    <programlisting><code>Report ESL1Ephem ACE.EarthSunL1CS.X ACE.EarthSunL1CS.Y ACE.EarthSunL1CS.Z ACE.EarthSunL1CS.VX ACE.EarthSunL1CS.VY ACE.EarthSunL1CS.VZ
-
-GMAT TotaldV = 0;
-For I = 1:7 
-
-   Target DefaultDC;
-
-      Vary DefaultDC(dV.B = 0, {Perturbation = 1e-5, MaxStep = 0.01, Lower = -0.1, Upper = 0.1});
-
-      GMAT VX = ACE.VX;
-      GMAT VY = ACE.VY;
-      GMAT VZ = ACE.VZ;
-
-      Maneuver dV(ACE);
-
-      GMAT dVX = ACE.VX - VX;
-      GMAT dVY = ACE.VY - VY; 
-      GMAT dVZ = ACE.VZ - VZ;
-
-      GMAT TotaldV = TotaldV + sqrt(  dVZ^2 + dVY^2 + dVZ^2  );    
-
-      Propagate DefaultProp(ACE, {ACE.EarthSunL1CS.Y = 0});
-
-      Achieve DefaultDC(ACE.EarthSunL1CS.VX = 0, {Tolerance = 1e-005});
-
-   EndTarget;  % For targeter DefaultDC
-   Propagate DefaultProp(ACE);
-
-   Report ESL1Ephem ACE.UTCGregorian ACE.EarthSunL1CS.X ACE.EarthSunL1CS.Y ACE.EarthSunL1CS.Z ACE.EarthSunL1CS.VX ACE.EarthSunL1CS.VY ACE.EarthSunL1CS.VZ
-
-EndFor;</code></programlisting>
 
     <screenshot>
       <info>

@@ -271,17 +271,6 @@
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft Sat;
-GMAT Sat.DisplayStateType = Keplerian;
-GMAT Sat.SMA = 7500;
-GMAT Sat.ECC = 0;
-GMAT Sat.INC = 0;
-GMAT Sat.RAAN = 45;
-GMAT Sat.AOP = 0;
-GMAT Sat.TA = 360;</code></programlisting>
-
               <screenshot>
                 <info>
                   <title>Figure: Sat Spacecraft Object'</title>
@@ -309,10 +298,6 @@ GMAT Sat.TA = 360;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft DummySat;
-GMAT Sat.DisplayStateType = Cartesian;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -334,16 +319,6 @@ GMAT Sat.DisplayStateType = Cartesian;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ForceModel DefaultProp_ForceModel;
-GMAT DefaultProp_ForceModel.CentralBody = Earth;
-GMAT DefaultProp_ForceModel.PointMasses = {Earth};
-GMAT DefaultProp_ForceModel.Drag = None;
-GMAT DefaultProp_ForceModel.SRP = Off;
-GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
-
-Create Propagator DefaultProp;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -389,16 +364,6 @@ Create Propagator DefaultProp;</code></programlisting>
               </itemizedlist>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ImpulsiveBurn dv1;
-GMAT dv1.Origin = Earth;
-GMAT dv1.Axes   = VNB;
-
-Create ImpulsiveBurn dv2;
-GMAT dv2.Origin = Earth;
-GMAT dv2.Axes   = VNB;</code></programlisting>
 
           <screenshot>
             <info>
@@ -467,9 +432,6 @@ GMAT dv2.Axes   = VNB;</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create Variable TOF dV1Time Cost Constraint1 Constraint2 Constraint3, dV1mag dV2mag RefEpoch PropEpoch Iterate;</code></programlisting>
         </listitem>
 
         <listitem>
@@ -527,21 +489,6 @@ GMAT dv2.Axes   = VNB;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create FminconOptimizer SQPfmincon
-GMAT SQPfmincon.DiffMaxChange = 0.1;    % Real number
-GMAT SQPfmincon.DiffMinChange = 0.00001;  % Real number
-GMAT SQPfmincon.MaxFunEvals   = 1000;    % Real number
-GMAT SQPfmincon.MaxIter       = 100;     % Real number
-GMAT SQPfmincon.TolX          = 0.001;    % Real number
-GMAT SQPfmincon.TolFun        = 0.00001;  % Real number
-GMAT SQPfmincon.TolCon        = 0.00001;  % Real number
-GMAT SQPfmincon.DerivativeCheck = Off;   % {On, Off}
-GMAT SQPfmincon.Diagnostics     = On;    % {On, Off}
-GMAT SQPfmincon.Display         = Iter   % {Iter, Off, Notify, Final}
-GMAT SQPfmincon.GradObj         = Off;   % {On, Off}
-GMAT SQPfmincon.GradConstr      = Off;   % {On, Off}</code></programlisting>
 
               <screenshot>
                 <info>
@@ -626,23 +573,6 @@ GMAT SQPfmincon.GradConstr      = Off;   % {On, Off}</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create XYPlot CostPlot
-CostPlot.IndVar = Iterate;
-CostPlot.Add    = Cost;
-
-Create XYPlot SMAPlot
-SMAPlot.IndVar = Iterate;
-SMAPlot.Add    = Sat.SMA;
-
-Create XYPlot ECCPlot
-ECCPlot.IndVar = Iterate;
-ECCPlot.Add    = Sat.ECC;
-
-Create XYPlot INCPlot
-INCPlot.IndVar = Iterate;
-INCPlot.Add    = Sat.INC;</code></programlisting>
 
           <screenshot>
             <info>
@@ -671,14 +601,6 @@ INCPlot.Add    = Sat.INC;</code></programlisting>
                   ./output/SampleMissions/Ex_LowEarthMinFuelTransfer.report</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ReportFile IterateData;
-GMAT IterateData.Filename = ./output/SampleMissions/Ex_LowEarthMinFuelTransfer.report;
-GMAT IterateData.Precision = 10;
-GMAT IterateData.WriteHeaders = On; 
-GMAT IterateData.ColumnWidth = 16;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -722,32 +644,6 @@ GMAT IterateData.ColumnWidth = 16;</code></programlisting>
                   <para>SolverIterations: All</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot DefaultOpenGL;
-GMAT DefaultOpenGL.Add = {Sat, Earth};
-GMAT DefaultOpenGL.CoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultOpenGL.ViewPointReference = Earth;
-GMAT DefaultOpenGL.ViewDirection = Earth;
-GMAT DefaultOpenGL.ViewScaleFactor = 1;
-GMAT DefaultOpenGL.FixedFovAngle = 45;
-GMAT DefaultOpenGL.ViewUpCoordinateSystem = EarthMJ2000Eq;
-GMAT DefaultOpenGL.ViewUpAxis = X;
-GMAT DefaultOpenGL.CelestialPlane = Off;
-GMAT DefaultOpenGL.XYPlane = On;
-GMAT DefaultOpenGL.WireFrame = Off;
-GMAT DefaultOpenGL.SolverIterations = All;
-GMAT DefaultOpenGL.Axes = Off;
-GMAT DefaultOpenGL.Grid = Off;
-GMAT DefaultOpenGL.SunLine = Off;
-GMAT DefaultOpenGL.UseInitialView = On;
-GMAT DefaultOpenGL.PerspectiveMode = Off;
-GMAT DefaultOpenGL.UseFixedFov = Off;
-GMAT DefaultOpenGL.DataCollectFrequency = 6; 
-GMAT DefaultOpenGL.UpdatePlotFrequency = 50;
-GMAT DefaultOpenGL.NumPointsToRedraw = 100;
-GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -844,15 +740,6 @@ GMAT DefaultOpenGL.ShowPlot = true;</code></programlisting>
           </listitem>
         </itemizedlist>
 
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Toggle CostPlot Off;
-Toggle SMAPlot Off;
-Toggle ECCPlot Off;
-Toggle INCPlot Off;
-Propagate DefaultProp(Sat) {Sat.ElapsedSecs = Sat.OrbitPeriod};
-GMAT RefEpoch = Sat.A1ModJulian;
-GMAT Iterate = 0;</code></programlisting>
 
         <screenshot>
           <info>
@@ -977,17 +864,6 @@ GMAT Iterate = 0;</code></programlisting>
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Vary SQPfmincon(dV1Time = 0.1, {Lower = -.5, Upper = 0.5, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 10});
-   GMAT PropEpoch = RefEpoch + dV1Time;
-   If dV1Time &gt; 0
-      Propagate DefaultProp(Sat) {Sat.A1ModJulian = PropEpoch};
-   EndIf;
-   If dV1Time &lt; 0
-      Propagate BackProp DefaultProp(Sat) {Sat.A1ModJulian = PropEpoch};
-   EndIf;</code></programlisting>
 
         <screenshot>
           <info>
@@ -1275,50 +1151,6 @@ GMAT Iterate = 0;</code></programlisting>
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Vary SQPfmincon(dv1.Element1 = 0.1, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Vary SQPfmincon(dv1.Element2 = 0.01, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Vary SQPfmincon(dv1.Element3 = 0.01, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Maneuver dv1(Sat);
-
-   Vary SQPfmincon(TOF = 0.3, {Lower = 0, Upper = 1, AdditiveScaleFactor = 0.0, MultiplicativeScaleFactor = 10});
-   GMAT PropEpoch = RefEpoch + TOF;
-   Propagate DefaultProp(Sat) {Sat.A1ModJulian = PropEpoch};
-   
-   Vary SQPfmincon(dv2.Element1 = 0.1, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Vary SQPfmincon(dv2.Element2 = 0.01, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Vary SQPfmincon(dv2.Element3 = 0.01, {Lower = -5, Upper = 5, AdditiveScaleFactor = 0, MultiplicativeScaleFactor = 1});
-   Maneuver dv2(Sat);
-   
-   GMAT Constraint1 = Sat.SMA/10000;
-   GMAT Constraint2 = Sat.ECC;
-   GMAT Constraint3 = Sat.INC;
-
-   NonlinearConstraint SQPfmincon(Constraint1=1);    % SMA Constraint
-   NonlinearConstraint SQPfmincon(Constraint2=0.05);    % ECC Constraint 
-   NonlinearConstraint SQPfmincon(Constraint3=5);    % INC Constraint
-   
-   GMAT dV1mag = sqrt( dv1.Element1^2 + dv1.Element2^2 + dv1.Element3^2 );
-   GMAT dV2mag = sqrt( dv2.Element1^2 + dv2.Element2^2 + dv2.Element3^2 );
-   GMAT Cost = ( dV1mag + dV2mag );
-   Minimize SQPfmincon(Cost);
-
-   BeginScript
-      Report IterateData dV1Time TOF Cost Sat.SMA Sat.ECC Sat.INC;
-      Toggle CostPlot On;
-      Toggle SMAPlot On;
-      Toggle ECCPlot On;
-      Toggle INCPlot On;
-      Propagate DefaultProp(DummySat);
-      Toggle CostPlot Off;
-      Toggle SMAPlot Off;
-      Toggle ECCPlot Off;
-      Toggle INCPlot Off;
-   EndScript;
-
-EndOptimize;  % For optimizer SQPfmincon</code></programlisting>
 
         <screenshot>
           <info>

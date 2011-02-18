@@ -13,7 +13,6 @@ set xmlparser=org.apache.xerces.parsers.XIncludeParserConfiguration
 rem set XSL options
 set xslopts=-PARAM use.extensions 1
 set xslopts=%xslopts% -PARAM graphicsize.extension 1
-set xslopts=%xslopts% -PARAM shade.verbatim 1
 
 rem set up environment
 xcopy src\files build\files /i /s /e /q /v /y
@@ -34,6 +33,7 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
+    -PARAM shade.verbatim 1 ^
 	-PARAM paper.type USletter ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
@@ -48,6 +48,7 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
+    -PARAM shade.verbatim 1 ^
 	-PARAM paper.type A4 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
@@ -86,6 +87,7 @@ java -cp %xalancp%	^
 	-PARAM base.dir ..\build\chm\ ^
 	-PARAM manifest.in.base.dir 1 ^
 	-PARAM chunk.first.sections 1 ^
+    -PARAM html.stylesheet files\style.css ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
 xcopy src\files build\chm\files /i /s /e /q /v /y
@@ -100,8 +102,9 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
+    -PARAM html.stylesheet files\style.css ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\xhtml-1_1\docbook.xsl ^
+	-XSL contrib\docbook-xsl-ns\html\docbook.xsl ^
 	-OUT build\help.html
 echo --------------------
 echo.
@@ -114,8 +117,9 @@ java -cp %xalancp%	^
 	%xslopts% ^
 	-PARAM base.dir ..\build\html\ ^
 	-PARAM img.src.path ..\ ^
+    -PARAM html.stylesheet ..\files\style.css ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\xhtml-1_1\chunk.xsl
+	-XSL contrib\docbook-xsl-ns\html\chunkfast.xsl
 echo --------------------
 echo.
 

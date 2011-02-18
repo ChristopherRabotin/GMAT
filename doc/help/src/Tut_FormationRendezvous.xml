@@ -165,19 +165,6 @@
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft Sat1;
-GMAT Sat1.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
-GMAT Sat1.CoordinateSystem = EarthMJ2000Eq;
-GMAT Sat1.DisplayStateType = Keplerian;
-GMAT Sat1.SMA   = 7600;
-GMAT Sat1.ECC   = 0;
-GMAT Sat1.INC   = 100.51;
-GMAT Sat1.AOP  = 0;
-GMAT Sat1.RAAN  = 278.85;
-GMAT Sat1.TA  = 90;</code></programlisting>
-
               <screenshot>
                 <info>
                   <title>Figure: Sat1 Spacecraft Object</title>
@@ -222,19 +209,6 @@ GMAT Sat1.TA  = 90;</code></programlisting>
                   <para>Use Keplerian State Type</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft Sat2;
-GMAT Sat2.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
-GMAT Sat2.CoordinateSystem = EarthMJ2000Eq;
-GMAT Sat2.DisplayStateType = Keplerian;
-GMAT Sat2.SMA   = 7600;
-GMAT Sat2.ECC   = 0.045;
-GMAT Sat2.INC   = 100.47;
-GMAT Sat2.AOP   = 180.95;
-GMAT Sat2.RAAN  = 284.39;
-GMAT Sat2.TA    = 264.90;</code></programlisting>
             </listitem>
 
             <listitem>
@@ -263,19 +237,6 @@ GMAT Sat2.TA    = 264.90;</code></programlisting>
                   <para>Use Keplerian State Type</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft Sat3;
-GMAT Sat3.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
-GMAT Sat3.CoordinateSystem = EarthMJ2000Eq;
-GMAT Sat3.DisplayStateType = Keplerian;
-GMAT Sat3.SMA   = 7600;
-GMAT Sat3.ECC   = 0.0702;
-GMAT Sat3.INC   = 100.40;
-GMAT Sat3.AOP   = 181.54;
-GMAT Sat3.RAAN  = 287.90;
-GMAT Sat3.TA    = 261.81;</code></programlisting>
             </listitem>
 
             <listitem>
@@ -304,19 +265,6 @@ GMAT Sat3.TA    = 261.81;</code></programlisting>
                   <para>Use Keplerian State Type</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create Spacecraft Sat4;
-GMAT Sat4.Epoch.UTCGregorian = 01 Jan 2000 11:59:27.966;
-GMAT Sat4.CoordinateSystem = EarthMJ2000Eq;
-GMAT Sat4.DisplayStateType = Keplerian;
-GMAT Sat4.SMA   = 7600;
-GMAT Sat4.ECC   = 0.101;
-GMAT Sat4.INC   = 100.29;
-GMAT Sat4.AOP   = 182.141;
-GMAT Sat4.RAAN  = 291.82;
-GMAT Sat4.TA    = 258.67;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -350,17 +298,6 @@ GMAT Sat4.TA    = 258.67;</code></programlisting>
               <para>Set Earth, Sun, Luna and Jupiter as Point Masses</para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ForceModel LowEarth;
-GMAT LowEarth.PointMasses = {Earth, Sun, Luna, Jupiter};
-
-Create Propagator RKV_LowEarth;
-GMAT RKV_LowEarth.Type    = RungeKutta89;
-GMAT RKV_LowEarth.MinStep = .001;
-GMAT RKV_LowEarth.MaxStep = 900;
-GMAT RKV_LowEarth.FM      = LowEarth;</code></programlisting>
 
           <screenshot>
             <info>
@@ -397,13 +334,6 @@ GMAT RKV_LowEarth.FM      = LowEarth;</code></programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create ImpulsiveBurn Burn1;
-GMAT Burn1.Origin = Earth;
-GMAT Burn1.Axes = VNB;
-GMAT Burn1.Element1 = .0001;</code></programlisting>
-
           <screenshot>
             <info>
               <title>Figure: Burn1 Impulsive Burn Object</title>
@@ -435,14 +365,6 @@ GMAT Burn1.Element1 = .0001;</code></programlisting>
               DifferentialCorrectorDC.data</para>
             </listitem>
           </itemizedlist>
-
-          <para>Script Syntax:</para>
-
-          <programlisting><code>Create DifferentialCorrector DC;
-GMAT DC.ShowProgress = true;
-GMAT DC.ReportStyle = 'Normal';
-GMAT DC.TargeterTextFile = 'DifferentialCorrectorDC.data';
-GMAT DC.MaximumIterations = 25;</code></programlisting>
 
           <screenshot>
             <info>
@@ -487,16 +409,6 @@ GMAT DC.MaximumIterations = 25;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create CoordinateSystem EarthMoonRot;
-Create CoordinateSystem Sat1LVLH;
-GMAT Sat1LVLH.Axes    = ObjectReferenced;
-GMAT Sat1LVLH.Origin  = Sat1;
-GMAT Sat1LVLH.Primary = Earth;
-GMAT Sat1LVLH.YAxis   = -N;
-GMAT Sat1LVLH.ZAxis   = -R;</code></programlisting>
-
               <screenshot>
                 <info>
                   <title>Figure: Sat1LVLH Coordinate System Object</title>
@@ -531,15 +443,6 @@ GMAT Sat1LVLH.ZAxis   = -R;</code></programlisting>
                   <para>Primary is Earth</para>
                 </listitem>
               </itemizedlist>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create CoordinateSystem Sat2VNB;
-GMAT Sat2VNB.Axes    = ObjectReferenced;
-GMAT Sat2VNB.Origin  = Sat2;
-GMAT Sat2VNB.Primary = Earth;
-GMAT Sat2VNB.XAxis   = V;
-GMAT Sat2VNB.YAxis   = N;</code></programlisting>
             </listitem>
           </itemizedlist>
         </listitem>
@@ -550,14 +453,6 @@ GMAT Sat2VNB.YAxis   = N;</code></programlisting>
           <itemizedlist>
             <listitem>
               <para>Data Report saved to a file</para>
-
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create ReportFile DataReport;
-GMAT DataReport.Filename = ./output/SampleMissions/Ex_FormationRendezvous.report;
-GMAT DataReport.Precision = 16;
-GMAT DataReport.WriteHeaders = On;
-GMAT DataReport.ColumnWidth = 20;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -590,13 +485,6 @@ GMAT DataReport.ColumnWidth = 20;</code></programlisting>
                       <para>Sat2wrtSat1LVLH: XZ plots of Sat2 in
                       Sat1VNB</para>
 
-                      <para>Script Syntax:</para>
-
-                      <programlisting><code>Create XYPlot Sat2wrtSat1LVLH;
-GMAT Sat2wrtSat1LVLH.SolverIterations = None;
-GMAT Sat2wrtSat1LVLH.IndVar   = Sat2.Sat1LVLH.X;
-GMAT Sat2wrtSat1LVLH.Add      = Sat2.Sat1LVLH.Z;
-GMAT Sat2wrtSat1LVLH.Grid     = On;</code></programlisting>
 
                       <screenshot>
                         <info>
@@ -619,27 +507,11 @@ GMAT Sat2wrtSat1LVLH.Grid     = On;</code></programlisting>
 
                     <listitem>
                       <para>Sat1wrtSat2VNB: XY plots of Sat1 in Sat2VNB</para>
-
-                      <para>Script Syntax:</para>
-
-                      <programlisting><code>Create XYPlot Sat1wrtSat2VNB;
-GMAT Sat1wrtSat2VNB.SolverIterations = None;
-GMAT Sat1wrtSat2VNB.IndVar       = Sat1.Sat2VNB.X;
-GMAT Sat1wrtSat2VNB.Add          = Sat1.Sat2VNB.Y;
-GMAT Sat1wrtSat2VNB.Grid         = On;</code></programlisting>
                     </listitem>
 
                     <listitem>
                       <para>Sat2wrtSat1VNB2: YZ plots of Sat1 in
                       Sat2VNB</para>
-
-                      <para>Script Syntax:</para>
-
-                      <programlisting><code>Create XYPlot Sat1wrtSat2VNB2;
-GMAT Sat1wrtSat2VNB2.SolverIterations = None;
-GMAT Sat1wrtSat2VNB2.IndVar       = Sat1.Sat2VNB.Y;
-GMAT Sat1wrtSat2VNB2.Add          = Sat1.Sat2VNB.Z;
-GMAT Sat1wrtSat2VNB2.Grid         = On;</code></programlisting>
                     </listitem>
                   </itemizedlist>
                 </listitem>
@@ -683,28 +555,6 @@ GMAT Sat1wrtSat2VNB2.Grid         = On;</code></programlisting>
                 </listitem>
               </itemizedlist>
 
-              <para>Script Syntax:</para>
-
-              <programlisting><code>Create OpenGLPlot Sat2InSat1LVLH;
-GMAT Sat2InSat1LVLH.Add = {Sat2, Sat3, Sat4};
-GMAT Sat2InSat1LVLH.CoordinateSystem = Sat1LVLH;
-GMAT Sat2InSat1LVLH.ViewPointReference = Earth;
-GMAT Sat2InSat1LVLH.ViewDirection = Earth;
-GMAT Sat2InSat1LVLH.ViewScaleFactor = .15;
-GMAT Sat2InSat1LVLH.FixedFovAngle = 45;
-GMAT Sat2InSat1LVLH.ViewUpCoordinateSystem = Sat1LVLH;
-GMAT Sat2InSat1LVLH.ViewUpAxis = X;
-GMAT Sat2InSat1LVLH.CelestialPlane = Off;
-GMAT Sat2InSat1LVLH.XYPlane = On;
-GMAT Sat2InSat1LVLH.WireFrame = Off;
-GMAT Sat2InSat1LVLH.SolverIterations = All;
-GMAT Sat2InSat1LVLH.Axes = Off;
-GMAT Sat2InSat1LVLH.SunLine = Off;
-GMAT Sat2InSat1LVLH.PerspectiveMode = Off;
-GMAT Sat2InSat1LVLH.UseFixedFov = Off;
-GMAT Sat2InSat1LVLH.DataCollectFrequency = 1;
-GMAT Sat2InSat1LVLH.UpdatePlotFrequency = 50;
-GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
 
               <screenshot>
                 <info>
@@ -916,27 +766,6 @@ GMAT Sat2InSat1LVLH.NumPointsToRedraw = 0;</code></programlisting>
             </itemizedlist>
           </listitem>
         </itemizedlist>
-
-        <para>Script Syntax:</para>
-
-        <programlisting><code>Toggle Sat1wrtSat2VNB On;
-Toggle Sat2InSat1LVLH On;
-Toggle Sat1wrtSat2VNB2 On;
-Toggle Sat2wrtSat1LVLH On;
-
-Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
-Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
-Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
-Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;
-
-GMAT DataReport.WriteHeaders = Off;
-
-Propagate RKV_LowEarth(Sat1, Sat2, Sat3, Sat4, {Sat1.ElapsedDays = .2});
-
-Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
-Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
-Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
-Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programlisting>
 
         <screenshot>
           <info>
@@ -1242,28 +1071,6 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
                 </itemizedlist>
               </listitem>
             </itemizedlist>
-
-            <para>Script Syntax:</para>
-
-            <programlisting><code>Target DC;
-
-     Vary DC(Burn1.V = 0.0001, {Perturbation = 0.0001, MaxStep = 0.05, Lower = -0.3, Upper = 0.3});
-     Vary DC(Burn1.N = 0.000, {Perturbation = 0.0001, MaxStep = 0.05, Lower = -0.3, Upper = 0.3});
-     Vary DC(Burn1.B = 0.000, {Perturbation = 0.0001, MaxStep = 0.05, Lower = -0.3, Upper = 0.3});
-
-     Maneuver Burn1(Sat2);
-     Propagate  RKV_LowEarth(Sat1, Sat2, Sat3, Sat4, {Sat1.ElapsedSecs = 5498.65387429});
-
-     Achieve DC(Sat2.Sat1LVLH.X = 0, {Tolerance = 0.0001});
-     Achieve DC(Sat2.Sat1LVLH.Y = 0, {Tolerance = 0.0001});
-     Achieve DC(Sat2.Sat1LVLH.Z = 0, {Tolerance = 0.0001});
-
-EndTarget;
-
-Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
-Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
-Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
-Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programlisting>
 
             <screenshot>
               <info>
@@ -1614,37 +1421,7 @@ Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programl
                 </itemizedlist>
               </listitem>
             </itemizedlist>
-
-            <para>Script Syntax:</para>
-
-            <programlisting><code>Target DC;
-
-     Vary DC(Burn1.V = 0.0001, {Perturbation = 0.0001, MaxStep = 0.5, Lower = -1.0, Upper = 1.0});
-     Vary DC(Burn1.N = 0.000, {Perturbation = 0.0001, MaxStep = 0.5, Lower = -1.0, Upper = 1.0});
-     Vary DC(Burn1.B = 0.000, {Perturbation = 0.0001, MaxStep = 0.5, Lower = -1.0, Upper = 1.0});
-     
-     Maneuver Burn1(Sat2);
-     
-     Propagate  RKV_LowEarth(Sat1, Sat2, Sat3, Sat4, {Sat1.ElapsedSecs = 5498.65387429});
-     
-     Achieve DC(Sat2.VX = Sat1.VX, {Tolerance = 0.0001});
-     Achieve DC(Sat2.VY = Sat1.VY, {Tolerance = 0.0001});
-     Achieve DC(Sat2.VZ = Sat1.VZ, {Tolerance = 0.0001});
-     
-EndTarget;
-
-Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
-Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
-Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
-Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;
-
-Propagate RKV_LowEarth(Sat1, Sat2, Sat3, Sat4, {Sat1.ElapsedDays = .2});
-
-Report DataReport Sat1.X Sat1.Y Sat1.Z Sat1.VX Sat1.VY Sat1.VZ;
-Report DataReport Sat2.X Sat2.Y Sat2.Z Sat2.VX Sat2.VY Sat2.VZ;
-Report DataReport Sat3.X Sat3.Y Sat3.Z Sat3.VX Sat3.VY Sat3.VZ;
-Report DataReport Sat4.X Sat4.Y Sat4.Z Sat4.VX Sat4.VY Sat4.VZ;</code></programlisting>
-          </listitem>
+         </listitem>
         </itemizedlist>
       </section>
     </section>

@@ -13,7 +13,6 @@ xmlparser='org.apache.xerces.parsers.XIncludeParserConfiguration'
 # set XSL options
 xslopts='-PARAM use.extensions 1'
 xslopts=${xslopts}' -PARAM graphicsize.extension 1'
-xslopts=${xslopts}' -PARAM shade.verbatim 1 '
 
 # set up environment
 echo 'Setting up environment...'
@@ -38,6 +37,7 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	${xslopts} \
+    -PARAM shade.verbatim 1 \
 	-PARAM paper.type USletter \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
@@ -52,6 +52,7 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	${xslopts} \
+    -PARAM shade.verbatim 1 \
 	-PARAM paper.type A4 \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
@@ -84,8 +85,9 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	${xslopts} \
+    -PARAM html.stylesheet files\style.css \
 	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/xhtml-1_1/docbook.xsl \
+	-XSL contrib/docbook-xsl-ns/html/docbook.xsl \
 	-OUT build/help.html
 echo '--------------------'
 echo
@@ -98,8 +100,13 @@ java -cp ${xalancp}	\
 	${xslopts} \
 	-PARAM base.dir ../build/html/ \
 	-PARAM img.src.path ../ \
+    -PARAM html.stylesheet ../files/style.css \
+    -PARAM chunker.output.encoding UTF-8 \
+    -PARAM chunker.output.doctype-public "-//W3C//DTD HTML 4.01//EN" \
+    -PARAM chunker.output.doctype-system \
+        "http://www.w3.org/TR/html4/strict.dtd" \
 	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/xhtml-1_1/chunk.xsl
+	-XSL contrib/docbook-xsl-ns/html/chunkfast.xsl
 echo '--------------------'
 echo
 

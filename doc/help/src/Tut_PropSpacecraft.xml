@@ -100,12 +100,6 @@
           </listitem>
         </orderedlist>
 
-        <para>You can also set the spacecraft epoch in the script. In the
-        script, you set this epoch using the following two lines:</para>
-
-        <programlisting><code>Sat.DateFormat = UTCGregorian;
-Sat.Epoch = 22 Jul 2014 11:29:10.811;</code></programlisting>
-
         <screenshot>
           <info>
             <title>Figure: Spacecraft Epoch Setup</title>
