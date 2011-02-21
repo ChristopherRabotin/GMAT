@@ -522,14 +522,14 @@
             <para>Enter the following between the BeginScript/EndScript text
             and click OK to exit the panel:</para>
 
-            <programlisting><code>GMAT DecoratedReport.WriteHeaders = Off; % Turn report headers off 
-stringVar = '=================================================='; % Heading
-Report DecoratedReport stringVar; % Outputs the string variable to the report
-stringVar = GMAT Report File in Time X Y Z VX VY VZ format; % Heading
-Report DecoratedReport stringVar; % Outputs the string variable to the report
-stringVar = '=================================================='; % Heading
-Report DecoratedReport stringVar; % Outputs the string variable to the report
-GMAT DecoratedReport.WriteHeaders = On; % Turn report headers back on</code></programlisting>
+            <programlisting>GMAT DecoratedReport.WriteHeaders = Off;
+stringVar = '==================================================';
+Report DecoratedReport stringVar;
+stringVar = GMAT Report File in Time X Y Z VX VY VZ format;
+Report DecoratedReport stringVar;
+stringVar = '==================================================';
+Report DecoratedReport stringVar;
+GMAT DecoratedReport.WriteHeaders = On;</programlisting>
 
             <para>Observe how WriteHeaders was turned off while outputting
             string data. If you don't do this, you will get the word stringVar

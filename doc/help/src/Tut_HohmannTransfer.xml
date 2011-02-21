@@ -11,11 +11,15 @@
 
   <section>
     <title>Objective and Overview</title>
+    <para><emphasis role="bold">Level:</emphasis> Beginner</para>
+    <para><emphasis role="bold">Final result:</emphasis>
+      <link xlink:href="scripts/HohmannTransferDesign.script"
+      >HohmannTransferDesign.script</link></para>
 
-    <para>The objective of this tutorial is to use differential correction to
-    perform a Hohmann Transfer. To focus on the configuration of the target
-    sequence, we make extensive use of the default configurations for
-    spacecraft, propagators, and maneuvers. The basic steps are.</para>
+    <para>In this tutorial, we will use differential correction to perform a Hohmann transfer from
+      an initial parking orbit to a final mission orbit. In order to focus on the configuration of
+      the target sequence, we will make extensive use of the default configurations for spacecraft,
+      propagators, and maneuvers. This tutorial is split into five basic steps:</para>
 
     <orderedlist>
       <listitem>
@@ -41,10 +45,6 @@
         the converged solution.</para>
       </listitem>
     </orderedlist>
-
-    <para>You can download the script file and run it beforehand to see the
-    final results of this tutorial: <link
-    xlink:href="scripts/HohmannTransferDesign.script">HohmannTransferDesign.script</link></para>
   </section>
 
   <section>

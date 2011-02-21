@@ -101,12 +101,10 @@ java -cp ${xalancp}	\
 	-PARAM base.dir ../build/html/ \
 	-PARAM img.src.path ../ \
     -PARAM html.stylesheet ../files/style.css \
-    -PARAM chunker.output.encoding UTF-8 \
-    -PARAM chunker.output.doctype-public "-//W3C//DTD HTML 4.01//EN" \
-    -PARAM chunker.output.doctype-system \
-        "http://www.w3.org/TR/html4/strict.dtd" \
+    -PARAM chunk.quietly 1 \
+    -PARAM chunk.toc toc.xml \
 	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/html/chunkfast.xsl
+	-XSL contrib/docbook-xsl-ns/html/chunktoc.xsl
 echo '--------------------'
 echo
 

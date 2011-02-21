@@ -86,7 +86,7 @@ java -cp %xalancp%	^
  	%xslopts% ^
 	-PARAM base.dir ..\build\chm\ ^
 	-PARAM manifest.in.base.dir 1 ^
-	-PARAM chunk.first.sections 1 ^
+	-PARAM chunk.quietly 1 ^
     -PARAM html.stylesheet files\style.css ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
@@ -118,8 +118,10 @@ java -cp %xalancp%	^
 	-PARAM base.dir ..\build\html\ ^
 	-PARAM img.src.path ..\ ^
     -PARAM html.stylesheet ..\files\style.css ^
+    -PARAM chunk.quietly 1 ^
+    -PARAM chunk.toc toc.xml ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\html\chunkfast.xsl
+	-XSL contrib\docbook-xsl-ns\html\chunktoc.xsl
 echo --------------------
 echo.
 
