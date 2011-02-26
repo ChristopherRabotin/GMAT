@@ -127,8 +127,8 @@ echo.
 
 rem move output files
 echo Collecting output files...
-xcopy build\*.pdf output /i /s /e /q /v /y
-xcopy build\*.chm output /i /s /e /q /v /y
-xcopy build\help.html output /i /s /e /q /v /y
+xcopy build\*.pdf output /i /s /q /v /y
+xcopy build\help.chm output /i /s /q /v /y
+xcopy build\help.html output /i /s /q /v /y
 xcopy build\html output\html /i /s /e /q /v /y
 xcopy build\files output\files /i /s /e /q /v /y
