@@ -86,8 +86,18 @@ java -cp %xalancp%	^
  	%xslopts% ^
 	-PARAM base.dir ..\build\chm\ ^
 	-PARAM manifest.in.base.dir 1 ^
+    -PARAM chapter.autolabel 0 ^
 	-PARAM chunk.quietly 1 ^
+    -PARAM chunk.section.depth 1 ^
+    -PARAM generate.toc "" ^
     -PARAM html.stylesheet files\style.css ^
+    -PARAM htmlhelp.remember.window.position 1 ^
+    -PARAM htmlhelp.hhc.section.depth 1 ^
+    -PARAM htmlhelp.hhc.show.root 0 ^
+    -PARAM htmlhelp.show.favorites 1 ^
+    -PARAM htmlhelp.show.advanced.search 1 ^
+    -PARAM htmlhelp.use.hhk 1 ^
+    -PARAM htmlhelp.default.topic ch01.html ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
 xcopy src\files build\chm\files /i /s /e /q /v /y
