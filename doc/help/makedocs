@@ -37,8 +37,9 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	${xslopts} \
-    -PARAM shade.verbatim 1 \
+	-PARAM fop1.extensions 1 \
 	-PARAM paper.type USletter \
+    -PARAM shade.verbatim 1 \
 	-IN src/help.xml \
 	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
 	-OUT build/help-letter.fo
@@ -52,6 +53,7 @@ java -cp ${xalancp}	\
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
 	org.apache.xalan.xslt.Process \
 	${xslopts} \
+   -PARAM fop1.extensions 1 \
     -PARAM shade.verbatim 1 \
 	-PARAM paper.type A4 \
 	-IN src/help.xml \
