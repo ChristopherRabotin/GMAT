@@ -17,7 +17,7 @@ xslopts=${xslopts}' -PARAM graphicsize.extension 1'
 # set up environment
 echo 'Setting up environment...'
 if [ ! -d build ]; then
-	mkdir build
+    mkdir build
 fi
 svn export --force src/files build/files
 
@@ -26,39 +26,39 @@ echo 'Validating document...'
 java \
     -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
     -jar contrib/jing/bin/jing.jar \
-	contrib/docbook/docbookxi.rng \
-	src/help.xml
+    contrib/docbook/docbookxi.rng \
+    src/help.xml
 echo '--------------------'
 echo
 
 # DocBook -> XSL-FO -> PDF (letter)
 echo 'PDF (letter)'
-java -cp ${xalancp}	\
-	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
-	org.apache.xalan.xslt.Process \
-	${xslopts} \
-	-PARAM fop1.extensions 1 \
-	-PARAM paper.type USletter \
+java -cp ${xalancp} \
+    -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
+    org.apache.xalan.xslt.Process \
+    ${xslopts} \
+    -PARAM fop1.extensions 1 \
+    -PARAM paper.type USletter \
     -PARAM shade.verbatim 1 \
-	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
-	-OUT build/help-letter.fo
+    -IN src/help.xml \
+    -XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
+    -OUT build/help-letter.fo
 sh contrib/fop/fop build/help-letter.fo build/help-letter-fo.pdf
 echo '--------------------'
 echo
 
 # DocBook -> XSL-FO -> PDF (A4)
 echo 'PDF (A4)'
-java -cp ${xalancp}	\
-	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
-	org.apache.xalan.xslt.Process \
-	${xslopts} \
-   -PARAM fop1.extensions 1 \
+java -cp ${xalancp} \
+    -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
+    org.apache.xalan.xslt.Process \
+    ${xslopts} \
+    -PARAM fop1.extensions 1 \
     -PARAM shade.verbatim 1 \
-	-PARAM paper.type A4 \
-	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
-	-OUT build/help-a4.fo
+    -PARAM paper.type A4 \
+    -IN src/help.xml \
+    -XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
+    -OUT build/help-a4.fo
 sh contrib/fop/fop build/help-a4.fo build/help-a4-fo.pdf
 echo '--------------------'
 echo
@@ -66,53 +66,53 @@ echo
 # DocBook -> LaTeX -> PDF (letter)
 echo 'LaTeX PDF (letter)'
 dblatex -o build/help-letter-latex.pdf \
-	-P latex.class.options=letterpaper \
-	-T simple \
-	src/help.xml
+    -P latex.class.options=letterpaper \
+    -T simple \
+    src/help.xml
 echo '--------------------'
 echo
 
 # DocBook -> LaTeX -> PDF (A4)
 echo 'LaTeX PDF (A4)'
 dblatex -o build/help-a4-latex.pdf \
-	-P latex.class.options=a4paper \
-	-T simple \
-	src/help.xml
+    -P latex.class.options=a4paper \
+    -T simple \
+    src/help.xml
 echo '--------------------'
 echo
 
 # DocBook -> HTML (single page)
 echo 'HTML (single page)'
-java -cp ${xalancp}	\
-	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
-	org.apache.xalan.xslt.Process \
-	${xslopts} \
+java -cp ${xalancp} \
+    -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
+    org.apache.xalan.xslt.Process \
+    ${xslopts} \
     -PARAM html.stylesheet files\style.css \
-	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/html/docbook.xsl \
-	-OUT build/help.html
+    -IN src/help.xml \
+    -XSL contrib/docbook-xsl-ns/html/docbook.xsl \
+    -OUT build/help.html
 echo '--------------------'
 echo
 
 # DocBook -> HTML (multiple pages)
 echo 'HTML (multiple pages)'
-java -cp ${xalancp}	\
-	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
-	org.apache.xalan.xslt.Process \
-	${xslopts} \
-	-PARAM base.dir ../build/html/ \
-	-PARAM img.src.path ../ \
+java -cp ${xalancp} \
+    -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=${xmlparser} \
+    org.apache.xalan.xslt.Process \
+    ${xslopts} \
+    -PARAM base.dir ../build/html/ \
+    -PARAM img.src.path ../ \
     -PARAM html.stylesheet ../files/style.css \
     -PARAM chunk.quietly 1 \
     -PARAM chunk.toc toc.xml \
-	-IN src/help.xml \
-	-XSL contrib/docbook-xsl-ns/html/chunktoc.xsl
+    -IN src/help.xml \
+    -XSL contrib/docbook-xsl-ns/html/chunktoc.xsl
 echo '--------------------'
 echo
 
 # move output files
 echo 'Collecting output files...'
 if [ ! -d output ]; then
-	mkdir output
+    mkdir output
 fi
 cp -fpR build/*.pdf build/help.html build/html build/files output

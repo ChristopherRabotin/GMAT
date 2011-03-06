@@ -10,6 +10,34 @@
   <title>Spacecraft Overview</title>
 
   <section>
+    <title>Syntax</title>
+
+    <synopsis>Create Spacecraft <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>parameter</replaceable> = <replaceable>value</replaceable>
+...</synopsis>
+  </section>
+
+  <section>
+    <title>Description</title>
+
+    <para>A spacecraft.</para>
+  </section>
+
+  <section>
+    <title>Parameters</title>
+
+    <variablelist>
+      <varlistentry>
+        <term></term>
+
+        <listitem>
+          <para></para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section>
     <title>Overview</title>
 
     <para>All of the tabs within the spacecraft object are listed below as
