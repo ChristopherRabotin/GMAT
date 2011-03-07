@@ -13,6 +13,9 @@ set xmlparser=org.apache.xerces.parsers.XIncludeParserConfiguration
 rem set XSL options
 set xslopts=-PARAM use.extensions 1
 set xslopts=%xslopts% -PARAM graphicsize.extension 1
+set xslopts=%xslopts% -PARAM tablecolumns.extension 1
+set xslopts=%xslopts% -PARAM refentry.generate.name 0
+set xslopts=%xslopts% -PARAM refentry.generate.title 1
 
 rem set up environment
 xcopy src\files build\files /i /s /e /q /v /y
@@ -33,6 +36,8 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
+    -PARAM body.font.family sans-serif ^
+    -PARAM fop1.extensions 1 ^
     -PARAM shade.verbatim 1 ^
 	-PARAM paper.type USletter ^
 	-IN src\help.xml ^
@@ -48,6 +53,8 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
+    -PARAM body.font.family sans-serif ^
+    -PARAM fop1.extensions 1 ^
     -PARAM shade.verbatim 1 ^
 	-PARAM paper.type A4 ^
 	-IN src\help.xml ^
@@ -79,7 +86,6 @@ echo.
 
 rem DocBook -> CHM
 echo Windows Help
-
 java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
  	org.apache.xalan.xslt.Process ^
@@ -129,9 +135,8 @@ java -cp %xalancp%	^
 	-PARAM img.src.path ..\ ^
     -PARAM html.stylesheet ..\files\style.css ^
     -PARAM chunk.quietly 1 ^
-    -PARAM chunk.toc toc.xml ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\html\chunktoc.xsl
+	-XSL contrib\docbook-xsl-ns\html\chunkfast.xsl
 echo --------------------
 echo.
 
