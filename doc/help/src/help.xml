@@ -19,7 +19,6 @@
     <releaseinfo>2011a</releaseinfo>
   </info>
 
-  <!--
     <chapter>
         <title>Introduction</title>
         <xi:include href="Intro_IntroducingGMAT.xml"/>
@@ -36,7 +35,7 @@
         <xi:include href="HowTo_CreatingEphemerisFiles.xml"/>
         <xi:include href="HowTo_VisualizingaTrajectory.xml"/>
     </chapter>
-    
+
     <chapter>
         <title>Samples and Tutorials</title>
 
@@ -56,14 +55,19 @@
         <xi:include href="Tut_MinFuelLunarTransfer.xml"/>
         <xi:include href="Tut_LEOStationKeeping.xml"/>
     </chapter>
-    -->
 
   <reference>
-    <title>Reference: Resources</title>
+    <title>Reference (new): Resources</title>
 
     <xi:include href="Resource_Spacecraft.xml" />
+  </reference>  
 
-    <!--
+  <chapter>
+        <title>Reference: Resources</title>
+        <xi:include href="Resource_SpacecraftOverview.xml"/>
+        <xi:include href="Resource_SpacecraftOrbit.xml"/>
+        <xi:include href="Resource_SpacecraftAttitude.xml"/>
+        <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
         <xi:include href="Resource_Propagator.xml"/>
         <xi:include href="Resource_ReportFile.xml"/>
         <xi:include href="Resource_FuelTank.xml"/>
@@ -82,11 +86,9 @@
         <xi:include href="Resource_Barycenter.xml"/>
         <xi:include href="Resource_LibrationPoint.xml"/>
         <xi:include href="Resource_ImpulsiveBurn.xml"/>
-        -->
-  </reference>
+  </chapter>
 
-  <!--
-    <reference>
+    <chapter>
         <title>Reference: Commands</title>
             
         <xi:include href="Command_Propagate.xml"/>
@@ -108,8 +110,8 @@
         <xi:include href="Command_Minimize.xml"/>
         <xi:include href="Command_Optimize.xml"/>
         <xi:include href="Command_CallFunction.xml"/>        
-    </reference>
-        
+    </chapter>
+
     <chapter>
         <title>Reference: Miscellaneous</title>
             
@@ -119,5 +121,4 @@
         <xi:include href="Misc_GMATCommandsinMATLAB.xml"/>
         <xi:include href="Misc_GMATConsoleInstructions.xml"/>
     </chapter>
-    -->
 </book>

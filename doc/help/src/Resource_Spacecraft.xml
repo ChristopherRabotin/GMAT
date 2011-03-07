@@ -142,39 +142,67 @@
           <term>Epoch</term>
 
           <listitem>
-            <para>The initial epoch of the spacecraft's state.</para>
+            <para>The initial epoch of the spacecraft's state and
+            properties.</para>
 
-            <informaltable>
-              <tgroup cols="2">
-                <colspec align="center" />
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
 
-                <tbody>
-                  <row>
-                    <entry>Default</entry>
+                <listitem>
+                  <para><literal>21545</literal> (TAIModJulian format)</para>
+                </listitem>
+              </varlistentry>
 
-                    <entry><literal>21545</literal> (TAIModJulian
-                    format)</entry>
-                  </row>
+              <varlistentry>
+                <term>Limits</term>
 
-                  <row>
-                    <entry>Limits</entry>
+                <listitem>
+                  <para><literal>04 Oct 1957 12:00:00.000</literal> or later
+                  in all time systems (<literal>6116.0</literal> modified
+                  Julian)</para>
+                </listitem>
+              </varlistentry>
 
-                    <entry><literal>04 Oct 1957 12:00:00.000</literal> or
-                    later in all time systems (<literal>6116.0</literal>
-                    modified Julian)</entry>
-                  </row>
+              <varlistentry>
+                <term>Units</term>
 
-                  <row>
-                    <entry>Units</entry>
-
-                    <entry>days (modified Julian format only)</entry>
-                  </row>
-                </tbody>
-              </tgroup>
-            </informaltable>
+                <listitem>
+                  <para>days (modified Julian format only)</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
         </varlistentry>
       </variablelist>
     </refsection>
+
+    <refsection>
+      <title>Orbit</title>
+
+      <para></para>
+    </refsection>
+
+    <refsection>
+      <title>Attitude</title>
+
+      <para></para>
+    </refsection>
+
+    <refsection>
+      <title>Ballistic and Mass</title>
+
+      <para></para>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <example>
+      <title>Creating a default Spacecraft</title>
+
+      <programlisting>Create Spacecraft sc;</programlisting>
+    </example>
   </refsection>
 </refentry>
