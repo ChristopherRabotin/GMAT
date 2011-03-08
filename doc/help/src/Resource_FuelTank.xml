@@ -1,247 +1,371 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="FuelTank" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Fuel Tank</title>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>FuelTank</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <para>The tank of the spacecraft is added under the resource tree, under
-    spacecraft, and added to the folder Hardware. This object is a tank of
-    fuel that would be used on a finite burn.</para>
+    <refmiscinfo class="version">2011a</refmiscinfo>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
 
-      <itemizedlist>
-        <listitem>
-          <para>BeginFiniteBurn/EndFiniteBurn</para>
+  <refnamediv>
+    <refname>FuelTank</refname>
 
-          <itemizedlist>
-            <listitem>
-              <para>These commands use the tank and the thruster to start a
-              finite burn, where the delta V is not instantaneous.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
+    <refpurpose>A fuel tank.</refpurpose>
+  </refnamediv>
 
-        <listitem>
-          <para>Thruster</para>
+  <refsynopsisdiv>
+    <synopsis>Create FuelTank <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
 
-          <itemizedlist>
-            <listitem>
-              <para>This object uses the tank for power for a finite
-              burn.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
+  <refsection>
+    <title>Description</title>
 
-        <listitem>
-          <para>FiniteBurn</para>
+    <para>A FuelTank is a thermodynamc model of a tank and is required for
+    finite burn modelling or for implusive burns that use mass depletion. The
+    thermodynamic properties of the tank are modelled using the ideal gas law
+    and assume that there is no energy transfer into or out of the tank as
+    fuel is depleted. To use a FuelTank, you must first create the tank, and
+    then attach it to the desired spacecraft and associate it with a thruster
+    as shown in the examples below.</para>
+  </refsection>
 
-          <itemizedlist>
-            <listitem>
-              <para>This takes the parameters of the tank and the thruster and
-              apply it to a coordinate system, with a scaling method available
-              if wanted.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
+  <refsection>
+    <title>Fields</title>
 
-        <listitem>
-          <para>Spacecraft</para>
+    <refsection>
+      <variablelist>
+        <varlistentry>
+          <term>Pressure</term>
 
-          <itemizedlist>
-            <listitem>
-              <para>This is the object that the burn is applied to.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
-
-  <section>
-    <title>Using the GUI</title>
-
-    <itemizedlist>
-      <listitem>
-        <para>Fuel Mass</para>
-
-        <itemizedlist>
           <listitem>
-            <para>The total mass of fuel available in the fuel tank.</para>
+            <para>The pressure in the tank.</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>1500</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number ≥ 0</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>kPa.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
+        </varlistentry>
 
-      <listitem>
-        <para>Pressure</para>
+        <varlistentry>
+          <term>Temperature</term>
 
-        <itemizedlist>
           <listitem>
-            <para>The pressure of the fuel in the tank.</para>
+            <para>The temperature of the fuel and ullage in the tank. GMAT
+            currently assumes ullage and fuel are always at the same
+            temperature.</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>20</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number &gt; -273.15</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>C.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
+        </varlistentry>
 
-      <listitem>
-        <para>Temperature</para>
+        <varlistentry>
+          <term>FuelMass</term>
 
-        <itemizedlist>
           <listitem>
-            <para>The temperature of the fuel in the tank.</para>
+            <para>The FuelMass field is the mass of fuel in the tank.<caution>
+                <para>By default, GMAT will not allow the fuel mass to be
+                negative. However, occasionally in iterative processes such as
+                targeting, a solver will try values of a maneuver parameter
+                that result in total fuel depletion. Using the default tank
+                settings this will throw an excpeption stopping the run unless
+                you set the AllowNegativeFuelMass flag to true.</para>
+              </caution></para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>756</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number ≥ 0</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>kg.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
+        </varlistentry>
+      </variablelist>
 
-      <listitem>
-        <para>Reference Temperature</para>
-      </listitem>
+      <variablelist>
+        <varlistentry>
+          <term>ReferenceTemperature</term>
 
-      <listitem>
-        <para>Volume</para>
-
-        <itemizedlist>
           <listitem>
-            <para>The original volume of the fuel in the tank.</para>
+            <para>The temperature of the tank when fuel was loaded.</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>20</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number ≥ -273.15</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>C.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
+        </varlistentry>
 
-      <listitem>
-        <para>Fuel Density</para>
+        <varlistentry>
+          <term>Volume</term>
 
-        <itemizedlist>
           <listitem>
-            <para>The density of the fuel</para>
+            <para>The volume of the tank. GMAT checks to ensure that the
+            volume of the tank is larger than the volume of fuel loaded in the
+            tank and throws an exception in the case that the fuel volume is
+            larger than the tank volume.</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>0.75</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number &gt; 0 such that fuel volume is &lt; tank
+                  volume.</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>m<superscript>3</superscript>.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
+        </varlistentry>
 
-      <listitem>
-        <para>Pressure Regulated</para>
+        <varlistentry>
+          <term>FuelDensity</term>
 
-        <itemizedlist>
           <listitem>
-            <para>If selected, it means that the pressure will be maintained a
-            constant during the duration of a thrust. If not, it means that
-            the pressure in the tank will decrease with time as more fuel is
-            released by a thruster.</para>
+            <para>The density of the fuel.</para>
+
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
+
+                <listitem>
+                  <para>1260</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Options</term>
+
+                <listitem>
+                  <para>Real Number &gt; 0</para>
+                </listitem>
+              </varlistentry>
+
+              <varlistentry>
+                <term>Units</term>
+
+                <listitem>
+                  <para>kg/m<superscript>3</superscript>.</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
           </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+        </varlistentry>
+      </variablelist>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Fuel Tank Dialog
-        Box</title>
-      </info>
+      <variablelist>
+        <varlistentry>
+          <term>PressureModel</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_FuelTank_Default.jpeg"></imagedata>
-        </imageobject>
+          <listitem>
+            <para>The pressure model describes how pressure in the tank
+            changes as fuel is depleted.</para>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Fuel Tank Dialog
-          Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
 
-  <section>
-    <title>Using the script</title>
+                <listitem>
+                  <para>PressureRegulated</para>
+                </listitem>
+              </varlistentry>
 
-    <section>
-      <title>Script Examples</title>
+              <varlistentry>
+                <term>Options</term>
 
-      <programlisting><code>Create FuelTank FuelTank1;
-GMAT FuelTank1.FuelMass = 756;
-GMAT FuelTank1.Pressure = 1500;
-GMAT FuelTank1.Temperature = 20;
-GMAT FuelTank1.RefTemperature = 20;
-GMAT FuelTank1.Volume = 0.75;
-GMAT FuelTank1.FuelDensity = 1260;
-GMAT FuelTank1.PressureRegulated = true;</code></programlisting>
-    </section>
-  </section>
+                <listitem>
+                  <para>PressureRegulated, BlowDown</para>
+                </listitem>
+              </varlistentry>
 
-  <section>
-    <title>Reference Table</title>
+              <varlistentry>
+                <term>Units</term>
 
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>FuelMass</para></entry>
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
 
-            <entry><para>Default: 756.</para> <para>Options: [Real Number ≥
-            0]</para> <para>The FuelMass field is the mass of fuel in the
-            tank.</para> <para>Units: kg.</para></entry>
-          </row>
+        <varlistentry>
+          <term>AllowNegativeFuelMass</term>
 
-          <row>
-            <entry><para>Pressure</para></entry>
+          <listitem>
+            <para>This field allows the fuel tank to have negagive fuel mass
+            which can be useful in optimization and targeting sequences before
+            convergences has occurred.</para>
 
-            <entry><para>Default: 1500.</para> <para>Options: [Real Number ≥
-            0]</para> <para>The Pressure field isthe pressure of the fuel in
-            the tank.</para> <para>Units: kPa.</para></entry>
-          </row>
+            <variablelist>
+              <varlistentry>
+                <term>Default</term>
 
-          <row>
-            <entry><para>Temperature</para></entry>
+                <listitem>
+                  <para>false</para>
+                </listitem>
+              </varlistentry>
 
-            <entry><para>Default: 20.</para> <para>Options: [Real
-            Number]</para> <para>The Temperature field is the temperature of
-            the fuel in the tank.</para> <para>Units: C.</para></entry>
-          </row>
+              <varlistentry>
+                <term>Options</term>
 
-          <row>
-            <entry><para>RefTemperature</para></entry>
+                <listitem>
+                  <para>true, false.</para>
+                </listitem>
+              </varlistentry>
 
-            <entry><para>Default: 20.</para> <para>Options: [Real
-            Number]</para> <para>RefTemperature</para> <para>Units:
-            C.</para></entry>
-          </row>
+              <varlistentry>
+                <term>Units</term>
 
-          <row>
-            <entry><para>Volume</para></entry>
+                <listitem>
+                  <para>N/A</para>
+                </listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+  </refsection>
 
-            <entry><para>Default: 0.75.</para> <para>Options: [Real Number ≥
-            0]</para> <para>The Volume field is the volume of the tank.</para>
-            <para> Units: m<superscript>3</superscript>.</para></entry>
-          </row>
+  <refsection>
+    <example>
+      <title>Creating a default FuelTank and attaching it to a
+      Spacecraft</title>
 
-          <row>
-            <entry><para>FuelDensity</para></entry>
+      <programlisting>%  Create the Fuel Tank Object
+Create FuelTank aTank;
+aTank.AllowNegativeFuelMass = false;
+aTank.FuelMass = 756;
+aTank.Pressure = 1500;
+aTank.Temperature = 20;
+aTank.RefTemperature = 20;
+aTank.Volume = 0.75;
+aTank.FuelDensity = 1260;
+aTank.PressureModel = PressureRegulated;
 
-            <entry><para>Default: 1260.</para> <para>Options: [Real Number ≥
-            0]</para> <para>The FuelDensity parameter is the fuel
-            density.</para> <para>Units:
-            kg/m<superscript>3</superscript></para></entry>
-          </row>
+%  Create a Thruster and assign it a FuelTank
+Create Thruster aThruster;
+aThruster.Tank = {aTank};
 
-          <row>
-            <entry><para>PressureRegulated</para></entry>
+%  Add the FuelTank and Thruster to a Spacecraft
+Create Spacecraft aSpacecraft
+aSpacecraft.Tanks = {aTank};
+aSpacecraft.Thrusters = {aThruster};
 
-            <entry><para>Default: true.</para> <para>Options: [true,
-            false]</para> <para>The PressureRegulated flag allows the userto
-            choose between a pressure regulated tank or a blow down tank. If
-            PressureRegulated is true, then thepressure is held constant as
-            fuel mass is depleted. If PressureRegulated is false, then the
-            pressuredecreases as fuel is depleted.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+</programlisting>
+    </example>
+  </refsection>
+</refentry>
