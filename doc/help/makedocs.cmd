@@ -41,7 +41,7 @@ java -cp %xalancp%	^
     -PARAM shade.verbatim 1 ^
 	-PARAM paper.type USletter ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
+	-XSL xform\fo.xsl ^
 	-OUT build\help-letter.fo
 call contrib\fop\fop.cmd build\help-letter.fo build\help-letter.pdf
 echo --------------------
@@ -58,7 +58,7 @@ java -cp %xalancp%	^
     -PARAM shade.verbatim 1 ^
 	-PARAM paper.type A4 ^
 	-IN src\help.xml ^
-	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
+	-XSL xform\fo.xsl ^
 	-OUT build\help-a4.fo
 call contrib\fop\fop.cmd build\help-a4.fo build\help-a4.pdf
 echo --------------------
