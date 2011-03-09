@@ -6,6 +6,11 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Resources</primary>
+    <secondary>Spacecraft</secondary>
+  </indexterm>
+
   <refmeta>
     <refentrytitle>Spacecraft</refentrytitle>
 
@@ -348,7 +353,7 @@
             <listitem>
               <para>Y is the y-component of the Spacecraft state in the
               coordinate system chosen in the Spacecraft Coordinate System
-              field. </para>
+              field.</para>
 
               <variablelist>
                 <varlistentry>
@@ -392,7 +397,7 @@
             <listitem>
               <para>Z is the z-component of the Spacecraft state in the
               coordinate system chosen in the Spacecraft Coordinate System
-              field. </para>
+              field.</para>
 
               <variablelist>
                 <varlistentry>
@@ -436,7 +441,7 @@
             <listitem>
               <para>VX is the x-component of the Spacecraft velocity in the
               coordinate system chosen in the Spacecraft Coordinate System
-              field. </para>
+              field.</para>
 
               <variablelist>
                 <varlistentry>
@@ -480,7 +485,7 @@
             <listitem>
               <para>VY is the y-component of the Spacecraft velocity in the
               coordinate system chosen in the Spacecraft Coordinate System
-              field. </para>
+              field.</para>
 
               <variablelist>
                 <varlistentry>
@@ -524,7 +529,7 @@
             <listitem>
               <para>VZ is the z-component of the Spacecraft velocity in the
               coordinate system chosen in the Spacecraft Coordinate System
-              field. </para>
+              field.</para>
 
               <variablelist>
                 <varlistentry>
@@ -604,9 +609,9 @@
 
                   <listitem>
                     <informalequation>
-                      <alt>\left| SMA \right| &gt; 10^{-3}</alt>
+                      <alt>\left| SMA \right| &gt; 10^{-3} \textrm{km}</alt>
 
-                      <mathphrase>|SMA| &gt; 1 m</mathphrase>
+                      <mathphrase>|SMA| &gt; 1e-3 km</mathphrase>
                     </informalequation>
                   </listitem>
                 </varlistentry>
@@ -632,7 +637,7 @@
               0.9999999 to avoid numerical issues in the conversion to other
               state types as the Keplerian elements are undefined for
               parabolic orbits. For hyperbolic orbits ECC must be greater than
-              or equal to 1.0000001. See also the SMA description. </para>
+              or equal to 1.0000001. See also the SMA description.</para>
 
               <variablelist>
                 <varlistentry>
@@ -655,7 +660,13 @@
                   <term>Limits</term>
 
                   <listitem>
-                    <para></para>
+                    <informalequation>
+                      <alt>0.0 \le ECC \le 0.9999999 \textrm{or} ECC \ge
+                      1.0000001</alt>
+
+                      <mathphrase>0.0 &lt;= ECC &lt;= 0.9999999 or ECC &gt;=
+                      1.0000001</mathphrase>
+                    </informalequation>
                   </listitem>
                 </varlistentry>
 
@@ -676,7 +687,7 @@
             <listitem>
               <para>The INC field is the spacecraft orbit's osculating
               inclination, in degrees, with respect to the selected coordinate
-              system. </para>
+              system.</para>
 
               <variablelist>
                 <varlistentry>
@@ -720,7 +731,7 @@
             <listitem>
               <para>The RAAN field is the spacecraft orbit's osculating right
               ascension of the ascending node, in degrees, with respect to the
-              selected coordinate system. </para>
+              selected coordinate system.</para>
 
               <variablelist>
                 <varlistentry>
@@ -764,7 +775,7 @@
             <listitem>
               <para>The AOP field is the spacecraft orbit's osculating
               argument of periapsis, in degrees, with respect to the selected
-              coordinate system. </para>
+              coordinate system.</para>
 
               <variablelist>
                 <varlistentry>
@@ -807,7 +818,7 @@
 
             <listitem>
               <para>The TA field is the spacecraft orbit's osculating true
-              anomaly. </para>
+              anomaly.</para>
 
               <variablelist>
                 <varlistentry>
@@ -846,18 +857,6 @@
           </varlistentry>
         </variablelist>
       </refsection>
-    </refsection>
-
-    <refsection>
-      <title>Attitude</title>
-
-      <para></para>
-    </refsection>
-
-    <refsection>
-      <title>Ballistic and Mass</title>
-
-      <para></para>
     </refsection>
   </refsection>
 

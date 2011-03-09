@@ -59,7 +59,9 @@
   <reference>
     <title>Reference (new): Resources</title>
 
+    <xi:include href="Resource_FuelTank.xml"/>
     <xi:include href="Resource_Spacecraft.xml" />
+    
   </reference>  
 
   <chapter>
@@ -70,7 +72,6 @@
         <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
         <xi:include href="Resource_Propagator.xml"/>
         <xi:include href="Resource_ReportFile.xml"/>
-        <xi:include href="Resource_FuelTank.xml"/>
         <xi:include href="Resource_Thruster.xml"/>
         <xi:include href="Resource_SQP(fmincon).xml"/>
         <xi:include href="Resource_SolarSystem.xml"/>
@@ -121,4 +122,6 @@
         <xi:include href="Misc_GMATCommandsinMATLAB.xml"/>
         <xi:include href="Misc_GMATConsoleInstructions.xml"/>
     </chapter>
+    
+    <index/>
 </book>

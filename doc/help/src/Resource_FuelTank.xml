@@ -43,7 +43,6 @@
   <refsection>
     <title>Fields</title>
 
-    <refsection>
       <variablelist>
         <varlistentry>
           <term>Pressure</term>
@@ -337,10 +336,10 @@
           </listitem>
         </varlistentry>
       </variablelist>
-    </refsection>
   </refsection>
 
   <refsection>
+    <title>Examples</title>
     <example>
       <title>Creating a default FuelTank and attaching it to a
       Spacecraft</title>
@@ -367,5 +366,9 @@ aSpacecraft.Thrusters = {aThruster};
 
 </programlisting>
     </example>
+  </refsection>
+  <refsection>
+  <title>Interactions</title>
+  <para>some text</para>
   </refsection>
 </refentry>
