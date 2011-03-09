@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+<refentry version="5.0" xml:id="FuelTank"
+          xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
           xmlns:svg="http://www.w3.org/2000/svg"
@@ -43,303 +44,304 @@
   <refsection>
     <title>Fields</title>
 
-      <variablelist>
-        <varlistentry>
-          <term>Pressure</term>
+    <variablelist>
+      <varlistentry>
+        <term>Pressure</term>
 
-          <listitem>
-            <para>The pressure in the tank.</para>
+        <listitem>
+          <para>The pressure in the tank.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>1500</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>1500</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number ≥ 0</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number ≥ 0</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>kPa.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+              <listitem>
+                <para>kPa.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <varlistentry>
-          <term>Temperature</term>
+      <varlistentry>
+        <term>Temperature</term>
 
-          <listitem>
-            <para>The temperature of the fuel and ullage in the tank. GMAT
-            currently assumes ullage and fuel are always at the same
-            temperature.</para>
+        <listitem>
+          <para>The temperature of the fuel and ullage in the tank. GMAT
+          currently assumes ullage and fuel are always at the same
+          temperature.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>20</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>20</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number &gt; -273.15</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number &gt; -273.15</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>C.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+              <listitem>
+                <para>C.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <varlistentry>
-          <term>FuelMass</term>
+      <varlistentry>
+        <term>FuelMass</term>
 
-          <listitem>
-            <para>The FuelMass field is the mass of fuel in the tank.<caution>
-                <para>By default, GMAT will not allow the fuel mass to be
-                negative. However, occasionally in iterative processes such as
-                targeting, a solver will try values of a maneuver parameter
-                that result in total fuel depletion. Using the default tank
-                settings this will throw an excpeption stopping the run unless
-                you set the AllowNegativeFuelMass flag to true.</para>
-              </caution></para>
+        <listitem>
+          <para>The FuelMass field is the mass of fuel in the tank.<caution>
+              <para>By default, GMAT will not allow the fuel mass to be
+              negative. However, occasionally in iterative processes such as
+              targeting, a solver will try values of a maneuver parameter that
+              result in total fuel depletion. Using the default tank settings
+              this will throw an excpeption stopping the run unless you set
+              the AllowNegativeFuelMass flag to true.</para>
+            </caution></para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>756</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>756</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number ≥ 0</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number ≥ 0</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>kg.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+              <listitem>
+                <para>kg.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
 
-      <variablelist>
-        <varlistentry>
-          <term>ReferenceTemperature</term>
+    <variablelist>
+      <varlistentry>
+        <term>ReferenceTemperature</term>
 
-          <listitem>
-            <para>The temperature of the tank when fuel was loaded.</para>
+        <listitem>
+          <para>The temperature of the tank when fuel was loaded.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>20</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>20</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number ≥ -273.15</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number ≥ -273.15</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>C.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+              <listitem>
+                <para>C.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <varlistentry>
-          <term>Volume</term>
+      <varlistentry>
+        <term>Volume</term>
 
-          <listitem>
-            <para>The volume of the tank. GMAT checks to ensure that the
-            volume of the tank is larger than the volume of fuel loaded in the
-            tank and throws an exception in the case that the fuel volume is
-            larger than the tank volume.</para>
+        <listitem>
+          <para>The volume of the tank. GMAT checks to ensure that the volume
+          of the tank is larger than the volume of fuel loaded in the tank and
+          throws an exception in the case that the fuel volume is larger than
+          the tank volume.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>0.75</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>0.75</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number &gt; 0 such that fuel volume is &lt; tank
-                  volume.</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number &gt; 0 such that fuel volume is &lt; tank
+                volume.</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>m<superscript>3</superscript>.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+              <listitem>
+                <para>m<superscript>3</superscript>.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <varlistentry>
-          <term>FuelDensity</term>
+      <varlistentry>
+        <term>FuelDensity</term>
 
-          <listitem>
-            <para>The density of the fuel.</para>
+        <listitem>
+          <para>The density of the fuel.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>1260</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>1260</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>Real Number &gt; 0</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>Real Number &gt; 0</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>kg/m<superscript>3</superscript>.</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+              <listitem>
+                <para>kg/m<superscript>3</superscript>.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
 
-      <variablelist>
-        <varlistentry>
-          <term>PressureModel</term>
+    <variablelist>
+      <varlistentry>
+        <term>PressureModel</term>
 
-          <listitem>
-            <para>The pressure model describes how pressure in the tank
-            changes as fuel is depleted.</para>
+        <listitem>
+          <para>The pressure model describes how pressure in the tank changes
+          as fuel is depleted.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>PressureRegulated</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>PressureRegulated</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>PressureRegulated, BlowDown</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>PressureRegulated, BlowDown</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
+              <listitem>
+                <para>N/A</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <varlistentry>
-          <term>AllowNegativeFuelMass</term>
+      <varlistentry>
+        <term>AllowNegativeFuelMass</term>
 
-          <listitem>
-            <para>This field allows the fuel tank to have negagive fuel mass
-            which can be useful in optimization and targeting sequences before
-            convergences has occurred.</para>
+        <listitem>
+          <para>This field allows the fuel tank to have negagive fuel mass
+          which can be useful in optimization and targeting sequences before
+          convergences has occurred.</para>
 
-            <variablelist>
-              <varlistentry>
-                <term>Default</term>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-                <listitem>
-                  <para>false</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>false</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Options</term>
+            <varlistentry>
+              <term>Options</term>
 
-                <listitem>
-                  <para>true, false.</para>
-                </listitem>
-              </varlistentry>
+              <listitem>
+                <para>true, false.</para>
+              </listitem>
+            </varlistentry>
 
-              <varlistentry>
-                <term>Units</term>
+            <varlistentry>
+              <term>Units</term>
 
-                <listitem>
-                  <para>N/A</para>
-                </listitem>
-              </varlistentry>
-            </variablelist>
-          </listitem>
-        </varlistentry>
-      </variablelist>
+              <listitem>
+                <para>N/A</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
   </refsection>
 
   <refsection>
     <title>Examples</title>
+
     <example>
       <title>Creating a default FuelTank and attaching it to a
       Spacecraft</title>
@@ -367,8 +369,10 @@ aSpacecraft.Thrusters = {aThruster};
 </programlisting>
     </example>
   </refsection>
+
   <refsection>
-  <title>Interactions</title>
-  <para>some text</para>
+    <title>Interactions</title>
+
+    <para>some text</para>
   </refsection>
 </refentry>

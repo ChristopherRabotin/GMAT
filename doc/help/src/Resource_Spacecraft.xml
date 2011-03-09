@@ -8,6 +8,7 @@
           xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
     <primary>Resources</primary>
+
     <secondary>Spacecraft</secondary>
   </indexterm>
 
@@ -38,9 +39,9 @@
 
     <para>A Spacecraft resource contains information about the spacecraft's
     orbit, its attitude, its physical parameters (such as mass and drag
-    coefficient), and any attached hardware, including thrusters and fuel
-    tanks. It also contains information about the visual model used to
-    represent it in an OrbitView.</para>
+    coefficient), and any attached hardware, including thrusters and <link
+    linkend="FuelTank">fuel tanks</link>. It also contains information about
+    the visual model used to represent it in an OrbitView.</para>
   </refsection>
 
   <refsection>
