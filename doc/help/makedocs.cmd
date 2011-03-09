@@ -43,7 +43,7 @@ java -cp %xalancp%	^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-letter.fo
-call contrib\fop\fop.cmd build\help-letter.fo build\help-letter-fo.pdf
+call contrib\fop\fop.cmd build\help-letter.fo build\help-letter.pdf
 echo --------------------
 echo.
 
@@ -60,29 +60,29 @@ java -cp %xalancp%	^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\fo\docbook.xsl ^
 	-OUT build\help-a4.fo
-call contrib\fop\fop.cmd build\help-a4.fo build\help-a4-fo.pdf
+call contrib\fop\fop.cmd build\help-a4.fo build\help-a4.pdf
 echo --------------------
 echo.
 
 rem DocBook -> LaTeX -> PDF (letter)
-echo LaTeX PDF (letter)
-python C:\Python27\Scripts\dblatex ^
-	-o build\help-letter-latex.pdf ^
-	-P latex.class.options=letterpaper ^
-	-T simple ^
-	src\help.xml
-echo --------------------
-echo.
+REM echo LaTeX PDF (letter)
+REM python C:\Python27\Scripts\dblatex ^
+	REM -o build\help-letter-latex.pdf ^
+	REM -P latex.class.options=letterpaper ^
+	REM -T simple ^
+	REM src\help.xml
+REM echo --------------------
+REM echo.
 
 rem DocBook -> LaTeX -> PDF (A4)
-echo LaTeX PDF (A4)
-python C:\Python27\Scripts\dblatex ^
-	-o build\help-a4-latex.pdf ^
-	-P latex.class.options=a4paper ^
-	-T simple ^
-	src\help.xml
-echo --------------------
-echo.
+REM echo LaTeX PDF (A4)
+REM python C:\Python27\Scripts\dblatex ^
+	REM -o build\help-a4-latex.pdf ^
+	REM -P latex.class.options=a4paper ^
+	REM -T simple ^
+	REM src\help.xml
+REM echo --------------------
+REM echo.
 
 rem DocBook -> CHM
 echo Windows Help
