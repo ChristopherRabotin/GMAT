@@ -149,7 +149,7 @@
             <para>The initial epoch of the spacecraft's state and
             properties.</para>
 
-            <variablelist>
+            <variablelist spacing="compact">
               <varlistentry>
                 <term>Type</term>
 
@@ -205,7 +205,7 @@
             ModifiedKeplerian, and Equinoctial are not permitted. This is
             because these state types require a µ value.</para>
 
-            <variablelist>
+            <variablelist spacing="compact">
               <varlistentry>
                 <term>Type</term>
 
@@ -218,7 +218,7 @@
                 <term>Values</term>
 
                 <listitem>
-                  <itemizedlist>
+                  <itemizedlist spacing="compact">
                     <listitem>
                       <para><literal>EarthMJ2000Eq</literal> (default)</para>
                     </listitem>
@@ -253,7 +253,7 @@
             Equinoctial are not permitted. This is because these state types
             require a µ value.</para>
 
-            <variablelist>
+            <variablelist spacing="compact">
               <varlistentry>
                 <term>Type</term>
 
@@ -266,7 +266,7 @@
                 <term>Values</term>
 
                 <listitem>
-                  <itemizedlist>
+                  <itemizedlist spacing="compact">
                     <listitem>
                       <para><literal>Cartesian</literal> (default)</para>
                     </listitem>
@@ -310,7 +310,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -354,7 +354,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -398,7 +398,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -442,7 +442,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -486,7 +486,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -530,7 +530,7 @@
               coordinate system chosen in the Spacecraft Coordinate System
               field.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -586,7 +586,7 @@
               should be less than -1 m. GMAT does not support the creation of
               parabolic orbits.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -638,7 +638,7 @@
               parabolic orbits. For hyperbolic orbits ECC must be greater than
               or equal to 1.0000001. See also the SMA description.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -688,7 +688,7 @@
               inclination, in degrees, with respect to the selected coordinate
               system.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -732,7 +732,7 @@
               ascension of the ascending node, in degrees, with respect to the
               selected coordinate system.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -776,7 +776,7 @@
               argument of periapsis, in degrees, with respect to the selected
               coordinate system.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
@@ -819,7 +819,7 @@
               <para>The TA field is the spacecraft orbit's osculating true
               anomaly.</para>
 
-              <variablelist>
+              <variablelist spacing="compact">
                 <varlistentry>
                   <term>Type</term>
 
