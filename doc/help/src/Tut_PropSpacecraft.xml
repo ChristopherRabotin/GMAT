@@ -95,27 +95,11 @@
 
           <listitem>
             <para>Save the changes by left clicking the Apply button at the
-            bottom of the window. Below you see the orbit tab after correctly
-            setting the epoch to the desired value.</para>
+            bottom of the window. In the first figure below you see the orbit
+            tab after correctly setting the epoch to the desired value.</para>
           </listitem>
         </orderedlist>
 
-        <screenshot>
-          <info>
-            <title>Figure: Spacecraft Epoch Setup</title>
-          </info>
-
-          <mediaobject>
-            <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_PropSpacecraft_SpacecraftEpochSetup.jpeg"></imagedata>
-            </imageobject>
-
-            <caption>
-              <para>Figure: Spacecraft Epoch Setup</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
       </section>
 
       <section>
@@ -168,8 +152,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_PropSpacecraft_SpacecraftStateSetup.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -277,8 +262,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_PropSpacecraft_ForceModelPointMassConfiguration.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelPointMassConfiguration.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -297,8 +283,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_PropSpacecraft_ForceModelConfiguration.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -379,8 +366,9 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                       fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"></imagedata>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_PropSpacecraft_DefaultOrbitviewConfiguration.jpeg"
+                       scalefit="1" width="100%"></imagedata>
           </imageobject>
 
           <caption>
@@ -445,8 +433,9 @@
 
             <mediaobject>
               <imageobject>
-                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.jpeg"></imagedata>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandPropagatorSelectDialogConfiguration.jpeg"
+                           scalefit="1" width="100%"></imagedata>
               </imageobject>
 
               <caption>
@@ -495,8 +484,9 @@
 
             <mediaobject>
               <imageobject>
-                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.jpeg"></imagedata>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandSpaceObjectSelectdialogConfiguration.jpeg"
+                           scalefit="1" width="100%"></imagedata>
               </imageobject>
 
               <caption>
@@ -551,8 +541,9 @@
 
             <mediaobject>
               <imageobject>
-                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.jpeg"></imagedata>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandParameterSelectDialogConfiguration.jpeg"
+                           scalefit="1" width="100%"></imagedata>
               </imageobject>
 
               <caption>
@@ -574,8 +565,9 @@
 
             <mediaobject>
               <imageobject>
-                <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.bmp"></imagedata>
+                <imagedata align="center" contentdepth="100%"
+                           fileref="files/images/Tut_PropSpacecraft_PropagateCommandConfiguration.jpeg"
+                           scalefit="1" width="100%"></imagedata>
               </imageobject>
 
               <caption>
@@ -616,8 +608,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.bmp"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Tut_PropSpacecraft_OrbitviewPlotAfterMissionRun.jpeg"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>

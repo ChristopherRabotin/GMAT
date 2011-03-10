@@ -11,15 +11,16 @@
 
   <section>
     <title>Objective and Overview</title>
-    <para><emphasis role="bold">Level:</emphasis> Beginner</para>
-    <para><emphasis role="bold">Final result:</emphasis>
-      <link xlink:href="scripts/HohmannTransferDesign.script"
-      >HohmannTransferDesign.script</link></para>
 
-    <para>In this tutorial, we will use differential correction to perform a Hohmann transfer from
-      an initial parking orbit to a final mission orbit. In order to focus on the configuration of
-      the target sequence, we will make extensive use of the default configurations for spacecraft,
-      propagators, and maneuvers. This tutorial is split into five basic steps:</para>
+    <para><emphasis role="bold">Final result:</emphasis> <link
+    xlink:href="scripts/HohmannTransferDesign.script">HohmannTransferDesign.script</link></para>
+
+    <para>In this tutorial, we will use differential correction to perform a
+    Hohmann transfer from an initial parking orbit to a final mission orbit.
+    In order to focus on the configuration of the target sequence, we will
+    make extensive use of the default configurations for spacecraft,
+    propagators, and maneuvers. This tutorial is split into five basic
+    steps:</para>
 
     <orderedlist>
       <listitem>
@@ -118,8 +119,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_Hohmann_DefaultOpenGL.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_DefaultOpenGL.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -135,32 +137,42 @@
 
     <para>In this section you will create two targeting segments. The first
     targeting segment will raise orbit apogee to GEOsynchronous altitude
-    (42165km). The second targeting sequence will circularize the orbit. Each
-    targeting segment we will employ a Target command, a Vary command, a
-    Maneuver, and Achieve command inside of the Target branch command.</para>
+    (~42165km). The second targeting sequence will circularize the orbit. Each
+    targeting segment employs a Target command, a Vary command, a Maneuver, a
+    Propagate Command and Achieve command inside of the Target branch
+    command.</para>
 
     <section>
       <title>Initial Propagate Sequence</title>
 
-      <itemizedlist>
+      <orderedlist>
         <listitem>
-          <para>Propagate1</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Set the stopping condition parameter as the Earth's
-              periapsis. It can be found be right-clicking on
-              DefaultSC.ElapsedSecs, under the Parameter heading.</para>
-            </listitem>
-
-            <listitem>
-              <para>The previous step will bring up the Parameter Select
-              Dialog Box. Select Periapsis under the Object Properties list
-              and click the Add Selected Item(s) button.</para>
-            </listitem>
-          </itemizedlist>
+          <para>Right-click on the Mission tab to bring up the Mssion
+          Tree.</para>
         </listitem>
-      </itemizedlist>
+
+        <listitem>
+          <para>Right-click on the Propagate1 and select open from the
+          menu.</para>
+        </listitem>
+
+        <listitem>
+          <para>Locate the Stopping Conditions group box and then right click
+          on the set of ellipses next to the text "DefaultSC.ElapsedSecs".
+          This will open the Parameter Select Dialog box.</para>
+        </listitem>
+
+        <listitem>
+          <para>Under the Object Properties list on the Parameter Select
+          Dialog box, locate periapsis and double-click on it. Click ok on the
+          Parameter Select Dialog box.</para>
+        </listitem>
+
+        <listitem>
+          <para>Click the Ok button on the Propagate 1 dialog box to save
+          changes and close.</para>
+        </listitem>
+      </orderedlist>
 
       <screenshot>
         <info>
@@ -169,8 +181,9 @@
 
         <mediaobject>
           <imageobject>
-            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                       fileref="files/images/Tut_Hohmann_Propagate1PropagateCommand.jpeg"></imagedata>
+            <imagedata align="center" contentdepth="100%"
+                       fileref="files/images/Tut_Hohmann_Propagate1PropagateCommand.jpeg"
+                       scalefit="1" width="100%"></imagedata>
           </imageobject>
 
           <caption>
@@ -182,94 +195,121 @@
       <section>
         <title>First Targeting Sequence</title>
 
-        <itemizedlist>
+        <para>To raise the orbit apogee to GEO altitude, you will employ a
+        Targeting loop. Begin by creating the commands necessary to perform
+        the targeting sequence:</para>
+
+        <orderedlist>
           <listitem>
-            <para>Target1: Insert this after Propagate1</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>Vary1: Append this Vary to Target1</para>
-              </listitem>
-
-              <listitem>
-                <para>Maneuver1: Insert this Maneuver after Vary</para>
-              </listitem>
-
-              <listitem>
-                <para>Propagate2</para>
-
-                <itemizedlist>
-                  <listitem>
-                    <para>This propagate should be inserted after the
-                    Maneuver</para>
-                  </listitem>
-
-                  <listitem>
-                    <para>Set the stopping parameter as Earth's apoapsis. This
-                    process is the same as before when setting the first
-                    propagate command's stopping parameter as Earth's
-                    periapsis</para>
-                  </listitem>
-                </itemizedlist>
-              </listitem>
-
-              <listitem>
-                <para>Achieve1:</para>
-
-                <itemizedlist>
-                  <listitem>
-                    <para>This will go after Propagate2.</para>
-                  </listitem>
-
-                  <listitem>
-                    <para>Note: From here on it will be assumed that you will
-                    follow the order of commands shown in the mission
-                    tree.</para>
-                  </listitem>
-                </itemizedlist>
-              </listitem>
-            </itemizedlist>
+            <para>Right-click on Propagate1 in the Misssion Tree, select
+            Insert After, and select Target.</para>
           </listitem>
-        </itemizedlist>
 
-        <informaltable colsep="0" frame="none">
-          <tgroup cols="2">
-		  <colspec colname='c1'/>
-		  <colspec colname='c2'/>
-            <tbody>
-              <row>
-                <entry><screenshot>
-                    <info>
-                      <title>Figure: Appending a Targeting Sequence</title>
-                    </info>
+          <listitem>
+            <para>Right-click on Target1 in the Mission Tree, select Insert
+            After, and select Vary.</para>
+          </listitem>
 
-                    <mediaobject>
-                      <imageobject>
-                        <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                                   fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence1.jpeg"></imagedata>
-                      </imageobject>
-                    </mediaobject>
-                  </screenshot></entry>
+          <listitem>
+            <para>Right-click on Vary1 in the Mission Tree, select Insert
+            After, and select Manuever.</para>
+          </listitem>
 
-                <entry><screenshot>
-                    <info>
-                      <title>Figure: Appending a Targeting Sequence</title>
-                    </info>
+          <listitem>
+            <para>Right-click on Maneuver1 in the Mission Tree, select Insert
+            After, and select Propagate.</para>
+          </listitem>
 
-                    <mediaobject>
-                      <imageobject>
-                        <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                                   fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence2.jpeg"></imagedata>
-                      </imageobject>
-                    </mediaobject>
-                  </screenshot></entry>
-              </row>
-			  <row>
-				<entry namest="c1" nameend="c2" align='center'>Figure: Appending a Targeting Sequence</entry>
-			  </row>
-            </tbody>
-          </tgroup>
-        </informaltable>
+          <listitem>
+            <para>Right-click on Propagate2 in the Mission Tree, select Insert
+            After, and select Achieve.</para>
+
+            <informaltable colsep="0" frame="none">
+              <tgroup cols="2">
+                <colspec colname="c1" />
+
+                <colspec colname="c2" />
+
+                <tbody>
+                  <row>
+                    <entry><screenshot>
+                        <info>
+                          <title>Figure: Appending a Targeting
+                          Sequence</title>
+                        </info>
+
+                        <mediaobject>
+                          <imageobject>
+                            <imagedata align="center" contentdepth="100%"
+                                       fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence1.jpeg"
+                                       scalefit="1" width="100%"></imagedata>
+                          </imageobject>
+                        </mediaobject>
+                      </screenshot></entry>
+
+                    <entry><screenshot>
+                        <info>
+                          <title>Figure: Appending a Targeting
+                          Sequence</title>
+                        </info>
+
+                        <mediaobject>
+                          <imageobject>
+                            <imagedata align="center" contentdepth="100%"
+                                       fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence2.jpeg"
+                                       scalefit="1" width="100%"></imagedata>
+                          </imageobject>
+                        </mediaobject>
+                      </screenshot></entry>
+                  </row>
+
+                  <row>
+                    <entry align="center" nameend="c2" namest="c1">Figure:
+                    Appending a Targeting Sequence</entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable>
+
+            <para>Now you will configure the commands you created above to
+            solve for the delta-v required to raise orbit apoapsis from LEO to
+            GEO. The images for each GUI are shown below the following
+            steps.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right Click on Vary1 in the Mission Tree and select Open.
+            Notice that the in the Variable SetUp group box, the variable is
+            defined as DefaulIB.Element1. This is the velocity component of
+            DefaultIB in the local VNB system. So we do not need to change the
+            targeter variable.</para>
+          </listitem>
+
+          <listitem>
+            <para>Locate the initial value text box and set it to 1.5. Click
+            Ok to close the Vary1 dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on the Maneuver1 command in the Mission Tree.
+            Notice that the command is set to apply DefaultIB to DefaultSC so
+            we do not need to change any settings for this command. Click Ok
+            to close the Maneuver1 dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on the Propagate2 dialog box. Use the same
+            procedure shown in the sections above to set the stopping condtion
+            to Apoapsis and then click Ok to close the dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Finally, Right-click on the Achieve1 command in the Mission
+            Tree. Notice that the goal is set to DefaultSC.Earth.RMAG. So we
+            do not need to change any settings for this command. Click Ok to
+            close the dialog box.</para>
+          </listitem>
+        </orderedlist>
 
         <screenshot>
           <info>
@@ -278,8 +318,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_Hohmann_Target1TargetCommand.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_Target1TargetCommand.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -295,8 +336,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_Hohmann_Vary1VaryCommand.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_Vary1VaryCommand.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -312,8 +354,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -329,8 +372,9 @@
 
           <mediaobject>
             <imageobject>
-              <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                         fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.jpeg"></imagedata>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.jpeg"
+                         scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
@@ -343,25 +387,73 @@
       <section>
         <title>Second Targeting Sequence</title>
 
-        <itemizedlist>
+        <para>To circularize the orbit, you will employ another
+        Targeting loop. Begin by creating the commands necessary to perform
+        the targeting sequence:</para>
+
+        <orderedlist>
           <listitem>
-            <para>Target2:</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>Vary2</para>
-              </listitem>
-
-              <listitem>
-                <para>Maneuver2</para>
-              </listitem>
-
-              <listitem>
-                <para>Achieve2: set the Goal field to be earth's SMA</para>
-              </listitem>
-            </itemizedlist>
+            <para>Right-click on EndTarget1 in the Misssion Tree, select
+            Insert After, and select Target.</para>
           </listitem>
-        </itemizedlist>
+
+          <listitem>
+            <para>Right-click on Target2 in the Mission Tree, select Insert
+            After, and select Vary.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on Vary2 in the Mission Tree, select Insert
+            After, and select Manuever.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on Maneuver2 in the Mission Tree, select Insert
+            After, and select Propagate.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on Propagate3 in the Mission Tree, select Insert
+            After, and select Achieve.</para>
+
+            <para>Now you will configure the commands you created above to
+            solve for the delta-v required to raise orbit apoapsis from LEO to
+            GEO.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right Click on Vary2 in the Mission Tree and select Open.
+            Notice that the in the Variable SetUp group box, the variable is
+            defined as DefaulIB.Element1. This is the velocity component of
+            DefaultIB in the local VNB system. So we do not need to change the
+            targeter variable.</para>
+          </listitem>
+
+          <listitem>
+            <para>Locate the initial value text box and set it to 1.5. Click
+            Ok to close the Vary1 dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on the Maneuver1 command in the Mission Tree.
+            Notice that the command is set to apply DefaultIB to DefaultSC so
+            we do not need to change any settings for this command. Click Ok
+            to close the Maneuver1 dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Right-click on the Propagate2 dialog box. Use the same
+            procedure show above to set the stopping condtion to Apoapsis and
+            then click Ok to close the dialog box.</para>
+          </listitem>
+
+          <listitem>
+            <para>Finally, Right-click on the Achieve1 command in the Mission
+            Tree. Notice that the goal is set to DefaultSC.Earth.RMAG. So we
+            do not need to change any settings for this command. Click Ok to
+            close the dialog box.</para>
+          </listitem>
+        </orderedlist>
       </section>
 
       <section>
@@ -399,8 +491,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Tut_Hohmann_OutputAfterInitialPropagateSequence.jpeg"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Tut_Hohmann_OutputAfterInitialPropagateSequence.jpeg"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>
@@ -417,8 +510,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Tut_Hohmann_OutputAfterFirstandSecondTargetingSequences.jpeg"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Tut_Hohmann_OutputAfterFirstandSecondTargetingSequences.jpeg"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>
@@ -435,8 +529,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Tut_Hohmann_OutputAfterFinalPropagateSequence.jpeg"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Tut_Hohmann_OutputAfterFinalPropagateSequence.jpeg"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>

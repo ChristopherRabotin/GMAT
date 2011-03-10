@@ -31,29 +31,31 @@
     <chapter>
         <title>How To</title>
         <xi:include href="HowTo_ReportingMissionParameters.xml"/>
-        <xi:include href="HowTo_RunningScriptsfromMATLAB.xml"/>
+		<xi:include href="Tut_MATLAB.xml"/>
         <xi:include href="HowTo_CreatingEphemerisFiles.xml"/>
+		<xi:include href="Tut_CreatingReport.xml"/>
         <xi:include href="HowTo_VisualizingaTrajectory.xml"/>
+		<!--
+		<xi:include href="HowTo_RunningScriptsfromMATLAB.xml"/>
+        <xi:include href="Tut_ForceModels.xml"/>
+		-->
     </chapter>
 
     <chapter>
         <title>Samples and Tutorials</title>
-
         <xi:include href="Tut_PropSpacecraft.xml"/>
         <xi:include href="Tut_HohmannTransfer.xml"/>
-        <xi:include href="Tut_CreatingReport.xml"/>
-        <xi:include href="Tut_MATLAB.xml"/>
-        <xi:include href="Tut_ForceModels.xml"/>
-        <xi:include href="Tut_AlgebraicOptimization.xml"/>
-
         <xi:include href="Tut_MarsB-PlaneTargeting.xml"/>
-        <xi:include href="Tut_L2Transfer.xml"/>
         <xi:include href="Tut_ACEStationKeeping.xml"/>
         <xi:include href="Tut_LunarTransfer.xml"/>
-        <xi:include href="Tut_FormationRendezvous.xml"/>
         <xi:include href="Tut_MinFuelOrbitTransfer.xml"/>
-        <xi:include href="Tut_MinFuelLunarTransfer.xml"/>
         <xi:include href="Tut_LEOStationKeeping.xml"/>
+		<!--
+		<xi:include href="Tut_AlgebraicOptimization.xml"/>
+		<xi:include href="Tut_FormationRendezvous.xml"/>
+		<xi:include href="Tut_L2Transfer.xml"/>
+	    <xi:include href="Tut_MinFuelLunarTransfer.xml"/>
+		-->
     </chapter>
 
   <reference>

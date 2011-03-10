@@ -51,7 +51,16 @@
         <listitem>
           <para>The pressure in the tank.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		     <varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -60,13 +69,15 @@
               </listitem>
             </varlistentry>
 
-            <varlistentry>
-              <term>Options</term>
+			<varlistentry>
+			  <term>Limits</term>
 
-              <listitem>
-                <para>Real Number ≥ 0</para>
-              </listitem>
-            </varlistentry>
+			  <listitem>
+				<informalequation>
+				  <mathphrase> Pressure &gt; 0 </mathphrase>
+				</informalequation>
+			  </listitem>
+			</varlistentry>
 
             <varlistentry>
               <term>Units</term>
@@ -87,7 +98,16 @@
           currently assumes ullage and fuel are always at the same
           temperature.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		  	<varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -97,10 +117,12 @@
             </varlistentry>
 
             <varlistentry>
-              <term>Options</term>
+              <term>Limits</term>
 
               <listitem>
-                <para>Real Number &gt; -273.15</para>
+                <informalequation>
+				  <mathphrase> Temperature &gt; -273.15 </mathphrase>
+				</informalequation>
               </listitem>
             </varlistentry>
 
@@ -128,7 +150,16 @@
               the AllowNegativeFuelMass flag to true.</para>
             </caution></para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		    <varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -138,10 +169,12 @@
             </varlistentry>
 
             <varlistentry>
-              <term>Options</term>
+              <term>Limits</term>
 
               <listitem>
-                <para>Real Number ≥ 0</para>
+                <informalequation>
+				  <mathphrase> FuelMass &gt; 0 </mathphrase>
+				</informalequation>
               </listitem>
             </varlistentry>
 
@@ -157,14 +190,23 @@
       </varlistentry>
     </variablelist>
 
-    <variablelist>
+    <variablelist spacing="compact">
       <varlistentry>
         <term>ReferenceTemperature</term>
 
         <listitem>
           <para>The temperature of the tank when fuel was loaded.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		  	<varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -177,7 +219,9 @@
               <term>Options</term>
 
               <listitem>
-                <para>Real Number ≥ -273.15</para>
+                <informalequation>
+				  <mathphrase> ReferenceTemperature >=; 0 </mathphrase>
+				</informalequation>
               </listitem>
             </varlistentry>
 
@@ -201,7 +245,16 @@
           throws an exception in the case that the fuel volume is larger than
           the tank volume.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		  	<varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -236,7 +289,16 @@
         <listitem>
           <para>The density of the fuel.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		          
+  		    <varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Real Numer</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -246,7 +308,7 @@
             </varlistentry>
 
             <varlistentry>
-              <term>Options</term>
+              <term>Limits</term>
 
               <listitem>
                 <para>Real Number &gt; 0</para>
@@ -265,7 +327,7 @@
       </varlistentry>
     </variablelist>
 
-    <variablelist>
+    <variablelist spacing="compact">
       <varlistentry>
         <term>PressureModel</term>
 
@@ -273,7 +335,16 @@
           <para>The pressure model describes how pressure in the tank changes
           as fuel is depleted.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
+		  
+		  	<varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Enumeration</para>
+              </listitem>
+            </varlistentry>
+			
             <varlistentry>
               <term>Default</term>
 
@@ -283,7 +354,7 @@
             </varlistentry>
 
             <varlistentry>
-              <term>Options</term>
+              <term>Limits</term>
 
               <listitem>
                 <para>PressureRegulated, BlowDown</para>
@@ -309,7 +380,7 @@
           which can be useful in optimization and targeting sequences before
           convergences has occurred.</para>
 
-          <variablelist>
+          <variablelist spacing="compact">
             <varlistentry>
               <term>Default</term>
 
@@ -368,11 +439,5 @@ aSpacecraft.Thrusters = {aThruster};
 
 </programlisting>
     </example>
-  </refsection>
-
-  <refsection>
-    <title>Interactions</title>
-
-    <para>some text</para>
   </refsection>
 </refentry>
