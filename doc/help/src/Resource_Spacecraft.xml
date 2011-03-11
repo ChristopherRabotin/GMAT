@@ -62,15 +62,11 @@
               <inlineequation>
                   <mathphrase>JD</mathphrase>
                 </inlineequation> is the full Julian date:<informalequation>
-                  <alt>MJD = JD - 2400000.5</alt>
-
                   <mathphrase>MJD = JD - 2400000.5</mathphrase>
                 </informalequation>GMAT, however, uses the following
               definition:</para>
 
               <informalequation>
-                <alt>MJD = JD - 2430000.0</alt>
-
                 <mathphrase>MJD = JD - 2430000.0</mathphrase>
               </informalequation>
             </caution>
@@ -315,7 +311,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -359,7 +355,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -403,7 +399,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -447,7 +443,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -491,7 +487,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -535,7 +531,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -568,7 +564,7 @@
         </variablelist>
       </refsection>
 
-      <refsection>
+      <refsection xml:id="SpacecraftDisplayStateTypeKeplerian">
         <title>Keplerian State</title>
 
         <variablelist>
@@ -591,7 +587,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -608,8 +604,6 @@
 
                   <listitem>
                     <informalequation>
-                      <alt>\left| SMA \right| &gt; 10^{-3} \textrm{km}</alt>
-
                       <mathphrase>|SMA| &gt; 1e-3 km</mathphrase>
                     </informalequation>
                   </listitem>
@@ -643,7 +637,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -660,9 +654,6 @@
 
                   <listitem>
                     <informalequation>
-                      <alt>0.0 \le ECC \le 0.9999999 \textrm{or} ECC \ge
-                      1.0000001</alt>
-
                       <mathphrase>0.0 &lt;= ECC &lt;= 0.9999999 or ECC &gt;=
                       1.0000001</mathphrase>
                     </informalequation>
@@ -693,7 +684,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -737,7 +728,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -781,7 +772,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -824,7 +815,7 @@
                   <term>Type</term>
 
                   <listitem>
-                    <para>numeric</para>
+                    <para>real number</para>
                   </listitem>
                 </varlistentry>
 
@@ -855,6 +846,440 @@
             </listitem>
           </varlistentry>
         </variablelist>
+      </refsection>
+
+      <refsection>
+        <title>ModifiedKeplerian State</title>
+
+        <variablelist>
+          <varlistentry>
+            <term><literal>RadPer</literal></term>
+
+            <listitem>
+              <para>The RadPer field is the spacecraft orbit's osculating
+              radius of periapsis. RadPer must be greater than zero.</para>
+
+              <variablelist>
+                <varlistentry>
+                  <term>Type</term>
+
+                  <listitem>
+                    <para>real number</para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Default</term>
+
+                  <listitem>
+                    <para></para>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Limits</term>
+
+                  <listitem>
+                    <informalequation>
+                      <mathphrase>RadPer &gt; 0</mathphrase>
+                    </informalequation>
+                  </listitem>
+                </varlistentry>
+
+                <varlistentry>
+                  <term>Units</term>
+
+                  <listitem>
+                    <para>km</para>
+                  </listitem>
+                </varlistentry>
+              </variablelist>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>RadApo</literal></term>
+
+            <listitem>
+              <para>The RadApo field is the spacecraft orbit's osculating
+              radius of apoapsis. RadApo must be strictly greater than or less
+              than zero. When RadApo is negative, the orbit is
+              hyperbolic.</para>
+
+              <para><variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <informalequation>
+                        <alt>RadApo ~= 0</alt>
+
+                        <m:math>
+                          <m:mrow>
+                            <m:mi>RadApo</m:mi>
+
+                            <m:mo></m:mo>
+
+                            <m:mn>0</m:mn>
+                          </m:mrow>
+                        </m:math>
+                      </informalequation>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist></para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>INC</literal></term>
+
+            <listitem>
+              <para>See the <xref
+              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              description of this field.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>RAAN</literal></term>
+
+            <listitem>
+              <para>See the <xref
+              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              description of this field.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>AOP</literal></term>
+
+            <listitem>
+              <para>See the <xref
+              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              description of this field.</para>
+            </listitem>
+          </varlistentry>
+
+          <varlistentry>
+            <term><literal>TA</literal></term>
+
+            <listitem>
+              <para>See the <xref
+              linkend="SpacecraftDisplayStateTypeKeplerian" /> section for a
+              description of this field.</para>
+            </listitem>
+          </varlistentry>
+        </variablelist>
+      </refsection>
+
+      <refsection>
+        <title>SphericalAZFPA State</title>
+
+        <para><variablelist>
+            <varlistentry>
+              <term><literal>RMAG</literal></term>
+
+              <listitem>
+                <para>The RMAG field allows the user to set the magnitude of
+                the spacecraft's position vector.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <informalequation>
+                        <alt>RMAG &gt; 0</alt>
+
+                        <m:math display="block">
+                          <m:mi>RMAG</m:mi>
+
+                          <m:mo>&gt;</m:mo>
+
+                          <m:mn>0</m:mn>
+                        </m:math>
+                      </informalequation>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>km</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><literal>RA</literal></term>
+
+              <listitem>
+                <para>The RA field allows the user to set the spacecraft's
+                right ascension.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>degrees</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><literal>DEC</literal></term>
+
+              <listitem>
+                <para>The DEC field allows the user to set the spacecraft's
+                declination.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>degrees</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><literal>VMAG</literal></term>
+
+              <listitem>
+                <para>The VMAG field allows the user to set the magnitude of
+                the spacecraft's velocity.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <informalequation>
+                        <mathphrase>VMAG &gt;= 0</mathphrase>
+                      </informalequation>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <informalequation>
+                        <alt>km/s</alt>
+
+                        <m:math>
+                          <m:mi>km</m:mi>
+
+                          <m:mo>/</m:mo>
+
+                          <m:mi>s</m:mi>
+                        </m:math>
+                      </informalequation>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><literal>AZI</literal></term>
+
+              <listitem>
+                <para>The AZI field allows the user to set the spacecraft's
+                azimuth angle.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>degrees</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term><literal>FPA</literal></term>
+
+              <listitem>
+                <para>The FPA allows the user to set a spacecraft's flight
+                path angle.</para>
+
+                <variablelist>
+                  <varlistentry>
+                    <term>Type</term>
+
+                    <listitem>
+                      <para>real number</para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Default</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Limits</term>
+
+                    <listitem>
+                      <para></para>
+                    </listitem>
+                  </varlistentry>
+
+                  <varlistentry>
+                    <term>Units</term>
+
+                    <listitem>
+                      <para>degrees</para>
+                    </listitem>
+                  </varlistentry>
+                </variablelist>
+              </listitem>
+            </varlistentry>
+          </variablelist></para>
       </refsection>
     </refsection>
   </refsection>
