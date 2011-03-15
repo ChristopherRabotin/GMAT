@@ -1,159 +1,135 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Array" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Array</title>
+<refentry version="5.0" xml:id="Array" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>Array</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Array</refname>
+
+    <refpurpose>A fuel tank.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create Array <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The purpose of an array is to store multiple parameters under one
     object, such as components of a vector.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+  <refsection>
+    <title>Fields</title>
 
-      <itemizedlist>
+    <variablelist>
+      <varlistentry>
+        <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
+        FORMATTING$</term>
+
         <listitem>
-          <para>Report Command</para>
+          <para>$ITEM DESCRIPTION$</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Report commands can be used to retrieve information within
-              arrays or from the entire array.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>$ITEM DEFAULT VALUE$</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>$ITEM OPTIONS$</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>$UNITS$</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
-      </itemizedlist>
-    </section>
-  </section>
+      </varlistentry>
 
-  <section>
-    <title>Using the GUI</title>
+      <varlistentry>
+        <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
+        FORMATTING$</term>
 
-    <itemizedlist>
-      <listitem>
-        <para>Name - Field</para>
+        <listitem>
+          <para>$ITEM DESCRIPTION$</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>User can define the name of the Array.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
 
-      <listitem>
-        <para>Row - Field</para>
+              <listitem>
+                <para>$ITEM DEFAULT VALUE$</para>
+              </listitem>
+            </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Input how many rows are needed based on given or desired
-            information</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+            <varlistentry>
+              <term>Limits</term>
 
-      <listitem>
-        <para>Column - Field</para>
+              <listitem>
+                <para>$ITEM OPTIONS$</para>
+              </listitem>
+            </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Input how many columns are needed based on given or desired
-            information</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+            <varlistentry>
+              <term>Units</term>
 
-      <listitem>
-        <para>Arrays - Field</para>
+              <listitem>
+                <para>$UNITS$</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
 
-        <itemizedlist>
-          <listitem>
-            <para>To be added</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+  <refsection>
+    <title>Interactions</title>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Array Object
-        Parameter Select Dialog Box</title>
-      </info>
+    <variablelist>
+      <varlistentry>
+        <term>Report Commands</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_Array_ParameterSelect.jpeg"></imagedata>
-        </imageobject>
+        <listitem>
+          <para>Report commands can be used to retrieve information within
+          arrays or from the entire array.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Array Object
-          Parameter Select Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+  <refsection>
+    <title>Examples</title>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Array Object Dialog
-        Box</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_Array_Default.jpeg"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Default Name and Settings for the Array Object Dialog
-          Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
-
-  <section>
-    <title>Using the script</title>
-
-    <section>
-      <title>Script Syntax</title>
-
-      <programlisting><code>Create Array Array1[2,2];
+    <programlisting><code>Create Array Array1[2,2];
 </code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
-            FORMATTING$</para></entry>
-
-            <entry><para>Default: $ITEM DEFAULT VALUE$</para> <para>Options: {
-            $ITEM OPTIONS$ }</para> <para>$ITEM DESCRIPTION$</para>
-            <para>Units: $UNITS$</para></entry>
-          </row>
-
-          <row>
-            <entry><para>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
-            FORMATTING$</para></entry>
-
-            <entry><para>Default: $ITEM DEFAULT VALUE$</para> <para>Options: {
-            $ITEM OPTIONS$ }</para> <para>$ITEM DESCRIPTION$</para>
-            <para>Units: $UNITS$</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+  </refsection>
+</refentry>

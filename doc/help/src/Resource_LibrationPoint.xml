@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="LibrationPoint"
+<refentry version="5.0" xml:id="LibrationPoint"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,10 +7,30 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Libration Point</title>
+  <refmeta>
+    <refentrytitle>Libration Point</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Libration Point</refname>
+
+    <refpurpose>A libration point.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create LibrationPoint <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The object Libration Point allows you to add a special point that
     can be used as a reference point or a point to be used for the plots. The
@@ -18,122 +38,167 @@
     satellite can orbit about even though there is no central body. it is a
     phenomenon of a three-body system. It is part of the resource tree and can
     be added under Solar System.</para>
+  </refsection>
+  
+  <refsection>
+    <title>Fields</title>
+    
+    <variablelist>
+        <varlistentry>
+            <term>Primary</term>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+            <listitem>
+                <para>The Primary field tells GMAT
+            which body to consider the primary body in the calculation of the
+            location of a libration point.</para>
+                
+                <variablelist spacing="compact">
+                    <varlistentry>
+                        <term>Default</term>
+                        
+                        <listitem>
+                            <para>Sun</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Limits</term>
+                        
+                        <listitem>
+                            <para>Sun, Mercury,
+            Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune,
+            Pluto, or any Barycenter. ( The Primary and Secondary bodies
+            cannot be the same )</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Units</term>
+                        
+                        <listitem>
+                            <para>N/A</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+            <term>Secondary</term>
 
-      <itemizedlist>
-        <listitem>
-          <para>Coordinate System</para>
+            <listitem>
+                <para>The Secondary field
+            tells GMAT which body to consider the secondary body in the
+            calculation of the location of a libration point.</para>
+                
+                <variablelist spacing="compact">
+                    <varlistentry>
+                        <term>Default</term>
+                        
+                        <listitem>
+                            <para>Earth</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Limits</term>
+                        
+                        <listitem>
+                            <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
+            Neptune, Pluto, or any Barycenter. ( The Primary and Secondary
+            bodies cannot be the same )</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Units</term>
+                        
+                        <listitem>
+                            <para>N/A</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </listitem>
+        </varlistentry>
+        
+        <varlistentry>
+            <term>Point</term>
 
-          <itemizedlist>
+            <listitem>
+                <para>The Point field specifies which libration point
+            the object corresponds to.</para>
+                
+                <variablelist spacing="compact">
+                    <varlistentry>
+                        <term>Default</term>
+                        
+                        <listitem>
+                            <para>L1</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Limits</term>
+                        
+                        <listitem>
+                            <para>L1, L2, L3, L4, L5</para>
+                        </listitem>
+                    </varlistentry>
+                    
+                    <varlistentry>
+                        <term>Units</term>
+                        
+                        <listitem>
+                            <para>N/A</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </listitem>
+        </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+      <title>Interactions</title>
+
+      <variablelist>
+        <varlistentry>
+          <term>Coordinate System</term>
+
             <listitem>
               <para>Interacts with libration point in that libration point can
               be selected as the origin of the coordinate system or as a
               primary or secondary point for defining the axes.</para>
             </listitem>
-          </itemizedlist>
-        </listitem>
+        </varlistentry>
 
-        <listitem>
-          <para>OpenGL plot</para>
+        <varlistentry>
+          <term>OpenGL plot</term>
 
-          <itemizedlist>
             <listitem>
               <para>Interacts with a libration point in a number of ways. It
               can be selected as a celestial object to be drawn onto the plot.
               A libration point can also be selected as the View Point
               Reference or the View Direction.</para>
             </listitem>
-          </itemizedlist>
-        </listitem>
+        </varlistentry>
 
-        <listitem>
-          <para>Barycenter</para>
+        <varlistentry>
+          <term>Barycenter</term>
 
-          <itemizedlist>
             <listitem>
               <para>Interacts with a libration point in that the bary center
               can be selected as the primary or secondary body for calculating
               the libration point.</para>
             </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+    
+  <refsection>
+    <title>Examples</title>
 
-  <section>
-    <title>Using the GUI</title>
-
-    <itemizedlist>
-      <listitem>
-        <para>Primary Body</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This is the main body of the system, picked from the list of
-            celestial bodies.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Secondary Body</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This is the second body that will be used to perform
-            calculations in the system for the finding of the libration
-            point.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Libration Point</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>The other option is to select which libration point is
-            wanted. There are a total of 5 libration points. The first
-            libration point is between the two bodies. The second libration
-            point is in a line from the primary body, through the secondary
-            body, to the libration point. The third libration point is in a
-            line from the secondary body through the primary body, out to the
-            libration point. The fourth and fifth libration points are nearly
-            on the orbit path of the secondary body, placed symmetrically. For
-            more information, see http://en.wikipedia.org/wiki/Libration_point
-            .</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
-
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Libration Point
-        object Dialog Box</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_Libration_Default.jpeg"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Default Name and Settings for the Libration Point
-          object Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
-
-  <section>
-    <title>Using the Script</title>
-
-    <section>
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>
@@ -141,60 +206,15 @@ Create Libration Point;
 .Primary = ;
 .Secondary = ;
 .Point = &lt;'L1', 'L2', 'L3', 'L4', 'L5'&gt;</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Sample Script</title>
 
       <programlisting><code>Create LibrationPoint Libration1;
 GMAT Libration1.Primary = Sun;
 GMAT Libration1.Secondary = Earth;
 GMAT Libration1.Point = 'L1';</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>Primary</para></entry>
-
-            <entry><para>Default: Sun. </para> <para>Options: [Sun, Mercury,
-            Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus, Neptune,
-            Pluto], or any Barycenter. ( The Primary and Secondary bodies
-            cannot be the same )] </para> <para>The Primary field tells GMAT
-            which body to consider the primary body in the calculation of the
-            location of a libration point.</para> <para>Units: N/A.
-            </para></entry>
-          </row>
-
-          <row>
-            <entry><para>Secondary</para></entry>
-
-            <entry><para>Default: Earth. </para> <para> Options: [Sun,
-            Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn, Uranus,
-            Neptune, Pluto, or any Barycenter. ( The Primary and Secondary
-            bodies cannot be the same )] </para> <para>The Secondary field
-            tells GMAT which body to consider the secondary body in the
-            calculation of the location of a libration point. </para> <para>
-            Units: N/A. </para></entry>
-          </row>
-
-          <row>
-            <entry><para>Point</para></entry>
-
-            <entry><para>Default: L1. </para> <para> Options: [L1, L2, L3, L4,
-            L5] </para> <para>The Point field specifies which libration point
-            the object corresponds to. </para> <para>Units: N/A.
-            </para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-
-    <para></para>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

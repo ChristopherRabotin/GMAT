@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="FiniteBurn"
+<refentry version="5.0" xml:id="FiniteBurn"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,83 +7,241 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>Finite Burn</title>
+  <refmeta>
+    <refentrytitle>Finite Burn</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Finite Burn</refname>
+
+    <refpurpose>A finite burn.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create FiniteBurn <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The Finite Burn object is used when a continuous propulsion is
     desired. Impulsive burns happen instantaneously and through a Maneuver
     command, while finite burns occur until the End Finite Burn command is
     reached in the mission sequence and are typically coupled with Propagate
     commands.</para>
-  </section>
+  </refsection>
 
-  <section>
-    <title>Reference Table</title>
+  <refsection>
+    <title>Fields</title>
 
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>Origin</para></entry>
+    <variablelist>
+      <varlistentry>
+        <term>Origin</term>
 
-            <entry><para>Default: Earth.</para> <para>Options: { Any celestial
-            body, libration point, or barycenter }</para> <para>Together the
+        <listitem>
+            <para>Together the
             Origin and Axes fields describe the coordinate system in which a
             maneuver is applied. The Origin field determines the origin of the
             maneuver coordinate system. The ability to define the coordinate
             system locally avoids having to create many coordinate systems,
             associated with specific spacecraft, in order to perform finite
-            maneuvers for multiple spacecraft.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
+            maneuvers for multiple spacecraft.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>Earth</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Any celestial
+            body, libration point, or barycenter</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>Axes</term>
 
-          <row>
-            <entry><para>Axes</para></entry>
-
-            <entry><para>Default: VNB.</para> <para>Options: { VNB, MJ2000Eq
-            }</para> <para>The Axes field, together with the Origin field,
+        <listitem>
+            <para>The Axes field, together with the Origin field,
             describe the coordinate system in which a finite maneuver is
             applied. If VNB is chosen for Axes, a local coordinate system is
             created such that the x-axis points in the velocity direction of
             the spacecraft, with respect to the point defined by Origin, the
             y-axis points in the normal direction of the spacecraft with
             respect to Origin, and the z-axis completes the right-handed
-            set.</para> <para>Units: N/A.</para></entry>
-          </row>
+            set.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>VNB</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>VNB, MJ2000Eq</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>Thrusters</term>
 
-          <row>
-            <entry><para>Thrusters</para></entry>
-
-            <entry><para>Default: No Default.</para> <para>Options: { Any
-            thruster created by user }</para> <para>The Thrusters field allows
+        <listitem>
+            <para>The Thrusters field allows
             the selection of which thrusters to use when applying a finite
             maneuver. The user can select more than one thruster, from the
             list of thrusters previously created, by including all thrusters
             in curly braces. An example is MyFiniteBurn.Thrusters =
-            Thruster1,Thruster2,Thruster3.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
+            Thruster1,Thruster2,Thruster3.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>No Default</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Any
+            thruster created by user</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
 
-          <row>
-            <entry><para>BurnScaleFactor</para></entry>
+      <varlistentry>
+        <term>BurnScaleFactor</term>
 
-            <entry><para>Default: 1.0.</para> <para>Options: { Real Number
-            }</para> <para>The BurnScaleFactor is used to scale the total
+        <listitem>
+            <para>The BurnScaleFactor is used to scale the total
             acceleration before adding the acceleration due to a finite burn
             into the sum of the accelerations of a spacecraft. The scaling is
             performed by taking the sum of the accelerations applied by all
             thrusters specified under the Thrusters field, and multiplying the
-            total thrust by BurnScaleFactor.</para> <para>Units:
-            None.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
+            total thrust by BurnScaleFactor.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>1.0</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Real Number</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
 
-  <section>
+  <refsection>
+    <title>Interactions</title>
+
+    <variablelist>
+        <varlistentry>
+          <term>Spacecraft</term>
+            
+          <listitem>
+            <para>A spacecraft must be created in order to apply any
+            burn.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Thruster</term>
+
+          <listitem>
+            <para>Any thruster created in the resource tree can be
+            incorporated into a finite burn to be used on the
+            spacecraft.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Begin and End Finite Burn command</term>
+
+          <listitem>
+            <para>After a finite burn is created, to apply it to the mission
+            sequence, a Begin and End Finite Burn command must be appended to
+            the mission tree.</para>
+          </listitem>
+        </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
     <title>Examples</title>
 
     <screenshot>
@@ -109,46 +267,5 @@
 GMAT FiniteBurn1.Origin = Earth;
 GMAT FiniteBurn1.Axes = VNB;
 GMAT FiniteBurn1.BurnScaleFactor = 1;</code></programlisting>
-  </section>
-
-  <section>
-    <title>Objects and Commands Interactions</title>
-
-    <itemizedlist>
-      <listitem>
-        <para>Spacecraft</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>A spacecraft must be created in order to apply any
-            burn.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Thruster</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>Any thruster created in the resource tree can be
-            incorporated into a finite burn to be used on the
-            spacecraft.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Begin and End Finite Burn command</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>After a finite burn is created, to apply it to the mission
-            sequence, a Begin and End Finite Burn command must be appended to
-            the mission tree.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
-  </section>
-</section>
+  </refsection>
+</refentry>

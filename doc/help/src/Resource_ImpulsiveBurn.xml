@@ -1,248 +1,322 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="ImpulsiveBurn"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Impulsive Burn</title>
+<refentry version="5.0" xml:id="ImpulsiveBurn"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>Impulsive Burn</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Impulsive Burn</refname>
+
+    <refpurpose>A impulsive burn.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create ImpulsiveBurn <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The impulsive burn object in GMAT allows the spacecraft to undergo
-    an instantaneous ?V in up to three dimensions as opposed to a finite burn
+    an instantaneous ΔV in up to three dimensions as opposed to a finite burn
     which is not instantaneous. The user can configure the burn by defining
     its origin, type of axes, vector format, and magnitude of the vectors.
     Depending on the mission, it will be simpler to use one axes or vector
     format over the other.</para>
 
-    <section>
+    <refsection>
       <title>Possible Coupling with Other Objects</title>
 
-      <itemizedlist>
+      <variablelist>
+        <varlistentry>
+          <term>Spacecraft</term>
+
+          <listitem>
+            <para>Must be created in order to apply any burn. The purpose of
+            the impulsive burn is to instantaneously propel the spacecraft to
+            either target or optimize a goal during its mission.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Maneuver command</term>
+
+          <listitem>
+            <para>Must be created to call the burn into the mission sequence
+            because without a maneuver, the spacecraft simply propagates
+            around a specified trajectory. If there are several burns that
+            exist, in the Maneuver dialog box the user can choose which burn
+            to utilize for that part of the mission sequence. In addition, a
+            Propagate command must follow the maneuver to allow the trajectory
+            to unfold after a burn has been applied.</para>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Vary command</term>
+
+          <listitem>
+            <para>Required a burn to be specified in the Variable Setup group
+            box. The purpose of the Vary command is to apply a burn in order
+            to change a parameter of the spacecraft's trajectory.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>Origin</term>
+
         <listitem>
-          <para>Spacecraft</para>
+          <para>Together the Origin and Axes fields describe the coordinate
+          system in which a maneuver is applied. The Origin field determines
+          the origin of the maneuver coordinatesystem. The ability to define
+          the coordinate system locally avoids having to create many
+          coordinate systems, associated with specific spacecraft, in order to
+          perform finite maneuvers for multiple spacecraft.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Must be created in order to apply any burn. The purpose of
-              the impulsive burn is to instantaneously propel the spacecraft
-              to either target or optimize a goal during its mission.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>Earth</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Any celestial body</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>N/A</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Axes</term>
 
         <listitem>
-          <para>Maneuver command</para>
+          <para>The Axes field, together with the Origin field, describethe
+          coordinate system in which an impulsive maneuver is applied. If VNB
+          is chosen for Axes, a local coordinate system is created such that
+          the x-axis points in the velocity direction of thespacecraft, with
+          respect to the point defined by Origin, the y-axis points in the
+          normal direction of the spacecraft with respect to Origin, and the
+          z-axis completes the right-handed set.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Must be created to call the burn into the mission sequence
-              because without a maneuver, the spacecraft simply propagates
-              around a specified trajectory. If there are several burns that
-              exist, in the Maneuver dialog box the user can choose which burn
-              to utilize for that part of the mission sequence. In addition, a
-              Propagate command must follow the maneuver to allow the
-              trajectory to unfold after a burn has been applied.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>VNB</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>VNB, MJ2000Eq</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>N/A</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>VectorFormat</term>
 
         <listitem>
-          <para>Vary command</para>
+          <para>The VectorFormat field allows the user to define the format of
+          the maneuver vector.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Required a burn to be specified in the Variable Setup
-              group box. The purpose of the Vary command is to apply a burn in
-              order to change a parameter of the spacecraft's
-              trajectory.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>Cartesian</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Cartesian</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>N/A</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
-      </itemizedlist>
-    </section>
-  </section>
+      </varlistentry>
 
-  <section>
-    <title>Using the GUI</title>
+      <varlistentry>
+        <term>Element1</term>
 
-    <para>The Impulsive Burn dialog box contains three drop down menus and one
-    group box to set the magnitude of the burn in three dimensions. Setting
-    the first three menus to any property installs a tentative coordinate
-    system about that object without having to add one under the Coordinate
-    Systems folder in the resource tree.</para>
+        <listitem>
+          <para>The Element1 field allows the user to define the first element
+          of the impulsive maneuver vector. Element1 is X if VectorFormat is
+          Cartesian.</para>
 
-    <itemizedlist>
-      <listitem>
-        <para>Origin - Field</para>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>The parameter for the origin can be any celestial body or
-            other spacecraft. Selecting the spacecraft that is experiencing
-            the burn will return a null set since the position would always be
-            zero in all directions.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+              <listitem>
+                <para>0</para>
+              </listitem>
+            </varlistentry>
 
-      <listitem>
-        <para>Axes - Field</para>
+            <varlistentry>
+              <term>Limits</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>Depending on the mission, two types of axes are available.
-            The MJ2000Eq option applies a Cartesian approach where the burn is
-            specified in an XYZ format, while the VNB option utilizes the burn
-            as specified in the velocity, normal, and binormal directions, the
-            velocity direction being positive X. Notice when the axes type is
-            changed, the vector magnitude fields will change to correspond
-            with it.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
 
-      <listitem>
-        <para>Vector Format - Field</para>
+            <varlistentry>
+              <term>Units</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>This field only supplies a Cartesian option for the vector
-            to maintain it in an XYZ or VNB format.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+              <listitem>
+                <para>km/sec</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-      <listitem>
-        <para>Vector - Group Box</para>
+      <varlistentry>
+        <term>Element2</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>This group box allows magnitudes to be entered for each of
-            the three dimensions of the burn. As mentioned above, by changing
-            the Axes field from MJ2000Eq to VNB, the group box will change
-            accordingly to match up with the axes chosen. Also, the VNB axes
-            requires additional information at the start of the mission. The
-            main issue with VNB Axes is that it is impossible to locate a
-            spacecraft with just that information. Some of the angles (RAAN,
-            azimuth, TA, etc.) must be known to adequately specify a location,
-            but the system can be advantageous if dealing with a spinning axis
-            on the spacecraft, for example.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+        <listitem>
+          <para>The Element2 field allows the user to define the second
+          element of the impulsive maneuver vector. Element2 is Y if
+          VectorFormat is Cartesian.</para>
 
-    <screenshot>
-      <info>
-        <title>Figure: Impulsive Burn Dialog Box</title>
-      </info>
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_ImpulsiveBurn_ImpulsiveBurnDialogBox.jpeg"></imagedata>
-        </imageobject>
+              <listitem>
+                <para>0</para>
+              </listitem>
+            </varlistentry>
 
-        <caption>
-          <para>Figure: Impulsive Burn Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+            <varlistentry>
+              <term>Limits</term>
 
-  <section>
-    <title>Using the Script</title>
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
 
-    <section>
-      <title>Script Syntax</title>
+            <varlistentry>
+              <term>Units</term>
 
-      <programlisting><code>Create ImpulsiveBurn ImpulsiveBurn1;
+              <listitem>
+                <para>km/sec</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Element3</term>
+
+        <listitem>
+          <para>The Element3 field allows the user to define the third element
+          of the impulsive maneuver vector. Element3 is Z if VectorFormat is
+          Cartesian.</para>
+
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>0</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Real Number</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>km/sec</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <programlisting><code>Create ImpulsiveBurn ImpulsiveBurn1;
 GMAT ImpulsiveBurn1.Origin = Earth;
 GMAT ImpulsiveBurn1.Axes = VNB;
 GMAT ImpulsiveBurn1.VectorFormat = Cartesian;
 GMAT ImpulsiveBurn1.Element1 = 0;
 GMAT ImpulsiveBurn1.Element2 = 0;
 GMAT ImpulsiveBurn1.Element3 = 0;</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>Origin</para></entry>
-
-            <entry><para>Default: Earth.</para> <para>Options: { Any celestial
-            body }</para> <para>Together the Origin and Axes fields describe
-            the coordinate system in which a maneuver is applied. The Origin
-            field determines the origin of the maneuver coordinatesystem. The
-            ability to define the coordinate system locally avoids having to
-            create many coordinate systems, associated with specific
-            spacecraft, in order to perform finite maneuvers for multiple
-            spacecraft.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Axes</para></entry>
-
-            <entry><para>Default: VNB.</para> <para>Options: { VNB,MJ2000Eq
-            }</para> <para>The Axes field, together with the Origin field,
-            describethe coordinate system in which an impulsive maneuver is
-            applied. If VNB is chosen for Axes, a local coordinate system is
-            created such that the x-axis points in the velocity direction of
-            thespacecraft, with respect to the point defined by Origin, the
-            y-axis points in the normal direction of the spacecraft with
-            respect to Origin, and the z-axis completes the right-handed
-            set.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>VectorFormat</para></entry>
-
-            <entry><para>Default: Cartesian.</para> <para>Options: { Cartesian
-            }</para> <para>The VectorFormat field allows the user to define
-            the format of the maneuver vector.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Element1</para></entry>
-
-            <entry><para>Default: 0.</para> <para>Options: { Real Number
-            }</para> <para>The Element1 field allows the user to define the
-            first element of the impulsive maneuver vector. Element1 is X if
-            VectorFormat is Cartesian. Units: km/sec.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Element2</para></entry>
-
-            <entry><para>Default: 0.</para> <para>Options: { Real Number
-            }</para> <para>The Element2 field allows the user to define the
-            second element of the impulsive maneuver vector. Element2 is Y if
-            VectorFormat is Cartesian.</para> <para>Units:
-            km/sec.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Element3</para></entry>
-
-            <entry><para>Default: 0.</para> <para>Options: { Real Number
-            }</para> <para>The Element3 field allows the user to define the
-            third element of the impulsive maneuver vector. Element3 is Z if
-            VectorFormat is Cartesian.</para> <para>Units:
-            km/sec.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+  </refsection>
+</refentry>

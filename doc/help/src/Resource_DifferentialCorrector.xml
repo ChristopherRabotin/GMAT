@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="DifferentialCorrector"
+<refentry version="5.0" xml:id="DifferentialCorrector"
          xmlns="http://docbook.org/ns/docbook"
          xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -7,9 +7,29 @@
          xmlns:m="http://www.w3.org/1998/Math/MathML"
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
-  <title>DifferentialCorrector</title>
+  <refmeta>
+    <refentrytitle>Differential Corrector</refentrytitle>
 
-  <section>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Celestial Bodies</refname>
+
+    <refpurpose>A differential corrector.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create DifferentialCorrector <replaceable>name</replaceable>
+<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
     <title>Overview</title>
 
     <para>A differential corrector is a numerical solver for solving two-point
@@ -31,10 +51,236 @@
     GUI screen shots and reference table below. You can learn more about how
     to use a DC in a targeting sequence by reading the help files for Target,
     Vary, and Achieve.</para>
-  </section>
+  </refsection>
 
-  <section>
-    <title>Interfaces</title>
+  <refsection>
+    <title>Fields</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>MaximumIterations</term>
+
+        <listitem>
+            <para>The MaximumIterations field allows the user to set
+            the maximum number of iterations the differential corrector is
+            allowed during the attempt to find a solution. If the maximum
+            iterations is reached, GMAT exits the target loop and continues to
+            the next command in the mission sequence. In this case, the
+            objects retain their states as of the last nominal pass through
+            the targeting loop.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>25</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Integer &gt;= 1</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>DerivativeMethod</term>
+
+        <listitem>
+            <para>The DerivativeMethod field allows the user to choose between
+            one-sided and central differencing for numerically determining the
+            Jacobian matrix.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>ForwardDifference</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>ForwardDifference, BackwardDifference, CentralDifference</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>ShowProgress</term>
+
+        <listitem>
+            <para>When the ShowProgress field is set to true,
+            then data illustrating the progress of the differential correction
+            process are written to the message window. The message window is
+            updated with information on the current control variable values
+            and the contraint variances for both on perturbation and iteration
+            passes. When the ShowProgress field is set to false, no
+            information on the progress of the differential correction process
+            is displayed.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>true</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>true, false</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>ReportStyle</term>
+
+        <listitem>
+            <para>The ReportStyle field
+            allows the user to control the amount and type of information
+            written to the file defined in the ReportFile field. Currently,
+            the Normal and Concise options contain the same information: the
+            Jacobian, the inverse of the Jacobian, the current values of the
+            control variables, and achieved and desired values of the
+            constraints. Verbose contains values of the perturbation variables
+            in addition to the data for Normal and Concise. Debug contains
+            detailed script snippets at each iteration for objects who have
+            control variables.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>Normal</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Normal, Concise, Verbose, Debug</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term>ReportFile</term>
+
+        <listitem>
+            <para>The ReportFile field allows the user to specify the path and file name
+            for the differential correction report.</para>
+            
+            <variablelist spacing="compact">
+                <varlistentry>
+                    <term>Default</term>
+                    
+                    <listitem>
+                        <para>DifferentialCorrectorDCName</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Limits</term>
+                    
+                    <listitem>
+                        <para>Filename consistent with OS</para>
+                    </listitem>
+                </varlistentry>
+                
+                <varlistentry>
+                    <term>Units</term>
+                    
+                    <listitem>
+                        <para>N/A</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </listitem>
+      </varlistentry>
+      
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Object and Command Interactions</title>
+
+    <para>The Differential Corrector does not interact directly with any
+    resource objects.</para>
+
+    <para>The Differential Corrector is used in the following mission sequence
+    commands:</para>
+
+    <itemizedlist>
+      <listitem>
+        <para>Target</para>
+      </listitem>
+
+      <listitem>
+        <para>Vary</para>
+      </listitem>
+
+      <listitem>
+        <para>Achieve</para>
+      </listitem>
+    </itemizedlist>
+  </refsection>
+  
+  <refsection>
+    <title>Examples</title>
 
     <screenshot>
       <info>
@@ -61,102 +307,5 @@ GMAT DefaultDC.ReportStyle = 'Normal';
 GMAT DefaultDC.TargeterTextFile = 'DifferentialCorrectorDefaultDC.data';
 GMAT DefaultDC.MaximumIterations = 25;
 GMAT DefaultDC.UseCentralDifferences = false;</code></programlisting>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>MaximumIterations</para></entry>
-
-            <entry><para>Default: 25</para> <para>Options: Integer &gt;=
-            1</para> <para>The MaximumIterations field allows the user to set
-            the maximum number of iterations the differential corrector is
-            allowed during the attempt to find a solution. If the maximum
-            iterations is reached, GMAT exits the target loop and continues to
-            the next command in the mission sequence. In this case, the
-            objects retain their states as of the last nominal pass through
-            the targeting loop.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>DerivativeMethod</para></entry>
-
-            <entry><para>Default: ForwardDifference</para> <para>Options:
-            [ForwardDifference, BackwardDifference, CentralDifference]</para>
-            <para>The DerivativeMethod field allows the user to choose between
-            one-sided and central differencing for numerically determining the
-            Jacobian matrix.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>ShowProgress</para></entry>
-
-            <entry><para>Default: true.</para> <para>Options: [true,
-            false]</para> <para>When the ShowProgress field is set to true,
-            then data illustrating the progress of the differential correction
-            process are written to the message window. The message window is
-            updated with information on the current control variable values
-            and the contraint variances for both on perturbation and iteration
-            passes. When the ShowProgress field is set to false, no
-            information on the progress of the differential correction process
-            is displayed.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>ReportStyle</para></entry>
-
-            <entry><para>Default: Normal .</para> <para>Options: [Normal,
-            Concise, Verbose, Debug]:</para> <para>The ReportStyle field
-            allows the user to control the amount and type of information
-            written to the file defined in the ReportFile field. Currently,
-            the Normal and Concise options contain the same information: the
-            Jacobian, the inverse of the Jacobian, the current values of the
-            control variables, and achieved and desired values of the
-            constraints. Verbose contains values of the perturbation variables
-            in addition to the data for Normal and Concise. Debug contains
-            detailed script snippets at each iteration for objects who have
-            control variables.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>ReportFile</para></entry>
-
-            <entry><para>Default: DifferentialCorrectorDCName.</para>
-            <para>Options: [Filename consistent with OS]</para> <para>The
-            ReportFile field allows the user to specify the path and file name
-            for the differential correction report.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-
-  <section>
-    <title>Object and Command Interactions</title>
-
-    <para>The Differential Corrector does not interact directly with any
-    resource objects.</para>
-
-    <para>The Differential Corrector is used in the following mission sequence
-    commands:</para>
-
-    <itemizedlist>
-      <listitem>
-        <para>Target</para>
-      </listitem>
-
-      <listitem>
-        <para>Vary</para>
-      </listitem>
-
-      <listitem>
-        <para>Achieve</para>
-      </listitem>
-    </itemizedlist>
-  </section>
-</section>
+  </refsection>
+</refentry>
