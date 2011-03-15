@@ -8,7 +8,7 @@
          xmlns:html="http://www.w3.org/1999/xhtml"
          xmlns:db="http://docbook.org/ns/docbook">
   <refmeta>
-    <refentrytitle>Differential Corrector</refentrytitle>
+    <refentrytitle>DifferentialCorrector</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
@@ -18,7 +18,7 @@
   </refmeta>
 
   <refnamediv>
-    <refname>Celestial Bodies</refname>
+    <refname>Differential Corrector</refname>
 
     <refpurpose>A differential corrector.</refpurpose>
   </refnamediv>
@@ -30,7 +30,7 @@
   </refsynopsisdiv>
 
   <refsection>
-    <title>Overview</title>
+    <title>Description</title>
 
     <para>A differential corrector is a numerical solver for solving two-point
     boundary value problems. The DC in GMAT uses a simple shooting method

@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Variable" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Variable</title>
+<refentry version="5.0" xml:id="Variable"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>Variable</refentrytitle>
 
-  <section>
-    <title>Overview</title>
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Variable</refname>
+
+    <refpurpose>A variable.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create Variable <replaceable>name</replaceable>
+<replaceable>name</replaceable> = <replaceable>value</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The Variable object allows you to create and name a variable and
     assign to it a real number value. A variable can be used in numerous
@@ -18,9 +39,9 @@
     assignment to a numeric literal. In more complex cases, a variable can be
     defined using an assignment that contains a complicated mathematical
     expression.</para>
-  </section>
+  </refsection>
 
-  <section>
+  <refsection>
     <title>Interfaces</title>
 
     <screenshot>
@@ -30,8 +51,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Resource_Variable_ParameterCreateDialogBox.bmp"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Resource_Variable_ParameterCreateDialogBox.bmp"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>
@@ -39,26 +61,10 @@
         </caption>
       </mediaobject>
     </screenshot>
+  </refsection>
 
-    <section>
-      <title>Script Syntax</title>
-
-      <programlisting><code>GMAT [Variable Name] = [expression]</code></programlisting>
-    </section>
-
-    <section>
-      <title>Script Examples</title>
-
-      <programlisting><code>Create Variable pi Energy mu SMA
-mu     = 398600.4415;
-pi     = 3.14159265358979;
-Energy = MySpacecraft.VMAG^2/2 - mu/r; 
-SMA    = -mu/2/Energy;</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Object and Commands Interactions</title>
+  <refsection>
+    <title>Interactions</title>
 
     <itemizedlist>
       <listitem>
@@ -86,5 +92,15 @@ SMA    = -mu/2/Energy;</code></programlisting>
         <para><link linkend="Minimize">Minimize Command</link></para>
       </listitem>
     </itemizedlist>
-  </section>
-</section>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <programlisting><code>Create Variable pi Energy mu SMA
+mu     = 398600.4415;
+pi     = 3.14159265358979;
+Energy = MySpacecraft.VMAG^2/2 - mu/r; 
+SMA    = -mu/2/Energy;</code></programlisting>
+  </refsection>
+</refentry>
