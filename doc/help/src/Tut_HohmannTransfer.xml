@@ -99,7 +99,8 @@
         </listitem>
 
         <listitem>
-          <para>Change the View Scale Factor input field to the value 5</para>
+          <para>Change the View Scale Factor input field to the value
+          1.5</para>
         </listitem>
 
         <listitem>
@@ -152,7 +153,7 @@
         </listitem>
 
         <listitem>
-          <para>Right-click on the Propagate1 and select open from the
+          <para>Right-click on Propagate1 and select Open from the
           menu.</para>
         </listitem>
 
@@ -164,8 +165,8 @@
 
         <listitem>
           <para>Under the Object Properties list on the Parameter Select
-          Dialog box, locate periapsis and double-click on it. Click ok on the
-          Parameter Select Dialog box.</para>
+          Dialog box, locate periapsis and double-click on it. Click the Ok
+          button to close the Parameter Select Dialog box.</para>
         </listitem>
 
         <listitem>
@@ -278,6 +279,13 @@
           </listitem>
 
           <listitem>
+            <para>Right Click on Target1 in the Mission Tree and select Open.
+            Locate the ExitMode drop-down menu and set it ot SaveAndContinue.
+            This will save the converged solution of the targeting
+            problem.</para>
+          </listitem>
+
+          <listitem>
             <para>Right Click on Vary1 in the Mission Tree and select Open.
             Notice that the in the Variable SetUp group box, the variable is
             defined as DefaulIB.Element1. This is the velocity component of
@@ -337,7 +345,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Vary1VaryCommand.jpeg"
+                         fileref="files/images/Tut_Hohmann_Vary1VaryCommand.png"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
@@ -355,7 +363,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.jpeg"
+                         fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.png"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
@@ -373,7 +381,7 @@
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.jpeg"
+                         fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.png"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
@@ -387,9 +395,9 @@
       <section>
         <title>Second Targeting Sequence</title>
 
-        <para>To circularize the orbit, you will employ another
-        Targeting loop. Begin by creating the commands necessary to perform
-        the targeting sequence:</para>
+        <para>To circularize the orbit, you will employ another Targeting
+        loop. Begin by creating the commands necessary to perform the
+        targeting sequence:</para>
 
         <orderedlist>
           <listitem>
@@ -483,44 +491,6 @@
     transfer orbit. You don't see these kind of line for the target sequence
     from the transfer to final orbit because there is no propagation involved.
     The targeting only occurs at one spot.</para>
-
-    <screenshot>
-      <info>
-        <title>Figure: Output After Initial Propagate Sequence</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_Hohmann_OutputAfterInitialPropagateSequence.jpeg"
-                     scalefit="1" width="100%"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Output After Initial Propagate Sequence</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-
-    <screenshot>
-      <info>
-        <title>Figure: Output After First and Second Targeting
-        Sequences</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_Hohmann_OutputAfterFirstandSecondTargetingSequences.jpeg"
-                     scalefit="1" width="100%"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Output After First and Second Targeting
-          Sequences</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
 
     <screenshot>
       <info>

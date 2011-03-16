@@ -25,6 +25,7 @@
         <xi:include href="Intro_GMATInterfaceDesignPhilosophy.xml"/>
         <xi:include href="Intro_SystemRequirements.xml"/>
         <xi:include href="Intro_Installation.xml"/>
+		<xi:include href="Intro_DataAndConfiguration.xml"/>
         <xi:include href="Intro_SupportandResources.xml"/>
     </chapter>
     
