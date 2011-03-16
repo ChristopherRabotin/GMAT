@@ -299,7 +299,7 @@
               <term>Units</term>
 
               <listitem>
-                <para>F<subscript>T</subscript>(P,T) &amp;nbsp = &amp;nbsp
+                <para>F<subscript>T</subscript>(P,T) =
                 {C<subscript>1</subscript>+C<subscript>2</subscript>P+C<subscript>3</subscript>P<superscript>2</superscript>+C<subscript>4</subscript>P<superscript>C<subscript>5</subscript></superscript>+C<subscript>6</subscript>P<superscript>C<subscript>7</subscript></superscript>+C<subscript>8</subscript>P<superscript>C<subscript>9</subscript></superscript>
                 +C<subscript>10</subscript>C<subscript>11</subscript><superscript>C<subscript>12</subscript>P</superscript>}(T/T<subscript>ref</subscript>)<superscript>1+C<subscript>13</subscript>+C<subscript>14</subscript>P</superscript></para>
               </listitem>
