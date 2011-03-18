@@ -7,6 +7,10 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
+<indexterm>
+    <primary>BaryCenter</primary>
+</indexterm>
+		  
   <refmeta>
     <refentrytitle>Barycenter</refentrytitle>
 
@@ -25,17 +29,18 @@
 
   <refsynopsisdiv>
     <synopsis>Create Barycenter <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
+<replaceable>name</replaceable>.BodyNames = {<replaceable>bodyName1,bodyName2,...,bodyNameN</replaceable>}
 </synopsis>
   </refsynopsisdiv>
 
   <refsection>
     <title>Description</title>
 
-    <para>A barycenter is the center of mass of two or more objects and is
-    located under the Solar System folder in the resource tree. The Barycenter
-    object allows you to create a special point that can be used as a
-    reference point or a point to be used for the plots.</para>
+    <para>A barycenter is the center of mass of one or more celestial bodies and
+	can be used as the origin of a <link
+    linkend="CoordinateSystem">CoordinateSystem</link>, a reference point in an OrbitView,
+	or as one of the points in a <link
+    linkend="LibrationPoint">LibrationPoint</link>.</para>
   </refsection>
 
   <refsection>
@@ -44,12 +49,14 @@
     <variablelist>
       <varlistentry>
         <term>BodyNames</term>
-
+        
         <listitem>
           <para>The BodyNames field is a list that contains the bodies used to
           define a barycenter. In a script, the list must be surrounded by
           curly braces. (i.e. BaryCenterName.BodyNames = { Earth, Luna
-          })</para>
+          })
+		  <emphasis><indexterm><primary>BodyNames</primary></indexterm></emphasis>
+		  </para>
 
           <variablelist spacing="compact">
             <varlistentry>
@@ -65,8 +72,8 @@
 
               <listitem>
                 <para>Sun, Mercury, Venus, Earth, Luna, Mars, Jupiter, Saturn,
-                Uranus, Neptune, Pluto. (At least one body must be
-                selected!)</para>
+                Uranus, Neptune, Pluto, or any user-defined celestial body. At least one body must be
+                selected!</para>
               </listitem>
             </varlistentry>
 

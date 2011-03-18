@@ -32,12 +32,9 @@
   <refsection>
     <title>Description</title>
 
-    <para>The object Libration Point allows you to add a special point that
-    can be used as a reference point or a point to be used for the plots. The
-    libration point, also called a Lagrange point, is a point in space that a
-    satellite can orbit about even though there is no central body. it is a
-    phenomenon of a three-body system. It is part of the resource tree and can
-    be added under Solar System.</para>
+    <para> A Libration point, also called a Lagrange point, is a point of
+	equilibrium in the restricted three-body problem.  
+   </para>
   </refsection>
   
   <refsection>
@@ -48,9 +45,9 @@
             <term>Primary</term>
 
             <listitem>
-                <para>The Primary field tells GMAT
-            which body to consider the primary body in the calculation of the
-            location of a libration point.</para>
+                <para>The Primary field allows you to define the 
+               body treated as the primary in the calculation of the
+            libration point location.  (See Math. Spec for more details).</para>
                 
                 <variablelist spacing="compact">
                     <varlistentry>
@@ -87,9 +84,9 @@
             <term>Secondary</term>
 
             <listitem>
-                <para>The Secondary field
-            tells GMAT which body to consider the secondary body in the
-            calculation of the location of a libration point.</para>
+                <para>The Secondary field allows you to define the 
+               body treated as the secondary in the calculation of the
+            libration point location.</para>
                 
                 <variablelist spacing="compact">
                     <varlistentry>
@@ -157,44 +154,7 @@
         </varlistentry>
     </variablelist>
   </refsection>
-  
-  <refsection>
-      <title>Interactions</title>
-
-      <variablelist>
-        <varlistentry>
-          <term>Coordinate System</term>
-
-            <listitem>
-              <para>Interacts with libration point in that libration point can
-              be selected as the origin of the coordinate system or as a
-              primary or secondary point for defining the axes.</para>
-            </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>OpenGL plot</term>
-
-            <listitem>
-              <para>Interacts with a libration point in a number of ways. It
-              can be selected as a celestial object to be drawn onto the plot.
-              A libration point can also be selected as the View Point
-              Reference or the View Direction.</para>
-            </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Barycenter</term>
-
-            <listitem>
-              <para>Interacts with a libration point in that the bary center
-              can be selected as the primary or secondary body for calculating
-              the libration point.</para>
-            </listitem>
-        </varlistentry>
-      </variablelist>
-    </refsection>
-    
+     
   <refsection>
     <title>Examples</title>
 

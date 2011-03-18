@@ -60,37 +60,33 @@
     </chapter>
 
   <reference>
-    <title>Reference (new): Resources</title>
-
+    <title>Reference: Resources</title>
+	
+    <xi:include href="Resource_Array.xml"/>
+    <xi:include href="Resource_Barycenter.xml"/>
+	<xi:include href="Resource_CelestialBodies.xml"/>
+	<xi:include href="Resource_CoordinateSystems.xml"/>
+	<xi:include href="Resource_DifferentialCorrector.xml"/>
+	<xi:include href="Resource_FiniteBurn.xml"/>
     <xi:include href="Resource_FuelTank.xml"/>
+	<xi:include href="Resource_ImpulsiveBurn.xml"/>
+	<xi:include href="Resource_LibrationPoint.xml"/>
+	<xi:include href="Resource_OpenGLPlot.xml"/>
+	<xi:include href="Resource_Propagator.xml"/>
+    <xi:include href="Resource_ReportFile.xml"/>
+    <xi:include href="Resource_SolarSystem.xml"/>
+    <xi:include href="Resource_SQP(fmincon).xml"/>
     <xi:include href="Resource_Spacecraft.xml" />
+	<xi:include href="Resource_SpacecraftOverview.xml"/>
+    <xi:include href="Resource_SpacecraftOrbit.xml"/>
+    <xi:include href="Resource_SpacecraftAttitude.xml"/>
+    <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
+	<xi:include href="Resource_String.xml"/>
+    <xi:include href="Resource_Thruster.xml"/>
+    <xi:include href="Resource_Variable.xml"/>
+	<xi:include href="Resource_XYPlot.xml"/>
     
-  </reference>  
-
-  <chapter>
-        <title>Reference: Resources</title>
-        <xi:include href="Resource_SpacecraftOverview.xml"/>
-        <xi:include href="Resource_SpacecraftOrbit.xml"/>
-        <xi:include href="Resource_SpacecraftAttitude.xml"/>
-        <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
-        <xi:include href="Resource_Propagator.xml"/>
-        <xi:include href="Resource_ReportFile.xml"/>
-        <xi:include href="Resource_Thruster.xml"/>
-        <xi:include href="Resource_SQP(fmincon).xml"/>
-        <xi:include href="Resource_SolarSystem.xml"/>
-        <xi:include href="Resource_DifferentialCorrector.xml"/>
-        <xi:include href="Resource_CelestialBodies.xml"/>
-        <xi:include href="Resource_OpenGLPlot.xml"/>
-        <xi:include href="Resource_XYPlot.xml"/>
-        <xi:include href="Resource_CoordinateSystems.xml"/>
-        <xi:include href="Resource_FiniteBurn.xml"/>
-        <xi:include href="Resource_Variable.xml"/>
-        <xi:include href="Resource_String.xml"/>
-        <xi:include href="Resource_Array.xml"/>
-        <xi:include href="Resource_Barycenter.xml"/>
-        <xi:include href="Resource_LibrationPoint.xml"/>
-        <xi:include href="Resource_ImpulsiveBurn.xml"/>
-  </chapter>
+ </reference>  
 
     <chapter>
         <title>Reference: Commands</title>
@@ -121,7 +117,6 @@
             
         <xi:include href="Misc_MathOperatorsinScripting.xml"/>
         <xi:include href="Misc_ScriptEditorShortcutKeys.xml"/>
-        <xi:include href="Misc_ProcessResources.xml"/>
         <xi:include href="Misc_GMATCommandsinMATLAB.xml"/>
         <xi:include href="Misc_GMATConsoleInstructions.xml"/>
     </chapter>

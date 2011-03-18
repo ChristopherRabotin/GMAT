@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="CoordinateSystems"
+<refentry version="5.0" xml:id="CoordinateSystem"
           xmlns="http://docbook.org/ns/docbook"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           xmlns:xi="http://www.w3.org/2001/XInclude"
@@ -8,7 +8,7 @@
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
   <refmeta>
-    <refentrytitle>CoordinateSystems</refentrytitle>
+    <refentrytitle>CoordinateSystem</refentrytitle>
 
     <refmiscinfo class="source">GMAT</refmiscinfo>
 
