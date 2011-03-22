@@ -53,7 +53,7 @@
 
           <itemizedlist>
             <listitem>
-              <para><link linkend="SpacecraftOverview">Spacecraft
+              <para><link linkend="Spacecraft">Spacecraft
               Object</link></para>
             </listitem>
 
@@ -94,7 +94,7 @@
             </listitem>
 
             <listitem>
-              <para><link linkend="CoordinateSystems">Coordinate System
+              <para><link linkend="CoordinateSystem">Coordinate System
               Objects</link></para>
             </listitem>
           </itemizedlist>
@@ -425,7 +425,7 @@
             <listitem>
               <para>To create the necessary variables, insert the line of code
               below into the script just after the setup of the <link
-              linkend="CoordinateSystems">Coordinate System
+              linkend="CoordinateSystem">Coordinate System
               Objects</link></para>
             </listitem>
           </itemizedlist>
@@ -598,7 +598,7 @@
 
                 <listitem>
                   <para>Switch both the View Definition and the View Up
-                  Direction <link linkend="CoordinateSystems">Coordinate
+                  Direction <link linkend="CoordinateSystem">Coordinate
                   System Objects</link> to EarthSunRotCS (Note: Don't forget
                   to create this System first as well)</para>
                 </listitem>
@@ -954,7 +954,7 @@
 
     <para>By now you should understand not only how to setup the required
     objects for this mission such as the Barycenter, Libration Point, <link
-    linkend="CoordinateSystems">Coordinate System Objects</link>, Reports,
+    linkend="CoordinateSystem">Coordinate System Objects</link>, Reports,
     <link linkend="Variable">Variable Object</link>, and different views for
     the <link linkend="OpenGLPlot">OpenGL Plot Object</link>, but also how to
     apply these to create an effective and well documented mission. Below are

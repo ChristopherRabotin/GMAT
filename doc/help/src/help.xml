@@ -77,10 +77,11 @@
     <xi:include href="Resource_SolarSystem.xml"/>
     <xi:include href="Resource_SQP(fmincon).xml"/>
     <xi:include href="Resource_Spacecraft.xml" />
-	<xi:include href="Resource_SpacecraftOverview.xml"/>
+	<!-- <xi:include href="Resource_SpacecraftOverview.xml"/>
     <xi:include href="Resource_SpacecraftOrbit.xml"/>
     <xi:include href="Resource_SpacecraftAttitude.xml"/>
     <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
+    -->
 	<xi:include href="Resource_String.xml"/>
     <xi:include href="Resource_Thruster.xml"/>
     <xi:include href="Resource_Variable.xml"/>

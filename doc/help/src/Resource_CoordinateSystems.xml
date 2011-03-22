@@ -52,7 +52,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term><link linkend="SpacecraftOverview">Spacecraft</link></term>
+          <term><link linkend="Spacecraft">Spacecraft</link></term>
 
           <listitem>
             <para>In the spacecraft dialog box you may change what coordinate
