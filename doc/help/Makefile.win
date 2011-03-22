@@ -1,3 +1,7 @@
+# Tools
+fop = .\contrib\fop\fop.cmd
+rm = del
+
 # Build Xalan classpath
 xalancp = "contrib/xalan-j/xalan.jar;contrib/xalan-j/serializer.jar;\
 	contrib/xalan-j/xml-apis.jar;contrib/xalan-j/xercesImpl.jar;\

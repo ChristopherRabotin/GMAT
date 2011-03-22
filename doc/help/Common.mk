@@ -22,20 +22,19 @@ all : help-letter-fo.pdf \
 	help-letter-latex.pdf \
 	help-letter-latex.pdf
 
-help-letter-fo.pdf : help-letter.fo
-	contrib/fop/fop $< $@
+help-letter.pdf : help-letter.fo
+	$(fop) $? $@
 
-help-a4-fo.pdf : help-a4.fo
-	contrib/fop/fop $< $@
+help-a4.pdf : help-a4.fo
+	$(fop) $? $@
 
-help-letter-latex.pdf : $(srcfiles)
-help-a4-latex.pdf : $(srcfiles)
-
+copyfiles :
+	$(cp) src/files .
 validate :
 	$(java) -jar contrib/jing/bin/jing.jar contrib/docbook/docbookxi.rng $(top)
 
 clean :
-	rm -f *.fo *.pdf
+	$(rm) *.fo *.pdf
 
 help-letter.fo : validate $(xmlfiles)
 	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
