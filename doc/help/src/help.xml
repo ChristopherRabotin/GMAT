@@ -61,7 +61,6 @@
 
   <reference>
     <title>Reference: Resources</title>
-	
     <xi:include href="Resource_Array.xml"/>
     <xi:include href="Resource_Barycenter.xml"/>
 	<xi:include href="Resource_CelestialBodies.xml"/>
@@ -89,29 +88,33 @@
     
  </reference>  
 
+  <reference>
+    <title>Reference: Commands</title>
+    <xi:include href="Command_Target.xml"/>
+  </reference>
+  
     <chapter>
         <title>Reference: Commands</title>
-            
-        <xi:include href="Command_Propagate.xml"/>
-        <xi:include href="Command_While.xml"/>
-        <xi:include href="Command_If.xml"/>
-        <xi:include href="Command_Target.xml"/>
-        <xi:include href="Command_Report.xml"/>
-        <xi:include href="Command_For.xml"/>
-        <xi:include href="Command_Maneuver.xml"/>
-        <xi:include href="Command_Equation.xml"/>
-        <xi:include href="Command_Toggle.xml"/>
-        <xi:include href="Command_Vary.xml"/>
-        <xi:include href="Command_BeginFiniteBurn.xml"/>
-        <xi:include href="Command_Achieve.xml"/>
-        <xi:include href="Command_Stop.xml"/>
-        <xi:include href="Command_ScriptEvent.xml"/>
-        <xi:include href="Command_Else.xml"/>
-        <xi:include href="Command_NonLinearConstraint.xml"/>
-        <xi:include href="Command_Minimize.xml"/>
-        <xi:include href="Command_Optimize.xml"/>
-        <xi:include href="Command_CallFunction.xml"/>        
+            <xi:include href="Command_Propagate.xml"/>
+    <xi:include href="Command_While.xml"/>
+    <xi:include href="Command_If.xml"/>
+    <xi:include href="Command_Report.xml"/>
+    <xi:include href="Command_For.xml"/>
+    <xi:include href="Command_Maneuver.xml"/>
+    <xi:include href="Command_Equation.xml"/>
+    <xi:include href="Command_Toggle.xml"/>
+    <xi:include href="Command_Vary.xml"/>
+    <xi:include href="Command_BeginFiniteBurn.xml"/>
+    <xi:include href="Command_Achieve.xml"/>
+    <xi:include href="Command_Stop.xml"/>
+    <xi:include href="Command_ScriptEvent.xml"/>
+    <xi:include href="Command_Else.xml"/>
+    <xi:include href="Command_NonLinearConstraint.xml"/>
+    <xi:include href="Command_Minimize.xml"/>
+    <xi:include href="Command_Optimize.xml"/>
+    <xi:include href="Command_CallFunction.xml"/>        
     </chapter>
+        
 
     <chapter>
         <title>Reference: Miscellaneous</title>
