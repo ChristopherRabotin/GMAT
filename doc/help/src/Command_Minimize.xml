@@ -1,20 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Minimize" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Minimize</title>
+<refentry version="5.0" xml:id="Minimize"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Minimize</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>Minimize</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Minimize</refname>
+
+    <refpurpose>Run a minimize</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The minimize command in GMAT allows variables to minimize by using a
     defined optimizer in optimize sequence.</para>
 
-    <section>
+    <refsection>
       <title>Possible Coupling with Other Objects</title>
 
       <itemizedlist>
@@ -39,72 +62,97 @@
           </itemizedlist>
         </listitem>
       </itemizedlist>
-    </section>
-  </section>
+    </refsection>
+  </refsection>
 
-  <section>
-    <title>Using the GUI</title>
+  <refsection>
+    <title>Options</title>
 
-    <para>The Minimize dialog contains two menus, which are optimizer and
-    variable to be minimized. Each properties are needed to be selected to
-    accomplish a minimization. Also, users have to define an optimizer before,
-    and users need to define an undefined variable or function if users would
-    like to apply.</para>
+    <variablelist>
+      <varlistentry>
+        <term>OptimizerName</term>
 
-    <itemizedlist>
-      <listitem>
-        <para>Optimizer - Drop Down Menus</para>
+        <listitem>
+          <para>The OptimizerName option allows the user to specify which
+          solver to use to minimize the cost function.</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must select the optimizer, generally you can choose the
-            solver in optimize command</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-      <listitem>
-        <para>Variable to be Minimized - Drop Down Menus</para>
+              <listitem>
+                <para>SQP1</para>
+              </listitem>
+            </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must select the variable or the function to be
-            minimized</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+            <varlistentry>
+              <term>Limits</term>
 
-    <para><screenshot>
-        <info>
-          <title>Figure: Default Minimize Command Dialog Box without setting
-          fmincon and variable to be minimized</title>
-        </info>
+              <listitem>
+                <para>Any existing fmincon solver</para>
+              </listitem>
+            </varlistentry>
 
-        <mediaobject>
-          <imageobject>
-            <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                       fileref="files/images/Command_Minimize_Default.jpeg"></imagedata>
-          </imageobject>
+            <varlistentry>
+              <term>Units</term>
 
-          <caption>
-            <para>Figure: Default Minimize Command Dialog Box without setting
-            fmincon and variable to be minimized</para>
-          </caption>
-        </mediaobject>
-      </screenshot></para>
-  </section>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-  <section>
-    <title>Using the Script</title>
+      <varlistentry>
+        <term>Arg</term>
 
-    <section>
+        <listitem>
+          <para>The Arg field allows the user to specify the function to be
+          minimized upon convergence of the solver given by OptimizerName. Arg
+          can be any of the following: Variable, Array element, or Spacecraft
+          Parameter or any other 1x1 numeric user defined parameter.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>DefaultSC.ECC</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Variable, Spacecraft parameter, or Array element</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>Minimize OptimizerName (Arg)</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Minimize the eccentricity of Sat, using fminconSQP
@@ -115,37 +163,6 @@ Minimize fminconSQP(DeltaV);
 
 % Minimize the first component of MyArray, using fminconSQP
 Minimize fminconSQP(MyArray(1,1));</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>OptimizerName</para></entry>
-
-            <entry><para>Default: SQP1.</para> <para>Options: { Any existing
-            fmincon solver } </para> <para>The OptimizerName option allows the
-            user to specify which solver to use to minimize the cost
-            function.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Arg</para></entry>
-
-            <entry><para>Default: DefaultSC.ECC.</para> <para>Options: {
-            Variable, Spacecraft parameter, or Array element }</para>
-            <para>The Arg field allows the user to specify the function to be
-            minimized upon convergence of the solver given by OptimizerName.
-            Arg can be any of the following: Variable, Array element, or
-            Spacecraft Parameter or any other 1x1 numeric user defined
-            parameter.</para> <para>Units: N/A.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

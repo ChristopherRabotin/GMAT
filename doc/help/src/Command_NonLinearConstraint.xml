@@ -1,23 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="NonLinearConstraint"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>NonLinearConstraint</title>
+<refentry version="5.0" xml:id="NonLinearConstraint"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>NonLinearConstraint</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>NonLinearConstraint</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>NonLinearConstraint</refname>
+
+    <refpurpose>Run a NonLinearConstraint</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The nonlinear constraints in GMAT allows spacecraft properties,
     variable or array to apply constraint values, and also NonLinearConstraint
     can be created in optimize sequences. By using the fmincon optimizer,
     users can give various nonlinear constraints.</para>
 
-    <section>
+    <refsection>
       <title>Possible Coupling with Other Objects</title>
 
       <itemizedlist>
@@ -42,109 +64,101 @@
           </itemizedlist>
         </listitem>
       </itemizedlist>
-    </section>
-  </section>
+    </refsection>
+  </refsection>
 
-  <section>
-    <title>Using the GUI</title>
+  <refsection>
+    <title>Options</title>
 
-    <para>The NonLinearConstraint dialog contains four menus, which are
-    Optimizer, Constraint, sign of equality or inequality and Constraint
-    Value.</para>
+    <variablelist>
+      <varlistentry>
+        <term>OptimizeName</term>
 
-    <itemizedlist>
-      <listitem>
-        <para>Optimizer - Drop Down Menus</para>
+        <listitem>
+          <para>The OptimizerName option allows the user to specify which
+          solver to use in satisfying nonlinear constraints.</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must select Optimizer in order to apply
-            NonLinearConstraint</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-      <listitem>
-        <para>Constraint - Drop Down Menus or Field</para>
+              <listitem>
+                <para>SQP1</para>
+              </listitem>
+            </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must set Constraint by using Choose dialog or giving real
-            number</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+            <varlistentry>
+              <term>Limits</term>
 
-      <listitem>
-        <para>sign of equality or inequality - Drop Down Menus</para>
+              <listitem>
+                <para>Any existing fmincon solver</para>
+              </listitem>
+            </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must select the sign of equality or inequality from the
-            box</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+            <varlistentry>
+              <term>Units</term>
 
-      <listitem>
-        <para>Constraint Value - Drop Down Menus or Field</para>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <itemizedlist>
-          <listitem>
-            <para>Must set Constraint Value by using Choose dialog or giving
-            real number</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+      <varlistentry>
+        <term>{logical expression}</term>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default NonLinearConstraint Command Dialog Box</title>
-      </info>
+        <listitem>
+          <para>The logical expression field allows the user to specify the
+          constraint to be satisfied upon convergence of the solver given by
+          OptimizerName. Arg1 and Arg2 can be any of the following: Real
+          Number, a 1-D Array (column vector),Array element, Variable,
+          Spacecraft Parameter or any other numeric user defined parameter. If
+          Arg1 is a 1-D Array, then Arg2 must be a 1-D Array with the same
+          dimensions and vice-versa.</para>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_NonLinearConstraint_Default.jpeg"></imagedata>
-        </imageobject>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-        <caption>
-          <para>Figure: Default NonLinearConstraint Command Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
+              <listitem>
+                <para>DefaultSC.SMA = 7000</para>
+              </listitem>
+            </varlistentry>
 
-    <screenshot>
-      <info>
-        <title>Figure: Parameter Selecting Dialog Box of NonLinearConstraint
-        Command</title>
-      </info>
+            <varlistentry>
+              <term>Limits</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_NonLinearConstraint_ParameterSelecting.jpeg"></imagedata>
-        </imageobject>
+              <listitem>
+                <para>Arg1 &lt;= Arg2 where &lt;= can be &gt;= ; &lt;= ;
+                =</para>
+              </listitem>
+            </varlistentry>
 
-        <caption>
-          <para>Figure: Parameter Selecting Dialog Box of NonLinearConstraint
-          Command</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+            <varlistentry>
+              <term>Units</term>
 
-  <section>
-    <title>Using the Script</title>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
 
-    <section>
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>NonLinearConstraint OptimizerName ({logical expression})</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Constrain the SMA of Sat to be 7000 km, using fminconSQP
@@ -155,40 +169,6 @@ NonLinearConstraint fminconSQP( Sat.SMA &lt;= 7000 );
 
 % Constrain the SMA of Sat to be greater than or equal to 7000 km, using fminconSQP
 NonLinearConstraint fminconSQP( Sat.SMA &gt;= 7000a );</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>OptimizeName</para></entry>
-
-            <entry><para>Default: SQP1.</para> <para>Options: { Any existing
-            fmincon solver }</para> <para>The OptimizerName option allows the
-            user to specify which solver to use in satisfying nonlinear
-            constraints.</para> <para>Units: N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry><para>{logical expression}</para></entry>
-
-            <entry><para>Default: DefaultSC.SMA = 7000.</para> <para>Options:
-            { Arg1 &lt;= Arg2 where &lt;= can be &gt;= ; &lt;= ; = }</para>
-            <para>The logical expression field allows the user to specify the
-            constraint to be satisfied upon convergence of the solver given by
-            OptimizerName. Arg1 and Arg2 can be any of the following: Real
-            Number, a 1-D Array (column vector),Array element, Variable,
-            Spacecraft Parameter or any other numeric user defined parameter.
-            If Arg1 is a 1-D Array, then Arg2 must be a 1-D Array with the
-            same dimensions and vice-versa.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

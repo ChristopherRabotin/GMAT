@@ -1,96 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="CallFunction"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Call Function</title>
+<refentry version="5.0" xml:id="CallFunction"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>CallFunction</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>CallFunction</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Call Function</refname>
+
+    <refpurpose>Run a call function</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Definition</title>
 
     <para>GMAT functions are very useful and work nearly the same as they do
     in most programming languages. They may be invoked using the Call Function
     command covered here.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
-
-      <itemizedlist>
-        <listitem>
-          <para>Function</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Any function that you create will be available to the Call
-              Function command for use.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Spacecraft</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>All of the standard spacecraft object properties are
-              available for function inputs and outputs.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Impulsive Burn</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Both the standard direction sets of Elements 1, 2, and 3,
-              as well as V, N, and B are available for function inputs and
-              outputs.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Variable</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Variables are available as values for both input and
-              output.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>Array</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Arrays are available as data for both input and
-              output.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-
-        <listitem>
-          <para>String</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>Strings are available as data for both input and
-              output.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
-
-  <section>
+  <refsection>
     <title>Using the Call Function Command in the GUI</title>
 
     <para>The Call Function Command is is useful in that</para>
@@ -161,8 +110,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_CallFunction_Default.jpeg"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_CallFunction_Default.jpeg"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>
@@ -171,12 +121,129 @@
         </caption>
       </mediaobject>
     </screenshot>
-  </section>
+  </refsection>
 
-  <section>
-    <title>Using the Call Function Command in the script</title>
+  <refsection>
+    <title>Options</title>
 
-    <section>
+    <variablelist>
+      <varlistentry>
+        <term>OutputList</term>
+
+        <listitem>
+          <para>The OutputList option allows the user to set the output of
+          Function to a user defined parameter.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Variables, Arrays, S/C, Paramters, any other
+                user-defined parameters, or blank. Multiple outputs must be
+                expressed in a comma delimited list format</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>InputList</term>
+
+        <listitem>
+          <para>The InputList option allows the user to set the input of
+          Function to a user defined parameter.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Variables, Arrays, S/C, Paramters, any other
+                user-defined parameters, or blank. Multiple inputs must be
+                expressed in a comma delimited list format.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Function</term>
+
+        <listitem>
+          <para>The Function option allows the user to set the function that
+          will be called in a specific location of the mission sequence. The
+          function has to be defined before it can be used in the CallFunction
+          Command.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>GMAT of Matlab Function</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+  
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>%Function call with Inputs and Outputs
@@ -190,9 +257,9 @@ GMAT Function(InputList)
 
 Function call with no Inputs or Outputs
 GMAT Function</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Matlab function call without inputs or outputs
@@ -204,49 +271,6 @@ GMAT clearAll
 GMAT [ ] = clearAll( )</code></programlisting>
 
       <para></para>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>OutputList</para></entry>
-
-            <entry><para>Default: None</para><para>Options: [ Variables,
-            Arrays, S/C, Paramters, any other user-defined parameters, or
-            blank. Multiple outputs must be expressed in a comma delimited
-            list format ]</para><para>The OutputList option allows the user
-            to set the output of Function to a user defined parameter.</para>
-            <para>Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para>InputList</para></entry>
-
-            <entry><para>Default: None</para><para> Options: [ Variables,
-            Arrays, S/C, Paramters, any other user-defined parameters, or
-            blank. Multiple inputs must be expressed in a comma delimited list
-            format. ]</para><para>The InputList option allows the user to
-            set the input of Function to a user defined parameter.</para>
-            <para>Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para>Function</para></entry>
-
-            <entry><para>Default: None</para><para>Options: [ GMAT of
-            Matlab Function ]</para><para>The Function option allows the
-            user to set the function that will be called in a specific
-            location of the mission sequence. The function has to be defined
-            before it can be used in the CallFunction Command.</para>
-			<para>Units: N/A</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

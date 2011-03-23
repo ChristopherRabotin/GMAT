@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Else" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Else</title>
+<refentry version="5.0" xml:id="Else" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Else</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>Else</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Else</refname>
+
+    <refpurpose>Run an else</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>If-Else statements in GMAT work as they do in other programming
     languages, especially Matlab. The Else command adds another dimension to
@@ -21,57 +43,12 @@
     Else statement after the If will ensure that the lines of script within
     the scope of that Else are executed when x is equal to 5 or
     greater.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+  <refsection>
+    <title>Examples</title>
 
-      <itemizedlist>
-        <listitem>
-          <para><link linkend="If">If</link></para>
-
-          <itemizedlist>
-            <listitem>
-              <para>The If command is the only part of GMAT that interacts
-              with the Else command. Whenever Else is used, If must precede it
-              as described below.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
-
-  <section>
-    <title>Using the Else Command in the GUI</title>
-
-    <para>Else appears as the option 'If-Else' in the GUI when adding it to
-    the Mission tree. Once added to the tree, there will appear an If with an
-    Else appended to it. You may add any command(s) you wish after the Else
-    statement.</para>
-
-    <screenshot>
-      <info>
-        <title>Figure: Default Appearance of the Else Command in the Mission
-        tree</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="files/images/Command_Else_Default.jpeg"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Default Appearance of the Else Command in the Mission
-          tree</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
-
-  <section>
-    <title>Using the Else Command in the script</title>
-
-    <section>
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>If &lt;logical expression&gt;;
@@ -79,9 +56,9 @@
 Else;
    &lt;Statements&gt;;
 EndIf;</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>If DefaultSC.ElapsedDays &lt; 1;
@@ -89,6 +66,6 @@ EndIf;</code></programlisting>
 Else;
    Propagate DefaultProp( DefaultSC , { DefaultSC.ElapsedDays = 0.2 });
 EndIf;</code></programlisting>
-    </section>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

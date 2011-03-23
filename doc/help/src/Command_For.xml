@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>For</title>
+<refentry version="5.0" xml:id="For" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>For</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>For</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>For</refname>
+
+    <refpurpose>Run a for loop</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The for loop is a control flow statement that allows portions of
     code to be executed iteratively using an explicit loop variable
@@ -20,9 +42,9 @@
     command statement. The parameters used to define Start, Increment, and End
     can be any of the following GMAT parameters: numeric literal (real
     number), variable, array element, object property.</para>
-  </section>
+  </refsection>
 
-  <section>
+  <refsection>
     <title>Interfaces</title>
 
     <para>The GUI for the For Loop command is divided into four
@@ -59,7 +81,9 @@
 
       <mediaobject>
         <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="files/images/Command_For_Default.bmp"></imagedata>
+          <imagedata align="center" contentdepth="100%"
+                     fileref="files/images/Command_For_Default.bmp"
+                     scalefit="1" width="100%"></imagedata>
         </imageobject>
 
         <caption>
@@ -69,7 +93,7 @@
       </mediaobject>
     </screenshot>
 
-    <section>
+    <refsection>
       <title>Script Syntax</title>
 
       <para>(Simple For Loop)</para>
@@ -83,9 +107,9 @@ EndFor; }</code></programlisting>
       <programlisting><code>For Variable = Start:Increment:End;
 
 EndFor;</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Output the value of the For loop Variable to a file
@@ -93,64 +117,160 @@ For I = 1:1:10;
 GMAT testVar = I;
 Report DefaultReportFile I;
 EndFor;</code></programlisting>
-    </section>
-  </section>
+    </refsection>
+  </refsection>
 
-  <section>
-    <title>Reference Table</title>
+  <refsection>
+    <title>Options</title>
 
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para>Variable</para></entry>
+    <variablelist>
+      <varlistentry>
+        <term>Variable</term>
 
-            <entry><para>Default: No Default.</para> <para>Options: [ Variable
-            ]</para> <para>The Variable field allows the user to define the
-            variable that to be incremented during the loop process.</para>
-            <para>Units: N/A.</para></entry>
-          </row>
+        <listitem>
+          <para>The Variable field allows the user to define the variable that
+          to be incremented during the loop process.</para>
 
-          <row>
-            <entry><para>Start</para></entry>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-            <entry><para>Default: 1.</para> <para>Options: [ Real Number,
-            Array element, Variable, or any user defined parameter ].</para>
-            <para>The Start option allows the user to set the starting value
-            of the For Loop.</para> <para>Units: N/A.</para></entry>
-          </row>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
 
-          <row>
-            <entry><para>Increment</para></entry>
+            <varlistentry>
+              <term>Limits</term>
 
-            <entry><para>Default: 1.</para><para>Options: [ Real Number,
-            Array element, Variable, or any user defined parameter ].</para>
-            <para>The Increment option allows the user to set the increment
-            value of the For Loop. When the increment value is not included in
-            a for loop statement, the default value is used.</para>
-            <para>Units: N/A.</para></entry>
-          </row>
+              <listitem>
+                <para>Variable</para>
+              </listitem>
+            </varlistentry>
 
-          <row>
-            <entry><para>End</para></entry>
+            <varlistentry>
+              <term>Units</term>
 
-            <entry><para>Default: 10.</para><para>Options: [ Real Number,
-            Array, Variable, or any user defined parameter ].</para>
-            <para>The End option allows the user to set the ending value of
-            the For Loop.</para><para>Units: N/A.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-  <section>
-    <title>Objects and Command Interactions</title>
+      <varlistentry>
+        <term>Start</term>
 
-    <para></para>
-  </section>
+        <listitem>
+          <para>The Start option allows the user to set the starting value of
+          the For Loop.</para>
 
-  <section>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>1</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Real Number, Array element, Variable, or any user
+                defined parameter</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Increment</term>
+
+        <listitem>
+          <para>The Increment option allows the user to set the increment
+          value of the For Loop. When the increment value is not included in a
+          for loop statement, the default value is used.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>1</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Real Number, Array element, Variable, or any user
+                defined parameter</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>End</term>
+
+        <listitem>
+          <para>The End option allows the user to set the ending value of the
+          For Loop.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>10</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Real Number, Array, Variable, or any user defined
+                parameter</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
     <title>For Loop Behavior</title>
 
     <para>When the Increment option is left out of the script syntax the
@@ -159,5 +279,5 @@ EndFor;</code></programlisting>
     Increment&lt;0, then the For Loop should not execute. If Start&gt;End and
     Increment&gt;0, then the For Loop should not execute. End can be equal to
     Start, but the For Loop will not execute.</para>
-  </section>
-</section>
+  </refsection>
+</refentry>
