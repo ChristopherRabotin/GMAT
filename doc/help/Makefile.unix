@@ -8,3 +8,7 @@ xalancp = "contrib/xalan-j/xalan.jar:contrib/xalan-j/serializer.jar:\
 	contrib/docbook-xsl-ns/extensions/xalan27.jar"
 
 include Common.mk
+
+# Custom rules
+clean :
+	$(rm) *.fo *.pdf files

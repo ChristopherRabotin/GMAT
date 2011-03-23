@@ -1,3 +1,8 @@
+# Makefile to build GMAT User Guide from DocBook sources.
+# 
+# Prerequisites (must be present in %PATH% environment variable):
+#   svn (Subversion command-line client)
+
 # Tools
 fop = .\contrib\fop\fop.cmd
 rm = del
@@ -8,3 +13,8 @@ xalancp = "contrib/xalan-j/xalan.jar;contrib/xalan-j/serializer.jar;\
 	contrib/docbook-xsl-ns/extensions/xalan27.jar"
 
 include Common.mk
+
+# Custom rules
+clean :
+	del *.fo *.pdf
+	rd files /s /q

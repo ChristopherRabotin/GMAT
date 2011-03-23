@@ -17,24 +17,23 @@ graphicfiles = src/files/images/*.*
 srcfiles = $(xmlfiles) $(graphicfiles)
 
 # Rules
-all : help-letter-fo.pdf \
-	help-a4-fo.pdf \
-	help-letter-latex.pdf \
-	help-letter-latex.pdf
+all : pdf
 
-help-letter.pdf : help-letter.fo
-	$(fop) $? $@
+pdf : help-letter.pdf \
+	help-a4.pdf \
 
-help-a4.pdf : help-a4.fo
-	$(fop) $? $@
+help-letter.pdf : files/style.css help-letter.fo
+	$(fop) help-letter.fo $@
 
-copyfiles :
-	$(cp) src/files .
+help-a4.pdf : files/style.css help-a4.fo
+	$(fop) help-a4.fo $@
+
+# stand-in for entire files directory
+files/style.css : src/files/style.css
+	svn export --force src/files files
+    
 validate :
 	$(java) -jar contrib/jing/bin/jing.jar contrib/docbook/docbookxi.rng $(top)
-
-clean :
-	$(rm) *.fo *.pdf
 
 help-letter.fo : validate $(xmlfiles)
 	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
@@ -44,7 +43,7 @@ help-letter.fo : validate $(xmlfiles)
 	-PARAM paper.type USletter \
 	-PARAM shade.verbatim 1 \
 	-IN $(top) \
-	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
+	-XSL xform/fo.xsl \
 	-OUT $@
 
 help-a4.fo : validate $(xmlfiles)
@@ -55,5 +54,5 @@ help-a4.fo : validate $(xmlfiles)
 	-PARAM paper.type A4 \
 	-PARAM shade.verbatim 1 \
 	-IN $(top) \
-	-XSL contrib/docbook-xsl-ns/fo/docbook.xsl \
+	-XSL xform/fo.xsl \
 	-OUT $@
