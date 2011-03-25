@@ -96,7 +96,7 @@ java -cp %xalancp%	^
 	-PARAM chunk.quietly 1 ^
     -PARAM chunk.section.depth 1 ^
     -PARAM generate.toc "" ^
-    -PARAM html.stylesheet files\style.css ^
+    -PARAM html.stylesheet files/style.css ^
     -PARAM htmlhelp.remember.window.position 1 ^
     -PARAM htmlhelp.hhc.section.depth 1 ^
     -PARAM htmlhelp.hhc.show.root 0 ^
@@ -104,11 +104,13 @@ java -cp %xalancp%	^
     -PARAM htmlhelp.show.advanced.search 1 ^
     -PARAM htmlhelp.use.hhk 1 ^
     -PARAM htmlhelp.default.topic ch01.html ^
+    -PARAM variablelist.as.table 1 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
 xcopy src\files build\chm\files /i /s /e /q /v /y
 hhc build\chm\htmlhelp.hhp
-move build\chm\htmlhelp.chm build\help.chm
+move build\chm\htmlhelp.chm build\chm\help.chm
+zip build\help.chm.zip build\chm\help.chm
 echo --------------------
 echo.
 
@@ -118,7 +120,8 @@ java -cp %xalancp%	^
 	-Dorg.apache.xerces.xni.parser.XMLParserConfiguration=%xmlparser% ^
 	org.apache.xalan.xslt.Process ^
 	%xslopts% ^
-    -PARAM html.stylesheet files\style.css ^
+    -PARAM html.stylesheet files/style.css ^
+    -PARAM variablelist.as.table 1 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\html\docbook.xsl ^
 	-OUT build\help.html
@@ -133,8 +136,9 @@ java -cp %xalancp%	^
 	%xslopts% ^
 	-PARAM base.dir ..\build\html\ ^
 	-PARAM img.src.path ..\ ^
-    -PARAM html.stylesheet ..\files\style.css ^
+    -PARAM html.stylesheet ../files/style.css ^
     -PARAM chunk.quietly 1 ^
+    -PARAM variablelist.as.table 1 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\html\chunkfast.xsl
 echo --------------------
@@ -143,7 +147,7 @@ echo.
 rem move output files
 echo Collecting output files...
 xcopy build\*.pdf output /i /s /q /v /y
-xcopy build\help.chm output /i /s /q /v /y
+xcopy build\help.chm.zip output /i /s /q /v /y
 xcopy build\help.html output /i /s /q /v /y
 xcopy build\html output\html /i /s /e /q /v /y
 xcopy build\files output\files /i /s /e /q /v /y

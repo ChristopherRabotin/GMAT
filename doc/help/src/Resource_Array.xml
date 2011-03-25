@@ -6,130 +6,169 @@
           xmlns:m="http://www.w3.org/1998/Math/MathML"
           xmlns:html="http://www.w3.org/1999/xhtml"
           xmlns:db="http://docbook.org/ns/docbook">
-  <refmeta>
-    <refentrytitle>Array</refentrytitle>
+    <indexterm>
+        <primary>Array</primary>
+    </indexterm>
 
-    <refmiscinfo class="source">GMAT</refmiscinfo>
+    <refmeta>
+        <refentrytitle>Array</refentrytitle>
 
-    <refmiscinfo class="version">2011a</refmiscinfo>
+        <refmiscinfo class="source">GMAT</refmiscinfo>
 
-    <refmiscinfo class="manual">Resources</refmiscinfo>
-  </refmeta>
+        <refmiscinfo class="version">2011a</refmiscinfo>
 
-  <refnamediv>
-    <refname>Array</refname>
+        <refmiscinfo class="manual">Resources</refmiscinfo>
+    </refmeta>
 
-    <refpurpose>A fuel tank.</refpurpose>
-  </refnamediv>
+    <refnamediv>
+        <refname>Array</refname>
 
-  <refsynopsisdiv>
-    <synopsis>Create Array <replaceable>name</replaceable>
-<replaceable>name</replaceable>.<replaceable>field</replaceable> = <replaceable>value</replaceable>
-</synopsis>
-  </refsynopsisdiv>
+        <refpurpose>A two-dimensional numeric array variable</refpurpose>
+    </refnamediv>
 
-  <refsection>
-    <title>Description</title>
+    <refsynopsisdiv>
+        <synopsis>Create Array <replaceable>name</replaceable>[<replaceable>rows</replaceable>,<replaceable>columns</replaceable>];
+<replaceable>name</replaceable>(<replaceable>row</replaceable>,<replaceable>column</replaceable>) = <replaceable>value</replaceable>;
+…</synopsis>
+    </refsynopsisdiv>
 
-    <para>The purpose of an array is to store multiple parameters under one
-    object, such as components of a vector.</para>
-  </refsection>
+    <refsection>
+        <title>Description</title>
 
-  <refsection>
-    <title>Fields</title>
+        <para>An array is a numeric variable that can contain multiple values
+        in either one or two dimensions (i.e. a matrix).</para>
+    </refsection>
 
-    <variablelist>
-      <varlistentry>
-        <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
-        FORMATTING$</term>
+    <refsection>
+        <title>Fields</title>
 
-        <listitem>
-          <para>$ITEM DESCRIPTION$</para>
-
-          <variablelist spacing="compact">
+        <variablelist>
             <varlistentry>
-              <term>Default</term>
+                <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
+                FORMATTING$</term>
 
-              <listitem>
-                <para>$ITEM DEFAULT VALUE$</para>
-              </listitem>
+                <listitem>
+                    <para>$ITEM DESCRIPTION$</para>
+
+                    <variablelist spacing="compact">
+                        <varlistentry>
+                            <term>Default</term>
+
+                            <listitem>
+                                <para>$ITEM DEFAULT VALUE$</para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>Limits</term>
+
+                            <listitem>
+                                <para>$ITEM OPTIONS$</para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>Units</term>
+
+                            <listitem>
+                                <para>$UNITS$</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
             </varlistentry>
 
             <varlistentry>
-              <term>Limits</term>
+                <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
+                FORMATTING$</term>
 
-              <listitem>
-                <para>$ITEM OPTIONS$</para>
-              </listitem>
+                <listitem>
+                    <para>$ITEM DESCRIPTION$</para>
+
+                    <variablelist spacing="compact">
+                        <varlistentry>
+                            <term>Default</term>
+
+                            <listitem>
+                                <para>$ITEM DEFAULT VALUE$</para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>Limits</term>
+
+                            <listitem>
+                                <para>$ITEM OPTIONS$</para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>Units</term>
+
+                            <listitem>
+                                <para>$UNITS$</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </listitem>
             </varlistentry>
+        </variablelist>
+    </refsection>
 
+    <refsection>
+        <title>Interactions</title>
+
+        <variablelist>
             <varlistentry>
-              <term>Units</term>
+                <term>Report Commands</term>
 
-              <listitem>
-                <para>$UNITS$</para>
-              </listitem>
+                <listitem>
+                    <para>Report commands can be used to retrieve information
+                    within arrays or from the entire array.</para>
+                </listitem>
             </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
+        </variablelist>
+    </refsection>
 
-      <varlistentry>
-        <term>$ITEM NAME. WILL MOST LIKELY USE COURIER NEW HTML
-        FORMATTING$</term>
+    <refsection>
+        <title>Examples</title>
 
-        <listitem>
-          <para>$ITEM DESCRIPTION$</para>
+        <example>
+            <title>Creating an array</title>
 
-          <variablelist spacing="compact">
-            <varlistentry>
-              <term>Default</term>
+            <para>This example creates an empty one-dimensional array with 5
+            elements.</para>
 
-              <listitem>
-                <para>$ITEM DEFAULT VALUE$</para>
-              </listitem>
-            </varlistentry>
+            <programlisting>Create Array Array1[1,5];</programlisting>
+        </example>
 
-            <varlistentry>
-              <term>Limits</term>
+        <example>
+            <title>Creating and populating a matrix</title>
 
-              <listitem>
-                <para>$ITEM OPTIONS$</para>
-              </listitem>
-            </varlistentry>
+            <para>This example creates the identity matrix of size 2 and names
+            it <literal>I</literal>:</para>
+<!--
+            <informalequation>
+            <m:math>
+            <m:mi>I</m:mi><m:mo>=</m:mo>
+                <m:mo>[</m:mo>
+     <m:mtable>
+        <m:mtr>
+          <m:mtd> 1 </m:mtd>
+          <m:mtd> 0 </m:mtd>
+     </m:mtr>
+     <m:mtr>
+          <m:mtd> 0 </m:mtd>
+          <m:mtd> 1 </m:mtd>
+     </m:mtr>
+</m:mtable><m:mo>]</m:mo></m:math>
+            </informalequation>-->
 
-            <varlistentry>
-              <term>Units</term>
-
-              <listitem>
-                <para>$UNITS$</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsection>
-
-  <refsection>
-    <title>Interactions</title>
-
-    <variablelist>
-      <varlistentry>
-        <term>Report Commands</term>
-
-        <listitem>
-          <para>Report commands can be used to retrieve information within
-          arrays or from the entire array.</para>
-        </listitem>
-      </varlistentry>
-    </variablelist>
-  </refsection>
-
-  <refsection>
-    <title>Examples</title>
-
-    <programlisting><code>Create Array Array1[2,2];
-</code></programlisting>
-  </refsection>
+            <programlisting><code>Create Array I[2,2];
+I(1,1) = 1;
+I(1,2) = 0;
+I(2,1) = 0;
+I(2,2) = 1;</code></programlisting>
+        </example>
+    </refsection>
 </refentry>

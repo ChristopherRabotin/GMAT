@@ -23,10 +23,12 @@ pdf : help-letter.pdf \
 	help-a4.pdf \
 
 help-letter.pdf : files/style.css help-letter.fo
-	$(fop) help-letter.fo $@
+	python contrib/svgmath/math2svg.py -o help-letter-conv.fo help-letter.fo
+	$(fop) help-letter-conv.fo $@
 
 help-a4.pdf : files/style.css help-a4.fo
-	$(fop) help-a4.fo $@
+	python contrib/svgmath/math2svg.py -o help-a4-conv.fo help-a4.fo
+	$(fop) help-a4-conv.fo $@
 
 # stand-in for entire files directory
 files/style.css : src/files/style.css
