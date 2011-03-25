@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="While" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>While</title>
+<refentry version="5.0" xml:id="While" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>While</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>While</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>While</refname>
+
+    <refpurpose>Run a while loop</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The while loop is a control logic function that allows GMAT to check
     the spacecraft's status on a given parameter while performing a command or
@@ -17,136 +39,158 @@
     spacecraft has reached the given property, the while loop will check its
     condition and react according to the equation defined in the loop's dialog
     box.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that Interact</title>
+  <refsection>
+    <title>Options</title>
 
-      <para><itemizedlist>
-          <listitem>
-            <para>Spacecraft<itemizedlist>
-                <listitem>
-                  <para>On either side of the equation and inside the loop's
-                  Parameter Select Dialog box, an Object Type must be called
-                  from the drop down menu to reference for the loop to
-                  function properly. Available options include a spacecraft,
-                  variables, arrays, or strings.</para>
-                </listitem>
-              </itemizedlist></para>
-          </listitem>
+    <variablelist>
+      <varlistentry>
+        <term>&lt;logical expression&gt;</term>
 
-          <listitem>
-            <para>Variables/Arrays/Strings<itemizedlist>
-                <listitem>
-                  <para>See Spacecraft bullet.</para>
-                </listitem>
-              </itemizedlist></para>
-          </listitem>
+        <listitem>
+          <para>Arg1 and Arg2 can be any of the following: Real Number, Array,
+          Variable, Spacecraft Parameter or any other user defined
+          parameter.</para>
 
-          <listitem>
-            <para>Maneuver Command<itemizedlist>
-                <listitem>
-                  <para>As part of the while loop definition, the sequence
-                  must be performing a command or include an internal control
-                  logic function while something else is happening. Typical
-                  commands include Maneuver and Propagate and any control
-                  function, If, If-Else, For, or While, is possible.</para>
-                </listitem>
-              </itemizedlist></para>
-          </listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-          <listitem>
-            <para>Propagate Command<itemizedlist>
-                <listitem>
-                  <para>See Maneuver Command bullet</para>
-                </listitem>
-              </itemizedlist></para>
-          </listitem>
+              <listitem>
+                <para>DefaultSC.ElapsedDays &lt; 1.0</para>
+              </listitem>
+            </varlistentry>
 
-          <listitem>
-            <para>Control Logic Functions<itemizedlist>
-                <listitem>
-                  <para>See Maneuver Command bullet</para>
-                </listitem>
-              </itemizedlist></para>
-          </listitem>
-        </itemizedlist></para>
-    </section>
-  </section>
+            <varlistentry>
+              <term>Limits</term>
 
-  <section>
-    <title>Using GUI</title>
+              <listitem>
+                <para>Arg1 &lt; Arg2 and &lt; can be &gt; , &lt; , &gt;= ,
+                &lt;= , == , ~=</para>
+              </listitem>
+            </varlistentry>
 
-    <para>The While Loop dialog box contains four sections, a left hand (LHS)
-    and right hand (RHS) side of the equation, a logical operator column and a
-    condition column. The LHS and RHS supply the parameters to put on either
-    side of the condition for the equation, and the logical operators exist so
-    more complex loops can be run through GMAT.</para>
+            <varlistentry>
+              <term>Units</term>
 
-    <itemizedlist>
-      <listitem>
-        <para>LHS/RHS - Field<itemizedlist>
-            <listitem>
-              <para>Both the LHS and RHS columns have the capability of either
-              entering a value or selecting a property from a second dialog
-              box, but typically the LHS is a property and the RHS is a value.
-              You can manually add a value by applying a double left click, or
-              you can open the Parameter Select dialog box by applying a right
-              click. In addition to selecting a property, an Object Type and
-              an object from the Object List must be highlighted. If a
-              property is selected that requires a coordinate system, then a
-              system must be chosen from the drop down menu that appears below
-              the Object Properties menu.</para>
-            </listitem>
-          </itemizedlist></para>
-      </listitem>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-      <listitem>
-        <para>Condition - Field<itemizedlist>
-            <listitem>
-              <para>The condition column supplies the inequality symbols
-              (&lt;, &gt;, &lt;=, &gt;=, ==, and ~=) for the
-              expression.</para>
-            </listitem>
-          </itemizedlist></para>
-      </listitem>
+      <varlistentry>
+        <term>&lt;Statements&gt;</term>
 
-      <listitem>
-        <para>Logical Operator - Field<itemizedlist>
-            <listitem>
-              <para>The logical operator column only supplies one option, the
-              ability to right click the box to add an And or Or operator
-              (&amp; or |). Except for the uppermost box in the far left
-              column that states the loop or statement being used, the rest of
-              the boxes are open to add operators.</para>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-              <screenshot>
-                <info>
-                  <title>Figure: Default Name and Settings for the While Loop
-                  Dialog Box</title>
-                </info>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
 
-                <mediaobject>
-                  <imageobject>
-                    <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                               fileref="files/images/Command_While_Default.jpeg"></imagedata>
-                  </imageobject>
+            <varlistentry>
+              <term>Limits</term>
 
-                  <caption>
-                    <para>Figure: Default Name and Settings for the While Loop
-                    Dialog Box</para>
-                  </caption>
-                </mediaobject>
-              </screenshot>
-            </listitem>
-          </itemizedlist></para>
-      </listitem>
-    </itemizedlist>
-  </section>
+              <listitem>
+                <para>Any script line that can be in the mission
+                sequence</para>
+              </listitem>
+            </varlistentry>
 
-  <section>
-    <title>Using the Script</title>
+            <varlistentry>
+              <term>Units</term>
 
-    <section>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>|</term>
+
+        <listitem>
+          <para>The | option allows the user to set an OR operator in between
+          s.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&amp;</term>
+
+        <listitem>
+          <para>The &amp; option allows the user to set an AND operator in
+          between &lt;logical expression&gt;s.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <itemizedlist>
@@ -166,9 +210,9 @@ EndWhile;</code></programlisting>
 EndWhile;</code></programlisting>
         </listitem>
       </itemizedlist>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>While DefaultSC.ElapsedDays &lt; 1;
@@ -178,52 +222,6 @@ EndWhile;
 While MyVariable &lt; MyArray(1,1);
 MyArray(1,1) = 5;
 EndWhile;</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry>&lt;logical expression&gt;</entry>
-
-            <entry><para>Default: DefaultSC.ElapsedDays &lt; 1.0.</para>
-            <para>Options: { Arg1 &lt; Arg2 and &lt; can be &gt; , &lt; ,
-            &gt;= , &lt;= , == , ~= }.</para> <para>Arg1 and Arg2 can be any
-            of the following: Real Number, Array, Variable, Spacecraft
-            Parameter or any other user defined parameter.</para> <para>Units:
-            N/A.</para></entry>
-          </row>
-
-          <row>
-            <entry>&lt;Statements&gt;</entry>
-
-            <entry><para>Default: N/A. </para> <para>Options: { Any script
-            line that can be in the mission sequence }.</para> <para>Units:
-            N/A. </para></entry>
-          </row>
-
-          <row>
-            <entry>|</entry>
-
-            <entry><para>Default: N/A.</para> <para>Options: { N/A }.</para>
-            <para>The | option allows the user to set an OR operator in
-            between s.</para> <para>Units: N/A. </para></entry>
-          </row>
-
-          <row>
-            <entry>&amp;</entry>
-
-            <entry><para>Default: N/A.</para> <para>Options: { N/A }.</para>
-            <para>The &amp; option allows the user to set an AND operator in
-            between &lt;logical expression&gt;s.</para> <para>Units: N/A.
-            </para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

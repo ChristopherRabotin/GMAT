@@ -24,7 +24,7 @@
   <refnamediv>
     <refname>Call Function</refname>
 
-    <refpurpose>Run a call function</refpurpose>
+    <refpurpose>Perform a call function</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -37,90 +37,6 @@
     <para>GMAT functions are very useful and work nearly the same as they do
     in most programming languages. They may be invoked using the Call Function
     command covered here.</para>
-  </refsection>
-
-  <refsection>
-    <title>Using the Call Function Command in the GUI</title>
-
-    <para>The Call Function Command is is useful in that</para>
-
-    <itemizedlist>
-      <listitem>
-        <para>Output - Display</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This is where the Objects or values selected for output are
-            displayed.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>View (Output) - Button</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This button brings up the standard Parameter Select dialog
-            box. It allows you to add objects to the list of outputs.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Function - Drop Down Menu</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This is where you select the function that will be called by
-            the Call Function command.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>Input - Display</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This is where the Objects or values selected for input are
-            displayed.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-
-      <listitem>
-        <para>View (Input) - Button</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>This button also brings up the standard Parameter Select
-            dialog box. It allows you to add objects to the list of
-            inputs.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
-
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Call Function Command
-        Dialog Box</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Command_CallFunction_Default.jpeg"
-                     scalefit="1" width="100%"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Default Name and Settings for the Call Function
-          Command Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
   </refsection>
 
   <refsection>

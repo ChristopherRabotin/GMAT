@@ -1,113 +1,138 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Report" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Report</title>
+<refentry version="5.0" xml:id="Report" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Report</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>Report</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Report</refname>
+
+    <refpurpose>Output a report</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The report command allows the user find parameters of the orbit and
     the spacecraft at particular moments in time. This command is inserted
     into the mission tree at various locations in the mission tree. The
     parameters found by this command are placed into a report file that can be
     accessed at a later time.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+  <refsection>
+    <title>Options</title>
 
-      <itemizedlist>
+    <variablelist>
+      <varlistentry>
+        <term>ReportName</term>
+
         <listitem>
-          <para>ReportFile</para>
+          <para>The ReportName option allows the user to specift the
+          ReportFile for data output.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Object where the parameters retrieved by the report
-              command.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Any ReportFile created</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
-      </itemizedlist>
-    </section>
-  </section>
+      </varlistentry>
 
-  <section>
-    <title>Using the GUI</title>
+      <varlistentry>
+        <term>DataList</term>
 
-    <para>The report command has two main boxes. The first box allows one to
-    select which report the parameters will be stored in. The second box
-    interacts with the ParameterSelectDialog and allows the user to pick which
-    parameters are desired to be seen at that particular moment.</para>
+        <listitem>
+          <para>The DataList option allows the user to output data to the
+          Filename specified by the ReportName. Multiple objects can be in the
+          DataList when they are separated by spaces.</para>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Report Command Dialog
-        Box</title>
-      </info>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_Report_Default.jpeg"></imagedata>
-        </imageobject>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Report Command
-          Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+            <varlistentry>
+              <term>Limits</term>
 
-  <section>
-    <title>Using the script</title>
+              <listitem>
+                <para>Spacecraft parameter, Array, Variable, String, or any
+                other single user defined parameter</para>
+              </listitem>
+            </varlistentry>
 
-    <section>
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>Report  ReportName  DataList</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>%Report the time and position of DefaultSC
 
 Report DefaultReport DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z;</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para> ReportName</para></entry>
-
-            <entry><para> Default: N/A </para> <para> Options: { Any
-            ReportFile created }</para> <para> The ReportName option allows
-            the user to specift the ReportFile for data output. </para> <para>
-            Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> DataList</para></entry>
-
-            <entry><para> Default: N/A</para> <para> Options: { Spacecraft
-            parameter, Array, Variable, String, or any other single user
-            defined parameter }</para> <para> The DataList option allows the
-            user to output data to the Filename specified by the ReportName.
-            Multiple objects can be in the DataList when they are separated by
-            spaces. </para> <para> Units: N/A</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

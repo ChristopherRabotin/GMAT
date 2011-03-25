@@ -24,7 +24,7 @@
   <refnamediv>
     <refname>Minimize</refname>
 
-    <refpurpose>Run a minimize</refpurpose>
+    <refpurpose>Perform a minimize command</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>

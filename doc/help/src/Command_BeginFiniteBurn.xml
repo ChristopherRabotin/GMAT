@@ -24,7 +24,7 @@
   <refnamediv>
     <refname>BeginFiniteBurn</refname>
 
-    <refpurpose>Run a begin finite burn</refpurpose>
+    <refpurpose>Perform a begin finite burn</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>

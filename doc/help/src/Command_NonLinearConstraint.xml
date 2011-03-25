@@ -24,7 +24,7 @@
   <refnamediv>
     <refname>NonLinearConstraint</refname>
 
-    <refpurpose>Run a NonLinearConstraint</refpurpose>
+    <refpurpose>Apply nonlinear constraint</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>

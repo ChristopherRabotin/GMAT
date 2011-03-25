@@ -1,71 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Stop" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Stop</title>
+<refentry version="5.0" xml:id="Stop" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Stop</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview</title>
+  <refmeta>
+    <refentrytitle>Stop</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Stop</refname>
+
+    <refpurpose>Perform a stop command</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The Stop command simply ends a mission in GMAT. Whether placed in
     the script or GUI, Stop will halt the execution of the mission and have
     GMAT report back that the Command Sequence was intentionally
     interrupted.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+  <refsection>
+    <title>Examples</title>
 
-      <itemizedlist>
-        <listitem>
-          <para>No Objects or Commands interact with Stop</para>
-        </listitem>
-      </itemizedlist>
-    </section>
-  </section>
-
-  <section>
-    <title>Using the GUI</title>
-
-    <para>Since there is no GUI window for the Stop command, the screen shot
-    below shows how it looks in the Mission tree.</para>
-
-    <screenshot>
-      <info>
-        <title>Figure: Stop Command as it appears in the Mission Tree</title>
-      </info>
-
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center" fileref="files/images/Command_Stop_Default.jpeg"></imagedata>
-        </imageobject>
-
-        <caption>
-          <para>Figure: Stop Command as it appears in the Mission Tree</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
-
-  <section>
-    <title>Using the script</title>
-
-    <section>
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>Stop</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Stop between propagation sequences
 Propagate DefaultProp(DefaultSC) DefaultSC.ElapsedSecs = 8640.0;
 Stop;
 Propagate DefaultProp(DefaultSC) DefaultSC.ElapsedDays = 10.0;</code></programlisting>
-    </section>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

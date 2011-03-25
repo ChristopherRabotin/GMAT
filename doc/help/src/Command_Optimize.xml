@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<refentry version="5.0" xml:id="Optimize" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
+<refentry version="5.0" xml:id="Optimize"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
   <indexterm>
     <primary>Optimize</primary>
   </indexterm>
@@ -23,7 +24,7 @@
   <refnamediv>
     <refname>Optimize</refname>
 
-    <refpurpose>Run an optimize sequence</refpurpose>
+    <refpurpose>Perform an optimize command</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -76,78 +77,81 @@
     <title>Options</title>
 
     <variablelist>
-        <varlistentry>
-            <term>SolverName</term>
-            
-            <listitem>
-              <para>The SolverName field allows the
-            user to choose between any previously created optimizer for use in
-            an optimization sequence. For example, to begin a optimization
-            sequence using DefaultSQP, the script is Optimize
-            DefaultSQP.</para>
-              
-              <variablelist>
-                <varlistentry>
-                    <term>Default</term>
-                    <listitem>
-                        <para>DefaultSQP</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Limits</term>
-                    <listitem>
-                        <para>Any
-            existing optimizer</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Units</term>
-                    <listitem>
-                        <para>None</para>
-                    </listitem>
-                 </varlistentry>
-              </variablelist>
-            </listitem>
-        </varlistentry>
-        
-        <varlistentry>
-            <term>&lt;Statements&gt;</term>
-            
-            <listitem>
-              <para></para>
-              
-              <variablelist>
-                <varlistentry>
-                    <term>Default</term>
-                    <listitem>
-                        <para>None</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Limits</term>
-                    <listitem>
-                        <para>Any
-            non-targeter and non-optimizer command lines used in the mission
-            sequence, as well as the optimizer dependent command lines Vary,
-            NonLinearConstraint, and Minimize.</para>
-                    </listitem>
-                </varlistentry>
-                
-                <varlistentry>
-                    <term>Units</term>
-                    <listitem>
-                        <para>None</para>
-                    </listitem>
-                 </varlistentry>
-              </variablelist>
-            </listitem>
-        </varlistentry>
+      <varlistentry>
+        <term>SolverName</term>
+
+        <listitem>
+          <para>The SolverName field allows the user to choose between any
+          previously created optimizer for use in an optimization sequence.
+          For example, to begin a optimization sequence using DefaultSQP, the
+          script is Optimize DefaultSQP.</para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>DefaultSQP</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Any existing optimizer</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>&lt;Statements&gt;</term>
+
+        <listitem>
+          <para></para>
+
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Any non-targeter and non-optimizer command lines used in
+                the mission sequence, as well as the optimizer dependent
+                command lines Vary, NonLinearConstraint, and Minimize.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
     </variablelist>
   </refsection>
-  
+
   <refsection>
     <title>Examples</title>
 

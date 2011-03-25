@@ -1,243 +1,295 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="Propagate"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>Propagate</title>
+<refentry version="5.0" xml:id="Propagate"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>Propagate</primary>
+  </indexterm>
 
-  <section>
-    <title>Overview of the Propagate Command</title>
+  <refmeta>
+    <refentrytitle>Propagate</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Propagate</refname>
+
+    <refpurpose>Perform a propagate command</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
 
     <para>The Propagate Command is a very important one and will be covered in
     this section. Basically, Propagate will take the given spacecraft and,
     using the Propagat''or'' specified as its guide, make it travel until the
     given condition is met whether it be a location or something else such as
     elapsed time.</para>
+  </refsection>
 
-    <section>
-      <title>Listing of Objects and Commands that interact</title>
+  <refsection>
+    <title>Reference Table</title>
 
-      <itemizedlist>
-        <listitem>
-          <para>Spacecraft</para>
-
-          <itemizedlist>
-            <listitem>
-              <para>It is pretty intuitive that you would need to choose a
-              spacecraft to propagate in order to use the command. Basically,
-              once you create a spacecraft in the resource tree, it will
-              appear as a spacecraft that you can propagate using this
-              command. Note that you can propagate several spacecraft using
-              the same Propagate command.</para>
-            </listitem>
-          </itemizedlist>
-        </listitem>
+    <variablelist>
+      <varlistentry>
+        <term>BackProp</term>
 
         <listitem>
-          <para>Formation</para>
+          <para>The BackProp option allows the user to set the flag to enable
+          or disable backwards propagation for all spacecraft in the SatListN
+          option. The Backward Propagation GUI check box field stores all the
+          data in BackProp. A check indicates backward propagation is enabled
+          and no check indicates forward propagation. In the script, BackProp
+          can be the word Backwards for backward propagation or blank for
+          forward propagation.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>The same way that you can propagate a Spacecraft, you can
-              propagate a group of spacecraft that are assigned to a
-              Formation.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Backwards or None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>Mode</term>
 
         <listitem>
-          <para>Propagator</para>
+          <para>The Mode option allows the user to set the propagation mode
+          for the propagator that will affect all of the spacecraft added to
+          the SatListN option. For example, if synchronized is selected, all
+          spacecraft are propagated at the same step size. The Propagate Mode
+          GUI field stores all the data in Mode. In the script, Mode is left
+          blank for the None option and the text of the other options
+          available is used for their respective modes.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Just as the propagate command needs a spacecraft to
-              propagate, it also needs a propagator that has the parameters of
-              propagation. This basically means that you must setup a
-              propagator that governs the spacecraft as it travels through
-              space. This includes what gravity is affecting it, as well as
-              drag and solar radiation pressure.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Synchronized or None</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>PropagatorName</term>
 
         <listitem>
-          <para>Parameters</para>
+          <para>The PropagatorName option allows the user to select a user
+          defined propagator to use in spacecraft and/or formation
+          propagation. The Propagator GUI field stores all the data in
+          PropagatorName.</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>Whatever parameters of object type Spacecraft, Variable,
-              or Array, that are present within the Parameter Select Dialog
-              box, are available to this field.</para>
-            </listitem>
-          </itemizedlist>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>DefaultProp</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Default propagator or any user-defined propagator</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
         </listitem>
-      </itemizedlist>
-    </section>
-  </section>
+      </varlistentry>
 
-  <section>
-    <title>Using the Propagate Command in the GUI</title>
+      <varlistentry>
+        <term>SatListN</term>
 
-    <para>The Propagate Command dialog box is split into two sections. The
-    first of these is the Propagators and Spacecraft Group Box. It is where
-    you specify which Propagator the Propagate Command will use. It is also
-    where you specify which spacecraft to propagate. The next Groups Box is
-    the Stopping Conditions. This Box is where you set the condition that will
-    end the propagation of the spacecraft.</para>
+        <listitem>
+          <para>The SatListN option allows the user to enter all the
+          satellites and/or formations they want to propagate using the
+          PropagatorName propagator settings. The Spacecraft List GUI field
+          stores all the data in SatListN.</para>
 
-    <itemizedlist>
-      <listitem>
-        <para>Propagators and Spacecraft - Field</para>
-
-        <itemizedlist>
-          <listitem>
-            <para>Propagate Mode - Drop Down Menu</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>This is where you set what mode you want the Propagator
-                to use, None or Synchronized</para>
-              </listitem>
-            </itemizedlist>
-          </listitem>
-
-          <listitem>
-            <para>Backwards Propagation - Check Box</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>Checking this box will make the spacecraft travel
-                backwards until the given stopping condition is met. Examples
-                of this would make a spacecraft will travel backwards in its
-                orbit or travel backwards in time for a given period.</para>
-              </listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
               <listitem>
-                <para>Backwards propagation can be useful if you know where a
-                spacecraft must be at the end of its journey and you must see
-                what possible path it can take to reach that objective.</para>
+                <para>DefaultSC</para>
               </listitem>
-            </itemizedlist>
-          </listitem>
+            </varlistentry>
 
-          <listitem>
-            <para>Propagator - Field</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>This specifies the Propagator that the Propagate Command
-                uses</para>
-              </listitem>
-            </itemizedlist>
-          </listitem>
-
-          <listitem>
-            <para>Spacecraft List - Field</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>This is where the spacecraft that the Propagate Command
-                is operating upon is specified.</para>
-              </listitem>
+            <varlistentry>
+              <term>Limits</term>
 
               <listitem>
-                <para>Multiple Spacecraft may be entered here with their
-                trajectories all being governed by the given propagator. If
-                they are, they may be synchronized as given in the script
-                example below.</para>
+                <para>Any existing spacecraft or formations, not being
+                propagated by another propagator in the same Propagate event.
+                Multiple spacecraft must be expressed in a comma delimited
+                list format.</para>
               </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
 
               <listitem>
-                <para>Besides Spacecraft, entire formations may be entered
-                here for propagation.</para>
+                <para>None</para>
               </listitem>
-            </itemizedlist>
-          </listitem>
-        </itemizedlist>
-      </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-      <listitem>
-        <para>Stopping Conditions - Field</para>
+      <varlistentry>
+        <term>StopCondListN / Parameter</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>Stop Tolerance - Field</para>
+        <listitem>
+          <para>The StopCondListN option allows the user to enter all the
+          parameters used for the propagator stopping condition. See the
+          StopCondListN/Condition Option/Field for additional details to the
+          StopCondListN option.</para>
 
-            <itemizedlist>
-              <listitem>
-                <para>This is how close you allow GMAT to be off from the
-                given stopping condition. The smaller the number, the greater
-                the precision.</para>
-              </listitem>
-            </itemizedlist>
-          </listitem>
-
-          <listitem>
-            <para>Parameter - Field</para>
-
-            <itemizedlist>
-              <listitem>
-                <para>This is what the Propagate Command will stop on. It can
-                be set as a date, a location in orbit, or any other option
-                given in the Parameter Select Dialog Box.</para>
-              </listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
               <listitem>
-                <para>Multiple stopping conditions may be chosen. GMAT will
-                stop propagation at the earliest met parameter.</para>
+                <para>DefaultSC.ElapsedSecs</para>
               </listitem>
-            </itemizedlist>
-          </listitem>
+            </varlistentry>
 
-          <listitem>
-            <para>Condition - Field</para>
+            <varlistentry>
+              <term>Limits</term>
 
-            <itemizedlist>
               <listitem>
-                <para>If the Parameter you set requires a value, such as a
-                number of elapsed days, then you enter it here.</para>
+                <para>Any single element user accessible spacecraft parameter
+                followed by an equal sign</para>
               </listitem>
-            </itemizedlist>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+            </varlistentry>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the Propagate Command
-        Dialog Box</title>
-      </info>
+            <varlistentry>
+              <term>Units</term>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_Propagate_Default.jpeg"></imagedata>
-        </imageobject>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the Propagate Command
-          Dialog Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+      <varlistentry>
+        <term>StopCondListN / Condition</term>
 
-  <section>
-    <title>Using the Propagate Command in the script</title>
+        <listitem>
+          <para>The StopCondListN option allows the user to enter the
+          propagator stopping condition's value for the StopCondListN
+          Parameter field.</para>
 
-    <section>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>8640.0</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                <para>Real Number, Array element, Variable, spacecraft
+                parameter, or any user defined parameter</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>Dependant on the condition selected.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>Propagate Mode BackProp PropagatorName(SatList1,fStopCondList1g) ...
 BackPropPropagatorName (SatListN, {StopCondList})</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Single spacecraft propagation with one stopping condition
@@ -272,91 +324,6 @@ Prop2(Sat3, {Sat3.TA = 0.0});
 % Syntax #2
 Propagate Prop1(Sat1,Sat2) {Sat1.ElapsedSecs = 8640.0, Sat2.MA = 90} ...
 Prop2(Sat3), {Sat3.TA = 0.0};</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para> BackProp</para></entry>
-
-            <entry><para> Default: None</para> <para> Options: { Backwards or
-            None }</para> <para> The BackProp option allows the user to set
-            the flag to enable or disable backwards propagation for all
-            spacecraft in the SatListN option. The Backward Propagation GUI
-            check box field stores all the data in BackProp. A check indicates
-            backward propagation is enabled and no check indicates forward
-            propagation. In the script, BackProp can be the word Backwards for
-            backward propagation or blank for forward propagation.</para>
-            <para> Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> Mode</para></entry>
-
-            <entry><para> Default: None</para> <para> Options: { Synchronized
-            or None }</para> <para> The Mode option allows the user to set the
-            propagation mode for the propagator that will affect all of the
-            spacecraft added to the SatListN option. For example, if
-            synchronized is selected, all spacecraft are propagated at the
-            same step size. The Propagate Mode GUI field stores all the data
-            in Mode. In the script, Mode is left blank for the None option and
-            the text of the other options available is used for their
-            respective modes.</para> <para> Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> PropagatorName</para></entry>
-
-            <entry><para> Default: DefaultProp</para> <para> Options: {
-            Default propagator or any user-defined propagator }</para> <para>
-            The PropagatorName option allows the user to select a user defined
-            propagator to use in spacecraft and/or formation propagation. The
-            Propagator GUI field stores all the data in PropagatorName.</para>
-            <para> Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> SatListN</para></entry>
-
-            <entry><para> Default: DefaultSC</para> <para> Options: { Any
-            existing spacecraft or formations, not being propagated by another
-            propagator in the same Propagate event. Multiple spacecraft must
-            be expressed in a comma delimited list format. }</para> <para> The
-            SatListN option allows the user to enter all the satellites and/or
-            formations they want to propagate using the PropagatorName
-            propagator settings. The Spacecraft List GUI field stores all the
-            data in SatListN.</para> <para> Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> StopCondListN /Parameter</para></entry>
-
-            <entry><para> Default: DefaultSC.ElapsedSecs =</para> <para>
-            Options: { Any single element user accessible spacecraft parameter
-            followed by an equal sign }</para> <para> The StopCondListN option
-            allows the user to enter all the parameters used for the
-            propagator stopping condition. See the StopCondListN/Condition
-            Option/Field for additional details to the StopCondListN
-            option.</para> <para> Units: N/A</para></entry>
-          </row>
-
-          <row>
-            <entry><para> StopCondListN /Condition</para></entry>
-
-            <entry><para> Default: 8640.0</para> <para> Options: { Real
-            Number, Array element, Variable, spacecraft parameter, or any user
-            defined parameter }.</para> <para> The StopCondListN option allows
-            the user to enter the propagator stopping condition's value for
-            the StopCondListN Parameter field.</para> <para> Units: Dependant
-            on the condition selected.</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>

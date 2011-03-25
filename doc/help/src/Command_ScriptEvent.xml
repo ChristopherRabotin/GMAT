@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<section version="5.0" xml:id="ScriptEvent"
-         xmlns="http://docbook.org/ns/docbook"
-         xmlns:xlink="http://www.w3.org/1999/xlink"
-         xmlns:xi="http://www.w3.org/2001/XInclude"
-         xmlns:svg="http://www.w3.org/2000/svg"
-         xmlns:m="http://www.w3.org/1998/Math/MathML"
-         xmlns:html="http://www.w3.org/1999/xhtml"
-         xmlns:db="http://docbook.org/ns/docbook">
-  <title>ScriptEvent</title>
+<refentry version="5.0" xml:id="ScriptEvent"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <indexterm>
+    <primary>ScriptEvent</primary>
+  </indexterm>
 
-  <section>
+  <refmeta>
+    <refentrytitle>ScriptEvent</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Commands</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>ScriptEvent</refname>
+
+    <refpurpose>Perform a ScriptEvent command</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis></synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
     <title>Overview</title>
 
     <para>The ScriptEvent command allows a user to enter in script within the
@@ -19,56 +41,58 @@
     Additionally, the ScriptEvent allows a user to have more freedom if the
     GUI is problematic and won't allow the user to perform the desired
     operation.</para>
-  </section>
+  </refsection>
 
-  <section>
-    <title>Using the GUI</title>
+  <refsection>
+    <title>Options</title>
 
-    <itemizedlist>
-      <listitem>
-        <para>Field</para>
+    <variablelist>
+      <varlistentry>
+        <term>&lt;Statements&gt;</term>
 
-        <itemizedlist>
-          <listitem>
-            <para>You can type the script commands needed between BeginScript
-            and EndScript;.</para>
-          </listitem>
-        </itemizedlist>
-      </listitem>
-    </itemizedlist>
+        <listitem>
+          <variablelist>
+            <varlistentry>
+              <term>Default</term>
 
-    <screenshot>
-      <info>
-        <title>Figure: Default Name and Settings for the ScriptEvent Dialog
-        Box</title>
-      </info>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
 
-      <mediaobject>
-        <imageobject>
-          <imagedata scalefit="1" width="100%" contentdepth="100%" align="center"
-                     fileref="files/images/Command_ScriptEvent_Default.jpeg"></imagedata>
-        </imageobject>
+            <varlistentry>
+              <term>Limits</term>
 
-        <caption>
-          <para>Figure: Default Name and Settings for the ScriptEvent Dialog
-          Box</para>
-        </caption>
-      </mediaobject>
-    </screenshot>
-  </section>
+              <listitem>
+                <para>Any valid line of GMAT script</para>
+              </listitem>
+            </varlistentry>
 
-  <section>
-    <title>Using the script</title>
+            <varlistentry>
+              <term>Units</term>
 
-    <section>
+              <listitem>
+                <para>None</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <refsection>
       <title>Script Syntax</title>
 
       <programlisting><code>BeginScript
      &lt;Statements&gt;
 EndScript;</code></programlisting>
-    </section>
+    </refsection>
 
-    <section>
+    <refsection>
       <title>Script Examples</title>
 
       <programlisting><code>% Assignment Command inside Script Event
@@ -76,23 +100,6 @@ EndScript;</code></programlisting>
 BeginScript
      GMAT testVar = 24;
 EndScript;</code></programlisting>
-    </section>
-  </section>
-
-  <section>
-    <title>Reference Table</title>
-
-    <informaltable>
-      <tgroup cols="2">
-        <tbody>
-          <row>
-            <entry><para> &lt;Statements&gt;</para></entry>
-
-            <entry><para> Default: N/A</para> <para> Options: { Any valid line
-            of GMAT script }</para> <para> Units: N/A</para></entry>
-          </row>
-        </tbody>
-      </tgroup>
-    </informaltable>
-  </section>
-</section>
+    </refsection>
+  </refsection>
+</refentry>
