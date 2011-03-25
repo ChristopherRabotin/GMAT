@@ -19,33 +19,37 @@
     Hohmann transfer from an initial parking orbit to a final mission orbit.
     In order to focus on the configuration of the target sequence, we will
     make extensive use of the default configurations for spacecraft,
-    propagators, and maneuvers. This tutorial is split into five basic
-    steps:</para>
+    propagators, and maneuvers. This tutorial is split into the following
+    basic steps:</para>
 
-    <orderedlist>
-      <listitem>
+    <procedure>
+      <step>
         <para>Create and configure a differential corrector.</para>
-      </listitem>
+      </step>
 
-      <listitem>
+      <step>
         <para>Modify the default Orbit View to visualize the
         trajectory.</para>
-      </listitem>
+      </step>
 
-      <listitem>
+      <step>
+        <para>Create two default Impulsive Maneuvers.</para>
+      </step>
+
+      <step>
         <para>Add a target sequence to the mission to raise apogee to GEO
-        altitude</para>
-      </listitem>
+        altitude.</para>
+      </step>
 
-      <listitem>
+      <step>
         <para>Add a second target sequence to circularize the orbit.</para>
-      </listitem>
+      </step>
 
-      <listitem>
+      <step>
         <para>Run the mission, save the solution, and rerun the mission using
         the converged solution.</para>
-      </listitem>
-    </orderedlist>
+      </step>
+    </procedure>
   </section>
 
   <section>
@@ -64,116 +68,145 @@
     <section>
       <title>Creating the Differential Corrector</title>
 
-      <para>To create a differential for use in the mission sequence:</para>
+      <para>To create a differential corrector for use in the mission
+      sequence:</para>
 
-      <orderedlist>
-        <listitem>
-          <para>Expand the Solvers folder in the Resources tree by clicking on
-          the box with a plus sign in it.</para>
-        </listitem>
+      <procedure>
+        <step>
+          <para>Locate the Solvers folder in the Resource Tree and expand if
+          it is minimized.</para>
+        </step>
 
-        <listitem>
-          <para>Right click the Boundary Value Solvers folder and select Add
-          --&gt; DifferentialCorrector to create DC1.</para>
-        </listitem>
-      </orderedlist>
-
-      <para>We'll leave the settings for the differential corrector at the
-      default values.</para>
+        <step>
+          <para>Right-click the Boundary Value Solvers folder, select Add, and
+          then select DifferentialCorrector.</para>
+        </step>
+      </procedure>
     </section>
 
     <section>
       <title>Modifying the default Orbit View</title>
 
-      <para>We need to make minor modifications to Default Orbit View so that
+      <para>We need to make minor modifications to default Orbit View so that
       the entire final orbit will fit in the graphics window.</para>
 
-      <orderedlist>
-        <listitem>
-          <para>Open the dialog box for the DefaultOrbitView</para>
-        </listitem>
+      <procedure>
+        <step>
+          <para>Locate DefaultOrbitView in the Resource Tree, and right-click
+          on it, and select Open.</para>
+        </step>
 
-        <listitem>
-          <para>Change the Solver Iterations input field, located in the
-          Drawing Option group box, to the value All</para>
-        </listitem>
+        <step>
+          <para>Change the SolverIterations input field, located in the
+          Drawing Option group box, to the value All.</para>
+        </step>
 
-        <listitem>
-          <para>Change the View Scale Factor input field to the value
-          1.5</para>
-        </listitem>
+        <step>
+          <para>Change the ViewScaleFactor input field to the value
+          1.5.</para>
+        </step>
 
-        <listitem>
-          <para>Change the View Up Definition Axis to X</para>
-        </listitem>
+        <step>
+          <para>Change the ViewUpDefinition Axis to X.</para>
+        </step>
 
-        <listitem>
-          <para>Click the Ok button to save changes and close the dialog
-          box.</para>
-        </listitem>
-      </orderedlist>
+        <step>
+          <para>Verify the configuration against the screen capture below,
+          make any changes necessary, and click Ok on the DefaultOrbitView
+          dialog box.</para>
+        </step>
+      </procedure>
 
       <para><screenshot>
           <info>
-            <title></title>
+            <title>Modifications to the Default OrbitView</title>
           </info>
 
           <mediaobject>
             <imageobject>
               <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_DefaultOpenGL.jpeg"
+                         fileref="files/images/Tut_Hohmann_DefaultOpenGL.png"
                          scalefit="1" width="100%"></imagedata>
             </imageobject>
 
             <caption>
-              <para></para>
+              <para>Modifications to the Default OrbitView</para>
             </caption>
           </mediaobject>
         </screenshot></para>
+    </section>
+
+    <section>
+      <title>Creating the Maneuvers.</title>
+
+      <para>You need two default maneuvers for this tutorial and we will
+      rename the default maneuver and create a new maneuver:</para>
+
+      <procedure>
+        <step>
+          <para>Locate DefaultIB in the Resource Tree, right-click on it,
+          select Rename, and change the name to dv1.</para>
+        </step>
+
+        <step>
+          <para>Right-click on the Burns folder, select
+          Add--&gt;ImpulsiveBurn.</para>
+        </step>
+
+        <step>
+          <para>Right-click on the impulsive burn created in the previous
+          step, select Rename, and change the name to dv2.</para>
+        </step>
+      </procedure>
     </section>
   </section>
 
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para>In this section you will create two targeting segments. The first
-    targeting segment will raise orbit apogee to GEOsynchronous altitude
-    (~42165km). The second targeting sequence will circularize the orbit. Each
-    targeting segment employs a Target command, a Vary command, a Maneuver, a
-    Propagate Command and Achieve command inside of the Target branch
-    command.</para>
+    <para>Below you will create two targeting segments. The first targeting
+    segment will raise orbit apogee to GEOsynchronous altitude (~42165km). The
+    second targeting segment will circularize the orbit. Each targeting
+    segment employs a Target command, a Vary command, a Maneuver, a Propagate
+    Command and Achieve command inside of the Target branch command. You'll
+    begin by modifying the intial propagate command to propagate to periapsis.
+    Next you will create the command structure and finally you will configure
+    each command.</para>
 
     <section>
       <title>Initial Propagate Sequence</title>
 
-      <orderedlist>
-        <listitem>
-          <para>Right-click on the Mission tab to bring up the Mssion
-          Tree.</para>
-        </listitem>
+      <para>To configure the initial propagate sequence to propagate to
+      periapsis, perform the following steps:</para>
 
-        <listitem>
+      <procedure>
+        <step>
+          <para>Left-click on the Mission tab to bring up the Mission
+          Tree.</para>
+        </step>
+
+        <step>
           <para>Right-click on Propagate1 and select Open from the
           menu.</para>
-        </listitem>
+        </step>
 
-        <listitem>
+        <step>
           <para>Locate the Stopping Conditions group box and then right click
           on the set of ellipses next to the text "DefaultSC.ElapsedSecs".
           This will open the Parameter Select Dialog box.</para>
-        </listitem>
+        </step>
 
-        <listitem>
+        <step>
           <para>Under the Object Properties list on the Parameter Select
           Dialog box, locate periapsis and double-click on it. Click the Ok
           button to close the Parameter Select Dialog box.</para>
-        </listitem>
+        </step>
 
-        <listitem>
+        <step>
           <para>Click the Ok button on the Propagate 1 dialog box to save
           changes and close.</para>
-        </listitem>
-      </orderedlist>
+        </step>
+      </procedure>
 
       <screenshot>
         <info>
@@ -194,285 +227,325 @@
       </screenshot>
 
       <section>
-        <title>First Targeting Sequence</title>
+        <title>Creating the Command Sequence</title>
 
-        <para>To raise the orbit apogee to GEO altitude, you will employ a
+        <para>To determine the delta Vs required to raise the orbit apogee to
+        GEO altitude and then circularize the orbit , you will employ a
         Targeting loop. Begin by creating the commands necessary to perform
-        the targeting sequence:</para>
+        the targeting sequence as described below. The figure below
+        illustrates the configuration of the mission tree after you have
+        completed the steps in this section.</para>
 
-        <orderedlist>
-          <listitem>
+        <screenshot>
+          <info>
+            <title>Figure: Mission Tree for Hohmann Transfer</title>
+          </info>
+
+          <mediaobject>
+            <imageobject>
+              <imagedata align="center" contentdepth="100%"
+                         fileref="files/images/Tut_Hohmann_MissionTree.png"
+                         scalefit="1" width="100%"></imagedata>
+            </imageobject>
+
+            <caption>
+              <para>Figure: Mission Tree for Hohmann Transfer</para>
+            </caption>
+          </mediaobject>
+        </screenshot>
+
+        <procedure>
+          <step>
             <para>Right-click on Propagate1 in the Misssion Tree, select
             Insert After, and select Target.</para>
-          </listitem>
+          </step>
 
-          <listitem>
+          <step>
             <para>Right-click on Target1 in the Mission Tree, select Insert
             After, and select Vary.</para>
-          </listitem>
+          </step>
 
-          <listitem>
+          <step>
             <para>Right-click on Vary1 in the Mission Tree, select Insert
             After, and select Manuever.</para>
-          </listitem>
+          </step>
 
-          <listitem>
+          <step>
             <para>Right-click on Maneuver1 in the Mission Tree, select Insert
             After, and select Propagate.</para>
-          </listitem>
+          </step>
 
-          <listitem>
+          <step>
             <para>Right-click on Propagate2 in the Mission Tree, select Insert
             After, and select Achieve.</para>
+          </step>
 
-            <informaltable colsep="0" frame="none">
-              <tgroup cols="2">
-                <colspec colname="c1" />
+          <step>
+            <para>Right-click on Achieve1 in the Mission Tree, select Insert
+            After, and select Vary.</para>
+          </step>
 
-                <colspec colname="c2" />
+          <step>
+            <para>Right-click on Vary2 in the Mission Tree, select Insert
+            After, and select Manuever.</para>
+          </step>
 
-                <tbody>
-                  <row>
-                    <entry><screenshot>
-                        <info>
-                          <title>Figure: Appending a Targeting
-                          Sequence</title>
-                        </info>
+          <step>
+            <para>Right-click on Maneuver2 in the Mission Tree, select Insert
+            After, and select Propagate.</para>
+          </step>
 
-                        <mediaobject>
-                          <imageobject>
-                            <imagedata align="center" contentdepth="100%"
-                                       fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence1.jpeg"
-                                       scalefit="1" width="100%"></imagedata>
-                          </imageobject>
-                        </mediaobject>
-                      </screenshot></entry>
+          <step>
+            <para>Right-click on Propagate3 in the Mission Tree, select Insert
+            After, and select Achieve.</para>
+          </step>
+        </procedure>
 
-                    <entry><screenshot>
-                        <info>
-                          <title>Figure: Appending a Targeting
-                          Sequence</title>
-                        </info>
+        <para>Let's talk about the function of the command sequence you
+        created above. The Vary commands define the variables the differential
+        corrector can modify to achieve the goals defined in the Achieve
+        commands. Because there are two variables (Vary commands) and two
+        Achieve commands (constraints), this is a "square" targeting problem.
+        Below you will configure the Vary commands to modify the maneuver
+        values to achieve a final orbit radius of 42165 and an eccentricity of
+        0.0001</para>
+      </section>
 
-                        <mediaobject>
-                          <imageobject>
-                            <imagedata align="center" contentdepth="100%"
-                                       fileref="files/images/Tut_Hohmann_AppendingaTargetingSequence2.jpeg"
-                                       scalefit="1" width="100%"></imagedata>
-                          </imageobject>
-                        </mediaobject>
-                      </screenshot></entry>
-                  </row>
+      <section>
+        <title>Configuring the Command Sequence</title>
 
-                  <row>
-                    <entry align="center" nameend="c2" namest="c1">Figure:
-                    Appending a Targeting Sequence</entry>
-                  </row>
-                </tbody>
-              </tgroup>
-            </informaltable>
+        <para>Now you will configure the commands you created above to solve
+        for the delta-Vs required to perform a Hohmann transfer.</para>
 
-            <para>Now you will configure the commands you created above to
-            solve for the delta-v required to raise orbit apoapsis from LEO to
-            GEO. The images for each GUI are shown below the following
-            steps.</para>
-          </listitem>
-
-          <listitem>
+        <procedure>
+          <step>
             <para>Right Click on Target1 in the Mission Tree and select Open.
-            Locate the ExitMode drop-down menu and set it ot SaveAndContinue.
+            Locate the ExitMode drop-down menu and set it to SaveAndContinue.
             This will save the converged solution of the targeting
             problem.</para>
-          </listitem>
+          </step>
 
-          <listitem>
+          <step>
+            <para>When you are finished, click OK to close the Target1 dialog
+            box.</para>
+
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Target1TargetCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Target1 Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
+
+          <step>
             <para>Right Click on Vary1 in the Mission Tree and select Open.
             Notice that the in the Variable SetUp group box, the variable is
-            defined as DefaulIB.Element1. This is the velocity component of
-            DefaultIB in the local VNB system. So we do not need to change the
-            targeter variable.</para>
-          </listitem>
+            defined as dv1.Element1. This is the velocity component of dv1 in
+            the local VNB system. So we do not need to change the targeter
+            variable.</para>
+          </step>
 
-          <listitem>
-            <para>Locate the initial value text box and set it to 1.5. Click
-            Ok to close the Vary1 dialog box.</para>
-          </listitem>
+          <step>
+            <para>Locate the initial value text box and set it to 1.0.</para>
+          </step>
 
-          <listitem>
+          <step>
+            <para>Set the MaxStep to 0.5 and then click Ok to close the Vary1
+            dialog box.</para>
+
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Vary1VaryCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Vary1 Vary Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
+
+          <step>
             <para>Right-click on the Maneuver1 command in the Mission Tree.
             Notice that the command is set to apply DefaultIB to DefaultSC so
             we do not need to change any settings for this command. Click Ok
             to close the Maneuver1 dialog box.</para>
-          </listitem>
 
-          <listitem>
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Maneuver1 Maneuver Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
+
+          <step>
             <para>Right-click on the Propagate2 dialog box. Use the same
             procedure shown in the sections above to set the stopping condtion
             to Apoapsis and then click Ok to close the dialog box.</para>
-          </listitem>
+          </step>
 
-          <listitem>
-            <para>Finally, Right-click on the Achieve1 command in the Mission
-            Tree. Notice that the goal is set to DefaultSC.Earth.RMAG. So we
-            do not need to change any settings for this command. Click Ok to
-            close the dialog box.</para>
-          </listitem>
-        </orderedlist>
+          <step>
+            <para>Finally, Right-click on the <literal>Achieve1</literal>
+            command in the Mission Tree. Notice that the goal is set to
+            DefaultSC.Earth.RMAG. So we do not need to change any settings for
+            this command. Click Ok to close the dialog box.</para>
 
-        <screenshot>
-          <info>
-            <title>Figure: Target1 Target Command</title>
-          </info>
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
 
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Target1TargetCommand.jpeg"
-                         scalefit="1" width="100%"></imagedata>
-            </imageobject>
+                <caption>
+                  <para>Figure: Achieve1 Achieve Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
 
-            <caption>
-              <para>Figure: Target1 Target Command</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
+          <step>
+            <para>Click on Vary2 in the Mission Tree and select Open.</para>
+          </step>
 
-        <screenshot>
-          <info>
-            <title>Figure: Vary1 Vary Command</title>
-          </info>
+          <step>
+            <para>Click the Edit button next to Variable text box.</para>
+          </step>
 
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Vary1VaryCommand.png"
-                         scalefit="1" width="100%"></imagedata>
-            </imageobject>
+          <step>
+            <para>Click on dv2 under the Object List.</para>
+          </step>
 
-            <caption>
-              <para>Figure: Vary1 Vary Command</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
+          <step>
+            <para>Double-click on Element1 under the ObjectProperties.</para>
 
-        <screenshot>
-          <info>
-            <title>Figure: Maneuver1 Maneuver Command</title>
-          </info>
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_ParamSelectdV2.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
 
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Maneuver1ManeuverCommand.png"
-                         scalefit="1" width="100%"></imagedata>
-            </imageobject>
+                <caption>
+                  <para>Figure: Achieve1 Achieve Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
 
-            <caption>
-              <para>Figure: Maneuver1 Maneuver Command</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
+          <step>
+            <para>Locate the initial value text box and set it to 1.0.</para>
+          </step>
 
-        <screenshot>
-          <info>
-            <title>Figure: Achieve1 Achieve Command</title>
-          </info>
+          <step>
+            <para>Locate the MaxStep text box and set it to 0.2. Click Ok to
+            close the Vary1 dialog box.</para>
 
-          <mediaobject>
-            <imageobject>
-              <imagedata align="center" contentdepth="100%"
-                         fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.png"
-                         scalefit="1" width="100%"></imagedata>
-            </imageobject>
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Vary2VaryCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
 
-            <caption>
-              <para>Figure: Achieve1 Achieve Command</para>
-            </caption>
-          </mediaobject>
-        </screenshot>
-      </section>
+                <caption>
+                  <para>Figure: Achieve1 Achieve Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
 
-      <section>
-        <title>Second Targeting Sequence</title>
+          <step>
+            <para>Right-click on the <literal>Maneuver2</literal> command in
+            the Mission Tree.</para>
+          </step>
 
-        <para>To circularize the orbit, you will employ another Targeting
-        loop. Begin by creating the commands necessary to perform the
-        targeting sequence:</para>
+          <step>
+            <para>Locate the on the <literal>Burn</literal> combo box and
+            change it to <literal>dv2</literal>. Click OK to close the
+            Maneuver2 dialog box.</para>
 
-        <orderedlist>
-          <listitem>
-            <para>Right-click on EndTarget1 in the Misssion Tree, select
-            Insert After, and select Target.</para>
-          </listitem>
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
 
-          <listitem>
-            <para>Right-click on Target2 in the Mission Tree, select Insert
-            After, and select Vary.</para>
-          </listitem>
+                <caption>
+                  <para>Figure: Achieve1 Achieve Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
 
-          <listitem>
-            <para>Right-click on Vary2 in the Mission Tree, select Insert
-            After, and select Manuever.</para>
-          </listitem>
-
-          <listitem>
-            <para>Right-click on Maneuver2 in the Mission Tree, select Insert
-            After, and select Propagate.</para>
-          </listitem>
-
-          <listitem>
-            <para>Right-click on Propagate3 in the Mission Tree, select Insert
-            After, and select Achieve.</para>
-
-            <para>Now you will configure the commands you created above to
-            solve for the delta-v required to raise orbit apoapsis from LEO to
-            GEO.</para>
-          </listitem>
-
-          <listitem>
-            <para>Right Click on Vary2 in the Mission Tree and select Open.
-            Notice that the in the Variable SetUp group box, the variable is
-            defined as DefaulIB.Element1. This is the velocity component of
-            DefaultIB in the local VNB system. So we do not need to change the
-            targeter variable.</para>
-          </listitem>
-
-          <listitem>
-            <para>Locate the initial value text box and set it to 1.5. Click
-            Ok to close the Vary1 dialog box.</para>
-          </listitem>
-
-          <listitem>
-            <para>Right-click on the Maneuver1 command in the Mission Tree.
-            Notice that the command is set to apply DefaultIB to DefaultSC so
-            we do not need to change any settings for this command. Click Ok
-            to close the Maneuver1 dialog box.</para>
-          </listitem>
-
-          <listitem>
+          <step>
             <para>Right-click on the Propagate2 dialog box. Use the same
-            procedure show above to set the stopping condtion to Apoapsis and
-            then click Ok to close the dialog box.</para>
-          </listitem>
+            procedure shown above to set the stopping condtion to
+            <literal>Apoapsis</literal> and then click Ok to close the dialog
+            box.</para>
+          </step>
 
-          <listitem>
-            <para>Finally, Right-click on the Achieve1 command in the Mission
-            Tree. Notice that the goal is set to DefaultSC.Earth.RMAG. So we
-            do not need to change any settings for this command. Click Ok to
-            close the dialog box.</para>
-          </listitem>
-        </orderedlist>
-      </section>
+          <step>
+            <para>Finally, Right-click on the Achieve2 command in the Mission
+            Tree.</para>
+          </step>
 
-      <section>
-        <title>Final Propagate Sequence</title>
+          <step>
+            <para>Click on the Edit button next to the Goal text box.
+            Tree.</para>
+          </step>
 
-        <itemizedlist>
-          <listitem>
-            <para>Propagate3: set the stopping condition parameter to be one
-            elapsed day (86400 seconds).</para>
-          </listitem>
-        </itemizedlist>
+          <step>
+            <para>Locate <literal> ECC </literal> in the Object Properties
+            list and double-click on it. Hit Ok to close the Parameter Select
+            Dialog Box.</para>
+          </step>
+
+          <step>
+            <para>Change the <literal> Value </literal> to 0.005.</para>
+          </step>
+
+          <step>
+            <para>Change the <literal> Tolerance </literal> to 0.0001</para>
+
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Achieve2AchieveCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Achieve1 Achieve Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
+          </step>
+        </procedure>
       </section>
     </section>
   </section>
@@ -480,27 +553,20 @@
   <section>
     <title>Running the Mission</title>
 
-    <para>The openGL image below was stopped after the first propagate
-    command. The spacecraft started at its initial conditions and propagated
-    forward to the periapsis point of the first orbit. The next openGL image
-    leaves off where the last image stopped. The transfer orbit is targeted
-    and the spacecraft propagates from the initial orbit periapsis point to
-    the transfer orbit apoapsis point. This image has the solver/targeter
-    iterations turned off. The final image shown below shows all the orbits.
-    The teal-ish lines represent the solver/targeter iterations for the
-    transfer orbit. You don't see these kind of line for the target sequence
-    from the transfer to final orbit because there is no propagation involved.
-    The targeting only occurs at one spot.</para>
+    <para>Before running the mission, click on the Save button in the toolbar
+    and save your file to the desired location. Now click on the Run button in
+    the Toolbar. As the mission is running, you will see the Differetial
+    Corrector try different maneuvers values resulting in trajectories
+    iterations in light blue. These are Differential Corrector iterations, and
+    perturbation passes to determine the Jacobian of the two-point boundary
+    value problem. After the mission is run, the OrbitView should appear
+    similar to the image shown below.</para>
 
     <screenshot>
-      <info>
-        <title>Figure: Output After Final Propagate Sequence</title>
-      </info>
-
       <mediaobject>
         <imageobject>
           <imagedata align="center" contentdepth="100%"
-                     fileref="files/images/Tut_Hohmann_OutputAfterFinalPropagateSequence.jpeg"
+                     fileref="files/images/Tut_Hohmann_OutputAfterFinalPropagateSequence.png"
                      scalefit="1" width="100%"></imagedata>
         </imageobject>
 

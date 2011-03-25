@@ -46,16 +46,18 @@
         <title>Samples and Tutorials</title>
         <xi:include href="Tut_PropSpacecraft.xml"/>
         <xi:include href="Tut_HohmannTransfer.xml"/>
+
         <xi:include href="Tut_MarsB-PlaneTargeting.xml"/>
-        <xi:include href="Tut_ACEStationKeeping.xml"/>
         <xi:include href="Tut_LunarTransfer.xml"/>
         <xi:include href="Tut_MinFuelOrbitTransfer.xml"/>
-        <xi:include href="Tut_LEOStationKeeping.xml"/>
 		<!--
+				<xi:include href="Tut_LEOStationKeeping.xml"/>
 		<xi:include href="Tut_AlgebraicOptimization.xml"/>
 		<xi:include href="Tut_FormationRendezvous.xml"/>
 		<xi:include href="Tut_L2Transfer.xml"/>
 	    <xi:include href="Tut_MinFuelLunarTransfer.xml"/>
+	    <xi:include href="Tut_ACEStationKeeping.xml"/>
+		<xi:include href="Resource_CoordinateSystems.xml"/>
 		-->
     </chapter>
 
@@ -64,7 +66,7 @@
     <xi:include href="Resource_Array.xml"/>
     <xi:include href="Resource_Barycenter.xml"/>
 	<xi:include href="Resource_CelestialBodies.xml"/>
-	<xi:include href="Resource_CoordinateSystems.xml"/>
+
 	<xi:include href="Resource_DifferentialCorrector.xml"/>
 	<xi:include href="Resource_FiniteBurn.xml"/>
     <xi:include href="Resource_FuelTank.xml"/>
@@ -124,6 +126,6 @@
         <xi:include href="Misc_GMATCommandsinMATLAB.xml"/>
         <xi:include href="Misc_GMATConsoleInstructions.xml"/>
     </chapter>
-    
+
     <index/>
 </book>

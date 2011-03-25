@@ -44,16 +44,14 @@
     <section>
       <title>bin Folder</title>
 
-      <para>The bin filder contains all binary files required to run GMAT.
-      These libraries include the executable file (GMAT.exe on Windows) and
-      libraries for the GUI (these start with "wxbase"). The bin folder also
+      <para>The bin filder contains all binary files required for the core functionality
+	  in GMAT (third-party, alpha and beta libraries are placed in the plugins folder).
+      These libraries include the executable file (GMAT.exe on Windows, GMAT.app on Mac, etc.) and
+      libraries for the GUI. The bin folder also
       contains two text files: gmat_startup_file.txt, and gmat.ini. The
       startup file is discussed in detail in a separate section below. The
       gmat.ini files is used to configure some GUI panels, set paths to
-      external web links, and define "tool tip" messages. A "proprietary" sub
-      folder within the bin directory is for third party libraries that cannot
-      be distributed as open source files and is an empty folder in the open
-      source distribution.</para>
+      external web links, and define "tool tip" messages. </para>
     </section>
 
     <section>
@@ -83,25 +81,27 @@
           </mediaobject>
         </screenshot></para>
 
-      <para>The icons folder contains graphics files for icons and images
+      <para>The graphics folder contains four subfolders: splash, stars, icons   and
+      texture. The splash folder contains the GMAT splash screen that is
+      displayed briefly while GMAT is initializing. The stars folder contains
+      a star catalogue used for displaying stars in 3D graphics. The
+      texture folder contains texture maps used for 3D graphics. The icons folder
+	  contains graphics files for icons and images
       loaded at run time. These include the GMAT logo, images used on the
       about panel and welcome screen, and icons for the Toolbar, Resource Tree
-      and Mission Tree. The planetary_coeff folder contains Earth Orientation
+      and Mission Tree.</para>
+	  
+	 <para> The planetary_coeff folder contains Earth Orientation
       Parameters (EOP) provided by the International Earth Rotation Service
-      (IERS) and nutation coefficients for different nutation theories.</para>
-
-      <para>The planetary_ephem folder contains two folders: de and spk. The
+      (IERS) and nutation coefficients for different nutation theories.
+	  The planetary_ephem folder contains two folders: de and spk. The
       de folder contains the binary Digital Ephemeris DE405 files for the 8
       planets, the Moon, and pluto developed and distributed by JPL. The spk
       folder contains an spk kernel built from the DE421 file and kernels for
       selected comets, asteroids and moons. All ephemeris files distributed
       with GMAT are in the little-endian representation.</para>
 
-      <para>The plot folder contains three subfolders: splash, stars, and
-      texture. The splash folder contains the GMAT splash screen that is
-      displayed briefly while GMAT is initializing. The stars folder contains
-      a star catalogue used for displaying stars in 3D graphics. Finally, the
-      texture folder contains texture maps used for 3D graphics.</para>
+
 
       <para>The last two sub-folders in the data folder are time and vehicle.
       The time folder contains the JPL leap second kernel naif0009.tls and the
@@ -126,7 +126,7 @@
 
       <para>The matlab folder contains m-files required for GMAT's MATLAB
       interfaces including the interface to fmincon, and interfaces for
-      driving GMAT from MATALB. All files in the matlab folder must be
+      driving GMAT from MATLAB. All files in the matlab folder must be
       included in your MATLAB path for the MATLAB interfaces to function
       properly.</para>
     </section>
@@ -136,8 +136,18 @@
 
       <para>The output folder is the default location for file output such as
       ephemeris files and report files. If no path information is provided for
-      reports or ephemereris files created during a GMAT session, then those
+      reports or ephemeris files created during a GMAT session, then those
       files will be written to the output folder.</para>
+    </section>
+	
+	<section>
+      <title>plugins Folder</title>
+
+      <para> The plugins folder is for third-party libraries and for functionality that is 
+	  still in alpha or beta status.  A "proprietary" sub
+      folder within the plugins directory is for third-party libraries that cannot
+      be distributed as open source files and is an empty folder in the open
+      source distribution.</para>
     </section>
 
     <section>
@@ -181,7 +191,7 @@
       and the Earth Orientation Parameters (EOP) provided by the IERS. The EOP
       file is updated daily by the IERS. To update your local file with the
       latest data, simply replace the data in file eopc04.62-now, (located in
-      the directory .\data\planetary_coeff\ ) with the data provided by the
+      the directory ./data/planetary_coeff/ ) with the data provided by the
       IERS in the link <link
       xlink:href="http://data.iers.org/products/177/11221/orig/eopc04_05_IAU2000.62-now">here</link>.
       There are two leap second files provided with GMAT. The file named
@@ -207,7 +217,7 @@
       <title>Loading Custom Plugins</title>
 
       <para>Custom plugins are loaded by adding a line to your startup file
-      describing the name and location of the plugin library. In order for an
+      describing the name and location of the plugin library. In order for a
       plugin to work with GMAT, the plugin library must be placed in the
       folder referenced in the startup file. You specify the path to a plugin
       using the "PLUGIN" keyword and specify the file by providing its name
@@ -255,10 +265,10 @@
     the following MATLAB folders must be added to your system path:</para>
 
     <programlisting> 
-      MATLAB\bin\win32 
-      MATLAB\bin 
-      MATLAB\runtime\win32
-</programlisting>
+      MATLAB/bin/win32 
+      MATLAB/bin 
+      MATLAB/runtime/win32
+    </programlisting>
 
     <caution>
       <para>The above folders are added to your system path during MATLAB

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>Differential Corrector</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>Differential Corrector</refname>
+
+    <refpurpose>Solver </refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis>Create DifferentialCorrector <replaceable>name</replaceable>
+<replaceable>name.ShowProgress 
+name.ReportStyle 
+name.ReportFile 
+name.MaximumIterations 
+name.DerivativeMethod
+</replaceable>
+</synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>A differential corrector is a numerical solver for solving two-point
+    boundary value problems. The DC in GMAT uses a simple shooting method
+    where the derivatives are determined using finite differencing. In the
+    mission sequence, you use the differential corrector object in a Target
+    sequence to solve two-point value problems. For example, differential
+    correctors are often used to determine the maneuver components required to
+    achieve desired orbital conditions, say, B-plane conditions at a planetary
+    flyby.</para>
+
+    <para>You must create and configure a differential corrector object
+    according to your application by setting numerical properties of the
+    solver such as tolerance and maximum iterations. You can also select among
+    different output options that show increasing levels of information for
+    each differential corrector iteration.</para>
+
+    <para>The allowable settings for a differential corrector are shown in the
+    GUI screen shots and reference table below. You can learn more about how
+    to use a DC in a targeting sequence by reading the help files for Target,
+    Vary, and Achieve.</para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <refsection>
+      <title></title>
+
+      <variablelist>
+        <varlistentry>
+          <term>DerivativeMethod</term>
+
+          <listitem>
+            <para>The entry format and time system of the Epoch field.</para>
+
+            <caution>
+              <para>The definition of the modified Julian date is not the same
+              as other software. Most software uses the Smithsonian
+              Astrophysical Observatory definition of 1957, where
+              <inlineequation>
+                  <mathphrase>JD</mathphrase>
+                </inlineequation> is the full Julian date:<informalequation>
+                  <alt>MJD = JD - 2400000.5</alt>
+
+                  <mathphrase>MJD = JD - 2400000.5</mathphrase>
+                </informalequation>GMAT, however, uses the following
+              definition:</para>
+
+              <informalequation>
+                <alt>MJD = JD - 2430000.0</alt>
+
+                <mathphrase>MJD = JD - 2430000.0</mathphrase>
+              </informalequation>
+            </caution>
+
+            <informaltable>
+              <tgroup cols="2">
+                <colspec align="center" />
+
+                <thead>
+                  <row>
+                    <entry align="center">Value</entry>
+
+                    <entry align="center">Description</entry>
+                  </row>
+                </thead>
+
+                <tbody>
+                  <row>
+                    <entry><literal>A1Gregorian</literal></entry>
+
+                    <entry>A.1 time scale, Gregorian format ("DD MMM YYYY
+                    hh:mm:ss.ddd")</entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>A1ModJulian</literal></entry>
+
+                    <entry>A.1 time scale, modified Julian format</entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>TAIGregorian</literal></entry>
+
+                    <entry>TAI time scale</entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>TAIModJulian</literal></entry>
+
+                    <entry><emphasis>Default</emphasis></entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>TTGregorian</literal></entry>
+
+                    <entry>TT time scale</entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>TTModJulian</literal></entry>
+
+                    <entry></entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>UTCGregorian</literal></entry>
+
+                    <entry>UTC time scale</entry>
+                  </row>
+
+                  <row>
+                    <entry><literal>UTCModJulian</literal></entry>
+
+                    <entry></entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable>
+          </listitem>
+        </varlistentry>
+
+        <varlistentry>
+          <term>Epoch</term>
+
+          <listitem>
+            <para>The initial epoch of the spacecraft's state.</para>
+
+            <informaltable>
+              <tgroup cols="2">
+                <colspec align="center" />
+
+                <tbody>
+                  <row>
+                    <entry>Default</entry>
+
+                    <entry><literal>21545</literal> (TAIModJulian
+                    format)</entry>
+                  </row>
+
+                  <row>
+                    <entry>Limits</entry>
+
+                    <entry><literal>04 Oct 1957 12:00:00.000</literal> or
+                    later in all time systems (<literal>6116.0</literal>
+                    modified Julian)</entry>
+                  </row>
+
+                  <row>
+                    <entry>Units</entry>
+
+                    <entry>days (modified Julian format only)</entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsection>
+  </refsection>
+</refentry>
