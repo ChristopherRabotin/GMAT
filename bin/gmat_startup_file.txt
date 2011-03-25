@@ -1,91 +1,113 @@
-VERSION = 2005-07-13
 #-------------------------------------------------------------------------------
-# ! Do not remove or change VERSION date, it won't work otherwise!!
-# Only the new FileManager, version after 2005/07/13, recognizes this new format.
+# General Mission Analysis Tool (GMAT) startup file
 #-------------------------------------------------------------------------------
-# 
-# Path/File naming convention:
-#   - Path name should end with PATH
-#   - File name should end with FILE
-#   - Path/File names are case sensitive
+# Comment line starts with #
+# Comment line starting with ## will be saved when saving startup file.
 #
-# You can add potential file and texture files by following the naming
-# convention.
-#   - Potential file should begin with planet name and end with POT_FILE
-#   - Texture file should begin with planet name and end with TEXTURE_FILE
+# Path/File naming convention:
+#   - Path name should end with _PATH
+#   - File name should end with _FILE
+#   - Path/File names are case sensative
+#
+# You can add potential and texture files by following the naming convention.
+#   - Potential file should begin with planet name and end with _POT_FILE
+#   - Texture file should begin with planet name and end with _TEXTURE_FILE
+#
+# If same _FILE is specified multiple times, it will use the last one.
 #
 # You can have more than one line containing GMAT_FUNCTION_PATH. GMAT will store 
 # the multiple paths you specify and scan for GMAT Functions using the paths 
-# in top to bottom order. 
+# in top to bottom order and use the first function found from the search paths.
 #
-# In order for an object plugin to work inside GMAT, the plugin dll must be placed
-# in the folder containing the GMAT executable. Once placed in the correct folder
-# the PLUGIN line below must be set equal to the plugin name minus the dll 
+# In order for an object plugin to work inside GMAT, the plugin dll must be placed 
+# in the folder containing the GMAT executable. Once placed in the correct folder 
+# the PLUGIN line below must be set equal to the plugin name without the dll 
 # extension with the comment (#) removed from the front of the line.
 #
-#-------------------------------------------------------------------------------
-ROOT_PATH            = ./files/
+# Availabe PLUGINs are:
+# PLUGIN = libMatlabInterface
+# PLUGIN = libFminconOptimizer
+# PLUGIN = libVF13Optimizer
+# PLUGIN = libDataFile
+# PLUGIN = libGmatEstimation
+#
+#===============================================================================
+RUN_MODE               = TESTING
+MATLAB_MODE            = SINGLE
 #-----------------------------------------------------------
-OUTPUT_PATH          = ./output/
-LOG_FILE             = ./GmatLog.txt
-#REPORT_FILE         = OUTPUT_PATH/GmatReport.txt
+ROOT_PATH              = ../data/
 #-----------------------------------------------------------
-GMAT_FUNCTION_PATH   = ./GmatFunctions/
-#GMAT_FUNCTION_PATH   = 
-MATLAB_FUNCTION_PATH = ./matlab/
-FUNCTION_PATH        = ./functions/
-#PLUGIN              = 
+PLUGIN                 = libVF13Optimizer
+PLUGIN                 = libGmatEstimation
+PLUGIN                 = libDataFile
+PLUGIN                 = libCcsdsEphemerisFile
+PLUGIN                 = libMatlabInterface
+PLUGIN                 = libFminconOptimizer
 #-----------------------------------------------------------
-SPLASH_PATH          = ROOT_PATH/splash/
-SPLASH_FILE          = SPLASH_PATH/GMATSplashScreen.tif
+OUTPUT_PATH            = ../output/
+LOG_FILE               = OUTPUT_PATH/GmatLog.txt
+REPORT_FILE            = OUTPUT_PATH/GmatReport.txt
+SCREENSHOT_FILE        = OUTPUT_PATH
 #-----------------------------------------------------------
-ICON_PATH            = ROOT_PATH/icons
-MAIN_ICON_FILE       = ICON_PATH/GMATWin32.ico
-#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.xpm
-#MAIN_ICON_FILE      = ICON_PATH/GMATMac.icn
-#MAIN_ICON_FILE      = ICON_PATH/GMATLinux48.ico
+MEASUREMENT_PATH       = OUTPUT_PATH/
 #-----------------------------------------------------------
-SLP_PATH             = ROOT_PATH/planetary_ephem/slp/
-SLP_FILE             = SLP_PATH/DBS_mn2000.pc
+EPHEM_PATH             = OUTPUT_PATH/
 #-----------------------------------------------------------
-DE_PATH              = ROOT_PATH/planetary_ephem/de/
-DE200_FILE           = DE_PATH/leDE1941.200
-DE405_FILE           = DE_PATH/leDE1941.405
+#GMAT_FUNCTION_PATH    = 
 #-----------------------------------------------------------
-EARTH_POT_PATH       = ROOT_PATH/gravity/earth/
-JGM2_FILE            = EARTH_POT_PATH/JGM2.cof
-JGM3_FILE            = EARTH_POT_PATH/JGM3.cof
-EGM96_FILE           = EARTH_POT_PATH/EGM96.cof
-EARTH_POT_FILE       = EARTH_POT_PATH/JGM2.cof
+#MATLAB_FUNCTION_PATH  = 
 #-----------------------------------------------------------
-LUNA_POT_PATH        = ROOT_PATH/gravity/luna/
-LUNA_POT_FILE        = LUNA_POT_PATH/LP165P.cof
+SPK_PATH               = ROOT_PATH/planetary_ephem/spk/
+PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
 #-----------------------------------------------------------
-VENUS_POT_PATH       = ROOT_PATH/gravity/venus/
-VENUS_POT_FILE       = VENUS_POT_PATH/MGNP180U.cof
+DE_PATH                = ROOT_PATH/planetary_ephem/de/
+DE405_FILE             = DE_PATH/leDE1941.405
 #-----------------------------------------------------------
-MARS_POT_PATH        = ROOT_PATH/gravity/mars/
-MARS_POT_FILE        = MARS_POT_PATH/Mars50c.cof
+PLANETARY_COEFF_PATH   = ROOT_PATH/planetary_coeff/
+EOP_FILE               = PLANETARY_COEFF_PATH/eopc04.62-now
+PLANETARY_COEFF_FILE   = PLANETARY_COEFF_PATH/NUT85.DAT
+NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
-PLANETARY_COEFF_PATH = ROOT_PATH/planetary_coeff/
-EOP_FILE             = PLANETARY_COEFF_PATH/eopc04.62-now
-PLANETARY_COEFF_FILE = PLANETARY_COEFF_PATH/NUT85.DAT
-NUTATION_COEFF_FILE  = PLANETARY_COEFF_PATH/NUTATION.DAT
+TIME_PATH              = ROOT_PATH/time/
+LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
+LSK_FILE               = TIME_PATH/naif0009.tls
 #-----------------------------------------------------------
-TIME_PATH            = ROOT_PATH/time/
-LEAP_SECS_FILE       = TIME_PATH/tai-utc.dat
+EARTH_POT_PATH         = ROOT_PATH/gravity/earth/
+LUNA_POT_PATH          = ROOT_PATH/gravity/luna/
+MARS_POT_PATH          = ROOT_PATH/gravity/mars/
+VENUS_POT_PATH         = ROOT_PATH/gravity/venus/
 #-----------------------------------------------------------
-TEXTURE_PATH         = ROOT_PATH/plot/texture/
-SUN_TEXTURE_FILE     = TEXTURE_PATH/Sun.jpg
-MERCURY_TEXTURE_FILE = TEXTURE_PATH/Mercury_JPLCaltech.jpg
-VENUS_TEXTURE_FILE   = TEXTURE_PATH/Venus_BjornJonsson.jpg
-EARTH_TEXTURE_FILE   = TEXTURE_PATH/ModifiedBlueMarble.jpg
-MARS_TEXTURE_FILE    = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
-JUPITER_TEXTURE_FILE = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
-SATURN_TEXTURE_FILE  = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
-URANUS_TEXTURE_FILE  = TEXTURE_PATH/Uranus_JPLCaltech.jpg
-NEPTUNE_TEXTURE_FILE = TEXTURE_PATH/Neptune_BjornJonsson.jpg
-PLUTO_TEXTURE_FILE   = TEXTURE_PATH/Pluto_JPLCaltech.jpg
-LUNA_TEXTURE_FILE    = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
+EGM96_FILE             = EARTH_POT_PATH/EGM96.cof
+JGM2_FILE              = EARTH_POT_PATH/JGM2.cof
+JGM3_FILE              = EARTH_POT_PATH/JGM3.cof
+MARS50C_FILE           = MARS_POT_PATH/Mars50c.cof
+MGNP180U_FILE          = VENUS_POT_PATH/MGNP180U.cof
+LP165P_FILE            = LUNA_POT_PATH/lp165p.cof
+#-----------------------------------------------------------
+GUI_CONFIG_PATH        = ROOT_PATH/gui_config/
+PERSONALIZATION_FILE   = ROOT_PATH/gui_config/MyGmat.ini
+#-----------------------------------------------------------
+ICON_PATH              = ROOT_PATH/graphics/icons/
+MAIN_ICON_FILE         = ICON_PATH/GMATWin32.ico
+#-----------------------------------------------------------
+SPLASH_PATH            = ROOT_PATH/graphics/splash/
+SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.tif
+#-----------------------------------------------------------
+TEXTURE_PATH           = ROOT_PATH/graphics/texture/
+EARTH_TEXTURE_FILE     = TEXTURE_PATH/ModifiedBlueMarble.jpg
+JUPITER_TEXTURE_FILE   = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
+LUNA_TEXTURE_FILE      = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
+MARS_TEXTURE_FILE      = TEXTURE_PATH/Mars_JPLCaltechUSGS.jpg
+MERCURY_TEXTURE_FILE   = TEXTURE_PATH/Mercury_JPLCaltech.jpg
+NEPTUNE_TEXTURE_FILE   = TEXTURE_PATH/Neptune_BjornJonsson.jpg
+PLUTO_TEXTURE_FILE     = TEXTURE_PATH/Pluto_JPLCaltech.jpg
+SATRUN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
+SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
+URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
+#-----------------------------------------------------------
+STAR_PATH              = ROOT_PATH/graphics/stars/
+STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
+CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
+#-----------------------------------------------------------
 #-----------------------------------------------------------
 
