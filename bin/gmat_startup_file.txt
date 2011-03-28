@@ -19,10 +19,11 @@
 # the multiple paths you specify and scan for GMAT Functions using the paths 
 # in top to bottom order and use the first function found from the search paths.
 #
-# In order for an object plugin to work inside GMAT, the plugin dll must be placed 
-# in the folder containing the GMAT executable. Once placed in the correct folder 
-# the PLUGIN line below must be set equal to the plugin name without the dll 
-# extension with the comment (#) removed from the front of the line.
+# In order for an object plugin to work inside GMAT, the plugin dynamic link libraries; 
+# Windows(.dll), Linux(.so) and Mac(.dylib), must be placed in the folder containing
+# the GMAT executable or application. Once placed in the correct folder 
+# the PLUGIN line below must be set equal to the plugin name without the dynamic link 
+# library extension with the comment (#) removed from the front of the line.
 #
 # Availabe PLUGINs are:
 # PLUGIN = libMatlabInterface
@@ -32,17 +33,21 @@
 # PLUGIN = libGmatEstimation
 #
 #===============================================================================
-RUN_MODE               = TESTING
-MATLAB_MODE            = SINGLE
+#RUN_MODE              = TESTING
+#RUN_MODE              = TESTING_NO_PLOTS
+#RUN_MODE              = EXIT_AFTER_RUN
+#MATLAB_MODE           = SINGLE
+#MATLAB_MODE           = SHARED
+#MATLAB_MODE           = NO_MATLAB
 #-----------------------------------------------------------
 ROOT_PATH              = ../data/
 #-----------------------------------------------------------
-PLUGIN                 = libVF13Optimizer
-PLUGIN                 = libGmatEstimation
-PLUGIN                 = libDataFile
-PLUGIN                 = libCcsdsEphemerisFile
-PLUGIN                 = libMatlabInterface
-PLUGIN                 = libFminconOptimizer
+#PLUGIN                 = libVF13Optimizer
+#PLUGIN                 = libGmatEstimation
+#PLUGIN                 = libDataFile
+#PLUGIN                 = libCcsdsEphemerisFile
+#PLUGIN                 = libMatlabInterface
+#PLUGIN                 = libFminconOptimizer
 #-----------------------------------------------------------
 OUTPUT_PATH            = ../output/
 LOG_FILE               = OUTPUT_PATH/GmatLog.txt
@@ -108,6 +113,9 @@ URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 STAR_PATH              = ROOT_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
+#-----------------------------------------------------------
+MODEL_PATH             = ROOT_PATH/vehicle/models/
+SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 
