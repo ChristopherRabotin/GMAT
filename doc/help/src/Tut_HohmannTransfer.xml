@@ -15,12 +15,18 @@
     <para><emphasis role="bold">Final result:</emphasis> <link
     xlink:href="scripts/HohmannTransferDesign.script">HohmannTransferDesign.script</link></para>
 
-    <para>In this tutorial, we will use differential correction to perform a
-    Hohmann transfer from an initial parking orbit to a final mission orbit.
-    In order to focus on the configuration of the target sequence, we will
-    make extensive use of the default configurations for spacecraft,
-    propagators, and maneuvers. This tutorial is split into the following
-    basic steps:</para>
+    <para>The objective of this tutorial is to learn how to use differential
+    correction (targeting) to perform a Hohmann transfer from a LEO parking
+    orbit to a GEO mission orbit. In order to focus on the configuration of
+    the differential correction process, you will make extensive use of the
+    default configurations for spacecraft, propagators, and maneuvers. The
+    target sequence employs two velocity-dirction maneuvers and two
+    propagation sequences. The purpose of the first maneuver is to raise orbit
+    apogee to 42165 km. The purpose of the second maneuver is to nearly
+    circularize the orbit and yield a final eccentricity of 0.005. The
+    differential corrector and associated commands are used to solve for the
+    required maneuver magnitudes to reach the desired altitude eccentricity.
+    The basic steps of this tutorial are:</para>
 
     <procedure>
       <step>
@@ -28,21 +34,16 @@
       </step>
 
       <step>
-        <para>Modify the default Orbit View to visualize the
-        trajectory.</para>
+        <para>Modify the default OrbitView to visualize the trajectory.</para>
       </step>
 
       <step>
-        <para>Create two default Impulsive Maneuvers.</para>
+        <para>Create two default impulsive maneuvers.</para>
       </step>
 
       <step>
         <para>Add a target sequence to the mission to raise apogee to GEO
-        altitude.</para>
-      </step>
-
-      <step>
-        <para>Add a second target sequence to circularize the orbit.</para>
+        altitude and circularize the orbit.</para>
       </step>
 
       <step>
@@ -57,24 +58,24 @@
 
     <para>Begin by loading the default mission ( click the new mission button
     in the toolbar) or starting a new GMAT session. For this tutorial, we will
-    use the default configurations for DefaultSC, DefaultProp, and the default
-    impulsive burn. DefaultSC is configured to a near circular orbit and
-    DefaultProp is configured to use Earth as the central body with Earth
-    10x10 gravity field and perturbations from the Sun and Moon. The default
-    impulsive burn is in the VNB coordinate system. You may want to open the
-    dialog boxes for these objects and look more closely at them as we will
-    leave the settings of those objects at their default values.</para>
+    use the default configurations for a spaceraft (DefaultSC), a propagator
+    (DefaultProp), and maneuvers. DefaultSC is configured to a near circular
+    orbit and DefaultProp is configured to use Earth as the central body with
+    a gravity model of degree and order 4. The default impulsive burn model
+    uses the Velocity Normal Binormal (VNB) coordinate system. You may want to
+    open the dialog boxes for these objects and inspect them more closely as
+    we will leave the settings of those objects at their default
+    values.</para>
 
     <section>
       <title>Creating the Differential Corrector</title>
 
-      <para>To create a differential corrector for use in the mission
-      sequence:</para>
+      <para>To create a differential corrector:</para>
 
       <procedure>
         <step>
-          <para>Locate the Solvers folder in the Resource Tree and expand if
-          it is minimized.</para>
+          <para>Locate the Solvers folder in the Resource Tree and expand it
+          if it is minimized.</para>
         </step>
 
         <step>
@@ -87,13 +88,13 @@
     <section>
       <title>Modifying the default Orbit View</title>
 
-      <para>We need to make minor modifications to default Orbit View so that
+      <para>You need to make minor modifications to default Orbit View so that
       the entire final orbit will fit in the graphics window.</para>
 
       <procedure>
         <step>
-          <para>Locate DefaultOrbitView in the Resource Tree, and right-click
-          on it, and select Open.</para>
+          <para>Locate DefaultOrbitView in the Resource Tree, right-click on
+          it, and select Open.</para>
         </step>
 
         <step>
@@ -102,8 +103,8 @@
         </step>
 
         <step>
-          <para>Change the ViewScaleFactor input field to the value
-          1.5.</para>
+          <para>Change the the last field next to ViewPointVector to
+          9000.</para>
         </step>
 
         <step>
@@ -164,11 +165,8 @@
   <section>
     <title>Creating and Configuring the Mission Tree</title>
 
-    <para>Below you will create two targeting segments. The first targeting
-    segment will raise orbit apogee to GEOsynchronous altitude (~42165km). The
-    second targeting segment will circularize the orbit. Each targeting
-    segment employs a Target command, a Vary command, a Maneuver, a Propagate
-    Command and Achieve command inside of the Target branch command. You'll
+    <para>Below you will create a targeting sequence to raise orbit apogee to
+    GEOsynchronous altitude (~42165km) and then circularize the orbit. You'll
     begin by modifying the intial propagate command to propagate to periapsis.
     Next you will create the command structure and finally you will configure
     each command.</para>
@@ -221,7 +219,7 @@
           </imageobject>
 
           <caption>
-            <para>Figure: Propagate1 Propagate Command</para>
+            <para>Figure: Propagate1 Command</para>
           </caption>
         </mediaobject>
       </screenshot>
@@ -230,11 +228,11 @@
         <title>Creating the Command Sequence</title>
 
         <para>To determine the delta Vs required to raise the orbit apogee to
-        GEO altitude and then circularize the orbit , you will employ a
-        Targeting loop. Begin by creating the commands necessary to perform
-        the targeting sequence as described below. The figure below
-        illustrates the configuration of the mission tree after you have
-        completed the steps in this section.</para>
+        GEO altitude and then circularize the orbit, you will employ a
+        Targeting loop. Let's begin by creating the commands necessary to
+        perform the targeting sequence. The figure below illustrates the
+        configuration of the mission tree after you have completed the steps
+        in this section.</para>
 
         <screenshot>
           <info>
@@ -249,7 +247,7 @@
             </imageobject>
 
             <caption>
-              <para>Figure: Mission Tree for Hohmann Transfer</para>
+              <para>Figure: The Mission Tree for a Hohmann Transfer</para>
             </caption>
           </mediaobject>
         </screenshot>
@@ -353,7 +351,7 @@
           </step>
 
           <step>
-            <para>Locate the initial value text box and set it to 1.0.</para>
+            <para>Locate the InitialValue text box and set it to 1.0.</para>
           </step>
 
           <step>
@@ -369,7 +367,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Vary1 Vary Command</para>
+                  <para>Figure: Vary1 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -390,7 +388,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Maneuver1 Maneuver Command</para>
+                  <para>Figure: Maneuver1 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -400,11 +398,25 @@
             <para>Right-click on the Propagate2 dialog box. Use the same
             procedure shown in the sections above to set the stopping condtion
             to Apoapsis and then click Ok to close the dialog box.</para>
+
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Propagate2PropagateCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Propagate2 Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
           </step>
 
           <step>
-            <para>Finally, Right-click on the <literal>Achieve1</literal>
-            command in the Mission Tree. Notice that the goal is set to
+            <para>Right-click on the <literal>Achieve1</literal> command in
+            the Mission Tree. Notice that the goal is set to
             DefaultSC.Earth.RMAG. So we do not need to change any settings for
             this command. Click Ok to close the dialog box.</para>
 
@@ -417,7 +429,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Achieve1 Achieve Command</para>
+                  <para>Figure: Achieve1 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -437,6 +449,10 @@
 
           <step>
             <para>Double-click on Element1 under the ObjectProperties.</para>
+          </step>
+
+          <step>
+            <para>Click Ok to close the ParameterSelect dialog box.</para>
 
             <screenshot>
               <mediaobject>
@@ -447,7 +463,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Achieve1 Achieve Command</para>
+                  <para>Figure: Parameter Select for Vary2</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -470,7 +486,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Achieve1 Achieve Command</para>
+                  <para>Figure: Vary2 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -490,22 +506,35 @@
               <mediaobject>
                 <imageobject>
                   <imagedata align="center" contentdepth="100%"
-                             fileref="files/images/Tut_Hohmann_Achieve1AchieveCommand.png"
+                             fileref="files/images/Tut_Hohmann_Maneuver2ManeuverCommand.png"
                              scalefit="1" width="100%"></imagedata>
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Achieve1 Achieve Command</para>
+                  <para>Figure: Maneuver2 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
           </step>
 
           <step>
-            <para>Right-click on the Propagate2 dialog box. Use the same
+            <para>Right-click on the Propagate3 dialog box. Use the same
             procedure shown above to set the stopping condtion to
-            <literal>Apoapsis</literal> and then click Ok to close the dialog
-            box.</para>
+            <literal>ElapsedDays</literal> of 1.0. box.</para>
+
+            <screenshot>
+              <mediaobject>
+                <imageobject>
+                  <imagedata align="center" contentdepth="100%"
+                             fileref="files/images/Tut_Hohmann_Propagate3PropagateCommand.png"
+                             scalefit="1" width="100%"></imagedata>
+                </imageobject>
+
+                <caption>
+                  <para>Figure: Propagate3 Command</para>
+                </caption>
+              </mediaobject>
+            </screenshot>
           </step>
 
           <step>
@@ -540,7 +569,7 @@
                 </imageobject>
 
                 <caption>
-                  <para>Figure: Achieve1 Achieve Command</para>
+                  <para>Figure: Achieve2 Command</para>
                 </caption>
               </mediaobject>
             </screenshot>
@@ -556,7 +585,7 @@
     <para>Before running the mission, click on the Save button in the toolbar
     and save your file to the desired location. Now click on the Run button in
     the Toolbar. As the mission is running, you will see the Differetial
-    Corrector try different maneuvers values resulting in trajectories
+    Corrector try different maneuvers values resulting in trajectory
     iterations in light blue. These are Differential Corrector iterations, and
     perturbation passes to determine the Jacobian of the two-point boundary
     value problem. After the mission is run, the OrbitView should appear
@@ -575,5 +604,25 @@
         </caption>
       </mediaobject>
     </screenshot>
+	
+	 <para>You can save the resulting solution so that if you make small changes to the problem and retarget, the
+	 initial guess for subsequent runs will use the solution from your work above.  .</para>
+	 
+	         <procedure>
+          <step>
+            <para>Right-click on Target1 in the Mission Tree.</para>
+          </step>
+		  
+		  <step>
+            <para>Left-click on Apply Corrections.</para>
+          </step>
+		  
+		  <step>
+            <para>Rerun the mission by clicking the Run button in the toolbar.  If you inspect the results in the
+			message window you should see that the targetting only took one iteration because it started from the solution!</para>
+          </step>
+		  
+		  </procedure>
+	
   </section>
 </section>
