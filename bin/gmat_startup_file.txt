@@ -25,7 +25,7 @@
 # the PLUGIN line below must be set equal to the plugin name without the dynamic link 
 # library extension with the comment (#) removed from the front of the line.
 #
-# Availabe PLUGINs are:
+# Some availabe PLUGINs are:
 # PLUGIN = libMatlabInterface
 # PLUGIN = libFminconOptimizer
 # PLUGIN = libVF13Optimizer
