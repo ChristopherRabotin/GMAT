@@ -43,7 +43,7 @@
 
       <variablelist>
         <varlistentry>
-          <term><link linkend="Thruster">Thruster</link></term>
+          <term>Thruster</term>
 
           <listitem>
             <para>The Thruster object allows you to set a coordinate system as
@@ -52,7 +52,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term><link linkend="Spacecraft">Spacecraft</link></term>
+          <term>Spacecraft</term>
 
           <listitem>
             <para>In the spacecraft dialog box you may change what coordinate
@@ -62,7 +62,7 @@
         </varlistentry>
 
         <varlistentry>
-          <term><link linkend="OpenGLPlot">OpenGL Plot</link></term>
+          <term>OpenGL Plot</term>
 
           <listitem>
             <para>Coordinate Systems are very key to the display of OpenGL

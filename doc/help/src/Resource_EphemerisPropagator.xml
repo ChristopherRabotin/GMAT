@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<refentry version="5.0" xml:id="EphemerisPropagator"
+          xmlns="http://docbook.org/ns/docbook"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          xmlns:xi="http://www.w3.org/2001/XInclude"
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns:m="http://www.w3.org/1998/Math/MathML"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+          xmlns:db="http://docbook.org/ns/docbook">
+  <refmeta>
+    <refentrytitle>EphemerisPropagator</refentrytitle>
+
+    <refmiscinfo class="source">GMAT</refmiscinfo>
+
+    <refmiscinfo class="version">2011a</refmiscinfo>
+
+    <refmiscinfo class="manual">Resources</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname>EphemerisPropagator</refname>
+
+    <refpurpose>Under Construction.</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <synopsis> Under Construction.
+   </synopsis>
+  </refsynopsisdiv>
+
+  <refsection>
+    <title>Description</title>
+
+    <para>Under Construction.</para>
+  </refsection>
+
+  <refsection>
+    <title>Fields</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>Field Name</term>
+
+        <listitem>
+          <para>Description....</para>
+
+          <variablelist spacing="compact">
+            <varlistentry>
+              <term>Type</term>
+
+              <listitem>
+                <para>Fill This In.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Default</term>
+
+              <listitem>
+                <para>Fill This In.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Limits</term>
+
+              <listitem>
+                  <para>Fill This In.</para>
+              </listitem>
+            </varlistentry>
+
+            <varlistentry>
+              <term>Units</term>
+
+              <listitem>
+                <para>Fill This In.</para>
+              </listitem>
+            </varlistentry>
+          </variablelist>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsection>
+
+  <refsection>
+    <title>Examples</title>
+
+    <example>
+      <title>Example Script</title>
+
+      <programlisting>% 
+
+</programlisting>
+    </example>
+  </refsection>
+</refentry>
