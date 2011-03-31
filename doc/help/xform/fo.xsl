@@ -42,5 +42,13 @@
 <xsl:attribute-set name="variablelist.term.properties">
     <xsl:attribute name="font-weight">bold</xsl:attribute>
 </xsl:attribute-set>
+<xsl:attribute-set name="list.item.spacing">
+    <xsl:attribute name="space-before.minimum">0.8em</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">1.2em</xsl:attribute>
+    <xsl:attribute name="space-before.optimum">1em</xsl:attribute>
+    <xsl:attribute name="space-after.minimum">0em</xsl:attribute>
+    <xsl:attribute name="space-after.maximum">0em</xsl:attribute>
+    <xsl:attribute name="space-after.optimum">0em</xsl:attribute>
+</xsl:attribute-set>
 
 </xsl:stylesheet>
