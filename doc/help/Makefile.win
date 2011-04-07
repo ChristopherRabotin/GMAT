@@ -15,6 +15,36 @@ xalancp = "contrib/xalan-j/xalan.jar;contrib/xalan-j/serializer.jar;\
 include Common.mk
 
 # Custom rules
+all : help.chm help.chm.zip
+
 clean :
-	del *.fo *.pdf
-	rd files /s /q
+	-del *.fo *.pdf *.html *.chm *.chm.zip
+	-rd files html chm /s /q
+
+help.chm : files/style.css validate $(xmlfiles)
+	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
+		$(xslopts) \
+		-PARAM base.dir ../chm/ \
+		-PARAM manifest.in.base.dir 1 \
+		-PARAM chapter.autolabel 0 \
+		-PARAM chunk.quietly 1 \
+		-PARAM chunk.section.depth 1 \
+		-PARAM generate.toc "" \
+		-PARAM html.stylesheet files/style.css \
+		-PARAM htmlhelp.remember.window.position 1 \
+		-PARAM htmlhelp.hhc.section.depth 1 \
+		-PARAM htmlhelp.hhc.show.root 0 \
+		-PARAM htmlhelp.show.favorites 1 \
+		-PARAM htmlhelp.show.advanced.search 1 \
+		-PARAM htmlhelp.use.hhk 1 \
+		-PARAM htmlhelp.default.topic ch01.html \
+		-PARAM use.id.as.filename 1 \
+		-PARAM variablelist.as.table 1 \
+		-IN $(top) \
+		-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl
+	xcopy files chm\files /i /s /e /q /v /y
+	-hhc chm\htmlhelp.hhp
+	move chm\htmlhelp.chm help.chm
+
+help.chm.zip : help.chm
+	zip help.chm.zip help.chm

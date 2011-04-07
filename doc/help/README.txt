@@ -4,31 +4,22 @@ Prerequisites
 To generate the GMAT help documentation, the following tools must be installed
 and present on the system path for the current user:
 
-* Java (for everything)
+* Java
 
-* Python 2.x (script assumes 2.7.x) (for LaTeX output)
-    Main page: http://python.org
-    Windows: http://python.org/download/
-    
-* dblatex (for LaTeX output)
-    Main page: http://dblatex.sourceforge.net/
-    Windows: https://sourceforge.net/projects/dblatex/files/dblatex/
-    
-    Download, extract, and run "python setup.py install".
+* GNU Make (http://gnuwin32.sourceforge.net/packages/make.htm)
+  or
+  Microsoft NMAKE (bundled with Visual Studio)
 
-* LaTeX (any distribution, such as MiKTeX) (for LaTeX output)
+* Subversion command-line client
+    Download from http://www.collab.net or http://www.sliksvn.com
 
-* ImageMagick (for LaTeX output)
-    Main page: http://imagemagick.org
-    Windows: (get the first download) 
-        http://imagemagick.org/script/binary-releases.php#windows
-    
-    After install, add it to the beginning of your system path.
-    
+* Zip
+	Download: ftp://ftp.info-zip.org/pub/infozip/win32/
+
 * HTML Help Workshop (for Windows Help output)
-    Download: http://www.microsoft.com/downloads/en/details.aspx?FamilyID=00535334-c8a6-452f-9aa0-d597d16580cc&displaylang=en
+    Download: http://msdn.microsoft.com/en-us/library/ms669985%28v=VS.85%29.aspx
 
-    
+
 -----------------------------------------------------------------
 Usage
 -----------------------------------------------------------------

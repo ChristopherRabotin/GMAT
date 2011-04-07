@@ -104,6 +104,7 @@ java -cp %xalancp%	^
     -PARAM htmlhelp.show.advanced.search 1 ^
     -PARAM htmlhelp.use.hhk 1 ^
     -PARAM htmlhelp.default.topic ch01.html ^
+    -PARAM use.id.as.filename 1 ^
     -PARAM variablelist.as.table 1 ^
 	-IN src\help.xml ^
 	-XSL contrib\docbook-xsl-ns\htmlhelp\htmlhelp.xsl

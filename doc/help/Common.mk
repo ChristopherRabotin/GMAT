@@ -17,7 +17,7 @@ graphicfiles = src/files/images/*.*
 srcfiles = $(xmlfiles) $(graphicfiles)
 
 # Rules
-all : pdf
+all : pdf help.html html/index.html
 
 pdf : help-letter.pdf \
 	help-a4.pdf \
@@ -27,6 +27,28 @@ help-letter.pdf : files/style.css help-letter.fo
 
 help-a4.pdf : files/style.css help-a4.fo
 	$(fop) help-a4.fo $@
+
+help.html : files/style.css validate $(xmlfiles)
+	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
+	$(xslopts) \
+    -PARAM html.stylesheet files/style.css \
+	-PARAM use.id.as.filename 1 \
+    -PARAM variablelist.as.table 1 \
+	-IN src/help.xml \
+	-XSL contrib/docbook-xsl-ns/html/docbook.xsl \
+	-OUT help.html
+
+html/index.html : files/style.css validate $(xmlfiles)
+	$(java) -cp $(xalancp) org.apache.xalan.xslt.Process \
+	$(xslopts) \
+	-PARAM base.dir ../html/ \
+	-PARAM img.src.path ../ \
+    -PARAM html.stylesheet ../files/style.css \
+    -PARAM chunk.quietly 1 \
+	-PARAM use.id.as.filename 1 \
+    -PARAM variablelist.as.table 1 \
+	-IN src/help.xml \
+	-XSL contrib/docbook-xsl-ns/html/chunkfast.xsl
 
 # stand-in for entire files directory
 files/style.css : src/files/style.css
