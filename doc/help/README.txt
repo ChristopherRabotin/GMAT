@@ -25,11 +25,21 @@ Usage
 -----------------------------------------------------------------
 Windows:
     1. Open a command window (such as cmd.exe).
-    2. Navigate to the the folder containing makedocs.cmd.
-    3. Run "makedocs". All output files will be placed in the build
-        directory, and the final files will be moved to the output directory.
-        
+    2. Navigate to the folder containing Makefile.win.
+    3. Run "make -f Makefile.win" or "nmake /f Makefile.win".
+
 Mac/Linux:
     1. Open a shell.
-    2. Navigate to the folder containing makedocs.
-    3. Run "./makedocs" or "sh makedocs".
+    2. Navigate to the folder containing Makefile.unix.
+    3. Run "make -f Makefile.unix".
+
+You can perform specific actions by running:
+    "make -f <makefile> <target>" or
+    "nmake /f <makefile> <target>".
+
+The supported targets are:
+    all:        build everything
+    pdf:        build PDF docs
+    <filename>: build a specific file (e.g. help.chm, help-letter.pdf)
+    clean:      delete all automatically-created files
+    validate:   validate the DocBook XML
