@@ -79,132 +79,135 @@
 		
   </chapter>
 
-  <reference>
-    <title>Reference: Resources</title>
+    <part xml:id="RefGuide">
+        <title>Reference Guide</title>
+      <reference>
+        <title>Resources</title>
 
-    <xi:include href="Resource_Array.xml" />
+        <xi:include href="Resource_Array.xml" />
 
-    <xi:include href="Resource_Barycenter.xml" />
+        <xi:include href="Resource_Barycenter.xml" />
 
-    <xi:include href="Resource_CelestialBodies.xml" />
-	
-	<xi:include href="Resource_CoordinateSystems.xml" />
+        <xi:include href="Resource_CelestialBodies.xml" />
+        
+        <xi:include href="Resource_CoordinateSystems.xml" />
 
-    <xi:include href="Resource_DifferentialCorrector.xml" />
-	
-	<xi:include href="Resource_EphemerisFile.xml" />
+        <xi:include href="Resource_DifferentialCorrector.xml" />
+        
+        <xi:include href="Resource_EphemerisFile.xml" />
 
-	<xi:include href="Resource_EphemerisPropagator.xml" />
+        <xi:include href="Resource_EphemerisPropagator.xml" />
 
-    <xi:include href="Resource_FiniteBurn.xml" />
-	
-    <xi:include href="Resource_Formation.xml" />
+        <xi:include href="Resource_FiniteBurn.xml" />
+        
+        <xi:include href="Resource_Formation.xml" />
 
-    <xi:include href="Resource_FuelTank.xml" />
-	
-	<xi:include href="Resource_GroundStation.xml" />
+        <xi:include href="Resource_FuelTank.xml" />
+        
+        <xi:include href="Resource_GroundStation.xml" />
 
-    <xi:include href="Resource_ImpulsiveBurn.xml" />
+        <xi:include href="Resource_ImpulsiveBurn.xml" />
 
-    <xi:include href="Resource_LibrationPoint.xml" />
-	
-    <xi:include href="Resource_MatlabFunction.xml" />
-	
-    <xi:include href="Resource_OpenGLPlot.xml" />
+        <xi:include href="Resource_LibrationPoint.xml" />
+        
+        <xi:include href="Resource_MatlabFunction.xml" />
+        
+        <xi:include href="Resource_OpenGLPlot.xml" />
 
-    <xi:include href="Resource_Propagator.xml" />
+        <xi:include href="Resource_Propagator.xml" />
 
-    <xi:include href="Resource_ReportFile.xml" />
+        <xi:include href="Resource_ReportFile.xml" />
 
-    <xi:include href="Resource_SolarSystem.xml" />
-	
-	<xi:include href="Resource_Spacecraft.xml" />
+        <xi:include href="Resource_SolarSystem.xml" />
+        
+        <xi:include href="Resource_Spacecraft.xml" />
 
-    <xi:include href="Resource_SQP(fmincon).xml" />
+        <xi:include href="Resource_SQP(fmincon).xml" />
 
-    <xi:include href="Resource_String.xml" />
+        <xi:include href="Resource_String.xml" />
 
-    <xi:include href="Resource_Thruster.xml" />
-	
-    <xi:include href="Resource_Variable.xml" />
-	
-    <xi:include href="Resource_VF13adOptimizer.xml" />
+        <xi:include href="Resource_Thruster.xml" />
+        
+        <xi:include href="Resource_Variable.xml" />
+        
+        <xi:include href="Resource_VF13adOptimizer.xml" />
 
-    <xi:include href="Resource_XYPlot.xml" />
-	
-	<!-- <xi:include href="Resource_SpacecraftOverview.xml"/>
-    <xi:include href="Resource_SpacecraftOrbit.xml"/>
-    <xi:include href="Resource_SpacecraftAttitude.xml"/>
-    <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
-    -->
-	
-  </reference>
+        <xi:include href="Resource_XYPlot.xml" />
+        
+        <!-- <xi:include href="Resource_SpacecraftOverview.xml"/>
+        <xi:include href="Resource_SpacecraftOrbit.xml"/>
+        <xi:include href="Resource_SpacecraftAttitude.xml"/>
+        <xi:include href="Resource_SpacecraftBallisticMass.xml"/>
+        -->
+        
+      </reference>
 
-  <reference>
-    <title>Reference: Commands</title>
-	
-	<xi:include href="Command_Achieve.xml" />
-		
-	<xi:include href="Command_BeginFiniteBurn.xml" />
-	
-    <xi:include href="Command_BeginMissionSequence.xml" />
+      <reference>
+        <title>Commands</title>
+        
+        <xi:include href="Command_Achieve.xml" />
+            
+        <xi:include href="Command_BeginFiniteBurn.xml" />
+        
+        <xi:include href="Command_BeginMissionSequence.xml" />
 
-    <xi:include href="Command_CallFunction.xml" />
+        <xi:include href="Command_CallFunction.xml" />
 
-	<xi:include href="Command_Else.xml" />
-	
-	<xi:include href="Command_EndFiniteBurn.xml" />
-		
-    <xi:include href="Command_Equation.xml" />
-	
-    <xi:include href="Command_For.xml" />
+        <xi:include href="Command_Else.xml" />
+        
+        <xi:include href="Command_EndFiniteBurn.xml" />
+            
+        <xi:include href="Command_Equation.xml" />
+        
+        <xi:include href="Command_For.xml" />
 
-    <xi:include href="Command_If.xml" />
+        <xi:include href="Command_If.xml" />
 
-    <xi:include href="Command_Maneuver.xml" />
+        <xi:include href="Command_Maneuver.xml" />
 
-    <xi:include href="Command_Minimize.xml" />
+        <xi:include href="Command_Minimize.xml" />
 
-    <xi:include href="Command_NonLinearConstraint.xml" />
+        <xi:include href="Command_NonLinearConstraint.xml" />
 
-    <xi:include href="Command_Optimize.xml" />
-	
-    <xi:include href="Command_PenUp.xml" />
+        <xi:include href="Command_Optimize.xml" />
+        
+        <xi:include href="Command_PenUp.xml" />
 
-	<xi:include href="Command_PenDown.xml" />
-		
-	<xi:include href="Command_Propagate.xml" />
+        <xi:include href="Command_PenDown.xml" />
+            
+        <xi:include href="Command_Propagate.xml" />
 
-    <xi:include href="Command_Report.xml" />
-	
-	<xi:include href="Command_Save.xml" />
-		
-    <xi:include href="Command_ScriptEvent.xml" />
+        <xi:include href="Command_Report.xml" />
+        
+        <xi:include href="Command_Save.xml" />
+            
+        <xi:include href="Command_ScriptEvent.xml" />
 
-    <xi:include href="Command_Stop.xml" />
-	
-	<xi:include href="Command_Target.xml" />
+        <xi:include href="Command_Stop.xml" />
+        
+        <xi:include href="Command_Target.xml" />
 
-    <xi:include href="Command_Toggle.xml" />
+        <xi:include href="Command_Toggle.xml" />
 
-    <xi:include href="Command_Vary.xml" />
-	
-	<xi:include href="Command_While.xml" />
-	
-  </reference>
-<!--
-  <chapter>
-    <title>Reference: Miscellaneous</title>
+        <xi:include href="Command_Vary.xml" />
+        
+        <xi:include href="Command_While.xml" />
+        
+      </reference>
+    <!--
+      <chapter>
+        <title>Reference: Miscellaneous</title>
 
-    <xi:include href="Misc_MathOperatorsinScripting.xml" />
+        <xi:include href="Misc_MathOperatorsinScripting.xml" />
 
-    <xi:include href="Misc_ScriptEditorShortcutKeys.xml" />
+        <xi:include href="Misc_ScriptEditorShortcutKeys.xml" />
 
-    <xi:include href="Misc_GMATCommandsinMATLAB.xml" />
+        <xi:include href="Misc_GMATCommandsinMATLAB.xml" />
 
-    <xi:include href="Misc_GMATConsoleInstructions.xml" />
-  </chapter>
-      -->
-
-  <index />
+        <xi:include href="Misc_GMATConsoleInstructions.xml" />
+      </chapter>
+          -->
+    </part>
+    
+    <index />
 </book>

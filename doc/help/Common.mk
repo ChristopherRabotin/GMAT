@@ -4,7 +4,8 @@ javaDefs = -Dorg.apache.xerces.xni.parser.XMLParserConfiguration=$(xercesP)
 xercesP = org.apache.xerces.parsers.XIncludeParserConfiguration
 
 # Common XSLT options
-xslopts = -PARAM use.extensions 1 \
+xslopts = -PARAM part.autolabel 0 \
+    -PARAM use.extensions 1 \
 	-PARAM graphicsize.extension 1 \
 	-PARAM tablecolumns.extension 1 \
 	-PARAM refentry.generate.name 0 \
