@@ -40,7 +40,7 @@
 #MATLAB_MODE           = SHARED
 #MATLAB_MODE           = NO_MATLAB
 #-----------------------------------------------------------
-ROOT_PATH              = ../data/
+ROOT_PATH              = ../
 #-----------------------------------------------------------
 PLUGIN                 = libCcsdsEphemerisFile
 PLUGIN                 = libDataFile
@@ -62,25 +62,27 @@ EPHEM_PATH             = OUTPUT_PATH/
 #-----------------------------------------------------------
 #MATLAB_FUNCTION_PATH  = 
 #-----------------------------------------------------------
-SPK_PATH               = ROOT_PATH/planetary_ephem/spk/
+DATA_PATH              = ROOT_PATH/data/
+#-----------------------------------------------------------
+SPK_PATH               = DATA_PATH/planetary_ephem/spk/
 PLANETARY_SPK_FILE     = SPK_PATH/de421.bsp
 #-----------------------------------------------------------
-DE_PATH                = ROOT_PATH/planetary_ephem/de/
+DE_PATH                = DATA_PATH/planetary_ephem/de/
 DE405_FILE             = DE_PATH/leDE1941.405
 #-----------------------------------------------------------
-PLANETARY_COEFF_PATH   = ROOT_PATH/planetary_coeff/
+PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
 EOP_FILE               = PLANETARY_COEFF_PATH/eopc04.62-now
 PLANETARY_COEFF_FILE   = PLANETARY_COEFF_PATH/NUT85.DAT
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
-TIME_PATH              = ROOT_PATH/time/
+TIME_PATH              = DATA_PATH/time/
 LEAP_SECS_FILE         = TIME_PATH/tai-utc.dat
 LSK_FILE               = TIME_PATH/naif0009.tls
 #-----------------------------------------------------------
-EARTH_POT_PATH         = ROOT_PATH/gravity/earth/
-LUNA_POT_PATH          = ROOT_PATH/gravity/luna/
-MARS_POT_PATH          = ROOT_PATH/gravity/mars/
-VENUS_POT_PATH         = ROOT_PATH/gravity/venus/
+EARTH_POT_PATH         = DATA_PATH/gravity/earth/
+LUNA_POT_PATH          = DATA_PATH/gravity/luna/
+MARS_POT_PATH          = DATA_PATH/gravity/mars/
+VENUS_POT_PATH         = DATA_PATH/gravity/venus/
 #-----------------------------------------------------------
 EGM96_FILE             = EARTH_POT_PATH/EGM96.cof
 JGM2_FILE              = EARTH_POT_PATH/JGM2.cof
@@ -89,16 +91,16 @@ MARS50C_FILE           = MARS_POT_PATH/Mars50c.cof
 MGNP180U_FILE          = VENUS_POT_PATH/MGNP180U.cof
 LP165P_FILE            = LUNA_POT_PATH/lp165p.cof
 #-----------------------------------------------------------
-GUI_CONFIG_PATH        = ROOT_PATH/gui_config/
-PERSONALIZATION_FILE   = ROOT_PATH/gui_config/MyGmat.ini
+GUI_CONFIG_PATH        = DATA_PATH/gui_config/
+PERSONALIZATION_FILE   = DATA_PATH/gui_config/MyGmat.ini
 #-----------------------------------------------------------
-ICON_PATH              = ROOT_PATH/graphics/icons/
+ICON_PATH              = DATA_PATH/graphics/icons/
 MAIN_ICON_FILE         = ICON_PATH/GMATWin32.ico
 #-----------------------------------------------------------
-SPLASH_PATH            = ROOT_PATH/graphics/splash/
+SPLASH_PATH            = DATA_PATH/graphics/splash/
 SPLASH_FILE            = SPLASH_PATH/GMATSplashScreen.tif
 #-----------------------------------------------------------
-TEXTURE_PATH           = ROOT_PATH/graphics/texture/
+TEXTURE_PATH           = DATA_PATH/graphics/texture/
 EARTH_TEXTURE_FILE     = TEXTURE_PATH/ModifiedBlueMarble.jpg
 JUPITER_TEXTURE_FILE   = TEXTURE_PATH/Jupiter_HermesCelestiaMotherlode.jpg
 LUNA_TEXTURE_FILE      = TEXTURE_PATH/Moon_HermesCelestiaMotherlode.jpg
@@ -110,12 +112,14 @@ SATRUN_TEXTURE_FILE    = TEXTURE_PATH/Saturn_gradiusCelestiaMotherlode.jpg
 SUN_TEXTURE_FILE       = TEXTURE_PATH/Sun.jpg
 URANUS_TEXTURE_FILE    = TEXTURE_PATH/Uranus_JPLCaltech.jpg
 #-----------------------------------------------------------
-STAR_PATH              = ROOT_PATH/graphics/stars/
+STAR_PATH              = DATA_PATH/graphics/stars/
 STAR_FILE              = STAR_PATH/inp_StarCatalog.txt
 CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
 #-----------------------------------------------------------
-MODEL_PATH             = ROOT_PATH/vehicle/models/
+MODEL_PATH             = DATA_PATH/vehicle/models/
 SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
+#-----------------------------------------------------------
+#HELP_FILE             = 
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 
