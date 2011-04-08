@@ -71,7 +71,7 @@ DE_PATH                = DATA_PATH/planetary_ephem/de/
 DE405_FILE             = DE_PATH/leDE1941.405
 #-----------------------------------------------------------
 PLANETARY_COEFF_PATH   = DATA_PATH/planetary_coeff/
-EOP_FILE               = PLANETARY_COEFF_PATH/eopc04.62-now
+EOP_FILE               = PLANETARY_COEFF_PATH/eopc04_08.62-now
 PLANETARY_COEFF_FILE   = PLANETARY_COEFF_PATH/NUT85.DAT
 NUTATION_COEFF_FILE    = PLANETARY_COEFF_PATH/NUTATION.DAT
 #-----------------------------------------------------------
