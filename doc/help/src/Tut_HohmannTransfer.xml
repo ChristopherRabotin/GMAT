@@ -305,7 +305,7 @@
         Achieve commands (constraints), this is a "square" targeting problem.
         Below you will configure the Vary commands to modify the maneuver
         values to achieve a final orbit radius of 42165 and an eccentricity of
-        0.0001</para>
+        0.005</para>
       </section>
 
       <section>
