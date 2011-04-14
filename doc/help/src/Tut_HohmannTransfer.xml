@@ -99,12 +99,11 @@
 
         <step>
           <para>Change the SolverIterations input field, located in the
-          Drawing Option group box, to the value All.</para>
+          Drawing Option group box, to the value Current.</para>
         </step>
 
         <step>
-          <para>Change the the last field next to ViewPointVector to
-          9000.</para>
+          <para>Change ViewPointVector to 0, 0, 90000 respectively.</para>
         </step>
 
         <step>
@@ -254,8 +253,8 @@
 
         <procedure>
           <step>
-            <para>Right-click on Propagate1 in the Misssion Tree, select
-            Insert After, and select Target.</para>
+            <para>Right-click on Propagate1 in the Mission Tree, select Insert
+            After, and select Target.</para>
           </step>
 
           <step>
@@ -317,7 +316,7 @@
 
         <procedure>
           <step>
-            <para>Right Click on Target1 in the Mission Tree and select Open.
+            <para>Right-click on Target1 in the Mission Tree and select Open.
             Locate the ExitMode drop-down menu and set it to SaveAndContinue.
             This will save the converged solution of the targeting
             problem.</para>
@@ -343,8 +342,8 @@
           </step>
 
           <step>
-            <para>Right Click on Vary1 in the Mission Tree and select Open.
-            Notice that the in the Variable SetUp group box, the variable is
+            <para>Right-click on Vary1 in the Mission Tree and select Open.
+            Notice that in the Variable SetUp group box, the variable is
             defined as dv1.Element1. This is the velocity component of dv1 in
             the local VNB system. So we do not need to change the targeter
             variable.</para>
@@ -374,10 +373,10 @@
           </step>
 
           <step>
-            <para>Right-click on the Maneuver1 command in the Mission Tree.
-            Notice that the command is set to apply DefaultIB to DefaultSC so
-            we do not need to change any settings for this command. Click Ok
-            to close the Maneuver1 dialog box.</para>
+            <para>Double-click on the Maneuver1 command in the Mission Tree.
+            Notice that the command is set to apply dv1 to DefaultSC so we do
+            not need to change any settings for this command. Click Ok to
+            close the Maneuver1 dialog box.</para>
 
             <screenshot>
               <mediaobject>
@@ -395,7 +394,7 @@
           </step>
 
           <step>
-            <para>Right-click on the Propagate2 dialog box. Use the same
+            <para>Double-click on the Propagate2 dialog box. Use the same
             procedure shown in the sections above to set the stopping condtion
             to Apoapsis and then click Ok to close the dialog box.</para>
 
@@ -415,7 +414,7 @@
           </step>
 
           <step>
-            <para>Right-click on the <literal>Achieve1</literal> command in
+            <para>Double-click on the <literal>Achieve1</literal> command in
             the Mission Tree. Notice that the goal is set to
             DefaultSC.Earth.RMAG. So we do not need to change any settings for
             this command. Click Ok to close the dialog box.</para>
@@ -436,7 +435,7 @@
           </step>
 
           <step>
-            <para>Click on Vary2 in the Mission Tree and select Open.</para>
+            <para>Double-click on Vary2 in the Mission Tree.</para>
           </step>
 
           <step>
@@ -493,14 +492,14 @@
           </step>
 
           <step>
-            <para>Right-click on the <literal>Maneuver2</literal> command in
+            <para>Double-click on the <literal>Maneuver2</literal> command in
             the Mission Tree.</para>
           </step>
 
           <step>
-            <para>Locate the on the <literal>Burn</literal> combo box and
-            change it to <literal>dv2</literal>. Click OK to close the
-            Maneuver2 dialog box.</para>
+            <para>Locate the <literal>Burn</literal> combo box and change it
+            to <literal>dv2</literal>. Click OK to close the Maneuver2 dialog
+            box.</para>
 
             <screenshot>
               <mediaobject>
@@ -518,7 +517,7 @@
           </step>
 
           <step>
-            <para>Right-click on the Propagate3 dialog box. Use the same
+            <para>Double-click on the Propagate3 dialog box. Use the same
             procedure shown above to set the stopping condtion to
             <literal>ElapsedDays</literal> of 1.0. box.</para>
 
@@ -538,19 +537,18 @@
           </step>
 
           <step>
-            <para>Finally, Right-click on the Achieve2 command in the Mission
+            <para>Finally, double-click on the Achieve2 command in the Mission
             Tree.</para>
           </step>
 
           <step>
-            <para>Click on the Edit button next to the Goal text box.
-            Tree.</para>
+            <para>Click on the Edit button next to the Goal text box.</para>
           </step>
 
           <step>
             <para>Locate <literal> ECC </literal> in the Object Properties
-            list and double-click on it. Hit Ok to close the Parameter Select
-            Dialog Box.</para>
+            list and double-click on it. Click Ok to close the Parameter
+            Select Dialog Box.</para>
           </step>
 
           <step>
@@ -604,25 +602,26 @@
         </caption>
       </mediaobject>
     </screenshot>
-	
-	 <para>You can save the resulting solution so that if you make small changes to the problem and retarget, the
-	 initial guess for subsequent runs will use the solution from your work above.  .</para>
-	 
-	         <procedure>
-          <step>
-            <para>Right-click on Target1 in the Mission Tree.</para>
-          </step>
-		  
-		  <step>
-            <para>Left-click on Apply Corrections.</para>
-          </step>
-		  
-		  <step>
-            <para>Rerun the mission by clicking the Run button in the toolbar.  If you inspect the results in the
-			message window you should see that the targetting only took one iteration because it started from the solution!</para>
-          </step>
-		  
-		  </procedure>
-	
+
+    <para>You can save the resulting solution so that if you make small
+    changes to the problem and retarget, the initial guess for subsequent runs
+    will use the solution from your work above. .</para>
+
+    <procedure>
+      <step>
+        <para>Double-click on Target1 in the Mission Tree.</para>
+      </step>
+
+      <step>
+        <para>Left-click on Apply Corrections.</para>
+      </step>
+
+      <step>
+        <para>Rerun the mission by clicking the Run button in the toolbar. If
+        you inspect the results in the message window you should see that the
+        targetting only took one iteration because it started from the
+        solution!</para>
+      </step>
+    </procedure>
   </section>
 </section>
