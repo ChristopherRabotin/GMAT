@@ -1,0 +1,77 @@
+This file lists all the files that need to be packaged for release and where
+they reside in the GMAT repositories. The list below was created in preparation
+for the R2011a beta release, and should be updated prior to every future
+release.
+
+This file layout represents the layout of the system once installed by the user.
+Platform-dependent variations are noted for the bin directory. In cases where
+the entire directory structure is present in the source location, individual
+files are not listed.
+
+The placeholders used below are:
+    <network>:      \\mesa-file\595\GMAT
+    <SF repo>:      https://gmat.svn.sourceforge.net/svnroot/gmat
+    <Jazz repo>:    https://gs580s-jazz.ndc.nasa.gov/svn/GMAT
+
+bin/ (Windows)
+    GMAT.exe                            source: <network>\Builds\windows\<date>
+    GMAT.ini                            source: <SF repo>/trunk/application/
+    gmat_startup_file.txt               source: <SF repo>/trunk/application/
+    libCcsdsEphemerisFile.dll           source: <network>\Builds\windows\<date>
+    libDataFile.dll                     source: <network>\Builds\windows\<date>
+    libGmatBase.dll                     source: <network>\Builds\windows\<date>
+    libGmatEstimation.dll               source: <network>\Builds\windows\<date>
+    libpcre-0.dll                       source: <network>\Builds\windows\gcc_lib\other
+    libpcrecpp-0.dll                    source: <network>\Builds\windows\gcc_lib\other
+    mingwm10.dll                        source: <network>\Builds\windows\gcc_lib\other
+    wxbase28_gcc_custom.dll             source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    wxmsw28_adv_gcc_custom.dll          source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    wxmsw28_core_gcc_custom.dll         source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    wxmsw28_gl_gcc_custom.dll           source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    wxmsw28_netutils_gcc_custom.dll     source: <network>\Builds\windows\gcc_lib\wx2.8.11
+    wxmsw28_stc_gcc_custom.dll          source: <network>\Builds\windows\gcc_lib\wx2.8.11
+
+bin/ (Mac OS X)
+    <incomplete>
+
+bin/ (Linux)
+    <incomplete>
+
+data/                                   source: <SF repo>/trunk/application/
+    *
+
+docs/
+    GMATAcceptanceTestPlan.pdf          source: ?
+    GMATArchitecturalSpec.pdf           source: <Jazz repo>/trunk/doc/SystemDocs/
+    GMATCompilerSetup.pdf               source: ?
+    GMATInputRangeTestPlan.pdf          source: ?
+    GMATMathSpec.pdf                    source: <Jazz repo>/trunk/doc/SystemDocs/
+    GMATMissionStatement.pdf            source: ?
+    GMATProductBrochure.pdf             source: ?
+    GMATQuickTables.pdf                 source: ?
+    GMATStyleGuide.pdf                  source: ?
+    GMATSystemTestPlan.pdf              source: ?
+    GMATUsersGuide.pdf                  source: ?
+    help/                               source: <network>\Builds\windows\help
+        *
+
+matlab/                                 source: <SF repo>/trunk/application/
+    *
+
+output/
+    <empty>
+
+plugins/
+    libFminconOptimizer.dll             source: <network>\Builds\windows\<date>
+    libMatlabInterface.dll              source: <network>\Builds\windows\<date>
+    proprietary/
+        <empty>
+
+samples/                                source: ?
+    *
+
+userfunctions/                          source: ?
+    *
+
+License.txt                             source: ?
+README.txt                              source: ?
