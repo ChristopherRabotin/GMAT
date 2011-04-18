@@ -5,11 +5,16 @@ function GroundTrack
 cartState = [7100 0 1300 0 7.35 1]';
 
 % Retrograde state
-cartState = [2124 -4462 6651 -3.6 3.9 4]';
+%cartState = [2124 -4462 6651 -3.6 3.9 4]';
+
+% Molniya
+cartState = [-52 -3079 -6150 10.043 -0.170 0]';
+
+cartState = [-743.686572704364 39985.553832 0 -2.855551774845245 -0.053169 1.517940]';
 
 %% Propagate the orbit for one day
 odeOpt = odeset('AbsTol',1e-9,'RelTol',1e-9);
-[t,xHist] = ode113(@OrbitDot,[0 12000],cartState,odeOpt);
+[t,xHist] = ode113(@OrbitDot,[0 15*86400],cartState,odeOpt);
 
 %%  Plot the 3D orbit
 figure(1)
@@ -41,6 +46,7 @@ image([-180 180],[-90 90],topoNew,'CDataMapping', 'scaled');axis equal;
 axis([-180 180 -90 90]); hold on; 
 
 %%  Loop over epeheris and draw points
+        figure(2);
 for ephIdx = 1:numEphemPoints
     
     % Compute longitude and latitude
@@ -51,7 +57,7 @@ for ephIdx = 1:numEphemPoints
     
     %  Draw new points depending upon special case
     if ephIdx > 2
-        figure(2);
+
         % Prograde case stepping of RHS of plot
         if  dir == 1 & oldLong > 0 && mod(long,2*pi) > pi 
             modoldLon = mod(oldLong,pi2);
