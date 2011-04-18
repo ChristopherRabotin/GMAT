@@ -50,8 +50,18 @@ then
         $winbuildspath/$winbuildname/libGmatEstimation.dll \
         $winbuildspath/$winbuildname/libMatlabInterface.dll \
         gmat/plugins
+    
+    # docs
+    mkdir -p gmat/docs
+    cp -prv \
+        $winbuildspath/help \
+        gmat/docs
+        
 elif [ $1 == 'lin' ]
 then
+    echo 'Linux not implemented'
+    
 elif [ $1 == 'mac' ]
 then
+    echo 'Mac not implemented'
 fi
