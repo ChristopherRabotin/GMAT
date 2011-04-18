@@ -20,7 +20,6 @@ bin/ (Windows)
     libCcsdsEphemerisFile.dll           source: <network>\Builds\windows\<date>
     libDataFile.dll                     source: <network>\Builds\windows\<date>
     libGmatBase.dll                     source: <network>\Builds\windows\<date>
-    libGmatEstimation.dll               source: <network>\Builds\windows\<date>
     libpcre-0.dll                       source: <network>\Builds\windows\gcc_lib\other
     libpcrecpp-0.dll                    source: <network>\Builds\windows\gcc_lib\other
     mingwm10.dll                        source: <network>\Builds\windows\gcc_lib\other
@@ -84,9 +83,20 @@ matlab/                                 source: <SF repo>/trunk/application/
 output/
     <empty>
 
-plugins/
+plugins/ (Windows)
     libFminconOptimizer.dll             source: <network>\Builds\windows\<date>
+    libGmatEstimation.dll               source: <network>\Builds\windows\<date>
     libMatlabInterface.dll              source: <network>\Builds\windows\<date>
+    proprietary/
+        <empty>
+
+plugins/ (Mac OS X)
+    <incomplete>
+    proprietary/
+        <empty>
+
+plugins/ (Linux)
+    <incomplete>
     proprietary/
         <empty>
 
@@ -96,5 +106,5 @@ samples/                                source: ?
 userfunctions/                          source: ?
     *
 
-License.txt                             source: ?
-README.txt                              source: ?
+License.txt                             source: <SF repo>/trunk/application/
+README.txt                              source: <SF repo>/trunk/application/
