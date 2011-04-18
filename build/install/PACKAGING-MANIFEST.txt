@@ -34,8 +34,31 @@ bin/ (Windows)
 bin/ (Mac OS X)
     <incomplete>
 
-bin/ (Linux)
-    <incomplete>
+bin/ (Linux)                            source: Thinking Systems FTP Server
+    GMAT
+    GMAT.ini
+    gmat_startup_file.txt
+    libCcsdsEphemerisFile.so
+    libDataFile.so
+    libGmatBase.so
+    RunGmat.sh
+    
+bin/lib/ (Linux only)                   source: Thinking Systems FTP Server
+    libpcrecpp.so.0
+    libpcrecpp.so.0.0.0  
+    libpcre.so.0      
+    libpcre.so.0.0.1  
+    libwx_base-2.8.so.0      
+    libwx_base_xml-2.8.so.0  
+    libwx_gtk2_aui-2.8.so.0   
+    libwx_gtk2_gl-2.8.so.0    
+    libwx_gtk2_qa-2.8.so.0        
+    libwx_gtk2_xrc-2.8.so.0
+    libwx_base_net-2.8.so.0  
+    libwx_gtk2_adv-2.8.so.0  
+    libwx_gtk2_core-2.8.so.0  
+    libwx_gtk2_html-2.8.so.0  
+    libwx_gtk2_richtext-2.8.so.0
 
 data/                                   source: <SF repo>/trunk/application/
     *
