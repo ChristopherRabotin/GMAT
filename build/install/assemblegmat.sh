@@ -15,6 +15,13 @@ apppath=$sfrepo/trunk/application
 winbuildspath='//mesa-file/595/GMAT/Builds/windows'
 winbuildname=2011-04-15
 
+# usage
+if [ -z "$1" ]
+then
+    echo "Usage: $0 win|lin|mac"
+    exit 1
+fi
+    
 # bin, data, matlab
 svn export --force $apppath gmat
 
@@ -43,4 +50,8 @@ then
         $winbuildspath/$winbuildname/libGmatEstimation.dll \
         $winbuildspath/$winbuildname/libMatlabInterface.dll \
         gmat/plugins
+elif [ $1 == 'lin' ]
+then
+elif [ $1 == 'mac' ]
+then
 fi
