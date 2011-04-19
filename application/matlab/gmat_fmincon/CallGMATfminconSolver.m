@@ -40,6 +40,10 @@ function [F,GradF] = CallGMATfminconSolver(X)
 %          nineq is the number of nonlinear inequality constraints
 % -------------------------------------------------------------------------
 %
+% Copyright (c) 2002 - 2011 United States Government as represented by the
+% Administrator of the National Aeronautics and Space Administration.
+% All Other Rights Reserved.
+%
 %  Modification History
 %
 %  29 Aug 06  - S. Hughes, Created File
