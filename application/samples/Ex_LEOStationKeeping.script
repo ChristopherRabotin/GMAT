@@ -1,0 +1,109 @@
+%  Script Mission - TRMM mission Example
+%
+%  This script demonstrates spacecraft propagation and targeting
+%  based off of the TRMM mission.
+%
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft LEOsat
+GMAT LEOsat.J2000BodyName = Earth;
+GMAT LEOsat.DateFormat = 'UTCGregorian';
+GMAT LEOsat.Epoch = 05 Jan 2010 00:00:00.000;
+GMAT LEOsat.X = -4083.9;
+GMAT LEOsat.Y = 4691.8;
+GMAT LEOsat.Z = -2576.7;
+GMAT LEOsat.VX = -4.252;
+GMAT LEOsat.VY = -5.509;
+GMAT LEOsat.VZ = -3.284;
+GMAT LEOsat.DisplayStateType = Cartesian;
+GMAT LEOsat.AnomalyType = TA;
+GMAT LEOsat.CoordinateSystem = EarthMJ2000Eq;
+GMAT LEOsat.DryMass = 850;
+GMAT LEOsat.Cd = 2.2000000000000002;
+GMAT LEOsat.Cr = 1.8;
+GMAT LEOsat.DragArea = 15;
+GMAT LEOsat.SRPArea = 1;
+
+%----------------------------------------
+%---------- ForceModels and Propagators
+%----------------------------------------
+
+Create ForceModel fm;
+GMAT fm.PrimaryBodies = {Earth};
+GMAT fm.PointMasses = {Luna, Sun};
+GMAT fm.Drag = JacchiaRoberts;
+GMAT fm.Drag.F107 = 150;
+GMAT fm.Drag.F107A = 150;
+
+Create Propagator prop;
+GMAT prop.FM = fm;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create DifferentialCorrector DC;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn burn;
+GMAT burn.Axes = VNB;
+
+%----------------------------------------
+%---------- Plots/Reports
+%----------------------------------------
+
+Create XYPlot plot;
+GMAT plot.IndVar = LEOsat.CurrA1MJD;
+GMAT plot.Add = LEOsat.Altitude;
+GMAT plot.Grid = On;
+GMAT plot.SolverIterations = None;
+
+Create ReportFile Data;
+GMAT Data.Filename = Ex_LEOStationKeeping.report;
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.ColumnWidth = 20;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence
+Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+GMAT Data.WriteHeaders = Off;
+Propagate prop(LEOsat, {LEOsat.ElapsedDays = 0.1});
+Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+
+While LEOsat.ElapsedDays < 10
+   Propagate prop(LEOsat);
+
+   If LEOsat.Altitude < 342
+      Target DC;
+         Vary DC(burn.Element1 = 0.002, {Perturbation = 0.0001});
+         Maneuver burn(LEOsat);
+         Achieve DC(LEOsat.SMA = 6734, {Tolerance = 0.1});
+      EndTarget;
+      Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+    
+      Propagate prop(LEOsat, {LEOsat.Apoapsis});
+      Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+
+      Target DC;
+         Vary DC(burn.Element1 = 0.001, {Perturbation = 0.00005});
+         Maneuver burn(LEOsat);
+         Achieve DC(LEOsat.ECC = 0.0005, {Tolerance = 0.0001});
+      EndTarget;
+      Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+   EndIf
+   
+EndWhile
+Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;
+
+Propagate prop(LEOsat, {LEOsat.Apoapsis});
+Report Data LEOsat.A1ModJulian LEOsat.Altitude LEOsat.SMA LEOsat.ECC LEOsat.INC LEOsat.RAAN LEOsat.TA;

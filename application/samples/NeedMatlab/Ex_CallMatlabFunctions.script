@@ -1,0 +1,48 @@
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+
+%----------------------------------------
+%---------- Arrays, Variables, Strings
+%----------------------------------------
+
+Create Array vec[4,1];
+Create Variable maxVec floorValue isAField fieldValue;
+Create String fieldName
+GMAT vec(1, 1) = 1;
+GMAT vec(2, 1) = 2;
+GMAT vec(3, 1) = 3;
+GMAT vec(4, 1) = 4.2214331;
+fieldName = 'CoordinateSystem';
+
+%----------------------------------------
+%---------- Functions
+%----------------------------------------
+
+Create MatlabFunction max floor isfield getfield;
+Create ReportFile rf;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+
+GMAT [maxVec] = max(vec);
+Report rf maxVec;
+
+GMAT [floorValue] = floor(maxVec);
+Report rf floorValue;
+
+GMAT [isAField] = isfield(DefaultSC,fieldName)
+Report rf isAField
+
+fieldName = 'X'
+GMAT [fieldValue] = getfield(DefaultSC,fieldName)
+Report rf fieldValue
+
+

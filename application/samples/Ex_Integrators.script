@@ -1,0 +1,146 @@
+%  Script Mission - Integrator Examples  
+%
+%  This script demonstrates how to choose different numerical integrators
+%  in the propagator set up
+
+
+% -------------------------------------------------------------------------
+% --------------------------- Create Objects ------------------------------
+% -------------------------------------------------------------------------
+
+%----------------------------Create the Spacecraft-------------------------
+% Create Sat and define its orbit
+Create Spacecraft Sat;
+GMAT Sat.Epoch.UTCGregorian  = 04 Jan 2003 00:00:00.000;
+GMAT Sat.DisplayStateType = Cartesian;
+GMAT Sat.X = -6365.554;
+GMAT Sat.Y = 2087.458;
+GMAT Sat.Z = 878.918
+GMAT Sat.VX = -1.635;
+GMAT Sat.VY = -6.597762;
+GMAT Sat.VZ = 3.5058499;
+GMAT Sat.DryMass = 100;
+GMAT Sat.Cd = 2.25;
+GMAT Sat.Cr = 1.21;
+GMAT Sat.DragArea = 4;
+GMAT Sat.SRPArea = 4;
+
+%----------------------------Create ForceModels---------------------------
+%  Define Force Model with point mass only
+Create ForceModel PointMass;
+GMAT PointMass.PrimaryBodies        =  {Earth};
+GMAT PointMass.Gravity.Earth.Model  = JGM2;
+GMAT PointMass.Gravity.Earth.Degree = 0;
+GMAT PointMass.Gravity.Earth.Order  = 0;
+
+%----------------------------Create Propagators---------------------------
+
+%Create a Runge Kutta Fehlburg (56) Propagator
+Create Propagator EarthPointMass_RK56;
+GMAT  EarthPointMass_RK56.Type     = RungeKutta56;
+GMAT  EarthPointMass_RK56.InitialStepSize = 30;;
+GMAT  EarthPointMass_RK56.Accuracy = 1e-12;
+GMAT  EarthPointMass_RK56.MinStep  = 1e-5;
+GMAT  EarthPointMass_RK56.MaxStep  = 1000;
+GMAT  EarthPointMass_RK56.FM       =  PointMass;
+
+%Create a Runge Kutta Nystrom (68) Propagator
+Create Propagator EarthPointMass_RK68;
+GMAT  EarthPointMass_RK68.Type     = RungeKutta68;
+GMAT  EarthPointMass_RK68.InitialStepSize = 30;;
+GMAT  EarthPointMass_RK68.Accuracy = 1e-12;
+GMAT  EarthPointMass_RK68.MinStep  = 1e-5;
+GMAT  EarthPointMass_RK68.MaxStep  = 1000;
+GMAT  EarthPointMass_RK68.FM       =  PointMass;
+
+% Create a Runge Kutta Verner (89) Propagator
+Create Propagator EarthPointMass_RKV89;
+GMAT  EarthPointMass_RKV89.Type     = RungeKutta89;
+GMAT  EarthPointMass_RKV89.InitialStepSize = 30;;
+GMAT  EarthPointMass_RKV89.Accuracy = 1e-12;
+GMAT  EarthPointMass_RKV89.MinStep  = 1e-5;
+GMAT  EarthPointMass_RKV89.MaxStep  = 1000;
+GMAT  EarthPointMass_RKV89.FM       =  PointMass;
+
+% Create a Prince Dormand (45) Propagator
+Create Propagator EarthPointMass_PD45;
+GMAT  EarthPointMass_PD45.Type     = PrinceDormand45;
+GMAT  EarthPointMass_PD45.InitialStepSize = 30;;
+GMAT  EarthPointMass_PD45.Accuracy = 1e-12;
+GMAT  EarthPointMass_PD45.MinStep  = 1e-5;
+GMAT  EarthPointMass_PD45.MaxStep  = 1000;
+GMAT  EarthPointMass_PD45.FM       =  PointMass;
+
+% Create a Prince Dormand (78) Propagator
+Create Propagator EarthPointMass_PD78;
+GMAT  EarthPointMass_PD78.Type     = PrinceDormand78;
+GMAT  EarthPointMass_PD78.InitialStepSize = 30;;
+GMAT  EarthPointMass_PD78.Accuracy = 1e-12;
+GMAT  EarthPointMass_PD78.MinStep  = 1e-5;
+GMAT  EarthPointMass_PD78.MaxStep  = 1000;
+GMAT  EarthPointMass_PD78.FM       =  PointMass;
+
+% Create a Bulirsch Stoer Propagator
+Create Propagator EarthPointMass_BS;
+GMAT  EarthPointMass_BS.Type     = BulirschStoer;
+GMAT  EarthPointMass_BS.InitialStepSize = 30;;
+GMAT  EarthPointMass_BS.Accuracy = 1e-12;
+GMAT  EarthPointMass_BS.MinStep  = 1e-5;
+GMAT  EarthPointMass_BS.MaxStep  = 200;
+GMAT  EarthPointMass_BS.FM       =  PointMass;
+
+% Create a Adams Bashforth Moulton Propagator
+Create Propagator EarthPointMass_ABM;
+GMAT  EarthPointMass_ABM.Type     = AdamsBashforthMoulton;
+GMAT  EarthPointMass_ABM.InitialStepSize = 30;;
+GMAT  EarthPointMass_ABM.Accuracy = 1e-8;
+GMAT  EarthPointMass_ABM.MinStep  = 1e-5;
+GMAT  EarthPointMass_ABM.MaxStep  = 1000;
+GMAT  EarthPointMass_ABM.LowerError  = 1e-12;
+GMAT  EarthPointMass_ABM.TargetError  = 1e-10;
+GMAT  EarthPointMass_ABM.FM       =  PointMass;
+
+%----------------------------Create OpenGL Plot_---------------------------
+Create OpenGLPlot GLPlot;
+GMAT GLPlot.Add = {Sat, Earth};
+GMAT GLPlot.CoordinateSystem = EarthMJ2000Eq;
+GMAT GLPlot.ViewPointReference = Earth;
+GMAT GLPlot.ViewDirection = Earth;
+GMAT GLPlot.ViewScaleFactor = 1.4;
+GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
+GMAT GLPlot.ViewUpAxis = Z;
+GMAT GLPlot.Axes       = On;
+
+%------------------------------ Create Report -----------------------------
+Create ReportFile IntegratorRpt;
+GMAT IntegratorRpt.Filename = Ex_Integrators.report
+GMAT IntegratorRpt.Precision = 16;
+GMAT IntegratorRpt.WriteHeaders = Off;
+GMAT IntegratorRpt.ColumnWidth = 20;
+
+% -------------------------------------------------------------------------
+% ---------------------------  Begin Mission Sequence
+% -------------------------------------------------------------------------
+%  Propagate using each of the propagators created above
+BeginMissionSequence
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+GMAT IntegratorRpt.WriteHeaders = Off;
+Propagate  EarthPointMass_RK56(Sat, {Sat.ElapsedDays = 0.1});
+
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthPointMass_RK68(Sat, {Sat.ElapsedDays = 0.1});
+
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthPointMass_RKV89(Sat, {Sat.ElapsedDays = 0.1});
+
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthPointMass_PD45(Sat, {Sat.ElapsedDays = 0.1});
+
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthPointMass_PD78(Sat, {Sat.ElapsedDays = 0.1});
+
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthPointMass_BS(Sat, {Sat.ElapsedDays = 0.1});
+
+Propagate  EarthPointMass_ABM(Sat, {Sat.ElapsedDays = 0.1});
+Report IntegratorRpt Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;

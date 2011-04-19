@@ -1,0 +1,153 @@
+%  Script Mission - Station Keeping Example 
+%
+%  This script demonstrates how to ...
+%
+
+
+%----------------------------------------------------------------------
+%-----------------------  Create Spacecraft ---------------------------
+%----------------------------------------------------------------------
+
+Create Spacecraft ACE;
+GMAT ACE.DateFormat = UTCGregorian;
+GMAT ACE.Epoch = 09 Dec 2005 12:59:60.000;
+GMAT ACE.CoordinateSystem = EarthMJ2000Eq;
+GMAT ACE.DisplayStateType = Cartesian;
+GMAT ACE.X = -528665.57732100005;
+GMAT ACE.Y = -1325445.1645269999;
+GMAT ACE.Z = -525969.84357799997;
+GMAT ACE.VX = 0.24043505600000001;
+GMAT ACE.VY = -0.068342457999999995;
+GMAT ACE.VZ = 0.031571536099999999;
+GMAT ACE.DryMass = 850;
+GMAT ACE.Cd = 2.2;
+GMAT ACE.Cr = 1.8;
+GMAT ACE.DragArea = 15;
+GMAT ACE.SRPArea = 1;
+
+%----------------------------------------------------------------------
+%----------------- Create BaryCenter and Libration Point --------------
+%----------------------------------------------------------------------
+
+Create Barycenter DefaultBC;
+GMAT DefaultBC.BodyNames = {Earth, Luna};
+
+Create LibrationPoint ESL1;
+GMAT ESL1.Primary = Sun;
+GMAT ESL1.Secondary = Earth;
+GMAT ESL1.Point = L1;
+
+%----------------------------------------------------------------------
+%-----------------------------  Force Model ---------------------------
+%----------------------------------------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PointMasses = {Sun, Earth, Luna};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+
+Create Propagator EarthSunMoon;
+GMAT EarthSunMoon.FM = DefaultProp_ForceModel;
+GMAT EarthSunMoon.Type = RungeKutta89;
+GMAT EarthSunMoon.InitialStepSize = 60;
+GMAT EarthSunMoon.Accuracy = 9.9999999999999994e-012;
+GMAT EarthSunMoon.MinStep = 0;
+GMAT EarthSunMoon.MaxStep = 40000;
+GMAT EarthSunMoon.MaxStepAttempts = 40000;
+
+%----------------------------------------------------------------------
+%----------------------  Create Maneuvers and DC ----------------------
+%----------------------------------------------------------------------
+
+Create ImpulsiveBurn dV;
+GMAT dV.CoordinateSystem = EarthSunRotCS;
+GMAT dV.Element1 = 0;
+GMAT dV.Element2 = 0;
+GMAT dV.Element3 = 0;
+
+Create DifferentialCorrector DefaultDC;
+GMAT DefaultDC.ShowProgress = true;
+GMAT DefaultDC.ReportStyle = Normal;
+GMAT DefaultDC.TargeterTextFile = targeter_DefaultDC.data;
+GMAT DefaultDC.MaximumIterations = 25;
+GMAT DefaultDC.DerivativeMethod = ForwardDifference
+
+%----------------------------------------------------------------------
+%----------------------  Create OpenGL Plots -------------------------
+%----------------------------------------------------------------------
+
+Create OpenGLPlot L1View;
+GMAT L1View.Add = {ACE, Earth};
+GMAT L1View.CoordinateSystem = EarthSunL1CS;
+GMAT L1View.ViewPointReference = ESL1;
+GMAT L1View.ViewDirection = ESL1;
+GMAT L1View.ViewScaleFactor = 18;
+GMAT L1View.FixedFovAngle = 45;
+GMAT L1View.ViewUpCoordinateSystem = EarthSunL1CS;
+GMAT L1View.ViewUpAxis = Z;
+GMAT L1View.SolverIterations = Current;
+
+
+Create OpenGLPlot EarthSunRotView;
+GMAT EarthSunRotView.Add = {ACE, Earth, Luna};
+GMAT EarthSunRotView.CoordinateSystem = EarthSunRotCS;
+GMAT EarthSunRotView.ViewPointReference = Earth;
+GMAT EarthSunRotView.ViewDirection = Earth;
+GMAT EarthSunRotView.ViewScaleFactor = 100;
+GMAT EarthSunRotView.ViewPointVector = [-30000 -15000 10000]
+GMAT EarthSunRotView.FixedFovAngle = 45;
+GMAT EarthSunRotView.ViewUpCoordinateSystem = EarthSunRotCS;
+GMAT EarthSunRotView.ViewUpAxis = Z;
+GMAT EarthSunRotView.SolverIterations = Current;
+
+Create ReportFile Data;
+GMAT Data.Filename = Ex_LibrationPointStationKeeping_ESM.report;
+GMAT Data.Precision = 16;
+GMAT Data.ColumnWidth = 26;
+
+%----------------------------------------------------------------------
+%---------------------- Create Coordinate Systems ---------------------
+%----------------------------------------------------------------------
+
+Create CoordinateSystem EarthSunL1CS;
+GMAT EarthSunL1CS.Origin = ESL1;
+GMAT EarthSunL1CS.Axes = ObjectReferenced;
+GMAT EarthSunL1CS.XAxis = R;
+GMAT EarthSunL1CS.ZAxis = N;
+GMAT EarthSunL1CS.Primary = Sun;
+GMAT EarthSunL1CS.Secondary = Earth;
+
+Create CoordinateSystem EarthSunRotCS;
+GMAT EarthSunRotCS.Origin = Earth;
+GMAT EarthSunRotCS.Axes = ObjectReferenced;
+GMAT EarthSunRotCS.XAxis = R;
+GMAT EarthSunRotCS.ZAxis = N;
+GMAT EarthSunRotCS.Primary = Sun;
+GMAT EarthSunRotCS.Secondary = Earth;
+
+Create Variable I
+
+%**********************************************************************
+%----------------------------------------------------------------------
+%------------------------ The Mission Sequence ------------------------
+%----------------------------------------------------------------------
+%**********************************************************************
+BeginMissionSequence
+
+For I = 1:7 
+
+   Target DefaultDC 
+
+      Vary DefaultDC(dV.Element1 = dV.Element1, {Perturbation = 1e-5, MaxStep = 0.01, Lower = -0.1, Upper = 0.1});
+      Maneuver dV(ACE);
+      Propagate EarthSunMoon(ACE, {ACE.EarthSunL1CS.Y = 0});
+      Achieve DefaultDC(ACE.EarthSunL1CS.VX = 0, {Tolerance = 1e-005});
+
+   EndTarget;  % For targeter DefaultDC
+   
+   Report Data ACE.EarthSunL1CS.X ACE.EarthSunL1CS.Y ACE.EarthSunL1CS.Z ACE.EarthSunL1CS.VX ACE.EarthSunL1CS.VY ACE.EarthSunL1CS.VZ
+
+EndFor;  
+

@@ -1,0 +1,116 @@
+%  Script Mission - Finite Burn Examples  
+%
+%  This script demonstrates how to set up tanks and thrusters, and use them
+%  in a finite maneuver sequence.  
+%
+
+
+% -------------------------------------------------------------------------
+% --------------------------- Create Objects ------------------------------
+% -------------------------------------------------------------------------
+
+%  Create a default spacecraft
+Create Spacecraft Sc;
+
+%  Create a fuel tank and name it tank1
+%          Here we create a fuel tank and set up its physical properties
+%          including Temperature, Fuel Mass, Fuel Density etc.
+Create FuelTank tank1
+GMAT tank1.Temperature = 20.0;
+GMAT tank1.RefTemperature = 12.0;
+GMAT tank1.FuelMass = 725;
+GMAT tank1.FuelDensity = 1029;
+GMAT tank1.Pressure = 1200.0;
+GMAT tank1.Volume = 0.8;
+GMAT tank1.PressureModel = PressureRegulated
+
+%  Create a thruster
+%         Here we create a thruster and tell the thruster which tank to
+%         draw fuel from.  We also set up the direction of the thruster.
+%         Currently, you specify the thruster orientation with respect to
+%         the spacecraft VNB or EarthMJ2000Eq systems.  This will change
+%         when attitude capabilities are added to GMAT.
+Create Thruster engine1
+GMAT engine1.Tank = {tank1};
+GMAT engine1.C1 = 70;
+GMAT engine1.C2 = 0;
+GMAT engine1.K1 = 1500;
+GMAT engine1.K3 = 0;
+GMAT engine1.ThrustDirection1 = 1.0;
+GMAT engine1.ThrustDirection2 = 0;
+GMAT engine1.ThrustDirection3 = 0;
+GMAT engine1.ThrustScaleFactor = 1;
+
+%  Here we attach the tanks and thrusters created above to the spacecraft
+GMAT Sc.Tanks = {tank1}
+GMAT Sc.Thrusters = {engine1};
+
+%  Create a thruster
+%         Here we create a finite maneuver.  We create the maneuver and
+%         give it a name first.  We need to tell the maneuver which
+%         thrusters to use, and which tank to draw from.  Currently you can
+%         have multiple thrusters, but only one tank, from which both
+%         thrusters draw fuel.  We can also apply a burn scale factor.  The
+%         thrust from each thruster is added together, and the sum is
+%         multiplied by BurnScaleFactor.
+Create FiniteBurn fb;
+GMAT fb.Thrusters = {engine1};
+
+
+%  Create a force model
+Create ForceModel fm;
+GMAT fm.PointMasses = {Earth};
+
+%  Create a propagator
+Create Propagator prop;
+GMAT prop.FM = fm;
+
+%  Create a report file
+Create ReportFile rf;
+GMAT rf.Filename  = Ex_FiniteBurn.report;
+rf.WriteHeaders = Off;
+GMAT rf.Precision = 16;
+
+%  Create an XYPlot  
+Create XYPlot energy
+GMAT energy.IndVar = Sc.CurrA1MJD;
+GMAT energy.Add    = Sc.Energy;
+GMAT energy.Grid   = On;
+
+Create XYPlot SMAvsTime
+GMAT SMAvsTime.IndVar = Sc.CurrA1MJD;
+GMAT SMAvsTime.Add = Sc.SMA;
+GMAT SMAvsTime.Grid = On;
+
+Create XYPlot INCvsTime
+GMAT INCvsTime.IndVar = Sc.CurrA1MJD;
+GMAT INCvsTime.Add = Sc.INC;
+GMAT INCvsTime.Grid = On;
+
+%  Create an OpenGL Plot  
+Create OpenGLPlot SatOpenGL
+GMAT SatOpenGL.Add = {Sc, Earth};
+GMAT SatOpenGL.ViewScaleFactor = 4;
+GMAT SatOpenGL.XYPlane = On;
+GMAT SatOpenGL.ViewPointVector = [ 10000 10000 10000];
+
+% -------------------------------------------------------------------------
+% --------------------------- Mission Sequence ----------------------------
+% -------------------------------------------------------------------------
+BeginMissionSequence
+%  Propagate for 1/10 of a day, without thrusters on.
+Propagate prop(Sc, {Sc.ElapsedSecs = 8640});
+
+%  Turn on thrusters....they will remain on through all events until the
+%  "EndFiniteBurn fb(Sc)" command is executed.
+BeginFiniteBurn fb(Sc);
+
+   %  Propagate for 5 days, while thrusters are turned on.
+   Propagate prop(Sc, {Sc.ElapsedDays = 1});
+   
+%  Turn off thrusters   
+EndFiniteBurn fb(Sc);
+
+%  Propagate for 5 days
+Propagate prop(Sc, {Sc.ElapsedDays =1});
+Report rf Sc.ElapsedSecs  Sc.X  Sc.Y Sc.Z  

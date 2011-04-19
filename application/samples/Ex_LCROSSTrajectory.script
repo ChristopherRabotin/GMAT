@@ -1,0 +1,570 @@
+
+%%-----------------------------------------------------------
+%%------------------- Define Spacecraft --------------------
+%%-----------------------------------------------------------
+Create Spacecraft LRO;
+GMAT LRO.DateFormat = UTCGregorian;
+
+GMAT LRO.CoordinateSystem = EarthMJ2000Eq;
+GMAT LRO.DisplayStateType = Cartesian;
+
+Create Spacecraft ImpactSat ImpactSatInit CanonImpactSat
+ImpactSat.DateFormat = UTCGregorian
+ImpactSat.CoordinateSystem = EarthMJ2000Eq;
+
+Create Spacecraft ImpactSat_MoonFixed
+ImpactSat_MoonFixed.DateFormat = UTCGregorian
+ImpactSat_MoonFixed.CoordinateSystem = MoonFixed;
+ImpactSat_MoonFixed.DisplayStateType = Cartesian;
+
+%%-----------------------------------------------------------
+%%------------------- Define Spacecraft --------------------
+%%-----------------------------------------------------------
+Create Spacecraft LCROSS LCROSSInit;
+GMAT LCROSS.DateFormat = TAIModJulian;
+GMAT LCROSS.Epoch = 21545.000000000;
+GMAT LCROSS.CoordinateSystem = EarthMJ2000Eq;
+GMAT LCROSS.DisplayStateType = Cartesian;
+GMAT LCROSS.DryMass = 850;
+GMAT LCROSS.Cd = 2.2;
+GMAT LCROSS.Cr = 1.8;
+GMAT LCROSS.DragArea = 15;
+GMAT LCROSS.SRPArea = 1;
+
+%%------------------------------------------------------------
+%%------------------- Define Propagators --------------------
+%%------------------------------------------------------------
+ 
+%% Create a force model for near Lunar propagation
+Create ForceModel NearMoonProp_ForceModel;
+GMAT NearMoonProp_ForceModel.CentralBody = Luna;
+%GMAT NearMoonProp_ForceModel.PrimaryBodies =
+GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth, Jupiter, Luna};
+GMAT NearMoonProp_ForceModel.Drag = None;
+GMAT NearMoonProp_ForceModel.SRP = On;
+GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
+GMAT NearMoonProp_ForceModel.SRP.Flux = 1367;
+GMAT NearMoonProp_ForceModel.SRP.Nominal_Sun = 149597870.691;
+
+%% Create a force model for near Lunar propagation
+%Create ForceModel NearMoonProp_ForceModel;
+%%GMAT NearMoonProp_ForceModel.CentralBody = Luna;
+%GMAT NearMoonProp_ForceModel.PrimaryBodies =
+%GMAT NearMoonProp_ForceModel.PointMasses = {Sun, Earth, Luna};
+%GMAT NearMoonProp_ForceModel.Drag = None;
+%GMAT NearMoonProp_ForceModel.SRP = On;
+%GMAT NearMoonProp_ForceModel.ErrorControl = RSSStep;
+%GMAT NearMoonProp_ForceModel.Luna.Flux = 1367;
+%GMAT NearMoonProp_ForceModel.Luna.Nominal_Sun = 149597870.691;
+
+%% Create a force model for deep space propagation
+Create ForceModel EarthFull_ForceModel;
+GMAT EarthFull_ForceModel.CentralBody = Earth;
+GMAT EarthFull_ForceModel.PrimaryBodies = {Earth};
+GMAT EarthFull_ForceModel.PointMasses = {Sun, Luna, Jupiter};
+GMAT EarthFull_ForceModel.Drag = None;
+GMAT EarthFull_ForceModel.SRP = On;
+GMAT EarthFull_ForceModel.ErrorControl = RSSStep;
+GMAT EarthFull_ForceModel.Earth.Degree = 4;
+GMAT EarthFull_ForceModel.Earth.Order = 0;
+GMAT EarthFull_ForceModel.Earth.PotentialFile = JGM2.cof;
+GMAT EarthFull_ForceModel.Earth.Flux = 1367;
+GMAT EarthFull_ForceModel.Earth.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator NearMoonProp;
+GMAT NearMoonProp.FM = NearMoonProp_ForceModel;
+GMAT NearMoonProp.Type = PrinceDormand78;  %PrinceDormand45;   %PrinceDormand78;
+GMAT NearMoonProp.InitialStepSize = 60;
+GMAT NearMoonProp.Accuracy = 1e-9;
+GMAT NearMoonProp.MinStep = 0.001;
+GMAT NearMoonProp.MaxStep = 20000;
+GMAT NearMoonProp.MaxStepAttempts = 50;
+
+Create Propagator EarthFull;
+GMAT EarthFull.FM = EarthFull_ForceModel;
+GMAT EarthFull.Type = RungeKutta56;  %PrinceDormand45;  %PrinceDormand78;
+GMAT EarthFull.InitialStepSize = 60; 
+GMAT EarthFull.Accuracy = 1e-09;
+GMAT EarthFull.MinStep = 0.001;
+GMAT EarthFull.MaxStep = 20000;
+GMAT EarthFull.MaxStepAttempts = 50; 
+
+Create ForceModel MoonTwoBody_ForceModel;
+GMAT MoonTwoBody_ForceModel.CentralBody = Luna;
+GMAT MoonTwoBody_ForceModel.PointMasses = {Luna};
+GMAT MoonTwoBody_ForceModel.Drag = None;
+GMAT MoonTwoBody_ForceModel.SRP = Off;
+GMAT MoonTwoBody_ForceModel.ErrorControl = RSSStep;
+
+Create Propagator MoonTwoBody;
+GMAT MoonTwoBody.FM = MoonTwoBody_ForceModel;
+GMAT MoonTwoBody.Type = RungeKutta89;
+GMAT MoonTwoBody.InitialStepSize = 60;
+GMAT MoonTwoBody.Accuracy = 9.999999999999999e-12;
+GMAT MoonTwoBody.MinStep = 0.001;
+GMAT MoonTwoBody.MaxStep = 20000;
+GMAT MoonTwoBody.MaxStepAttempts = 50;
+
+%%------------------------------------------------------------
+%%------------------- Create Maneuvers-- --------------------
+%%------------------------------------------------------------
+Create ImpulsiveBurn EDUSdv;
+GMAT EDUSdv.Origin = Earth;
+GMAT EDUSdv.Axes = VNB;
+GMAT EDUSdv.VectorFormat = Cartesian;
+GMAT EDUSdv.Element1 = 0;
+GMAT EDUSdv.Element2 = 0;
+GMAT EDUSdv.Element3 = 0
+
+Create ImpulsiveBurn LROLOI
+LROLOI.CoordinateSystem = Local;
+LROLOI.Origin = Luna;
+LROLOI.Axes   = VNB;
+LROLOI.Element1 =  -0.294816448336
+
+Create ImpulsiveBurn LROTCM
+LROTCM.CoordinateSystem = Local;
+LROTCM.Origin = Luna;
+LROTCM.Axes   = VNB;
+LROTCM.Element1 = 0.00494673009567
+LROTCM.Element2 = -0.0134520458643
+
+Create ImpulsiveBurn EDUSdv_J2000;
+GMAT EDUSdv_J2000.Origin = Earth;
+GMAT EDUSdv_J2000.Axes = MJ2000Eq;
+GMAT EDUSdv_J2000.VectorFormat = Cartesian;
+GMAT EDUSdv_J2000.Element1 = 0;
+GMAT EDUSdv_J2000.Element2 = 0;
+GMAT EDUSdv_J2000.Element3 = 0;
+
+Create ImpulsiveBurn LCM1;
+GMAT LCM1.Origin = Earth;
+GMAT LCM1.Axes = VNB;
+GMAT LCM1.VectorFormat = Cartesian;
+GMAT LCM1.Element1 = 0;
+GMAT LCM1.Element2 = 0;
+GMAT LCM1.Element3 = 0;
+
+Create ImpulsiveBurn LCM2;
+GMAT LCM2.Origin = Earth;
+GMAT LCM2.Axes = VNB;
+GMAT LCM2.VectorFormat = Cartesian;
+GMAT LCM2.Element1 = 0;
+GMAT LCM2.Element2 = 0;
+GMAT LCM2.Element3 = 0;
+
+Create ImpulsiveBurn dVatMoon;
+GMAT dVatMoon.Origin = Luna;
+GMAT dVatMoon.Axes = MJ2000Eq;
+GMAT dVatMoon.VectorFormat = Cartesian;
+GMAT dVatMoon.Element1 = 0;
+GMAT dVatMoon.Element2 = 0;
+GMAT dVatMoon.Element3 = 0;
+
+%----------------------------------------
+%---------- Variables, Arrays, Strings
+%----------------------------------------
+%----- These are variables that are just useful -------
+Create Variable LoopCounter PositionError VelocityError Cost LCM1Mag LCM2Mag EDUSdvMag EDMdvEpoch LCM1Epoch LCM2Epoch;
+Create Variable A1ImpactEpoch LoopCounter2 ConstraintError dx dy dz dVx dVy dVz SF_EDUSx dVatMoonMag;
+Create Variable  Min_Cost UseGMAToutput_Flag RefEpoch PropEpoch ET_EDUSdV ET_LCM1;
+Create Variable ET_LCM2 ET_Coll A1CollEpoch VXdiff VYdiff VZdiff I DeltaVx DeltaVy DeltaVz;
+Create Variable PosError VelError EDUS_J2000_DVx EDUS_J2000_DVy EDUS_J2000_DVz DV1_J2000_DVx DV1_J2000_DVy DV1_J2000_DVz DV2_J2000_DVx DV2_J2000_DVy;
+Create Variable DV2_J2000_DVz SteveReferenceEpoch;
+Create Variable Res LunarSMA DesiredSMA ConError BPlaneAngle PeriselentAlt Error1 Error2 Error3 Loop2;
+Create Variable NumSatRevs NumMoonRevs NumCrossings DotProduct pi DesiredAOP Loop1 TargetUTCModJulian
+Create Variable dVX dVY dVZ UTCGregorian
+Create Array X[15,1];
+
+Create Variable AOP_J2000 LCM2Mag_mps
+
+
+%----- Strings ---------
+Create String EmptyLine NewIterate PostTLI PreEDUS PostEDUS PreLCM1 PostLCM1 PreLCM2 PostLCM2 Periselene;
+Create String EDUSData BPlaneData LCM1Sol LCM2Sol PostLCM2Data ImpactSatData ImpactData
+GMAT EmptyLine = ' '
+GMAT NewIterate = '------ Begin New Iterate Data -------'
+EDUSData   = '------ EDUS Maneuver Data -------'
+BPlaneData = '------  B-Plane  Data -------'
+LCM1Sol   = '------ LCM1 Maneuver Data -------'
+LCM2Sol   = '------ LCM2 Maneuver Data -------'
+PostLCM2Data = '------ Post LCM2 State -------'
+ImpactData =   '------ Impact Data -------'
+
+ImpactSatData = '---------- Impact Sat Data --------------'
+
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem EarthMJ2000Eq;
+GMAT EarthMJ2000Eq.Origin = Earth;
+GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
+GMAT EarthMJ2000Eq.UpdateInterval = 60;
+GMAT EarthMJ2000Eq.OverrideOriginInterval = false;
+
+Create CoordinateSystem EarthMJ2000Ec;
+GMAT EarthMJ2000Ec.Origin = Earth;
+GMAT EarthMJ2000Ec.Axes = MJ2000Ec;
+GMAT EarthMJ2000Ec.UpdateInterval = 60;
+GMAT EarthMJ2000Ec.OverrideOriginInterval = false;
+
+Create CoordinateSystem EarthFixed;
+GMAT EarthFixed.Origin = Earth;
+GMAT EarthFixed.Axes = BodyFixed;
+GMAT EarthFixed.UpdateInterval = 60;
+GMAT EarthFixed.OverrideOriginInterval = false;
+
+
+%%------------------------------------------------------------
+%%------------------- Create Coordinate Systems -------------
+%%------------------------------------------------------------
+
+Create CoordinateSystem MoonFixed;
+GMAT MoonFixed.Origin = Luna;
+GMAT MoonFixed.Axes = BodyFixed;
+GMAT MoonFixed.UpdateInterval = 60;
+GMAT MoonFixed.OverrideOriginInterval = false;
+
+Create CoordinateSystem MoonFK5;
+GMAT MoonFK5.Origin = Luna;
+GMAT MoonFK5.Axes = MJ2000Eq;
+GMAT MoonFK5.UpdateInterval = 60;
+GMAT MoonFK5.OverrideOriginInterval = false;
+
+Create CoordinateSystem MoonEarthRot;
+GMAT MoonEarthRot.Origin = Luna;
+GMAT MoonEarthRot.Axes = ObjectReferenced;
+GMAT MoonEarthRot.UpdateInterval = 60;
+GMAT MoonEarthRot.OverrideOriginInterval = false;
+GMAT MoonEarthRot.XAxis = R;
+GMAT MoonEarthRot.ZAxis = N;
+GMAT MoonEarthRot.Primary = Earth;
+GMAT MoonEarthRot.Secondary = Luna;
+
+Create CoordinateSystem EarthMoonRot;
+GMAT EarthMoonRot.Origin = Earth;
+GMAT EarthMoonRot.Axes = ObjectReferenced;
+GMAT EarthMoonRot.UpdateInterval = 60;
+GMAT EarthMoonRot.OverrideOriginInterval = false;
+GMAT EarthMoonRot.XAxis = R;
+GMAT EarthMoonRot.ZAxis = N;
+GMAT EarthMoonRot.Primary = Earth;
+GMAT EarthMoonRot.Secondary = Luna;
+
+Create CoordinateSystem LunaFixed;
+GMAT LunaFixed.Origin = Luna;
+GMAT LunaFixed.Axes = BodyFixed;
+GMAT LunaFixed.UpdateInterval = 60;
+GMAT LunaFixed.OverrideOriginInterval = false;
+
+Create CoordinateSystem MoonInertial
+MoonInertial.Origin = Luna;
+MoonInertial.Axes   = BodyInertial;
+
+%%-----------------------------------------------------------------
+%%-----------------Create and Setup the Solvers -------------------
+%%-----------------------------------------------------------------
+
+Create DifferentialCorrector DC;
+GMAT DC.ShowProgress = true;
+GMAT DC.ReportStyle = Normal;
+GMAT DC.TargeterTextFile = DifferentialCorrectorDC.data;
+GMAT DC.MaximumIterations = 2500; 
+GMAT DC.UseCentralDifferences = false;
+
+Create DifferentialCorrector DC_central;
+GMAT DC_central.ShowProgress = true;
+GMAT DC_central.ReportStyle = Normal;
+GMAT DC_central.TargeterTextFile = DifferentialCorrectorDC.data;
+GMAT DC_central.MaximumIterations = 2500; 
+GMAT DC_central.UseCentralDifferences = false;
+
+
+%%------------------------------------------------------------
+%%------------------- Create Plots and Reports --------------
+%%------------------------------------------------------------
+Create Enhanced3DView EarthView;
+GMAT EarthView.SolverIterations = All; %Current or None are other options
+GMAT EarthView.Add = {LCROSS,Luna, Earth, ImpactSat,  LRO}; 
+GMAT EarthView.OrbitColor = [ 255 12632256  12256  243234 ];
+GMAT EarthView.TargetColor = [ 8421440 1234 23445  123124];
+GMAT EarthView.CoordinateSystem = EarthMJ2000Eq; 
+GMAT EarthView.ViewPointReference = Earth;
+GMAT EarthView.ViewPointVector = [ 25000 25000 25000 ];
+GMAT EarthView.ViewDirection = Earth;
+GMAT EarthView.ViewScaleFactor = 25;
+GMAT EarthView.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT EarthView.ViewUpAxis = Z;
+GMAT EarthView.CelestialPlane = Off;
+GMAT EarthView.XYPlane = Off;
+GMAT EarthView.WireFrame = Off;
+GMAT EarthView.Axes = Off;
+GMAT EarthView.Grid = Off;
+GMAT EarthView.SunLine = Off;
+GMAT EarthView.UseInitialView = On;
+GMAT EarthView.DataCollectFrequency = 3;
+GMAT EarthView.UpdatePlotFrequency = 50;
+GMAT EarthView.NumPointsToRedraw = 0;
+GMAT EarthView.ShowPlot = true;
+
+Create Enhanced3DView MoonView;
+GMAT MoonView.SolverIterations = Current;
+GMAT MoonView.Add = {LCROSS, Luna, Earth, LRO};
+GMAT MoonView.OrbitColor = [ 255 12632256 65280   ];
+GMAT MoonView.TargetColor = [ 8421440  8421440 32423 ];
+GMAT MoonView.CoordinateSystem = MoonInertial;
+GMAT MoonView.ViewPointReference = Luna;
+GMAT MoonView.ViewDirection = Luna;
+GMAT MoonView.ViewPointVector = [ 20000 20000 20000 ];
+GMAT MoonView.ViewScaleFactor = .6;
+GMAT MoonView.ViewUpCoordinateSystem = MoonInertial;
+GMAT MoonView.ViewUpAxis = Z;
+GMAT MoonView.CelestialPlane = Off;
+GMAT MoonView.XYPlane = Off;
+GMAT MoonView.WireFrame = Off;
+GMAT MoonView.Axes = On;
+GMAT MoonView.Grid = On;
+GMAT MoonView.SunLine = Off;
+GMAT MoonView.UseInitialView = On;
+GMAT MoonView.DataCollectFrequency = 3;
+GMAT MoonView.UpdatePlotFrequency = 50;
+GMAT MoonView.NumPointsToRedraw = 0;
+GMAT MoonView.ShowPlot = true;
+
+Create ReportFile Data;
+GMAT Data.SolverIterations = None;
+GMAT Data.Filename = Data.txt;
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.LeftJustify = On;
+GMAT Data.ZeroFill = On;
+GMAT Data.ColumnWidth = 30;
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%-------------------------- Mission Sequence ----------------------------
+%------------------------------------------------------------------------
+%------------------------------------------------------------------------
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%  Input state information and initial guesses for optimization variables
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+BeginMissionSequence
+
+%---- Initializations
+GMAT LCROSS = LRO;
+LunarSMA = 384410.3;
+pi = 3.14159265358979;
+
+BeginScript
+      
+   %---- Define LCROSS physical properties
+   GMAT LRO.DryMass = 3256.8;
+   GMAT LRO.Cr = 1.4;
+   GMAT LRO.SRPArea = 42.354;
+      
+   %---- Define the initial conditions for LRO
+   GMAT LRO.Epoch = '19 Jun 2009 01:31:05.920 ';
+   GMAT LRO.X  = 20747.68418000;
+   GMAT LRO.Y  = 50758.29345000 ;
+   GMAT LRO.Z  = 8229.21836200;
+   GMAT LRO.VX = 0.11610208;
+   GMAT LRO.VY = 3.32267120  ;
+   GMAT LRO.VZ = 1.05827656;
+   GMAT LCROSS = LRO;
+   GMAT RefEpoch = LRO.A1ModJulian;
+   GMAT ImpactSat = LRO;
+   
+   GMAT LRO.Epoch = '18 Jun 2009 23:58:54.680 ';
+   GMAT LRO.X  = 18997.18364;
+   GMAT LRO.Y  = 30057.69679;
+   GMAT LRO.Z  = 2054.89630;
+   GMAT LRO.VX = 0.61569;
+   GMAT LRO.VY = 4.29276;
+   GMAT LRO.VZ = 1.17090;
+                        
+   %---- Define the MoonFixed impact location and Epoch
+   GMAT ImpactSat_MoonFixed.Epoch = '9 Oct 2009 11:30:00.000';
+   ImpactSat_MoonFixed.X = 125.734;       
+   ImpactSat_MoonFixed.Y = -89.636; 
+   ImpactSat_MoonFixed.Z = -1730.522; 
+
+   %---- Define the initial conditions for ImpactSat
+   GMAT ImpactSat.Epoch = ImpactSat_MoonFixed.Epoch;
+   GMAT ImpactSat.X = ImpactSat_MoonFixed.EarthMJ2000Eq.X;
+   GMAT ImpactSat.Y = ImpactSat_MoonFixed.EarthMJ2000Eq.Y;
+   GMAT ImpactSat.Z = ImpactSat_MoonFixed.EarthMJ2000Eq.Z;
+
+   %---- Define the desired Resonance condition
+   NumSatRevs  = 3;
+   NumMoonRevs = 4;
+   Res = NumSatRevs/NumMoonRevs;  
+   DesiredSMA    = 473722.2056;%((398600.4415)^(1/3)*(NumMoonRevs/NumSatRevs/2/pi*2360551.68)^(2/3))*1.00;  
+   DesiredAOP    = 35.4553172712919;         
+   AOP_J2000     = 35.4553172712919; 
+   BPlaneAngle   = 79.5592 ;             
+   PeriselentAlt = 3318.092;                
+                            
+   %---- Define intial guess for EDUSdv  
+   GMAT ET_EDUSdV = (0/86400);
+   EDUSdv.Element1 = 0.00001; 
+   EDUSdv.Element2 = 0.00001;  
+   EDUSdv.Element3 = 0.00001;
+                                 
+   %---- Define intial guess for LCM1 
+   GMAT ET_LCM1 = 0.905018439982086 + ET_EDUSdV; 
+   GMAT LCM1.Element1 =  0.001704940 ;  
+   GMAT LCM1.Element2 =  0.005791633 ;  
+   GMAT LCM1.Element3 = -0.000661562;        
+ 
+   %---- Define intial guess for LCM2 
+   GMAT ET_LCM2 = 33.770;
+   GMAT LCM2.Element1 = 0.013391482; 
+   GMAT LCM2.Element2 =  -0.007895569 ;  
+   GMAT LCM2.Element3 =  0.013918756;  
+     
+   %---- Define initial guess for Collocation Elapsed Time
+   GMAT ET_Coll = 100; 
+   ImpactSat.X = 54580.02594841291;
+   ImpactSat.Y = 331618.2005005924;
+   ImpactSat.Z = 162362.268059963;
+   ImpactSat.VX = -0.6416435343925693
+   ImpactSat.VY = -0.4568696547646986 
+   ImpactSat.VZ = 2.402724393937031;
+
+EndScript;
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%  Report Initial Guess Data to file
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%================================================================================================================
+%------------------------------------------------------------------------
+%----  Part 1: Find the canonical solution
+%------------------------------------------------------------------------
+%================================================================================================================
+
+%------------------------------------------------------------------------
+%----  Target sequence 1:  Try using EDUS dv to achieve BPlane Coordinates
+%------------------------------------------------------------------------
+
+%---- Store LCROSS spacecraft state for later use
+LCM1.Element1 = 0.00306139288909
+LCM1.Element2 = -0.00154568531603
+LCM1.Element3 = 0.00308387318091
+ET_LCM2 = 33.8898378781
+LCM2.Element1 = -0.00150770654724
+LCM2.Element2 = 0.0229441083419
+LCM2.Element3 = 0.00277315503137
+ET_Coll = 100.068369408
+dVatMoon.Element1 = -0.014073821735
+dVatMoon.Element2 = -0.3936966287
+dVatMoon.Element3 = -0.231610121973
+
+LCROSSInit = LCROSS;
+ImpactSat = ImpactSatInit;
+LCROSS    = LCROSSInit;
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Prop to where EDUS performs maneuver
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%----- Propagate LCROSS to EDUS Maneuver and Perform Maneuver
+Propagate EarthFull(LRO) {LRO.A1ModJulian = LCROSS.A1ModJulian};
+GMAT PropEpoch = RefEpoch + ET_EDUSdV;
+LRO.Epoch = LCROSS.Epoch;
+Propagate EarthFull(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
+Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+Report Data LRO.TAIModJulian LRO.X LRO.Y LRO.Z LRO.VX LRO.VY LRO.VZ
+
+%---- Perform the maneuver
+dVx = LCROSS.VX; 
+dVy = LCROSS.VY;
+dVz = LCROSS.VZ;
+Maneuver EDUSdv(LCROSS);
+dVx = LCROSS.VX - dVx;
+dVy = LCROSS.VY - dVy;
+dVz = LCROSS.VZ - dVz;
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Prop to LCM1 and perform manevuer
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%----- Propagate LCROSS to Epoch of LCM1
+GMAT PropEpoch = RefEpoch + ET_LCM1;
+Propagate EarthFull(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
+
+%---- Apply maneuver LCM1
+dVx = LCROSS.VX;
+dVy = LCROSS.VY;
+dVz = LCROSS.VZ;
+Maneuver LCM1(LCROSS);
+Maneuver LROTCM(LRO);
+dVx = LCROSS.VX - dVx;
+dVy = LCROSS.VY - dVy;
+dVz = LCROSS.VZ - dVz;
+Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Prop to periselene
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%----- Propagate LCROSS to Periselene
+Propagate NearMoonProp(LCROSS,LRO) {LRO.Luna.Periapsis};
+Maneuver LROLOI(LRO);
+
+%----- Propagate LCROSS to Periselene
+Propagate NearMoonProp(LCROSS,LRO) {LRO.Luna.Periapsis};
+LROLOI.Element1 = -.500;
+Maneuver LROLOI(LRO);
+Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Prop to LCM2 and perform manevuer
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+%---- Vary the epoch of LCM2
+GMAT PropEpoch = RefEpoch + ET_LCM2;
+   
+%----- Propagate to epoch of LCM2 
+Propagate NearMoonProp(LCROSS,LRO) {LCROSS.A1ModJulian = PropEpoch};
+   
+%----- Vary and apply the maneuver LCM2
+dVx = LCROSS.VX;
+dVy = LCROSS.VY;
+dVz = LCROSS.VZ;
+Maneuver LCM2(LCROSS);
+dVx = LCROSS.VX - dVx;
+dVy = LCROSS.VY - dVy;
+dVz = LCROSS.VZ - dVz;
+Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Prop to LCROSS to Impact
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
+%--- Vary the collocation epoch
+GMAT A1CollEpoch = RefEpoch + ET_Coll;
+A1ImpactEpoch = ImpactSat.A1ModJulian
+Propagate NearMoonProp(LCROSS,LRO) {LCROSS.Luna.RMAG = 1700};
+Report Data LCROSS.TAIModJulian LCROSS.X LCROSS.Y LCROSS.Z LCROSS.VX LCROSS.VY LCROSS.VZ
+
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+%---- Calculate Collocation contraints and Cost
+%++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+dx = (ImpactSat.X - LCROSS.X);
+dy = (ImpactSat.Y - LCROSS.Y);
+dz = (ImpactSat.Z - LCROSS.Z); 
+
+PositionError = sqrt(dx^2 + dy^2 + dz^2);
+VelocityError = sqrt(dVx^2 + dVy^2 + dVz^2);  
+ 

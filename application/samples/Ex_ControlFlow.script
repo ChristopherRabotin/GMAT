@@ -1,0 +1,103 @@
+%  Script Mission - Control Flow Examples  
+%
+%  This script demonstrates how to use basic control flow in GMAT.
+%  The control flow used are For, While, and If statements.
+%
+
+%
+% -------------------------------------------------------------------------
+% --------------------------- Create Objects ------------------------------
+% -------------------------------------------------------------------------
+
+% Create Sat and define its orbit
+Create Spacecraft Sat;
+GMAT Sat.DateFormat = UTCGregorian;
+GMAT Sat.Epoch = '22 Jul 2014 11:29:10.811';
+GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
+GMAT Sat.DisplayStateType = Keplerian;
+GMAT Sat.SMA = 83474.31800000001;
+GMAT Sat.ECC = 0.8965199999999999;
+GMAT Sat.INC = 12.4606;
+GMAT Sat.RAAN = 112.8362;
+GMAT Sat.AOP = 218.9805;
+GMAT Sat.TA = 180;
+GMAT Sat.DryMass = 850;
+GMAT Sat.Cd = 2.2;
+GMAT Sat.Cr = 1.8;
+GMAT Sat.DragArea = 15;
+GMAT Sat.SRPArea = 1;
+
+Create ForceModel FM;
+GMAT FM.CentralBody = Earth;
+GMAT FM.PointMasses = {Earth};
+GMAT FM.Drag = None;
+GMAT FM.SRP = Off;
+
+% Create propgator with point mass only
+Create Propagator  EarthPointMass;
+GMAT  EarthPointMass.Type     = PrinceDormand78;
+GMAT  EarthPointMass.StopIfAccuracyIsViolated = false;
+GMAT  EarthPointMass.InitialStepSize = 30;
+GMAT  EarthPointMass.Accuracy = 1e-12;
+GMAT  EarthPointMass.MinStep  = 0;
+GMAT  EarthPointMass.MaxStep  = 86400;
+GMAT  EarthPointMass.FM       = FM;
+
+%  Create Variables and Arrays
+Create Variable I ;
+
+%  Create 
+Create OpenGLPlot EarthView;
+GMAT EarthView.Add = {Sat,Earth};
+GMAT EarthView.ViewScaleFactor = 2.5;
+GMAT EarthView.ViewUpAxis = X;
+GMAT EarthView.ViewPointVector = [ 0 0 30000 ];
+
+Create ReportFile Data;
+GMAT Data.Filename = Ex_Data.report
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.ColumnWidth = 20;
+
+% -------------------------------------------------------------------------
+% ---------------------------  Begin Mission Sequence ---------------------
+% -------------------------------------------------------------------------
+BeginMissionSequence
+
+% =========================================================================
+%  Example:  Use For loop to Prop for 5 orbits and save ephem at every apogee
+% =========================================================================
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+For I = 1:5;
+     Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
+     Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+EndFor;
+
+% =========================================================================
+%  Example: Prop to next apogee while the ElapsedDays is less than ten days
+% =========================================================================
+While Sat.TAIModJulian < 26882;
+   Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
+   Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+EndWhile;
+
+% =========================================================================
+%  Example:  If the true anomaly of Sat's orbit is greater than 178 degrees, then
+%  propagate to periapsis.
+% =========================================================================
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+If  Sat.TA > 178;
+    Propagate EarthPointMass(Sat,  {Sat.Periapsis} );
+    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+EndIf;
+
+% =========================================================================
+%  Example:  If TA is < 90 do prop to periapsis, otherwise, prop to apoapsis
+% =========================================================================
+If  Sat.TA > 90;
+    Propagate EarthPointMass(Sat,  {Sat.Periapsis} );
+    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+Else
+    Propagate EarthPointMass(Sat,  {Sat.Apoapsis} );
+    Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ Sat.TA;
+EndIf;

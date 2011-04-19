@@ -1,0 +1,216 @@
+%  Script Mission - Force Model Examples  
+%
+%  This script demonstrates how to set up different force models in the
+%  propagator setup
+%
+
+
+
+% -------------------------------------------------------------------------
+% --------------------------- Create Objects ------------------------------
+% -------------------------------------------------------------------------
+
+%----------------------------Create the Spacecraft----------------------
+% Create Sat and define its orbit
+Create Spacecraft Sat;
+GMAT Sat.Epoch.UTCGregorian  = 04 Jan 2003 00:00:00.000;
+GMAT Sat.DisplayStateType = Cartesian;
+GMAT Sat.X = -6365.554;
+GMAT Sat.Y = 2087.458;
+GMAT Sat.Z = 878.918
+GMAT Sat.VX = -1.635;
+GMAT Sat.VY = -6.597762;
+GMAT Sat.VZ = 3.5058499;
+GMAT Sat.DryMass = 100;
+GMAT Sat.Cd = 2.25;
+GMAT Sat.Cr = 1.21;
+GMAT Sat.DragArea = 4;
+GMAT Sat.SRPArea = 4;
+
+%----------------------------Create ForceModels----------------------
+
+%  Define Force Model with point mass only
+Create ForceModel PointMass;
+GMAT PointMass.PrimaryBodies        = {Earth};
+GMAT PointMass.Gravity.Earth.Model  = JGM2;
+GMAT PointMass.Gravity.Earth.Degree = 0;
+GMAT PointMass.Gravity.Earth.Order  = 0;
+
+%  Define Force Model with third bodies 
+Create ForceModel ThirdBodies;
+GMAT ThirdBodies.PrimaryBodies        = {Earth};
+GMAT ThirdBodies.Gravity.Earth.Model  = JGM2;
+GMAT ThirdBodies.Gravity.Earth.Degree = 0;
+GMAT ThirdBodies.Gravity.Earth.Order  = 0;
+GMAT ThirdBodies.PointMasses   = { Sun, Luna,  Venus, Mars, Jupiter, Saturn, Uranus, Neptune};
+
+%  Define Force Model with 12x12 gravity
+Create ForceModel NonSpherical12;
+GMAT NonSpherical12.PrimaryBodies        = {Earth};
+GMAT NonSpherical12.Gravity.Earth.Model  = JGM2;
+GMAT NonSpherical12.Gravity.Earth.Degree = 12;
+GMAT NonSpherical12.Gravity.Earth.Order  = 12;
+
+%  Define Force Model with MSISE90 Drag 
+Create ForceModel  MSISE90Drag;
+GMAT  MSISE90Drag.PrimaryBodies        = {Earth};
+GMAT  MSISE90Drag.Gravity.Earth.Model  = JGM2;
+GMAT  MSISE90Drag.Gravity.Earth.Degree = 0;
+GMAT  MSISE90Drag.Gravity.Earth.Order  = 0;
+GMAT  MSISE90Drag.Drag       = MSISE90;
+GMAT  MSISE90Drag.Drag.F107  = 175;
+GMAT  MSISE90Drag.Drag.F107A = 175;
+GMAT  MSISE90Drag.Drag.MagneticIndex = 4;
+
+%  Define Force Model with Jacchia Roberts Drag 
+Create ForceModel  JRDrag;
+GMAT  JRDrag.PrimaryBodies        = {Earth};
+GMAT  JRDrag.Gravity.Earth.Model  = JGM2;
+GMAT  JRDrag.Gravity.Earth.Degree = 0;
+GMAT  JRDrag.Gravity.Earth.Order  = 0;
+GMAT  JRDrag.Drag       = JacchiaRoberts;
+GMAT  JRDrag.Drag.F107  = 150;
+GMAT  JRDrag.Drag.F107A = 150;
+GMAT  JRDrag.Drag.MagneticIndex = 3;
+
+%  Define Force Model with SRP
+Create ForceModel  SRP;
+GMAT  SRP.PrimaryBodies        = {Earth};
+GMAT  SRP.Gravity.Earth.Model  = JGM2;
+GMAT  SRP.Gravity.Earth.Degree = 0;
+GMAT  SRP.Gravity.Earth.Order  = 0;
+GMAT  SRP.SRP = On;
+
+%  Define Force Model with SRP
+Create ForceModel  AllForces;
+GMAT  AllForces.PrimaryBodies        = {Earth};
+GMAT  AllForces.Gravity.Earth.Model  = JGM2;
+GMAT  AllForces.Gravity.Earth.Degree = 20;
+GMAT  AllForces.Gravity.Earth.Order  = 20;
+GMAT  AllForces.SRP = On;
+GMAT  AllForces.Drag = MSISE90
+GMAT  AllForces.Drag.F107  = 150;
+GMAT  AllForces.Drag.F107A = 150;
+GMAT  AllForces.Drag.MagneticIndex = 3;
+
+%----------------------------Create Propagators----------------------
+% Create propgator with point mass only
+Create Propagator  EarthPointMass;
+GMAT  EarthPointMass.Type     = PrinceDormand78;
+GMAT  EarthPointMass.StopIfAccuracyIsViolated = false;
+GMAT  EarthPointMass.InitialStepSize = 30;
+GMAT  EarthPointMass.Accuracy = 1e-12;
+GMAT  EarthPointMass.MinStep  = 0;
+GMAT  EarthPointMass.MaxStep   = 86400;
+GMAT  EarthPointMass.FM       = PointMass;
+
+% Create propgator with third bodies only
+Create Propagator  EarthThirdBodies;
+GMAT  EarthThirdBodies.Type     = PrinceDormand78;
+GMAT EarthThirdBodies.StopIfAccuracyIsViolated = false;
+GMAT  EarthThirdBodies.InitialStepSize = 30;
+GMAT EarthThirdBodies.Accuracy  = 1e-12;
+GMAT EarthThirdBodies.MinStep   = 0;
+GMAT EarthThirdBodies.MaxStep   = 86400;
+GMAT  EarthThirdBodies.FM       =  ThirdBodies;
+
+% Create propgator with 12x12 gravity only
+Create Propagator  EarthAspherical12x12;
+GMAT EarthAspherical12x12.Type      = PrinceDormand78;
+GMAT EarthAspherical12x12.StopIfAccuracyIsViolated = false;
+GMAT  EarthAspherical12x12.InitialStepSize = 30;
+GMAT  EarthAspherical12x12.Accuracy = 1e-12;
+GMAT EarthAspherical12x12.MinStep   = 0;
+GMAT EarthAspherical12x12.MaxStep   = 86400;
+GMAT  EarthAspherical12x12.FM       =  NonSpherical12;
+
+% Create propgator with MSISE-90 drag only
+Create Propagator  EarthMSISE90;
+GMAT EarthMSISE90.Type     = PrinceDormand78;
+GMAT EarthMSISE90.StopIfAccuracyIsViolated = false;
+GMAT EarthMSISE90.Accuracy = 1e-12;
+GMAT EarthMSISE90.MinStep  = 0;
+GMAT EarthMSISE90.MaxStep  = 86400;
+GMAT  EarthMSISE90.FM      =   MSISE90Drag;
+
+% Create propgator with Jacchia-Roberts drag only
+Create Propagator  EarthJacchiaRoberts;
+GMAT EarthJacchiaRoberts.Type     = PrinceDormand78;
+GMAT EarthJacchiaRoberts.StopIfAccuracyIsViolated = false;
+GMAT EarthJacchiaRoberts.InitialStepSize = 30;
+GMAT EarthJacchiaRoberts.Accuracy = 1e-12;
+GMAT EarthJacchiaRoberts.MinStep  = 0;
+GMAT EarthJacchiaRoberts.MaxStep  = 86400;
+GMAT  EarthJacchiaRoberts.FM      =   JRDrag;
+
+% Create propgator with SRP only
+Create Propagator  EarthSRP;
+GMAT  EarthSRP.Type     = PrinceDormand78;
+GMAT  EarthSRP.StopIfAccuracyIsViolated = false;
+GMAT  EarthSRP.InitialStepSize = 30;
+GMAT  EarthSRP.Accuracy = 1e-12;
+GMAT  EarthSRP.MinStep  = 0;
+GMAT  EarthSRP.MaxStep  = 86400;
+GMAT  EarthSRP.FM       =   SRP;
+
+Create Propagator  EarthFull;
+GMAT  EarthFull.Type     = PrinceDormand78;
+GMAT  EarthFull.StopIfAccuracyIsViolated = false;
+GMAT  EarthFull.InitialStepSize = 30;
+GMAT  EarthFull.Accuracy = 1e-12;
+GMAT  EarthFull.MinStep  = 0;
+GMAT  EarthFull.MaxStep  = 86400;
+GMAT  EarthFull.FM       =   AllForces;
+
+%----------------------------Create Plots/Reports----------------------
+
+Create OpenGLPlot GLPlot;
+GMAT GLPlot.Add = {Sat, Earth};
+GMAT GLPlot.CoordinateSystem = EarthMJ2000Eq;
+GMAT GLPlot.ViewPointReference = Earth;
+GMAT GLPlot.ViewDirection = Earth;
+GMAT GLPlot.ViewScaleFactor = 1.4;
+GMAT GLPlot.ViewPointVector = [ -10000 -15000 3000 ];
+GMAT GLPlot.ViewUpAxis = Z;
+GMAT GLPlot.Axes       = On;
+
+% Create Report
+Create ReportFile Data;
+GMAT Data.Filename = Ex_ForceModels.report;
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.ColumnWidth = 20;
+
+% -------------------------------------------------------------------------
+% ---------------------------  Begin Mission Sequence ---------------------
+% -------------------------------------------------------------------------
+BeginMissionSequence
+%Propagate using point mass propagator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+GMAT Data.WriteHeaders = Off;
+Propagate  EarthPointMass(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using third bodies propagator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate   EarthThirdBodies(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using 12x12 gravity model propgator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthAspherical12x12(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using Jacchia-Roberts propagator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthJacchiaRoberts(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using MSISE-90 propagator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthMSISE90(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using SRP propagator
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthSRP(Sat, {Sat.ElapsedDays = 0.1});
+
+%Propagate using using complex force model
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;
+Propagate  EarthFull(Sat, {Sat.ElapsedDays = 0.1});
+Report Data Sat.A1ModJulian Sat.X Sat.Y Sat.Z Sat.VX Sat.VY Sat.VZ;

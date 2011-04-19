@@ -1,0 +1,147 @@
+%General Mission Analysis Tool(GMAT) Script
+%Created: 2010-10-07 01:04:36
+
+
+%----------------------------------------
+%---------- User-Modified Default Celestial Bodies
+%----------------------------------------
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft Sat;
+GMAT Sat.DateFormat = TAIModJulian;
+GMAT Sat.Epoch = '21545';
+GMAT Sat.CoordinateSystem = EarthMJ2000Eq;
+GMAT Sat.DisplayStateType = Keplerian;
+GMAT Sat.SMA = 9999.999999999987;
+GMAT Sat.ECC = 0.1000000000000002;
+GMAT Sat.INC = 12.85008005658097;
+GMAT Sat.RAAN = 306.6148021947984;
+GMAT Sat.AOP = 314.1905515359917;
+GMAT Sat.TA = 99.88774933204918;
+GMAT Sat.DryMass = 850;
+GMAT Sat.Cd = 2.2;
+GMAT Sat.Cr = 1.8;
+GMAT Sat.DragArea = 15;
+GMAT Sat.SRPArea = 1;
+GMAT Sat.NAIFId = -123456789;
+GMAT Sat.NAIFIdReferenceFrame = -123456789;
+GMAT Sat.Id = 'SatId';
+GMAT Sat.Attitude = CoordinateSystemFixed;
+GMAT Sat.ModelFile = '../data/vehicle/models/aura.3ds';
+GMAT Sat.ModelOffsetX = 1;
+GMAT Sat.ModelOffsetY = 0;
+GMAT Sat.ModelOffsetZ = 0;
+GMAT Sat.ModelRotationX = 0;
+GMAT Sat.ModelRotationY = 0;
+GMAT Sat.ModelRotationZ = 0;
+GMAT Sat.ModelScale = 3.624564647674561;
+GMAT Sat.AttitudeDisplayStateType = 'Quaternion';
+GMAT Sat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT Sat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT Sat.Q1 = 0;
+GMAT Sat.Q2 = 0;
+GMAT Sat.Q3 = 0;
+GMAT Sat.Q4 = 1;
+GMAT Sat.EulerAngleSequence = '321';
+GMAT Sat.AngularVelocityX = 0;
+GMAT Sat.AngularVelocityY = 0;
+GMAT Sat.AngularVelocityZ = 0;
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PrimaryBodies = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Degree = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.Order = 4;
+GMAT DefaultProp_ForceModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.InitialStepSize = 60;
+GMAT DefaultProp.Accuracy = 9.999999999999999e-012;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 2700;
+GMAT DefaultProp.MaxStepAttempts = 50;
+GMAT DefaultProp.StopIfAccuracyIsViolated = true;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn DefaultIB;
+GMAT DefaultIB.CoordinateSystem = Local;
+GMAT DefaultIB.Origin = Earth;
+GMAT DefaultIB.Axes = VNB;
+GMAT DefaultIB.Element1 = 0;
+GMAT DefaultIB.Element2 = 0;
+GMAT DefaultIB.Element3 = 0;
+GMAT DefaultIB.DecrementMass = false;
+GMAT DefaultIB.Isp = 300;
+GMAT DefaultIB.GravitationalAccel = 9.81;
+
+%----------------------------------------
+%---------- Subscribers
+%----------------------------------------
+
+Create OrbitView Enhanced3DView1;
+GMAT Enhanced3DView1.SolverIterations = Current;
+GMAT Enhanced3DView1.Add = {Sat, Earth};
+GMAT Enhanced3DView1.OrbitColor = [ 255 32768 ];
+GMAT Enhanced3DView1.TargetColor = [ 8421440 0 ];
+GMAT Enhanced3DView1.CoordinateSystem = EarthMJ2000Eq;
+GMAT Enhanced3DView1.ViewPointReference = Earth;
+GMAT Enhanced3DView1.ViewPointVector = [ 30000 0 0 ];
+GMAT Enhanced3DView1.ViewDirection = Earth;
+GMAT Enhanced3DView1.ViewScaleFactor = 1;
+GMAT Enhanced3DView1.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT Enhanced3DView1.ViewUpAxis = Z;
+GMAT Enhanced3DView1.CelestialPlane = Off;
+GMAT Enhanced3DView1.XYPlane = On;
+GMAT Enhanced3DView1.WireFrame = Off;
+GMAT Enhanced3DView1.Axes = On;
+GMAT Enhanced3DView1.Grid = Off;
+GMAT Enhanced3DView1.SunLine = Off;
+GMAT Enhanced3DView1.UseInitialView = On;
+GMAT Enhanced3DView1.DataCollectFrequency = 1;
+GMAT Enhanced3DView1.UpdatePlotFrequency = 50;
+GMAT Enhanced3DView1.NumPointsToRedraw = 0;
+GMAT Enhanced3DView1.ShowPlot = true;
+GMAT Enhanced3DView1.StarCount = 7000;
+GMAT Enhanced3DView1.EnableStars = On;
+GMAT Enhanced3DView1.EnableConstellations = On;
+GMAT Enhanced3DView1.MinFOV = 0;
+GMAT Enhanced3DView1.MaxFOV = 90;
+GMAT Enhanced3DView1.InitialFOV = 45;
+
+Create ReportFile Data;
+GMAT Data.Filename = Ex_Basic3DModel.report;
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.ColumnWidth = 20;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+
+BeginMissionSequence;
+Propagate DefaultProp(Sat) {Sat.ElapsedSecs = 40000};
+Propagate DefaultProp(Sat) {Sat.ElapsedSecs = 40000};
+
+Report Data Sat.TAIModJulian Sat.X Sat.Y Sat.Z
+Report Data Sat.Q1 Sat.Q2 Sat.Q3 Sat.Q4

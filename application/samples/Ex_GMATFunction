@@ -1,0 +1,484 @@
+% Script Mission - GMAT Function example 
+%
+% This script provides an example of how to use GMAT Functions
+% Related Files needed: ./GmatFunction/QualityFactor.gmf
+%
+
+ 
+
+
+%----------------------------------------
+%---------- Spacecrafts
+%----------------------------------------
+
+Create Spacecraft MMS_E_SC1;
+GMAT MMS_E_SC1.DateFormat = TAIModJulian;
+GMAT MMS_E_SC1.Epoch = '26586';
+GMAT MMS_E_SC1.CoordinateSystem = EarthMJ2000Eq;
+GMAT MMS_E_SC1.DisplayStateType = Cartesian;
+GMAT MMS_E_SC1.X = 7100;
+GMAT MMS_E_SC1.Y = 0;
+GMAT MMS_E_SC1.Z = 1300;
+GMAT MMS_E_SC1.VX = 0;
+GMAT MMS_E_SC1.VY = 7.35;
+GMAT MMS_E_SC1.VZ = 1;
+GMAT MMS_E_SC1.DryMass = 710;
+GMAT MMS_E_SC1.Cd = 2.2;
+GMAT MMS_E_SC1.Cr = 1.4;
+GMAT MMS_E_SC1.DragArea = 2.5;
+GMAT MMS_E_SC1.SRPArea = 2.5;
+GMAT MMS_E_SC1.NAIFId = -123456789;
+GMAT MMS_E_SC1.Id = 'SatId';
+GMAT MMS_E_SC1.ModelScale = 0.2;
+GMAT MMS_E_SC1.Attitude = CoordinateSystemFixed;
+GMAT MMS_E_SC1.AttitudeDisplayStateType = 'Quaternion';
+GMAT MMS_E_SC1.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT MMS_E_SC1.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT MMS_E_SC1.Q1 = 0;
+GMAT MMS_E_SC1.Q2 = 0;
+GMAT MMS_E_SC1.Q3 = 0;
+GMAT MMS_E_SC1.Q4 = 1;
+GMAT MMS_E_SC1.EulerAngleSequence = '312';
+GMAT MMS_E_SC1.AngularVelocityX = 0;
+GMAT MMS_E_SC1.AngularVelocityY = 0;
+GMAT MMS_E_SC1.AngularVelocityZ = 0;
+
+Create Spacecraft MMS_E_SC2;
+GMAT MMS_E_SC2.DateFormat = TAIModJulian;
+GMAT MMS_E_SC2.Epoch = '26586';
+GMAT MMS_E_SC2.CoordinateSystem = EarthMJ2000Eq;
+GMAT MMS_E_SC2.DisplayStateType = Cartesian;
+GMAT MMS_E_SC2.X = 7100;
+GMAT MMS_E_SC2.Y = 0;
+GMAT MMS_E_SC2.Z = 1300;
+GMAT MMS_E_SC2.VX = 0;
+GMAT MMS_E_SC2.VY = 7.35;
+GMAT MMS_E_SC2.VZ = 1;
+GMAT MMS_E_SC2.DryMass = 710;
+GMAT MMS_E_SC2.Cd = 2.2;
+GMAT MMS_E_SC2.Cr = 1.4;
+GMAT MMS_E_SC2.DragArea = 2.5;
+GMAT MMS_E_SC2.SRPArea = 2.5;
+GMAT MMS_E_SC2.NAIFId = -123456789;
+GMAT MMS_E_SC2.ModelScale = 0.2;
+GMAT MMS_E_SC2.Id = 'SatId';
+GMAT MMS_E_SC2.Attitude = CoordinateSystemFixed;
+GMAT MMS_E_SC2.AttitudeDisplayStateType = 'Quaternion';
+GMAT MMS_E_SC2.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT MMS_E_SC2.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT MMS_E_SC2.Q1 = 0;
+GMAT MMS_E_SC2.Q2 = 0;
+GMAT MMS_E_SC2.Q3 = 0;
+GMAT MMS_E_SC2.Q4 = 1;
+GMAT MMS_E_SC2.EulerAngleSequence = '312';
+GMAT MMS_E_SC2.AngularVelocityX = 0;
+GMAT MMS_E_SC2.AngularVelocityY = 0;
+GMAT MMS_E_SC2.AngularVelocityZ = 0;
+
+Create Spacecraft MMS_E_SC3;
+GMAT MMS_E_SC3.DateFormat = TAIModJulian;
+GMAT MMS_E_SC3.Epoch = '26586';
+GMAT MMS_E_SC3.CoordinateSystem = EarthMJ2000Eq;
+GMAT MMS_E_SC3.DisplayStateType = Cartesian;
+GMAT MMS_E_SC3.X = 7100;
+GMAT MMS_E_SC3.Y = 0;
+GMAT MMS_E_SC3.Z = 1300;
+GMAT MMS_E_SC3.VX = 0;
+GMAT MMS_E_SC3.VY = 7.35;
+GMAT MMS_E_SC3.VZ = 1;
+GMAT MMS_E_SC3.DryMass = 710;
+GMAT MMS_E_SC3.Cd = 2.2;
+GMAT MMS_E_SC3.Cr = 1.4;
+GMAT MMS_E_SC3.DragArea = 2.5;
+GMAT MMS_E_SC3.SRPArea = 2.5;
+GMAT MMS_E_SC3.NAIFId = -123456789;
+GMAT MMS_E_SC3.Id = 'SatId';
+GMAT MMS_E_SC3.Attitude = CoordinateSystemFixed;
+GMAT MMS_E_SC3.ModelScale = 0.2;
+GMAT MMS_E_SC3.AttitudeDisplayStateType = 'Quaternion';
+GMAT MMS_E_SC3.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT MMS_E_SC3.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT MMS_E_SC3.Q1 = 0;
+GMAT MMS_E_SC3.Q2 = 0;
+GMAT MMS_E_SC3.Q3 = 0;
+GMAT MMS_E_SC3.Q4 = 1;
+GMAT MMS_E_SC3.EulerAngleSequence = '312';
+GMAT MMS_E_SC3.AngularVelocityX = 0;
+GMAT MMS_E_SC3.AngularVelocityY = 0;
+GMAT MMS_E_SC3.AngularVelocityZ = 0;
+
+Create Spacecraft MMS_E_SC4;
+GMAT MMS_E_SC4.DateFormat = TAIModJulian;
+GMAT MMS_E_SC4.Epoch = '26586';
+GMAT MMS_E_SC4.CoordinateSystem = EarthMJ2000Eq;
+GMAT MMS_E_SC4.DisplayStateType = Cartesian;
+GMAT MMS_E_SC4.X = 7100;
+GMAT MMS_E_SC4.Y = 0;
+GMAT MMS_E_SC4.Z = 1300;
+GMAT MMS_E_SC4.VX = 0;
+GMAT MMS_E_SC4.VY = 7.35;
+GMAT MMS_E_SC4.VZ = 1;
+GMAT MMS_E_SC4.DryMass = 710;
+GMAT MMS_E_SC4.Cd = 2.2;
+GMAT MMS_E_SC4.Cr = 1.4;
+GMAT MMS_E_SC4.DragArea = 2.5;
+GMAT MMS_E_SC4.SRPArea = 2.5;
+GMAT MMS_E_SC4.NAIFId = -123456789;
+GMAT MMS_E_SC4.Id = 'SatId';
+GMAT MMS_E_SC4.ModelScale = 0.2;
+GMAT MMS_E_SC4.Attitude = CoordinateSystemFixed;
+GMAT MMS_E_SC4.AttitudeDisplayStateType = 'Quaternion';
+GMAT MMS_E_SC4.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT MMS_E_SC4.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT MMS_E_SC4.Q1 = 0;
+GMAT MMS_E_SC4.Q2 = 0;
+GMAT MMS_E_SC4.Q3 = 0;
+GMAT MMS_E_SC4.Q4 = 1;
+GMAT MMS_E_SC4.EulerAngleSequence = '312';
+GMAT MMS_E_SC4.AngularVelocityX = 0;
+GMAT MMS_E_SC4.AngularVelocityY = 0;
+GMAT MMS_E_SC4.AngularVelocityZ = 0;
+
+
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create ForceModel MMS_EarthModel;
+GMAT MMS_EarthModel.CentralBody = Earth;
+GMAT MMS_EarthModel.PrimaryBodies = {Earth};
+GMAT MMS_EarthModel.PointMasses = {Sun, Luna};
+GMAT MMS_EarthModel.Drag = None;
+%GMAT MMS_EarthModel.Drag.F107 = 150;
+%GMAT MMS_EarthModel.Drag.F107A = 150;
+%GMAT MMS_EarthModel.Drag.MagneticIndex = 3;
+GMAT MMS_EarthModel.SRP = On;
+GMAT MMS_EarthModel.ErrorControl = RSSStep;
+GMAT MMS_EarthModel.GravityField.Earth.Degree = 4;
+GMAT MMS_EarthModel.GravityField.Earth.Order = 4;
+GMAT MMS_EarthModel.GravityField.Earth.PotentialFile = 'JGM2.cof';
+GMAT MMS_EarthModel.SRP.Flux = 1359.3885699989;
+GMAT MMS_EarthModel.SRP.Nominal_Sun = 149597870.691;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator MMS_Prop;
+GMAT MMS_Prop.FM = MMS_EarthModel;
+GMAT MMS_Prop.Type = PrinceDormand78;
+GMAT MMS_Prop.InitialStepSize = 60;
+GMAT MMS_Prop.Accuracy = 1e-009;
+GMAT MMS_Prop.MinStep = 0.001;
+GMAT MMS_Prop.MaxStep = 500;
+GMAT MMS_Prop.MaxStepAttempts = 50;
+
+
+
+%----------------------------------------
+%---------- Variables, Arrays, Strings
+%----------------------------------------
+
+Create Variable sideLength12 sideLength13 sideLength14 sideLength24 sideLength23 sideLength34 sideLength12_E sideLength13_E sideLength14_E sideLength24_E;
+Create Variable sideLength23_E sideLength34_E Q_volume Q_size Q Q_E QRoI QRoI_E RoI1 RoI2;
+Create Variable CountDays InitialJD InitialJD4loop FormSize sideLength1 sideLength2 sideLength3 sideLength4 sideLength5 sideLength6;
+Create Variable dummy1 volumeActual volumeDesired dummy2 QFvol QFsize QF dummy3 avgL dummy4;
+Create Variable sizeConstant1 sizeConstant2 sizeConstant3 sizeConstant4;
+
+%----- Create Arrays
+Create Array posVec1[3,1] posVec2[3,1] posVec3[3,1] posVec4[3,1] dummyArr1[1,1] relPosVec1[3,1] relPosVec2[3,1] relPosVec3[3,1] dummyArr2[1,1] relPosVec4[3,1];
+Create Array relPosVec5[3,1] relPosVec6[3,1] rp2_cross_rp3[3,1] prod[1,1];
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem MMS1VNB;
+GMAT MMS1VNB.Origin = MMS_E_SC1;
+GMAT MMS1VNB.Axes = ObjectReferenced;
+GMAT MMS1VNB.UpdateInterval = 0;
+GMAT MMS1VNB.OverrideOriginInterval = false;
+GMAT MMS1VNB.XAxis = 'V';
+GMAT MMS1VNB.YAxis = 'N';
+GMAT MMS1VNB.Primary = Earth;
+GMAT MMS1VNB.Secondary = MMS_E_SC1;
+
+%----------------------------------------
+%---------- Plots
+%----------------------------------------
+
+Create XYPlot QvsDays_E;
+GMAT QvsDays_E.SolverIterations = Current;
+GMAT QvsDays_E.IndVar = MMS_E_SC1.ElapsedDays;
+GMAT QvsDays_E.Add = {Q_E};
+GMAT QvsDays_E.Grid = On;
+GMAT QvsDays_E.ShowPlot = true;
+
+Create XYPlot SideLengthvsDays_E;
+GMAT SideLengthvsDays_E.SolverIterations = Current;
+GMAT SideLengthvsDays_E.IndVar = MMS_E_SC1.ElapsedDays;
+GMAT SideLengthvsDays_E.Add = {sideLength12_E, sideLength13_E, sideLength14_E, sideLength24_E, sideLength23_E, sideLength34_E};
+GMAT SideLengthvsDays_E.Grid = On;
+GMAT SideLengthvsDays_E.ShowPlot = true;
+
+Create ReportFile Data;
+GMAT Data.SolverIterations = Current;
+GMAT Data.Filename = 'Ex_MMSFormation.report';
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.LeftJustify = On;
+GMAT Data.ZeroFill = Off;
+GMAT Data.ColumnWidth = 20;
+
+Create OpenGLPlot OpenGLPlot1;
+GMAT OpenGLPlot1.SolverIterations = Current;
+GMAT OpenGLPlot1.Add = {MMS_E_SC2, MMS_E_SC3, MMS_E_SC4};
+GMAT OpenGLPlot1.OrbitColor = [ 1056964863 255 255 ];
+GMAT OpenGLPlot1.TargetColor = [ 4227327 4227327 4227327 ];
+GMAT OpenGLPlot1.CoordinateSystem = MMS1VNB;
+GMAT OpenGLPlot1.ViewPointReference = MMS_E_SC1;
+GMAT OpenGLPlot1.ViewPointVector = [ 1000 1000 1000 ];
+GMAT OpenGLPlot1.ViewDirection = MMS_E_SC1;
+GMAT OpenGLPlot1.ViewScaleFactor = 1;
+GMAT OpenGLPlot1.ViewUpCoordinateSystem = MMS1VNB;
+GMAT OpenGLPlot1.ViewUpAxis = Z;
+GMAT OpenGLPlot1.CelestialPlane = Off;
+GMAT OpenGLPlot1.XYPlane = Off;
+GMAT OpenGLPlot1.WireFrame = Off;
+GMAT OpenGLPlot1.Axes = On;
+GMAT OpenGLPlot1.Grid = Off;
+GMAT OpenGLPlot1.SunLine = Off;
+GMAT OpenGLPlot1.UseInitialView = On;
+GMAT OpenGLPlot1.DataCollectFrequency = 1;
+GMAT OpenGLPlot1.UpdatePlotFrequency = 50;
+GMAT OpenGLPlot1.NumPointsToRedraw = 500;
+GMAT OpenGLPlot1.ShowPlot = true;
+
+Create OpenGLPlot OpenGLPlot2;
+GMAT OpenGLPlot2.SolverIterations = Current;
+GMAT OpenGLPlot2.Add = {MMS_E_SC1, Earth};
+GMAT OpenGLPlot2.OrbitColor = [ 255 32768 ];
+GMAT OpenGLPlot2.TargetColor = [ 8421440 0 ];
+GMAT OpenGLPlot2.CoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot2.ViewPointReference = Earth;
+GMAT OpenGLPlot2.ViewPointVector = [ 30000 30000 30000 ];
+GMAT OpenGLPlot2.ViewDirection = Earth;
+GMAT OpenGLPlot2.ViewScaleFactor = 3;
+GMAT OpenGLPlot2.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot2.ViewUpAxis = Z;
+GMAT OpenGLPlot2.CelestialPlane = Off;
+GMAT OpenGLPlot2.XYPlane = Off;
+GMAT OpenGLPlot2.WireFrame = Off;
+GMAT OpenGLPlot2.Axes = On;
+GMAT OpenGLPlot2.Grid = Off;
+GMAT OpenGLPlot2.SunLine = Off;
+GMAT OpenGLPlot2.UseInitialView = On;
+GMAT OpenGLPlot2.DataCollectFrequency = 1;
+GMAT OpenGLPlot2.UpdatePlotFrequency = 50;
+GMAT OpenGLPlot2.NumPointsToRedraw = 0;
+GMAT OpenGLPlot2.ShowPlot = true;
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence
+
+BeginScript
+   % Set the initial state of the MMS formation
+   
+   GMAT FormSize = 400;
+   GMAT MMS_E_SC1.SMA = 42095.7;
+   GMAT MMS_E_SC1.ECC = 0.81818;
+   GMAT MMS_E_SC1.INC = 27.8;
+   GMAT MMS_E_SC1.RAAN = 0;
+   GMAT MMS_E_SC1.AOP = 15.000001;
+   GMAT MMS_E_SC1.TA = 180;
+   
+   GMAT MMS_E_SC2.SMA = 42095.7;
+   GMAT MMS_E_SC2.ECC = 0.8125316;
+   GMAT MMS_E_SC2.INC = 27.809327;
+   GMAT MMS_E_SC2.RAAN = 359.98896;
+   GMAT MMS_E_SC2.AOP = 15.298854;
+   GMAT MMS_E_SC2.TA = 179.87707;
+   
+   GMAT MMS_E_SC3.SMA = 42095.7;
+   GMAT MMS_E_SC3.ECC = 0.81256647;
+   GMAT MMS_E_SC3.INC = 27.841923;
+   GMAT MMS_E_SC3.RAAN = 359.65878;
+   GMAT MMS_E_SC3.AOP = 15.122691;
+   GMAT MMS_E_SC3.TA = 180.07207;
+   
+   GMAT MMS_E_SC4.SMA = 42095.7;
+   GMAT MMS_E_SC4.ECC = 0.8127262;
+   GMAT MMS_E_SC4.INC = 27.772116;
+   GMAT MMS_E_SC4.RAAN = 0.4213339;
+   GMAT MMS_E_SC4.AOP = 14.485717;
+   GMAT MMS_E_SC4.TA = 180.05801;
+   
+   
+   GMAT InitialJD = MMS_E_SC1.UTCModJulian;
+   
+EndScript;
+
+
+% Propagate S/C based on integrator step size
+GMAT CountDays = 0;
+GMAT InitialJD4loop = MMS_E_SC1.UTCModJulian;
+Report Data CountDays Q_E sideLength12_E sideLength13_E sideLength14_E sideLength23_E sideLength24_E sideLength34_E;
+GMAT Data.WriteHeaders = Off;
+While CountDays < 2
+   
+   GMAT CountDays = MMS_E_SC1.UTCModJulian - InitialJD4loop;
+   
+   Propagate MMS_Prop(MMS_E_SC1, MMS_E_SC2, MMS_E_SC3, MMS_E_SC4);
+   
+   %----------------------------------------
+   %---------- Side Length and Quality Factor Calculation
+   %----------------------------------------            
+   % Call GMAT Function
+   
+   
+   
+   %----- Define position vectors of spacecraft
+   GMAT posVec1(1, 1) = MMS_E_SC1.X;
+   GMAT posVec1(2, 1) = MMS_E_SC1.Y;
+   GMAT posVec1(3, 1) = MMS_E_SC1.Z;
+   GMAT posVec2(1, 1) = MMS_E_SC2.X;
+   GMAT posVec2(2, 1) = MMS_E_SC2.Y;
+   GMAT posVec2(3, 1) = MMS_E_SC2.Z;
+   GMAT posVec3(1, 1) = MMS_E_SC3.X;
+   GMAT posVec3(2, 1) = MMS_E_SC3.Y;
+   GMAT posVec3(3, 1) = MMS_E_SC3.Z;
+   GMAT posVec4(1, 1) = MMS_E_SC4.X;
+   GMAT posVec4(2, 1) = MMS_E_SC4.Y;
+   GMAT posVec4(3, 1) = MMS_E_SC4.Z;
+   
+   
+   %----- Calculate relative position data
+   GMAT relPosVec1 = posVec1 - posVec2;
+   GMAT relPosVec2 = posVec1 - posVec3;
+   GMAT relPosVec3 = posVec1 - posVec4;
+   GMAT relPosVec4 = posVec2 - posVec3;
+   GMAT relPosVec5 = posVec2 - posVec4;
+   GMAT relPosVec6 = posVec3 - posVec4;
+   
+   
+   %----- Calculate the side lengths
+   GMAT sideLength1 = norm(relPosVec1);
+   GMAT sideLength2 = norm(relPosVec2);
+   GMAT sideLength3 = norm(relPosVec3);
+   GMAT sideLength4 = norm(relPosVec4);
+   GMAT sideLength5 = norm(relPosVec5);
+   GMAT sideLength6 = norm(relPosVec6);
+   
+   
+   %----- Define size constants for size portion of the quality factor
+   If FormSize == 10
+      GMAT sizeConstant1 = 4;
+      GMAT sizeConstant2 = 6;
+      GMAT sizeConstant3 = 18;
+      GMAT sizeConstant4 = 25;
+   EndIf;
+   
+   If FormSize == 25
+      GMAT sizeConstant1 = 15;
+      GMAT sizeConstant2 = 20;
+      GMAT sizeConstant3 = 35;
+      GMAT sizeConstant4 = 40;
+   EndIf;
+   
+   If FormSize == 30
+      GMAT sizeConstant1 = 19.3125;
+      GMAT sizeConstant2 = 23.1500;
+      GMAT sizeConstant3 = 42.0750;
+      GMAT sizeConstant4 = 49.4750;
+   EndIf;
+   
+   If FormSize == 40
+      GMAT sizeConstant1 = 25;
+      GMAT sizeConstant2 = 30;
+      GMAT sizeConstant3 = 55;
+      GMAT sizeConstant4 = 65;
+   EndIf;
+   
+   If FormSize == 60
+      GMAT sizeConstant1 = 45;
+      GMAT sizeConstant2 = 50;
+      GMAT sizeConstant3 = 75;
+      GMAT sizeConstant4 = 80;
+   EndIf;
+   
+   If FormSize == 160
+      GMAT sizeConstant1 = 135;
+      GMAT sizeConstant2 = 140;
+      GMAT sizeConstant3 = 190;
+      GMAT sizeConstant4 = 210;
+   EndIf;
+   
+   If FormSize == 400
+      GMAT sizeConstant1 = 250;
+      GMAT sizeConstant2 = 300;
+      GMAT sizeConstant3 = 550;
+      GMAT sizeConstant4 = 600;
+   EndIf;
+   
+   
+   %----- Calculate actual volume
+   GMAT rp2_cross_rp3(1,1) = relPosVec2(2,1)*relPosVec3(3,1)-relPosVec2(3,1)*relPosVec3(2,1);
+   GMAT rp2_cross_rp3(2,1) = relPosVec2(3,1)*relPosVec3(1,1)-relPosVec2(1,1)*relPosVec3(3,1);
+   GMAT rp2_cross_rp3(3,1) = relPosVec2(1,1)*relPosVec3(2,1)-relPosVec2(2,1)*relPosVec3(1,1);
+   GMAT prod(1,1) = relPosVec1(1,1)*rp2_cross_rp3(1,1) + relPosVec1(2,1)*rp2_cross_rp3(2,1) + relPosVec1(3,1)*rp2_cross_rp3(3,1);
+   GMAT volumeActual = norm(prod)/6;
+   
+   
+   %----- Average Side Length and ideal volume
+   GMAT avgL = (sideLength1 + sideLength2 + sideLength3 + sideLength4 + sideLength5 + sideLength6) / 6;
+   GMAT volumeDesired = sqrt(2)/12*avgL^3;
+   
+   
+   %----- QFvol, the volume portion of the quality factor
+   GMAT QFvol = volumeActual/volumeDesired;
+   
+   
+   %----- QFsize, the size portion of the quality factor
+   If avgL < sizeConstant1
+      GMAT QFsize = 0;
+   EndIf;
+   If sizeConstant1 <= avgL & avgL <= sizeConstant2
+      GMAT QFsize = (avgL-sizeConstant1)^2*(avgL+sizeConstant1-2*sizeConstant2)^2/(sizeConstant2-sizeConstant1)^4;
+   EndIf;
+   If sizeConstant2 <= avgL & avgL <= sizeConstant3
+      GMAT QFsize = 1;
+   EndIf;
+   If sizeConstant3 <= avgL & avgL <= sizeConstant4
+      GMAT QFsize = (avgL - sizeConstant4)^2*(avgL - 2*sizeConstant3+sizeConstant4)^2/(sizeConstant4-sizeConstant3)^4;
+   EndIf;
+   If avgL > sizeConstant4
+      GMAT QFsize = 0;
+   EndIf;
+   
+   If MMS_E_SC1.TA > 160 & MMS_E_SC1.TA < 200
+      PenDown QvsDays_E
+   Else
+      PenUp QvsDays_E
+   EndIf
+   
+   %-----  The total quality factor
+   GMAT Q_E = QFvol*QFsize;
+   GMAT sideLength12_E = sideLength1;
+   GMAT sideLength13_E = sideLength2;
+   GMAT sideLength14_E = sideLength3;
+   GMAT sideLength23_E = sideLength4;
+   GMAT sideLength24_E = sideLength5;
+   GMAT sideLength34_E = sideLength6;
+   
+   Report Data CountDays Q_E sideLength12_E sideLength13_E sideLength14_E sideLength23_E sideLength24_E sideLength34_E;
+
+EndWhile;

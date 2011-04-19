@@ -1,0 +1,165 @@
+%  Script Mission - Hohmann Transfer Example
+%
+%  This script demonstrates how to target a Hohmann Transfer
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft DefaultSC;
+GMAT DefaultSC.DateFormat = TAIModJulian;
+GMAT DefaultSC.Epoch = 21545;
+GMAT DefaultSC.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultSC.DisplayStateType = Cartesian;
+GMAT DefaultSC.X = 7100;
+GMAT DefaultSC.Y = 0;
+GMAT DefaultSC.Z = 1300;
+GMAT DefaultSC.VX = 0;
+GMAT DefaultSC.VY = 7.3499999999999996;
+GMAT DefaultSC.VZ = 1;
+GMAT DefaultSC.DryMass = 850;
+GMAT DefaultSC.Cd = 2.2;
+GMAT DefaultSC.Cr = 1.8;
+GMAT DefaultSC.DragArea = 15;
+GMAT DefaultSC.SRPArea = 1;
+
+%----------------------------------------
+%---------- ForceModels and Propagators
+%----------------------------------------
+
+Create ForceModel DefaultProp_ForceModel;
+GMAT DefaultProp_ForceModel.CentralBody = Earth;
+GMAT DefaultProp_ForceModel.PointMasses = {Earth};
+GMAT DefaultProp_ForceModel.Drag = None;
+GMAT DefaultProp_ForceModel.SRP = Off;
+GMAT DefaultProp_ForceModel.ErrorControl = RSSStep;
+
+
+Create Propagator DefaultProp;
+GMAT DefaultProp.FM = DefaultProp_ForceModel;
+GMAT DefaultProp.Type = RungeKutta89;
+GMAT DefaultProp.InitialStepSize = 120;
+GMAT DefaultProp.Accuracy = 9.9999999999999994e-012;
+GMAT DefaultProp.MinStep = 0.001;
+GMAT DefaultProp.MaxStep = 2700;
+GMAT DefaultProp.MaxStepAttempts = 50;
+
+%----------------------------------------
+%---------- Burns
+%----------------------------------------
+
+Create ImpulsiveBurn TOI;
+GMAT TOI.Axes = VNB;
+GMAT TOI.Element1 = 0.0001;
+GMAT TOI.Element2 = 0;
+GMAT TOI.Element3 = 0;
+
+
+Create ImpulsiveBurn GOI;
+GMAT GOI.Axes = VNB;
+GMAT GOI.Element1 = 0;
+GMAT GOI.Element2 = 0;
+GMAT GOI.Element3 = 0;
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+Create DifferentialCorrector DC;
+GMAT DC.ShowProgress = true;
+GMAT DC.ReportStyle = Normal;
+GMAT DC.TargeterTextFile = targeter_DefaultDC.data;
+GMAT DC.MaximumIterations = 25;
+GMAT DC.UseCentralDifferences = false;
+
+%----------------------------------------
+%---------- Coordinate Systems
+%----------------------------------------
+
+Create CoordinateSystem EarthMJ2000Eq;
+GMAT EarthMJ2000Eq.Origin = Earth;
+GMAT EarthMJ2000Eq.Axes = MJ2000Eq;
+GMAT EarthMJ2000Eq.UpdateInterval = 60;
+GMAT EarthMJ2000Eq.OverrideOriginInterval = false;
+GMAT EarthMJ2000Eq.Epoch = 21545;
+
+
+Create CoordinateSystem EarthMJ2000Ec;
+GMAT EarthMJ2000Ec.Origin = Earth;
+GMAT EarthMJ2000Ec.Axes = MJ2000Ec;
+GMAT EarthMJ2000Ec.UpdateInterval = 60;
+GMAT EarthMJ2000Ec.OverrideOriginInterval = false;
+GMAT EarthMJ2000Ec.Epoch = 21545;
+
+
+Create CoordinateSystem EarthFixed;
+GMAT EarthFixed.Origin = Earth;
+GMAT EarthFixed.Axes = BodyFixed;
+GMAT EarthFixed.UpdateInterval = 60;
+GMAT EarthFixed.OverrideOriginInterval = false;
+GMAT EarthFixed.Epoch = 21545;
+
+%----------------------------------------
+%---------- Plots/Reports
+%----------------------------------------
+
+Create OpenGLPlot OpenGLPlot1;
+GMAT OpenGLPlot1.Add = {Earth, DefaultSC};
+GMAT OpenGLPlot1.CoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot1.ViewPointReference = Earth;
+GMAT OpenGLPlot1.ViewDirection = Earth;
+GMAT OpenGLPlot1.ViewScaleFactor = 4;
+GMAT OpenGLPlot1.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT OpenGLPlot1.ViewUpAxis = X;
+
+Create ReportFile Data;
+GMAT Data.Filename = Ex_HohmannTransfer.report;
+GMAT Data.Precision = 16;
+GMAT Data.WriteHeaders = Off;
+GMAT Data.ColumnWidth = 20;
+
+
+%----------------------------------------
+%---------- Mission Sequence
+%----------------------------------------
+BeginMissionSequence
+% Propagate orbit for specified duration
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+GMAT Data.WriteHeaders = Off;
+Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedSecs = 86400});
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Propagate orbit to the next Periapsis point
+Propagate DefaultProp(DefaultSC, {DefaultSC.Periapsis});
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Burn in the velocity direction to reach an alternate Apoapsis point
+Target DC;
+   Vary DC(TOI.Element1 = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0, Upper = 3.14159});
+   Maneuver TOI(DefaultSC);
+   Propagate DefaultProp(DefaultSC, {DefaultSC.Apoapsis});
+   Achieve DC(DefaultSC.Earth.RMAG = 42165, {Tolerance = 0.1});
+EndTarget;  % For targeter DC
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Propagate orbit to the next Periapsis point
+Propagate DefaultProp(DefaultSC, {DefaultSC.Periapsis});
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Propagate orbit to the next Apoapsis point
+Propagate DefaultProp(DefaultSC, {DefaultSC.Apoapsis});
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Burn in the velocity direction to reach an alternate Periapsis point
+Target DC;
+   Vary DC(TOI.Element1 = 0.5, {Perturbation = 0.0001, MaxStep = 0.2, Lower = 0, Upper = 3.14159});
+   Maneuver TOI(DefaultSC);
+   Propagate DefaultProp(DefaultSC, {DefaultSC.Periapsis});
+   Achieve DC(DefaultSC.Earth.SMA = 42165, {Tolerance = 0.1});
+EndTarget;  % For targeter DC
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
+
+% Propagate orbit for specified duration
+Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedSecs = 86400}); 
+Report Data DefaultSC.A1ModJulian DefaultSC.X DefaultSC.Y DefaultSC.Z DefaultSC.VX DefaultSC.VY DefaultSC.VZ;
