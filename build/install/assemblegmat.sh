@@ -9,24 +9,56 @@
 # Unresolved questions:
 #   Are we supplying an empty plugins/proprietary folder?
 
+# Initializations
+WINDOWS=false
+MAC=false
+LINUX=false
+
+usage() {
+    echo "Usage:"
+    echo "  $0 win <buildname>"
+    echo "  $0 lin"
+    echo "  $0 mac"
+}
+
 # File sources
 sfrepo='https://gmat.svn.sourceforge.net/svnroot/gmat'
 apppath=$sfrepo/trunk/application
-winbuildspath='//mesa-file/595/GMAT/Builds/windows'
-winbuildname=2011-04-15
 
-# usage
-if [ -z "$1" ]
+# Platform selection
+if [ "$1" == 'win' ]
 then
-    echo "Usage: $0 win|lin|mac"
+    if [ -z "$2" ]
+    then
+        usage
+        exit 1
+    else
+        WINDOWS=true
+        winbuildname="$2"
+    fi
+elif [ "$1" == 'lin' ]
+then
+    LINUX=true
+elif [ "$1" == 'mac' ]
+then
+    MAC=true
+else
+    usage
     exit 1
 fi
     
 # bin, data, matlab
 svn export --force $apppath gmat
 
-if [ $1 == 'win' ]
+# output (empty)
+mkdir -p gmat/output
+
+# Platform-dependent stuff
+if $WINDOWS
 then
+    # File locations
+    winbuildspath='//mesa-file/595/GMAT/Builds/windows'
+    
     # bin (Windows)
     cp -prv \
         $winbuildspath/$winbuildname/GMAT.exe \
@@ -56,12 +88,15 @@ then
     cp -prv \
         $winbuildspath/help \
         gmat/docs
-        
-elif [ $1 == 'lin' ]
-then
-    echo 'Linux not implemented'
     
-elif [ $1 == 'mac' ]
+    # Remove Thumbs.db hidden files
+    find gmat -iname thumbs.db -delete
+    
+elif $LINUX
 then
-    echo 'Mac not implemented'
+    echo 'Linux-specific files not implemented'
+    
+elif $MAC
+then
+    echo 'Mac-specific files not implemented'
 fi
