@@ -64,10 +64,10 @@ data/                                   source: <SF repo>/trunk/application/
 
 docs/
     GMATAcceptanceTestPlan.pdf          source: ?
-    GMATArchitecturalSpec.pdf           source: <Jazz repo>/trunk/doc/SystemDocs/
+    GMATArchitecturalSpec.pdf           source: ?
     GMATCompilerSetup.pdf               source: ?
     GMATInputRangeTestPlan.pdf          source: ?
-    GMATMathSpec.pdf                    source: <Jazz repo>/trunk/doc/SystemDocs/
+    GMATMathSpec.pdf                    source: ?
     GMATMissionStatement.pdf            source: ?
     GMATProductBrochure.pdf             source: ?
     GMATQuickTables.pdf                 source: ?
@@ -100,10 +100,10 @@ plugins/ (Linux)
     proprietary/
         <empty>
 
-samples/                                source: ?
+samples/                                source: <SF repo>/trunk/application/
     *
 
-userfunctions/                          source: ?
+userfunctions/                          source: <SF repo>/trunk/application/
     *
 
 License.txt                             source: <SF repo>/trunk/application/
