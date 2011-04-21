@@ -5,9 +5,6 @@
 # where files are located.
 #
 # Usage: assemblegmat.sh win|linux|mac
-#
-# Unresolved questions:
-#   Are we supplying an empty plugins/proprietary folder?
 
 # Initializations
 WINDOWS=false
@@ -76,7 +73,7 @@ then
         gmat/bin
 
     # plugins (Windows)
-    mkdir -p gmat/plugins
+    mkdir -p gmat/plugins/proprietary
     cp -prv \
         $winbuildspath/$winbuildname/libFminconOptimizer.dll \
         $winbuildspath/$winbuildname/libGmatEstimation.dll \
