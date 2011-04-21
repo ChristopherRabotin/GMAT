@@ -66,10 +66,10 @@ then
 
     # bin (Windows)
     cp -prv \
-        $winbuildspath/gcc_lib/wx2.8.11/* \
+        $winbuildspath/gcc_lib/wx2.8.11/*.dll \
         gmat/bin
     cp -prv \
-        $winbuildspath/gcc_lib/other/* \
+        $winbuildspath/gcc_lib/other/*.dll \
         gmat/bin
 
     # plugins (Windows)
@@ -79,14 +79,8 @@ then
         $winbuildspath/$winbuildname/libGmatEstimation.dll \
         $winbuildspath/$winbuildname/libMatlabInterface.dll \
         gmat/plugins
-    
-    # docs
-    mkdir -p gmat/docs
-    cp -prv \
-        $winbuildspath/help \
-        gmat/docs
-    
-    # Remove Thumbs.db hidden files
+
+    # Remove Windows hidden files
     find gmat -iname thumbs.db -delete
     
 elif $LINUX
