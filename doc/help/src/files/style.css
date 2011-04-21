@@ -15,6 +15,10 @@ h1, h2, h3, h4, h5 {
     border-collapse: collapse;
 }
 
+div.variablelist table tbody tr td {
+    vertical-align: top;
+}
+
 div.variablelist table tbody tr td p {
     margin-bottom: 0px;
 }
