@@ -1,0 +1,153 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>OpenGLPlot</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL-NS Stylesheets V1.76.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="rn01.html" title="Resources"><link rel="prev" href="MATLABFunction.html" title="MATLABFunction"><link rel="next" href="Propagator.html" title="Propagator"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">OpenGLPlot</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="MATLABFunction.html">Prev</a>&nbsp;</td><th align="center" width="60%">Resources</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Propagator.html">Next</a></td></tr></table><hr></div><div class="refentry" title="OpenGLPlot"><a name="OpenGLPlot"></a><div class="titlepage"></div><div class="refnamediv"><h2><span class="refentrytitle">OpenGLPlot</span></h2><p>OpenGL Plot &mdash; A OpenGL Plot.</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><pre class="synopsis">Create OpenGLPlot <em class="replaceable"><code>name</code></em>
+<em class="replaceable"><code>name</code></em>.<em class="replaceable"><code>field</code></em> = <em class="replaceable"><code>value</code></em>
+&#133;</pre></div><div class="refsection" title="Description"><a name="N11642"></a><h2>Description</h2><p>Without OpenGL Plots, you would have no way of visualizing your
+    spacecraft as it traveled along its trajectory. OpenGL Plots also have a
+    multitude of options that allow you to customize your view of the
+    spacecraft. This makes these types of plots very useful and in most cases
+    necessary to using GMAT.</p></div><div class="refsection" title="Fields"><a name="N11647"></a><h2>Fields</h2><div class="refsection" title="Fields Associated with Plot Options"><a name="N1164A"></a><h3>Fields Associated with Plot Options</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">DataCollectFrequency</span></p></td><td><p>The DataCollectFrequency field allows the user to
+            define how data is collected for plotting. It is often inefficient
+            to draw every ephemeris point associated with a trajectory. Often,
+            drawing a smaller subset of the data still results in smooth
+            trajectory plots, while executing more quickly. The
+            DataCollectFrequency is an integer that represents how often to
+            collect data and store for plotting. If DataCollectFrequency is
+            set to 10, then Data is collected every 10 integration
+            steps.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Integer &ge; 1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Integration Steps</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">UpdatePlotFrequency</span></p></td><td><p>The UpdatePlotFrequency field allows the user to
+            specify how often to update an OpenGL plot is updated with new
+            data collected during the process of propagating spacecraft and
+            running a mission. Data is collected for a plot according the
+            value defined by DataCollectFrequency. An OpenGL plot is updated
+            with the new data, according to the value set in
+            UpdatePlotFrequency. If UpdatePlotFrequency is set to 10 and
+            DataCollectFrequency is set to 2, then the plot is updated with
+            new data every 20 (10*2) integration steps.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>50</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Integer &ge; 1</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Integration Steps</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">NumPointsToRedraw</span></p></td><td><p>When NumPointsToRedraw is set to zero, all
+            ephemeris points are drawn. When NumPointsToRedraw is set to a
+            positive integer, say 10 for example, only the last 10 collected
+            data points are drawn. See DataCollectFrequency for explanation of
+            how data is collected for an OpenGL plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>0</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Integer &ge; 0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Integration Steps</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ShowPlot</span></p></td><td><p>The ShowPlot field allows the user to turn off a
+            plot for a particular run, without deleting the plot object, or
+            removing it from the script. If you select true, then the plot
+            will be shown. If you select false, then the plot will not be
+            shown.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>true</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>true , false</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Fields Associated with Viewed Objects"><a name="N116B6"></a><h3>Fields Associated with Viewed Objects</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Add</span></p></td><td><p>The Add subfield adds a spacecraft,celestial body,
+            libration point,or barycenter to a plot. When creating a plot the
+            Earth is added as a default body and may be removed by using the
+            Remove command. The user can add a spacecraft, celestial body,
+            libration point, or barycenter to a plot by using the name used to
+            create the object. The GUI's Selected field is the equivalent of
+            the script's Add field. In the event of no Add command or no
+            objects in the Selected field, GMAT should run without the OpenGL
+            plot and a warning message displayed in the message window. The
+            following warning message is sufficient: OpenGL plot will be
+            turned off. No object has been selected for plotting.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>DefaultSC, Earth</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>SpacecraftName CelestialBodyName LibrationPointName BarycenterName</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Remove</span></p></td><td><p>The Remove subfield
+            removes a spacecraft,celestial body, libration point, or
+            barycenter from a plot. The user can remove any object that has
+            been added to a plot by using the name used to add the
+            object.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>No Default</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Any object included in the Add list</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Fields Associated with Drawing Options"><a name="N116EE"></a><h3>Fields Associated with Drawing Options</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">WireFrame</span></p></td><td><p>When the WireFrame field is set to On, celestial
+            bodies are drawn using a wireframe model. When the WireFrame field
+            is set to Off, then celestial bodies are drawn using a full
+            map.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">EclipticPlane</span></p></td><td><p>The EclipticPlane field allows
+            the user to tell GMAT to draw a grid representing the ecliptic
+            plane in an OpenGL plot. Note, the ecliptic plane can currently
+            only be drawn for plots whose coordinate system uses the MJ2000Eq
+            axis system.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off  Note:
+            Only allowed for OpenGL plots with Coordinate Systems that use the
+            MJ2000Eq axis system</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">XYPlane</span></p></td><td><p>The XYPlane flag allows the user to tell GMAT to draw a grid
+            representing the XY-plane of the coordinate system selected under
+            the CoordinateSystem field of the OpenGL plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Axes</span></p></td><td><p>The Axis flag allows the user to tell GMAT to draw the
+            Cartesian axis system associated with the coordinate system
+            selected under the CoordinateSystem field of an OpenGL
+            plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Grid</span></p></td><td><p>The Grid flag allows the user to tell GMAT to draw a grid
+            representing the longitude and latitude lines celestial bodies
+            added to an OpenGL plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">EarthSunLines</span></p></td><td><p>The EarthSunLines allows the user to tell GMAT to draw a
+            line that starts at the center of Earth and points towards the
+            Sun.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">SolverIterations</span></p></td><td><p>The SolverIterations field determines whether or
+            not perturbed trajectories are plotted during a solver (Targeter,
+            Optimize) sequence. When SolverIterations is set to On, solver
+            iterations are shown on the plot. When SolverIterations is Off,
+            the solver iterations are not shown on the plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Off</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Fields Associated with View Definition"><a name="N117A8"></a><h3>Fields Associated with View Definition</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">CoordinateSystem</span></p></td><td><p>The
+            CoordinateSystem field on an OpenGL plot allows the user to select
+            which coordinate system to use to draw the plot data. A coordinate
+            system is defined as an origin and an axis system, and the
+            CoordinateSystem field allows the user to determine the origin and
+            axis system of an OpenGL plot. See the CoordinateSystem object
+            fields for information of defining different types of coordinate
+            systems.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>EarthMJ2000Eq</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Any
+            default or user defined coordinate system</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ViewPointReference</span></p></td><td><p>The ViewPointReference field
+            is an optional field that allows the user to change the reference
+            point from which ViewPointVector is measured. ViewPointReference}
+            defaults to the origin of the coordinate system for the plot. A
+            ViewPointReference can be any spacecraft, celestial body,
+            libration point, or barycenter.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Earth</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>SpacecraftName, CelestialBodyName, LibrationPointName, BarycenterName, or a 3-vector
+            of numerical values</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ViewPointVector</span></p></td><td><p>The product of ViewScaleFactor and ViewPointVector field
+            determines the view point location with respect to
+            ViewPointReference. ViewPointVector can be a vector, or any of the
+            following objects: spacecraft,celestial body, libration point,or
+            barycenter. The location of the Viewpoint in three-space is
+            defined as the vector addition of ViewPointReference, and the
+            vector defined by product of ViewScaleFactor and ViewPointVector
+            in the coordinate system chosen by the user.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>[0 0 30000]</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>SpacecraftName, CelestialBodyName, LibrationPointName,
+            BarycenterName, or a 3-vector of numerical values</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km or N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ViewScaleFactor</span></p></td><td><p>The ViewScaleFactor field scales ViewPointVector
+            before adding it to ViewPointReference. The ViewScaleFactor allows
+            the user to back away from an object to fit in the field of
+            view.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Real Number &ge; 0</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ViewDirection</span></p></td><td><p>The ViewDirection field allows
+            the user to select the direction of view in an OpenGL plot. The
+            user can specify the view direction by choosing an object to point
+            at such as a spacecraft,celestial body, libration point,or
+            barycenter. Alternatively, the user can specify a vector of the
+            form [x y z]. If the user specification of ViewDirection,
+            ViewPointReference, and ViewPointVector, results in a zero vector,
+            GMAT uses [0 0 10000] for ViewDirection.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Earth</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>SpacecraftName, CelestialBodyName, LibrationPointName, BarycenterName, or a 3-vector
+            of numerical values</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>km or N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Fields Associated with View Options"><a name="N1182E"></a><h3>Fields Associated with View Options</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">UseInitialView</span></p></td><td><p>The UseInitialView field allows the user to control the view
+            of an OpenGL plot between multiple runs of a mission sequence. The
+            first time a specific OpenGL plot is created, GMAT will
+            automatically use the view as defined by the fields associated
+            with View Definition, View Up Direction, and Field of View.
+            However, if the user changes the view using the mouse, GMAT will
+            retain this view upon rerunning the mission if UseInitialView is
+            set to false. If UseInitialView is set to true, the view for an
+            OpenGL plot will be returned to the view defined by the initial
+            settings.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>On</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>On , Off</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Fields Associated with View Up Definition"><a name="N1184C"></a><h3>Fields Associated with View Up Definition</h3><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">ViewUpCoordinate System</span></p></td><td><p>The
+            ViewUpCoordinateSystem and ViewUpAxis fields are used to determine
+            which direction appears as up in an OpenGL plot and together with
+            the fields associated the the View Direction, uniquely define the
+            view. The fields associated with the View Definition allow the
+            user to define the point of view in 3-space, and the direction of
+            the line of sight. However, this information alone is not enough
+            to uniquely define the view. We also must provide how the view is
+            oriented about the line of sight. This is accomplished by defining
+            what direction should appear as the up direction in the plot and
+            is configured using the ViewUpCoordinateSystem field and the
+            ViewUpAxis field. The ViewUpCoordinateSystem allows the user to
+            select a coordinate system to define the up direction. Most of the
+            time this system will be the same as the coordinate system chosen
+            under the CoordinateSystem field.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>EarthMJ2000Eq</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Any default or user defined coordinate system</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">ViewUpAxis</span></p></td><td><p>The ViewUpAxis allows the user to define
+            which axis of the ViewUpCoordinateSystem that will appear as the
+            up direction in an OpenGL plot. See the comments under
+            ViewUpCoordinateSystem for more details of fields used to
+            determine the up direction in an OpenGL plot.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>Z</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>X , -X , Y , -Y , Z , -Z</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>N/A</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div></div><div class="refsection" title="Interactions"><a name="N11884"></a><h2>Interactions</h2><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Spacecraft</span></p></td><td><p>Any spacecraft in your mission is available to the OpenGL
+            Plot for display</p></td></tr><tr><td><p><span class="term">Solar System</span></p></td><td><p>The Sun and all of the Planets may be plotted or referenced
+            in the OpenGL Plot</p><p>If you add any Barrycenters or Libration Points, they will
+            also be available for plotting and reference</p></td></tr><tr><td><p><span class="term">Coordinate Systems</span></p></td><td><p>Both View Definition and View Up Definition may use the
+            three default or user added coordinate systems</p></td></tr></tbody></table></div></div><div class="refsection" title="Examples"><a name="N1189C"></a><h2>Examples</h2><pre class="programlisting"><code class="code">Create OpenGLPlot DefaultOpenGL;
+GMAT DefaultOpenGL.SolverIterations = Current;
+GMAT DefaultOpenGL.Add = {DefaultSC, Earth};
+GMAT DefaultOpenGL.OrbitColor = [ 255 32768 ];
+GMAT DefaultOpenGL.TargetColor = [ 8421440 0 ];
+GMAT DefaultOpenGL.CoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultOpenGL.ViewPointReference = Earth;
+GMAT DefaultOpenGL.ViewPointVector = [ 0 0 30000 ];
+GMAT DefaultOpenGL.ViewDirection = Earth;
+GMAT DefaultOpenGL.ViewScaleFactor = 1;
+GMAT DefaultOpenGL.ViewUpCoordinateSystem = EarthMJ2000Eq;
+GMAT DefaultOpenGL.ViewUpAxis = Z;
+GMAT DefaultOpenGL.CelestialPlane = Off;
+GMAT DefaultOpenGL.XYPlane = On;
+GMAT DefaultOpenGL.WireFrame = Off;
+GMAT DefaultOpenGL.Axes = On;
+GMAT DefaultOpenGL.Grid = Off;
+GMAT DefaultOpenGL.SunLine = Off;
+GMAT DefaultOpenGL.UseInitialView = On;
+GMAT DefaultOpenGL.DataCollectFrequency = 1;
+GMAT DefaultOpenGL.UpdatePlotFrequency = 50;
+GMAT DefaultOpenGL.NumPointsToRedraw = 0;
+GMAT DefaultOpenGL.ShowPlot = true;</code></pre></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="MATLABFunction.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="rn01.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Propagator.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">MATLABFunction&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Propagator</td></tr></table></div></body></html>

@@ -1,0 +1,65 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Propagate</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL-NS Stylesheets V1.76.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="rn02.html" title="Commands"><link rel="prev" href="PenDown.html" title="PenDown"><link rel="next" href="Report.html" title="Report"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Propagate</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="PenDown.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="Report.html">Next</a></td></tr></table><hr></div><div class="refentry" title="Propagate"><a name="Propagate"></a><div class="titlepage"></div><a name="N12F43" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Propagate</span></h2><p>Propagate &mdash; Perform a propagate command</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><pre class="synopsis"></pre></div><div class="refsection" title="Description"><a name="N12F59"></a><h2>Description</h2><p>The Propagate Command is a very important one and will be covered in
+    this section. Basically, Propagate will take the given spacecraft and,
+    using the Propagat''or'' specified as its guide, make it travel until the
+    given condition is met whether it be a location or something else such as
+    elapsed time.</p></div><div class="refsection" title="Reference Table"><a name="N12F5E"></a><h2>Reference Table</h2><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">BackProp</span></p></td><td><p>The BackProp option allows the user to set the flag to enable
+          or disable backwards propagation for all spacecraft in the SatListN
+          option. The Backward Propagation GUI check box field stores all the
+          data in BackProp. A check indicates backward propagation is enabled
+          and no check indicates forward propagation. In the script, BackProp
+          can be the word Backwards for backward propagation or blank for
+          forward propagation.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Backwards or None</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Mode</span></p></td><td><p>The Mode option allows the user to set the propagation mode
+          for the propagator that will affect all of the spacecraft added to
+          the SatListN option. For example, if synchronized is selected, all
+          spacecraft are propagated at the same step size. The Propagate Mode
+          GUI field stores all the data in Mode. In the script, Mode is left
+          blank for the None option and the text of the other options
+          available is used for their respective modes.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Synchronized or None</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">PropagatorName</span></p></td><td><p>The PropagatorName option allows the user to select a user
+          defined propagator to use in spacecraft and/or formation
+          propagation. The Propagator GUI field stores all the data in
+          PropagatorName.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>DefaultProp</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Default propagator or any user-defined propagator</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">SatListN</span></p></td><td><p>The SatListN option allows the user to enter all the
+          satellites and/or formations they want to propagate using the
+          PropagatorName propagator settings. The Spacecraft List GUI field
+          stores all the data in SatListN.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>DefaultSC</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Any existing spacecraft or formations, not being
+                propagated by another propagator in the same Propagate event.
+                Multiple spacecraft must be expressed in a comma delimited
+                list format.</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">StopCondListN / Parameter</span></p></td><td><p>The StopCondListN option allows the user to enter all the
+          parameters used for the propagator stopping condition. See the
+          StopCondListN/Condition Option/Field for additional details to the
+          StopCondListN option.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>DefaultSC.ElapsedSecs</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Any single element user accessible spacecraft parameter
+                followed by an equal sign</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">StopCondListN / Condition</span></p></td><td><p>The StopCondListN option allows the user to enter the
+          propagator stopping condition's value for the StopCondListN
+          Parameter field.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>8640.0</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Real Number, Array element, Variable, spacecraft
+                parameter, or any user defined parameter</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>Dependant on the condition selected.</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="Examples"><a name="N12FF8"></a><h2>Examples</h2><div class="refsection" title="Script Syntax"><a name="N12FFB"></a><h3>Script Syntax</h3><pre class="programlisting"><code class="code">Propagate Mode BackProp PropagatorName(SatList1,fStopCondList1g) ...
+BackPropPropagatorName (SatListN, {StopCondList})</code></pre></div><div class="refsection" title="Script Examples"><a name="N13001"></a><h3>Script Examples</h3><pre class="programlisting"><code class="code">% Single spacecraft propagation with one stopping condition
+% Syntax #1
+Propagate DefaultProp(DefaultSC, {DefaultSC.ElapsedSecs = 8640.0});
+
+% Single spacecraft propagation with one stopping condition
+% Syntax #2
+Propagate DefaultProp(DefaultSC) {DefaultSC.ElapsedSecs = 8640.0};
+
+% Single spacecraft propagation by one integration step
+Propagate DefaultProp(DefaultSC);
+
+% Multiple spacecraft propagation by one integration step
+Propagate DefaultProp(Sat1, Sat2, Sat3);
+
+% Single formation propagation by one integration step
+Propagate DefaultProp(DefaultFormation);
+
+% Single spacecraft backwards propagation by one integration step
+Propagate Backwards DefaultProp(DefaultSC);
+
+% Two spacecraft synchronized propagation with one stopping condition
+Propagate Synchronized DefaultProp(Sat1, Sat2, {DefaultSC.ElapsedSecs = 8640.0});
+
+% Multiple spacecraft propagation with multiple stopping conditions and propagation settings
+% Syntax #1
+Propagate Prop1(Sat1,Sat2, {Sat1.ElapsedSecs = 8640.0, Sat2.MA = 90}) ...
+Prop2(Sat3, {Sat3.TA = 0.0});
+
+% Multiple spacecraft propagation with multiple stopping conditions and propagation settings
+% Syntax #2
+Propagate Prop1(Sat1,Sat2) {Sat1.ElapsedSecs = 8640.0, Sat2.MA = 90} ...
+Prop2(Sat3), {Sat3.TA = 0.0};</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="PenDown.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="rn02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="Report.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">PenDown&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;Report</td></tr></table></div></body></html>

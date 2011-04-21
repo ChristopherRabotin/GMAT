@@ -1,0 +1,37 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>For</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL-NS Stylesheets V1.76.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="rn02.html" title="Commands"><link rel="prev" href="Equation.html" title="Equation"><link rel="next" href="If.html" title="If"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">For</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="Equation.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="If.html">Next</a></td></tr></table><hr></div><div class="refentry" title="For"><a name="For"></a><div class="titlepage"></div><a name="N12B82" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">For</span></h2><p>For &mdash; Perform a for loop</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><pre class="synopsis"></pre></div><div class="refsection" title="Description"><a name="N12B98"></a><h2>Description</h2><p>The for loop is a control flow statement that allows portions of
+    code to be executed iteratively using an explicit loop variable
+    (Wikipedia). GMAT for loops are three-expression loops that allow the user
+    to set the initial value of the loop variable, its increment, and the test
+    to exit the loop. A parameter must be defined explicitly using a Create
+    Variable statement or GUI equivalent before it can be used in a for loop
+    command statement. The parameters used to define Start, Increment, and End
+    can be any of the following GMAT parameters: numeric literal (real
+    number), variable, array element, object property.</p></div><div class="refsection" title="Interfaces"><a name="N12B9D"></a><h2>Interfaces</h2><p>The GUI for the For Loop command is divided into four
+    sections.</p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>The first section, the index, is where the counter variable name
+        is displayed.</p></li><li class="listitem"><p>The second section, the start, is the number with which the
+        counter variable is first stored with.</p></li><li class="listitem"><p>The third section, the increment, is the value that the counter
+        variable will change by each time the program goes through the
+        loop.</p></li><li class="listitem"><p>The fourth section, the end, is the value of the counter
+        variable when the loop is exited.</p></li></ul></div><div class="screenshot"><div class="mediaobject" align="center"><table cellpadding="0" cellspacing="0" summary="manufactured viewport for HTML img" border="0" width="100%"><tr><td align="center"><img src="../files/images/Command_For_Default.bmp" align="middle" height="360"></td></tr></table><div class="caption"><p>Figure: Default Name and Settings for the For Loop command
+          Dialog Box</p></div></div></div><div class="refsection" title="Script Syntax"><a name="N12BBE"></a><h3>Script Syntax</h3><p>(Simple For Loop)</p><pre class="programlisting"><code class="code">For Variable = Start:End;
+
+EndFor; }</code></pre><p>(Expanded For Loop)</p><pre class="programlisting"><code class="code">For Variable = Start:Increment:End;
+
+EndFor;</code></pre></div><div class="refsection" title="Script Examples"><a name="N12BCB"></a><h3>Script Examples</h3><pre class="programlisting"><code class="code">% Output the value of the For loop Variable to a file
+For I = 1:1:10;
+GMAT testVar = I;
+Report DefaultReportFile I;
+EndFor;</code></pre></div></div><div class="refsection" title="Options"><a name="N12BD1"></a><h2>Options</h2><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Variable</span></p></td><td><p>The Variable field allows the user to define the variable that
+          to be incremented during the loop process.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>None</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Variable</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Start</span></p></td><td><p>The Start option allows the user to set the starting value of
+          the For Loop.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                defined parameter</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">Increment</span></p></td><td><p>The Increment option allows the user to set the increment
+          value of the For Loop. When the increment value is not included in a
+          for loop statement, the default value is used.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>1</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Real Number, Array element, Variable, or any user
+                defined parameter</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr><tr><td><p><span class="term">End</span></p></td><td><p>The End option allows the user to set the ending value of the
+          For Loop.</p><div class="variablelist"><table border="0"><col valign="top" align="left"><tbody><tr><td><p><span class="term">Default</span></p></td><td><p>10</p></td></tr><tr><td><p><span class="term">Limits</span></p></td><td><p>Real Number, Array, Variable, or any user defined
+                parameter</p></td></tr><tr><td><p><span class="term">Units</span></p></td><td><p>None</p></td></tr></tbody></table></div></td></tr></tbody></table></div></div><div class="refsection" title="For Loop Behavior"><a name="N12C39"></a><h2>For Loop Behavior</h2><p>When the Increment option is left out of the script syntax the
+    default value is used. If an Increment value of 0 is used, the For Loop
+    should not execute but GMAT should continue to run. If End&gt;Start and
+    Increment&lt;0, then the For Loop should not execute. If Start&gt;End and
+    Increment&gt;0, then the For Loop should not execute. End can be equal to
+    Start, but the For Loop will not execute.</p></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="Equation.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="rn02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="If.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">Equation&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;If</td></tr></table></div></body></html>
