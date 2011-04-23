@@ -74,7 +74,7 @@ docs/
     GMATStyleGuide.pdf                  source: ?
     GMATSystemTestPlan.pdf              source: ?
     GMATUsersGuide.pdf                  source: ?
-    help/                               source: <network>\Builds\windows\help
+    help/                               source: <SF repo>/trunk/application/
         *
 
 matlab/                                 source: <SF repo>/trunk/application/
