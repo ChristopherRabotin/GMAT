@@ -112,7 +112,7 @@ Function InstDirCheck
             Abort
             ${Break}
         ${Case} 2
-            MessageBox MB_OK|MB_ICONSTOP "The is not enough disk space available to install."
+            MessageBox MB_OK|MB_ICONSTOP "There is not enough disk space available to install."
             Abort
             ${Break}
     ${EndSwitch}
