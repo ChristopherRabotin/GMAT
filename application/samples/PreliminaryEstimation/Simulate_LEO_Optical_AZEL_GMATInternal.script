@@ -1,0 +1,102 @@
+% Script Test Case for Simulation using a USNTrackingSystem
+
+%--------------------------------------------
+%---------- Spacecraft
+%--------------------------------------------
+Create Spacecraft ODSat;
+GMAT ODSat.DateFormat = UTCGregorian;
+GMAT ODSat.Epoch = '01 Jan 2000 11:59:28.000';
+GMAT ODSat.Id = ODSatID;
+GMAT ODSat.X = 6648.937;
+GMAT ODSat.Y = -335.169;
+GMAT ODSat.Z = 2789.137;
+GMAT ODSat.VX = -0.34697109;
+GMAT ODSat.VY = 7.092177415;
+GMAT ODSat.VZ = 2.14549075;
+ODSat.Id = 'ODSat01';
+
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+Create GroundStation Maui;
+Maui.CentralBody = Earth;
+Maui.StateType = Cartesian;
+Maui.HorizonReference = Sphere;
+Maui.X = -4450.8;
+Maui.Y = 2676.1;
+Maui.Z = -3691.38;
+Maui.Id = 'Maui';
+
+%Create GroundStation Maui;
+%Maui.CentralBody = Earth;
+%Maui.StateType = Spherical;
+%Maui.HorizonReference = Ellipsoid;
+%Maui.Latitude = -35.586612725;
+%Maui.Longitude = 148.983076735;
+%Maui.Altitude = 0.675012
+%Maui.Id = 'Maui';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+Create ForceModel ODProp_ForceModel;
+ODProp_ForceModel.CentralBody = Earth;
+%ODProp_ForceModel.PointMasses = {Sun, Earth, Luna};
+ODProp_ForceModel.PointMasses = {Earth};
+ODProp_ForceModel.Drag = None;
+ODProp_ForceModel.SRP = Off;
+ODProp_ForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+Create Propagator ODProp;
+ODProp.FM = ODProp_ForceModel;
+ODProp.Type = RungeKutta89;
+ODProp.InitialStepSize = 60;
+ODProp.Accuracy = 1e-13;
+ODProp.MinStep = 0;
+ODProp.MaxStep = 2700;
+ODProp.MaxStepAttempts = 50;
+
+%----------------------------------------
+%---------- Datafiles
+%----------------------------------------
+Create DataFile MauiMeasData;
+MauiMeasData.Filename = 'Maui_OpticalAzEl.gmd';
+MauiMeasData.Format = GMATInternal;
+
+%----------------------------------------
+%---------- MeasurementModels
+%----------------------------------------
+Create MeasurementModel AEMeasurement;
+AEMeasurement.ObservationData = {MauiMeasData};
+AEMeasurement.Type = OpticalAzEl;
+AEMeasurement.Participants = {Maui, ODSat};
+AEMeasurement.Bias = 0;
+AEMeasurement.NoiseSigma = 1e-05;
+AEMeasurement.TimeConstant = 6000;
+AEMeasurement.Covariance.Bias = [1000000 1000000];
+
+%----------------------------------------
+%---------- Tracking Systems
+%----------------------------------------
+Create OpticalTrackingSystem Tracker
+Tracker.Add = {AEMeasurement}
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+Create Simulator simmer;
+simmer.AddData             = {Tracker};
+simmer.InitialEpochFormat  = UTCGregorian;
+simmer.InitialEpoch        = '01 Jan 2000 11:59:28.000';
+simmer.FinalEpochFormat    = UTCGregorian;
+simmer.FinalEpoch          = '02 Jan 2000 11:59:28.000';
+simmer.MeasurementTimeStep = 100;
+simmer.Propagator          = ODProp;
+
+%----- Run the estimator
+BeginMissionSequence
+RunSimulator simmer;
+

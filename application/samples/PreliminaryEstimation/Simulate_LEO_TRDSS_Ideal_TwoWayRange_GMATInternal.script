@@ -1,0 +1,276 @@
+%--------------------------------------------------------------
+%===== Create and configure the HST spacecraft
+%--------------------------------------------------------------
+
+%----------------------------------------
+%---------- Solar System User-Modified Values
+%----------------------------------------
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+
+Create Spacecraft AQUA;
+GMAT AQUA.DateFormat = UTCGregorian;
+GMAT AQUA.Epoch = '09 Jun 2004 00:00:00.000';
+GMAT AQUA.CoordinateSystem = EarthMJ2000Eq;
+GMAT AQUA.DisplayStateType = Cartesian;
+GMAT AQUA.X = 1301.791156942444;
+GMAT AQUA.Y = -6957.768625623927;
+GMAT AQUA.Z = -288.7080151269336;
+GMAT AQUA.VX = -1.11216535377368;
+GMAT AQUA.VY = 0.0907365703826921;
+GMAT AQUA.VZ = -7.418833565259988;
+GMAT AQUA.DryMass = 821.1888;
+GMAT AQUA.Cd = 2.2;
+GMAT AQUA.Cr = 1.448009157951282;
+GMAT AQUA.DragArea = 15;
+GMAT AQUA.SRPArea = 20.438;
+GMAT AQUA.NAIFId = -123456789;
+GMAT AQUA.NAIFIdReferenceFrame = -123456789;
+GMAT AQUA.Id = 'AQUA';
+GMAT AQUA.Attitude = CoordinateSystemFixed;
+GMAT AQUA.AttitudeDisplayStateType = 'Quaternion';
+GMAT AQUA.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT AQUA.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT AQUA.Q1 = 0;
+GMAT AQUA.Q2 = 0;
+GMAT AQUA.Q3 = 0;
+GMAT AQUA.Q4 = 1;
+GMAT AQUA.EulerAngleSequence = '312';
+GMAT AQUA.AngularVelocityX = 0;
+GMAT AQUA.AngularVelocityY = 0;
+GMAT AQUA.AngularVelocityZ = 0;
+
+Create Spacecraft TDRSS4;
+GMAT TDRSS4.DateFormat = UTCGregorian;
+GMAT TDRSS4.Epoch = '09 Jun 2004 00:00:00.000';
+GMAT TDRSS4.CoordinateSystem = EarthMJ2000Eq;
+GMAT TDRSS4.DisplayStateType = Cartesian;
+GMAT TDRSS4.X = -33706.32486153131;
+GMAT TDRSS4.Y = -25220.99822905847;
+GMAT TDRSS4.Z = 2557.37264082928;
+GMAT TDRSS4.VX = 1.820046298589535;
+GMAT TDRSS4.VY = -2.461466717090732;
+GMAT TDRSS4.VZ = -0.2775481078198591;
+GMAT TDRSS4.DryMass = 821.1888;
+GMAT TDRSS4.Cd = 2.2;
+GMAT TDRSS4.Cr = 1.448009157951282;
+GMAT TDRSS4.DragArea = 15;
+GMAT TDRSS4.SRPArea = 20.438;
+GMAT TDRSS4.NAIFId = -123456789;
+GMAT TDRSS4.NAIFIdReferenceFrame = -123456789;
+GMAT TDRSS4.Id = 'TDRSS4';
+GMAT TDRSS4.Attitude = CoordinateSystemFixed;
+GMAT TDRSS4.AttitudeDisplayStateType = 'Quaternion';
+GMAT TDRSS4.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT TDRSS4.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT TDRSS4.Q1 = 0;
+GMAT TDRSS4.Q2 = 0;
+GMAT TDRSS4.Q3 = 0;
+GMAT TDRSS4.Q4 = 1;
+GMAT TDRSS4.EulerAngleSequence = '312';
+GMAT TDRSS4.AngularVelocityX = 0;
+GMAT TDRSS4.AngularVelocityY = 0;
+GMAT TDRSS4.AngularVelocityZ = 0;
+
+Create Spacecraft TDRSS5;
+GMAT TDRSS5.DateFormat = UTCGregorian;
+GMAT TDRSS5.Epoch = '09 Jun 2004 00:00:00.000';
+GMAT TDRSS5.CoordinateSystem = EarthMJ2000Eq;
+GMAT TDRSS5.DisplayStateType = Cartesian;
+GMAT TDRSS5.X = 4421.72712165692;
+GMAT TDRSS5.Y = 41917.62684848997;
+GMAT TDRSS5.Z = 596.5561143765002;
+GMAT TDRSS5.VX = -3.045329984255742;
+GMAT TDRSS5.VY = 0.3168982270839584;
+GMAT TDRSS5.VZ = 0.2890083011048917;
+GMAT TDRSS5.DryMass = 821.1888;
+GMAT TDRSS5.Cd = 2.2;
+GMAT TDRSS5.Cr = 1.448009157951282;
+GMAT TDRSS5.DragArea = 15;
+GMAT TDRSS5.SRPArea = 20.438;
+GMAT TDRSS5.NAIFId = -123456789;
+GMAT TDRSS5.NAIFIdReferenceFrame = -123456789;
+GMAT TDRSS5.Id = 'TDRSS5';
+GMAT TDRSS5.Attitude = CoordinateSystemFixed;
+GMAT TDRSS5.AttitudeDisplayStateType = 'Quaternion';
+GMAT TDRSS5.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT TDRSS5.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT TDRSS5.Q1 = 0;
+GMAT TDRSS5.Q2 = 0;
+GMAT TDRSS5.Q3 = 0;
+GMAT TDRSS5.Q4 = 1;
+GMAT TDRSS5.EulerAngleSequence = '312';
+GMAT TDRSS5.AngularVelocityX = 0;
+GMAT TDRSS5.AngularVelocityY = 0;
+GMAT TDRSS5.AngularVelocityZ = 0;
+
+%----------------------------------------
+%---------- Hardware Components
+%----------------------------------------
+
+Create FuelTank FuelTank1;
+GMAT FuelTank1.FuelMass = 756;
+GMAT FuelTank1.Pressure = 1500;
+GMAT FuelTank1.Temperature = 20;
+GMAT FuelTank1.RefTemperature = 20;
+GMAT FuelTank1.Volume = 0.75;
+GMAT FuelTank1.FuelDensity = 1260;
+GMAT FuelTank1.PressureModel = PressureRegulated;
+GMAT FuelTank1.AllowNegativeFuelMass = false;
+
+Create Thruster Thruster1;
+GMAT Thruster1.CoordinateSystem = Local;
+GMAT Thruster1.Origin = Earth;
+GMAT Thruster1.Axes = VNB;
+GMAT Thruster1.ThrustDirection1 = 1;
+GMAT Thruster1.ThrustDirection2 = 0;
+GMAT Thruster1.ThrustDirection3 = 0;
+GMAT Thruster1.DutyCycle = 1;
+GMAT Thruster1.ThrustScaleFactor = 1;
+GMAT Thruster1.DecrementMass = true;
+GMAT Thruster1.Tank = {FuelTank1};
+GMAT Thruster1.GravitationalAccel = 9.81;
+GMAT Thruster1.C1 = 10;
+GMAT Thruster1.C2 = 0;
+GMAT Thruster1.C3 = 0;
+GMAT Thruster1.C4 = 0;
+GMAT Thruster1.C5 = 0;
+GMAT Thruster1.C6 = 0;
+GMAT Thruster1.C7 = 0;
+GMAT Thruster1.C8 = 0;
+GMAT Thruster1.C9 = 0;
+GMAT Thruster1.C10 = 0;
+GMAT Thruster1.C11 = 0;
+GMAT Thruster1.C12 = 0;
+GMAT Thruster1.C13 = 0;
+GMAT Thruster1.C14 = 0;
+GMAT Thruster1.C15 = 0;
+GMAT Thruster1.C16 = 0;
+GMAT Thruster1.K1 = 300;
+GMAT Thruster1.K2 = 0;
+GMAT Thruster1.K3 = 0;
+GMAT Thruster1.K4 = 0;
+GMAT Thruster1.K5 = 0;
+GMAT Thruster1.K6 = 0;
+GMAT Thruster1.K7 = 0;
+GMAT Thruster1.K8 = 0;
+GMAT Thruster1.K9 = 0;
+GMAT Thruster1.K10 = 0;
+GMAT Thruster1.K11 = 0;
+GMAT Thruster1.K12 = 0;
+GMAT Thruster1.K13 = 0;
+GMAT Thruster1.K14 = 0;
+GMAT Thruster1.K15 = 0;
+GMAT Thruster1.K16 = 0;
+
+%--------------------------------------------------------------
+%===== Create the ground stations
+%--------------------------------------------------------------
+
+Create GroundStation ST2K_48;
+GMAT ST2K_48.CentralBody = Earth;
+GMAT ST2K_48.StateType = Spherical;
+GMAT ST2K_48.HorizonReference = Ellipsoid;
+GMAT ST2K_48.Latitude = 32.54297736111111;
+GMAT ST2K_48.Longitude = 253.3879110555556;
+GMAT ST2K_48.Altitude = 1.45231;
+GMAT ST2K_48.Id = 'ST2K_48';
+
+Create GroundStation ST2K_47;
+GMAT ST2K_47.CentralBody = Earth;
+GMAT ST2K_47.StateType = Spherical;
+GMAT ST2K_47.HorizonReference = Ellipsoid;
+GMAT ST2K_47.Latitude = 32.54327958333333;
+GMAT ST2K_47.Longitude = 253.3879110555556;
+GMAT ST2K_47.Altitude = 1.45228;
+GMAT ST2K_47.Id = 'ST2K_47';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+
+%--------------------------------------------------------------
+%===== Create the propagator
+%--------------------------------------------------------------
+
+Create ForceModel TwoBodyForce;
+GMAT TwoBodyForce.CentralBody = Earth;
+GMAT TwoBodyForce.PointMasses = {Earth};
+GMAT TwoBodyForce.Drag = None;
+GMAT TwoBodyForce.SRP = Off;
+GMAT TwoBodyForce.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator TwoBodyProp;
+
+GMAT TwoBodyProp.FM = TwoBodyForce;
+GMAT TwoBodyProp.Type = PrinceDormand78;
+GMAT TwoBodyProp.InitialStepSize = 60;
+GMAT TwoBodyProp.Accuracy = 1e-012;
+GMAT TwoBodyProp.MinStep = 0;
+GMAT TwoBodyProp.MaxStep = 86400;
+GMAT TwoBodyProp.MaxStepAttempts = 50;
+
+%----------------------------------------
+%---------- Datafiles
+%----------------------------------------
+
+Create DataFile AQUA_TDRSSData;
+GMAT AQUA_TDRSSData.Filename = 'AQUA_TDRSSTwoWayRange.gmd';
+GMAT AQUA_TDRSSData.Format = GMATInternal;
+
+%----------------------------------------
+%---------- MeasurementModels
+%----------------------------------------
+
+Create MeasurementModel AQUA_TDRSS4Range;
+GMAT AQUA_TDRSS4Range.ObservationData = {AQUA_TDRSSData};
+GMAT AQUA_TDRSS4Range.Type = TDRSSTwoWayRange;
+GMAT AQUA_TDRSS4Range.Participants = {ST2K_48, TDRSS4, AQUA};
+GMAT AQUA_TDRSS4Range.Bias = [ 8.066587754055735e-275 ];
+GMAT AQUA_TDRSS4Range.NoiseSigma = [ 0];
+GMAT AQUA_TDRSS4Range.TimeConstant = 6000;
+
+Create MeasurementModel AQUA_TDRSS5Range;
+GMAT AQUA_TDRSS5Range.ObservationData = {AQUA_TDRSSData};
+GMAT AQUA_TDRSS5Range.Type = TDRSSTwoWayRange;
+GMAT AQUA_TDRSS5Range.Participants = {ST2K_48, TDRSS5, AQUA};
+GMAT AQUA_TDRSS5Range.Bias = [ 5.85416249393703e-316 ];
+GMAT AQUA_TDRSS5Range.NoiseSigma = [ 0 ];
+GMAT AQUA_TDRSS5Range.TimeConstant = 6000;
+
+%--------------------------------------------------------------
+%===== Create the Tracking Systems and Measurement Models
+%--------------------------------------------------------------
+
+Create TDRSSTrackingSystem AQUA_TDRSS;
+GMAT AQUA_TDRSS.Add = {'AQUA_TDRSS4Range'};
+
+%--------------------------------------------------------------
+%===== Create and configure the simulator
+%--------------------------------------------------------------
+Create Simulator AQUAsim;
+GMAT AQUAsim.ShowProgress = true;
+GMAT AQUAsim.ReportStyle = Normal;
+GMAT AQUAsim.ReportFile = 'SimulatorAQUAsim.data';
+GMAT AQUAsim.MaximumIterations = 25;
+GMAT AQUAsim.AddData = {AQUA_TDRSS};
+GMAT AQUAsim.Propagator = 'TwoBodyProp';
+GMAT AQUAsim.InitialEpochFormat = UTCGregorian;
+GMAT AQUAsim.InitialEpoch = '09 Jun 2004 00:00:00.000';
+GMAT AQUAsim.FinalEpochFormat = UTCGregorian;
+GMAT AQUAsim.FinalEpoch = '10 Jun 2004 00:00:00.000';
+GMAT AQUAsim.MeasurementTimeStep = 60;
+
+%--------------------------------------------------------------
+%===== Run the simulator
+%--------------------------------------------------------------
+BeginMissionSequence
+RunSimulator AQUAsim;

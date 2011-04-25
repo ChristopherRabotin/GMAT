@@ -1,0 +1,168 @@
+% Script Test Case for Build 0.1
+
+
+%----------------------------------------
+%---------- Solar System User-Modified Values
+%----------------------------------------
+
+
+%----------------------------------------
+%---------- Spacecraft
+%----------------------------------------
+%
+
+%----- Create the spacecraft
+
+Create Spacecraft ODSat;
+GMAT ODSat.DateFormat = UTCGregorian;
+GMAT ODSat.Epoch = '01 Jan 2000 11:59:28.000';
+GMAT ODSat.CoordinateSystem = EarthMJ2000Eq;
+GMAT ODSat.DisplayStateType = Cartesian;
+GMAT ODSat.X = 6648.237;
+GMAT ODSat.Y = -335.169;
+GMAT ODSat.Z = 2789.137;
+GMAT ODSat.VX = -0.34697109;
+GMAT ODSat.VY = 7.092177415;
+GMAT ODSat.VZ = 2.14549075;
+GMAT ODSat.DryMass = 850;
+GMAT ODSat.Cd = 2.2;
+GMAT ODSat.Cr = 1.8;
+GMAT ODSat.DragArea = 15;
+GMAT ODSat.SRPArea = 1;
+GMAT ODSat.Id = 'ODSatID';
+GMAT ODSat.Attitude = CoordinateSystemFixed;
+GMAT ODSat.AttitudeDisplayStateType = 'Quaternion';
+GMAT ODSat.AttitudeRateDisplayStateType = 'AngularVelocity';
+GMAT ODSat.AttitudeCoordinateSystem = 'EarthMJ2000Eq';
+GMAT ODSat.Q1 = 0;
+GMAT ODSat.Q2 = 0;
+GMAT ODSat.Q3 = 0;
+GMAT ODSat.Q4 = 1;
+GMAT ODSat.EulerAngleSequence = '312';
+GMAT ODSat.AngularVelocityX = 0;
+GMAT ODSat.AngularVelocityY = 0;
+GMAT ODSat.AngularVelocityZ = 0;
+
+ODSat.Covariance.CartesianState = [1e12 1e12 1e12 1e6 1e6 1e6];
+
+%----------------------------------------
+%---------- GroundStations
+%----------------------------------------
+
+
+
+%----- Create the ground station
+
+Create GroundStation Maui;
+GMAT Maui.CentralBody = Earth;
+GMAT Maui.StateType = Cartesian;
+GMAT Maui.HorizonReference = Sphere;
+GMAT Maui.X = -4450.8;
+GMAT Maui.Y = 2676.1;
+GMAT Maui.Z = -3691.38;
+GMAT Maui.Id = 'MauiID';
+
+%----------------------------------------
+%---------- ForceModels
+%----------------------------------------
+
+
+
+%----- Create the propagator
+
+Create ForceModel ODProp_ForceModel;
+GMAT ODProp_ForceModel.CentralBody = Earth;
+GMAT ODProp_ForceModel.PointMasses = {Sun, Earth, Luna};
+GMAT ODProp_ForceModel.Drag = None;
+GMAT ODProp_ForceModel.SRP = Off;
+GMAT ODProp_ForceModel.ErrorControl = RSSStep;
+
+%----------------------------------------
+%---------- Propagators
+%----------------------------------------
+
+Create Propagator ODProp;
+
+GMAT ODProp.FM = ODProp_ForceModel;
+
+GMAT ODProp.Type = RungeKutta89;
+GMAT ODProp.InitialStepSize = 60;
+GMAT ODProp.Accuracy = 1e-13;
+GMAT ODProp.MinStep = 0;
+GMAT ODProp.MaxStep = 2700;
+GMAT ODProp.MaxStepAttempts = 50;
+
+%----------------------------------------
+%---------- Variables, Arrays, Strings
+%----------------------------------------
+
+Create Variable ep resid;
+
+%----------------------------------------
+%---------- Datafiles
+%----------------------------------------
+
+%----- Create the data file
+Create DataFile MauiMeasData;
+GMAT MauiMeasData.Filename = 'Maui_GeometricRange.gmd';
+GMAT MauiMeasData.Format = GMATInternal;
+
+%----------------------------------------
+%---------- MeasurementModels
+%----------------------------------------
+
+%----- Create a range measurement between Maui and ODSat
+Create MeasurementModel RangeMeasurement;
+GMAT RangeMeasurement.ObservationData = {MauiMeasData};
+GMAT RangeMeasurement.Type = GeometricRange;
+GMAT RangeMeasurement.Participants = {Maui, ODSat};
+GMAT RangeMeasurement.Bias = 0;
+GMAT RangeMeasurement.NoiseSigma = 1e-05;
+GMAT RangeMeasurement.TimeConstant = 6000;
+RangeMeasurement.Covariance.Bias = [1000000];
+
+%----------------------------------------
+%---------- Solvers
+%----------------------------------------
+
+
+
+%----- Create the estimator
+
+Create BatchEstimatorInv BatchEst;
+GMAT BatchEst.ShowProgress = true;
+GMAT BatchEst.ReportStyle = 'Normal';
+GMAT BatchEst.ReportFile = 'BatchEstimatorInvBatchEst.data';
+GMAT BatchEst.MaximumIterations = 15;
+GMAT BatchEst.Measurements = {RangeMeasurement};
+GMAT BatchEst.AddSolveFor = {'ODSat.CartesianState', 'RangeMeasurement.Bias'};
+GMAT BatchEst.AbsoluteTol = 1e-05;
+GMAT BatchEst.RelativeTol = 1e-06;
+GMAT BatchEst.Propagator = ODProp;
+GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
+
+%----------------------------------------
+%---------- Plots and Reports
+%----------------------------------------
+
+Create XYPlot XYPlot1;
+GMAT XYPlot1.SolverIterations = Current;
+GMAT XYPlot1.IndVar = ODSat.A1ModJulian;
+GMAT XYPlot1.Add = {ODSat.EarthMJ2000Eq.X};
+GMAT XYPlot1.Grid = On;
+GMAT XYPlot1.ShowPlot = true;
+
+%%----- Toss in a plot
+%Create XYPlot XYPlot1;
+%GMAT XYPlot1.SolverIterations = Current;
+%GMAT XYPlot1.IndVar = ODSat.A1ModJulian;
+%GMAT XYPlot1.Add = {ODSat.EarthMJ2000Eq.X, ODSat.EarthMJ2000Eq.Y, ODSat.EarthMJ2000Eq.Z};
+%GMAT XYPlot1.Grid = On;
+%GMAT XYPlot1.ShowPlot = true;
+
+
+%----- Run the estimator
+BeginMissionSequence
+Save BatchEst;
+
+RunEstimator BatchEst;
