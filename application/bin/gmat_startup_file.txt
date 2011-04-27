@@ -42,10 +42,8 @@
 #-----------------------------------------------------------
 ROOT_PATH              = ../
 #-----------------------------------------------------------
-PLUGIN                 = libCcsdsEphemerisFile
-PLUGIN                 = libDataFile
-PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
-PLUGIN                 = ../plugins/libGmatEstimation
+#PLUGIN                 = ../plugins/proprietary/libVF13Optimizer
+#PLUGIN                 = ../plugins/libGmatEstimation
 PLUGIN                 = ../plugins/libMatlabInterface
 PLUGIN                 = ../plugins/libFminconOptimizer
 #-----------------------------------------------------------
