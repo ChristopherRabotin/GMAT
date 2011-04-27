@@ -59,8 +59,6 @@ then
     # bin (Windows)
     cp -prv \
         $winbuildspath/$winbuildname/GMAT.exe \
-        $winbuildspath/$winbuildname/libCcsdsEphemerisFile.dll \
-        $winbuildspath/$winbuildname/libDataFile.dll \
         $winbuildspath/$winbuildname/libGmatBase.dll \
         gmat/bin
 
