@@ -152,9 +152,9 @@ GMAT EarthMoonRotatingView.ViewUpAxis = X;
 
 
 Create XYPlot RadApoPlot
-GMAT RadApoPlot.IndVar = Sat.CurrA1MJD;
-GMAT RadApoPlot.Add    = { Sat.RMAG };
-GMAT RadApoPlot.Grid = On;
+GMAT RadApoPlot.XVariable = Sat.CurrA1MJD;
+GMAT RadApoPlot.YVariables    = { Sat.RMAG };
+GMAT RadApoPlot.ShowGrid = true;
 GMAT RadApoPlot.SolverIterations = None;
 
 Create ReportFile Data;

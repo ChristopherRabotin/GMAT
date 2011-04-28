@@ -147,17 +147,17 @@ GMAT BatchEst.EstimationEpochFormat = 'FromParticipants';
 
 Create XYPlot XYPlot1;
 GMAT XYPlot1.SolverIterations = Current;
-GMAT XYPlot1.IndVar = ODSat.A1ModJulian;
-GMAT XYPlot1.Add = {ODSat.EarthMJ2000Eq.X};
-GMAT XYPlot1.Grid = On;
+GMAT XYPlot1.XVariable = ODSat.A1ModJulian;
+GMAT XYPlot1.YVariables = {ODSat.EarthMJ2000Eq.X};
+GMAT XYPlot1.ShowGrid = true;
 GMAT XYPlot1.ShowPlot = true;
 
 %%----- Toss in a plot
 %Create XYPlot XYPlot1;
 %GMAT XYPlot1.SolverIterations = Current;
-%GMAT XYPlot1.IndVar = ODSat.A1ModJulian;
-%GMAT XYPlot1.Add = {ODSat.EarthMJ2000Eq.X, ODSat.EarthMJ2000Eq.Y, ODSat.EarthMJ2000Eq.Z};
-%GMAT XYPlot1.Grid = On;
+%GMAT XYPlot1.XVariable = ODSat.A1ModJulian;
+%GMAT XYPlot1.YVariables = {ODSat.EarthMJ2000Eq.X, ODSat.EarthMJ2000Eq.Y, ODSat.EarthMJ2000Eq.Z};
+%GMAT XYPlot1.ShowGrid = true;
 %GMAT XYPlot1.ShowPlot = true;
 
 

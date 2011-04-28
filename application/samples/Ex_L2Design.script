@@ -70,12 +70,12 @@ GMAT EarthProp.MaxStepAttempts = 50;
 Create ImpulsiveBurn dV
 GMAT dV.Axes = VNB;
 GMAT dV.Origin = Earth;
-GMAT dV.V = -0.00003;
+GMAT dV.Element1 = -0.00003;
 
 Create ImpulsiveBurn dVCirc
 GMAT dVCirc.Axes = VNB;
 GMAT dVCirc.Origin = Earth;
-GMAT dVCirc.V = -0.00003;
+GMAT dVCirc.Element1 = -0.00003;
 
 Create DifferentialCorrector DC;
 
@@ -190,9 +190,9 @@ GMAT L2View.NumPointsToRedraw = 0;
 % ------------------------------XYPlots--------------------------------------
 
 Create XYPlot ERRot_YZ;
-GMAT ERRot_YZ.IndVar = Sat.CSEarthMoonRot.Y;
-GMAT ERRot_YZ.Add = { Sat.CSEarthMoonRot.Z};
-GMAT ERRot_YZ.Grid = On;
+GMAT ERRot_YZ.XVariable = Sat.CSEarthMoonRot.Y;
+GMAT ERRot_YZ.YVariables = { Sat.CSEarthMoonRot.Z};
+GMAT ERRot_YZ.ShowGrid = true;
 GMAT ERRot_YZ.SolverIterations = None;
 
 % ------------------------------ Reports --------------------------------------

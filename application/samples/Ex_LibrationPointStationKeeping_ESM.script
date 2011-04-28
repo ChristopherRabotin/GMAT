@@ -70,7 +70,7 @@ GMAT dV.Element3 = 0;
 Create DifferentialCorrector DefaultDC;
 GMAT DefaultDC.ShowProgress = true;
 GMAT DefaultDC.ReportStyle = Normal;
-GMAT DefaultDC.TargeterTextFile = targeter_DefaultDC.data;
+GMAT DefaultDC.ReportFile = targeter_DefaultDC.data;
 GMAT DefaultDC.MaximumIterations = 25;
 GMAT DefaultDC.DerivativeMethod = ForwardDifference
 

@@ -115,7 +115,6 @@ GMAT MoonTwoBody.MaxStepAttempts = 50;
 Create ImpulsiveBurn EDUSdv;
 GMAT EDUSdv.Origin = Earth;
 GMAT EDUSdv.Axes = VNB;
-GMAT EDUSdv.VectorFormat = Cartesian;
 GMAT EDUSdv.Element1 = 0;
 GMAT EDUSdv.Element2 = 0;
 GMAT EDUSdv.Element3 = 0
@@ -136,7 +135,6 @@ LROTCM.Element2 = -0.0134520458643
 Create ImpulsiveBurn EDUSdv_J2000;
 GMAT EDUSdv_J2000.Origin = Earth;
 GMAT EDUSdv_J2000.Axes = MJ2000Eq;
-GMAT EDUSdv_J2000.VectorFormat = Cartesian;
 GMAT EDUSdv_J2000.Element1 = 0;
 GMAT EDUSdv_J2000.Element2 = 0;
 GMAT EDUSdv_J2000.Element3 = 0;
@@ -274,16 +272,16 @@ MoonInertial.Axes   = BodyInertial;
 Create DifferentialCorrector DC;
 GMAT DC.ShowProgress = true;
 GMAT DC.ReportStyle = Normal;
-GMAT DC.TargeterTextFile = DifferentialCorrectorDC.data;
+GMAT DC.ReportFile = DifferentialCorrectorDC.data;
 GMAT DC.MaximumIterations = 2500; 
-GMAT DC.UseCentralDifferences = false;
+GMAT DC.DerivativeMethod = ForwardDifference;
 
 Create DifferentialCorrector DC_central;
 GMAT DC_central.ShowProgress = true;
 GMAT DC_central.ReportStyle = Normal;
-GMAT DC_central.TargeterTextFile = DifferentialCorrectorDC.data;
+GMAT DC_central.ReportFile = DifferentialCorrectorDC.data;
 GMAT DC_central.MaximumIterations = 2500; 
-GMAT DC_central.UseCentralDifferences = false;
+GMAT DC_central.DerivativeMethod = ForwardDifference;
 
 
 %%------------------------------------------------------------
