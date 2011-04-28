@@ -1,0 +1,18 @@
+<html><head><META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Else</title><link href="../files/style.css" type="text/css" rel="stylesheet"><meta content="DocBook XSL-NS Stylesheets V1.76.1" name="generator"><link rel="home" href="index.html" title="General Mission Analysis Tool (GMAT)"><link rel="up" href="rn02.html" title="Commands"><link rel="prev" href="CallFunction.html" title="CallFunction"><link rel="next" href="EndFiniteBurn.html" title="EndFiniteBurn"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="navheader"><table summary="Navigation header" width="100%"><tr><th align="center" colspan="3">Else</th></tr><tr><td align="left" width="20%"><a accesskey="p" href="CallFunction.html">Prev</a>&nbsp;</td><th align="center" width="60%">Commands</th><td align="right" width="20%">&nbsp;<a accesskey="n" href="EndFiniteBurn.html">Next</a></td></tr></table><hr></div><div class="refentry" title="Else"><a name="Else"></a><div class="titlepage"></div><a name="N12F2A" class="indexterm"></a><div class="refnamediv"><h2><span class="refentrytitle">Else</span></h2><p>Else &mdash; Perform an else statement</p></div><div class="refsynopsisdiv" title="Synopsis"><h2>Synopsis</h2><pre class="synopsis"></pre></div><div class="refsection" title="Description"><a name="N12F40"></a><h2>Description</h2><p>If-Else statements in GMAT work as they do in other programming
+    languages, especially Matlab. The Else command adds another dimension to
+    an If statement. You use an Else statement when you want something to
+    happen when the conditions of an If statement are not met. For example, an
+    If statement who's condition is "x &lt; 5" will only execute the script
+    within its scope when x is indeed less than 5. GMAT would otherwise pass
+    over the If statement's associated script and continue. However, having an
+    Else statement after the If will ensure that the lines of script within
+    the scope of that Else are executed when x is equal to 5 or
+    greater.</p></div><div class="refsection" title="Examples"><a name="N12F45"></a><h2>Examples</h2><div class="refsection" title="Script Syntax"><a name="N12F48"></a><h3>Script Syntax</h3><pre class="programlisting"><code class="code">If &lt;logical expression&gt;;
+   &lt;Statements&gt;;
+Else;
+   &lt;Statements&gt;;
+EndIf;</code></pre></div><div class="refsection" title="Script Examples"><a name="N12F4E"></a><h3>Script Examples</h3><pre class="programlisting"><code class="code">If DefaultSC.ElapsedDays &lt; 1;
+   Propagate DefaultProp( DefaultSC , { DefaultSC.ElapsedDays = 0.01 });
+Else;
+   Propagate DefaultProp( DefaultSC , { DefaultSC.ElapsedDays = 0.2 });
+EndIf;</code></pre></div></div></div><div class="navfooter"><hr><table summary="Navigation footer" width="100%"><tr><td align="left" width="40%"><a accesskey="p" href="CallFunction.html">Prev</a>&nbsp;</td><td align="center" width="20%"><a accesskey="u" href="rn02.html">Up</a></td><td align="right" width="40%">&nbsp;<a accesskey="n" href="EndFiniteBurn.html">Next</a></td></tr><tr><td valign="top" align="left" width="40%">CallFunction&nbsp;</td><td align="center" width="20%"><a accesskey="h" href="index.html">Home</a></td><td valign="top" align="right" width="40%">&nbsp;EndFiniteBurn</td></tr></table></div></body></html>
