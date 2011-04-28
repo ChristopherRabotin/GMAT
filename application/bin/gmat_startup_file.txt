@@ -117,7 +117,7 @@ CONSTELLATION_FILE     = STAR_PATH/inp_Constellation.txt
 MODEL_PATH             = DATA_PATH/vehicle/models/
 SPACECRAFT_MODEL_FILE  = MODEL_PATH/aura.3ds
 #-----------------------------------------------------------
-#HELP_FILE             = 
+HELP_FILE              = ROOT_PATH/docs/help/help.chm
 #-----------------------------------------------------------
 #-----------------------------------------------------------
 
