@@ -31,6 +31,9 @@
 </xsl:attribute-set>
 
 <!-- titles -->
+<xsl:attribute-set name="component.title.properties">
+    <xsl:attribute name="color">#004080</xsl:attribute>
+</xsl:attribute-set>
 <xsl:attribute-set name="section.title.properties">
     <xsl:attribute name="color">#004080</xsl:attribute>
 </xsl:attribute-set>
