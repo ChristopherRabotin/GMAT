@@ -85,7 +85,7 @@ GMAT MoonAllForces.GravityField.Earth.Order = 20;
 GMAT MoonAllForces.SRP.Flux = 1367;
 GMAT MoonAllForces.SRP.Nominal_Sun = 149597870.691;
 GMAT MoonAllForces.PointMasses   = { Sun, Earth,  Venus, Mars, Jupiter, Saturn, Uranus, Neptune};
-GMAT MoonAllForces.GravityField.Luna.PotentialFile = 'lp165p.cof';
+GMAT MoonAllForces.GravityField.Luna.PotentialFile = 'LP165P.cof';
 
 Create Propagator EarthFull;
 GMAT EarthFull.FM = AllForces;
