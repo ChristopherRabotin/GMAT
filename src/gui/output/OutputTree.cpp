@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              OutputTree
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -17,8 +19,8 @@
  */
 //------------------------------------------------------------------------------
 #include "gmatwxdefs.hpp"
-#include "bitmaps/folder.xpm"
-#include "bitmaps/openfolder.xpm"
+#include "bitmaps/ClosedFolder.xpm"
+#include "bitmaps/OpenFolder.xpm"
 #include "bitmaps/file.xpm"
 #include "bitmaps/report.xpm"
 #include "bitmaps/openglplot.xpm"
@@ -45,7 +47,6 @@
 
 BEGIN_EVENT_TABLE(OutputTree, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, OutputTree::OnItemRightClick)
-
    EVT_TREE_ITEM_ACTIVATED(-1, OutputTree::OnItemActivated)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, OutputTree::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1, OutputTree::OnEndLabelEdit)
@@ -99,7 +100,7 @@ void OutputTree::RemoveItem(GmatTree::ItemType type, const wxString &name)
    
    wxTreeItemId parentId;
    
-   if (type == GmatTree::OUTPUT_OPENGL_PLOT)
+   if (type == GmatTree::OUTPUT_ORBIT_VIEW)
       parentId = mOpenGlItem;
    else if (type == GmatTree::OUTPUT_XY_PLOT)
       parentId = mXyPlotItem;
@@ -218,19 +219,19 @@ void OutputTree::UpdateOutput(bool resetTree, bool removeReports)
       
       if (objTypeName.Trim() == "ReportFile")
       {
-         AppendItem(mReportItem, objName, GmatTree::ICON_FILE, -1,
+         AppendItem(mReportItem, objName, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_REPORT));
       }
-      else if (objTypeName.Trim() == "OpenGLPlot" &&
+      else if (objTypeName.Trim() == "OrbitView" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mOpenGlItem, objName, GmatTree::ICON_FILE, -1,
-                    new GmatTreeItemData(objName, GmatTree::OUTPUT_OPENGL_PLOT));
+         AppendItem(mOpenGlItem, objName, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
+                    new GmatTreeItemData(objName, GmatTree::OUTPUT_ORBIT_VIEW));
       }
       else if (objTypeName.Trim() == "XYPlot" &&
                sub->GetBooleanParameter("ShowPlot"))
       {
-         AppendItem(mXyPlotItem, objName, GmatTree::ICON_FILE, -1,
+         AppendItem(mXyPlotItem, objName, GmatTree::OUTPUT_ICON_XYPLOT, -1,
                     new GmatTreeItemData(objName, GmatTree::OUTPUT_XY_PLOT));
       }
    }
@@ -255,29 +256,29 @@ void OutputTree::AddDefaultResources()
    
    //----- Reports
    mReportItem =
-      AppendItem(output, wxT("Reports"), GmatTree::ICON_FOLDER, -1,
+      AppendItem(output, wxT("Reports"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
                  new GmatTreeItemData(wxT("Reports"),
                                       GmatTree::REPORTS_FOLDER));
    
-   SetItemImage(mReportItem, GmatTree::ICON_OPENFOLDER,
+   SetItemImage(mReportItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
    
-   //----- OpenGL Plots
+   //----- Orbit Views
    mOpenGlItem =
-      AppendItem(output, wxT("OpenGL Plots"), GmatTree::ICON_FOLDER, -1,
-                 new GmatTreeItemData(wxT("OpenGL PLOTS"),
-                                      GmatTree::OPENGL_PLOTS_FOLDER));
+      AppendItem(output, wxT("Orbit Views"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
+                 new GmatTreeItemData(wxT("Orbit Views"),
+                                      GmatTree::ORBIT_VIEWS_FOLDER));
    
-   SetItemImage(mOpenGlItem, GmatTree::ICON_OPENFOLDER,
+   SetItemImage(mOpenGlItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
    
    //----- XY Plots
    mXyPlotItem =
-      AppendItem(output, wxT("XY Plots"), GmatTree::ICON_FOLDER, -1,
+      AppendItem(output, wxT("XY Plots"), GmatTree::OUTPUT_ICON_CLOSEDFOLDER, -1,
                  new GmatTreeItemData(wxT("XY Plots"),
                                       GmatTree::XY_PLOTS_FOLDER));
     
-   SetItemImage(mXyPlotItem, GmatTree::ICON_OPENFOLDER,
+   SetItemImage(mXyPlotItem, GmatTree::OUTPUT_ICON_OPENFOLDER,
                 wxTreeItemIcon_Expanded);
 }
 
@@ -315,7 +316,7 @@ void OutputTree::OnItemRightClick(wxTreeEvent& event)
 void OutputTree::ShowMenu(wxTreeItemId itemId, const wxPoint& pt)
 {
    GmatTreeItemData *treeItem = (GmatTreeItemData *)GetItemData(itemId);
-   theSubscriberName = treeItem->GetDesc();
+   theSubscriberName = treeItem->GetName();
    GmatTree::ItemType itemType = treeItem->GetItemType();
    
    #if DEBUG_OUTPUT_TREE
@@ -410,7 +411,7 @@ void OutputTree::OnRename(wxCommandEvent &event)
    
    wxTreeItemId item = GetSelection();
    GmatTreeItemData *selItem = (GmatTreeItemData *) GetItemData(item);
-   wxString oldName = selItem->GetDesc();
+   wxString oldName = selItem->GetName();
    wxString newName = oldName;
    newName = wxGetTextFromUser(wxT("New name: "), wxT("Input Text"),
                                newName, this);
@@ -482,8 +483,8 @@ void OutputTree::OnEndLabelEdit(wxTreeEvent &event)
       GmatTreeItemData *selItem = (GmatTreeItemData *)
          GetItemData(GetSelection());
       
-      wxString oldLabel = selItem->GetDesc();
-      selItem->SetDesc(newLabel);
+      wxString oldLabel = selItem->GetName();
+      selItem->SetName(newLabel);
    }
    else
    {
@@ -506,16 +507,16 @@ void OutputTree::AddIcons()
    wxImageList *images = new wxImageList ( size, size, true );
   
    wxBusyCursor wait;
-   wxIcon icons[7];
-
-   icons[0] = wxIcon ( folder_xpm );
-   icons[1] = wxIcon ( file_xpm );
-   icons[2] = wxIcon ( openfolder_xpm );
-   icons[3] = wxIcon ( report_xpm );
-   icons[4] = wxIcon ( openglplot_xpm );
-   icons[5] = wxIcon ( xyplot_xpm );
-   icons[6] = wxIcon ( default_xpm );
-
+   wxIcon icons[GmatTree::OUTPUT_ICON_COUNT];
+   
+   icons[GmatTree::OUTPUT_ICON_CLOSEDFOLDER] = wxIcon(ClosedFolder_xpm);
+   icons[GmatTree::OUTPUT_ICON_OPENFOLDER] = wxIcon(OpenFolder_xpm);
+   icons[GmatTree::OUTPUT_ICON_REPORTFILE] = wxIcon(report_xpm);
+   icons[GmatTree::OUTPUT_ICON_ORBITVIEW] = wxIcon(openglplot_xpm);
+   icons[GmatTree::OUTPUT_ICON_XYPLOT] = wxIcon(xyplot_xpm);
+   icons[GmatTree::OUTPUT_ICON_FILE] = wxIcon(file_xpm);
+   icons[GmatTree::OUTPUT_ICON_DEFAULT] = wxIcon(default_xpm);
+   
    int sizeOrig = icons[0].GetWidth();
    for ( size_t i = 0; i < WXSIZEOF(icons); i++ )
    {
@@ -551,7 +552,7 @@ void OutputTree::OnAddReportFile(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("ReportFile", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_REPORT, -1,
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_REPORTFILE, -1,
                  new GmatTreeItemData(name, GmatTree::REPORT_FILE));
 
       Expand(item);
@@ -578,7 +579,7 @@ void OutputTree::OnAddXyPlot(wxCommandEvent &event)
    if (theGuiInterpreter->CreateSubscriber
        ("XYPlot", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_XY_PLOT, -1,
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_XYPLOT, -1,
                  new GmatTreeItemData(name, GmatTree::XY_PLOT));
       
       Expand(item);
@@ -587,7 +588,7 @@ void OutputTree::OnAddXyPlot(wxCommandEvent &event)
 
 
 //------------------------------------------------------------------------------
-// void OnAddOpenGlPlot(wxCommandEvent &event)
+// void OnAddOrbitView(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 /**
  * Add an opengl plot to plots folder
@@ -595,18 +596,18 @@ void OutputTree::OnAddXyPlot(wxCommandEvent &event)
  * @param <event> command event
  */
 //------------------------------------------------------------------------------
-void OutputTree::OnAddOpenGlPlot(wxCommandEvent &event)
+void OutputTree::OnAddOrbitView(wxCommandEvent &event)
 {
    wxTreeItemId item = GetSelection();
-  
+   
    wxString name;
-   name.Printf("OpenGLPlot");
-
+   name.Printf("OrbitView");
+   
    if (theGuiInterpreter->CreateSubscriber
-       ("OpenGLPlot", std::string(name.c_str())) != NULL)
+       ("OrbitView", std::string(name.c_str())) != NULL)
    {
-      AppendItem(item, name, GmatTree::ICON_OPEN_GL_PLOT, -1,
-                 new GmatTreeItemData(name, GmatTree::OPENGL_PLOT));
+      AppendItem(item, name, GmatTree::OUTPUT_ICON_ORBITVIEW, -1,
+                 new GmatTreeItemData(name, GmatTree::ORBIT_VIEW));
 
       Expand(item);
    }
@@ -637,7 +638,7 @@ void OutputTree::OnCompareNumericValues(wxCommandEvent &event)
       return;
    }
    
-   std::string filename1 = theReport->GetFileName();
+   std::string filename1 = theReport->GetPathAndFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename2 =
       wxFileSelector("Choose a file to open", "", "", "report",
@@ -705,7 +706,7 @@ void OutputTree::OnCompareTextLines(wxCommandEvent &event)
       return;
    }
    
-   std::string filename1 = theReport->GetFileName();
+   std::string filename1 = theReport->GetPathAndFileName();
    StringArray colTitles = theReport->GetRefObjectNameArray(Gmat::PARAMETER);
    wxString filename2 =
       wxFileSelector("Choose a file to open", "", "", "report",

@@ -1,11 +1,21 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ScriptEventPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2005/1/12
+// Modified:
+//    2006.12.04 Linda Jun
+//       - Implemented save changes by replacing old command sequence with new
 //
 /**
  * Declares ScriptEventPanel class.
@@ -17,28 +27,47 @@
 
 #include "GmatPanel.hpp"
 #include "Parameter.hpp"
+#include "MissionTreeItemData.hpp"
+#include <wx/laywin.h>
+
+#ifdef __USE_STC_EDITOR__
+#include "Editor.hpp"
+#endif
 
 class ScriptEventPanel: public GmatPanel
 {
 public:
    // constructors
-   //ScriptEventPanel(wxWindow *parent, GmatCommand *cmd);
    ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item);
    ~ScriptEventPanel();
    
+   virtual void SetEditorModified(bool flag);
+   
    wxTextCtrl *mFileContentsTextCtrl;
+   
+#ifdef __USE_STC_EDITOR__
+   Editor* GetEditor() { return mEditor; };
+#endif
    
 private:
    // member data
+#ifdef __USE_STC_EDITOR__
+   Editor *mEditor;
+#endif
+   
    MissionTreeItemData *theItem;
    GmatCommand *theCommand;
    GmatCommand *mPrevCommand;
    GmatCommand *mNextCommand;
    GmatCommand *mNewCommand;
    
+   wxSashLayoutWindow* theCommentsWin;
+   wxSashLayoutWindow* theScriptsWin;
+   
+   wxTextCtrl  *mCommentTextCtrl;
    wxGridSizer *mBottomSizer;
-   wxBoxSizer *mPageSizer;
-
+   wxBoxSizer  *mPageSizer;
+   
    void ReplaceScriptEvent();
    
    // for Debug
@@ -51,19 +80,21 @@ private:
    virtual void SaveData();
    
    // event handling
-   void OnTextUpdate(wxCommandEvent& event);
+   void OnCommentChange(wxCommandEvent& event);
+   void OnScriptChange(wxCommandEvent& event);
+   void OnSashDrag(wxSashEvent &event);
+   void OnSize(wxSizeEvent &event);
    
    DECLARE_EVENT_TABLE();
-
+   
    // IDs for the controls and the menu commands
    enum
-   {     
-      ID_TEXT = 9000,
-      ID_LISTBOX,
-      ID_BUTTON,
-      ID_COLOR_BUTTON,
-      ID_COMBO,
-      ID_TEXTCTRL
+   {
+      ID_SASH_WINDOW = 9000,
+      ID_TEXT,
+      ID_COMMENT_CTRL,
+      ID_SCRIPT_CTRL,
+      ID_STC,
    };
 };
 

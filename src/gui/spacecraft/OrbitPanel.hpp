@@ -1,11 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            OrbitPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -55,6 +57,8 @@ private:
    StringArray mStateTypeNames;
    /// valid anomaly type in the Anomaly
    StringArray mAnomalyTypeNames;
+   /// names of the available coordinate systems
+   StringArray coordSystemNames;
    
    Anomaly mAnomaly;
    Anomaly mTrueAnomaly;
@@ -63,6 +67,8 @@ private:
    bool dataChanged;
    bool canClose;
    
+   bool coordSysCBOnly;
+
    Spacecraft     *theSpacecraft;
    SolarSystem    *theSolarSystem;
    GuiItemManager *theGuiManager;
@@ -113,6 +119,7 @@ private:
 
    void DisplayState();
    void BuildValidStateTypes();
+   void BuildValidCoordinateSystemList(const std::string &forStateType);
    void BuildState(const Rvector6 &inputState, bool isInternal = false);
    
    wxString ToString(Real rval);

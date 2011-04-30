@@ -1,13 +1,21 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ForPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2004/05/17
+//
 /**
- * This class contains the Conditional Statement Setup window.
+ * Declares the For loop setup window.
  */
 //------------------------------------------------------------------------------
 #ifndef ForPanel_hpp
@@ -33,10 +41,19 @@ public:
    ~ForPanel();  
 
 private:
-   static const int INDEX_COL = 0;
-   static const int START_COL = 1;
-   static const int INCR_COL = 2;
-   static const int END_COL = 3;
+
+   enum GridColumn
+   {
+      INDEX_SEL_COL = 0,
+      INDEX_COL,
+      START_SEL_COL,
+      START_COL,
+      INCR_SEL_COL,
+      INCR_COL,
+      END_SEL_COL,
+      END_COL,
+      MAX_COL,
+   };
    
    wxString mIndexString;
    wxString mStartString;
@@ -63,10 +80,13 @@ private:
    virtual void LoadData();
    virtual void SaveData();
    
-   // Layout & data handling methods
-   void Setup(wxWindow *parent);
-   void OnCellValueChange(wxGridEvent& event);
+   // data handling methods
+   void GetNewValue(Integer row, Integer col);
+   
+   // event handling methods
+   void OnCellLeftClick(wxGridEvent& event);
    void OnCellRightClick(wxGridEvent& event);
+   void OnCellValueChange(wxGridEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();

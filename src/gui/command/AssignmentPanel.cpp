@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              AssignmentPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -16,7 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include "AssignmentPanel.hpp"
+#include "StringUtil.hpp"           // for GmatStringUtil::
 #include "MessageInterface.hpp"
+#include <wx/config.h>
 
 //#define DEBUG_ASSIGNMENT_PANEL 1
 //#define DEBUG_ASSIGNMENT_PANEL_SAVE 1
@@ -75,27 +79,37 @@ void AssignmentPanel::Create()
    #endif
    
    int bsize = 2; // bordersize
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Equation"));
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 0, 0);
    
+   wxStaticText *mLhsLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Left-Hand Side") );
    mLhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(150,-1), 0);
+   mLhsTextCtrl->SetToolTip(pConfig->Read(_T("LeftHandSideHint")));
    
    wxStaticText *equalSign =
       new wxStaticText(this, ID_TEXT, wxT(" = "),
                        wxDefaultPosition, wxDefaultSize, 0);
    
+   wxStaticText *mRhsLabel =
+      new wxStaticText( this, ID_TEXT, wxT(GUI_ACCEL_KEY"Right-Hand Side") );
    mRhsTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                      wxDefaultPosition, wxSize(400,-1), 0);
+   mRhsTextCtrl->SetToolTip(pConfig->Read(_T("RightHandSideHint")));
    
-   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(10, 10, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(mLhsTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(mLhsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   pageSizer->Add(0, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(mRhsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   pageSizer->Add(mLhsTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    pageSizer->Add(equalSign, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageSizer->Add(mRhsTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
+   pageSizer->Add(mRhsTextCtrl, 0, wxALIGN_LEFT|wxALL, bsize);
    
    theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTER|wxALL, bsize);
    

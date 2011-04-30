@@ -2,15 +2,23 @@
 //------------------------------------------------------------------------------
 //                              FormationSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2004/02/12
+// Modified: 
+//    2010.03.22 Thomas Grubb 
+//      - Read tooltips from configuration file (GMAT.ini)
+//      - Added tooltips & accelerator keys
+//      - Added GmatStaticBoxSizers group boxes
+//      - Added ability to add and remove spacecraft via double-click
 /**
  * Implements FormationSetupPanel class.
  */
@@ -19,6 +27,8 @@
 #include "GmatAppData.hpp"
 #include "Formation.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
+#include <wx/config.h>
 
 // #define DEBUG_FORMATION 1
 
@@ -30,8 +40,12 @@ BEGIN_EVENT_TABLE(FormationSetupPanel, GmatPanel)
    EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
+#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatPanel::OnHelp)
-    
+#endif
+
+   EVT_LISTBOX_DCLICK(AVL_LISTBOX, FormationSetupPanel::OnAddSpaceObject)
+   EVT_LISTBOX_DCLICK(SEL_LISTBOX, FormationSetupPanel::OnRemoveSpaceObject)
    EVT_BUTTON(ADD_BUTTON, FormationSetupPanel::OnAddSpaceObject)
    EVT_BUTTON(REMOVE_BUTTON, FormationSetupPanel::OnRemoveSpaceObject)
    EVT_BUTTON(CLEAR_BUTTON, FormationSetupPanel::OnClearSpaceObject)
@@ -98,38 +112,43 @@ void FormationSetupPanel::Create()
    //causing VC++ error => wxString emptyList[] = {};
    wxArrayString emptyList;
 
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Formation"));
+
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    wxFlexGridSizer *mFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    
    //------------------------------------------------------
    // available SpaceObject list (1st column)
    //------------------------------------------------------
-   wxBoxSizer *availableBoxSizer = new wxBoxSizer(wxVERTICAL);
-   
-   wxStaticText *titleAvailable =
-      new wxStaticText(this, -1, wxT("Space Objects"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+   GmatStaticBoxSizer *availableBoxSizer = new GmatStaticBoxSizer( wxVERTICAL, this, 
+      wxT("Space"GUI_ACCEL_KEY"craft") );
    
    mSoExcList.Add(mFormationName.c_str());
    
    mSoAvailableListBox = 
-      theGuiManager->GetSpaceObjectListBox(this, -1, wxSize(150, 200),
+      theGuiManager->GetSpaceObjectListBox(this, AVL_LISTBOX, wxSize(150, 200),
                                            &mSoExcList, false); //loj: 7/18/05 Added false
+   mSoAvailableListBox->SetToolTip(pConfig->Read(_T("AvailableSpacecraftListHint")));
    
-   availableBoxSizer->Add(titleAvailable, 0, wxALIGN_CENTRE|wxALL, bsize);
    availableBoxSizer->Add(mSoAvailableListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
+
    //------------------------------------------------------
    // add, remove, clear parameter buttons (2nd column)
    //------------------------------------------------------
-   wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("-->"),
+   wxButton *addScButton = new wxButton(this, ADD_BUTTON, wxT("--"GUI_ACCEL_KEY">"),
                                wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   addScButton->SetToolTip(pConfig->Read(_T("AddSpacecraftHint")));
    
-   wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT("<--"),
+   wxButton *removeScButton = new wxButton(this, REMOVE_BUTTON, wxT(GUI_ACCEL_KEY"<--"),
                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   removeScButton->SetToolTip(pConfig->Read(_T("RemoveSpacecraftHint")));
    
-   wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<="),
+   wxButton *clearScButton = new wxButton(this, CLEAR_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
                               wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   clearScButton->SetToolTip(pConfig->Read(_T("ClearSpacecraftHint")));
    
    wxBoxSizer *arrowButtonsBoxSizer = new wxBoxSizer(wxVERTICAL);
    arrowButtonsBoxSizer->Add(addScButton, 0, wxALIGN_CENTRE|wxALL, bsize);
@@ -139,16 +158,14 @@ void FormationSetupPanel::Create()
    //------------------------------------------------------
    // selected spacecraft list (4th column)
    //------------------------------------------------------
-   wxStaticText *titleSelected =
-      new wxStaticText(this, -1, wxT("Space Objects in Formation"),
-                       wxDefaultPosition, wxSize(-1,-1), 0);
+   GmatStaticBoxSizer *mSoSelectedBoxSizer = new GmatStaticBoxSizer( wxVERTICAL, this, 
+      wxT("Spacecraft in "GUI_ACCEL_KEY"Formation") );
    
    mSoSelectedListBox =
       new wxListBox(this, SEL_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
                     emptyList, wxLB_SINGLE);
+   mSoSelectedListBox->SetToolTip(pConfig->Read(_T("SelectedSpacecraftListHint")));
    
-   wxBoxSizer *mSoSelectedBoxSizer = new wxBoxSizer(wxVERTICAL);
-   mSoSelectedBoxSizer->Add(titleSelected, 0, wxALIGN_CENTRE|wxALL, bsize);
    mSoSelectedBoxSizer->Add(mSoSelectedListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    //------------------------------------------------------

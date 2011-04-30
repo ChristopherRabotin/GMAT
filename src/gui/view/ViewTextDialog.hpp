@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         ViewTextDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -27,27 +29,27 @@ class ViewTextDialog : public wxDialog
 {
 public:
    ViewTextDialog(wxWindow *parent, const wxString& title, int w, int h);
-   
+
    void AppendText(const wxString& text);
    void SetMaxLength(unsigned long len) { theText->SetMaxLength(len); };
    wxTextCtrl *GetTextCtrl() { return theText; };
-   
+
    virtual void OnOK(wxCommandEvent &event);
-   
+
 protected:
-   
+
    /// The component on the dialog that shows the text.
    wxTextCtrl *theText;
    wxButton *theOkButton;
-   
+
    wxBoxSizer *theDialogSizer;
    wxBoxSizer *theButtonSizer;
    wxBoxSizer *theMiddleSizer;
    wxBoxSizer *theBottomSizer;
-   
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-   
+
    // IDs for the controls and the menu commands
    enum
    {

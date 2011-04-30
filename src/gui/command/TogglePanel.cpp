@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              TogglePanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/10/20
@@ -45,16 +49,27 @@ END_EVENT_TABLE()
  * @param <parent> input parent.
  */
 //------------------------------------------------------------------------------
-TogglePanel::TogglePanel(wxWindow *parent, GmatCommand *cmd)
+TogglePanel::TogglePanel(wxWindow *parent, GmatCommand *cmd, bool forXyPlotOnly)
    : GmatPanel(parent)
 {
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage
+      ("TogglePanel::TogglePanel() entered, parent=<%p>, cmd=<%p>, forXyPlotOnly=%d\n",
+       parent, cmd, forXyPlotOnly);
+   #endif
+   
    theCommand = cmd;
-
+   isForXyPlotOnly = forXyPlotOnly;
+   
    if (theCommand != NULL)
    {
       Create();
       Show();
    }
+   
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::TogglePanel() leaving\n");
+   #endif
 }
 
 
@@ -63,7 +78,10 @@ TogglePanel::TogglePanel(wxWindow *parent, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 TogglePanel::~TogglePanel()
 {
-   theGuiManager->UnregisterCheckListBox("Subscriber", mSubsCheckListBox);
+   if (isForXyPlotOnly)
+      theGuiManager->UnregisterCheckListBox("XYPlot", mSubsCheckListBox);
+   else
+      theGuiManager->UnregisterCheckListBox("Subscriber", mSubsCheckListBox);
 }
 
 
@@ -84,40 +102,59 @@ TogglePanel::~TogglePanel()
 //------------------------------------------------------------------------------
 void TogglePanel::Create()
 {
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::Create() entered\n");
+   #endif
+   
    int bsize = 3;
-    
+   wxString cmdName = theCommand->GetTypeName().c_str();
+   
    // create object label
    wxStaticText *objectLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Select Subscribers to Toggle"),
+      new wxStaticText(this, ID_TEXT, wxT("Select Subscribers to " + cmdName),
                        wxDefaultPosition, wxDefaultSize, 0);
    
    // create subscriber check list box
-   mSubsCheckListBox =
-      theGuiManager->GetSubscriberCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
+   if (isForXyPlotOnly)
+      mSubsCheckListBox =
+         theGuiManager->GetXyPlotCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
+   else
+      mSubsCheckListBox =
+         theGuiManager->GetSubscriberCheckListBox(this, ID_CHECKLISTBOX, wxSize(150,-1));
    
    // On or Off button
-   mOnRadioButton =
-      new wxRadioButton(this, ID_RADIOBUTTON, wxT("On"),
-                        wxDefaultPosition, wxDefaultSize, 0);
-   
-   mOffRadioButton =
-      new wxRadioButton(this, ID_RADIOBUTTON, wxT("Off"),
-                        wxDefaultPosition, wxDefaultSize, 0);
+   if (!isForXyPlotOnly)
+   {
+      mOnRadioButton =
+         new wxRadioButton(this, ID_RADIOBUTTON, wxT("On"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+      
+      mOffRadioButton =
+         new wxRadioButton(this, ID_RADIOBUTTON, wxT("Off"),
+                           wxDefaultPosition, wxDefaultSize, 0);
+   }
    
    // create sizers
-   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *buttonSizer = NULL;
    wxBoxSizer *pageSizer = new wxBoxSizer(wxHORIZONTAL);
-   
-   buttonSizer->Add(mOnRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
-   buttonSizer->Add(mOffRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   if (!isForXyPlotOnly)
+   {
+      buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+      buttonSizer->Add(mOnRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
+      buttonSizer->Add(mOffRadioButton, 0, wxALIGN_CENTER | wxALL, bsize);
+   }
    
    pageSizer->Add(objectLabel, 0, wxALIGN_CENTER | wxALL, bsize);
    pageSizer->Add(mSubsCheckListBox, 0, wxALIGN_CENTER | wxALL, bsize);
-   pageSizer->Add(buttonSizer, 0, wxALIGN_CENTER | wxALL, bsize);
-
+   if (!isForXyPlotOnly)
+      pageSizer->Add(buttonSizer, 0, wxALIGN_CENTER | wxALL, bsize);
+   
    // add to middle sizer
-   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, bsize);     
-
+   theMiddleSizer->Add(pageSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -126,53 +163,69 @@ void TogglePanel::Create()
 //------------------------------------------------------------------------------
 void TogglePanel::LoadData()
 {
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::LoadData() entered\n");
+   #endif
+   
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
    
-   // get subscriber names 
-   StringArray subNames = theCommand->GetRefObjectNameArray(Gmat::SUBSCRIBER);
-   int subsize = subNames.size();
-   
-   std::string toggleState = theCommand->GetStringParameter
-      (theCommand->GetParameterID("ToggleState"));
-   
-   #if DEBUG_TOGGLE_PANEL
-   for (unsigned int i=0; i<subNames.size(); i++)
-      MessageInterface::ShowMessage
-         ("TogglePanel::LoadData() subName[%d]=%s, toggleState=%s\n", i,
-          subNames[i].c_str(), toggleState.c_str());
-   #endif
-   
-   // Initialize check list box
-   std::string name;
-   std::string subName;
-   for (UnsignedInt i=0; i<mSubsCheckListBox->GetCount(); i++)
+   try
    {
-      name = mSubsCheckListBox->GetString(i).c_str();
-      for (int j=0; j<subsize; j++)
+      // get subscriber names 
+      StringArray subNames = theCommand->GetRefObjectNameArray(Gmat::SUBSCRIBER);
+      int subsize = subNames.size();
+      
+      std::string toggleState;
+      if (!isForXyPlotOnly)
       {
-         subName = subNames[j];
-         if (name == subName)
+         toggleState = theCommand->GetStringParameter
+            (theCommand->GetParameterID("ToggleState"));
+      
+         #if DEBUG_TOGGLE_PANEL
+         for (unsigned int i=0; i<subNames.size(); i++)
+            MessageInterface::ShowMessage
+               ("TogglePanel::LoadData() subName[%d]=%s, toggleState=%s\n", i,
+                subNames[i].c_str(), toggleState.c_str());
+         #endif
+      }
+      
+      // Initialize check list box
+      std::string name;
+      std::string subName;
+      for (UnsignedInt i=0; i<mSubsCheckListBox->GetCount(); i++)
+      {
+         name = mSubsCheckListBox->GetString(i).c_str();
+         for (int j=0; j<subsize; j++)
          {
-            mSubsCheckListBox->Check(i);
-            break;
+            subName = subNames[j];
+            #if DEBUG_TOGGLE_PANEL
+            MessageInterface::ShowMessage
+               ("   name='%s', subName='%s'\n", name.c_str(), subName.c_str());
+            #endif
+            if (name == subName)
+            {
+               mSubsCheckListBox->Check(i);
+               break;
+            }
          }
       }
       
-      #if DEBUG_TOGGLE_PANEL
-      MessageInterface::ShowMessage("   name=%s\n", name.c_str());
-      #endif
-      
+      if (!isForXyPlotOnly)
+      {
+         if (toggleState == "On")
+            mOnRadioButton->SetValue(true);
+         else
+            mOffRadioButton->SetValue(true);
+      }
    }
-
-   if (toggleState == "On")
-      mOnRadioButton->SetValue(true);
-   else
-      mOffRadioButton->SetValue(true);
+   catch (GmatBaseException &ex)
+   {
+      MessageInterface::ShowMessage(ex.GetFullMessage());
+   }
    
    #if DEBUG_TOGGLE_PANEL
-   MessageInterface::ShowMessage
-      ("TogglePanel::LoadData() exiting\n");
+   MessageInterface::ShowMessage("TogglePanel::LoadData() leaving\n");
    #endif
 }
 
@@ -182,10 +235,16 @@ void TogglePanel::LoadData()
 //------------------------------------------------------------------------------
 void TogglePanel::SaveData()
 {
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::SaveData() entered\n");
+   #endif
+   
    int count = mSubsCheckListBox->GetCount();
-   bool toggleOn = mOnRadioButton->GetValue();
-   std::string onOff = toggleOn ? "On" : "Off";
    int checkedCount = 0;
+   std::string onOff = "Off";
+   
+   if (!isForXyPlotOnly)
+      onOff = mOnRadioButton->GetValue() ? "On" : "Off";
    
    canClose = true;
    
@@ -195,7 +254,7 @@ void TogglePanel::SaveData()
    for (int i=0; i<count; i++)
       if (mSubsCheckListBox->IsChecked(i))
          checkedCount++;
-
+   
    if (checkedCount == 0)
    {
       MessageInterface::PopupMessage
@@ -204,32 +263,58 @@ void TogglePanel::SaveData()
       canClose = false;
       return;
    }
-
+   
    
    //-----------------------------------------------------------------
    // save values to base, base code should do any range checking
    //-----------------------------------------------------------------
    
-   theCommand->TakeAction("Clear");
-   
-   std::string subName;
-   for (int i=0; i<count; i++)
+   try
    {
-      if (mSubsCheckListBox->IsChecked(i))
+      theCommand->TakeAction("Clear");
+      
+      std::string subName;
+      std::string cmdStr = theCommand->GetTypeName();
+      for (int i=0; i<count; i++)
       {
-         subName = mSubsCheckListBox->GetString(i);
-         theCommand->SetStringParameter(theCommand->GetParameterID("Subscriber"), subName);
-         
-         #if DEBUG_TOGGLE_PANEL
-         MessageInterface::ShowMessage
-            ("TogglePanel::SaveData() subName=%s, onOff=%s\n", subName.c_str(),
-             onOff.c_str());
-         #endif
+         if (mSubsCheckListBox->IsChecked(i))
+         {
+            subName = mSubsCheckListBox->GetString(i);
+            cmdStr = cmdStr + " " + subName;
+
+            //@todo
+            // We need to add SetStringParameter() to MarkPoint, ClearPlot, PenUp/Down
+            if (!isForXyPlotOnly)
+               theCommand->SetStringParameter(theCommand->GetParameterID("Subscriber"), subName);
+            
+            #if DEBUG_TOGGLE_PANEL
+            MessageInterface::ShowMessage
+               ("TogglePanel::SaveData() subName=%s, onOff=%s\n", subName.c_str(),
+                onOff.c_str());
+            #endif
+         }
       }
+      
+      if (isForXyPlotOnly)
+      {
+         #if DEBUG_TOGGLE_PANEL
+         MessageInterface::ShowMessage("   cmdStr='%s'\n", cmdStr.c_str());
+         #endif
+         theCommand->SetGeneratingString(cmdStr);
+         theCommand->InterpretAction();
+      }
+      else
+         theCommand->SetStringParameter(theCommand->GetParameterID("ToggleState"), onOff);
+      
+   }
+   catch (BaseException &ex)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage());
    }
    
-   theCommand->SetStringParameter(theCommand->GetParameterID("ToggleState"), onOff);
-   
+   #if DEBUG_TOGGLE_PANEL
+   MessageInterface::ShowMessage("TogglePanel::SaveData() leaving\n");
+   #endif
 }
 
 //---------------------------------
@@ -262,13 +347,4 @@ void TogglePanel::OnCheckListBoxChange(wxCommandEvent& event)
    EnableUpdate(true);
 }
 
-
-// //------------------------------------------------------------------------------
-// // void OnSelectSubscriber(wxCommandEvent& event)
-// //------------------------------------------------------------------------------
-// void TogglePanel::OnSelectSubscriber(wxCommandEvent& event)
-// {
-//    ShowOption();
-//    EnableUpdate(true);
-// }
 

@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                             GuiMessageReceiver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -56,10 +58,10 @@ GuiMessageReceiver*  GuiMessageReceiver::instance = NULL;
 //------------------------------------------------------------------------------
 GuiMessageReceiver::GuiMessageReceiver() :
    MAX_MESSAGE_LENGTH      (10000),
-   logFile                 (NULL)
+   logFile                 (NULL),
+   logEnabled              (false),
+   logFileSet              (false)
 {
-   messageQueue.push
-      ("GuiMessageReceiver.cpp:GuiMessageReceiver(): Starting GMAT ...");
 }
 
 //------------------------------------------------------------------------------
@@ -99,30 +101,6 @@ GuiMessageReceiver* GuiMessageReceiver::Instance()
 
 
 //------------------------------------------------------------------------------
-//  std::string GetMessage()
-//------------------------------------------------------------------------------
-/**
- * Pops the messages off the message queue and concatenates them together.
- * 
- * @return The concatenated messages.
- */
-//------------------------------------------------------------------------------
-std::string GuiMessageReceiver::GetMessage()
-{
-   std::string msg;
-   
-   while (!GuiMessageReceiver::messageQueue.empty())
-   {
-      msg = msg + GuiMessageReceiver::messageQueue.front().c_str();
-      GuiMessageReceiver::messageQueue.pop();
-   }
-   GuiMessageReceiver::messageExist = 0;
-
-   return msg;
-}
-
-
-//------------------------------------------------------------------------------
 //  void ClearMessage()
 //------------------------------------------------------------------------------
 /**
@@ -133,9 +111,7 @@ void GuiMessageReceiver::ClearMessage()
 {
    GmatAppData *appData = GmatAppData::Instance();
    if (appData->GetMessageTextCtrl() != NULL)
-   {
       appData->GetMessageTextCtrl()->Clear();
-   }
 }
 
 
@@ -181,8 +157,13 @@ void GuiMessageReceiver::ShowMessage(const std::string &msgString)
 {
    GmatAppData *appData = GmatAppData::Instance();
    if (appData->GetMessageTextCtrl() != NULL)
+   {
       appData->GetMessageTextCtrl()->AppendText(wxString(msgString.c_str()));
-   
+      // Added since text in the message window are not always scrolled down,
+      // such as debug message from the panel or dialog (LOJ: 2009.03.20)
+      appData->GetMessageTextCtrl()->PageDown();
+      appData->GetMessageTextCtrl()->Update();
+   }
    LogMessage(msgString);   
 }
 
@@ -191,7 +172,8 @@ void GuiMessageReceiver::ShowMessage(const std::string &msgString)
 //  void ShowMessage(const char *msg, ...)
 //------------------------------------------------------------------------------
 /**
- * Displays a message passed in as a char* and a variable argument list.
+ * Displays a message passed in as a char* and a variable argument
+ * list.  Throws std::bad_alloc on memory exhaustion.
  * 
  * @param msg The message, possibly including markers for variable argument 
  *            substitution.
@@ -211,25 +193,42 @@ void GuiMessageReceiver::ShowMessage(const char *msg, ...)
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    //LogMessage("strlen(msg)=%d, size=%d\n", strlen(msg), size);
    
-   if( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);
-      va_end(marker);
-      //LogMessage("ret from vsprintf()=%d\n", ret);
-   }
-   else
-   {
-      msgBuffer = 
-         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
-   }
+//   if( (msgBuffer = (char *)malloc(size)) != NULL )
+//   {
+//      va_start(marker, msg);
+//      ret = vsprintf(msgBuffer, msg, marker);
+//      va_end(marker);
+//      //LogMessage("ret from vsprintf()=%d\n", ret);
+//   }
+//   else
+//   {
+//      msgBuffer =
+//         "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+//   }
+
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer)
+      throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
+   //LogMessage("ret from vsprintf()=%d\n", ret);
    
    GmatAppData *appData = GmatAppData::Instance();
    if (appData->GetMessageTextCtrl() != NULL)
       appData->GetMessageTextCtrl()->AppendText(wxString(msgBuffer));
    
    LogMessage(std::string(msgBuffer));
-   free(msgBuffer);
+
+//   free(msgBuffer);
+   delete[] msgBuffer;
 } // end ShowMessage()
 
 
@@ -308,6 +307,8 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const std::stri
  * 
  * This method logs informational messages directed at pop-up message boxes and
  * shows the message as a pop-up.
+ *
+ * Throws std::bad_alloc in memory exhaustion.
  * 
  * @param msgType The type of message that is displayed, selected from the set
  *                {ERROR_, WARNING_, INFO_} enumerated in the Gmat namespace.
@@ -328,20 +329,37 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if ( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);      
-      va_end(marker);
-      
-      // if no EOL then append it
-      if (msgBuffer[strlen(msgBuffer)-1] != '\n')
-         msgBuffer[strlen(msgBuffer)] = '\n';
-   }
-   else
-   {
-      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
-   }
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer) throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
+
+   // if no EOL then append it
+   if (msgBuffer[strlen(msgBuffer)-1] != '\n')
+      msgBuffer[strlen(msgBuffer)] = '\n';
+
+//   if ( (msgBuffer = (char *)malloc(size)) != NULL )
+//   {
+//      va_start(marker, msg);
+//      ret = vsprintf(msgBuffer, msg, marker);
+//      va_end(marker);
+//
+//      // if no EOL then append it
+//      if (msgBuffer[strlen(msgBuffer)-1] != '\n')
+//         msgBuffer[strlen(msgBuffer)] = '\n';
+//   }
+//   else
+//   {
+//      msgBuffer = "*** WARNING *** Cannot allocate enough memory to show the message.\n";
+//   }
    
    // always show message
    ShowMessage(msgBuffer);
@@ -367,8 +385,8 @@ void GuiMessageReceiver::PopupMessage(Gmat::MessageType msgType, const char *msg
       };
    }
    
-   free(msgBuffer);
-   
+//   free(msgBuffer);
+   delete[] msgBuffer;
 } // end PopupMessage()
 
 
@@ -460,8 +478,10 @@ void GuiMessageReceiver::LogMessage(const std::string &msg)
 /**
  * Logs a variable argument formatted message to the log file.
  * 
- * This method calls teh std::string vrrersion of LogMessage to do the actual 
+ * This method calls the std::string vrrersion of LogMessage to do the actual
  * logging.
+ *
+ * Throws std::bad_alloc on memory exhaustion.
  * 
  * @param msg The message, possibly including markers for variable argument 
  *            substitution.
@@ -480,20 +500,35 @@ void GuiMessageReceiver::LogMessage(const char *msg, ...)
    // actual max message length is MAX_MESSAGE_LENGTH
    size = strlen(msg) + MAX_MESSAGE_LENGTH;
    
-   if ( (msgBuffer = (char *)malloc(size)) != NULL )
-   {
-      va_start(marker, msg);      
-      ret = vsprintf(msgBuffer, msg, marker);      
-      va_end(marker);
-   }
-   else
-   {
-      msgBuffer = "*** WARNING *** Cannot allocate enough memory to log the message.\n";
-   }
+//   if ( (msgBuffer = (char *)malloc(size)) != NULL )
+//   {
+//      va_start(marker, msg);
+//      ret = vsprintf(msgBuffer, msg, marker);
+//      va_end(marker);
+//   }
+//   else
+//   {
+//      msgBuffer = "*** WARNING *** Cannot allocate enough memory to log the message.\n";
+//   }
+//
+
+   // Note: 'new' throws an exception of type std::bad_alloc on failure.
+   // (Note that if an exception is thrown, no memory will have been
+   // allocated, so there will be no memory leak.)
+   msgBuffer = new char[size];
+
+   // For older C++ compilers, duplicate that behavior by hand.
+   if (!msgBuffer) throw std::bad_alloc();
+
+   // Process the message
+   va_start(marker, msg);
+   ret = vsprintf(msgBuffer, msg, marker);
+   va_end(marker);
    
    LogMessage(std::string(msgBuffer));
-   free(msgBuffer);
    
+//   free(msgBuffer);
+   delete[] msgBuffer;
 } // end LogMessage()
 
 
@@ -626,4 +661,60 @@ void GuiMessageReceiver::CloseLogFile()
 {
    if (logFile)
       fclose(logFile);
+   
+   logFile = NULL;
+   logFileSet = false;
 }
+
+
+//------------------------------------------------------------------------------
+//  std::string GetMessage()
+//------------------------------------------------------------------------------
+/**
+ * Pops the messages off the message queue and concatenates them together.
+ * 
+ * @return The concatenated messages.
+ */
+//------------------------------------------------------------------------------
+std::string GuiMessageReceiver::GetMessage()
+{
+   std::string msg;
+   
+   while (!GuiMessageReceiver::messageQueue.empty())
+   {
+      msg = msg + messageQueue.front().c_str();
+      messageQueue.pop();
+   }
+   GuiMessageReceiver::messageExist = 0;
+   
+   return msg;
+}
+
+//------------------------------------------------------------------------------
+// void PutMessage(const std::string &msg)
+//------------------------------------------------------------------------------
+/**
+ * Push the message into queue
+ */
+//------------------------------------------------------------------------------
+void GuiMessageReceiver::PutMessage(const std::string &msg)
+{
+   messageQueue.push(msg);
+}
+
+//------------------------------------------------------------------------------
+// void ClearMessageQueue()
+//------------------------------------------------------------------------------
+/**
+ * Tells the MessageReceiver to clear the message queue.
+ */
+//------------------------------------------------------------------------------
+void GuiMessageReceiver::ClearMessageQueue()
+{
+   while (!GuiMessageReceiver::messageQueue.empty())
+      messageQueue.pop();
+   
+   GuiMessageReceiver::messageExist = 0;
+}
+
+

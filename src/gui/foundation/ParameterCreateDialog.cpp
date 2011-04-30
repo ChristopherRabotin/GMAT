@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              ParameterCreateDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -15,30 +19,47 @@
 //------------------------------------------------------------------------------
 
 #include "ParameterCreateDialog.hpp"
+#include "ParameterSelectDialog.hpp"
 #include "GmatStaticBoxSizer.hpp"
 #include "RgbColor.hpp"
 #include "ParameterInfo.hpp"            // for GetDepObjectType()
+#include "StringUtil.hpp"               // for GmatStringUtil::
 #include "MessageInterface.hpp"
 #include "StringTokenizer.hpp"
+#include "Array.hpp"
+#include "gmatdefs.hpp"
+#include "ArraySetupDialog.hpp"
+#include "bitmaps/NewMission.xpm"
 
-#include "wx/colordlg.h"   // for wxColourDialog
+#include <wx/tglbtn.h>
+#include <wx/notebook.h>
+#include <wx/config.h>
+#include <wx/variant.h>                 // for wxVariant()
 
-//#define DEBUG_PARAM_CREATE_DIALOG 1
-//#define DEBUG_PARAM_CREATE_VAR 1
-//#define DEBUG_PARAM_CREATE_SAVE 1
+//#define DEBUG_PARAM_CREATE
+//#define DEBUG_PARAM_CREATE_VAR
+//#define DEBUG_PARAM_CREATE_LOAD
+//#define DEBUG_PARAM_CREATE_SAVE
+//#define DEBUG_PAGE_CHANGED
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ParameterCreateDialog, GmatDialog)
-   EVT_BUTTON(ID_BUTTON, ParameterCreateDialog::OnButton)
-   EVT_BUTTON(ID_COLOR_BUTTON, ParameterCreateDialog::OnColorButtonClick)
-   EVT_COMBOBOX(ID_COMBO, ParameterCreateDialog::OnComboBoxChange)
-   EVT_LISTBOX(ID_PROPERTY_LISTBOX, ParameterCreateDialog::OnSelectProperty)
-   EVT_TEXT(ID_TEXTCTRL, ParameterCreateDialog::OnTextUpdate)
+   EVT_BUTTON(ID_BUTTON_OK, ParameterCreateDialog::OnOK)
+   EVT_BUTTON(ID_CREATE_BUTTON, ParameterCreateDialog::OnCreateButton)
+   EVT_BUTTON(ID_SELECT_BUTTON, ParameterCreateDialog::OnSelectButtonClick)
+   EVT_BUTTON(ID_EDITARRAY_BUTTON, ParameterCreateDialog::OnEditArrayButtonClick)
+   EVT_BUTTON(ID_CLEAR_VAR_BUTTON, ParameterCreateDialog::OnClearButtonClick)
+   EVT_BUTTON(ID_CLEAR_ARR_BUTTON, ParameterCreateDialog::OnClearButtonClick)
+   EVT_BUTTON(ID_CLEAR_STR_BUTTON, ParameterCreateDialog::OnClearButtonClick)
+   EVT_TEXT(ID_VARTEXTCTRL, ParameterCreateDialog::OnVarTextUpdate)
+   EVT_TEXT(ID_ARYTEXTCTRL, ParameterCreateDialog::OnAryTextUpdate)
+   EVT_TEXT(ID_STRTEXTCTRL, ParameterCreateDialog::OnStrTextUpdate)
+   EVT_NOTEBOOK_PAGE_CHANGED(ID_NOTEBOOK, ParameterCreateDialog::OnPageChanged)
+   EVT_LISTBOX(ID_LISTBOX, ParameterCreateDialog::OnListboxClick)
 END_EVENT_TABLE()
-
    
 //------------------------------------------------------------------------------
 // ParameterCreateDialog(wxWindow *parent, int paramType)
@@ -47,20 +68,73 @@ END_EVENT_TABLE()
  * @param paramType 1 = Variable, 2 = Array, 3 = String
  */
 //------------------------------------------------------------------------------
-ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, int paramType)
+ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, ParameterType paramType)
    : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
 {
+   #ifdef DEBUG_PARAM_CREATE
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog() entered, paramType=%d\n", paramType);
+   #endif
+   
    mParamType = paramType;
    mCurrParam = NULL;
    mParamNames.Clear();
    mIsParamCreated = false;
-   mCreateVariable = false;
-   mCreateString  = false;
-   mCreateArray = false;
-   mColor.Set(0, 0, 0); // initialize to black
+   mPageChangedByUser = false;
+   mArrayChanged = false;
+   mVariableChanged = false;
+   mStringChanged = false;
+   mSelectVarStrings.Add("Spacecraft");
+   mSelectVarStrings.Add("ImpulsiveBurn");
    
-   Create();
+   Create(); 
+   SetParameterType( paramType );
    ShowData();
+   mPageChangedByUser = true;
+}
+
+
+//------------------------------------------------------------------------------
+// ParameterCreateDialog(wxWindow *parent, string paramName)
+//------------------------------------------------------------------------------
+/*
+ */
+//------------------------------------------------------------------------------
+ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, const wxString paramName)
+   : GmatDialog(parent, -1, wxString(_T("ParameterCreateDialog")))
+{
+   #ifdef DEBUG_PARAM_CREATE
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog() entered, paramName='%s'\n", paramName.c_str());
+   #endif
+   
+   mObjectName = paramName.c_str();
+   mCurrParam = (Parameter*)theGuiInterpreter->GetConfiguredObject(mObjectName);
+   if (!mCurrParam)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::ERROR_, "Cannot find the parameter object named " + mObjectName);
+   }
+   else
+   {
+      mParamNames.Clear();
+      mIsParamCreated = false;
+      mPageChangedByUser = false;
+      mSelectVarStrings.Add("Spacecraft");
+      mSelectVarStrings.Add("ImpulsiveBurn");
+      
+      Create(); 
+      std::string s = mCurrParam->GetTypeName();
+      if (s == "String")
+         mParamType = STRING;
+      else if (s == "Array")
+         mParamType = ARRAY;
+      else
+         mParamType = VARIABLE;
+      SetParameterType( mParamType );
+      ShowData();
+      mPageChangedByUser = true;
+   }
 }
 
 
@@ -69,15 +143,20 @@ ParameterCreateDialog::ParameterCreateDialog(wxWindow *parent, int paramType)
 //------------------------------------------------------------------------------
 ParameterCreateDialog::~ParameterCreateDialog()
 {
-   #if DEBUG_GUI_ITEM_UNREG
-   MessageInterface::ShowMessage
-      ("ParameterCreateDialog::~ParameterCreateDialog() Unregister Spacecraft:%d\n",
-       mObjectListBox);
-   #endif
+   mSelectVarStrings.Clear();   
+}
 
-   // Unregister GUI components
-   theGuiManager->UnregisterListBox("Spacecraft", mObjectListBox, &mExcludedScList);
-   theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
+
+//------------------------------------------------------------------------------
+// void OnOK()
+//------------------------------------------------------------------------------
+/**
+ * Closes the page
+ */
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnOK(wxCommandEvent &event)
+{
+   Close();
 }
 
 
@@ -86,244 +165,257 @@ ParameterCreateDialog::~ParameterCreateDialog()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::Create()
 {
-   #if DEBUG_PARAM_CREATE_DIALOG
+   #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage("ParameterCreateDialog::Create() entered\n");
    #endif
    
+   #if __WXMAC__
+   int buttonWidth = 40;
+   #else
+   int buttonWidth = 25;
+   #endif
+
    int bsize = 2;
+   std::string CreateLabel = "="GUI_ACCEL_KEY">";
+   wxBitmap clearBitmap = wxBitmap(NewMission_xpm);
    
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Parameter"));
+
+   notebook = new wxNotebook(this, ID_NOTEBOOK);
+   wxPanel *varPanel = new wxPanel(notebook);
+   wxPanel *arrPanel = new wxPanel(notebook);
+   wxPanel *strPanel = new wxPanel(notebook);
    //wxStaticText
    wxStaticText *varNameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
+      new wxStaticText(varPanel, ID_TEXT, wxT("Variable "GUI_ACCEL_KEY"Name"),
                         wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *objStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Object"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *propertyStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Property"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *configVarStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Variables"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   mCoordSysLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Coordinate System"),
-                       wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *expStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Expression (Available Operators: +-*/^ )"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *colorStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Color"),
+      new wxStaticText(varPanel, ID_TEXT, wxT("Variable "GUI_ACCEL_KEY"Value"),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *varEqualSignStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("="),
+      new wxStaticText(varPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrNameStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
+      new wxStaticText(arrPanel, ID_TEXT, wxT("Array "GUI_ACCEL_KEY"Name"),
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1RowStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Row"),
+      new wxStaticText(arrPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Row"),
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arr1ColStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Column"),
+      new wxStaticText(arrPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Column"),
                         wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *emptyStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("  "),
-                       wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrEqualSignStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("="),
+      new wxStaticText(arrPanel, ID_TEXT, wxT("="),
                        wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *arrTimesStaticText =
-      new wxStaticText(this, ID_TEXT, wxT(" X"),
+      new wxStaticText(arrPanel, ID_TEXT, wxT(" X"),
                        wxDefaultPosition, wxDefaultSize, 0);
-   wxStaticText *configArrStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("Arrays"),
-                       wxDefaultPosition, wxDefaultSize, 0);
-      wxStaticText *stringNameLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Name"),
+   wxStaticText *stringNameLabel =
+      new wxStaticText(strPanel, ID_TEXT, wxT("String "GUI_ACCEL_KEY"Name"),
                         wxDefaultPosition, wxDefaultSize, 0);
+   wxStaticText *stringEqualSignStaticText =
+      new wxStaticText(strPanel, ID_TEXT, wxT("="),
+                       wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *stringValueLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Value"),
+      new wxStaticText(strPanel, ID_TEXT, wxT("String "GUI_ACCEL_KEY"Value"),
                         wxDefaultPosition, wxDefaultSize, 0);
    wxStaticText *configStringLabel =
-      new wxStaticText(this, ID_TEXT, wxT("Strings"),
+      new wxStaticText(strPanel, ID_TEXT, wxT(GUI_ACCEL_KEY"Strings"),
                         wxDefaultPosition, wxDefaultSize, 0);
    
    // wxTextCtrl
-   mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                     wxDefaultPosition, wxSize(130,20), 0);
-   mExprTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                  wxDefaultPosition, wxSize(280,20), 0);
+   mVarClearButton =
+      new wxBitmapButton(varPanel, ID_CLEAR_VAR_BUTTON, clearBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, 20));
+   mVarClearButton->SetToolTip(pConfig->Read(_T("ClearVariableHint"), "Clear Variable Fields"));
    
-   mArrNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+   mVarNameTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
+                                     wxDefaultPosition, wxSize(130,20), 0);
+   mVarNameTextCtrl->SetToolTip(pConfig->Read(_T("VariableNameHint")));
+
+   // Only numeric value is allowed (LOJ: 2010.11.24)
+   mVarValueTextCtrl = new wxTextCtrl(varPanel, ID_VARTEXTCTRL, wxT(""),
+                                  wxDefaultPosition, wxSize(280,20), 0,
+                                  wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mVarValueTextCtrl->SetToolTip(pConfig->Read(_T("VariableValueHint")));
+   
+   mArrClearButton =
+      new wxBitmapButton(arrPanel, ID_CLEAR_ARR_BUTTON, clearBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, 20));
+   mArrClearButton->SetToolTip(pConfig->Read(_T("ClearArrayHint"), "Clear Array Fields"));
+   
+   mArrNameTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(102,20), 0);
-   mArrRowTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
-   mArrColTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                                    wxDefaultPosition, wxSize(35,20), 0);
-   mStringNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+   mArrNameTextCtrl->SetToolTip(pConfig->Read(_T("ArrayNameHint")));
+   mArrRowTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
+                                    wxDefaultPosition, wxSize(50,20), 0, 
+                                    wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mArrRowTextCtrl->SetToolTip(pConfig->Read(_T("ArrayRowValueHint")));
+   mArrColTextCtrl = new wxTextCtrl(arrPanel, ID_ARYTEXTCTRL, wxT(""),
+                                    wxDefaultPosition, wxSize(50,20), 0,
+                                    wxTextValidator(wxGMAT_FILTER_NUMERIC));
+   mArrColTextCtrl->SetToolTip(pConfig->Read(_T("ArrayColumnValueHint")));
+
+   mStrClearButton =
+      new wxBitmapButton(strPanel, ID_CLEAR_STR_BUTTON, clearBitmap, wxDefaultPosition,
+                         wxSize(buttonWidth, 20));
+   mStrClearButton->SetToolTip(pConfig->Read(_T("ClearStringHint"), "Clear String Fields"));
+   
+   mStringNameTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
                                         wxDefaultPosition, wxSize(80,20), 0);
-   mStringValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+   mStringNameTextCtrl->SetToolTip(pConfig->Read(_T("StringNameHint")));
+   mStringValueTextCtrl = new wxTextCtrl(strPanel, ID_STRTEXTCTRL, wxT(""),
                                      wxDefaultPosition, wxSize(110,20), 0);
+   mStringValueTextCtrl->SetToolTip(pConfig->Read(_T("StringValueHint")));
    
    // wxButton
-   mCreateVariableButton = new wxButton(this, ID_BUTTON, wxT("Create"),
-                                        wxDefaultPosition, wxDefaultSize, 0);
-   mPastePropertyButton = new wxButton(this, ID_BUTTON, wxT("Paste"),
+   mCreateVariableButton = new wxButton(varPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+                                        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   mCreateVariableButton->SetToolTip(pConfig->Read(_T("CreateVariableHint")));
+   mCreateVariableButton->Disable();
+   mSelectButton = new wxButton(varPanel, ID_SELECT_BUTTON, wxT("Select"),
                                      wxDefaultPosition, wxDefaultSize, 0);
-   mPasteUserVarButton = new wxButton(this, ID_BUTTON, wxT("Paste"),
-                                  wxDefaultPosition, wxDefaultSize, 0);
-   mColorButton =  new wxButton(this, ID_COLOR_BUTTON, wxT(""),
-                                wxDefaultPosition, wxSize(25, 20), 0);
-   mColorButton->SetBackgroundColour(mColor);
-   
-   mCreateArrayButton = new wxButton(this, ID_BUTTON, wxT("Create"),
+   mSelectButton->SetToolTip(pConfig->Read(_T("SelectHint")));
+
+   mCreateArrayButton = new wxButton(arrPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+                                     wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   mCreateArrayButton->SetToolTip(pConfig->Read(_T("CreateArrayHint")));
+   mCreateArrayButton->Disable();
+   mEditArrayButton = new wxButton(arrPanel, ID_EDITARRAY_BUTTON, wxT("Edit"),
                                      wxDefaultPosition, wxDefaultSize, 0);
-   mCreateStringButton = new wxButton(this, ID_BUTTON, wxT("Create"),
-                                      wxDefaultPosition, wxDefaultSize, 0);
+   mEditArrayButton->Disable();
+   mEditArrayButton->SetToolTip(pConfig->Read(_T("EditArrayHint")));
+
+   mCreateStringButton = new wxButton(strPanel, ID_CREATE_BUTTON, wxT(CreateLabel.c_str()),
+                                      wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+   mCreateStringButton->SetToolTip(pConfig->Read(_T("CreateStringHint")));
+   mCreateStringButton->Disable();
    
    //wxArrayString
    wxArrayString emptyArray;
    
    // wxListBox
-   mObjectListBox = 
-      theGuiManager->GetSpacecraftListBox(this, -1, wxSize(135, 85), &mExcludedScList);
-   mPropertyListBox = 
-      theGuiManager->GetPropertyListBox(this, ID_PROPERTY_LISTBOX, wxSize(135, 85), "Spacecraft");
    mUserVarListBox =
-      theGuiManager->GetUserVariableListBox(this, -1, wxSize(170, 85), "");
+      theGuiManager->GetUserVariableListBox(varPanel, ID_LISTBOX, wxSize(170, 125), "");
+   mUserVarListBox->SetToolTip(pConfig->Read(_T("VariableListHint")));
    mUserArrayListBox =
-      theGuiManager->GetUserArrayListBox(this, -1, wxSize(170, 50), "");
+      theGuiManager->GetUserArrayListBox(arrPanel, ID_LISTBOX, wxSize(170, 125), "");
+   mUserArrayListBox->SetToolTip(pConfig->Read(_T("ArrayListHint")));
    mUserStringListBox =
-      theGuiManager->GetUserStringListBox(this, -1, wxSize(170, 50), "");
+      theGuiManager->GetUserStringListBox(strPanel, ID_LISTBOX, wxSize(170, 125), "");
+   mUserStringListBox->SetToolTip(pConfig->Read(_T("StringListHint")));
           
-   // wxComboBox
-   mCoordSysComboBox = theGuiManager->GetCoordSysComboBox(this, ID_COMBO, wxSize(120,-1));
-   mCentralBodyComboBox = theGuiManager->GetConfigBodyComboBox(this, ID_COMBO, wxSize(100,-1));
-   //mCentralBodyComboBox->SetStringSelection("Earth"); // Earth is the default
-   
    // wxSizers
-   wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    mDetailsBoxSizer = new wxBoxSizer(wxHORIZONTAL);   
    
-   wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(3, 0, 0);
+   wxFlexGridSizer *top1FlexGridSizer = new wxFlexGridSizer(5, 0, 0);
    wxFlexGridSizer *objPropertyFlexGridSizer = new wxFlexGridSizer(4, 0, 0);
    wxFlexGridSizer *arr1FlexGridSizer = new wxFlexGridSizer(7, 0, 0);
-   wxFlexGridSizer *stringFlexGridSizer = new wxFlexGridSizer(5, 0, 0);
-   
+   wxFlexGridSizer *stringFlexGridSizer = new wxFlexGridSizer(6, 0, 0);
+
+
    GmatStaticBoxSizer *variableStaticBoxSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Variable");
+      new GmatStaticBoxSizer(wxHORIZONTAL, varPanel);
    
    GmatStaticBoxSizer *arrayStaticBoxSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "Array");
+      new GmatStaticBoxSizer(wxHORIZONTAL, arrPanel);
    
    GmatStaticBoxSizer *stringStaticBoxSizer =
-      new GmatStaticBoxSizer(wxVERTICAL, this, "String");
+      new GmatStaticBoxSizer(wxVERTICAL, strPanel);
    
    // Add to wx*Sizers
    //-------------------------------------------------------
    // for Variable
    //-------------------------------------------------------
+   top1FlexGridSizer->Add(0, 0, 0, bsize);
    top1FlexGridSizer->Add(varNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   top1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, 0, bsize);
    top1FlexGridSizer->Add(expStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, 0, bsize);
    
+   top1FlexGridSizer->Add(mVarClearButton, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(mVarNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    top1FlexGridSizer->Add(varEqualSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   top1FlexGridSizer->Add(mExprTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mVarValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(mCreateVariableButton, 0, wxALIGN_CENTRE|wxALL, bsize);
    
-   // 1st row
-   objPropertyFlexGridSizer->Add(mCreateVariableButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mPastePropertyButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mPasteUserVarButton, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   // 2nd row
-   objPropertyFlexGridSizer->Add(objStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(propertyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(configVarStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   // 3rd row
-   objPropertyFlexGridSizer->Add(mObjectListBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(mPropertyListBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   objPropertyFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, wxALIGN_CENTER|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, wxALIGN_CENTRE|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, wxALIGN_CENTRE|wxALL, bsize);
+   top1FlexGridSizer->Add(mSelectButton, 0, wxALIGN_LEFT|wxALL, bsize);
+   top1FlexGridSizer->Add(0, 0, wxALIGN_CENTRE|wxALL, bsize);
    objPropertyFlexGridSizer->Add(mUserVarListBox, 0, wxALIGN_CENTER|wxALL, bsize);
-   
-   mDetailsBoxSizer->Add(colorStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mDetailsBoxSizer->Add(mColorButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mDetailsBoxSizer->Add(30, 20, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mDetailsBoxSizer->Add(mCoordSysLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mDetailsBoxSizer->Add(mCoordSysComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   mDetailsBoxSizer->Add(mCentralBodyComboBox, 0, wxALIGN_CENTRE|wxALL, bsize);
    
    variableStaticBoxSizer->Add(top1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    variableStaticBoxSizer->Add(objPropertyFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
-   variableStaticBoxSizer->Add(mDetailsBoxSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    
-   stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(stringNameLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(stringValueLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(configStringLabel, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(0, 0, 0, bsize);
+   stringFlexGridSizer->Add(stringNameLabel, 0, wxALIGN_CENTER|wxALL, bsize);
+   stringFlexGridSizer->Add(0, 0, 0, bsize);
+   stringFlexGridSizer->Add(stringValueLabel, 1, wxALIGN_CENTER|wxALL, bsize);
+   stringFlexGridSizer->Add(0, 0, 0, bsize);
+   stringFlexGridSizer->Add(configStringLabel, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   stringFlexGridSizer->Add(mCreateStringButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(mStringNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(varEqualSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   stringFlexGridSizer->Add(mStringValueTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   stringFlexGridSizer->Add(mUserStringListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringFlexGridSizer->Add(mStrClearButton, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   stringFlexGridSizer->Add(mStringNameTextCtrl, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   stringFlexGridSizer->Add(stringEqualSignStaticText, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   stringFlexGridSizer->Add(mStringValueTextCtrl, 1, wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   stringFlexGridSizer->Add(mCreateStringButton, 0, wxALIGN_CENTER_HORIZONTAL|wxALL, bsize);
+   stringFlexGridSizer->Add(mUserStringListBox, 0, wxALIGN_CENTER|wxALL, bsize);
    
-   stringStaticBoxSizer->Add(stringFlexGridSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   stringStaticBoxSizer->Add(stringFlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
    
    //-------------------------------------------------------
    // for Array Creation
    //-------------------------------------------------------
    // 1st row
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arr1RowStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(emptyStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arr1ColStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(configArrStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
+   arr1FlexGridSizer->Add(0, 0, 0, bsize);
+   arr1FlexGridSizer->Add(arrNameStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(0, 0, 0, bsize);
+   arr1FlexGridSizer->Add(arr1RowStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(0, 0, 0, bsize);
+   arr1FlexGridSizer->Add(arr1ColStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(0, 0, 0, bsize);
+   //arr1FlexGridSizer->Add(configArrStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    
    // 2nd row
-   arr1FlexGridSizer->Add(mCreateArrayButton, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mArrNameTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arrEqualSignStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mArrRowTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(arrTimesStaticText, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTRE|wxALL, bsize);
-   arr1FlexGridSizer->Add(mUserArrayListBox, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
+   arr1FlexGridSizer->Add(mArrClearButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrNameTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(arrEqualSignStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrRowTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(arrTimesStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(mArrColTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   arr1FlexGridSizer->Add(mCreateArrayButton, 0, wxALIGN_CENTER|wxALL, bsize);
+   //arr1FlexGridSizer->Add(mUserArrayListBox, 0, wxALIGN_CENTER|wxALL, bsize);
+
+   arr1FlexGridSizer->Add(0, 0, 0, bsize);
+   arr1FlexGridSizer->Add(mEditArrayButton, 0, wxALIGN_LEFT, bsize);
+
    arrayStaticBoxSizer->Add(arr1FlexGridSizer, 0, wxALIGN_TOP|wxALL, bsize);
+   arrayStaticBoxSizer->Add(mUserArrayListBox, 0, wxALIGN_TOP|wxALL, bsize);
    
-   pageBoxSizer->Add(variableStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(arrayStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   pageBoxSizer->Add(stringStaticBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
-   
-   if (mParamType == 1)
-   {
-      pageBoxSizer->Show(arrayStaticBoxSizer, false);
-      pageBoxSizer->Show(stringStaticBoxSizer, false);
-   }
-   else if (mParamType == 2)
-   {
-      pageBoxSizer->Show(variableStaticBoxSizer, false);
-      pageBoxSizer->Show(stringStaticBoxSizer, false);
-   }
-   else if (mParamType == 3)
-   {
-      pageBoxSizer->Show(variableStaticBoxSizer, false);
-      pageBoxSizer->Show(arrayStaticBoxSizer, false);
-   }
-   
-   
+   varPanel->SetSizer(variableStaticBoxSizer);
+   arrPanel->SetSizer(arrayStaticBoxSizer);
+   strPanel->SetSizer(stringStaticBoxSizer);
+
    //-------------------------------------------------------
    // add to parent sizer
    //-------------------------------------------------------
-   theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, 5);
+   notebook->AddPage(varPanel, GUI_ACCEL_KEY"Variable", true);
+   notebook->AddPage(arrPanel, GUI_ACCEL_KEY"Array", false);
+   notebook->AddPage(strPanel, GUI_ACCEL_KEY"String", false);
    
-   #if DEBUG_PARAM_CREATE_DIALOG
+   theMiddleSizer->Add(notebook, 0, wxALIGN_LEFT|wxGROW, 0);
+   
+   theCancelButton->SetLabel("Cancel");
+   theOkButton->SetLabel("Close"); // OK button acts like Close   
+   // Only numbers and string literals are allowed for initial values, so hide
+   mSelectButton->Hide();
+   
+   #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage("ParameterCreateDialog::Create() exiting\n");
    #endif
    
@@ -335,19 +427,62 @@ void ParameterCreateDialog::Create()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::LoadData()
 {
-   #if DEBUG_PARAM_CREATE_DIALOG
-   MessageInterface::ShowMessage("ParameterCreateDialog::LoadData() entering\n");
+   #ifdef DEBUG_PARAM_CREATE_LOAD
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::LoadData() entering, mObjectName='%s'\n", mObjectName.c_str());
    #endif
    
-   mCreateVariableButton->Disable();
-   mCreateStringButton->Disable();
-   mCreateArrayButton->Disable();
-   mPropertyListBox->SetSelection(0);
+   wxString str;
+   int mNumRows;
+   int mNumCols;
+//   Real rval;
    
-   // show coordinate system or central body
-   ShowCoordSystem();
+   if (mObjectName != "")
+   {
+      mCurrParam =
+         (Parameter*)theGuiInterpreter->GetConfiguredObject(mObjectName.c_str());
+      
+      // Set the pointer for the "Show Script" button
+      mObject = mCurrParam;
+      if (mCurrParam == NULL)
+         return;
+      
+      switch (mParamType)
+      {
+         case VARIABLE:
+            mVarNameTextCtrl->SetValue(mObjectName.c_str());
+            // We no longer allow expression (LOJ: 2010.11.24)
+            //mVarValueTextCtrl->SetValue(mCurrParam->GetStringParameter("Expression").c_str());
+            mVarValueTextCtrl->SetValue(wxVariant(mCurrParam->GetRealParameter("Value")));
+            mCreateVariableButton->Disable();
+            mUserVarListBox->SetStringSelection(mObjectName.c_str());
+            mVariableChanged = false;
+            break;
+         case ARRAY:
+            mArrNameTextCtrl->SetValue(mObjectName.c_str());
+            mNumRows = mCurrParam->GetIntegerParameter("NumRows");
+            mNumCols = mCurrParam->GetIntegerParameter("NumCols");
+            str << mNumRows;
+            mArrRowTextCtrl->SetValue(str);
+            str = "";
+            str << mNumCols;
+            mArrColTextCtrl->SetValue(str);
+            mCreateArrayButton->Disable();
+            mEditArrayButton->Enable(mCurrParam != NULL);
+            mUserArrayListBox->SetStringSelection(mObjectName.c_str());
+            mArrayChanged = false;
+            break;
+         case STRING:
+            mStringNameTextCtrl->SetValue(mObjectName.c_str());
+            mStringValueTextCtrl->SetValue(mCurrParam->GetStringParameter("Expression").c_str());
+            mCreateStringButton->Disable();
+            mUserStringListBox->SetStringSelection(mObjectName.c_str());
+            mStringChanged = false;
+            break;
+      }
+   }
    
-   #if DEBUG_PARAM_CREATE_DIALOG
+   #ifdef DEBUG_PARAM_CREATE_LOAD
    MessageInterface::ShowMessage("ParameterCreateDialog::LoadData() exiting\n");
    #endif   
 }
@@ -358,36 +493,107 @@ void ParameterCreateDialog::LoadData()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::SaveData()
 {
-   if (mCreateVariableButton->IsEnabled())
-      mCreateVariable = true;
-   
-   if (mCreateStringButton->IsEnabled())
-      mCreateString = true;
-   
-   if (mCreateArrayButton->IsEnabled())
-      mCreateArray = true;
-   
-   if (mCreateVariable || mCreateString || mCreateArray)
-      EnableUpdate(true);
-   
+   std::string s;
+   Integer mNumCols;
+   Integer mNumRows;
+
    canClose = true;
+   wxString paramName;
    
-   #if DEBUG_PARAM_CREATE_SAVE
+   #ifdef DEBUG_PARAM_CREATE_SAVE
    MessageInterface::ShowMessage
-      ("ParameterCreateDialog::SaveData() canClose=%d, mCreateVariable=%d, "
-       "mCreateString=%d, mCreateArray=%d\n", canClose, mCreateVariable,
-       mCreateString, mCreateArray);
+      ("ParameterCreateDialog::SaveData() entered, mParamType=%d, mCurrParam=<%p>\n"
+       "   mArrayChanged=%d, mVariableChanged=%d, mStringChanged=%d\n", mParamType,
+       mCurrParam, mArrayChanged, mVariableChanged, mStringChanged);
    #endif
    
-   if (mCreateVariable)
-      CreateVariable();
+   // Check for the existing name
    
-   if (mCreateString)
-      CreateString();
+   switch (mParamType)
+   {
+      case VARIABLE:
+         paramName = mVarNameTextCtrl->GetValue();
+         if ((mCurrParam == NULL) || (mObjectName.c_str() != paramName))
+         {
+            CreateVariable();
+         }
+         else
+         {
+            std::string expr = mVarValueTextCtrl->GetValue().c_str();
+            Real rval;
+            CheckReal(rval, expr, "Expression", "Real Number");
+            #ifdef DEBUG_PARAM_CREATE_SAVE
+            MessageInterface::ShowMessage
+               ("   Setting %s to variable '%s'\n", expr.c_str(), mCurrParam->GetName().c_str());
+            #endif
+            mCurrParam->SetStringParameter("Expression", expr);
+            ResetControls();
+         }
+         break;
+      case ARRAY:
+         paramName = mArrNameTextCtrl->GetValue();
+         if ((mCurrParam == NULL) || (mObjectName.c_str() != paramName))
+         {
+            #ifdef DEBUG_PARAM_CREATE_SAVE
+            MessageInterface::ShowMessage
+               ("   Creating new Array '%s'\n", paramName.c_str());
+            #endif
+            CreateArray();
+         }
+         else
+         {
+            #ifdef DEBUG_PARAM_CREATE_SAVE
+            MessageInterface::ShowMessage
+               ("   Modifying existing Array '%s'\n", paramName.c_str());
+            #endif
+            
+            s = mArrRowTextCtrl->GetValue().c_str();
+            CheckIntegerRange(mNumRows, s, "Rows", 1, 1000, true, true, true, true);
+            s = mArrColTextCtrl->GetValue().c_str();
+            CheckIntegerRange(mNumCols, s, "Columns", 1, 1000, true, true, true, true);
+            
+            // Reset size if columns and rows are valid
+            if (canClose)
+            {
+               #ifdef DEBUG_PARAM_CREATE_SAVE
+               MessageInterface::ShowMessage
+                  ("   Resetting size of Array '%s' to rows=%d, cols=%d\n",
+                   paramName.c_str(), mNumRows, mNumCols);
+               #endif
+               ((Array *) mCurrParam)->SetSize(mNumRows, mNumCols);
+            }
+            
+            if (canClose)
+               ResetControls();
+         }
+         break;
+      case STRING:
+         paramName = mStringNameTextCtrl->GetValue();
+         if ((mCurrParam == NULL) || (mObjectName.c_str() != paramName))
+         {
+            CreateString();
+         }
+         else
+         {
+            std::string expr = mStringValueTextCtrl->GetValue().c_str();
+            mCurrParam->SetStringParameter("Expression", expr);
+            ResetControls();
+         }
+         break;
+   }
    
-   if (mCreateArray)
-      CreateArray();
-      
+   if (!canClose) return;
+   
+   EnableUpdate( mCreateVariableButton->IsEnabled() || 
+                 mCreateArrayButton->IsEnabled() || 
+                 mCreateStringButton->IsEnabled() );
+   
+   #ifdef DEBUG_PARAM_CREATE_SAVE
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::SaveData() leaving, mParamType=%d, mCurrParam=<%p>\n"
+       "   mArrayChanged=%d, mVariableChanged=%d, mStringChanged=%d\n", mParamType,
+       mCurrParam, mArrayChanged, mVariableChanged, mStringChanged);
+   #endif
 }
 
 
@@ -397,9 +603,40 @@ void ParameterCreateDialog::SaveData()
 void ParameterCreateDialog::ResetData()
 {
    mIsParamCreated = false;
-   mCreateVariable = false;
-   mCreateString  = false;
-   mCreateArray = false;
+}
+
+
+//------------------------------------------------------------------------------
+// virtual void ResetControls()
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::ResetControls()
+{
+   switch (mParamType)
+   {
+      case VARIABLE:
+         mCreateVariableButton->Disable();
+         mVarValueTextCtrl->SetValue("");
+         mVarNameTextCtrl->SetValue("");
+         mVariableChanged = false;
+         mUserVarListBox->Deselect(mUserVarListBox->GetSelection());
+         break;
+      case ARRAY:
+         mCreateArrayButton->Disable();
+         mArrNameTextCtrl->SetValue("");
+         mArrRowTextCtrl->SetValue("");
+         mArrColTextCtrl->SetValue("");
+         mEditArrayButton->Disable();
+         mUserArrayListBox->Deselect(mUserArrayListBox->GetSelection());
+         mArrayChanged = false;
+         break;
+      case STRING:
+         mCreateStringButton->Disable();
+         mStringNameTextCtrl->SetValue("");
+         mStringValueTextCtrl->SetValue("");
+         mUserStringListBox->Deselect(mUserStringListBox->GetSelection());
+         mStringChanged = false;
+         break;
+   }
 }
 
 
@@ -408,176 +645,280 @@ void ParameterCreateDialog::ResetData()
 //---------------------------------
 
 //------------------------------------------------------------------------------
-// void OnTextUpdate(wxCommandEvent& event)
+// void OnVarTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnTextUpdate(wxCommandEvent& event)
+void ParameterCreateDialog::OnVarTextUpdate(wxCommandEvent& event)
 {
    mCreateVariableButton->Disable();
-   mCreateStringButton->Disable();
-   mCreateArrayButton->Disable();
 
-   if (mVarNameTextCtrl->GetValue().Trim() != "" &&
-       mVarNameTextCtrl->GetValue().Trim() != " " &&
-       mExprTextCtrl->GetValue().Trim() != "")
+   if (mVarNameTextCtrl->IsModified() && mVarNameTextCtrl->GetValue().Trim() != "" ||
+       mVarValueTextCtrl->IsModified() && mVarValueTextCtrl->GetValue().Trim() != "")
    {
       mCreateVariableButton->Enable();
       EnableUpdate(true);
+      mVariableChanged = true;
    }
    
-   if (mStringNameTextCtrl->GetValue().Trim() != "" )
-   {
-      mCreateStringButton->Enable();
-      EnableUpdate(true);
-   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnAryTextUpdate(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnAryTextUpdate(wxCommandEvent& event)
+{
+   mCreateArrayButton->Disable();
    
-   if (mArrNameTextCtrl->GetValue().Trim() != "" &&
-       mArrRowTextCtrl->GetValue().Trim() != "" &&
-       mArrColTextCtrl->GetValue().Trim() != "")
+   if (mArrNameTextCtrl->IsModified() && mArrNameTextCtrl->GetValue().Trim() != "" ||
+       mArrRowTextCtrl->IsModified() && mArrRowTextCtrl->GetValue().Trim() != "" ||
+       mArrColTextCtrl->IsModified() && mArrColTextCtrl->GetValue().Trim() != "")
    {
       mCreateArrayButton->Enable();
       EnableUpdate(true);
+      mArrayChanged = true;
    }
 
 }
 
 
 //------------------------------------------------------------------------------
-// void OnComboBoxChange(wxCommandEvent& event)
+// void OnStrTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnComboBoxChange(wxCommandEvent& event)
+void ParameterCreateDialog::OnStrTextUpdate(wxCommandEvent& event)
 {
-   //loj: 9/26/06
-   // This needs to be updated to have ObjectType combobox like
-   // in ParameterSelectDialog.
+   mCreateStringButton->Disable();
    
-   if (event.GetEventObject() == mCoordSysComboBox)
+   if (mStringNameTextCtrl->IsModified() && mStringNameTextCtrl->GetValue().Trim() != "" ||
+       mStringValueTextCtrl->IsModified())
    {
-      //mCurrParam->SetStringParameter
-      //   ("DepObject", std::string(mCoordSysComboBox->GetStringSelection().c_str()));
+      mCreateStringButton->Enable();
+      EnableUpdate(true);
+      mStringChanged = true;
    }
-   else if (event.GetEventObject() == mCentralBodyComboBox)
-   {
-      //mCurrParam->SetStringParameter
-      //   ("DepObject", std::string(mCentralBodyComboBox->GetStringSelection().c_str()));
-   }
+   
 }
 
 
 //------------------------------------------------------------------------------
-// void OnButton(wxCommandEvent& event)
+// void OnCreateButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnButton(wxCommandEvent& event)
+void ParameterCreateDialog::OnCreateButton(wxCommandEvent& event)
 {    
-   if (event.GetEventObject() == mCreateVariableButton)  
+   SaveData();
+   switch (mParamType)
    {
-      mCreateVariable = true;
-      mCreateString = false;
-      mCreateArray = false;
-      SaveData();
+      case VARIABLE:
+         mVarNameTextCtrl->SetFocus();
+         break;
+      case ARRAY:
+         mArrNameTextCtrl->SetFocus();
+         break;
+      case STRING:
+         mStringNameTextCtrl->SetFocus();
+         break;
    }
-   else if (event.GetEventObject() == mCreateStringButton)  
-   {
-      mCreateVariable = false;
-      mCreateString = true;
-      mCreateArray = false;
-      SaveData();
-   }
-   else if (event.GetEventObject() == mCreateArrayButton)  
-   {
-      mCreateArray = true;
-      mCreateString = false;
-      mCreateVariable = false;
-      SaveData();
-   }
-   else if (event.GetEventObject() == mPastePropertyButton)  
-   {
-      wxString s = GetParamName();
+}
 
-      mExprTextCtrl->AppendText(s);
+//------------------------------------------------------------------------------
+// void SetParameterType(ParameterType paramType)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::SetParameterType( ParameterType paramType )
+{
+   mParamType = paramType;
 
-      if (mVarNameTextCtrl->GetValue() != "" &&
-          mVarNameTextCtrl->GetValue() != " ")
+   #ifdef DEBUG_PARAM_CREATE
+   MessageInterface::ShowMessage
+      ("SetParameterType() entered, mParamType=%d, mObjectName='%s'\n",
+       mParamType, mObjectName.c_str());
+   #endif
+   
+   // This SetSelection() is deprecated and should not be used in new code.
+   // So used the ChangeSelection() function instead. (LOJ: 2010.11.29)
+   notebook->ChangeSelection( (size_t) mParamType );
+}
+
+
+//------------------------------------------------------------------------------
+// void OnPageChanged(wxNotebookEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnPageChanged(wxNotebookEvent& event)
+{
+   #ifdef DEBUG_PAGE_CHANGED
+   MessageInterface::ShowMessage
+      ("OnPageChanged() entered, mPageChangedByUser=%d, mArrayChanged=%d, "
+       "mVariableChanged=%d, mStringChanged=%d\n", mPageChangedByUser, mArrayChanged,
+       mVariableChanged, mStringChanged);
+   #endif
+   
+   
+   if (mPageChangedByUser)
+   {
+      // Show current selection data when page chaged by user
+      mParamType = (ParameterType) event.GetSelection();
+      switch (mParamType)
       {
-         mCreateVariableButton->Enable();
-         EnableUpdate(true);
+      case VARIABLE:
+         mObjectName = mUserVarListBox->GetStringSelection();
+         if (!mVariableChanged)
+            LoadData();
+         break;
+      case ARRAY:
+         mObjectName = mUserArrayListBox->GetStringSelection();
+         if (!mArrayChanged)
+            LoadData();
+         break;
+      case STRING:
+         mObjectName = mUserStringListBox->GetStringSelection();
+         if (!mStringChanged)
+            LoadData();
+         break;
       }
    }
-   else if (event.GetEventObject() == mPasteUserVarButton)  
+   
+   // Show current selection data when page chages
+   switch (mParamType)
    {
-      mExprTextCtrl->AppendText(mUserVarListBox->GetStringSelection());
+      case VARIABLE:
+         mVarNameTextCtrl->SetFocus();
+         break;
+      case ARRAY:
+         mArrNameTextCtrl->SetFocus();
+         break;
+      case STRING:
+         mStringNameTextCtrl->SetFocus();
+         break;
    }
 }
 
 
 //------------------------------------------------------------------------------
-// void OnColorButtonClick(wxCommandEvent& event)
+// void OnClearButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnColorButtonClick(wxCommandEvent& event)
+void ParameterCreateDialog::OnClearButtonClick(wxCommandEvent& event)
 {    
-   wxColourData data;
-   data.SetColour(mColor);
-
-   wxColourDialog dialog(this, &data);
-   //dialog.CenterOnParent();
-   dialog.Center();
-   
-   if (dialog.ShowModal() == wxID_OK)
+   switch (mParamType)
    {
-      mColor = dialog.GetColourData().GetColour();
-      mColorButton->SetBackgroundColour(mColor);
+      case VARIABLE:
+         mVarNameTextCtrl->Clear();
+         mVarValueTextCtrl->Clear();
+         mUserVarListBox->Deselect(mUserVarListBox->GetSelection());
+         break;
+      case ARRAY:
+         mArrNameTextCtrl->Clear();
+         mArrRowTextCtrl->Clear();
+         mArrColTextCtrl->Clear();
+         mUserArrayListBox->Deselect(mUserArrayListBox->GetSelection());
+         break;
+      case STRING:
+         mStringNameTextCtrl->Clear();
+         mStringValueTextCtrl->Clear();
+         mUserStringListBox->Deselect(mUserStringListBox->GetSelection());
+         break;
    }
 }
 
+
 //------------------------------------------------------------------------------
-// void OnSelectProperty(wxCommandEvent& event)
+// void OnEditArrayButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::OnSelectProperty(wxCommandEvent& event)
+void ParameterCreateDialog::OnEditArrayButtonClick(wxCommandEvent& event)
 {
-   ShowCoordSystem();   
+   #ifdef DEBUG_EDIT_ARRAY
+   MessageInterface::ShowMessage
+      ("ParameterCreateDialog::OnEditArrayButtonClick() paramName='%s'\n",
+       mArrNameTextCtrl->GetValue().c_str());
+   #endif
+   
+   ArraySetupDialog paramDlg(this, mArrNameTextCtrl->GetValue());
+   paramDlg.ShowModal();
 }
 
 
 //------------------------------------------------------------------------------
-// void ShowCoordSystem()
+// void OnSelectButtonClick(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ParameterCreateDialog::ShowCoordSystem()
+void ParameterCreateDialog::OnSelectButtonClick(wxCommandEvent& event)
+{    
+
+   ParameterSelectDialog paramDlg(this, mSelectVarStrings,
+                                  GuiItemManager::SHOW_PLOTTABLE, false, true);
+   
+   paramDlg.SetParamNameArray(mSelectVarStrings);
+   paramDlg.ShowModal();
+   
+   if (paramDlg.HasSelectionChanged())
+   {
+      wxArrayString selectVarStrings = paramDlg.GetParamNameArray();
+      if (selectVarStrings.Count() > 0)
+      {
+         mVarValueTextCtrl->Clear();
+         for (unsigned int i=0; i<selectVarStrings.Count(); i++)
+            mVarValueTextCtrl->AppendText(selectVarStrings[i]);
+      }
+      else // no selections
+      {
+         mVarValueTextCtrl->Clear();
+      }
+   }
+}
+
+
+//------------------------------------------------------------------------------
+// void OnListboxClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::OnListboxClick(wxCommandEvent& event)
 {
-   std::string property = std::string(mPropertyListBox->GetStringSelection().c_str());
-   GmatParam::DepObject depObj = ParameterInfo::Instance()->GetDepObjectType(property);
+   wxString currObject = mObjectName.c_str();
+   wxString nextObject = event.GetString();
+   mObjectName = event.GetString();
+
+   #ifdef DEBUG_LIST_BOX
+   MessageInterface::ShowMessage
+      ("OnListboxClick() entered, currObject='%s', nextObject='%s'\n   "
+       "mArrayChanged=%d, mVariableChanged=%d, mStringChanged=%d\n", currObject.c_str(),
+       nextObject.c_str(), mArrayChanged, mVariableChanged, mStringChanged);
+   #endif
    
-   //MessageInterface::ShowMessage
-   //   ("===> ShowCoordSystem() property=%s, depObj=%d\n", property.c_str(), depObj);
+   bool objectChanged = false;
    
-   if (depObj == GmatParam::COORD_SYS)
+   if (event.GetEventObject() == mUserVarListBox)
+      objectChanged = mVariableChanged;
+   else if (event.GetEventObject() == mUserArrayListBox)
+      objectChanged = mVariableChanged;
+   else if (event.GetEventObject() == mUserStringListBox)
+      objectChanged = mStringChanged;
+   
+   // Prompt user for saving current object before switching to other of the same type
+   if (objectChanged)
    {
-      mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Coordinate System");
-      mCoordSysComboBox->Show();
-      mCentralBodyComboBox->Hide();
-      mDetailsBoxSizer->Remove(mCentralBodyComboBox);
-      mDetailsBoxSizer->Layout();
-   }
-   else if (depObj == GmatParam::ORIGIN)
-   {
-      mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Central Body");
-      mCentralBodyComboBox->Show();
-      mCoordSysComboBox->Hide();
-      mDetailsBoxSizer->Remove(mCoordSysComboBox);
-      mDetailsBoxSizer->Layout();
-      mDetailsBoxSizer->Layout();
-   }
-   else
-   {
-      mCoordSysLabel->Hide();
-      mCoordSysComboBox->Hide();
-      mCentralBodyComboBox->Hide();
-      mDetailsBoxSizer->Layout();
-      mDetailsBoxSizer->Layout();
+      if (currObject != nextObject)
+      {      
+         wxMessageDialog *msgDlg = new wxMessageDialog
+            (this, "The change will be lost, do you want to save it first?", "Save...",
+             wxYES_NO |wxICON_QUESTION, wxDefaultPosition);
+         
+         int result = msgDlg->ShowModal();
+         if (result == wxID_YES)
+         {
+            // Save current object before switching to other
+            mObjectName = currObject;
+            SaveData();
+            mObjectName = nextObject;
+         }
+         else if (result == wxID_NO)
+         {
+            mVariableChanged = false;
+         }
+      }
    }
    
-   #if DEBUG_PARAM_CREATE_DIALOG
-   MessageInterface::ShowMessage("ParameterCreateDialog::ShowCoordSystem() exiting\n");
+   LoadData();
+   
+   #ifdef DEBUG_LIST_BOX
+   MessageInterface::ShowMessage
+      ("OnListboxClick() leaving, currObject='%s', mObjectName='%s'\n   "
+       "mArrayChanged=%d, mVariableChanged=%d, mStringChanged=%d\n", currObject.c_str(),
+       mObjectName.c_str(), mArrayChanged, mVariableChanged, mStringChanged);
    #endif
 }
 
@@ -592,71 +933,42 @@ void ParameterCreateDialog::ShowCoordSystem()
 //------------------------------------------------------------------------------
 Parameter* ParameterCreateDialog::CreateParameter(const wxString &name)
 {
-   #if DEBUG_PARAM_CREATE_DIALOG
+   #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage
       ("ParameterCreateDialog::CreateParameter() name:%s\n", name.c_str());
    #endif
    
    std::string paramName(name.c_str());
-   std::string ownerName(mObjectListBox->GetStringSelection().c_str());
-   std::string propName(mPropertyListBox->GetStringSelection().c_str());
-   std::string depObjName = "";
+   //std::string ownerName(mObjectListBox->GetStringSelection().c_str());
+   //std::string propName(mPropertyListBox->GetStringSelection().c_str());
+   //std::string depObjName = "";
 
-   if (mCentralBodyComboBox->IsShown())
-   {
-      depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
-   }
-   else if (mCoordSysComboBox->IsShown())
-   {
-      depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
-   }
+   //if (mCentralBodyComboBox->IsShown())
+   //{
+   //   depObjName = std::string(mCentralBodyComboBox->GetStringSelection().c_str());
+   //}
+   //else if (mCoordSysComboBox->IsShown())
+   //{
+   //   depObjName = std::string(mCoordSysComboBox->GetStringSelection().c_str());
+   //}
    
    Parameter *param = theGuiInterpreter->GetParameter(paramName);
    
    // create a parameter if it does not exist
    if (param == NULL)
    {
-      param = theGuiInterpreter->CreateParameter(propName, paramName);
-      param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
+      //param = theGuiInterpreter->CreateParameter(propName, paramName);
+      //param->SetRefObjectName(Gmat::SPACECRAFT, ownerName);
       
-      if (depObjName != "")
-         param->SetStringParameter("DepObject", depObjName);
+      //if (depObjName != "")
+      //   param->SetStringParameter("DepObject", depObjName);
    }
    
-   #if DEBUG_PARAM_CREATE_DIALOG
+   #ifdef DEBUG_PARAM_CREATE
    MessageInterface::ShowMessage("ParameterCreateDialog::CreateParameter() exiting\n");
    #endif
    
    return param;
-}
-
-
-//------------------------------------------------------------------------------
-// wxString GetParamName()
-//------------------------------------------------------------------------------
-wxString ParameterCreateDialog::GetParamName()
-{
-   wxString depObj = "";
-   
-   if (mCentralBodyComboBox->IsShown())
-      depObj = mCentralBodyComboBox->GetStringSelection();
-   else if (mCoordSysComboBox->IsShown())
-      depObj = mCoordSysComboBox->GetStringSelection();
-   
-   wxString paramName;
-   
-   if (depObj == "")
-   {
-      paramName = mObjectListBox->GetStringSelection() + "." + 
-         mPropertyListBox->GetStringSelection();
-   }
-   else
-   {
-      paramName = mObjectListBox->GetStringSelection() + "." + depObj + "." +
-         mPropertyListBox->GetStringSelection();
-   }
-   
-   return paramName;
 }
 
 
@@ -671,33 +983,36 @@ void ParameterCreateDialog::CreateVariable()
 {
    wxString wxvarName = mVarNameTextCtrl->GetValue().Trim();
    std::string varName = std::string(wxvarName.c_str());
-   wxString wxvarExpr = mExprTextCtrl->GetValue().Trim();
+   wxString wxvarExpr = mVarValueTextCtrl->GetValue().Trim();
    std::string varExpr = std::string(wxvarExpr.c_str());
    Real realNum;
    bool isRealNumber = true;
    
-   #if DEBUG_PARAM_CREATE_VAR
+   #ifdef DEBUG_PARAM_CREATE_VAR
    MessageInterface::ShowMessage
-      ("ParameterCreateDialog::CreateVariable() varName = "  + varName +
+      ("ParameterCreateDialog::CreateVariable() entered, varName = "  + varName +
        " varExpr = " + varExpr + "\n");
    #endif
-   
    
    // check if it has blank variable name or expression
    if (varName == "" || varExpr == "")
    {
       MessageInterface::PopupMessage
-         (Gmat::ERROR_, "Variable or expression cannot be blank");
+         (Gmat::ERROR_, "Variable name or value cannot be blank");
       canClose = false;
       return;
    }
+   
+   // Trim blank spaces
+   varName = GmatStringUtil::Trim(varName);
    
    // check if it has valid variable name
    if (!GmatStringUtil::IsValidName(varName))
    {
       MessageInterface::PopupMessage
          (Gmat::ERROR_, "Invalid variable name: \"%s.\" Variable name must "
-          "start with an alphabet letter", varName.c_str());
+          "follow GMAT variable name rules (start with an alphabetic character, "
+          "only alphanumerics and underscores, no reserved words)", varName.c_str());
       canClose = false;
       return;
    }
@@ -709,15 +1024,16 @@ void ParameterCreateDialog::CreateVariable()
    Parameter *param = NULL;
    
    // check if variable name already exist
-   if (theGuiInterpreter->GetParameter(varName) != NULL)
+   //if (theGuiInterpreter->GetParameter(varName) != NULL)
+   if (theGuiInterpreter->GetConfiguredObject(varName) != NULL)
    {
       MessageInterface::PopupMessage
-         (Gmat::WARNING_, "The variable: %s cannot be created. It already exists.",
-          varName.c_str());
+         (Gmat::WARNING_, "The variable: \"%s\" cannot be created. "
+          "The name already exists.", varName.c_str());
       canClose = false;
       return;
    }
-
+   
    try
    {
       // create a variable if rhs is a number
@@ -728,70 +1044,17 @@ void ParameterCreateDialog::CreateVariable()
       }
       else
       {
-         // Parse the Parameter
-         StringTokenizer st(varExpr, "()*/+-^ ");
-         StringArray tokens = st.GetAllTokens();
-         StringArray paramArray;
-         
-         // Check if unexisting varibles used in expression
-         for (unsigned int i=0; i<tokens.size(); i++)
-         {
-            #if DEBUG_PARAM_CREATE_VAR
-            MessageInterface::ShowMessage("   token:<%s> \n", tokens[i].c_str());
-            #endif
-            
-            if (!GmatStringUtil::ToReal(tokens[i], realNum))
-            {
-               // create system parameter if it is NULL
-               if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
-               {
-                  // check if it is system parameter
-                  std::string type, owner, depObj;
-                  GmatStringUtil::ParseParameter(tokens[i], type, owner, depObj);
-                  if (theGuiInterpreter->IsParameter(type))
-                  {
-                     #if DEBUG_PARAM_CREATE_VAR
-                     MessageInterface::ShowMessage
-                        ("type:%s is a system parameter\n", type.c_str());
-                     #endif
-                  
-                     Parameter *sysParam = 
-                        theGuiInterpreter->CreateParameter(type, tokens[i]);
-                  
-                     // set ref. object name
-                     sysParam->SetRefObjectName(sysParam->GetOwnerType(), owner);
-                  
-                     // set dependent object name
-                     if (depObj != "")
-                        sysParam->SetStringParameter("DepObject", depObj);
-                  
-                  }
-                  else
-                  {
-                     MessageInterface::PopupMessage
-                        (Gmat::WARNING_, "The variable \"%s\" does not exist. "
-                         "It must be created first.", tokens[i].c_str());
-                     canClose = false;
-                     return;
-                  }
-               }
-            
-               // create a variable
-               param = theGuiInterpreter->CreateParameter("Variable", varName);
-               param->SetStringParameter("Expression", varExpr);
-            
-               // set parameter names used in expression
-               param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
-            
-            }
-         }      
+         #ifdef __ALLOW_SETTING_TO_ANOTHER_OBJECT__
+            SetVariableToAnotherObject(varExpr);
+         #else
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "\"%s\" is not a valid number", varExpr.c_str());
+            canClose = false;
+            return;
+         #endif
       }
-   
-   
-      RgbColor color(mColor.Red(), mColor.Green(), mColor.Blue());
-      param->SetUnsignedIntParameter("Color", color.GetIntColor());
       
-      #if DEBUG_PARAM_CREATE_VAR
+      #ifdef DEBUG_PARAM_CREATE_VAR
       MessageInterface::ShowMessage
          ("ParameterCreateDialog::CreateVariable() The variable \"%s\" added\n",
           varName.c_str());
@@ -814,10 +1077,12 @@ void ParameterCreateDialog::CreateVariable()
       }
       
       // reset values 
-      mCreateVariable = false;
-      mCreateVariableButton->Disable();
-      mExprTextCtrl->SetValue("");
-      mVarNameTextCtrl->SetValue("");
+      ResetControls();
+      
+      #ifdef DEBUG_PARAM_CREATE_VAR
+      MessageInterface::ShowMessage
+         ("ParameterCreateDialog::CreateVariable() leaving\n");
+      #endif
    }
    catch (BaseException &e)
    {
@@ -838,20 +1103,43 @@ void ParameterCreateDialog::CreateString()
    try
    {
       // if new user string to create
-      if (theGuiInterpreter->GetParameter(strName) == NULL)
+      if (theGuiInterpreter->GetConfiguredObject(strName) == NULL)
       {
+         // check if it has blank variable name
+         if (strName == "")
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "String name cannot be blank");
+            canClose = false;
+            return;
+         }
+         
+         // Trim blank spaces
+         strName = GmatStringUtil::Trim(strName);
+         
+         // check if it has valid variable name
+         if (!GmatStringUtil::IsValidName(strName))
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Invalid string name: \"%s.\" String name must "
+                "follow GMAT variable name rules (start with an alphabetic character, "
+                "only alphanumerics and underscores, no reserved words)", strName.c_str());
+            canClose = false;
+            return;
+         }
+         
          Parameter *param;
-      
+         
          param = theGuiInterpreter->CreateParameter("String", strName);
          param->SetStringParameter("Expression", strValue);
-      
+         
          mParamNames.Add(strName.c_str());
          mIsParamCreated = true;
          theGuiManager->UpdateParameter();
-      
+         
          GmatAppData::Instance()->GetResourceTree()->UpdateVariable();
          mUserStringListBox->Append(strName.c_str());
-      
+         
          for (unsigned int i=0; i<mUserStringListBox->GetCount(); i++)
          {
             if (mUserStringListBox->GetString(i).IsSameAs(strName.c_str()))
@@ -860,20 +1148,17 @@ void ParameterCreateDialog::CreateString()
                break;
             }
          }
-
+         
          EnableUpdate(true);
       }
       else
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ParameterCreateDialog::CreateString()\nThe string: %s"
-             " cannot be created. It already exists.", strName.c_str());
+            (Gmat::WARNING_, "The string: \"%s\" cannot be created. "
+             "The name already exists.", strName.c_str());
       }
-
-      mCreateString = false;
-      mCreateStringButton->Disable();
-      mStringNameTextCtrl->SetValue("");
-      mStringValueTextCtrl->SetValue("");
+      
+      ResetControls();
    }
    catch (BaseException &e)
    {
@@ -888,24 +1173,68 @@ void ParameterCreateDialog::CreateString()
 //------------------------------------------------------------------------------
 void ParameterCreateDialog::CreateArray()
 {
+   std::string s;
    long row, col;
+   Integer mNumCols, mNumRows;
 
+   s = mArrRowTextCtrl->GetValue().c_str();
+   CheckIntegerRange(mNumRows, s, "Rows", 1, 1000, true, true, true, true);
+   s = mArrColTextCtrl->GetValue().c_str();
+   CheckIntegerRange(mNumCols, s, "Columns", 1, 1000, true, true, true, true);
+   
    if (!(mArrRowTextCtrl->GetValue().ToLong(&row)) ||
        !(mArrColTextCtrl->GetValue().ToLong(&col)))
    {
       wxLogError(wxT("Row or Column is not a number"));
       wxLog::FlushActive();
+      canClose = false;
       return;
    }
-
+   
+   // Check for maximum array size of 1000x1000
+   if (row > 1000 || col > 1000)
+   {
+      MessageInterface::PopupMessage
+         (Gmat::WARNING_, "The array size %d x %d is too big. The maximum "
+          "allowed size is 1000 x 1000", row, col);
+      canClose = false;
+      return;
+   }
+   
+   if (!canClose)
+      return;
+   
    try
    {
       wxString wxarrName = mArrNameTextCtrl->GetValue().Trim();
       std::string arrName = std::string(wxarrName.c_str());
-
+      
       // if new user array to create
-      if (theGuiInterpreter->GetParameter(arrName) == NULL)
+      if (theGuiInterpreter->GetConfiguredObject(arrName) == NULL)
       {
+         // check if it has blank variable name or expression
+         if (arrName == "")
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Array name cannot be blank");
+            canClose = false;
+            return;
+         }
+         
+         // Trim blank spaces
+         arrName = GmatStringUtil::Trim(arrName);
+         
+         // check if it has valid variable name
+         if (!GmatStringUtil::IsValidName(arrName))
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "Invalid array name: \"%s.\" Array name must "
+                "follow GMAT variable name rules (start with an alphabetic character, "
+                "only alphanumerics and underscores, no reserved words)", arrName.c_str());
+            canClose = false;
+            return;
+         }
+         
          Parameter *param;
          
          param = theGuiInterpreter->CreateParameter("Array", arrName);
@@ -933,19 +1262,95 @@ void ParameterCreateDialog::CreateArray()
       else
       {
          MessageInterface::PopupMessage
-            (Gmat::WARNING_, "ParameterCreateDialog::CreateArray()\nThe array: %s"
-             " cannot be created. It already exists.", arrName.c_str());
+            (Gmat::WARNING_, "The array: \"%s\" cannot be created. "
+             "The name already exists.", arrName.c_str());
       }
-      
-      mCreateArray = false;
-      mCreateArrayButton->Disable();
-      mArrNameTextCtrl->SetValue("");
-      mArrRowTextCtrl->SetValue("");
-      mArrColTextCtrl->SetValue("");
+      ResetControls();      
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
+}
+
+
+//------------------------------------------------------------------------------
+// void SetVariableToAnotherObject(const std::string &varName,
+//                                 const std::string &varExpr)
+//------------------------------------------------------------------------------
+void ParameterCreateDialog::SetVariableToAnotherObject(const std::string &varName,
+                                                       const std::string &varExpr)
+{
+   // Parse the Parameter
+   //StringTokenizer st(varExpr, "()*/+-^ ");
+   // tokenize nothing, we want no expressions, 04/2010 TGG
+   StringTokenizer st(varExpr, "");
+   StringArray tokens = st.GetAllTokens();
+   StringArray paramArray;
+   Real realNum;
+   Parameter *param = NULL;
+   
+   // Check if unexisting varibles used in expression
+   for (unsigned int i=0; i<tokens.size(); i++)
+   {
+      #ifdef DEBUG_PARAM_CREATE_VAR
+      MessageInterface::ShowMessage("   token:<%s> \n", tokens[i].c_str());
+      #endif
+      
+      if (!GmatStringUtil::ToReal(tokens[i], realNum))
+      {
+         // Check for the valid name
+         if (!GmatStringUtil::IsValidName(tokens[i]))
+         {
+            MessageInterface::PopupMessage
+               (Gmat::ERROR_, "\"%s\" is not a valid number or variable name",
+                tokens[i].c_str());
+            canClose = false;
+            return;
+         }
+         
+         // create system parameter if it is NULL
+         if (theGuiInterpreter->GetParameter(tokens[i]) == NULL)
+         {
+            // check if it is system parameter
+            std::string type, owner, depObj;
+            GmatStringUtil::ParseParameter(tokens[i], type, owner, depObj);
+            if (theGuiInterpreter->IsParameter(type))
+            {
+               #ifdef DEBUG_PARAM_CREATE_VAR
+               MessageInterface::ShowMessage
+                  ("type:%s is a system parameter\n", type.c_str());
+               #endif
+               
+               Parameter *sysParam = 
+                  theGuiInterpreter->CreateParameter(type, tokens[i]);
+               
+               // set ref. object name
+               sysParam->SetRefObjectName(sysParam->GetOwnerType(), owner);
+               
+               // set dependent object name
+               if (depObj != "")
+                  sysParam->SetStringParameter("DepObject", depObj);
+               
+            }
+            else
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::WARNING_, "The variable \"%s\" does not exist. "
+                   "It must be created first.", tokens[i].c_str());
+               canClose = false;
+               return;
+            }
+         }
+         
+         // create a variable
+         param = theGuiInterpreter->CreateParameter("Variable", varName);
+         param->SetStringParameter("Expression", varExpr);
+         
+         // set parameter names used in expression
+         param->SetRefObjectName(Gmat::PARAMETER, tokens[i]);
+         
+      }
+   }      
 }
 

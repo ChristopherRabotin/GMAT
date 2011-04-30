@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              MissionTree
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // ** Legal **
 //
@@ -23,6 +27,8 @@
 #include "DecoratedTree.hpp"
 #include "GuiItemManager.hpp"
 #include "GuiInterpreter.hpp"
+
+#include <map>
 
 #ifdef __TEST_MISSION_TREE_ACTIONS__
 #include <fstream>            // for ofstream for saving actions
@@ -133,7 +139,11 @@ private:
    void OnAppend(wxCommandEvent &event);
    void OnInsertBefore(wxCommandEvent &event);
    void OnInsertAfter(wxCommandEvent &event);
-      
+   
+   void OnAutoAppend(wxCommandEvent &event);
+   void OnAutoInsertBefore(wxCommandEvent &event);
+   void OnAutoInsertAfter(wxCommandEvent &event);
+   
    void OnDelete(wxCommandEvent &event);
    void OnRun(wxCommandEvent &event);
    void OnShowDetail(wxCommandEvent &event);
@@ -153,10 +163,14 @@ private:
    wxMenu* CreateControlLogicPopupMenu(int type, ActionType action);
    
    wxString GetCommandString(GmatCommand *cmd, const wxString &currStr);
-   int GetMenuId(const wxString &cmd, ActionType action);
-   GmatTree::MissionIconType GetIconId(const wxString &cmd);
    GmatTree::ItemType GetCommandId(const wxString &cmd);
    int* GetCommandCounter(const wxString &cmd);
+   
+   void CreateCommandIdMap();
+   void CreateMenuIds(const wxString &cmd, int index);
+   int  GetMenuId(const wxString &cmd, ActionType action);
+   
+   GmatTree::MissionIconType GetIconId(const wxString &cmd);
    wxTreeItemId FindChild(wxTreeItemId parentId, const wxString &cmd);
    bool IsInsideSolver(wxTreeItemId itemId, GmatTree::ItemType &itemType);
    
@@ -194,7 +208,7 @@ private:
    
    enum
    {
-      POPUP_SWAP_BEFORE = 25000,
+      POPUP_SWAP_BEFORE = 1000,
       POPUP_SWAP_AFTER,
       POPUP_CUT,
       POPUP_COPY,
@@ -216,6 +230,7 @@ private:
       POPUP_INSERT_AFTER,
       
       //----- begin of MENU_EVT_RANGE of OnAppend()
+      POPUP_APPEND_COMMAND = 2000,
       POPUP_APPEND_PROPAGATE,
       POPUP_APPEND_MANEUVER,
       POPUP_APPEND_BEGIN_FINITE_BURN,
@@ -227,7 +242,8 @@ private:
       POPUP_APPEND_MINIMIZE,
       POPUP_APPEND_NON_LINEAR_CONSTRAINT,
       POPUP_APPEND_REPORT,
-      POPUP_APPEND_FUNCTION,
+      POPUP_APPEND_CALL_GMAT_FUNCTION,
+      POPUP_APPEND_CALL_MATLAB_FUNCTION,
       POPUP_APPEND_ASSIGNMENT,
       POPUP_APPEND_TOGGLE,
       POPUP_APPEND_SAVE,
@@ -242,9 +258,11 @@ private:
       POPUP_APPEND_WHILE,
       POPUP_APPEND_D0_WHILE,
       POPUP_APPEND_SWITCH,
+      POPUP_APPEND_UNKNOWN,
       //----- end of MENU_EVT_RANGE
       
       //----- begin of MENU_EVT_RANGE of OnInsertBefore()
+      POPUP_INSERT_BEFORE_COMMAND = 3000,
       POPUP_INSERT_BEFORE_PROPAGATE, 
       POPUP_INSERT_BEFORE_MANEUVER,
       POPUP_INSERT_BEFORE_BEGIN_FINITE_BURN,
@@ -256,7 +274,8 @@ private:
       POPUP_INSERT_BEFORE_MINIMIZE,
       POPUP_INSERT_BEFORE_NON_LINEAR_CONSTRAINT,
       POPUP_INSERT_BEFORE_REPORT,
-      POPUP_INSERT_BEFORE_FUNCTION,
+      POPUP_INSERT_BEFORE_CALL_GMAT_FUNCTION,
+      POPUP_INSERT_BEFORE_CALL_MATLAB_FUNCTION,
       POPUP_INSERT_BEFORE_ASSIGNMENT,
       POPUP_INSERT_BEFORE_TOGGLE,
       POPUP_INSERT_BEFORE_SAVE,
@@ -271,9 +290,11 @@ private:
       POPUP_INSERT_BEFORE_WHILE,
       POPUP_INSERT_BEFORE_D0_WHILE,
       POPUP_INSERT_BEFORE_SWITCH,
+      POPUP_INSERT_BEFORE_UNKNOWN,
       //----- end of MENU_EVT_RANGE
       
       //----- begin of MENU_EVT_RANGE of OnInsertAfter()
+      POPUP_INSERT_AFTER_COMMAND = 4000,
       POPUP_INSERT_AFTER_PROPAGATE, 
       POPUP_INSERT_AFTER_MANEUVER,
       POPUP_INSERT_AFTER_BEGIN_FINITE_BURN,
@@ -285,7 +306,8 @@ private:
       POPUP_INSERT_AFTER_MINIMIZE,
       POPUP_INSERT_AFTER_NON_LINEAR_CONSTRAINT,
       POPUP_INSERT_AFTER_REPORT,
-      POPUP_INSERT_AFTER_FUNCTION,
+      POPUP_INSERT_AFTER_CALL_GMAT_FUNCTION,
+      POPUP_INSERT_AFTER_CALL_MATLAB_FUNCTION,
       POPUP_INSERT_AFTER_ASSIGNMENT,
       POPUP_INSERT_AFTER_TOGGLE,
       POPUP_INSERT_AFTER_SAVE,
@@ -300,6 +322,7 @@ private:
       POPUP_INSERT_AFTER_WHILE,
       POPUP_INSERT_AFTER_D0_WHILE,
       POPUP_INSERT_AFTER_SWITCH,
+      POPUP_INSERT_AFTER_UNKNOWN,
       //----- end of MENU_EVT_RANGE
       
       POPUP_VIEW_VARIABLES,
@@ -313,7 +336,16 @@ private:
       POPUP_START_SAVE_ACTIONS,
       POPUP_STOP_SAVE_ACTIONS,
       POPUP_READ_ACTIONS,
+      
+      //----- for auto menu actions
+      AUTO_APPEND_COMMAND = 5000,
+      AUTO_INSERT_BEFORE_COMMAND = 6000,
+      AUTO_INSERT_AFTER_COMMAND = 7000,
+      AUTO_END = 8000,
    };
+   
+   std::map<wxString, int> cmdIdMap;
+   std::map<int, wxString> idCmdMap;
 };
 
 #endif // MissionTree_hpp

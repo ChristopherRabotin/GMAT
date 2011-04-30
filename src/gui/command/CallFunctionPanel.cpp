@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              CallFunctionPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -245,10 +247,10 @@ void CallFunctionPanel::Create()
                       wxTE_MULTILINE|wxTE_READONLY);
    
    theInputViewButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    theOutputViewButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    wxFlexGridSizer *pageSizer = new wxFlexGridSizer( 5, 0, 0 );
    pageSizer->Add(outLeftBracket, 0, wxALIGN_CENTRE|wxALL, bsize);

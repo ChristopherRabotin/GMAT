@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              InteractiveMatlabDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison Greene
 // Created: 2004/11/12
@@ -45,10 +49,10 @@ InteractiveMatlabDialog::InteractiveMatlabDialog(wxWindow *parent)
    // reset array of strings
    inputStrings.Clear();
    outputStrings.Clear();
-
+   
    // create command
-   theCmd = new CallFunction();
-
+   theCmd = new CallFunction("CallMatlabFunction");
+   
    Create();
    Show();
 }
@@ -241,7 +245,7 @@ void InteractiveMatlabDialog::OnButton(wxCommandEvent& event)
    if (event.GetEventObject() == theEvaluateButton)
    {
       delete(theCmd);
-      theCmd = new CallFunction();
+      theCmd = new CallFunction("CallMatlabFunction");
       SetupCommand();
       SetResults();
    }

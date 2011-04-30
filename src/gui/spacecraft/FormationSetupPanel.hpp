@@ -1,16 +1,21 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              FormationSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
 // Author: Linda Jun
-// Created: 2004/02/12
+// Created: 2004/02/12 
+// Modified: 
+//    2010.03.22 Thomas Grubb 
+//      - Added AVL_LISTBOX window id to use with Available ListBox double-click
 /**
  * Declares FormationSetupPanel class. This class allows user to setup OpenGL Plot.
  */
@@ -52,7 +57,8 @@ protected:
       ADD_BUTTON = 99000,
       REMOVE_BUTTON,
       CLEAR_BUTTON,
-      SEL_LISTBOX
+      SEL_LISTBOX,
+      AVL_LISTBOX
    };
 };
 #endif

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              SinglePathSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2006/03/29
@@ -15,7 +19,7 @@
 #include "SinglePathSetupPanel.hpp"
 #include "MessageInterface.hpp"
 
-#include "bitmaps/open.xpm"
+#include "bitmaps/OpenFolder.xpm"
 
 //#define DEBUG_SETPATH
 
@@ -87,7 +91,7 @@ void SinglePathSetupPanel::Create()
    int buttonWidth = 25;
    #endif
    
-   wxBitmap openBitmap = wxBitmap(open_xpm);
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
    
    //------------------------------------------------------
    // Create components

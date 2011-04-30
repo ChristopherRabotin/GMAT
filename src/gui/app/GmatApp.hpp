@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatApp
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -22,31 +24,44 @@
 #include "gmatwxdefs.hpp"
 #include "Moderator.hpp"
 #include "GmatMainFrame.hpp"
+#include "GmatAppData.hpp"
 
-#include "wx/docview.h"   // for wxDocument
-class wxDocManager;
+#if wxUSE_PRINTING_ARCHITECTURE
+// global print data, to remember settings during the session
+wxPrintData *globalPrintData = (wxPrintData*) NULL;
+wxPageSetupData *globalPageSetupData = (wxPageSetupData*) NULL;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 class GmatApp : public wxApp
 {
 public:
-    GmatApp();
-    // override base class virtuals
-    // ----------------------------
-
-    // this one is called on application startup and is a good place for the app
-    // initialization (doing it here and not in the ctor allows to have an error
-    // return: if OnInit() returns false, the application terminates)
-    virtual bool OnInit();
-
-    //loj: added
-    int OnExit(void);
-
+   GmatApp();
+   // override base class virtuals
+   // ----------------------------
+   
+   // This one is called on application startup and is a good place for the app
+   // initialization (doing it here and not in the constructor allows to have
+   // an error return: if OnInit() returns false, the application terminates)
+   virtual bool OnInit();
+   
+   int OnExit(void);
+   int FilterEvent(wxEvent& event);
+   
 protected:
-
+   
 private:
-    
-    Moderator *theModerator;
-    GmatMainFrame *theMainFrame;
+   
+   Moderator *theModerator;
+   GmatMainFrame *theMainFrame;
+   wxString scriptToRun;
+   wxString batchFile;
+   bool showMainFrame;
+   bool runScript;
+   bool runBatch;
+   bool startMatlabServer;
+   
+   void ProcessCommandLineOptions();
+   void RunBatch();
 };
 
 DECLARE_APP(GmatApp)

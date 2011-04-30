@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ThrusterCoefficientDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2005/01/13
@@ -18,24 +22,25 @@
 
 #include "gmatwxdefs.hpp"
 #include "GmatDialog.hpp"
-#include "Thruster.hpp"
 
 class ThrusterCoefficientDialog : public GmatDialog
 {
 public:
-   ThrusterCoefficientDialog(wxWindow *parent, Thruster *thruster, std::string type);
+   ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
+                             const wxString &title, GmatBase *obj,
+                             const wxString &type);
    
-private:  
-    
-   Thruster *theThruster;
+private:
    
-   StringArray coefName;
-   RealArray coefValue;
+   GmatBase    *theObject;
+   Integer     coefCount;
+   StringArray coefNames;
+   RealArray   coefValues;
    
-   std::string coefType;
-     
-   wxGrid *coefficientGrid;
-
+   wxString coefType;
+   
+   wxGrid *coefGrid;
+   
    // methods inherited from GmatDialog
    virtual void Create();
    virtual void LoadData();
@@ -44,7 +49,6 @@ private:
    
    // event handling   
    DECLARE_EVENT_TABLE();
-   void OnCellValueChange(wxGridEvent &event);
    
    // IDs for the controls and the menu commands
    enum
@@ -54,6 +58,3 @@ private:
 };
 
 #endif
-
-
-

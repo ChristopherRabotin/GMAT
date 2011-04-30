@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             MissionTreeItemData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // ** Legal **
 //
@@ -23,15 +27,13 @@
 class MissionTreeItemData : public GmatTreeItemData
 {
 public:
-   MissionTreeItemData(const wxString desc, GmatTree::ItemType type,
-                       const wxString &name = "", GmatCommand *cmd = NULL);
+   MissionTreeItemData(const wxString &name, GmatTree::ItemType type,
+                       const wxString &title = "", GmatCommand *cmd = NULL);
+   
    virtual GmatCommand* GetCommand();
    virtual void SetCommand(GmatCommand *cmd);
-   virtual wxString GetCommandName();
-    
+   
 protected:
-private:
    GmatCommand *theCommand;
-   wxString theCommandName;
 };
 #endif // MissionTreeItemData_hpp

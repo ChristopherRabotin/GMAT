@@ -2,10 +2,12 @@
 //------------------------------------------------------------------------------
 //                            TankPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -21,6 +23,7 @@
 #include "TankPanel.hpp"
 #include "MessageInterface.hpp"
 #include "GmatAppData.hpp"
+#include <wx/config.h>
 
 //------------------------------
 // event tables for wxWindows
@@ -71,15 +74,28 @@ TankPanel::~TankPanel()
 //------------------------------------------------------------------------------
 void TankPanel::Create()
 {
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Spacecraft Tanks"));
+
    // wxButton
-   selectButton = new wxButton( this, ID_BUTTON, wxT("->"),
+   selectButton = new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-   removeButton = new wxButton( this, ID_BUTTON, wxT("<-"),
+   selectButton->SetToolTip(pConfig->Read(_T("AddTankHint")));
+
+   removeButton = new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"),
                               wxDefaultPosition, wxDefaultSize, 0 );
+   removeButton->SetToolTip(pConfig->Read(_T("RemoveTankHint")));
+
    selectAllButton = new wxButton( this, ID_BUTTON, wxT("=>"),
                               wxDefaultPosition, wxDefaultSize, 0 );
-   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<="),
+   selectAllButton->SetToolTip(pConfig->Read(_T("AddAllTanksHint")));
+
+   removeAllButton = new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="),
                               wxDefaultPosition, wxDefaultSize, 0 );
+   removeAllButton->SetToolTip(pConfig->Read(_T("ClearTanksHint")));
+
                               
    // wxString
    //causing VC++ error => wxString emptyList[] = {};
@@ -95,10 +111,12 @@ void TankPanel::Create()
    availableTankListBox =
       theGuiManager->GetFuelTankListBox(this, ID_LISTBOX, wxSize(150,200),
                                         &mExcludedTankList);
+   availableTankListBox->SetToolTip(pConfig->Read(_T("AvailableTanksHint")));
    
    selectedTankListBox =
       new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150,200), //0,
                     emptyList, wxLB_SINGLE);
+   selectedTankListBox->SetToolTip(pConfig->Read(_T("SelectedTanksHint")));
    
    Integer bsize = 3; // border size
    
@@ -106,9 +124,9 @@ void TankPanel::Create()
    wxBoxSizer *boxSizer1 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer2 = new wxBoxSizer( wxVERTICAL );
    wxBoxSizer *boxSizer3 = new wxBoxSizer( wxHORIZONTAL );
-   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT("Available Tanks") );
+   wxStaticBox *staticBox1 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Available Tanks") );
    wxStaticBoxSizer *staticBoxSizer1 = new wxStaticBoxSizer( staticBox1, wxHORIZONTAL );
-   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT("Selected Tanks") );
+   wxStaticBox *staticBox2 = new wxStaticBox( this, -1, wxT(GUI_ACCEL_KEY"Selected Tanks") );
    wxStaticBoxSizer *staticBoxSizer2 = new wxStaticBoxSizer( staticBox2, wxHORIZONTAL );
    
    // Add to wx*Sizers   

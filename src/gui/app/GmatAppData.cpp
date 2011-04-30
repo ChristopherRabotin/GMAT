@@ -2,15 +2,20 @@
 //------------------------------------------------------------------------------
 //                              GmatAppData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2003/10/29
+// Modified: 
+//    2010.03.01 Thomas Grubb 
+//       - Open configuration file (GMAT.ini)
 //
 /**
  * defines application data.
@@ -18,6 +23,10 @@
 //------------------------------------------------------------------------------
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
+#include "FileManager.hpp"
+#include "MessageInterface.hpp"
+#include <wx/confbase.h>
+#include <wx/fileconf.h>
 
 GmatAppData* GmatAppData::theGmatAppData = NULL;
 
@@ -92,6 +101,21 @@ void GmatAppData::SetResourceTree(ResourceTree *resourceTree)
 ResourceTree* GmatAppData::GetResourceTree()
 {
    return theResourceTree;
+}
+
+
+//------------------------------------------------------------------------------
+// wxConfigBase* GetPersonalizationConfig()
+//------------------------------------------------------------------------------
+wxConfigBase* GmatAppData::GetPersonalizationConfig()
+{
+   if (thePersonalizationConfig == NULL)
+   {
+//      MessageInterface::PopupMessage(Gmat::INFO_, "Setting up Personalization file: %s\n",FileManager::Instance()->GetFilename(FileManager::PERSONALIZATION_FILE).c_str());
+      thePersonalizationConfig = new wxFileConfig(wxEmptyString, wxEmptyString, (FileManager::Instance()->GetFullPathname(FileManager::PERSONALIZATION_FILE)).c_str(),
+              wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
+   }
+   return thePersonalizationConfig;
 }
 
 
@@ -204,6 +228,25 @@ wxFont GmatAppData::GetFont()
 
 
 //------------------------------------------------------------------------------
+// void SetTempScriptName(const wxString &tempName)
+//------------------------------------------------------------------------------
+void GmatAppData::SetTempScriptName(const wxString &tempName)
+{
+   theTempScriptName = tempName;
+}
+
+
+//------------------------------------------------------------------------------
+// wxString GetTempScriptName()
+//------------------------------------------------------------------------------
+wxString GmatAppData::GetTempScriptName()
+{
+   return theTempScriptName;
+}
+
+
+
+//------------------------------------------------------------------------------
 // GmatAppData()
 //------------------------------------------------------------------------------
 /**
@@ -220,7 +263,19 @@ GmatAppData::GmatAppData()
    theMessageWindow = NULL;
    theCompareWindow = NULL;
    theMessageTextCtrl = NULL;
+   theTempScriptName = "$gmattempscript$.script";
+   thePersonalizationConfig = NULL;
+
+   
+   #ifdef __USE_EDITOR__
+   thePageSetupDialogData = NULL;
+   #endif
+   
    theFont = wxFont(10, wxMODERN, wxNORMAL, wxNORMAL);
+   // set the global wx config, read from local directory (GMAT.ini)
+   wxFileConfig *pConfig = new wxFileConfig(wxEmptyString, wxEmptyString, "GMAT.ini", 
+           wxEmptyString, wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_RELATIVE_PATH);
+   wxConfigBase::Set(pConfig);
 #endif
 }
 

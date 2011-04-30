@@ -2,7 +2,14 @@
 //------------------------------------------------------------------------------
 //                              ScriptEventPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2005/1/12
@@ -13,28 +20,30 @@
 //------------------------------------------------------------------------------
 
 #include "ScriptEventPanel.hpp"
+#include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
 #include "CommandUtil.hpp"       // for GetCommandSeqString()
-#include "ShowScriptDialog.hpp"
 #include "NoOp.hpp"
+#include <algorithm>             // for sort(), set_difference()
 #include <sstream>               // for std::stringstream
 
+// This needs more working on size, so commented out
+//#define __USE_SASH_WINDOW__
 
-//#define DBGLVL_SCRIPTEVENTPANEL_LOAD 1
-//#define DBGLVL_SCRIPTEVENTPANEL_SAVE 1
-//#define DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS 1
+//#define DBGLVL_SEPANEL_CREATE 1
+//#define DBGLVL_SEPANEL_LOAD 1
+//#define DBGLVL_SEPANEL_SAVE 1
+//#define DBGLVL_SEPANEL_REPLACE_CMDS 1
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ScriptEventPanel, GmatPanel)
-   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
-   EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   
-   EVT_TEXT(ID_TEXTCTRL, ScriptEventPanel::OnTextUpdate)
+   EVT_TEXT(ID_COMMENT_CTRL, ScriptEventPanel::OnCommentChange)
+   EVT_TEXT(ID_SCRIPT_CTRL, ScriptEventPanel::OnCommentChange)
+   EVT_SASH_DRAGGED (ID_SASH_WINDOW, ScriptEventPanel::OnSashDrag)
+   EVT_SIZE (ScriptEventPanel::OnSize)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -44,20 +53,23 @@ END_EVENT_TABLE()
  * A constructor.
  */
 //------------------------------------------------------------------------------
-//ScriptEventPanel::ScriptEventPanel(wxWindow *parent, GmatCommand *cmd)
 ScriptEventPanel::ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item)
    : GmatPanel(parent)
 {
    theItem = item;
    theCommand = item->GetCommand();
-
-   #if DBGLVL_SCRIPTEVENTPANEL
+   
+   #if DBGLVL_SEPANEL
    ShowCommand("ScriptEventPanel() theCommand=", theCommand);
    #endif
    
    mPrevCommand = NULL;
    mNextCommand = NULL;
    mNewCommand = NULL;
+   
+   #ifdef __USE_STC_EDITOR__
+   mEditor = NULL;
+   #endif
    
    if (theCommand != NULL)
    {
@@ -79,6 +91,23 @@ ScriptEventPanel::ScriptEventPanel(wxWindow *parent, MissionTreeItemData *item)
 //------------------------------------------------------------------------------
 ScriptEventPanel::~ScriptEventPanel()
 {
+   #ifdef __USE_STC_EDITOR__
+   if (mEditor)
+   {
+      delete mEditor;
+      mEditor = NULL;
+   }
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetEditorModified(bool isModified)
+//------------------------------------------------------------------------------
+void ScriptEventPanel::SetEditorModified(bool isModified)
+{
+   EnableUpdate(isModified);
+   mEditorModified = isModified;
 }
 
 
@@ -87,31 +116,165 @@ ScriptEventPanel::~ScriptEventPanel()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::Create()
 {
+   #if DBGLVL_SEPANEL_CREATE
+   MessageInterface::ShowMessage("ScriptEventPanel::Create() entered\n");
+   #endif
+   
    int bsize = 3; // border size
    
-   // create sizers
-   mBottomSizer = new wxGridSizer( 1, 0, 0 );
-   mPageSizer = new wxBoxSizer(wxVERTICAL);
+   //=================================================================
+   #ifdef __USE_SASH_WINDOW__
+   //=================================================================
    
+   int w, h;
+   
+   // A window w/sash for comments
+   theCommentsWin =
+      new wxSashLayoutWindow(this, ID_SASH_WINDOW,
+                             wxDefaultPosition, wxSize(-1, -1), wxSW_3D);
+   // A window w/sash for scripts
+   theScriptsWin =
+      new wxSashLayoutWindow(this, -1,
+                             wxDefaultPosition, wxSize(-1, -1), wxSW_3D);
+   
+   theCommentsWin->SetDefaultSize(wxSize(20, 70));
+   theCommentsWin->SetMinimumSizeY(50);
+   theCommentsWin->SetMaximumSizeY(350);
+   theCommentsWin->SetOrientation(wxLAYOUT_HORIZONTAL);
+   theCommentsWin->SetAlignment(wxLAYOUT_TOP);
+   theCommentsWin->SetSashVisible(wxSASH_BOTTOM, TRUE);
+   
+   theScriptsWin->SetMinimumSizeY(100);
+   theScriptsWin->SetMaximumSizeY(500);
+   theScriptsWin->SetOrientation(wxLAYOUT_HORIZONTAL);
+   theScriptsWin->SetAlignment(wxLAYOUT_BOTTOM);
+   //theScriptsWin->SetSashVisible(wxSASH_TOP, TRUE);
+   
+   
+   // Comment label
+   wxStaticText *commentText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("Comments"), wxDefaultPosition, wxDefaultSize, 0);
+   // Comment text
+   mCommentTextCtrl =
+      new wxTextCtrl(theCommentsWin, ID_COMMENT_CTRL, wxT(""), wxDefaultPosition,
+                     wxSize(-1, 70), wxTE_MULTILINE | wxTE_DONTWRAP);
+   
+   // BeginScript label
+   wxStaticText *beginScriptText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("BeginScript;"), wxDefaultPosition, wxDefaultSize, 0);
+   // EndScript label
+   wxStaticText *endScriptText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("EndScript;"), wxDefaultPosition, wxDefaultSize, 0);
+   // Change font color to blue
+   beginScriptText->SetForegroundColour(*wxBLUE);
+   endScriptText->SetForegroundColour(*wxBLUE);
+   
+#ifdef __USE_STC_EDITOR__
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage
+      ("ScriptEventPanel::Create(), creating Editor from parent = <%p>\n", this);
+   #endif
+   mEditor = new Editor(theScriptsWin, true, ID_STC);
+#else
    // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
    mFileContentsTextCtrl =
-      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), wxDefaultPosition,
+      new wxTextCtrl(theScriptsWin, ID_SCRIPT_CTRL, wxT(""), wxDefaultPosition,
                      wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
    
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+#endif
+   
+   
+   //------------------------------------------------------
+   // add to sizer
+   //------------------------------------------------------
+   mPageSizer = new wxBoxSizer(wxVERTICAL);
+   mPageSizer->Add(commentText, 0);
+   mPageSizer->Add(theCommentsWin, 0, wxGROW);
+   mPageSizer->Add(beginScriptText, 0);
+   mPageSizer->Add(theScriptsWin, 1, wxGROW);
+   mPageSizer->Add(endScriptText, 0);
+   theMiddleSizer->Add(mPageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   
+   // Not using sash window
+   //=================================================================
+   #else
+   //=================================================================
+   
+   theCommentsWin = NULL;
+   theScriptsWin = NULL;
+   
+   // Comment label
+   wxStaticText *commentText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("Comments"), wxDefaultPosition, wxDefaultSize, 0);
+   // Comment text
+   mCommentTextCtrl =
+      new wxTextCtrl(this, ID_COMMENT_CTRL, wxT(""), wxDefaultPosition,
+                     wxSize(-1, 70), wxTE_MULTILINE | wxTE_DONTWRAP);
+   
+   // BeginScript label
+   wxStaticText *beginScriptText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("BeginScript;"), wxDefaultPosition, wxDefaultSize, 0);
+   // EndScript label
+   wxStaticText *endScriptText =
+      new wxStaticText(this, ID_TEXT,
+                       wxT("EndScript;"), wxDefaultPosition, wxDefaultSize, 0);
+   // Change font color to blue
+   beginScriptText->SetForegroundColour(*wxBLUE);
+   endScriptText->SetForegroundColour(*wxBLUE);
+   
+#ifdef __USE_STC_EDITOR__
+   #ifdef DEBUG_CREATE
+   MessageInterface::ShowMessage
+      ("ScriptEventPanel::Create(), creating Editor from parent = <%p>\n", this);
+   #endif
+   mEditor = new Editor(this, true, ID_STC);
+#else
+   // We don't want TextCtrl to wrap text, so add wxTE_DONTWRAP to style
+   mFileContentsTextCtrl =
+      new wxTextCtrl(this, ID_SCRIPT_CTRL, wxT(""), wxDefaultPosition,
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_DONTWRAP);
+   
+   mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
+#endif
    
    //------------------------------------------------------
    // add to sizer
    //------------------------------------------------------
    
+   mBottomSizer = new wxGridSizer( 1, 0, 0 );
+   
+#ifdef __USE_STC_EDITOR__
+   mBottomSizer->Add(mEditor, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+#else
    mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL, 
                      bsize);
+#endif
    
    //------------------------------------------------------
    // add to parent sizer
    //------------------------------------------------------
+   
+   mPageSizer = new wxBoxSizer(wxVERTICAL);
+   mPageSizer->Add(commentText, 0, wxALIGN_LEFT | wxALL, bsize);
+   mPageSizer->Add(mCommentTextCtrl, 0, wxALIGN_LEFT | wxGROW | wxALL, bsize);
+   mPageSizer->Add(beginScriptText, 0, wxALIGN_LEFT | wxALL, bsize);
    mPageSizer->Add(mBottomSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   mPageSizer->Add(endScriptText, 0, wxALIGN_LEFT | wxALL, bsize);
    theMiddleSizer->Add(mPageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   
+   //=================================================================
+   #endif
+   //=================================================================
+   
+   #if DBGLVL_SEPANEL_CREATE
+   MessageInterface::ShowMessage("ScriptEventPanel::Create() leaving\n");
+   #endif
 }
 
 
@@ -124,7 +287,7 @@ void ScriptEventPanel::LoadData()
    // Set the pointer for the "Show Script" button
    mObject = theCommand;
    
-   #if DBGLVL_SCRIPTEVENTPANEL_LOAD
+   #if DBGLVL_SEPANEL_LOAD
    MessageInterface::ShowMessage("ScriptEventPanel::LoadData()\n");
    MessageInterface::ShowMessage("     theCommand=%s\n", theCommand->GetTypeName().c_str());
    std::string cmdString = GmatCommandUtil::GetCommandSeqString(theCommand);
@@ -133,16 +296,30 @@ void ScriptEventPanel::LoadData()
    GmatCommand *firstCmd = theGuiInterpreter->GetFirstCommand();
    cmdString = GmatCommandUtil::GetCommandSeqString(firstCmd);
    MessageInterface::ShowMessage("===> mission seuqence=%s\n", cmdString.c_str());
-
+   
    mPrevCommand = theCommand->GetPrevious();
    ShowCommand("     mPrevCommand = ", mPrevCommand);
    #endif
    
    std::stringstream text;
-   text << theCommand->GetGeneratingString();
+   
+   // We don't want to include Begin/EndScript,
+   // so pass Gmat::GUI_EDITOR to GetGeneratingString()
+   text << theCommand->GetGeneratingString(Gmat::GUI_EDITOR);
+   mCommentTextCtrl->AppendText(theCommand->GetCommentLine().c_str());
+   mCommentTextCtrl->SetModified(false);
    
    wxString scriptText = text.str().c_str();
-   mFileContentsTextCtrl->AppendText(scriptText);
+   
+   #ifdef __USE_STC_EDITOR__
+      mEditor->AppendText(scriptText);
+      mEditor->EmptyUndoBuffer();
+      mEditor->SetSavePoint();
+   #else
+      mFileContentsTextCtrl->AppendText(scriptText);
+      mFileContentsTextCtrl->SetModified(false);
+   #endif
+   
    EnableUpdate(false);
 }
 
@@ -158,72 +335,76 @@ void ScriptEventPanel::LoadData()
 //------------------------------------------------------------------------------
 void ScriptEventPanel::SaveData()
 {
-   #if DBGLVL_SCRIPTEVENTPANEL_SAVE
-   MessageInterface::ShowMessage("===> ScriptEventPanel::SaveData() Entered\n");
+   #if DBGLVL_SEPANEL_SAVE
+   MessageInterface::ShowMessage("ScriptEventPanel::SaveData() Entered\n");
    #endif
    
    canClose = false;
    std::stringstream scriptText1;
    
-   //-----------------------------------------------------------------
-   // Get text lines and do some sanity checking
-   //-----------------------------------------------------------------
-   int numLines = mFileContentsTextCtrl->GetNumberOfLines();
-   int beginCount = 0;
-   int endCount = 0;
-   std::string::size_type commentIndex = std::string::npos;
-   std::string::size_type beginIndex = std::string::npos;
-   std::string::size_type endIndex = std::string::npos;
-   wxString line;
-   
-   for (int i=0; i<numLines; i++)
-   {
-      line = mFileContentsTextCtrl->GetLineText(i);
-
-      scriptText1 << line << "\n";
-      commentIndex = line.Find("%");
-      beginIndex = line.Find("BeginScript");
-      endIndex = line.Find("EndScript");
-      
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE > 1
-      MessageInterface::ShowMessage
-         ("     line=<%s>, commentIndex=%u, beginIndex=%u, endIndex=%u\n",
-          line.c_str(), commentIndex, beginIndex, endIndex);
-      #endif
-      
-      if (beginIndex == line.npos && endIndex == line.npos)
-         continue;
-      
-      if (commentIndex == line.npos)
-      {
-         if (beginIndex != line.npos)
-            beginCount++;
-         else if (endIndex != line.npos)
-            endCount++;
-      }
-      else
-      {
-         if (beginIndex < commentIndex)
-            beginCount++;
-         else if (endIndex < commentIndex)
-            endCount++;            
-      }
-   }
-   
-   #if DBGLVL_SCRIPTEVENTPANEL_SAVE > 1
-   MessageInterface::ShowMessage
-      ("     beginCount=%d, endCount=%d\n", beginCount, endCount);
+   // If only comment changed, just set comment and return
+   #ifdef __USE_STC_EDITOR__
+   if (!mEditor->IsModified() && mCommentTextCtrl->IsModified())
+   #else
+   if (!mFileContentsTextCtrl->IsModified() && mCommentTextCtrl->IsModified())
    #endif
-   
-   // Check for Begin/EndScript keyword
-   if (beginCount != endCount)
    {
-      MessageInterface::PopupMessage
-         (Gmat::WARNING_, "Unbalanced \"Begin/EndScript\" found in this "
-          "script block.\nScript not saved.\n");
-      
+      theCommand->SetCommentLine(mCommentTextCtrl->GetValue().c_str());
+      mCommentTextCtrl->SetModified(false);
+      EnableUpdate(false);
+      canClose = true;
+      #if DBGLVL_SEPANEL_SAVE
+      MessageInterface::ShowMessage
+         ("ScriptEventPanel::SaveData() only comment saved, just returning\n");
+      #endif
       return;
    }
+   
+   
+   //-----------------------------------------------------------------
+   // Add lines to stringstream
+   //-----------------------------------------------------------------
+   scriptText1 << "BeginScript;" << "\n";
+   //=======================================================
+   #ifdef __USE_STC_EDITOR__
+   //=======================================================
+   
+   #if DBGLVL_SEPANEL_SAVE
+   int numLines = mEditor->GetLineCount();
+   MessageInterface::ShowMessage("   number of lines=%d\n", numLines);
+   #endif
+   
+   wxString text = mEditor->GetText();
+   
+   // Add EOL if not there.
+   size_t length = text.Len();
+   wxChar lastChar = text[length-1];
+   
+   if (lastChar != '\n' && lastChar != '\r' && lastChar != '\0')
+      text = text + "\n";
+   
+   scriptText1 << text;
+   
+   //=======================================================
+   #else
+   //=======================================================
+   
+   int numLines = mFileContentsTextCtrl->GetNumberOfLines();
+   wxString line;
+   for (int i=0; i<numLines; i++)
+   {      
+      line = mFileContentsTextCtrl->GetLineText(i);
+      scriptText1 << line << "\n";
+      // Since GmatMdiChildFrame uses this TextCtrl for checking
+      // modified flag, set the flag to false
+      mFileContentsTextCtrl->SetModified(false);
+   }
+   
+   //=======================================================
+   #endif
+   //=======================================================
+   
+   scriptText1 << "EndScript;" << "\n";
    
    
    //-----------------------------------------------------------------
@@ -231,18 +412,17 @@ void ScriptEventPanel::SaveData()
    //-----------------------------------------------------------------
    std::string cmdString = GmatCommandUtil::GetCommandSeqString(theCommand);
    
-   #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+   #if DBGLVL_SEPANEL_SAVE
    MessageInterface::ShowMessage
-      ("     ==> Current BeginScript sequence=%s\n", cmdString.c_str());
+      ("   ==> Current BeginScript sequence=%s\n", cmdString.c_str());
    #endif
    
    // Get previous command
    mPrevCommand = theCommand->GetPrevious();
    
-   #if DBGLVL_SCRIPTEVENTPANEL_SAVE
-   GmatCommand *firstCmd = theGuiInterpreter->GetFirstCommand();
-   ShowCommand("     mPrevCommand = ", mPrevCommand);
-   ShowCommand("     theCommand->GetPrevious() = ", theCommand->GetPrevious());   
+   #if DBGLVL_SEPANEL_SAVE
+   ShowCommand("   mPrevCommand = ", mPrevCommand);
+   ShowCommand("   theCommand->GetPrevious() = ", theCommand->GetPrevious());   
    #endif
    
    //-----------------------------------------------------------------
@@ -250,9 +430,9 @@ void ScriptEventPanel::SaveData()
    //-----------------------------------------------------------------
    if (mPrevCommand == NULL)
    {      
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+      #if DBGLVL_SEPANEL_SAVE
       GmatCommand *firstCmd = theGuiInterpreter->GetFirstCommand();
-      ShowCommand("     firstCmd = ", firstCmd);
+      ShowCommand("   firstCmd = ", firstCmd);
       #endif
       
       MessageInterface::PopupMessage
@@ -262,8 +442,8 @@ void ScriptEventPanel::SaveData()
       return;
    }
    
-   #if DBGLVL_SCRIPTEVENTPANEL_SAVE
-   ShowCommand("     mPrevCommand = ", mPrevCommand);
+   #if DBGLVL_SEPANEL_SAVE
+   ShowCommand("   mPrevCommand = ", mPrevCommand);
    #endif
    
    //-----------------------------------------------------------------
@@ -272,20 +452,27 @@ void ScriptEventPanel::SaveData()
    GmatCommand *tempNoOp = new NoOp;
    GmatCommand *inCommand = tempNoOp;
    
+   // Save old function list, so that new functions can be delete if there
+   // is script errors
+   StringArray oldFunctions = theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
+   for (UnsignedInt i=0; i<oldFunctions.size(); i++)
+      MessageInterface::ShowMessage
+         ("   ==> oldFunctions[%d] = '%s'\n", i, oldFunctions[i].c_str());
+   
    try
    {
       //--------------------------------------------------------------
       // Set text lines to istringstream and interpret
       //--------------------------------------------------------------
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+      #if DBGLVL_SEPANEL_SAVE
       MessageInterface::ShowMessage
-         ("     scriptText1 =\n%s\n", scriptText1.str().c_str());
+         ("   scriptText1 =\n%s\n", scriptText1.str().c_str());
       #endif
       
       std::istringstream *inStringStream = new std::istringstream;
       inStringStream->str(scriptText1.str());
       
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+      #if DBGLVL_SEPANEL_SAVE
       MessageInterface::ShowMessage
          ("====================> ScriptEvent calling "
           "theGuiInterpreter->Interpret(%p)\n", inCommand);
@@ -293,29 +480,69 @@ void ScriptEventPanel::SaveData()
       
       canClose = theGuiInterpreter->Interpret(inCommand, inStringStream);
       
-      
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE
-      ShowCommand("     inCommand = ", inCommand);
+      #if DBGLVL_SEPANEL_SAVE
+      ShowCommand("   inCommand = ", inCommand);
       cmdString = GmatCommandUtil::GetCommandSeqString(inCommand);
       MessageInterface::ShowMessage
-         ("     ==> temp noOp seuqence=%s\n", cmdString.c_str());
+         ("   ==> temp noOp seuqence=%s\n", cmdString.c_str());
+      MessageInterface::ShowMessage("   canClose = %d\n", canClose);
       #endif
       
       //--------------------------------------------------------------
       // If error occurred during interpretation, handle and return
       //--------------------------------------------------------------
+      bool ignoreErrors = true;
       if (!canClose)
       {         
-         MessageInterface::PopupMessage
-            (Gmat::ERROR_,
-             "Error parsing the ScriptEvent; Script not saved.\n"
-             "Please correct the text.\n");
+         wxMessageDialog *msgDlg = new wxMessageDialog
+            (this, "Errors were found in the ScriptEvent; Do you want to save it anyway?", "",
+             wxYES_NO | wxICON_QUESTION, wxDefaultPosition);
+         int result = msgDlg->ShowModal();
          
-         #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+         ignoreErrors = false;
+         if (result == wxID_YES)
+         {
+            ignoreErrors = true;
+            canClose = true;
+         }
+      }
+      
+      if (!ignoreErrors)
+      {
+         #if DBGLVL_SEPANEL_SAVE
          MessageInterface::ShowMessage
-            ("     Deleting tempNoOp->GetNext()=%p\n", tempNoOp->GetNext());
+            ("   Deleting tempNoOp->GetNext()=%p\n", tempNoOp->GetNext());
          #endif
-
+         
+         //--------------------------------------------
+         // Delete newly created GmatFunctions first
+         // since any non-command text will create as
+         // GmatFunctions, such as aaaa; or bbbb;
+         //--------------------------------------------
+         StringArray allFunctions = theGuiInterpreter->GetListOfObjects(Gmat::FUNCTION);
+         #if DBGLVL_SEPANEL_SAVE
+         for (UnsignedInt i=0; i<allFunctions.size(); i++)
+            MessageInterface::ShowMessage
+               ("   ==> allFunctions[%d] = '%s'\n", i, allFunctions[i].c_str());
+         #endif
+         
+         sort(oldFunctions.begin(), oldFunctions.end());
+         sort(allFunctions.begin(), allFunctions.end());
+         
+         StringArray newFunctions;
+         // Make list of new functions
+         set_difference(allFunctions.begin(), allFunctions.end(), oldFunctions.begin(),
+                        oldFunctions.end(), back_inserter(newFunctions));
+         
+         for (UnsignedInt i=0; i<newFunctions.size(); i++)
+         {
+            #if DBGLVL_SEPANEL_SAVE
+            MessageInterface::ShowMessage
+               ("   ==> removing newFunctions[%d] = '%s'\n", i, newFunctions[i].c_str());
+            #endif
+            theGuiInterpreter->RemoveObjectIfNotUsed(Gmat::FUNCTION, newFunctions[i]);
+         }
+         
          //--------------------------------------------
          // Delete commands appended to BeginScript
          //--------------------------------------------
@@ -329,9 +556,9 @@ void ScriptEventPanel::SaveData()
             temp = NULL;
          }
          
-         #if DBGLVL_SCRIPTEVENTPANEL_SAVE
+         #if DBGLVL_SEPANEL_SAVE
          MessageInterface::ShowMessage
-            ("     New Script not saved. Deleting tempNoOp=%p\n", tempNoOp);
+            ("   New Script not saved. Deleting tempNoOp=%p\n", tempNoOp);
          #endif
          
          if (tempNoOp != NULL)
@@ -349,9 +576,9 @@ void ScriptEventPanel::SaveData()
       //--------------------------------------------------------------
       mNewCommand = tempNoOp->GetNext();
       
-      #if DBGLVL_SCRIPTEVENTPANEL_SAVE
-      ShowCommand("     saving  mNewCommand = ", mNewCommand);
-      ShowCommand("     deleting tempNoOp   = ", tempNoOp);
+      #if DBGLVL_SEPANEL_SAVE
+      ShowCommand("   saving  mNewCommand = ", mNewCommand);
+      ShowCommand("   deleting tempNoOp   = ", tempNoOp);
       #endif
       
       tempNoOp->ForceSetNext(NULL);
@@ -364,22 +591,139 @@ void ScriptEventPanel::SaveData()
       ReplaceScriptEvent();
       mObject = mNewCommand;
       theCommand = mNewCommand;
+      
+      // Save comment if modified
+      if (mCommentTextCtrl->IsModified())
+      {
+         std::string comments = mCommentTextCtrl->GetValue().c_str();
+         comments = comments + "\n";
+         theCommand->SetCommentLine(comments);
+         #if DBGLVL_SEPANEL_SAVE
+         MessageInterface::ShowMessage("   saving new comments\n");
+         #endif
+      }
+      
+      EnableUpdate(false);
    }
    catch (BaseException &ex)
    {
-      MessageInterface::PopupMessage(Gmat::ERROR_,
-         "Error parsing the ScriptEvent; please correct the text");
+      MessageInterface::PopupMessage(Gmat::ERROR_, ex.GetFullMessage() + 
+         "\nError parsing the ScriptEvent; please correct the text");
       canClose = false;
    }
+   
+   #if DBGLVL_SEPANEL_SAVE
+   MessageInterface::ShowMessage("ScriptEventPanel::SaveData() exiting\n");
+   #endif
 }
 
 
 //------------------------------------------------------------------------------
-// void OnTextUpdate(wxCommandEvent& event)
+// void OnCommentChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
-void ScriptEventPanel::OnTextUpdate(wxCommandEvent& event)
+void ScriptEventPanel::OnCommentChange(wxCommandEvent& event)
 {
    EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnScriptChange(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void ScriptEventPanel::OnScriptChange(wxCommandEvent& event)
+{
+   EnableUpdate(true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnSashDrag(wxSashEvent &event)
+//------------------------------------------------------------------------------
+void ScriptEventPanel::OnSashDrag(wxSashEvent &event)
+{
+   int w, h;
+   GetClientSize(&w, &h);
+
+   #ifdef DEBUG_SASH_DRAG
+   MessageInterface::ShowMessage
+      ("ScriptEventPanel::OnSashDrag() entered, clientW=%d, clientH=%d\n", w, h);
+   #endif
+   
+   if (event.GetDragStatus() == wxSASH_STATUS_OUT_OF_RANGE)
+      return;
+   
+   int newH = event.GetDragRect().height;
+   
+   #ifdef DEBUG_SASH_DRAG
+   MessageInterface::ShowMessage("Setting comments new height to %d\n", newH);
+   #endif
+   
+   // Sets size of comment window
+   theCommentsWin->SetDefaultSize(wxSize(w, newH));
+   
+   wxLayoutAlgorithm layout;
+   // Sets the rest of area to scripts window
+   layout.LayoutWindow(this, theScriptsWin);
+   
+   theMiddleSizer->Layout();
+   
+   #ifdef DEBUG_SASH_DRAG
+   MessageInterface::ShowMessage("ScriptEventPanel::OnSashDrag() leaving\n");
+   #endif
+}
+
+
+// ------------------------------------------------------------------------------
+// void OnSize(wxSizeEvent& event)
+//------------------------------------------------------------------------------
+/**
+ * Handles resizing of the window
+ *
+ * @param <event> input event.
+ */
+//------------------------------------------------------------------------------
+void ScriptEventPanel::OnSize(wxSizeEvent& event)
+{
+   int w, h;
+   GetClientSize(&w, &h);
+
+   #ifdef DEBUG_SIZE
+   MessageInterface::ShowMessage("ScriptEventPanel::OnSize() entered\n");
+   MessageInterface::ShowMessage("   client size w=%d, h=%d\n", w, h);
+   #endif
+   
+   // adjust new maximum SashWindow size
+   //@todo - Fix this to work (Why comments window disappears?)
+   if (theCommentsWin != NULL && theScriptsWin != NULL)
+   {
+      int minH = 50;
+      int maxH = 350;
+      
+      #ifdef DEBUG_SIZE
+      int minComH = theCommentsWin->GetMinimumSizeY();
+      int maxcomH = theCommentsWin->GetMaximumSizeY();
+      int minScrH = theScriptsWin->GetMinimumSizeY();
+      int maxScrH = theScriptsWin->GetMaximumSizeY();
+      MessageInterface::ShowMessage("minComH=%d, maxcomH=%d\n", minComH, maxcomH);
+      MessageInterface::ShowMessage("minScrH=%d, maxScrH=%d\n", minScrH, maxScrH);
+      MessageInterface::ShowMessage("Setting comments min height to %d\n", minH);
+      MessageInterface::ShowMessage("Setting comments max height to %d\n", maxH);
+      #endif
+      
+      theCommentsWin->SetMinimumSizeY(minH);
+      theCommentsWin->SetMaximumSizeY(maxH);
+      
+      wxLayoutAlgorithm layout;
+      layout.LayoutWindow(this, theScriptsWin);
+      
+      theMiddleSizer->Layout();
+   }
+   
+   event.Skip(true);
+   
+   #ifdef DEBUG_SIZE
+   MessageInterface::ShowMessage("ScriptEventPanel::OnSize() leaving\n");
+   #endif
 }
 
 
@@ -393,11 +737,11 @@ void ScriptEventPanel::OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void ScriptEventPanel::ReplaceScriptEvent()
 {
-   #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
+   #if DBGLVL_SEPANEL_REPLACE_CMDS
    MessageInterface::ShowMessage("ScriptEventPanel::ReplaceScriptEvent() Entered\n");
-   ShowCommand("     theCommand   = ", theCommand);
-   ShowCommand("     mNewCommand  = ", mNewCommand);
-   ShowCommand("     mPrevCommand = ", mPrevCommand);
+   ShowCommand("   theCommand   = ", theCommand);
+   ShowCommand("   mNewCommand  = ", mNewCommand);
+   ShowCommand("   mPrevCommand = ", mPrevCommand);
    #endif
    
    if (theCommand != NULL && mPrevCommand != NULL && mNewCommand != NULL)
@@ -417,10 +761,10 @@ void ScriptEventPanel::ReplaceScriptEvent()
          return;
       }
       
-      #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-      ShowCommand("     first     = ", first);
-      ShowCommand("     parent    = ", parent);
-      ShowCommand("     endScript = ", endScript);
+      #if DBGLVL_SEPANEL_REPLACE_CMDS
+      ShowCommand("   first     = ", first);
+      ShowCommand("   parent    = ", parent);
+      ShowCommand("   endScript = ", endScript);
       #endif
       
       // If endScript found continue, otherwise internal error found      
@@ -431,15 +775,15 @@ void ScriptEventPanel::ReplaceScriptEvent()
          //-----------------------------------------------------------
          mNextCommand = GmatCommandUtil::GetNextCommand(theCommand);
          
-         #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-         ShowCommand("     mNextCommand = ", mNextCommand);
+         #if DBGLVL_SEPANEL_REPLACE_CMDS
+         ShowCommand("   mNextCommand = ", mNextCommand);
          #endif
          
          //-----------------------------------------------------------
          // Delete old ScriptEvent
          //-----------------------------------------------------------
-         #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-         ShowCommand("     ==> calling gui->DeleteCommand() ", theCommand);
+         #if DBGLVL_SEPANEL_REPLACE_CMDS
+         ShowCommand("   ==> calling gui->DeleteCommand() ", theCommand);
          #endif
          
          //Note: DeleteCommand() does not delete theCommand
@@ -452,9 +796,9 @@ void ScriptEventPanel::ReplaceScriptEvent()
             temp = NULL;
          }
          
-         #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
+         #if DBGLVL_SEPANEL_REPLACE_CMDS
          MessageInterface::ShowMessage
-            ("     ==> after Calling gui->DeleteCommand()\n");
+            ("   ==> after Calling gui->DeleteCommand()\n");
          #endif
          
          //-----------------------------------------------------------
@@ -462,8 +806,8 @@ void ScriptEventPanel::ReplaceScriptEvent()
          //-----------------------------------------------------------
          if (parent->IsOfType("BranchCommand"))
          {
-            #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-            ShowCommand("     insert commands to BranchCommand = ", parent);
+            #if DBGLVL_SEPANEL_REPLACE_CMDS
+            ShowCommand("   insert commands to BranchCommand = ", parent);
             #endif
             
             GmatCommand *prevCmd = mPrevCommand;
@@ -477,8 +821,8 @@ void ScriptEventPanel::ReplaceScriptEvent()
             {
                realPrevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
                
-               #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-               ShowCommand("     realPrevCmd = ", realPrevCmd);
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               ShowCommand("   realPrevCmd = ", realPrevCmd);
                #endif
                
                prevCmd = realPrevCmd;
@@ -489,16 +833,16 @@ void ScriptEventPanel::ReplaceScriptEvent()
             {
                next = current->GetNext();
                
-               #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-               ShowCommand("     Inserting current = ", current);
-               ShowCommand("     after     prevCmd = ", prevCmd);
-               ShowCommand("               next    = ", next);
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               ShowCommand("   Inserting current = ", current);
+               ShowCommand("   after     prevCmd = ", prevCmd);
+               ShowCommand("             next    = ", next);
                #endif
                
                current->ForceSetNext(NULL);
                
-               #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-               MessageInterface::ShowMessage("     ==> calling gui->InsertCommand()\n");
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               MessageInterface::ShowMessage("   ==> calling gui->InsertCommand()\n");
                #endif
                
                realPrevCmd = prevCmd;
@@ -515,8 +859,8 @@ void ScriptEventPanel::ReplaceScriptEvent()
                {
                   realPrevCmd = GmatCommandUtil::GetMatchingEnd(prevCmd);
                   
-                  #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-                  ShowCommand("     realPrevCmd = ", realPrevCmd);
+                  #if DBGLVL_SEPANEL_REPLACE_CMDS
+                  ShowCommand("   realPrevCmd = ", realPrevCmd);
                   #endif
 
                   prevCmd = realPrevCmd;
@@ -524,10 +868,10 @@ void ScriptEventPanel::ReplaceScriptEvent()
                
                theGuiInterpreter->InsertCommand(current, prevCmd);               
                
-               #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
                MessageInterface::ShowMessage
-                  ("     ==> after calling gui->InsertCommand()\n");
-               ShowCommand("     prevCmd->next = ", prevCmd->GetNext());
+                  ("   ==> after calling gui->InsertCommand()\n");
+               ShowCommand("   prevCmd->next = ", prevCmd->GetNext());
                
                std::string cmdString = GmatCommandUtil::GetCommandSeqString(first);
                MessageInterface::ShowMessage
@@ -537,9 +881,9 @@ void ScriptEventPanel::ReplaceScriptEvent()
                prevCmd = current;
                current = next;
                
-               #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
-               ShowCommand("     Inserting current = ", current);
-               ShowCommand("     after     prevCmd = ", prevCmd);
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               ShowCommand("   Inserting current = ", current);
+               ShowCommand("   after     prevCmd = ", prevCmd);
                #endif
             } // end while
             
@@ -550,15 +894,40 @@ void ScriptEventPanel::ReplaceScriptEvent()
          //-----------------------------------------------------------
          else
          {
+            #if DBGLVL_SEPANEL_REPLACE_CMDS
+            MessageInterface::ShowMessage
+               ("   Set previous/next command of BeginScript\n");
+            #endif
             // Set previous/next command of BeginScript
-            mPrevCommand->ForceSetNext(mNewCommand);
-            mNewCommand->ForceSetPrevious(mPrevCommand);
+            if (mPrevCommand->IsOfType("BranchEnd"))
+            {
+               // If previous command is BranchEnd, find matching parent of
+               // BranchEnd and set BranchEnd's next command to matching parent, then
+               // set next command of matching parent to new command
+               GmatCommand *subParent =
+                  GmatCommandUtil::GetParentCommand(first, mPrevCommand);
+               
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               ShowCommand("   Setting ", subParent, " as next of ", mPrevCommand);
+               #endif
+               mPrevCommand->ForceSetNext(subParent);
+               
+               #if DBGLVL_SEPANEL_REPLACE_CMDS
+               ShowCommand("   Setting ", mNewCommand, " as next of ", subParent);
+               #endif
+               subParent->ForceSetNext(mNewCommand);
+            }
+            else
+            {
+               mPrevCommand->ForceSetNext(mNewCommand);
+               mNewCommand->ForceSetPrevious(mPrevCommand);
+            }
             
             // Set previous/next command of EndScript
             if (mNextCommand != NULL)
                mNextCommand->ForceSetPrevious(endScript);
             
-            endScript->ForceSetNext(mNextCommand);            
+            endScript->ForceSetNext(mNextCommand);
          }
          
          //-----------------------------------------------------------
@@ -571,12 +940,14 @@ void ScriptEventPanel::ReplaceScriptEvent()
          //-----------------------------------------------------------
          if (mNewCommand->GetPrevious() != mPrevCommand)
          {
-            MessageInterface::PopupMessage
-               (Gmat::ERROR_, "ScriptEventPanel::ReplaceScriptEvent() "
-                "*** INTERNAL ERROR ***  \nmNewCommand->GetPrevious() != "
-                "mPrevCommand\n");
-            //ShowCommand("mNewCommand->GetPrevious() = ", mNewCommand->GetPrevious());
-            ShowCommand("mPrevCommand = ", mPrevCommand);
+            if (!mPrevCommand->IsOfType("BranchEnd"))
+            {
+               MessageInterface::PopupMessage
+                  (Gmat::ERROR_, "ScriptEventPanel::ReplaceScriptEvent() "
+                   "*** INTERNAL ERROR ***  \nmNewCommand->GetPrevious() != "
+                   "mPrevCommand\n");
+               //ShowCommand("mPrevCommand = ", mPrevCommand);
+            }
          }
          
          if (mNewCommand->GetNext() == NULL)
@@ -587,7 +958,7 @@ void ScriptEventPanel::ReplaceScriptEvent()
          }
          else
          {
-            #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
+            #if DBGLVL_SEPANEL_REPLACE_CMDS
             std::string cmdString = GmatCommandUtil::GetCommandSeqString(first);    
             MessageInterface::ShowMessage
                ("===> final new sequence=%s\n", cmdString.c_str());
@@ -602,7 +973,7 @@ void ScriptEventPanel::ReplaceScriptEvent()
       }
    }
    
-   #if DBGLVL_SCRIPTEVENTPANEL_REPLACE_CMDS
+   #if DBGLVL_SEPANEL_REPLACE_CMDS
    MessageInterface::ShowMessage
       ("ScriptEventPanel::ReplaceScriptEvent() Leaving\n\n");
    #endif

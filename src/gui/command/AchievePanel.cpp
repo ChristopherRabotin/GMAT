@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                               AchievePanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/10/12
@@ -100,7 +104,7 @@ void AchievePanel::Create()
    mGoalNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(250,-1), 0);
    mViewGoalButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    // Value
    wxStaticText *initialStaticText =
@@ -109,7 +113,7 @@ void AchievePanel::Create()
    mGoalValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                        wxDefaultPosition, wxSize(250,-1), 0);
    mViewGoalValueButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
 
    // Tolerence
    wxStaticText *toleranceStaticText =
@@ -118,7 +122,7 @@ void AchievePanel::Create()
    mToleranceTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                        wxDefaultPosition, wxSize(250,-1), 0);   
    mViewToleranceButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    
    // wx*Sizers

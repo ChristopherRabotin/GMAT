@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                   VaryPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/10/12
@@ -21,8 +25,11 @@
 #include "gmatdefs.hpp"
 #include "GuiInterpreter.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
-//#define DEBUG_VARY_PANEL 1
+//#define DEBUG_VARYPANEL_LOAD
+//#define DEBUG_VARYPANEL_SAVE
+//#define DEBUG_VARYPANEL_SOLVER
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -35,7 +42,7 @@ BEGIN_EVENT_TABLE(VaryPanel, GmatPanel)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// VaryPanel(wxWindow *parent, GmatCommand *cmd)
+// VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
 //------------------------------------------------------------------------------
 /**
  * A constructor.
@@ -44,18 +51,14 @@ END_EVENT_TABLE()
 VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
    : GmatPanel(parent)
 {
+   #ifdef DEBUG_VARYPANEL
+   MessageInterface::ShowMessage
+      ("VaryPanel::VaryPanel() entered, cmd=<%p><%s>, inOptimize=%d\n",
+       cmd, cmd ? cmd->GetTypeName().c_str() : "NULL", inOptimize);
+   #endif
+   
    mVaryCommand = (Vary *)cmd;
    inOptimizeCmd = inOptimize;
-   
-   mSolverData.solverName = "";
-   mSolverData.varName = "";
-   mSolverData.initialValue = "0.0";
-   mSolverData.pert = "0.0";
-   mSolverData.minValue = "-9.999e30";
-   mSolverData.maxValue = "9.999e30";
-   mSolverData.maxStep = "9.999e30";
-   mSolverData.additiveScaleFactor = "0.0";
-   mSolverData.multiplicativeScaleFactor = "1.0";
    
    mObjectTypeList.Add("Spacecraft");
    mObjectTypeList.Add("ImpulsiveBurn");
@@ -63,7 +66,13 @@ VaryPanel::VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize)
    Create();
    Show();
    
+   solverChanged = false;
+   variableChanged = false;
    EnableUpdate(false);
+   
+   #ifdef DEBUG_VARYPANEL
+   MessageInterface::ShowMessage("VaryPanel::VaryPanel() leaving\n");
+   #endif
 }
 
 //------------------------------------------------------------------------------
@@ -85,24 +94,24 @@ VaryPanel::~VaryPanel()
 void VaryPanel::Create()
 {
    int bsize = 2; // bordersize
-
+   
    // Targeter
    wxStaticText *solverStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Solver"),
                        wxDefaultPosition, wxSize(40, -1), 0);
    
-   // Show all userdefined Solvers
+   // Show all user-defined Solvers
    mSolverComboBox =
       theGuiManager->GetSolverComboBox(this, ID_COMBO, wxSize(180,-1));
    
    // Variable
    wxStaticText *varStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Variable"), 
-                       wxDefaultPosition, wxSize(40, -1), 0);
+                       wxDefaultPosition, wxSize(55, -1), 0);
    mVarNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(250,-1), 0);
    mViewVarButton = new
-      wxButton(this, ID_BUTTON, wxT("View"), wxDefaultPosition, wxDefaultSize, 0);
+      wxButton(this, ID_BUTTON, wxT("Edit"), wxDefaultPosition, wxDefaultSize, 0);
    
    // Initial Value
    wxStaticText *initialStaticText =
@@ -110,26 +119,26 @@ void VaryPanel::Create()
                        wxDefaultPosition, wxDefaultSize, 0);
    mInitialTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                      wxDefaultPosition, wxSize(100,-1), 0);
-
+   
    // Perturbation
    pertStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Perturbation"), 
                        wxDefaultPosition, wxDefaultSize, 0);
    mPertTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                   wxDefaultPosition, wxSize(100,-1), 0);
-
+   
    // Lower
-   minValueStaticText =
+   lowerValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Lower"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-   mMinValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+   mLowerValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                    wxDefaultPosition, wxSize(100,-1), 0);
 
    // Upper
-   maxValueStaticText =
+   upperValueStaticText =
       new wxStaticText(this, ID_TEXT, wxT("Upper"), 
                        wxDefaultPosition, wxDefaultSize, 0);
-   mMaxValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
+   mUpperValueTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""), 
                                    wxDefaultPosition, wxSize(100,-1), 0);
 
    // Max Step
@@ -155,8 +164,7 @@ void VaryPanel::Create()
    
    // wx*Sizers
    wxBoxSizer *panelSizer = new wxBoxSizer(wxVERTICAL);
-   wxStaticBox *varSetupStaticBox = new wxStaticBox(this, -1, wxT("Variable Setup"));
-   wxStaticBoxSizer *varSetupSizer = new wxStaticBoxSizer(varSetupStaticBox, wxVERTICAL);
+   GmatStaticBoxSizer *varSetupSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "Variable Setup");
    wxFlexGridSizer *valueGridSizer = new wxFlexGridSizer(6, 0, 0);
    wxBoxSizer *solverBoxSizer = new wxBoxSizer(wxHORIZONTAL);
    wxBoxSizer *variableBoxSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -174,15 +182,15 @@ void VaryPanel::Create()
    valueGridSizer->Add(40, 20, 0, wxALIGN_LEFT|wxALL, bsize);
    valueGridSizer->Add(initialStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(pertStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(minValueStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(maxValueStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   valueGridSizer->Add(lowerValueStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
+   valueGridSizer->Add(upperValueStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(maxStepStaticText, 0, wxALIGN_CENTER|wxALL, bsize);
    
    valueGridSizer->Add(40, 20, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(mInitialTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(mPertTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(mMinValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
-   valueGridSizer->Add(mMaxValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   valueGridSizer->Add(mLowerValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
+   valueGridSizer->Add(mUpperValueTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
    valueGridSizer->Add(mMaxStepTextCtrl, 0, wxALIGN_CENTER|wxALL, bsize);
 
    scaleGridSizer->Add(additiveStaticText, 0, wxALIGN_LEFT|wxALL, bsize);
@@ -205,91 +213,85 @@ void VaryPanel::Create()
 //------------------------------------------------------------------------------
 void VaryPanel::LoadData()
 {
-   #if DEBUG_VARY_PANEL
+   #ifdef DEBUG_VARYPANEL_LOAD
    MessageInterface::ShowMessage("VaryPanel::LoadData() entered\n");
-   MessageInterface::ShowMessage("Command=%s\n", mVaryCommand->GetTypeName().c_str());
+   MessageInterface::ShowMessage
+      ("   Command=<%p>'%s'\n", mVaryCommand, mVaryCommand ?
+       mVaryCommand->GetTypeName().c_str() : "NULL");
    #endif
    
    mVarNameTextCtrl->Disable(); // we don't want user to edit this box
    mViewVarButton->Enable();
+   
+   if (mVaryCommand == NULL)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, "The Vary command is NULL\n");
+      return;
+   }
    
    try
    {
       // Set the pointer for the "Show Script" button
       mObject = mVaryCommand;
       
-      std::string solverName =
+      solverName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("SolverName"));
       
-      #if DEBUG_VARY_PANEL
-      MessageInterface::ShowMessage("solverName=%s\n", solverName.c_str());
+      #ifdef DEBUG_VARYPANEL_LOAD
+      MessageInterface::ShowMessage("   solverName=%s\n", solverName.c_str());
       #endif
       
-      std::string varName =
+      variableName =
          mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Variable"));
       
-      #if DEBUG_VARY_PANEL
-      MessageInterface::ShowMessage("varName=%s\n", varName.c_str());
+      #ifdef DEBUG_VARYPANEL_LOAD
+      MessageInterface::ShowMessage("   variableName=%s\n", variableName.c_str());
       #endif
-            
-      mSolverData.solverName = wxT(solverName.c_str());
-      mSolverData.varName = wxT(varName.c_str());
       
-      std::string initVal = 
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("InitialValue"));
-      mSolverData.initialValue = wxT(initVal.c_str());
+      wxString initValStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("InitialValue")).c_str();
+      wxString pertStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Perturbation")).c_str();
+      wxString lowerStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Lower")).c_str();
+      wxString upperStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Upper")).c_str();      
+      wxString maxStepStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MaxStep")).c_str();
+      wxString addSfStr = 
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("AdditiveScaleFactor")).c_str();
+      wxString multCfStr =
+         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MultiplicativeScaleFactor")).c_str();
       
-      std::string pertVal = 
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Perturbation"));
-      mSolverData.pert = wxT(pertVal.c_str());
+      mSolverComboBox->SetStringSelection(solverName.c_str());
+      mVarNameTextCtrl->SetValue(variableName.c_str());
       
-      std::string lowerVal = 
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Lower"));
-      mSolverData.minValue = wxT(lowerVal.c_str());
+      mInitialTextCtrl->SetValue(initValStr);
+      mPertTextCtrl->SetValue(pertStr);
+      mLowerValueTextCtrl->SetValue(lowerStr);
+      mUpperValueTextCtrl->SetValue(upperStr);
+      mMaxStepTextCtrl->SetValue(maxStepStr);
+      mAdditiveTextCtrl->SetValue(addSfStr);
+      mMultiplicativeTextCtrl->SetValue(multCfStr);
       
-      std::string upperVal = 
-      mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("Upper"));
-      mSolverData.maxValue = wxT(upperVal.c_str());
-      
-      std::string maxVal = 
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MaxStep"));
-      mSolverData.maxStep = wxT(maxVal.c_str());
-      
-      std::string addVal = 
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("AdditiveScaleFactor"));
-      mSolverData.additiveScaleFactor = wxT(addVal.c_str());
-      
-      std::string multVal =
-         mVaryCommand->GetStringParameter(mVaryCommand->GetParameterID("MultiplicativeScaleFactor"));
-      mSolverData.multiplicativeScaleFactor = wxT(multVal.c_str());
-      
-      if (inOptimizeCmd)
-      {   
-         pertStaticText->Enable(false);
-         maxStepStaticText->Enable(false);
-         mPertTextCtrl->Enable(false);
-         mMaxStepTextCtrl->Enable(false);
-      }
-      else // in target
-      {
-         // gray out the optimize stuff
-         additiveStaticText->Enable(false);
-         multiplicativeStaticText->Enable(false);
-         mAdditiveTextCtrl->Enable(false);
-         mMultiplicativeTextCtrl->Enable(false);
-      }
-      
+      //  Enalbe or disable fields depends on the solver type
       GmatBase *solver = theGuiInterpreter->GetConfiguredObject(solverName);
       if (solver != NULL)
+      {
+         mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
+         solver->SetStringParameter
+            (solver->GetParameterID("Variables"), variableName);
          SetControlEnabling(solver);
-
+      }
    }
    catch (BaseException &e)
    {
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
    }
-
-   ShowVariableSetup();
+   
+   #ifdef DEBUG_VARYPANEL_LOAD
+   MessageInterface::ShowMessage("VaryPanel::LoadData() leaving\n");
+   #endif
 }
 
 
@@ -298,28 +300,69 @@ void VaryPanel::LoadData()
 //------------------------------------------------------------------------------
 void VaryPanel::SaveData()
 {   
+   #ifdef DEBUG_VARYPANEL_SAVE
+   MessageInterface::ShowMessage("VaryPanel::SaveData() entered\n");
+   #endif
+   
    canClose = true;
+   std::string strInitVal, strPert, strLower, strUpper, strMaxStep;
+   std::string strAddSf, strMultSf;
    
    //-----------------------------------------------------------------
    // check input values: Number, Variable, Array element, Parameter
    //-----------------------------------------------------------------
    
-   CheckVariable(mSolverData.initialValue.c_str(), Gmat::BURN, "InitialValue",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.pert.c_str(), Gmat::BURN, "Perturbation",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.minValue.c_str(), Gmat::BURN, "Lower",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.maxValue.c_str(), Gmat::BURN, "Upper",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.maxStep.c_str(), Gmat::BURN, "MaxStep",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.additiveScaleFactor.c_str(), Gmat::BURN,
-                 "AdditiveScaleFactor",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
-   CheckVariable(mSolverData.multiplicativeScaleFactor.c_str(), Gmat::BURN,
-                 "MultiplicativeScaleFactor",
-                 "Real Number, Variable, Array element, plottable Parameter", true);
+   std::string expRange = "Real Number, Variable, Array element, Plottable Parameter";
+   
+   // Any plottable Parameters allowed, so use UNKNOWN_OBJECT
+   if (mInitialTextCtrl->IsModified())
+   {
+      strInitVal = mInitialTextCtrl->GetValue().c_str();
+      CheckVariable(strInitVal, Gmat::UNKNOWN_OBJECT,
+                    "InitialValue", expRange, true);
+   }
+   
+   if (mPertTextCtrl->IsModified())
+   {
+      strPert = mPertTextCtrl->GetValue().c_str();
+      CheckVariable(strPert, Gmat::UNKNOWN_OBJECT,
+                    "Perturbation", expRange, true);
+   }
+   
+   if (mLowerValueTextCtrl->IsModified())
+   {
+      strLower = mLowerValueTextCtrl->GetValue().c_str();
+      CheckVariable(strLower, Gmat::UNKNOWN_OBJECT,
+                    "Lower", expRange, true);
+   }
+   
+   if (mUpperValueTextCtrl->IsModified())
+   {
+      strUpper = mUpperValueTextCtrl->GetValue().c_str();
+      CheckVariable(strUpper.c_str(), Gmat::UNKNOWN_OBJECT,
+                    "Upper", expRange, true);
+   }
+   
+   if (mMaxStepTextCtrl->IsModified())
+   {
+      strMaxStep = mMaxStepTextCtrl->GetValue().c_str();
+      CheckVariable(strMaxStep.c_str(), Gmat::UNKNOWN_OBJECT,
+                    "MaxStep", expRange, true);
+   }
+   
+   if (mAdditiveTextCtrl->IsModified())
+   {
+      strAddSf = mAdditiveTextCtrl->GetValue().c_str();
+      CheckVariable(strAddSf.c_str(), Gmat::UNKNOWN_OBJECT,
+                    "AdditiveScaleFactor", expRange, true);
+   }
+   
+   if (mMultiplicativeTextCtrl->IsModified())
+   {
+      strMultSf = mMultiplicativeTextCtrl->GetValue().c_str();
+      CheckVariable(strMultSf.c_str(), Gmat::UNKNOWN_OBJECT,
+                    "MultiplicativeScaleFactor", expRange, true);
+   }
    
    if (!canClose)
       return;
@@ -327,61 +370,103 @@ void VaryPanel::SaveData()
    //-----------------------------------------------------------------
    // save values to base, base code should do the range checking
    //-----------------------------------------------------------------
-   std::string solverName = mSolverData.solverName.c_str();
-   std::string variableName = mSolverData.varName.c_str();
    
-   #if DEBUG_VARY_PANEL
-   MessageInterface::ShowMessage
-      ("VaryPanel::SaveData() solverName=%s, variableName=%s\n",
+   #ifdef DEBUG_VARYPANEL_SAVE
+   MessageInterface::ShowMessage("   solverName=%s, variableName=%s\n",
        solverName.c_str(), variableName.c_str());
    #endif
    
    Solver *solver = (Solver*)theGuiInterpreter->GetConfiguredObject(solverName);
-
+   
    if (solver == NULL)
       throw GmatBaseException("Cannot find the solver: " + solverName);
-
+   
+   bool validateCommand = false;
+   
    try
    {
-      solver->SetStringParameter
-         (solver->GetParameterID("Variables"), variableName);
+      if (solverChanged)
+      {
+         #ifdef DEBUG_VARYPANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   Solver changed, solver=<%p>'%s'\n", solver, solver->GetName().c_str());
+         #endif
+         mVaryCommand->SetStringParameter("SolverName", solverName);
+         mVaryCommand->SetRefObject(solver, Gmat::SOLVER, solverName);
+         solverChanged = false;
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("SolverName"), solverName);
+      if (variableChanged)
+      {
+         #ifdef DEBUG_VARYPANEL_SAVE
+         MessageInterface::ShowMessage
+            ("   Variable changed, variableName='%s'\n", variableName.c_str());
+         #endif
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("Variable", variableName);
+         solver->SetStringParameter("Variables", variableName);
+         variableChanged = false;
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("Variable"), variableName);
+      if (mInitialTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("InitialValue", strInitVal.c_str());
+         mInitialTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("InitialValue"),
-          mSolverData.initialValue.c_str());
+      if (mPertTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("Perturbation", strPert.c_str());
+         mPertTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("Perturbation"),
-          mSolverData.pert.c_str());
-   
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("Lower"),
-          mSolverData.minValue.c_str());
+      if (mLowerValueTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("Lower", strLower.c_str());
+         mLowerValueTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("Upper"),
-          mSolverData.maxValue.c_str());
+      if (mUpperValueTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("Upper", strUpper.c_str());
+         mUpperValueTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("MaxStep"),
-          mSolverData.maxStep.c_str());
+      if (mMaxStepTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("MaxStep", strMaxStep.c_str());
+         mMaxStepTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("AdditiveScaleFactor"),
-          mSolverData.additiveScaleFactor.c_str());
+      if (mAdditiveTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("AdditiveScaleFactor", strAddSf.c_str());
+         mAdditiveTextCtrl->DiscardEdits();
+      }
       
-      mVaryCommand->SetStringParameter
-         (mVaryCommand->GetParameterID("MultiplicativeScaleFactor"),
-          mSolverData.multiplicativeScaleFactor.c_str());
+      if (mMultiplicativeTextCtrl->IsModified())
+      {
+         validateCommand = true;
+         mVaryCommand->SetStringParameter("MultiplicativeScaleFactor", strMultSf.c_str());
+         mMultiplicativeTextCtrl->DiscardEdits();
+      }
       
-      if (!theGuiInterpreter->ValidateCommand(mVaryCommand))
-          canClose = false;
+      // avoid unnecessary validation since it clears all wrappers and recreates them
+      if (validateCommand)
+      {
+         #ifdef DEBUG_VARYPANEL_SAVE
+         MessageInterface::ShowMessage("   Calling ValidateCommand()\n");
+         #endif
+         
+         if (!theGuiInterpreter->ValidateCommand(mVaryCommand))
+            canClose = false;
+      }
       
    }
    catch (BaseException &e)
@@ -389,24 +474,12 @@ void VaryPanel::SaveData()
       MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
       canClose = false;
    }
+   
+   #ifdef DEBUG_VARYPANEL_SAVE
+   MessageInterface::ShowMessage("VaryPanel::SaveData() leaving\n");
+   #endif
 }
 
-//------------------------------------------------------------------------------
-// void ShowVariableSetup()
-//------------------------------------------------------------------------------
-void VaryPanel::ShowVariableSetup()
-{
-   mSolverComboBox->SetStringSelection(mSolverData.solverName);
-   mVarNameTextCtrl->SetValue(mSolverData.varName);
-   
-   mInitialTextCtrl->SetValue(mSolverData.initialValue);
-   mPertTextCtrl->SetValue(mSolverData.pert);
-   mMinValueTextCtrl->SetValue(mSolverData.minValue);
-   mMaxValueTextCtrl->SetValue(mSolverData.maxValue);
-   mMaxStepTextCtrl->SetValue(mSolverData.maxStep);
-   mAdditiveTextCtrl->SetValue(mSolverData.additiveScaleFactor);
-   mMultiplicativeTextCtrl->SetValue(mSolverData.multiplicativeScaleFactor);
-}
 
 //---------------------------------
 // event handling
@@ -417,28 +490,6 @@ void VaryPanel::ShowVariableSetup()
 //------------------------------------------------------------------------------
 void VaryPanel::OnTextChange(wxCommandEvent& event)
 {
-   if (mInitialTextCtrl->IsModified())
-      mSolverData.initialValue =
-         mInitialTextCtrl->GetValue();
-   
-   if (mPertTextCtrl->IsModified())
-      mSolverData.pert = mPertTextCtrl->GetValue();
-   
-   if (mMinValueTextCtrl->IsModified())
-      mSolverData.minValue = mMinValueTextCtrl->GetValue();
-   
-   if (mMaxValueTextCtrl->IsModified())
-      mSolverData.maxValue = mMaxValueTextCtrl->GetValue();
-   
-   if (mMaxStepTextCtrl->IsModified())
-      mSolverData.maxStep = mMaxStepTextCtrl->GetValue();
-   
-   if (mAdditiveTextCtrl->IsModified())
-      mSolverData.additiveScaleFactor = mAdditiveTextCtrl->GetValue();
-   
-   if (mMultiplicativeTextCtrl->IsModified())
-      mSolverData.multiplicativeScaleFactor = mMultiplicativeTextCtrl->GetValue();
-   
    EnableUpdate(true);
 }
 
@@ -448,13 +499,30 @@ void VaryPanel::OnTextChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 {
-   mSolverData.solverName = mSolverComboBox->GetStringSelection();
+   #ifdef DEBUG_VARYPANEL_SOLVER
+   MessageInterface::ShowMessage("VaryPanel::OnSolverSelection() entered\n");
+   #endif
    
-   std::string solverName = mSolverData.solverName.c_str();
+   solverName = mSolverComboBox->GetStringSelection().c_str();
+   
    GmatBase *slvr = theGuiInterpreter->GetConfiguredObject(solverName);
-   SetControlEnabling(slvr);
-
-   EnableUpdate(true);
+   
+   #ifdef DEBUG_VARYPANEL_SOLVER
+   MessageInterface::ShowMessage
+      ("   solverName='%s', solver=<%p>'%s'\n", solverName.c_str(), slvr,
+       slvr ? slvr->GetName().c_str() : "NULL");
+   #endif
+   
+   if (slvr == NULL)
+   {
+      MessageInterface::PopupMessage(Gmat::ERROR_, "The solver " + solverName + " is NULL");
+   }
+   else
+   {
+      solverChanged = true;
+      SetControlEnabling(slvr);
+      EnableUpdate(true);
+   }
 }
 
 
@@ -469,6 +537,11 @@ void VaryPanel::OnSolverSelection(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void VaryPanel::SetControlEnabling(GmatBase *slvr)
 {
+   #ifdef DEBUG_SET_CONTROL
+   MessageInterface::ShowMessage
+      ("VaryPanel::SetControlEnabling() entered, solver=<%p><%s>'%s'\n", slvr,
+       slvr->GetTypeName().c_str(), slvr->GetName().c_str());
+   #endif
    if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowScaleSetting")))
    {
       additiveStaticText->Enable(true);
@@ -486,17 +559,17 @@ void VaryPanel::SetControlEnabling(GmatBase *slvr)
    
    if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowRangeSettings")))
    {
-      minValueStaticText->Enable(true);
-      mMinValueTextCtrl->Enable(true);
-      maxValueStaticText->Enable(true);
-      mMaxValueTextCtrl->Enable(true);
+      lowerValueStaticText->Enable(true);
+      mLowerValueTextCtrl->Enable(true);
+      upperValueStaticText->Enable(true);
+      mUpperValueTextCtrl->Enable(true);
    }
    else // in target
    {
-      minValueStaticText->Enable(false);
-      mMinValueTextCtrl->Enable(false);
-      maxValueStaticText->Enable(false);
-      mMaxValueTextCtrl->Enable(false);
+      lowerValueStaticText->Enable(false);
+      mLowerValueTextCtrl->Enable(false);
+      upperValueStaticText->Enable(false);
+      mUpperValueTextCtrl->Enable(false);
    }      
    
    if (slvr->GetBooleanParameter(slvr->GetParameterID("AllowStepsizeSetting")))
@@ -520,6 +593,10 @@ void VaryPanel::SetControlEnabling(GmatBase *slvr)
       pertStaticText->Enable(false);
       mPertTextCtrl->Enable(false);
    }
+   #ifdef DEBUG_SET_CONTROL
+   MessageInterface::ShowMessage
+      ("VaryPanel::SetControlEnabling() leaving\n");
+   #endif
 }
 
 
@@ -544,8 +621,8 @@ void VaryPanel::OnButton(wxCommandEvent& event)
       {
          wxString newParamName = paramDlg.GetParamName();
          mVarNameTextCtrl->SetValue(newParamName);
-         mSolverData.varName = newParamName;
-         
+         variableName = newParamName.c_str();
+         variableChanged = true;
          EnableUpdate(true);
       }
    }

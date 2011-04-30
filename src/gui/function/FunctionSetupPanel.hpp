@@ -1,8 +1,15 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              FunctionSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2004/12/15
@@ -18,39 +25,48 @@
 #include "GmatPanel.hpp"
 #include "GmatFunction.hpp"
 
+#ifdef __USE_STC_EDITOR__
+#include "Editor.hpp"
+#endif
+
 class FunctionSetupPanel: public GmatPanel
 {
 public:
    // constructors
    FunctionSetupPanel(wxWindow *parent, const wxString &name); 
+   ~FunctionSetupPanel();
+   
+   virtual void SetEditorModified(bool flag);
+   
    wxTextCtrl *mFileContentsTextCtrl;
-    
+   
+#ifdef __USE_STC_EDITOR__
+   Editor* GetEditor() { return mEditor; };
+#endif
+   
 private:
    GmatFunction *theGmatFunction;
-
+   wxString mFullFunctionPath;
+   wxString mFunctionName;
+   
+#ifdef __USE_STC_EDITOR__
+   Editor *mEditor;
+#endif
+   
    bool mEnableLoad;
    bool mEnableSave;
-
-   wxStaticBoxSizer *mTopSizer;
-   wxBoxSizer *mMiddleSizer;
-   wxGridSizer *mBottomSizer;
-//   wxFlexGridSizer *mPageSizer;
-   wxBoxSizer *mPageSizer;
-
-   wxTextCtrl *mFileNameTextCtrl;
+   bool mIsNewFunction;
+   wxString mFilename;
    
-   wxButton *mBrowseButton;
-   wxButton *mLoadButton;
-   wxButton *mSaveButton;
-
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-    
+   
    // event handling
    void OnTextUpdate(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
+   void OnSaveAs(wxCommandEvent& event);
    
    DECLARE_EVENT_TABLE();
 

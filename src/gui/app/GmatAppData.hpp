@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                              GmatAppData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -25,6 +27,16 @@
 #include "MissionTree.hpp"
 #include "OutputTree.hpp"
 #include "GmatMainFrame.hpp"
+#include <wx/print.h>         // for wxPrintData
+#include <wx/printdlg.h>      // for wxPageSetupDialogData
+#include <wx/confbase.h>
+#include <wx/config.h>
+
+
+#ifdef __USE_STC_EDITOR__
+#include <wx/cmndata.h>
+#endif
+
 #endif
 
 #include "GuiInterpreter.hpp"
@@ -63,7 +75,11 @@ public:
    
    void SetFont(wxFont font);
    wxFont GetFont();
-   
+
+   void SetTempScriptName(const wxString &tempName);
+   wxString GetTempScriptName();
+
+   wxConfigBase* GetPersonalizationConfig();
 #endif
     
 private:
@@ -85,9 +101,22 @@ private:
    ViewTextFrame *theCompareWindow;
    wxTextCtrl    *theMessageTextCtrl;
    wxFont        theFont;
+   wxString      theTempScriptName;
+   wxConfigBase  *thePersonalizationConfig;
+   
+   #ifdef __USE_STC_EDITOR__
+   wxPageSetupDialogData *thePageSetupDialogData;
+   #endif
 #endif
    
 };
 
+#if !defined __CONSOLE_APP__
+   #if wxUSE_PRINTING_ARCHITECTURE
+   // global print data, to remember settings during the session
+   extern wxPrintData *globalPrintData;
+   extern wxPageSetupData *globalPageSetupData;
+   #endif // wxUSE_PRINTING_ARCHITECTURE
+#endif
 
 #endif // GmatAppData_hpp

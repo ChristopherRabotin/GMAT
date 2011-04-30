@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              RunScriptFolderDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2005/12/22
@@ -17,7 +21,7 @@
 #include "MessageInterface.hpp"
 #include "GmatStaticBoxSizer.hpp"
 
-//#define DEBUG_RUN_SCRIPT_FOLDER_DIALOG 1
+//#define DEBUG_RUN_SCRIPT_FOLDER_DIALOG
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -50,7 +54,8 @@ RunScriptFolderDialog::RunScriptFolderDialog(wxWindow *parent, int numScripts,
    mNumTimesToRun = 1;
    mAbsTol = absTol;
    mCompareDir = compareDir;
-   
+
+   mFilterString = "";
    mReplaceString = "GMAT";
    
    Create();
@@ -71,7 +76,7 @@ RunScriptFolderDialog::~RunScriptFolderDialog()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::Create()
 {
-   #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
    MessageInterface::ShowMessage("RunScriptFolderDialog::Create() entered.\n");
    #endif
    
@@ -108,6 +113,14 @@ void RunScriptFolderDialog::Create()
    //------------------------------------------------------
    // run scripts
    //------------------------------------------------------
+   wxStaticText *startingScriptsLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Starting script number:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mStartingScriptTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
+                     wxDefaultPosition, wxSize(80,20), 0);
+   
    wxStaticText *numScriptsLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of scripts to run:"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -115,7 +128,15 @@ void RunScriptFolderDialog::Create()
    mNumScriptsToRunTextCtrl =
       new wxTextCtrl(this, ID_TEXTCTRL, wxT("1"),
                      wxDefaultPosition, wxSize(80,20), 0);
-
+   
+   wxStaticText *filterScriptsLabel =
+      new wxStaticText(this, ID_TEXT, wxT("Run scripts contain:"),
+                       wxDefaultPosition, wxDefaultSize, 0);
+   
+   mFilterStringTextCtrl =
+      new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
+                     wxDefaultPosition, wxSize(80,20), 0);
+   
    wxStaticText *numTimesLabel =
       new wxStaticText(this, ID_TEXT, wxT("Number of times to run each script:"),
                        wxDefaultPosition, wxDefaultSize, 0);
@@ -146,10 +167,18 @@ void RunScriptFolderDialog::Create()
    
    //---------- sizer
    wxFlexGridSizer *runSizer = new wxFlexGridSizer(4, 0, 0);
+   runSizer->Add(startingScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   runSizer->Add(mStartingScriptTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(numScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumScriptsToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
-   runSizer->Add(20, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(filterScriptsLabel, 0, wxALIGN_LEFT|wxALL, bsize);
+   runSizer->Add(mFilterStringTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
+   runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(numTimesLabel, 0, wxALIGN_LEFT|wxALL, bsize);
    runSizer->Add(mNumTimesToRunTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runSizer->Add(5, 20, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
@@ -165,7 +194,10 @@ void RunScriptFolderDialog::Create()
    runStaticSizer->Add(currOutDir2, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(mCurrOutDirTextCtrl, 0, wxALIGN_RIGHT|wxGROW|wxALL, bsize);
    runStaticSizer->Add(mChangeCurrOutDirButton, 0, wxALIGN_CENTER|wxALL, bsize);
-   
+
+   //=================================================================
+   #ifdef __ENABLE_COMPARE__
+   //=================================================================
    //------------------------------------------------------
    // compare results
    //------------------------------------------------------
@@ -246,15 +278,25 @@ void RunScriptFolderDialog::Create()
    compareStaticSizer->Add(mSaveResultCheckBox, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(saveDirSizer, 0, wxALIGN_LEFT|wxALL, bsize);
    compareStaticSizer->Add(mSaveFileTextCtrl, 0, wxALIGN_LEFT|wxGROW|wxALL, bsize+2);
+   //=================================================================
+   #endif
+   //=================================================================
    
    //------------------------------------------------------
    // add to page sizer
    //------------------------------------------------------
    wxBoxSizer *pageBoxSizer = new wxBoxSizer(wxVERTICAL);
    pageBoxSizer->Add(runStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   
+   #ifdef __ENABLE_COMPARE__
    pageBoxSizer->Add(compareStaticSizer, 0, wxALIGN_CENTRE|wxGROW|wxALL, bsize);
+   #endif
    
    theMiddleSizer->Add(pageBoxSizer, 0, wxALIGN_CENTRE|wxALL, bsize);
+   
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   MessageInterface::ShowMessage("RunScriptFolderDialog::Create() leaving.\n");
+   #endif
 }
 
 
@@ -263,28 +305,54 @@ void RunScriptFolderDialog::Create()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::LoadData()
 {
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   MessageInterface::ShowMessage("RunScriptFolderDialog::LoadData() entered.\n");
+   #endif
+   
    wxString str;
    str.Printf("%d", mNumScriptsToRun);
    mNumScriptsToRunTextCtrl->SetValue(str);
    
-   str.Printf("%g", mAbsTol);
-   mAbsTolTextCtrl->SetValue(str);
-   
    FileManager *fm = FileManager::Instance();
    wxString sep = fm->GetPathSeparator().c_str();
    
-   mCurrOutDir = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   try
+   {
+      mCurrOutDir = fm->GetFullPathname(FileManager::OUTPUT_PATH).c_str();
+   }
+   catch (BaseException &e)
+   {
+      MessageInterface::ShowMessage(e.GetFullMessage());
+   }
+   
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   MessageInterface::ShowMessage("   mCurrOutDir='%s'\n", mCurrOutDir.c_str());
+   #endif
+   
    mSaveScriptsDirTextCtrl->SetValue(mCurrOutDir + "AutoSave");
    mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
+   
+   //=======================================================
+   #ifdef __ENABLE_COMPARE__
+   //=======================================================
+   str.Printf("%g", mAbsTol);
+   mAbsTolTextCtrl->SetValue(str);
    mCompareDirTextCtrl->SetValue(mCompareDir);
    mSaveFileTextCtrl->SetValue(mCompareDir + sep + "CompareNumericResults.txt");
-   
    mSaveResultCheckBox->Disable();
    mSaveFileTextCtrl->Disable();
    mSaveBrowseButton->Disable();
    mSaveScriptsDirTextCtrl->Disable();
    mChangeSaveScriptsDirButton->Disable();
+   //=======================================================
+   #endif
+   //=======================================================
+   
    theOkButton->Enable();
+   
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   MessageInterface::ShowMessage("RunScriptFolderDialog::LoadData() leaving.\n");
+   #endif
 }
 
 
@@ -293,10 +361,18 @@ void RunScriptFolderDialog::LoadData()
 //------------------------------------------------------------------------------
 void RunScriptFolderDialog::SaveData()
 {
+   long numStartingScript;
    long numScriptsToRun;
    long numTimesToRun;
    canClose = true;
-      
+   
+   if (!mStartingScriptTextCtrl->GetValue().ToLong(&numStartingScript))
+   {
+      wxMessageBox("Invalid number of scripts to run entered.");
+      canClose = false;
+      return;
+   }
+   
    if (!mNumScriptsToRunTextCtrl->GetValue().ToLong(&numScriptsToRun))
    {
       wxMessageBox("Invalid number of scripts to run entered.");
@@ -310,13 +386,19 @@ void RunScriptFolderDialog::SaveData()
       canClose = false;
       return;
    }
-   
+
+   //=======================================================
+   #ifdef __ENABLE_COMPARE__
+   //=======================================================
    if (!mAbsTolTextCtrl->GetValue().ToDouble(&mAbsTol))
    {
       wxMessageBox("Invalid tolerance entered.");
       canClose = false;
       return;
    }
+   //=======================================================
+   #endif
+   //=======================================================
    
    if (mCurrOutDirTextCtrl->GetValue() == "")
    {
@@ -340,27 +422,42 @@ void RunScriptFolderDialog::SaveData()
    
    mCreateRunFolder = mCreateRunFolderCheckBox->GetValue();
    
+   mNumStartingScript = numStartingScript;
    mNumScriptsToRun = numScriptsToRun;
    mNumTimesToRun = numTimesToRun;
    
+   mFilterString = mFilterStringTextCtrl->GetValue();
    mSaveScriptsDir = mSaveScriptsDirTextCtrl->GetValue();
    mCurrOutDir = mCurrOutDirTextCtrl->GetValue();
+   
+   //=======================================================
+   #ifdef __ENABLE_COMPARE__
+   //=======================================================
    mReplaceString = mReplaceTextCtrl->GetValue();
    mCompareDir = mCompareDirTextCtrl->GetValue();
    mSaveFilename = mSaveFileTextCtrl->GetValue();
+   //=======================================================
+   #endif
+   //=======================================================
    
    mRunScripts = true;
    if (mNumScriptsToRun <= 0)
       mRunScripts = false;
    
+   //=======================================================
+   #ifdef __ENABLE_COMPARE__
+   //=======================================================
    mCompareResults = mCompareCheckBox->GetValue();
    mSaveCompareResults = mSaveResultCheckBox->GetValue();
+   //=======================================================
+   #endif
+   //=======================================================
    
-   #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+   #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
    MessageInterface::ShowMessage
-      ("RunScriptFolderDialog::SaveData() mNumScriptsToRun=%d, mNumTimesToRun=%d\n"
-       "mCompareResults=%d, mAbsTol=%e\n   mCompareDir=%s, mReplaceString=%s\n",
-       mNumScriptsToRun, mNumTimesToRun, mCompareResults, mAbsTol,
+      ("RunScriptFolderDialog::SaveData() mNumScriptsToRun=%d, mFilterString='%s', "
+       "mNumTimesToRun=%d\nmCompareResults=%d, mAbsTol=%e\n   mCompareDir=%s, mReplaceString=%s\n",
+       mNumScriptsToRun, mFilterString.c_str(), mNumTimesToRun, mCompareResults, mAbsTol,
        mCompareDir.c_str(), mReplaceString.c_str());
    #endif
 }
@@ -392,7 +489,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          mSaveScriptsDir = dialog.GetPath();
          mSaveScriptsDirTextCtrl->SetValue(mSaveScriptsDir);
          
-         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
             ("RunScriptFolderDialog::OnButtonClick() mSaveScriptsDir=%s\n",
              mSaveScriptsDir.c_str());
@@ -410,16 +507,26 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          
          mCurrOutDir = dialog.GetPath();
          mCurrOutDirTextCtrl->SetValue(mCurrOutDir);
+         //=================================================================
+         #ifdef __ENABLE_COMPARE__
+         //------------------------------------------------------
          mSaveFileTextCtrl->SetValue(mCurrOutDir + sep + "CompareNumericResults.txt");
+         //=================================================================
+         #endif
+         //------------------------------------------------------
+         
          mOutDirChanged = true;
          
-         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
             ("RunScriptFolderDialog::OnButtonClick() mCurrOutDir=%s\n",
              mCurrOutDir.c_str());
          #endif
       }
    }
+   //=================================================================
+   #ifdef __ENABLE_COMPARE__
+   //------------------------------------------------------
    else if (event.GetEventObject() == mDirBrowseButton)
    {
       wxDirDialog dialog(this, "Select a directory to compare", mCompareDir);
@@ -429,7 +536,7 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
          wxString dirname = dialog.GetPath();
          mCompareDirTextCtrl->SetValue(dirname);
          
-         #if DEBUG_RUN_SCRIPT_FOLDER_DIALOG
+         #ifdef DEBUG_RUN_SCRIPT_FOLDER_DIALOG
          MessageInterface::ShowMessage
             ("RunScriptFolderDialog::OnButtonClick() dirname=%s\n",
              dirname.c_str());
@@ -450,8 +557,11 @@ void RunScriptFolderDialog::OnButtonClick(wxCommandEvent& event)
             ("RunScriptFolderDialog::OnButtonClick() savefile=%s\n",
              filename.c_str());
       }
-      
    }
+   //=================================================================
+   #endif
+   //=================================================================
+   
 }
 
 

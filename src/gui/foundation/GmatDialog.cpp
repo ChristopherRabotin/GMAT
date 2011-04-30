@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              GmatDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -12,6 +16,8 @@
  */
 //------------------------------------------------------------------------------
 
+#include <wx/utils.h>
+#include <wx/config.h>
 #include "GmatDialog.hpp"
 #include "GmatAppData.hpp"
 #include "FileManager.hpp"
@@ -27,8 +33,10 @@
 BEGIN_EVENT_TABLE(GmatDialog, wxDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
+#ifdef __SHOW_HELP_BUTTON__
    EVT_BUTTON(ID_BUTTON_HELP, GmatDialog::OnHelp)
-   EVT_CLOSE(GmatDialog::OnClose) 
+#endif
+   EVT_CLOSE(GmatDialog::OnClose)
 END_EVENT_TABLE()
 
 //------------------------------
@@ -53,22 +61,27 @@ END_EVENT_TABLE()
 GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
                        GmatBase *obj, const wxPoint& pos, const wxSize& size,
                        long style)
-   : wxDialog(parent, id, title, pos, size, style, title)
+   : wxDialog(parent, id, title, pos, size, style | wxMAXIMIZE_BOX | wxMINIMIZE_BOX,
+              title)
 {
    mObject = obj;
-   
+   UserInputValidator::SetObject(obj);
+   UserInputValidator::SetWindow(this);
+
    canClose = true;
    mDataChanged = false;
+   mDataUpdated = false;
    int borderSize = 2;
-   
+
    theGuiInterpreter = GmatAppData::Instance()->GetGuiInterpreter();
    theGuiManager = GuiItemManager::GetInstance();
-   
+   UserInputValidator::SetGuiManager(theGuiManager);
+
    theParent = parent;
-    
+
    theDialogSizer = new wxBoxSizer(wxVERTICAL);
    theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
-   
+
    #if __WXMAC__
    theMiddleSizer = new wxBoxSizer(wxVERTICAL);
    theBottomSizer = new wxBoxSizer(wxVERTICAL);
@@ -78,22 +91,30 @@ GmatDialog::GmatDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    theMiddleSizer = new wxStaticBoxSizer(middleStaticBox, wxVERTICAL);
    theBottomSizer = new wxStaticBoxSizer(bottomStaticBox, wxVERTICAL);
    #endif
-   
+
    // create bottom buttons
    theOkButton =
       new wxButton(this, ID_BUTTON_OK, "OK", wxDefaultPosition, wxDefaultSize, 0);
-   
+
    theCancelButton =
       new wxButton(this, ID_BUTTON_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize, 0);
-   
-   //theHelpButton =
-   //   new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-   
-   // adds the buttons to button sizer    
+
+   #ifdef __SHOW_HELP_BUTTON__
+   theHelpButton = new wxButton
+      (this, ID_BUTTON_HELP, GUI_ACCEL_KEY"Help", wxDefaultPosition, wxDefaultSize, 0);
+   #endif
+
+   // adds the buttons to button sizer
+   #ifdef __SHOW_HELP_BUTTON__
+   theButtonSizer->Add(0, 1, wxALIGN_LEFT | wxALL);
+   #endif
    theButtonSizer->Add(theOkButton, 0, wxALIGN_CENTER | wxALL, borderSize);
    theButtonSizer->Add(theCancelButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   //theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   
+   #ifdef __SHOW_HELP_BUTTON__
+   theButtonSizer->Add(0, 1, wxALIGN_RIGHT | wxALL);
+   theButtonSizer->Add(theHelpButton, 0, wxALIGN_RIGHT | wxALL, borderSize);
+   #endif
+
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
 }
 
@@ -107,11 +128,29 @@ void GmatDialog::EnableUpdate(bool enable)
    MessageInterface::ShowMessage
       ("GmatDialog::EnableUpdate() enable=%d\n", enable);
    #endif
-   
+
    if (enable)
       mDataChanged = true;
    else
       mDataChanged = false;
+}
+
+
+//------------------------------------------------------------------------------
+// bool HasDataUpdated
+//------------------------------------------------------------------------------
+bool GmatDialog::HasDataUpdated()
+{
+   return mDataUpdated;
+}
+
+
+//------------------------------------------------------------------------------
+// void SetCanClose(bool flag)
+//------------------------------------------------------------------------------
+void GmatDialog::SetCanClose(bool flag)
+{
+   canClose = flag;
 }
 
 
@@ -130,7 +169,7 @@ void GmatDialog::OnOK(wxCommandEvent &event)
    MessageInterface::ShowMessage
       ("GmatDialog::OnOK() canClose=%d\n", canClose);
    #endif
-   
+
    if (canClose)
    {
       mDataChanged = false;
@@ -163,7 +202,22 @@ void GmatDialog::OnCancel(wxCommandEvent &event)
 //------------------------------------------------------------------------------
 void GmatDialog::OnHelp(wxCommandEvent &event)
 {
-   // open separate window to show help
+    wxString s;
+    wxString baseHelpLink;
+    char msgBuffer[255];
+
+    // get the config object
+    wxConfigBase *pConfig = wxConfigBase::Get();
+    pConfig->SetPath(wxT("/Help"));
+    s = GetName().c_str();
+    // get base help link if available
+    baseHelpLink = pConfig->Read(_T("BaseHelpLink"),_T("http://gmat.sourceforge.net/docs/R2011a/html/%s.html"));
+    sprintf( msgBuffer, baseHelpLink.c_str(), s.c_str());
+
+    // open separate window to show help
+    s = pConfig->Read(_T(s),_T(msgBuffer));
+
+    wxLaunchDefaultBrowser(s);
 }
 
 
@@ -176,7 +230,7 @@ void GmatDialog::OnClose(wxCloseEvent &event)
    MessageInterface::ShowMessage
       ("GmatDialog::OnClose() mDataChanged=%d\n", mDataChanged);
    #endif
-   
+
    if (mDataChanged)
    {
       if ( wxMessageBox(_T("Changes will be lost. \nDo you really want to close?"),
@@ -186,116 +240,9 @@ void GmatDialog::OnClose(wxCloseEvent &event)
          return;
       }
    }
-   
+
    event.Skip();
 }
-
-
-//------------------------------------------------------------------------------
-// bool CheckReal(Real &rvalue, const std::string &str,
-//                const std::string &field, const std::string &expRange,
-//                bool onlyMsg = false)
-//------------------------------------------------------------------------------
-/*
- * This method checks if input string is valid real number. It uses
- * GmatStringUtil::ToReal() to convert string to Real value. This method
- * pops up the error message and sets canClose to false if input string is
- * invaid real number.
- *
- * @param  rvalue   Real value to be set if input string is valid
- * @param  str      Input string value
- * @param  field    Field name should used in the error message
- * @param  expRange Expected value range to be used in the error message
- * @param  onlyMsg  if true, it only shows error message
- */
-//------------------------------------------------------------------------------
-bool GmatDialog::CheckReal(Real &rvalue, const std::string &str,
-                          const std::string &field, const std::string &expRange,
-                          bool onlyMsg)
-{
-   //MessageInterface::ShowMessage
-   //   ("===> CheckReal() str=%s, field=%s, expRange=%s\n", str.c_str(),
-   //    field.c_str(), expRange.c_str());
-   
-   if (onlyMsg)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
-      
-      canClose = false;
-      return false;
-   }
-   
-   // check for real value
-   Real rval;
-   if (GmatStringUtil::ToReal(str, &rval))
-   {
-      rvalue = rval;
-      return true;
-   }
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
-      
-      canClose = false;
-      return false;
-   }
-}
-
-
-//------------------------------------------------------------------------------
-// bool CheckInteger(Integer &ivalue, const std::string &str,
-//                   const std::string &field, const std::string &expRange,
-//                   bool onlyMsg = false)
-//------------------------------------------------------------------------------
-/*
- * This method checks if input string is valid integer number. It uses
- * GmatStringUtil::ToInteger() to convert string to Integer value. This method
- * pops up the error message and sets canClose to false if input string is
- * invaid integer number.
- *
- * @param  ivalue   Integer value to be set if input string is valid
- * @param  str      Input string value
- * @param  field    Field name should used in the error message
- * @param  expRange Expected value range to be used in the error message
- * @param  onlyMsg  if true, it only shows error message
- */
-//------------------------------------------------------------------------------
-bool GmatDialog::CheckInteger(Integer &ivalue, const std::string &str,
-                             const std::string &field, const std::string &expRange,
-                             bool onlyMsg)
-{
-   if (onlyMsg)
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
-      
-      canClose = false;
-      return false;
-   }
-   
-   // check for integer value
-   Integer ival;
-   if (GmatStringUtil::ToInteger(str, &ival))
-   {
-      ivalue = ival;
-      return true;
-   }
-   else
-   {
-      MessageInterface::PopupMessage
-         (Gmat::ERROR_, mMsgFormat.c_str(), str.c_str(), field.c_str(),
-          expRange.c_str());
-      
-      canClose = false;
-      return false;
-   }
-}
-
 
 //-------------------------------
 // protected methods
@@ -311,16 +258,16 @@ bool GmatDialog::CheckInteger(Integer &ivalue, const std::string &str,
 void GmatDialog::ShowData()
 {
    // add items to middle sizer
-   
+
    theDialogSizer->Add(theMiddleSizer, 1, wxGROW | wxALL, 1);
    theDialogSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
-   
+
    // tells the enclosing window to adjust to the size of the sizer
    SetAutoLayout(TRUE);
    SetSizer(theDialogSizer); //use the sizer for layout
    theDialogSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
    theDialogSizer->SetSizeHints(this); //set size hints to honour minimum size
-   
+
    // Set icon if icon file is in the start up file
    FileManager *fm = FileManager::Instance();
    try
@@ -334,33 +281,19 @@ void GmatDialog::ShowData()
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }
-   catch (GmatBaseException &e)
+   catch (GmatBaseException &)
    {
       //MessageInterface::ShowMessage(e.GetMessage());
    }
-   
+
    CenterOnScreen(wxBOTH);
-   
+
    // We want always enable OK button
    //theOkButton->Disable();
    //theHelpButton->Disable(); //loj: for future build
-   
-   if (mObject == NULL)
-   {
-      mMsgFormat =
-         "The value of \"%s\" for field \"%s\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
-   }
-   else
-   {
-      mMsgFormat =
-         "The value of \"%s\" for field \"%s\" on object \""
-         + mObject->GetName() +  "\" is not an allowed value. \n"
-         "The allowed values are: [%s].";
-   }
-   
+
    LoadData();
-   
+
 }
 
 

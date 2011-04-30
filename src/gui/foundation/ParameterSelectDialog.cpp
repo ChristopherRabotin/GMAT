@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              ParameterSelectDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -118,7 +122,7 @@ ParameterSelectDialog::~ParameterSelectDialog()
    
    theGuiManager->UnregisterListBox(mObjectType, mObjectListBox);
    theGuiManager->UnregisterComboBox("CoordinateSystem", mCoordSysComboBox);
-   theGuiManager->UnregisterComboBox("SpacePoint", mCentralBodyComboBox);
+   theGuiManager->UnregisterComboBox("CelestialBody", mCentralBodyComboBox);
 }
 
 
@@ -201,7 +205,7 @@ void ParameterSelectDialog::Create()
    #endif
    
    //------------------------------------------------------
-   // create paramter sizer
+   // create parameter sizer
    //------------------------------------------------------
    
    mParameterSizer = theGuiManager->
@@ -226,7 +230,8 @@ void ParameterSelectDialog::Create()
                                mObjectTypeList, mShowOption,
                                mAllowMultiSelect, mAllowString,
                                mAllowWholeObject, mAllowSysParam,
-                               mAllowVariable, mAllowArray, mObjectType);
+                               mAllowVariable, mAllowArray, mObjectType,
+                               "Parameter Select");
    
    //------------------------------------------------------
    // add to parent sizer
@@ -245,36 +250,41 @@ void ParameterSelectDialog::LoadData()
    MessageInterface::ShowMessage("ParameterSelectDialog::LoadData() entered.\n");
    #endif
    
-   if (mAllowSysParam)
+   if (mShowOption != GuiItemManager::SHOW_WHOLE_OBJECT_ONLY)
    {
-      if (!mAllowMultiSelect)
+      if (mAllowSysParam)
+      {
+         // Let's alway select the first item (loj: 2009.02.04)
+         //if (!mAllowMultiSelect)
          mPropertyListBox->SetSelection(0);
-      
-      if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
-      {
-         mCoordSysLabel->Hide();
-         mCoordSysComboBox->SetValue("");
-         mCentralBodyComboBox->SetValue("");
-         mCoordSysComboBox->Hide();
-         mCentralBodyComboBox->Hide();
-      }
-      else
-      {
-         mLastCoordSysName = mCoordSysComboBox->GetString(0);
          
-         // show coordinate system or central body
-         ShowCoordSystem();
+         if (mObjectType == "ImpulsiveBurn" || mAllowMultiSelect)
+         {
+            mCoordSysLabel->Hide();
+            mCoordSysComboBox->SetValue("");
+            mCentralBodyComboBox->SetValue("");
+            mCoordSysComboBox->Hide();
+            mCentralBodyComboBox->Hide();
+         }
+         else
+         {
+            mLastCoordSysName = mCoordSysComboBox->GetString(0);
+            
+            // show coordinate system or central body
+            ShowCoordSystem();
+         }
       }
    }
    
+   // Let's alway select the first item (loj: 2009.02.04)   
    // fire ListBoxSect event to show array info or not if single selection
-   if (!mAllowMultiSelect)
-   {
+   //if (!mAllowMultiSelect)
+   //{
       mObjectListBox->SetSelection(0);
       wxCommandEvent tempEvent;
       tempEvent.SetEventObject(mObjectListBox);
       OnListBoxSelect(tempEvent);
-   }
+   //}
    
    // hide array element
    ShowArrayInfo(false);
@@ -391,7 +401,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
          
          // set adding mode to true
          mIsAddingMode = true;
-      
+         
          if (AddMultipleSelections())
             mHasSelectionChanged = true;
          
@@ -419,7 +429,7 @@ void ParameterSelectDialog::OnButtonClick(wxCommandEvent& event)
       mSelectedListBox->Clear();
       mHasSelectionChanged = true;
    }
-
+   
    if (mHasSelectionChanged)
       EnableUpdate(true);
 }
@@ -674,7 +684,7 @@ void ParameterSelectDialog::OnComboBoxChange(wxCommandEvent& event)
       ShowArrayInfo(false);
    
    // fire ObjectListBox select event if single selection
-   if (!mAllowMultiSelect)
+   if ((!mAllowMultiSelect) && (obj != mCoordSysComboBox))
    {
       mObjectListBox->SetSelection(0);
       wxCommandEvent tempEvent;
@@ -691,11 +701,28 @@ void ParameterSelectDialog::OnCheckBoxChange(wxCommandEvent& event)
 {
    if (event.GetEventObject() == mEntireObjectCheckBox)
    {
-      #ifdef DEBUG_PSDIALOG_CHECK_BOX
+      bool allowWholeObject = mEntireObjectCheckBox->IsChecked();
+      //#ifdef DEBUG_PSDIALOG_CHECK_BOX
       MessageInterface::ShowMessage
          ("OnCheckBoxChange() IsChecked()=%d\n",
           mEntireObjectCheckBox->IsChecked());
-      #endif
+      MessageInterface::ShowMessage
+         ("On\nCheck\nBox\nChange() IsChecked()=%d\n",
+          mEntireObjectCheckBox->IsChecked());
+      //#endif
+      
+      // if user can whole object, set ListBox style to wxLB_EXTENDED
+      if (allowWholeObject)
+         mObjectListBox->SetWindowStyle(wxLB_EXTENDED);
+      else
+      {
+         // Deselect all objects and Select first one
+         DeselectAllObjects();
+         mObjectListBox->SetSelection(0);
+         mObjectListBox->SetWindowStyle(wxLB_SINGLE);
+      }
+      
+      Refresh();
    }
 }
 
@@ -1172,7 +1199,7 @@ void ParameterSelectDialog::ShowCoordSystem()
    if (depObj == GmatParam::COORD_SYS)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Coordinate System");
+      mCoordSysLabel->SetLabel("Coordinate "GUI_ACCEL_KEY"System");
       
       mCoordSysComboBox->SetStringSelection(mLastCoordSysName);
       
@@ -1186,12 +1213,12 @@ void ParameterSelectDialog::ShowCoordSystem()
    else if (depObj == GmatParam::ORIGIN)
    {
       mCoordSysLabel->Show();
-      mCoordSysLabel->SetLabel("Central Body");
+      mCoordSysLabel->SetLabel("Central "GUI_ACCEL_KEY"Body");
       
-      //mCentralBodyComboBox->SetStringSelection("Earth");
-      
-      mCoordSysSizer->Remove(mCentralBodyComboBox);
+      // I had to remove mCoordSysComboBox first and then mCentralBodyComboBox,
+      // otherwise, mCentralBodyComboBox shows too far to right
       mCoordSysSizer->Remove(mCoordSysComboBox);
+      mCoordSysSizer->Remove(mCentralBodyComboBox);
       mCoordSysSizer->Add(mCentralBodyComboBox);
       mCentralBodyComboBox->Show();
       mCoordSysComboBox->Hide();
@@ -1224,6 +1251,19 @@ void ParameterSelectDialog::ClearProperties()
    mCoordSysComboBox->Hide();
    mCentralBodyComboBox->Hide();
    mParameterSizer->Layout();
+}
+
+
+//------------------------------------------------------------------------------
+// void DeselectAllObjects()
+//------------------------------------------------------------------------------
+void ParameterSelectDialog::DeselectAllObjects()
+{
+   wxArrayInt selections;
+   int count = mObjectListBox->GetSelections(selections);
+   
+   for (int i=0; i<count; i++)
+      mObjectListBox->Deselect(selections[i]);
 }
 
 

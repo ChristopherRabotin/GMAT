@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                             MissionTreeItemData
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // ** Legal **
 //
@@ -19,27 +23,29 @@
 //------------------------------
 
 //------------------------------------------------------------------------------
-// MissionTreeItemData(wxString desc, GmatTree::ItemType type, const wxString &name,
-//                     GmatCommand *cmd)
+// MissionTreeItemData(const wxString &name, GmatTree::ItemType type,
+//                     const wxString &title, GmatCommand *cmd)
 //------------------------------------------------------------------------------
 /**
  * Constructs MissionTreeItemData object.
  *
- * @param <desc> input string for description of node.
- * @param <type> input int for type of data.
  * @param <name> command name
+ * @param <type> input int for type of data.
+ * @param <title> input string for description of node.
  * @param <cmd> command pointer
  *
  * @note Creates the MissionTreeItemData object.
  */
 //------------------------------------------------------------------------------
-MissionTreeItemData::MissionTreeItemData(wxString desc, GmatTree::ItemType type,
-                                         const wxString &name, GmatCommand *cmd)
-    : GmatTreeItemData(desc, type)
+MissionTreeItemData::MissionTreeItemData(const wxString &name, GmatTree::ItemType type,
+                                         const wxString &title, GmatCommand *cmd)
+    : GmatTreeItemData(name, type, title)
 {
+   // Set title as name for mission tree since they are the same
+   mItemTitle = name;
    theCommand = cmd;
-   theCommandName = name;
 }
+
 
 //------------------------------------------------------------------------------
 // virtual GmatCommand* GetCommand()
@@ -63,17 +69,5 @@ GmatCommand* MissionTreeItemData::GetCommand()
 void MissionTreeItemData::SetCommand(GmatCommand* cmd)
 {
    theCommand = cmd;
-}
-
-//------------------------------------------------------------------------------
-// virtual wxString GetCommandName()
-//------------------------------------------------------------------------------
-/**
- * @return command name
- */
-//------------------------------------------------------------------------------
-wxString MissionTreeItemData::GetCommandName()
-{
-   return theCommandName;
 }
 

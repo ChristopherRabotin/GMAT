@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CoordSystemConfigPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2004/10/26
@@ -32,6 +36,7 @@ private:
    wxString mEpochFormat;
    bool mOriginChanged;
    bool mObjRefChanged;
+   bool mEpochChanged;
    
    wxTextCtrl *epochTextCtrl;
    wxTextCtrl *intervalTextCtrl;

@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CoordSysCreateDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison Greene
 // Created: 2005/03/03
@@ -18,6 +22,7 @@
 #include "MessageInterface.hpp"
 #include "CoordinateSystem.hpp"
 #include "AxisSystem.hpp"
+#include <wx/config.h>
 
 //#define DEBUG_COORD_DIALOG 1
 //#define DEBUG_COORD_DIALOG_SAVE 1
@@ -49,13 +54,19 @@ CoordSysCreateDialog::CoordSysCreateDialog(wxWindow *parent)
 //------------------------------------------------------------------------------
 void CoordSysCreateDialog::Create()
 {
+    // get the config object
+    wxConfigBase *pConfig = wxConfigBase::Get();
+    // SetPath() understands ".."
+    pConfig->SetPath(wxT("/Coordinate System"));
+
     // wxStaticText
     nameStaticText = new wxStaticText( this, ID_TEXT,
-         wxT("Coordinate System Name"), wxDefaultPosition, wxDefaultSize, 0 );
+         wxT("Coordinate System "GUI_ACCEL_KEY"Name"), wxDefaultPosition, wxDefaultSize, 0 );
 
     // wxTextCtrl
     nameTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""),
          wxDefaultPosition, wxSize(160,-1), 0 );
+    nameTextCtrl->SetToolTip(pConfig->Read(_T("NameHint")));
 
     mCoordPanel = new CoordPanel(this, true);
 
@@ -82,18 +93,18 @@ void CoordSysCreateDialog::LoadData()
       originComboBox = mCoordPanel->GetOriginComboBox();
       typeComboBox = mCoordPanel->GetTypeComboBox();
       primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-      formatComboBox = mCoordPanel->GetFormatComboBox();
+//      formatComboBox = mCoordPanel->GetFormatComboBox();
       secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
 
       xComboBox = mCoordPanel->GetXComboBox();
       yComboBox = mCoordPanel->GetYComboBox();
       zComboBox = mCoordPanel->GetZComboBox();
 
-      intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
+//      intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
 
       mCoordPanel->SetDefaultAxis();
             
-      wxFormatName = formatComboBox->GetValue().Trim();
+//      wxFormatName = formatComboBox->GetValue().Trim();
       mCoordPanel->EnableOptions();
    }
    catch (BaseException &e)
@@ -118,7 +129,7 @@ void CoordSysCreateDialog::SaveData()
    #endif
    
    canClose = true;
-
+   
    std::string coordName = std::string(nameTextCtrl->GetValue().Trim().c_str());
    if (coordName == "")
    {
@@ -128,25 +139,42 @@ void CoordSysCreateDialog::SaveData()
       return;
    }
    
+   if (!IsValidName(coordName.c_str()))
+      return;
+   
    //-----------------------------------------------------------------
    // check values from text field
    //-----------------------------------------------------------------
    if (mIsTextModified)
    {
-      Real epoch, interval;
+      Real epoch;
+//      Real interval;
       std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
+      #if DEBUG_COORD_DIALOG_SAVE
+      MessageInterface::ShowMessage
+         ("CoordSysCreateDialog::SaveData() epoch value = %s\n",
+          str.c_str());
+      #endif
       bool isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0");
+      #if DEBUG_COORD_DIALOG_SAVE
+      MessageInterface::ShowMessage
+         ("CoordSysCreateDialog::SaveData() isValid = %s, and epoch real value = %12.10f\n",
+          (isValid? "true" : "false"), epoch);
+      #endif
       
-      // check range here, since there is no CoordinateSystem created yet
+      // check range here
       
-      if (isValid && epoch < 0.0)
-         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
+//      if (isValid && epoch < 0.0)
+//         CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
+      if (isValid)
+         CheckRealRange(str, epoch, "Epoch", 6116.0, 0.0, true, false, true, false);
       
-      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
-      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
-      
-      if (isValid && epoch < 0.0)
-         CheckReal(interval, str, "UpdateInterval", "Real Number >= 0", true);
+//      str = mCoordPanel->GetIntervalTextCtrl()->GetValue();
+//      isValid = CheckReal(interval, str, "UpdateInterval", "Real Number >= 0");
+//
+////      if (isValid && epoch < 0.0)
+//      if (isValid && interval < 0.0)
+//         CheckReal(interval, str, "UpdateInterval", "Real Number >= 0", true);
       
    }
    
@@ -214,8 +242,9 @@ void CoordSysCreateDialog::OnTextUpdate(wxCommandEvent& event)
       EnableUpdate(true);
    }
    
-   if (mCoordPanel->GetEpochTextCtrl()->IsModified() ||
-       mCoordPanel->GetIntervalTextCtrl()->IsModified())
+   if (mCoordPanel->GetEpochTextCtrl()->IsModified() )
+//      if (mCoordPanel->GetEpochTextCtrl()->IsModified() ||
+//          mCoordPanel->GetIntervalTextCtrl()->IsModified())
    {
       EnableUpdate(true);
       mIsTextModified = true;
@@ -235,10 +264,10 @@ void CoordSysCreateDialog::OnComboBoxChange(wxCommandEvent& event)
    {
       mCoordPanel->EnableOptions();
    }
-   else if (event.GetEventObject() == formatComboBox)
-   {
-      mCoordPanel->ChangeEpoch(wxFormatName);
-   }
+//   else if (event.GetEventObject() == formatComboBox)
+//   {
+//      mCoordPanel->ChangeEpoch(wxFormatName);
+//   }
    
    if (nameTextCtrl->GetValue().Trim() != "")
       EnableUpdate(true);

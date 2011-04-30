@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              BarycenterPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison Greene
 // Created: 2005/04/21
@@ -38,7 +42,8 @@ private:
    bool mIsBodySelected;
 
    wxString mSelBodyName;
-
+   wxArrayString mExcludedCelesBodyList;
+   
    wxButton *addBodyButton;
    wxButton *removeBodyButton;
    wxButton *clearBodyButton;

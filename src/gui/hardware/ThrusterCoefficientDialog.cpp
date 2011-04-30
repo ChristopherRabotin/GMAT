@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ThrusterCoefficientDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2005/01/13
@@ -17,31 +21,36 @@
 #include "ThrusterCoefficientDialog.hpp"
 #include "StringUtil.hpp"
 #include "MessageInterface.hpp"
-
 #include <wx/variant.h>
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(ThrusterCoefficientDialog, GmatDialog)
-   EVT_GRID_CELL_CHANGE(ThrusterCoefficientDialog::OnCellValueChange)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
-// ThrusterCoefficientDialog(wxWindow *parent)
+// ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
+//                           const wxString &title, GmatBase *obj,
+//                           const std::string &type)
 //------------------------------------------------------------------------------
-ThrusterCoefficientDialog::ThrusterCoefficientDialog(wxWindow *parent,
-                                            Thruster *thruster, std::string type)
-   : GmatDialog(parent, -1, wxString(_T("ThrusterCoefficientDialog")))
-{   
-   coefName.clear();
-   coefValue.clear();
-   
+ThrusterCoefficientDialog::
+ThrusterCoefficientDialog(wxWindow *parent, wxWindowID id, 
+                          const wxString &title, GmatBase *obj,
+                          const wxString &type)
+   : GmatDialog(parent, id, title, obj, wxDefaultPosition, wxDefaultSize)
+{
    coefType = type;
-   theThruster = thruster;
+   theObject = obj;
    
-   Create();
-   ShowData();
+   coefNames.clear();
+   coefValues.clear();
+   
+   if (obj != NULL)
+   {
+      Create();
+      ShowData();
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -49,19 +58,33 @@ ThrusterCoefficientDialog::ThrusterCoefficientDialog(wxWindow *parent,
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::Create()
 {
-   coefficientGrid = new wxGrid( this, ID_GRID, wxDefaultPosition, 
-                    wxSize(200,315), wxWANTS_CHARS );
-   coefficientGrid->CreateGrid( 14, 2 );
-   coefficientGrid->SetRowLabelSize(0);
-   coefficientGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+   coefGrid =
+      new wxGrid( this, ID_GRID, wxDefaultPosition, wxDefaultSize, wxWANTS_CHARS);
    
-   coefficientGrid->SetColLabelValue(0, _T("Coef"));
-   coefficientGrid->SetColSize(0, 60);
-   coefficientGrid->SetColLabelValue(1, _T("in Newton"));
-   coefficientGrid->SetColSize(1, 135);
+   coefCount = Thruster::COEFFICIENT_COUNT;
+   
+   coefGrid->EnableDragGridSize(false);
+   coefGrid->EnableDragColSize(false);
+   coefGrid->CreateGrid(coefCount, 3);
+   coefGrid->SetRowLabelSize(0);
+   coefGrid->SetDefaultCellAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
+   
+   coefGrid->SetColLabelValue(0, _T("Coefficient"));
+   coefGrid->SetColSize(0, 70);
+   coefGrid->SetColLabelValue(1, _T("Value"));
+   coefGrid->SetColSize(1, 135);
+   coefGrid->SetColLabelValue(2, _T("Unit"));
+   coefGrid->SetColSize(2, 80);
+   
+   // The first and third columns are read only
+   for (int i=0; i<coefCount; i++)
+   {
+      coefGrid->SetReadOnly(i, 0);
+      coefGrid->SetReadOnly(i, 2);
+   }
    
    // wxSizers   
-   theMiddleSizer->Add(coefficientGrid, 0, wxALIGN_CENTRE|wxALL, 3);
+   theMiddleSizer->Add(coefGrid, 0, wxALIGN_CENTRE|wxGROW|wxALL, 3);
 }
 
 //------------------------------------------------------------------------------
@@ -69,137 +92,161 @@ void ThrusterCoefficientDialog::Create()
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::LoadData()
 {
-   Integer count = 14;
    Integer paramID = 0;
-
+   int coefCount = Thruster::COEFFICIENT_COUNT;
+   
    if (coefType == "C")
    {
-      paramID = theThruster->GetParameterID("C1");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C1");
- 
-      paramID = theThruster->GetParameterID("C2");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C2");
+      paramID = theObject->GetParameterID("C1");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C1");
       
-      paramID = theThruster->GetParameterID("C3");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C3");
+      paramID = theObject->GetParameterID("C2");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C2");
       
-      paramID = theThruster->GetParameterID("C4");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C4");
+      paramID = theObject->GetParameterID("C3");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C3");
       
-      paramID = theThruster->GetParameterID("C5");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C5");
+      paramID = theObject->GetParameterID("C4");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C4");
       
-      paramID = theThruster->GetParameterID("C6");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C6");
+      paramID = theObject->GetParameterID("C5");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C5");
       
-      paramID = theThruster->GetParameterID("C7");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C7");
+      paramID = theObject->GetParameterID("C6");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C6");
       
-      paramID = theThruster->GetParameterID("C8");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C8");
+      paramID = theObject->GetParameterID("C7");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C7");
       
-      paramID = theThruster->GetParameterID("C9");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C9");
+      paramID = theObject->GetParameterID("C8");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C8");
       
-      paramID = theThruster->GetParameterID("C10");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C10");
+      paramID = theObject->GetParameterID("C9");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C9");
       
-      paramID = theThruster->GetParameterID("C11");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C11");
+      paramID = theObject->GetParameterID("C10");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C10");
       
-      paramID = theThruster->GetParameterID("C12");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C12");
+      paramID = theObject->GetParameterID("C11");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C11");
       
-      paramID = theThruster->GetParameterID("C13");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C13");
+      paramID = theObject->GetParameterID("C12");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C12");
       
-      paramID = theThruster->GetParameterID("C14");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("C14");
+      paramID = theObject->GetParameterID("C13");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C13");
+      
+      paramID = theObject->GetParameterID("C14");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C14");
    
-      for (Integer i = 0; i < count; i++)
+      paramID = theObject->GetParameterID("C15");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C15");
+      
+      paramID = theObject->GetParameterID("C16");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("C16");
+
+      paramID = theObject->GetParameterID("C_UNITS");
+      StringArray coefUnits = theObject->GetStringArrayParameter(paramID);
+      
+      for (Integer i = 0; i < coefCount; i++)
       {
-         coefficientGrid->SetCellValue(i, 0, coefName[i].c_str());
-         coefficientGrid->SetCellValue(i, 1, wxVariant(coefValue[i]));
+         coefGrid->SetCellValue(i, 0, coefNames[i].c_str());
+         coefGrid->SetCellValue(i, 1, wxVariant(coefValues[i]));
+         coefGrid->SetCellValue(i, 2, coefUnits[i].c_str());
       }
    }
    else if (coefType == "K")
    {
-      paramID = theThruster->GetParameterID("K1");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K1");
- 
-      paramID = theThruster->GetParameterID("K2");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K2");
+      paramID = theObject->GetParameterID("K1");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K1");
       
-      paramID = theThruster->GetParameterID("K3");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K3");
+      paramID = theObject->GetParameterID("K2");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K2");
       
-      paramID = theThruster->GetParameterID("K4");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K4");
+      paramID = theObject->GetParameterID("K3");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K3");
       
-      paramID = theThruster->GetParameterID("K5");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K5");
+      paramID = theObject->GetParameterID("K4");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K4");
       
-      paramID = theThruster->GetParameterID("K6");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K6");
+      paramID = theObject->GetParameterID("K5");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K5");
       
-      paramID = theThruster->GetParameterID("K7");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K7");
+      paramID = theObject->GetParameterID("K6");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K6");
       
-      paramID = theThruster->GetParameterID("K8");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K8");
+      paramID = theObject->GetParameterID("K7");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K7");
       
-      paramID = theThruster->GetParameterID("K9");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K9");
+      paramID = theObject->GetParameterID("K8");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K8");
       
-      paramID = theThruster->GetParameterID("K10");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K10");
+      paramID = theObject->GetParameterID("K9");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K9");
       
-      paramID = theThruster->GetParameterID("K11");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K11");
+      paramID = theObject->GetParameterID("K10");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K10");
       
-      paramID = theThruster->GetParameterID("K12");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K12");
+      paramID = theObject->GetParameterID("K11");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K11");
       
-      paramID = theThruster->GetParameterID("K13");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K13");
+      paramID = theObject->GetParameterID("K12");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K12");
       
-      paramID = theThruster->GetParameterID("K14");
-      coefValue.push_back(theThruster->GetRealParameter(paramID));
-      coefName.push_back("K14");
-   
-      for (Integer i = 0; i < count; i++)
+      paramID = theObject->GetParameterID("K13");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K13");
+      
+      paramID = theObject->GetParameterID("K14");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K14");
+      
+      paramID = theObject->GetParameterID("K15");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K15");
+      
+      paramID = theObject->GetParameterID("K16");
+      coefValues.push_back(theObject->GetRealParameter(paramID));
+      coefNames.push_back("K16");
+      
+      paramID = theObject->GetParameterID("K_UNITS");
+      StringArray coefUnits = theObject->GetStringArrayParameter(paramID);
+      
+      for (Integer i = 0; i < coefCount; i++)
       {
-         coefficientGrid->SetCellValue(i, 0, coefName[i].c_str());
-         coefficientGrid->SetCellValue(i, 1, wxVariant(coefValue[i]));
+         coefGrid->SetCellValue(i, 0, coefNames[i].c_str());
+         coefGrid->SetCellValue(i, 1, wxVariant(coefValues[i]));
+         coefGrid->SetCellValue(i, 2, coefUnits[i].c_str());
       }
-   }        
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -207,96 +254,44 @@ void ThrusterCoefficientDialog::LoadData()
 //------------------------------------------------------------------------------
 void ThrusterCoefficientDialog::SaveData()
 {
-   Integer paramID = 0;
-
-   if (coefType == "C")
+   #ifdef DEBUG_COEF_SAVE
+   MessageInterface::ShowMessage
+      ("ThrusterCoefficientDialog::SaveData() entered\n");
+   #endif
+   
+   canClose = true;
+   
+   // Validate input values
+   for (int i = 0; i < coefCount; i++)
    {
-      paramID = theThruster->GetParameterID("C1");
-      theThruster->SetRealParameter(paramID, coefValue[0]);
- 
-      paramID = theThruster->GetParameterID("C2");
-      theThruster->SetRealParameter(paramID, coefValue[1]);
-      
-      paramID = theThruster->GetParameterID("C3");
-      theThruster->SetRealParameter(paramID, coefValue[2]);
-      
-      paramID = theThruster->GetParameterID("C4");
-      theThruster->SetRealParameter(paramID, coefValue[3]);
-      
-      paramID = theThruster->GetParameterID("C5");
-      theThruster->SetRealParameter(paramID, coefValue[4]);
-      
-      paramID = theThruster->GetParameterID("C6");
-      theThruster->SetRealParameter(paramID, coefValue[5]);
-      
-      paramID = theThruster->GetParameterID("C7");
-      theThruster->SetRealParameter(paramID, coefValue[6]);
-      
-      paramID = theThruster->GetParameterID("C8");
-      theThruster->SetRealParameter(paramID, coefValue[7]);
-      
-      paramID = theThruster->GetParameterID("C9");
-      theThruster->SetRealParameter(paramID, coefValue[8]);
-      
-      paramID = theThruster->GetParameterID("C10");
-      theThruster->SetRealParameter(paramID, coefValue[9]);
-      
-      paramID = theThruster->GetParameterID("C11");
-      theThruster->SetRealParameter(paramID, coefValue[10]);
-      
-      paramID = theThruster->GetParameterID("C12");
-      theThruster->SetRealParameter(paramID, coefValue[11]);
-      
-      paramID = theThruster->GetParameterID("C13");
-      theThruster->SetRealParameter(paramID, coefValue[12]);
-      
-      paramID = theThruster->GetParameterID("C14");
-      theThruster->SetRealParameter(paramID, coefValue[13]);
+      std::string field = coefGrid->GetCellValue(i, 0).c_str();
+      std::string input = coefGrid->GetCellValue(i, 1).c_str();
+      #ifdef DEBUG_COEF_SAVE
+      MessageInterface::ShowMessage("   %s = '%s'\n", field.c_str(), input.c_str());
+      #endif
+      CheckReal(coefValues[i], input, field, "Real Number");
    }
-   else if (coefType == "K")
+   
+   if (!canClose)
+      return;
+   
+   // Save values
+   Integer paramID = 0;
+   
+   #ifdef DEBUG_COEF_SAVE
+   MessageInterface::ShowMessage("   Now saving coef values to Thruster\n");
+   #endif
+   
+   for (int i = 0; i < coefCount; i++)
    {
-      paramID = theThruster->GetParameterID("K1");
-      theThruster->SetRealParameter(paramID, coefValue[0]);
- 
-      paramID = theThruster->GetParameterID("K2");
-      theThruster->SetRealParameter(paramID, coefValue[1]);
-      
-      paramID = theThruster->GetParameterID("K3");
-      theThruster->SetRealParameter(paramID, coefValue[2]);
-      
-      paramID = theThruster->GetParameterID("K4");
-      theThruster->SetRealParameter(paramID, coefValue[3]);
-      
-      paramID = theThruster->GetParameterID("K5");
-      theThruster->SetRealParameter(paramID, coefValue[4]);
-      
-      paramID = theThruster->GetParameterID("K6");
-      theThruster->SetRealParameter(paramID, coefValue[5]);
-      
-      paramID = theThruster->GetParameterID("K7");
-      theThruster->SetRealParameter(paramID, coefValue[6]);
-      
-      paramID = theThruster->GetParameterID("K8");
-      theThruster->SetRealParameter(paramID, coefValue[7]);
-      
-      paramID = theThruster->GetParameterID("K9");
-      theThruster->SetRealParameter(paramID, coefValue[8]);
-      
-      paramID = theThruster->GetParameterID("K10");
-      theThruster->SetRealParameter(paramID, coefValue[9]);
-      
-      paramID = theThruster->GetParameterID("K11");
-      theThruster->SetRealParameter(paramID, coefValue[10]);
-      
-      paramID = theThruster->GetParameterID("K12");
-      theThruster->SetRealParameter(paramID, coefValue[11]);
-      
-      paramID = theThruster->GetParameterID("K13");
-      theThruster->SetRealParameter(paramID, coefValue[12]);
-      
-      paramID = theThruster->GetParameterID("K14");
-      theThruster->SetRealParameter(paramID, coefValue[13]);
-   }        
+      paramID = theObject->GetParameterID(coefNames[i]);
+      theObject->SetRealParameter(paramID, coefValues[i]);
+   }
+   
+   #ifdef DEBUG_COEF_SAVE
+   MessageInterface::ShowMessage
+      ("ThrusterCoefficientDialog::SaveData() exiting\n");
+   #endif
 }  
 
 //------------------------------------------------------------------------------
@@ -305,39 +300,4 @@ void ThrusterCoefficientDialog::SaveData()
 void ThrusterCoefficientDialog::ResetData()
 {
 }     
-
-//------------------------------------------------------------------------------
-// virtual void OnCellValueChange()
-//------------------------------------------------------------------------------
-void ThrusterCoefficientDialog::OnCellValueChange(wxGridEvent &event)
-{
-    int row = event.GetRow();
-    int col = event.GetCol();
-    
-    if (col == 0)
-    {
-       coefficientGrid->SetCellValue(row, col, coefName[row].c_str());    
-    }    
-    else if (col == 1)
-    {
-       Real rvalue;
-       std::string inputString(coefficientGrid->GetCellValue(row, col).c_str());
-       std::string msg = "The value of \"" + inputString + 
-//                         "\" for field \"%s\" on object \"" +
-//                          theFuelTank->GetName() + "\" 
-                        "\" is not an allowed value.  "
-                        "\nThe allowed values are: [ Real Number ].";
-
-       if (!GmatStringUtil::ToReal(inputString,&rvalue))
-       {
-          MessageInterface::PopupMessage(Gmat::ERROR_, msg);
-          return;
-       }
-
-       coefValue[row] = rvalue;
-//       coefValue[row] = atof(coefficientGrid->GetCellValue(row, col));
-       theOkButton->Enable(true);
-    }    
-}
-
 

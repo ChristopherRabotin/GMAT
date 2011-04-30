@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           DCSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2004/01/21
@@ -37,20 +41,26 @@ private:
    DifferentialCorrector *theDC;
    bool isTextModified;
    
-   wxString reportStyle;
+//   wxString reportStyle;
    
    wxStaticText *maxStaticText;
-   wxStaticText *textfileStaticText;
+   wxStaticText *reportfileStaticText;  // wxStaticText *textfileStaticText;
    wxStaticText *reportStyleStaticText;
+   wxStaticText *derivativeMethodStaticText;
    
    wxTextCtrl *maxTextCtrl;
-   wxTextCtrl *textfileTextCtrl;
+   wxTextCtrl *reportfileTextCtrl;      //   wxTextCtrl *textfileTextCtrl;
    
    wxCheckBox *showProgressCheckBox;
-   wxCheckBox *centralDifferencesCheckBox;
-   
-   wxComboBox *styleComboBox;
+//   wxCheckBox *centralDifferencesCheckBox;
       
+   wxComboBox *styleComboBox;
+   wxComboBox *derivativeMethodComboBox;
+         
+   wxBitmapButton       *browseButton;
+   
+   wxFileDialog *fileDialog;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -63,6 +73,7 @@ private:
    void OnTextUpdate(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent &event);
    void OnCheckBoxChange(wxCommandEvent &event);
+   void OnBrowse(wxCommandEvent &event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -73,7 +84,8 @@ private:
       ID_TEXT = 55000,
       ID_TEXTCTRL,
       ID_CHECKBOX,
-      ID_COMBOBOX
+      ID_COMBOBOX,
+      ID_BUTTON_BROWSE
    };
 };
 

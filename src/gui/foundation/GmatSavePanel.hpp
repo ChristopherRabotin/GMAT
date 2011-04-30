@@ -1,8 +1,15 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatSavePanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -26,59 +33,70 @@
 #include <wx/grid.h>
 #include "wx/radiobut.h"
 
+#include "GmatPanel.hpp"
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 
-class GmatSavePanel : public wxPanel
+class GmatSavePanel : public GmatPanel
 {
 public:
    // constructors
-   GmatSavePanel( wxWindow *parent, bool showScriptButton = true,
-                  wxString filename = "");
-
-   //loj: 4/1/05 Moved from protected to public because derived classes won't
-   //compile under GCC 3.4.2
+   GmatSavePanel(wxWindow *parent, bool showScriptButton = true,
+                 wxString filename = "", bool showScriptActiveStatus = false,
+                 bool isScriptActive = false);
+   
    virtual void OnSave(wxCommandEvent &event);
    virtual void OnSaveAs(wxCommandEvent &event);
-   virtual void OnClose(wxCommandEvent &event);
-   virtual void OnHelp(wxCommandEvent &event);
+   virtual void OnClosePanel(wxCommandEvent &event);
    virtual void OnScript(wxCommandEvent &event);
-
+   
+   virtual void SetEditorModified(bool flag);
+   void UpdateScriptActiveStatus(bool isActive);
+   void ReloadFile();
+   
 protected:
    // member functions
    virtual void Create() = 0;
    virtual void Show();
    virtual void LoadData() = 0;
    virtual void SaveData() = 0;
-    
+
+   void RefreshScriptActiveStatus(bool isActive);
    bool FileExists(std::string scriptFilename);
-      
+   
    // member data
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool canClose;
    bool mShowScriptButton;
+   bool hasFileLoaded;
+   bool mShowScriptActiveStatus;
+   bool mIsScriptActive;
+   
    wxString mFilename;
    
    wxWindow *theParent;
-    
-   wxBoxSizer *thePanelSizer;
+   
+   wxBoxSizer       *thePanelSizer;
    wxStaticBoxSizer *theTopSizer;
    wxStaticBoxSizer *theMiddleSizer;
    wxStaticBoxSizer *theBottomSizer;
-    
+   wxBoxSizer       *theButtonSizer;
+   
    wxButton *theSaveButton;
    wxButton *theSaveAsButton;
    wxButton *theCloseButton;
-   wxButton *theHelpButton;
    wxButton *theScriptButton;
    
+   wxStaticText *mScriptActiveLabel;
+   wxStaticText *mScriptDirtyLabel;
+   
    GmatBase *mObject;
-    
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     
@@ -88,7 +106,7 @@ protected:
       ID_BUTTON_HELP,
       ID_BUTTON_SCRIPT,
    };
-
+   
 };
 
 #endif // GmatSavePanel_hpp

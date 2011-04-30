@@ -1,11 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            SpacecraftPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -26,7 +28,7 @@
 #include "GuiInterpreter.hpp"
 #include "Spacecraft.hpp"
 #include "RealUtilities.hpp"
-
+#include "MessageInterface.hpp"
 #include <stdlib.h>
 
 //#define DEBUG_SPACECRAFT_PANEL 1
@@ -78,7 +80,8 @@ SpacecraftPanel::~SpacecraftPanel()
    // need to delete child from list in mainFrame
    //    delete(theBallisticMassPanel);
    //    delete(theOrbitPanel);
-   //    delete(currentSpacecraft);
+   
+   delete currentSpacecraft;
 }
 
 //-------------------------------
@@ -124,7 +127,8 @@ void SpacecraftPanel::Create()
    actuatorNotebook->SetForegroundColour(GetBackgroundColour());
    
    //wx*Panel
-   sensors = new wxPanel( spacecraftNotebook, -1 );
+   sensors = NULL;
+//   sensors = new wxPanel( spacecraftNotebook, -1 );
    
    theOrbitPanel = new OrbitPanel
       (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
@@ -156,18 +160,29 @@ void SpacecraftPanel::Create()
    #if DEBUG_SPACECRAFT_PANEL
    MessageInterface::ShowMessage("   ThrusterPanel created\n");
    #endif
-   
-   // visuals = new wxPanel( mainNotebook, -1 );
+   #ifdef __USE_SPICE__
+      theSpicePanel = new SpicePanel
+         (this, spacecraftNotebook, currentSpacecraft);
+   #endif
+   #if DEBUG_SPACECRAFT_PANEL
+   MessageInterface::ShowMessage("   SpicePanel created\n");
+   #endif
+
+   theVisualModelPanel = new VisualModelPanel
+      (this, spacecraftNotebook, currentSpacecraft, theSolarSystem);
    
    // Adding panels to notebook
    actuatorNotebook->AddPage( theThrusterPanel, wxT("Thruster") );
    spacecraftNotebook->AddPage( theOrbitPanel, wxT("Orbit") );
    spacecraftNotebook->AddPage( theAttitudePanel, wxT("Attitude") );
    spacecraftNotebook->AddPage( theBallisticMassPanel, wxT("Ballistic/Mass") );
-   spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
+//   spacecraftNotebook->AddPage( sensors, wxT("Sensors") );
    spacecraftNotebook->AddPage( theTankPanel, wxT("Tanks") );
+   #ifdef __USE_SPICE__
+      spacecraftNotebook->AddPage( theSpicePanel, wxT("SPICE") );
+   #endif
    spacecraftNotebook->AddPage( actuatorNotebook, wxT("Actuators") );
-   //spacecraftNotebook->AddPage( visuals , wxT("Visualization") );
+   spacecraftNotebook->AddPage( theVisualModelPanel , wxT("Visualization") );
    
    // theGridSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
    theMiddleSizer->Add(spacecraftNotebook, 1, wxGROW, 5);
@@ -192,6 +207,9 @@ void SpacecraftPanel::LoadData()
       theAttitudePanel->LoadData();
       theBallisticMassPanel->LoadData();
       theTankPanel->LoadData();
+      #ifdef __USE_SPICE__
+         theSpicePanel->LoadData();
+      #endif
       theThrusterPanel->LoadData();
    }
    catch (BaseException &e)
@@ -202,6 +220,11 @@ void SpacecraftPanel::LoadData()
    // explicitly disable apply button
    // it is turned on in each of the panels
    EnableUpdate(false);
+   #ifdef __WXMAC__
+      // this is needed for the Mac, as the VisualModelCanvas was messing up the other tabs
+      theVisualModelPanel->CanvasOn(false);
+      theVisualModelPanel->CanvasOn(true);
+   #endif
 }
 
 
@@ -248,13 +271,19 @@ void SpacecraftPanel::SaveData()
    
    if (theTankPanel->IsDataChanged())
       theTankPanel->SaveData();
-   
+   #ifdef __USE_SPICE__
+      if (theSpicePanel->IsDataChanged())
+         theSpicePanel->SaveData();
+   #endif
+
    if (theThrusterPanel->IsDataChanged())
       theThrusterPanel->SaveData();
    
+   if (theVisualModelPanel->IsDataChanged())
+      theVisualModelPanel->SaveData();
+   
    // copy the current info into theSpacecraft
    theSpacecraft->Copy(currentSpacecraft);
-   
    EnableUpdate(false);
 }
 
@@ -267,4 +296,7 @@ void SpacecraftPanel::OnPageChange(wxCommandEvent &event)
    theTankPanel->LoadData();
    theThrusterPanel->LoadData();
    theAttitudePanel->LoadData();
+   #ifdef __USE_SPICE__
+      theSpicePanel->LoadData();
+   #endif
 }    

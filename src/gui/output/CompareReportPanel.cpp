@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              CompareReportPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -15,6 +19,7 @@
 #include "CompareReportPanel.hpp"
 #include "GmatAppData.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -48,7 +53,7 @@ CompareReportPanel::CompareReportPanel(wxWindow *parent, const wxString &name)
    
    // create the text ctrl
    mTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-                              wxDefaultPosition, wxDefaultSize, //wxSize(800, 400),
+                              wxDefaultPosition, wxDefaultSize,
                               wxTE_DONTWRAP | wxTE_READONLY | wxTE_MULTILINE);
    
    // set font
@@ -57,28 +62,24 @@ CompareReportPanel::CompareReportPanel(wxWindow *parent, const wxString &name)
    // create bottom buttons
    theCloseButton =
       new wxButton(this, ID_BUTTON_CLOSE, "Close", wxDefaultPosition, wxDefaultSize, 0);
-   theHelpButton =
-      new wxButton(this, ID_BUTTON_HELP, "Help", wxDefaultPosition, wxDefaultSize, 0);
-
+   
    // adds the buttons to button sizer
    wxBoxSizer *theButtonSizer = new wxBoxSizer(wxHORIZONTAL);
    theButtonSizer->Add(theCloseButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-   theButtonSizer->Add(theHelpButton, 0, wxALIGN_CENTER | wxALL, borderSize);
-
-   wxStaticBoxSizer *theBottomSizer = new wxStaticBoxSizer(wxVERTICAL, this, "");
+   
+   GmatStaticBoxSizer *theBottomSizer = new GmatStaticBoxSizer(wxVERTICAL, this, "");
+//   wxStaticBoxSizer *theBottomSizer = new wxStaticBoxSizer(wxVERTICAL, this, "");
    theBottomSizer->Add(theButtonSizer, 0, wxALIGN_CENTER | wxALL, borderSize);
    
    wxBoxSizer *thePanelSizer = new wxBoxSizer(wxVERTICAL);
    thePanelSizer->Add(mTextCtrl, 1, wxGROW | wxALL, 1);
    thePanelSizer->Add(theBottomSizer, 0, wxGROW | wxALL, 1);
-
+   
    // tells the enclosing window to adjust to the size of the sizer
    SetAutoLayout( TRUE );
    SetSizer(thePanelSizer); //use the sizer for layout
-   thePanelSizer->Fit(this); //loj: if theParent is used it doesn't show the scroll bar
+   thePanelSizer->Fit(this);
    thePanelSizer->SetSizeHints(this); //set size hints to honour minimum size
-   
-   theHelpButton->Disable();
 }
 
 
@@ -91,17 +92,7 @@ CompareReportPanel::CompareReportPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 void CompareReportPanel::OnClose(wxCommandEvent &event)
 {
+   GmatAppData::Instance()->GetMainFrame()->OverrideActiveChildDirty(false);
    GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
 }
 
-//------------------------------------------------------------------------------
-// void OnHelp()
-//------------------------------------------------------------------------------
-/**
- * Shows Helps
- */
-//------------------------------------------------------------------------------
-void CompareReportPanel::OnHelp()
-{
-   // open separate window to show help?
-}

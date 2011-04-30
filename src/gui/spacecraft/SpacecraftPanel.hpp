@@ -1,11 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            SpacecraftPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -29,7 +31,9 @@
 #include "TankPanel.hpp"
 #include "AttitudePanel.hpp"
 #include "ThrusterPanel.hpp"
+#include "SpicePanel.hpp"
 #include "GuiInterpreter.hpp"
+#include "VisualModelPanel.hpp"
 
 #include "gmatdefs.hpp"
 #include "Spacecraft.hpp"
@@ -80,13 +84,14 @@ private:
    
    wxPanel *actuators;
    wxPanel *sensors;
-   wxPanel *visuals;
    
    BallisticsMassPanel *theBallisticMassPanel;
    OrbitPanel *theOrbitPanel;
    TankPanel *theTankPanel;
    ThrusterPanel *theThrusterPanel;
    AttitudePanel *theAttitudePanel;
+   VisualModelPanel *theVisualModelPanel;
+   SpicePanel    *theSpicePanel;
    
    // IDs for the controls and the menu commands
    enum

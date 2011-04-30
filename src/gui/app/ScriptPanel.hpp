@@ -1,8 +1,15 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ScriptPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2005/03/25
@@ -22,12 +29,13 @@ class ScriptPanel: public GmatSavePanel
 {
 public:
    // constructors
-   ScriptPanel(wxWindow *parent, const wxString &name);
+   ScriptPanel(wxWindow *parent, const wxString &name, bool activeScript = false);
    wxTextCtrl *mFileContentsTextCtrl;
-
+   
 private:
-   int mOldLineNumber;
-   int mOldLastPos;
+   int  mOldLineNumber;
+   int  mOldLastPos;
+   bool mUserModified;
    
    wxString mScriptFilename;
    wxColour mDefBgColor;
@@ -37,8 +45,7 @@ private:
    
    wxButton *mBuildButton;
    wxButton *mBuildRunButton;
-   //wxButton *mFontButton;
-
+   
    // methods inherited from GmatSavePanel
    virtual void Create();
    virtual void LoadData();
@@ -49,7 +56,6 @@ private:
    void OnTextUpdate(wxCommandEvent& event);
    void OnTextOverMaxLen(wxCommandEvent& event);
    void OnButton(wxCommandEvent& event);
-   //void OnFontSelect(wxCommandEvent& event);
 
    DECLARE_EVENT_TABLE();
 

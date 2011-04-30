@@ -2,7 +2,16 @@
 //------------------------------------------------------------------------------
 //                              FunctionSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// ** Legal **
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2004/12/15
@@ -13,24 +22,25 @@
 //------------------------------------------------------------------------------
 
 #include "FunctionSetupPanel.hpp"
+#include "GmatAppData.hpp"
+#include "FileUtil.hpp"           // for DoesFileExist()
 #include "MessageInterface.hpp"
 #include <wx/filename.h>          // for wxFileName::
 
-
-//#define DEBUG_PARAM_PANEL 1
+//#define DEBUG_FUNCTIONPANEL_LOAD
+//#define DEBUG_FUNCTIONPANEL_SAVE
+//#define DEBUG_FUNCTIONPANEL_BUTTON
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(FunctionSetupPanel, GmatPanel)
-   EVT_BUTTON(ID_BUTTON_OK, GmatPanel::OnOK)
-   EVT_BUTTON(ID_BUTTON_APPLY, GmatPanel::OnApply)
-   EVT_BUTTON(ID_BUTTON_CANCEL, GmatPanel::OnCancel)
    EVT_BUTTON(ID_BUTTON_SCRIPT, GmatPanel::OnScript)
-   
+   EVT_BUTTON(ID_BUTTON_OK, FunctionSetupPanel::OnButton)
+   EVT_BUTTON(ID_BUTTON_APPLY, FunctionSetupPanel::OnButton)
+   EVT_BUTTON(ID_BUTTON_CANCEL, FunctionSetupPanel::OnButton)
    EVT_TEXT(ID_TEXTCTRL, FunctionSetupPanel::OnTextUpdate)
-   EVT_BUTTON(ID_BUTTON, FunctionSetupPanel::OnButton)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -38,20 +48,66 @@ END_EVENT_TABLE()
 //------------------------------------------------------------------------------
 /**
  * A constructor.
+ *
+ * @note We may have to consider deriving this class from the GmatSavePanel
  */
 //------------------------------------------------------------------------------
 FunctionSetupPanel::FunctionSetupPanel(wxWindow *parent, const wxString &name)
    : GmatPanel(parent, true)
 {
+   #ifdef DEBUG_FUNCTIONPANEL_LOAD
+   MessageInterface::ShowMessage
+      ("In FunctionSetupPanel() constructor, function name='%s'\n", name.c_str());
+   #endif
+   
    mEnableLoad = false;
    mEnableSave = false;
-
+   mIsNewFunction = true;
+   mEditorModified = false;
+   mFunctionName = name;
+   mFileContentsTextCtrl = NULL;
+   
+   #ifdef __USE_STC_EDITOR__
+   mEditor = NULL;
+   #endif
+   
    theGmatFunction = (GmatFunction *)
-            theGuiInterpreter->GetConfiguredObject(std::string(name.c_str()));
-
+      theGuiInterpreter->GetConfiguredObject(name.c_str());
+   
    Create();
    Show();
 }
+
+
+//------------------------------------------------------------------------------
+// ~FunctionSetupPanel()
+//------------------------------------------------------------------------------
+/**
+ * A destructor.
+ */
+//------------------------------------------------------------------------------
+FunctionSetupPanel::~FunctionSetupPanel()
+{
+   #ifdef __USE_STC_EDITOR__
+   if (mEditor)
+   {
+      delete mEditor;
+      mEditor = NULL;
+   }
+   #endif
+}
+
+
+//------------------------------------------------------------------------------
+// void SetEditorModified(bool isModified)
+//------------------------------------------------------------------------------
+void FunctionSetupPanel::SetEditorModified(bool isModified)
+{
+   EnableUpdate(isModified);
+   theOkButton->Enable(isModified); // note: theOKButton is the Save button
+   mEditorModified = isModified;
+}
+
 
 //------------------------------------------------------------------------------
 // void Create()
@@ -60,64 +116,42 @@ void FunctionSetupPanel::Create()
 {
    int bsize = 3; // border size
    
-   wxStaticBox *topStaticBox = new wxStaticBox(this, -1, wxT(""));
+   //------------------------------------------------------
+   // Create file contents
+   //------------------------------------------------------
    
-   // create sizers
-   mMiddleSizer = new wxBoxSizer(wxHORIZONTAL);
-   mBottomSizer = new wxGridSizer( 1, 0, 0 );
-   mPageSizer = new wxBoxSizer(wxVERTICAL);
-   mTopSizer = new wxStaticBoxSizer(topStaticBox, wxHORIZONTAL);
-   wxBoxSizer *fileSizer = new wxBoxSizer(wxHORIZONTAL);
-
-   //wxStaticText
-   wxStaticText *fileStaticText =
-      new wxStaticText(this, ID_TEXT, wxT("File: "), wxDefaultPosition, 
-         wxDefaultSize, 0);
-
-   // wxTextCtrl
-   mFileNameTextCtrl = new wxTextCtrl(this, ID_TEXTCTRL, wxT(""),
-      wxDefaultPosition, wxSize(250,20), 0);
-
-   // create buttons
-   mBrowseButton =
-      new wxButton(this, ID_BUTTON, "Browse", wxDefaultPosition, wxDefaultSize, 0);
-
-   mLoadButton =
-      new wxButton(this, ID_BUTTON, "Load", wxDefaultPosition, wxDefaultSize, 0);
-   mLoadButton->Enable(mEnableLoad);
-
-   mSaveButton =
-      new wxButton(this, ID_BUTTON, "Save", wxDefaultPosition, wxDefaultSize, 0);
-   mSaveButton->Enable(mEnableSave);
-
-   // wxTextCtrl
+#ifdef __USE_STC_EDITOR__
+   mEditor = new Editor(this, true, -1, wxDefaultPosition, wxSize(700,400));
+#else
    mFileContentsTextCtrl = 
       new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), wxDefaultPosition, 
-         wxSize(250,100), wxTE_MULTILINE | wxGROW);
+         wxSize(700,400), wxTE_MULTILINE | wxGROW | wxTE_DONTWRAP);
    mFileContentsTextCtrl->SetFont( GmatAppData::Instance()->GetFont() );
-
+#endif
+   
    //------------------------------------------------------
-   // add to sizer
+   // Add to sizer
    //------------------------------------------------------
-   fileSizer->Add(fileStaticText, 0, wxALIGN_CENTER  | wxALL, bsize);
-   fileSizer->Add(mFileNameTextCtrl, 0, wxALIGN_CENTER  | wxALL, bsize);
-   fileSizer->Add(mBrowseButton, 0, wxALIGN_CENTER  | wxALL, bsize);
-   mTopSizer->Add(fileSizer, 0, wxALIGN_CENTER | wxALL, bsize);
-
-   mMiddleSizer->Add(mLoadButton, 0, wxALIGN_CENTER | wxALL, bsize);
-   mMiddleSizer->Add(mSaveButton, 0, wxALIGN_CENTER | wxALL, bsize);
-
-   mBottomSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL, 
-                     bsize);
-
-   //------------------------------------------------------
-   // add to parent sizer
-   //------------------------------------------------------
-   mPageSizer->Add(mTopSizer, 0, wxALIGN_CENTER | wxALL, bsize);
-   mPageSizer->Add(mMiddleSizer, 0, wxALIGN_CENTER | wxALL, bsize);
-   mPageSizer->Add(mBottomSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
-   theMiddleSizer->Add(mPageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   wxGridSizer *textSizer = new wxGridSizer( 1, 0, 0 );
+#ifdef __USE_STC_EDITOR__
+   textSizer->Add(mEditor, 0, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+#else
+   textSizer->Add(mFileContentsTextCtrl, 0, wxGROW | wxALIGN_CENTER | wxALL, 
+                  bsize);
+#endif
+   
+   wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
+   pageSizer->Add(textSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   theMiddleSizer->Add(pageSizer, 1, wxGROW | wxALIGN_CENTER | wxALL, bsize);
+   
+   // Change the label of OK, Apply and Cancel button
+   theOkButton->SetLabel("Save");
+   theApplyButton->SetLabel("Save As");
+   theCancelButton->SetLabel("Close");
+   
+   theOkButton->Disable();
 }
+
 
 //------------------------------------------------------------------------------
 // void LoadData()
@@ -126,138 +160,187 @@ void FunctionSetupPanel::LoadData()
 {
    // Set the pointer for the "Show Script" button
    mObject = theGmatFunction;
-
-   int pathId = theGmatFunction->GetParameterID("FunctionPath");
-   std::string path = theGmatFunction->GetStringParameter(pathId);
-
-   if (path == "")
-      path = theGmatFunction->GetName() + ".script";
-
-   mFileNameTextCtrl->SetValue(path.c_str());
    
-   wxString filename = mFileNameTextCtrl->GetValue();
-
-   if (filename != "")
+   // If it is a new function just return
+   if (theGmatFunction->IsNewFunction())
    {
-        // need to add default path...
+      #ifdef DEBUG_FUNCTIONPANEL_LOAD
+      MessageInterface::ShowMessage
+         ("FunctionSetupPanel::LoadData() This is new function, so just returning\n");
+      #endif
+      return;
    }
-
-   if (wxFileName::FileExists(filename))
+   
+   mFullFunctionPath = (theGmatFunction->GetStringParameter("FunctionPath")).c_str();
+   
+   #ifdef DEBUG_FUNCTIONPANEL_LOAD
+   MessageInterface::ShowMessage
+      ("FunctionSetupPanel::LoadData() mFullFunctionPath='%s'\n",
+       mFullFunctionPath.c_str());
+   #endif
+   
+   if (wxFileName::FileExists(mFullFunctionPath))
    {
-       mFileContentsTextCtrl->LoadFile(filename);
-       mEnableSave = false;
-   }
-
+      #ifdef __USE_STC_EDITOR__
+      mEditor->LoadFile(mFullFunctionPath);
+      #else
+      mFileContentsTextCtrl->LoadFile(mFullFunctionPath);
+      #endif
+      mEnableSave = false;
+      mIsNewFunction = false;
+      EnableUpdate(false);
+      theOkButton->Disable();
+   }   
 }
+
 
 //------------------------------------------------------------------------------
 // void SaveData()
 //------------------------------------------------------------------------------
 void FunctionSetupPanel::SaveData()
 {
-   wxString filename = mFileNameTextCtrl->GetValue();
+   std::string pathname = theGmatFunction->GetStringParameter("FunctionPath");
 
-   if (filename == "")
+   #ifdef DEBUG_FUNCTIONPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("FunctionSetupPanel::SaveData() path='%s'\n", pathname.c_str());
+   #endif
+   
+   if (pathname == "")
    {
       MessageInterface::PopupMessage
          (Gmat::WARNING_, "FunctionSetupPanel::SaveData()\n"
          "A function path was not specified.");
       return;
    }
+   
+   // save file contents
+   #ifdef __USE_STC_EDITOR__
+      mEditor->SaveFile(pathname);
+      #ifdef DEBUG_FUNCTIONPANEL_SAVE
+      MessageInterface::ShowMessage("   contents saved to '%s'\n", pathname.c_str());
+      #endif
+   #else
+      mFileContentsTextCtrl->SaveFile(pathname.c_str());
+      mFileContentsTextCtrl->SetModified(false);
+      #ifdef DEBUG_FUNCTIONPANEL_SAVE
+      MessageInterface::ShowMessage("   contents saved to '%s'\n", pathname.c_str());
+      #endif
+   #endif
 
-   // save file path to base
-   int pathId = theGmatFunction->GetParameterID("FunctionPath");
-   theGmatFunction->SetStringParameter(pathId,
-         mFileNameTextCtrl->GetValue().c_str());
-
-   // was file edited and not saved?
-   if (mEnableSave)
-   {
-      wxMessageDialog *msgDlg = new wxMessageDialog(this,
-         "Save function file?", "Save...", wxYES_NO | wxICON_QUESTION ,
-         wxDefaultPosition);
-      int result = msgDlg->ShowModal();
-
-      if (result == wxID_YES)
-         mFileContentsTextCtrl->SaveFile(filename);
-   }
+   // Do we want to set titile to function path and name later?
+   //(GmatAppData::Instance()->GetMainFrame()->GetActiveChild())->SetTitle(pathname);
+   EnableUpdate(false);
+   theOkButton->Disable();
 }
+
 
 //------------------------------------------------------------------------------
 // void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void FunctionSetupPanel::OnTextUpdate(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mFileNameTextCtrl)
-   {
-      mEnableLoad = true;
-      EnableUpdate(true);
-
-      if (mFileNameTextCtrl->GetValue() == "")
-      {
-         mEnableSave = false;
-         mEnableLoad = false;
-      }
-   }
-   else if (event.GetEventObject() == mFileContentsTextCtrl)
+   if (event.GetEventObject() == mFileContentsTextCtrl)
    {
       mEnableSave = true;
       EnableUpdate(true);
+      theOkButton->Enable();
    }
-
-   mLoadButton->Enable(mEnableLoad);
-   mSaveButton->Enable(mEnableSave);
 }
 
 //---------------------------------
 // private methods
 //---------------------------------
+
+//------------------------------------------------------------------------------
+// void FunctionSetupPanel::OnButton(wxCommandEvent& event)
+//------------------------------------------------------------------------------
 void FunctionSetupPanel::OnButton(wxCommandEvent& event)
 {
-   if (event.GetEventObject() == mBrowseButton)
+   // This is Save button which was renamed from OK button
+   if (event.GetEventObject() == theOkButton)
    {
-      // ag: should all files be included in thid dialog?
-      wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(""),
-            _T("Text files (*.txt, *.text)|*.txt;*.text|"\
-               "Script files (*.script, *.m)|*.script;*.m|"\
-               "GMAT Function files (*.gmf)|*.gmf"));
-
-      if (dialog.ShowModal() == wxID_OK)
-      {
-         wxString filename;
-
-         filename = dialog.GetPath().c_str();
-         mFileNameTextCtrl->SetValue(filename);
-      }
+      #ifdef DEBUG_FUNCTIONPANEL_BUTTON
+      MessageInterface::ShowMessage
+         ("FunctionSetupPanel::OnButton() entered, it is Save Button\n");
+      #endif
+      
+      if (mIsNewFunction)
+         OnSaveAs(event);
+      else
+         SaveData();
    }
-   else if (event.GetEventObject() == mLoadButton)
+   // This is SaveAs button which was renamed from Apply button
+   else if (event.GetEventObject() == theApplyButton)
    {
-      wxString filename = mFileNameTextCtrl->GetValue();
-
-      if (filename != "")
-      {
-         mFileContentsTextCtrl->LoadFile(filename);
-         mEnableSave = false;
-      }
+      #ifdef DEBUG_FUNCTIONPANEL_BUTTON
+      MessageInterface::ShowMessage
+         ("FunctionSetupPanel::OnButton() entered, it is SaveAs Button\n");
+      #endif
+      
+      OnSaveAs(event);
    }
-   else if (event.GetEventObject() == mSaveButton)
+   // This is Close button which was renamed from Cancel button
+   else if (event.GetEventObject() == theCancelButton)
    {
-      wxString filename = mFileNameTextCtrl->GetValue();
-
-      if (filename != "")
-      {
-         mFileContentsTextCtrl->SaveFile(filename);
-         mEnableSave = false;
-      }
+      #ifdef DEBUG_FUNCTIONPANEL_BUTTON
+      MessageInterface::ShowMessage
+         ("FunctionSetupPanel::OnButton() entered, it is Close Button, canClose=%d\n",
+          canClose);
+      #endif
+      
+      GmatAppData::Instance()->GetMainFrame()->CloseActiveChild();
    }
-   else
-   {
-      //Error - unknown object
-   }
-
-   mLoadButton->Enable(mEnableLoad);
-   mSaveButton->Enable(mEnableSave);
 }
 
 
+//------------------------------------------------------------------------------
+// void OnSaveAs()
+//------------------------------------------------------------------------------
+/**
+ * Saves the data and remain unclosed.
+ */
+//------------------------------------------------------------------------------
+void FunctionSetupPanel::OnSaveAs(wxCommandEvent &event)
+{
+   #ifdef DEBUG_FUNCTIONPANEL_SAVE
+   MessageInterface::ShowMessage
+      ("FunctionSetupPanel::OnSaveAs() entered, mIsNewFunction=%d\n", mIsNewFunction);
+   #endif
+   
+   wxString defaultFile;
+   defaultFile = mFunctionName + ".gmf";
+   
+   wxFileDialog dialog(this, _T("Choose a file"), _T(""), _T(defaultFile),
+         _T("GmatFunction files (*.gmf)|*.gmf|"\
+            "Text files (*.txt, *.text)|*.txt;*.text|"\
+            "All files (*.*)|*.*"), wxSAVE);
+   
+   if (dialog.ShowModal() == wxID_OK)
+   {
+      wxString path = dialog.GetPath().c_str();
+      
+      if (GmatFileUtil::DoesFileExist(path.c_str()))
+      {
+         if (wxMessageBox(_T("File already exists.\nDo you want to overwrite?"), 
+                          _T("Please confirm"), wxICON_QUESTION | wxYES_NO) == wxNO)
+            return;
+      }
+      
+      #ifdef DEBUG_FUNCTIONPANEL_SAVE
+      MessageInterface::ShowMessage("   path='%s'\n", path.c_str());
+      #endif
+      
+      theGmatFunction->SetStringParameter("FunctionPath", path.c_str());
+      mFilename = path;
+      SaveData();
+      mIsNewFunction = false;
+      theGmatFunction->SetNewFunction(false);
+      theOkButton->Disable();
+   }
+   
+   #ifdef DEBUG_FUNCTIONPANEL_SAVE
+   MessageInterface::ShowMessage("FunctionSetupPanel::OnSaveAs() exiting\n");
+   #endif
+}
 

@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatMdiChildFrame
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -19,13 +23,17 @@
 #include "GmatMenuBar.hpp"
 #include "GmatTreeItemData.hpp"  // for namespace GmatTree::
 
+#ifdef __USE_STC_EDITOR__
+#include "Editor.hpp"
+#endif
+
 class GmatMdiChildFrame : public wxMDIChildFrame
 {
 public:
    // constructors
    GmatMdiChildFrame(wxMDIParentFrame *parent, 
-                     const wxString &title = "", 
                      const wxString &name = "",
+                     const wxString &title = "", 
                      const GmatTree::ItemType type = GmatTree::UNKNOWN_ITEM,
                      wxWindowID id = -1, 
                      const wxPoint &pos = wxDefaultPosition, 
@@ -38,16 +46,29 @@ public:
    void SetTitle(wxString newTitle);
 #endif
 
-   wxMenuBar* GetMenuBar() { return theMenuBar; }
-   wxTextCtrl *GetScriptTextCtrl() { return theScriptTextCtrl; }
-   GmatTree::ItemType GetItemType() { return mItemType; }
-   void SetDataType(GmatTree::ItemType type) {mItemType = type;}
-   void SetScriptTextCtrl(wxTextCtrl *scriptTC) { theScriptTextCtrl = scriptTC; }
-   void SetDirty(bool dirty) { mDirty = dirty; }
-   bool IsDirty() { return mDirty; }
-   bool CanClose() { return mCanClose; }
+   wxMenuBar* GetMenuBar();
+   GmatTree::ItemType GetItemType();
+   void SetDataType(GmatTree::ItemType type);
+   wxTextCtrl* GetScriptTextCtrl();
+   void SetScriptTextCtrl(wxTextCtrl *textCtrl);
+   void UpdateGuiItem(int updateEdit, int updateAnimation);
    
+#ifdef __USE_STC_EDITOR__
+   Editor* GetEditor();
+   void SetEditor(Editor *editor);
+#endif
+   
+   void SetDirty(bool dirty);
+   void OverrideDirty(bool flag);
+   bool IsDirty();
+   bool CanClose();
+   
+   virtual wxWindow* GetAssociatedWindow();
+   virtual void SetAssociatedWindow(wxWindow *win);
+   
+   virtual void OnActivate(wxActivateEvent &event);
    virtual void OnClose(wxCloseEvent &event);
+   virtual void UpdateScriptActiveStatus(bool isActive);
    
 protected:
    
@@ -56,11 +77,18 @@ protected:
 #endif
    
    bool mDirty;
+   bool mOverrideDirty;
    bool mCanClose;
    GmatTree::ItemType mItemType;
    wxTextCtrl *theScriptTextCtrl;
    GmatMenuBar *theMenuBar;
+   wxMDIParentFrame *theParent;
+   wxWindow *theAssociatedWin;
    
+#ifdef __USE_STC_EDITOR__
+   Editor *theEditor;
+#endif
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
       

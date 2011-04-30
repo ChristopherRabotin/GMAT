@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              ResourceTree
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison Greene
 // Created: 2003/08/28
@@ -22,10 +26,11 @@
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 #include "GmatTreeItemData.hpp"
+#include "UserInputValidator.hpp"
 
 class GmatMainFrame;
 
-class ResourceTree : public wxTreeCtrl
+class ResourceTree : public wxTreeCtrl, public UserInputValidator
 {
 public:
 
@@ -36,25 +41,40 @@ public:
    void SetMainFrame(GmatMainFrame *gmf);
    void ClearResource(bool leaveScripts);
    void UpdateResource(bool resetCounter);
+   void SetActiveScript(const wxString &script);
+   void AddScript(wxString path);
    bool AddScriptItem(wxString path);
    void UpdateFormation();
    void UpdateVariable();
+   void UpdateRecentFiles(wxString filename);
    void OnAddScript(wxCommandEvent &event);
-   bool WasScriptAdded() { return mScriptAdded; }
+   void UpdateMatlabServerItem(bool start);
+   bool WasScriptAdded();
+   wxString GetLastScriptAdded();
    
-private:
+   // Added so plugin code can update the tree structure
+   void AddUserResources(std::vector<Gmat::PluginResource*> *rcs,
+         bool onlyChildNodes = false);
+   wxTreeItemId AddUserTreeNode(const std::string &newNodeName,
+         const std::string &parent = "");
+   
+protected:
    GmatMainFrame  *theMainFrame;
    GuiInterpreter *theGuiInterpreter;
    GuiItemManager *theGuiManager;
    bool mScriptFolderRunning;
    bool mHasUserInterrupted;
    bool mScriptAdded;
+   bool mMatlabServerStarted;
+   wxString mLastScriptAdded;
+   wxString mLastActiveScript;
    
    // for script error log
    int mBuildErrorCount;
    wxArrayString mFailedScriptsList;
    
    wxTreeItemId mDraggedItem;
+   wxTreeItemId mGroundStationItem;
    wxTreeItemId mSpacecraftItem;
    wxTreeItemId mHardwareItem;
    wxTreeItemId mFormationItem;
@@ -68,24 +88,42 @@ private:
    wxTreeItemId mVariableItem;
    wxTreeItemId mFunctionItem;
    wxTreeItemId mCoordSysItem;
-   wxTreeItemId mPredefinedFunctItem;
+   //wxTreeItemId mPredefinedFunctItem;
    wxTreeItemId mSpecialPointsItem;
    wxTreeItemId mScriptItem;
    wxTreeItemId mScriptFolderItem;
    wxTreeItemId mUniverseItem;
-   
+   wxTreeItemId interfaceItem;
+
+   // Mapping for plug-in objects
+   std::map<Integer, std::string> pluginMap;
+
+   /// Plugin tree item IDs
+   std::vector<wxTreeItemId> mPluginItems;
+   /// node Id -> Type mapping
+   std::map<std::string, Gmat::ObjectType> nodeTypeMap;
+   /// nodeId -> subtype mapping
+   std::map<std::string, std::string> nodeSubtypeMap;
+
+   // MSVC compiler will not accept a non-constant size for std::vector
+   static const Integer MAX_SUN_ORBITERS;
+
    // Mapping for plug-in objects
    std::map<Integer, std::string> pluginMap;
    
    // objects
    GmatBase* GetObject(const std::string &name);
    void UpdateGuiItem(GmatTree::ItemType itemType);
-   
+
    // resource tree
-   void AddNode(GmatTree::ItemType, const wxString &name);
+   void AddItemFolder(wxTreeItemId parentItemId, wxTreeItemId &itemId,
+                      const wxString &itemName, GmatTree::ItemType itemType);
    
+   void AddNode(GmatTree::ItemType, const wxString &name);
+
    void AddDefaultResources();
    void AddDefaultBodies(wxTreeItemId itemId);
+   void AddDefaultGroundStation(wxTreeItemId itemId, bool resetCounter = true);
    void AddDefaultSpacecraft(wxTreeItemId itemId, bool resetCounter = true);
    void AddDefaultHardware(wxTreeItemId itemId, bool resetCounter = true);
    void AddDefaultFormations(wxTreeItemId itemId, bool resetCounter = true);
@@ -101,6 +139,7 @@ private:
    void AddDefaultScripts(wxTreeItemId itemId);
    void AddDefaultSpecialPoints(wxTreeItemId itemId, bool incLibCounter = true,
                                 bool resetCounter = true);
+   void AddUserObjects();
 
    // event handlers
    void OnItemRightClick(wxTreeEvent& event);
@@ -115,23 +154,29 @@ private:
 
    void OnBeginDrag(wxTreeEvent &event);
    //void OnBeginRDrag(wxTreeEvent &event);
-   void OnEndDrag(wxTreeEvent &event);    
-   
-   void AddIcons();   
+   void OnEndDrag(wxTreeEvent &event);
+
+   void AddIcons();
    void OnAddBody(wxCommandEvent &event);
    void OnAddImpulsiveBurn(wxCommandEvent &event);
    void OnAddFiniteBurn(wxCommandEvent &event);
    void OnAddPropagator(wxCommandEvent &event);
+//   void OnAddSPKPropagator(wxCommandEvent &event);
    void OnAddConstellation(wxCommandEvent &event);
    void OnAddFormation(wxCommandEvent &event);
+   void OnAddGroundStation(wxCommandEvent &event);
    void OnAddSpacecraft(wxCommandEvent &event);
    void OnAddFuelTank(wxCommandEvent &event);
    void OnAddThruster(wxCommandEvent &event);
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
-   void OnAddOpenGlPlot(wxCommandEvent &event);
+   //void OnAddOpenGlPlot(wxCommandEvent &event);
+   void OnAddOrbitView(wxCommandEvent &event);
+   void OnAddEphemerisFile(wxCommandEvent &event);
+   void OnAddSubscriber(wxCommandEvent &event);
    void OnAddDiffCorr(wxCommandEvent &event);
    void OnAddSqp(wxCommandEvent &event);
+   void OnAddHardware(wxCommandEvent &event);
    void OnAddSolver(wxCommandEvent &event);
    void OnAddVariable(wxCommandEvent &event);
    void OnAddArray(wxCommandEvent &event);
@@ -141,6 +186,11 @@ private:
    void OnAddCoordSys(wxCommandEvent &event);
    void OnAddBarycenter(wxCommandEvent &event);
    void OnAddLibration(wxCommandEvent &event);
+   void OnAddPlanet(wxCommandEvent &event);
+   void OnAddMoon(wxCommandEvent &event);
+   void OnAddComet(wxCommandEvent &event);
+   void OnAddAsteroid(wxCommandEvent &event);
+   void OnAddUserObject(wxCommandEvent &event);
 
    //void OnAddScript(wxCommandEvent &event);
    //void OnNewScript(wxCommandEvent &event);
@@ -148,49 +198,70 @@ private:
    void OnRemoveScript(wxCommandEvent &event);
    void OnScriptBuildObject(wxCommandEvent& event);
    void OnScriptBuildAndRun(wxCommandEvent& event);
-   
+
    // script folder
    void OnAddScriptFolder(wxCommandEvent &event);
    void OnRunScriptsFromFolder(wxCommandEvent& event);
    void OnQuitRunScriptsFromFolder(wxCommandEvent& event);
    void OnRemoveScriptFolder(wxCommandEvent& event);
-   
+
    bool BuildScript(const wxString &filename, Integer openScriptOpt = 0,
                     bool closeScript = false, bool readBack = false,
                     const wxString &savePath = "", bool multiScripts = false);
-   
+
    // menu
    void ShowMenu(wxTreeItemId id, const wxPoint& pt);
-   wxMenu* CreatePopupMenu(GmatTree::ItemType type);
+   wxMenu* CreatePopupMenu(GmatTree::ItemType type,
+         const Gmat::ObjectType gmatType = Gmat::UNKNOWN_OBJECT,
+         const std::string &subtype = "");
    Gmat::ObjectType GetObjectType(GmatTree::ItemType itemType);
    wxTreeItemId GetTreeItemId(GmatTree::ItemType type);
-   GmatTree::IconType GetTreeItemIcon(GmatTree::ItemType type);
+   GmatTree::ResourceIconType GetTreeItemIcon(GmatTree::ItemType type);
+   
+   // icon
+   void GetBodyTypeAndIcon(const std::string bodyName,
+                          GmatTree::ItemType &bodyItemType,
+                          GmatTree::ResourceIconType &iconType);
+   
+   GmatTree::ResourceIconType GetIconId(GmatBase *obj);
+   
+   // user text input
+   int GetNameFromUser(wxString &newName, const wxString &oldName = "",
+                       const wxString &msg = "", const wxString &caption = "");
    
    // compare
    void CompareScriptRunResult(Real absTol, const wxString &replaceStr,
                                const wxString &dir1, const wxString &dir2,
                                wxTextCtrl *textCtrl);
+
+   wxTreeItemId FindIdOfNode(const wxString &txt, wxTreeItemId start);
+   void MakeScriptActive(const wxString &scriptName, bool active);
+   void MakeChildScriptActive(const wxTreeItemId &scriptItem,
+                              const wxString &scriptName, bool active,
+                              bool &scriptFound);
    
    DECLARE_EVENT_TABLE();
 
    // for popup menu
    enum
    {
-      POPUP_ADD_SC = 23000,
+      POPUP_ADD_SPACECRAFT = 23000,
+      POPUP_ADD_GROUND_STATION,
       POPUP_ADD_FORMATION,
       POPUP_ADD_CONSTELLATION,
-      
+
       POPUP_ADD_HARDWARE,
       POPUP_ADD_THRUSTER,
       POPUP_ADD_FUELTANK,
-      
+
       POPUP_ADD_PROPAGATOR,
+//      POPUP_ADD_SPK_PROPAGATOR,
       POPUP_ADD_BODY,
-      
+
       POPUP_ADD_BURN,
       POPUP_ADD_IMPULSIVE_BURN,
       POPUP_ADD_FINITE_BURN,
-      
+
       POPUP_ADD_SOLVER,
       POPUP_ADD_BOUNDARY_SOLVER,
       POPUP_ADD_OPTIMIZER,
@@ -198,27 +269,26 @@ private:
       POPUP_ADD_BROYDEN,
       POPUP_ADD_QUASI_NEWTON,
       POPUP_ADD_SQP,
-      
+
       POPUP_ADD_SUBSCRIBER,
       POPUP_ADD_REPORT_FILE,
       POPUP_ADD_XY_PLOT,
-      POPUP_ADD_OPENGL_PLOT,
+      //POPUP_ADD_OPENGL_PLOT,
+      POPUP_ADD_ORBIT_VIEW,
+      POPUP_ADD_EPHEMERIS_FILE,
+      
       POPUP_ADD_VARIABLE,
       POPUP_ADD_ARRAY,
       POPUP_ADD_STRING,
-      
+
       POPUP_ADD_COORD_SYS,
-      
-      POPUP_OPEN_MATLAB,
-      POPUP_CLOSE_MATLAB,
-      
-      POPUP_START_SERVER,
-      POPUP_STOP_SERVER,
-      
+
       POPUP_ADD_FUNCTION,
-      POPUP_ADD_MATLAB_FUNCT,
-      POPUP_ADD_GMAT_FUNCT,
-      
+      POPUP_ADD_MATLAB_FUNCTION,
+      POPUP_ADD_GMAT_FUNCTION,
+      POPUP_NEW_GMAT_FUNCTION,
+      POPUP_OPEN_GMAT_FUNCTION,
+
       POPUP_ADD_SCRIPT,
       POPUP_ADD_SCRIPT_FOLDER,
       POPUP_RUN_SCRIPTS_FROM_FOLDER,
@@ -232,6 +302,12 @@ private:
       POPUP_ADD_SPECIAL_POINT,
       POPUP_ADD_BARYCENTER,
       POPUP_ADD_LIBRATION,
+      POPUP_ADD_PLANET,
+      POPUP_ADD_MOON,
+      POPUP_ADD_COMET,
+      POPUP_ADD_ASTEROID,
+
+      POPUP_ADD_PLUGIN,
 
       POPUP_OPEN,
       POPUP_CLOSE,

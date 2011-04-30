@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                           OptimizePanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -35,6 +37,7 @@ private:
    
    wxComboBox *mSolverComboBox;
    wxComboBox *mSolverModeComboBox;
+   wxButton   *mApplyCorrectionsButton;
    
    // methods inherited from GmatPanel
    virtual void Create();
@@ -44,6 +47,9 @@ private:
    // Combobox event method
    void OnComboBoxChange(wxCommandEvent& event);
    
+   // Button press event method
+   void OnApplyButtonPress(wxCommandEvent& event);
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
    
@@ -52,6 +58,7 @@ private:
    {     
       ID_TEXT = 51000,
       ID_COMBO,
+      ID_APPLYBUTTON
    };
 };
 

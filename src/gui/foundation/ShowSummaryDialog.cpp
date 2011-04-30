@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                         ShowSummaryDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -13,13 +15,13 @@
 // Created: 2005/03/08
 //
 /**
- * Implements the dialog used to show scripting for individual components. 
+ * Implements the dialog used to show the command summary for individual
+ * components.
  */
 //------------------------------------------------------------------------------
 
 
 #include "ShowSummaryDialog.hpp"
-
 
 //------------------------------------------------------------------------------
 //  ShowSummaryDialog(wxWindow *parent, wxWindowID id, const wxString& title, 
@@ -65,11 +67,20 @@ void ShowSummaryDialog::Create()
    wxSize scriptPanelSize(500, 32);
    if (theObject != NULL) {
       text = theObject->GetStringParameter("Summary").c_str();
-      scriptPanelSize.Set(500, 400);
+
+      // This code is flaky -- text width is height dependent??? -- on Linux:
+//      GetTextExtent(text, &w, &h);
+//      w = (w + 200 > 1000 ? 1000 : w + 200);
+//      h = (h > 700 ? 700 : h);
+      scriptPanelSize.Set(690, 720);
+
+      SetSize(wxDefaultCoord, wxDefaultCoord, w, h);
    }
    
+   // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
+   // increase text size on Windows(loj: 2009.02.05)
    theSummary = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
-                      wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
+                    wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
    theSummary->SetFont( GmatAppData::Instance()->GetFont() );
    theMiddleSizer->Add(theSummary, 1, wxGROW|wxALL, 3);
 }

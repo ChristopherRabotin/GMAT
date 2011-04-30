@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              GmatDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/02
@@ -25,11 +29,12 @@
 #include <wx/grid.h>
 #include "wx/radiobut.h"
 
+#include "UserInputValidator.hpp"
 #include "GmatAppData.hpp"
 #include "GuiInterpreter.hpp"
 #include "GuiItemManager.hpp"
 
-class GmatDialog : public wxDialog
+class GmatDialog : public wxDialog, public UserInputValidator
 {
 public:
    
@@ -39,20 +44,14 @@ public:
               const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE);
    
    virtual void EnableUpdate(bool enable = true);
+   virtual bool HasDataUpdated();
+   virtual void SetCanClose(bool flag);
    
    virtual void OnOK(wxCommandEvent &event);
    virtual void OnCancel(wxCommandEvent &event);
    virtual void OnHelp(wxCommandEvent &event);
    virtual void OnClose(wxCloseEvent &event);
-   
-   bool CheckReal(Real &rvalue, const std::string &str,
-                  const std::string &field, const std::string &expRange,
-                  bool onlyMsg = false);
-   
-   bool CheckInteger(Integer &ivalue, const std::string &str,
-                     const std::string &field, const std::string &expRange,
-                     bool onlyMsg = false);
-   
+      
 protected:
    
    // member functions
@@ -69,7 +68,7 @@ protected:
    GmatBase *mObject;
    bool canClose;
    bool mDataChanged;
-   std::string mMsgFormat;
+   bool mDataUpdated;
    
    wxWindow *theParent;
     
@@ -86,11 +85,13 @@ protected:
    
    wxButton *theOkButton;
    wxButton *theCancelButton;
-   //wxButton *theHelpButton;
-
+   #ifdef __SHOW_HELP_BUTTON__
+   wxButton *theHelpButton;
+   #endif
+   
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-    
+   
    // IDs for the controls and the menu commands
    enum
    {     

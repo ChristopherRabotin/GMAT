@@ -1,8 +1,8 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                                  DecoratedTree
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool.
+// GMAT: General Mission Analysis Tool.
 //
 // Author: Darrel J. Conway
 // Created: 2003/10/12
@@ -11,7 +11,9 @@
 // framework.
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // 
 /**
@@ -166,7 +168,7 @@ void DecoratedTree::ExpandAll(wxTreeItemId root)
    wxTreeItemIdValue  cookie;
    wxTreeItemId current = GetFirstChild(root, cookie);
     
-   while (current > 0) {
+   while (current > (wxTreeItemId)0) {
       Expand(current);
       ExpandAll(current);
       current = GetNextChild(root, cookie);
@@ -198,12 +200,12 @@ wxTreeItemId DecoratedTree::Find(wxString str, wxTreeItemId root)
    wxTreeItemIdValue  cookie;
    wxTreeItemId current = GetFirstChild(root, cookie), item;
 
-   while (current > 0) {
+   while (current > (wxTreeItemId)0) {
       if (str == GetItemText(current))
          return current;
         
       item = Find(str, current);
-      if (item > 0)
+      if (item > (wxTreeItemId)0)
          return item;
         
       current = GetNextChild(root, cookie);
@@ -275,7 +277,7 @@ void DecoratedTree::DrawOutline(wxTreeItemId id)
 
     //wxWidgets-2.6.3:deprecated->dc.BeginDrawing();
     
-    while (current > 0) {
+    while (current > (wxTreeItemId)0) {
         visible = GetBoundingRect(current, bound, TRUE);
         dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
 
@@ -321,7 +323,7 @@ void DecoratedTree::DrawBoxes(wxTreeItemId id)
 
     //wxWidgets-2.6.3:deprecated->dc.BeginDrawing();
     
-    while (current > 0) {
+    while (current > (wxTreeItemId)0) {
        visible = GetBoundingRect(current, bound, TRUE);
        dc.SetPen(wxPen(wxColour(0xaf, 0xaf, 0xaf), 1, wxSOLID));
 

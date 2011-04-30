@@ -1,10 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              AboutDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+// $Copyright$
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 //
@@ -20,7 +23,7 @@
 #include "MessageInterface.hpp"
 #include "FileManager.hpp"
 #include "ViewTextDialog.hpp"
-
+#include "FileUtil.hpp"            // for GmatFileUtil::DoesFileExist()
 #include <wx/hyperlink.h>
 #include <wx/statline.h>
 #include <wx/gdicmn.h>
@@ -58,32 +61,29 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    : wxDialog(parent, id, title, pos, size, style, title)
 {
    wxBitmap bitmap;
+   wxBitmapButton *aboutButton;
    
-   // if splash file available, use it
+   // if icon file available, use it
    FileManager *fm = FileManager::Instance();
-   try
+   std::string iconFile = (fm->GetFullPathname("ICON_PATH") + "GMATAboutIcon.jpg");   
+   if (fm->DoesFileExist(iconFile))
    {
-      wxImage::AddHandler(new wxTIFFHandler);
-      wxString splashFile = fm->GetFullPathname("SPLASH_FILE").c_str();
-      bitmap.LoadFile(splashFile, wxBITMAP_TYPE_TIF);
+      bitmap.LoadFile(iconFile.c_str(), wxBITMAP_TYPE_JPEG);
       wxImage image = bitmap.ConvertToImage();
-      bitmap = wxBitmap(image.Scale(60, 60));
+      bitmap = wxBitmap(image.Scale(60, 60), wxIMAGE_QUALITY_HIGH);     
+      aboutButton = new wxBitmapButton(this, -1, bitmap, wxDefaultPosition,
+                                       wxSize(60, 60), wxTRANSPARENT_WINDOW);
    }
-   catch (BaseException &e)
-   {
-      //MessageInterface::PopupMessage(Gmat::ERROR_, e.GetFullMessage());
-   }
+   else
+      aboutButton = new wxBitmapButton(this, -1, NULL, wxDefaultPosition,
+                                       wxSize(60, 60));
    
    wxColourDatabase cdb;
    wxColour gmatColor = cdb.Find("NAVY");
       
-   wxBitmapButton *aboutButton
-      = new wxBitmapButton(this, -1, bitmap, wxDefaultPosition,
-                           wxSize(60,60));
-   
    wxStaticLine *line1 = new wxStaticLine(this);
    wxStaticLine *line2 = new wxStaticLine(this);
-      
+   
    // title, build date   
    wxStaticText *gmatText =
       new wxStaticText(this, -1, "General Mission Analysis Tool");
@@ -148,6 +148,8 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
    wxString use;
    use = use + " - Uses " + wxVERSION_STRING + "\n";
    use = use + " - Uses TSPlot\n";
+   use = use + " - Uses Pearl Compatible Regular Expressions\n";
+   use = use + " - Uses JPL SPICE Library\n";
    use = use + " - Planetary images courtesy of JPL/Caltech/USGS, Celestia \n";
    use = use + "   Motherlode, Bjorn Jonsson, and NASA World Wind";
    wxStaticText *useText = new wxStaticText(this, -1, use);
@@ -186,7 +188,7 @@ AboutDialog::AboutDialog(wxWindow *parent, wxWindowID id, const wxString& title,
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }
-   catch (GmatBaseException &e)
+   catch (GmatBaseException &/*e*/)
    {
       //MessageInterface::ShowMessage(e.GetMessage());
    }
@@ -224,6 +226,9 @@ void AboutDialog::OnHyperLinkClick(wxHyperlinkEvent &event)
       
       wxString rootPath = FileManager::Instance()->GetRootPath().c_str();
       wxString fileName = rootPath + "License.txt";
+      if (!GmatFileUtil::DoesFileExist(fileName.c_str()))
+         fileName = "../License.txt";
+      
       wxTextCtrl *text = dlg->GetTextCtrl();
       text->LoadFile(fileName);
       dlg->ShowModal();

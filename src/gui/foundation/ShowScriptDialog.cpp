@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                         ShowScriptDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under MOMS Task
 // Order 124.
@@ -81,11 +83,16 @@ void ShowScriptDialog::Create()
          text = genstring.c_str();   
          StringArray sar = theObject->GetGeneratingStringArray(Gmat::SHOW_SCRIPT);
          Integer size = sar.size();
-         scriptPanelSize.Set(500, 32 + (size+1) * h);
+         // set max height to 550(loj: 2008.11.25)
+         Integer height = 32 + (size+1) * h;
+         height = height > 550 ? 550 : height;
+         scriptPanelSize.Set(500, height);
       }
       
+      // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
+      // increase text size on Windows (loj: 2009.02.05)
       theScript = new wxTextCtrl(this, -1, text, wxPoint(0,0), scriptPanelSize, 
-                                 wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL);
+                                 wxTE_MULTILINE | wxTE_READONLY | wxHSCROLL | wxTE_RICH);
       theScript->SetFont( GmatAppData::Instance()->GetFont() );
       theMiddleSizer->Add(theScript, 1, wxGROW|wxALL, 3);
    }

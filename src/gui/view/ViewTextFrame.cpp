@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                                 ViewTextFrame
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number S-67573-G
@@ -45,13 +47,16 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
    CreateStatusBar(2);
    mWindowMode = mode;
    mTextType = type;
+
+   // Set additional style wxTE_RICH to Ctrl + mouse scroll wheel to decrease or
+   // increase text size(loj: 2009.02.05)
    mTextCtrl = new wxTextCtrl(this, -1, _T(""), wxPoint(0, 0), wxSize(0, 0),
-                              wxTE_MULTILINE | wxTE_READONLY);
+                              wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP | wxTE_RICH);
    mTextCtrl->SetMaxLength(320000);
    mTextCtrl->SetFont(GmatAppData::Instance()->GetFont());
-   
+
 #if wxUSE_MENUS
-   // create a menu bar 
+   // create a menu bar
    SetMenuBar(CreateMainMenu());
 #endif // wxUSE_MENUS
 
@@ -68,11 +73,11 @@ ViewTextFrame::ViewTextFrame(wxFrame *frame, const wxString& title,
          SetIcon(wxIcon(iconfile, wxBITMAP_TYPE_PICT_RESOURCE));
       #endif
    }
-   catch (GmatBaseException &e)
+   catch (GmatBaseException &)
    {
       //MessageInterface::ShowMessage(e.GetMessage());
    }
-   
+
    CenterOnScreen(wxBOTH);
 }
 
@@ -128,10 +133,10 @@ void ViewTextFrame::OnSaveAs(wxCommandEvent& WXUNUSED(event))
                         "Report files (*.report)|*.report|Text files (*.txt)|*.txt",
                         wxSAVE);
    }
-   
+
    if (!filename.empty())
       mTextCtrl->SaveFile(filename);
-   
+
 }
 
 

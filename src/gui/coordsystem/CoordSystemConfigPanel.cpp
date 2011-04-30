@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              CoordSystemConfigPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2004/10/26
@@ -23,6 +27,7 @@
 
 //#define DEBUG_COORD_PANEL_LOAD 1
 //#define DEBUG_COORD_PANEL_SAVE 1
+//#define DEBUG_COORD_PANEL_TEXT
 
 //------------------------------------------------------------------------------
 // event tables and other macros for wxWindows
@@ -48,6 +53,7 @@ CoordSystemConfigPanel::CoordSystemConfigPanel(wxWindow *parent,
    mEpochFormat = "A1ModJulian";
    mOriginChanged = false;
    mObjRefChanged = false;
+   mEpochChanged  = false;
    
    Create();
    Show();
@@ -95,12 +101,12 @@ void CoordSystemConfigPanel::LoadData()
    mObject = theCoordSys;
    
    epochTextCtrl = mCoordPanel->GetEpochTextCtrl();
-   intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
+//   intervalTextCtrl = mCoordPanel->GetIntervalTextCtrl();
    
    originComboBox = mCoordPanel->GetOriginComboBox();
    typeComboBox = mCoordPanel->GetTypeComboBox();
    primaryComboBox = mCoordPanel->GetPrimaryComboBox();
-   formatComboBox = mCoordPanel->GetFormatComboBox();
+//   formatComboBox = mCoordPanel->GetFormatComboBox();
    secondaryComboBox = mCoordPanel->GetSecondaryComboBox();
    
    xComboBox = mCoordPanel->GetXComboBox();
@@ -157,6 +163,43 @@ void CoordSystemConfigPanel::SaveData()
    //-----------------------------------------------------------------
    try
    {
+      //-------------------------------------------------------
+      // check/set new epoch
+      //-------------------------------------------------------
+      if (mEpochChanged)
+      {
+         std::string savedEpoch = (mCoordPanel->epochValue).c_str();
+         Real epoch;
+         std::string str = mCoordPanel->GetEpochTextCtrl()->GetValue().c_str();
+         #if DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage("Epoch data has been changed!!!!\n");
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() epoch value = %s\n",
+             str.c_str());
+         #endif
+         bool isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0");
+         #if DEBUG_COORD_PANEL_SAVE
+         MessageInterface::ShowMessage
+            ("CoordSystemConfigPanel::SaveData() isValid = %s, and epoch real value = %12.10f\n",
+             (isValid? "true" : "false"), epoch);
+         #endif
+
+         // check range here too
+
+//         if (isValid && epoch < 0.0)
+//            isValid = CheckReal(epoch, str, "Epoch", "Real Number >= 0", true);
+         if (isValid)
+            isValid = CheckRealRange(str, epoch, "Epoch", 6116.0, 0.0, true, false, true, false);
+         if (!isValid)
+         {
+            canClose = false;
+         }
+      }
+
+      if (!canClose)
+         return;
+
+
       //-------------------------------------------------------
       // set new origin
       //-------------------------------------------------------
@@ -223,12 +266,19 @@ void CoordSystemConfigPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
-// void OnGravityTextUpdate(wxCommandEvent& event)
+// void OnTextUpdate(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CoordSystemConfigPanel::OnTextUpdate(wxCommandEvent& event)
 {
    mObjRefChanged = true;
    EnableUpdate(true);
+   if (mCoordPanel->GetEpochTextCtrl()->IsModified() )
+   {
+      mEpochChanged = true;
+      #ifdef DEBUG_COORD_PANEL_TEXT
+         MessageInterface::ShowMessage("Text has been updated and epoch has been changed!!!\n");
+      #endif
+   }
 }
 
 
@@ -246,10 +296,10 @@ void CoordSystemConfigPanel::OnComboUpdate(wxCommandEvent& event)
       mCoordPanel->EnableOptions();
       mObjRefChanged = true;
    }
-   else if (event.GetEventObject() == formatComboBox)
-   {
-      mCoordPanel->ChangeEpoch(mEpochFormat);
-   }
+//   else if (event.GetEventObject() == formatComboBox)
+//   {
+//      mCoordPanel->ChangeEpoch(mEpochFormat);
+//   }
    else if (event.GetEventObject() == primaryComboBox ||
             event.GetEventObject() == secondaryComboBox)
    {

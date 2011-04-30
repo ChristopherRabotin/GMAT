@@ -2,9 +2,11 @@
 //------------------------------------------------------------------------------
 //                             GuiMessageReceiver
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG06CA54C
@@ -36,7 +38,6 @@ class GuiMessageReceiver : public MessageReceiver
 public:
    static GuiMessageReceiver*  Instance();
 
-   virtual std::string GetMessage();
    virtual void ClearMessage();
    virtual int  GetNumberOfMessageLines();
    virtual void ShowMessage(const std::string &msg);
@@ -58,6 +59,10 @@ public:
    
    virtual void OpenLogFile(const std::string &filename, bool append = false);
    virtual void CloseLogFile();
+   
+   virtual std::string GetMessage();
+   virtual void PutMessage(const std::string &msg);
+   virtual void ClearMessageQueue();
    
 private:
    static GuiMessageReceiver*  instance;

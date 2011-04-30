@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              MultiPathSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2006/03/29
@@ -20,7 +24,7 @@
 
 #include "bitmaps/up.xpm"
 #include "bitmaps/down.xpm"
-#include "bitmaps/open.xpm"
+#include "bitmaps/OpenFolder.xpm"
 
 //#define DEBUG_SETPATH 1
 
@@ -83,6 +87,25 @@ const wxArrayString& MultiPathSetupPanel::GetPathNames()
 
 
 //------------------------------------------------------------------------------
+// void UpdatePathNames(const StringArray &pathNames)
+//------------------------------------------------------------------------------
+void MultiPathSetupPanel::UpdatePathNames(const StringArray &pathNames)
+{
+   #if DEBUG_SETPATH
+   MessageInterface::ShowMessage
+      ("MultiPathSetupPanel::UpdatePathNames() entered. There are %d input paths\n",
+       pathNames.size());
+   #endif
+   
+   mPathNames.Clear();
+   for (UnsignedInt i=0; i<pathNames.size(); i++)
+      mPathNames.Add(pathNames[i].c_str());
+   
+   LoadData();
+}
+
+
+//------------------------------------------------------------------------------
 // virtual void Create()
 //------------------------------------------------------------------------------
 void MultiPathSetupPanel::Create()
@@ -102,7 +125,7 @@ void MultiPathSetupPanel::Create()
    
    wxBitmap upBitmap = wxBitmap(up_xpm);
    wxBitmap downBitmap = wxBitmap(down_xpm);
-   wxBitmap openBitmap = wxBitmap(open_xpm);
+   wxBitmap openBitmap = wxBitmap(OpenFolder_xpm);
    
    //------------------------------------------------------
    // create components
@@ -168,6 +191,13 @@ void MultiPathSetupPanel::Create()
 //------------------------------------------------------------------------------
 void MultiPathSetupPanel::LoadData()
 {
+   #if DEBUG_SETPATH
+   MessageInterface::ShowMessage
+      ("MultiPathSetupPanel::LoadData() entered. There are %d paths\n",
+       mPathNames.size());
+   #endif
+   
+   mPathListBox->Clear();
    mPathListBox->Set(mPathNames);
    
    // populate FileTextCtrl with first item by creating event
@@ -221,7 +251,9 @@ void MultiPathSetupPanel::OnButtonClick(wxCommandEvent& event)
    {
       if (pathname != "" && mPathListBox->FindString(pathname) == wxNOT_FOUND)
       {
-         mPathListBox->Append(pathname);
+         // Add to top of the list (loj: 2008.10.20)
+         //mPathListBox->Append(pathname);
+         mPathListBox->Insert(pathname, 0);
          mPathListBox->SetStringSelection(pathname);
       }
    }

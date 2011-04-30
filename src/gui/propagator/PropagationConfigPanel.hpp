@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                           PropagationConfigPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Waka Waktola
 // Created: 2003/08/29
@@ -16,13 +20,13 @@
 #define PropagationConfigPanel_hpp
 
 // gui includes
-#include "gmatwxdefs.hpp"
+#include "GmatStaticBoxSizer.hpp"
 
 // base includes
 #include "gmatdefs.hpp"
 #include "Propagator.hpp"
 #include "PropSetup.hpp"
-#include "ForceModel.hpp"
+#include "ODEModel.hpp"
 #include "DragForce.hpp"
 #include "GravityField.hpp"
 #include "HarmonicField.hpp"
@@ -33,6 +37,7 @@
 #include "AtmosphereModel.hpp"
 #include "MessageInterface.hpp"
 #include "GmatPanel.hpp"
+#include "gmatwxdefs.hpp"
 
 class PropagationConfigPanel : public GmatPanel
 {
@@ -43,19 +48,20 @@ public:
 
 private:
    
-   // Integrator types
-   enum IntegratorType
-   {
-      RKV89 = 0,
-      RKN68,
-      RKF56,
-      PD45,
-      PD78,
-      BS,
-      ABM,
-//      CW,
-      IntegratorCount,
-   };
+   // Integrator types -- No longer hard coded
+//   enum IntegratorType
+//   {
+//      RKV89 = 0,
+//      RKN68,
+//      RKF56,
+//      PD45,
+//      PD78,
+//      BS,
+//      ABM,
+////      CW,
+//      IntegratorCount,
+//   };
+   Integer IntegratorCount;
 
    // Earth gravity field model
    enum EarthGravModelType
@@ -107,7 +113,7 @@ private:
    enum EarthDragModelType
    {
       NONE_DM = 0,
-      EXPONENTIAL,
+//      EXPONENTIAL,
       MSISE90,
       JR,
       EarthDragModelCount,
@@ -146,7 +152,7 @@ private:
       GravityField *gravf;
       DragForce *dragf;
       SolarRadiationPressure *srpf;
-      bool useSrp; // for future use (SRP on indivitual body is future implementation)
+      bool useSrp; // for future use (SRP on individual body is future implementation)
       
       ForceType(const wxString &body, const wxString &grav = "None",
                 const wxString &drag = "None", const wxString &mag = "None",
@@ -175,10 +181,36 @@ private:
          }
    };
    
+   // SPK parameter buffers
+   wxString spkStep;
+   wxString spkBody;
+   wxString spkEpFormat;
+   wxString spkEpoch;
+
+   bool isSpkStepChanged;
+   bool isSpkBodyChanged;
+   bool isSpkEpFormatChanged;
+   bool isSpkEpochChanged;
+
+   wxFlexGridSizer *intFlexGridSizer;
+   GmatStaticBoxSizer *intStaticSizer;
+   GmatStaticBoxSizer *fmStaticSizer;
+   GmatStaticBoxSizer *magfStaticSizer;      // So it can be hidden
+
    wxStaticText *minIntErrorStaticText;
    wxStaticText *nomIntErrorStaticText;
    wxStaticText *potFileStaticText;
    
+   wxStaticText *initialStepSizeStaticText;
+   wxStaticText *unitsInitStepSizeStaticText;
+   wxStaticText *accuracyStaticText;
+   wxStaticText *minStepStaticText;
+   wxStaticText *unitsMinStepStaticText;
+   wxStaticText *maxStepStaticText;
+   wxStaticText *unitsMaxStepStaticText;
+   wxStaticText *maxStepAttemptStaticText;
+
+
    wxTextCtrl *initialStepSizeTextCtrl;
    wxTextCtrl *accuracyTextCtrl;
    wxTextCtrl *minStepTextCtrl;
@@ -186,7 +218,7 @@ private:
    wxTextCtrl *maxStepAttemptTextCtrl;
    wxTextCtrl *minIntErrorTextCtrl;
    wxTextCtrl *nomIntErrorTextCtrl;
-   wxTextCtrl *bodyTextCtrl;
+//   wxTextCtrl *bodyTextCtrl;
    wxTextCtrl *gravityDegreeTextCtrl;
    wxTextCtrl *gravityOrderTextCtrl;
    wxTextCtrl *potFileTextCtrl;
@@ -202,12 +234,24 @@ private:
    wxComboBox *theMagfModelComboBox;
    wxComboBox *theErrorComboBox;
    
-   wxButton *theGravModelSearchButton;
+   wxBitmapButton *theGravModelSearchButton;
    wxButton *theDragSetupButton;
    wxButton *theMagModelSearchButton;
    
    wxCheckBox *theSrpCheckBox;
+   wxCheckBox *theStopCheckBox;
    
+   // Controls used by Propagators that aren't Integrators (SPK for now)
+   wxStaticText *propagatorStepSizeStaticText;
+   wxTextCtrl *propagatorStepSizeTextCtrl;
+   wxStaticText *unitsPropagatorStepSizeStaticText;
+   wxStaticText *propCentralBodyStaticText;
+   wxComboBox *propCentralBodyComboBox;
+   wxStaticText *propagatorEpochFormatStaticText;
+   wxComboBox *propagatorEpochFormatComboBox;
+   wxStaticText *startEpochStaticText;
+   wxTextCtrl *startEpochTextCtrl;
+
    wxString integratorString;
    wxString primaryBodyString;
    wxString gravityFieldString;
@@ -217,6 +261,7 @@ private:
    
    std::string propSetupName;
    std::string thePropagatorName;
+   std::string theForceModelName;
    std::string mFmPrefaceComment;
    
    wxString currentBodyName;
@@ -237,11 +282,13 @@ private:
    
    std::map<wxString, wxString> theFileMap;
    
-   wxArrayString primaryBodiesArray;
+   // Restrict to one primary body:
+   wxString primaryBody;
+//   wxArrayString primaryBodiesArray;
    wxArrayString secondaryBodiesArray;
    wxArrayString integratorArray;
    
-   Integer numOfBodies;
+//   Integer numOfBodies;
    Integer numOfForces;
    Integer currentBodyId;
    
@@ -256,6 +303,7 @@ private:
    
    bool useDragForce;
    bool usePropOriginForSrp;
+   bool stopOnAccViolation;
    bool isForceModelChanged;
    bool isAtmosChanged;
    bool isDegOrderChanged;
@@ -268,7 +316,7 @@ private:
    
    Propagator                     *thePropagator;
    PropSetup                      *thePropSetup;
-   ForceModel                     *theForceModel;
+   ODEModel                       *theForceModel;
    PointMassForce                 *thePMF;
    DragForce                      *theDragForce;
    GravityField                   *theGravForce;
@@ -277,9 +325,12 @@ private:
    CelestialBody                  *theCelestialBody;
    AtmosphereModel                *theAtmosphereModel;
    std::vector<PointMassForce *>  thePMForces;
-   std::vector<ForceType*> primaryBodyList;
+//   std::vector<ForceType*> primaryBodyList;
    std::vector<ForceType*> pointMassBodyList;
    
+   // Restricted to one primary, so using a single ForceType rather than array
+   ForceType                      *primaryBodyData;
+
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
@@ -294,7 +345,6 @@ private:
    Integer FindPointMassBody(const wxString& bodyName);
    
    void Initialize();
-   void Setup(wxWindow *parent);
    void DisplayIntegratorData(bool integratorChanged);
    void DisplayPrimaryBodyData();
    void DisplayForceData();
@@ -306,9 +356,11 @@ private:
    void DisplayErrorControlData();
    void EnablePrimaryBodyItems(bool enable = true, bool clear = false);
    void UpdatePrimaryBodyItems();
+   void UpdatePrimaryBodyComboBoxList();
    
    // Saving data
    bool SaveIntegratorData();
+   bool SavePropagatorData();
    bool SaveDegOrder();
    bool SavePotFile();
    bool SaveAtmosModel();
@@ -320,9 +372,10 @@ private:
    void OnIntegratorTextUpdate(wxCommandEvent &event);
    void OnGravityTextUpdate(wxCommandEvent& event);
    void OnMagneticTextUpdate(wxCommandEvent& event);
-   
+
    // Checkbox event method
    void OnSRPCheckBoxChange(wxCommandEvent &event);
+   void OnStopCheckBoxChange(wxCommandEvent &event);
    
    // Combobox event method
    void OnIntegratorComboBox(wxCommandEvent &event);
@@ -331,6 +384,9 @@ private:
    void OnGravityModelComboBox(wxCommandEvent &event);
    void OnAtmosphereModelComboBox(wxCommandEvent &event);
    void OnErrorControlComboBox(wxCommandEvent &event);
+   void OnPropOriginComboBox(wxCommandEvent &);
+   void OnPropEpochComboBox(wxCommandEvent &);
+
    
    // Button event methods
    void OnAddBodyButton(wxCommandEvent &event);
@@ -354,6 +410,10 @@ private:
    // Strictly for reading gravity files
    static const Integer GRAV_MAX_DRIFT_DEGREE = 2;
    
+   void ShowIntegratorLayout(bool isIntegrator = true, bool isEphem = true);
+
+   void PopulateForces();
+
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
    
@@ -365,7 +425,8 @@ private:
       ID_TEXTCTRL_PROP,
       ID_TEXTCTRL_GRAV,
       ID_TEXTCTRL_MAGF,
-      ID_CHECKBOX,
+      ID_SRP_CHECKBOX,
+      ID_STOP_CHECKBOX,
       ID_CB_INTGR,
       ID_CB_BODY,
       ID_CB_ORIGIN,
@@ -378,7 +439,9 @@ private:
       ID_BUTTON_SETUP,
       ID_BUTTON_MAG_SEARCH,
       ID_BUTTON_PM_EDIT,
-      ID_BUTTON_SRP_EDIT 
+      ID_BUTTON_SRP_EDIT,
+      ID_CB_PROP_ORIGIN,
+      ID_CB_PROP_EPOCHFORMAT
    };
 };
 

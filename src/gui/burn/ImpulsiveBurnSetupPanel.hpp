@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              ImpulsiveBurnSetupPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: LaMont Ruley
 // Created: 2004/02/04
@@ -11,67 +15,23 @@
  * This class contains the Impulsive Burn Setup window.
  */
 //------------------------------------------------------------------------------
-
 #ifndef ImpulsiveBurnSetupPanel_hpp
 #define ImpulsiveBurnSetupPanel_hpp
 
-#include "gmatwxdefs.hpp"
-#include "GuiInterpreter.hpp"
-#include "GmatAppData.hpp"
-#include "GmatPanel.hpp"
-#include "Burn.hpp"
+#include "BurnThrusterPanel.hpp"
 
-class ImpulsiveBurnSetupPanel : public GmatPanel
+class ImpulsiveBurnSetupPanel : public BurnThrusterPanel
 {
 public:
    // constructors
-   ImpulsiveBurnSetupPanel(wxWindow *parent, const wxString &burnName);
+   ImpulsiveBurnSetupPanel(wxWindow *parent, const wxString &name);
    ~ImpulsiveBurnSetupPanel();
     
-private:
-   // member data
-   Burn *theBurn;
-   bool isTextModified;
+protected:
    
-   wxComboBox *axesComboBox;
-   wxComboBox *vectorFormatComboBox;
-   wxComboBox *centralBodyCB;
-   
-   wxPanel *vectorPanel;
-   
-   wxStaticText *description1;
-   wxStaticText *description2;
-   wxStaticText *description3;
-   wxStaticText *label1;
-   wxStaticText *label2;
-   wxStaticText *label3;
-   
-   wxTextCtrl *textCtrl1;
-   wxTextCtrl *textCtrl2;
-   wxTextCtrl *textCtrl3;
-   
-   // member functions
-   void AddVector(wxWindow *parent);
-   void LabelsUnits();
-   void OnComboBoxChange(wxCommandEvent& event);
-   void OnTextChange(wxCommandEvent& event);
-   
-   // methods inherited from GmatPanel
-   virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
    
-   // any class wishing to process wxWindows events must use this macro
-   DECLARE_EVENT_TABLE();
-   
-   // IDs for the controls and the menu commands
-   enum
-   {     
-      ID_TEXT = 81000,
-      ID_TEXTCTRL,
-      ID_COMBOBOX,
-      ID_STATIC_VECTOR
-   };
+private:
 };
-
 #endif // ImpulsiveBurnSetupPanel_hpp

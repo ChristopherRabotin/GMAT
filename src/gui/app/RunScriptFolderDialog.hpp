@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              RunScriptFolderDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2005/12/22
@@ -32,9 +36,11 @@ public:
    bool SaveCompareResults() { return mSaveCompareResults; }
    bool HasOutDirChanged() { return mOutDirChanged; }
    bool CreateRunFolder() { return mCreateRunFolder; }
+   Integer GetStartingScriptNumber() { return mNumStartingScript; }
    Integer GetNumScriptsToRun() { return mNumScriptsToRun; }
    Integer GetNumTimesToRun() { return mNumTimesToRun; }
    Real GetAbsTolerance() { return mAbsTol; }
+   wxString GetFilterString() { return mFilterString; }
    wxString GetReplaceString() { return mReplaceString; }
    wxString GetCompareDirectory() { return mCompareDir; }
    wxString GetSaveFilename() { return mSaveFilename; }
@@ -49,7 +55,9 @@ protected:
    virtual void SaveData();
    virtual void ResetData();
    
+   wxTextCtrl *mStartingScriptTextCtrl;
    wxTextCtrl *mNumScriptsToRunTextCtrl;
+   wxTextCtrl *mFilterStringTextCtrl;
    wxTextCtrl *mNumTimesToRunTextCtrl;
    wxTextCtrl *mCompareDirTextCtrl;
    wxTextCtrl *mReplaceTextCtrl;
@@ -91,9 +99,11 @@ private:
    bool mSaveCompareResults;
    bool mOutDirChanged;
    bool mCreateRunFolder;
+   Integer mNumStartingScript;
    Integer mNumScriptsToRun;
    Integer mNumTimesToRun;
    Real mAbsTol;
+   wxString mFilterString;
    wxString mReplaceString;
    wxString mCurrOutDir;
    wxString mSaveScriptsDir;

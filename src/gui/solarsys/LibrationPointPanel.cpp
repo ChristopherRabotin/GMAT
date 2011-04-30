@@ -1,11 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              LibrationPointPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -20,6 +22,7 @@
 //------------------------------------------------------------------------------
 
 #include "LibrationPointPanel.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "MessageInterface.hpp"
 
 //#define DEBUG_LIBRATIONPOINT_PANEL 1
@@ -69,6 +72,9 @@ LibrationPointPanel::LibrationPointPanel(wxWindow *parent, const wxString &name)
 //------------------------------------------------------------------------------
 LibrationPointPanel::~LibrationPointPanel()
 {
+   // Unregister GUI components
+   theGuiManager->UnregisterComboBox("CelestialBody", primaryBodyCB);
+   theGuiManager->UnregisterComboBox("CelestialBody", secondaryBodyCB);
 }
 
 //-------------------------------
@@ -98,6 +104,67 @@ void LibrationPointPanel::OnComboBoxChange(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void LibrationPointPanel::Create()
 {
+   int bsize = 2; // border size
+   
+   wxString librationList[] = {"L1", "L2", "L3", "L4", "L5"};
+   
+   if (theLibrationPt != NULL)
+   {
+      // create sizers
+      wxFlexGridSizer *pageSizer = new wxFlexGridSizer(3, 2, bsize, bsize);
+      
+      // label for primary body combobox
+      wxStaticText *primaryBodyLabel = new wxStaticText(this, ID_TEXT,
+         wxT("Primary Body:"), wxDefaultPosition, wxDefaultSize, 0);
+      
+      // combo box for avaliable bodies 
+      primaryBodyCB = 
+         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+      
+      // label for secondary body combobox
+      wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
+         wxT("Secondary Body:"), wxDefaultPosition, wxDefaultSize, 0);
+      
+      // combo box for avaliable bodies 
+      secondaryBodyCB = 
+         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+      
+      // label for libration point combobox
+      wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
+         wxT("Libration Point:"), wxDefaultPosition, wxDefaultSize, 0);
+      
+      // combo box for libration points 
+      librationPtCB = new wxComboBox(this, ID_COMBOBOX, wxT(""), 
+         wxDefaultPosition, wxSize(100,-1), 5, librationList, wxCB_READONLY);
+      
+      // add labels and comboboxes to page sizer    
+      pageSizer->Add(primaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(primaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(secondaryBodyLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(secondaryBodyCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(librationPointLabel, 0, wxALIGN_LEFT | wxALL, bsize);
+      pageSizer->Add(librationPtCB, 0, wxALIGN_LEFT | wxALL, bsize);
+      
+      // create Options box:
+      GmatStaticBoxSizer *optionsStaticBoxSizer =
+         new GmatStaticBoxSizer(wxVERTICAL, this, "Options");
+      optionsStaticBoxSizer->Add(pageSizer, 0, wxALIGN_LEFT|wxALL,bsize);
+      
+      // add page sizer to middle sizer
+      theMiddleSizer->Add(optionsStaticBoxSizer, 0, wxEXPAND|wxALL, bsize);
+   }
+   else
+   {
+      // show error message
+      MessageInterface::ShowMessage
+         ("LibrationPointPanel:Create() theLP is NULL\n");
+   }
+   
+}
+
+/*
+void LibrationPointPanel::Create()
+{
    int bsize = 5; // bordersize
 
    wxString librationList[] = {"L1", "L2", "L3", "L4", "L5"};
@@ -113,7 +180,7 @@ void LibrationPointPanel::Create()
       
       // combo box for avaliable bodies 
       primaryBodyCB = 
-         theGuiManager->GetConfigBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
       
       // label for secondary body combobox
       wxStaticText *secondaryBodyLabel = new wxStaticText(this, ID_TEXT,
@@ -121,7 +188,7 @@ void LibrationPointPanel::Create()
         
       // combo box for avaliable bodies 
       secondaryBodyCB = 
-         theGuiManager->GetConfigBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
+         theGuiManager->GetCelestialBodyComboBox(this, ID_COMBOBOX, wxSize(100,-1));
 
       // label for libration point combobox
       wxStaticText *librationPointLabel = new wxStaticText(this, ID_TEXT,
@@ -150,6 +217,7 @@ void LibrationPointPanel::Create()
    }
 
 }
+*/
 
 //------------------------------------------------------------------------------
 // virtual void LoadData()

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              CelesBodySelectDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -15,10 +19,9 @@
 //------------------------------------------------------------------------------
 
 #include "CelesBodySelectDialog.hpp"
-#include "ColorTypes.hpp"           // for namespace GmatColor::
 #include "MessageInterface.hpp"
-
-#include "wx/colordlg.h"            // for wxColourDialog
+#include "GmatStaticBoxSizer.hpp"
+#include <wx/config.h>
 
 //#define DEBUG_CELESBODY_DIALOG 1
 
@@ -30,8 +33,8 @@ BEGIN_EVENT_TABLE(CelesBodySelectDialog, GmatDialog)
    EVT_BUTTON(ID_BUTTON_OK, GmatDialog::OnOK)
    EVT_BUTTON(ID_BUTTON_CANCEL, GmatDialog::OnCancel)
    EVT_BUTTON(ID_BUTTON, CelesBodySelectDialog::OnButton)
-   EVT_BUTTON(ID_COLOR_BUTTON, CelesBodySelectDialog::OnColorButtonClick)
-   EVT_LISTBOX(ID_BODY_SEL_LISTBOX, CelesBodySelectDialog::OnSelectBody)
+   EVT_LISTBOX(ID_LISTBOX, CelesBodySelectDialog::OnSelectBody)
+   EVT_LISTBOX_DCLICK(ID_LISTBOX, CelesBodySelectDialog::OnListBoxDoubleClick)
 END_EVENT_TABLE()
 
 //------------------------------------------------------------------------------
@@ -58,25 +61,23 @@ CelesBodySelectDialog::CelesBodySelectDialog(wxWindow *parent,
 
 
 //------------------------------------------------------------------------------
-// void SetBodyColors(const wxArrayString &bodyNames,
-//                    const UnsignedIntArray &bodyColors)
+// ~CelesBodySelectDialog()
 //------------------------------------------------------------------------------
-void CelesBodySelectDialog::SetBodyColors(const wxArrayString &bodyNames,
-                                          const UnsignedIntArray &bodyColors)
+CelesBodySelectDialog::~CelesBodySelectDialog()
 {
-   for (unsigned int i=0; i<bodyNames.GetCount(); i++)
-   {
-      mBodyColorMap[bodyNames[i]] = bodyColors[i];
-      
-      #if DEBUG_CELESBODY_DIALOG
-      MessageInterface::ShowMessage
-         ("CelesBodySelectDialog::SetBodyColors() body=%s, color=%d\n",
-          bodyNames[i].c_str(), bodyColors[i]);
-      #endif
-   }
-
-   ShowBodyOption(mBodySelectedListBox->GetStringSelection(), true);
+   #if DEBUG_GUI_ITEM_UNREG
+   MessageInterface::ShowMessage
+      ("CelesBodySelectDialog::~CelesBodySelectDialog() Unregistering GUI items\n");
+   #endif
+   
+   // Unregister GUI components
+   if (mShowCalPoints)
+      theGuiManager->UnregisterListBox("CelestialPoint", mBodyListBox);
+   else
+      theGuiManager->UnregisterListBox("CelestialBody", mBodyListBox);
+   
 }
+
 
 //------------------------------------------------------------------------------
 // void Create()
@@ -86,49 +87,43 @@ void CelesBodySelectDialog::Create()
    int borderSize = 2;
    wxArrayString emptyList;
    
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Celestial Body"));
+
    // body GridSizer
-   wxFlexGridSizer *bodyGridSizer = new wxFlexGridSizer(3, 0, 0);
+   wxBoxSizer *bodyGridSizer = new wxBoxSizer(wxHORIZONTAL);
    
-   //-------------------------------------------------------
-   // 1st row
-   //-------------------------------------------------------
-   wxStaticText *bodySelectStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Bodies Selected"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   wxStaticText *bodyStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Available Bodies"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   bodyGridSizer->Add(bodyStaticText, 0, wxALIGN_CENTRE|wxALL, borderSize);
-   bodyGridSizer->Add(20, 20);
-   bodyGridSizer->Add(bodySelectStaticText, 0, wxALIGN_CENTER|wxALL, borderSize);
+   GmatStaticBoxSizer *bodyAvailableSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, GUI_ACCEL_KEY"Available Bodies");
    
-   //-------------------------------------------------------
-   // 2nd row
-   //-------------------------------------------------------
-   
-   // availabe celetestial body ListBox
+   // Available celestial body ListBox
    if (mShowCalPoints)
    {
       mBodyListBox =
-         theGuiManager->GetCelestialPointListBox(this, -1, wxSize(150, 200),
-                                                 mBodiesToExclude);
+         theGuiManager->GetCelestialPointListBox(this, ID_LISTBOX, wxSize(150, 200),
+                                                 &mBodiesToExclude);
    }
    else
    {
       mBodyListBox =
-         theGuiManager->GetConfigBodyListBox(this, -1, wxSize(150, 200),
-                                             mBodiesToExclude);
+         theGuiManager->GetCelestialBodyListBox(this, ID_LISTBOX, wxSize(150, 200),
+                                                &mBodiesToExclude);
    }
+   mBodyListBox->SetToolTip(pConfig->Read(_T("AvailableBodiesHint")));
+   bodyAvailableSizer->Add(mBodyListBox, 0, wxALIGN_CENTER|wxGROW, borderSize);
    
    // arrow buttons
    mAddBodyButton =
-      new wxButton( this, ID_BUTTON, wxT("->"), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxT("-"GUI_ACCEL_KEY">"), wxDefaultPosition, wxSize(20,20), 0 );
+   mAddBodyButton->SetToolTip(pConfig->Read(_T("AddBodyHint")));
    mRemoveBodyButton =
-      new wxButton( this, ID_BUTTON, wxT("<-"), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxT(GUI_ACCEL_KEY"<-"), wxDefaultPosition, wxSize(20,20), 0 );
+   mRemoveBodyButton->SetToolTip(pConfig->Read(_T("RemoveBodyHint")));
    mClearBodyButton =
-      new wxButton( this, ID_BUTTON, wxT("<="), wxDefaultPosition, wxSize(20,20), 0 );
-   mBodyColorButton =
-      new wxButton( this, ID_COLOR_BUTTON, wxT(""), wxDefaultPosition, wxSize(20,20), 0 );
+      new wxButton( this, ID_BUTTON, wxT("<"GUI_ACCEL_KEY"="), wxDefaultPosition, wxSize(20,20), 0 );
+   mClearBodyButton->SetToolTip(pConfig->Read(_T("ClearBodiesHint")));
    
    // add buttons to sizer
    wxBoxSizer *buttonsBoxSizer = new wxBoxSizer(wxVERTICAL);
@@ -136,6 +131,8 @@ void CelesBodySelectDialog::Create()
    buttonsBoxSizer->Add(mRemoveBodyButton, 0, wxALIGN_CENTER|wxALL, borderSize);
    buttonsBoxSizer->Add(mClearBodyButton, 0, wxALIGN_CENTER|wxALL, borderSize);
    
+   GmatStaticBoxSizer *bodySelectedSizer =
+      new GmatStaticBoxSizer(wxVERTICAL, this, GUI_ACCEL_KEY"Selected Bodies");
    // selected celetestial body ListBox
    if (! mBodiesToExclude.IsEmpty())
    {
@@ -146,29 +143,21 @@ void CelesBodySelectDialog::Create()
          selectedBodyList.Add(mBodiesToExclude[i]);
       
       mBodySelectedListBox =
-         new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition,
-                       wxSize(150, 200), selectedBodyList, wxLB_SINGLE);
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition,
+                       wxSize(150, 200), selectedBodyList, wxLB_SINGLE | wxLB_SORT);
    }
    else
    {
       mBodySelectedListBox =
-         new wxListBox(this, ID_BODY_SEL_LISTBOX, wxDefaultPosition, wxSize(150, 200),
-                       emptyList, wxLB_SINGLE);
+         new wxListBox(this, ID_LISTBOX, wxDefaultPosition, wxSize(150, 200),
+                       emptyList, wxLB_SINGLE|wxLB_SORT);
    }
+   mBodySelectedListBox->SetToolTip(pConfig->Read(_T("SelectedBodiesHint")));
+   bodySelectedSizer->Add(mBodySelectedListBox,0, wxALIGN_CENTER|wxGROW, borderSize);
    
-   bodyGridSizer->Add(mBodyListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
+   bodyGridSizer->Add(bodyAvailableSizer, 1, wxALIGN_CENTER|wxALL, borderSize);
    bodyGridSizer->Add(buttonsBoxSizer, 0, wxALIGN_CENTER|wxALL, borderSize);
-   bodyGridSizer->Add(mBodySelectedListBox, 0, wxALIGN_CENTER|wxALL, borderSize);
-   
-   //-------------------------------------------------------
-   // 3rd row
-   //-------------------------------------------------------
-   wxStaticText *bodyColorStaticText =
-      new wxStaticText( this, ID_TEXT, wxT("Orbit Color"),
-                        wxDefaultPosition, wxDefaultSize, 0 );
-   bodyGridSizer->Add(bodyColorStaticText, 0, wxALIGN_CENTER|wxALL, borderSize);
-   bodyGridSizer->Add(20, 20);
-   bodyGridSizer->Add(mBodyColorButton, 0, wxALIGN_CENTER|wxALL, borderSize);
+   bodyGridSizer->Add(bodySelectedSizer, 1, wxALIGN_CENTER|wxALL, borderSize);
    
    //-------------------------------------------------------
    // add to parent sizer
@@ -204,8 +193,6 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
          
          // select first available body
          mBodyListBox->SetSelection(0);
-         
-         // show body color
          ShowBodyOption(s, true);
       }
    }
@@ -242,48 +229,30 @@ void CelesBodySelectDialog::OnButton(wxCommandEvent& event)
 
 
 //------------------------------------------------------------------------------
-// void OnColorButtonClick(wxCommandEvent& event)
-//------------------------------------------------------------------------------
-void CelesBodySelectDialog::OnColorButtonClick(wxCommandEvent& event)
-{    
-   wxColourData data;
-   data.SetColour(mSelBodyColor);
-
-   wxColourDialog dialog(this, &data);
-   dialog.Center();
-   
-   if (dialog.ShowModal() == wxID_OK)
-   {
-      mSelBodyName = mBodySelectedListBox->GetStringSelection();
-      
-      mSelBodyColor = dialog.GetColourData().GetColour();
-      mBodyColorButton->SetBackgroundColour(mSelBodyColor);
-      
-      mBodyColorMap[mSelBodyName].Set(mSelBodyColor.Red(),
-                                      mSelBodyColor.Green(),
-                                      mSelBodyColor.Blue());
-      
-      #if DEBUG_CELESBODY_DIALOG
-      MessageInterface::ShowMessage("OnColorButtonClick() r=%d g=%d b=%d\n",
-                                    mSelBodyColor.Red(), mSelBodyColor.Green(),
-                                    mSelBodyColor.Blue());
-
-      MessageInterface::ShowMessage("OnColorButtonClick() UnsignedInt=%d\n",
-                                    mBodyColorMap[mSelBodyName].GetIntColor());
-      #endif
-      
-      theOkButton->Enable();
-   
-   }
-}
-
-
-//------------------------------------------------------------------------------
 // void OnSelectBody(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void CelesBodySelectDialog::OnSelectBody(wxCommandEvent& event)
 {
    ShowBodyOption(mBodySelectedListBox->GetStringSelection(), true);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnListBoxDoubleClick(wxCommandEvent& event)
+//------------------------------------------------------------------------------
+void CelesBodySelectDialog::OnListBoxDoubleClick(wxCommandEvent& event)
+{
+   wxCommandEvent evt;
+   if (event.GetEventObject() == mBodyListBox)
+   {
+      evt.SetEventObject(mAddBodyButton);
+      OnButton(evt);
+   }
+   else if (event.GetEventObject() == mBodySelectedListBox)
+   {
+      evt.SetEventObject(mRemoveBodyButton);
+      OnButton(evt);
+   }
 }
 
 
@@ -332,20 +301,7 @@ void CelesBodySelectDialog::SaveData()
    for(unsigned int i=0; i<mBodySelectedListBox->GetCount(); i++)
       mBodyNames.Add(mBodySelectedListBox->GetString(i));
    
-   mBodyColors.clear();
-   for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
-      mBodyColors.push_back(mBodyColorMap[mBodyNames[i]].GetIntColor());
-   
    mIsBodySelected = true;
-   
-   #if DEBUG_CELESBODY_DIALOG
-   MessageInterface::ShowMessage("CelesBodySelectDialog::SaveData()\n");
-   for (unsigned int i=0; i<mBodyNames.GetCount(); i++)
-   {
-      MessageInterface::ShowMessage("body name=%s, color=%d\n",
-                                    mBodyNames[i].c_str(), mBodyColors[i]);
-   }
-   #endif
 }
 
 
@@ -370,27 +326,5 @@ void CelesBodySelectDialog::ShowBodyOption(const wxString &name, bool show)
    #endif
    
    if (!name.IsSameAs(""))
-   {
       mSelBodyName = name;
-
-      // if body name not found, insert
-      if (mBodyColorMap.find(mSelBodyName) == mBodyColorMap.end())
-      {
-         mBodyColorMap[mSelBodyName] = RgbColor(GmatColor::L_BROWN32);
-      }
-      
-      RgbColor bodyColor = mBodyColorMap[mSelBodyName];
-      
-      #if DEBUG_CELESBODY_DIALOG
-      MessageInterface::ShowMessage
-         ("CelesBodySelectDialog::ShowBodyOption() mSelBodyName=%s bodyColor=%08x\n",
-          mSelBodyName.c_str(), bodyColor.GetIntColor());
-      #endif
-      
-      mSelBodyColor.Set(bodyColor.Red(), bodyColor.Green(), bodyColor.Blue());
-      mBodyColorButton->SetBackgroundColour(mSelBodyColor);
-   }
 }
-
-
-

@@ -1,8 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              OutputTree
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Allison Greene
 // Created: 2005/04/11
@@ -62,7 +66,7 @@ private:
    void AddIcons();   
    void OnAddReportFile(wxCommandEvent &event);
    void OnAddXyPlot(wxCommandEvent &event);
-   void OnAddOpenGlPlot(wxCommandEvent &event);
+   void OnAddOrbitView(wxCommandEvent &event);
    
    void OnCompareNumericValues(wxCommandEvent &event);
    void OnCompareTextLines(wxCommandEvent &event);

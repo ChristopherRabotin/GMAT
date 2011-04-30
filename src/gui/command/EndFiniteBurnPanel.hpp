@@ -1,10 +1,12 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              EndFiniteBurnPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc.
 // Author: Linda Jun
@@ -19,10 +21,8 @@
 #define EndFiniteBurnPanel_hpp
 
 #include "gmatwxdefs.hpp"
-#include "GmatAppData.hpp"
 #include "GmatPanel.hpp"
 #include "GmatCommand.hpp"
-#include "GuiItemManager.hpp"
 
 class EndFiniteBurnPanel : public GmatPanel
 {
@@ -34,18 +34,24 @@ public:
 protected:
    // member data
    GmatCommand *theCommand;
+   wxArrayString mObjectTypeList;
+   wxArrayString mSpacecraftList;
    
    wxComboBox *mFiniteBurnComboBox;
-   wxCheckListBox *mSatCheckListBox;
+   wxTextCtrl *mSatTextCtrl;
    
-   // member functions
-   void OnComboBoxChange(wxCommandEvent& event);
-   void OnCheckListBoxChange(wxCommandEvent& event);
+   wxArrayString ToWxArrayString(const StringArray &array);
+   wxString ToWxString(const wxArrayString &names);
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
+   
+   // event handling
+   void OnButtonClicked(wxCommandEvent& event);
+   void OnComboBoxChange(wxCommandEvent& event);
+   void OnTextUpdate(wxCommandEvent& event);
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
@@ -54,9 +60,9 @@ protected:
    enum
    {     
       ID_TEXT = 80000,
-      
+      ID_TEXTCTRL,
+      ID_BUTTON,
       ID_COMBOBOX,
-      ID_CHECKLISTBOX
    };
 };
 

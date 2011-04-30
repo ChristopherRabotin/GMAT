@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                              SpaceObjectSelectDialog
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/02/25
@@ -195,13 +199,18 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
       //-----------------------------------
       // add spacecraft object
       //-----------------------------------
-      wxString str = spaceObjAvailableListBox->GetStringSelection();
       int sel = spaceObjAvailableListBox->GetSelection();
+
+      if (sel == wxNOT_FOUND)
+         return;
+      
+      wxString str = spaceObjAvailableListBox->GetStringSelection();
       int strId = spaceObjSelectedListBox->FindString(str);
       
       #ifdef DEBUG_SO_DIALOG
       MessageInterface::ShowMessage
-         ( "SpaceObjectSelectDialog::OnButton() adding <%s>\n", str.c_str() );
+         ( "SpaceObjectSelectDialog::OnButton() sel=%d, strId=%d, adding '%s'\n",
+           sel, strId, str.c_str() );
       #endif
       
       // if the string wasn't found in the second list, insert it
@@ -262,6 +271,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
          spaceObjAvailableListBox->Append(spaceObjSelectedListBox->GetString(i));
       
       spaceObjSelectedListBox->Clear();
+      spaceObjAvailableListBox->SetSelection(0);
       EnableUpdate(true);
    }
 }
@@ -272,6 +282,7 @@ void SpaceObjectSelectDialog::OnButton(wxCommandEvent& event)
 //------------------------------------------------------------------------------
 void SpaceObjectSelectDialog::LoadData()
 {
+   spaceObjSelectedListBox->SetSelection(0);
 }
 
 

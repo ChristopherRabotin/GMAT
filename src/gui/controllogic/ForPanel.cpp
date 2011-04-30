@@ -1,17 +1,24 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                              ForPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
+//
+// Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
+// number S-67573-G
 //
 // Author: Allison Greene
 // Created: 2004/05/17
+//
 /**
- * This class contains the For Conditional Statement Setup window.
+ * Implements the For loop setup window.
  */
 //------------------------------------------------------------------------------
 #include "ForPanel.hpp"
-#include "ForDialog.hpp"
 #include "ParameterSelectDialog.hpp"
 
 //#define DEBUG_FOR_PANEL_LOAD 1
@@ -23,6 +30,7 @@
 //------------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(ForPanel, GmatPanel)
+   EVT_GRID_CELL_LEFT_CLICK(ForPanel::OnCellLeftClick)   
    EVT_GRID_CELL_RIGHT_CLICK(ForPanel::OnCellRightClick)   
    EVT_GRID_CELL_CHANGE(ForPanel::OnCellValueChange)
 END_EVENT_TABLE()
@@ -71,65 +79,67 @@ ForPanel::~ForPanel()
 //-------------------------------
 void ForPanel::Create()
 {
-    Setup(this);    
-}
-
-//------------------------------------------------------------------------------
-// void Setup( wxWindow *parent)
-//------------------------------------------------------------------------------
-void ForPanel::Setup( wxWindow *parent)
-{
    // wxGrid
 #if __WXMAC__
    conditionGrid =
-      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(630,65), wxWANTS_CHARS);
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(700,65), wxWANTS_CHARS);
 #else
    conditionGrid =
-      //loj: new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(503,50), wxWANTS_CHARS);
-      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(518,65), wxWANTS_CHARS);
+      new wxGrid(this, ID_GRID, wxDefaultPosition, wxSize(600,65), wxWANTS_CHARS);
 #endif
    
-   conditionGrid->CreateGrid(1, 4, wxGrid::wxGridSelectCells);
+   conditionGrid->CreateGrid(1, MAX_COL, wxGrid::wxGridSelectCells);
    conditionGrid->SetSelectionMode(wxGrid::wxGridSelectCells);
-   
-   //loj: 03/21/07 conditionGrid->EnableEditing(false);
-   
-   //conditionGrid->EnableEditing(true);
-   //conditionGrid->EnableCellEditControl(true);
-   //conditionGrid->ShowCellEditControl();
-   
-   conditionGrid->EnableDragColSize(false);
-   conditionGrid->EnableDragRowSize(false);
-   conditionGrid->EnableDragGridSize(false);
+   conditionGrid->SetDefaultCellAlignment(wxALIGN_CENTRE, wxALIGN_CENTRE);
  
- #if __WXMAC__  
-   conditionGrid->SetColSize(0, 155);
-   conditionGrid->SetColSize(1, 155);
-   conditionGrid->SetColSize(2, 155);
-   conditionGrid->SetColSize(3, 155);
+#if __WXMAC__  
+   conditionGrid->SetColSize(INDEX_SEL_COL, 25);
+   conditionGrid->SetColSize(INDEX_COL, 155);
+   conditionGrid->SetColSize(START_SEL_COL, 25);
+   conditionGrid->SetColSize(START_COL, 155);
+   conditionGrid->SetColSize(INCR_SEL_COL, 25);
+   conditionGrid->SetColSize(INCR_COL, 155);
+   conditionGrid->SetColSize(END_SEL_COL, 25);
+   conditionGrid->SetColSize(END_COL, 155);
 #else
-   conditionGrid->SetColSize(0, 125);
-   conditionGrid->SetColSize(1, 125);
-   conditionGrid->SetColSize(2, 125);
-   conditionGrid->SetColSize(3, 125);
+   conditionGrid->SetColSize(INDEX_SEL_COL, 25);
+   conditionGrid->SetColSize(INDEX_COL, 125);
+   conditionGrid->SetColSize(START_SEL_COL, 25);
+   conditionGrid->SetColSize(START_COL, 125);
+   conditionGrid->SetColSize(INCR_SEL_COL, 25);
+   conditionGrid->SetColSize(INCR_COL, 125);
+   conditionGrid->SetColSize(END_SEL_COL, 25);
+   conditionGrid->SetColSize(END_COL, 125);
 #endif
 
-   conditionGrid->SetColLabelValue(0, _T("Index"));
-   conditionGrid->SetColLabelValue(1, _T("Start"));
-   conditionGrid->SetColLabelValue(2, _T("Increment"));
-   conditionGrid->SetColLabelValue(3, _T("End"));
+   conditionGrid->SetColLabelValue(INDEX_SEL_COL, _T(""));
+   conditionGrid->SetColLabelValue(INDEX_COL, _T("Index"));
+   conditionGrid->SetColLabelValue(START_SEL_COL, _T(""));
+   conditionGrid->SetColLabelValue(START_COL, _T("Start"));
+   conditionGrid->SetColLabelValue(INCR_SEL_COL, _T(""));
+   conditionGrid->SetColLabelValue(INCR_COL, _T("Increment"));
+   conditionGrid->SetColLabelValue(END_SEL_COL, _T(""));
+   conditionGrid->SetColLabelValue(END_COL, _T("End"));
    
    conditionGrid->SetRowLabelSize(0);
    
    conditionGrid->SetScrollbars(0, 0, 0, 0, 0, 0, FALSE);   
    
-   Integer bsize = 5;
+   // Set ... before each column for selection
+   conditionGrid->SetCellBackgroundColour(0, INDEX_SEL_COL, *wxLIGHT_GREY);
+   conditionGrid->SetCellBackgroundColour(0, START_SEL_COL, *wxLIGHT_GREY);
+   conditionGrid->SetCellBackgroundColour(0, INCR_SEL_COL, *wxLIGHT_GREY);
+   conditionGrid->SetCellBackgroundColour(0, END_SEL_COL, *wxLIGHT_GREY);
+   conditionGrid->SetCellValue(0, INDEX_SEL_COL, _T("  ... "));
+   conditionGrid->SetCellValue(0, START_SEL_COL, _T("  ... "));
+   conditionGrid->SetCellValue(0, INCR_SEL_COL, _T("  ... "));
+   conditionGrid->SetCellValue(0, END_SEL_COL, _T("  ... "));
    
    // wx*Sizers
    wxBoxSizer *item0 = new wxBoxSizer( wxVERTICAL );
-   item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, bsize);
-
-   theMiddleSizer->Add(item0, 0, wxGROW, bsize);
+   item0->Add( conditionGrid, 0, wxALIGN_CENTER|wxALL, 0);
+   
+   theMiddleSizer->Add(item0, 0, wxGROW, 0);
 }
 
 
@@ -236,13 +246,10 @@ void ForPanel::SaveData()
 
 
 //------------------------------------------------------------------------------
-// void OnCellRightClick(wxGridEvent& event)
+// void GetNewValue(Integer row, Integer col)
 //------------------------------------------------------------------------------
-void ForPanel::OnCellRightClick(wxGridEvent& event)
+void ForPanel::GetNewValue(Integer row, Integer col)
 {
-   Integer row = event.GetRow();
-   Integer col = event.GetCol();
-   
    ParameterSelectDialog paramDlg(this, mObjectTypeList);
    paramDlg.ShowModal();
    
@@ -266,6 +273,60 @@ void ForPanel::OnCellRightClick(wxGridEvent& event)
       
       EnableUpdate(true);
    }  
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCellLeftClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+void ForPanel::OnCellLeftClick(wxGridEvent& event)
+{
+   Integer row = event.GetRow();
+   Integer col = event.GetCol();
+   
+   conditionGrid->SelectBlock(row, col, row, col);
+   conditionGrid->SetGridCursor(row, col);
+   
+   if (col == INDEX_SEL_COL || col == START_SEL_COL || col == INCR_SEL_COL ||
+       col == END_SEL_COL)
+      GetNewValue(row, col + 1);
+}
+
+
+//------------------------------------------------------------------------------
+// void OnCellRightClick(wxGridEvent& event)
+//------------------------------------------------------------------------------
+void ForPanel::OnCellRightClick(wxGridEvent& event)
+{
+   Integer row = event.GetRow();
+   Integer col = event.GetCol();
+
+   GetNewValue(row, col);
+
+   
+//    ParameterSelectDialog paramDlg(this, mObjectTypeList);
+//    paramDlg.ShowModal();
+   
+//    if (paramDlg.IsParamSelected())
+//    {
+//       wxString newParamName = paramDlg.GetParamName();
+      
+//       if (newParamName == conditionGrid->GetCellValue(row, col))
+//          return;
+      
+//       conditionGrid->SetCellValue(row, col, newParamName);
+      
+//       if (col == INDEX_COL)
+//          mIndexString = newParamName;
+//       else if (col == START_COL)
+//          mStartString = newParamName;
+//       else if (col == INCR_COL)
+//          mIncrString = newParamName;
+//       else if (col == END_COL)
+//          mEndString = newParamName;
+      
+//       EnableUpdate(true);
+//    }  
 }     
 
 

@@ -1,11 +1,13 @@
-//$Header$
+//$Id$
 //------------------------------------------------------------------------------
 //                            BallisticsMassPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
 //
 //
-// **Legal**
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Developed jointly by NASA/GSFC and Thinking Systems, Inc. under contract
 // number NNG04CC06P.
@@ -22,7 +24,9 @@
 #include "BallisticsMassPanel.hpp"
 #include "GuiItemManager.hpp"
 #include "MessageInterface.hpp"
+#include "GmatStaticBoxSizer.hpp"
 #include "StringUtil.hpp"  // for ToReal()
+#include <wx/config.h>
 
 //------------------------------
 // event tables for wxWindows
@@ -79,76 +83,88 @@ BallisticsMassPanel::~BallisticsMassPanel()
 //------------------------------------------------------------------------------
 void BallisticsMassPanel::Create()
 {
+   // get the config object
+   wxConfigBase *pConfig = wxConfigBase::Get();
+   // SetPath() understands ".."
+   pConfig->SetPath(wxT("/Spacecraft Ballistic Mass"));
+
     wxStaticText *emptyText = new wxStaticText( this, ID_TEXT,
                             wxT(""),
                             wxDefaultPosition, wxDefaultSize, 0 );
 
     wxStaticBox *item1 = new wxStaticBox( this, -1, wxT("") );
     wxStaticBoxSizer *item0 = new wxStaticBoxSizer( item1, wxVERTICAL );
-
+    GmatStaticBoxSizer *optionsSizer = new GmatStaticBoxSizer( wxVERTICAL, this, "Options" );
+    item0->Add(optionsSizer, 1, wxALIGN_LEFT|wxGROW);
     wxFlexGridSizer *item2 = new wxFlexGridSizer( 3, 0, 0 );
+    item2->AddGrowableCol(1);
 
     wxStaticText *dryMassStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Dry Mass"), 
+                            wxT("Dry "GUI_ACCEL_KEY"Mass"), 
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( dryMassStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( dryMassStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     dryMassTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    dryMassTextCtrl->SetToolTip(pConfig->Read(_T("DryMassHint")));
     item2->Add( dryMassTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
 
     wxStaticText *dryMassUnitsText = new wxStaticText( this, ID_TEXT,
                             wxT("Kg"),
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( dryMassUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( dryMassUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of Drag"), wxDefaultPosition, 
+                            wxT("Coefficient of "GUI_ACCEL_KEY"Drag"), wxDefaultPosition, 
                             wxDefaultSize, 0 );
-    item2->Add( dragCoeffStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( dragCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     dragCoeffTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    dragCoeffTextCtrl->SetToolTip(pConfig->Read(_T("DragCoefficientHint")));
     item2->Add( dragCoeffTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    item2->Add( emptyText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *reflectCoeffStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Coefficient of Reflectivity"), 
+                            wxT("Coefficient of "GUI_ACCEL_KEY"Reflectivity"), 
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( reflectCoeffStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( reflectCoeffStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     reflectCoeffTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    reflectCoeffTextCtrl->SetToolTip(pConfig->Read(_T("ReflectivityCoefficientHint")));
     item2->Add( reflectCoeffTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
-    item2->Add( emptyText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( emptyText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *dragAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("Drag Area"), 
+                            wxT("Drag "GUI_ACCEL_KEY"Area"), 
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( dragAreaStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( dragAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     dragAreaTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    dragAreaTextCtrl->SetToolTip(pConfig->Read(_T("DragAreaHint")));
     item2->Add( dragAreaTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     wxStaticText *dragAreaUnitsText = new wxStaticText( this, ID_TEXT,
                             wxT("m^2"),
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( dragAreaUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( dragAreaUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     wxStaticText *srpAreaStaticText = new wxStaticText( this, ID_TEXT, 
-                            wxT("SRP Area"), 
+                            wxT(GUI_ACCEL_KEY"SRP Area"), 
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( srpAreaStaticText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( srpAreaStaticText, 0, wxALIGN_LEFT|wxALL, 5 );
 
     srpAreaTextCtrl = new wxTextCtrl( this, ID_TEXTCTRL, wxT(""), 
-                            wxDefaultPosition, wxSize(80,-1), 0 );
+                            wxDefaultPosition, wxSize(80,-1), 0, wxTextValidator(wxGMAT_FILTER_NUMERIC) );
+    srpAreaTextCtrl->SetToolTip(pConfig->Read(_T("SRPAreaHint")));
     item2->Add( srpAreaTextCtrl, 0, wxALIGN_CENTER|wxALL, 5 );
     wxStaticText *srpAreaUnitsText = new wxStaticText( this, ID_TEXT,
                             wxT("m^2"),
                             wxDefaultPosition, wxDefaultSize, 0 );
-    item2->Add( srpAreaUnitsText, 0, wxALIGN_CENTER|wxALL, 5 );
+    item2->Add( srpAreaUnitsText, 0, wxALIGN_LEFT|wxALL, 5 );
 
-    item0->Add( item2, 0, wxALIGN_CENTER|wxALL, 5 );
+    optionsSizer->Add( item2, 0, wxALIGN_LEFT|wxALL, 5 );
 
     this->SetAutoLayout( TRUE );  
     this->SetSizer( item0 );
@@ -251,13 +267,13 @@ void BallisticsMassPanel::SaveData()
       // greater than or equal to 0.0
       inputString = reflectCoeffTextCtrl->GetValue();      
       if ((GmatStringUtil::ToReal(inputString,&rvalue)) && 
-          (rvalue >= 0.0))
+          (rvalue >= 0.0) && (rvalue <= 2.0))
          theSpacecraft->SetRealParameter(reflectCoeffID, rvalue);
       else
       {
          MessageInterface::PopupMessage(Gmat::ERROR_, msg.c_str(), 
             inputString.c_str(),"Coefficient of Reflectivity",
-            "Real Number >= 0.0");
+            "0.0 <= Real Number <= 2.0");
          canClose = false;
       }
 

@@ -2,7 +2,11 @@
 //------------------------------------------------------------------------------
 //                                    VaryPanel
 //------------------------------------------------------------------------------
-// GMAT: Goddard Mission Analysis Tool
+// GMAT: General Mission Analysis Tool
+//
+// Copyright (c) 2002-2011 United States Government as represented by the
+// Administrator of The National Aeronautics and Space Administration.
+// All Other Rights Reserved.
 //
 // Author: Linda Jun
 // Created: 2004/10/12
@@ -29,41 +33,26 @@ class VaryPanel : public GmatPanel
 public:
    VaryPanel(wxWindow *parent, GmatCommand *cmd, bool inOptimize = false);
    ~VaryPanel(); 
-    
-private:             
    
-   struct SolverType
-   {
-      wxString  solverName;
-      wxString  varName;
-      wxString  initialValue;
-      wxString  pert;
-      wxString  minValue;
-      wxString  maxValue;
-      wxString  maxStep;
-      wxString  additiveScaleFactor;
-      wxString  multiplicativeScaleFactor;
-      //Real      initialValue;
-      //Real      pert;
-      //Real      minValue;
-      //Real      maxValue;
-      //Real      maxStep;
-      //Parameter *varParam;
-      //Real      additiveScaleFactor;
-      //Real      multiplicativeScaleFactor;
-   };
+protected:
+   Vary *mVaryCommand;
+   std::string solverName;
+   std::string variableName;
+   bool        inOptimizeCmd;
+   bool        solverChanged;
+   bool        variableChanged;
    
    wxTextCtrl *mVarNameTextCtrl;
    wxTextCtrl *mInitialTextCtrl;
    wxTextCtrl *mPertTextCtrl;
    wxTextCtrl *mMaxStepTextCtrl;
-   wxTextCtrl *mMinValueTextCtrl;
-   wxTextCtrl *mMaxValueTextCtrl;
+   wxTextCtrl *mLowerValueTextCtrl;
+   wxTextCtrl *mUpperValueTextCtrl;
    wxTextCtrl *mAdditiveTextCtrl;
    wxTextCtrl *mMultiplicativeTextCtrl;
 
-   wxStaticText *minValueStaticText;
-   wxStaticText *maxValueStaticText;
+   wxStaticText *lowerValueStaticText;
+   wxStaticText *upperValueStaticText;
    wxStaticText *pertStaticText;
    wxStaticText *maxStepStaticText;
    wxStaticText *additiveStaticText;
@@ -71,19 +60,13 @@ private:
    
    wxButton *mViewVarButton;
    wxComboBox *mSolverComboBox;
-
-   wxArrayString mObjectTypeList;
-   SolverType mSolverData;
-   Vary *mVaryCommand;
    
-   bool inOptimizeCmd;
+   wxArrayString mObjectTypeList;
    
    // methods inherited from GmatPanel
    virtual void Create();
    virtual void LoadData();
    virtual void SaveData();
-
-   void ShowVariableSetup();
    
    // event handling method
    void OnTextChange(wxCommandEvent& event);    
@@ -94,7 +77,7 @@ private:
    
    // any class wishing to process wxWindows events must use this macro
    DECLARE_EVENT_TABLE();
-  
+   
    // IDs for the controls and the menu commands
    enum
    {     
@@ -102,7 +85,6 @@ private:
       ID_TEXTCTRL,
       ID_BUTTON,
       ID_COMBO,
-      ID_GRID,
    };
 };
 
